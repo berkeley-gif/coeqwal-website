@@ -19,7 +19,7 @@ const FreshWaterCandidates = {
 }
 
 const SnowWaterCandidates = {
-  1: "#f2f0ef", // Original chosen color in alpha,
+  1: "#fcfbfa", // Original chosen color in alpha,
   2: "#acdde9",
 }
 
@@ -39,7 +39,7 @@ export const OceanWaterColor = OceanWaterCandidates[3]
 export const FreshWaterColor = FreshWaterCandidates[3] // Precipitation
 export const RiverWaterColor = RiverWaterCandidates[4]
 export const SnowWaterColor = SnowWaterCandidates[2]
-export const OffWhiteColor = "#f2f0ef" // Used to replace pure white color
+export const OffWhiteColor = "#fcfbfa" // Used to replace pure white color
 export const InfrastructureColor = InfrastructureCandidates[2] // Used for infrastructure
 export const WetlandColor = WetlandCandidates[2] // Used for wetland
 

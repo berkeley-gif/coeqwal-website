@@ -95,12 +95,35 @@ export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps } from "./components/RadarPlot"
+export type {
+  RadarPlotAxisLabelDetailStyle,
+  RadarAxisDetailBottomMode,
+  RadarAxisLabelDetailPayload,
+  RadarAxisLabelDetailChromeMountPayload,
+  RadarAxisLabelDetailChromeOptions,
+  RadarAxisLabelDetailPointerBridge,
+} from "./components/radarAxisLabelDetail"
+export {
+  mergeRadarAxisLabelDetailStyle,
+  DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE,
+  radarAxisDetailBottomModeForIndex,
+} from "./components/radarAxisLabelDetail"
 
 export { default as TierHeatmap } from "./components/TierHeatmap"
 export type {
   TierHeatmapProps,
   TierHeatmapCell,
 } from "./components/TierHeatmap"
+export { default as ResilienceHeatmap } from "./components/ResilienceHeatmap"
+export type {
+  ResilienceHeatmapProps,
+  ResilienceHeatmapCell,
+  ResilienceAxisItem,
+  ResilienceHeatmapPalette,
+  ResilienceHeatmapMarginals,
+  ResilienceCellRender,
+  ResilienceGlyphEntry,
+} from "./components/ResilienceHeatmap"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,
@@ -124,7 +147,13 @@ export {
   getNestedValue,
 } from "./utils/d3-utils"
 
-export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
+export { isFullOpacityDuringSidebarHighlight } from "./utils/sidebarHighlightPolicy"
+
+export {
+  THEME_LINE_PALETTES,
+  THEME_LINE_PALETTES_LIGHT_TO_DARK,
+  getThemeLineColor,
+} from "./utils/themeLineColors"
 export type { ThemeKey } from "./utils/themeLineColors"
 
 export {
@@ -141,3 +170,5 @@ export {
   lerp,
 } from "./utils/shape-morph"
 export type { ShapeMorphData } from "./utils/shape-morph"
+
+export { hierarchicalRowOrder } from "./utils/clustering"

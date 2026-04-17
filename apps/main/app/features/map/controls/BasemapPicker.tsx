@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { MAP_THEME_URLS, type MapThemeKey } from "@repo/map"
 import { mapActions, useMapStyle, useMapMode } from "../store"
 
@@ -25,6 +25,7 @@ function getThumbUrl(key: MapThemeKey): string {
 }
 
 export function BasemapPicker() {
+  const theme = useTheme()
   const currentStyle = useMapStyle()
   const mapMode = useMapMode()
 
@@ -42,7 +43,7 @@ export function BasemapPicker() {
         zIndex: 2,
         display: "flex",
         pointerEvents: "auto",
-        bgcolor: "rgba(255,255,255,0.92)",
+        bgcolor: alpha(theme.palette.common.white, 0.92),
         backdropFilter: "blur(6px)",
         borderRadius: 1.5,
         p: 0.75,

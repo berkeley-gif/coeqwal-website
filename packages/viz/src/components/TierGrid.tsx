@@ -541,7 +541,6 @@ export default function TierGrid({
   selectedObjectives = [],
   onObjectiveClick,
   onCategoryClick,
-  onShowOnMap,
   tierColorMap = DEFAULT_TIER_COLORS,
   showMapView = false,
 }: TierGridProps) {

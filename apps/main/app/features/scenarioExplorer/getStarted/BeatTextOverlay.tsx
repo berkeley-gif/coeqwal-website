@@ -7,6 +7,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useTheme,
+  alpha,
   ArrowForwardIcon,
   IconButton,
   PlayArrowIcon,
@@ -433,11 +434,11 @@ export default function BeatTextOverlay({
                 sx={{
                   width: 36,
                   height: 36,
-                  backgroundColor: "rgba(255,255,255,0.15)",
+                  backgroundColor: alpha(theme.palette.common.white, 0.15),
                   backdropFilter: "blur(8px)",
                   color: "text.secondary",
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.3)",
+                    backgroundColor: alpha(theme.palette.common.white, 0.3),
                   },
                 }}
               >
@@ -451,11 +452,11 @@ export default function BeatTextOverlay({
                 sx={{
                   width: 44,
                   height: 44,
-                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backgroundColor: alpha(theme.palette.common.white, 0.2),
                   backdropFilter: "blur(8px)",
                   color: "text.secondary",
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.35)",
+                    backgroundColor: alpha(theme.palette.common.white, 0.35),
                   },
                 }}
               >
@@ -468,11 +469,11 @@ export default function BeatTextOverlay({
                 sx={{
                   width: 44,
                   height: 44,
-                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backgroundColor: alpha(theme.palette.common.white, 0.2),
                   backdropFilter: "blur(8px)",
                   color: "text.secondary",
                   "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.35)",
+                    backgroundColor: alpha(theme.palette.common.white, 0.35),
                   },
                 }}
               >
@@ -606,7 +607,7 @@ export default function BeatTextOverlay({
           bottom: 0,
           width: "33.33%",
           zIndex: 3,
-          backgroundColor: "rgba(255, 255, 255, 0.75)",
+          backgroundColor: alpha(theme.palette.common.white, 0.75),
           opacity: 0,
         }}
       />
@@ -760,7 +761,7 @@ export default function BeatTextOverlay({
                     py: 0.125,
                     "&.Mui-selected": {
                       backgroundColor: theme.palette.blue.bright,
-                      color: "#fff",
+                      color: theme.palette.common.white,
                       borderColor: theme.palette.blue.bright,
                       "&:hover": {
                         backgroundColor: theme.palette.blue.dark,

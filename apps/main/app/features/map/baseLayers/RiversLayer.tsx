@@ -8,8 +8,11 @@
  */
 
 import { memo, useMemo, useEffect } from "react"
+
+const OPACITY_TRANSITION = { duration: 300, delay: 0 }
 import { Source, Layer, Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 import { useIsOutcomeVisualizationActive, useMapMode } from "../store"
 import { useSalmonRiverColor } from "../visualizationLayers/hooks/useSalmonRiverColor"
@@ -25,7 +28,7 @@ export const RIVER_LAYER_IDS = [
 
 const DEFAULT_RIVER_BODY_COLOR = "#042f67" // rgb(4, 47, 103)
 const RIVER_TROUGH_COLOR = "#1a3a52"
-const RIVER_OUTLINE_COLOR = "#ffffff"
+const RIVER_OUTLINE_COLOR = themeValues.palette.common.white
 
 interface RiversLayerProps {
   visible: boolean
@@ -112,173 +115,6 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   const troughTargetOpacity = isOutcomeActive ? 0 : 0.6
   const lineTargetOpacity = isOutcomeActive ? 0 : 1
 
-  // Update layer properties when visibility, progress, or color changes
-  useEffect(() => {
-    const map = mapRef?.current?.getMap()
-    if (!map?.isStyleLoaded()) return
-
-    const opacityTransition = { duration: 300, delay: 0 }
-
-    // Sacramento layers
-    if (map.getLayer("sacramento-river-trough")) {
-      map.setLayoutProperty(
-        "sacramento-river-trough",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "sacramento-river-trough",
-        "line-width",
-        sacTroughWidth,
-      )
-      map.setPaintProperty(
-        "sacramento-river-trough",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "sacramento-river-trough",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "sacramento-river-trough",
-        "line-opacity",
-        troughTargetOpacity,
-      )
-    }
-    if (map.getLayer("sacramento-river-outline")) {
-      map.setLayoutProperty(
-        "sacramento-river-outline",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "sacramento-river-outline",
-        "line-width",
-        sacOutlineWidth,
-      )
-      map.setPaintProperty(
-        "sacramento-river-outline",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "sacramento-river-outline",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "sacramento-river-outline",
-        "line-opacity",
-        lineTargetOpacity,
-      )
-    }
-    if (map.getLayer("sacramento-river-body")) {
-      map.setLayoutProperty(
-        "sacramento-river-body",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty("sacramento-river-body", "line-color", sacBodyColor)
-      map.setPaintProperty("sacramento-river-body", "line-width", sacBodyWidth)
-      map.setPaintProperty(
-        "sacramento-river-body",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "sacramento-river-body",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "sacramento-river-body",
-        "line-opacity",
-        lineTargetOpacity,
-      )
-    }
-
-    // San Joaquin layers
-    if (map.getLayer("san-joaquin-river-trough")) {
-      map.setLayoutProperty(
-        "san-joaquin-river-trough",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-trough",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-trough",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-trough",
-        "line-opacity",
-        troughTargetOpacity,
-      )
-    }
-    if (map.getLayer("san-joaquin-river-outline")) {
-      map.setLayoutProperty(
-        "san-joaquin-river-outline",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-outline",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-outline",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-outline",
-        "line-opacity",
-        lineTargetOpacity,
-      )
-    }
-    if (map.getLayer("san-joaquin-river-body")) {
-      map.setLayoutProperty(
-        "san-joaquin-river-body",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-body",
-        "line-trim-offset",
-        trimOffset,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-body",
-        "line-opacity-transition",
-        opacityTransition,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-body",
-        "line-opacity",
-        lineTargetOpacity,
-      )
-    }
-  }, [
-    visible,
-    visibilityValue,
-    trimOffset,
-    sacBodyColor,
-    sacBodyWidth,
-    sacOutlineWidth,
-    sacTroughWidth,
-    troughTargetOpacity,
-    lineTargetOpacity,
-    mapRef,
-  ])
-
   // Move rivers to top when visible
   useEffect(() => {
     if (!visible) return
@@ -313,6 +149,81 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     [],
   )
 
+  const riverLayout = useMemo(
+    () => ({
+      "line-join": "round" as const,
+      "line-cap": "round" as const,
+      visibility: visibilityValue as "visible" | "none",
+    }),
+    [visibilityValue],
+  )
+
+  const sacTroughPaint = useMemo(
+    () => ({
+      "line-color": RIVER_TROUGH_COLOR,
+      "line-width": sacTroughWidth,
+      "line-opacity": troughTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [sacTroughWidth, troughTargetOpacity, trimOffset],
+  )
+
+  const sacOutlinePaint = useMemo(
+    () => ({
+      "line-color": RIVER_OUTLINE_COLOR,
+      "line-width": sacOutlineWidth,
+      "line-opacity": lineTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [sacOutlineWidth, lineTargetOpacity, trimOffset],
+  )
+
+  const sacBodyPaint = useMemo(
+    () => ({
+      "line-color": sacBodyColor,
+      "line-width": sacBodyWidth,
+      "line-opacity": lineTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [sacBodyColor, sacBodyWidth, lineTargetOpacity, trimOffset],
+  )
+
+  const sjTroughPaint = useMemo(
+    () => ({
+      "line-color": RIVER_TROUGH_COLOR,
+      "line-width": 7,
+      "line-opacity": troughTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [troughTargetOpacity, trimOffset],
+  )
+
+  const sjOutlinePaint = useMemo(
+    () => ({
+      "line-color": RIVER_OUTLINE_COLOR,
+      "line-width": 4,
+      "line-opacity": lineTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [lineTargetOpacity, trimOffset],
+  )
+
+  const sjBodyPaint = useMemo(
+    () => ({
+      "line-color": DEFAULT_RIVER_BODY_COLOR,
+      "line-width": 2,
+      "line-opacity": lineTargetOpacity,
+      "line-opacity-transition": OPACITY_TRANSITION,
+      "line-trim-offset": trimOffset,
+    }),
+    [lineTargetOpacity, trimOffset],
+  )
+
   return (
     <>
       <Source
@@ -324,47 +235,20 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         <Layer
           id="sacramento-river-trough"
           type="line"
-          paint={{
-            "line-color": RIVER_TROUGH_COLOR,
-            "line-width": sacTroughWidth,
-            "line-opacity": troughTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sacTroughPaint}
+          layout={riverLayout}
         />
         <Layer
           id="sacramento-river-outline"
           type="line"
-          paint={{
-            "line-color": RIVER_OUTLINE_COLOR,
-            "line-width": sacOutlineWidth,
-            "line-opacity": lineTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sacOutlinePaint}
+          layout={riverLayout}
         />
         <Layer
           id="sacramento-river-body"
           type="line"
-          paint={{
-            "line-color": sacBodyColor,
-            "line-width": sacBodyWidth,
-            "line-opacity": lineTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sacBodyPaint}
+          layout={riverLayout}
         />
       </Source>
 
@@ -377,47 +261,20 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         <Layer
           id="san-joaquin-river-trough"
           type="line"
-          paint={{
-            "line-color": RIVER_TROUGH_COLOR,
-            "line-width": 7,
-            "line-opacity": troughTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sjTroughPaint}
+          layout={riverLayout}
         />
         <Layer
           id="san-joaquin-river-outline"
           type="line"
-          paint={{
-            "line-color": RIVER_OUTLINE_COLOR,
-            "line-width": 4,
-            "line-opacity": lineTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sjOutlinePaint}
+          layout={riverLayout}
         />
         <Layer
           id="san-joaquin-river-body"
           type="line"
-          paint={{
-            "line-color": DEFAULT_RIVER_BODY_COLOR,
-            "line-width": 2,
-            "line-opacity": lineTargetOpacity,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
+          paint={sjBodyPaint}
+          layout={riverLayout}
         />
       </Source>
 

@@ -13,7 +13,7 @@ export type GroundwaterRow = {
 
 type Margin = { top: number; right: number; bottom: number; left: number }
 const margin: Margin = { top: 64, right: 24, bottom: 50, left: 150 }
-const axisColor = "#f2f0ef"
+const axisColor = "#fcfbfa"
 
 const tickLabelStyle: React.CSSProperties = {
   fontSize: "1.1rem",

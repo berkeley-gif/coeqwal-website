@@ -85,7 +85,7 @@ export function useScenarioList() {
 
   /**
    * Build an ID mapping from sibling group IDs to the resolved short_code
-   * for a given hydroclimate period string (e.g., "historical", "warmer-wetter").
+   * for a given hydroclimate period string (e.g., "historical", "cc50").
    * Falls back to the historical variant if the requested hydroclimate is missing.
    */
   const buildIdMapping = useCallback(

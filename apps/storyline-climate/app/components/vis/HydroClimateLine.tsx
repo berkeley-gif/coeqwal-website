@@ -124,12 +124,12 @@ function XAxis({
       <g className="x-axis" transform={`translate(${margin.left}, 0)`}>
         <path
           d={`M0,${yOffset} L${size.width - margin.right - margin.left},${yOffset}`}
-          stroke="#f2f0ef"
+          stroke="#fcfbfa"
           strokeWidth={1}
         ></path>
         <path
           d={`M0, ${size.height - margin.bottom} L${size.width - margin.right - margin.left}, ${size.height - margin.bottom}`}
-          stroke="#f2f0ef"
+          stroke="#fcfbfa"
           strokeWidth={3}
         ></path>
       </g>
@@ -212,7 +212,7 @@ function YTick({
         x2={0}
         y1={yPos}
         y2={yPos}
-        stroke="#f2f0ef"
+        stroke="#fcfbfa"
         strokeWidth={1}
       ></line>
       <text x={0} dx="-0.75em" y={yPos}>

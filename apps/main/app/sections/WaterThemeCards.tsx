@@ -111,7 +111,7 @@ function ThemeCard({
       {/* Description */}
       <Box
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.common.white,
           px: { xs: 3, md: 3.5 },
           py: { xs: 2.5, md: 3 },
           flex: 1,

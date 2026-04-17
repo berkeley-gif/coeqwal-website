@@ -15,13 +15,14 @@ import {
   Box,
   Typography,
   useTheme,
+  alpha,
   PlayArrowIcon,
   ViewListIcon,
   ExploreIcon,
   AdjustIcon,
   AppsIcon,
+  GridOnIcon,
   CompareArrowsIcon,
-  InsightsIcon,
 } from "@repo/ui/mui"
 import {
   useScenarioExplorerStore,
@@ -71,9 +72,9 @@ const TOOL_TABS: {
     label: "Distribution comparison",
   },
   {
-    mode: "data",
-    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Data in depth",
+    mode: "resilience",
+    icon: <GridOnIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Resilience heatmap",
   },
 ]
 
@@ -148,10 +149,14 @@ export default function ExploreSubNav() {
               border: "none",
               borderRadius: theme.borderRadius.sm ?? "4px",
               cursor: "pointer",
-              background: active ? "rgba(255,255,255,0.2)" : "transparent",
+              background: active
+                ? alpha(theme.palette.common.white, 0.2)
+                : "transparent",
               color: theme.palette.common.white,
               transition: "background-color 0.15s",
-              "&:hover": { background: "rgba(255,255,255,0.15)" },
+              "&:hover": {
+                background: alpha(theme.palette.common.white, 0.15),
+              },
             }}
           >
             {icon}
@@ -171,13 +176,32 @@ export default function ExploreSubNav() {
         )
       })}
 
-      {mainView === "explorer" && (
-        <>
+      {/* Grid container: 0fr collapses to zero width, 1fr reveals. */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: mainView === "explorer" ? "1fr" : "0fr",
+          transition: "grid-template-columns 0.35s cubic-bezier(0.4,0,0.2,1)",
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          sx={{
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            minWidth: 0,
+            opacity: mainView === "explorer" ? 1 : 0,
+            transition:
+              mainView === "explorer" ? "opacity 0.25s 0.15s" : "opacity 0.15s",
+          }}
+        >
           <Box
             sx={{
               width: "1px",
               height: 20,
-              backgroundColor: "rgba(255,255,255,0.35)",
+              backgroundColor: alpha(theme.palette.common.white, 0.35),
               flexShrink: 0,
               mx: 0.5,
             }}
@@ -202,23 +226,6 @@ export default function ExploreSubNav() {
               const active = exploreMode === mode
               return (
                 <React.Fragment key={mode}>
-                  {mode === "data" && (
-                    <Typography
-                      component="span"
-                      sx={{
-                        fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                        fontSize: "0.9375rem",
-                        fontWeight: 500,
-                        lineHeight: 1,
-                        letterSpacing: "0.01em",
-                        whiteSpace: "nowrap",
-                        color: theme.palette.text.secondary,
-                        px: 0.5,
-                      }}
-                    >
-                      View data for selected scenarios:
-                    </Typography>
-                  )}
                   <Box
                     component="button"
                     type="button"
@@ -235,12 +242,12 @@ export default function ExploreSubNav() {
                       borderRadius: theme.borderRadius.sm ?? "4px",
                       cursor: "pointer",
                       background: active
-                        ? "rgba(255,255,255,0.2)"
+                        ? alpha(theme.palette.common.white, 0.2)
                         : "transparent",
                       color: theme.palette.common.white,
                       transition: "background-color 0.15s",
                       "&:hover": {
-                        background: "rgba(255,255,255,0.15)",
+                        background: alpha(theme.palette.common.white, 0.15),
                       },
                     }}
                   >
@@ -262,8 +269,8 @@ export default function ExploreSubNav() {
               )
             },
           )}
-        </>
-      )}
+        </Box>
+      </Box>
     </Box>
   )
 }

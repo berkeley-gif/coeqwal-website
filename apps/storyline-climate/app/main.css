@@ -4,7 +4,7 @@
   --dark-color-transparent: #21212195;
   --dark-color: #021224;
   --light-color: #1a3a5c;
-  --text-color: #f2f0ef;
+  --text-color: #fcfbfa;
   --highlight-color: #ffb347; /* #f1b143;*/
 }
 
@@ -164,7 +164,7 @@ html {
 }
 
 .MuiFormControlLabel-label {
-  color: #f2f0ef !important;
+  color: #fcfbfa !important;
 }
 
 .img-container {
@@ -234,7 +234,7 @@ html {
 }
 
 .toggle-button {
-  background-color: #f2f0ef;
+  background-color: #fcfbfa;
 }
 
 .stroked-text {

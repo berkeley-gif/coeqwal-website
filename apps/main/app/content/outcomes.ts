@@ -141,12 +141,6 @@ export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
   "SOD_GW",
 ]
 
-/** All radar axes: standard API outcomes + NOD/SOD split axes */
-export const ALL_RADAR_AXES_ORDER: string[] = [
-  ...OUTCOME_CODE_ORDER,
-  ...NOD_SOD_OUTCOME_CODES,
-]
-
 /** NOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
 export const NOD_CODES: NodSodCode[] = [
   "NOD_DW",
@@ -175,6 +169,19 @@ export const OUTCOME_REGIONAL_VARIANTS: Partial<
   RES_STOR: ["NOD_RES", "SOD_RES"],
   GW_STOR: ["NOD_GW", "SOD_GW"],
 }
+
+/**
+ * Radar spoke order (codes): each aggregate outcome, then its NOD and SOD axes
+ * when those exist — so e.g. Community deliveries → NOD → SOD clockwise.
+ * Outcomes without regional splits appear alone. Selected-only subsets keep
+ * this relative order (see RadarPanel `visibleAxisNames`).
+ */
+export const ALL_RADAR_AXES_ORDER: string[] = OUTCOME_CODE_ORDER.flatMap(
+  (code) => {
+    const v = OUTCOME_REGIONAL_VARIANTS[code]
+    return v ? [code, v[0], v[1]] : [code]
+  },
+)
 
 // =============================================================================
 // OUTCOME LOCATION DESCRIPTIONS

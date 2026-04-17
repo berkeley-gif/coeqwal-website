@@ -496,32 +496,42 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                 width: "100%",
               }}
             >
-              {theme.sections.map((section) => (
-                <Panel
-                  id={section.id}
-                  key={section.id}
-                  ariaLabel={section.id}
-                  fullHeight={false}
-                  includeNavbarPadding={false}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: muiTheme.space.gap.xl,
-                  }}
-                >
-                  {SECTION_LABELS[section.id] && (
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {SECTION_LABELS[section.id]?.long}
-                    </Typography>
-                  )}
-                  <SectionContentRenderer content={section.content} />
-                </Panel>
-              ))}
+              <Box
+                sx={{
+                  maxWidth: { xs: "100%", xl: "60vw" },
+                  mx: "auto",
+                  width: "100%",
+                }}
+              >
+                {theme.sections.map((section) => (
+                  <Panel
+                    id={section.id}
+                    key={section.id}
+                    ariaLabel={section.id}
+                    fullHeight={false}
+                    includeNavbarPadding={false}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: muiTheme.space.gap.xl,
+                      paddingTop: muiTheme.space.listGap.md,
+                      paddingBottom: muiTheme.space.listGap.md,
+                    }}
+                  >
+                    {SECTION_LABELS[section.id] && (
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {SECTION_LABELS[section.id]?.long}
+                      </Typography>
+                    )}
+                    <SectionContentRenderer content={section.content} />
+                  </Panel>
+                ))}
+              </Box>
               <CenteredTextSection
                 id="conclusion"
                 ariaLabel="Conclusion"
