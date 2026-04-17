@@ -58,7 +58,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
           display: "flex",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 1.5,
+          gap: 0.5,
         }}
       >
         {children}
