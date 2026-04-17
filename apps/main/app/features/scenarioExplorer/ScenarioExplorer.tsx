@@ -33,7 +33,7 @@ import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
-import { RadarToggleChip } from "./components/RadarToggleChip"
+import { InlineToggleChip } from "./components/InlineToggleChip"
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
@@ -140,27 +140,27 @@ export default function ScenarioExplorer() {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <RadarToggleChip
+          <InlineToggleChip
             label="choose axes"
             active={showAxisSelector}
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="show all scenarios"
             active={radarShowAll}
             onClick={() => setRadarShowAll(!radarShowAll)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="dots only"
             active={showDotsOnly}
             onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="show range"
             active={showRadarRange}
             onClick={() => setShowRadarRange(!showRadarRange)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="highlight current operations"
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}

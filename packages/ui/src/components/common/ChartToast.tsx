@@ -56,6 +56,7 @@ export function ChartToast({ children, maxWidth = 360, sx }: ChartToastProps) {
           textAlign: "center",
           maxWidth,
           boxShadow: theme.shadows[4],
+          fontWeight: 400,
           ...sx,
         }}
       >
