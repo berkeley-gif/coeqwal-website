@@ -120,6 +120,9 @@ export type {
   ResilienceHeatmapCell,
   ResilienceAxisItem,
   ResilienceHeatmapPalette,
+  ResilienceHeatmapMarginals,
+  ResilienceCellRender,
+  ResilienceGlyphEntry,
 } from "./components/ResilienceHeatmap"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
@@ -164,3 +167,5 @@ export {
   lerp,
 } from "./utils/shape-morph"
 export type { ShapeMorphData } from "./utils/shape-morph"
+
+export { hierarchicalRowOrder } from "./utils/clustering"

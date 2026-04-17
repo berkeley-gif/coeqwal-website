@@ -359,6 +359,26 @@ const palette = {
     tier4: "#ee5d32", // Red, tier 4
   },
 
+  // Diverging scale for signed tier deltas. Higher tier # = worse, so
+  // positive delta = degradation (warm), negative delta = improvement (cool).
+  // Anchors at -3, -1.5, 0, +1.5, +3.
+  tierDiverging: {
+    negStrong: "#0f7a4a", // Deep green, max improvement
+    negWeak: "#a8e0c3", // Light green, small improvement
+    zero: "#f0efec", // Neutral off-white, no change
+    posWeak: "#fbd4b4", // Light orange, small degradation
+    posStrong: "#c44022", // Deep red, max degradation
+  },
+
+  // Monochromatic density ramps for aggregate "fraction-at-risk" and
+  // "fraction-acceptable-or-better" cell encodings.
+  tierDensity: {
+    riskMin: "#f4f4f2", // Near-white (0% of scenarios at risk)
+    riskMax: "#c44022", // Deep red (100% at risk)
+    oppMin: "#f4f4f2", // Near-white (0% acceptable)
+    oppMax: "#0f7a4a", // Deep green (100% acceptable)
+  },
+
   tabPanels: {
     learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
@@ -1803,6 +1823,8 @@ declare module "@mui/material/styles" {
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
+    tierDiverging: typeof themeValues.palette.tierDiverging
+    tierDensity: typeof themeValues.palette.tierDensity
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
     waterThemes: typeof themeValues.palette.waterThemes
@@ -1822,6 +1844,8 @@ declare module "@mui/material/styles" {
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
+    tierDiverging?: Partial<typeof themeValues.palette.tierDiverging>
+    tierDensity?: Partial<typeof themeValues.palette.tierDensity>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
     waterThemes?: Partial<typeof themeValues.palette.waterThemes>

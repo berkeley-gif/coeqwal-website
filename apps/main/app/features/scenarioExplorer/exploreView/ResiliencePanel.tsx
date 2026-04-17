@@ -4,17 +4,16 @@
  * ResiliencePanel — resilience heatmap.
  *
  * Hydroclimates run along the X axis; rows are either outcomes (scenario
- * view) or scenarios (outcome view). Cells are colored by rounded tier
- * (1-4) and display the continuous arithmetic-mean value inside.
+ * and aggregate views) or scenarios (outcome view). Cells render in one
+ * of several modes:
+ *   - tier:    categorical tier fill + continuous mean value.
+ *   - delta:   diverging fill around 0 with signed delta vs a baseline.
+ *   - density: fraction of scenarios at Tier 3+ (risk) or Tier 2- (opp).
+ *   - glyph:   sub-tile grid inside each cell, one tile per scenario.
  *
- * Controls live in the toolbar (rendered by ScenarioExplorer.tsx). This
- * panel owns no toolbar UI itself. It only reads the control state
- * and hover/click callbacks via props.
- *
- * Data comes from useResilienceMatrix(), which composes three
- * useMultipleScenarioTiers calls (one per hydroclimate, all pre-cached
- * by usePrefetchTiers) and merges in precomputed NOD/SOD means for the
- * historical hydroclimate.
+ * Control state is lifted to ScenarioExplorer.tsx; this panel only
+ * consumes it. Data comes from useResilienceMatrix for individual cells
+ * and useResilienceAggregate for aggregate-view cells.
  */
 
 import React, {
@@ -35,12 +34,17 @@ import {
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapPalette,
+  type ResilienceHeatmapMarginals,
+  type ResilienceCellRender,
+  type ResilienceGlyphEntry,
+  hierarchicalRowOrder,
 } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,
 } from "../hooks/useResilienceMatrix"
+import { useResilienceAggregate } from "../hooks/useResilienceAggregate"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
   OUTCOME_CODE_ORDER,
@@ -54,10 +58,41 @@ import { hydroclimateOptions } from "../../../content/scenarios"
 import { TIER_LABELS } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 
-export type ResilienceView = "scenario" | "outcome"
+export type ResilienceView = "scenario" | "outcome" | "aggregate"
+
+/**
+ * Cell encoding selects how each cell's fill / value is computed and drawn.
+ * - `tier`: categorical tier color + arithmetic mean value (current default).
+ * - `delta`: diverging color around 0, fed by `deltaMode`.
+ * - `density_risk`: fraction of scenarios in Tier 3+ (red ramp, aggregate view only).
+ * - `density_opp`: fraction in Tier 2- (green ramp, aggregate view only).
+ * - `glyph`: sub-tile grid inside each cell, one tile per scenario
+ *   (aggregate view only).
+ */
+export type CellEncoding =
+  | "tier"
+  | "delta"
+  | "density_risk"
+  | "density_opp"
+  | "glyph"
+
+/**
+ * Delta baseline selector. When `none`, no delta is computed.
+ * - `vs_historical`: per-(scenario, outcome) climate delta; historical column is 0.
+ * - `vs_baseline`: per-(outcome, hc) delta vs `deltaBaselineScenarioId`.
+ */
+export type DeltaMode = "none" | "vs_historical" | "vs_baseline"
+
+export type AggregateScope = "all" | "selected"
 
 export interface ResilienceControlsState {
   view: ResilienceView
+  cellEncoding: CellEncoding
+  deltaMode: DeltaMode
+  deltaBaselineScenarioId: string
+  aggregateScope: AggregateScope
+  reorderBySimilarity: boolean
+  showMarginals: boolean
   focusScenarioId: string
   focusOutcomeCode: string
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
@@ -79,6 +114,31 @@ const HYDROCLIMATE_LABELS: Record<string, string> = Object.fromEntries(
   hydroclimateOptions.map((h) => [h.value, h.label]),
 )
 
+const HISTORICAL_HC: ResilienceHydroclimate = "historical"
+
+function clampTier(value: number): number {
+  return Math.min(4, Math.max(1, Math.round(value)))
+}
+
+/**
+ * Resolve the effective viz-level cell renderer from the logical state.
+ * Density / glyph are aggregate-only; delta mode overrides tier when set.
+ */
+function resolveCellRender(
+  view: ResilienceView,
+  encoding: CellEncoding,
+  deltaMode: DeltaMode,
+): ResilienceCellRender {
+  if (view === "aggregate") {
+    if (encoding === "density_risk" || encoding === "density_opp") {
+      return encoding
+    }
+    if (encoding === "glyph") return "glyph"
+    return deltaMode !== "none" ? "delta" : "tier"
+  }
+  return deltaMode !== "none" ? "delta" : "tier"
+}
+
 export default function ResiliencePanel({
   controls,
   highlightedIds = null,
@@ -87,6 +147,12 @@ export default function ResiliencePanel({
   const theme = useTheme()
   const {
     view,
+    cellEncoding,
+    deltaMode,
+    deltaBaselineScenarioId,
+    aggregateScope,
+    reorderBySimilarity,
+    showMarginals,
     focusScenarioId,
     focusOutcomeCode,
     selectedHydroclimates,
@@ -112,9 +178,18 @@ export default function ResiliencePanel({
 
   const { showOutcomeOnMap, isMapVisible } = useOutcomeMapAction()
 
-  const { showAlternativeBaselines } = useScenarioExplorerStore()
+  // Aggregate hook reads the already-fetched matrix. We key it on the
+  // effective scope so it only recomputes when the set changes.
+  const aggregateScenarioIds = useMemo(() => {
+    if (aggregateScope === "selected") return selectedScenarios
+    return undefined
+  }, [aggregateScope, selectedScenarios])
 
-  // Tier colors from the theme (primitive-only for stable memo)
+  const aggregate = useResilienceAggregate({
+    scenarioIds: aggregateScenarioIds,
+  })
+
+  // Tier colors from the theme (primitive-only for stable memo).
   const tier1 = theme.palette.tiers.tier1
   const tier2 = theme.palette.tiers.tier2
   const tier3 = theme.palette.tiers.tier3
@@ -144,6 +219,15 @@ export default function ResiliencePanel({
   const grey400 = theme.palette.grey[400]
   const grey600 = theme.palette.grey[600]
   const grey700 = theme.palette.grey[700]
+  const divNegStrong = theme.palette.tierDiverging.negStrong
+  const divNegWeak = theme.palette.tierDiverging.negWeak
+  const divZero = theme.palette.tierDiverging.zero
+  const divPosWeak = theme.palette.tierDiverging.posWeak
+  const divPosStrong = theme.palette.tierDiverging.posStrong
+  const densRiskMin = theme.palette.tierDensity.riskMin
+  const densRiskMax = theme.palette.tierDensity.riskMax
+  const densOppMin = theme.palette.tierDensity.oppMin
+  const densOppMax = theme.palette.tierDensity.oppMax
   const heatmapPalette = useMemo<ResilienceHeatmapPalette>(
     () => ({
       text: textPrimary,
@@ -158,6 +242,15 @@ export default function ResiliencePanel({
       tooltipBg: commonWhite,
       tooltipBorder: grey300,
       tooltipShadow: `0 2px 8px ${grey600}1F`,
+      divergingNegStrong: divNegStrong,
+      divergingNegWeak: divNegWeak,
+      divergingZero: divZero,
+      divergingPosWeak: divPosWeak,
+      divergingPosStrong: divPosStrong,
+      densityRiskMin: densRiskMin,
+      densityRiskMax: densRiskMax,
+      densityOppMin: densOppMin,
+      densityOppMax: densOppMax,
     }),
     [
       textPrimary,
@@ -167,6 +260,15 @@ export default function ResiliencePanel({
       grey400,
       grey600,
       grey700,
+      divNegStrong,
+      divNegWeak,
+      divZero,
+      divPosWeak,
+      divPosStrong,
+      densRiskMin,
+      densRiskMax,
+      densOppMin,
+      densOppMax,
     ],
   )
 
@@ -181,10 +283,8 @@ export default function ResiliencePanel({
       }))
   }, [hydroclimates, selectedHydroclimates])
 
-  // Row ordering helpers
-
   // Outcome-row order (aggregate + optional NOD/SOD interleaved)
-  const scenarioViewRowCodes = useMemo(() => {
+  const outcomeRowCodes = useMemo(() => {
     if (!showRegionalSplit) return OUTCOME_CODE_ORDER as readonly string[]
     return OUTCOME_CODE_ORDER.flatMap<string>((code) => {
       const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
@@ -194,114 +294,388 @@ export default function ResiliencePanel({
 
   // Scenario-row order (for outcome view): primary baseline first, then
   // the 24 sibling-group order (already sorted by useScenarioList).
-  const outcomeViewRowIds = useMemo(() => {
+  const scenarioRowIds = useMemo(() => {
     const ids = [...scenarioIds]
-    if (!showAlternativeBaselines) {
-      // Still include alt baselines — they show their own row; this was
-      // intentional in the plan so every HC row count stays stable (24).
-    }
-    // Move primary baseline to top; leave the rest in their existing order.
     const primary = ids.indexOf(PRIMARY_SCENARIO_BASELINE_ID)
     if (primary > 0) {
       ids.splice(primary, 1)
       ids.unshift(PRIMARY_SCENARIO_BASELINE_ID)
     }
     return ids
-  }, [scenarioIds, showAlternativeBaselines])
+  }, [scenarioIds])
 
-  // Build rows + cells for the heatmap based on view
-  const { rows, cells, focusSubjectLabel } = useMemo(() => {
-    const out: ResilienceHeatmapCell[] = []
+  const effectiveCellRender = useMemo(
+    () => resolveCellRender(view, cellEncoding, deltaMode),
+    [view, cellEncoding, deltaMode],
+  )
 
+  // Build the underlying row keys + per-(row, col) value arrays. The
+  // "displayable" value is whatever drives the primary visual encoding
+  // (tier mean, delta, density fraction, aggregate mean); used both for
+  // cells and for marginals / clustering.
+  type RowValueFn = (rowKey: string, col: ResilienceHydroclimate) => {
+    continuousValue: number | null
+    tierLevel: number | null
+    available: boolean
+    unavailableReason?: string
+    divergingValue?: number | null
+    densityValue?: number | null
+    distribution?: ReadonlyArray<ResilienceGlyphEntry>
+    type?: "single_value" | "multi_value" | "nod_sod"
+    rowLabel: string
+    /** Value used for marginal row/col means + clustering. */
+    signal: number | null
+  }
+
+  const buildValueFn = useCallback<
+    () => { rowKeys: string[]; rowLabels: Record<string, string>; valueFn: RowValueFn; subjectLabel: string }
+  >(() => {
     if (view === "scenario") {
       const focusName = getDisplayName(focusScenarioId)
-      const rowItems: ResilienceAxisItem[] = scenarioViewRowCodes.map(
-        (code) => ({
-          key: code,
-          label: getOutcomeName(code),
-          definitionTooltip: getOutcomeDefinition(code),
-        }),
-      )
+      const rowKeys = [...outcomeRowCodes]
+      const rowLabels: Record<string, string> = {}
+      for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
 
-      for (const code of scenarioViewRowCodes) {
-        const outcomeName = getOutcomeName(code)
-        for (const col of columns) {
-          const hc = col.key as ResilienceHydroclimate
-          const cell = getCell(focusScenarioId, code, hc)
-          if (!cell) continue
-          out.push({
-            rowKey: code,
-            colKey: hc,
-            continuousValue: cell.continuousValue,
-            tierLevel: cell.tierLevel,
-            available: cell.available,
-            unavailableReason: cell.unavailableReason,
-            rowLabel: outcomeName,
-            colLabel: col.label,
-            subjectLabel: focusName,
-            scenarioId: focusScenarioId,
-            outcomeCode: code,
-            type: cell.type,
-          })
+      const valueFn: RowValueFn = (rowKey, hc) => {
+        const cell = getCell(focusScenarioId, rowKey, hc)
+        if (!cell) {
+          return {
+            continuousValue: null,
+            tierLevel: null,
+            available: false,
+            unavailableReason: "No data for this row",
+            rowLabel: rowLabels[rowKey] ?? rowKey,
+            signal: null,
+          }
         }
-      }
-
-      return {
-        rows: rowItems,
-        cells: out,
-        focusSubjectLabel: focusName,
-      }
-    }
-
-    // outcome view: rows = scenarios, one fixed outcome
-    const outcomeName = getOutcomeName(focusOutcomeCode)
-    const outcomeDef = getOutcomeDefinition(focusOutcomeCode)
-    const rowItems: ResilienceAxisItem[] = outcomeViewRowIds.map((sid) => ({
-      key: sid,
-      label: getDisplayName(sid),
-      definitionTooltip:
-        scenarios.find((s) => s.scenarioId === sid)?.description ||
-        getDisplayName(sid),
-    }))
-
-    for (const sid of outcomeViewRowIds) {
-      for (const col of columns) {
-        const hc = col.key as ResilienceHydroclimate
-        const cell = getCell(sid, focusOutcomeCode, hc)
-        if (!cell) continue
-        out.push({
-          rowKey: sid,
-          colKey: hc,
+        const base = {
           continuousValue: cell.continuousValue,
           tierLevel: cell.tierLevel,
           available: cell.available,
           unavailableReason: cell.unavailableReason,
-          rowLabel: getDisplayName(sid),
-          colLabel: col.label,
-          subjectLabel: outcomeName,
-          scenarioId: sid,
-          outcomeCode: focusOutcomeCode,
           type: cell.type,
+          rowLabel: rowLabels[rowKey] ?? rowKey,
+        }
+        if (deltaMode === "none" || !cell.available) {
+          return { ...base, signal: cell.continuousValue }
+        }
+        // Compute delta
+        let reference: number | null = null
+        if (deltaMode === "vs_historical") {
+          const ref = getCell(focusScenarioId, rowKey, HISTORICAL_HC)
+          reference = ref?.available ? ref.continuousValue : null
+        } else {
+          const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
+          reference = ref?.available ? ref.continuousValue : null
+        }
+        if (reference == null || cell.continuousValue == null) {
+          return {
+            ...base,
+            available: false,
+            unavailableReason: "Delta baseline unavailable",
+            divergingValue: null,
+            signal: null,
+          }
+        }
+        const dv = cell.continuousValue - reference
+        return { ...base, divergingValue: dv, signal: dv }
+      }
+
+      return {
+        rowKeys,
+        rowLabels,
+        valueFn,
+        subjectLabel: focusName,
+      }
+    }
+
+    if (view === "outcome") {
+      const outcomeName = getOutcomeName(focusOutcomeCode)
+      const rowKeys = [...scenarioRowIds]
+      const rowLabels: Record<string, string> = {}
+      for (const sid of rowKeys) rowLabels[sid] = getDisplayName(sid)
+
+      const valueFn: RowValueFn = (rowKey, hc) => {
+        const cell = getCell(rowKey, focusOutcomeCode, hc)
+        if (!cell) {
+          return {
+            continuousValue: null,
+            tierLevel: null,
+            available: false,
+            unavailableReason: "No data for this scenario",
+            rowLabel: rowLabels[rowKey] ?? rowKey,
+            signal: null,
+          }
+        }
+        const base = {
+          continuousValue: cell.continuousValue,
+          tierLevel: cell.tierLevel,
+          available: cell.available,
+          unavailableReason: cell.unavailableReason,
+          type: cell.type,
+          rowLabel: rowLabels[rowKey] ?? rowKey,
+        }
+        if (deltaMode === "none" || !cell.available) {
+          return { ...base, signal: cell.continuousValue }
+        }
+        let reference: number | null = null
+        if (deltaMode === "vs_historical") {
+          const ref = getCell(rowKey, focusOutcomeCode, HISTORICAL_HC)
+          reference = ref?.available ? ref.continuousValue : null
+        } else {
+          const ref = getCell(
+            deltaBaselineScenarioId,
+            focusOutcomeCode,
+            hc,
+          )
+          reference = ref?.available ? ref.continuousValue : null
+        }
+        if (reference == null || cell.continuousValue == null) {
+          return {
+            ...base,
+            available: false,
+            unavailableReason: "Delta baseline unavailable",
+            divergingValue: null,
+            signal: null,
+          }
+        }
+        const dv = cell.continuousValue - reference
+        return { ...base, divergingValue: dv, signal: dv }
+      }
+
+      return { rowKeys, rowLabels, valueFn, subjectLabel: outcomeName }
+    }
+
+    // view === "aggregate"
+    const rowKeys = [...outcomeRowCodes]
+    const rowLabels: Record<string, string> = {}
+    for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
+
+    const valueFn: RowValueFn = (rowKey, hc) => {
+      const agg = aggregate.getCell(rowKey, hc)
+      if (!agg || agg.availableCount === 0) {
+        return {
+          continuousValue: null,
+          tierLevel: null,
+          available: false,
+          unavailableReason: "No available data in aggregate",
+          rowLabel: rowLabels[rowKey] ?? rowKey,
+          signal: null,
+        }
+      }
+
+      const baseCell = {
+        continuousValue: agg.mean,
+        tierLevel: agg.mean != null ? clampTier(agg.mean) : null,
+        available: agg.mean != null,
+        rowLabel: rowLabels[rowKey] ?? rowKey,
+      }
+
+      if (cellEncoding === "density_risk") {
+        return {
+          ...baseCell,
+          densityValue: agg.riskDensity,
+          available: true,
+          signal: agg.riskDensity,
+        }
+      }
+      if (cellEncoding === "density_opp") {
+        return {
+          ...baseCell,
+          densityValue: agg.opportunityDensity,
+          available: true,
+          signal: agg.opportunityDensity,
+        }
+      }
+      if (cellEncoding === "glyph") {
+        const distribution: ResilienceGlyphEntry[] = agg.distribution.map(
+          (d) => ({
+            tierLevel: d.tierLevel,
+            label: getDisplayName(d.scenarioId),
+          }),
+        )
+        return {
+          ...baseCell,
+          distribution,
+          available: true,
+          signal: agg.mean,
+        }
+      }
+      // cellEncoding === "tier" or "delta"
+      if (deltaMode === "none") {
+        return { ...baseCell, signal: agg.mean }
+      }
+      // Aggregate delta computation.
+      let reference: number | null = null
+      if (deltaMode === "vs_historical") {
+        const ref = aggregate.getCell(rowKey, HISTORICAL_HC)
+        reference =
+          ref && ref.availableCount > 0 && ref.mean != null ? ref.mean : null
+      } else {
+        const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
+        reference = ref?.available ? ref.continuousValue : null
+      }
+      if (reference == null || agg.mean == null) {
+        return {
+          ...baseCell,
+          available: false,
+          unavailableReason: "Delta baseline unavailable",
+          divergingValue: null,
+          signal: null,
+        }
+      }
+      const dv = agg.mean - reference
+      return { ...baseCell, divergingValue: dv, signal: dv }
+    }
+
+    return {
+      rowKeys,
+      rowLabels,
+      valueFn,
+      subjectLabel: aggregate.subjectLabel,
+    }
+  }, [
+    view,
+    cellEncoding,
+    deltaMode,
+    deltaBaselineScenarioId,
+    outcomeRowCodes,
+    scenarioRowIds,
+    focusScenarioId,
+    focusOutcomeCode,
+    getCell,
+    getDisplayName,
+    aggregate,
+  ])
+
+  // Compute the (rowKey, col) value grid once, then derive cells,
+  // clustering, and marginals from it.
+  const { rowKeys, rowLabels, valueFn, subjectLabel } = useMemo(buildValueFn, [
+    buildValueFn,
+  ])
+
+  const valueGrid = useMemo(() => {
+    const grid: Record<string, Record<string, ReturnType<RowValueFn>>> = {}
+    for (const rk of rowKeys) {
+      const row: Record<string, ReturnType<RowValueFn>> = {}
+      for (const col of columns) {
+        row[col.key] = valueFn(rk, col.key as ResilienceHydroclimate)
+      }
+      grid[rk] = row
+    }
+    return grid
+  }, [rowKeys, columns, valueFn])
+
+  // Optional hierarchical row reordering by the row's signal vector.
+  const orderedRowKeys = useMemo(() => {
+    if (!reorderBySimilarity || rowKeys.length <= 2 || columns.length === 0) {
+      return rowKeys
+    }
+    const matrix: (number | null)[][] = rowKeys.map((rk) =>
+      columns.map((col) => valueGrid[rk]?.[col.key]?.signal ?? null),
+    )
+    const order = hierarchicalRowOrder(matrix)
+    return order.map((i) => rowKeys[i]!).filter((k): k is string => !!k)
+  }, [reorderBySimilarity, rowKeys, columns, valueGrid])
+
+  // Build rows + cells for the heatmap
+  const { rows, cells } = useMemo(() => {
+    const out: ResilienceHeatmapCell[] = []
+
+    const rowItems: ResilienceAxisItem[] = orderedRowKeys.map((rk) => {
+      if (view === "outcome") {
+        return {
+          key: rk,
+          label: rowLabels[rk] ?? rk,
+          definitionTooltip:
+            scenarios.find((s) => s.scenarioId === rk)?.description ||
+            rowLabels[rk] ||
+            rk,
+        }
+      }
+      return {
+        key: rk,
+        label: rowLabels[rk] ?? rk,
+        definitionTooltip: getOutcomeDefinition(rk),
+      }
+    })
+
+    for (const rk of orderedRowKeys) {
+      for (const col of columns) {
+        const v = valueGrid[rk]?.[col.key]
+        if (!v) continue
+        out.push({
+          rowKey: rk,
+          colKey: col.key,
+          continuousValue: v.continuousValue,
+          tierLevel: v.tierLevel,
+          available: v.available,
+          unavailableReason: v.unavailableReason,
+          rowLabel: rowLabels[rk] ?? rk,
+          colLabel: col.label,
+          subjectLabel,
+          scenarioId:
+            view === "scenario"
+              ? focusScenarioId
+              : view === "outcome"
+                ? rk
+                : undefined,
+          outcomeCode:
+            view === "scenario"
+              ? rk
+              : view === "outcome"
+                ? focusOutcomeCode
+                : rk,
+          type: v.type,
+          divergingValue: v.divergingValue,
+          densityValue: v.densityValue,
+          distribution: v.distribution,
         })
       }
     }
 
-    return {
-      rows: rowItems,
-      cells: out,
-      focusSubjectLabel: outcomeDef ?? outcomeName,
-    }
+    return { rows: rowItems, cells: out }
   }, [
+    orderedRowKeys,
+    columns,
+    valueGrid,
+    rowLabels,
+    subjectLabel,
     view,
     focusScenarioId,
     focusOutcomeCode,
-    columns,
-    scenarioViewRowCodes,
-    outcomeViewRowIds,
     scenarios,
-    getCell,
-    getDisplayName,
   ])
+
+  // Row and column marginals: mean of each row's/col's signal values.
+  const marginalsData = useMemo<ResilienceHeatmapMarginals | undefined>(() => {
+    if (!showMarginals) return undefined
+    const row: (number | null)[] = orderedRowKeys.map((rk) => {
+      let sum = 0
+      let count = 0
+      for (const col of columns) {
+        const v = valueGrid[rk]?.[col.key]?.signal
+        if (v != null && Number.isFinite(v)) {
+          sum += v
+          count += 1
+        }
+      }
+      return count > 0 ? sum / count : null
+    })
+    const col: (number | null)[] = columns.map((c) => {
+      let sum = 0
+      let count = 0
+      for (const rk of orderedRowKeys) {
+        const v = valueGrid[rk]?.[c.key]?.signal
+        if (v != null && Number.isFinite(v)) {
+          sum += v
+          count += 1
+        }
+      }
+      return count > 0 ? sum / count : null
+    })
+    return { row, col }
+  }, [showMarginals, orderedRowKeys, columns, valueGrid])
 
   // Hover coordination with the sidebar (debounced)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -338,17 +712,20 @@ export default function ResiliencePanel({
     }
   }, [])
 
-  // In scenario view, rows are outcomes — hover always implies the focus
-  // scenario. In outcome view, rows are scenarios — hover implies that row.
   const handleCellHover = useCallback(
     (cell: ResilienceHeatmapCell | null) => {
       if (!cell) {
         notifyHover(null)
         return
       }
-      const sid =
-        view === "scenario" ? focusScenarioId : cell.scenarioId ?? null
-      notifyHover(sid)
+      if (view === "scenario") {
+        notifyHover(focusScenarioId)
+      } else if (view === "outcome") {
+        notifyHover(cell.scenarioId ?? null)
+      } else {
+        // Aggregate view: no single scenario to highlight.
+        notifyHover(null)
+      }
     },
     [view, focusScenarioId, notifyHover],
   )
@@ -356,25 +733,22 @@ export default function ResiliencePanel({
   const handleCellClick = useCallback(
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
-      const outcomeCode = cell.outcomeCode ?? focusOutcomeCode
+      const outcomeCode = cell.outcomeCode
       const sid = cell.scenarioId ?? focusScenarioId
       if (!outcomeCode || !sid) return
       showOutcomeOnMap(outcomeCode, sid)
     },
-    [isMapVisible, focusOutcomeCode, focusScenarioId, showOutcomeOnMap],
+    [isMapVisible, focusScenarioId, showOutcomeOnMap],
   )
 
-  // Highlighted rows (sidebar hover sync). In scenario view, rows are
-  // outcomes, so we don't highlight anything by scenario. Just dim the
-  // entire heatmap when the hovered scenario differs from the focus.
+  // Highlighted rows (sidebar hover sync). Only meaningful in outcome view
+  // where rows are scenarios.
   const highlightedRowKeys = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
     if (view === "outcome") return new Set(highlightedIds)
     return null
   }, [highlightedIds, view])
 
-  // Chosen-row emphasis for outcome view: dim rows that aren't in
-  // selectedScenarios when at least one is selected. Merge with highlights.
   const dimRowKeys = useMemo<Set<string> | null>(() => {
     if (view !== "outcome") return null
     if (selectedScenarios.length === 0) return null
@@ -389,8 +763,7 @@ export default function ResiliencePanel({
 
   const formatRowTick = useCallback(
     (row: ResilienceAxisItem) => {
-      if (view !== "scenario") return row.label
-      // Indent NOD/SOD rows under their aggregate outcome parent.
+      if (view === "outcome") return row.label
       if ((NOD_SOD_OUTCOME_CODES as readonly string[]).includes(row.key)) {
         return `  ${row.label}`
       }
@@ -398,6 +771,12 @@ export default function ResiliencePanel({
     },
     [view],
   )
+
+  // Aggregate view with "selected" scope + empty selection → empty state.
+  const aggregateEmpty =
+    view === "aggregate" &&
+    aggregateScope === "selected" &&
+    selectedScenarios.length === 0
 
   // Render states
 
@@ -448,6 +827,13 @@ export default function ResiliencePanel({
     )
   }
 
+  const titleForView =
+    view === "outcome"
+      ? "Scenarios by hydroclimate"
+      : view === "aggregate"
+        ? "Outcomes by hydroclimate (aggregate)"
+        : "Outcomes by hydroclimate"
+
   return (
     <Box
       sx={{
@@ -472,13 +858,13 @@ export default function ResiliencePanel({
           variant="dashboard"
           sx={{ fontWeight: 600, color: theme.palette.text.primary }}
         >
-          {view === "scenario" ? "Outcomes by hydroclimate" : "Scenarios by hydroclimate"}
+          {titleForView}
         </Typography>
         <Typography
           variant="compactCaption"
           sx={{ color: theme.palette.text.secondary }}
         >
-          {focusSubjectLabel}
+          {subjectLabel}
         </Typography>
       </Box>
 
@@ -503,6 +889,20 @@ export default function ResiliencePanel({
               Select at least one hydroclimate in the chart controls.
             </Typography>
           </Box>
+        ) : aggregateEmpty ? (
+          <Box
+            sx={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Select one or more scenarios in the sidebar to aggregate over,
+              or switch the aggregate scope to &ldquo;all scenarios&rdquo;.
+            </Typography>
+          </Box>
         ) : (
           <ResilienceHeatmap
             rows={rows}
@@ -511,11 +911,14 @@ export default function ResiliencePanel({
             tierColors={tierColors}
             tierLabels={tierLabels}
             palette={heatmapPalette}
+            cellRender={effectiveCellRender}
             showCellNumbers={showCellNumbers}
             onCellHover={handleCellHover}
             onCellClick={isMapVisible ? handleCellClick : undefined}
             highlightedRowKeys={effectiveRowHighlight}
             formatRowTick={formatRowTick}
+            marginals={marginalsData}
+            showMarginals={showMarginals}
           />
         )}
       </Box>

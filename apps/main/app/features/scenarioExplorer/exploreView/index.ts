@@ -20,4 +20,7 @@ export { default as ResiliencePanel } from "./ResiliencePanel"
 export type {
   ResilienceControlsState,
   ResilienceView,
+  CellEncoding,
+  DeltaMode,
+  AggregateScope,
 } from "./ResiliencePanel"
