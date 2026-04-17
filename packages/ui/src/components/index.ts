@@ -100,12 +100,19 @@ export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
 
 // Chip components
-export { ToggleChip, TierChip, LocationChip, ScenarioBadge } from "./Chip"
+export {
+  ToggleChip,
+  TierChip,
+  LocationChip,
+  ScenarioBadge,
+  HydroclimateBadge,
+} from "./Chip"
 export type {
   ToggleChipProps,
   TierChipProps,
   LocationChipProps,
   ScenarioBadgeProps,
+  HydroclimateBadgeProps,
 } from "./Chip"
 
 // Error handling

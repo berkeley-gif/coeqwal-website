@@ -286,7 +286,9 @@ export default function ScenarioExplorer() {
                     />
                   )
                 }
-                toolbar={<ToolToolbar gridAligned hideTitle={!isListMode} />}
+                toolbar={
+                  <ToolToolbar gridAligned={isListMode} hideTitle={!isListMode} />
+                }
                 chartControls={isListMode ? undefined : chartControls}
               >
                 {isListMode && (

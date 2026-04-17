@@ -12,7 +12,9 @@
 
 import React from "react"
 import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
+import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
+import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
 import { useScenarioExplorerStore } from "../store"
 
 interface ToolToolbarProps {
@@ -43,6 +45,8 @@ export default function ToolToolbar({
   // TODO: re-enable high climate risk in radar once it has complete data
   const radarDisabledClimates =
     exploreMode === "radar" ? new Set(["warmer-drier-i"]) : undefined
+
+  const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   const viewControls = (
     <>
@@ -152,7 +156,7 @@ export default function ToolToolbar({
 
       <VerticalDivider />
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
         <Typography
           variant="dashboard"
           sx={{
@@ -174,6 +178,12 @@ export default function ToolToolbar({
           onChange={setHydroclimate}
           disabledValues={radarDisabledClimates}
         />
+        {!showMap && hydroBadge && (
+          <HydroclimateBadge
+            title={hydroBadge.title}
+            accentColor={hydroBadge.accentColor}
+          />
+        )}
       </Box>
     </>
   )
