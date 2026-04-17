@@ -19,12 +19,15 @@ interface ThemeGroupHeaderProps {
   isFirst?: boolean
   /** "grid" (default) uses CSS subgrid for StrategyGrid; "flex" uses a flat flex row for sidebar */
   layout?: "grid" | "flex"
+  /** Sidebar / grid: highlight linked charts when hovering this header (all theme scenario ids). */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 export default function ThemeGroupHeader({
   themeKey,
   scenarioIds,
   layout = "grid",
+  onRowHover,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
@@ -76,6 +79,8 @@ export default function ThemeGroupHeader({
   return (
     <Box
       data-theme-header={themeKey}
+      onMouseEnter={() => onRowHover?.(scenarioIds)}
+      onMouseLeave={() => onRowHover?.(null)}
       sx={{
         ...(isFlex
           ? {
