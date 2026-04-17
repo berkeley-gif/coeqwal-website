@@ -233,7 +233,7 @@ export {
 export * as icons from "@mui/icons-material"
 
 // Styles and themes
-export { useTheme, alpha, styled } from "@mui/material/styles"
+export { useTheme, alpha, styled, ThemeProvider } from "@mui/material/styles"
 export type { Theme } from "@mui/material/styles"
 
 // System utilities and types

@@ -11,10 +11,13 @@ import {
   RADAR_TIER_LABELS,
   RADAR_TIER_SWATCH_COLORS,
   type RadarAxisLabelDetailPayload,
+  type RadarAxisLabelDetailChromeOptions,
+  type RadarAxisLabelDetailPointerBridge,
   radarAxisDetailBottomModeForIndex,
 } from "./radarAxisLabelDetail"
 
 export type { RadarPlotAxisLabelDetailStyle } from "./radarAxisLabelDetail"
+export type { RadarAxisLabelDetailChromeOptions } from "./radarAxisLabelDetail"
 
 export interface RadarPlotProps {
   data: VerticalParallelLineData[]
@@ -76,6 +79,11 @@ export interface RadarPlotProps {
    * Pass values from theme
    */
   axisLabelDetailStyle?: Partial<RadarPlotAxisLabelDetailStyle>
+  /**
+   * Optional HTML UI mounted at the top of the axis-label hover detail
+   * (e.g. scenario checkbox + share via foreignObject).
+   */
+  axisLabelDetailChrome?: RadarAxisLabelDetailChromeOptions
 }
 
 function toTier(v: number): number {
@@ -92,6 +100,8 @@ const DEFAULT_COLORS = {
 }
 const DEFAULT_LINE_COLORS: string[] = []
 const HOVER_NOTIFY_MS = 80
+/** Delay before hiding axis-label detail after leaving the dot or panel (bridge cancels when entering panel). */
+const AXIS_DETAIL_DISMISS_MS = 500
 
 const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
@@ -299,6 +309,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onAxisPositions,
     svgRefCallback,
     axisLabelDetailStyle: axisLabelDetailStyleProp,
+    axisLabelDetailChrome,
   }) => {
     const axisLabelDetailStyle = useMemo(
       () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
@@ -344,6 +355,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     const leaveResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
       null,
     )
+    const axisDetailInnerHitRef = useRef<SVGGElement | null>(null)
+    const cancelAxisDetailDismissRef = useRef<(() => void) | null>(null)
+    /** Survives full SVG rebuild so the panel can reopen after e.g. checkbox → store → updateChart. */
+    const lastOpenAxisDetailRef = useRef<{
+      axis: string
+      detail: RadarAxisLabelDetailPayload
+    } | null>(null)
 
     const onLineHoverRef = useRef(onLineHover)
     useEffect(() => {
@@ -369,6 +387,40 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onAxisPositionsRef.current = onAxisPositions
     }, [onAxisPositions])
+
+    const axisLabelDetailChromeRef = useRef(axisLabelDetailChrome)
+    useEffect(() => {
+      axisLabelDetailChromeRef.current = axisLabelDetailChrome
+    }, [axisLabelDetailChrome])
+
+    useEffect(() => {
+      return () => {
+        queueMicrotask(() => {
+          axisLabelDetailChromeRef.current?.onBeforeSvgDomClear?.()
+        })
+      }
+    }, [])
+
+    useEffect(() => {
+      let raf = 0
+      const onMove = (e: PointerEvent) => {
+        const inner = axisDetailInnerHitRef.current
+        if (!inner) return
+        if (raf) return
+        raf = requestAnimationFrame(() => {
+          raf = 0
+          const stack = document.elementsFromPoint(e.clientX, e.clientY)
+          if (stack.some((node) => inner.contains(node))) {
+            cancelAxisDetailDismissRef.current?.()
+          }
+        })
+      }
+      window.addEventListener("pointermove", onMove, { passive: true })
+      return () => {
+        window.removeEventListener("pointermove", onMove)
+        if (raf) cancelAnimationFrame(raf)
+      }
+    }, [])
 
     const lastDimsRef = useRef<{ width: number; height: number }>({
       width: 0,
@@ -437,10 +489,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         // ── Full rebuild ──
         const svg = select(svgRef.current)
-        svg.selectAll("*").remove()
-        if (w <= 0 || h <= 0) return
 
-        const sh = axisLabelDetailStyle
+        const continueFullRebuild = () => {
+          svg.selectAll("*").remove()
+          axisDetailInnerHitRef.current = null
+          if (w <= 0 || h <= 0) return
+
+          const sh = axisLabelDetailStyle
         if (sh.panelShadowBlur > 0) {
           const filt = svg
             .append("defs")
@@ -470,18 +525,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         scalesRef.current = { rScale: (n: number) => rScale(n), cx, cy, radius }
 
         const g = svg.append("g").attr("class", "radar-chart-root")
-
-        const showAxisLabelDetail = (
-          axisKey: string,
-          detail: RadarAxisLabelDetailPayload | null,
-        ) => {
-          renderRadarAxisLabelDetailInto(
-            g as Selection<SVGGElement, unknown, null, undefined>,
-            axisKey,
-            detail,
-            axisLabelDetailStyle,
-          )
-        }
 
         const axisTitleFontWeightDefault =
           axisLabelDetailStyle.scenarioFontWeight
@@ -778,6 +821,58 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             })
         }
 
+        const cancelAxisDetailDismiss = () => {
+          if (leaveResetTimerRef.current !== null) {
+            clearTimeout(leaveResetTimerRef.current)
+            leaveResetTimerRef.current = null
+          }
+        }
+        cancelAxisDetailDismissRef.current = cancelAxisDetailDismiss
+
+        const handleAxisDetailHitTargetChange = (innerG: SVGGElement | null) => {
+          axisDetailInnerHitRef.current = innerG
+        }
+
+        const showAxisLabelDetail = (
+          axisKey: string,
+          detail: RadarAxisLabelDetailPayload | null,
+        ) => {
+          if (detail == null) {
+            lastOpenAxisDetailRef.current = null
+          } else {
+            lastOpenAxisDetailRef.current = { axis: axisKey, detail }
+          }
+          const pointerBridge: RadarAxisLabelDetailPointerBridge = {
+            onHitTargetChange: handleAxisDetailHitTargetChange,
+          }
+          if (detail != null) {
+            pointerBridge.onPanelEnter = cancelAxisDetailDismiss
+            pointerBridge.onPanelLeave = () => scheduleAxisDetailDismiss(axisKey)
+          }
+          renderRadarAxisLabelDetailInto(
+            g as Selection<SVGGElement, unknown, null, undefined>,
+            axisKey,
+            detail,
+            axisLabelDetailStyle,
+            axisLabelDetailChromeRef.current,
+            pointerBridge,
+          )
+        }
+
+        const scheduleAxisDetailDismiss = (axisKey: string) => {
+          if (leaveResetTimerRef.current !== null) {
+            clearTimeout(leaveResetTimerRef.current)
+          }
+          leaveResetTimerRef.current = setTimeout(() => {
+            leaveResetTimerRef.current = null
+            resetDotVisuals()
+            lastNotifiedIdRef.current = null
+            onLineHoverRef.current?.(null)
+            resetAllAxisLabelTitlesFontWeight()
+            showAxisLabelDetail(axisKey, null)
+          }, AXIS_DETAIL_DISMISS_MS)
+        }
+
         // Render dots
         axes.forEach((axis, axisIdx) => {
           const angle = getAngle(axisIdx)
@@ -838,10 +933,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
             dot
               .on("mouseenter", function () {
-                if (leaveResetTimerRef.current !== null) {
-                  clearTimeout(leaveResetTimerRef.current)
-                  leaveResetTimerRef.current = null
-                }
+                cancelAxisDetailDismiss()
 
                 // Entering a new dot cancels the previous dot’s leave timeout, so
                 // reset every spoke first (cross-axis moves otherwise leave stale bold).
@@ -880,6 +972,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 })
 
                 showAxisLabelDetail(axis, {
+                  scenarioId: scenario.id,
                   scenarioName: scenario.name,
                   tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
                 })
@@ -902,23 +995,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   hideTooltip(tooltipRef.current)
                 onDotHoverRef.current?.(null)
 
-                if (leaveResetTimerRef.current !== null) {
-                  clearTimeout(leaveResetTimerRef.current)
-                }
-                leaveResetTimerRef.current = setTimeout(() => {
-                  leaveResetTimerRef.current = null
-                  resetDotVisuals()
-                  lastNotifiedIdRef.current = null
-                  onLineHoverRef.current?.(null)
-                  resetAllAxisLabelTitlesFontWeight()
-                  showAxisLabelDetail(axis, null)
-                }, 20)
+                scheduleAxisDetailDismiss(axis)
               })
               .on("click", () => {
                 onPinnedToggleRef.current?.(scenario.id)
                 onLineClickRef.current?.(scenario)
                 onDotClickRef.current?.(scenario.id, axis)
                 showAxisLabelDetail(axis, {
+                  scenarioId: scenario.id,
                   scenarioName: scenario.name,
                   tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
                 })
@@ -1284,6 +1368,49 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
 
         onAxisPositionsRef.current?.(axisPositions)
+
+        const reopen = lastOpenAxisDetailRef.current
+        if (reopen) {
+          const scenario = data.find((d) => d.id === reopen.detail.scenarioId)
+          const sv = scenario?.values[reopen.axis]
+          if (scenario != null && sv != null && axes.includes(reopen.axis)) {
+            const tierIndex = Math.min(
+              4,
+              Math.max(1, Math.round(toTier(sv))),
+            )
+            resetAllAxisLabelTitlesFontWeight()
+            applyFocusVisuals(scenario.id)
+            drawPolygonForScenario(scenario.id, scenario.id)
+            showAxisLabelDetail(reopen.axis, {
+              scenarioId: scenario.id,
+              scenarioName: scenario.name,
+              tierIndex,
+            })
+            setAxisLabelTitlesFontWeight(reopen.axis, axisTitleFontWeightHover)
+            dotsLayer
+              .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+              .filter(function () {
+                return (
+                  this.getAttribute("data-scenario-id") === scenario.id &&
+                  this.getAttribute("data-axis") === reopen.axis
+                )
+              })
+              .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
+              .raise()
+          } else {
+            lastOpenAxisDetailRef.current = null
+          }
+        }
+        }
+
+        if (axisLabelDetailChromeRef.current?.onBeforeSvgDomClear) {
+          queueMicrotask(() => {
+            axisLabelDetailChromeRef.current?.onBeforeSvgDomClear?.()
+            queueMicrotask(continueFullRebuild)
+          })
+        } else {
+          continueFullRebuild()
+        }
       },
       [
         data,

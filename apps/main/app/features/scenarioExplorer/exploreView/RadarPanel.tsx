@@ -9,6 +9,7 @@
  */
 
 import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
+import { createRoot, type Root } from "react-dom/client"
 import {
   Box,
   Typography,
@@ -20,6 +21,7 @@ import {
   RadarPlot,
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
+  type RadarAxisLabelDetailChromeOptions,
 } from "@repo/viz"
 import { ChartToast, InfoIconButton, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
@@ -42,6 +44,7 @@ import {
   rasterizeSvgClone,
 } from "../dataExplorer/utils/exportUtils"
 import { InlineToggleChip } from "../components/InlineToggleChip"
+import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -111,7 +114,7 @@ export default function RadarPanel({
 
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
 
-  const { getThemeForScenario } = useScenarioList()
+  const { getThemeForScenario, getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
 
   const radarSvgRef = useRef<SVGSVGElement | null>(null)
@@ -379,6 +382,47 @@ export default function RadarPanel({
     onSingleCaptureReady?.(captureSingleScenarioRadar)
   }, [captureSingleScenarioRadar, onSingleCaptureReady])
 
+  const axisDetailChromeRootsRef = useRef(new Map<HTMLDivElement, Root>())
+
+  const axisLabelDetailChrome = useMemo((): RadarAxisLabelDetailChromeOptions => {
+    return {
+      onBeforeSvgDomClear() {
+        const map = axisDetailChromeRootsRef.current
+        for (const root of map.values()) {
+          root.unmount()
+        }
+        map.clear()
+      },
+      onScenarioControlsMount(host, payload) {
+        const map = axisDetailChromeRootsRef.current
+        let root = map.get(host)
+        if (!root) {
+          root = createRoot(host)
+          map.set(host, root)
+        }
+        const scenarioLabel = getDisplayName(payload.scenarioId)
+        const lineColor = scenarioColorMap[payload.scenarioId] ?? "#666666"
+        const accentColor = lineColor || theme.palette.blue.bright
+
+        root.render(
+          <RadarAxisDetailScenarioControlsRoot
+            theme={theme}
+            scenarioId={payload.scenarioId}
+            scenarioLabel={scenarioLabel}
+            lineColor={lineColor}
+            accentColor={accentColor}
+            captureSingle={captureSingleScenarioRadar}
+          />,
+        )
+      },
+      onScenarioControlsUnmount(host) {
+        const r = axisDetailChromeRootsRef.current.get(host)
+        r?.unmount()
+        axisDetailChromeRootsRef.current.delete(host)
+      },
+    }
+  }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
+
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 
   const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
@@ -630,6 +674,7 @@ export default function RadarPanel({
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}
             axisLabelDetailStyle={radarAxisLabelDetailStyle}
+            axisLabelDetailChrome={axisLabelDetailChrome}
           />
         </Box>
 

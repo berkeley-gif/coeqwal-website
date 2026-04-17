@@ -47,6 +47,13 @@ export type RadarPlotAxisLabelDetailStyle = {
   detailAnchorOffsetOneLinePx: number
   /** Horizontal gap between static axis title bbox and bottom-detail hover card. */
   detailBottomGapPx: number
+  /**
+   * Height of the optional HTML controls row (foreignObject) when
+   * `axisLabelDetailChrome.onScenarioControlsMount` is provided.
+   */
+  scenarioControlsRowHeightPx: number
+  /** Vertical gap below the controls row before the scenario title. */
+  scenarioControlsRowGapPx: number
 }
 
 /** Set from `data-detail-bottom-mode` on `g.axis-label` (see RadarPlot). */
@@ -133,8 +140,59 @@ function unionAxisLabelTitleBBox(
 }
 
 export type RadarAxisLabelDetailPayload = {
+  scenarioId: string
   scenarioName: string
   tierIndex: number
+}
+
+/** Optional UI (e.g. React via createRoot) mounted into a foreignObject at the top of the detail. */
+export type RadarAxisLabelDetailChromeOptions = {
+  onScenarioControlsMount?: (
+    host: HTMLDivElement,
+    payload: RadarAxisLabelDetailPayload,
+  ) => void
+  onScenarioControlsUnmount?: (host: HTMLDivElement) => void
+  /**
+   * Called immediately before D3 clears the SVG subtree (e.g. `svg.selectAll("*").remove()`).
+   * Required when using createRoot into foreignObject hosts so React unmounts before nodes are torn out.
+   */
+  onBeforeSvgDomClear?: () => void
+}
+
+/** Keeps the axis-label detail open when moving the pointer from the dot onto the panel. */
+export type RadarAxisLabelDetailPointerBridge = {
+  onPanelEnter?: () => void
+  onPanelLeave?: () => void
+  /** Notifies when `g.axis-label-detail-inner` is mounted or torn down (for global hit-testing). */
+  onHitTargetChange?: (innerG: SVGGElement | null) => void
+}
+
+function isPointerOverDetailInner(
+  innerEl: SVGGElement,
+  clientX: number,
+  clientY: number,
+): boolean {
+  const top = document.elementFromPoint(clientX, clientY)
+  if (top && innerEl.contains(top)) return true
+  const stack = document.elementsFromPoint(clientX, clientY)
+  for (const node of stack) {
+    if (innerEl.contains(node)) return true
+  }
+  return false
+}
+
+const CHROME_HOST_SELECTOR = "div.radar-axis-detail-chrome-host"
+
+function unmountScenarioDetailChrome(
+  detailGroup: BaseType | null,
+  chrome: RadarAxisLabelDetailChromeOptions | undefined,
+) {
+  if (!chrome?.onScenarioControlsUnmount || !detailGroup) return
+  select(detailGroup)
+    .selectAll(CHROME_HOST_SELECTOR)
+    .each(function () {
+      chrome.onScenarioControlsUnmount!(this as HTMLDivElement)
+    })
 }
 
 export const RADAR_AXIS_DETAIL_SHADOW_FILTER_ID = "radar-axis-detail-shadow"
@@ -193,6 +251,8 @@ export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyl
     detailAnchorOffsetTwoLinePx: 27,
     detailAnchorOffsetOneLinePx: 22,
     detailBottomGapPx: 8,
+    scenarioControlsRowHeightPx: 32,
+    scenarioControlsRowGapPx: 6,
   }
 
 export function mergeRadarAxisLabelDetailStyle(
@@ -313,16 +373,21 @@ export function renderRadarAxisLabelDetailInto(
   axis: string,
   payload: RadarAxisLabelDetailPayload | null,
   style: RadarPlotAxisLabelDetailStyle,
+  chrome?: RadarAxisLabelDetailChromeOptions,
+  pointerBridge?: RadarAxisLabelDetailPointerBridge,
 ) {
   const clearAllDetails = () => {
+    pointerBridge?.onHitTargetChange?.(null)
     rootG.selectAll("g.axis-label-detail").each(function () {
       const dg = select(this as SVGGElement)
+      unmountScenarioDetailChrome(this as SVGGElement, chrome)
       dg.selectAll("*").remove()
       dg.attr("visibility", "hidden")
     })
   }
 
   if (payload === null) {
+    pointerBridge?.onHitTargetChange?.(null)
     rootG
       .selectAll("g.axis-label")
       .filter(function () {
@@ -331,6 +396,7 @@ export function renderRadarAxisLabelDetailInto(
       .select("g.axis-label-detail")
       .each(function () {
         const dg = select(this as SVGGElement)
+        unmountScenarioDetailChrome(this as SVGGElement, chrome)
         dg.selectAll("*").remove()
         dg.attr("visibility", "hidden")
       })
@@ -344,13 +410,17 @@ export function renderRadarAxisLabelDetailInto(
   })
 
   const detailG = labelG.select("g.axis-label-detail")
-  if (detailG.empty()) return
+  if (detailG.empty()) {
+    pointerBridge?.onHitTargetChange?.(null)
+    return
+  }
 
   const lx = Number(labelG.attr("data-label-x"))
   const y0 = Number(labelG.attr("data-detail-y"))
   const anchor = labelG.attr("data-text-anchor") as "start" | "end" | "middle"
 
   detailG.attr("visibility", "visible")
+  unmountScenarioDetailChrome(detailG.node(), chrome)
   detailG.selectAll("*").remove()
 
   const s = style
@@ -379,6 +449,13 @@ export function renderRadarAxisLabelDetailInto(
 
   const padX = s.panelPaddingX
   const maxContentW = Math.max(48, s.detailMaxWidthPx - 2 * padX)
+  const showChrome = Boolean(chrome?.onScenarioControlsMount)
+  const controlsH = showChrome ? s.scenarioControlsRowHeightPx : 0
+  const controlsGap = showChrome ? s.scenarioControlsRowGapPx : 0
+  const foW = s.detailMaxWidthPx
+  let foX = contentX
+  if (contentAnchor === "end") foX = contentX - foW
+  else if (contentAnchor === "middle") foX = contentX - foW / 2
   const scenarioSpec = {
     fontSize: s.scenarioFontSize,
     fontFamily: s.fontFamily,
@@ -399,6 +476,28 @@ export function renderRadarAxisLabelDetailInto(
       const lyAttr = Number(labelG.attr("data-label-y"))
       y = Number.isFinite(lyAttr) ? lyAttr + nudge : y0
     }
+  }
+
+  if (showChrome && controlsH > 0) {
+    const fo = inner
+      .append("foreignObject")
+      .attr("x", foX)
+      .attr("y", y)
+      .attr("width", foW)
+      .attr("height", controlsH)
+      .attr("class", "radar-axis-detail-chrome-fo")
+
+    const host = fo
+      .append("xhtml:div")
+      .attr("class", "radar-axis-detail-chrome-host")
+      .style("width", `${foW}px`)
+      .style("height", `${controlsH}px`)
+      .style("box-sizing", "border-box")
+      .style("overflow", "hidden")
+      .node() as HTMLDivElement
+
+    chrome!.onScenarioControlsMount!(host, payload)
+    y += controlsH + controlsGap
   }
 
   const scenarioLines = wrapTextToLines(
@@ -498,6 +597,32 @@ export function renderRadarAxisLabelDetailInto(
 
   if (s.panelShadowBlur > 0) {
     panel.attr("filter", `url(#${RADAR_AXIS_DETAIL_SHADOW_FILTER_ID})`)
+  }
+
+  if (pointerBridge) {
+    const innerEl = inner.node() as SVGGElement
+    inner
+      .on("mouseover.axisDetailBridge", () => {
+        pointerBridge.onPanelEnter?.()
+      })
+      .on("mouseout.axisDetailBridge", function (event: MouseEvent) {
+        const rel = event.relatedTarget as Node | null
+        if (rel && innerEl.contains(rel)) return
+        if (rel == null) {
+          const x = event.clientX
+          const y = event.clientY
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (!isPointerOverDetailInner(innerEl, x, y)) {
+                pointerBridge.onPanelLeave?.()
+              }
+            })
+          })
+        } else {
+          pointerBridge.onPanelLeave?.()
+        }
+      })
+    pointerBridge.onHitTargetChange?.(innerEl)
   }
 
   // Paint order: later siblings draw on top. Raise this axis so the hover panel
