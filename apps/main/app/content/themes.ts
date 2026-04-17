@@ -155,6 +155,30 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: "Millions of Californians depend on community water systems for daily life, for drinking, cooking, bathing, schools, hospitals, and local businesses. When these systems are stressed, the impacts are immediate and personal.",
             },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-01.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-02.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-03.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-04.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
           ],
         },
       },
@@ -334,6 +358,12 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: "Understanding how surface water deliveries, groundwater use, agricultural production, and climate stress interact is essential for planning a stable and sustainable food future.",
             },
+            {
+              type: "image",
+              src: "/images/themes/Groundwater_theme.svg",
+              alt: "Groundwater diagram",
+              caption: "Agricultural water demand is met by surface water and groundwater. During droughts, surface water supply falls short and groundwater pumping fills the gap. In response, water tables decline. The Sustainable Groundwater Management Act (SGMA) introduces pumping limits to protect aquifers and agricultural land uses over decades.\nThe graphics compare two scenarios over 10 years. Without pumping limits (Scenario 1), groundwater use increases during drought, causing significant declines in groundwater levels. With limits (Scenario 2), some agricultural water demand goes unmet in during drought, but groundwater levels remain relatively stable.\nThese tradeoffs affect the economics of Central Valley agriculture. Pumping limits can agricultural reduce revenue during drought, but help sustain groundwater and support productive land use over the long term.",
+            },
           ],
         },
       },
@@ -481,8 +511,20 @@ export const WATER_THEMES: Theme[] = [
               text: "Salmon are central to this story. They travel hundreds of miles between rivers and the ocean and are part of Tribal traditions, fishing economies, our food supply, and California's natural heritage. When salmon struggle, it signals stress in the broader river system.",
             },
             {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-01.svg",
+              alt: "Fish theme",
+              caption: "Sacramento River winter-run Chinook have a unique life history. Spawning adults (age 2, 3, or 4 years old) enter the Sacramento River as early as November, and migrate far up the Sacramento River, where they hold in the upper river for several months before spawning.\nAfter spawning, the eggs incubate in the gravel for 3 months before emerging as fry. Fry can rear in freshwater environment for 5-10 months before transitioning to the smolt outmigration lifestage. From January through April, smolts migrate downstream and enter the Gulf of the Farallones. Once in the Pacific Ocean, they mature for 1-3 years before re-entering the Sacramento River to spawn again to start the next generation.",
+            },
+            {
               type: "paragraph",
               text: "Over time, dams, reservoirs, diversions, and land use changes have reshaped rivers. Spring floods that once spread across floodplains are now captured or confined. These changes have improved water reliability for people, but reduced habitat, changed temperatures, and altered the timing of flows.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-02.svg",
+              alt: "Fish theme",
+              caption: "Functional flows capture important hydrological features, including natural patterns of seasonal baseflows and flows from rain and snowmelt. The life stages of Sacramento River winter-run Chinook have adapted with these natural flow patterns, and rely on sufficient water to provide habitat for rearing fry, and to aid in their migrations, including downstream outmigration as smolts head to the ocean, and upstream migration as adults navigate to their spawning grounds to deposit eggs. Shasta Dam blocks their historical access the cool headwaters of Mount Shasta, and now they rely on artificially regulated flows downstream of Shasta Dam to maintain cool water temperatures required for egg survival. ",
             },
             {
               type: "paragraph",
@@ -495,6 +537,12 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "Understanding rivers as living ecosystems, not just water delivery systems, is essential for future water management. A key idea explored here is that river flows can be managed to better resemble natural patterns while still delivering water to people.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-03.svg",
+              alt: "Fish theme",
+              caption: "Historically, Sacramento River winter-run Chinook salmon spawned and deposited eggs in the cool headwater streams near Mount Shasta. The construction of Shasta Dam blocked access to these spawning grounds and they now spawn and deposit eggs near the town of Redding. Fry can rear in the mainstem Sacramento River, Yolo Bypass, Delta, and Bay before outmigrating to the Gulf of the Farallones.  \nFrom the gulf, they embark on an extensive migration in the Pacific Ocean before traversing the 300+ miles back to their spawning ground in the upper Sacramento River to start the next generation. Their success at each life stage is dependent on habitat – they need flow in the mainstem Sacramento and Delta for rearing and outmigration, and cool water temperatures from releases at Shasta Reservoir for their eggs to survive.",
             },
           ],
         },
@@ -656,7 +704,7 @@ export const WATER_THEMES: Theme[] = [
               alt: "Delta flow diagram",
               caption: "Water flow in the Delta changes with seasons, tides, and infrastructure operations. Winter storms and spring snowmelt bring in freshwater flows, while daily high tides push saltwater inland. Pumps in the southwest corner of the Delta export water to meet demand. \n When pumping is high relative to inflows, flow directions can reverse, pulling water and fish toward pumps and drawing saltwater deeper into the Delta.",
             },
-                        {
+            {
               type: "image",
               src: "/images/themes/Delta_Salinity_Flows-02.svg",
               alt: "Delta flow diagram",

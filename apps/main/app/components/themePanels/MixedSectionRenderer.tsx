@@ -42,7 +42,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
       component={motion.div}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.05 }}
       variants={fadeInRight}
       sx={{
         display: "flex",
@@ -130,7 +130,8 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   alignItems: isMobile ? "stretch" : "center",
                   mx: isMobile ? 0 : "30px",
                   my: isMobile ? "16px" : "30px",
-                  padding: muiTheme.space.component.xl
+                  padding: muiTheme.space.component.xl,
+                  maxWidth: isMobile ? "100%" : "900px",
                 }}
               >
                 <Box
@@ -144,16 +145,15 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   sx={{
                     // On desktop: take up roughly half the card.
                     // On mobile: full width of the card.
-                    width: isMobile ? "100%" : "50%",
+                    width: isMobile ? "100%" : block.caption ? "50%" : "100%",
                     flexShrink: 0,
                     height: "auto",
                     display: "block",
                   }}
                 />
                 {block.caption && (
-                  <Typography
+                  <Box
                     component="figcaption"
-                    variant="body2"
                     sx={{
                       flexGrow: 1,
                       color: muiTheme.palette.text.primary,
@@ -172,7 +172,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                     }}
                   >
                     {parseCaptionBlocks(block.caption)}
-                  </Typography>
+                  </Box>
                 )}
               </Box>
             )
