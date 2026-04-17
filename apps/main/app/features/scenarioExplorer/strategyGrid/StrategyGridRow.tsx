@@ -356,7 +356,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               alignSelf: "start",
               mr: -0.5,
               ...(!compact && {
-                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
+                pt: isListMode
+                  ? theme.spacing(theme.scenarios.grid.row.padding as number)
+                  : `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
                 pb: theme.scenarios.grid.row.padding,
               }),
               ...(compact && { gridRow: "1 / -1" }),
@@ -372,6 +374,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               sx={{
                 ...theme.scenarios.checkbox.sm,
                 cursor: "pointer",
+                ...(isListMode && { mt: "1px" }),
               }}
             />
           </Box>
@@ -780,6 +783,7 @@ function NonCompactRowContent({
     <StrategyHeader
       strategy={scenario}
       titleVariant="body2"
+      compact={isListMode}
       showDescription={showDescription}
       disableTruncation={disableTrunc}
       descriptionMaxWidth="none"
