@@ -40,18 +40,14 @@ function RadarAxisDetailScenarioControlsInner({
   const outcomeDisplayMode = useScenarioExplorerStore(
     (s) => s.outcomeDisplayMode,
   )
-  const pinnedScenarioIds = useScenarioExplorerStore(
-    (s) => s.pinnedScenarioIds,
-  )
+  const pinnedScenarioIds = useScenarioExplorerStore((s) => s.pinnedScenarioIds)
   const togglePinnedScenario = useScenarioExplorerStore(
     (s) => s.togglePinnedScenario,
   )
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
   const radarVisibleAxes = useScenarioExplorerStore((s) => s.radarVisibleAxes)
   const showRadarRange = useScenarioExplorerStore((s) => s.showRadarRange)
-  const highlightBaseline = useScenarioExplorerStore(
-    (s) => s.highlightBaseline,
-  )
+  const highlightBaseline = useScenarioExplorerStore((s) => s.highlightBaseline)
   const showDotsOnly = useScenarioExplorerStore((s) => s.showDotsOnly)
   const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
 

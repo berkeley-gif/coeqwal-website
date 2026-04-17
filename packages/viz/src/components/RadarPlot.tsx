@@ -504,926 +504,947 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           if (w <= 0 || h <= 0) return
 
           const sh = axisLabelDetailStyle
-        if (sh.panelShadowBlur > 0) {
-          const filt = svg
-            .append("defs")
-            .append("filter")
-            .attr("id", RADAR_AXIS_DETAIL_SHADOW_FILTER_ID)
-            .attr("x", "-40%")
-            .attr("y", "-40%")
-            .attr("width", "180%")
-            .attr("height", "180%")
-          filt
-            .append("feDropShadow")
-            .attr("dx", sh.panelShadowDx)
-            .attr("dy", sh.panelShadowDy)
-            .attr("stdDeviation", sh.panelShadowBlur)
-            .attr("flood-color", sh.panelShadowColor)
-            .attr("flood-opacity", sh.panelShadowOpacity)
-        }
+          if (sh.panelShadowBlur > 0) {
+            const filt = svg
+              .append("defs")
+              .append("filter")
+              .attr("id", RADAR_AXIS_DETAIL_SHADOW_FILTER_ID)
+              .attr("x", "-40%")
+              .attr("y", "-40%")
+              .attr("width", "180%")
+              .attr("height", "180%")
+            filt
+              .append("feDropShadow")
+              .attr("dx", sh.panelShadowDx)
+              .attr("dy", sh.panelShadowDy)
+              .attr("stdDeviation", sh.panelShadowBlur)
+              .attr("flood-color", sh.panelShadowColor)
+              .attr("flood-opacity", sh.panelShadowOpacity)
+          }
 
-        const MARGIN = 80
-        const size = Math.min(w, h)
-        const radius = (size - MARGIN * 2) / 2
-        if (radius <= 0) return
-        const cx = w / 2
-        const cy = h / 2
+          const MARGIN = 80
+          const size = Math.min(w, h)
+          const radius = (size - MARGIN * 2) / 2
+          if (radius <= 0) return
+          const cx = w / 2
+          const cy = h / 2
 
-        const rScale = scaleLinear().domain([4.5, 0.5]).range([0, radius])
-        scalesRef.current = { rScale: (n: number) => rScale(n), cx, cy, radius }
+          const rScale = scaleLinear().domain([4.5, 0.5]).range([0, radius])
+          scalesRef.current = {
+            rScale: (n: number) => rScale(n),
+            cx,
+            cy,
+            radius,
+          }
 
-        const g = svg.append("g").attr("class", "radar-chart-root")
+          const g = svg.append("g").attr("class", "radar-chart-root")
 
-        const axisTitleFontWeightDefault =
-          axisLabelDetailStyle.scenarioFontWeight
-        const axisTitleFontWeightHover = Math.min(
-          900,
-          axisTitleFontWeightDefault + 200,
-        )
-        const setAxisLabelTitlesFontWeight = (
-          axisKey: string,
-          weight: number,
-        ) => {
-          g.selectAll("g.axis-label")
-            .filter(function () {
-              return (this as SVGGElement).getAttribute("data-axis") === axisKey
-            })
-            .selectAll("text.axis-label-title")
-            .attr("font-weight", weight)
-        }
-
-        const resetAllAxisLabelTitlesFontWeight = () => {
-          g.selectAll("g.axis-label text.axis-label-title").attr(
-            "font-weight",
-            axisTitleFontWeightDefault,
+          const axisTitleFontWeightDefault =
+            axisLabelDetailStyle.scenarioFontWeight
+          const axisTitleFontWeightHover = Math.min(
+            900,
+            axisTitleFontWeightDefault + 200,
           )
-        }
-
-        const hasPinned = pinnedScenarioIds.size > 0
-        const hasScenarioColors = lineColors.length > 0
-        const dotR = 3.5
-        const DIM_OPACITY = 0.22
-        const EMPHASIS_DOT_DELTA = 1.2
-        const EMPHASIS_STROKE_WIDTH = 2
-        /** Slightly lighter than selected emphasis — sidebar / crosshair hover trace */
-        const HOVER_HIGHLIGHT_DOT_DELTA = 0.85
-        const HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
-        const PIN_DOT_DELTA = 1.45
-        const HOVER_DOT_RADIUS_BUMP = 1.45
-
-        const hasChosenIds = chosenIds && chosenIds.size > 0
-
-        /**
-         * External highlight (`highlightedIds`): emphasize those traces only;
-         * chosen, baseline, and pinned stay at normal resting emphasis (not dimmed).
-         * Chart dot hover (`focusId`) unchanged.
-         */
-        const selectedOrBaselineVisuals = {
-          dotR: dotR + EMPHASIS_DOT_DELTA,
-          opacity: 1.0,
-          strokeWidth: EMPHASIS_STROKE_WIDTH,
-          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-        } as const
-        const pinnedVisuals = {
-          dotR: dotR + PIN_DOT_DELTA,
-          opacity: 1.0,
-          strokeWidth: EMPHASIS_STROKE_WIDTH,
-          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-        } as const
-        const externalDimVisuals = {
-          dotR: dotR * 0.7,
-          opacity: DIM_OPACITY,
-          strokeWidth: 1.2,
-          strokeOpacity: DIM_OPACITY,
-        } as const
-        const hoverEmphasisVisuals = {
-          dotR: dotR + HOVER_HIGHLIGHT_DOT_DELTA,
-          opacity: 1.0,
-          strokeWidth: HOVER_HIGHLIGHT_STROKE_WIDTH,
-          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-        } as const
-
-        const resolveVisuals = (
-          scenarioId: string,
-          focusId?: string | null,
-        ) => {
-          const isFocused = focusId != null && scenarioId === focusId
-          const hasExternalHighlight =
-            highlightedIds != null && highlightedIds.size > 0
-          const isExternallyHighlighted =
-            hasExternalHighlight && highlightedIds!.has(scenarioId)
-          const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
-          const isPinned = pinnedScenarioIds.has(scenarioId)
-          const isBaseline =
-            highlightBaseline &&
-            baselineData != null &&
-            scenarioId === baselineData.id
-
-          const anyHighlightActive =
-            focusId != null ||
-            dimUnselected ||
-            (dimUnpinned && hasPinned) ||
-            hasExternalHighlight
-
-          if (isFocused || isExternallyHighlighted) {
-            return hoverEmphasisVisuals
+          const setAxisLabelTitlesFontWeight = (
+            axisKey: string,
+            weight: number,
+          ) => {
+            g.selectAll("g.axis-label")
+              .filter(function () {
+                return (
+                  (this as SVGGElement).getAttribute("data-axis") === axisKey
+                )
+              })
+              .selectAll("text.axis-label-title")
+              .attr("font-weight", weight)
           }
 
-          if (hasExternalHighlight) {
-            if (isSelected || isBaseline) return selectedOrBaselineVisuals
-            if (isPinned) return pinnedVisuals
-            return externalDimVisuals
+          const resetAllAxisLabelTitlesFontWeight = () => {
+            g.selectAll("g.axis-label text.axis-label-title").attr(
+              "font-weight",
+              axisTitleFontWeightDefault,
+            )
           }
 
-          if (isSelected || isBaseline) {
-            return selectedOrBaselineVisuals
-          }
+          const hasPinned = pinnedScenarioIds.size > 0
+          const hasScenarioColors = lineColors.length > 0
+          const dotR = 3.5
+          const DIM_OPACITY = 0.22
+          const EMPHASIS_DOT_DELTA = 1.2
+          const EMPHASIS_STROKE_WIDTH = 2
+          /** Slightly lighter than selected emphasis — sidebar / crosshair hover trace */
+          const HOVER_HIGHLIGHT_DOT_DELTA = 0.85
+          const HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
+          const PIN_DOT_DELTA = 1.45
+          const HOVER_DOT_RADIUS_BUMP = 1.45
 
-          if (isPinned) {
-            return pinnedVisuals
-          }
+          const hasChosenIds = chosenIds && chosenIds.size > 0
 
-          if (anyHighlightActive) {
-            return {
-              dotR: dotR * 0.7,
-              opacity: DIM_OPACITY,
-              strokeWidth: 1.2,
-              strokeOpacity: DIM_OPACITY,
+          /**
+           * External highlight (`highlightedIds`): emphasize those traces only;
+           * chosen, baseline, and pinned stay at normal resting emphasis (not dimmed).
+           * Chart dot hover (`focusId`) unchanged.
+           */
+          const selectedOrBaselineVisuals = {
+            dotR: dotR + EMPHASIS_DOT_DELTA,
+            opacity: 1.0,
+            strokeWidth: EMPHASIS_STROKE_WIDTH,
+            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+          } as const
+          const pinnedVisuals = {
+            dotR: dotR + PIN_DOT_DELTA,
+            opacity: 1.0,
+            strokeWidth: EMPHASIS_STROKE_WIDTH,
+            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+          } as const
+          const externalDimVisuals = {
+            dotR: dotR * 0.7,
+            opacity: DIM_OPACITY,
+            strokeWidth: 1.2,
+            strokeOpacity: DIM_OPACITY,
+          } as const
+          const hoverEmphasisVisuals = {
+            dotR: dotR + HOVER_HIGHLIGHT_DOT_DELTA,
+            opacity: 1.0,
+            strokeWidth: HOVER_HIGHLIGHT_STROKE_WIDTH,
+            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+          } as const
+
+          const resolveVisuals = (
+            scenarioId: string,
+            focusId?: string | null,
+          ) => {
+            const isFocused = focusId != null && scenarioId === focusId
+            const hasExternalHighlight =
+              highlightedIds != null && highlightedIds.size > 0
+            const isExternallyHighlighted =
+              hasExternalHighlight && highlightedIds!.has(scenarioId)
+            const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
+            const isPinned = pinnedScenarioIds.has(scenarioId)
+            const isBaseline =
+              highlightBaseline &&
+              baselineData != null &&
+              scenarioId === baselineData.id
+
+            const anyHighlightActive =
+              focusId != null ||
+              dimUnselected ||
+              (dimUnpinned && hasPinned) ||
+              hasExternalHighlight
+
+            if (isFocused || isExternallyHighlighted) {
+              return hoverEmphasisVisuals
             }
-          }
 
-          if (showDotsOnly) {
+            if (hasExternalHighlight) {
+              if (isSelected || isBaseline) return selectedOrBaselineVisuals
+              if (isPinned) return pinnedVisuals
+              return externalDimVisuals
+            }
+
+            if (isSelected || isBaseline) {
+              return selectedOrBaselineVisuals
+            }
+
+            if (isPinned) {
+              return pinnedVisuals
+            }
+
+            if (anyHighlightActive) {
+              return {
+                dotR: dotR * 0.7,
+                opacity: DIM_OPACITY,
+                strokeWidth: 1.2,
+                strokeOpacity: DIM_OPACITY,
+              }
+            }
+
+            if (showDotsOnly) {
+              return {
+                dotR,
+                opacity: 1.0,
+                strokeWidth: 1.2,
+                strokeOpacity: DIM_OPACITY,
+              }
+            }
+
             return {
               dotR,
               opacity: 1.0,
               strokeWidth: 1.2,
-              strokeOpacity: DIM_OPACITY,
+              strokeOpacity: 0.55,
             }
           }
 
-          return {
-            dotR,
-            opacity: 1.0,
-            strokeWidth: 1.2,
-            strokeOpacity: 0.55,
+          // 1. Tier zone rings (draw from outermost inward; each filled circle
+          //    covers the inner portion of the previous one)
+          if (showTierZones) {
+            ;[...TIER_POSITIONS].forEach((t, i) => {
+              const r = rScale(t - 0.5)
+              g.append("circle")
+                .attr("cx", cx)
+                .attr("cy", cy)
+                .attr("r", r)
+                .attr("fill", TIER_BAND_COLORS[i] ?? "#fff")
+                .attr("stroke", "none")
+            })
           }
-        }
 
-        // 1. Tier zone rings (draw from outermost inward; each filled circle
-        //    covers the inner portion of the previous one)
-        if (showTierZones) {
-          ;[...TIER_POSITIONS].forEach((t, i) => {
-            const r = rScale(t - 0.5)
+          // 2. Grid: concentric circles + radial spokes
+          TIER_POSITIONS.forEach((t) => {
+            const r = rScale(t)
             g.append("circle")
               .attr("cx", cx)
               .attr("cy", cy)
               .attr("r", r)
-              .attr("fill", TIER_BAND_COLORS[i] ?? "#fff")
-              .attr("stroke", "none")
+              .attr("fill", "none")
+              .attr("stroke", "#dce3ea")
+              .attr("stroke-width", 1)
           })
-        }
 
-        // 2. Grid: concentric circles + radial spokes
-        TIER_POSITIONS.forEach((t) => {
-          const r = rScale(t)
-          g.append("circle")
-            .attr("cx", cx)
-            .attr("cy", cy)
-            .attr("r", r)
-            .attr("fill", "none")
-            .attr("stroke", "#dce3ea")
-            .attr("stroke-width", 1)
-        })
-
-        axes.forEach((_, i) => {
-          const angle = getAngle(i)
-          const outerR = rScale(0.5)
-          g.append("line")
-            .attr("x1", cx)
-            .attr("y1", cy)
-            .attr("x2", cx + outerR * Math.cos(angle))
-            .attr("y2", cy + outerR * Math.sin(angle))
-            .attr("stroke", "#dce3ea")
-            .attr("stroke-width", 1)
-        })
-
-        // Tier labels along the first spoke (top)
-        TIER_POSITIONS.forEach((t, i) => {
-          const r = rScale(t)
-          g.append("text")
-            .attr("x", cx + 6)
-            .attr("y", cy - r - 3)
-            .attr("font-size", 9.5)
-            .attr("font-family", FONT_FAMILY)
-            .attr("font-weight", 500)
-            .attr("fill", "#718096")
-            .attr("letter-spacing", "0.02em")
-            .text(RADAR_TIER_LABELS[i] ?? "")
-        })
-
-        // Range band placeholder — drawn after dots so we can use actual positions
-        const rangeBandLayer = g.append("g").attr("class", "range-band")
-
-        // 4. Distribution dots layer
-        const distributionLayer = g
-          .append("g")
-          .attr("class", "distribution-dots")
-
-        // 5. Scenario path layer
-        const pathLayer = g.append("g").attr("class", "scenario-paths")
-
-        // 6. Baseline gold overlay — sibling after pathLayer so it paints above scenario traces
-        const baselineHighlightLayer = g
-          .append("g")
-          .attr("class", "baseline-highlight")
-
-        // 7. Dots layer
-        const dotsLayer = g.append("g").attr("class", "dots")
-
-        // 8. Highlight overlay (always above dots so the active-map ring isn't occluded)
-        g.append("g").attr("class", "highlight-overlay")
-
-        // Compute dodge offsets per axis (perpendicular to spoke)
-        const dodgeMap = new Map<string, number>()
-        const dotDiam = dotR * 2 + 1.5
-        const effectiveJitter = radius * 0.06
-        axes.forEach((axis) => {
-          const entries: { id: string; r: number }[] = []
-          data.forEach((scenario) => {
-            const sv = scenario.values[axis]
-            if (sv == null) return
-            entries.push({ id: scenario.id, r: rScale(toTier(sv)) })
+          axes.forEach((_, i) => {
+            const angle = getAngle(i)
+            const outerR = rScale(0.5)
+            g.append("line")
+              .attr("x1", cx)
+              .attr("y1", cy)
+              .attr("x2", cx + outerR * Math.cos(angle))
+              .attr("y2", cy + outerR * Math.sin(angle))
+              .attr("stroke", "#dce3ea")
+              .attr("stroke-width", 1)
           })
-          const offsets = computeSpokeDodge(entries, dotDiam, effectiveJitter)
-          offsets.forEach((off, id) => {
-            dodgeMap.set(`${axis}:${id}`, off)
+
+          // Tier labels along the first spoke (top)
+          TIER_POSITIONS.forEach((t, i) => {
+            const r = rScale(t)
+            g.append("text")
+              .attr("x", cx + 6)
+              .attr("y", cy - r - 3)
+              .attr("font-size", 9.5)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-weight", 500)
+              .attr("fill", "#718096")
+              .attr("letter-spacing", "0.02em")
+              .text(RADAR_TIER_LABELS[i] ?? "")
           })
-        })
 
-        // Build dot positions for polygon drawing
-        const dotPositions = new Map<string, { x: number; y: number }[]>()
+          // Range band placeholder — drawn after dots so we can use actual positions
+          const rangeBandLayer = g.append("g").attr("class", "range-band")
 
-        const T_DUR = morphSnapshot ? HC_DUR : hasAnimatedRef.current ? 0 : 400
-        hasAnimatedRef.current = true
+          // 4. Distribution dots layer
+          const distributionLayer = g
+            .append("g")
+            .attr("class", "distribution-dots")
 
-        const drawPolygonForScenario = (
-          scenarioId: string,
-          focusId?: string | null,
-        ) => {
-          pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
-          const pts = dotPositions.get(scenarioId)
-          if (!pts || pts.length < 3) return
-          const activeList = data
-          const scenario = activeList.find((s) => s.id === scenarioId)
-          if (!scenario) return
-          const si = activeList.indexOf(scenario)
-          const color = hasScenarioColors
-            ? lineColors[si] || colors.default
-            : colors.default
-          const pathGen = line<{ x: number; y: number }>()
-            .x((d) => d.x)
-            .y((d) => d.y)
-          const vis = resolveVisuals(scenarioId, focusId)
-          pathLayer
-            .append("path")
-            .attr("data-path-id", scenarioId)
-            .attr("d", pathGen([...pts, pts[0]!]) ?? "")
-            .attr("fill", "none")
-            .attr("stroke", color)
-            .attr("stroke-width", vis.strokeWidth)
-            .attr("stroke-opacity", vis.strokeOpacity)
-            .attr("stroke-linejoin", "round")
-            .attr("pointer-events", "none")
-        }
+          // 5. Scenario path layer
+          const pathLayer = g.append("g").attr("class", "scenario-paths")
 
-        const applyFocusVisuals = (focusId: string) => {
-          dotsLayer
-            .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-            .each(function () {
-              const sid = this.getAttribute("data-scenario-id") ?? ""
-              const vis = resolveVisuals(sid, focusId)
-              select(this)
-                .attr("fill-opacity", vis.opacity)
-                .attr("stroke-opacity", vis.opacity)
-                .attr("r", vis.dotR)
+          // 6. Baseline gold overlay — sibling after pathLayer so it paints above scenario traces
+          const baselineHighlightLayer = g
+            .append("g")
+            .attr("class", "baseline-highlight")
+
+          // 7. Dots layer
+          const dotsLayer = g.append("g").attr("class", "dots")
+
+          // 8. Highlight overlay (always above dots so the active-map ring isn't occluded)
+          g.append("g").attr("class", "highlight-overlay")
+
+          // Compute dodge offsets per axis (perpendicular to spoke)
+          const dodgeMap = new Map<string, number>()
+          const dotDiam = dotR * 2 + 1.5
+          const effectiveJitter = radius * 0.06
+          axes.forEach((axis) => {
+            const entries: { id: string; r: number }[] = []
+            data.forEach((scenario) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              entries.push({ id: scenario.id, r: rScale(toTier(sv)) })
             })
-          pathLayer
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id") ?? ""
-              const vis = resolveVisuals(sid, focusId)
-              el.attr("stroke-width", vis.strokeWidth).attr(
-                "stroke-opacity",
-                vis.strokeOpacity,
-              )
+            const offsets = computeSpokeDodge(entries, dotDiam, effectiveJitter)
+            offsets.forEach((off, id) => {
+              dodgeMap.set(`${axis}:${id}`, off)
             })
-        }
+          })
 
-        const resetDotVisuals = () => {
-          dotsLayer
-            .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-            .each(function () {
-              const sid = this.getAttribute("data-scenario-id") ?? ""
-              const vis = resolveVisuals(sid)
-              select(this)
-                .attr("fill-opacity", vis.opacity)
-                .attr("stroke-opacity", vis.opacity)
-                .attr("r", vis.dotR)
-            })
-          pathLayer
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id") ?? ""
-              const vis = resolveVisuals(sid)
-              el.attr("stroke-width", vis.strokeWidth).attr(
-                "stroke-opacity",
-                vis.strokeOpacity,
-              )
-            })
-        }
+          // Build dot positions for polygon drawing
+          const dotPositions = new Map<string, { x: number; y: number }[]>()
 
-        const cancelAxisDetailDismiss = () => {
-          if (leaveResetTimerRef.current !== null) {
-            clearTimeout(leaveResetTimerRef.current)
-            leaveResetTimerRef.current = null
-          }
-        }
-        cancelAxisDetailDismissRef.current = cancelAxisDetailDismiss
+          const T_DUR = morphSnapshot
+            ? HC_DUR
+            : hasAnimatedRef.current
+              ? 0
+              : 400
+          hasAnimatedRef.current = true
 
-        const handleAxisDetailHitTargetChange = (innerG: SVGGElement | null) => {
-          axisDetailInnerHitRef.current = innerG
-        }
-
-        const showAxisLabelDetail = (
-          axisKey: string,
-          detail: RadarAxisLabelDetailPayload | null,
-        ) => {
-          if (detail == null) {
-            lastOpenAxisDetailRef.current = null
-          } else {
-            lastOpenAxisDetailRef.current = { axis: axisKey, detail }
-          }
-          const pointerBridge: RadarAxisLabelDetailPointerBridge = {
-            onHitTargetChange: handleAxisDetailHitTargetChange,
-          }
-          if (detail != null) {
-            pointerBridge.onPanelEnter = cancelAxisDetailDismiss
-            pointerBridge.onPanelLeave = () => scheduleAxisDetailDismiss(axisKey)
-          }
-          renderRadarAxisLabelDetailInto(
-            g as Selection<SVGGElement, unknown, null, undefined>,
-            axisKey,
-            detail,
-            axisLabelDetailStyle,
-            axisLabelDetailChromeRef.current,
-            pointerBridge,
-          )
-        }
-
-        const scheduleAxisDetailDismiss = (axisKey: string) => {
-          if (leaveResetTimerRef.current !== null) {
-            clearTimeout(leaveResetTimerRef.current)
-          }
-          leaveResetTimerRef.current = setTimeout(() => {
-            leaveResetTimerRef.current = null
-            resetDotVisuals()
-            lastNotifiedIdRef.current = null
-            onLineHoverRef.current?.(null)
-            resetAllAxisLabelTitlesFontWeight()
-            showAxisLabelDetail(axisKey, null)
-          }, AXIS_DETAIL_DISMISS_MS)
-        }
-
-        // Render dots
-        axes.forEach((axis, axisIdx) => {
-          const angle = getAngle(axisIdx)
-          const perpAngle = angle + Math.PI / 2
-
-          data.forEach((scenario, si) => {
-            const sv = scenario.values[axis]
-            if (sv == null) return
-            const r = rScale(toTier(sv))
-            const dodgeOff = dodgeMap.get(`${axis}:${scenario.id}`) ?? 0
-            const dotX =
-              cx + r * Math.cos(angle) + dodgeOff * Math.cos(perpAngle)
-            const dotY =
-              cy + r * Math.sin(angle) + dodgeOff * Math.sin(perpAngle)
+          const drawPolygonForScenario = (
+            scenarioId: string,
+            focusId?: string | null,
+          ) => {
+            pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
+            const pts = dotPositions.get(scenarioId)
+            if (!pts || pts.length < 3) return
+            const activeList = data
+            const scenario = activeList.find((s) => s.id === scenarioId)
+            if (!scenario) return
+            const si = activeList.indexOf(scenario)
             const color = hasScenarioColors
               ? lineColors[si] || colors.default
               : colors.default
+            const pathGen = line<{ x: number; y: number }>()
+              .x((d) => d.x)
+              .y((d) => d.y)
+            const vis = resolveVisuals(scenarioId, focusId)
+            pathLayer
+              .append("path")
+              .attr("data-path-id", scenarioId)
+              .attr("d", pathGen([...pts, pts[0]!]) ?? "")
+              .attr("fill", "none")
+              .attr("stroke", color)
+              .attr("stroke-width", vis.strokeWidth)
+              .attr("stroke-opacity", vis.strokeOpacity)
+              .attr("stroke-linejoin", "round")
+              .attr("pointer-events", "none")
+          }
 
-            if (!dotPositions.has(scenario.id))
-              dotPositions.set(scenario.id, [])
-            dotPositions.get(scenario.id)!.push({ x: dotX, y: dotY })
-
-            const vis = resolveVisuals(scenario.id)
-
-            const oldPos = morphSnapshot?.dots.get(`${axis}:${scenario.id}`)
-            const isNewInMorph = morphSnapshot != null && !oldPos
-            const startCx = oldPos ? oldPos.cx : morphSnapshot ? dotX : cx
-            const startCy = oldPos ? oldPos.cy : morphSnapshot ? dotY : cy
-            const startR = morphSnapshot ? vis.dotR : 0
-            const startOp = isNewInMorph ? 0 : vis.opacity
-
-            const dot = dotsLayer
-              .append("circle")
-              .attr("class", "radar-dot")
-              .attr("cx", startCx)
-              .attr("cy", startCy)
-              .attr("r", startR)
-              .attr("fill", color)
-              .attr("fill-opacity", startOp)
-              .attr("stroke", "#fff")
-              .attr("stroke-width", 1)
-              .attr("stroke-opacity", startOp)
-              .attr("cursor", "pointer")
-              .attr("data-scenario-id", scenario.id)
-              .attr("data-axis", axis)
-              .attr("data-dodge", dodgeOff)
-              .attr("data-final-cx", dotX)
-              .attr("data-final-cy", dotY)
-
-            dot
-              .transition()
-              .duration(T_DUR)
-              .attr("cx", dotX)
-              .attr("cy", dotY)
-              .attr("r", vis.dotR)
-              .attr("fill-opacity", vis.opacity)
-              .attr("stroke-opacity", vis.opacity)
-
-            dot
-              .on("mouseenter", function () {
-                cancelAxisDetailDismiss()
-
-                // Entering a new dot cancels the previous dot’s leave timeout, so
-                // reset every spoke first (cross-axis moves otherwise leave stale bold).
-                resetAllAxisLabelTitlesFontWeight()
-
-                applyFocusVisuals(scenario.id)
+          const applyFocusVisuals = (focusId: string) => {
+            dotsLayer
+              .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+              .each(function () {
+                const sid = this.getAttribute("data-scenario-id") ?? ""
+                const vis = resolveVisuals(sid, focusId)
                 select(this)
-                  .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
-                  .raise()
-
-                drawPolygonForScenario(scenario.id, scenario.id)
-
-                if (hoverNotifyTimerRef.current !== null) {
-                  clearTimeout(hoverNotifyTimerRef.current)
-                  hoverNotifyTimerRef.current = null
-                }
-
-                if (enableTooltip) {
-                  const el = tooltipRef.current
-                  if (el) {
-                    showTooltip(
-                      el,
-                      scenario.name,
-                      axis,
-                      sv != null ? toTier(sv) : undefined,
-                      scenarioThemes?.[scenario.id],
-                      scenario.id,
-                    )
-                  }
-                }
-
-                onDotHoverRef.current?.({
-                  scenarioId: scenario.id,
-                  axis,
-                  tierValue: sv != null ? toTier(sv) : 0,
-                })
-
-                showAxisLabelDetail(axis, {
-                  scenarioId: scenario.id,
-                  scenarioName: scenario.name,
-                  tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
-                })
-                setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
-
-                if (lastNotifiedIdRef.current !== scenario.id) {
-                  hoverNotifyTimerRef.current = setTimeout(() => {
-                    hoverNotifyTimerRef.current = null
-                    lastNotifiedIdRef.current = scenario.id
-                    onLineHoverRef.current?.(scenario)
-                  }, HOVER_NOTIFY_MS)
-                }
+                  .attr("fill-opacity", vis.opacity)
+                  .attr("stroke-opacity", vis.opacity)
+                  .attr("r", vis.dotR)
               })
-              .on("mouseleave", function () {
-                if (hoverNotifyTimerRef.current !== null) {
-                  clearTimeout(hoverNotifyTimerRef.current)
-                  hoverNotifyTimerRef.current = null
-                }
-                if (enableTooltip && tooltipRef.current)
-                  hideTooltip(tooltipRef.current)
-                onDotHoverRef.current?.(null)
-
-                scheduleAxisDetailDismiss(axis)
+            pathLayer
+              .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+              .each(function () {
+                const el = select(this)
+                const sid = el.attr("data-path-id") ?? ""
+                const vis = resolveVisuals(sid, focusId)
+                el.attr("stroke-width", vis.strokeWidth).attr(
+                  "stroke-opacity",
+                  vis.strokeOpacity,
+                )
               })
-              .on("click", () => {
-                onPinnedToggleRef.current?.(scenario.id)
-                onLineClickRef.current?.(scenario)
-                onDotClickRef.current?.(scenario.id, axis)
-                showAxisLabelDetail(axis, {
-                  scenarioId: scenario.id,
-                  scenarioName: scenario.name,
-                  tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
-                })
-              })
-          })
-        })
+          }
 
-        // Range band: arcs along polar circles at each spoke to cover dodge
-        if (axisRange && Object.keys(axisRange).length > 0) {
-          const spokeInfo: {
-            angle: number
-            maxR: number
-            minR: number
-            outerHalf: number
-            innerHalf: number
-          }[] = []
+          const resetDotVisuals = () => {
+            dotsLayer
+              .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+              .each(function () {
+                const sid = this.getAttribute("data-scenario-id") ?? ""
+                const vis = resolveVisuals(sid)
+                select(this)
+                  .attr("fill-opacity", vis.opacity)
+                  .attr("stroke-opacity", vis.opacity)
+                  .attr("r", vis.dotR)
+              })
+            pathLayer
+              .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+              .each(function () {
+                const el = select(this)
+                const sid = el.attr("data-path-id") ?? ""
+                const vis = resolveVisuals(sid)
+                el.attr("stroke-width", vis.strokeWidth).attr(
+                  "stroke-opacity",
+                  vis.strokeOpacity,
+                )
+              })
+          }
+
+          const cancelAxisDetailDismiss = () => {
+            if (leaveResetTimerRef.current !== null) {
+              clearTimeout(leaveResetTimerRef.current)
+              leaveResetTimerRef.current = null
+            }
+          }
+          cancelAxisDetailDismissRef.current = cancelAxisDetailDismiss
+
+          const handleAxisDetailHitTargetChange = (
+            innerG: SVGGElement | null,
+          ) => {
+            axisDetailInnerHitRef.current = innerG
+          }
+
+          const showAxisLabelDetail = (
+            axisKey: string,
+            detail: RadarAxisLabelDetailPayload | null,
+          ) => {
+            if (detail == null) {
+              lastOpenAxisDetailRef.current = null
+            } else {
+              lastOpenAxisDetailRef.current = { axis: axisKey, detail }
+            }
+            const pointerBridge: RadarAxisLabelDetailPointerBridge = {
+              onHitTargetChange: handleAxisDetailHitTargetChange,
+            }
+            if (detail != null) {
+              pointerBridge.onPanelEnter = cancelAxisDetailDismiss
+              pointerBridge.onPanelLeave = () =>
+                scheduleAxisDetailDismiss(axisKey)
+            }
+            renderRadarAxisLabelDetailInto(
+              g as Selection<SVGGElement, unknown, null, undefined>,
+              axisKey,
+              detail,
+              axisLabelDetailStyle,
+              axisLabelDetailChromeRef.current,
+              pointerBridge,
+            )
+          }
+
+          const scheduleAxisDetailDismiss = (axisKey: string) => {
+            if (leaveResetTimerRef.current !== null) {
+              clearTimeout(leaveResetTimerRef.current)
+            }
+            leaveResetTimerRef.current = setTimeout(() => {
+              leaveResetTimerRef.current = null
+              resetDotVisuals()
+              lastNotifiedIdRef.current = null
+              onLineHoverRef.current?.(null)
+              resetAllAxisLabelTitlesFontWeight()
+              showAxisLabelDetail(axisKey, null)
+            }, AXIS_DETAIL_DISMISS_MS)
+          }
+
+          // Render dots
           axes.forEach((axis, axisIdx) => {
             const angle = getAngle(axisIdx)
-            const range = axisRange![axis]
-            if (!range) return
+            const perpAngle = angle + Math.PI / 2
 
-            const maxR = rScale(toTier(range.max))
-            const minR = rScale(toTier(range.min))
-
-            let maxDodge = 0
-            data.forEach((scenario) => {
-              const d = Math.abs(dodgeMap.get(`${axis}:${scenario.id}`) ?? 0)
-              if (d > maxDodge) maxDodge = d
-            })
-
-            const spread = (maxDodge + dotR) * 0.5
-            spokeInfo.push({
-              angle,
-              maxR,
-              minR,
-              outerHalf: maxR > 0 ? Math.atan2(spread, maxR) : 0,
-              innerHalf: minR > 0 ? Math.atan2(spread, minR) : 0,
-            })
-          })
-
-          if (spokeInfo.length >= 3) {
-            let outerD = ""
-            spokeInfo.forEach((s, i) => {
-              const sa = s.angle - s.outerHalf
-              const ea = s.angle + s.outerHalf
-              const sx = cx + s.maxR * Math.cos(sa)
-              const sy = cy + s.maxR * Math.sin(sa)
-              const ex = cx + s.maxR * Math.cos(ea)
-              const ey = cy + s.maxR * Math.sin(ea)
-              outerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
-              outerD += ` A${s.maxR},${s.maxR} 0 0 1 ${ex},${ey}`
-            })
-            outerD += " Z"
-
-            let innerD = ""
-            const rev = [...spokeInfo].reverse()
-            rev.forEach((s, i) => {
-              const sa = s.angle + s.innerHalf
-              const ea = s.angle - s.innerHalf
-              const sx = cx + s.minR * Math.cos(sa)
-              const sy = cy + s.minR * Math.sin(sa)
-              const ex = cx + s.minR * Math.cos(ea)
-              const ey = cy + s.minR * Math.sin(ea)
-              innerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
-              innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
-            })
-            innerD += " Z"
-
-            rangeBandLayer
-              .append("path")
-              .attr("class", "range-shadow")
-              .attr("d", `${outerD} ${innerD}`)
-              .attr("fill", "#cbd5e0")
-              .attr("fill-opacity", 0.35)
-              .attr("stroke", "#a0aec0")
-              .attr("stroke-width", 0.8)
-              .attr("stroke-opacity", 0.5)
-              .attr("fill-rule", "evenodd")
-              .attr("pointer-events", "none")
-          }
-        }
-
-        // Always draw all scenario polygons so dots never appear without lines
-        data.forEach((scenario) => {
-          drawPolygonForScenario(scenario.id)
-        })
-
-        if (
-          highlightBaseline &&
-          baselineData &&
-          data.some((s) => s.id === baselineData.id)
-        ) {
-          drawPolygonForScenario(baselineData.id)
-        }
-
-        if (highlightBaseline && baselineData) {
-          const blPts: [number, number][] = []
-          axes.forEach((axis, i) => {
-            const bv = baselineData.values[axis]
-            if (bv == null) return
-            const r = rScale(toTier(bv))
-            const angle = getAngle(i)
-            blPts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)])
-          })
-          if (blPts.length >= 3) {
-            const pathGen = line<[number, number]>()
-              .x((d) => d[0])
-              .y((d) => d[1])
-            const blIdx = data.findIndex((s) => s.id === baselineData.id)
-            const blStroke =
-              blIdx >= 0 && hasScenarioColors
-                ? lineColors[blIdx] || "#cc9a06"
-                : "#cc9a06"
-            baselineHighlightLayer
-              .append("path")
-              .attr("class", "baseline-polygon")
-              .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-              .attr("fill", "#cc9a06")
-              .attr("fill-opacity", 0.12)
-              .attr("stroke", blStroke)
-              .attr("stroke-width", 2.5)
-              .attr("stroke-opacity", 0.55)
-              .attr("pointer-events", "none")
-          }
-        }
-
-        // ── Morph animation: override elements to old positions, transition ──
-        if (morphSnapshot) {
-          const morphPathGen = line<{ x: number; y: number }>()
-            .x((d) => d.x)
-            .y((d) => d.y)
-
-          pathLayer
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id")
-              if (!sid) return
-              const finalD = el.attr("d")
-              const oldPts: { x: number; y: number }[] = []
-              axes.forEach((a) => {
-                const old = morphSnapshot!.dots.get(`${a}:${sid}`)
-                if (old) oldPts.push({ x: old.cx, y: old.cy })
-              })
-              if (oldPts.length >= 3) {
-                const oldD = morphPathGen([...oldPts, oldPts[0]!])
-                el.attr("d", oldD ?? "")
-                  .transition()
-                  .duration(HC_DUR)
-                  .attr("d", finalD ?? "")
-              } else {
-                const finalOp = parseFloat(el.attr("stroke-opacity") ?? "0.55")
-                el.attr("stroke-opacity", 0)
-                  .transition()
-                  .duration(HC_DUR)
-                  .attr("stroke-opacity", finalOp)
-              }
-            })
-
-          const blPath = svg.select<SVGPathElement>("path.baseline-polygon")
-          if (!blPath.empty() && morphSnapshot.baselineD) {
-            const finalBlD = blPath.attr("d")
-            blPath
-              .attr("d", morphSnapshot.baselineD)
-              .transition()
-              .duration(HC_DUR)
-              .attr("d", finalBlD ?? "")
-          }
-
-          const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
-          if (!rangeSel.empty() && morphSnapshot.rangeD) {
-            const finalRangeD = rangeSel.attr("d")
-            rangeSel
-              .attr("d", morphSnapshot.rangeD)
-              .transition()
-              .duration(HC_DUR)
-              .attr("d", finalRangeD ?? "")
-          } else if (!rangeSel.empty()) {
-            rangeSel.attr("fill-opacity", 0).attr("stroke-opacity", 0)
-            morphTimeoutRef.current = setTimeout(() => {
-              morphTimeoutRef.current = null
-              rangeSel
-                .transition()
-                .duration(HC_DUR * 0.4)
-                .attr("fill-opacity", 0.35)
-                .attr("stroke-opacity", 0.5)
-            }, HC_DUR)
-          }
-        }
-
-        // 8. Distribution dots.arranged along tier circle arcs
-        if (numAxes > 0 && showDistribution && distributionData && hasPinned) {
-          const pinnedArr = Array.from(pinnedScenarioIds)
-          const pinCount = pinnedArr.length
-          const locDotR = 2.5
-          const locDotDiam = locDotR * 2 + 0.5
-          const angularGap = (2 * Math.PI) / numAxes
-          const maxArcSpan = angularGap * 0.7
-
-          pinnedArr.forEach((scenarioId, pinIdx) => {
-            const outcomeBuckets = distributionData[scenarioId]
-            if (!outcomeBuckets) return
-            const si = data.findIndex((s) => s.id === scenarioId)
-            const color =
-              si >= 0 && hasScenarioColors
+            data.forEach((scenario, si) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              const r = rScale(toTier(sv))
+              const dodgeOff = dodgeMap.get(`${axis}:${scenario.id}`) ?? 0
+              const dotX =
+                cx + r * Math.cos(angle) + dodgeOff * Math.cos(perpAngle)
+              const dotY =
+                cy + r * Math.sin(angle) + dodgeOff * Math.sin(perpAngle)
+              const color = hasScenarioColors
                 ? lineColors[si] || colors.default
                 : colors.default
 
+              if (!dotPositions.has(scenario.id))
+                dotPositions.set(scenario.id, [])
+              dotPositions.get(scenario.id)!.push({ x: dotX, y: dotY })
+
+              const vis = resolveVisuals(scenario.id)
+
+              const oldPos = morphSnapshot?.dots.get(`${axis}:${scenario.id}`)
+              const isNewInMorph = morphSnapshot != null && !oldPos
+              const startCx = oldPos ? oldPos.cx : morphSnapshot ? dotX : cx
+              const startCy = oldPos ? oldPos.cy : morphSnapshot ? dotY : cy
+              const startR = morphSnapshot ? vis.dotR : 0
+              const startOp = isNewInMorph ? 0 : vis.opacity
+
+              const dot = dotsLayer
+                .append("circle")
+                .attr("class", "radar-dot")
+                .attr("cx", startCx)
+                .attr("cy", startCy)
+                .attr("r", startR)
+                .attr("fill", color)
+                .attr("fill-opacity", startOp)
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 1)
+                .attr("stroke-opacity", startOp)
+                .attr("cursor", "pointer")
+                .attr("data-scenario-id", scenario.id)
+                .attr("data-axis", axis)
+                .attr("data-dodge", dodgeOff)
+                .attr("data-final-cx", dotX)
+                .attr("data-final-cy", dotY)
+
+              dot
+                .transition()
+                .duration(T_DUR)
+                .attr("cx", dotX)
+                .attr("cy", dotY)
+                .attr("r", vis.dotR)
+                .attr("fill-opacity", vis.opacity)
+                .attr("stroke-opacity", vis.opacity)
+
+              dot
+                .on("mouseenter", function () {
+                  cancelAxisDetailDismiss()
+
+                  // Entering a new dot cancels the previous dot’s leave timeout, so
+                  // reset every spoke first (cross-axis moves otherwise leave stale bold).
+                  resetAllAxisLabelTitlesFontWeight()
+
+                  applyFocusVisuals(scenario.id)
+                  select(this)
+                    .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
+                    .raise()
+
+                  drawPolygonForScenario(scenario.id, scenario.id)
+
+                  if (hoverNotifyTimerRef.current !== null) {
+                    clearTimeout(hoverNotifyTimerRef.current)
+                    hoverNotifyTimerRef.current = null
+                  }
+
+                  if (enableTooltip) {
+                    const el = tooltipRef.current
+                    if (el) {
+                      showTooltip(
+                        el,
+                        scenario.name,
+                        axis,
+                        sv != null ? toTier(sv) : undefined,
+                        scenarioThemes?.[scenario.id],
+                        scenario.id,
+                      )
+                    }
+                  }
+
+                  onDotHoverRef.current?.({
+                    scenarioId: scenario.id,
+                    axis,
+                    tierValue: sv != null ? toTier(sv) : 0,
+                  })
+
+                  showAxisLabelDetail(axis, {
+                    scenarioId: scenario.id,
+                    scenarioName: scenario.name,
+                    tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
+                  })
+                  setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
+
+                  if (lastNotifiedIdRef.current !== scenario.id) {
+                    hoverNotifyTimerRef.current = setTimeout(() => {
+                      hoverNotifyTimerRef.current = null
+                      lastNotifiedIdRef.current = scenario.id
+                      onLineHoverRef.current?.(scenario)
+                    }, HOVER_NOTIFY_MS)
+                  }
+                })
+                .on("mouseleave", function () {
+                  if (hoverNotifyTimerRef.current !== null) {
+                    clearTimeout(hoverNotifyTimerRef.current)
+                    hoverNotifyTimerRef.current = null
+                  }
+                  if (enableTooltip && tooltipRef.current)
+                    hideTooltip(tooltipRef.current)
+                  onDotHoverRef.current?.(null)
+
+                  scheduleAxisDetailDismiss(axis)
+                })
+                .on("click", () => {
+                  onPinnedToggleRef.current?.(scenario.id)
+                  onLineClickRef.current?.(scenario)
+                  onDotClickRef.current?.(scenario.id, axis)
+                  showAxisLabelDetail(axis, {
+                    scenarioId: scenario.id,
+                    scenarioName: scenario.name,
+                    tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
+                  })
+                })
+            })
+          })
+
+          // Range band: arcs along polar circles at each spoke to cover dodge
+          if (axisRange && Object.keys(axisRange).length > 0) {
+            const spokeInfo: {
+              angle: number
+              maxR: number
+              minR: number
+              outerHalf: number
+              innerHalf: number
+            }[] = []
             axes.forEach((axis, axisIdx) => {
-              const buckets = outcomeBuckets[axis]
-              if (!buckets || buckets.length === 0) return
-              const axisAngle = getAngle(axisIdx)
+              const angle = getAngle(axisIdx)
+              const range = axisRange![axis]
+              if (!range) return
 
-              const arcSlice =
-                pinCount === 1 ? maxArcSpan : maxArcSpan / pinCount
-              const sliceCenter =
-                pinCount === 1
-                  ? axisAngle
-                  : axisAngle -
-                    maxArcSpan / 2 +
-                    arcSlice * pinIdx +
-                    arcSlice / 2
+              const maxR = rScale(toTier(range.max))
+              const minR = rScale(toTier(range.min))
 
-              buckets.forEach(({ tier, count }) => {
-                if (count <= 0) return
-                const tierR = rScale(tier)
-                const minArcR = radius * 0.25
-                const layoutR = Math.max(tierR, minArcR)
-                const arcLen = layoutR * arcSlice
-                const maxDotsPerRow = Math.max(
-                  1,
-                  Math.floor(arcLen / locDotDiam),
-                )
-                const rows = Math.ceil(count / maxDotsPerRow)
-                const cols = Math.min(count, maxDotsPerRow)
-                const usedArc = cols > 1 ? (cols * locDotDiam) / layoutR : 0
+              let maxDodge = 0
+              data.forEach((scenario) => {
+                const d = Math.abs(dodgeMap.get(`${axis}:${scenario.id}`) ?? 0)
+                if (d > maxDodge) maxDodge = d
+              })
 
-                for (let d = 0; d < count; d++) {
-                  const col = d % maxDotsPerRow
-                  const row = Math.floor(d / maxDotsPerRow)
-                  const colFrac = cols === 1 ? 0 : (col / (cols - 1)) * 2 - 1
-                  const dotAngle = sliceCenter + colFrac * (usedArc / 2)
-                  const radialOff =
-                    rows <= 1 ? 0 : (row - (rows - 1) / 2) * locDotDiam
-                  const effR = tierR + radialOff
-                  const dx = cx + effR * Math.cos(dotAngle)
-                  const dy = cy + effR * Math.sin(dotAngle)
-                  distributionLayer
-                    .append("circle")
-                    .attr("cx", dx)
-                    .attr("cy", dy)
-                    .attr("r", locDotR)
-                    .attr("fill", color)
-                    .attr("fill-opacity", 0.85)
-                    .attr("stroke", "rgba(0,0,0,0.25)")
-                    .attr("stroke-width", 0.5)
-                    .attr("pointer-events", "none")
-                    .attr("class", "dist-dot")
+              const spread = (maxDodge + dotR) * 0.5
+              spokeInfo.push({
+                angle,
+                maxR,
+                minR,
+                outerHalf: maxR > 0 ? Math.atan2(spread, maxR) : 0,
+                innerHalf: minR > 0 ? Math.atan2(spread, minR) : 0,
+              })
+            })
+
+            if (spokeInfo.length >= 3) {
+              let outerD = ""
+              spokeInfo.forEach((s, i) => {
+                const sa = s.angle - s.outerHalf
+                const ea = s.angle + s.outerHalf
+                const sx = cx + s.maxR * Math.cos(sa)
+                const sy = cy + s.maxR * Math.sin(sa)
+                const ex = cx + s.maxR * Math.cos(ea)
+                const ey = cy + s.maxR * Math.sin(ea)
+                outerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+                outerD += ` A${s.maxR},${s.maxR} 0 0 1 ${ex},${ey}`
+              })
+              outerD += " Z"
+
+              let innerD = ""
+              const rev = [...spokeInfo].reverse()
+              rev.forEach((s, i) => {
+                const sa = s.angle + s.innerHalf
+                const ea = s.angle - s.innerHalf
+                const sx = cx + s.minR * Math.cos(sa)
+                const sy = cy + s.minR * Math.sin(sa)
+                const ex = cx + s.minR * Math.cos(ea)
+                const ey = cy + s.minR * Math.sin(ea)
+                innerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+                innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
+              })
+              innerD += " Z"
+
+              rangeBandLayer
+                .append("path")
+                .attr("class", "range-shadow")
+                .attr("d", `${outerD} ${innerD}`)
+                .attr("fill", "#cbd5e0")
+                .attr("fill-opacity", 0.35)
+                .attr("stroke", "#a0aec0")
+                .attr("stroke-width", 0.8)
+                .attr("stroke-opacity", 0.5)
+                .attr("fill-rule", "evenodd")
+                .attr("pointer-events", "none")
+            }
+          }
+
+          // Always draw all scenario polygons so dots never appear without lines
+          data.forEach((scenario) => {
+            drawPolygonForScenario(scenario.id)
+          })
+
+          if (
+            highlightBaseline &&
+            baselineData &&
+            data.some((s) => s.id === baselineData.id)
+          ) {
+            drawPolygonForScenario(baselineData.id)
+          }
+
+          if (highlightBaseline && baselineData) {
+            const blPts: [number, number][] = []
+            axes.forEach((axis, i) => {
+              const bv = baselineData.values[axis]
+              if (bv == null) return
+              const r = rScale(toTier(bv))
+              const angle = getAngle(i)
+              blPts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)])
+            })
+            if (blPts.length >= 3) {
+              const pathGen = line<[number, number]>()
+                .x((d) => d[0])
+                .y((d) => d[1])
+              const blIdx = data.findIndex((s) => s.id === baselineData.id)
+              const blStroke =
+                blIdx >= 0 && hasScenarioColors
+                  ? lineColors[blIdx] || "#cc9a06"
+                  : "#cc9a06"
+              baselineHighlightLayer
+                .append("path")
+                .attr("class", "baseline-polygon")
+                .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
+                .attr("fill", "#cc9a06")
+                .attr("fill-opacity", 0.12)
+                .attr("stroke", blStroke)
+                .attr("stroke-width", 2.5)
+                .attr("stroke-opacity", 0.55)
+                .attr("pointer-events", "none")
+            }
+          }
+
+          // ── Morph animation: override elements to old positions, transition ──
+          if (morphSnapshot) {
+            const morphPathGen = line<{ x: number; y: number }>()
+              .x((d) => d.x)
+              .y((d) => d.y)
+
+            pathLayer
+              .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+              .each(function () {
+                const el = select(this)
+                const sid = el.attr("data-path-id")
+                if (!sid) return
+                const finalD = el.attr("d")
+                const oldPts: { x: number; y: number }[] = []
+                axes.forEach((a) => {
+                  const old = morphSnapshot!.dots.get(`${a}:${sid}`)
+                  if (old) oldPts.push({ x: old.cx, y: old.cy })
+                })
+                if (oldPts.length >= 3) {
+                  const oldD = morphPathGen([...oldPts, oldPts[0]!])
+                  el.attr("d", oldD ?? "")
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("d", finalD ?? "")
+                } else {
+                  const finalOp = parseFloat(
+                    el.attr("stroke-opacity") ?? "0.55",
+                  )
+                  el.attr("stroke-opacity", 0)
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("stroke-opacity", finalOp)
                 }
               })
-            })
-          })
-        }
 
-        // 9. Axis labels (outside ring)
-        const axisPositions: {
-          axis: string
-          x: number
-          y: number
-          anchor: "start" | "end" | "middle"
-        }[] = []
-        axes.forEach((axis, i) => {
-          const angle = getAngle(i)
-          const labelR = radius + 24
-          const lx = cx + labelR * Math.cos(angle)
-          const ly = cy + labelR * Math.sin(angle)
+            const blPath = svg.select<SVGPathElement>("path.baseline-polygon")
+            if (!blPath.empty() && morphSnapshot.baselineD) {
+              const finalBlD = blPath.attr("d")
+              blPath
+                .attr("d", morphSnapshot.baselineD)
+                .transition()
+                .duration(HC_DUR)
+                .attr("d", finalBlD ?? "")
+            }
 
-          const angleDeg = (angle * 180) / Math.PI
-          const isLeft = angleDeg > 90 || angleDeg < -90
-          const anchor =
-            Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
-
-          const curated = LABEL_BREAK_POINTS[axis]
-          const detailY = curated
-            ? ly + axisLabelDetailStyle.detailAnchorOffsetTwoLinePx
-            : ly + axisLabelDetailStyle.detailAnchorOffsetOneLinePx
-          const labelGroup = g
-            .append("g")
-            .attr("class", "axis-label")
-            .attr("data-axis", axis)
-            .attr("data-label-x", lx)
-            .attr("data-label-y", ly)
-            .attr("data-detail-y", detailY)
-            .attr("data-text-anchor", anchor)
-            .attr(
-              "data-detail-bottom-mode",
-              radarAxisDetailBottomModeForIndex(i, axes.length),
-            )
-
-          if (curated) {
-            labelGroup
-              .append("text")
-              .attr("class", "axis-label-title")
-              .attr("x", lx)
-              .attr("y", ly - 8)
-              .attr("text-anchor", anchor)
-              .attr("dominant-baseline", "middle")
-              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
-              .attr("font-family", axisLabelDetailStyle.fontFamily)
-              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
-              .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr(
-                "letter-spacing",
-                axisLabelDetailStyle.scenarioLetterSpacing,
-              )
-              .text(curated[0])
-            labelGroup
-              .append("text")
-              .attr("class", "axis-label-title")
-              .attr("x", lx)
-              .attr("y", ly + 8)
-              .attr("text-anchor", anchor)
-              .attr("dominant-baseline", "middle")
-              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
-              .attr("font-family", axisLabelDetailStyle.fontFamily)
-              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
-              .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr(
-                "letter-spacing",
-                axisLabelDetailStyle.scenarioLetterSpacing,
-              )
-              .text(curated[1])
-          } else {
-            labelGroup
-              .append("text")
-              .attr("class", "axis-label-title")
-              .attr("x", lx)
-              .attr("y", ly)
-              .attr("text-anchor", anchor)
-              .attr("dominant-baseline", "middle")
-              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
-              .attr("font-family", axisLabelDetailStyle.fontFamily)
-              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
-              .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr(
-                "letter-spacing",
-                axisLabelDetailStyle.scenarioLetterSpacing,
-              )
-              .text(axis)
+            const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
+            if (!rangeSel.empty() && morphSnapshot.rangeD) {
+              const finalRangeD = rangeSel.attr("d")
+              rangeSel
+                .attr("d", morphSnapshot.rangeD)
+                .transition()
+                .duration(HC_DUR)
+                .attr("d", finalRangeD ?? "")
+            } else if (!rangeSel.empty()) {
+              rangeSel.attr("fill-opacity", 0).attr("stroke-opacity", 0)
+              morphTimeoutRef.current = setTimeout(() => {
+                morphTimeoutRef.current = null
+                rangeSel
+                  .transition()
+                  .duration(HC_DUR * 0.4)
+                  .attr("fill-opacity", 0.35)
+                  .attr("stroke-opacity", 0.5)
+              }, HC_DUR)
+            }
           }
 
-          labelGroup
-            .append("g")
-            .attr("class", "axis-label-detail")
-            .attr("visibility", "hidden")
+          // 8. Distribution dots.arranged along tier circle arcs
+          if (
+            numAxes > 0 &&
+            showDistribution &&
+            distributionData &&
+            hasPinned
+          ) {
+            const pinnedArr = Array.from(pinnedScenarioIds)
+            const pinCount = pinnedArr.length
+            const locDotR = 2.5
+            const locDotDiam = locDotR * 2 + 0.5
+            const angularGap = (2 * Math.PI) / numAxes
+            const maxArcSpan = angularGap * 0.7
 
-          axisPositions.push({
-            axis,
-            x: lx,
-            y: ly,
-            anchor: anchor as "start" | "end" | "middle",
-          })
-        })
+            pinnedArr.forEach((scenarioId, pinIdx) => {
+              const outcomeBuckets = distributionData[scenarioId]
+              if (!outcomeBuckets) return
+              const si = data.findIndex((s) => s.id === scenarioId)
+              const color =
+                si >= 0 && hasScenarioColors
+                  ? lineColors[si] || colors.default
+                  : colors.default
 
-        onAxisPositionsRef.current?.(axisPositions)
+              axes.forEach((axis, axisIdx) => {
+                const buckets = outcomeBuckets[axis]
+                if (!buckets || buckets.length === 0) return
+                const axisAngle = getAngle(axisIdx)
 
-        const reopen = lastOpenAxisDetailRef.current
-        if (reopen) {
-          const scenario = data.find((d) => d.id === reopen.detail.scenarioId)
-          const sv = scenario?.values[reopen.axis]
-          if (scenario != null && sv != null && axes.includes(reopen.axis)) {
-            const tierIndex = Math.min(
-              4,
-              Math.max(1, Math.round(toTier(sv))),
-            )
-            resetAllAxisLabelTitlesFontWeight()
-            applyFocusVisuals(scenario.id)
-            drawPolygonForScenario(scenario.id, scenario.id)
-            showAxisLabelDetail(reopen.axis, {
-              scenarioId: scenario.id,
-              scenarioName: scenario.name,
-              tierIndex,
-            })
-            setAxisLabelTitlesFontWeight(reopen.axis, axisTitleFontWeightHover)
-            dotsLayer
-              .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-              .filter(function () {
-                return (
-                  this.getAttribute("data-scenario-id") === scenario.id &&
-                  this.getAttribute("data-axis") === reopen.axis
-                )
+                const arcSlice =
+                  pinCount === 1 ? maxArcSpan : maxArcSpan / pinCount
+                const sliceCenter =
+                  pinCount === 1
+                    ? axisAngle
+                    : axisAngle -
+                      maxArcSpan / 2 +
+                      arcSlice * pinIdx +
+                      arcSlice / 2
+
+                buckets.forEach(({ tier, count }) => {
+                  if (count <= 0) return
+                  const tierR = rScale(tier)
+                  const minArcR = radius * 0.25
+                  const layoutR = Math.max(tierR, minArcR)
+                  const arcLen = layoutR * arcSlice
+                  const maxDotsPerRow = Math.max(
+                    1,
+                    Math.floor(arcLen / locDotDiam),
+                  )
+                  const rows = Math.ceil(count / maxDotsPerRow)
+                  const cols = Math.min(count, maxDotsPerRow)
+                  const usedArc = cols > 1 ? (cols * locDotDiam) / layoutR : 0
+
+                  for (let d = 0; d < count; d++) {
+                    const col = d % maxDotsPerRow
+                    const row = Math.floor(d / maxDotsPerRow)
+                    const colFrac = cols === 1 ? 0 : (col / (cols - 1)) * 2 - 1
+                    const dotAngle = sliceCenter + colFrac * (usedArc / 2)
+                    const radialOff =
+                      rows <= 1 ? 0 : (row - (rows - 1) / 2) * locDotDiam
+                    const effR = tierR + radialOff
+                    const dx = cx + effR * Math.cos(dotAngle)
+                    const dy = cy + effR * Math.sin(dotAngle)
+                    distributionLayer
+                      .append("circle")
+                      .attr("cx", dx)
+                      .attr("cy", dy)
+                      .attr("r", locDotR)
+                      .attr("fill", color)
+                      .attr("fill-opacity", 0.85)
+                      .attr("stroke", "rgba(0,0,0,0.25)")
+                      .attr("stroke-width", 0.5)
+                      .attr("pointer-events", "none")
+                      .attr("class", "dist-dot")
+                  }
+                })
               })
-              .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
-              .raise()
-          } else {
-            lastOpenAxisDetailRef.current = null
+            })
           }
-        }
+
+          // 9. Axis labels (outside ring)
+          const axisPositions: {
+            axis: string
+            x: number
+            y: number
+            anchor: "start" | "end" | "middle"
+          }[] = []
+          axes.forEach((axis, i) => {
+            const angle = getAngle(i)
+            const labelR = radius + 24
+            const lx = cx + labelR * Math.cos(angle)
+            const ly = cy + labelR * Math.sin(angle)
+
+            const angleDeg = (angle * 180) / Math.PI
+            const isLeft = angleDeg > 90 || angleDeg < -90
+            const anchor =
+              Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
+
+            const curated = LABEL_BREAK_POINTS[axis]
+            const detailY = curated
+              ? ly + axisLabelDetailStyle.detailAnchorOffsetTwoLinePx
+              : ly + axisLabelDetailStyle.detailAnchorOffsetOneLinePx
+            const labelGroup = g
+              .append("g")
+              .attr("class", "axis-label")
+              .attr("data-axis", axis)
+              .attr("data-label-x", lx)
+              .attr("data-label-y", ly)
+              .attr("data-detail-y", detailY)
+              .attr("data-text-anchor", anchor)
+              .attr(
+                "data-detail-bottom-mode",
+                radarAxisDetailBottomModeForIndex(i, axes.length),
+              )
+
+            if (curated) {
+              labelGroup
+                .append("text")
+                .attr("class", "axis-label-title")
+                .attr("x", lx)
+                .attr("y", ly - 8)
+                .attr("text-anchor", anchor)
+                .attr("dominant-baseline", "middle")
+                .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+                .attr("font-family", axisLabelDetailStyle.fontFamily)
+                .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+                .attr("fill", axisLabelDetailStyle.axisTitleFill)
+                .attr(
+                  "letter-spacing",
+                  axisLabelDetailStyle.scenarioLetterSpacing,
+                )
+                .text(curated[0])
+              labelGroup
+                .append("text")
+                .attr("class", "axis-label-title")
+                .attr("x", lx)
+                .attr("y", ly + 8)
+                .attr("text-anchor", anchor)
+                .attr("dominant-baseline", "middle")
+                .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+                .attr("font-family", axisLabelDetailStyle.fontFamily)
+                .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+                .attr("fill", axisLabelDetailStyle.axisTitleFill)
+                .attr(
+                  "letter-spacing",
+                  axisLabelDetailStyle.scenarioLetterSpacing,
+                )
+                .text(curated[1])
+            } else {
+              labelGroup
+                .append("text")
+                .attr("class", "axis-label-title")
+                .attr("x", lx)
+                .attr("y", ly)
+                .attr("text-anchor", anchor)
+                .attr("dominant-baseline", "middle")
+                .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+                .attr("font-family", axisLabelDetailStyle.fontFamily)
+                .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+                .attr("fill", axisLabelDetailStyle.axisTitleFill)
+                .attr(
+                  "letter-spacing",
+                  axisLabelDetailStyle.scenarioLetterSpacing,
+                )
+                .text(axis)
+            }
+
+            labelGroup
+              .append("g")
+              .attr("class", "axis-label-detail")
+              .attr("visibility", "hidden")
+
+            axisPositions.push({
+              axis,
+              x: lx,
+              y: ly,
+              anchor: anchor as "start" | "end" | "middle",
+            })
+          })
+
+          onAxisPositionsRef.current?.(axisPositions)
+
+          const reopen = lastOpenAxisDetailRef.current
+          if (reopen) {
+            const scenario = data.find((d) => d.id === reopen.detail.scenarioId)
+            const sv = scenario?.values[reopen.axis]
+            if (scenario != null && sv != null && axes.includes(reopen.axis)) {
+              const tierIndex = Math.min(4, Math.max(1, Math.round(toTier(sv))))
+              resetAllAxisLabelTitlesFontWeight()
+              applyFocusVisuals(scenario.id)
+              drawPolygonForScenario(scenario.id, scenario.id)
+              showAxisLabelDetail(reopen.axis, {
+                scenarioId: scenario.id,
+                scenarioName: scenario.name,
+                tierIndex,
+              })
+              setAxisLabelTitlesFontWeight(
+                reopen.axis,
+                axisTitleFontWeightHover,
+              )
+              dotsLayer
+                .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+                .filter(function () {
+                  return (
+                    this.getAttribute("data-scenario-id") === scenario.id &&
+                    this.getAttribute("data-axis") === reopen.axis
+                  )
+                })
+                .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
+                .raise()
+            } else {
+              lastOpenAxisDetailRef.current = null
+            }
+          }
         }
 
         if (axisLabelDetailChromeRef.current?.onBeforeSvgDomClear) {

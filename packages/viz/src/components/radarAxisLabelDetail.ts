@@ -318,7 +318,11 @@ function estimateAxisDetailChromeRowWidthPx(
     fontFamily,
     fontWeight: 400,
   }
-  const codeW = measureSvgTextWidth(svg, scenarioId.toUpperCase(), shortCodeSpec)
+  const codeW = measureSvgTextWidth(
+    svg,
+    scenarioId.toUpperCase(),
+    shortCodeSpec,
+  )
   return AXIS_DETAIL_CHROME_ROW_FIXED_PX + codeW
 }
 
@@ -529,10 +533,7 @@ export function renderRadarAxisLabelDetailInto(
   const innerContentW = Math.max(scenarioBlockW, tierRowW, chromeRowW)
   const foW = Math.min(
     s.detailMaxWidthPx,
-    Math.max(
-      AXIS_DETAIL_INNER_WIDTH_MIN_PX,
-      Math.ceil(innerContentW),
-    ),
+    Math.max(AXIS_DETAIL_INNER_WIDTH_MIN_PX, Math.ceil(innerContentW)),
   )
 
   let foX = contentX
