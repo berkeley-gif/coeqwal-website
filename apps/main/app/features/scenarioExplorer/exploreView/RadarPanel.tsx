@@ -21,7 +21,7 @@ import {
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
 } from "@repo/viz"
-import { ChartToast, InfoIconButton } from "@repo/ui"
+import { ChartToast, InfoIconButton, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
@@ -501,6 +501,10 @@ export default function RadarPanel({
               px: 1,
             }}
           >
+            <TooltipCloseButton
+              onClick={() => setShowAxisSelector(false)}
+              ariaLabel="Close choose axes panel"
+            />
             <Typography
               variant="caption"
               sx={{
@@ -511,6 +515,7 @@ export default function RadarPanel({
                 mb: 1,
                 display: "block",
                 pl: 0.5,
+                pr: 5,
               }}
             >
               Choose axes
