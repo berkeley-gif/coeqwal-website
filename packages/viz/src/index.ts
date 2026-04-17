@@ -98,6 +98,9 @@ export type { RadarPlotProps } from "./components/RadarPlot"
 export type {
   RadarPlotAxisLabelDetailStyle,
   RadarAxisDetailBottomMode,
+  RadarAxisLabelDetailPayload,
+  RadarAxisLabelDetailChromeOptions,
+  RadarAxisLabelDetailPointerBridge,
 } from "./components/radarAxisLabelDetail"
 export {
   mergeRadarAxisLabelDetailStyle,

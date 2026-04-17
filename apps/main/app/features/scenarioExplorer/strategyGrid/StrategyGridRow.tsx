@@ -428,6 +428,7 @@ export function InlineRowActions({
   onShare,
   togglePinnedScenario,
   hidePinning,
+  shareIconNudgeTop,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -437,6 +438,8 @@ export function InlineRowActions({
   onShare: () => void
   togglePinnedScenario: (id: string) => void
   hidePinning?: boolean
+  /** Optional visual offset for the share control (e.g. sidebar alignment) */
+  shareIconNudgeTop?: string
 }) {
   const theme = useTheme()
   const shareItems = useScenarioExplorerStore((s) => s.shareItems)
@@ -565,6 +568,10 @@ export function InlineRowActions({
           }}
           sx={{
             p: 0.375,
+            ...(shareIconNudgeTop != null && {
+              position: "relative",
+              top: shareIconNudgeTop,
+            }),
             color: isShared
               ? theme.palette.blue.bright
               : theme.palette.grey[500],

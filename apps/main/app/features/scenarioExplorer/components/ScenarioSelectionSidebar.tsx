@@ -322,6 +322,7 @@ export default function ScenarioSelectionSidebar({
                       }
                       isPinned={isPinned}
                       accentColor={accentColor}
+                      shareIconNudgeTop="-2px"
                       onShare={async () => {
                         if (exploreMode === "radar") {
                           const result = await onCaptureRadarScenario?.(
