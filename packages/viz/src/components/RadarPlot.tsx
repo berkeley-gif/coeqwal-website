@@ -276,7 +276,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onLineHover,
     onLineClick,
     chosenIds,
-    highlightedIds: _highlightedIds,
+    highlightedIds: highlightedIdsProp,
     highlightBaseline = true,
     showScenarioPath: _showScenarioPath = true,
     showAllPaths: _showAllPaths = false,
@@ -307,6 +307,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
       [pinnedScenarioIdsProp],
+    )
+    const highlightedIds = useMemo(
+      () => highlightedIdsProp ?? null,
+      [highlightedIdsProp],
     )
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -518,6 +522,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           focusId?: string | null,
         ) => {
           const isFocused = focusId != null && scenarioId === focusId
+          const hasExternalHighlight =
+            highlightedIds != null && highlightedIds.size > 0
+          const isExternallyHighlighted =
+            hasExternalHighlight && highlightedIds!.has(scenarioId)
           const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
           const isPinned = pinnedScenarioIds.has(scenarioId)
           const isBaseline =
@@ -526,9 +534,30 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             scenarioId === baselineData.id
 
           const anyHighlightActive =
-            focusId != null || dimUnselected || (dimUnpinned && hasPinned)
+            focusId != null ||
+            dimUnselected ||
+            (dimUnpinned && hasPinned) ||
+            hasExternalHighlight
 
-          if (isFocused || isSelected || isBaseline) {
+          if (isFocused || isExternallyHighlighted) {
+            return {
+              dotR: dotR + 2,
+              opacity: 1.0,
+              strokeWidth: 2.5,
+              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+            }
+          }
+
+          if (hasExternalHighlight) {
+            return {
+              dotR: dotR * 0.7,
+              opacity: DIM_OPACITY,
+              strokeWidth: 1.2,
+              strokeOpacity: DIM_OPACITY,
+            }
+          }
+
+          if (isSelected || isBaseline) {
             return {
               dotR: dotR + 2,
               opacity: 1.0,
@@ -1271,6 +1300,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         getAngle,
         enableTooltip,
         axisLabelDetailStyle,
+        highlightedIds,
       ],
     )
 
