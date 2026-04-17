@@ -7,9 +7,9 @@
  * theme share a hue family but vary in lightness and saturation so that up to
  * 7 scenarios from the same theme are distinguishable.
  *
- * The palettes are ordered so the first few slots are the most "canonical"
- * colors for each theme, with later slots offering variation. This means the
- * most common case (1–3 scenarios per theme) always gets the strongest colors.
+ * getThemeLineColor uses THEME_LINE_PALETTES_LIGHT_TO_DARK`
+ * — the same hexes sorted by WCAG relative luminance so that, within a theme,
+ * index 0 is the lightest swatch and higher indices read progressively darker.
  *
  * Theme-to-hue mapping:
  *   baseline   warm amber / brown
@@ -89,6 +89,48 @@ export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
   ],
 }
 
+/** WCAG 2.x relative luminance for #rrggbb (0 = black, 1 = white). */
+function relativeLuminanceFromHex(hex: string): number {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m) return 0
+  const n = parseInt(m[1]!, 16)
+  const toLin = (c: number) => {
+    const x = c / 255
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+  }
+  const r = toLin((n >> 16) & 255)
+  const g = toLin((n >> 8) & 255)
+  const b = toLin(n & 255)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** Same colors as authoring palette, sorted lightest → darkest by relative luminance. */
+function sortPaletteLightToDark(colors: readonly string[]): string[] {
+  return [...colors]
+    .map((h, originalIndex) => ({
+      h,
+      lum: relativeLuminanceFromHex(h),
+      originalIndex,
+    }))
+    .sort((a, b) => {
+      if (b.lum !== a.lum) return b.lum - a.lum
+      return a.originalIndex - b.originalIndex
+    })
+    .map((x) => x.h)
+}
+
+const THEME_KEYS = Object.keys(THEME_LINE_PALETTES) as ThemeKey[]
+
+/** Per-theme palettes for chart lines: index 0 = lightest, last = darkest. */
+export const THEME_LINE_PALETTES_LIGHT_TO_DARK: Record<ThemeKey, string[]> =
+  THEME_KEYS.reduce(
+    (acc, key) => {
+      acc[key] = sortPaletteLightToDark(THEME_LINE_PALETTES[key])
+      return acc
+    },
+    {} as Record<ThemeKey, string[]>,
+  )
+
 /**
  * Dark goldenrod for s0020 (Current Operations).
  * Recognizable as the "baseline gold" while remaining clearly visible on
@@ -100,8 +142,8 @@ const CURRENT_OPS_COLOR = "#cc9a06"
  * Returns the line color for a scenario.
  *
  * s0020 (Current Operations) always returns the dark goldenrod color.
- * All other scenarios receive a color from their theme's palette,
- * indexed by their position among selected scenarios within that theme.
+ * Other scenarios use the theme palette in **light-to-dark** order so that
+ * earlier positions within a theme (by app ordering) read as lighter traces.
  *
  * @param theme            - The scenario's theme key
  * @param indexWithinTheme - Zero-based position among selected scenarios of this theme
@@ -113,6 +155,8 @@ export function getThemeLineColor(
   scenarioId?: string,
 ): string {
   if (scenarioId === "s0020") return CURRENT_OPS_COLOR
-  const palette = THEME_LINE_PALETTES[theme] ?? THEME_LINE_PALETTES.baseline
+  const palette =
+    THEME_LINE_PALETTES_LIGHT_TO_DARK[theme] ??
+    THEME_LINE_PALETTES_LIGHT_TO_DARK.baseline
   return palette[Math.min(indexWithinTheme, palette.length - 1)] ?? "#666666"
 }
