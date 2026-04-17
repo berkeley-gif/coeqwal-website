@@ -27,7 +27,13 @@ import {
   ResiliencePanel,
   RadarPanel,
 } from "./exploreView"
-import type { SingleScenarioCaptureFn } from "./exploreView"
+import type {
+  SingleScenarioCaptureFn,
+  ResilienceControlsState,
+} from "./exploreView"
+import ResilienceControls from "./exploreView/ResilienceControls"
+import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
+import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
@@ -141,6 +147,25 @@ export default function ScenarioExplorer() {
     return radarSingleCaptureRef.current?.(scenarioId) ?? null
   }, [])
 
+  // Resilience heatmap controls (panel-local state, lifted here so the
+  // toolbar and panel share one source of truth without store changes).
+  const [resilienceControls, setResilienceControls] =
+    useState<ResilienceControlsState>({
+      view: "scenario",
+      focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
+      focusOutcomeCode: "CWS_DEL",
+      selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
+      showRegionalSplit: false,
+      showCellNumbers: true,
+    })
+
+  const handleResilienceControlsChange = useCallback(
+    (next: Partial<ResilienceControlsState>) => {
+      setResilienceControls((prev) => ({ ...prev, ...next }))
+    },
+    [],
+  )
+
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
@@ -165,15 +190,15 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
-          <InlineToggleChip
-            label="show range"
-            active={showRadarRange}
-            onClick={() => setShowRadarRange(!showRadarRange)}
-          />
-          <Box
-            component="button"
-            type="button"
-            disabled={selectedScenarios.length === 0 && !radarShowAll}
+            <InlineToggleChip
+              label="show range"
+              active={showRadarRange}
+              onClick={() => setShowRadarRange(!showRadarRange)}
+            />
+            <Box
+              component="button"
+              type="button"
+              disabled={selectedScenarios.length === 0 && !radarShowAll}
             onClick={() => radarCaptureRef.current?.()}
             aria-label="capture view"
             sx={{
@@ -215,6 +240,16 @@ export default function ScenarioExplorer() {
         </ChartControlsBar>
       )
     }
+    if (exploreMode === "resilience") {
+      return (
+        <ChartControlsBar>
+          <ResilienceControls
+            controls={resilienceControls}
+            onChange={handleResilienceControlsChange}
+          />
+        </ChartControlsBar>
+      )
+    }
     return null
   }, [
     exploreMode,
@@ -230,6 +265,8 @@ export default function ScenarioExplorer() {
     setRadarShowAll,
     selectedScenarios,
     theme,
+    resilienceControls,
+    handleResilienceControlsChange,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -313,7 +350,13 @@ export default function ScenarioExplorer() {
                     onScenarioHover={handleToolScenarioHover}
                   />
                 )}
-                {exploreMode === "resilience" && <ResiliencePanel />}
+                {exploreMode === "resilience" && (
+                  <ResiliencePanel
+                    controls={resilienceControls}
+                    highlightedIds={highlightedIds}
+                    onScenarioHover={handleToolScenarioHover}
+                  />
+                )}
                 {exploreMode === "data" && <DataExplorerView />}
               </UnifiedToolLayout>
             </Box>

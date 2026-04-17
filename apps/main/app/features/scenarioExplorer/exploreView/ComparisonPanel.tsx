@@ -196,7 +196,7 @@ export default function ComparisonPanel({
     "off" | "morph" | "compare"
   >("off")
   const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
-  const [deviationComparisonHC] = useState("warmer-wetter")
+  const [deviationComparisonHC] = useState("cc50")
 
   // Map display names -> outcome codes for tooltip lookups
   const axisCodeMap = useMemo(

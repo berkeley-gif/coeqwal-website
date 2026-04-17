@@ -44,7 +44,7 @@ export default function ToolToolbar({
 
   // TODO: re-enable high climate risk in radar once it has complete data
   const radarDisabledClimates =
-    exploreMode === "radar" ? new Set(["warmer-drier-i"]) : undefined
+    exploreMode === "radar" ? new Set(["cc95"]) : undefined
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
