@@ -11,7 +11,7 @@
       }
 
       .cls-4, .cls-3 {
-        fill: #fff;
+        fill: #f2f0ef;
       }
 
       .cls-3 {
@@ -21,7 +21,7 @@
 
       .cls-5 {
         fill: none;
-        stroke: #fff;
+        stroke: #f2f0ef;
         stroke-linecap: round;
         stroke-miterlimit: 10;
         stroke-width: 4.23px;

@@ -15,6 +15,7 @@ import {
   Box,
   Typography,
   useTheme,
+  alpha,
   PlayArrowIcon,
   ViewListIcon,
   ExploreIcon,
@@ -148,10 +149,14 @@ export default function ExploreSubNav() {
               border: "none",
               borderRadius: theme.borderRadius.sm ?? "4px",
               cursor: "pointer",
-              background: active ? "rgba(255,255,255,0.2)" : "transparent",
+              background: active
+                ? alpha(theme.palette.common.white, 0.2)
+                : "transparent",
               color: theme.palette.common.white,
               transition: "background-color 0.15s",
-              "&:hover": { background: "rgba(255,255,255,0.15)" },
+              "&:hover": {
+                background: alpha(theme.palette.common.white, 0.15),
+              },
             }}
           >
             {icon}
@@ -196,7 +201,7 @@ export default function ExploreSubNav() {
             sx={{
               width: "1px",
               height: 20,
-              backgroundColor: "rgba(255,255,255,0.35)",
+              backgroundColor: alpha(theme.palette.common.white, 0.35),
               flexShrink: 0,
               mx: 0.5,
             }}
@@ -237,12 +242,12 @@ export default function ExploreSubNav() {
                       borderRadius: theme.borderRadius.sm ?? "4px",
                       cursor: "pointer",
                       background: active
-                        ? "rgba(255,255,255,0.2)"
+                        ? alpha(theme.palette.common.white, 0.2)
                         : "transparent",
                       color: theme.palette.common.white,
                       transition: "background-color 0.15s",
                       "&:hover": {
-                        background: "rgba(255,255,255,0.15)",
+                        background: alpha(theme.palette.common.white, 0.15),
                       },
                     }}
                   >

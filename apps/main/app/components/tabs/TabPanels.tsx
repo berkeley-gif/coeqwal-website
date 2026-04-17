@@ -148,8 +148,11 @@ export default function TabPanels() {
   const panelColor: string = useMemo(() => {
     if (activeTab === "learn" || activeTab === "explore")
       return "rgba(0, 0, 0, 0)"
-    return TABS.find((t) => t.key === activeTab)?.panelColor ?? "#ffffff"
-  }, [activeTab])
+    return (
+      TABS.find((t) => t.key === activeTab)?.panelColor ??
+      theme.palette.common.white
+    )
+  }, [activeTab, theme.palette.common.white])
 
   // Map tabs need pointerEvents: "none" on wrapper so the persistent map
   // behind (at z-index: -1) can receive drag/pan events.

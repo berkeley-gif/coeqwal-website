@@ -1,3 +1,6 @@
+import { alpha } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
+
 /**
  * COEQWAL custom tileset sources and runtime layer definitions.
  *
@@ -71,7 +74,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     sourceLayer: "demand_units",
     paint: {
       "fill-color": "#7094a9",
-      "fill-outline-color": "#ffffff",
+      "fill-outline-color": themeValues.palette.common.white,
       "fill-opacity": 0.5,
     },
     layout: { visibility: "none" },
@@ -84,7 +87,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     paint: {
       "fill-color": "#70a981",
       "fill-opacity": 0.5,
-      "fill-outline-color": "#ffffff",
+      "fill-outline-color": themeValues.palette.common.white,
     },
     layout: { visibility: "none" },
   },
@@ -95,7 +98,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     sourceLayer: "california-reservoir",
     paint: {
       "fill-color": "rgb(3, 34, 74)",
-      "fill-outline-color": "rgba(255, 255, 255, 0)",
+      "fill-outline-color": alpha(themeValues.palette.common.white, 0),
     },
     layout: { visibility: "none" },
   },

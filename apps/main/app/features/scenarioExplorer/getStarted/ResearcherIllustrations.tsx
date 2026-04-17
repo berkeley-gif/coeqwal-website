@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react"
 import type { MotionValue } from "@repo/motion"
+import { useTheme, alpha } from "@repo/ui/mui"
 
 /**
  * Water-themed symbols drawn on each researcher's T-shirt.
@@ -56,6 +57,8 @@ export default function ResearcherIllustrations({
   panelWidth,
   panelHeight,
 }: ResearcherIllustrationsProps) {
+  const theme = useTheme()
+  const cw = theme.palette.common.white
   const charRefs = useRef<(SVGGElement | null)[]>([])
   const smileRefs = useRef<(SVGPathElement | null)[]>([])
 
@@ -125,16 +128,16 @@ export default function ResearcherIllustrations({
               cx={cx}
               cy={cy + HEAD_CY}
               r={HEAD_R}
-              fill="white"
-              stroke="rgba(255,255,255,0.7)"
+              fill={cw}
+              stroke={alpha(cw, 0.7)}
               strokeWidth={1.5}
             />
 
             {/* T-shirt body */}
             <path
               d={tshirtPath(cx, cy + HEAD_CY + HEAD_R + 4)}
-              fill="rgba(255,255,255,0.15)"
-              stroke="rgba(255,255,255,0.6)"
+              fill={alpha(cw, 0.15)}
+              stroke={alpha(cw, 0.6)}
               strokeWidth={1.2}
               strokeLinejoin="round"
             />
@@ -143,7 +146,7 @@ export default function ResearcherIllustrations({
             <g
               transform={`translate(${cx}, ${cy + HEAD_CY + HEAD_R + 22})`}
               fill="none"
-              stroke="rgba(255,255,255,0.7)"
+              stroke={alpha(cw, 0.7)}
               strokeWidth={1.2}
               strokeLinecap="round"
               strokeLinejoin="round"

@@ -12,6 +12,7 @@ import { memo, useMemo, useEffect } from "react"
 const OPACITY_TRANSITION = { duration: 300, delay: 0 }
 import { Source, Layer, Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 import { useIsOutcomeVisualizationActive, useMapMode } from "../store"
 import { useSalmonRiverColor } from "../visualizationLayers/hooks/useSalmonRiverColor"
@@ -27,7 +28,7 @@ export const RIVER_LAYER_IDS = [
 
 const DEFAULT_RIVER_BODY_COLOR = "#042f67" // rgb(4, 47, 103)
 const RIVER_TROUGH_COLOR = "#1a3a52"
-const RIVER_OUTLINE_COLOR = "#ffffff"
+const RIVER_OUTLINE_COLOR = themeValues.palette.common.white
 
 interface RiversLayerProps {
   visible: boolean

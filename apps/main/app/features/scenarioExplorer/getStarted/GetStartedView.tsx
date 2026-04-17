@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { LinedList, InfoCard, BarredColumns, WaterDroplet } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
@@ -310,12 +310,12 @@ export default function GetStartedView() {
                     p: 0,
                     color: "text.secondary",
                     textDecoration: "underline",
-                    textDecorationColor: "rgba(255,255,255,0.4)",
+                    textDecorationColor: alpha(theme.palette.common.white, 0.4),
                     textUnderlineOffset: "3px",
                     cursor: "pointer",
                     font: "inherit",
                     "&:hover": {
-                      textDecorationColor: "rgba(255,255,255,0.8)",
+                      textDecorationColor: alpha(theme.palette.common.white, 0.8),
                     },
                   }}
                 >
@@ -520,12 +520,12 @@ export default function GetStartedView() {
                 p: 0,
                 color: "text.secondary",
                 textDecoration: "underline",
-                textDecorationColor: "rgba(255,255,255,0.4)",
+                textDecorationColor: alpha(theme.palette.common.white, 0.4),
                 textUnderlineOffset: "3px",
                 cursor: "pointer",
                 font: "inherit",
                 "&:hover": {
-                  textDecorationColor: "rgba(255,255,255,0.8)",
+                  textDecorationColor: alpha(theme.palette.common.white, 0.8),
                 },
               }}
             >
@@ -603,12 +603,12 @@ export default function GetStartedView() {
                 p: 0,
                 color: "text.secondary",
                 textDecoration: "underline",
-                textDecorationColor: "rgba(255,255,255,0.4)",
+                textDecorationColor: alpha(theme.palette.common.white, 0.4),
                 textUnderlineOffset: "3px",
                 cursor: "pointer",
                 font: "inherit",
                 "&:hover": {
-                  textDecorationColor: "rgba(255,255,255,0.8)",
+                  textDecorationColor: alpha(theme.palette.common.white, 0.8),
                 },
               }}
             >

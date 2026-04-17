@@ -15,7 +15,7 @@
 
 import { useEffect, useState, useMemo, useRef } from "react"
 import { useMap, Source, Layer, Popup } from "@repo/map"
-import { Box } from "@repo/ui/mui"
+import { Box, useTheme, alpha } from "@repo/ui/mui"
 
 // Components
 import TierMarkers from "./components/TierMarkers"
@@ -80,6 +80,7 @@ export default function VisualizationLayers({
 }: {
   hidden?: boolean
 }) {
+  const theme = useTheme()
   const map = useMap()
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
@@ -446,7 +447,7 @@ export default function VisualizationLayers({
                     alignItems: "center",
                     p: "3px 8px",
                     borderRadius: "4px",
-                    background: "rgba(255,255,255,0.75)",
+                    background: alpha(theme.palette.common.white, 0.75),
                     boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
                     fontSize: 11,
                     lineHeight: 1.3,

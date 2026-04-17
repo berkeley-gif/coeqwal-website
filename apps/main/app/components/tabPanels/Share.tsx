@@ -262,7 +262,9 @@ function TrayCard({
             boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
           }}
         >
-          <icons.Check sx={{ fontSize: "1rem", color: "#fff" }} />
+          <icons.Check
+            sx={{ fontSize: "1rem", color: theme.palette.common.white }}
+          />
         </Box>
       )}
     </Box>
@@ -313,7 +315,7 @@ function StoryCard({
       const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
       const dataUrl = await toPng(el, {
         pixelRatio: dpr * 2,
-        backgroundColor: "#ffffff",
+        backgroundColor: theme.palette.common.white,
         skipFonts: true,
       })
       const label =
@@ -329,7 +331,7 @@ function StoryCard({
         )
       }
     }
-  }, [item])
+  }, [item, theme.palette.common.white])
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
@@ -649,7 +651,7 @@ export default function SharePanel() {
             typeof window !== "undefined" ? window.devicePixelRatio : 1
           const dataUrl = await toPng(el, {
             pixelRatio: dpr * 2,
-            backgroundColor: "#ffffff",
+            backgroundColor: theme.palette.common.white,
             skipFonts: true,
           })
           const label =
@@ -675,7 +677,7 @@ export default function SharePanel() {
         )
       }
     }
-  }, [storyItems, shareItems])
+  }, [storyItems, shareItems, theme.palette.common.white])
 
   const handleDownloadAllData = useCallback(() => {
     const items = storyItems.length > 0 ? storyItems : shareItems
