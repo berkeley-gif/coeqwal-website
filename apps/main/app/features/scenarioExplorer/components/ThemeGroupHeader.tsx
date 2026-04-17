@@ -21,6 +21,8 @@ interface ThemeGroupHeaderProps {
   layout?: "grid" | "flex"
   /** Sidebar / grid: highlight linked charts when hovering this header (all theme scenario ids). */
   onRowHover?: (scenarioIds: string[] | null) => void
+  /** if single-select disable theme selection */
+  singleSelect?: boolean
 }
 
 export default function ThemeGroupHeader({
@@ -28,6 +30,7 @@ export default function ThemeGroupHeader({
   scenarioIds,
   layout = "grid",
   onRowHover,
+  singleSelect = false,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
@@ -113,25 +116,27 @@ export default function ThemeGroupHeader({
         },
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          ...(isFlex ? { flexShrink: 0 } : { mr: -0.5 }),
-        }}
-      >
-        <Checkbox
-          size="small"
-          checked={allChecked}
-          indeterminate={someChecked}
-          onChange={handleToggle}
+      {singleSelect && (
+        <Box
           sx={{
-            ...theme.scenarios.checkbox.md,
-            mt: 0,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            ...(isFlex ? { flexShrink: 0 } : { mr: -0.5 }),
           }}
-        />
-      </Box>
+        >
+          <Checkbox
+            size="small"
+            checked={allChecked}
+            indeterminate={someChecked}
+            onChange={handleToggle}
+            sx={{
+              ...theme.scenarios.checkbox.md,
+              mt: 0,
+            }}
+          />
+        </Box>
+      )}
 
       <Box
         sx={{

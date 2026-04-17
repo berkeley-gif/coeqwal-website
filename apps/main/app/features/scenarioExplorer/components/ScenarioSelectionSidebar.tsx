@@ -311,28 +311,17 @@ export default function ScenarioSelectionSidebar({
                 <Checkbox
                   size="small"
                   checked={isChosen}
-                  onChange={() => handleScenarioSelect(scenario.scenarioId)}
+                  onChange={() => toggleScenario(scenario.scenarioId)}
                   onClick={(e) => e.stopPropagation()}
                   sx={{
                     ...theme.scenarios.checkbox.sm,
                     flexShrink: 0,
-                    mt: "16px",
+                    alignSelf: "flex-start",
+                    // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
+                    mt: "1px",
                   }}
                 />
               )}
-              <Checkbox
-                size="small"
-                checked={isChosen}
-                onChange={() => toggleScenario(scenario.scenarioId)}
-                onClick={(e) => e.stopPropagation()}
-                sx={{
-                  ...theme.scenarios.checkbox.sm,
-                  flexShrink: 0,
-                  alignSelf: "flex-start",
-                  // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
-                  mt: "1px",
-                }}
-              />
 
               <Box
                 onClick={() => handleScenarioSelect(scenario.scenarioId)}
