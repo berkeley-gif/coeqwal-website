@@ -9,7 +9,7 @@ export type TierLevel = 1 | 2 | 3 | 4
 
 export const TIER_LABELS: Record<TierLevel, string> = {
   1: "Optimal",
-  2: "Sub-optimal",
+  2: "Acceptable",
   3: "At-risk",
   4: "Critical",
 } as const

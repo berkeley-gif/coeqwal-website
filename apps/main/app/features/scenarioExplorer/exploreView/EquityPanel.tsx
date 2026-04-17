@@ -8,19 +8,20 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from "react"
-import { Box, useTheme, CircularProgress } from "@repo/ui/mui"
+import { Box, useTheme, Tooltip } from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
-import { useTiers } from "@repo/data/coeqwal/hooks"
-import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
-import { TIER_LABELS } from "../../../content/tiers"
+import { getTierColorsFromTheme } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
-import { useMap } from "@repo/map"
+import { useMap, Marker } from "@repo/map"
+import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
+import type { TierLocationAssignmentsResponse } from "@repo/data/coeqwal"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 
@@ -151,46 +152,134 @@ function getPolygonCentroidFromMapbox(
 
 export default function EquityPanel() {
   const theme = useTheme()
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
+  const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // Get currently selected scenarios and comparison mode from the store
   const { selectedScenarios, showEquityComparison, showMap } =
     useScenarioExplorerStore()
 
-  // Use the first selected scenario, or fallback to baseline
-  const currentScenario = selectedScenarios[0] || "s0020"
-  const baselineScenario = "s0020"
+  const { outcomeNames, idMapping } = useResolvedScenarioTiers()
 
-  // Fetch all tier metadata
-  const { tiers: allTiers, isLoading: tiersLoading } = useTiers()
+  // Resolve scenario ID to the right hydro-climate
+  const firstSelected = selectedScenarios[0]
+  const currentScenario = firstSelected
+    ? idMapping[firstSelected] || firstSelected
+    : "s0020"
 
-  // Get active tier codes for fetching location assignments
-  const activeTierCodes = useMemo(() => {
-    return allTiers?.filter((t) => t.is_active).map((t) => t.short_code) || []
-  }, [allTiers])
+  const baselineScenario = idMapping["s0020"] || "s0020"
 
-  // Fetch location assignments for current scenario
-  const tierLocationResults = activeTierCodes.map((tierCode) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useTierLocationAssignments(currentScenario, tierCode),
+  // Call useTierLocationAssignments for each outcome (not in a loop - follows Rules of Hooks)
+  const cwsDel = useTierLocationAssignments(currentScenario, "CWS_DEL")
+  const agRev = useTierLocationAssignments(currentScenario, "AG_REV")
+  const envFlows = useTierLocationAssignments(currentScenario, "ENV_FLOWS")
+  const resStor = useTierLocationAssignments(currentScenario, "RES_STOR")
+  const gwStor = useTierLocationAssignments(currentScenario, "GW_STOR")
+  const deltaEco = useTierLocationAssignments(currentScenario, "DELTA_ECO")
+  const fwExp = useTierLocationAssignments(currentScenario, "FW_EXP")
+  const fwDeltaUses = useTierLocationAssignments(
+    currentScenario,
+    "FW_DELTA_USES",
+  )
+  const wrcSalmonAb = useTierLocationAssignments(
+    currentScenario,
+    "WRC_SALMON_AB",
   )
 
-  // Fetch baseline location assignments when comparison mode is ON
-  const baselineTierLocationResults = activeTierCodes.map((tierCode) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useTierLocationAssignments(
-      showEquityComparison ? baselineScenario : currentScenario,
-      tierCode,
-    ),
+  // Baseline data for comparison
+  const baselineCwsDel = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "CWS_DEL",
+  )
+  const baselineAgRev = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "AG_REV",
+  )
+  const baselineEnvFlows = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "ENV_FLOWS",
+  )
+  const baselineResStor = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "RES_STOR",
+  )
+  const baselineGwStor = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "GW_STOR",
+  )
+  const baselineDeltaEco = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "DELTA_ECO",
+  )
+  const baselineFwExp = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "FW_EXP",
+  )
+  const baselineFwDeltaUses = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "FW_DELTA_USES",
+  )
+  const baselineWrcSalmonAb = useTierLocationAssignments(
+    showEquityComparison ? baselineScenario : null,
+    "WRC_SALMON_AB",
   )
 
-  // Check if any tier location data is still loading
-  const tierLocationsLoading = tierLocationResults.some((r) => r.isLoading)
-  const baselineLocationsLoading = baselineTierLocationResults.some(
-    (r) => r.isLoading,
+  // Map outcome codes to their data
+  const tierDataByCode: Record<
+    string,
+    TierLocationAssignmentsResponse | undefined
+  > = useMemo(
+    () => ({
+      CWS_DEL: cwsDel.data,
+      AG_REV: agRev.data,
+      ENV_FLOWS: envFlows.data,
+      RES_STOR: resStor.data,
+      GW_STOR: gwStor.data,
+      DELTA_ECO: deltaEco.data,
+      FW_EXP: fwExp.data,
+      FW_DELTA_USES: fwDeltaUses.data,
+      WRC_SALMON_AB: wrcSalmonAb.data,
+    }),
+    [
+      cwsDel.data,
+      agRev.data,
+      envFlows.data,
+      resStor.data,
+      gwStor.data,
+      deltaEco.data,
+      fwExp.data,
+      fwDeltaUses.data,
+      wrcSalmonAb.data,
+    ],
   )
-  const isLoading =
-    tiersLoading || tierLocationsLoading || baselineLocationsLoading
+
+  const baselineTierDataByCode: Record<
+    string,
+    TierLocationAssignmentsResponse | undefined
+  > = useMemo(
+    () => ({
+      CWS_DEL: baselineCwsDel.data,
+      AG_REV: baselineAgRev.data,
+      ENV_FLOWS: baselineEnvFlows.data,
+      RES_STOR: baselineResStor.data,
+      GW_STOR: baselineGwStor.data,
+      DELTA_ECO: baselineDeltaEco.data,
+      FW_EXP: baselineFwExp.data,
+      FW_DELTA_USES: baselineFwDeltaUses.data,
+      WRC_SALMON_AB: baselineWrcSalmonAb.data,
+    }),
+    [
+      baselineCwsDel.data,
+      baselineAgRev.data,
+      baselineEnvFlows.data,
+      baselineResStor.data,
+      baselineGwStor.data,
+      baselineDeltaEco.data,
+      baselineFwExp.data,
+      baselineFwDeltaUses.data,
+      baselineWrcSalmonAb.data,
+    ],
+  )
 
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
@@ -208,12 +297,7 @@ export default function EquityPanel() {
 
   // Transform tier location data to tier grid format
   const { objectives, categories } = useMemo(() => {
-    if (!allTiers) {
-      return { objectives: [], categories: [] }
-    }
-
-    // Return empty data only if we've never loaded anything yet
-    if (tierLocationsLoading && tierLocationResults.every((r) => !r.data)) {
+    if (outcomeNames.length === 0) {
       return { objectives: [], categories: [] }
     }
 
@@ -221,32 +305,30 @@ export default function EquityPanel() {
     const categorySet = new Set<string>()
     let globalId = 0
 
-    // Build a map of baseline tier levels by location ID
+    // Build baseline tier map
     const baselineTierMap = new Map<string, number>()
     if (showEquityComparison) {
-      baselineTierLocationResults.forEach((baselineResult) => {
-        if (baselineResult.data) {
-          baselineResult.data.locations.forEach((location) => {
+      outcomeNames.forEach((outcome) => {
+        const baselineData = baselineTierDataByCode[outcome.shortCode]
+        if (baselineData) {
+          baselineData.locations.forEach((location) => {
             baselineTierMap.set(location.location_id, location.tier_level)
           })
         }
       })
     }
 
-    // Process each tier's location assignments
-    tierLocationResults.forEach((tierResult, idx) => {
-      const tierCode = activeTierCodes[idx]
-      const tierMetadata = allTiers.find((t) => t.short_code === tierCode)
+    // Process each outcome
+    outcomeNames.forEach((outcome) => {
+      const tierCode = outcome.shortCode
+      const currentData = tierDataByCode[tierCode]
 
-      if (!tierResult.data || !tierMetadata) {
-        return
-      }
+      if (!currentData) return
 
-      const categoryName = tierMetadata.name
+      const categoryName = outcome.displayName
       categorySet.add(categoryName)
 
-      // Create objectives for each location
-      tierResult.data.locations.forEach((location) => {
+      currentData.locations.forEach((location) => {
         const currentTierLevel = location.tier_level
         const baselineTierLevel = showEquityComparison
           ? (baselineTierMap.get(location.location_id) ?? currentTierLevel)
@@ -260,7 +342,7 @@ export default function EquityPanel() {
           locationId: location.location_id,
           locationName: location.location_name,
           tierLevel: currentTierLevel,
-          tierCode: tierCode, // Store tier code for coordinate lookup
+          tierCode: tierCode,
         })
       })
     })
@@ -270,11 +352,9 @@ export default function EquityPanel() {
       categories: Array.from(categorySet),
     }
   }, [
-    allTiers,
-    tierLocationResults,
-    baselineTierLocationResults,
-    tierLocationsLoading,
-    activeTierCodes,
+    outcomeNames,
+    tierDataByCode,
+    baselineTierDataByCode,
     showEquityComparison,
   ])
 
@@ -283,7 +363,6 @@ export default function EquityPanel() {
       const isSelected = prev.some(
         (obj) => obj.locationId === objective.locationId,
       )
-      // console.log("Selected Objective:", objective)
       if (isSelected) {
         return prev.filter((obj) => obj.locationId !== objective.locationId)
       } else {
@@ -304,68 +383,227 @@ export default function EquityPanel() {
       // Get the Mapbox map instance
       const map = mapRef?.current?.getMap()
 
-      // Create location highlights from selected objectives
-      const highlights = selectedObjectives
-        .filter((obj) => locationIds.includes(obj.locationId))
-        .map((obj) => {
-          // Get tier color and shape based on comparison mode
-          let tierColor = "#999"
-          let shape: "square" | "triangle-up" | "triangle-down" = "square"
+      // Filter objectives array to only the requested locations
+      const locationIdSet = new Set(locationIds)
+      const objectivesToShow = objectives.filter((obj) =>
+        locationIdSet.has(obj.locationId),
+      )
 
-          if (showEquityComparison) {
-            const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
-            const baselineTierNum = parseInt(
-              obj.baselineTier.replace("Tier ", ""),
-            )
-            if (currentTierNum === baselineTierNum) {
-              tierColor = "#64b5f6" // Light blue - no change
-              shape = "square"
-            } else if (currentTierNum < baselineTierNum) {
-              tierColor = "#1976d2" // Blue - improved
-              shape = "triangle-up"
-            } else {
-              tierColor = "#d32f2f" // Red - worsened
-              shape = "triangle-down"
-            }
+      if (objectivesToShow.length === 0) {
+        setMotionChildren?.(null)
+        return
+      }
+
+      // Create marker elements for each location
+      const markerElements = objectivesToShow.map((obj) => {
+        // Get tier color and shape based on comparison mode
+        let markerColor: string
+        let isTriangle = false
+        let triangleDirection: "up" | "down" = "up"
+
+        if (showEquityComparison) {
+          const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
+          const baselineTierNum = parseInt(
+            obj.baselineTier.replace("Tier ", ""),
+          )
+          if (currentTierNum === baselineTierNum) {
+            markerColor = "#64b5f6" // Light blue - no change
+            isTriangle = false // Circle for no change
+          } else if (currentTierNum < baselineTierNum) {
+            markerColor = "#1976d2" // Blue - improved
+            isTriangle = true
+            triangleDirection = "up" // Triangle pointing up for improvement
+          } else {
+            markerColor = "#d32f2f" // Red - worsened
+            isTriangle = true
+            triangleDirection = "down" // Triangle pointing down for worse
           }
+        } else {
+          // Use tier color when not in comparison mode
+          markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
+          isTriangle = false
+        }
 
-          // Get coordinates - try polygon centroid first, fallback to hardcoded
-          let coords: [number, number] | null = null
+        // Get coordinates - try polygon centroid first, fallback to hardcoded
+        let coords: [number, number] | null = null
 
-          if (obj.tierCode && map) {
-            // Try to get centroid from polygon layer
-            coords = getPolygonCentroidFromMapbox(
-              map,
-              obj.tierCode,
-              obj.locationId,
-            )
-          }
+        if (obj.tierCode && map) {
+          // Try to get centroid from polygon layer
+          coords = getPolygonCentroidFromMapbox(
+            map,
+            obj.tierCode,
+            obj.locationId,
+          )
+        }
 
-          // Fallback to hardcoded coordinates if polygon centroid not available
-          if (!coords && obj.tierCode) {
-            coords = getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
-          }
+        // Fallback to hardcoded coordinates if polygon centroid not available
+        if (!coords && obj.tierCode) {
+          coords = getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
+        }
 
-          return {
-            key: obj.locationId,
-            longitude: coords?.[0] ?? -121,
-            latitude: coords?.[1] ?? 38.5,
-            name: obj.locationName,
-            tierLevel: obj.tierLevel,
-            tierLabel: TIER_LABELS[obj.tierLevel as 1 | 2 | 3 | 4] || "Unknown",
-            tierColor,
-            shape,
-            pinned: true,
-          }
-        })
+        const lng = coords?.[0] ?? -121
+        const lat = coords?.[1] ?? 38.5
 
-      // Set location highlights on the map
-      mapActions.setLocationHighlights(highlights)
+        // Build tooltip content
+        const tooltipContent = showEquityComparison ? (
+          <Box sx={{ textAlign: "center" }}>
+            <Box
+              sx={{
+                fontWeight: 600,
+                fontSize: "13px",
+                mb: 1,
+                borderBottom: "1px solid rgba(255,255,255,0.3)",
+                pb: 0.75,
+              }}
+            >
+              {obj.locationName}
+            </Box>
+            <Box sx={{ fontSize: "12px", lineHeight: 1.6 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
+              >
+                <Box component="span" sx={{ color: "black" }}>
+                  Current:
+                </Box>
+                <Box component="span" sx={{ fontWeight: 500 }}>
+                  {obj.tier}
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
+              >
+                <Box component="span" sx={{ color: "black" }}>
+                  Baseline:
+                </Box>
+                <Box component="span" sx={{ fontWeight: 500 }}>
+                  {obj.baselineTier}
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ textAlign: "center" }}>
+            <Box
+              sx={{
+                fontWeight: 600,
+                fontSize: "13px",
+                mb: 0.5,
+              }}
+            >
+              {obj.locationName}
+            </Box>
+            <Box sx={{ fontSize: "12px", fontWeight: 500 }}>{obj.tier}</Box>
+          </Box>
+        )
 
-      // Switch to explore mode to show the map, just to be sure... maybe not needed
+        return (
+          <Marker
+            key={`${obj.locationId}-${obj.tierCode}`}
+            longitude={lng}
+            latitude={lat}
+            anchor="bottom"
+          >
+            <Tooltip
+              title={tooltipContent}
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: "white",
+                    "& .MuiTooltip-arrow": {
+                      color: "rgba(0, 0, 0, 0.9)",
+                    },
+                    padding: "12px 16px",
+                    fontSize: "12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                  },
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    px: 1,
+                    py: 0.5,
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    color: "white",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  {obj.locationName}
+                </Box>
+                {isTriangle ? (
+                  <Box
+                    component="svg"
+                    sx={{
+                      width: 14,
+                      height: 14,
+                      filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                    }}
+                    viewBox="0 0 14 14"
+                  >
+                    {triangleDirection === "up" ? (
+                      <polygon
+                        points="7,2 2,12 12,12"
+                        fill={markerColor}
+                        stroke="white"
+                        strokeWidth="1.5"
+                      />
+                    ) : (
+                      <polygon
+                        points="7,12 2,2 12,2"
+                        fill={markerColor}
+                        stroke="white"
+                        strokeWidth="1.5"
+                      />
+                    )}
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: "50%",
+                      backgroundColor: markerColor,
+                      border: "2px solid white",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                    }}
+                  />
+                )}
+              </Box>
+            </Tooltip>
+          </Marker>
+        )
+      })
+
+      // Set markers on the map
+      setMotionChildren?.(<>{markerElements}</>)
+
+      // Switch to explore mode to show the map
       mapActions.setMapMode("explore")
     },
-    [selectedObjectives, showEquityComparison, mapRef],
+    [objectives, showEquityComparison, tierColors, mapRef, setMotionChildren],
   )
 
   // Update selectedObjectives with fresh data when scenario or comparison mode changes
@@ -382,16 +620,29 @@ export default function EquityPanel() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScenario, showEquityComparison])
+  }, [currentScenario, showEquityComparison, objectives])
 
   // Update highlights when selected objectives changes
   useEffect(() => {
     if (selectedObjectives.length > 0 && showMap) {
       const locationIds = selectedObjectives.map((obj) => obj.locationId)
+      console.log("Highlighting on map for location IDs:", locationIds)
       handleShowOnMap(locationIds)
+    } else if (setMotionChildren) {
+      // Clear markers when no objectives selected or map hidden
+      setMotionChildren(null)
+    }
+  }, [selectedObjectives, showMap, handleShowOnMap, setMotionChildren])
+
+  // Cleanup markers on unmount
+  useEffect(() => {
+    return () => {
+      if (setMotionChildren) {
+        setMotionChildren(null)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObjectives, showMap])
+  }, [])
 
   return (
     <Box
@@ -428,27 +679,6 @@ export default function EquityPanel() {
           showMapView={showMap}
         />
       </Box>
-
-      {/* Show loading overlay when updating scenario data */}
-      {isLoading && objectives.length > 0 && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.7)",
-            pointerEvents: "none",
-            zIndex: 10,
-          }}
-        >
-          <CircularProgress size={32} />
-        </Box>
-      )}
     </Box>
   )
 }

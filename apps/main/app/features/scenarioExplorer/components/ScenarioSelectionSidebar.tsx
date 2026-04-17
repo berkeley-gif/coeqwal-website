@@ -15,6 +15,7 @@
 
 import React, { useMemo, useEffect, useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import { motion, AnimatePresence } from "@repo/motion"
 import { useScenarioExplorerStore } from "../store"
 import {
   StrategyHeader,
@@ -23,12 +24,18 @@ import {
 import { InlineRowActions } from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
+import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
+  hoveredAxisInfo?: {
+    scenarioId: string
+    axis: string
+    tierValue: number
+  } | null
   onRowHover?: (scenarioIds: string[] | null) => void
   singleSelect?: boolean
 }
@@ -36,10 +43,12 @@ interface ScenarioSelectionSidebarProps {
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredScenarioId,
+  hoveredAxisInfo,
   onRowHover,
   singleSelect = false,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
+  const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   const {
     selectedScenarios,
@@ -66,6 +75,7 @@ export default function ScenarioSelectionSidebar({
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+  const hasActiveScenario = activeScenarioId !== null
 
   // When switching to single-select mode, keep only the first selected scenario
   useEffect(() => {
@@ -246,14 +256,20 @@ export default function ScenarioSelectionSidebar({
                 py: 0.5,
                 cursor: "pointer",
                 overflow: "hidden",
+                borderRadius: theme.borderRadius.sm,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
-                backgroundColor: isActive ? `${accentColor}1A` : "transparent",
+                "--row-bg": isActive
+                  ? theme.palette.background.paper
+                  : hasActiveScenario
+                    ? "#f0eeeb"
+                    : "#faf8f5",
+                backgroundColor: "var(--row-bg)",
                 opacity: isSearchDimmed ? 0.4 : 1,
-                transition: "background-color 200ms ease, opacity 200ms ease",
+                transition:
+                  "background-color 0.2s ease, border-color 0.2s ease, opacity 200ms ease",
                 "&:hover": {
-                  backgroundColor: isActive
-                    ? `${accentColor}26`
-                    : theme.palette.interaction.selectedBackground,
+                  "--row-bg": theme.palette.background.paper,
+                  backgroundColor: "var(--row-bg)",
                 },
               }}
             >
@@ -308,6 +324,9 @@ export default function ScenarioSelectionSidebar({
                   titleVariant="body2"
                   compact
                   showDescription={showDefinitions}
+                  expandDescription={
+                    showDefinitions && scenario.scenarioId === hoveredScenarioId
+                  }
                   descriptionMaxWidth="none"
                   showThemeBadge={!groupByTheme}
                   inlineActions={
@@ -325,6 +344,63 @@ export default function ScenarioSelectionSidebar({
                     />
                   }
                 />
+
+                <AnimatePresence>
+                  {scenario.scenarioId === hoveredAxisInfo?.scenarioId && (
+                    <motion.div
+                      key="axis-hover-detail"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <Box sx={{ pt: 0.5, pb: 0.75 }}>
+                        <Typography
+                          variant="compactSubtitle"
+                          sx={{
+                            display: "block",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                          }}
+                        >
+                          {hoveredAxisInfo.axis}
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            mt: 0.25,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "3px",
+                              flexShrink: 0,
+                              bgcolor:
+                                tierColors[
+                                  Math.round(
+                                    hoveredAxisInfo.tierValue,
+                                  ) as keyof typeof tierColors
+                                ] ?? theme.palette.grey[400],
+                            }}
+                          />
+                          <Typography
+                            variant="compactCaption"
+                            sx={{ color: theme.palette.grey[600] }}
+                          >
+                            {getTierLabel(
+                              Math.round(hoveredAxisInfo.tierValue),
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Box>
 
               <Box

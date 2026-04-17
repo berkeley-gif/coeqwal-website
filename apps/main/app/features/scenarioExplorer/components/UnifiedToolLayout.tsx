@@ -62,7 +62,6 @@ export default function UnifiedToolLayout({
   useEffect(() => {
     mapActions.clearOutcomeVisualization()
     mapActions.clearMapTooltips()
-    mapActions.clearLocationHighlights()
   }, [exploreMode])
 
   return (

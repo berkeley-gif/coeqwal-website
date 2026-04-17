@@ -25,7 +25,7 @@ import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 
 const panelVariants = {
-  enter: { opacity: 0, x: 30 }, // is this used?
+  enter: { opacity: 0, x: 30 },
   center: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -30 },
 }
