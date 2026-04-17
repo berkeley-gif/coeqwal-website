@@ -495,9 +495,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         ) => {
           g.selectAll("g.axis-label")
             .filter(function () {
-              return (
-                (this as SVGGElement).getAttribute("data-axis") === axisKey
-              )
+              return (this as SVGGElement).getAttribute("data-axis") === axisKey
             })
             .selectAll("text.axis-label-title")
             .attr("font-weight", weight)
@@ -883,10 +881,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
                 showAxisLabelDetail(axis, {
                   scenarioName: scenario.name,
-                  tierIndex: Math.min(
-                    4,
-                    Math.max(1, Math.round(toTier(sv))),
-                  ),
+                  tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
                 })
                 setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
 
@@ -925,10 +920,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 onDotClickRef.current?.(scenario.id, axis)
                 showAxisLabelDetail(axis, {
                   scenarioName: scenario.name,
-                  tierIndex: Math.min(
-                    4,
-                    Math.max(1, Math.round(toTier(sv))),
-                  ),
+                  tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
                 })
               })
           })
@@ -1238,7 +1230,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("font-family", axisLabelDetailStyle.fontFamily)
               .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
               .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
+              .attr(
+                "letter-spacing",
+                axisLabelDetailStyle.scenarioLetterSpacing,
+              )
               .text(curated[0])
             labelGroup
               .append("text")
@@ -1251,7 +1246,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("font-family", axisLabelDetailStyle.fontFamily)
               .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
               .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
+              .attr(
+                "letter-spacing",
+                axisLabelDetailStyle.scenarioLetterSpacing,
+              )
               .text(curated[1])
           } else {
             labelGroup
@@ -1265,7 +1263,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("font-family", axisLabelDetailStyle.fontFamily)
               .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
               .attr("fill", axisLabelDetailStyle.axisTitleFill)
-              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
+              .attr(
+                "letter-spacing",
+                axisLabelDetailStyle.scenarioLetterSpacing,
+              )
               .text(axis)
           }
 

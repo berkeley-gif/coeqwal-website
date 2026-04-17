@@ -200,7 +200,9 @@ export function mergeRadarAxisLabelDetailStyle(
 ): RadarPlotAxisLabelDetailStyle {
   if (!partial) return { ...DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE }
   const out = { ...DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE }
-  for (const key of Object.keys(partial) as (keyof RadarPlotAxisLabelDetailStyle)[]) {
+  for (const key of Object.keys(
+    partial,
+  ) as (keyof RadarPlotAxisLabelDetailStyle)[]) {
     const v = partial[key]
     if (v !== undefined) (out as Record<string, unknown>)[key as string] = v
   }
@@ -337,21 +339,16 @@ export function renderRadarAxisLabelDetailInto(
 
   clearAllDetails()
 
-  const labelG = rootG
-    .selectAll("g.axis-label")
-    .filter(function () {
-      return (this as SVGGElement).getAttribute("data-axis") === axis
-    })
+  const labelG = rootG.selectAll("g.axis-label").filter(function () {
+    return (this as SVGGElement).getAttribute("data-axis") === axis
+  })
 
   const detailG = labelG.select("g.axis-label-detail")
   if (detailG.empty()) return
 
   const lx = Number(labelG.attr("data-label-x"))
   const y0 = Number(labelG.attr("data-detail-y"))
-  const anchor = labelG.attr("data-text-anchor") as
-    | "start"
-    | "end"
-    | "middle"
+  const anchor = labelG.attr("data-text-anchor") as "start" | "end" | "middle"
 
   detailG.attr("visibility", "visible")
   detailG.selectAll("*").remove()
@@ -378,9 +375,7 @@ export function renderRadarAxisLabelDetailInto(
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
   const tierText = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}`
 
-  const inner = detailG
-    .append("g")
-    .attr("class", "axis-label-detail-inner")
+  const inner = detailG.append("g").attr("class", "axis-label-detail-inner")
 
   const padX = s.panelPaddingX
   const maxContentW = Math.max(48, s.detailMaxWidthPx - 2 * padX)
