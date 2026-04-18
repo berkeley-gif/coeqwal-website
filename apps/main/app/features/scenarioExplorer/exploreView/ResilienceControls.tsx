@@ -18,7 +18,7 @@
  * visible. The underlying code and state remain wired, so flipping this
  * back to `true` restores the full toolbar without any other changes.
  */
-const SHOW_INSIGHT_MODES = false
+const SHOW_INSIGHT_MODES = true
 
 import React, { useCallback, useMemo } from "react"
 import {
@@ -34,6 +34,7 @@ import { InlineToggleChip } from "../components/InlineToggleChip"
 import type {
   CellEncoding,
   DeltaMode,
+  QuadrantUnit,
   ResilienceControlsState,
   ResilienceView,
 } from "./ResiliencePanel"
@@ -73,11 +74,13 @@ export default function ResilienceControls({
     aggregateScope,
     reorderBySimilarity,
     showMarginals,
-    focusScenarioId,
+    showAllScenarios,
     focusOutcomeCode,
     selectedHydroclimates,
     showRegionalSplit,
     showCellNumbers,
+    quadrantUnit,
+    quadrantOutcome,
   } = controls
 
   const outcomeItems = useMemo(() => {
@@ -113,14 +116,17 @@ export default function ResilienceControls({
   const handleViewChange = useCallback(
     (next: ResilienceView) => {
       if (view === next) return
-      // When leaving aggregate view, reset density/glyph encodings so we
-      // don't render an invalid mode on the scenario/outcome views.
+      // When leaving aggregate view, reset density/glyph/leverage encodings
+      // so we don't render an invalid mode on the scenario/outcome/quadrant
+      // views.
       const patch: Partial<ResilienceControlsState> = { view: next }
       if (
         next !== "aggregate" &&
         (cellEncoding === "density_risk" ||
           cellEncoding === "density_opp" ||
-          cellEncoding === "glyph")
+          cellEncoding === "glyph" ||
+          cellEncoding === "distribution" ||
+          cellEncoding === "leverage")
       ) {
         patch.cellEncoding = "tier"
       }
@@ -129,13 +135,11 @@ export default function ResilienceControls({
     [view, cellEncoding, onChange],
   )
 
-  const handleFocusChange = useCallback(
+  const handleFocusOutcomeChange = useCallback(
     (e: SelectChangeEvent<string>) => {
-      const value = e.target.value
-      if (view === "scenario") onChange({ focusScenarioId: value })
-      else if (view === "outcome") onChange({ focusOutcomeCode: value })
+      onChange({ focusOutcomeCode: e.target.value })
     },
-    [view, onChange],
+    [onChange],
   )
 
   const toggleHydroclimate = useCallback(
@@ -173,13 +177,6 @@ export default function ResilienceControls({
   const allHcsSelected =
     selectedHydroclimates.size === RESILIENCE_HYDROCLIMATES.length
 
-  const focusValue =
-    view === "scenario"
-      ? focusScenarioId
-      : view === "outcome"
-        ? focusOutcomeCode
-        : ""
-
   const handleEncodingChange = useCallback(
     (e: SelectChangeEvent<string>) => {
       onChange({ cellEncoding: e.target.value as CellEncoding })
@@ -201,19 +198,50 @@ export default function ResilienceControls({
     [onChange],
   )
 
+  const handleQuadrantUnitChange = useCallback(
+    (next: QuadrantUnit) => {
+      if (quadrantUnit === next) return
+      onChange({ quadrantUnit: next })
+    },
+    [quadrantUnit, onChange],
+  )
+
+  const handleQuadrantOutcomeChange = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      onChange({ quadrantOutcome: e.target.value })
+    },
+    [onChange],
+  )
+
+  const isQuadrant = view === "quadrant"
+
   // Delta compare only composes cleanly with tier/mean encodings.
-  // In density/glyph aggregate modes, hide the compare-to dropdown.
+  // In density/glyph/leverage aggregate modes, and in the quadrant view,
+  // hide the compare-to dropdown.
   const showDeltaControls =
     SHOW_INSIGHT_MODES &&
+    !isQuadrant &&
     (view !== "aggregate" ||
       cellEncoding === "tier" ||
       cellEncoding === "delta")
 
-  const showFocusSelect = view !== "aggregate"
+  // After Phase 3, by-outcome view renders all 19 outcomes as tiles
+  // (small multiples), so neither view has a focus-outcome dropdown.
+  // The outcome picker remains for the quadrant LOI mode (handled
+  // separately below). Outcome subsetting is a later phase.
+  const showOutcomeFocusSelect = false
+  // "Show all scenarios" mirrors the radar panel: applies to the two
+  // scenario-driven views. Aggregate view has its own `aggregateScope`
+  // toggle; quadrant view uses it too.
+  const showShowAllScenariosChip = view === "scenario" || view === "outcome"
   const showEncodingSelect = SHOW_INSIGHT_MODES && view === "aggregate"
-  const showAggregateScope = SHOW_INSIGHT_MODES && view === "aggregate"
-  const showReorderChip = SHOW_INSIGHT_MODES
-  const showMarginalsChip = SHOW_INSIGHT_MODES
+  const showAggregateScope =
+    SHOW_INSIGHT_MODES && (view === "aggregate" || isQuadrant)
+  const showReorderChip = SHOW_INSIGHT_MODES && !isQuadrant
+  const showMarginalsChip = SHOW_INSIGHT_MODES && !isQuadrant
+  const showNodSodToggle = !isQuadrant
+  const showCellNumbersToggle = !isQuadrant
+  const showHydroclimatePicker = !isQuadrant
   // The second-line divider is only useful when at least one of the
   // insight-mode controls (encoding / delta) is visible.
   const showInsightDivider = showEncodingSelect || showDeltaControls
@@ -235,7 +263,10 @@ export default function ResilienceControls({
         flexWrap: "wrap",
       }}
     >
-      {/* View toggle */}
+      {/* Primary view toggle — the three small-multiples / aggregate
+          views pivot between each other with a shared shape. Quadrant
+          is moved to a secondary "Analyze:" entry point below because
+          its axes and data shape differ fundamentally. */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography variant="compactCaption" sx={captionSx}>
           View:
@@ -259,16 +290,36 @@ export default function ResilienceControls({
         )}
       </Box>
 
-      {/* Focus picker (hidden in aggregate view) */}
-      {showFocusSelect && (
+      {/* Secondary entry point for the quadrant analysis view. */}
+      {SHOW_INSIGHT_MODES && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ mx: 0.25, borderColor: theme.palette.divider }}
+          />
+          <Typography variant="compactCaption" sx={captionSx}>
+            Analyze:
+          </Typography>
+          <InlineToggleChip
+            label="quadrant"
+            active={view === "quadrant"}
+            onClick={() => handleViewChange("quadrant")}
+          />
+        </Box>
+      )}
+
+      {/* Outcome focus picker (by-outcome view only — scenario view
+          is sidebar-driven). */}
+      {showOutcomeFocusSelect && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           <Typography variant="compactCaption" sx={captionSx}>
-            {view === "outcome" ? "Outcome:" : "Scenario:"}
+            Outcome:
           </Typography>
           <Select
             size="small"
-            value={focusValue}
-            onChange={handleFocusChange}
+            value={focusOutcomeCode}
+            onChange={handleFocusOutcomeChange}
             sx={{
               minWidth: 200,
               maxWidth: 320,
@@ -276,33 +327,90 @@ export default function ResilienceControls({
               ".MuiSelect-select": { py: 0.5 },
             }}
           >
-            {view === "scenario"
-              ? scenarioItems.map((s) => (
-                  <MenuItem
-                    key={s.id}
-                    value={s.id}
-                    sx={{ fontSize: "0.8125rem" }}
-                  >
-                    {s.label}
-                  </MenuItem>
-                ))
-              : outcomeItems.map((o) => (
-                  <MenuItem
-                    key={o.code}
-                    value={o.code}
-                    sx={{
-                      fontSize: "0.8125rem",
-                      pl: o.indent ? 4 : 2,
-                    }}
-                  >
-                    {o.label}
-                  </MenuItem>
-                ))}
+            {outcomeItems.map((o) => (
+              <MenuItem
+                key={o.code}
+                value={o.code}
+                sx={{
+                  fontSize: "0.8125rem",
+                  pl: o.indent ? 4 : 2,
+                }}
+              >
+                {o.label}
+              </MenuItem>
+            ))}
           </Select>
         </Box>
       )}
 
-      {/* Aggregate-scope toggle (aggregate view only) */}
+      {/* Show-all-scenarios chip (by-scenario and by-outcome views).
+          Mirrors the radar panel pattern: when off, the view respects
+          sidebar selection; when on, it falls back to all 24. */}
+      {showShowAllScenariosChip && (
+        <InlineToggleChip
+          label="show all scenarios"
+          active={showAllScenarios}
+          onClick={() => onChange({ showAllScenarios: !showAllScenarios })}
+        />
+      )}
+
+      {/* Quadrant-unit toggle (quadrant view only) */}
+      {isQuadrant && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="compactCaption" sx={captionSx}>
+            Unit:
+          </Typography>
+          <InlineToggleChip
+            label="by outcome"
+            active={quadrantUnit === "outcome"}
+            onClick={() => handleQuadrantUnitChange("outcome")}
+          />
+          <InlineToggleChip
+            label="by LOI"
+            active={quadrantUnit === "loi"}
+            onClick={() => handleQuadrantUnitChange("loi")}
+          />
+        </Box>
+      )}
+
+      {/* Quadrant outcome picker (quadrant/LOI mode only) */}
+      {isQuadrant && quadrantUnit === "loi" && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+          <Typography variant="compactCaption" sx={captionSx}>
+            Outcome:
+          </Typography>
+          <Select
+            size="small"
+            value={quadrantOutcome ?? ""}
+            onChange={handleQuadrantOutcomeChange}
+            displayEmpty
+            sx={{
+              minWidth: 200,
+              maxWidth: 320,
+              fontSize: "0.8125rem",
+              ".MuiSelect-select": { py: 0.5 },
+            }}
+          >
+            <MenuItem value="" disabled sx={{ fontSize: "0.8125rem" }}>
+              Pick an outcome
+            </MenuItem>
+            {outcomeItems.map((o) => (
+              <MenuItem
+                key={o.code}
+                value={o.code}
+                sx={{
+                  fontSize: "0.8125rem",
+                  pl: o.indent ? 4 : 2,
+                }}
+              >
+                {o.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+      )}
+
+      {/* Aggregate-scope toggle (aggregate + quadrant views) */}
       {showAggregateScope && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Typography variant="compactCaption" sx={captionSx}>
@@ -321,28 +429,30 @@ export default function ResilienceControls({
         </Box>
       )}
 
-      {/* Hydroclimate multi-select */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-        <Typography variant="compactCaption" sx={captionSx}>
-          Hydroclimates:
-        </Typography>
-        <InlineToggleChip
-          label="all"
-          active={allHcsSelected}
-          onClick={toggleShowAllHcs}
-        />
-        {hydroclimateOptions.map((opt) => {
-          const hc = opt.value as ResilienceHydroclimate
-          return (
-            <InlineToggleChip
-              key={opt.value}
-              label={HYDROCLIMATE_SHORT_LABELS[hc] ?? opt.label}
-              active={selectedHydroclimates.has(hc)}
-              onClick={() => toggleHydroclimate(hc)}
-            />
-          )
-        })}
-      </Box>
+      {/* Hydroclimate multi-select (not shown in quadrant view) */}
+      {showHydroclimatePicker && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="compactCaption" sx={captionSx}>
+            Hydroclimates:
+          </Typography>
+          <InlineToggleChip
+            label="all"
+            active={allHcsSelected}
+            onClick={toggleShowAllHcs}
+          />
+          {hydroclimateOptions.map((opt) => {
+            const hc = opt.value as ResilienceHydroclimate
+            return (
+              <InlineToggleChip
+                key={opt.value}
+                label={HYDROCLIMATE_SHORT_LABELS[hc] ?? opt.label}
+                active={selectedHydroclimates.has(hc)}
+                onClick={() => toggleHydroclimate(hc)}
+              />
+            )
+          })}
+        </Box>
+      )}
 
       {showInsightDivider && (
         <Divider
@@ -377,18 +487,21 @@ export default function ResilienceControls({
             <MenuItem value="density_opp" sx={{ fontSize: "0.8125rem" }}>
               opportunity density
             </MenuItem>
-            <MenuItem value="glyph" sx={{ fontSize: "0.8125rem" }}>
+            <MenuItem value="distribution" sx={{ fontSize: "0.8125rem" }}>
               distribution
+            </MenuItem>
+            <MenuItem value="leverage" sx={{ fontSize: "0.8125rem" }}>
+              operational leverage
             </MenuItem>
           </Select>
         </Box>
       )}
 
-      {/* Compare-to (delta) controls */}
+      {/* Climate-shift (delta) controls */}
       {showDeltaControls && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           <Typography variant="compactCaption" sx={captionSx}>
-            Compare to:
+            Climate shift:
           </Typography>
           <Select
             size="small"
@@ -464,19 +577,23 @@ export default function ResilienceControls({
         />
       )}
 
-      {/* NOD/SOD toggle */}
-      <InlineToggleChip
-        label="NOD/SOD rows"
-        active={showRegionalSplit}
-        onClick={() => onChange({ showRegionalSplit: !showRegionalSplit })}
-      />
+      {/* NOD/SOD toggle (heatmap-only) */}
+      {showNodSodToggle && (
+        <InlineToggleChip
+          label="NOD/SOD rows"
+          active={showRegionalSplit}
+          onClick={() => onChange({ showRegionalSplit: !showRegionalSplit })}
+        />
+      )}
 
-      {/* Cell-number toggle */}
-      <InlineToggleChip
-        label="cell values"
-        active={showCellNumbers}
-        onClick={() => onChange({ showCellNumbers: !showCellNumbers })}
-      />
+      {/* Cell-number toggle (heatmap-only) */}
+      {showCellNumbersToggle && (
+        <InlineToggleChip
+          label="cell values"
+          active={showCellNumbers}
+          onClick={() => onChange({ showCellNumbers: !showCellNumbers })}
+        />
+      )}
     </Box>
   )
 }

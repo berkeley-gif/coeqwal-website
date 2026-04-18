@@ -39,6 +39,8 @@ export type ResilienceCellRender =
   | "density_risk"
   | "density_opp"
   | "glyph"
+  | "distribution"
+  | "leverage"
 
 export interface ResilienceAxisItem {
   key: string
@@ -78,6 +80,11 @@ export interface ResilienceHeatmapCell {
   densityValue?: number | null
   /** Per-scenario tier values; used when cellRender === "glyph". */
   distribution?: ReadonlyArray<ResilienceGlyphEntry>
+  /**
+   * Tier range (0..3) across sibling operations at this hydroclimate.
+   * Used when cellRender === "leverage".
+   */
+  leverageValue?: number | null
   /** Optional override for the tooltip "value" line. */
   valueTooltipOverride?: string
 }
@@ -123,6 +130,9 @@ export interface ResilienceHeatmapPalette {
   /** Monochrome ramp anchors for density_opp (0% .. 100%). */
   densityOppMin: string
   densityOppMax: string
+  /** Monochrome ramp anchors for leverage (0 .. 3 tier range). */
+  leverageMin: string
+  leverageMax: string
 }
 
 export interface ResilienceHeatmapMarginals {
@@ -159,6 +169,13 @@ export interface ResilienceHeatmapProps {
   marginals?: ResilienceHeatmapMarginals
   /** Whether to render marginal strips when `marginals` is provided. */
   showMarginals?: boolean
+  /**
+   * Hide the internal legend strip. Used by the small-multiples wrapper
+   * which renders one shared legend outside the tile grid. When true, the
+   * component also reclaims the vertical space that the legend would have
+   * consumed.
+   */
+  hideLegend?: boolean
 }
 
 const MARGIN = { top: 16, right: 24, bottom: 72, left: 200 }
@@ -218,6 +235,18 @@ function densityColor(
   return interpolateRgb(palette.densityOppMin, palette.densityOppMax)(t)
 }
 
+/**
+ * Monochromatic ramp over a tier range value (0..3). Input values above 3
+ * clamp to the ramp endpoint.
+ */
+function leverageColor(
+  value: number,
+  palette: ResilienceHeatmapPalette,
+): string {
+  const t = clamp(value / 3, 0, 1)
+  return interpolateRgb(palette.leverageMin, palette.leverageMax)(t)
+}
+
 function formatDelta(value: number): string {
   const rounded = Math.abs(value) < 0.05 ? 0 : value
   if (rounded === 0) return "0"
@@ -227,6 +256,11 @@ function formatDelta(value: number): string {
 
 function formatPercent(fraction: number): string {
   return `${Math.round(clamp(fraction, 0, 1) * 100)}%`
+}
+
+function formatLeverage(value: number): string {
+  if (value < 0.05) return "0"
+  return value.toFixed(1)
 }
 
 const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
@@ -248,6 +282,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     formatRowTick = defaultRowTick,
     marginals,
     showMarginals = false,
+    hideLegend = false,
   }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -365,6 +400,27 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           return { fill, text, textColor }
         }
 
+        if (cellRender === "leverage") {
+          const lv = cell.leverageValue
+          if (lv == null) {
+            return { fill: null, text: null, textColor: paletteTextMuted }
+          }
+          const fill = leverageColor(lv, palette)
+          const text = formatLeverage(lv)
+          const textColor = lv / 3 >= 0.55 ? onDarkTier : onLightTier
+          return { fill, text, textColor }
+        }
+
+        // "distribution" uses a neutral backdrop (stacked tier bars are
+        // drawn on top later). Suppress the numeric inside-cell label.
+        if (cellRender === "distribution") {
+          return {
+            fill: palette.tooltipBg, // common white, neutral canvas
+            text: null,
+            textColor: paletteTextMuted,
+          }
+        }
+
         // "tier" and "glyph" share the tier-color basis (glyph paints
         // sub-tiles over this, but we still want an average fill to peek
         // through for sparse / degraded layouts).
@@ -425,6 +481,27 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           cell.densityValue != null
         ) {
           valueText = `${formatPercent(cell.densityValue)} at Tier 2 or better`
+        } else if (cellRender === "leverage" && cell.leverageValue != null) {
+          valueText = `Operational leverage ${formatLeverage(cell.leverageValue)} tiers`
+        } else if (
+          cellRender === "distribution" &&
+          cell.distribution &&
+          cell.distribution.length > 0
+        ) {
+          const counts: [number, number, number, number] = [0, 0, 0, 0]
+          for (const entry of cell.distribution) {
+            const t = entry.tierLevel
+            if (t != null && t >= 1 && t <= 4) counts[t - 1]! += 1
+          }
+          const total = counts.reduce((a, b) => a + b, 0)
+          const parts = counts
+            .map((c, i) => {
+              if (c === 0) return null
+              const pct = Math.round((c / total) * 100)
+              return `Tier ${i + 1}: ${c} (${pct}%)`
+            })
+            .filter((s): s is string => s != null)
+          valueText = parts.length > 0 ? parts.join(" · ") : "No data"
         } else if (cell.tierLevel != null) {
           valueText = `Tier ${cell.tierLevel}${
             cell.continuousValue != null &&
@@ -503,8 +580,14 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const extraRight = showMarginalRowStrip ? MARGINAL_BAND + MARGINAL_GAP : 0
         const extraBottom = showMarginalColStrip ? MARGINAL_BAND + MARGINAL_GAP : 0
 
+        // Reclaim legend space when the tile is embedded in small-multiples
+        // (the wrapper renders one shared legend outside).
+        const effectiveMarginBottom = hideLegend
+          ? MARGIN.bottom - LEGEND_HEIGHT
+          : MARGIN.bottom
+
         const innerW = w - MARGIN.left - MARGIN.right - extraRight
-        const innerH = h - MARGIN.top - MARGIN.bottom - extraBottom
+        const innerH = h - MARGIN.top - effectiveMarginBottom - extraBottom
         if (innerW <= 0 || innerH <= 0) return
 
         // Diagonal-hatch pattern for unavailable cells.
@@ -590,6 +673,66 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 .attr("fill-opacity", opacity)
             }
 
+            // Distribution overlay: 4 stacked tier-colored bars inside
+            // the cell, each proportional to that tier's count across the
+            // cell's observations. Mirrors the "bars" mode of the
+            // MorphableDistributionGlyph used in the Learn-mode key
+            // outcomes panel.
+            if (
+              cellRender === "distribution" &&
+              cell.available &&
+              cell.distribution &&
+              cell.distribution.length > 0
+            ) {
+              const counts: [number, number, number, number] = [0, 0, 0, 0]
+              for (const entry of cell.distribution) {
+                const t = entry.tierLevel
+                if (t != null && t >= 1 && t <= 4) {
+                  counts[t - 1]! += 1
+                }
+              }
+              const total = counts.reduce((a, b) => a + b, 0)
+              if (total > 0) {
+                const hPad = 3
+                const vPad = 3
+                const innerBarsW = bandW - hPad * 2
+                const innerBarsH = bandH - vPad * 2
+                if (innerBarsW >= 8 && innerBarsH >= 10) {
+                  const barGap = Math.max(1, innerBarsH * 0.08)
+                  const barH = (innerBarsH - barGap * 3) / 4
+                  const maxBarW = innerBarsW
+                  const trackColor = paletteUnavailFill
+                  counts.forEach((count, i) => {
+                    const frac = count / total
+                    const by = y + vPad + i * (barH + barGap)
+                    // Track (unfilled portion)
+                    g.append("rect")
+                      .attr("x", x + hPad)
+                      .attr("y", by)
+                      .attr("width", maxBarW)
+                      .attr("height", barH)
+                      .attr("rx", Math.min(2, barH / 2))
+                      .attr("fill", trackColor)
+                      .attr("fill-opacity", opacity * 0.5)
+                      .attr("pointer-events", "none")
+                    // Filled portion
+                    if (frac > 0) {
+                      const w = Math.max(1.5, frac * maxBarW)
+                      g.append("rect")
+                        .attr("x", x + hPad)
+                        .attr("y", by)
+                        .attr("width", w)
+                        .attr("height", barH)
+                        .attr("rx", Math.min(2, barH / 2))
+                        .attr("fill", tierColors[i] ?? trackColor)
+                        .attr("fill-opacity", opacity)
+                        .attr("pointer-events", "none")
+                    }
+                  })
+                }
+              }
+            }
+
             // Glyph overlay: sub-tiles inside the cell, one per scenario.
             // Degrades to the base fill when the cell is too small.
             if (
@@ -661,11 +804,12 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               })
 
             // Print inner value when enabled + the cell has enough room.
-            // Glyph mode suppresses the inner number (the sub-tiles carry
-            // the information).
+            // Glyph and distribution modes suppress the inner number
+            // (the sub-tiles / stacked bars carry the information).
             if (
               showCellNumbers &&
               cellRender !== "glyph" &&
+              cellRender !== "distribution" &&
               cell.available &&
               resolved.text != null &&
               bandW > 28 &&
@@ -717,6 +861,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 fill = densityColor(val, "risk", palette)
               } else if (cellRender === "density_opp") {
                 fill = densityColor(val, "opp", palette)
+              } else if (cellRender === "leverage") {
+                fill = leverageColor(val, palette)
               } else {
                 fill = colorScale(val)
               }
@@ -729,7 +875,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                     : cellRender === "density_risk" ||
                         cellRender === "density_opp"
                       ? formatPercent(val)
-                      : val.toFixed(1)
+                      : cellRender === "leverage"
+                        ? formatLeverage(val)
+                        : val.toFixed(1)
                 g.append("text")
                   .attr("x", stripX + MARGINAL_BAND / 2)
                   .attr("y", y + bandH / 2)
@@ -739,7 +887,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                   .attr("font-weight", 600)
                   .attr(
                     "fill",
-                    cellRender === "tier" || cellRender === "glyph"
+                    cellRender === "tier" ||
+                      cellRender === "glyph" ||
+                      cellRender === "distribution"
                       ? tierTextColor(val)
                       : paletteText,
                   )
@@ -786,6 +936,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 fill = densityColor(val, "risk", palette)
               } else if (cellRender === "density_opp") {
                 fill = densityColor(val, "opp", palette)
+              } else if (cellRender === "leverage") {
+                fill = leverageColor(val, palette)
               } else {
                 fill = colorScale(val)
               }
@@ -798,7 +950,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                     : cellRender === "density_risk" ||
                         cellRender === "density_opp"
                       ? formatPercent(val)
-                      : val.toFixed(1)
+                      : cellRender === "leverage"
+                        ? formatLeverage(val)
+                        : val.toFixed(1)
                 g.append("text")
                   .attr("x", x + bandW / 2)
                   .attr("y", stripY + MARGINAL_BAND / 2)
@@ -808,7 +962,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                   .attr("font-weight", 600)
                   .attr(
                     "fill",
-                    cellRender === "tier" || cellRender === "glyph"
+                    cellRender === "tier" ||
+                      cellRender === "glyph" ||
+                      cellRender === "distribution"
                       ? tierTextColor(val)
                       : paletteText,
                   )
@@ -901,6 +1057,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
         })
 
+        // Legend — skipped entirely when the parent opts out (e.g., the
+        // small-multiples wrapper renders one shared legend outside).
+        if (hideLegend) return
+
         // Legend — varies by cellRender mode.
         const legendG = svg
           .append("g")
@@ -909,7 +1069,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             `translate(${MARGIN.left}, ${MARGIN.top + innerH + extraBottom + LEGEND_HEIGHT - 4})`,
           )
 
-        if (cellRender === "tier" || cellRender === "glyph") {
+        if (
+          cellRender === "tier" ||
+          cellRender === "glyph" ||
+          cellRender === "distribution"
+        ) {
           const legendEntryW = 80
           tierColors.forEach((color, i) => {
             const ox = i * legendEntryW
@@ -1093,6 +1257,78 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
             .text(labelText)
+        } else if (cellRender === "leverage") {
+          const barW = 220
+          const barH = 10
+          const gradId = "resilience-leverage-gradient"
+          const grad = defs
+            .append("linearGradient")
+            .attr("id", gradId)
+            .attr("x1", "0%")
+            .attr("x2", "100%")
+          grad
+            .append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", palette.leverageMin)
+          grad
+            .append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", palette.leverageMax)
+
+          legendG
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", -12)
+            .attr("width", barW)
+            .attr("height", barH)
+            .attr("rx", 2)
+            .attr("fill", `url(#${gradId})`)
+
+          const ticks: [number, string][] = [
+            [0, "0"],
+            [barW / 2, "1.5"],
+            [barW, "3"],
+          ]
+          ticks.forEach(([x, label]) => {
+            legendG
+              .append("text")
+              .attr("x", x)
+              .attr("y", 10)
+              .attr(
+                "text-anchor",
+                x === 0 ? "start" : x === barW ? "end" : "middle",
+              )
+              .attr("font-size", 10)
+              .attr("fill", paletteTextMuted)
+              .text(label)
+          })
+
+          legendG
+            .append("text")
+            .attr("x", barW + 16)
+            .attr("y", -2)
+            .attr("font-size", 10)
+            .attr("fill", paletteTextMuted)
+            .text("tier range across operations")
+
+          const unavailableOx = barW + 220
+          legendG
+            .append("rect")
+            .attr("x", unavailableOx)
+            .attr("y", -12)
+            .attr("width", 14)
+            .attr("height", 14)
+            .attr("rx", 2)
+            .attr("fill", `url(#${HATCH_ID})`)
+            .attr("stroke", paletteUnavailStroke)
+            .attr("stroke-width", 1)
+          legendG
+            .append("text")
+            .attr("x", unavailableOx + 20)
+            .attr("y", -1)
+            .attr("font-size", 10)
+            .attr("fill", paletteTextMuted)
+            .text("Insufficient coverage")
         }
       },
       [
@@ -1126,6 +1362,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         showMarginalColStrip,
         marginalRow,
         marginalCol,
+        hideLegend,
       ],
     )
 
