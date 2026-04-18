@@ -54,6 +54,14 @@ export interface ResilienceGlyphEntry {
   tierLevel: number | null
   /** Optional short label for sub-tile tooltips. */
   label?: string
+  /** Scenario id, populated in distributionMode === "scenario". */
+  scenarioId?: string
+  /** LOI / location identifier, populated in distributionMode === "location". */
+  loiId?: string
+  /** Human-readable location name for the tooltip (location mode). */
+  locationName?: string
+  /** Continuous tier value for the tooltip (e.g. mean across scope). */
+  tierValue?: number
 }
 
 export interface ResilienceHeatmapCell {
@@ -161,6 +169,21 @@ export interface ResilienceHeatmapProps {
   height?: number
   onCellHover?: (cell: ResilienceHeatmapCell | null) => void
   onCellClick?: (cell: ResilienceHeatmapCell) => void
+  /**
+   * Sub-mode for cellRender === "distribution". Controls sort + tooltip
+   * copy, and routes per-square hover/click to different callbacks in the
+   * parent (sidebar highlight vs map highlight).
+   */
+  distributionMode?: "scenario" | "location"
+  /** Per-square hover inside a distribution cell. */
+  onSquareHover?: (
+    info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry } | null,
+  ) => void
+  /** Per-square click inside a distribution cell. */
+  onSquareClick?: (info: {
+    cell: ResilienceHeatmapCell
+    entry: ResilienceGlyphEntry
+  }) => void
   /** Sidebar-hover highlighted scenarios; dims non-matching rows/cells. */
   highlightedRowKeys?: Set<string> | null
   /** Row key label formatter override (e.g. regional indent for NOD/SOD). */
@@ -278,6 +301,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     height = 500,
     onCellHover,
     onCellClick,
+    distributionMode = "scenario",
+    onSquareHover,
+    onSquareClick,
     highlightedRowKeys = null,
     formatRowTick = defaultRowTick,
     marginals,
@@ -304,6 +330,16 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       onCellClickRef.current = onCellClick
     }, [onCellClick])
+
+    const onSquareHoverRef = useRef(onSquareHover)
+    useEffect(() => {
+      onSquareHoverRef.current = onSquareHover
+    }, [onSquareHover])
+
+    const onSquareClickRef = useRef(onSquareClick)
+    useEffect(() => {
+      onSquareClickRef.current = onSquareClick
+    }, [onSquareClick])
 
     const formatRowTickRef = useRef(formatRowTick)
     useEffect(() => {
@@ -531,6 +567,46 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       if (el) el.style.display = "none"
     }, [])
 
+    // Per-square tooltip used when hovering an individual rounded square
+    // inside a distribution cell. Branches copy by distributionMode.
+    const showSquareTooltip = useCallback(
+      (
+        event: MouseEvent,
+        cell: ResilienceHeatmapCell,
+        entry: ResilienceGlyphEntry,
+      ) => {
+        const el = cellTooltipRef.current
+        if (!el) return
+
+        const tierLevel = entry.tierLevel
+        const tierText =
+          tierLevel != null
+            ? `Tier ${tierLevel}${
+                entry.tierValue != null && entry.tierValue !== tierLevel
+                  ? ` (${entry.tierValue.toFixed(2)})`
+                  : ""
+              }`
+            : "No data"
+
+        let subjectLine = ""
+        if (distributionMode === "location") {
+          subjectLine = entry.locationName ?? entry.loiId ?? "Location"
+        } else {
+          subjectLine = entry.label ?? entry.scenarioId ?? cell.subjectLabel
+        }
+
+        el.innerHTML = `
+          <div style="font-weight:600;color:${paletteText}">${escapeHtml(subjectLine)}</div>
+          <div style="color:${paletteText}">${escapeHtml(cell.rowLabel)}</div>
+          <div style="color:${paletteTextMuted}">${escapeHtml(cell.colLabel)}</div>
+          <div style="margin-top:4px;color:${paletteText};font-weight:500">${escapeHtml(tierText)}</div>
+        `
+        el.style.display = "block"
+        positionCellTooltip(event)
+      },
+      [positionCellTooltip, paletteText, paletteTextMuted, distributionMode],
+    )
+
     const positionAxisTooltip = useCallback((event: MouseEvent) => {
       const el = axisTooltipRef.current
       const container = containerRef.current
@@ -673,63 +749,101 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 .attr("fill-opacity", opacity)
             }
 
-            // Distribution overlay: 4 stacked tier-colored bars inside
-            // the cell, each proportional to that tier's count across the
-            // cell's observations. Mirrors the "bars" mode of the
-            // MorphableDistributionGlyph used in the Learn-mode key
-            // outcomes panel.
+            // Distribution overlay: a grid of rounded squares, one per
+            // distribution entry (e.g. one per scenario in aggregate view),
+            // colored by that entry's tier. Matches the "distribution"
+            // mode of MorphableDistributionGlyph used in the get-started
+            // key-outcomes animated sequence. Scales with cell size.
             if (
               cellRender === "distribution" &&
               cell.available &&
               cell.distribution &&
               cell.distribution.length > 0
             ) {
-              const counts: [number, number, number, number] = [0, 0, 0, 0]
-              for (const entry of cell.distribution) {
-                const t = entry.tierLevel
-                if (t != null && t >= 1 && t <= 4) {
-                  counts[t - 1]! += 1
-                }
-              }
-              const total = counts.reduce((a, b) => a + b, 0)
-              if (total > 0) {
-                const hPad = 3
-                const vPad = 3
-                const innerBarsW = bandW - hPad * 2
-                const innerBarsH = bandH - vPad * 2
-                if (innerBarsW >= 8 && innerBarsH >= 10) {
-                  const barGap = Math.max(1, innerBarsH * 0.08)
-                  const barH = (innerBarsH - barGap * 3) / 4
-                  const maxBarW = innerBarsW
-                  const trackColor = paletteUnavailFill
-                  counts.forEach((count, i) => {
-                    const frac = count / total
-                    const by = y + vPad + i * (barH + barGap)
-                    // Track (unfilled portion)
-                    g.append("rect")
-                      .attr("x", x + hPad)
-                      .attr("y", by)
-                      .attr("width", maxBarW)
-                      .attr("height", barH)
-                      .attr("rx", Math.min(2, barH / 2))
-                      .attr("fill", trackColor)
-                      .attr("fill-opacity", opacity * 0.5)
-                      .attr("pointer-events", "none")
-                    // Filled portion
-                    if (frac > 0) {
-                      const w = Math.max(1.5, frac * maxBarW)
-                      g.append("rect")
-                        .attr("x", x + hPad)
-                        .attr("y", by)
-                        .attr("width", w)
-                        .attr("height", barH)
-                        .attr("rx", Math.min(2, barH / 2))
-                        .attr("fill", tierColors[i] ?? trackColor)
-                        .attr("fill-opacity", opacity)
-                        .attr("pointer-events", "none")
-                    }
-                  })
-                }
+              // Group ascending by tier so greens fill first row-by-row.
+              // Entries without a tier sort last and paint in the
+              // unavailable grey so readers see a contiguous "no data" tail.
+              const sorted = [...cell.distribution].sort((a, b) => {
+                const av = a.tierLevel ?? 5
+                const bv = b.tierLevel ?? 5
+                return av - bv
+              })
+              const total = sorted.length
+              const hPad = 3
+              const vPad = 3
+              const innerGridW = bandW - hPad * 2
+              const innerGridH = bandH - vPad * 2
+              // Target 10 cols like the key-outcomes glyph, but don't
+              // create empty columns when total < 10.
+              const cols = Math.max(1, Math.min(10, total))
+              const rows = Math.max(1, Math.ceil(total / cols))
+              // gap ≈ 20% of square size. Solve for square size so the
+              // grid fits both innerGridW and innerGridH:
+              //   w: s * (cols + 0.2*(cols-1)) = innerGridW
+              //   h: s * (rows + 0.2*(rows-1)) = innerGridH
+              const sW = innerGridW / (1.2 * cols - 0.2)
+              const sH = innerGridH / (1.2 * rows - 0.2)
+              const squareSize = Math.min(sW, sH)
+              if (squareSize >= 2 && innerGridW >= 6 && innerGridH >= 6) {
+                const gap = Math.max(0.5, squareSize * 0.2)
+                const corner = Math.max(1, squareSize * 0.2)
+                const stride = squareSize + gap
+                const gridW = cols * stride - gap
+                const gridH = rows * stride - gap
+                const gx = x + hPad + (innerGridW - gridW) / 2
+                const gy = y + vPad + (innerGridH - gridH) / 2
+                const interactive =
+                  !!onSquareHoverRef.current || !!onSquareClickRef.current
+                sorted.forEach((entry, i) => {
+                  const col = i % cols
+                  const rowIdx = Math.floor(i / cols)
+                  const t = entry.tierLevel
+                  const fill =
+                    t != null && t >= 1 && t <= 4
+                      ? (tierColors[t - 1] ?? paletteUnavailFill)
+                      : paletteUnavailFill
+                  const sq = g
+                    .append("rect")
+                    .attr("x", gx + col * stride)
+                    .attr("y", gy + rowIdx * stride)
+                    .attr("width", squareSize)
+                    .attr("height", squareSize)
+                    .attr("rx", corner)
+                    .attr("ry", corner)
+                    .attr("fill", fill)
+                    .attr("fill-opacity", opacity * 0.9)
+                    .attr("stroke", "transparent")
+                    .attr("stroke-width", 1)
+
+                  if (interactive) {
+                    sq.attr("cursor", onSquareClickRef.current ? "pointer" : "default")
+                      .attr("pointer-events", "all")
+                      .on("mouseenter", function (event: MouseEvent) {
+                        event.stopPropagation()
+                        select(this)
+                          .attr("stroke", paletteHoverStroke)
+                          .attr("stroke-width", 1.5)
+                        showSquareTooltip(event, cell, entry)
+                        onSquareHoverRef.current?.({ cell, entry })
+                      })
+                      .on("mousemove", function (event: MouseEvent) {
+                        event.stopPropagation()
+                        positionCellTooltip(event)
+                      })
+                      .on("mouseleave", function (event: MouseEvent) {
+                        event.stopPropagation()
+                        select(this).attr("stroke", "transparent")
+                        hideCellTooltip()
+                        onSquareHoverRef.current?.(null)
+                      })
+                      .on("click", function (event: MouseEvent) {
+                        event.stopPropagation()
+                        onSquareClickRef.current?.({ cell, entry })
+                      })
+                  } else {
+                    sq.attr("pointer-events", "none")
+                  }
+                })
               }
             }
 
@@ -1355,6 +1469,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         showCellTooltip,
         positionCellTooltip,
         hideCellTooltip,
+        showSquareTooltip,
         showAxisTooltip,
         positionAxisTooltip,
         hideAxisTooltip,
@@ -1363,6 +1478,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         marginalRow,
         marginalCol,
         hideLegend,
+        distributionMode,
       ],
     )
 

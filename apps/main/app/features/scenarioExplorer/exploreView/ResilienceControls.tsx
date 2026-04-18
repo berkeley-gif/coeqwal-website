@@ -88,6 +88,12 @@ export default function ResilienceControls({
   const setShowResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.setShowResilienceOutcomeSelector,
   )
+  const distributionMode = useScenarioExplorerStore(
+    (s) => s.resilienceDistributionMode,
+  )
+  const setDistributionMode = useScenarioExplorerStore(
+    (s) => s.setResilienceDistributionMode,
+  )
 
   // Flat outcome list (key outcomes + regional variants) used by the
   // quadrant LOI outcome picker. The heatmap's row visibility is driven
@@ -123,16 +129,15 @@ export default function ResilienceControls({
   const handleViewChange = useCallback(
     (next: ResilienceView) => {
       if (view === next) return
-      // When leaving aggregate view, reset density/glyph/leverage encodings
-      // so we don't render an invalid mode on the scenario/outcome/quadrant
-      // views.
+      // Density/glyph/leverage encodings only compose cleanly in the
+      // aggregate view. Distribution is now available in every heatmap
+      // view (scenario, outcome, aggregate), so keep it on transition.
       const patch: Partial<ResilienceControlsState> = { view: next }
       if (
         next !== "aggregate" &&
         (cellEncoding === "density_risk" ||
           cellEncoding === "density_opp" ||
           cellEncoding === "glyph" ||
-          cellEncoding === "distribution" ||
           cellEncoding === "leverage")
       ) {
         patch.cellEncoding = "tier"
@@ -232,7 +237,15 @@ export default function ResilienceControls({
   // "Choose outcome rows" picker applies to every heatmap view; hidden
   // in quadrant.
   const showOutcomeRowsChip = !isQuadrant
-  const showEncodingSelect = SHOW_INSIGHT_MODES && view === "aggregate"
+  // Encoding picker: aggregate view shows all options (mean tier, density,
+  // distribution, leverage). The by-scenario and by-outcome views only
+  // expose "tier" and "distribution" — the richer insight encodings don't
+  // compose cleanly at the small-multiples scale.
+  const showEncodingSelect =
+    SHOW_INSIGHT_MODES && (view === "aggregate" || view === "scenario" || view === "outcome")
+  const isAggregate = view === "aggregate"
+  const showDistributionModeToggle =
+    SHOW_INSIGHT_MODES && cellEncoding === "distribution" && !isQuadrant
   const showAggregateScope =
     SHOW_INSIGHT_MODES && (view === "aggregate" || isQuadrant)
   const showReorderChip = SHOW_INSIGHT_MODES && !isQuadrant
@@ -438,7 +451,8 @@ export default function ResilienceControls({
         />
       )}
 
-      {/* Cell encoding (aggregate view only) */}
+      {/* Cell encoding. Aggregate view shows all insight encodings; the
+          other heatmap views expose only "mean tier" and "distribution". */}
       {showEncodingSelect && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           <Typography variant="compactCaption" sx={captionSx}>
@@ -457,19 +471,46 @@ export default function ResilienceControls({
             <MenuItem value="tier" sx={{ fontSize: "0.8125rem" }}>
               mean tier
             </MenuItem>
-            <MenuItem value="density_risk" sx={{ fontSize: "0.8125rem" }}>
-              risk density
-            </MenuItem>
-            <MenuItem value="density_opp" sx={{ fontSize: "0.8125rem" }}>
-              opportunity density
-            </MenuItem>
+            {isAggregate && (
+              <MenuItem value="density_risk" sx={{ fontSize: "0.8125rem" }}>
+                risk density
+              </MenuItem>
+            )}
+            {isAggregate && (
+              <MenuItem value="density_opp" sx={{ fontSize: "0.8125rem" }}>
+                opportunity density
+              </MenuItem>
+            )}
             <MenuItem value="distribution" sx={{ fontSize: "0.8125rem" }}>
               distribution
             </MenuItem>
-            <MenuItem value="leverage" sx={{ fontSize: "0.8125rem" }}>
-              operational leverage
-            </MenuItem>
+            {isAggregate && (
+              <MenuItem value="leverage" sx={{ fontSize: "0.8125rem" }}>
+                operational leverage
+              </MenuItem>
+            )}
           </Select>
+        </Box>
+      )}
+
+      {/* Distribution sub-mode toggle (appears only when the distribution
+          encoding is active). "By scenario" is the default; "By location"
+          switches to per-LOI squares with map highlighting on hover. */}
+      {showDistributionModeToggle && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="compactCaption" sx={captionSx}>
+            Distribution:
+          </Typography>
+          <InlineToggleChip
+            label="by scenario"
+            active={distributionMode === "scenario"}
+            onClick={() => setDistributionMode("scenario")}
+          />
+          <InlineToggleChip
+            label="by location"
+            active={distributionMode === "location"}
+            onClick={() => setDistributionMode("location")}
+          />
         </Box>
       )}
 

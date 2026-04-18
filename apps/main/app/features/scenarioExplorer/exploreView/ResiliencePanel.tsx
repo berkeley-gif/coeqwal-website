@@ -50,7 +50,10 @@ import {
   type ResilienceHydroclimate,
 } from "../hooks/useResilienceMatrix"
 import { useResilienceAggregate } from "../hooks/useResilienceAggregate"
+import { useResilienceLoiDistribution } from "../hooks/useResilienceLoiDistribution"
 import { useOutcomeMapAction } from "../../map/hooks"
+import { mapActions } from "../../map/store"
+import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import {
   OUTCOME_CODE_ORDER,
   OUTCOME_REGIONAL_VARIANTS,
@@ -60,7 +63,7 @@ import {
   type OutcomeCode,
 } from "../../../content/outcomes"
 import { hydroclimateOptions } from "../../../content/scenarios"
-import { TIER_LABELS } from "../../../content/tiers"
+import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 
 export type ResilienceView = "scenario" | "outcome" | "aggregate" | "quadrant"
@@ -206,6 +209,9 @@ export default function ResiliencePanel({
   )
   const setResilienceVisibleOutcomes = useScenarioExplorerStore(
     (s) => s.setResilienceVisibleOutcomes,
+  )
+  const distributionMode = useScenarioExplorerStore(
+    (s) => s.resilienceDistributionMode,
   )
 
   // Effective per-view scenario scope. Mirrors the radar-panel pattern:
@@ -361,6 +367,49 @@ export default function ResiliencePanel({
     }
     return rows
   }, [resilienceVisibleOutcomes])
+
+  // Per-LOI distribution fetch (only when the "By location" sub-mode is
+  // active for the distribution cell encoding). Scoped to the current
+  // view's visible scenarios so we don't over-fetch; NOD/SOD aggregate
+  // rows are skipped because they're already regional roll-ups.
+  const loiDistributionEnabled =
+    cellEncoding === "distribution" &&
+    distributionMode === "location" &&
+    view !== "quadrant"
+
+  const loiDistributionScope = useMemo<readonly string[]>(() => {
+    if (!loiDistributionEnabled) return []
+    if (view === "aggregate") {
+      return aggregateScenarioIds ?? scenarioIds
+    }
+    // By-scenario and by-outcome views both fall back to all 24 when no
+    // sidebar selection is present.
+    if (showAllScenarios || selectedScenarios.length === 0) {
+      return scenarioIds
+    }
+    return selectedScenarios
+  }, [
+    loiDistributionEnabled,
+    view,
+    aggregateScenarioIds,
+    scenarioIds,
+    showAllScenarios,
+    selectedScenarios,
+  ])
+
+  const loiDistributionOutcomes = useMemo<readonly string[]>(() => {
+    if (!loiDistributionEnabled) return []
+    if (view === "outcome") return OUTCOME_CODE_ORDER as readonly string[]
+    return outcomeRowCodes.filter(
+      (c) => !(NOD_SOD_OUTCOME_CODES as readonly string[]).includes(c),
+    )
+  }, [loiDistributionEnabled, view, outcomeRowCodes])
+
+  const loiDistribution = useResilienceLoiDistribution({
+    outcomeCodes: loiDistributionOutcomes,
+    scopeScenarioIds: loiDistributionScope,
+    enabled: loiDistributionEnabled,
+  })
 
   // Scenario-row order (for outcome view): primary baseline first, then
   // the 24 sibling-group order (already sorted by useScenarioList).
@@ -578,12 +627,25 @@ export default function ResiliencePanel({
         }
       }
       if (cellEncoding === "glyph" || cellEncoding === "distribution") {
-        const distribution: ResilienceGlyphEntry[] = agg.distribution.map(
-          (d) => ({
+        // Scenario-mode default: one square per scenario in the scope,
+        // colored by that scenario's tier. Annotated with scenarioId so
+        // the viz can fire hover → sidebar highlight.
+        let distribution: ResilienceGlyphEntry[]
+        if (
+          cellEncoding === "distribution" &&
+          distributionMode === "location"
+        ) {
+          const entries =
+            loiDistribution.byCell[rowKey]?.[hc as ResilienceHydroclimate] ?? []
+          distribution = [...entries]
+        } else {
+          distribution = agg.distribution.map((d) => ({
             tierLevel: d.tierLevel,
             label: getDisplayName(d.scenarioId),
-          }),
-        )
+            scenarioId: d.scenarioId,
+            tierValue: d.continuousValue ?? undefined,
+          }))
+        }
         return {
           ...baseCell,
           distribution,
@@ -664,6 +726,8 @@ export default function ResiliencePanel({
     getCell,
     getDisplayName,
     aggregate,
+    distributionMode,
+    loiDistribution,
   ])
 
   // Compute the (rowKey, col) value grid once, then derive cells,
@@ -782,6 +846,35 @@ export default function ResiliencePanel({
     ): ResilienceHeatmapCell | null => {
       const cell = getCell(scenarioId, rowKey, hc)
       if (!cell) return null
+      // When the distribution encoding is active in by-scenario view, the
+      // tile itself is a single scenario. "scenario" mode renders a single
+      // degenerate square (one entry). "location" mode renders per-LOI
+      // squares for that scenario — re-aggregated from the already-fetched
+      // raw data.
+      let distribution: ReadonlyArray<ResilienceGlyphEntry> | undefined
+      if (cellEncoding === "distribution" && cell.available) {
+        if (distributionMode === "location") {
+          const isNodSod = (NOD_SOD_OUTCOME_CODES as readonly string[]).includes(
+            rowKey,
+          )
+          if (!isNodSod) {
+            distribution = loiDistribution.buildEntriesForScope(
+              rowKey,
+              hc,
+              [scenarioId],
+            )
+          }
+        } else {
+          distribution = [
+            {
+              tierLevel: cell.tierLevel,
+              label: subject,
+              scenarioId,
+              tierValue: cell.continuousValue ?? undefined,
+            },
+          ]
+        }
+      }
       const base: ResilienceHeatmapCell = {
         rowKey,
         colKey: hc,
@@ -795,6 +888,7 @@ export default function ResiliencePanel({
         scenarioId,
         outcomeCode: rowKey,
         type: cell.type,
+        distribution,
       }
       if (deltaMode === "none" || !cell.available) return base
       let reference: number | null = null
@@ -818,7 +912,14 @@ export default function ResiliencePanel({
         divergingValue: cell.continuousValue - reference,
       }
     },
-    [getCell, deltaMode, deltaBaselineScenarioId],
+    [
+      getCell,
+      deltaMode,
+      deltaBaselineScenarioId,
+      cellEncoding,
+      distributionMode,
+      loiDistribution,
+    ],
   )
 
   // Effective list of scenarios for the by-scenario small-multiples
@@ -909,6 +1010,33 @@ export default function ResiliencePanel({
     ): ResilienceHeatmapCell | null => {
       const cell = getCell(scenarioId, outcomeCode, hc)
       if (!cell) return null
+      // In by-outcome view, each row is a scenario and each tile is one
+      // outcome. "distribution" mode is meaningful only per-LOI (scenario
+      // mode degenerates to a single square).
+      let distribution: ReadonlyArray<ResilienceGlyphEntry> | undefined
+      if (cellEncoding === "distribution" && cell.available) {
+        if (distributionMode === "location") {
+          const isNodSod = (NOD_SOD_OUTCOME_CODES as readonly string[]).includes(
+            outcomeCode,
+          )
+          if (!isNodSod) {
+            distribution = loiDistribution.buildEntriesForScope(
+              outcomeCode,
+              hc,
+              [scenarioId],
+            )
+          }
+        } else {
+          distribution = [
+            {
+              tierLevel: cell.tierLevel,
+              label: rowLabel,
+              scenarioId,
+              tierValue: cell.continuousValue ?? undefined,
+            },
+          ]
+        }
+      }
       const base: ResilienceHeatmapCell = {
         rowKey: scenarioId,
         colKey: hc,
@@ -922,6 +1050,7 @@ export default function ResiliencePanel({
         scenarioId,
         outcomeCode,
         type: cell.type,
+        distribution,
       }
       if (deltaMode === "none" || !cell.available) return base
       let reference: number | null = null
@@ -945,7 +1074,14 @@ export default function ResiliencePanel({
         divergingValue: cell.continuousValue - reference,
       }
     },
-    [getCell, deltaMode, deltaBaselineScenarioId],
+    [
+      getCell,
+      deltaMode,
+      deltaBaselineScenarioId,
+      cellEncoding,
+      distributionMode,
+      loiDistribution,
+    ],
   )
 
   const byOutcomeTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
@@ -1073,6 +1209,69 @@ export default function ResiliencePanel({
     },
     [isMapVisible, effectiveFocusScenarioId, showOutcomeOnMap],
   )
+
+  // Per-square hover for the distribution encoding. Branches by
+  // distributionMode: "scenario" drives the sidebar highlight (same code
+  // path as the radar's dot-hover); "location" paints LocationHighlight
+  // pins on the map so the user can cross-reference the LOI geography.
+  const handleSquareHover = useCallback(
+    (
+      info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry } | null,
+    ) => {
+      if (!info) {
+        if (distributionMode === "location") {
+          mapActions.clearLocationHighlights()
+        } else {
+          notifyHover(null)
+        }
+        return
+      }
+      if (distributionMode === "location") {
+        const { cell, entry } = info
+        const outcomeCode = cell.outcomeCode
+        const loiId = entry.loiId
+        if (!outcomeCode || !loiId) {
+          mapActions.clearLocationHighlights()
+          return
+        }
+        const coords = getOutcomeLocationCoordinates(outcomeCode, loiId)
+        if (!coords) {
+          mapActions.clearLocationHighlights()
+          return
+        }
+        const tierLevel = entry.tierLevel ?? 0
+        const tierColorIndex = Math.max(1, Math.min(4, tierLevel)) - 1
+        const tierColor =
+          tierColors[tierColorIndex] ?? theme.palette.grey[300]
+        mapActions.setLocationHighlights([
+          {
+            key: `resilience-heatmap-${outcomeCode}-${loiId}`,
+            longitude: coords[0],
+            latitude: coords[1],
+            name: entry.locationName ?? loiId,
+            tierLevel: tierLevel || 1,
+            tierLabel: tierLevel
+              ? getTierLabel(tierLevel)
+              : (entry.label ?? ""),
+            tierColor,
+          },
+        ])
+      } else {
+        // "scenario" mode — drive sidebar highlight + scroll.
+        const sid = info.entry.scenarioId
+        if (sid) notifyHover(sid)
+      }
+    },
+    [distributionMode, notifyHover, tierColors, theme.palette.grey],
+  )
+
+  // Cleanup on unmount: drop any location highlights we painted so the
+  // map doesn't retain stale pins when the user leaves the tool.
+  useEffect(() => {
+    return () => {
+      mapActions.clearLocationHighlights()
+    }
+  }, [])
 
   // Highlighted rows (sidebar hover sync). Only meaningful in outcome view
   // where rows are scenarios.
@@ -1338,6 +1537,12 @@ export default function ResiliencePanel({
             onCellHover={handleCellHover}
             onCellClick={isMapVisible ? handleCellClick : undefined}
             formatRowTick={formatRowTick}
+            distributionMode={distributionMode}
+            onSquareHover={(info) =>
+              handleSquareHover(
+                info ? { cell: info.cell, entry: info.entry } : null,
+              )
+            }
           />
         ) : view === "outcome" ? (
           <ResilienceHeatmapSmallMultiples
@@ -1353,6 +1558,12 @@ export default function ResiliencePanel({
             onCellHover={handleCellHover}
             onCellClick={isMapVisible ? handleCellClick : undefined}
             formatRowTick={formatRowTick}
+            distributionMode={distributionMode}
+            onSquareHover={(info) =>
+              handleSquareHover(
+                info ? { cell: info.cell, entry: info.entry } : null,
+              )
+            }
           />
         ) : (
           <ResilienceHeatmap
@@ -1370,6 +1581,8 @@ export default function ResiliencePanel({
             formatRowTick={formatRowTick}
             marginals={marginalsData}
             showMarginals={showMarginals}
+            distributionMode={distributionMode}
+            onSquareHover={handleSquareHover}
           />
         )}
           </motion.div>
