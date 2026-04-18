@@ -21,6 +21,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
   startTransition,
 } from "react"
 import {
@@ -52,7 +53,7 @@ import {
 import { useResilienceAggregate } from "../hooks/useResilienceAggregate"
 import { useResilienceLoiDistribution } from "../hooks/useResilienceLoiDistribution"
 import { useOutcomeMapAction } from "../../map/hooks"
-import { mapActions } from "../../map/store"
+import { mapActions, type LocationHighlight } from "../../map/store"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import {
   OUTCOME_CODE_ORDER,
@@ -235,7 +236,8 @@ export default function ResiliencePanel({
     error,
   } = useResilienceMatrix()
 
-  const { showOutcomeOnMap, isMapVisible } = useOutcomeMapAction()
+  const { showOutcomeOnMap, isMapVisible, activeOutcome } =
+    useOutcomeMapAction()
 
   // Aggregate hook reads the already-fetched matrix. We key it on the
   // effective scope so it only recomputes when the set changes.
@@ -1210,65 +1212,166 @@ export default function ResiliencePanel({
     [isMapVisible, effectiveFocusScenarioId, showOutcomeOnMap],
   )
 
+  // Build a LocationHighlight payload from a distribution square in
+  // "location" mode. Returns null if the cell lacks an outcome code, the
+  // entry lacks an LOI, or we can't resolve coordinates.
+  const buildLocationHighlight = useCallback(
+    (
+      cell: ResilienceHeatmapCell,
+      entry: ResilienceGlyphEntry,
+    ): { outcomeCode: string; highlight: LocationHighlight } | null => {
+      const outcomeCode = cell.outcomeCode
+      const loiId = entry.loiId
+      if (!outcomeCode || !loiId) return null
+      const coords = getOutcomeLocationCoordinates(outcomeCode, loiId)
+      if (!coords) return null
+      const tierLevel = entry.tierLevel ?? 0
+      const tierColorIndex = Math.max(1, Math.min(4, tierLevel)) - 1
+      const tierColor =
+        tierColors[tierColorIndex] ?? theme.palette.grey[300]
+      return {
+        outcomeCode,
+        highlight: {
+          key: `resilience-heatmap-${outcomeCode}-${loiId}`,
+          longitude: coords[0],
+          latitude: coords[1],
+          name: entry.locationName ?? loiId,
+          tierLevel: tierLevel || 1,
+          tierLabel: tierLevel
+            ? getTierLabel(tierLevel)
+            : (entry.label ?? ""),
+          tierColor,
+        },
+      }
+    },
+    [tierColors, theme.palette.grey],
+  )
+
+  // Pinned squares survive hover-leave and are rendered as persistent
+  // popups on the map (same UX as the get-started key-outcomes overlay).
+  // We keep `outcomeCode` alongside each highlight so we can drop pins
+  // when the active map outcome changes.
+  const [pinnedSquareLois, setPinnedSquareLois] = useState<
+    Map<string, { outcomeCode: string; highlight: LocationHighlight }>
+  >(() => new Map())
+  const [hoveredSquareHighlight, setHoveredSquareHighlight] =
+    useState<LocationHighlight | null>(null)
+
+  // Single source of truth: whenever either the hover or the pinned set
+  // changes, re-emit the merged list to the map store.
+  useEffect(() => {
+    const list: LocationHighlight[] = []
+    for (const { highlight } of pinnedSquareLois.values()) {
+      list.push({ ...highlight, pinned: true })
+    }
+    if (
+      hoveredSquareHighlight &&
+      !pinnedSquareLois.has(hoveredSquareHighlight.key)
+    ) {
+      list.push(hoveredSquareHighlight)
+    }
+    mapActions.setLocationHighlights(list)
+  }, [pinnedSquareLois, hoveredSquareHighlight])
+
   // Per-square hover for the distribution encoding. Branches by
   // distributionMode: "scenario" drives the sidebar highlight (same code
-  // path as the radar's dot-hover); "location" paints LocationHighlight
-  // pins on the map so the user can cross-reference the LOI geography.
+  // path as the radar's dot-hover); "location" feeds the merged
+  // hover-plus-pins emitter above.
   const handleSquareHover = useCallback(
     (
       info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry } | null,
     ) => {
       if (!info) {
         if (distributionMode === "location") {
-          mapActions.clearLocationHighlights()
+          setHoveredSquareHighlight(null)
         } else {
           notifyHover(null)
         }
         return
       }
       if (distributionMode === "location") {
-        const { cell, entry } = info
-        const outcomeCode = cell.outcomeCode
-        const loiId = entry.loiId
-        if (!outcomeCode || !loiId) {
-          mapActions.clearLocationHighlights()
-          return
-        }
-        const coords = getOutcomeLocationCoordinates(outcomeCode, loiId)
-        if (!coords) {
-          mapActions.clearLocationHighlights()
-          return
-        }
-        const tierLevel = entry.tierLevel ?? 0
-        const tierColorIndex = Math.max(1, Math.min(4, tierLevel)) - 1
-        const tierColor =
-          tierColors[tierColorIndex] ?? theme.palette.grey[300]
-        mapActions.setLocationHighlights([
-          {
-            key: `resilience-heatmap-${outcomeCode}-${loiId}`,
-            longitude: coords[0],
-            latitude: coords[1],
-            name: entry.locationName ?? loiId,
-            tierLevel: tierLevel || 1,
-            tierLabel: tierLevel
-              ? getTierLabel(tierLevel)
-              : (entry.label ?? ""),
-            tierColor,
-          },
-        ])
+        const built = buildLocationHighlight(info.cell, info.entry)
+        setHoveredSquareHighlight(built?.highlight ?? null)
       } else {
         // "scenario" mode — drive sidebar highlight + scroll.
         const sid = info.entry.scenarioId
         if (sid) notifyHover(sid)
       }
     },
-    [distributionMode, notifyHover, tierColors, theme.palette.grey],
+    [distributionMode, notifyHover, buildLocationHighlight],
   )
 
-  // Cleanup on unmount: drop any location highlights we painted so the
-  // map doesn't retain stale pins when the user leaves the tool.
+  // Per-square click. Opens the outcome's map layer and (location mode)
+  // toggles a persistent pin for the clicked LOI. No-op when the map
+  // is hidden, same guard as handleCellClick above.
+  const handleSquareClick = useCallback(
+    (info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry }) => {
+      if (!isMapVisible) return
+      const { cell, entry } = info
+      const outcomeCode = cell.outcomeCode
+      if (!outcomeCode) return
+
+      if (distributionMode === "location") {
+        const sid = cell.scenarioId ?? effectiveFocusScenarioId
+        if (!sid) return
+        showOutcomeOnMap(outcomeCode, sid)
+
+        const built = buildLocationHighlight(cell, entry)
+        if (!built) return
+        setPinnedSquareLois((prev) => {
+          const next = new Map(prev)
+          if (next.has(built.highlight.key)) {
+            next.delete(built.highlight.key)
+          } else {
+            next.set(built.highlight.key, built)
+          }
+          return next
+        })
+      } else {
+        const sid =
+          entry.scenarioId ?? cell.scenarioId ?? effectiveFocusScenarioId
+        if (!sid) return
+        showOutcomeOnMap(outcomeCode, sid)
+      }
+    },
+    [
+      isMapVisible,
+      distributionMode,
+      effectiveFocusScenarioId,
+      showOutcomeOnMap,
+      buildLocationHighlight,
+    ],
+  )
+
+  // When the active map outcome changes (either by our own click or by
+  // any other caller), drop pinned squares whose outcome no longer
+  // matches so stale popups don't float on top of a different layer.
+  const activeOutcomeCode = activeOutcome?.outcomeCode ?? null
+  useEffect(() => {
+    if (pinnedSquareLois.size === 0) return
+    setPinnedSquareLois((prev) => {
+      let changed = false
+      const next = new Map(prev)
+      for (const [key, pin] of prev) {
+        if (activeOutcomeCode !== pin.outcomeCode) {
+          next.delete(key)
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+    // We intentionally depend only on activeOutcomeCode — depending on
+    // pinnedSquareLois would re-run the effect after our own setState.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOutcomeCode])
+
+  // Cleanup on unmount: drop any hover / pinned state and any location
+  // highlights we painted so the map doesn't retain stale pins when the
+  // user leaves the tool.
   useEffect(() => {
     return () => {
+      setPinnedSquareLois(new Map())
+      setHoveredSquareHighlight(null)
       mapActions.clearLocationHighlights()
     }
   }, [])
@@ -1543,6 +1646,9 @@ export default function ResiliencePanel({
                 info ? { cell: info.cell, entry: info.entry } : null,
               )
             }
+            onSquareClick={(info) =>
+              handleSquareClick({ cell: info.cell, entry: info.entry })
+            }
           />
         ) : view === "outcome" ? (
           <ResilienceHeatmapSmallMultiples
@@ -1564,6 +1670,9 @@ export default function ResiliencePanel({
                 info ? { cell: info.cell, entry: info.entry } : null,
               )
             }
+            onSquareClick={(info) =>
+              handleSquareClick({ cell: info.cell, entry: info.entry })
+            }
           />
         ) : (
           <ResilienceHeatmap
@@ -1583,6 +1692,7 @@ export default function ResiliencePanel({
             showMarginals={showMarginals}
             distributionMode={distributionMode}
             onSquareHover={handleSquareHover}
+            onSquareClick={handleSquareClick}
           />
         )}
           </motion.div>

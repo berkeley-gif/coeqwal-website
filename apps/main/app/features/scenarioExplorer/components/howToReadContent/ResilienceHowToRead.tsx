@@ -118,7 +118,8 @@ export function ResilienceHowToRead() {
               current scope, colored by that scenario&rsquo;s tier for the
               cell&rsquo;s (outcome, climate). Hovering a square highlights
               that scenario in the sidebar and scrolls it into view — the
-              same pattern as the radar chart.
+              same pattern as the radar chart. Clicking a square opens that
+              outcome&rsquo;s layer on the map for the clicked scenario.
             </Typography>
           </li>
         </ul>
@@ -131,8 +132,11 @@ export function ResilienceHowToRead() {
               the scope&rsquo;s scenarios for that (outcome, climate).
               Hovering a square highlights that LOI on the map when the map
               panel is open, exactly like the get-started key-outcomes
-              animation. NOD/SOD outcomes (which are already pre-aggregated
-              regions) are not broken out by LOI in this mode.
+              animation. Clicking a square opens that outcome&rsquo;s layer
+              on the map and pins the LOI&rsquo;s popup so it persists after
+              the cursor moves away (click again to unpin). NOD/SOD
+              outcomes (which are already pre-aggregated regions) are not
+              broken out by LOI in this mode.
             </Typography>
           </li>
         </ul>
