@@ -172,6 +172,11 @@ interface ScenarioExplorerState {
   showResilienceOutcomeSelector: boolean
   resilienceVisibleOutcomes: string[]
 
+  // Resilience heatmap distribution sub-mode (within the "distribution"
+  // cell encoding). "scenario" = one square per scenario; "location" =
+  // one square per LOI (mean tier across scope scenarios).
+  resilienceDistributionMode: "scenario" | "location"
+
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
 
@@ -265,6 +270,9 @@ interface ScenarioExplorerActions {
   toggleResilienceOutcome: (code: string) => void
   setResilienceVisibleOutcomes: (codes: string[]) => void
 
+  // Resilience heatmap distribution sub-mode
+  setResilienceDistributionMode: (mode: "scenario" | "location") => void
+
   // Hydroclimate
   setHydroclimate: (value: string) => void
 
@@ -331,6 +339,7 @@ const initialState: ScenarioExplorerState = {
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
   showResilienceOutcomeSelector: false,
   resilienceVisibleOutcomes: [...OUTCOME_CODE_ORDER],
+  resilienceDistributionMode: "scenario",
   hydroclimate: "historical",
   groupByTheme: true,
   sortBy: null,
@@ -662,6 +671,11 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setResilienceVisibleOutcomes: (codes) =>
       set((state) => {
         state.resilienceVisibleOutcomes = codes
+      }),
+
+    setResilienceDistributionMode: (mode) =>
+      set((state) => {
+        state.resilienceDistributionMode = mode
       }),
 
     // Hydroclimate

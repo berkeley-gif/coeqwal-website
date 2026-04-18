@@ -22,6 +22,7 @@ import React, { useMemo } from "react"
 import ResilienceHeatmap, {
   type ResilienceAxisItem,
   type ResilienceCellRender,
+  type ResilienceGlyphEntry,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapPalette,
 } from "./ResilienceHeatmap"
@@ -63,6 +64,22 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   onCellClick?: (cell: ResilienceHeatmapCell) => void
   /** Formatter passed to each tile. */
   formatRowTick?: (row: ResilienceAxisItem) => string
+  /** Distribution sub-mode plumbed down to each tile. */
+  distributionMode?: "scenario" | "location"
+  /** Per-tile per-square hover (distribution encoding only). */
+  onSquareHover?: (
+    info: {
+      tileId: string
+      cell: ResilienceHeatmapCell
+      entry: ResilienceGlyphEntry
+    } | null,
+  ) => void
+  /** Per-tile per-square click (distribution encoding only). */
+  onSquareClick?: (info: {
+    tileId: string
+    cell: ResilienceHeatmapCell
+    entry: ResilienceGlyphEntry
+  }) => void
 }
 
 /**
@@ -145,6 +162,9 @@ const ResilienceHeatmapSmallMultiples: React.FC<
     onCellHover,
     onCellClick,
     formatRowTick,
+    distributionMode,
+    onSquareHover,
+    onSquareClick,
   }) => {
     const tileHeight = useMemo(() => {
       if (tileAspect === "tall") {
@@ -255,6 +275,20 @@ const ResilienceHeatmapSmallMultiples: React.FC<
                   onCellHover={onCellHover}
                   onCellClick={onCellClick}
                   formatRowTick={formatRowTick}
+                  distributionMode={distributionMode}
+                  onSquareHover={
+                    onSquareHover
+                      ? (info) =>
+                          onSquareHover(
+                            info ? { tileId: tile.id, ...info } : null,
+                          )
+                      : undefined
+                  }
+                  onSquareClick={
+                    onSquareClick
+                      ? (info) => onSquareClick({ tileId: tile.id, ...info })
+                      : undefined
+                  }
                 />
               </div>
             </div>
