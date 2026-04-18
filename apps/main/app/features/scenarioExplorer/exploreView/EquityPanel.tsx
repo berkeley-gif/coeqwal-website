@@ -15,6 +15,7 @@ import { mapActions, useMapStore } from "../../map/store"
 import { getTierColorsFromTheme } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+import { OUTCOME_NAMES } from "../../../content/outcomes"
 import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
@@ -446,30 +447,42 @@ export default function EquityPanel() {
 
         // Build tooltip content
         const tooltipContent = showEquityComparison ? (
-          <Box sx={{ textAlign: "center" }}>
+          <Box>
             <Box
               sx={{
                 fontWeight: 600,
-                fontSize: "13px",
-                mb: 1,
-                borderBottom: "1px solid rgba(255,255,255,0.3)",
-                pb: 0.75,
+                mb: 0.5,
+                color: "#1a202c",
+                fontSize: "15.5px",
               }}
             >
               {obj.locationName}
             </Box>
-            <Box sx={{ fontSize: "12px", lineHeight: 1.6 }}>
+            <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
+              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+            </Box>
+            <Box
+              sx={{
+                borderTop: "1px solid #e2e8f0",
+                pt: 0.75,
+                mt: 0.75,
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: 2,
+                  gap: 1,
+                  fontSize: "12px",
                 }}
               >
-                <Box component="span" sx={{ color: "black" }}>
-                  Current:
+                <Box component="span" sx={{ color: "#718096" }}>
+                  Selected:
                 </Box>
-                <Box component="span" sx={{ fontWeight: 500 }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 600, color: "#2d3748" }}
+                >
                   {obj.tier}
                 </Box>
               </Box>
@@ -477,30 +490,64 @@ export default function EquityPanel() {
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: 2,
+                  gap: 1,
+                  fontSize: "12px",
+                  mt: 0.5,
                 }}
               >
-                <Box component="span" sx={{ color: "black" }}>
+                <Box component="span" sx={{ color: "#718096" }}>
                   Baseline:
                 </Box>
-                <Box component="span" sx={{ fontWeight: 500 }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 600, color: "#2d3748" }}
+                >
                   {obj.baselineTier}
                 </Box>
               </Box>
             </Box>
           </Box>
         ) : (
-          <Box sx={{ textAlign: "center" }}>
+          <Box>
             <Box
               sx={{
                 fontWeight: 600,
-                fontSize: "13px",
                 mb: 0.5,
+                color: "#1a202c",
+                fontSize: "15.5px",
               }}
             >
               {obj.locationName}
             </Box>
-            <Box sx={{ fontSize: "12px", fontWeight: 500 }}>{obj.tier}</Box>
+            <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
+              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+            </Box>
+            <Box
+              sx={{
+                borderTop: "1px solid #e2e8f0",
+                pt: 0.75,
+                mt: 0.75,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  fontSize: "12px",
+                }}
+              >
+                <Box component="span" sx={{ color: "#718096" }}>
+                  Tier:
+                </Box>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 600, color: "#2d3748" }}
+                >
+                  {obj.tier}
+                </Box>
+              </Box>
+            </Box>
           </Box>
         )
 
@@ -632,7 +679,8 @@ export default function EquityPanel() {
       // Clear markers when no objectives selected or map hidden
       setMotionChildren(null)
     }
-  }, [selectedObjectives, showMap, handleShowOnMap, setMotionChildren])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedObjectives, showMap])
 
   // Cleanup markers on unmount
   useEffect(() => {
