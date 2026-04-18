@@ -29,14 +29,17 @@ import {
   Typography,
   useTheme,
 } from "@repo/ui/mui"
+import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
 import {
   ResilienceHeatmap,
+  ResilienceHeatmapSmallMultiples,
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapPalette,
   type ResilienceHeatmapMarginals,
   type ResilienceCellRender,
   type ResilienceGlyphEntry,
+  type ResilienceSmallMultiplesTile,
   hierarchicalRowOrder,
 } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
@@ -58,7 +61,7 @@ import { hydroclimateOptions } from "../../../content/scenarios"
 import { TIER_LABELS } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 
-export type ResilienceView = "scenario" | "outcome" | "aggregate"
+export type ResilienceView = "scenario" | "outcome" | "aggregate" | "quadrant"
 
 /**
  * Cell encoding selects how each cell's fill / value is computed and drawn.
@@ -67,7 +70,12 @@ export type ResilienceView = "scenario" | "outcome" | "aggregate"
  * - `density_risk`: fraction of scenarios in Tier 3+ (red ramp, aggregate view only).
  * - `density_opp`: fraction in Tier 2- (green ramp, aggregate view only).
  * - `glyph`: sub-tile grid inside each cell, one tile per scenario
- *   (aggregate view only).
+ *   (aggregate view only, legacy).
+ * - `distribution`: stacked tier-colored horizontal bars inside each cell
+ *   (aggregate view only); mirrors the MorphableDistributionGlyph "bars"
+ *   mode used in Learn mode.
+ * - `leverage`: monochromatic ramp over the tier range across sibling
+ *   operations (aggregate view only).
  */
 export type CellEncoding =
   | "tier"
@@ -75,6 +83,8 @@ export type CellEncoding =
   | "density_risk"
   | "density_opp"
   | "glyph"
+  | "distribution"
+  | "leverage"
 
 /**
  * Delta baseline selector. When `none`, no delta is computed.
@@ -85,6 +95,13 @@ export type DeltaMode = "none" | "vs_historical" | "vs_baseline"
 
 export type AggregateScope = "all" | "selected"
 
+/**
+ * Unit of analysis for the quadrant view.
+ * - `outcome`: one dot per outcome, averaged across sibling groups.
+ * - `loi`: one dot per location of interest, within a single outcome.
+ */
+export type QuadrantUnit = "outcome" | "loi"
+
 export interface ResilienceControlsState {
   view: ResilienceView
   cellEncoding: CellEncoding
@@ -93,11 +110,26 @@ export interface ResilienceControlsState {
   aggregateScope: AggregateScope
   reorderBySimilarity: boolean
   showMarginals: boolean
+  /**
+   * Sidebar-driven scope for the by-scenario and by-outcome views. When
+   * false (default), these views read `selectedScenarios` from the store
+   * and render an empty-state prompt when none are pinned. When true,
+   * they fall back to all 24 scenarios. Mirrors the `radarShowAll`
+   * pattern in RadarPanel.
+   */
+  showAllScenarios: boolean
+  /**
+   * Retained for the delta-vs-baseline feature. No longer user-selectable
+   * as a "focus" dropdown; by-scenario view now derives its focused
+   * scenario from `selectedScenarios` in the store.
+   */
   focusScenarioId: string
   focusOutcomeCode: string
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   showRegionalSplit: boolean
   showCellNumbers: boolean
+  quadrantUnit: QuadrantUnit
+  quadrantOutcome: string | null
 }
 
 interface ResiliencePanelProps {
@@ -134,6 +166,8 @@ function resolveCellRender(
       return encoding
     }
     if (encoding === "glyph") return "glyph"
+    if (encoding === "distribution") return "distribution"
+    if (encoding === "leverage") return "leverage"
     return deltaMode !== "none" ? "delta" : "tier"
   }
   return deltaMode !== "none" ? "delta" : "tier"
@@ -153,7 +187,7 @@ export default function ResiliencePanel({
     aggregateScope,
     reorderBySimilarity,
     showMarginals,
-    focusScenarioId,
+    showAllScenarios,
     focusOutcomeCode,
     selectedHydroclimates,
     showRegionalSplit,
@@ -164,6 +198,16 @@ export default function ResiliencePanel({
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
   )
+
+  // Effective per-view scenario scope. Mirrors the radar-panel pattern:
+  // when showAllScenarios is off, respect sidebar `selectedScenarios`;
+  // when on, fall back to all 24. Phase 1 renders a single heatmap; the
+  // by-scenario branch picks the first item as its focus and later
+  // phases will fan this out into small multiples.
+  const effectiveScenarioScope = useMemo<readonly string[]>(() => {
+    if (showAllScenarios) return [] // sentinel: "all" resolved from matrix
+    return selectedScenarios
+  }, [showAllScenarios, selectedScenarios])
 
   const {
     scenarioIds,
@@ -228,6 +272,8 @@ export default function ResiliencePanel({
   const densRiskMax = theme.palette.tierDensity.riskMax
   const densOppMin = theme.palette.tierDensity.oppMin
   const densOppMax = theme.palette.tierDensity.oppMax
+  const leverageMin = theme.palette.tierLeverage.min
+  const leverageMax = theme.palette.tierLeverage.max
   const heatmapPalette = useMemo<ResilienceHeatmapPalette>(
     () => ({
       text: textPrimary,
@@ -251,6 +297,8 @@ export default function ResiliencePanel({
       densityRiskMax: densRiskMax,
       densityOppMin: densOppMin,
       densityOppMax: densOppMax,
+      leverageMin,
+      leverageMax,
     }),
     [
       textPrimary,
@@ -269,6 +317,8 @@ export default function ResiliencePanel({
       densRiskMax,
       densOppMin,
       densOppMax,
+      leverageMin,
+      leverageMax,
     ],
   )
 
@@ -294,7 +344,7 @@ export default function ResiliencePanel({
 
   // Scenario-row order (for outcome view): primary baseline first, then
   // the 24 sibling-group order (already sorted by useScenarioList).
-  const scenarioRowIds = useMemo(() => {
+  const scenarioRowIdsAll = useMemo(() => {
     const ids = [...scenarioIds]
     const primary = ids.indexOf(PRIMARY_SCENARIO_BASELINE_ID)
     if (primary > 0) {
@@ -303,6 +353,22 @@ export default function ResiliencePanel({
     }
     return ids
   }, [scenarioIds])
+
+  // By-outcome view Y axis: sidebar-selected scenarios (in the canonical
+  // order) when showAllScenarios is off, or all 24 when it's on.
+  const scenarioRowIds = useMemo(() => {
+    if (showAllScenarios) return scenarioRowIdsAll
+    const selectedSet = new Set(selectedScenarios)
+    return scenarioRowIdsAll.filter((id) => selectedSet.has(id))
+  }, [showAllScenarios, scenarioRowIdsAll, selectedScenarios])
+
+  // By-scenario view focus: Phase 1 keeps a single heatmap, so we pick
+  // the first sidebar-selected scenario (or the baseline when show-all
+  // is on). Phase 2 replaces this with small multiples.
+  const effectiveFocusScenarioId = useMemo<string | null>(() => {
+    if (showAllScenarios) return PRIMARY_SCENARIO_BASELINE_ID
+    return selectedScenarios[0] ?? null
+  }, [showAllScenarios, selectedScenarios])
 
   const effectiveCellRender = useMemo(
     () => resolveCellRender(view, cellEncoding, deltaMode),
@@ -321,6 +387,7 @@ export default function ResiliencePanel({
     divergingValue?: number | null
     densityValue?: number | null
     distribution?: ReadonlyArray<ResilienceGlyphEntry>
+    leverageValue?: number | null
     type?: "single_value" | "multi_value" | "nod_sod"
     rowLabel: string
     /** Value used for marginal row/col means + clustering. */
@@ -331,13 +398,14 @@ export default function ResiliencePanel({
     () => { rowKeys: string[]; rowLabels: Record<string, string>; valueFn: RowValueFn; subjectLabel: string }
   >(() => {
     if (view === "scenario") {
-      const focusName = getDisplayName(focusScenarioId)
+      const focusId = effectiveFocusScenarioId
+      const focusName = focusId ? getDisplayName(focusId) : ""
       const rowKeys = [...outcomeRowCodes]
       const rowLabels: Record<string, string> = {}
       for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
 
       const valueFn: RowValueFn = (rowKey, hc) => {
-        const cell = getCell(focusScenarioId, rowKey, hc)
+        const cell = focusId ? getCell(focusId, rowKey, hc) : null
         if (!cell) {
           return {
             continuousValue: null,
@@ -362,7 +430,9 @@ export default function ResiliencePanel({
         // Compute delta
         let reference: number | null = null
         if (deltaMode === "vs_historical") {
-          const ref = getCell(focusScenarioId, rowKey, HISTORICAL_HC)
+          const ref = focusId
+            ? getCell(focusId, rowKey, HISTORICAL_HC)
+            : null
           reference = ref?.available ? ref.continuousValue : null
         } else {
           const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
@@ -487,7 +557,7 @@ export default function ResiliencePanel({
           signal: agg.opportunityDensity,
         }
       }
-      if (cellEncoding === "glyph") {
+      if (cellEncoding === "glyph" || cellEncoding === "distribution") {
         const distribution: ResilienceGlyphEntry[] = agg.distribution.map(
           (d) => ({
             tierLevel: d.tierLevel,
@@ -499,6 +569,34 @@ export default function ResiliencePanel({
           distribution,
           available: true,
           signal: agg.mean,
+        }
+      }
+      if (cellEncoding === "leverage") {
+        // Tier range across sibling operations at this hydroclimate. We
+        // work on the continuous (arithmetic-mean-of-LOI) values so the
+        // spread is smoother than the rounded tier 1..4 steps. Require
+        // at least 2 available siblings for a meaningful range; mark
+        // cells with fewer as unavailable (covered by the hatch pattern).
+        const vals = agg.distribution
+          .map((d) => d.continuousValue)
+          .filter((v): v is number => v != null && Number.isFinite(v))
+        if (vals.length < 2) {
+          return {
+            ...baseCell,
+            available: false,
+            unavailableReason: "Insufficient sibling coverage",
+            leverageValue: null,
+            signal: null,
+          }
+        }
+        const min = Math.min(...vals)
+        const max = Math.max(...vals)
+        const range = Math.max(0, max - min)
+        return {
+          ...baseCell,
+          leverageValue: range,
+          available: true,
+          signal: range,
         }
       }
       // cellEncoding === "tier" or "delta"
@@ -541,7 +639,7 @@ export default function ResiliencePanel({
     deltaBaselineScenarioId,
     outcomeRowCodes,
     scenarioRowIds,
-    focusScenarioId,
+    effectiveFocusScenarioId,
     focusOutcomeCode,
     getCell,
     getDisplayName,
@@ -616,7 +714,7 @@ export default function ResiliencePanel({
           subjectLabel,
           scenarioId:
             view === "scenario"
-              ? focusScenarioId
+              ? (effectiveFocusScenarioId ?? undefined)
               : view === "outcome"
                 ? rk
                 : undefined,
@@ -630,6 +728,7 @@ export default function ResiliencePanel({
           divergingValue: v.divergingValue,
           densityValue: v.densityValue,
           distribution: v.distribution,
+          leverageValue: v.leverageValue,
         })
       }
     }
@@ -642,9 +741,223 @@ export default function ResiliencePanel({
     rowLabels,
     subjectLabel,
     view,
-    focusScenarioId,
+    effectiveFocusScenarioId,
     focusOutcomeCode,
     scenarios,
+  ])
+
+  // Per-scenario cell computation for the by-scenario small-multiples
+  // view. Mirrors the scenario branch in `buildValueFn`, but parameterized
+  // over scenarioId so each tile can consume its own cells. Honors the
+  // active delta mode so the small-multiples respect the Climate shift
+  // control when set.
+  const computeScenarioTileCell = useCallback(
+    (
+      scenarioId: string,
+      rowKey: string,
+      hc: ResilienceHydroclimate,
+      rowLabel: string,
+      subject: string,
+      colLabel: string,
+    ): ResilienceHeatmapCell | null => {
+      const cell = getCell(scenarioId, rowKey, hc)
+      if (!cell) return null
+      const base: ResilienceHeatmapCell = {
+        rowKey,
+        colKey: hc,
+        continuousValue: cell.continuousValue,
+        tierLevel: cell.tierLevel,
+        available: cell.available,
+        unavailableReason: cell.unavailableReason,
+        rowLabel,
+        colLabel,
+        subjectLabel: subject,
+        scenarioId,
+        outcomeCode: rowKey,
+        type: cell.type,
+      }
+      if (deltaMode === "none" || !cell.available) return base
+      let reference: number | null = null
+      if (deltaMode === "vs_historical") {
+        const ref = getCell(scenarioId, rowKey, HISTORICAL_HC)
+        reference = ref?.available ? ref.continuousValue : null
+      } else {
+        const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
+        reference = ref?.available ? ref.continuousValue : null
+      }
+      if (reference == null || cell.continuousValue == null) {
+        return {
+          ...base,
+          available: false,
+          unavailableReason: "Delta baseline unavailable",
+          divergingValue: null,
+        }
+      }
+      return {
+        ...base,
+        divergingValue: cell.continuousValue - reference,
+      }
+    },
+    [getCell, deltaMode, deltaBaselineScenarioId],
+  )
+
+  // Effective list of scenarios for the by-scenario small-multiples
+  // view. Sidebar-selected by default; full 24 when "show all" is on.
+  const byScenarioScope = useMemo<readonly string[]>(() => {
+    if (view !== "scenario") return []
+    if (showAllScenarios) return scenarioRowIdsAll
+    return selectedScenarios
+  }, [view, showAllScenarios, scenarioRowIdsAll, selectedScenarios])
+
+  const byScenarioTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
+    if (view !== "scenario" || byScenarioScope.length === 0) return []
+    const tiles: ResilienceSmallMultiplesTile[] = []
+    for (const sid of byScenarioScope) {
+      const title = getDisplayName(sid)
+      const tileCells: ResilienceHeatmapCell[] = []
+      for (const rk of outcomeRowCodes) {
+        const rl = getOutcomeName(rk)
+        for (const col of columns) {
+          const c = computeScenarioTileCell(
+            sid,
+            rk,
+            col.key as ResilienceHydroclimate,
+            rl,
+            title,
+            col.label,
+          )
+          if (c) tileCells.push(c)
+        }
+      }
+      tiles.push({ id: sid, title, cells: tileCells })
+    }
+    return tiles
+  }, [
+    view,
+    byScenarioScope,
+    outcomeRowCodes,
+    columns,
+    computeScenarioTileCell,
+    getDisplayName,
+  ])
+
+  // Shared row axis for by-scenario tiles. Separate from `rows` above
+  // (which is the single-heatmap Y axis) so the tiles don't depend on
+  // the single-heatmap value grid.
+  const byScenarioRows = useMemo<ResilienceAxisItem[]>(
+    () =>
+      outcomeRowCodes.map((code) => ({
+        key: code,
+        label: getOutcomeName(code),
+        definitionTooltip: getOutcomeDefinition(code),
+      })),
+    [outcomeRowCodes],
+  )
+
+  // By-outcome small multiples — one tile per outcome, Y = scenarios,
+  // X = climates. Phase 3 renders all 19 outcomes always. The scenario
+  // rows inside each tile respect sidebar selection (falling back to
+  // all 24 when sidebar is empty or show-all is on, so the panel is
+  // always populated).
+  const byOutcomeScenarioRowIds = useMemo<readonly string[]>(() => {
+    if (showAllScenarios) return scenarioRowIdsAll
+    if (selectedScenarios.length === 0) return scenarioRowIdsAll
+    const selectedSet = new Set(selectedScenarios)
+    return scenarioRowIdsAll.filter((id) => selectedSet.has(id))
+  }, [showAllScenarios, scenarioRowIdsAll, selectedScenarios])
+
+  const byOutcomeRows = useMemo<ResilienceAxisItem[]>(
+    () =>
+      byOutcomeScenarioRowIds.map((sid) => ({
+        key: sid,
+        label: getDisplayName(sid),
+        definitionTooltip:
+          scenarios.find((s) => s.scenarioId === sid)?.description ||
+          getDisplayName(sid),
+      })),
+    [byOutcomeScenarioRowIds, getDisplayName, scenarios],
+  )
+
+  const computeOutcomeTileCell = useCallback(
+    (
+      scenarioId: string,
+      outcomeCode: string,
+      hc: ResilienceHydroclimate,
+      rowLabel: string,
+      subject: string,
+      colLabel: string,
+    ): ResilienceHeatmapCell | null => {
+      const cell = getCell(scenarioId, outcomeCode, hc)
+      if (!cell) return null
+      const base: ResilienceHeatmapCell = {
+        rowKey: scenarioId,
+        colKey: hc,
+        continuousValue: cell.continuousValue,
+        tierLevel: cell.tierLevel,
+        available: cell.available,
+        unavailableReason: cell.unavailableReason,
+        rowLabel,
+        colLabel,
+        subjectLabel: subject,
+        scenarioId,
+        outcomeCode,
+        type: cell.type,
+      }
+      if (deltaMode === "none" || !cell.available) return base
+      let reference: number | null = null
+      if (deltaMode === "vs_historical") {
+        const ref = getCell(scenarioId, outcomeCode, HISTORICAL_HC)
+        reference = ref?.available ? ref.continuousValue : null
+      } else {
+        const ref = getCell(deltaBaselineScenarioId, outcomeCode, hc)
+        reference = ref?.available ? ref.continuousValue : null
+      }
+      if (reference == null || cell.continuousValue == null) {
+        return {
+          ...base,
+          available: false,
+          unavailableReason: "Delta baseline unavailable",
+          divergingValue: null,
+        }
+      }
+      return {
+        ...base,
+        divergingValue: cell.continuousValue - reference,
+      }
+    },
+    [getCell, deltaMode, deltaBaselineScenarioId],
+  )
+
+  const byOutcomeTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
+    if (view !== "outcome") return []
+    // Phase 3: always render all 19 outcomes (no subsetting yet).
+    const tiles: ResilienceSmallMultiplesTile[] = []
+    for (const outcomeCode of OUTCOME_CODE_ORDER) {
+      const title = getOutcomeName(outcomeCode)
+      const tileCells: ResilienceHeatmapCell[] = []
+      for (const sid of byOutcomeScenarioRowIds) {
+        const rl = getDisplayName(sid)
+        for (const col of columns) {
+          const c = computeOutcomeTileCell(
+            sid,
+            outcomeCode,
+            col.key as ResilienceHydroclimate,
+            rl,
+            title,
+            col.label,
+          )
+          if (c) tileCells.push(c)
+        }
+      }
+      tiles.push({ id: outcomeCode, title, cells: tileCells })
+    }
+    return tiles
+  }, [
+    view,
+    byOutcomeScenarioRowIds,
+    columns,
+    computeOutcomeTileCell,
+    getDisplayName,
   ])
 
   // Row and column marginals: mean of each row's/col's signal values.
@@ -719,7 +1032,7 @@ export default function ResiliencePanel({
         return
       }
       if (view === "scenario") {
-        notifyHover(focusScenarioId)
+        notifyHover(effectiveFocusScenarioId)
       } else if (view === "outcome") {
         notifyHover(cell.scenarioId ?? null)
       } else {
@@ -727,18 +1040,18 @@ export default function ResiliencePanel({
         notifyHover(null)
       }
     },
-    [view, focusScenarioId, notifyHover],
+    [view, effectiveFocusScenarioId, notifyHover],
   )
 
   const handleCellClick = useCallback(
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
       const outcomeCode = cell.outcomeCode
-      const sid = cell.scenarioId ?? focusScenarioId
+      const sid = cell.scenarioId ?? effectiveFocusScenarioId
       if (!outcomeCode || !sid) return
       showOutcomeOnMap(outcomeCode, sid)
     },
-    [isMapVisible, focusScenarioId, showOutcomeOnMap],
+    [isMapVisible, effectiveFocusScenarioId, showOutcomeOnMap],
   )
 
   // Highlighted rows (sidebar hover sync). Only meaningful in outcome view
@@ -776,6 +1089,15 @@ export default function ResiliencePanel({
   const aggregateEmpty =
     view === "aggregate" &&
     aggregateScope === "selected" &&
+    selectedScenarios.length === 0
+
+  // By-scenario view with no sidebar selection and show-all off →
+  // "Select scenarios, or show all" prompt. By-outcome view always has
+  // tiles (it falls back to all-24 scenarios for the Y axis), so no
+  // global empty state there.
+  const sidebarEmpty =
+    view === "scenario" &&
+    !showAllScenarios &&
     selectedScenarios.length === 0
 
   // Render states
@@ -834,6 +1156,19 @@ export default function ResiliencePanel({
         ? "Outcomes by hydroclimate (aggregate)"
         : "Outcomes by hydroclimate"
 
+  // Cross-fade + translate-y pivot animation. Respects the user's
+  // reduced-motion preference (WCAG 2.3.3).
+  const prefersReducedMotion = useReducedMotion()
+  const motionTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.25, ease: "easeOut" as const }
+  const motionInitial = prefersReducedMotion
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: 8 }
+  const motionExit = prefersReducedMotion
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: -8 }
+
   return (
     <Box
       sx={{
@@ -874,8 +1209,24 @@ export default function ResiliencePanel({
           minHeight: 0,
           px: theme.space.component.lg,
           pb: theme.space.component.md,
+          position: "relative",
         }}
       >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={view}
+            initial={motionInitial}
+            animate={{ opacity: 1, y: 0 }}
+            exit={motionExit}
+            transition={motionTransition}
+            style={{
+              height: "100%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+            }}
+          >
         {columns.length === 0 ? (
           <Box
             sx={{
@@ -903,6 +1254,56 @@ export default function ResiliencePanel({
               or switch the aggregate scope to &ldquo;all scenarios&rdquo;.
             </Typography>
           </Box>
+        ) : sidebarEmpty ? (
+          <Box
+            sx={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              px: 3,
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "center", maxWidth: 480 }}
+            >
+              Select one or more scenarios in the sidebar to populate this
+              view, or toggle &ldquo;show all scenarios&rdquo; in the chart
+              controls above.
+            </Typography>
+          </Box>
+        ) : view === "scenario" ? (
+          <ResilienceHeatmapSmallMultiples
+            rows={byScenarioRows}
+            columns={columns}
+            tiles={byScenarioTiles}
+            tierColors={tierColors}
+            tierLabels={tierLabels}
+            palette={heatmapPalette}
+            cellRender={effectiveCellRender}
+            showCellNumbers={showCellNumbers}
+            tileAspect="wide"
+            onCellHover={handleCellHover}
+            onCellClick={isMapVisible ? handleCellClick : undefined}
+            formatRowTick={formatRowTick}
+          />
+        ) : view === "outcome" ? (
+          <ResilienceHeatmapSmallMultiples
+            rows={byOutcomeRows}
+            columns={columns}
+            tiles={byOutcomeTiles}
+            tierColors={tierColors}
+            tierLabels={tierLabels}
+            palette={heatmapPalette}
+            cellRender={effectiveCellRender}
+            showCellNumbers={showCellNumbers}
+            tileAspect="tall"
+            onCellHover={handleCellHover}
+            onCellClick={isMapVisible ? handleCellClick : undefined}
+            formatRowTick={formatRowTick}
+          />
         ) : (
           <ResilienceHeatmap
             rows={rows}
@@ -921,6 +1322,8 @@ export default function ResiliencePanel({
             showMarginals={showMarginals}
           />
         )}
+          </motion.div>
+        </AnimatePresence>
       </Box>
 
       {isLoading && hasData && (

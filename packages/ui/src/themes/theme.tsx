@@ -379,6 +379,15 @@ const palette = {
     oppMax: "#0f7a4a", // Deep green (100% acceptable)
   },
 
+  // Monochromatic ramp for operational-leverage cell encoding: how much
+  // tier spread is possible across sibling operations at a given HC.
+  // Reads as a neutral "how much does policy move this?" signal, so we
+  // use a purple ramp to keep it distinct from the risk/opportunity ramps.
+  tierLeverage: {
+    min: "#f4f4f2", // Near-white (0 tier range — operations don't move it)
+    max: "#5f3b8a", // Deep purple (max 3 tier range)
+  },
+
   tabPanels: {
     learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
@@ -1825,6 +1834,7 @@ declare module "@mui/material/styles" {
     tiers: typeof themeValues.palette.tiers
     tierDiverging: typeof themeValues.palette.tierDiverging
     tierDensity: typeof themeValues.palette.tierDensity
+    tierLeverage: typeof themeValues.palette.tierLeverage
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
     waterThemes: typeof themeValues.palette.waterThemes
@@ -1846,6 +1856,7 @@ declare module "@mui/material/styles" {
     tiers?: Partial<typeof themeValues.palette.tiers>
     tierDiverging?: Partial<typeof themeValues.palette.tierDiverging>
     tierDensity?: Partial<typeof themeValues.palette.tierDensity>
+    tierLeverage?: Partial<typeof themeValues.palette.tierLeverage>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
     waterThemes?: Partial<typeof themeValues.palette.waterThemes>

@@ -124,6 +124,19 @@ export type {
   ResilienceCellRender,
   ResilienceGlyphEntry,
 } from "./components/ResilienceHeatmap"
+export { default as ResilienceHeatmapSmallMultiples } from "./components/ResilienceHeatmapSmallMultiples"
+export type {
+  ResilienceHeatmapSmallMultiplesProps,
+  ResilienceSmallMultiplesTile,
+  ResilienceSmallMultiplesTileAspect,
+} from "./components/ResilienceHeatmapSmallMultiples"
+export { default as ResilienceQuadrant } from "./components/ResilienceQuadrant"
+export type {
+  ResilienceQuadrantProps,
+  ResilienceQuadrantDatum,
+  ResilienceQuadrantPalette,
+  ResilienceQuadrantUnit,
+} from "./components/ResilienceQuadrant"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,

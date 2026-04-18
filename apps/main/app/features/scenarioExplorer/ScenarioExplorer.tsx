@@ -25,6 +25,7 @@ import {
   ComparisonPanel,
   EquityPanel,
   ResiliencePanel,
+  ResilienceQuadrantPanel,
   RadarPanel,
 } from "./exploreView"
 import type {
@@ -158,11 +159,14 @@ export default function ScenarioExplorer() {
       aggregateScope: "all",
       reorderBySimilarity: false,
       showMarginals: false,
+      showAllScenarios: false,
       focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
       focusOutcomeCode: "CWS_DEL",
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
       showRegionalSplit: false,
       showCellNumbers: true,
+      quadrantUnit: "outcome",
+      quadrantOutcome: "CWS_DEL",
     })
 
   const handleResilienceControlsChange = useCallback(
@@ -356,13 +360,21 @@ export default function ScenarioExplorer() {
                     onScenarioHover={handleToolScenarioHover}
                   />
                 )}
-                {exploreMode === "resilience" && (
-                  <ResiliencePanel
-                    controls={resilienceControls}
-                    highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
-                  />
-                )}
+                {exploreMode === "resilience" &&
+                  (resilienceControls.view === "quadrant" ? (
+                    <ResilienceQuadrantPanel
+                      controls={resilienceControls}
+                      onControlsChange={handleResilienceControlsChange}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  ) : (
+                    <ResiliencePanel
+                      controls={resilienceControls}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  ))}
                 {exploreMode === "data" && <DataExplorerView />}
               </UnifiedToolLayout>
             </Box>
