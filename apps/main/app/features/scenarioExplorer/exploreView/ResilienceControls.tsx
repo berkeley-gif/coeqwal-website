@@ -31,6 +31,7 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { InlineToggleChip } from "../components/InlineToggleChip"
+import { useScenarioExplorerStore } from "../store"
 import type {
   CellEncoding,
   DeltaMode,
@@ -75,36 +76,42 @@ export default function ResilienceControls({
     reorderBySimilarity,
     showMarginals,
     showAllScenarios,
-    focusOutcomeCode,
     selectedHydroclimates,
-    showRegionalSplit,
     showCellNumbers,
     quadrantUnit,
     quadrantOutcome,
   } = controls
 
+  const showResilienceOutcomeSelector = useScenarioExplorerStore(
+    (s) => s.showResilienceOutcomeSelector,
+  )
+  const setShowResilienceOutcomeSelector = useScenarioExplorerStore(
+    (s) => s.setShowResilienceOutcomeSelector,
+  )
+
+  // Flat outcome list (key outcomes + regional variants) used by the
+  // quadrant LOI outcome picker. The heatmap's row visibility is driven
+  // by the "choose outcome rows" picker instead (see ResiliencePanel).
   const outcomeItems = useMemo(() => {
     const items: { code: string; label: string; indent?: boolean }[] = []
     for (const code of OUTCOME_CODE_ORDER) {
       items.push({ code, label: getOutcomeName(code) })
-      if (showRegionalSplit) {
-        const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-        if (variants) {
-          items.push({
-            code: variants[0],
-            label: getOutcomeName(variants[0]),
-            indent: true,
-          })
-          items.push({
-            code: variants[1],
-            label: getOutcomeName(variants[1]),
-            indent: true,
-          })
-        }
+      const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
+      if (variants) {
+        items.push({
+          code: variants[0],
+          label: getOutcomeName(variants[0]),
+          indent: true,
+        })
+        items.push({
+          code: variants[1],
+          label: getOutcomeName(variants[1]),
+          indent: true,
+        })
       }
     }
     return items
-  }, [showRegionalSplit])
+  }, [])
 
   const scenarioItems = useMemo(() => {
     return siblingGroups.map((s) => ({
@@ -133,13 +140,6 @@ export default function ResilienceControls({
       onChange(patch)
     },
     [view, cellEncoding, onChange],
-  )
-
-  const handleFocusOutcomeChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onChange({ focusOutcomeCode: e.target.value })
-    },
-    [onChange],
   )
 
   const toggleHydroclimate = useCallback(
@@ -225,21 +225,18 @@ export default function ResilienceControls({
       cellEncoding === "tier" ||
       cellEncoding === "delta")
 
-  // After Phase 3, by-outcome view renders all 19 outcomes as tiles
-  // (small multiples), so neither view has a focus-outcome dropdown.
-  // The outcome picker remains for the quadrant LOI mode (handled
-  // separately below). Outcome subsetting is a later phase.
-  const showOutcomeFocusSelect = false
   // "Show all scenarios" mirrors the radar panel: applies to the two
   // scenario-driven views. Aggregate view has its own `aggregateScope`
   // toggle; quadrant view uses it too.
   const showShowAllScenariosChip = view === "scenario" || view === "outcome"
+  // "Choose outcome rows" picker applies to every heatmap view; hidden
+  // in quadrant.
+  const showOutcomeRowsChip = !isQuadrant
   const showEncodingSelect = SHOW_INSIGHT_MODES && view === "aggregate"
   const showAggregateScope =
     SHOW_INSIGHT_MODES && (view === "aggregate" || isQuadrant)
   const showReorderChip = SHOW_INSIGHT_MODES && !isQuadrant
   const showMarginalsChip = SHOW_INSIGHT_MODES && !isQuadrant
-  const showNodSodToggle = !isQuadrant
   const showCellNumbersToggle = !isQuadrant
   const showHydroclimatePicker = !isQuadrant
   // The second-line divider is only useful when at least one of the
@@ -309,40 +306,6 @@ export default function ResilienceControls({
         </Box>
       )}
 
-      {/* Outcome focus picker (by-outcome view only — scenario view
-          is sidebar-driven). */}
-      {showOutcomeFocusSelect && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Typography variant="compactCaption" sx={captionSx}>
-            Outcome:
-          </Typography>
-          <Select
-            size="small"
-            value={focusOutcomeCode}
-            onChange={handleFocusOutcomeChange}
-            sx={{
-              minWidth: 200,
-              maxWidth: 320,
-              fontSize: "0.8125rem",
-              ".MuiSelect-select": { py: 0.5 },
-            }}
-          >
-            {outcomeItems.map((o) => (
-              <MenuItem
-                key={o.code}
-                value={o.code}
-                sx={{
-                  fontSize: "0.8125rem",
-                  pl: o.indent ? 4 : 2,
-                }}
-              >
-                {o.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </Box>
-      )}
-
       {/* Show-all-scenarios chip (by-scenario and by-outcome views).
           Mirrors the radar panel pattern: when off, the view respects
           sidebar selection; when on, it falls back to all 24. */}
@@ -351,6 +314,19 @@ export default function ResilienceControls({
           label="show all scenarios"
           active={showAllScenarios}
           onClick={() => onChange({ showAllScenarios: !showAllScenarios })}
+        />
+      )}
+
+      {/* Choose outcome rows — opens the checkbox overlay in
+          ResiliencePanel. Mirrors the radar's "choose outcome axes"
+          pattern. */}
+      {showOutcomeRowsChip && (
+        <InlineToggleChip
+          label="choose outcome rows"
+          active={showResilienceOutcomeSelector}
+          onClick={() =>
+            setShowResilienceOutcomeSelector(!showResilienceOutcomeSelector)
+          }
         />
       )}
 
@@ -574,15 +550,6 @@ export default function ResilienceControls({
           label="marginals"
           active={showMarginals}
           onClick={() => onChange({ showMarginals: !showMarginals })}
-        />
-      )}
-
-      {/* NOD/SOD toggle (heatmap-only) */}
-      {showNodSodToggle && (
-        <InlineToggleChip
-          label="NOD/SOD rows"
-          active={showRegionalSplit}
-          onClick={() => onChange({ showRegionalSplit: !showRegionalSplit })}
         />
       )}
 

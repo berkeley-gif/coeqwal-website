@@ -25,10 +25,12 @@ import React, {
 } from "react"
 import {
   Box,
+  Checkbox,
   CircularProgress,
   Typography,
   useTheme,
 } from "@repo/ui/mui"
+import { TooltipCloseButton } from "@repo/ui"
 import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
 import {
   ResilienceHeatmap,
@@ -118,15 +120,8 @@ export interface ResilienceControlsState {
    * pattern in RadarPanel.
    */
   showAllScenarios: boolean
-  /**
-   * Retained for the delta-vs-baseline feature. No longer user-selectable
-   * as a "focus" dropdown; by-scenario view now derives its focused
-   * scenario from `selectedScenarios` in the store.
-   */
-  focusScenarioId: string
   focusOutcomeCode: string
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
-  showRegionalSplit: boolean
   showCellNumbers: boolean
   quadrantUnit: QuadrantUnit
   quadrantOutcome: string | null
@@ -190,13 +185,27 @@ export default function ResiliencePanel({
     showAllScenarios,
     focusOutcomeCode,
     selectedHydroclimates,
-    showRegionalSplit,
     showCellNumbers,
   } = controls
 
   const { selectedScenarios } = useScenarioExplorerStore()
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
+  )
+  const showResilienceOutcomeSelector = useScenarioExplorerStore(
+    (s) => s.showResilienceOutcomeSelector,
+  )
+  const setShowResilienceOutcomeSelector = useScenarioExplorerStore(
+    (s) => s.setShowResilienceOutcomeSelector,
+  )
+  const resilienceVisibleOutcomes = useScenarioExplorerStore(
+    (s) => s.resilienceVisibleOutcomes,
+  )
+  const toggleResilienceOutcome = useScenarioExplorerStore(
+    (s) => s.toggleResilienceOutcome,
+  )
+  const setResilienceVisibleOutcomes = useScenarioExplorerStore(
+    (s) => s.setResilienceVisibleOutcomes,
   )
 
   // Effective per-view scenario scope. Mirrors the radar-panel pattern:
@@ -333,14 +342,25 @@ export default function ResiliencePanel({
       }))
   }, [hydroclimates, selectedHydroclimates])
 
-  // Outcome-row order (aggregate + optional NOD/SOD interleaved)
+  // Outcome-row order. Driven by the "choose outcome rows" picker in
+  // the store: iterates OUTCOME_CODE_ORDER to preserve the canonical
+  // sequence, then interleaves each key outcome's NOD/SOD variants
+  // immediately after its parent (each row included only when present
+  // in `resilienceVisibleOutcomes`).
   const outcomeRowCodes = useMemo(() => {
-    if (!showRegionalSplit) return OUTCOME_CODE_ORDER as readonly string[]
-    return OUTCOME_CODE_ORDER.flatMap<string>((code) => {
+    const selected = new Set(resilienceVisibleOutcomes)
+    const rows: string[] = []
+    for (const code of OUTCOME_CODE_ORDER) {
+      if (selected.has(code)) rows.push(code)
       const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-      return variants ? [code, variants[0], variants[1]] : [code]
-    })
-  }, [showRegionalSplit])
+      if (variants) {
+        for (const v of variants) {
+          if (selected.has(v)) rows.push(v)
+        }
+      }
+    }
+    return rows
+  }, [resilienceVisibleOutcomes])
 
   // Scenario-row order (for outcome view): primary baseline first, then
   // the 24 sibling-group order (already sorted by useScenarioList).
@@ -1100,6 +1120,9 @@ export default function ResiliencePanel({
     !showAllScenarios &&
     selectedScenarios.length === 0
 
+  // All three heatmap views depend on at least one visible outcome row.
+  const noOutcomesSelected = outcomeRowCodes.length === 0 && view !== "quadrant"
+
   // Render states
 
   if (error) {
@@ -1212,6 +1235,15 @@ export default function ResiliencePanel({
           position: "relative",
         }}
       >
+        {showResilienceOutcomeSelector && (
+          <ResilienceOutcomeSelector
+            visible={resilienceVisibleOutcomes}
+            onToggle={toggleResilienceOutcome}
+            onSetAll={setResilienceVisibleOutcomes}
+            onClose={() => setShowResilienceOutcomeSelector(false)}
+          />
+        )}
+
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={view}
@@ -1272,6 +1304,25 @@ export default function ResiliencePanel({
               Select one or more scenarios in the sidebar to populate this
               view, or toggle &ldquo;show all scenarios&rdquo; in the chart
               controls above.
+            </Typography>
+          </Box>
+        ) : noOutcomesSelected ? (
+          <Box
+            sx={{
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              px: 3,
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "center", maxWidth: 480 }}
+            >
+              No outcome rows selected. Open &ldquo;choose outcome rows&rdquo;
+              in the chart controls above to pick which outcomes to display.
             </Typography>
           </Box>
         ) : view === "scenario" ? (
@@ -1338,6 +1389,233 @@ export default function ResiliencePanel({
           }}
         />
       )}
+    </Box>
+  )
+}
+
+// Outcome-row picker overlay. Mirrors the radar's "choose axes" panel:
+// 220px wide, anchored to the left of the chart area, with a header,
+// two group toggles ("All key outcomes" / "All regional outcomes"), and
+// per-outcome checkboxes (regional variants indented under their parent
+// key outcome).
+function ResilienceOutcomeSelector({
+  visible,
+  onToggle,
+  onSetAll,
+  onClose,
+}: {
+  visible: readonly string[]
+  onToggle: (code: string) => void
+  onSetAll: (codes: string[]) => void
+  onClose: () => void
+}) {
+  const theme = useTheme()
+  const visibleSet = useMemo(() => new Set(visible), [visible])
+
+  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => visibleSet.has(c))
+  const someKeySelected =
+    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => visibleSet.has(c))
+
+  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
+    visibleSet.has(c),
+  )
+  const someRegionalSelected =
+    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => visibleSet.has(c))
+
+  const toggleGroup = useCallback(
+    (codes: readonly string[], allOn: boolean) => {
+      if (allOn) {
+        onSetAll(visible.filter((c) => !codes.includes(c)))
+      } else {
+        const merged = [...visible]
+        for (const c of codes) {
+          if (!merged.includes(c)) merged.push(c)
+        }
+        onSetAll(merged)
+      }
+    },
+    [visible, onSetAll],
+  )
+
+  const withRegional = useMemo(
+    () =>
+      OUTCOME_CODE_ORDER.filter(
+        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
+      ),
+    [],
+  )
+  const withoutRegional = useMemo(
+    () =>
+      OUTCOME_CODE_ORDER.filter(
+        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
+      ),
+    [],
+  )
+
+  const checkboxSx = useMemo(
+    () => ({ padding: 0, margin: 0, transform: "scale(0.8)" }),
+    [],
+  )
+
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        top: 0,
+        left: theme.space.component.lg,
+        bottom: theme.space.component.md,
+        width: 220,
+        zIndex: 2,
+        overflowY: "auto",
+        borderRight: `1px solid ${theme.palette.divider}`,
+        bgcolor: theme.palette.background.paper,
+        py: 1.5,
+        px: 1,
+      }}
+    >
+      <TooltipCloseButton
+        onClick={onClose}
+        ariaLabel="Close choose outcome rows panel"
+      />
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 700,
+          fontSize: "0.7rem",
+          letterSpacing: "0.04em",
+          color: "text.primary",
+          mb: 1,
+          display: "block",
+          pl: 0.5,
+          pr: 5,
+        }}
+      >
+        Choose outcome rows
+      </Typography>
+
+      <OutcomeRow
+        label="All key outcomes"
+        checked={allKeySelected}
+        indeterminate={someKeySelected}
+        bold
+        onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
+        sx={checkboxSx}
+      />
+      <OutcomeRow
+        label="All regional outcomes"
+        checked={allRegionalSelected}
+        indeterminate={someRegionalSelected}
+        bold
+        onClick={() => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)}
+        sx={checkboxSx}
+      />
+
+      <Box
+        sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
+      />
+
+      {withRegional.map((code) => {
+        const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
+        return (
+          <Box key={code} sx={{ mb: 0.75 }}>
+            <OutcomeRow
+              label={getOutcomeName(code)}
+              checked={visibleSet.has(code)}
+              bold
+              onClick={() => onToggle(code)}
+              sx={checkboxSx}
+            />
+            {variants.map((vCode) => (
+              <OutcomeRow
+                key={vCode}
+                label={
+                  vCode.startsWith("NOD")
+                    ? "North of Delta"
+                    : "South of Delta"
+                }
+                checked={visibleSet.has(vCode)}
+                indent
+                onClick={() => onToggle(vCode)}
+                sx={checkboxSx}
+              />
+            ))}
+          </Box>
+        )
+      })}
+
+      <Box
+        sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
+      />
+
+      {withoutRegional.map((code) => (
+        <OutcomeRow
+          key={code}
+          label={getOutcomeName(code)}
+          checked={visibleSet.has(code)}
+          bold
+          onClick={() => onToggle(code)}
+          sx={checkboxSx}
+        />
+      ))}
+    </Box>
+  )
+}
+
+function OutcomeRow({
+  label,
+  checked,
+  indeterminate,
+  bold,
+  indent,
+  onClick,
+  sx,
+}: {
+  label: string
+  checked: boolean
+  indeterminate?: boolean
+  bold?: boolean
+  indent?: boolean
+  onClick: () => void
+  sx: Record<string, unknown>
+}) {
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        width: "100%",
+        border: "none",
+        background: "none",
+        cursor: "pointer",
+        py: 0.35,
+        pl: indent ? 2.5 : 0.5,
+        pr: 0.5,
+        borderRadius: 0.5,
+        "&:hover": { bgcolor: "action.hover" },
+      }}
+    >
+      <Checkbox
+        size="small"
+        checked={checked}
+        indeterminate={indeterminate}
+        tabIndex={-1}
+        sx={sx}
+      />
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: bold ? 500 : 400,
+          fontSize: "0.72rem",
+          lineHeight: 1.3,
+          textAlign: "left",
+        }}
+      >
+        {label}
+      </Typography>
     </Box>
   )
 }

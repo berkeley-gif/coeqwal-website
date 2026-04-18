@@ -160,10 +160,8 @@ export default function ScenarioExplorer() {
       reorderBySimilarity: false,
       showMarginals: false,
       showAllScenarios: false,
-      focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
       focusOutcomeCode: "CWS_DEL",
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
-      showRegionalSplit: false,
       showCellNumbers: true,
       quadrantUnit: "outcome",
       quadrantOutcome: "CWS_DEL",
@@ -181,7 +179,7 @@ export default function ScenarioExplorer() {
       return (
         <ChartControlsBar>
           <InlineToggleChip
-            label="choose axes"
+            label="choose outcome axes"
             active={showAxisSelector}
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
