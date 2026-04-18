@@ -10,12 +10,13 @@
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
  */
 
-import React from "react"
+import React, { useState } from "react"
 import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
 import { useScenarioExplorerStore } from "../store"
+import { HowToReadChartModal } from "./HowToReadChartModal"
 
 interface ToolToolbarProps {
   gridAligned?: boolean
@@ -48,6 +49,8 @@ export default function ToolToolbar({
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
+  const [howToReadOpen, setHowToReadOpen] = useState(false)
+
   const viewControls = (
     <>
       <Box
@@ -59,14 +62,31 @@ export default function ToolToolbar({
         }}
       >
         <Box
-          component="span"
+          component="button"
+          type="button"
+          onClick={() => setHowToReadOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={howToReadOpen}
           sx={{
             display: "inline-flex",
             alignItems: "center",
             gap: 0.5,
-            color: "grey.400",
-            pointerEvents: "none",
-            userSelect: "none",
+            p: 0,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: theme.palette.text.primary,
+            font: "inherit",
+            textDecoration: "none",
+            transition: "color 120ms",
+            "&:hover": {
+              color: theme.palette.blue.bright,
+            },
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.blue.bright}`,
+              outlineOffset: 2,
+              borderRadius: theme.borderRadius.sm,
+            },
           }}
         >
           <Typography
@@ -185,6 +205,11 @@ export default function ToolToolbar({
           />
         )}
       </Box>
+      <HowToReadChartModal
+        open={howToReadOpen}
+        onClose={() => setHowToReadOpen(false)}
+        exploreMode={exploreMode}
+      />
     </>
   )
 
