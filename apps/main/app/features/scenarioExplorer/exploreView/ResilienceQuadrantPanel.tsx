@@ -49,6 +49,7 @@ import {
   type OutcomeCode,
 } from "../../../content/outcomes"
 import { hydroclimateOptions } from "../../../content/scenarios"
+import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import type { ResilienceControlsState } from "./ResiliencePanel"
 
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
@@ -74,14 +75,14 @@ export default function ResilienceQuadrantPanel({
   onScenarioHover,
 }: ResilienceQuadrantPanelProps) {
   const theme = useTheme()
-  const {
-    quadrantUnit,
-    quadrantOutcome,
-    aggregateScope,
-    focusScenarioId,
-  } = controls
+  const { quadrantUnit, quadrantOutcome, aggregateScope } = controls
 
   const { selectedScenarios } = useScenarioExplorerStore()
+  // Scenario used for LOI-level map focus. Prefer the user's first
+  // sidebar selection; fall back to the baseline so "show on map" still
+  // works when nothing is pinned.
+  const loiMapScenarioId =
+    selectedScenarios[0] ?? PRIMARY_SCENARIO_BASELINE_ID
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
   )
@@ -282,10 +283,10 @@ export default function ResilienceQuadrantPanel({
       // exist yet, so we degrade to the same behavior as a heatmap cell
       // click.
       if (!isMapVisible) return
-      if (!loiOutcomeCode || !focusScenarioId) return
-      showOutcomeOnMap(loiOutcomeCode, focusScenarioId)
+      if (!loiOutcomeCode || !loiMapScenarioId) return
+      showOutcomeOnMap(loiOutcomeCode, loiMapScenarioId)
     },
-    [isMapVisible, loiOutcomeCode, focusScenarioId, showOutcomeOnMap],
+    [isMapVisible, loiOutcomeCode, loiMapScenarioId, showOutcomeOnMap],
   )
 
   // Render.
