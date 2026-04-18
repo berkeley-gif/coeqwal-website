@@ -1281,7 +1281,7 @@ export default function ResiliencePanel({
               justifyContent: "center",
             }}
           >
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2">
               Select one or more scenarios in the sidebar to aggregate over,
               or switch the aggregate scope to &ldquo;all scenarios&rdquo;.
             </Typography>
@@ -1298,7 +1298,6 @@ export default function ResiliencePanel({
           >
             <Typography
               variant="body2"
-              color="text.secondary"
               sx={{ textAlign: "center", maxWidth: 480 }}
             >
               Select one or more scenarios in the sidebar to populate this
