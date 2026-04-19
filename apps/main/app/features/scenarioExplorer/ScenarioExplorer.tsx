@@ -330,7 +330,10 @@ export default function ScenarioExplorer() {
                   )
                 }
                 toolbar={
-                  <ToolToolbar gridAligned={isListMode} hideTitle={!isListMode} />
+                  <ToolToolbar
+                    gridAligned={isListMode}
+                    hideTitle={!isListMode}
+                  />
                 }
                 chartControls={isListMode ? undefined : chartControls}
               >
