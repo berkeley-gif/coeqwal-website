@@ -156,7 +156,14 @@ export default function ToolToolbar({
 
       <VerticalDivider />
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          flexWrap: "wrap",
+        }}
+      >
         <Typography
           variant="dashboard"
           sx={{
