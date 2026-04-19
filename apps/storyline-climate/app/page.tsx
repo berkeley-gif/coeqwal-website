@@ -1,53 +1,111 @@
 "use client"
 
-import { useRef } from "react"
-import { HeaderStory } from "@repo/motion/components"
 import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import SectionStarter from "./components/02Temperature"
-import SectionSnow from "./components/03Snowmelt"
-import SectionDelta from "./components/05Delta"
-import SectionTransition from "./components/06AdaptTransition"
-import SectionGroundwater from "./components/04Groundwater"
-import SectionResolution from "./components/07Resolution"
+import { Temperature, TemperatureBuilder } from "./components/02Temperature"
 import { AnimatePresence, motion } from "@repo/motion"
+import { BaseHeader } from "@repo/ui"
+import {
+  SCROLLAMA_CONFIG,
+  useScrollamaSection,
+} from "./hooks/useScrollamaSection"
+import { Scrollama, Step } from "react-scrollama"
+import { SectionId } from "./store"
+import SierraNevada, { Snowmelt } from "./components/03Snowmelt"
+import Groundwater from "./components/04Groundwater"
+import Balance, { Bullet } from "./components/06AdaptTransition"
+import SectionResolution from "./components/07Resolution"
 
 export default function StoryContainer() {
-  const containerRef = useRef<HTMLDivElement>(null)
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
 
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
-      <HeaderStory />
-      <Box
-        component="main"
-        ref={containerRef}
-        sx={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          margin: 0,
-          padding: 0,
-          width: "100%",
-          "& > *": {
-            margin: 0,
-          },
-          pointerEvents: "none",
-          color: "common.white",
-        }}
-      >
-        <Opener />
-        <SectionStarter />
-        <SectionSnow />
-        <SectionGroundwater />
-        <SectionDelta />
-        <SectionTransition />
-        <SectionResolution />
-      </Box>
+      <BaseHeader backgroundColor="overlay.waterDark" />
+      <ContentContainer />
     </>
+  )
+}
+
+function ContentContainer() {
+  const { onStepEnter } = useScrollamaSection()
+
+  return (
+    <Box
+      component="main"
+      sx={{
+        position: "relative",
+        pointerEvents: "none",
+        color: "common.white",
+      }}
+    >
+      <Scrollama
+        onStepEnter={onStepEnter}
+        offset={SCROLLAMA_CONFIG.offset}
+        debug={SCROLLAMA_CONFIG.debug}
+      >
+        {/* Opener is intentionally non-sticky. */}
+        <Step data={"opener" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Opener />
+          </Box>
+        </Step>
+
+        {/* These components already manage sticky behavior internally via StickyContainer. */}
+        <Step data={"temperatureBuilder" as SectionId}>
+          <Box width="100%">
+            <TemperatureBuilder />
+          </Box>
+        </Step>
+
+        <Step data={"temperature" as SectionId}>
+          <Box width="100%">
+            <Temperature />
+          </Box>
+        </Step>
+
+        <Step data={"sierranevada" as SectionId}>
+          <Box width="100%">
+            <SierraNevada />
+          </Box>
+        </Step>
+
+        <Step data={"snowmelt" as SectionId}>
+          <Box width="100%">
+            <Snowmelt />
+          </Box>
+        </Step>
+
+        <Step data={"groundwater" as SectionId}>
+          <Box width="100%">
+            <Groundwater />
+          </Box>
+        </Step>
+
+        {/* Add Delta View*/}
+
+        <Step data={"balance" as SectionId}>
+          <Box width="100%">
+            <Balance />
+          </Box>
+        </Step>
+
+        <Step data={"bullet" as SectionId}>
+          <Box width="100%">
+            <Bullet />
+          </Box>
+        </Step>
+
+        <Step data={"bullet" as SectionId}>
+          <Box width="100%">
+            <SectionResolution />
+          </Box>
+        </Step>
+      </Scrollama>
+    </Box>
   )
 }
 

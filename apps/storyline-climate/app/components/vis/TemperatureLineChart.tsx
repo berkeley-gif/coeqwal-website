@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import * as d3 from "d3"
+import { scaleLinear, type ScaleLinear, ticks, extent, mean } from "@repo/viz"
+import { format, csvParse, line, curveMonotoneX } from "@repo/viz"
 import { OffWhiteColor } from "../helpers/colorPalette"
 import { motion, MotionValue, useTransform } from "@repo/motion"
-import { Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
 
 type Row = { Date: string; Value: string }
@@ -12,19 +13,6 @@ type Margin = { top: number; right: number; bottom: number; left: number }
 type ContainerSize = { width: number; height: number }
 
 const defaultMargin: Margin = { top: 24, right: 24, bottom: 80, left: 100 }
-const axisColor = OffWhiteColor
-// consistent font styling for all axis and label text
-//TODO: make this consistent throughout the story
-const axisLabelStyle: React.CSSProperties = {
-  fontSize: "1.1rem",
-  fill: OffWhiteColor,
-}
-
-const titleLabelStyle: React.CSSProperties = {
-  fontSize: "1.25rem",
-  fill: OffWhiteColor,
-  fontWeight: "bold",
-}
 
 function XAxis({
   size,
@@ -34,11 +22,12 @@ function XAxis({
   ticks,
 }: {
   size: ContainerSize
-  xScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
   margin: Margin
   scrollProgress: MotionValue<number>
   ticks: number[]
 }) {
+  const theme = useTheme()
   const y = size.height - margin.bottom
 
   const linePathLength = usePlayAnimationOnce(
@@ -48,17 +37,7 @@ function XAxis({
   )
   return (
     <>
-      {/*
-        <g className="x-axis-line">
-        <path
-          d={`M${margin.left},${y} L${size.width - margin.right},${y}`}
-          stroke={axisColor}
-          strokeWidth={1}
-        />
-      </g>
-      */}
-
-      <g className="x-axis-ticks">
+      <g>
         {ticks.map((t, i) => (
           <XTick
             idx={i}
@@ -76,7 +55,8 @@ function XAxis({
         y={y}
         dy="3em"
         style={{
-          ...titleLabelStyle,
+          fill: OffWhiteColor,
+          fontSize: theme.typography.subtitle2.fontSize,
           textAnchor: "middle",
           opacity: linePathLength,
         }}
@@ -100,6 +80,7 @@ function XTick({
   idx: number
   scrollProgress: MotionValue<number>
 }) {
+  const theme = useTheme()
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
 
@@ -110,16 +91,20 @@ function XTick({
         x2={xPos}
         y1={yPos}
         y2={yPos + 6}
-        stroke={axisColor}
+        stroke={OffWhiteColor}
         strokeWidth={1}
       />
       <text
         x={xPos}
         y={yPos}
         dy="1.6em"
-        style={{ ...axisLabelStyle, textAnchor: "middle" }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
+          textAnchor: "middle",
+        }}
       >
-        {d3.format("d")(tick)}
+        {format("d")(tick)}
       </text>
     </motion.g>
   )
@@ -132,12 +117,13 @@ function YAxis({
   scrollProgress,
   labelOffset = -80, // extra spacing for label
 }: {
-  yScale: d3.ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
   margin: Margin
   ticks: number[]
   scrollProgress: MotionValue<number>
   labelOffset?: number
 }) {
+  const theme = useTheme()
   const [r0, r1] = yScale.range() as [number, number]
   const center = (r0 + r1) / 2
 
@@ -154,7 +140,7 @@ function YAxis({
         x2={0}
         y1={r0}
         y2={r1}
-        stroke={axisColor}
+        stroke={OffWhiteColor}
         strokeWidth={1}
         pathLength={linePathLength}
       />
@@ -174,7 +160,11 @@ function YAxis({
       <motion.text
         transform={`translate(${labelOffset},${center}) rotate(-90)`}
         textAnchor="middle"
-        style={{ ...titleLabelStyle, opacity: linePathLength }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.subtitle2.fontSize,
+          opacity: linePathLength,
+        }}
       >
         Temperature (°F)
       </motion.text>
@@ -195,15 +185,23 @@ function YTick({
 }) {
   const range: [number, number] = [0.1 + idx * 0.02, 0.3 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
+  const theme = useTheme()
 
   return (
-    <motion.g key={idx} style={{ opacity: tickOpacity }}>
+    <motion.g
+      key={idx}
+      style={{
+        opacity: tickOpacity,
+        fontSize: theme.typography.caption.fontSize,
+        fill: OffWhiteColor,
+      }}
+    >
       <line
         x1={-6}
         x2={0}
         y1={yPos}
         y2={yPos}
-        stroke={axisColor}
+        stroke={OffWhiteColor}
         strokeWidth={1}
       />
       <text
@@ -211,9 +209,9 @@ function YTick({
         y={yPos}
         dx="-0.25em"
         dy="0.35em"
-        style={{ ...axisLabelStyle, textAnchor: "end" }}
+        style={{ fill: OffWhiteColor, textAnchor: "end" }}
       >
-        {d3.format(".2~f")(tick)}
+        {format(".2~f")(tick)}
       </text>
     </motion.g>
   )
@@ -252,7 +250,7 @@ export default function TemperatureLineChart({
         .split(/\r?\n/)
         .filter((line) => line.trim() && !line.startsWith("#"))
         .join("\n")
-      const rows = d3.csvParse(cleaned) as Row[]
+      const rows = csvParse(cleaned) as Row[]
 
       const all: Point[] = rows
         .map((r) => {
@@ -275,7 +273,7 @@ export default function TemperatureLineChart({
 
   const avg = useMemo(() => {
     const filtered = points.filter((d) => d.year >= 1960 && d.year <= 2025)
-    return filtered.length ? d3.mean(filtered, (d) => d.value)! : undefined
+    return filtered.length ? mean(filtered, (d) => d.value)! : undefined
   }, [points])
 
   const height = 480
@@ -286,17 +284,15 @@ export default function TemperatureLineChart({
 
   const xScale = useMemo(() => {
     if (!points.length) return null
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain([START_YEAR, END_YEAR])
       .range([margin.left, margin.left + innerW])
   }, [points, innerW, margin.left])
 
   const yScale = useMemo(() => {
     if (!points.length) return null
-    return d3
-      .scaleLinear()
-      .domain(d3.extent(points, (d) => d.value) as [number, number])
+    return scaleLinear()
+      .domain(extent(points, (d) => d.value) as [number, number])
       .nice()
       .range([margin.top + innerH, margin.top])
   }, [points, innerH, margin.top])
@@ -304,24 +300,23 @@ export default function TemperatureLineChart({
   const xTicks = useMemo(() => {
     if (!xScale) return []
     const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
-    return d3.ticks(START_YEAR, END_YEAR, count)
+    return ticks(START_YEAR, END_YEAR, count)
   }, [xScale, innerW])
 
   const yTicks = useMemo(() => {
     if (!yScale) return []
     const [y0, y1] = yScale.domain() as [number, number] // force tuple
     //const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
-    return d3.ticks(y0, y1, 6)
+    return ticks(y0, y1, 6)
   }, [yScale])
 
   const linePath = useMemo(() => {
     if (!xScale || !yScale) return ""
     return (
-      d3
-        .line<Point>()
+      line<Point>()
         .x((d) => xScale(d.year))
         .y((d) => yScale(d.value))
-        .curve(d3.curveMonotoneX)(points) ?? ""
+        .curve(curveMonotoneX)(points) ?? ""
     )
   }, [points, xScale, yScale])
 
@@ -338,14 +333,15 @@ export default function TemperatureLineChart({
   )
 
   return (
-    <div style={{ position: "relative", width: "100%" }}>
+    <Box
+      style={{
+        position: "relative",
+        width: "100%",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "flex-end", width: "100%" }}>
         <div ref={wrapRef} style={{ flex: "0 0 90%", minWidth: 0 }}>
-          <svg
-            width={size.width}
-            height={size.height}
-            style={{ display: "block" }}
-          >
+          <svg width={size.width} height={size.height}>
             {xScale && yScale && (
               <>
                 <XAxis
@@ -404,15 +400,15 @@ export default function TemperatureLineChart({
             opacity: historicalAvgLabelOpacity,
           }}
         >
-          <Typography variant="body2">
+          <Typography variant="subtitle2">
             {START_YEAR}
             {"\u2014"}
             {END_YEAR}
           </Typography>
-          <Typography variant="body2">Historical average</Typography>
-          <Typography variant="body2">{d3.format(".1f")(avg)} °F</Typography>
+          <Typography variant="subtitle2">Historical average</Typography>
+          <Typography variant="subtitle2">{format(".1f")(avg)} °F</Typography>
         </motion.div>
       )}
-    </div>
+    </Box>
   )
 }

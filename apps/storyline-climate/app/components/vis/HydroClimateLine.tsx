@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  scalePoint,
+  scaleLinear,
+  line,
+  area,
+  type ScalePoint,
+  type ScaleLinear,
+} from "@repo/viz"
 import { ContainerSize } from "./HydroClimate"
-import * as d3 from "d3"
 import "./hydroclimate.css"
 
 export type FlowEntry = {
@@ -37,16 +44,14 @@ function FlowLine({
   }, [])
 
   const xScale = useMemo(() => {
-    return d3
-      .scalePoint()
+    return scalePoint()
       .domain(months.map((m) => m.toString()))
       .range([margin.left, size.width - margin.right])
       .padding(0.5)
   }, [months, size.width])
 
   const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain(yExtents)
       .range([size.height - margin.bottom, margin.top])
       .nice()
@@ -76,16 +81,14 @@ function FlowLineWithBand({
   yScale,
 }: {
   data: FlowEntry[]
-  xScale: d3.ScalePoint<string>
-  yScale: d3.ScaleLinear<number, number>
+  xScale: ScalePoint<string>
+  yScale: ScaleLinear<number, number>
 }) {
-  const lineGenerator = d3
-    .line<FlowEntry>()
+  const lineGenerator = line<FlowEntry>()
     .x((d) => xScale(d.monthNum.toString()) ?? 0)
     .y((d) => yScale(d.median))
 
-  const areaGenerator = d3
-    .area<FlowEntry>()
+  const areaGenerator = area<FlowEntry>()
     .x((d) => xScale(d.monthNum.toString()) ?? 0)
     .y0((d) => yScale(d.Qone))
     .y1((d) => yScale(d.Qthree))
@@ -115,7 +118,7 @@ function XAxis({
 }: {
   size: ContainerSize
   yOffset: number
-  xScale: d3.ScalePoint<string>
+  xScale: ScalePoint<string>
 }) {
   const xTicks = ["Oct", "Dec", "Mar", "Jul", "Sep"]
   const xTicksNum = [1, 3, 6, 9, 12]
@@ -153,7 +156,7 @@ function XAxis({
   )
 }
 
-function YAxis({ yScale }: { yScale: d3.ScaleLinear<number, number> }) {
+function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
   return (
     <>
       <g className="y-axis" transform={`translate(${margin.left},0)`}>

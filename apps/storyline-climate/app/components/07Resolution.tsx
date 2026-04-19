@@ -1,79 +1,26 @@
 "use client"
 
 import { Box, Stack, Typography } from "@repo/ui/mui"
-import { motion, MotionValue, useScroll, useTransform } from "@repo/motion"
-import useActiveSection from "../hooks/useActiveSection"
-import { useEffect, useRef } from "react"
+import { motion, useScroll, useTransform } from "@repo/motion"
+import { useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
 import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import ResolutionScenario from "./vis/ResolutionScenerio"
 
 function SectionResolution() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  })
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      console.log("Temperature scrollYProgress:", v)
-    })
-    return () => unsubscribe()
-  }, [scrollYProgress])
-
-  //NOTE: play with this to change how horizontal scroll flows
-  const x = useTransform(scrollYProgress, [0.3, 1], ["0vw", `-${150}vw`])
-
   return (
     <div>
-      <div ref={containerRef} style={{ height: "300vh", position: "relative" }}>
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            overflow: "hidden",
-            height: "100vh",
-            width: "100%",
-          }}
-        >
-          <motion.div
-            style={{
-              x,
-              width: "400vw",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Box width="50%">
-              <Hydroclimate />
-            </Box>
-            <Box width="150vw">
-              <ScenarioTheme scrollProgress={scrollYProgress} />
-            </Box>
-            <Box width="100vw">
-              <ScenarioTransition scrollProgress={scrollYProgress} />
-            </Box>
-            <Box
-              id="scenario-transition"
-              className="container-center"
-              height="100vh"
-              sx={{ position: "relative" }}
-            ></Box>
-          </motion.div>
-        </div>
-      </div>
-
+      <Hydroclimate />
+      <ScenarioTheme />
+      <ScenarioTransition />
       <Conclusion />
     </div>
   )
 }
 
 function Hydroclimate() {
-  const { sectionRef } = useActiveSection("hydroclimate", { amount: 0.5 })
-
+  const sectionRef = useRef(null)
   return (
     <StickyContainer
       sectionID="hydroclimate"
@@ -144,16 +91,16 @@ function Hydroclimate() {
   )
 }
 
-function ScenarioTheme({
-  scrollProgress,
-}: {
-  scrollProgress: MotionValue<number>
-}) {
-  const { sectionRef } = useActiveSection("scenariotheme", { amount: 0.5 })
+function ScenarioTheme() {
+  const sectionRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
 
-  const firstScenario = useTransform(scrollProgress, [0.4, 0.6], [0, 1])
-  const secondScenario = useTransform(scrollProgress, [0.5, 0.6], [0, 1])
-  const restScenario = useTransform(scrollProgress, [0.45, 0.6], [0, 1])
+  const firstScenario = useTransform(scrollYProgress, [0.2, 0.45], [0, 1])
+  const secondScenario = useTransform(scrollYProgress, [0.3, 0.55], [0, 1])
+  const restScenario = useTransform(scrollYProgress, [0.25, 0.6], [0, 1])
 
   return (
     <StickyContainer
@@ -173,19 +120,19 @@ function ScenarioTheme({
   )
 }
 
-function ScenarioTransition({
-  scrollProgress,
-}: {
-  scrollProgress: MotionValue<number>
-}) {
-  const { sectionRef } = useActiveSection("scenariotransition", { amount: 0.5 })
-  const pathLength = useTransform(scrollProgress, [0.7, 1], [0, 1])
+function ScenarioTransition() {
+  const sectionRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
+  const pathLength = useTransform(scrollYProgress, [0.2, 0.9], [0, 1])
 
   //TODO: fix this
   return (
     <StickyContainer
       sectionID="scenariotransition"
-      stickyRollHeight="100vh"
+      stickyRollHeight="140vh"
       sectionRef={sectionRef}
     >
       <SVGLineContainer viewBox="10 157 1128 997">
@@ -232,9 +179,7 @@ function ScenarioTransition({
 }
 
 function Conclusion() {
-  const { sectionRef } = useActiveSection("conclusion", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],

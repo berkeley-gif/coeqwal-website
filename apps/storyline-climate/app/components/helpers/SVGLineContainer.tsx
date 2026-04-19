@@ -10,7 +10,7 @@ interface SVGLineContainerProps {
 function SVGLineContainer({
   viewBox,
   children,
-  preserveAspectRatio = "xMidYMid meet",
+  preserveAspectRatio = "none",
 }: SVGLineContainerProps) {
   return (
     <Box
