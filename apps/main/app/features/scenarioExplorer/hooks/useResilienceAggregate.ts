@@ -50,10 +50,7 @@ export interface UseResilienceAggregateResult {
   /** Human-readable subject label, e.g. "All 24 scenarios" or "12 selected scenarios". */
   subjectLabel: string
   /** Pre-pivoted aggregate cells: cells[outcomeCode][hc]. */
-  cells: Record<
-    string,
-    Record<ResilienceHydroclimate, ResilienceAggregateCell>
-  >
+  cells: Record<string, Record<ResilienceHydroclimate, ResilienceAggregateCell>>
   /** Lookup helper: returns null if outcome/hc is unknown. */
   getCell: (
     outcomeCode: string,
@@ -78,8 +75,13 @@ export function useResilienceAggregate(
   options: UseResilienceAggregateOptions = {},
 ): UseResilienceAggregateResult {
   const matrix = useResilienceMatrix()
-  const { cells: matrixCells, hydroclimates, rowOrder, isLoading, error } =
-    matrix
+  const {
+    cells: matrixCells,
+    hydroclimates,
+    rowOrder,
+    isLoading,
+    error,
+  } = matrix
 
   const effectiveScenarioIds = useMemo(() => {
     const list =
@@ -154,8 +156,7 @@ export function useResilienceAggregate(
         }
 
         const mean = availableCount > 0 ? sum / availableCount : null
-        const riskDensity =
-          availableCount > 0 ? riskCount / availableCount : 0
+        const riskDensity = availableCount > 0 ? riskCount / availableCount : 0
         const opportunityDensity =
           availableCount > 0 ? oppCount / availableCount : 0
 
@@ -175,12 +176,7 @@ export function useResilienceAggregate(
     }
 
     return out
-  }, [
-    effectiveOutcomeCodes,
-    effectiveScenarioIds,
-    hydroclimates,
-    matrixCells,
-  ])
+  }, [effectiveOutcomeCodes, effectiveScenarioIds, hydroclimates, matrixCells])
 
   const getCell = useMemo(() => {
     return (

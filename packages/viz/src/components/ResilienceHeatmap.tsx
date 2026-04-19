@@ -23,13 +23,7 @@
  *  - updateChart deps are minimal; callbacks live in refs.
  */
 
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react"
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { scaleBand, interpolateRgb, select } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
@@ -190,9 +184,10 @@ function divergingColor(
   const v = clamp(value, -3, 3)
   if (v <= -1.5) {
     const t = (v + 3) / 1.5 // 0 at -3 (negStrong) -> 1 at -1.5 (negWeak)
-    return interpolateRgb(palette.divergingNegStrong, palette.divergingNegWeak)(
-      t,
-    )
+    return interpolateRgb(
+      palette.divergingNegStrong,
+      palette.divergingNegWeak,
+    )(t)
   }
   if (v < 0) {
     const t = (v + 1.5) / 1.5 // 0 at -1.5 -> 1 at 0
@@ -415,15 +410,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           valueText = cell.unavailableReason ?? "No data"
         } else if (cellRender === "delta" && cell.divergingValue != null) {
           valueText = `Δ tier ${formatDelta(cell.divergingValue)}`
-        } else if (
-          cellRender === "density_risk" &&
-          cell.densityValue != null
-        ) {
+        } else if (cellRender === "density_risk" && cell.densityValue != null) {
           valueText = `${formatPercent(cell.densityValue)} at Tier 3+`
-        } else if (
-          cellRender === "density_opp" &&
-          cell.densityValue != null
-        ) {
+        } else if (cellRender === "density_opp" && cell.densityValue != null) {
           valueText = `${formatPercent(cell.densityValue)} at Tier 2 or better`
         } else if (cell.tierLevel != null) {
           valueText = `Tier ${cell.tierLevel}${
@@ -500,8 +489,12 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         }
 
         // Reserve extra space for marginal strips when shown.
-        const extraRight = showMarginalRowStrip ? MARGINAL_BAND + MARGINAL_GAP : 0
-        const extraBottom = showMarginalColStrip ? MARGINAL_BAND + MARGINAL_GAP : 0
+        const extraRight = showMarginalRowStrip
+          ? MARGINAL_BAND + MARGINAL_GAP
+          : 0
+        const extraBottom = showMarginalColStrip
+          ? MARGINAL_BAND + MARGINAL_GAP
+          : 0
 
         const innerW = w - MARGIN.left - MARGIN.right - extraRight
         const innerH = h - MARGIN.top - MARGIN.bottom - extraBottom
@@ -579,9 +572,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .attr("cursor", onCellClick ? "pointer" : "default")
 
             if (cell.available && resolved.fill) {
-              rect
-                .attr("fill", resolved.fill)
-                .attr("fill-opacity", opacity)
+              rect.attr("fill", resolved.fill).attr("fill-opacity", opacity)
             } else {
               rect
                 .attr("fill", `url(#${HATCH_ID})`)
@@ -676,10 +667,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 .attr("y", y + bandH / 2)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "central")
-                .attr(
-                  "font-size",
-                  Math.min(Math.min(bandW, bandH) * 0.36, 14),
-                )
+                .attr("font-size", Math.min(Math.min(bandW, bandH) * 0.36, 14))
                 .attr("font-weight", 600)
                 .attr("fill", resolved.textColor)
                 .attr("fill-opacity", opacity)
@@ -865,7 +853,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         })
 
         // X axis (hydroclimates) — shifted down when the col marginal is shown.
-        const xAxisY = innerH + (showMarginalColStrip ? MARGINAL_BAND + MARGINAL_GAP : 0)
+        const xAxisY =
+          innerH + (showMarginalColStrip ? MARGINAL_BAND + MARGINAL_GAP : 0)
         const xAxis = g
           .append("g")
           .attr("class", "resilience-x-axis")

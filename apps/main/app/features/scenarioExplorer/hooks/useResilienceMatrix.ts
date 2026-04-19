@@ -224,14 +224,8 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
     () => buildIdMapping(HC_HISTORICAL),
     [buildIdMapping],
   )
-  const cc50Mapping = useMemo(
-    () => buildIdMapping(HC_CC50),
-    [buildIdMapping],
-  )
-  const cc95Mapping = useMemo(
-    () => buildIdMapping(HC_CC95),
-    [buildIdMapping],
-  )
+  const cc50Mapping = useMemo(() => buildIdMapping(HC_CC50), [buildIdMapping])
+  const cc95Mapping = useMemo(() => buildIdMapping(HC_CC95), [buildIdMapping])
 
   const historicalTiers = useMultipleScenarioTiers(historicalMapping)
   const cc50Tiers = useMultipleScenarioTiers(cc50Mapping)
@@ -243,7 +237,10 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
   )
 
   const cells = useMemo<
-    Record<string, Record<string, Record<ResilienceHydroclimate, ResilienceCell>>>
+    Record<
+      string,
+      Record<string, Record<ResilienceHydroclimate, ResilienceCell>>
+    >
   >(() => {
     const result: Record<
       string,
@@ -253,9 +250,7 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
     const hcSources: Record<
       ResilienceHydroclimate,
       {
-        scores:
-          | Record<string, Record<string, OutcomeScoreData>>
-          | undefined
+        scores: Record<string, Record<string, OutcomeScoreData>> | undefined
         raw: Record<string, ScenarioTiersResponse> | undefined
       }
     > = {
@@ -340,12 +335,7 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
       cc95Tiers.error ??
       null
     )
-  }, [
-    scenariosError,
-    historicalTiers.error,
-    cc50Tiers.error,
-    cc95Tiers.error,
-  ])
+  }, [scenariosError, historicalTiers.error, cc50Tiers.error, cc95Tiers.error])
 
   return {
     scenarioIds,
