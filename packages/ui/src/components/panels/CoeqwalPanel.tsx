@@ -14,6 +14,17 @@
  * layout="single" .everything stacked left-aligned in one column
  * layout="split"  .headline spans full width; description sits in the
  *                    right half only
+ *
+ * Rounded-corner / inset support:
+ *
+ *   - `borderRadius` accepts a token key ("md", "lg", ...) or a raw
+ *     number / CSS string; it is applied to the panel's outer (or inner,
+ *     when inset) `Box` along with `overflow: hidden`.
+ *   - `inset` pulls the panel in from the viewport edges so all four
+ *     rounded corners are visible against a `frameBackground` frame.
+ *     `inset={true}` uses a responsive default; pass `{ x, y }` to tune.
+ *   - Without `inset`, radius is applied in-place and only shows where
+ *     a differently-coloured neighbour sits above / below.
  */
 
 import React from "react"
@@ -25,6 +36,12 @@ import {
   type Theme,
 } from "@mui/material"
 import { motion } from "@repo/motion"
+import {
+  resolveRadius,
+  resolveInset,
+  type RadiusValue,
+  type PanelInset,
+} from "./resolveRadius"
 
 const MotionBox = motion.create(Box)
 
@@ -76,6 +93,17 @@ export interface CoeqwalPanelProps {
    *  "center" (default).vertically centres content.
    *  "top".content starts at the top (useful when descriptionSx handles positioning). */
   contentAlign?: "center" | "top"
+  /** Rounded corner radius for the panel surface. Token key
+   *  ("none"|"xs"|"sm"|"md"|"lg"|"xl"|"2xl"|"pill"|"circle") or raw CSS value.
+   *  Default: no radius (square). */
+  borderRadius?: RadiusValue
+  /** Pull the panel in from the viewport edges so all four rounded
+   *  corners are visible. `true` uses a responsive default;
+   *  `{ x, y }` overrides. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset panel.
+   *  Ignored when `inset` is falsy. Default: transparent (inherits parent). */
+  frameBackground?: string
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -97,10 +125,16 @@ export function CoeqwalPanel({
   childrenMt = 5,
   responsiveHeadline,
   contentAlign = "center",
+  borderRadius,
+  inset,
+  frameBackground,
 }: CoeqwalPanelProps) {
   const theme = useTheme()
   const bg = background ?? theme.palette.common.white
   const fg = textColor ?? theme.palette.text.primary
+
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
 
   const motionProps = contentMotionStyle
     ? { style: contentMotionStyle }
@@ -111,23 +145,8 @@ export function CoeqwalPanel({
         transition: { duration: 0.5, ease: "easeOut" },
       }
 
-  return (
-    <Box
-      component="section"
-      id={id}
-      sx={{
-        background: bg,
-        borderBottom: borderBottom ?? "none",
-        px: theme.space.panel.padding,
-        py: theme.space.panel.padding,
-        ...(minHeight !== undefined && {
-          minHeight,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: contentAlign === "top" ? "flex-start" : "center",
-        }),
-      }}
-    >
+  const contentInner = (
+    <>
       <MotionBox
         {...motionProps}
         sx={
@@ -204,6 +223,68 @@ export function CoeqwalPanel({
 
       {/* Below-the-fold slot.card grids, etc. */}
       {children && <Box sx={{ mt: childrenMt }}>{children}</Box>}
+    </>
+  )
+
+  const panelPadding = {
+    px: theme.space.panel.padding,
+    py: theme.space.panel.padding,
+  }
+
+  const minHeightSx =
+    minHeight !== undefined
+      ? {
+          minHeight,
+          display: "flex",
+          flexDirection: "column" as const,
+          justifyContent:
+            contentAlign === "top" ? ("flex-start" as const) : ("center" as const),
+        }
+      : {}
+
+  // Inset path: outer section is the frame, inner is the rounded card.
+  if (insetCfg) {
+    return (
+      <Box
+        component="section"
+        id={id}
+        sx={{
+          background: frameBackground ?? "transparent",
+          borderBottom: borderBottom ?? "none",
+          px: insetCfg.x,
+          py: insetCfg.y,
+        }}
+      >
+        <Box
+          sx={{
+            background: bg,
+            borderRadius: radius,
+            overflow: radius !== undefined ? "hidden" : undefined,
+            ...panelPadding,
+            ...minHeightSx,
+          }}
+        >
+          {contentInner}
+        </Box>
+      </Box>
+    )
+  }
+
+  // Non-inset path: radius (if any) is applied directly to the section.
+  return (
+    <Box
+      component="section"
+      id={id}
+      sx={{
+        background: bg,
+        borderBottom: borderBottom ?? "none",
+        borderRadius: radius,
+        overflow: radius !== undefined ? "hidden" : undefined,
+        ...panelPadding,
+        ...minHeightSx,
+      }}
+    >
+      {contentInner}
     </Box>
   )
 }

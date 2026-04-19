@@ -7,7 +7,7 @@
  * by location" cell encoding. Fans out `fetchTierLocationAssignments`
  * across the scope scenarios for the requested outcomes + hydroclimates
  * and assembles, per (outcome, hc), a list of `ResilienceGlyphEntry`
- * objects — one per LOI, with the tier level aggregated across scope.
+ * objects - one per LOI, with the tier level aggregated across scope.
  *
  * Mirrors the data-loading pattern of `useResilienceLoiSensitivity`:
  * preload SWR keys and dedupe in-flight requests. Gated by `enabled`

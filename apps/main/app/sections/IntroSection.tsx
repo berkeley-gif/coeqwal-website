@@ -4,7 +4,13 @@ import { useRef, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { CoeqwalPanel, NavArrow } from "@repo/ui"
+import {
+  CoeqwalPanel,
+  NavArrow,
+  tunerRadius,
+  tunerInsetX,
+  tunerInsetY,
+} from "@repo/ui"
 import { motion } from "@repo/motion"
 import {
   useScrollProgress,
@@ -207,6 +213,9 @@ const IntroSection = () => {
           sources={VIDEO_SRCS}
           fallbackImage="/images/home_hero_fallback.png"
           hideHeadline
+          borderRadius={tunerRadius()}
+          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+          frameBackground={theme.palette.common.white}
         />
       </div>
 
@@ -218,6 +227,9 @@ const IntroSection = () => {
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
           minHeight="120vh"
+          borderRadius={tunerRadius()}
+          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+          frameBackground={theme.palette.common.white}
           contentMotionStyle={{ opacity: aboutOpacity }}
           responsiveHeadline={
             <>
@@ -263,27 +275,31 @@ const IntroSection = () => {
         dockRef={waterThemesDockRef}
         contentOpacity={waterThemesOpacity}
         borderBottom={theme.border.light}
+        borderRadius={tunerRadius()}
+        inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+        frameBackground={theme.palette.common.white}
       />
 
-      {/* Spacer between themes panel and site overview */}
+      {/* Want to know more?.frame + rounded inset panel */}
       <Box
         sx={{
-          height: theme.space.panel.padding,
-          backgroundColor: "brand.panelLight",
-        }}
-      />
-
-      {/* On this site, you can */}
-      <Box
-        component="section"
-        aria-label="On this site, you can"
-        sx={{
-          backgroundColor: "brand.panelLight",
-          px: theme.space.panel.padding,
-          pt: theme.space.panel.padding,
-          pb: `calc(${theme.space.panel.padding} + 80px)`,
+          backgroundColor: theme.palette.common.white,
+          px: tunerInsetX(),
+          py: tunerInsetY(),
         }}
       >
+        <Box
+          component="section"
+          aria-label="On this site, you can"
+          sx={{
+            backgroundColor: "brand.panelLight",
+            borderRadius: tunerRadius(),
+            overflow: "hidden",
+            px: theme.space.panel.padding,
+            pt: theme.space.panel.padding,
+            pb: `calc(${theme.space.panel.padding} + 80px)`,
+          }}
+        >
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -355,6 +371,7 @@ const IntroSection = () => {
             Delta.
           </Typography>
         </MotionBox>
+        </Box>
       </Box>
     </Box>
   )

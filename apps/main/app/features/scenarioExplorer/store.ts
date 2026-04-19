@@ -104,7 +104,7 @@ function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
       JSON.stringify({ shareItems: stripped, storyItemIds }),
     )
   } catch {
-    // localStorage full or unavailable — silently ignore
+    // localStorage full or unavailable - silently ignore
   }
 }
 

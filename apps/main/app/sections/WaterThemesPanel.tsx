@@ -15,7 +15,14 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { NavArrow, InfoCard } from "@repo/ui"
+import {
+  NavArrow,
+  InfoCard,
+  resolveRadius,
+  resolveInset,
+  type RadiusValue,
+  type PanelInset,
+} from "@repo/ui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
   StickyScrollSection,
@@ -300,9 +307,15 @@ function ThemeCircleLabel({
 function WaterThemesPanelContent({
   contentOpacity,
   borderBottom,
+  borderRadius,
+  inset,
+  frameBackground,
 }: {
   contentOpacity: MotionValue<number>
   borderBottom?: string
+  borderRadius?: RadiusValue
+  inset?: PanelInset
+  frameBackground?: string
 }) {
   const theme = useTheme()
   const prefersReducedMotion = useReducedMotion()
@@ -319,14 +332,18 @@ function WaterThemesPanelContent({
     prefersReducedMotion ? [0, 0] : [1, 0],
   )
 
-  return (
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
+
+  const content = (
     <Box
       sx={{
         position: "relative",
         width: "100%",
         height: "100%",
         overflow: "hidden",
-        borderBottom: borderBottom ?? "none",
+        borderBottom: insetCfg ? "none" : (borderBottom ?? "none"),
+        borderRadius: radius,
       }}
     >
       {/* Layer 1: Gradient background (always visible) */}
@@ -371,9 +388,9 @@ function WaterThemesPanelContent({
           boxSizing: "border-box",
         }}
       >
-        {/* Headline + intro — fades in with crossfade */}
+        {/* Headline + intro - fades in with crossfade */}
         <motion.div style={{ opacity: contentOpacity }}>
-          {/* Responsive headline — visible on xs–md only */}
+          {/* Responsive headline - visible on xs–md only */}
           <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
             <Typography
               variant="h2Main"
@@ -406,7 +423,7 @@ function WaterThemesPanelContent({
           </Typography>
         </motion.div>
 
-        {/* Five theme cards — horizontal grid */}
+        {/* Five theme cards - horizontal grid */}
         <Box
           sx={{
             display: "grid",
@@ -433,6 +450,27 @@ function WaterThemesPanelContent({
       </Box>
     </Box>
   )
+
+  if (insetCfg) {
+    return (
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          background: frameBackground ?? "transparent",
+          borderBottom: borderBottom ?? "none",
+          px: insetCfg.x,
+          py: insetCfg.y,
+          boxSizing: "border-box",
+        }}
+      >
+        {content}
+      </Box>
+    )
+  }
+
+  return content
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -454,6 +492,13 @@ export interface WaterThemesPanelProps {
   contentOpacity: MotionValue<number>
   /** Bottom border style */
   borderBottom?: string
+  /** Rounded corner radius for the pinned panel surface. */
+  borderRadius?: RadiusValue
+  /** Pull the panel in from the viewport edges so all four rounded
+   *  corners are visible against a `frameBackground`. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset panel. */
+  frameBackground?: string
 }
 
 export function WaterThemesPanel({
@@ -461,6 +506,9 @@ export function WaterThemesPanel({
   dockRef,
   contentOpacity,
   borderBottom,
+  borderRadius,
+  inset,
+  frameBackground,
 }: WaterThemesPanelProps) {
   return (
     <div ref={panelRef}>
@@ -468,6 +516,9 @@ export function WaterThemesPanel({
         <WaterThemesPanelContent
           contentOpacity={contentOpacity}
           borderBottom={borderBottom}
+          borderRadius={borderRadius}
+          inset={inset}
+          frameBackground={frameBackground}
         />
       </StickyScrollSection>
       {/* Dock marker.positioned 75vh above the section end via

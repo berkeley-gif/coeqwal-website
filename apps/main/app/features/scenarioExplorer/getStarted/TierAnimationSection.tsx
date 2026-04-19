@@ -1101,7 +1101,7 @@ export default function TierAnimationSection() {
 
         try {
           // Ensure all animation layers have visibility "visible" at the
-          // layout level — OutcomePolygonLayer may have set them to "none"
+          // layout level - OutcomePolygonLayer may have set them to "none"
           // if it was previously mounted in another map mode.
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
             if (map.getLayer(fill))
@@ -1345,7 +1345,7 @@ export default function TierAnimationSection() {
               map.setPaintProperty("demand-units", "fill-color", expr as never)
             }
             // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
-            // delta-detaw) stay hidden — the SVG overlay handles their outcomes.
+            // delta-detaw) stay hidden - the SVG overlay handles their outcomes.
             // Only demand-units is shown on the map during the animation.
           } catch {
             /* ok */
@@ -1371,7 +1371,7 @@ export default function TierAnimationSection() {
         // Build demand-units opacity expression:
         // - Fading entries: interpolated opacity (0.65 → 0)
         // - Not-yet-fading entries: 0.65 (still visible)
-        // - Untracked DUs: 0 (hidden — prevents ghost mid-blue polygons)
+        // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
         if (duEntries.length > 0 && map.getLayer("demand-units")) {
           const caseExpr: unknown[] = ["case"]
           for (const entry of duEntries) {
@@ -1695,7 +1695,7 @@ export default function TierAnimationSection() {
 
   /**
    * Re-project cached geographic data to screen without re-querying Mapbox.
-   * Safe to call on every map move/zoom — feature count stays stable.
+   * Safe to call on every map move/zoom - feature count stays stable.
    */
   const reprojectShapes = useCallback(() => {
     if (!mapAPI.mapRef?.current || !panelRef.current) return
@@ -1816,7 +1816,7 @@ export default function TierAnimationSection() {
     return () => window.removeEventListener("resize", onResize)
   }, [reprojectShapes])
 
-  // Re-apply offset on scroll (cheap — no Mapbox queries).
+  // Re-apply offset on scroll (cheap - no Mapbox queries).
   // With page-level scrolling, listen on window instead of a parent scroll container.
   useEffect(() => {
     if (!panelInView) return
@@ -2188,7 +2188,7 @@ export default function TierAnimationSection() {
           {/* Background cover: transparent → forest green as map fades */}
           <MapFade opacity={mapOpacity} color={forestBg} />
 
-          {/* Outcome polygon morph overlay — active during Beat 2 */}
+          {/* Outcome polygon morph overlay - active during Beat 2 */}
           {activeOutcomeGroups.length > 0 && panelSize && (
             <motion.div
               style={{

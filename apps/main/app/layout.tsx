@@ -9,6 +9,7 @@ import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { DataProvider } from "@repo/data/providers"
+import { PanelTuner } from "@repo/ui"
 import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
 
@@ -36,6 +37,8 @@ export default function RootLayout({
                 </Suspense>
 
                 {children}
+
+                <PanelTuner />
               </ThemeRegistry>
             </DataProvider>
           </TranslationProvider>

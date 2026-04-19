@@ -266,7 +266,7 @@ export function useTierAnimationData(): TierAnimationData {
  * tier levels for a non-base hydroclimate variant. Returns {} when on the base
  * scenario so the caller falls through to useTierAnimationData's data.
  *
- * Designed to never trigger a loading flash — old overrides stay visible until
+ * Designed to never trigger a loading flash - old overrides stay visible until
  * the new fetch completes. Failures per-outcome are silently skipped so outcomes
  * without data for a given hydroclimate fall back to the base (s0020) tiers.
  */

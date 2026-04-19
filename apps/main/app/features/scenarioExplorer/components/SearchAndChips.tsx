@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * SearchAndChips — Search input + visibility toggle chips.
+ * SearchAndChips - Search input + visibility toggle chips.
  *
  * Shared across the sidebar (non-list modes) and the toolbar (list mode).
  * Reads all state from the scenario-explorer store so consumers just render
@@ -16,9 +16,16 @@ import ToggleChip from "./ToggleChip"
 interface SearchAndChipsProps {
   /** Show a vertical divider between search and chips (toolbar layout) */
   showDivider?: boolean
+  /** Optional node rendered inline immediately to the right of the search
+   *  input, before the divider / chips. Used by the sidebar to mount the
+   *  "TUNE SCENARIO LIST" entry point; kept unset in the toolbar variant. */
+  afterSearch?: React.ReactNode
 }
 
-export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
+export default function SearchAndChips({
+  showDivider,
+  afterSearch,
+}: SearchAndChipsProps) {
   const theme = useTheme()
   const {
     searchQuery,
@@ -84,6 +91,8 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           </IconButton>
         )}
       </Box>
+
+      {afterSearch}
 
       {showDivider && (
         <Box

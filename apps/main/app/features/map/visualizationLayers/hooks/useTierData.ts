@@ -49,7 +49,7 @@ const tierLocationCache = new Map<string, TierLocationsResponse>()
 // In-flight request deduplication: avoids duplicate fetches for the same key
 const inFlightRequests = new Map<string, Promise<TierLocationsResponse>>()
 
-/** Synchronous cache probe — returns cached data or null. */
+/** Synchronous cache probe - returns cached data or null. */
 export function peekTierLocationCache(
   scenarioId: string,
   tierCode: string,

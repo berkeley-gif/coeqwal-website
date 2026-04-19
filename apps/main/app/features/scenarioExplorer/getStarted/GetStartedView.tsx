@@ -1,11 +1,82 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, type ReactNode } from "react"
 import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
-import { LinedList, InfoCard, BarredColumns, WaterDroplet } from "@repo/ui"
+import {
+  LinedList,
+  InfoCard,
+  BarredColumns,
+  WaterDroplet,
+  tunerRadius,
+  tunerInsetX,
+  tunerInsetY,
+} from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
 import TierAnimationSection from "./TierAnimationSection"
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Rounded-panel shell for get-started sections.                               */
+/* Frame (outer) holds the inset; card (inner) holds the rounded corners.      */
+/* Tune these three constants to adjust all nine sections at once.             */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Corner radius + inset values are read from CSS custom properties so they
+ * can be tuned live via the PanelTuner widget (summoned with Cmd/Ctrl+K).
+ * The `tuner*()` helpers expand to `var(<name>, <fallback>)` so panels
+ * render with sensible defaults whenever the tuner hasn't written values.
+ */
+const GET_STARTED_RADIUS = tunerRadius()
+const GET_STARTED_INSET_X = tunerInsetX()
+const GET_STARTED_INSET_Y = tunerInsetY()
+
+interface GetStartedPanelShellProps {
+  children: ReactNode
+  /** Card background colour (the rounded surface) */
+  background: string
+  /** Optional frame background; defaults to transparent so the frame blends
+   *  into the scroll container. Pass a colour to cover content behind
+   *  (e.g. the persistent map when `mapMode === "get-started"`). */
+  frameBackground?: string
+  /** Inner min-height (default: 100vh) */
+  minHeight?: string | number
+}
+
+function GetStartedPanelShell({
+  children,
+  background,
+  frameBackground,
+  minHeight = "100vh",
+}: GetStartedPanelShellProps) {
+  const theme = useTheme()
+  return (
+    <Box
+      sx={{
+        pointerEvents: "auto",
+        backgroundColor: frameBackground ?? "transparent",
+        px: GET_STARTED_INSET_X,
+        py: GET_STARTED_INSET_Y,
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: background,
+          borderRadius: GET_STARTED_RADIUS,
+          overflow: "hidden",
+          minHeight,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          px: theme.space.panel.padding,
+          py: theme.space.panel.padding,
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  )
+}
 
 const WATER_ISSUE_THEMES = [
   {
@@ -49,22 +120,22 @@ const HYDROCLIMATES = [
   {
     title: "Moderate-dry climate risk",
     description:
-      "Warmer and slightly drier conditions (\u22121% runoff change) — 50th percentile level of concern",
+      "Warmer and slightly drier conditions (\u22121% runoff change) - 50th percentile level of concern",
   },
   {
     title: "Moderate-wet climate risk",
     description:
-      "Warmer and wetter conditions (+7% runoff change) — 44th percentile level of concern",
+      "Warmer and wetter conditions (+7% runoff change) - 44th percentile level of concern",
   },
   {
     title: "High climate risk",
     description:
-      "Warmer and much drier conditions (\u22127% runoff change) — 95th percentile level of concern",
+      "Warmer and much drier conditions (\u22127% runoff change) - 95th percentile level of concern",
   },
   {
     title: "Extreme climate risk",
     description:
-      "Much warmer and extremely drier conditions (\u221221% runoff change) — 99th percentile level of concern",
+      "Much warmer and extremely drier conditions (\u221221% runoff change) - 99th percentile level of concern",
   },
 ] as const
 
@@ -176,26 +247,14 @@ export default function GetStartedView() {
         backgroundColor: mapActive ? "transparent" : exploreBg,
       }}
     >
-      {/* Welcome — custom layout (no ContentPanel) for full-width grid */}
-      <Box
-        sx={{
-          pointerEvents: "auto",
-          backgroundColor: mapActive
-            ? theme.palette.tabPanels.exploreDeep
-            : "transparent",
-        }}
+      {/* Welcome - custom layout (no ContentPanel) for full-width grid */}
+      <GetStartedPanelShell
+        background={theme.palette.tabPanels.exploreDeep}
+        frameBackground={
+          mapActive ? theme.palette.tabPanels.exploreDeep : undefined
+        }
       >
-        <Box
-          sx={{
-            backgroundColor: theme.palette.tabPanels.exploreDeep,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+        <>
           {/* Heading */}
           <Typography
             variant="h3"
@@ -218,7 +277,7 @@ export default function GetStartedView() {
               rowGap: sp.lg,
             }}
           >
-            {/* Column 1 — The model */}
+            {/* Column 1 - The model */}
             <Box>
               <Typography
                 variant="overline"
@@ -266,7 +325,7 @@ export default function GetStartedView() {
               </Typography>
             </Box>
 
-            {/* Column 2 — The library */}
+            {/* Column 2 - The library */}
             <Box>
               <Typography
                 variant="overline"
@@ -328,7 +387,7 @@ export default function GetStartedView() {
               </Typography>
             </Box>
 
-            {/* Column 3 — What you'll learn */}
+            {/* Column 3 - What you'll learn */}
             <Box>
               <Typography
                 variant="overline"
@@ -364,22 +423,12 @@ export default function GetStartedView() {
               />
             </Box>
           </Box>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
-      {/* Water Issues — custom layout for five-column grid */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.blue.dark,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      {/* Water Issues - custom layout for five-column grid */}
+      <GetStartedPanelShell background={theme.palette.blue.dark}>
+        <>
           {/* Five-column grid */}
           <Box
             sx={{
@@ -390,7 +439,7 @@ export default function GetStartedView() {
               rowGap: sp.lg,
             }}
           >
-            {/* Heading — full width */}
+            {/* Heading - full width */}
             <Typography
               variant="h3"
               component="h2"
@@ -404,7 +453,7 @@ export default function GetStartedView() {
               What water issues interest you?
             </Typography>
 
-            {/* Intro — full width, below the gap */}
+            {/* Intro - full width, below the gap */}
             <Typography
               variant="body2"
               color="text.secondary"
@@ -429,7 +478,7 @@ export default function GetStartedView() {
               )
             })}
 
-            {/* Footer CTA — full width */}
+            {/* Footer CTA - full width */}
             <Typography
               variant="body2"
               color="text.secondary"
@@ -438,22 +487,12 @@ export default function GetStartedView() {
               Click on each water issue to learn more.
             </Typography>
           </Box>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
       {/* Hydroclimate Futures */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.nature.forest,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={theme.palette.nature.forest}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -536,22 +575,12 @@ export default function GetStartedView() {
             </Typography>
             .
           </Typography>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
       {/* Key Outcomes */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: exploreBg,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={exploreBg}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -619,25 +648,32 @@ export default function GetStartedView() {
             </Typography>
             .
           </Typography>
+        </>
+      </GetStartedPanelShell>
+
+      {/* Map panel (TierAnimationSection).thin outer frame + rounded shell;
+          radius applied around (not inside) the pinned map overlay so the
+          tier animation's own 100vh geometry is preserved. */}
+      <Box
+        sx={{
+          pointerEvents: "auto",
+          px: GET_STARTED_INSET_X,
+          py: GET_STARTED_INSET_Y,
+        }}
+      >
+        <Box
+          sx={{
+            borderRadius: GET_STARTED_RADIUS,
+            overflow: "hidden",
+          }}
+        >
+          <TierAnimationSection />
         </Box>
       </Box>
 
-      {/* Map panel (TierAnimationSection) */}
-      <TierAnimationSection />
-
       {/* Data in Depth */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.nature.forest,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={theme.palette.nature.forest}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -680,22 +716,12 @@ export default function GetStartedView() {
               different scenarios.
             </Typography>
           </Box>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
       {/* Interpreting Scenario Outcomes */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: exploreBg,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={exploreBg}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -712,7 +738,7 @@ export default function GetStartedView() {
               columnGap: theme.space.section.xl,
             }}
           >
-            {/* Left — three lenses */}
+            {/* Left - three lenses */}
             <Box>
               <Typography
                 variant="body2"
@@ -747,7 +773,7 @@ export default function GetStartedView() {
               />
             </Box>
 
-            {/* Right — visualization tools */}
+            {/* Right - visualization tools */}
             <Box>
               <Typography
                 variant="body2"
@@ -769,22 +795,12 @@ export default function GetStartedView() {
               />
             </Box>
           </Box>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
       {/* Choose Your Scenarios */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.blue.dark,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={theme.palette.blue.dark}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -843,22 +859,12 @@ export default function GetStartedView() {
             </Typography>{" "}
             section of the site.
           </Typography>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
 
       {/* Before You Begin Your Exploration */}
-      <Box sx={{ pointerEvents: "auto" }}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.tabPanels.exploreDeep,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            px: theme.space.panel.padding,
-            py: theme.space.panel.padding,
-          }}
-        >
+      <GetStartedPanelShell background={theme.palette.tabPanels.exploreDeep}>
+        <>
           <Typography
             variant="h3"
             component="h2"
@@ -900,8 +906,8 @@ export default function GetStartedView() {
               labelWeight={400}
             />
           </Box>
-        </Box>
-      </Box>
+        </>
+      </GetStartedPanelShell>
     </Box>
   )
 }

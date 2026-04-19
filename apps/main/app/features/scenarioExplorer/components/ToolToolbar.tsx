@@ -101,7 +101,7 @@ export default function ToolToolbar({
           </Typography>
         </Box>
 
-        {/* Show distribution — temporarily hidden
+        {/* Show distribution - temporarily hidden
         <VerticalDivider />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>

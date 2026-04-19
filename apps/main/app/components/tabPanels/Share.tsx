@@ -144,7 +144,7 @@ function transformToCSS(
 }
 
 // ---------------------------------------------------------------------------
-// TrayCard — full-size card for the bottom tray (same content as StoryCard)
+// TrayCard - full-size card for the bottom tray (same content as StoryCard)
 // ---------------------------------------------------------------------------
 
 const TRAY_CARD_WIDTH = 280
@@ -272,7 +272,7 @@ function TrayCard({
 }
 
 // ---------------------------------------------------------------------------
-// StoryCard — sortable full-size card for the story canvas
+// StoryCard - sortable full-size card for the story canvas
 // ---------------------------------------------------------------------------
 
 function StoryCard({

@@ -390,7 +390,7 @@ export default function VisualizationLayers({
               />
             )}
 
-          {/* Pinned tooltips (multiple allowed) — suppressed in get-started mode */}
+          {/* Pinned tooltips (multiple allowed) - suppressed in get-started mode */}
           {!isGetStartedMode &&
             pinnedFeatures.map((feature) => (
               <MapFeatureTooltip
@@ -401,7 +401,7 @@ export default function VisualizationLayers({
               />
             ))}
 
-          {/* Hover tooltip (only if not already pinned) — suppressed in get-started mode */}
+          {/* Hover tooltip (only if not already pinned) - suppressed in get-started mode */}
           {!isGetStartedMode && hoveredFeature && !isHoveredAlreadyPinned && (
             <MapFeatureTooltip
               key="hover"

@@ -115,7 +115,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // return to the overview when the user deselects an outcome.
   const wasActiveRef = useRef(false)
 
-  // Camera control — zoom to camera preset on outcome click, return to
+  // Camera control - zoom to camera preset on outcome click, return to
   // overview on deselect. In explore mode, all easeTo/fitBounds calls
   // include left padding so the camera centers within the visible strip.
   useEffect(() => {

@@ -45,7 +45,7 @@ export interface StrategyGridProps {
   renderMode?: "all" | "headersOnly" | "contentOnly"
   /** When false, hides the key operations column (col 3) from the grid */
   showOperations?: boolean
-  /** When true, hides scenario title (col 2) and ops (col 3) — shows only outcomes */
+  /** When true, hides scenario title (col 2) and ops (col 3) - shows only outcomes */
   outcomesOnly?: boolean
   /** When true, hides the column title row (Scenario library / Key operations / Key outcomes) */
   hideColumnTitles?: boolean
@@ -76,7 +76,7 @@ export interface StrategyGridProps {
   /**
    * Hide the outcome columns (col 4) via CSS display:none.
    * Cascades to children through a `.outcome-col` class selector
-   * on the grid container — no prop drilling required.
+   * on the grid container - no prop drilling required.
    */
   hideOutcomes?: boolean
 

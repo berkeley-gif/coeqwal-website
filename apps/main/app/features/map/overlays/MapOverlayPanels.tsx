@@ -44,7 +44,7 @@ import {
   StrategyInfoPanel,
   KeyOperationsPanel,
   KeyOutcomesPanel,
-  // SummaryPanel temporarily disabled — fetches heavy GeoJSON for polygon centroids
+  // SummaryPanel temporarily disabled - fetches heavy GeoJSON for polygon centroids
   // SummaryPanel,
 } from "./scenarioPanels"
 import { mapActions, useIsOutcomeVisualizationActive } from "../store"
@@ -932,7 +932,7 @@ export default function MapOverlayPanels() {
                     />
                   </RightPanelSlot>
 
-                  {/* SummaryPanel temporarily disabled — fetches heavy GeoJSON
+                  {/* SummaryPanel temporarily disabled - fetches heavy GeoJSON
                      for polygon centroids. Re-enable once centroids are available
                      from a lightweight endpoint or hardcoded. */}
                   {/* <RightPanelSlot

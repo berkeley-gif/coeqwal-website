@@ -278,7 +278,7 @@ export default function SmoothTabs() {
         })}
       </div>
 
-      {/* Full-width tab description — visible when expanded or opened by click */}
+      {/* Full-width tab description - visible when expanded or opened by click */}
       <AnimatePresence initial={false}>
         {showDescriptions && (
           <motion.div
