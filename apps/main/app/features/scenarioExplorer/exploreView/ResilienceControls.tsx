@@ -157,9 +157,7 @@ export default function ResilienceControls({
       selectedHydroclimates.size === RESILIENCE_HYDROCLIMATES.length
     if (allSelected) {
       onChange({
-        selectedHydroclimates: new Set<ResilienceHydroclimate>([
-          "historical",
-        ]),
+        selectedHydroclimates: new Set<ResilienceHydroclimate>(["historical"]),
       })
     } else {
       onChange({

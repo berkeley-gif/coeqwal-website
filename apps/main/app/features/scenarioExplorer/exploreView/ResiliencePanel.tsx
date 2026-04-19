@@ -23,12 +23,7 @@ import React, {
   useRef,
   startTransition,
 } from "react"
-import {
-  Box,
-  CircularProgress,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, CircularProgress, Typography, useTheme } from "@repo/ui/mui"
 import {
   ResilienceHeatmap,
   type ResilienceAxisItem,
@@ -201,12 +196,7 @@ export default function ResiliencePanel({
 
   const tierLabels = useMemo(
     () =>
-      [
-        TIER_LABELS[1],
-        TIER_LABELS[2],
-        TIER_LABELS[3],
-        TIER_LABELS[4],
-      ] as const,
+      [TIER_LABELS[1], TIER_LABELS[2], TIER_LABELS[3], TIER_LABELS[4]] as const,
     [],
   )
 
@@ -313,7 +303,10 @@ export default function ResiliencePanel({
   // "displayable" value is whatever drives the primary visual encoding
   // (tier mean, delta, density fraction, aggregate mean); used both for
   // cells and for marginals / clustering.
-  type RowValueFn = (rowKey: string, col: ResilienceHydroclimate) => {
+  type RowValueFn = (
+    rowKey: string,
+    col: ResilienceHydroclimate,
+  ) => {
     continuousValue: number | null
     tierLevel: number | null
     available: boolean
@@ -328,7 +321,12 @@ export default function ResiliencePanel({
   }
 
   const buildValueFn = useCallback<
-    () => { rowKeys: string[]; rowLabels: Record<string, string>; valueFn: RowValueFn; subjectLabel: string }
+    () => {
+      rowKeys: string[]
+      rowLabels: Record<string, string>
+      valueFn: RowValueFn
+      subjectLabel: string
+    }
   >(() => {
     if (view === "scenario") {
       const focusName = getDisplayName(focusScenarioId)
@@ -423,11 +421,7 @@ export default function ResiliencePanel({
           const ref = getCell(rowKey, focusOutcomeCode, HISTORICAL_HC)
           reference = ref?.available ? ref.continuousValue : null
         } else {
-          const ref = getCell(
-            deltaBaselineScenarioId,
-            focusOutcomeCode,
-            hc,
-          )
+          const ref = getCell(deltaBaselineScenarioId, focusOutcomeCode, hc)
           reference = ref?.available ? ref.continuousValue : null
         }
         if (reference == null || cell.continuousValue == null) {
@@ -802,9 +796,7 @@ export default function ResiliencePanel({
   }
 
   const hasData =
-    !!matrixCells &&
-    Object.keys(matrixCells).length > 0 &&
-    columns.length > 0
+    !!matrixCells && Object.keys(matrixCells).length > 0 && columns.length > 0
 
   if (isLoading && !hasData) {
     return (
@@ -899,8 +891,8 @@ export default function ResiliencePanel({
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Select one or more scenarios in the sidebar to aggregate over,
-              or switch the aggregate scope to &ldquo;all scenarios&rdquo;.
+              Select one or more scenarios in the sidebar to aggregate over, or
+              switch the aggregate scope to &ldquo;all scenarios&rdquo;.
             </Typography>
           </Box>
         ) : (
