@@ -137,21 +137,24 @@ importers:
       '@repo/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@repo/state':
+        specifier: workspace:*
+        version: link:../../packages/state
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@turf/turf':
-        specifier: ^7.2.0
-        version: 7.2.0
-      d3:
-        specifier: ^7.9.0
-        version: 7.9.0
+      '@repo/viz':
+        specifier: workspace:*
+        version: link:../../packages/viz
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
       next:
         specifier: ^15.2.1
         version: 15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+      react-scrollama:
+        specifier: ^2.4.2
+        version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       roughjs:
         specifier: ^4.6.6
         version: 4.6.6
@@ -165,9 +168,6 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/d3':
-        specifier: ^7.4.3
-        version: 7.4.3
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.16

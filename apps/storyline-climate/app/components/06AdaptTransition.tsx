@@ -3,25 +3,15 @@
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { Box, Typography } from "@repo/ui/mui"
 import { useEffect, useRef, useState } from "react"
-import * as d3 from "d3"
+import { scaleLinear, range, line, curveCatmullRom } from "@repo/viz"
 import "../rain.css"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import RainAnimation from "./helpers/RainAnimation"
 import StickyContainer from "./helpers/StickyContainer"
-import useActiveSection from "../hooks/useActiveSection"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 
-function SectionTransition() {
-  return (
-    <>
-      <Balance />
-      <Bullet />
-    </>
-  )
-}
-
-function Balance() {
-  const { sectionRef } = useActiveSection("balance", { amount: 0.5 })
+export default function Balance() {
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -50,7 +40,7 @@ function Balance() {
         <RainAnimation />
       </Box>
 
-      <SVGLineContainer viewBox="-270 0 1261 1145">
+      <SVGLineContainer viewBox="0 0 1261 1145" preserveAspectRatio="none">
         <motion.path
           className="svg-line"
           pathLength={thirdLinePath}
@@ -125,9 +115,9 @@ function Balance() {
 function computeCurvePaths(width: number, height: number): string[] {
   if (width <= 0 || height <= 0) return []
 
-  const X = d3.scaleLinear().domain([0, 1]).range([0, width])
+  const X = scaleLinear().domain([0, 1]).range([0, width])
   const N = 240
-  const xs = d3.range(N).map((i) => i / (N - 1))
+  const xs = range(N).map((i) => i / (N - 1))
 
   // layout
   const mid = height * 0.5
@@ -148,9 +138,8 @@ function computeCurvePaths(width: number, height: number): string[] {
     [0.12, Math.PI * 1.5],
   ]
 
-  const lineGen = d3
-    .line<[number, number]>()
-    .curve(d3.curveCatmullRom.alpha(0.8))
+  const lineGen = line<[number, number]>()
+    .curve(curveCatmullRom.alpha(0.8))
     .x((d) => d[0])
     .y((d) => d[1])
 
@@ -164,7 +153,7 @@ function computeCurvePaths(width: number, height: number): string[] {
   })
 }
 
-function Bullet() {
+export function Bullet() {
   const svgRef = useRef<SVGSVGElement>(null)
   const [paths, setPaths] = useState<string[]>([])
 
@@ -238,5 +227,3 @@ function Bullet() {
     </Box>
   )
 }
-
-export default SectionTransition

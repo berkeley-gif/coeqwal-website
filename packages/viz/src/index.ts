@@ -169,3 +169,32 @@ export {
 export type { ShapeMorphData } from "./utils/shape-morph"
 
 export { hierarchicalRowOrder } from "./utils/clustering"
+
+export {
+  area,
+  autoType,
+  bisector,
+  csv,
+  curveBasis,
+  curveCatmullRom,
+  curveLinear,
+  curveMonotoneX,
+  csvParse,
+  extent,
+  format,
+  interpolateRgb,
+  line,
+  max,
+  mean,
+  min,
+  range,
+  scaleBand,
+  scaleLinear,
+  scalePoint,
+  scaleTime,
+  select,
+  ticks,
+  timeFormat,
+} from "d3"
+
+export type { Area, ScaleLinear, ScalePoint, ScaleTime } from "d3"

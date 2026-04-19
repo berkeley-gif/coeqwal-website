@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useFetchData } from "../../hooks/useFetchData"
 import FlowLine, { FlowEntry } from "./HydroClimateLine"
-import * as d3 from "d3"
+import { scaleLinear, type ScaleLinear } from "@repo/viz"
 import {
   Box,
   Button,
@@ -219,16 +219,14 @@ function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
   }, [])
 
   const xScale = useMemo(() => {
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain(xExtents)
       .range([margin.left, size.width - margin.right])
       .nice()
   }, [size.width])
 
   const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain(yExtents)
       .range([size.height - margin.bottom, margin.top])
       .nice()
@@ -266,8 +264,8 @@ function ClimatePoint({
   onSelect,
 }: {
   data: { model: string; temperature: number; precipitation: number }[]
-  xScale: d3.ScaleLinear<number, number>
-  yScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
   onSelect: (model: string) => void
 }) {
   const breakpoint = useBreakpoint()
@@ -327,8 +325,8 @@ function Rules({
   size,
 }: {
   size: ContainerSize
-  xScale: d3.ScaleLinear<number, number>
-  yScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
 }) {
   const xValues = [10, 5, -5, -10]
   const yValues = [1, 2]
@@ -361,7 +359,7 @@ function Rules({
   )
 }
 
-function YAxis({ yScale }: { yScale: d3.ScaleLinear<number, number> }) {
+function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
   return (
     <>
       <g className="y-axis" transform={`translate(${margin.left},0)`}>
@@ -393,7 +391,7 @@ function XAxis({
 }: {
   size: ContainerSize
   yOffset: number
-  xScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
 }) {
   return (
     <>

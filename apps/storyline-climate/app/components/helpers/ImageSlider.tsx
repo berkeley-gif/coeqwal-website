@@ -11,6 +11,8 @@ type HorizontalCompareProps = {
   height?: number | string
   width?: number | string
   initial?: number // 0..100 (% from left)
+  leftKnobLabel?: string
+  rightKnobLabel?: string
 }
 
 type VerticalCompareProps = {
@@ -39,6 +41,8 @@ export function HorizontalImageSlider({
   width = "100%",
   height = "100vh",
   initial = 50,
+  leftKnobLabel,
+  rightKnobLabel,
 }: HorizontalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -187,6 +191,61 @@ export function HorizontalImageSlider({
           style={{ fill: "#104472", transform: "rotate(90deg)" }}
         />
       </Box>
+
+      {(leftKnobLabel || rightKnobLabel) && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: `${pos}%`,
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            pointerEvents: "none",
+          }}
+        >
+          {leftKnobLabel && (
+            <Box
+              sx={{
+                mr: 4.5,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: "10px",
+                backgroundColor: "common.white",
+                backdropFilter: "blur(2px)",
+                color: "blue.darkest",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {leftKnobLabel}
+            </Box>
+          )}
+
+          {rightKnobLabel && (
+            <Box
+              sx={{
+                ml: 4.5,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: "10px",
+                backgroundColor: "common.white",
+                backdropFilter: "blur(2px)",
+                color: "blue.darkest",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {rightKnobLabel}
+            </Box>
+          )}
+        </Box>
+      )}
     </Box>
   )
 }

@@ -2,21 +2,13 @@
 
 import { Box, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
-import useActiveSection from "../hooks/useActiveSection"
-import GroundwaterContainer from "./vis/Groundwater"
+import GroundwaterLine from "./vis/GroundwaterLine"
 import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
-
-function SectionGroundwater() {
-  return (
-    <>
-      <Groundwater />
-    </>
-  )
-}
+import { useRef } from "react"
 
 function Groundwater() {
-  const { sectionRef } = useActiveSection("groundwater", { amount: 0.5 })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -30,12 +22,12 @@ function Groundwater() {
       stickyRollHeight="120vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="0 0 1291 630">
+      <SVGLineContainer viewBox="0 20 1728 1117">
         <motion.path
-          d="M0.390137 -9 C0.390137 -9 443.39 80 560.39 290 C677.39 500 1044.83 496.033 1318.39 628"
+          d="M1748 713C1474.44 581.033 984 429 804 263C624 97 268 -8 268 -8"
           className="svg-line"
           pathLength={linePath}
-          transform="translate(0, -250)"
+          transform={"scale(1.1)"}
         />
       </SVGLineContainer>
 
@@ -53,12 +45,15 @@ function Groundwater() {
         }}
       >
         <Box className="paragraph" component="article">
-          <Typography variant="h4">{"Increasing Droughts"}</Typography>
+          <Typography variant="h3">{"Increasing Droughts"}</Typography>
         </Box>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
+            {"Droughts are not new to California."}
+          </Typography>
+          <Typography variant="body1">
             {
-              "Droughts are not new to California. But in a changing climate, droughts are expected to occur more often. "
+              "But in a changing climate, droughts are expected to occur more often. "
             }
           </Typography>
         </Box>
@@ -109,26 +104,23 @@ function Groundwater() {
           paddingRight: "5rem",
         }}
       >
-        <Box width="100%" height="40%" sx={{ marginBottom: "1rem" }}>
-          <GroundwaterContainer scrollProgress={scrollYProgress} />
+        <Box
+          className="paragraph"
+          component="article"
+          sx={{ pointerEvents: "auto" }}
+        >
+          <Typography variant="h5" align="left">
+            {"Cumulative Groundwater Loss in Central Valley"}
+          </Typography>
+          <Typography variant="caption" align="left" sx={{ opacity: 0.7 }}>
+            {
+              "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: Liu et al., 2022"
+            }
+          </Typography>
         </Box>
-        <Typography
-          variant="h6"
-          textAlign={"center"}
-          gutterBottom
-          sx={{ fontSize: "1.5rem" }}
-        >
-          {"Cumulative Groundwater Loss in Central Valley"}
-        </Typography>
-        <Typography
-          variant="caption"
-          textAlign={"center"}
-          sx={{ padding: "0 5rem" }}
-        >
-          {
-            "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: Liu et al., 2022"
-          }
-        </Typography>
+        <Box width="100%" height="50%">
+          <GroundwaterLine scrollProgress={scrollYProgress} />
+        </Box>
       </Box>
     </StickyContainer>
   )
@@ -242,4 +234,4 @@ function Conservation() {
 }
 */
 
-export default SectionGroundwater
+export default Groundwater

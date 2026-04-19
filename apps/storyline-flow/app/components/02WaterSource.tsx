@@ -292,7 +292,7 @@ export function Snowpack() {
               )
             }}
             valueLabelDisplay="auto"
-            valueLabelFormat={(value) => MONTHS[value]}
+            valueLabelFormat={(value: number) => MONTHS[value]}
             marks={MONTHS.filter((d) => selectedMonths.includes(d)).map(
               (each) => ({
                 value: MONTHS.indexOf(each),

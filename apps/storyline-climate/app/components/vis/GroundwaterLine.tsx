@@ -1,9 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import * as d3 from "d3"
-import type { ContainerSize } from "./Groundwater"
+import { scaleLinear, line, area, type ScaleLinear } from "@repo/viz"
+import {
+  min,
+  max,
+  scaleTime,
+  curveLinear,
+  bisector,
+  timeFormat,
+  type ScaleTime,
+} from "@repo/viz"
+import { csv, autoType } from "@repo/viz"
 import { OffWhiteColor } from "../helpers/colorPalette"
 import { motion, MotionValue } from "@repo/motion"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
+import { useTheme } from "@repo/ui/mui"
+
+export type ContainerSize = { width: number; height: number }
 
 export type GroundwaterRow = {
   msmt_date: string
@@ -15,17 +27,6 @@ type Margin = { top: number; right: number; bottom: number; left: number }
 const margin: Margin = { top: 64, right: 24, bottom: 50, left: 150 }
 const axisColor = "#fcfbfa"
 
-const tickLabelStyle: React.CSSProperties = {
-  fontSize: "1.1rem",
-  fill: OffWhiteColor,
-}
-
-const axisLabelStyle: React.CSSProperties = {
-  fontSize: "1.2rem",
-  fill: OffWhiteColor,
-  fontWeight: "bold",
-}
-
 // --------------------------------------------
 // Define drought bands (edit these dates)
 // --------------------------------------------
@@ -35,19 +36,52 @@ const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
   { start: new Date("1999-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
 ]
 
-type Props = {
-  data: GroundwaterRow[]
-  yExtents: [number, number]
-  scrollProgress: MotionValue<number>
-}
+type Props = { scrollProgress: MotionValue<number> }
 
-export default function GroundwaterLine({
-  data,
-  yExtents,
-  scrollProgress,
-}: Props) {
+export default function GroundwaterLine({ scrollProgress }: Props) {
+  const theme = useTheme()
+  const [data, setData] = useState<GroundwaterRow[]>([])
+  const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
+
+  useEffect(() => {
+    let cancelled = false
+
+    csv("./data/combined_groundwater.csv", autoType).then((raw) => {
+      if (cancelled) return
+
+      const processed: GroundwaterRow[] = raw
+        .map((d: any) => {
+          const year = Number(d["Year"])
+          const gwRaw = Number(d["GW Change"])
+          const gwDepth = Number.isFinite(gwRaw) && gwRaw < 0 ? -gwRaw : gwRaw
+
+          return {
+            msmt_date: `${year}-01-01`,
+            date: new Date(year, 0, 1),
+            gse_gwe: gwDepth,
+          }
+        })
+        .filter(
+          (d) =>
+            Number.isFinite(d.gse_gwe) &&
+            d.date instanceof Date &&
+            !Number.isNaN(d.date.getTime()),
+        )
+
+      setData(processed)
+      const values = processed.map((r) => r.gse_gwe)
+      const minVal = 0
+      const maxVal = max(values) ?? 0
+      const pad = maxVal * 0.05 || 1
+      setYExtents([minVal, maxVal + pad])
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -62,39 +96,35 @@ export default function GroundwaterLine({
   }, [])
 
   const xScale = useMemo(() => {
-    const minDate = d3.min(data, (d) => d.date!) ?? new Date()
-    const maxDate = d3.max(data, (d) => d.date!) ?? new Date()
-    return d3
-      .scaleTime()
+    const minDate = min(data, (d) => d.date!) ?? new Date()
+    const maxDate = max(data, (d) => d.date!) ?? new Date()
+    return scaleTime()
       .domain([minDate, maxDate])
       .range([margin.left, Math.max(margin.left, size.width - margin.right)])
   }, [data, size.width])
 
   const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain(yExtents)
       .range([margin.top, Math.max(margin.top, size.height - margin.bottom)]) // reversed
       .nice()
   }, [yExtents, size.height])
 
   const linePath = useMemo(() => {
-    const line = d3
-      .line<GroundwaterRow>()
+    const lineGen = line<GroundwaterRow>()
       .x((d) => xScale(d.date!))
       .y((d) => yScale(d.gse_gwe))
-      .curve(d3.curveLinear)
-    return line(data) ?? ""
+      .curve(curveLinear)
+    return lineGen(data) ?? ""
   }, [data, xScale, yScale])
 
   const areaPath = useMemo(() => {
-    const area = d3
-      .area<GroundwaterRow>()
+    const areaGen = area<GroundwaterRow>()
       .x((d) => xScale(d.date!))
       .y0(yScale(yExtents[1])) // fill down to bottom of chart
       .y1((d) => yScale(d.gse_gwe))
-      .curve(d3.curveLinear)
-    return area(data) ?? ""
+      .curve(curveLinear)
+    return areaGen(data) ?? ""
   }, [data, xScale, yScale, yExtents])
 
   const xTicks = useMemo(() => xScale.ticks(6), [xScale])
@@ -108,7 +138,7 @@ export default function GroundwaterLine({
   const rechargeGaps = useMemo(() => {
     if (DROUGHT_BANDS.length < 2 || data.length === 0) return []
 
-    const bisectDate = d3.bisector<GroundwaterRow, Date>((d) => d.date!).center
+    const bisectDate = bisector<GroundwaterRow, Date>((d) => d.date!).center
 
     return DROUGHT_BANDS.slice(0, -1)
       .map((b, i) => {
@@ -213,7 +243,7 @@ export default function GroundwaterLine({
             textAnchor="middle"
             style={{
               fill: OffWhiteColor,
-              fontSize: "1.05rem",
+              fontSize: theme.typography.caption.fontSize,
               opacity: 0.9,
             }}
           >
@@ -238,11 +268,12 @@ function XAxis({
   scrollProgress,
 }: {
   size: ContainerSize
-  xScale: d3.ScaleTime<number, number>
+  xScale: ScaleTime<number, number>
   margin: Margin
   ticks: Date[]
   scrollProgress: MotionValue<number>
 }) {
+  const theme = useTheme()
   // x-axis line is drawn at the TOP of the plot area
   const yLine = margin.top
   const yLabels = Math.max(margin.top, size.height - margin.bottom)
@@ -294,7 +325,12 @@ function XAxis({
         x={(margin.left + size.width - margin.right) / 2}
         y={yLabels}
         dy="2em"
-        style={{ ...axisLabelStyle, textAnchor: "middle", opacity: 1 }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.subtitle2.fontSize,
+          textAnchor: "middle",
+          opacity: 1,
+        }}
       >
         Year
       </motion.text>
@@ -302,7 +338,12 @@ function XAxis({
         x={(margin.left + size.width - margin.right) / 2}
         y={yLine}
         dy="-1em"
-        style={{ ...tickLabelStyle, textAnchor: "middle", opacity: 0.5 }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
+          textAnchor: "middle",
+          opacity: 0.5,
+        }}
       >
         Grayed area = drought period
       </motion.text>
@@ -323,6 +364,7 @@ function XTick({
   idx: number
   scrollProgress: MotionValue<number>
 }) {
+  const theme = useTheme()
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
 
@@ -341,9 +383,13 @@ function XTick({
         x={xPos}
         y={yPos}
         dy="1.2em"
-        style={{ ...tickLabelStyle, textAnchor: "middle" }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
+          textAnchor: "middle",
+        }}
       >
-        {d3.timeFormat("%Y")(tick)}
+        {timeFormat("%Y")(tick)}
       </text>
     </motion.g>
   )
@@ -355,11 +401,12 @@ function YAxis({
   ticks,
   scrollProgress,
 }: {
-  yScale: d3.ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
   margin: Margin
   ticks: number[]
   scrollProgress: MotionValue<number>
 }) {
+  const theme = useTheme()
   const annotationOpacity = usePlayAnimationOnce(
     scrollProgress,
     [0.4, 0.6],
@@ -384,7 +431,8 @@ function YAxis({
         dx="-5em"
         dy="0.3em"
         style={{
-          ...tickLabelStyle,
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
           textAnchor: "middle",
           opacity: annotationOpacity,
         }}
@@ -397,7 +445,8 @@ function YAxis({
         dx="-5em"
         dy="1.5em"
         style={{
-          ...tickLabelStyle,
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
           textAnchor: "middle",
           opacity: annotationOpacity,
         }}
@@ -410,7 +459,8 @@ function YAxis({
         dx="-5em"
         dy="2.7em"
         style={{
-          ...tickLabelStyle,
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
           textAnchor: "middle",
           opacity: annotationOpacity,
         }}
@@ -432,11 +482,19 @@ function YTick({
   idx: number
   scrollProgress: MotionValue<number>
 }) {
+  const theme = useTheme()
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
 
   return (
-    <motion.g key={idx} style={{ opacity: tickOpacity }}>
+    <motion.g
+      key={idx}
+      style={{
+        opacity: tickOpacity,
+        fontSize: theme.typography.caption.fontSize,
+        fill: OffWhiteColor,
+      }}
+    >
       <line
         x1={-6}
         x2={0}
@@ -450,7 +508,7 @@ function YTick({
         y={yPos}
         dy="0.35em"
         dx="-0.25em"
-        style={{ ...tickLabelStyle, textAnchor: "end" }}
+        style={{ fill: OffWhiteColor, textAnchor: "end" }}
       >
         {`${tick}`}
       </text>
