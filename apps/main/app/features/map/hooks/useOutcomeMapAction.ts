@@ -15,13 +15,14 @@ import type { OutcomeVisualization } from "../store"
  * the siblingGroupId fallback logic.
  */
 export function useOutcomeMapAction() {
-  const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
+  const { showOnMap, showOnMapForGroup, isMapVisible } =
+    useMapVisualizationAction()
   const activeOutcome = useActiveMapOutcome()
 
   /**
    * Trigger (or toggle off) a map visualization for an outcome + scenario.
    * Accepts either an outcome short code ("CWS_DEL") or a display name
-   * ("Community water system deliveries") — the display name is resolved
+   * ("Community water system deliveries") - the display name is resolved
    * to a code automatically.
    */
   const showOutcomeOnMap = useCallback(
@@ -31,6 +32,22 @@ export function useOutcomeMapAction() {
       showOnMapForGroup(code, scenarioId)
     },
     [isMapVisible, showOnMapForGroup],
+  )
+
+  /**
+   * Fixed-scenario variant - does not re-resolve via `buildIdMapping`, so
+   * the caller controls exactly which scenarioId the tier fetch hits.
+   * Use this when you need a stable scenario (e.g. aggregate views that
+   * don't belong to any one hydroclimate and want to anchor on the
+   * historical baseline).
+   */
+  const showOutcomeOnMapFixed = useCallback(
+    (outcomeCodeOrName: string, scenarioId: string) => {
+      if (!isMapVisible) return
+      const code = getOutcomeCode(outcomeCodeOrName) ?? outcomeCodeOrName
+      showOnMap(code, scenarioId)
+    },
+    [isMapVisible, showOnMap],
   )
 
   /**
@@ -51,11 +68,16 @@ export function useOutcomeMapAction() {
 
   return {
     showOutcomeOnMap,
+    showOutcomeOnMapFixed,
     isOutcomeActive,
     isMapVisible,
     activeOutcome,
   } satisfies {
     showOutcomeOnMap: (outcomeCodeOrName: string, scenarioId: string) => void
+    showOutcomeOnMapFixed: (
+      outcomeCodeOrName: string,
+      scenarioId: string,
+    ) => void
     isOutcomeActive: (outcomeCode: string, scenarioId: string) => boolean
     isMapVisible: boolean
     activeOutcome: OutcomeVisualization | null

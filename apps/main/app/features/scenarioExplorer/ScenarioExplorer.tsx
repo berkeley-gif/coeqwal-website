@@ -81,7 +81,7 @@ export default function ScenarioExplorer() {
   /**
    * Hover coordination (sidebar ↔ tool panels in non-list modes).
    * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
-   * Charts must keep `chosenIds` (selected scenarios) visible when this is set —
+   * Charts must keep `chosenIds` (selected scenarios) visible when this is set -
    * it adds emphasis for hovered IDs; it does not replace selection visibility.
    */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
@@ -371,6 +371,7 @@ export default function ScenarioExplorer() {
                       controls={resilienceControls}
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
+                      onControlsChange={handleResilienceControlsChange}
                     />
                   ))}
                 {exploreMode === "data" && <DataExplorerView />}

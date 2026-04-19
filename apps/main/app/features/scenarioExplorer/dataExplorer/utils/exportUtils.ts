@@ -255,7 +255,7 @@ function radarDataToCSV(
 /**
  * Export a single share-item's chart data as CSV.
  *
- * Bar chart items produce a readable matrix — one row per outcome,
+ * Bar chart items produce a readable matrix - one row per outcome,
  * tier scores as columns (Optimal, Acceptable, At-risk, Critical).
  *
  * Radar items produce a scenario × outcome matrix:
@@ -491,7 +491,7 @@ export async function captureSvgToBlob(
   const clone = svgElement.cloneNode(true) as SVGSVGElement
   inlineStyles(clone, svgElement)
 
-  // Use getBoundingClientRect for reliable pixel dimensions — baseVal can be
+  // Use getBoundingClientRect for reliable pixel dimensions - baseVal can be
   // 0 when the SVG uses percentage-based sizing (style="width:100%").
   const rect = svgElement.getBoundingClientRect()
   const svgWidth = rect.width || svgElement.clientWidth || 600

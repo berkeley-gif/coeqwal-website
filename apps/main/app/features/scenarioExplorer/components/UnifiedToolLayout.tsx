@@ -133,7 +133,7 @@ export default function UnifiedToolLayout({
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map reveal area — always rendered, width transitions between 0 and 25%.
+      {/* Map reveal area - always rendered, width transitions between 0 and 25%.
           pointer-events:none so clicks pass through to the persistent map behind. */}
       <Box
         sx={{

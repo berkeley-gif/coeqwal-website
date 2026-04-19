@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ResiliencePanel — resilience heatmap.
+ * ResiliencePanel - resilience heatmap.
  *
  * Hydroclimates run along the X axis; rows are either outcomes (scenario
  * and aggregate views) or scenarios (outcome view). Cells render in one
@@ -66,6 +66,7 @@ import {
 import { hydroclimateOptions } from "../../../content/scenarios"
 import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
+import ResilienceChartTuner from "./ResilienceChartTuner"
 
 export type ResilienceView = "scenario" | "outcome" | "aggregate" | "quadrant"
 
@@ -135,6 +136,13 @@ interface ResiliencePanelProps {
   controls: ResilienceControlsState
   highlightedIds?: Set<string> | null
   onScenarioHover?: (scenarioId: string | null) => void
+  /**
+   * Optional callback for mutating the shared control state. When
+   * provided, a "TUNE CHART" entry point renders in the upper-left of
+   * the chart area; when omitted, the button is suppressed (useful for
+   * read-only previews of the panel).
+   */
+  onControlsChange?: (next: Partial<ResilienceControlsState>) => void
 }
 
 const HYDROCLIMATE_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
@@ -176,6 +184,7 @@ export default function ResiliencePanel({
   controls,
   highlightedIds = null,
   onScenarioHover,
+  onControlsChange,
 }: ResiliencePanelProps) {
   const theme = useTheme()
   const {
@@ -236,8 +245,13 @@ export default function ResiliencePanel({
     error,
   } = useResilienceMatrix()
 
-  const { showOutcomeOnMap, isMapVisible, activeOutcome } =
-    useOutcomeMapAction()
+  const {
+    showOutcomeOnMap,
+    showOutcomeOnMapFixed,
+    isOutcomeActive,
+    isMapVisible,
+    activeOutcome,
+  } = useOutcomeMapAction()
 
   // Aggregate hook reads the already-fetched matrix. We key it on the
   // effective scope so it only recomputes when the set changes.
@@ -412,6 +426,14 @@ export default function ResiliencePanel({
     scopeScenarioIds: loiDistributionScope,
     enabled: loiDistributionEnabled,
   })
+  // Destructure stable members so consumers can list them as memo deps
+  // without invalidating on every render (the hook returns a new object
+  // literal each call, which would otherwise cascade through buildValueFn
+  // → cells → updateChart and rebuild the SVG on every parent re-render -
+  // observed as a hover-induced infinite render loop on outcomes whose
+  // hover sets hoveredSquareHighlight to a non-null value).
+  const loiByCell = loiDistribution.byCell
+  const loiBuildEntriesForScope = loiDistribution.buildEntriesForScope
 
   // Scenario-row order (for outcome view): primary baseline first, then
   // the 24 sibling-group order (already sorted by useScenarioList).
@@ -440,6 +462,20 @@ export default function ResiliencePanel({
     if (showAllScenarios) return PRIMARY_SCENARIO_BASELINE_ID
     return selectedScenarios[0] ?? null
   }, [showAllScenarios, selectedScenarios])
+
+  // Best-effort scenario id for map actions. In aggregate views there is
+  // no single "focused" scenario, but the map layer still needs a scenario
+  // to key the visualization request. We fall back through: explicit
+  // focus → first aggregated scenario → baseline. The layer geometry is
+  // scenario-invariant for the outcomes we show, so any valid id is fine.
+  const mapScenarioFallback = useMemo<string>(() => {
+    return (
+      effectiveFocusScenarioId ??
+      aggregateScenarioIds?.[0] ??
+      selectedScenarios[0] ??
+      PRIMARY_SCENARIO_BASELINE_ID
+    )
+  }, [effectiveFocusScenarioId, aggregateScenarioIds, selectedScenarios])
 
   const effectiveCellRender = useMemo(
     () => resolveCellRender(view, cellEncoding, deltaMode),
@@ -638,7 +674,7 @@ export default function ResiliencePanel({
           distributionMode === "location"
         ) {
           const entries =
-            loiDistribution.byCell[rowKey]?.[hc as ResilienceHydroclimate] ?? []
+            loiByCell[rowKey]?.[hc as ResilienceHydroclimate] ?? []
           distribution = [...entries]
         } else {
           distribution = agg.distribution.map((d) => ({
@@ -729,7 +765,7 @@ export default function ResiliencePanel({
     getDisplayName,
     aggregate,
     distributionMode,
-    loiDistribution,
+    loiByCell,
   ])
 
   // Compute the (rowKey, col) value grid once, then derive cells,
@@ -851,7 +887,7 @@ export default function ResiliencePanel({
       // When the distribution encoding is active in by-scenario view, the
       // tile itself is a single scenario. "scenario" mode renders a single
       // degenerate square (one entry). "location" mode renders per-LOI
-      // squares for that scenario — re-aggregated from the already-fetched
+      // squares for that scenario - re-aggregated from the already-fetched
       // raw data.
       let distribution: ReadonlyArray<ResilienceGlyphEntry> | undefined
       if (cellEncoding === "distribution" && cell.available) {
@@ -860,7 +896,7 @@ export default function ResiliencePanel({
             rowKey,
           )
           if (!isNodSod) {
-            distribution = loiDistribution.buildEntriesForScope(
+            distribution = loiBuildEntriesForScope(
               rowKey,
               hc,
               [scenarioId],
@@ -920,7 +956,7 @@ export default function ResiliencePanel({
       deltaBaselineScenarioId,
       cellEncoding,
       distributionMode,
-      loiDistribution,
+      loiBuildEntriesForScope,
     ],
   )
 
@@ -977,7 +1013,7 @@ export default function ResiliencePanel({
     [outcomeRowCodes],
   )
 
-  // By-outcome small multiples — one tile per outcome, Y = scenarios,
+  // By-outcome small multiples - one tile per outcome, Y = scenarios,
   // X = climates. Phase 3 renders all 19 outcomes always. The scenario
   // rows inside each tile respect sidebar selection (falling back to
   // all 24 when sidebar is empty or show-all is on, so the panel is
@@ -1022,7 +1058,7 @@ export default function ResiliencePanel({
             outcomeCode,
           )
           if (!isNodSod) {
-            distribution = loiDistribution.buildEntriesForScope(
+            distribution = loiBuildEntriesForScope(
               outcomeCode,
               hc,
               [scenarioId],
@@ -1082,7 +1118,7 @@ export default function ResiliencePanel({
       deltaBaselineScenarioId,
       cellEncoding,
       distributionMode,
-      loiDistribution,
+      loiBuildEntriesForScope,
     ],
   )
 
@@ -1201,15 +1237,42 @@ export default function ResiliencePanel({
     [view, effectiveFocusScenarioId, notifyHover],
   )
 
+  // Aggregate view has no "current" scenario/hydroclimate - every column
+  // and row aggregates across them. We anchor the map call on the
+  // historical baseline (same scenarioId Get Started uses, which has the
+  // widest /locations coverage) and bypass hydroclimate re-resolution so
+  // react-marker outcomes render reliably.
+  const triggerMapForOutcome = useCallback(
+    (outcomeCode: string, hydroclimateAwareSid: string | null) => {
+      if (view === "aggregate") {
+        const sid = PRIMARY_SCENARIO_BASELINE_ID
+        if (!isOutcomeActive(outcomeCode, sid)) {
+          showOutcomeOnMapFixed(outcomeCode, sid)
+        }
+        return
+      }
+      const sid = hydroclimateAwareSid ?? mapScenarioFallback
+      if (!isOutcomeActive(outcomeCode, sid)) {
+        showOutcomeOnMap(outcomeCode, sid)
+      }
+    },
+    [
+      view,
+      mapScenarioFallback,
+      showOutcomeOnMap,
+      showOutcomeOnMapFixed,
+      isOutcomeActive,
+    ],
+  )
+
   const handleCellClick = useCallback(
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
       const outcomeCode = cell.outcomeCode
-      const sid = cell.scenarioId ?? effectiveFocusScenarioId
-      if (!outcomeCode || !sid) return
-      showOutcomeOnMap(outcomeCode, sid)
+      if (!outcomeCode) return
+      triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
     },
-    [isMapVisible, effectiveFocusScenarioId, showOutcomeOnMap],
+    [isMapVisible, triggerMapForOutcome],
   )
 
   // Build a LocationHighlight payload from a distribution square in
@@ -1254,24 +1317,46 @@ export default function ResiliencePanel({
   const [pinnedSquareLois, setPinnedSquareLois] = useState<
     Map<string, { outcomeCode: string; highlight: LocationHighlight }>
   >(() => new Map())
-  const [hoveredSquareHighlight, setHoveredSquareHighlight] =
-    useState<LocationHighlight | null>(null)
 
-  // Single source of truth: whenever either the hover or the pinned set
-  // changes, re-emit the merged list to the map store.
+  // Hover highlight is a ref, not state. Storing it as useState caused
+  // every mousemove over the distribution squares to re-render the panel
+  // (and therefore the memoized ResilienceHeatmap), which in turn fired
+  // `updateChart` and rebuilt the SVG. When that rebuild happened between
+  // `mousedown` and `mouseup` on a square, the browser resolved the
+  // click on the parent <svg> rather than the original <rect>, so clicks
+  // on hover-sensitive outcomes (the three react-marker outcomes that
+  // drive a Mapbox popup on hover) were dropped intermittently. Refs do
+  // not trigger a render; we emit to the map store imperatively from the
+  // hover/click handlers below.
+  const hoveredSquareHighlightRef = useRef<LocationHighlight | null>(null)
+
+  // Mirror pinnedSquareLois in a ref so `emitLocationHighlights` can
+  // read the latest value without needing it in its dep array.
+  const pinnedSquareLoisRef = useRef(pinnedSquareLois)
   useEffect(() => {
+    pinnedSquareLoisRef.current = pinnedSquareLois
+  }, [pinnedSquareLois])
+
+  // Merged [pinned ∪ hovered] emitter. Reads both sources from refs so
+  // its own identity is stable across renders.
+  const emitLocationHighlights = useCallback(() => {
     const list: LocationHighlight[] = []
-    for (const { highlight } of pinnedSquareLois.values()) {
+    for (const { highlight } of pinnedSquareLoisRef.current.values()) {
       list.push({ ...highlight, pinned: true })
     }
-    if (
-      hoveredSquareHighlight &&
-      !pinnedSquareLois.has(hoveredSquareHighlight.key)
-    ) {
-      list.push(hoveredSquareHighlight)
+    const hovered = hoveredSquareHighlightRef.current
+    if (hovered && !pinnedSquareLoisRef.current.has(hovered.key)) {
+      list.push(hovered)
     }
     mapActions.setLocationHighlights(list)
-  }, [pinnedSquareLois, hoveredSquareHighlight])
+  }, [])
+
+  // Click-driven re-emit: when the pinned set changes we need to push
+  // the new list to the map store. Hover-driven re-emit is handled
+  // imperatively inside handleSquareHover.
+  useEffect(() => {
+    emitLocationHighlights()
+  }, [pinnedSquareLois, emitLocationHighlights])
 
   // Per-square hover for the distribution encoding. Branches by
   // distributionMode: "scenario" drives the sidebar highlight (same code
@@ -1283,7 +1368,8 @@ export default function ResiliencePanel({
     ) => {
       if (!info) {
         if (distributionMode === "location") {
-          setHoveredSquareHighlight(null)
+          hoveredSquareHighlightRef.current = null
+          emitLocationHighlights()
         } else {
           notifyHover(null)
         }
@@ -1291,14 +1377,20 @@ export default function ResiliencePanel({
       }
       if (distributionMode === "location") {
         const built = buildLocationHighlight(info.cell, info.entry)
-        setHoveredSquareHighlight(built?.highlight ?? null)
+        hoveredSquareHighlightRef.current = built?.highlight ?? null
+        emitLocationHighlights()
       } else {
-        // "scenario" mode — drive sidebar highlight + scroll.
+        // "scenario" mode - drive sidebar highlight + scroll.
         const sid = info.entry.scenarioId
         if (sid) notifyHover(sid)
       }
     },
-    [distributionMode, notifyHover, buildLocationHighlight],
+    [
+      distributionMode,
+      notifyHover,
+      buildLocationHighlight,
+      emitLocationHighlights,
+    ],
   )
 
   // Per-square click. Opens the outcome's map layer and (location mode)
@@ -1306,15 +1398,18 @@ export default function ResiliencePanel({
   // is hidden, same guard as handleCellClick above.
   const handleSquareClick = useCallback(
     (info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry }) => {
-      if (!isMapVisible) return
       const { cell, entry } = info
       const outcomeCode = cell.outcomeCode
+      if (!isMapVisible) return
       if (!outcomeCode) return
 
       if (distributionMode === "location") {
-        const sid = cell.scenarioId ?? effectiveFocusScenarioId
-        if (!sid) return
-        showOutcomeOnMap(outcomeCode, sid)
+        // Location mode encodes LOIs. Entries carry no scenarioId, so we
+        // defer to triggerMapForOutcome which picks between the
+        // hydroclimate-aware and fixed-baseline paths based on view. Pin
+        // state below updates regardless - the guard inside the trigger
+        // prevents repeat clicks from toggling the layer off.
+        triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
 
         const built = buildLocationHighlight(cell, entry)
         if (!built) return
@@ -1328,17 +1423,16 @@ export default function ResiliencePanel({
           return next
         })
       } else {
-        const sid =
-          entry.scenarioId ?? cell.scenarioId ?? effectiveFocusScenarioId
-        if (!sid) return
-        showOutcomeOnMap(outcomeCode, sid)
+        triggerMapForOutcome(
+          outcomeCode,
+          entry.scenarioId ?? cell.scenarioId ?? null,
+        )
       }
     },
     [
       isMapVisible,
       distributionMode,
-      effectiveFocusScenarioId,
-      showOutcomeOnMap,
+      triggerMapForOutcome,
       buildLocationHighlight,
     ],
   )
@@ -1360,7 +1454,7 @@ export default function ResiliencePanel({
       }
       return changed ? next : prev
     })
-    // We intentionally depend only on activeOutcomeCode — depending on
+    // We intentionally depend only on activeOutcomeCode - depending on
     // pinnedSquareLois would re-run the effect after our own setState.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeOutcomeCode])
@@ -1371,7 +1465,7 @@ export default function ResiliencePanel({
   useEffect(() => {
     return () => {
       setPinnedSquareLois(new Map())
-      setHoveredSquareHighlight(null)
+      hoveredSquareHighlightRef.current = null
       mapActions.clearLocationHighlights()
     }
   }, [])
@@ -1510,10 +1604,20 @@ export default function ResiliencePanel({
           px: theme.space.component.lg,
           py: theme.space.component.sm,
           display: "flex",
-          alignItems: "baseline",
+          alignItems: "center",
           gap: 2,
         }}
       >
+        {/* TUNE CHART entry point - pinned to the upper-left of the chart
+            area so beginners have an obvious onboarding surface for the
+            heatmap's many controls. Only renders when a mutator is
+            wired in; suppress for read-only previews. */}
+        {onControlsChange && (
+          <ResilienceChartTuner
+            controls={controls}
+            onChange={onControlsChange}
+          />
+        )}
         <Typography
           variant="dashboard"
           sx={{ fontWeight: 600, color: theme.palette.text.primary }}

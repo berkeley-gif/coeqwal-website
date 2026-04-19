@@ -8,7 +8,7 @@
  */
 
 // ============================================================================
-// ENV_FLOWS — Environmental flow monitoring stations (diamond markers)
+// ENV_FLOWS - Environmental flow monitoring stations (diamond markers)
 // ============================================================================
 
 export const ENV_FLOWS_COORDINATES: Record<string, [number, number]> = {
@@ -52,7 +52,7 @@ export const ENV_FLOWS_NAMES: Record<string, string> = {
 }
 
 // ============================================================================
-// STATION COORDINATES — Compliance stations and pumping plants
+// STATION COORDINATES - Compliance stations and pumping plants
 // ============================================================================
 
 export const STATION_COORDINATES: Record<string, [number, number]> = {
@@ -70,7 +70,7 @@ export const STATION_NAMES: Record<string, string> = {
 }
 
 // ============================================================================
-// RESERVOIRS — Coordinates and label stagger for reservoir polygon markers
+// RESERVOIRS - Coordinates and label stagger for reservoir polygon markers
 // ============================================================================
 
 export interface ReservoirConfig {
@@ -89,7 +89,7 @@ export const RESERVOIR_CONFIGS: Record<string, ReservoirConfig> = {
 }
 
 // ============================================================================
-// SALMON — Representative centroid for the Sacramento River
+// SALMON - Representative centroid for the Sacramento River
 // ============================================================================
 
 export const SALMON_RIVER_CENTROID: [number, number] = [-121.95, 39.5]

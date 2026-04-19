@@ -272,7 +272,7 @@ export default function RadarPanel({
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
 
-  // Radar capture function — exposed to parent via onCaptureReady
+  // Radar capture function - exposed to parent via onCaptureReady
   const captureRadar = useCallback(async () => {
     const svg = radarSvgRef.current
     if (!svg) {
@@ -703,7 +703,7 @@ export default function RadarPanel({
           />
         </Box>
 
-        {/* TODO: Info icon overlay — one per axis label (disabled pending refinement)
+        {/* TODO: Info icon overlay - one per axis label (disabled pending refinement)
         {axisPositions.length > 0 && (
           <Box
             sx={{

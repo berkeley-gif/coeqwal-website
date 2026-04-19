@@ -175,7 +175,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         const { dataUrl } = await captureElementToBlob(el)
         item.cachedImageDataUrl = dataUrl
       } catch {
-        // capture failed — scorecard still renders from live data
+        // capture failed - scorecard still renders from live data
       }
     }
 
@@ -902,7 +902,7 @@ function NonCompactRowContent({
         </Box>
       )}
 
-      {/* Column 4: Outcome glyphs — wraps below in wrapped mode */}
+      {/* Column 4: Outcome glyphs - wraps below in wrapped mode */}
       <Box
         ref={outcomeColRef}
         className="outcome-col"
@@ -927,7 +927,7 @@ function NonCompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        {/* Key outcomes label — compact mode only (wrapped uses header row) */}
+        {/* Key outcomes label - compact mode only (wrapped uses header row) */}
         {layoutMode === "compact" && (
           <Typography
             variant="dashboard"
@@ -1002,7 +1002,7 @@ function NonCompactRowContent({
 }
 
 /**
- * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
+ * Outcomes-only row content - just the outcome glyphs, no title/ops/checkbox.
  * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
  *
  * In distribution view, a second grid row of location descriptions is appended

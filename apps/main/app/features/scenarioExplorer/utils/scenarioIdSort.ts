@@ -1,4 +1,4 @@
-/** Canonical baseline scenario (Current Operations) — listed first within baseline theme */
+/** Canonical baseline scenario (Current Operations) - listed first within baseline theme */
 export const PRIMARY_SCENARIO_BASELINE_ID = "s0020"
 
 const SCENARIO_ID_NUMERIC = /^s(\d+)$/i

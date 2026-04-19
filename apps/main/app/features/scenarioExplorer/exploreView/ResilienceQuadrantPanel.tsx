@@ -385,7 +385,7 @@ export default function ResilienceQuadrantPanel({
         >
           {subjectLabel}
           {quadrantUnit === "loi" && loiOutcomeCode
-            ? ` — ${getOutcomeName(loiOutcomeCode)}`
+            ? ` - ${getOutcomeName(loiOutcomeCode)}`
             : ""}
         </Typography>
       </Box>

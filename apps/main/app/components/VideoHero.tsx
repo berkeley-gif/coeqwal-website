@@ -16,7 +16,13 @@ import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
 import { useReducedMotion } from "@repo/motion"
-import { ScrollToButton } from "@repo/ui"
+import {
+  ScrollToButton,
+  resolveRadius,
+  resolveInset,
+  type RadiusValue,
+  type PanelInset,
+} from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
 export type VideoSource = { src: string; type: string }
@@ -31,12 +37,22 @@ export interface VideoHeroProps {
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
   /** Hide the headline (for use with MorphingHeadline) */
   hideHeadline?: boolean
+  /** Rounded corner radius. Token key or raw CSS value. */
+  borderRadius?: RadiusValue
+  /** Pull the hero in from the viewport edges so all four rounded
+   *  corners are visible against a `frameBackground`. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset hero. */
+  frameBackground?: string
 }
 
 export default function VideoHero({
   sources,
   fallbackImage,
   hideHeadline = false,
+  borderRadius,
+  inset,
+  frameBackground,
 }: VideoHeroProps) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -105,7 +121,19 @@ export default function VideoHero({
 
   const showStaticImage = failed
 
-  return (
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
+
+  // Inset mode uses a wrapping frame Box; inner height must subtract the
+  // vertical frame padding so the hero still fits one viewport.
+  const heroHeight =
+    insetCfg && insetCfg.y !== 0
+      ? typeof insetCfg.y === "number"
+        ? `calc(100vh - ${insetCfg.y * 2}px)`
+        : `calc(100vh - (${insetCfg.y} * 2))`
+      : "100vh"
+
+  const hero = (
     // WCAG 1.3.1: Semantic section element with accessible name
     // Uses CSS Grid stacking for layering video behind content
     <Box
@@ -117,11 +145,12 @@ export default function VideoHero({
         display: "grid",
         gridTemplateAreas: '"stack"',
         gridTemplateRows: "1fr",
-        height: "100vh",
+        height: heroHeight,
         width: "100%",
         overflow: "hidden",
         pointerEvents: "auto", // Re-enable interactions (parent main has pointerEvents: none)
         cursor: "default", // Override map's pan cursor
+        borderRadius: radius,
       }}
     >
       {/* WCAG 1.1.1: Decorative video/image, hidden from assistive technology */}
@@ -326,4 +355,21 @@ export default function VideoHero({
       />
     </Box>
   )
+
+  if (insetCfg) {
+    return (
+      <Box
+        sx={{
+          background: frameBackground ?? "transparent",
+          px: insetCfg.x,
+          py: insetCfg.y,
+          width: "100%",
+        }}
+      >
+        {hero}
+      </Box>
+    )
+  }
+
+  return hero
 }

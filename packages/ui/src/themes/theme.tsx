@@ -435,6 +435,8 @@ const borderRadius = {
   sm: "4px", // Small (input fields, tags)
   md: "8px", // Standard (cards, panels, tooltips)
   lg: "12px", // Mobile nav drawer corners (BaseHeader)
+  xl: "16px", // Large card / soft panel corner
+  "2xl": "24px", // Prominent panel corner (homepage panel redesign)
   pill: "999px", // Full pill/capsule shape
   circle: "50%", // Perfect circles
 }

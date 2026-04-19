@@ -384,7 +384,7 @@ export default function BeatTextOverlay({
         pointerEvents: "none",
       }}
     >
-      {/* Left column — heading + body, matching ContentPanel layout */}
+      {/* Left column - heading + body, matching ContentPanel layout */}
       <Box
         sx={{
           position: "absolute",
@@ -483,7 +483,7 @@ export default function BeatTextOverlay({
           </Box>
         </motion.div>
 
-        {/* Body content — same flow as ContentPanel children */}
+        {/* Body content - same flow as ContentPanel children */}
         <Box
           ref={beat1Ref}
           sx={{
@@ -551,7 +551,7 @@ export default function BeatTextOverlay({
               </Box>
             ))}
           </Box>
-          {/* Calsim data beat — appears after morph completes */}
+          {/* Calsim data beat - appears after morph completes */}
           <Box
             ref={calsimTextRef}
             sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
@@ -578,7 +578,7 @@ export default function BeatTextOverlay({
               the Current operations water management scenario.
             </Typography>
           </Box>
-          {/* Tour CTA — appears after scenario header */}
+          {/* Tour CTA - appears after scenario header */}
           <Box
             ref={tourCtaRef}
             sx={{
@@ -597,7 +597,7 @@ export default function BeatTextOverlay({
         </Box>
       </Box>
 
-      {/* Beat 2 — white backdrop on the right third */}
+      {/* Beat 2 - white backdrop on the right third */}
       <Box
         ref={beat2PanelRef}
         sx={{
@@ -612,7 +612,7 @@ export default function BeatTextOverlay({
         }}
       />
 
-      {/* Beat 2 — text items in flow layout */}
+      {/* Beat 2 - text items in flow layout */}
       <Box
         sx={{
           position: "absolute",
@@ -828,7 +828,7 @@ export default function BeatTextOverlay({
               minHeight: 0,
             }}
           >
-            {/* Left column — Consumptive uses */}
+            {/* Left column - Consumptive uses */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               {beat2Layout.eyebrows[0] && (
                 <Box
@@ -941,7 +941,7 @@ export default function BeatTextOverlay({
               </Box>
             </Box>
 
-            {/* Right column — Non-consumptive uses */}
+            {/* Right column - Non-consumptive uses */}
             <Box sx={{ flex: 1, minWidth: 0 }}>
               {beat2Layout.eyebrows[1] && (
                 <Box

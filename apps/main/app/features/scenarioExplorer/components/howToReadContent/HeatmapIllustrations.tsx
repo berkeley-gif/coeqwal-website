@@ -290,7 +290,7 @@ export function DensityCellExample() {
   const perCell = size * 2 + gap
   const width = samples.length * perCell + (samples.length - 1) * 24
   return (
-    <Figure caption="Density mode: each cell has two stacked halves — top half shows share of LOIs at risk, bottom shows share that are performing well.">
+    <Figure caption="Density mode: each cell has two stacked halves - top half shows share of LOIs at risk, bottom shows share that are performing well.">
       <svg
         width={width}
         height={size * 2 + 36}

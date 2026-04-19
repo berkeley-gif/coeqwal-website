@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ResilienceControls — chart-controls bar for the resilience heatmap.
+ * ResilienceControls - chart-controls bar for the resilience heatmap.
  *
  * Renders inside the ChartControlsBar slot of ScenarioExplorer. The panel
  * state lives in the parent (ScenarioExplorer.tsx) so that controls and
@@ -239,7 +239,7 @@ export default function ResilienceControls({
   const showOutcomeRowsChip = !isQuadrant
   // Encoding picker: aggregate view shows all options (mean tier, density,
   // distribution, leverage). The by-scenario and by-outcome views only
-  // expose "tier" and "distribution" — the richer insight encodings don't
+  // expose "tier" and "distribution" - the richer insight encodings don't
   // compose cleanly at the small-multiples scale.
   const showEncodingSelect =
     SHOW_INSIGHT_MODES && (view === "aggregate" || view === "scenario" || view === "outcome")
@@ -273,7 +273,7 @@ export default function ResilienceControls({
         flexWrap: "wrap",
       }}
     >
-      {/* Primary view toggle — the three small-multiples / aggregate
+      {/* Primary view toggle - the three small-multiples / aggregate
           views pivot between each other with a shared shape. Quadrant
           is moved to a secondary "Analyze:" entry point below because
           its axes and data shape differ fundamentally. */}
@@ -330,7 +330,7 @@ export default function ResilienceControls({
         />
       )}
 
-      {/* Choose outcome rows — opens the checkbox overlay in
+      {/* Choose outcome rows - opens the checkbox overlay in
           ResiliencePanel. Mirrors the radar's "choose outcome axes"
           pattern. */}
       {showOutcomeRowsChip && (
