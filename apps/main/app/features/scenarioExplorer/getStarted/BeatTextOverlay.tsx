@@ -71,6 +71,10 @@ interface BeatTextOverlayProps {
   onRewind?: () => void
   onPlay?: () => void
   onPause?: () => void
+  /** When true (e.g. reduced-motion users), hide all playback controls and
+   *  let `beat1Ref` scroll internally so the fully revealed end-state body
+   *  content is reachable without the play affordance. */
+  hideControls?: boolean
   beat2Layout?: Beat2Layout | null
   onOutcomeClick?: (code: string, force?: boolean) => void
   selectedOutcomeCode?: string | null
@@ -123,6 +127,7 @@ export default function BeatTextOverlay({
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
+  hideControls = false,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -240,6 +245,11 @@ export default function BeatTextOverlay({
   /** Natural height of `introCollapseRef` (including padding), measured
    *  via ResizeObserver. Used as the animating max-height target. */
   const introCollapseHeightRef = useRef<number>(0)
+  /** Wrapper around the "How are scenario results measured?" subtitle.
+   *  Collapses on the same schedule as `introCollapseRef` so, post-reveal,
+   *  only the page title sits above the tier legend. */
+  const subtitleCollapseRef = useRef<HTMLDivElement>(null)
+  const subtitleCollapseHeightRef = useRef<number>(0)
   /** Root Box of the right-column (absolutely positioned at `right: 0`,
    *  `width: 33.33%`). Used as the reference frame for ResizeObserver
    *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
@@ -294,17 +304,26 @@ export default function BeatTextOverlay({
       }
 
       // Intro collapse group: after the Critical row lands (~0.45) and a
-      // short hold, fade out the intro paragraphs first, then collapse
-      // their height so the tier legend slides up into the vacated space
-      // via document flow. Running the two sequentially (fade then slide)
-      // reads more cleanly than overlapping them.
+      // short hold, fade out the intro paragraphs + subtitle first, then
+      // collapse their height so the tier legend slides up into the
+      // vacated space via document flow. The subtitle ("How are scenario
+      // results measured?") collapses on the same schedule as the intro
+      // paragraphs so only the page title sits above the legend at rest.
+      // Running the two sequentially (fade then slide) reads more cleanly
+      // than overlapping them.
+      const introFadeOut = clamp01((v - 0.49) / 0.03)
+      const introCollapse = clamp01((v - 0.52) / 0.03)
       if (introCollapseRef.current) {
-        const fadeOut = clamp01((v - 0.49) / 0.03)
-        const collapse = clamp01((v - 0.52) / 0.03)
         const el = introCollapseRef.current
-        el.style.opacity = String(1 - fadeOut)
+        el.style.opacity = String(1 - introFadeOut)
         el.style.maxHeight =
-          introCollapseHeightRef.current * (1 - collapse) + "px"
+          introCollapseHeightRef.current * (1 - introCollapse) + "px"
+      }
+      if (subtitleCollapseRef.current) {
+        const el = subtitleCollapseRef.current
+        el.style.opacity = String(1 - introFadeOut)
+        el.style.maxHeight =
+          subtitleCollapseHeightRef.current * (1 - introCollapse) + "px"
       }
 
       if (beat2PanelRef.current) {
@@ -312,7 +331,7 @@ export default function BeatTextOverlay({
         // outcome titles + location captions, since the narrative text
         // lives on the left panel. It fades in with AG_REV's solo morph
         // so the backdrop arrives together with the first graphics.
-        const fadeIn = clamp01((v - 0.74) / 0.03)
+        const fadeIn = clamp01((v - 0.76) / 0.03)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -403,10 +422,11 @@ export default function BeatTextOverlay({
       }
 
       // "All other key outcomes..." text: bridges AG_REV's solo morph
-      // (ends at 0.765) and the remaining outcomes' fly-ins (start at
-      // 0.80). Text is fully visible just as the next morph wave begins.
+      // (ends at 0.78) and the remaining outcomes' fly-ins (start at
+      // 0.84). Fade in 0.79–0.82 leaves a 0.02 reading beat before the
+      // next morph wave begins.
       if (allOtherOutcomesRef.current) {
-        const fadeIn = clamp01((v - 0.77) / 0.03)
+        const fadeIn = clamp01((v - 0.79) / 0.03)
         allOtherOutcomesRef.current.style.opacity = String(fadeIn)
       }
     })
@@ -422,19 +442,29 @@ export default function BeatTextOverlay({
    * and seed the element's initial `max-height` so the progress handler
    * has a closed-form value to animate toward zero. */
   useLayoutEffect(() => {
-    const el = introCollapseRef.current
-    if (!el) return
+    const intro = introCollapseRef.current
+    const subtitle = subtitleCollapseRef.current
 
     const measure = () => {
-      const h = el.scrollHeight
-      introCollapseHeightRef.current = h
-      if (!el.style.maxHeight || el.style.maxHeight === "0px") {
-        el.style.maxHeight = h + "px"
+      if (intro) {
+        const h = intro.scrollHeight
+        introCollapseHeightRef.current = h
+        if (!intro.style.maxHeight || intro.style.maxHeight === "0px") {
+          intro.style.maxHeight = h + "px"
+        }
+      }
+      if (subtitle) {
+        const h = subtitle.scrollHeight
+        subtitleCollapseHeightRef.current = h
+        if (!subtitle.style.maxHeight || subtitle.style.maxHeight === "0px") {
+          subtitle.style.maxHeight = h + "px"
+        }
       }
     }
 
     const ro = new ResizeObserver(() => measure())
-    ro.observe(el)
+    if (intro) ro.observe(intro)
+    if (subtitle) ro.observe(subtitle)
     measure()
 
     return () => ro.disconnect()
@@ -544,88 +574,105 @@ export default function BeatTextOverlay({
           >
             Visualizing key outcomes
           </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 0.75,
-              alignItems: "center",
-              pointerEvents: "auto",
-            }}
-          >
-            {playState !== "idle" && (
-              <IconButton
-                onClick={onRewind}
-                size="small"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: alpha(theme.palette.common.white, 0.15),
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.common.white, 0.3),
-                  },
-                }}
-              >
-                <ReplayIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            )}
-            {playState === "playing" ? (
-              <IconButton
-                onClick={onPause}
-                size="small"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  backgroundColor: alpha(theme.palette.common.white, 0.2),
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.common.white, 0.35),
-                  },
-                }}
-              >
-                <PauseIcon sx={{ fontSize: 24 }} />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={onPlay}
-                size="small"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  backgroundColor: alpha(theme.palette.common.white, 0.2),
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.common.white, 0.35),
-                  },
-                }}
-              >
-                <PlayArrowIcon sx={{ fontSize: 24 }} />
-              </IconButton>
-            )}
-          </Box>
+          {!hideControls && (
+            <Box
+              sx={{
+                display: "flex",
+                gap: 0.75,
+                alignItems: "center",
+                pointerEvents: "auto",
+              }}
+            >
+              {playState !== "idle" && (
+                <IconButton
+                  onClick={onRewind}
+                  size="small"
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    backgroundColor: alpha(theme.palette.common.white, 0.15),
+                    backdropFilter: "blur(8px)",
+                    color: "text.secondary",
+                    "&:hover": {
+                      backgroundColor: alpha(theme.palette.common.white, 0.3),
+                    },
+                  }}
+                >
+                  <ReplayIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              )}
+              {playState === "playing" ? (
+                <IconButton
+                  onClick={onPause}
+                  size="small"
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    backgroundColor: alpha(theme.palette.common.white, 0.2),
+                    backdropFilter: "blur(8px)",
+                    color: "text.secondary",
+                    "&:hover": {
+                      backgroundColor: alpha(theme.palette.common.white, 0.35),
+                    },
+                  }}
+                >
+                  <PauseIcon sx={{ fontSize: 24 }} />
+                </IconButton>
+              ) : (
+                <IconButton
+                  onClick={onPlay}
+                  size="small"
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    backgroundColor: alpha(theme.palette.common.white, 0.2),
+                    backdropFilter: "blur(8px)",
+                    color: "text.secondary",
+                    "&:hover": {
+                      backgroundColor: alpha(theme.palette.common.white, 0.35),
+                    },
+                  }}
+                >
+                  <PlayArrowIcon sx={{ fontSize: 24 }} />
+                </IconButton>
+              )}
+            </Box>
+          )}
         </motion.div>
 
         <motion.div style={{ opacity: headingOpacity, flexShrink: 0 }}>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ maxWidth: "66%", mb: theme.space.section.md, opacity: 0.85 }}
-          >
-            How are scenario results measured?
-          </Typography>
+          <Box ref={subtitleCollapseRef} sx={{ overflow: "hidden" }}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", opacity: 0.85 }}
+            >
+              How are scenario results measured?
+            </Typography>
+          </Box>
         </motion.div>
 
-        {/* Body content - same flow as ContentPanel children */}
+        {/* Body content - same flow as ContentPanel children.
+         *
+         * `mt: theme.space.section.sm` (24 px) matches the project's
+         * heading-to-content precedent (see e.g. `apps/main/app/data/page.tsx`).
+         * It acts as the gap below the subtitle pre-collapse, and becomes
+         * the gap directly below the page title post-collapse once the
+         * subtitle + intro paragraphs both animate to height 0. */}
         <Box
           ref={beat1Ref}
           sx={{
-            mt: 2,
+            mt: theme.space.section.sm,
             opacity: 0,
             width: "100%",
             maxWidth: theme.space.paragraphMaxWidth.compact,
+            ...(hideControls && {
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              pointerEvents: "auto",
+              pr: 1,
+            }),
             "& .MuiTypography-root": {
               color: textColor,
               textShadow: shadow,
@@ -766,7 +813,11 @@ export default function BeatTextOverlay({
           </Box>
           <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
             <Typography variant="body1" component="p">
-              The colors correspond to different water delivery outcome levels that affect agricultural revenue, ranging from optimal levels (blue) to critical levels (red).
+              The colors correspond to different water delivery outcome levels that affect{" "}
+              <Box component="strong" sx={{ fontWeight: 600 }}>
+                agricultural revenue
+              </Box>
+              , ranging from optimal levels (blue) to critical levels (red).
             </Typography>
           </Box>
           <Box ref={allOtherOutcomesRef} sx={{ mt: 2, opacity: 0 }}>

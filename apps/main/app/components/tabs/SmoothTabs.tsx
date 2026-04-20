@@ -198,13 +198,16 @@ export default function SmoothTabs() {
         onKeyDown={handleKeyDown}
         className="tab-container"
         style={{
-          display: "flex",
-          gap: 0,
+          // Grid with 3 equal columns so each tab lives in a cell that
+          // is exactly 1/3 of the viewport wide. When expanded, each
+          // tab is narrower than its cell and centered inside it
+          // (halo on both sides). When docked, tabs stretch to fill
+          // their cells for the continuous nav-bar look.
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
           width: "100%",
           pointerEvents: "auto",
-          paddingLeft: 0,
-          paddingRight: 0,
-          transition: "padding 0.3s ease",
+          boxSizing: "border-box",
         }}
       >
         {TABS.map(({ key, label, panelColor }) => {
@@ -220,20 +223,25 @@ export default function SmoothTabs() {
               type="button"
               tabIndex={selected ? 0 : -1}
               style={{
-                flex: 1,
+                // Each tab sits inside a 1/3-wide grid cell. When
+                // expanded, the tab is 85% of its cell and centered
+                // via justifySelf. When docked, width = 100% makes
+                // tabs stretch edge-to-edge.
+                justifySelf: "center",
+                width: isInTabsArea ? "100%" : "85%",
                 position: "relative",
                 border: "none",
                 backgroundColor: panelColor,
                 cursor: "pointer",
                 color: theme.palette.common.white,
                 transition:
-                  "padding 0.4s ease, clip-path 0.4s ease, gap 0.4s ease, font-size 0.4s ease",
+                  "padding 0.4s ease, gap 0.4s ease, font-size 0.4s ease, width 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
                 gap: 0,
-                alignItems: isInTabsArea ? "center" : "flex-start",
+                alignItems: "center",
                 justifyContent: "center",
-                textAlign: isInTabsArea ? "center" : "left",
+                textAlign: "center",
                 padding: isInTabsArea
                   ? "0 20px"
                   : `14px ${theme.space.panel.padding}`,
@@ -242,11 +250,6 @@ export default function SmoothTabs() {
                   : undefined,
                 borderTop: "none",
                 borderBottom: "none",
-                // File-tab shape: triangle cut from upper-right corner (80px).
-                // No cutout when docked for a clean layered look.
-                clipPath: isInTabsArea
-                  ? "none"
-                  : "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}

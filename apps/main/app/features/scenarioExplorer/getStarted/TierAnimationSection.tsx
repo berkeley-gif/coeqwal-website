@@ -2,7 +2,13 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
-import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
+import {
+  useMotionValue,
+  useTransform,
+  motion,
+  animate,
+  useReducedMotion,
+} from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
 import {
@@ -247,6 +253,12 @@ export default function TierAnimationSection() {
   const [playState, setPlayState] = useState<
     "idle" | "playing" | "paused" | "finished"
   >("idle")
+  /** `prefers-reduced-motion: reduce` honored at the orchestration level:
+   *  we skip the time-based `animate(progress, 1, ...)` entirely and jump
+   *  straight to the settled end-state the moment the panel becomes
+   *  visible. Child listeners on `progress` resolve themselves to their
+   *  v = 1 branches, so no per-listener reduced-motion code is needed. */
+  const prefersReducedMotion = useReducedMotion() ?? false
 
   const polygonsAllowedRef = useRef(false)
   const resolvedScenarioIdRef = useRef("s0020")
@@ -267,6 +279,43 @@ export default function TierAnimationSection() {
 
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
 
+  /** Settle the animation to its resting end-state: clear visualization +
+   *  highlights, hide all animation polygon/line layers, and flip
+   *  `playState` into "finished" so the interactive UI lights up. Shared
+   *  between the normal `animate(progress, 1, { onComplete })` finish and
+   *  the reduced-motion fast-forward path below. */
+  const settleToFinishedState = useCallback(() => {
+    setPlayState("finished")
+    mapActions.clearOutcomeVisualization()
+    mapActions.clearLocationHighlights()
+
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (map?.isStyleLoaded?.()) {
+      try {
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill)) {
+            map.setPaintProperty(fill, "fill-opacity-transition", {
+              duration: 0,
+              delay: 0,
+            })
+            map.setPaintProperty(fill, "fill-opacity", 0)
+            map.setFilter(fill, null)
+          }
+          if (map.getLayer(outline)) {
+            map.setPaintProperty(outline, "line-opacity", 0)
+          }
+        }
+        for (const lineLayer of ANIM_LINE_LAYERS) {
+          if (map.getLayer(lineLayer)) {
+            map.setPaintProperty(lineLayer, "line-opacity", 0)
+          }
+        }
+      } catch {
+        /* ok */
+      }
+    }
+  }, [mapAPI.mapRef])
+
   /** Start (or resume) the progress animation. */
   const beginProgressAnimation = useCallback(
     (startFrom: number) => {
@@ -275,40 +324,10 @@ export default function TierAnimationSection() {
       controlsRef.current = animate(progress, 1, {
         duration: remaining,
         ease: "linear",
-        onComplete: () => {
-          setPlayState("finished")
-          mapActions.clearOutcomeVisualization()
-          mapActions.clearLocationHighlights()
-
-          const map = mapAPI.mapRef?.current?.getMap?.()
-          if (map?.isStyleLoaded?.()) {
-            try {
-              for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-                if (map.getLayer(fill)) {
-                  map.setPaintProperty(fill, "fill-opacity-transition", {
-                    duration: 0,
-                    delay: 0,
-                  })
-                  map.setPaintProperty(fill, "fill-opacity", 0)
-                  map.setFilter(fill, null)
-                }
-                if (map.getLayer(outline)) {
-                  map.setPaintProperty(outline, "line-opacity", 0)
-                }
-              }
-              for (const lineLayer of ANIM_LINE_LAYERS) {
-                if (map.getLayer(lineLayer)) {
-                  map.setPaintProperty(lineLayer, "line-opacity", 0)
-                }
-              }
-            } catch {
-              /* ok */
-            }
-          }
-        },
+        onComplete: settleToFinishedState,
       })
     },
-    [progress, mapAPI.mapRef],
+    [progress, settleToFinishedState],
   )
 
   const handlePlay = useCallback(() => {
@@ -448,6 +467,27 @@ export default function TierAnimationSection() {
 
     computePolygonDataRef.current()
   }, [progress, mapAPI.mapRef])
+
+  /* ── Reduced-motion path ──
+   *
+   * When the user has `prefers-reduced-motion: reduce`, we never run the
+   * 30s linear `animate(progress, 1, ...)`. Instead, as soon as the panel
+   * scrolls into view, we snap `progress` to 1 — every child listener on
+   * BeatTextOverlay / OutcomeMorphOverlay then resolves to its v = 1
+   * branch, which collapses the intro block, reveals the tier legend,
+   * reveals all narrative blocks, raises the backdrop, and parks every
+   * glyph at its settled square position. `settleToFinishedState()`
+   * applies the same map cleanup the normal onComplete runs, and
+   * `setPlayState("finished")` lights up the interactive UI. The
+   * BeatTextOverlay's `hideControls={prefersReducedMotion}` prop keeps the
+   * play affordance out of sight since it's non-functional here. */
+  useEffect(() => {
+    if (!prefersReducedMotion) return
+    if (!panelInView) return
+    if (controlsRef.current) controlsRef.current.stop()
+    progress.set(1)
+    settleToFinishedState()
+  }, [prefersReducedMotion, panelInView, progress, settleToFinishedState])
 
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
@@ -1245,10 +1285,10 @@ export default function TierAnimationSection() {
     const BEAT1B_START = 0.55
     const BEAT1C_BLEND_START = 0.6
     const BEAT1C_BLEND_END = 0.66
-    // AG_REV now morphs solo starting at 0.74 (see getOutcomeProgressRange
+    // AG_REV now morphs solo starting at 0.76 (see getOutcomeProgressRange
     // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
     // DU filter restore + hide-schedule over in time for AG_REV's morph.
-    const BEAT2_START = 0.74
+    const BEAT2_START = 0.76
 
     let frozenColorPhase = 0
 
@@ -1522,7 +1562,7 @@ export default function TierAnimationSection() {
     if (!agData) return
 
     const POPUPS_IN = 0.69
-    const POPUPS_OUT = 0.74 // clear at start of AG_REV morph (Beat 2)
+    const POPUPS_OUT = 0.76 // clear at start of AG_REV morph (Beat 2)
     const count = BEAT1C_POPUP_DU_IDS.length
     const span = POPUPS_OUT - POPUPS_IN
     const perPopup = span / count
@@ -2435,6 +2475,7 @@ export default function TierAnimationSection() {
             onHydroclimateChange={setHydroclimate}
             outcomeMorphWindows={outcomeMorphWindows}
             onGlyphLayoutChange={handleGlyphLayoutChange}
+            hideControls={prefersReducedMotion}
           />
 
           {isInteractive &&
