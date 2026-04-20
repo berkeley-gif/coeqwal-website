@@ -43,10 +43,6 @@ export default function ToolToolbar({
   } = useScenarioExplorerStore()
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
-  // TODO: re-enable high climate risk in radar once it has complete data
-  const radarDisabledClimates =
-    exploreMode === "radar" ? new Set(["cc95"]) : undefined
-
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   const [howToReadOpen, setHowToReadOpen] = useState(false)
@@ -203,7 +199,6 @@ export default function ToolToolbar({
           iconFontSize="1rem"
           value={hydroclimate}
           onChange={setHydroclimate}
-          disabledValues={radarDisabledClimates}
         />
         {!showMap && hydroBadge && (
           <HydroclimateBadge

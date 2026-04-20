@@ -29,6 +29,8 @@ export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
 const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
 
+const HC_HISTORICAL = "historical"
+
 /** Convert a tier mean (1-4 scale) to the radar chart's internal format,
  *  matching the API path: normalized_score = (4 - ws) / 3, then * 2 - 1. */
 function tierMeanToRadarValue(tierMean: number): number {
@@ -168,13 +170,25 @@ export function useComparisonData() {
           const outcomeScore = scenarioScores[code]
           const displayName = getOutcomeName(code)
           if (outcomeScore?.normalized_score !== undefined) {
-            values[displayName] = outcomeScore.normalized_score * 2 - 1
+            let v = outcomeScore.normalized_score * 2 - 1
+            // Winter-run salmon tier scores sometimes come through above 4
+            // on the 1-4 tier scale, which maps to radar values below -1.
+            // Clip anything over 4 back to 4 (radar value -1) so those
+            // scenarios still render at the bottom of the axis instead of
+            // clipping off-chart. Not clear why the upstream scores exceed
+            // 4; leaving that for someone else to figure out.
+            if (code === "WRC_SALMON_AB" && v < -1) v = -1
+            values[displayName] = v
           } else {
             values[displayName] = null
           }
         })
 
-        const localScores = nodSodData[scenarioId]
+        // NOD/SOD tier means are only defined for the historical hydroclimate;
+        // for cc50/cc95 we mark them unavailable so the radar does not mix
+        // climate-varied aggregate tiers with historical NOD/SOD numbers.
+        const localScores =
+          hydroclimate === HC_HISTORICAL ? nodSodData[scenarioId] : undefined
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
           const raw = localScores?.[code]
@@ -191,7 +205,7 @@ export function useComparisonData() {
       .filter((scenario) => {
         return Object.keys(scenario.values).length > 0
       })
-  }, [allScoreData, scenarios])
+  }, [allScoreData, scenarios, hydroclimate])
 
   // Axes use display names for user-facing labels (standard + NOD/SOD)
   const axes = useMemo(() => {
@@ -210,7 +224,10 @@ export function useComparisonData() {
       for (const code of OUTCOME_CODE_ORDER) {
         const s = scores[code]
         if (s?.normalized_score === undefined) continue
-        const v = s.normalized_score * 2 - 1
+        let v = s.normalized_score * 2 - 1
+        // Match the salmon clamp in parallelPlotData so axis min/max does
+        // not get dragged off the bottom of the radar.
+        if (code === "WRC_SALMON_AB" && v < -1) v = -1
         const name = getOutcomeName(code)
         const cur = range[name]
         if (cur) {
@@ -221,6 +238,7 @@ export function useComparisonData() {
         }
       }
 
+      if (hydroclimate !== HC_HISTORICAL) continue
       const localScores = nodSodData[scenarioId]
       if (!localScores) continue
       for (const code of NOD_SOD_OUTCOME_CODES) {
@@ -238,7 +256,7 @@ export function useComparisonData() {
       }
     }
     return range
-  }, [allScoreData, allScenarioIds])
+  }, [allScoreData, allScenarioIds, hydroclimate])
 
   const lineColors = useMemo(() => {
     // Create a lookup from the scenarios array
@@ -263,7 +281,10 @@ export function useComparisonData() {
       values[name] =
         s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
     })
-    const baselineLocal = nodSodData[PRIMARY_BASELINE_ID]
+    const baselineLocal =
+      hydroclimate === HC_HISTORICAL
+        ? nodSodData[PRIMARY_BASELINE_ID]
+        : undefined
     NOD_SOD_OUTCOME_CODES.forEach((code) => {
       const name = getOutcomeName(code)
       const raw = baselineLocal?.[code]
@@ -275,7 +296,7 @@ export function useComparisonData() {
       values,
       highlighted: false,
     }
-  }, [parallelPlotData, allScoreData, getDisplayName])
+  }, [parallelPlotData, allScoreData, getDisplayName, hydroclimate])
 
   // Tier heatmap data: scenario × outcome matrix
   const heatmapCells = useMemo<TierHeatmapCell[]>(() => {

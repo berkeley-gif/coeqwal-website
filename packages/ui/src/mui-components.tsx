@@ -118,6 +118,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import PauseIcon from "@mui/icons-material/Pause"
 import ReplayIcon from "@mui/icons-material/Replay"
 import InfoIcon from "@mui/icons-material/Info"
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import EditNoteIcon from "@mui/icons-material/EditNote"
@@ -191,6 +192,7 @@ export {
   PauseIcon,
   ReplayIcon,
   InfoIcon,
+  InfoOutlinedIcon,
   UnfoldMoreIcon,
   MyLocationIcon,
   EditNoteIcon,
