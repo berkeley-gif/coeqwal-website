@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useId, useMemo, useRef, useState } from "react"
 import { scaleLinear, line, area, type ScaleLinear } from "@repo/viz"
 import {
   min,
@@ -11,7 +11,7 @@ import {
 } from "@repo/viz"
 import { csv, autoType } from "@repo/viz"
 import { OffWhiteColor } from "../helpers/colorPalette"
-import { motion, MotionValue } from "@repo/motion"
+import { motion, MotionValue, useTransform } from "@repo/motion"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import { useTheme } from "@repo/ui/mui"
 
@@ -35,10 +35,18 @@ const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
   { start: new Date("1983-01-01"), end: new Date("1992-06-01"), opacity: 0.22 },
   { start: new Date("1999-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
 ]
+const RECHARGE_LABELS = ["1st recharge", "2nd recharge"] as const
 
-type Props = { scrollProgress: MotionValue<number> }
+type Props = {
+  scrollProgress: MotionValue<number>
+  debug?: boolean
+}
 
-export default function GroundwaterLine({ scrollProgress }: Props) {
+export default function GroundwaterLine({
+  scrollProgress,
+  debug = false,
+}: Props) {
+  const revealClipId = useId().replace(/:/g, "")
   const theme = useTheme()
   const [data, setData] = useState<GroundwaterRow[]>([])
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
@@ -52,9 +60,10 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
       if (cancelled) return
 
       const processed: GroundwaterRow[] = raw
-        .map((d: any) => {
-          const year = Number(d["Year"])
-          const gwRaw = Number(d["GW Change"])
+        .map((d) => {
+          const row = d as Record<string, unknown>
+          const year = Number(row["Year"])
+          const gwRaw = Number(row["GW Change"])
           const gwDepth = Number.isFinite(gwRaw) && gwRaw < 0 ? -gwRaw : gwRaw
 
           return {
@@ -127,14 +136,81 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
     return areaGen(data) ?? ""
   }, [data, xScale, yScale, yExtents])
 
+  const groundwaterTrendPath = useMemo(() => {
+    const points = data
+      .filter(
+        (d): d is GroundwaterRow & { date: Date } =>
+          d.date instanceof Date &&
+          !Number.isNaN(d.date.getTime()) &&
+          Number.isFinite(d.gse_gwe),
+      )
+      .map((d) => ({
+        x: d.date.getTime(),
+        date: d.date,
+        value: d.gse_gwe,
+      }))
+
+    if (points.length < 2) return ""
+
+    const n = points.length
+    const sumX = points.reduce((acc, d) => acc + d.x, 0)
+    const sumY = points.reduce((acc, d) => acc + d.value, 0)
+    const sumXY = points.reduce((acc, d) => acc + d.x * d.value, 0)
+    const sumXX = points.reduce((acc, d) => acc + d.x * d.x, 0)
+    const denom = n * sumXX - sumX * sumX
+    if (denom === 0) return ""
+
+    const slope = (n * sumXY - sumX * sumY) / denom
+    const intercept = (sumY - slope * sumX) / n
+
+    const minDate = points.reduce((minP, p) => (p.x < minP.x ? p : minP)).date
+    const maxDate = points.reduce((maxP, p) => (p.x > maxP.x ? p : maxP)).date
+
+    const trendLine = line<{ date: Date; value: number }>()
+      .x((d) => xScale(d.date))
+      .y((d) => yScale(d.value))
+
+    return (
+      trendLine([
+        {
+          date: minDate,
+          value: slope * minDate.getTime() + intercept,
+        },
+        {
+          date: maxDate,
+          value: slope * maxDate.getTime() + intercept,
+        },
+      ]) ?? ""
+    )
+  }, [data, xScale, yScale])
+
   const xTicks = useMemo(() => xScale.ticks(6), [xScale])
   const yTicks = useMemo(() => yScale.ticks(3), [yScale])
 
   const plotWidth = Math.max(0, size.width - margin.left - margin.right)
   const plotHeight = Math.max(0, size.height - margin.top - margin.bottom)
+  const chartRevealProgress = usePlayAnimationOnce(
+    scrollProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+  const chartRevealWidth = useTransform(
+    chartRevealProgress,
+    [0, 1],
+    [0, plotWidth],
+  )
+  const trendPathLength = usePlayAnimationOnce(
+    scrollProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+  const trendOpacity = usePlayAnimationOnce(
+    scrollProgress,
+    [0.5, 0.7],
+    [0, 0.9],
+  )
 
   // setting the charge labels below the water curve
-  const RECHARGE_LABELS = ["1st recharge", "2nd recharge"]
   const rechargeGaps = useMemo(() => {
     if (DROUGHT_BANDS.length < 2 || data.length === 0) return []
 
@@ -181,13 +257,12 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
 
   return (
     <svg ref={svgRef} width="100%" height="100%">
-      {/* clip to plotting area so bands/area/line don't spill out */}
       <defs>
-        <clipPath id="plot-clip">
-          <rect
+        <clipPath id={revealClipId}>
+          <motion.rect
             x={margin.left}
             y={margin.top}
-            width={plotWidth}
+            width={chartRevealWidth}
             height={plotHeight}
           />
         </clipPath>
@@ -197,6 +272,7 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
       <XAxis
         size={size}
         xScale={xScale}
+        yPos={yScale(yExtents[1])}
         margin={margin}
         ticks={xTicks}
         scrollProgress={scrollProgress}
@@ -209,14 +285,25 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
       />
 
       {/* Area under line (light blue) */}
-      <g clipPath="url(#plot-clip)">
+      <g clipPath={`url(#${revealClipId})`}>
         <path d={areaPath} fill="#115EB6" />
         {/* Golden line on top */}
         <path d={linePath} fill="none" stroke="#0c498fff" strokeWidth={3} />
+        {debug && groundwaterTrendPath && (
+          <motion.path
+            d={groundwaterTrendPath}
+            fill="none"
+            stroke="#8EC5FF"
+            strokeWidth={3}
+            strokeDasharray="8 6"
+            pathLength={trendPathLength}
+            style={{ opacity: trendOpacity }}
+          />
+        )}
       </g>
 
       {/* --- Gray shaded drought bands (behind) --- */}
-      <g clipPath="url(#plot-clip)" pointerEvents="none">
+      <g clipPath={`url(#${revealClipId})`} pointerEvents="none">
         {DROUGHT_BANDS.map((b, i) => {
           const x0 = xScale(b.start)
           const x1 = xScale(b.end)
@@ -226,7 +313,7 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
               x={Math.min(x0, x1)}
               y={margin.top}
               width={Math.max(0, Math.abs(x1 - x0))}
-              height={plotHeight}
+              height={yScale(yExtents[1]) - margin.top}
               fill="#8b99b2" // gray-blue
               opacity={b.opacity ?? 0.22}
             />
@@ -234,7 +321,7 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
         })}
       </g>
       {/* Recharge labels placed below curve */}
-      <g clipPath="url(#plot-clip)" pointerEvents="none">
+      <g clipPath={`url(#${revealClipId})`} pointerEvents="none">
         {rechargeGaps.map((g, i) => (
           <text
             key={i}
@@ -263,12 +350,14 @@ export default function GroundwaterLine({ scrollProgress }: Props) {
 function XAxis({
   size,
   xScale,
+  yPos,
   margin,
   ticks,
   scrollProgress,
 }: {
   size: ContainerSize
   xScale: ScaleTime<number, number>
+  yPos: number
   margin: Margin
   ticks: Date[]
   scrollProgress: MotionValue<number>
@@ -276,7 +365,7 @@ function XAxis({
   const theme = useTheme()
   // x-axis line is drawn at the TOP of the plot area
   const yLine = margin.top
-  const yLabels = Math.max(margin.top, size.height - margin.bottom)
+  const yLabels = yPos
 
   // --- icon setup ---
   const iconSize = 48
@@ -324,7 +413,7 @@ function XAxis({
       <motion.text
         x={(margin.left + size.width - margin.right) / 2}
         y={yLabels}
-        dy="2em"
+        dy="50"
         style={{
           fill: OffWhiteColor,
           fontSize: theme.typography.subtitle2.fontSize,

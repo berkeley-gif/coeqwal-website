@@ -15,8 +15,9 @@ import { Scrollama, Step } from "react-scrollama"
 import { SectionId } from "./store"
 import SierraNevada, { Snowmelt } from "./components/03Snowmelt"
 import Groundwater from "./components/04Groundwater"
+import DeltaFarms, { DeltaAqueduct } from "./components/05Delta"
 import Balance, { Bullet } from "./components/06AdaptTransition"
-import SectionResolution from "./components/07Resolution"
+import { Conclusion, Hydroclimate, Themes } from "./components/07Resolution"
 
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
@@ -85,7 +86,17 @@ function ContentContainer() {
           </Box>
         </Step>
 
-        {/* Add Delta View*/}
+        <Step data={"deltaFarms" as SectionId}>
+          <Box width="100%">
+            <DeltaFarms />
+          </Box>
+        </Step>
+
+        <Step data={"deltaAqueduct" as SectionId}>
+          <Box width="100%">
+            <DeltaAqueduct />
+          </Box>
+        </Step>
 
         <Step data={"balance" as SectionId}>
           <Box width="100%">
@@ -101,7 +112,19 @@ function ContentContainer() {
 
         <Step data={"bullet" as SectionId}>
           <Box width="100%">
-            <SectionResolution />
+            <Hydroclimate />
+          </Box>
+        </Step>
+
+        <Step data={"bullet" as SectionId}>
+          <Box width="100%">
+            <Themes />
+          </Box>
+        </Step>
+
+        <Step data={"bullet" as SectionId}>
+          <Box width="100%">
+            <Conclusion />
           </Box>
         </Step>
       </Scrollama>

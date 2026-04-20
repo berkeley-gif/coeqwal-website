@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react"
-import { OffWhiteColor, FreshWaterColor } from "./colorPalette"
+import { useState, useEffect, useRef } from "react"
 
 export default function RainAnimation() {
   const [drops] = useState(Array(100).fill(null))
   const [intensity, setIntensity] = useState(1)
+  const rainRef = useRef<HTMLDivElement | null>(null)
+  const [travelPx, setTravelPx] = useState(0)
 
   useEffect(() => {
     let startTime = Date.now()
@@ -21,9 +22,28 @@ export default function RainAnimation() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    const el = rainRef.current
+    if (!el) return
+
+    const updateTravel = () => {
+      setTravelPx(el.getBoundingClientRect().height)
+    }
+
+    updateTravel()
+    const ro = new ResizeObserver(updateTravel)
+    ro.observe(el)
+
+    return () => ro.disconnect()
+  }, [])
+
   return (
     <>
-      <div className="rain">
+      <div
+        ref={rainRef}
+        className="rain"
+        style={{ ["--rain-travel" as string]: `${travelPx}px` }}
+      >
         {drops.map((_, i) => {
           const delay = Math.random() * 5
           const baseDur = 2 + Math.random() * 2

@@ -51,9 +51,10 @@ export default function SierraNevada() {
       stickyRollHeight="120vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="450 100 864 864">
+      <SVGLineContainer viewBox="20 0 1728 1117" preserveAspectRatio="xMinYMin">
         <motion.path
-          d="M927 -40.0001C927 -40.0001 609 -62 401 138C193 338 -117 430 -117 430"
+          d="M2 0V640.001C2 640.001 172 833 264 718C356 603 419.997 470 504 510C588.003 550 674.006 688 758.003 687.001C842 686.001 894.006 436.001 988.003 436.001C1082 436.001 1565 703.001 1492 856C1419 1009 1492 1114 1492 1114V1146H2064"
+          //d="M2 0V640.001C2 640.001 162 815.001 254 700.001C346 585.001 388 448.001 472.003 488.001C556.006 528.001 674.006 688.001 758.003 687.001C842 686.001 894.006 436.001 988.003 436.001C1082 436.001 1500.01 662.002 1427 815.001C1354 968 1364 1114 1364 1114V1146H2064"
           className="svg-line"
           pathLength={linePath}
         />
@@ -231,7 +232,7 @@ export function Snowmelt() {
       stickyRollHeight="200vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="0 0 2012 1133">
+      <SVGLineContainer viewBox="0 0 2012 1133" zIndex={2}>
         <motion.path
           id="risingHeatPath"
           d="M0 2H309C309 2 421.151 143.424 723 268C1024.85 392.576 837.399 576.216 1051 652C1187.22 700.329 2010 843 2010 843V1133"

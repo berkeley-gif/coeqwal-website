@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Box, UnfoldMoreIcon } from "@repo/ui/mui"
+import { Box, UnfoldMoreIcon, useTheme } from "@repo/ui/mui"
 
 type HorizontalCompareProps = {
   leftSrc: string
@@ -48,6 +48,7 @@ export function HorizontalImageSlider({
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
+  const theme = useTheme()
 
   const updateFromPointer = useCallback((clientX: number) => {
     const el = wrapRef.current
@@ -215,7 +216,7 @@ export function HorizontalImageSlider({
                 backgroundColor: "common.white",
                 backdropFilter: "blur(2px)",
                 color: "blue.darkest",
-                fontSize: "0.75rem",
+                fontSize: theme.typography.caption.fontSize,
                 fontWeight: "bold",
                 lineHeight: 1.2,
                 whiteSpace: "nowrap",
@@ -235,7 +236,7 @@ export function HorizontalImageSlider({
                 backgroundColor: "common.white",
                 backdropFilter: "blur(2px)",
                 color: "blue.darkest",
-                fontSize: "0.75rem",
+                fontSize: theme.typography.caption.fontSize,
                 fontWeight: "bold",
                 lineHeight: 1.2,
                 whiteSpace: "nowrap",

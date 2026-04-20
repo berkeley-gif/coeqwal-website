@@ -134,10 +134,10 @@ export function Temperature() {
       <SVGLineContainer viewBox="0 0 1728 952">
         <motion.path
           id="warmingTrendPath"
-          d="M-124 328.925C-124 328.925 1252 139.712 1543 39.7122C1834 -60.2881 1824 272.712 1688 528.712"
-          //d="M-120 364.258C-120 364.258 976 229.257 1264 47.2572C1400.13 -38.7677 1585.63 8.97369 1728 110.281"
+          //d="M-124 290.308C-124 290.308 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          d="M-112 262.094C-112 262.094 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
           className="svg-line glow-effect"
-          transform="translate(50, 130)"
+          transform="translate(50, 187)"
           pathLength={linePath}
           /*style={{
                 strokeDasharray: pathLength,
@@ -148,10 +148,11 @@ export function Temperature() {
         />
         <motion.path
           id="warmingTrendTextPath"
-          d="M-124 328.925C-124 328.925 1252 139.712 1543 39.7122C1834 -60.2881 1824 272.712 1688 528.712"
+          //d="M-124 290.308C-124 290.308 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          d="M-112 262.094C-112 262.094 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
           fill="none"
           stroke="none"
-          transform="translate(50, 108)"
+          transform="translate(50, 155)"
         />
         <motion.text
           fill="#F1B143"
@@ -163,7 +164,7 @@ export function Temperature() {
         >
           <textPath
             href="#warmingTrendTextPath"
-            startOffset="50.5%"
+            startOffset="38.5%"
             textAnchor="middle"
           >
             Overall Warming Trend

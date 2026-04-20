@@ -54,8 +54,8 @@ export default function SierraNevadaImageScroller({
           leftSrc={selectedDryImage}
           rightSrc={selectedImage}
           width="100%"
-          leftKnobLabel="Dry Year - 2015"
-          rightKnobLabel="Wet Year - 2023"
+          leftKnobLabel={"Dry Year \u2013 2015"}
+          rightKnobLabel={"Wet Year \u2013 2023"}
         />
       </Box>
     </motion.div>
