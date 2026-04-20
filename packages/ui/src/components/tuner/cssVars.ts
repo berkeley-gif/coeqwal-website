@@ -30,3 +30,41 @@ export const tunerInsetX = (
 export const tunerInsetY = (
   fallback: string = "clamp(16px, 3vw, 32px)",
 ): string => `var(${PANEL_INSET_Y_VAR}, ${fallback})`
+
+/**
+ * Measure the current computed value of a tuner CSS variable in pixels.
+ *
+ * Uses a throwaway `div` so `clamp(...)` / `vw` / `vh` fallbacks resolve
+ * correctly via the browser's style engine. Returns `fallback` on SSR or
+ * when measurement fails.
+ */
+const measureCssVarPx = (
+  varName: string,
+  fallback: number,
+  cssFallback: string,
+): number => {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return fallback
+  }
+  try {
+    const probe = document.createElement("div")
+    probe.style.position = "absolute"
+    probe.style.visibility = "hidden"
+    probe.style.pointerEvents = "none"
+    probe.style.height = `var(${varName}, ${cssFallback})`
+    document.body.appendChild(probe)
+    const px = probe.getBoundingClientRect().height
+    document.body.removeChild(probe)
+    return Number.isFinite(px) ? px : fallback
+  } catch {
+    return fallback
+  }
+}
+
+/** Current value of `--panel-inset-y` in pixels (live, reflects tuner edits). */
+export const tunerInsetYPx = (fallback: number = 24): number =>
+  measureCssVarPx(PANEL_INSET_Y_VAR, fallback, "clamp(16px, 3vw, 32px)")
+
+/** Current value of `--panel-inset-x` in pixels (live, reflects tuner edits). */
+export const tunerInsetXPx = (fallback: number = 28): number =>
+  measureCssVarPx(PANEL_INSET_X_VAR, fallback, "clamp(16px, 3vw, 40px)")

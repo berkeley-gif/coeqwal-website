@@ -12,5 +12,7 @@ export {
   tunerRadius,
   tunerInsetX,
   tunerInsetY,
+  tunerInsetXPx,
+  tunerInsetYPx,
 } from "./cssVars"
 export { createTunerDarkTheme } from "./tunerTheme"

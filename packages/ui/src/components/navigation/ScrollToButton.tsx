@@ -28,6 +28,13 @@ interface ScrollToButtonProps {
   axis?: MotionAxis
   /** Accessible label for screen readers (WCAG 4.1.2) */
   ariaLabel?: string
+  /**
+   * Offset (in px) subtracted from the target's top when scrolling.
+   * Use this to account for a fixed header so the scrolled-to
+   * element lands below it instead of underneath it. Pass a
+   * function to resolve the offset at click time. Defaults to 0.
+   */
+  scrollOffset?: number | (() => number)
 }
 
 export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
@@ -41,6 +48,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   rotation,
   axis,
   ariaLabel = "Scroll down",
+  scrollOffset,
 }) => {
   const theme = useTheme()
   const buttonColor =
@@ -56,6 +64,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
     <ScrollIndicator
       // only pass these when they exist
       scrollToId={hasScrollTarget ? scrollToId : undefined}
+      scrollOffset={scrollOffset}
       onClick={hasOnClick ? onClick : undefined}
       color={buttonColor}
       animationComplete={animationComplete}

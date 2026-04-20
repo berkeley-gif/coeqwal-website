@@ -157,6 +157,8 @@ export {
   tunerRadius,
   tunerInsetX,
   tunerInsetY,
+  tunerInsetXPx,
+  tunerInsetYPx,
 } from "./tuner"
 export type {
   ChartTunerProps,

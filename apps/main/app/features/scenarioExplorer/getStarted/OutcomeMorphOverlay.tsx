@@ -330,15 +330,27 @@ function computeOutcomeLayout(
  * Morphing begins at 0.78, after the Beat 1C tier-color blend, example
  * text, and map popups have all played.
  */
+/** Beat 2 is split so AG_REV morphs first (solo), then the overlay narrates
+ *  "All other key outcomes...", then the remaining outcomes morph in their
+ *  existing order. AG_REV gets a dedicated early window; the rest divide the
+ *  tail of the progress track equally.
+ *
+ *  Returns the [start, end] progress window (in `progress` space, 0..1) for
+ *  the morph of a given outcome. `activeCodes` lets us size the tail slice
+ *  based on how many outcomes actually ended up with polygons to morph. */
 export function getOutcomeProgressRange(
-  index: number,
-  total: number,
+  code: string,
+  activeCodes: readonly string[],
 ): [number, number] {
-  const beat2Start = 0.78
-  const beat2End = 1.0
-  const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
-  const start = beat2Start + index * sliceWidth
-  return [start, start + sliceWidth * 0.9]
+  if (code === "AG_REV") return [0.74, 0.82]
+  const others = activeCodes.filter((c) => c !== "AG_REV")
+  const beatStart = 0.85
+  const beatEnd = 1.0
+  const slice = (beatEnd - beatStart) / Math.max(others.length, 1)
+  const i = others.indexOf(code)
+  if (i < 0) return [beatStart, beatEnd]
+  const start = beatStart + i * slice
+  return [start, start + slice * 0.9]
 }
 
 export default function OutcomeMorphOverlay({
@@ -369,8 +381,9 @@ export default function OutcomeMorphOverlay({
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
+    const activeCodes = outcomes.map((o) => o.code)
 
-    return outcomes.map((outcome, oi) => {
+    return outcomes.map((outcome) => {
       const sampled =
         outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME
           ? (() => {
@@ -440,7 +453,7 @@ export default function OutcomeMorphOverlay({
         hasData,
         glyphMeta: layout.glyphMeta,
         bounds,
-        progressRange: getOutcomeProgressRange(oi, outcomes.length),
+        progressRange: getOutcomeProgressRange(outcome.code, activeCodes),
       }
     })
   }, [
