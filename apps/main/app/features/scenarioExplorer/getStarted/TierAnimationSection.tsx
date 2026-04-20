@@ -80,12 +80,12 @@ interface BeatDef {
 }
 
 const BEATS: readonly BeatDef[] = [
-  // B0 (displayed as 1/5) - intro paragraphs fade, tier legend fully
-  //      revealed. Played automatically on arrival. Durations are
-  //      3x the prior baseline so text + converging-blues beats give
-  //      readers time to absorb the narrative.
+  // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
+  //      Played automatically on arrival. Durations are 3x the prior
+  //      baseline so text + converging-blues beats give readers time
+  //      to absorb the narrative.
   { id: "legend", progress: 0.45, duration: 12 },
-  // B1 (2/5) - Merged transition + narrative. Duration 9s over 0.28
+  // B1 (2/4) - Merged transition + narrative. Duration 9s over 0.28
   //      progress (~0.32s per 0.01 progress). Sub-windows:
   //      1. Intro text collapses, tier legend floats to top of the
   //         left panel (0.46 → 0.49).
@@ -105,18 +105,21 @@ const BEATS: readonly BeatDef[] = [
   //         outcome levels..." fades in at 0.65 → 0.68, leaving a
   //         ~1.6s reading pause before the beat settles at 0.73.
   { id: "collapse-and-colors", progress: 0.73, duration: 9 },
-  // B2 - AG_REV polygons morph to their distribution squares. Tween
-  //      plays the morph window [0.76, 0.78] and settles at 0.78.
-  //      3.5s total over 0.05 progress: a brief lead-in (~2.1s from
-  //      0.73 → 0.76) lets the reader's eye reach the map, then the
-  //      morph itself plays over [0.76, 0.78] (~1.4s).
+  // B2 (3/4) - AG_REV polygons morph to their distribution squares.
+  //      Tween plays the morph window [0.76, 0.78] and settles at
+  //      0.78. 3.5s total over 0.05 progress: a brief lead-in (~2.1s
+  //      from 0.73 → 0.76) lets the reader's eye reach the map, then
+  //      the morph itself plays over [0.76, 0.78] (~1.4s).
   { id: "ag-rev-morph", progress: 0.78, duration: 3.5 },
-  // B3 - "All other key outcomes can be mapped and visualized in
-  //      similar ways." text fades in; morph overlay backdrop is up;
-  //      we pause just before the other 8 morphs start at 0.84.
-  { id: "all-other-text", progress: 0.83, duration: 3.6 },
-  // B4 - remaining 8 outcome morphs play back-to-back over [0.84, 1.0].
-  { id: "eight-morphs", progress: 1.0, duration: 18 },
+  // B3 (4/4) - Merged "remaining outcomes" beat. The two Beat 1C
+  //      paragraphs under the tier legend fade out (0.78 → 0.80),
+  //      "For each scenario, outcome levels..." fades in in their
+  //      place (0.80 → 0.82), and the remaining 8 outcome morphs play
+  //      back-to-back over [0.84, 1.0]. Tween velocity matches AG_REV
+  //      (~70s per progress unit), so each 0.02-wide morph window
+  //      takes ~1.4s, identical to AG_REV's morph speed. Total
+  //      duration 15.5s = 70 * 0.22 (the 0.78 → 1.0 span).
+  { id: "all-other-morphs", progress: 1.0, duration: 15.5 },
 ] as const
 
 const FINAL_BEAT_INDEX = BEATS.length - 1
@@ -2564,7 +2567,10 @@ export default function TierAnimationSection() {
       ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
     ]
 
-    const EYEBROW_FADE_IN = 0.77
+    // Eyebrow labels fade in alongside the right-panel backdrop so they're
+    // fully present by the time beat 3 (AG_REV morph) settles at 0.78. The
+    // 0.02 fade width is applied by BeatTextOverlay's progress handler.
+    const EYEBROW_FADE_IN = 0.755
     const eyebrows = [
       {
         label: "Consumptive uses",

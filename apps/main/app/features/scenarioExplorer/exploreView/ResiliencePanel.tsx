@@ -1839,44 +1839,40 @@ export default function ResiliencePanel({
             </Typography>
           </Box>
         ) : onboardingEmpty ? (
-          <OnboardingAggregate
-            view={view}
-            rows={rows}
-            columns={columns}
-            cells={cells}
-            tierColors={tierColors}
-            tierLabels={tierLabels}
-            palette={heatmapPalette}
-            cellRender={effectiveCellRender}
-            showCellNumbers={showCellNumbers}
-            onCellHover={handleCellHover}
-            onCellClick={isMapVisible ? handleCellClick : undefined}
-            highlightedRowKeys={effectiveRowHighlight}
-            formatRowTick={formatRowTick}
-            marginals={marginalsData}
-            showMarginals={showMarginals}
-            distributionMode={distributionMode}
-            onSquareHover={handleSquareHover}
-            onSquareClick={handleSquareClick}
-            onBrowseScenarios={
-              onControlsChange
-                ? () =>
-                    onControlsChange({
-                      view: "scenario",
-                      showAllScenarios: true,
-                    })
-                : undefined
+          <BrowseShell
+            banner={
+              <OnboardingBanner
+                variant="empty"
+                onBrowseScenarios={
+                  onControlsChange ? handleBrowseScenarios : undefined
+                }
+                onBrowseOutcomes={
+                  onControlsChange ? handleBrowseOutcomes : undefined
+                }
+                onOpenWalkthrough={handleOpenWalkthrough}
+              />
             }
-            onBrowseOutcomes={
-              onControlsChange
-                ? () =>
-                    onControlsChange({
-                      view: "outcome",
-                    })
-                : undefined
-            }
-            onOpenWalkthrough={() => setWalkthroughOpen(true)}
-          />
+          >
+            <ResilienceHeatmap
+              rows={rows}
+              columns={columns}
+              cells={cells}
+              tierColors={tierColors}
+              tierLabels={tierLabels}
+              palette={heatmapPalette}
+              cellRender={effectiveCellRender}
+              showCellNumbers={showCellNumbers}
+              onCellHover={handleCellHover}
+              onCellClick={isMapVisible ? handleCellClick : undefined}
+              highlightedRowKeys={effectiveRowHighlight}
+              formatRowTick={formatRowTick}
+              marginals={marginalsData}
+              showMarginals={showMarginals}
+              distributionMode={distributionMode}
+              onSquareHover={handleSquareHover}
+              onSquareClick={handleSquareClick}
+            />
+          </BrowseShell>
         ) : expandedTile ? (
           <ExpandedTileView
             tile={expandedTile}
@@ -1907,7 +1903,18 @@ export default function ResiliencePanel({
             }
           />
         ) : view === "scenario" ? (
-          <GridWithCurationChip
+          <BrowseShell
+            banner={
+              onboardingVariant === "browse-scenarios" ? (
+                <OnboardingBanner
+                  variant="browse-scenarios"
+                  onBackToAggregate={
+                    onControlsChange ? handleBackToAggregate : undefined
+                  }
+                  onOpenWalkthrough={handleOpenWalkthrough}
+                />
+              ) : undefined
+            }
             chip={
               showScenarioCurationChip
                 ? {
@@ -1947,36 +1954,50 @@ export default function ResiliencePanel({
               isTilePinned={isScenarioPinned}
               onTileExpand={onControlsChange ? handleTileExpand : undefined}
             />
-          </GridWithCurationChip>
+          </BrowseShell>
         ) : view === "outcome" ? (
-          <ResilienceHeatmapSmallMultiples
-            rows={byOutcomeRows}
-            columns={columns}
-            tiles={byOutcomeTiles}
-            tierColors={tierColors}
-            tierLabels={tierLabels}
-            palette={heatmapPalette}
-            cellRender={effectiveCellRender}
-            showCellNumbers={showCellNumbers}
-            tileAspect="tall"
-            onCellHover={handleCellHover}
-            onCellClick={isMapVisible ? handleCellClick : undefined}
-            formatRowTick={formatRowTick}
-            distributionMode={distributionMode}
-            onSquareHover={(info) =>
-              handleSquareHover(
-                info ? { cell: info.cell, entry: info.entry } : null,
-              )
+          <BrowseShell
+            banner={
+              onboardingVariant === "browse-outcomes" ? (
+                <OnboardingBanner
+                  variant="browse-outcomes"
+                  onBackToAggregate={
+                    onControlsChange ? handleBackToAggregate : undefined
+                  }
+                  onOpenWalkthrough={handleOpenWalkthrough}
+                />
+              ) : undefined
             }
-            onSquareClick={(info) =>
-              handleSquareClick({ cell: info.cell, entry: info.entry })
-            }
-            onTilePin={
-              onControlsChange ? handleTilePinByOutcome : undefined
-            }
-            isTilePinned={isOutcomePinned}
-            onTileExpand={onControlsChange ? handleTileExpand : undefined}
-          />
+          >
+            <ResilienceHeatmapSmallMultiples
+              rows={byOutcomeRows}
+              columns={columns}
+              tiles={byOutcomeTiles}
+              tierColors={tierColors}
+              tierLabels={tierLabels}
+              palette={heatmapPalette}
+              cellRender={effectiveCellRender}
+              showCellNumbers={showCellNumbers}
+              tileAspect="tall"
+              onCellHover={handleCellHover}
+              onCellClick={isMapVisible ? handleCellClick : undefined}
+              formatRowTick={formatRowTick}
+              distributionMode={distributionMode}
+              onSquareHover={(info) =>
+                handleSquareHover(
+                  info ? { cell: info.cell, entry: info.entry } : null,
+                )
+              }
+              onSquareClick={(info) =>
+                handleSquareClick({ cell: info.cell, entry: info.entry })
+              }
+              onTilePin={
+                onControlsChange ? handleTilePinByOutcome : undefined
+              }
+              isTilePinned={isOutcomePinned}
+              onTileExpand={onControlsChange ? handleTileExpand : undefined}
+            />
+          </BrowseShell>
         ) : (
           <ResilienceHeatmap
             rows={rows}
@@ -2521,11 +2542,20 @@ function ExpandedTileView({
  * when they've pinned items while in show-all mode, and clicking it
  * fires the supplied `onClick` (typically flipping show-all off).
  */
-function GridWithCurationChip({
+/**
+ * Layout shell for the chart area. Stacks an optional onboarding
+ * banner and an optional curation chip above the children so every
+ * view path (empty-state aggregate, by-scenario gallery, by-outcome
+ * gallery) can render consistent header affordances without each
+ * branch having to rebuild its own flex column.
+ */
+function BrowseShell({
+  banner,
   chip,
   children,
 }: {
-  chip:
+  banner?: React.ReactNode
+  chip?:
     | {
         label: string
         actionLabel: string
@@ -2535,49 +2565,52 @@ function GridWithCurationChip({
   children: React.ReactNode
 }) {
   const theme = useTheme()
-  if (!chip) return <>{children}</>
+  if (!banner && !chip) return <>{children}</>
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, gap: 1 }}>
-      <Box
-        sx={{
-          display: "inline-flex",
-          alignSelf: "flex-start",
-          alignItems: "center",
-          gap: 1,
-          px: 1.25,
-          py: 0.5,
-          borderRadius: 999,
-          border: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-          {chip.label}
-        </Typography>
+      {banner}
+      {chip && (
         <Box
-          component="button"
-          type="button"
-          onClick={chip.onClick}
           sx={{
-            appearance: "none",
-            border: "none",
-            background: "transparent",
-            color: theme.palette.primary.main,
-            cursor: "pointer",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            textDecoration: "underline",
-            p: 0,
-            "&:hover": { opacity: 0.85 },
-            "&:focus-visible": {
-              outline: `2px solid ${theme.palette.primary.main}`,
-              outlineOffset: 2,
-            },
+            display: "inline-flex",
+            alignSelf: "flex-start",
+            alignItems: "center",
+            gap: 1,
+            px: 1.25,
+            py: 0.5,
+            borderRadius: 999,
+            border: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.paper,
           }}
         >
-          {chip.actionLabel}
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            {chip.label}
+          </Typography>
+          <Box
+            component="button"
+            type="button"
+            onClick={chip.onClick}
+            sx={{
+              appearance: "none",
+              border: "none",
+              background: "transparent",
+              color: theme.palette.primary.main,
+              cursor: "pointer",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              textDecoration: "underline",
+              p: 0,
+              "&:hover": { opacity: 0.85 },
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.primary.main}`,
+                outlineOffset: 2,
+              },
+            }}
+          >
+            {chip.actionLabel}
+          </Box>
         </Box>
-      </Box>
+      )}
       <Box sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
     </Box>
   )
