@@ -17,6 +17,7 @@ import {
   useTheme,
   CircularProgress,
   Checkbox,
+  InfoOutlinedIcon,
 } from "@repo/ui/mui"
 import {
   RadarPlot,
@@ -24,7 +25,7 @@ import {
   type RadarPlotAxisLabelDetailStyle,
   type RadarAxisLabelDetailChromeOptions,
 } from "@repo/viz"
-import { ChartToast, InfoIconButton, TooltipCloseButton } from "@repo/ui"
+import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
@@ -34,10 +35,13 @@ import {
   getOutcomeName,
   getOutcomeCode,
   getOutcomeDefinition,
+  OUTCOME_DEFINITIONS,
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
+  NOD_SOD_NAMES,
   OUTCOME_REGIONAL_VARIANTS,
   type OutcomeCode,
+  type NodSodCode,
 } from "../../../content/outcomes"
 import {
   captureSvgToBlob,
@@ -178,6 +182,104 @@ export default function RadarPanel({
       setAxisPositions(positions)
     },
     [],
+  )
+
+  // Measured bounding boxes of each axis label group in the SVG, keyed by
+  // axis display name. Used to place the info icon flush against the
+  // rendered text rather than guessing from the anchor point. Re-measured
+  // whenever the chart re-renders (new axisPositions array).
+  const [axisLabelRects, setAxisLabelRects] = useState<
+    Record<string, { x: number; y: number; width: number; height: number }>
+  >({})
+
+  useEffect(() => {
+    const svg = radarSvgRef.current
+    if (!svg || axisPositions.length === 0) {
+      setAxisLabelRects({})
+      return
+    }
+    const rects: Record<
+      string,
+      { x: number; y: number; width: number; height: number }
+    > = {}
+    svg.querySelectorAll<SVGGElement>("g.axis-label").forEach((g) => {
+      const axis = g.getAttribute("data-axis")
+      if (!axis) return
+      // For two-line curated labels the group contains two <text> title
+      // elements; the last appended one is the bottom line. We want the
+      // icon to land after the last word of that last line, so we measure
+      // the last <text class="axis-label-title"> specifically rather than
+      // the whole group's bbox (which would center across both lines and
+      // right-align to the widest line).
+      const titles = g.querySelectorAll<SVGTextElement>(
+        "text.axis-label-title",
+      )
+      const last = titles[titles.length - 1]
+      if (!last) return
+      try {
+        const bb = last.getBBox()
+        if (bb.width > 0 && bb.height > 0) {
+          rects[axis] = {
+            x: bb.x,
+            y: bb.y,
+            width: bb.width,
+            height: bb.height,
+          }
+        }
+      } catch {
+        // getBBox can throw on detached nodes; ignore and skip.
+      }
+    })
+    setAxisLabelRects(rects)
+  }, [axisPositions])
+
+  // Which axis label's info popover is currently open (by display name).
+  // Only one open at a time; clicking another closes the previous.
+  const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
+  const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
+
+  // Map an axis display name back to its outcome code, handling both the
+  // aggregate outcomes (OUTCOME_NAMES) and the regional NOD/SOD codes
+  // (NOD_SOD_NAMES). Returns the code string or undefined.
+  const axisDisplayNameToCode = useCallback(
+    (displayName: string): string | undefined => {
+      const primary = getOutcomeCode(displayName)
+      if (primary) return primary
+      const nodSodEntry = (
+        Object.entries(NOD_SOD_NAMES) as [NodSodCode, string][]
+      ).find(([, name]) => name === displayName)
+      return nodSodEntry?.[0]
+    },
+    [],
+  )
+
+  // Reverse lookup from a NOD/SOD code to its parent aggregate outcome,
+  // so regional spokes can fall back to the parent outcome's definition
+  // (we don't carry separate NOD/SOD definition copy on the radar).
+  const nodSodToParent = useMemo(() => {
+    const map = new Map<NodSodCode, OutcomeCode>()
+    for (const [parent, variants] of Object.entries(
+      OUTCOME_REGIONAL_VARIANTS,
+    ) as [OutcomeCode, [NodSodCode, NodSodCode]][]) {
+      const [nod, sod] = variants
+      map.set(nod, parent)
+      map.set(sod, parent)
+    }
+    return map
+  }, [])
+
+  // Resolve an axis display name to its definition text. For NOD/SOD spokes,
+  // we intentionally show the parent outcome's definition (no regional
+  // variants of the copy today). Returns undefined if no definition exists.
+  const resolveAxisDefinition = useCallback(
+    (displayName: string): string | undefined => {
+      const code = axisDisplayNameToCode(displayName)
+      if (!code) return undefined
+      const parent = nodSodToParent.get(code as NodSodCode)
+      if (parent) return OUTCOME_DEFINITIONS[parent]
+      return getOutcomeDefinition(code)
+    },
+    [axisDisplayNameToCode, nodSodToParent],
   )
 
   // Prevent browser text-selection inside the chart area
@@ -701,79 +803,123 @@ export default function RadarPanel({
             axisLabelDetailStyle={radarAxisLabelDetailStyle}
             axisLabelDetailChrome={axisLabelDetailChrome}
           />
-        </Box>
 
-        {/* TODO: Info icon overlay - one per axis label (disabled pending refinement)
-        {axisPositions.length > 0 && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          >
-            {axisPositions.map(({ axis, x, y, anchor }) => {
-              const code = getOutcomeCode(axis)
-              const definition = code
-                ? getOutcomeDefinition(code)
-                : undefined
-              if (!definition) return null
+          {/* Per-axis info icons with click-to-open definition popover.
+              Positioned using the same pixel coordinates the RadarPlot
+              reports via onAxisPositions (SVG width/height are set to the
+              container's pixel size, so SVG user units == DOM pixels here,
+              and this overlay shares the same bounds and transform as the
+              chart wrapper). */}
+          {axisPositions.length > 0 && (
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              {axisPositions.map(({ axis, x, y }) => {
+                const definition = resolveAxisDefinition(axis)
+                if (!definition) return null
 
-              const offsetX =
-                anchor === "start" ? 6 : anchor === "end" ? -6 : 0
-              const offsetY = anchor === "middle" ? 14 : 0
-              const translate =
-                anchor === "start"
-                  ? "translate(0, -50%)"
-                  : anchor === "end"
-                    ? "translate(-100%, -50%)"
-                    : "translate(-50%, 0)"
+                // Always place the icon inline after the last word of the
+                // label (i.e. flush against the right edge of the rendered
+                // text), vertically centered. When we haven't measured the
+                // label's bbox yet, fall back to a rough offset from the
+                // anchor point so the icon still appears on first paint.
+                const rect = axisLabelRects[axis]
+                const GAP = 3
+                const iconLeft = rect ? rect.x + rect.width + GAP : x + GAP
+                const iconTop = rect ? rect.y + rect.height / 2 : y
 
-              return (
-                <Box
-                  key={axis}
-                  sx={{
-                    position: "absolute",
-                    left: x + offsetX,
-                    top: y + offsetY,
-                    transform: translate,
-                    pointerEvents: "auto",
-                  }}
-                >
-                  <InfoIconButton
-                    variant="inline"
-                    placement="top"
-                    tooltipContent={
-                      <Box sx={{ maxWidth: 260 }}>
-                        <Typography
-                          variant="compactSubtitle"
+                const isOpen = openInfoAxis === axis
+
+                return (
+                  <Box
+                    key={axis}
+                    sx={{
+                      position: "absolute",
+                      left: iconLeft,
+                      top: iconTop,
+                      transform: "translate(0, -50%)",
+                      pointerEvents: "auto",
+                      lineHeight: 0,
+                    }}
+                  >
+                    <ClickTooltip
+                      open={isOpen}
+                      onClose={closeInfoTooltip}
+                      placement="top"
+                      maxWidth="320px"
+                      content={
+                        <Box sx={{ pr: theme.space.component.md }}>
+                          <Typography
+                            variant="compactSubtitle"
+                            sx={{
+                              fontWeight: 700,
+                              display: "block",
+                              mb: theme.space.component.sm,
+                            }}
+                          >
+                            {axis}
+                          </Typography>
+                          <Typography
+                            variant="compactCaption"
+                            sx={{ display: "block" }}
+                          >
+                            {definition}
+                          </Typography>
+                        </Box>
+                      }
+                    >
+                      {/* span wrapper: gives MUI Tooltip a native element it
+                          can attach its ref and extra ARIA props to. */}
+                      <span style={{ display: "inline-flex" }}>
+                        <Box
+                          component="button"
+                          type="button"
+                          aria-label={`About ${axis}`}
+                          aria-expanded={isOpen}
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation()
+                            setOpenInfoAxis(isOpen ? null : axis)
+                          }}
                           sx={{
-                            fontWeight: 600,
-                            display: "block",
-                            mb: 0.5,
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "2px",
+                            borderRadius: "50%",
+                            color: isOpen
+                              ? theme.palette.primary.main
+                              : theme.palette.text.primary,
+                            transition:
+                              "color 120ms ease, background-color 120ms ease",
+                            "&:hover": {
+                              color: theme.palette.primary.main,
+                            },
+                            "&:focus-visible": {
+                              outline: `2px solid ${theme.palette.primary.main}`,
+                              outlineOffset: "1px",
+                            },
                           }}
                         >
-                          {axis}
-                        </Typography>
-                        <Typography
-                          variant="compactCaption"
-                          sx={{ display: "block" }}
-                        >
-                          {definition}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </Box>
-              )
-            })}
-          </Box>
-        )}
-        */}
+                          <InfoOutlinedIcon
+                            sx={{ fontSize: 14, display: "block" }}
+                          />
+                        </Box>
+                      </span>
+                    </ClickTooltip>
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+        </Box>
 
         {!hasRadarTraceData && !isLoading && (
           <ChartToast maxWidth={480}>
