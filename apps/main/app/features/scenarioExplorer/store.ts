@@ -104,7 +104,7 @@ function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
       JSON.stringify({ shareItems: stripped, storyItemIds }),
     )
   } catch {
-    // localStorage full or unavailable — silently ignore
+    // localStorage full or unavailable - silently ignore
   }
 }
 
@@ -167,6 +167,15 @@ interface ScenarioExplorerState {
 
   // Radar axis visibility
   radarVisibleAxes: string[]
+
+  // Resilience heatmap outcome-row visibility
+  showResilienceOutcomeSelector: boolean
+  resilienceVisibleOutcomes: string[]
+
+  // Resilience heatmap distribution sub-mode (within the "distribution"
+  // cell encoding). "scenario" = one square per scenario; "location" =
+  // one square per LOI (mean tier across scope scenarios).
+  resilienceDistributionMode: "scenario" | "location"
 
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
@@ -256,6 +265,14 @@ interface ScenarioExplorerActions {
   toggleRadarAxis: (code: string) => void
   setRadarVisibleAxes: (codes: string[]) => void
 
+  // Resilience heatmap outcome-row visibility
+  setShowResilienceOutcomeSelector: (show: boolean) => void
+  toggleResilienceOutcome: (code: string) => void
+  setResilienceVisibleOutcomes: (codes: string[]) => void
+
+  // Resilience heatmap distribution sub-mode
+  setResilienceDistributionMode: (mode: "scenario" | "location") => void
+
   // Hydroclimate
   setHydroclimate: (value: string) => void
 
@@ -320,6 +337,9 @@ const initialState: ScenarioExplorerState = {
   radarShowAll: false,
   showAxisSelector: false,
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
+  showResilienceOutcomeSelector: false,
+  resilienceVisibleOutcomes: [...OUTCOME_CODE_ORDER],
+  resilienceDistributionMode: "scenario",
   hydroclimate: "historical",
   groupByTheme: true,
   sortBy: null,
@@ -631,6 +651,31 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setRadarVisibleAxes: (codes) =>
       set((state) => {
         state.radarVisibleAxes = codes
+      }),
+
+    setShowResilienceOutcomeSelector: (show) =>
+      set((state) => {
+        state.showResilienceOutcomeSelector = show
+      }),
+
+    toggleResilienceOutcome: (code) =>
+      set((state) => {
+        const idx = state.resilienceVisibleOutcomes.indexOf(code)
+        if (idx >= 0) {
+          state.resilienceVisibleOutcomes.splice(idx, 1)
+        } else {
+          state.resilienceVisibleOutcomes.push(code)
+        }
+      }),
+
+    setResilienceVisibleOutcomes: (codes) =>
+      set((state) => {
+        state.resilienceVisibleOutcomes = codes
+      }),
+
+    setResilienceDistributionMode: (mode) =>
+      set((state) => {
+        state.resilienceDistributionMode = mode
       }),
 
     // Hydroclimate

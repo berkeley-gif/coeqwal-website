@@ -168,7 +168,7 @@ function DescriptionWithGlossaryLinks({
         </Box>
       </motion.div>
 
-      {/* Truncated view — height-clipped with "… more" overlay at bottom-right */}
+      {/* Truncated view - height-clipped with "… more" overlay at bottom-right */}
       <motion.div
         initial={false}
         animate={{

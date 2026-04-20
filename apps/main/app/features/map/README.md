@@ -81,7 +81,7 @@ When a user clicks a glyph or radar dot for an outcome, the map zooms to a view 
 
 `cameraBounds` takes priority over `cameraPreset`.
 
-### Example — adding bounds for a new outcome
+### Example - adding bounds for a new outcome
 
 **1. Measure the extent** (see section below).
 
@@ -109,11 +109,11 @@ MY_OUTCOME: {
 
 ## Measuring the extent of a Mapbox layer
 
-The demand-unit (and other tileset) polygon geometries live only in Mapbox — not in the repo. To measure the actual bounding box of a layer:
+The demand-unit (and other tileset) polygon geometries live only in Mapbox - not in the repo. To measure the actual bounding box of a layer:
 
 ### Step 1 Expose the map instance temporarily
 
-`MapInstance.tsx` already exposes the Mapbox instance as `window.__mapInstance` in development mode (guarded by `process.env.NODE_ENV === "development"`). It is set inside `handleMapLoad` and is available after the map fires its first load event. No code change is needed — just make sure you are running the dev server.
+`MapInstance.tsx` already exposes the Mapbox instance as `window.__mapInstance` in development mode (guarded by `process.env.NODE_ENV === "development"`). It is set inside `handleMapLoad` and is available after the map fires its first load event. No code change is needed - just make sure you are running the dev server.
 
 ### Step 2 Load the app and activate the outcome
 
@@ -159,7 +159,7 @@ console.log(
 
 ### Step 4 Hardcode the result
 
-Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry entry. The `window.__mapInstance` assignment in `MapInstance.tsx` is dev-only and does not need to be removed — it is a no-op in production.
+Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry entry. The `window.__mapInstance` assignment in `MapInstance.tsx` is dev-only and does not need to be removed - it is a no-op in production.
 
 ---
 
@@ -167,4 +167,4 @@ Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry e
 
 | Outcome   | Constant         | Coverage                                                                                                                                             |
 | --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CWS_DEL` | `CWS_DEL_BOUNDS` | `[[-122.525, 35.995], [-119.803, 40.745]]` — Urban demand units (167 features), measured from `demand_units` tileset with `Class === "Urban"` filter |
+| `CWS_DEL` | `CWS_DEL_BOUNDS` | `[[-122.525, 35.995], [-119.803, 40.745]]` - Urban demand units (167 features), measured from `demand_units` tileset with `Class === "Urban"` filter |

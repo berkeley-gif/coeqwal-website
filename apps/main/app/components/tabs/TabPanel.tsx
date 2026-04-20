@@ -3,6 +3,7 @@
 import { forwardRef, type ReactNode } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { useMapMode } from "../../features/map/store"
+import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import AutoAdvanceFooter from "./AutoAdvanceFooter"
 
 type TabPanelProps = {
@@ -14,6 +15,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
     const theme = useTheme()
     const mapMode = useMapMode()
+    const mainView = useScenarioExplorerStore((s) => s.mainView)
     const thisPanelId = `panel-${tabKey}`
 
     // Both learn and explore tabs are transparent so the persistent map
@@ -61,8 +63,16 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         }}
       >
         {children}
-        {/* Share is the last tab.no "advance" footer needed */}
-        {tabKey !== "share" && <AutoAdvanceFooter />}
+        {/* Auto-advance footer sentinel.
+            - Share is the last tab, so no footer needed.
+            - In the Explore tab, the footer is only shown at the end
+              of the Get Started sub-view; the Tools / Data sub-views
+              take the full viewport and scroll internally, so the
+              footer would just get in the way. */}
+        {tabKey !== "share" &&
+          !(tabKey === "explore" && mainView !== "get-started") && (
+            <AutoAdvanceFooter />
+          )}
       </div>
     )
   },

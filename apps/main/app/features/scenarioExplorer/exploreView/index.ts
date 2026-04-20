@@ -17,10 +17,12 @@ export type { SingleScenarioCaptureFn } from "./RadarPanel"
 export { default as EquityPanel } from "./EquityPanel"
 export { default as ComparisonPanel } from "./ComparisonPanel"
 export { default as ResiliencePanel } from "./ResiliencePanel"
+export { default as ResilienceQuadrantPanel } from "./ResilienceQuadrantPanel"
 export type {
   ResilienceControlsState,
   ResilienceView,
   CellEncoding,
   DeltaMode,
   AggregateScope,
+  QuadrantUnit,
 } from "./ResiliencePanel"

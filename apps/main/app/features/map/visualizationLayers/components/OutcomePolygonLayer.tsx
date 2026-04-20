@@ -244,7 +244,7 @@ export function OutcomePolygonLayer({
   useEffect(() => {
     if (!mapRef?.current || !fillId) return
 
-    // Style is being reloaded — reset state so the next run (mapReady = true)
+    // Style is being reloaded - reset state so the next run (mapReady = true)
     // always uses the full fade-in path with proper paint initialization.
     if (!mapReady) {
       wasShowingDataRef.current = false
@@ -313,7 +313,7 @@ export function OutcomePolygonLayer({
     // ── Crossfade path: data was already showing, just update colors ──
     // Mapbox interpolates fill-color and line-color natively, so we only
     // need to set the transition duration and update the expression.
-    // Always ensure visibility is "visible" — the layer may have been hidden
+    // Always ensure visibility is "visible" - the layer may have been hidden
     // by a previous unmount cleanup when switching between different polygon
     // layer types (e.g. demand-units → calsim-wba).
     if (wasShowingDataRef.current) {

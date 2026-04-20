@@ -157,7 +157,7 @@ export function StrategyGridContent({
 
   // Filter scenarios: chosen-only takes precedence, then baseline visibility
   const displayScenarios = (() => {
-    // When showing only chosen scenarios, respect that fully — no baseline filtering
+    // When showing only chosen scenarios, respect that fully - no baseline filtering
     if (showOnlyChosen) {
       return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
     }
@@ -411,7 +411,7 @@ export function StrategyGridContent({
 
   return (
     <>
-      {/* Sticky pinned rows — stick at top of scroll area */}
+      {/* Sticky pinned rows - stick at top of scroll area */}
       {hasPinned && (
         <Box
           sx={{
@@ -438,7 +438,7 @@ export function StrategyGridContent({
         </Box>
       )}
 
-      {/* Unpinned rows — scroll normally */}
+      {/* Unpinned rows - scroll normally */}
       {renderScenarioRows(unpinnedScenarios, {
         themeIds: themeScenarioIds,
         showThemeBadge: !groupByTheme,

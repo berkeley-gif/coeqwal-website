@@ -11,11 +11,20 @@
  * - Optional background image with grid stacking
  * - Full viewport height by default, configurable
  * - WCAG 2.0 AA compliant with semantic section element
+ * - Opt-in rounded corners via `borderRadius` (token key or raw CSS)
+ * - Opt-in inset framing via `inset` (+ `frameBackground`) so all four
+ *   rounded corners are visible against a frame.
  */
 
 import React from "react"
 import { Box, useTheme } from "@mui/material"
 import type { SxProps, Theme } from "@mui/material"
+import {
+  resolveRadius,
+  resolveInset,
+  type RadiusValue,
+  type PanelInset,
+} from "./resolveRadius"
 
 export interface PanelProps {
   /** Panel ID for navigation */
@@ -46,6 +55,17 @@ export interface PanelProps {
   contentSx?: SxProps<Theme>
   /** Panel content */
   children: React.ReactNode
+  /** Rounded corner radius for the panel surface. Token key
+   *  ("none"|"xs"|"sm"|"md"|"lg"|"xl"|"2xl"|"pill"|"circle") or raw CSS value.
+   *  Default: no radius (square). */
+  borderRadius?: RadiusValue
+  /** Pull the panel in from the viewport edges so all four rounded
+   *  corners are visible. `true` uses a responsive default;
+   *  `{ x, y }` overrides. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset panel.
+   *  Ignored when `inset` is falsy. Default: transparent (inherits parent). */
+  frameBackground?: string
 }
 
 export function Panel({
@@ -63,13 +83,16 @@ export function Panel({
   sx,
   contentSx,
   children,
+  borderRadius,
+  inset,
+  frameBackground,
 }: PanelProps) {
   const theme = useTheme()
 
-  // Determine if we need grid stacking (when background image is provided)
   const hasBackgroundImage = !!backgroundImage
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
 
-  // Standard panel padding from theme
   const panelPadding = includePadding
     ? {
         paddingTop: includeNavbarPadding
@@ -85,18 +108,42 @@ export function Panel({
 
   // Simple mode: no background image, direct styling on container
   if (!hasBackgroundImage) {
+    const innerStyles = {
+      position: "relative" as const, // For absolute children (scroll indicators, etc.)
+      height: fullHeight ? "100vh" : "auto",
+      width: "100%",
+      overflow: fullHeight || radius !== undefined ? "hidden" : "visible",
+      backgroundColor,
+      borderRadius: radius,
+      ...panelPadding,
+    }
+
+    if (insetCfg) {
+      return (
+        <Box
+          component="section"
+          id={id}
+          aria-label={ariaLabel}
+          sx={{
+            background: frameBackground ?? "transparent",
+            px: insetCfg.x,
+            py: insetCfg.y,
+            width: "100%",
+            ...sx,
+          }}
+        >
+          <Box sx={innerStyles}>{children}</Box>
+        </Box>
+      )
+    }
+
     return (
       <Box
         component="section"
         id={id}
         aria-label={ariaLabel}
         sx={{
-          position: "relative", // For absolute children (scroll indicators, etc.)
-          height: fullHeight ? "100vh" : "auto",
-          width: "100%",
-          overflow: fullHeight ? "hidden" : "visible",
-          backgroundColor,
-          ...panelPadding,
+          ...innerStyles,
           ...sx,
         }}
       >
@@ -106,23 +153,20 @@ export function Panel({
   }
 
   // Grid stacking mode: background color and background image and content
-  return (
-    <Box
-      component="section"
-      id={id}
-      aria-label={ariaLabel}
-      sx={{
-        position: "relative", // For absolute children (scroll indicators, etc.)
-        display: "grid",
-        gridTemplateAreas: '"stack"',
-        gridTemplateRows: "1fr",
-        height: fullHeight ? "100vh" : height,
-        width: "100%",
-        overflow: "hidden",
-        backgroundColor,
-        ...sx,
-      }}
-    >
+  const gridInnerStyles = {
+    position: "relative" as const, // For absolute children (scroll indicators, etc.)
+    display: "grid",
+    gridTemplateAreas: '"stack"',
+    gridTemplateRows: "1fr",
+    height: fullHeight ? "100vh" : height,
+    width: "100%",
+    overflow: "hidden",
+    backgroundColor,
+    borderRadius: radius,
+  }
+
+  const gridInner = (
+    <>
       {/* Background image layer */}
       <Box
         aria-hidden="true"
@@ -147,6 +191,39 @@ export function Panel({
       >
         {children}
       </Box>
+    </>
+  )
+
+  if (insetCfg) {
+    return (
+      <Box
+        component="section"
+        id={id}
+        aria-label={ariaLabel}
+        sx={{
+          background: frameBackground ?? "transparent",
+          px: insetCfg.x,
+          py: insetCfg.y,
+          width: "100%",
+          ...sx,
+        }}
+      >
+        <Box sx={gridInnerStyles}>{gridInner}</Box>
+      </Box>
+    )
+  }
+
+  return (
+    <Box
+      component="section"
+      id={id}
+      aria-label={ariaLabel}
+      sx={{
+        ...gridInnerStyles,
+        ...sx,
+      }}
+    >
+      {gridInner}
     </Box>
   )
 }

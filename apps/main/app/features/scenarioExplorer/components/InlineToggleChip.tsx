@@ -28,7 +28,10 @@ export function InlineToggleChip({
   const theme = useTheme()
   const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
 
-  const defaultInactiveBg = theme.palette.grey[200]
+  // `action.disabledBackground` resolves to a light-grey in the normal
+  // light theme and to a subtle white overlay under the tuner dark theme,
+  // so the chip reads correctly in both contexts without any prop change.
+  const defaultInactiveBg = theme.palette.action.disabledBackground
   const defaultActiveBg = theme.palette.interaction.selectedBackground
 
   return (

@@ -178,7 +178,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 /**
  * Fetch tier data for multiple scenarios.
  *
- * @param idMapping — Optional mapping of display IDs to fetch IDs.
+ * @param idMapping - Optional mapping of display IDs to fetch IDs.
  *   When provided, fetches tier data for `Object.values(idMapping)` (the
  *   resolved short_codes for the active hydroclimate) and re-keys all output
  *   data structures using `Object.keys(idMapping)` (the sibling group IDs).

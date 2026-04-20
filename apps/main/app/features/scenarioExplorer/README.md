@@ -133,8 +133,8 @@ The Zustand store (with Immer) manages state shared across components.
 
 #### Hydroclimate
 
-| Property       | Type     | Default        | Description                                                                       |
-| -------------- | -------- | -------------- | --------------------------------------------------------------------------------- |
+| Property       | Type     | Default        | Description                                                    |
+| -------------- | -------- | -------------- | -------------------------------------------------------------- |
 | `hydroclimate` | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"cc50"`, `"cc95"`) |
 
 #### Other
@@ -369,7 +369,7 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 
 ### Reference implementations
 
-- **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) — Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
-- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) — Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
+- **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) - Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
+- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
 
 For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.

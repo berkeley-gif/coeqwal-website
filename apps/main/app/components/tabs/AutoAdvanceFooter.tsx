@@ -9,14 +9,25 @@ import { Typography, useTheme } from "@repo/ui/mui"
 import { useTabs, nextTab } from "../../context/Tabs"
 import { TABS, TAB_ORDER } from "../../types/tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 
 export default function AutoAdvanceFooter() {
   const { state } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
+  const setMainView = useScenarioExplorerStore((s) => s.setMainView)
   const theme = useTheme()
 
+  // The Explore tab has two sub-views ("get-started" and the Tools
+  // views). Tools is handled by hiding the footer entirely in
+  // TabPanel, so when this footer renders for the Explore tab it's
+  // always at the end of Get Started and should advance to Tools
+  // (switch `mainView`), not navigate to the next top-level tab.
   const onAdvance = () => {
+    if (activeTab === "explore") {
+      setMainView("explorer")
+      return
+    }
     const nxt = nextTab(TAB_ORDER, activeTab)!
     navigateToTab(nxt)
   }

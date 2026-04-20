@@ -272,7 +272,7 @@ export default function RadarPanel({
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
 
-  // Radar capture function — exposed to parent via onCaptureReady
+  // Radar capture function - exposed to parent via onCaptureReady
   const captureRadar = useCallback(async () => {
     const svg = radarSvgRef.current
     if (!svg) {
@@ -562,7 +562,7 @@ export default function RadarPanel({
           >
             <TooltipCloseButton
               onClick={() => setShowAxisSelector(false)}
-              ariaLabel="Close choose axes panel"
+              ariaLabel="Close choose outcome axes panel"
             />
             <Typography
               variant="caption"
@@ -577,7 +577,7 @@ export default function RadarPanel({
                 pr: 5,
               }}
             >
-              Choose axes
+              Choose outcome axes
             </Typography>
             <AxisRow
               label="All key outcomes"
@@ -703,7 +703,7 @@ export default function RadarPanel({
           />
         </Box>
 
-        {/* TODO: Info icon overlay — one per axis label (disabled pending refinement)
+        {/* TODO: Info icon overlay - one per axis label (disabled pending refinement)
         {axisPositions.length > 0 && (
           <Box
             sx={{
@@ -815,7 +815,7 @@ export default function RadarPanel({
             >
               <Box component="span">To show data, use</Box>
               <InlineToggleChip
-                label="choose axes"
+                label="choose outcome axes"
                 active={showAxisSelector}
                 onClick={() => setShowAxisSelector(!showAxisSelector)}
                 onDarkBackground

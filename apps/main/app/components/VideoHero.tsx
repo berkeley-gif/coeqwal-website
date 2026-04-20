@@ -16,7 +16,14 @@ import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
 import { useReducedMotion } from "@repo/motion"
-import { ScrollToButton } from "@repo/ui"
+import {
+  ScrollToButton,
+  resolveRadius,
+  resolveInset,
+  tunerInsetYPx,
+  type RadiusValue,
+  type PanelInset,
+} from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
 export type VideoSource = { src: string; type: string }
@@ -31,12 +38,22 @@ export interface VideoHeroProps {
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
   /** Hide the headline (for use with MorphingHeadline) */
   hideHeadline?: boolean
+  /** Rounded corner radius. Token key or raw CSS value. */
+  borderRadius?: RadiusValue
+  /** Pull the hero in from the viewport edges so all four rounded
+   *  corners are visible against a `frameBackground`. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset hero. */
+  frameBackground?: string
 }
 
 export default function VideoHero({
   sources,
   fallbackImage,
   hideHeadline = false,
+  borderRadius,
+  inset,
+  frameBackground,
 }: VideoHeroProps) {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -105,7 +122,19 @@ export default function VideoHero({
 
   const showStaticImage = failed
 
-  return (
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
+
+  // Inset mode uses a wrapping frame Box; inner height must subtract the
+  // vertical frame padding so the hero still fits one viewport.
+  const heroHeight =
+    insetCfg && insetCfg.y !== 0
+      ? typeof insetCfg.y === "number"
+        ? `calc(100vh - ${insetCfg.y * 2}px)`
+        : `calc(100vh - (${insetCfg.y} * 2))`
+      : "100vh"
+
+  const hero = (
     // WCAG 1.3.1: Semantic section element with accessible name
     // Uses CSS Grid stacking for layering video behind content
     <Box
@@ -117,11 +146,12 @@ export default function VideoHero({
         display: "grid",
         gridTemplateAreas: '"stack"',
         gridTemplateRows: "1fr",
-        height: "100vh",
+        height: heroHeight,
         width: "100%",
         overflow: "hidden",
         pointerEvents: "auto", // Re-enable interactions (parent main has pointerEvents: none)
         cursor: "default", // Override map's pan cursor
+        borderRadius: radius,
       }}
     >
       {/* WCAG 1.1.1: Decorative video/image, hidden from assistive technology */}
@@ -238,62 +268,59 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content.diagonal: headline upper-left, paragraph lower-right */}
+      {/* Headline.upper-left, offset below fixed header */}
       <Box
         sx={{
           gridArea: "stack",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          paddingBottom: theme.space.panel.topOffset,
-          paddingLeft: theme.space.panel.padding,
-          paddingRight: theme.space.panel.padding,
+          display: hideHeadline ? { xs: "block", lg: "none" } : "block",
+          alignSelf: "flex-start",
+          justifySelf: "flex-start",
+          marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
+          marginLeft: theme.space.panel.padding,
+          marginRight: theme.space.panel.padding,
+          maxWidth: { xs: "100%", sm: "720px" },
+          color: "text.secondary",
+          textShadow: theme.textShadow.display,
+          pointerEvents: "auto",
           zIndex: theme.zIndex.heroContent,
-          pointerEvents: "none",
         }}
       >
-        {/* Headline.marginTop offsets exactly the fixed header height */}
-        <Box
-          sx={{
-            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
-            alignSelf: "flex-start",
-            marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
-            maxWidth: { xs: "100%", sm: "720px" },
-            color: "text.secondary",
-            textShadow: theme.textShadow.display,
-            pointerEvents: "auto",
-          }}
-        >
-          <Typography
-            variant="h2Main"
-            component="h2"
-            sx={{ display: "block", mb: 0.5 }}
-          >
-            {t("homePanel.titleLine1")}
-          </Typography>
-          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-            {t("homePanel.titleLine2")}
-          </Typography>
-        </Box>
-
-        {/* Paragraph.lower left */}
         <Typography
-          variant="displayBody"
-          component="p"
-          sx={{
-            alignSelf: "flex-end",
-            marginTop: "auto",
-            textAlign: "left",
-            maxWidth: "480px",
-            color: "text.secondary",
-            textShadow: theme.textShadow.nav,
-            lineHeight: 1.6,
-            pointerEvents: "auto",
-          }}
+          variant="h2Main"
+          component="h2"
+          sx={{ display: "block", mb: 0.5 }}
         >
-          {t("homePanel.content")}
+          {t("homePanel.titleLine1")}
+        </Typography>
+        <Typography variant="h1" component="h1" sx={{ display: "block" }}>
+          {t("homePanel.titleLine2")}
         </Typography>
       </Box>
+
+      {/* Paragraph.lower-right. Left edge aligns with the first
+          header nav item ("Guides") via the `--coeqwal-nav-left`
+          CSS variable published by BaseHeader; right edge aligns
+          with the header's right panel padding so the block tracks
+          the nav horizontally. Falls back gracefully if the header
+          hasn't measured yet (e.g. SSR, mobile nav). */}
+      <Typography
+        variant="displayBody"
+        component="p"
+        sx={{
+          position: "absolute",
+          bottom: theme.space.panel.topOffset,
+          left: `var(--coeqwal-nav-left, calc(100% - 480px - ${theme.space.panel.padding}))`,
+          right: theme.space.panel.padding,
+          textAlign: "left",
+          color: "text.secondary",
+          textShadow: theme.textShadow.nav,
+          lineHeight: 1.6,
+          pointerEvents: "auto",
+          zIndex: theme.zIndex.heroContent,
+        }}
+      >
+        {t("homePanel.content")}
+      </Typography>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}
       <Box
@@ -309,6 +336,14 @@ export default function VideoHero({
           color={`${theme.palette.text.secondary}D9`}
           size={52}
           scrollToId="about-coeqwal"
+          // Scroll so the About panel's rounded card sits flush
+          // below the header: subtract the header height, then add
+          // back one top frame-gap (`tunerInsetY`) so the frame
+          // strip tucks under the header instead of appearing as
+          // extra whitespace above the card. Resolved at click
+          // time so live PanelTuner edits to `--panel-inset-y`
+          // take effect immediately.
+          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
           ariaLabel="Scroll down to learn more"
         />
       </Box>
@@ -326,4 +361,21 @@ export default function VideoHero({
       />
     </Box>
   )
+
+  if (insetCfg) {
+    return (
+      <Box
+        sx={{
+          background: frameBackground ?? "transparent",
+          px: insetCfg.x,
+          py: insetCfg.y,
+          width: "100%",
+        }}
+      >
+        {hero}
+      </Box>
+    )
+  }
+
+  return hero
 }

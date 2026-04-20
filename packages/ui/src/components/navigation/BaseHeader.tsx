@@ -24,12 +24,6 @@
  * 3. Custom: Main app uses its own scroll detection (isInTabsArea) and passes
  *    dynamic `backgroundColor` directly
  *
- * Navigation links (left to right):
- * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
- * - Get data: links to dev.coeqwal.org/data
- * - About COEQWAL
- * - Language switcher (optional)
- *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Semantic nav element, heading structure, role="group" for nav sections
  * - WCAG 1.4.1: Active states use bold text + bullet indicator (not color alone)
@@ -166,7 +160,29 @@ export interface BaseHeaderProps {
 
   /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
   waterThemesOptions?: NavDropdownOption[]
+
+  /** Optional offset from the top of the viewport. Used by apps whose
+   *  rounded-panel layout keeps a visible frame strip above the header
+   *  (so the header sits on the panel surface rather than over the frame).
+   *
+   *  Accepts a number (interpreted as px) or a raw CSS string such as
+   *  `"24px"` or `"var(--panel-inset-y, clamp(16px, 3vw, 32px))"`.
+   *  Defaults to `0` — behavior is identical to today for any consumer
+   *  that does not pass this prop (e.g. storyline-flow). */
+  topOffset?: string | number
+
+  /** Optional symmetric inset from the left and right edges of the
+   *  viewport. Lets the header pull in to match a rounded-panel side
+   *  frame (typically `tunerInsetX()`). Defaults to `0` — behavior is
+   *  identical to today for any consumer that does not pass this. */
+  sideOffset?: string | number
 }
+
+/** Resolve an offset prop to a CSS-ready string; `undefined` → `"0"` so
+ *  that the composed `inset` shorthand matches the previous literal
+ *  exactly for consumers that don't opt in. */
+const resolveOffset = (v: string | number | undefined): string =>
+  v === undefined ? "0" : typeof v === "number" ? `${v}px` : v
 
 const translations: TranslationsMap = {
   en: {
@@ -223,6 +239,8 @@ export function BaseHeader({
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
   logoVariant = "light",
+  topOffset,
+  sideOffset,
 }: BaseHeaderProps) {
   /* ========================================
    * THEME & LAYOUT
@@ -251,6 +269,38 @@ export function BaseHeader({
 
   // WCAG: Ref for focus return when drawer closes
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
+
+  /* ========================================
+   * NAV LEFT EDGE → CSS VARIABLE
+   * Publish the left viewport coordinate of the first nav item to
+   * `--coeqwal-nav-left` on :root so other parts of the page
+   * (e.g. hero body copy) can horizontally align to it. Updates on
+   * resize and whenever the nav's size changes (hydration, fonts,
+   * language switcher toggles, etc.).
+   * ======================================== */
+  const navRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const el = navRef.current
+    if (!el) return
+
+    const root = document.documentElement
+    const update = () => {
+      const left = el.getBoundingClientRect().left
+      root.style.setProperty("--coeqwal-nav-left", `${left}px`)
+    }
+    update()
+
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener("resize", update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", update)
+    }
+    // Re-bind whenever the nav mounts/unmounts (mobile ↔ desktop)
+    // so the CSS variable stays in sync with the live DOM element.
+  }, [isMobile])
 
   const handleMobileMenuOpen = () => setMobileMenuOpen(true)
   const handleMobileMenuClose = () => {
@@ -398,11 +448,17 @@ export function BaseHeader({
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
           // Smooth color transitions when background/text change
-          transition: `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`,
+          transition: `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease, top ${theme.transition.standard} ease, left ${theme.transition.standard} ease, right ${theme.transition.standard} ease`,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
-          inset: "0 0 auto 0",
+          inset: `${resolveOffset(topOffset)} ${resolveOffset(sideOffset)} auto ${resolveOffset(sideOffset)}`,
+          // MUI AppBar defaults to width: 100%, which would ignore the
+          // `right` side of our `inset` shorthand and just shift the whole
+          // 100%-wide bar to the right. Force width:auto so that
+          // `left` + `right` together constrain the header's width,
+          // letting it pull in symmetrically from both viewport edges.
+          width: "auto",
           height: "var(--header-h)",
           overflow: "hidden",
         }}
@@ -478,6 +534,7 @@ export function BaseHeader({
           {!isMobile && (
             <Box
               component="nav"
+              ref={navRef}
               aria-label="Main navigation"
               sx={{
                 justifySelf: isWideDesktop ? "end" : undefined,
