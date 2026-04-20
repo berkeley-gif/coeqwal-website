@@ -1,21 +1,20 @@
 "use client"
 
 import {
-  Fragment,
   useRef,
   useEffect,
   useLayoutEffect,
-  // useMemo,
-  // useCallback,
+  useMemo,
+  useCallback,
 } from "react"
 import {
   Box,
   Typography,
-  // ToggleButton,
-  // ToggleButtonGroup,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
   alpha,
-  // ArrowForwardIcon,
+  ArrowForwardIcon,
   IconButton,
   PlayArrowIcon,
   PauseIcon,
@@ -24,13 +23,13 @@ import {
 import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-// import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
-// import { HybridTooltip } from "@repo/ui"
-// import {
-//   getScenarioIconDefs,
-//   renderIconDef,
-// } from "../../scenarios/components/shared/opsIcons"
-// import { useDrawerStore } from "@repo/state/drawer"
+import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
+import { HybridTooltip } from "@repo/ui"
+import {
+  getScenarioIconDefs,
+  renderIconDef,
+} from "../../scenarios/components/shared/opsIcons"
+import { useDrawerStore } from "@repo/state/drawer"
 
 interface ColumnEyebrow {
   label: string
@@ -128,105 +127,111 @@ export default function BeatTextOverlay({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
 
-  // TODO: restore with scenario header re-enable.
-  // const GLOSSARY_TERMS = useMemo(
-  //   () => [
-  //     {
-  //       pattern: /\bTUCPs?\b/g,
-  //       glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
-  //     },
-  //     {
-  //       pattern: /\bSGMA\b/g,
-  //       glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
-  //     },
-  //     {
-  //       pattern: /\bDelta Conveyance Project\b/g,
-  //       glossaryTerm: "Delta Conveyance Project",
-  //     },
-  //   ],
-  //   [],
-  // )
-  //
-  // const handleGlossaryClick = useCallback(
-  //   (term: string) => (e: React.MouseEvent) => {
-  //     e.stopPropagation()
-  //     setDrawerContent({ selectedTerm: term })
-  //     openDrawer("glossary")
-  //   },
-  //   [setDrawerContent, openDrawer],
-  // )
-  //
-  // const glossaryLinkStyles = useMemo(
-  //   () => ({
-  //     color: theme.palette.blue.bright,
-  //     borderBottom: `2px solid ${theme.palette.blue.bright}`,
-  //     cursor: "pointer",
-  //     background: "none",
-  //     border: "none",
-  //     borderBottomStyle: "solid" as const,
-  //     borderBottomWidth: "2px",
-  //     borderBottomColor: theme.palette.blue.bright,
-  //     padding: 0,
-  //     font: "inherit",
-  //     "&:hover": { borderBottomWidth: "3px" },
-  //     "&:focus-visible": {
-  //       outline: `2px solid ${theme.palette.blue.bright}`,
-  //       outlineOffset: "2px",
-  //       borderRadius: "2px",
-  //     },
-  //   }),
-  //   [theme.palette.blue.bright],
-  // )
-  //
-  // const descriptionWithLinks = useMemo(() => {
-  //   if (!scenarioDescription) return null
-  //   const combined = new RegExp(
-  //     `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
-  //     "g",
-  //   )
-  //   const result: React.ReactNode[] = []
-  //   let lastIndex = 0
-  //   let match: RegExpExecArray | null
-  //   while ((match = combined.exec(scenarioDescription)) !== null) {
-  //     if (match.index > lastIndex)
-  //       result.push(scenarioDescription.slice(lastIndex, match.index))
-  //     const word = match[1] ?? ""
-  //     const punct = match[2] ?? ""
-  //     const term = GLOSSARY_TERMS.find((t) =>
-  //       new RegExp(`^${t.pattern.source}$`).test(word),
-  //     )
-  //     if (term) {
-  //       result.push(
-  //         <Box
-  //           component="button"
-  //           type="button"
-  //           key={`gl-${match.index}`}
-  //           onClick={handleGlossaryClick(term.glossaryTerm)}
-  //           tabIndex={0}
-  //           aria-label={`Open glossary for ${term.glossaryTerm}`}
-  //           sx={glossaryLinkStyles}
-  //         >
-  //           {word}
-  //         </Box>,
-  //       )
-  //       if (punct) result.push(punct)
-  //     }
-  //     lastIndex = match.index + match[0].length
-  //   }
-  //   if (lastIndex < scenarioDescription.length)
-  //     result.push(scenarioDescription.slice(lastIndex))
-  //   return result
-  // }, [
-  //   scenarioDescription,
-  //   GLOSSARY_TERMS,
-  //   handleGlossaryClick,
-  //   glossaryLinkStyles,
-  // ])
+  // NOTE: GLOSSARY_TERMS / handleGlossaryClick / glossaryLinkStyles /
+  // descriptionWithLinks are kept live; they're only consumed by the
+  // commented-out scenario-header JSX below (wrapped in `{false && ...}`),
+  // which we preserve for later reuse.
+  const GLOSSARY_TERMS = useMemo(
+    () => [
+      {
+        pattern: /\bTUCPs?\b/g,
+        glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+      },
+      {
+        pattern: /\bSGMA\b/g,
+        glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
+      },
+      {
+        pattern: /\bDelta Conveyance Project\b/g,
+        glossaryTerm: "Delta Conveyance Project",
+      },
+    ],
+    [],
+  )
+
+  const handleGlossaryClick = useCallback(
+    (term: string) => (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setDrawerContent({ selectedTerm: term })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  const glossaryLinkStyles = useMemo(
+    () => ({
+      color: theme.palette.blue.bright,
+      borderBottom: `2px solid ${theme.palette.blue.bright}`,
+      cursor: "pointer",
+      background: "none",
+      border: "none",
+      borderBottomStyle: "solid" as const,
+      borderBottomWidth: "2px",
+      borderBottomColor: theme.palette.blue.bright,
+      padding: 0,
+      font: "inherit",
+      "&:hover": { borderBottomWidth: "3px" },
+      "&:focus-visible": {
+        outline: `2px solid ${theme.palette.blue.bright}`,
+        outlineOffset: "2px",
+        borderRadius: "2px",
+      },
+    }),
+    [theme.palette.blue.bright],
+  )
+
+  const descriptionWithLinks = useMemo(() => {
+    if (!scenarioDescription) return null
+    const combined = new RegExp(
+      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
+      "g",
+    )
+    const result: React.ReactNode[] = []
+    let lastIndex = 0
+    let match: RegExpExecArray | null
+    while ((match = combined.exec(scenarioDescription)) !== null) {
+      if (match.index > lastIndex)
+        result.push(scenarioDescription.slice(lastIndex, match.index))
+      const word = match[1] ?? ""
+      const punct = match[2] ?? ""
+      const term = GLOSSARY_TERMS.find((t) =>
+        new RegExp(`^${t.pattern.source}$`).test(word),
+      )
+      if (term) {
+        result.push(
+          <Box
+            component="button"
+            type="button"
+            key={`gl-${match.index}`}
+            onClick={handleGlossaryClick(term.glossaryTerm)}
+            tabIndex={0}
+            aria-label={`Open glossary for ${term.glossaryTerm}`}
+            sx={glossaryLinkStyles}
+          >
+            {word}
+          </Box>,
+        )
+        if (punct) result.push(punct)
+      }
+      lastIndex = match.index + match[0].length
+    }
+    if (lastIndex < scenarioDescription.length)
+      result.push(scenarioDescription.slice(lastIndex))
+    return result
+  }, [
+    scenarioDescription,
+    GLOSSARY_TERMS,
+    handleGlossaryClick,
+    glossaryLinkStyles,
+  ])
 
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
   const tierLegendRef = useRef<HTMLDivElement>(null)
+  /** Per-row refs (one per tier level) so the legend can fade in row by row
+   *  instead of as a single block. Index 0 = Optimal (top row). */
+  const tierLegendRowRefs = useRef<(HTMLDivElement | null)[]>([])
   /** Root Box of the right-column (absolutely positioned at `right: 0`,
    *  `width: 33.33%`). Used as the reference frame for ResizeObserver
    *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
@@ -244,15 +249,16 @@ export default function BeatTextOverlay({
   eyebrowDataRef.current = beat2Layout?.eyebrows
   const beat2LayoutRef = useRef<Beat2Layout | null | undefined>(undefined)
   beat2LayoutRef.current = beat2Layout
-  // TODO: restore scenario-header (current operations text, key-op icons,
-  // description, encoding toggle, climate chooser) + "Add a location" CTA
-  // when reintroducing those controls; see commented JSX blocks below.
-  // const scenarioHeaderRef = useRef<HTMLDivElement>(null)
+  // NOTE: scenarioHeaderRef + addLocationCtaRef are kept live because their
+  // JSX (current operations text, key-op icons, description, encoding toggle,
+  // climate chooser, "Add a location" CTA) is preserved behind
+  // `{false && ...}` guards below for future reuse. They're not rendered.
+  const scenarioHeaderRef = useRef<HTMLDivElement>(null)
   const calsimTextRef = useRef<HTMLDivElement>(null)
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
-  // const addLocationCtaRef = useRef<HTMLDivElement>(null)
+  const addLocationCtaRef = useRef<HTMLDivElement>(null)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
@@ -281,8 +287,9 @@ export default function BeatTextOverlay({
       }
 
       if (beat2PanelRef.current) {
-        // Beat 2 panel backdrop reveals at Beat 2 start (0.78)
-        const fadeIn = clamp01((v - 0.78) / 0.03)
+        // Beat 2 panel backdrop reveals at Beat 2 start (0.74 — AG_REV's
+        // solo morph). Also mirrors the BEAT2_START map-side boundary.
+        const fadeIn = clamp01((v - 0.74) / 0.03)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -305,7 +312,7 @@ export default function BeatTextOverlay({
       if (layoutItems) {
         for (const item of layoutItems) {
           const win = windows?.[item.code]
-          const morphStart = win?.start ?? 0.78
+          const morphStart = win?.start ?? 0.74
           const morphEnd = win?.end ?? 0.99
 
           const titleEl = titleRefsMap.current.get(item.code)
@@ -341,24 +348,42 @@ export default function BeatTextOverlay({
         }
       }
 
-      if (tierLegendRef.current) {
-        const fadeIn = clamp01((v - 0.46) / 0.04)
-        tierLegendRef.current.style.opacity = String(fadeIn)
+      // Tier legend staggers in row by row (Optimal → Acceptable → At risk
+      // → Critical) so the gap between "To compare results..." (0.20–0.24)
+      // and the map's Beat 1B collapse (0.55) fills with a meaningful
+      // level-by-level reveal instead of a single 0.22-wide dead zone.
+      const TIER_LEGEND_FIRST_START = 0.26
+      const TIER_LEGEND_ROW_STEP = 0.05
+      const TIER_LEGEND_ROW_FADE = 0.04
+      const legendRows = tierLegendRowRefs.current
+      for (let i = 0; i < legendRows.length; i++) {
+        const el = legendRows[i]
+        if (!el) continue
+        const start = TIER_LEGEND_FIRST_START + i * TIER_LEGEND_ROW_STEP
+        el.style.opacity = String(clamp01((v - start) / TIER_LEGEND_ROW_FADE))
       }
 
-      // Beat 1C example text: "each polygon on the map represents..."
-      // Appears just after the tier-color blend completes (0.66) so the
-      // viewer sees tier colors first, then reads the explanation.
+      // Beat 1C example text ("each polygon on the map represents..."):
+      // kicks off the overlay narrative as soon as the AG-only filter +
+      // blue→tier blend begins (0.60), so the text and the color change
+      // register together.
       if (beat1cExampleRef.current) {
-        const fadeIn = clamp01((v - 0.66) / 0.03)
+        const fadeIn = clamp01((v - 0.6) / 0.03)
         beat1cExampleRef.current.style.opacity = String(fadeIn)
       }
 
-      // Beat 1C delivery-levels text: appears after the popups have been
-      // on screen long enough to register (around 0.74).
+      // Beat 1C delivery-levels text: appears once the tier colors are
+      // fully set and the example popups have had a moment to read.
       if (beat1cDeliveryRef.current) {
-        const fadeIn = clamp01((v - 0.74) / 0.03)
+        const fadeIn = clamp01((v - 0.7) / 0.03)
         beat1cDeliveryRef.current.style.opacity = String(fadeIn)
+      }
+
+      // "All other key outcomes..." text: bridges AG_REV's solo morph and
+      // the remaining outcomes' fly-ins.
+      if (allOtherOutcomesRef.current) {
+        const fadeIn = clamp01((v - 0.82) / 0.03)
+        allOtherOutcomesRef.current.style.opacity = String(fadeIn)
       }
     })
     return unsub
@@ -409,31 +434,22 @@ export default function BeatTextOverlay({
   useEffect(() => {
     if (!interactive) {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "0"
-      // if (scenarioHeaderRef.current)
-      //   scenarioHeaderRef.current.style.opacity = "0"
-      // if (addLocationCtaRef.current)
-      //   addLocationCtaRef.current.style.opacity = "0"
       return
     }
     const t1 = setTimeout(() => {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "1"
     }, 400)
-    // const t2 = setTimeout(() => {
-    //   if (scenarioHeaderRef.current)
-    //     scenarioHeaderRef.current.style.opacity = "1"
-    //   if (addLocationCtaRef.current)
-    //     addLocationCtaRef.current.style.opacity = "1"
-    // }, 1800)
     return () => {
       clearTimeout(t1)
-      // clearTimeout(t2)
     }
   }, [interactive])
 
-  // const opsIconDefs = useMemo(
-  //   () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
-  //   [scenarioId],
-  // )
+  // Kept live (unused while scenarioHeader JSX is disabled behind
+  // `{false && ...}`). Restore usage in the JSX to re-enable.
+  const opsIconDefs = useMemo(
+    () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
+    [scenarioId],
+  )
 
   const padding = theme.space.panel.padding
   const textColor = theme.palette.undertone.warm
@@ -592,7 +608,6 @@ export default function BeatTextOverlay({
             ref={tierLegendRef}
             sx={{
               mt: 2.5,
-              opacity: 0,
               display: "grid",
               gridTemplateColumns: "auto auto 1fr",
               columnGap: 1.5,
@@ -627,8 +642,24 @@ export default function BeatTextOverlay({
                     "Severe water supply shortages threaten long-term viability.",
                 },
               ] as const
-            ).map(({ color, label, description }) => (
-              <Fragment key={label}>
+            ).map(({ color, label, description }, rowIdx) => (
+              /* Each row is its own subgrid row so column widths stay
+               * aligned (swatch | label badge | description) while we drive
+               * a per-row opacity for the staggered fade-in. */
+              <Box
+                key={label}
+                ref={(el: HTMLDivElement | null) => {
+                  tierLegendRowRefs.current[rowIdx] = el
+                }}
+                sx={{
+                  display: "grid",
+                  gridColumn: "1 / -1",
+                  gridTemplateColumns: "subgrid",
+                  alignItems: "center",
+                  columnGap: 1.5,
+                  opacity: 0,
+                }}
+              >
                 <Box
                   sx={{
                     width: 16,
@@ -666,21 +697,12 @@ export default function BeatTextOverlay({
                 <Typography variant="body1" component="span">
                   {description}
                 </Typography>
-              </Fragment>
+              </Box>
             ))}
           </Box>
-          {/* Beat 1C: example of what a single polygon represents */}
-          <Box ref={beat1cExampleRef} sx={{ mt: 2.5, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              For example, each polygon on the map represents an agricultural water district receiving surface water deliveries.
-            </Typography>
-          </Box>
-          {/* Beat 1C: how colors map to delivery/revenue outcomes */}
-          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              The colors correspond to different water delivery levels that affect agricultural revenues, ranging from optimal levels (blue) to critical levels (red).
-            </Typography>
-          </Box>
+          {/* Beat 1C narrative moved to the overlay panel; see right-column
+           *  root below for "For example..." / "The colors correspond..." /
+           *  "All other key outcomes..." blocks. */}
           {/* Calsim data beat - appears after morph completes */}
           <Box
             ref={calsimTextRef}
@@ -729,8 +751,10 @@ export default function BeatTextOverlay({
           },
         }}
       >
-        {/* Scenario header + encoding toggle */}
-        <Box
+        {/* Scenario header + encoding toggle.
+         *  Disabled per design direction — kept in-source (wrapped in
+         *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
+        {false && (<Box
           ref={scenarioHeaderRef}
           sx={{
             px: 3,
@@ -846,7 +870,7 @@ export default function BeatTextOverlay({
                 value={encodingMode}
                 exclusive
                 onChange={(_, val) => {
-                  if (val) onEncodingChange(val as EncodingMode)
+                  if (val) onEncodingChange?.(val as EncodingMode)
                 }}
                 size="small"
                 sx={{
@@ -914,6 +938,34 @@ export default function BeatTextOverlay({
                 />
               </Box>
             )}
+          </Box>
+        </Box>)}
+
+        {/* Beat 1C narrative, promoted into the overlay panel now that the
+         *  scenario-header block is hidden. These replace the former
+         *  `beat1cExampleRef` / `beat1cDeliveryRef` blocks that lived on the
+         *  left panel. */}
+        <Box
+          sx={{
+            px: 3,
+            pt: 2,
+            flexShrink: 0,
+          }}
+        >
+          <Box ref={beat1cExampleRef} sx={{ opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              For example, each polygon on the map represents an agricultural water district receiving surface water deliveries.
+            </Typography>
+          </Box>
+          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              The colors correspond to different water delivery outcome levels that affect agricultural revenues, ranging from optimal levels (blue) to critical levels (red).
+            </Typography>
+          </Box>
+          <Box ref={allOtherOutcomesRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              All other key outcomes can be mapped and visualized in similar ways.
+            </Typography>
           </Box>
         </Box>
 
@@ -1050,8 +1102,9 @@ export default function BeatTextOverlay({
                       </Box>
                     )
                   })}
-                {col === 0 && (
-                  /* "Add a location to track" CTA, pinned to end of left col */
+                {col === 0 && false && (
+                  /* "Add a location to track" CTA — disabled per design
+                   *  direction, kept in-source for future reuse. */
                   <Box
                     ref={addLocationCtaRef}
                     sx={{

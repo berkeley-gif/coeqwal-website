@@ -35,6 +35,14 @@ interface ScrollIndicatorProps {
   onClick?: () => void
   /** Target element ID to scroll to (if provided, handles scrolling automatically) */
   scrollToId?: string
+  /**
+   * Offset (in px) subtracted from the target's top when scrolling.
+   * Use this to account for a fixed header so the scrolled-to
+   * element lands below it instead of underneath it. Pass a
+   * function to resolve the offset at click time (e.g. when it
+   * depends on CSS variables that may change live). Defaults to 0.
+   */
+  scrollOffset?: number | (() => number)
   /** Custom icon/content to animate */
   children?: React.ReactNode
   /** Additional styles */
@@ -61,6 +69,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   hideDuration = 0.8,
   onClick,
   scrollToId,
+  scrollOffset = 0,
   children,
   style = {},
   className,
@@ -83,7 +92,9 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
         const rect = targetElement.getBoundingClientRect()
         const currentScrollTop =
           window.pageYOffset || document.documentElement.scrollTop
-        const targetPosition = rect.top + currentScrollTop
+        const resolvedOffset =
+          typeof scrollOffset === "function" ? scrollOffset() : scrollOffset
+        const targetPosition = rect.top + currentScrollTop - resolvedOffset
 
         requestAnimationFrame(() => {
           window.scrollTo({
@@ -99,7 +110,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
 
     // Call custom onClick if provided
     onClick?.()
-  }, [scrollToId, onClick])
+  }, [scrollToId, scrollOffset, onClick])
 
   // WCAG 2.1.1: Keyboard accessibility
   const handleKeyDown = useCallback(

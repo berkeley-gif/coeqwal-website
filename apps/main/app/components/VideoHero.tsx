@@ -20,6 +20,7 @@ import {
   ScrollToButton,
   resolveRadius,
   resolveInset,
+  tunerInsetYPx,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -267,62 +268,59 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content.diagonal: headline upper-left, paragraph lower-right */}
+      {/* Headline.upper-left, offset below fixed header */}
       <Box
         sx={{
           gridArea: "stack",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          paddingBottom: theme.space.panel.topOffset,
-          paddingLeft: theme.space.panel.padding,
-          paddingRight: theme.space.panel.padding,
+          display: hideHeadline ? { xs: "block", lg: "none" } : "block",
+          alignSelf: "flex-start",
+          justifySelf: "flex-start",
+          marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
+          marginLeft: theme.space.panel.padding,
+          marginRight: theme.space.panel.padding,
+          maxWidth: { xs: "100%", sm: "720px" },
+          color: "text.secondary",
+          textShadow: theme.textShadow.display,
+          pointerEvents: "auto",
           zIndex: theme.zIndex.heroContent,
-          pointerEvents: "none",
         }}
       >
-        {/* Headline.marginTop offsets exactly the fixed header height */}
-        <Box
-          sx={{
-            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
-            alignSelf: "flex-start",
-            marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
-            maxWidth: { xs: "100%", sm: "720px" },
-            color: "text.secondary",
-            textShadow: theme.textShadow.display,
-            pointerEvents: "auto",
-          }}
-        >
-          <Typography
-            variant="h2Main"
-            component="h2"
-            sx={{ display: "block", mb: 0.5 }}
-          >
-            {t("homePanel.titleLine1")}
-          </Typography>
-          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-            {t("homePanel.titleLine2")}
-          </Typography>
-        </Box>
-
-        {/* Paragraph.lower left */}
         <Typography
-          variant="displayBody"
-          component="p"
-          sx={{
-            alignSelf: "flex-end",
-            marginTop: "auto",
-            textAlign: "left",
-            maxWidth: "480px",
-            color: "text.secondary",
-            textShadow: theme.textShadow.nav,
-            lineHeight: 1.6,
-            pointerEvents: "auto",
-          }}
+          variant="h2Main"
+          component="h2"
+          sx={{ display: "block", mb: 0.5 }}
         >
-          {t("homePanel.content")}
+          {t("homePanel.titleLine1")}
+        </Typography>
+        <Typography variant="h1" component="h1" sx={{ display: "block" }}>
+          {t("homePanel.titleLine2")}
         </Typography>
       </Box>
+
+      {/* Paragraph.lower-right. Left edge aligns with the first
+          header nav item ("Guides") via the `--coeqwal-nav-left`
+          CSS variable published by BaseHeader; right edge aligns
+          with the header's right panel padding so the block tracks
+          the nav horizontally. Falls back gracefully if the header
+          hasn't measured yet (e.g. SSR, mobile nav). */}
+      <Typography
+        variant="displayBody"
+        component="p"
+        sx={{
+          position: "absolute",
+          bottom: theme.space.panel.topOffset,
+          left: `var(--coeqwal-nav-left, calc(100% - 480px - ${theme.space.panel.padding}))`,
+          right: theme.space.panel.padding,
+          textAlign: "left",
+          color: "text.secondary",
+          textShadow: theme.textShadow.nav,
+          lineHeight: 1.6,
+          pointerEvents: "auto",
+          zIndex: theme.zIndex.heroContent,
+        }}
+      >
+        {t("homePanel.content")}
+      </Typography>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}
       <Box
@@ -338,6 +336,14 @@ export default function VideoHero({
           color={`${theme.palette.text.secondary}D9`}
           size={52}
           scrollToId="about-coeqwal"
+          // Scroll so the About panel's rounded card sits flush
+          // below the header: subtract the header height, then add
+          // back one top frame-gap (`tunerInsetY`) so the frame
+          // strip tucks under the header instead of appearing as
+          // extra whitespace above the card. Resolved at click
+          // time so live PanelTuner edits to `--panel-inset-y`
+          // take effect immediately.
+          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
           ariaLabel="Scroll down to learn more"
         />
       </Box>

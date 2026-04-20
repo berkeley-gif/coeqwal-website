@@ -1245,7 +1245,10 @@ export default function TierAnimationSection() {
     const BEAT1B_START = 0.55
     const BEAT1C_BLEND_START = 0.6
     const BEAT1C_BLEND_END = 0.66
-    const BEAT2_START = 0.78
+    // AG_REV now morphs solo starting at 0.74 (see getOutcomeProgressRange
+    // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
+    // DU filter restore + hide-schedule over in time for AG_REV's morph.
+    const BEAT2_START = 0.74
 
     let frozenColorPhase = 0
 
@@ -1519,7 +1522,7 @@ export default function TierAnimationSection() {
     if (!agData) return
 
     const POPUPS_IN = 0.69
-    const POPUPS_OUT = 0.78 // clear at start of Beat 2
+    const POPUPS_OUT = 0.74 // clear at start of AG_REV morph (Beat 2)
     const count = BEAT1C_POPUP_DU_IDS.length
     const span = POPUPS_OUT - POPUPS_IN
     const perPopup = span / count
@@ -2069,25 +2072,24 @@ export default function TierAnimationSection() {
    *  locations" caption once the polygons have settled as squares. */
   const outcomeMorphWindows = useMemo(() => {
     const map: Record<string, { start: number; end: number }> = {}
-    const total = activeOutcomeGroups.length
-    if (total === 0) return map
-    for (let i = 0; i < total; i++) {
-      const [start, end] = getOutcomeProgressRange(i, total)
-      map[activeOutcomeGroups[i]!.code] = { start, end }
+    if (activeOutcomeGroups.length === 0) return map
+    const activeCodes = activeOutcomeGroups.map((g) => g.code)
+    for (const group of activeOutcomeGroups) {
+      const [start, end] = getOutcomeProgressRange(group.code, activeCodes)
+      map[group.code] = { start, end }
     }
     return map
   }, [activeOutcomeGroups])
 
   useEffect(() => {
-    const total = activeOutcomeGroups.length
     const schedule: HideScheduleEntry[] = []
-    for (let i = 0; i < total; i++) {
-      const group = activeOutcomeGroups[i]!
+    const activeCodes = activeOutcomeGroups.map((g) => g.code)
+    for (const group of activeOutcomeGroups) {
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
       if (!config) continue
-      const [morphStart] = getOutcomeProgressRange(i, total)
+      const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
       // Beat 2 slices are tighter now (0.22 span across 9 outcomes ≈ 0.024
       // each); use a shorter fade lead so the DU fade doesn't bleed into
       // the previous outcome's morph.
@@ -2159,7 +2161,16 @@ export default function TierAnimationSection() {
     // measured from the DOM later; this is only used to decide row count.
     const approxColWidth = Math.max(80, panelSize.width * (1 / 3) / 2 - 36)
 
-    const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
+    // Left column renders in this explicit order (AG_REV before CWS_DEL).
+    // We don't touch OUTCOME_CODE_ORDER globally — radar axes + NOD/SOD
+    // helpers depend on that list — so we just prepend the left-column codes
+    // in their desired order and iterate the rest of OUTCOME_CODE_ORDER after.
+    const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
+    const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
+    const orderedCodes: string[] = [
+      ...LEFT_COLUMN_ORDER,
+      ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
+    ]
 
     const EYEBROW_FADE_IN = 0.77
     const eyebrows = [
@@ -2181,8 +2192,8 @@ export default function TierAnimationSection() {
 
     const items: OutcomeLayoutItem[] = []
 
-    for (let idx = 0; idx < OUTCOME_CODE_ORDER.length; idx++) {
-      const code = OUTCOME_CODE_ORDER[idx]!
+    for (let idx = 0; idx < orderedCodes.length; idx++) {
+      const code = orderedCodes[idx]! as (typeof OUTCOME_CODE_ORDER)[number]
       const label = getOutcomeName(code)
       const isActive = ACTIVE_OUTCOMES.has(code)
       const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1

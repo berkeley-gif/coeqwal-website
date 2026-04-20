@@ -270,6 +270,38 @@ export function BaseHeader({
   // WCAG: Ref for focus return when drawer closes
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
+  /* ========================================
+   * NAV LEFT EDGE → CSS VARIABLE
+   * Publish the left viewport coordinate of the first nav item to
+   * `--coeqwal-nav-left` on :root so other parts of the page
+   * (e.g. hero body copy) can horizontally align to it. Updates on
+   * resize and whenever the nav's size changes (hydration, fonts,
+   * language switcher toggles, etc.).
+   * ======================================== */
+  const navRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const el = navRef.current
+    if (!el) return
+
+    const root = document.documentElement
+    const update = () => {
+      const left = el.getBoundingClientRect().left
+      root.style.setProperty("--coeqwal-nav-left", `${left}px`)
+    }
+    update()
+
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener("resize", update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", update)
+    }
+    // Re-bind whenever the nav mounts/unmounts (mobile ↔ desktop)
+    // so the CSS variable stays in sync with the live DOM element.
+  }, [isMobile])
+
   const handleMobileMenuOpen = () => setMobileMenuOpen(true)
   const handleMobileMenuClose = () => {
     setMobileMenuOpen(false)
@@ -502,6 +534,7 @@ export function BaseHeader({
           {!isMobile && (
             <Box
               component="nav"
+              ref={navRef}
               aria-label="Main navigation"
               sx={{
                 justifySelf: isWideDesktop ? "end" : undefined,
