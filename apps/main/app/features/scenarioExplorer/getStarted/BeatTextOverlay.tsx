@@ -570,7 +570,7 @@ export default function BeatTextOverlay({
           </Typography>
           <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
             <Typography variant="body1" component="p">
-              To compare results on a common scale, we group key outcomes into levels based on how parts of the water system perform under those different water supply conditions:
+              To compare results on a common scale, we group key outcomes into levels:
             </Typography>
           </Box>
           <Box

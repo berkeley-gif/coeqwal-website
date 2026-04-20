@@ -277,12 +277,14 @@ const IntroSection = () => {
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
-          // Shorter than 100vh by the header height so the full
-          // rounded panel (top + bottom corners) fits below the
-          // fixed header when scrolled into view. The 2*insetY
-          // frame-gap around it is preserved because `inset` is
-          // independent of `minHeight`.
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
+          // Shorter than 100vh by the header height plus one
+          // inter-panel gap band (2 × tunerInsetY), so the full
+          // rounded panel (top + bottom corners) sits below the
+          // fixed header with whitespace below it that visually
+          // matches the gap strips between panels. The frame-gap
+          // itself is preserved because `inset` is independent of
+          // `minHeight`.
+          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
           borderRadius={tunerRadius()}
           inset={{ x: tunerInsetX(), y: tunerInsetY() }}
           frameBackground={theme.palette.common.white}
