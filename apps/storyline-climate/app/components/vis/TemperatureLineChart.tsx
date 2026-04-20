@@ -12,6 +12,11 @@ type Point = { year: number; value: number }
 type Margin = { top: number; right: number; bottom: number; left: number }
 type ContainerSize = { width: number; height: number }
 
+type Props = {
+  scrollProgress: MotionValue<number>
+  debug?: boolean
+}
+
 const defaultMargin: Margin = { top: 24, right: 24, bottom: 80, left: 100 }
 
 function XAxis({
@@ -219,9 +224,8 @@ function YTick({
 
 export default function TemperatureLineChart({
   scrollProgress,
-}: {
-  scrollProgress: MotionValue<number>
-}) {
+  debug = false,
+}: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [wrapWidth, setWrapWidth] = useState<number>(800)
   const [points, setPoints] = useState<Point[]>([])
@@ -320,6 +324,35 @@ export default function TemperatureLineChart({
     )
   }, [points, xScale, yScale])
 
+  const trendLinePath = useMemo(() => {
+    if (!xScale || !yScale || points.length < 2) return ""
+
+    const n = points.length
+    const sumX = points.reduce((acc, d) => acc + d.year, 0)
+    const sumY = points.reduce((acc, d) => acc + d.value, 0)
+    const sumXY = points.reduce((acc, d) => acc + d.year * d.value, 0)
+    const sumXX = points.reduce((acc, d) => acc + d.year * d.year, 0)
+    const denom = n * sumXX - sumX * sumX
+    if (denom === 0) return ""
+
+    const slope = (n * sumXY - sumX * sumY) / denom
+    const intercept = (sumY - slope * sumX) / n
+
+    const minYear = Math.min(...points.map((d) => d.year))
+    const maxYear = Math.max(...points.map((d) => d.year))
+
+    const trendLine = line<Point>()
+      .x((d) => xScale(d.year))
+      .y((d) => yScale(d.value))
+
+    return (
+      trendLine([
+        { year: minYear, value: slope * minYear + intercept },
+        { year: maxYear, value: slope * maxYear + intercept },
+      ]) ?? ""
+    )
+  }, [points, xScale, yScale])
+
   const pathLength = useTransform(scrollProgress, [0.3, 0.7], [0, 1])
   const historicalAvgOpacity = usePlayAnimationOnce(
     scrollProgress,
@@ -367,6 +400,18 @@ export default function TemperatureLineChart({
                 fill="none"
                 stroke={OffWhiteColor}
                 strokeWidth={3}
+                pathLength={pathLength}
+                transition={{ ease: "spring" }}
+              />
+            )}
+
+            {debug && trendLinePath && (
+              <motion.path
+                d={trendLinePath}
+                fill="none"
+                stroke="#8EC5FF"
+                strokeWidth={3}
+                strokeDasharray="8,6"
                 pathLength={pathLength}
                 transition={{ ease: "spring" }}
               />

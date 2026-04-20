@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { Box, Typography } from "@repo/ui/mui"
 import { useEffect, useRef, useState } from "react"
+import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import { scaleLinear, range, line, curveCatmullRom } from "@repo/viz"
 import "../rain.css"
 import { FreshWaterColor } from "./helpers/colorPalette"
@@ -40,7 +41,7 @@ export default function Balance() {
         <RainAnimation />
       </Box>
 
-      <SVGLineContainer viewBox="0 0 1261 1145" preserveAspectRatio="none">
+      <SVGLineContainer viewBox="0 0 1261 1145" preserveAspectRatio="xMaxYMax">
         <motion.path
           className="svg-line"
           pathLength={thirdLinePath}
@@ -154,8 +155,19 @@ function computeCurvePaths(width: number, height: number): string[] {
 }
 
 export function Bullet() {
+  const sectionRef = useRef<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const [paths, setPaths] = useState<string[]>([])
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
+  const bulletPathLength = useTransform(scrollYProgress, [0.2, 0.5], [0, 1])
+  const bulletOpacity = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.1, 0.3],
+    [0, 0.5],
+  )
 
   useEffect(() => {
     const svgEl = svgRef.current
@@ -174,15 +186,16 @@ export function Bullet() {
 
   return (
     <Box
+      component={motion.div}
+      ref={sectionRef}
       id="bullet"
       className="container-center"
-      height="100vh"
+      height="110vh"
       width="100%"
       sx={{
         justifyContent: "center",
         position: "relative",
         overflow: "hidden",
-        backgroundColor: "transparent",
       }}
       tabIndex={-1}
       role="region"
@@ -199,14 +212,8 @@ export function Bullet() {
             key={i}
             d={d}
             className="svg-line"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 0.5 }}
-            viewport={{ once: false, amount: 0.2 }} // retrigger
-            transition={{
-              duration: 1,
-              ease: "easeInOut",
-              delay: i * 0.25,
-            }}
+            pathLength={bulletPathLength}
+            style={{ opacity: bulletOpacity }}
           />
         ))}
       </motion.svg>

@@ -9,6 +9,9 @@ import {
 } from "@repo/viz"
 import { ContainerSize } from "./HydroClimate"
 import "./hydroclimate.css"
+import { OffWhiteColor } from "../helpers/colorPalette"
+import { motion } from "@repo/motion"
+import { useTheme } from "@repo/ui/mui"
 
 export type FlowEntry = {
   model: string
@@ -20,7 +23,7 @@ export type FlowEntry = {
   Qthree: number
 }
 
-const margin = { top: 20, right: 40, bottom: 40, left: 120 }
+const margin = { top: 20, right: 40, bottom: 40, left: 180 }
 const yTicks = [65, 40, 20, 0, -20, -40, -65]
 
 function FlowLine({
@@ -33,6 +36,7 @@ function FlowLine({
   yExtents: [number, number]
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null)
+  const theme = useTheme()
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
   const months = new Array(12).fill(0).map((_, i) => i + 1)
 
@@ -58,20 +62,58 @@ function FlowLine({
   }, [size.height, yExtents])
 
   return (
-    <svg id="hydroclimate-line-svg" ref={svgRef} width="100%" height="100%">
-      <text
+    <motion.svg
+      id="hydroclimate-line-svg"
+      ref={svgRef}
+      width="100%"
+      height="100%"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+    >
+      <motion.text
         id="hydroclimate-line-title"
         x={0}
         y={margin.top}
         dx={"0.75em"}
         dy={"-0.5em"}
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1, ease: "easeOut" }}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.subtitle2.fontSize,
+          textAnchor: "start",
+        }}
       >
-        Selected - <tspan fontWeight="bold">{selected}</tspan>
-      </text>
-      <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
-      <FlowLineWithBand data={data} xScale={xScale} yScale={yScale} />
-      <YAxis yScale={yScale} />
-    </svg>
+        Selected -{" "}
+        <motion.tspan
+          key={selected}
+          fontWeight="bold"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          {selected}
+        </motion.tspan>
+      </motion.text>
+      <motion.g
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
+      >
+        <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
+        <YAxis yScale={yScale} />
+      </motion.g>
+      <motion.g
+        key={selected}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <FlowLineWithBand data={data} xScale={xScale} yScale={yScale} />
+      </motion.g>
+    </motion.svg>
   )
 }
 
@@ -95,17 +137,23 @@ function FlowLineWithBand({
 
   return (
     <g>
-      <path
+      <motion.path
         d={lineGenerator(data) ?? ""}
         fill="none"
         stroke={"#F1b143"}
         strokeWidth={2}
-      ></path>
-      <path
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
+      ></motion.path>
+      <motion.path
         d={areaGenerator(data) ?? ""}
         fill={"#F1b143"}
         fillOpacity={0.15}
         stroke="none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
       />
     </g>
   )
@@ -122,6 +170,7 @@ function XAxis({
 }) {
   const xTicks = ["Oct", "Dec", "Mar", "Jul", "Sep"]
   const xTicksNum = [1, 3, 6, 9, 12]
+  const theme = useTheme()
   return (
     <>
       <g className="x-axis" transform={`translate(${margin.left}, 0)`}>
@@ -148,7 +197,17 @@ function XAxis({
             xPos={xScale(xTicksNum[idx]!.toString()) ?? 0}
           />
         ))}
-        <text id="x-axis-label" x={size.width / 2} y={0} dy="2.5em">
+        <text
+          id="x-axis-label"
+          x={size.width / 2}
+          y={0}
+          dy="2.5em"
+          style={{
+            fill: OffWhiteColor,
+            fontSize: theme.typography.subtitle2.fontSize,
+            textAnchor: "middle",
+          }}
+        >
           Months in a water year
         </text>
       </g>
@@ -157,6 +216,7 @@ function XAxis({
 }
 
 function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
+  const theme = useTheme()
   return (
     <>
       <g className="y-axis" transform={`translate(${margin.left},0)`}>
@@ -165,7 +225,15 @@ function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
         ))}
       </g>
       <g className="y-axis" transform={`translate(${margin.left / 2},0)`}>
-        <text id="y-axis-label" x={0} y={yScale(0)}>
+        <text
+          id="y-axis-label"
+          x={0}
+          y={yScale(0)}
+          style={{
+            fill: OffWhiteColor,
+            fontSize: theme.typography.subtitle2.fontSize,
+          }}
+        >
           <tspan x={0} dy="-0.6em" dx="-1em">
             Changes in
           </tspan>
@@ -190,9 +258,19 @@ function XTick({
   xPos: number
   idx: number
 }) {
+  const theme = useTheme()
   return (
     <g key={idx} className="x-axis-ticks">
-      <text x={xPos} y={0} dy="1em">
+      <text
+        x={xPos}
+        y={0}
+        dy="1em"
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
+          textAnchor: "middle",
+        }}
+      >
         {value}
       </text>
     </g>
@@ -208,6 +286,7 @@ function YTick({
   yPos: number
   idx: number
 }) {
+  const theme = useTheme()
   return (
     <g key={idx} className="y-axis-ticks">
       <line
@@ -218,7 +297,15 @@ function YTick({
         stroke="#fcfbfa"
         strokeWidth={1}
       ></line>
-      <text x={0} dx="-0.75em" y={yPos}>
+      <text
+        x={0}
+        dx="-0.75em"
+        y={yPos}
+        style={{
+          fill: OffWhiteColor,
+          fontSize: theme.typography.caption.fontSize,
+        }}
+      >
         {value <= 0 ? `${value}%` : `+${value}%`}
       </text>
     </g>

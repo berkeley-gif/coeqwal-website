@@ -2,15 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useFetchData } from "../../hooks/useFetchData"
 import FlowLine, { FlowEntry } from "./HydroClimateLine"
 import { scaleLinear, type ScaleLinear } from "@repo/viz"
-import {
-  Box,
-  Button,
-  Stack,
-  Typography,
-  ButtonGroup,
-  ToggleButtonGroup,
-  ToggleButton,
-} from "@repo/ui/mui"
+import { Box, Button, Stack, Typography } from "@repo/ui/mui"
 import { useBreakpoint } from "@repo/ui/hooks"
 
 export type ContainerSize = {
@@ -80,49 +72,35 @@ export default function HydroClimateContainer() {
 
   return (
     <>
-      <div style={{ width: "15%", height: "100%" }}>
-        <ClimateModelSelector onSelect={onModelSelect} />
-      </div>
       <div
         style={{
-          width: "60%",
+          width: "100%",
           height: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           flexDirection: "column",
         }}
       >
         <div
           style={{
-            height: "15%",
+            height: "20%",
             width: "100%",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
           }}
         >
-          <ToggleButtonGroup
-            size="large"
-            exclusive
-            value="streamflow"
-            sx={{
-              color: "#fcfbfa",
-              "& .MuiButtonGroup-grouped, & .MuiButton-root": {
-                borderColor: "#fcfbfa",
-              },
-            }}
+          <Typography
+            variant="body1"
+            sx={{ mr: 2, whiteSpace: "nowrap", fontWeight: 700 }}
           >
-            <ToggleButton sx={{ color: "#fcfbfa" }} value="temperature">
-              Temperature
-            </ToggleButton>
-            <ToggleButton sx={{ color: "#fcfbfa" }} value="precipitation">
-              Precipitation
-            </ToggleButton>
-            <ToggleButton sx={{ color: "#fcfbfa" }} value="streamflow">
-              Streamflow
-            </ToggleButton>
-          </ToggleButtonGroup>
+            {"Choose a hydroclimate:"}
+          </Typography>
+          <ClimateModelSelector
+            onSelect={onModelSelect}
+            selectedModel={selectedModel}
+          />
         </div>
         {selectedModel && (
           <FlowLine
@@ -141,9 +119,8 @@ export default function HydroClimateContainer() {
             }}
           >
             <Typography variant="body1">
-              Click on a <span className="highlight-text">hydroclimate</span> on
-              the left to see how the river flows change across months in a
-              year!
+              Click a <span className="highlight-text">hydroclimate</span> above
+              to see how the river flows change across months in a year!
             </Typography>
           </div>
         )}
@@ -154,8 +131,10 @@ export default function HydroClimateContainer() {
 
 function ClimateModelSelector({
   onSelect,
+  selectedModel,
 }: {
   onSelect: (model: string) => void
+  selectedModel: string
 }) {
   return (
     <Box
@@ -163,25 +142,51 @@ function ClimateModelSelector({
       height="100%"
       sx={{
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
+        flexDirection: "row",
+        justifyContent: "flex-start",
         alignItems: "center",
       }}
     >
-      <Typography variant="h6">Hydroclimates</Typography>
-      <Stack spacing={2} mt={2}>
+      <Stack
+        direction="row"
+        spacing={1.5}
+        useFlexGap
+        sx={{
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          px: 2,
+        }}
+      >
         {models.map((model: Model, idx) => (
           <Button
             key={idx}
             variant="contained"
             onClick={() => onSelect(model.model)}
             sx={{
-              backgroundColor: model.background,
-              color: model.text,
+              borderRadius: "999px",
+              px: 2,
+              py: 0.9,
+              minHeight: "40px",
+              textTransform: "none",
+              fontWeight: 700,
+              letterSpacing: "0.01em",
+              backgroundColor:
+                selectedModel === model.model ? model.hover : model.background,
+              color: selectedModel === model.model ? "#ffffff" : model.text,
+              border:
+                selectedModel === model.model
+                  ? "2px solid rgba(252, 251, 250, 0.92)"
+                  : "1px solid rgba(252, 251, 250, 0.35)",
+              boxShadow:
+                selectedModel === model.model
+                  ? "0 0 0 2px rgba(241, 177, 67, 0.26), 0 8px 20px rgba(0, 0, 0, 0.25)"
+                  : "0 4px 12px rgba(0, 0, 0, 0.2)",
               "&:hover": {
                 backgroundColor: model.hover,
+                transform: "translateY(-1px)",
+                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.25)",
               },
-              boxShadow: "none",
             }}
           >
             {model.model}
@@ -256,6 +261,8 @@ function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
     </svg>
   )
 }
+
+const _archivedClimateScatter = ClimateScatter
 
 function ClimatePoint({
   data,
