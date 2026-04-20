@@ -77,7 +77,7 @@ interface BeatTextOverlayProps {
   backOutOpacity?: MotionValue<number>
   playState: "idle" | "playing" | "paused" | "finished"
   /** Storyboard navigation. `beatIndex` is a 0-based cursor into the
-   *  storyboard; `totalBeats` is the length of that storyboard. Handlers
+   *  storyboard. `totalBeats` is the length of that storyboard. Handlers
    *  drive Play / Next / Back / Restart.
    *
    *  `hasPlayed` gates which control chrome is shown:
@@ -107,8 +107,8 @@ interface BeatTextOverlayProps {
   hydroclimate?: string
   onHydroclimateChange?: (value: string) => void
   onAddLocation?: () => void
-  /** Map of outcome code → Beat 2 morph progress window. `start` drives
-   *  each outcome title's fade-in (just before its polygons begin morphing);
+  /** Map of outcome code -> Beat 2 morph progress window. `start` drives
+   *  each outcome title's fade-in (just before its polygons begin morphing).
    *  `end` drives the caption fade-in (once the polygons settle as squares). */
   outcomeMorphWindows?: Record<string, { start: number; end: number }>
   /** Called by the ResizeObserver whenever per-outcome glyph placeholders
@@ -157,7 +157,7 @@ export default function BeatTextOverlay({
   const { setDrawerContent, openDrawer } = useDrawerStore()
 
   // NOTE: GLOSSARY_TERMS / handleGlossaryClick / glossaryLinkStyles /
-  // descriptionWithLinks are kept live; they're only consumed by the
+  // descriptionWithLinks are kept live. They're only consumed by the
   // commented-out scenario-header JSX below (wrapped in `{false && ...}`),
   // which we preserve for later reuse.
   const GLOSSARY_TERMS = useMemo(
@@ -301,11 +301,11 @@ export default function BeatTextOverlay({
   /** The three reveal blocks below the tier legend collapse their
    *  vertical space while hidden so the bottom control row (which sits
    *  in document flow below them) hugs whatever text is actually
-   *  visible — not some lower bound set by invisible-but-reserved
+   *  visible - not some lower bound set by invisible-but-reserved
    *  blocks. We use the CSS grid `grid-template-rows: Xfr` trick:
    *  the ref points at a single-row grid whose row collapses at `0fr`
    *  and expands to its min-content size at `1fr`, so the browser
-   *  computes the natural height itself from document flow — no
+   *  computes the natural height itself from document flow - no
    *  measurement needed. */
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
@@ -313,7 +313,7 @@ export default function BeatTextOverlay({
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   /** Bottom Back / indicator / Next control row opacity.
    *
-   *  The row is only visible when a text sequence has finished — i.e.,
+   *  The row is only visible when a text sequence has finished - i.e.,
    *  the parent is settled at a beat (`playState === "paused"` or
    *  `"finished"`) and the user has clicked Play. Any new sequence
    *  (Play, Next, Back between beats, Back-from-first-beat) flips `playState`
@@ -334,7 +334,7 @@ export default function BeatTextOverlay({
 
   /* ── `beat1Ref` opacity: progress-driven fade-in × back-out fade-out ──
    *
-   * We multiply the progress-derived fade-in (0.02 → 0.06 window) by
+   * We multiply the progress-derived fade-in (0.02 -> 0.06 window) by
    * `backOutOpacity` (default 1, animated to 0 on Back-from-first-beat) so the
    * entire text block (intro paragraphs, tier legend, beat 1C reveals,
    * bottom controls) fades out together during back-out instead of the
@@ -363,7 +363,7 @@ export default function BeatTextOverlay({
 
   /* ── Bottom controls visibility follows `playState` ──
    *
-   * Show only at reading pauses — i.e. when the parent has settled at
+   * Show only at reading pauses - i.e. when the parent has settled at
    * a beat (`paused` or `finished`) and the user has clicked Play.
    * Any new sequence (Play, Next, Back) flips `playState` to `playing`
    * and this effect fades the row back out. Pre-play (`idle`) and the
@@ -403,7 +403,7 @@ export default function BeatTextOverlay({
       // map convergence (starting at 0.50) takes over attention.
       //
       // Collapse is driven via `grid-template-rows: 1fr -> 0fr` on the
-      // outer wrapper; the browser interpolates each row's height from
+      // outer wrapper. The browser interpolates each row's height from
       // the inner overflow-hidden child's natural `min-content` height
       // down to zero, so no JS measurement is needed (same pattern as
       // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
@@ -436,13 +436,19 @@ export default function BeatTextOverlay({
       // Outcome titles fade in per-slice, synced to each outcome's own morph.
       // Each title appears just before its polygons begin morphing so the
       // viewer can read the title while watching that slice animate.
-      // Captions fade in at the *end* of each morph window, after the
-      // polygons have settled as squares.
+      // Captions fade in across the *last portion* of each morph window so
+      // they're fully visible the moment the polygons settle as squares.
+      // (Earlier we had captions starting at morphEnd, which left AG_REV's
+      // caption only partially faded in when beat 3 ends at AG_REV's
+      // morphEnd of 0.78.)
       const windows = outcomeMorphWindowsRef.current
       const TITLE_LEAD = 0.008
       const TITLE_FADE = 0.018
-      const CAPTION_LEAD = 0.002
+      // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
+      // exactly at morphEnd, so the "x locations" text is fully opaque
+      // the instant the squares lock in.
       const CAPTION_FADE = 0.012
+      const CAPTION_LEAD = CAPTION_FADE
       // Late morph slices (when activeOutcomeGroups is short) can push the
       // caption's natural fadeEnd past 1.0, leaving the caption partially
       // opaque at rest. Cap fadeEnd so every caption settles at opacity 1
@@ -502,8 +508,8 @@ export default function BeatTextOverlay({
         }
       }
 
-      // Tier legend staggers in row by row (Optimal → Acceptable → At risk
-      // → Critical) so the gap between "To compare results..." (0.20–0.24)
+      // Tier legend staggers in row by row (Optimal -> Acceptable -> At risk
+      // -> Critical) so the gap between "To compare results..." (0.20–0.24)
       // and the map's Beat 1B collapse (0.50) fills with a meaningful
       // level-by-level reveal instead of a single 0.22-wide dead zone.
       const TIER_LEGEND_FIRST_START = 0.26
@@ -532,7 +538,7 @@ export default function BeatTextOverlay({
       // the bottom controls are invisible anyway, so the layout push on
       // the control row isn't perceived.
       // Beat 1C paragraphs fade in during beat 2 and then fade out at
-      // the start of the merged final beat (0.78 → 0.80), freeing the
+      // the start of the merged final beat (0.78 -> 0.80), freeing the
       // left-panel slot for "For each scenario, outcome levels...".
       // Their grid rows collapse once fully faded out so the new
       // paragraph slides cleanly into their former document-flow slot.
@@ -556,7 +562,7 @@ export default function BeatTextOverlay({
 
       // "For each scenario, outcome levels..." fades in during the
       // merged final beat, right after the two Beat 1C paragraphs
-      // finish fading out (0.80 → 0.82). The remaining 8 outcome
+      // finish fading out (0.80 -> 0.82). The remaining 8 outcome
       // morphs then play alongside this sentence over [0.84, 1.0].
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
@@ -605,6 +611,17 @@ export default function BeatTextOverlay({
         }
       })
       onGlyphLayoutChange(layout)
+
+      // Sync the white backdrop's height to the content column's
+      // natural height. The backdrop sits at `zIndex: 3` (below the
+      // SVG morph overlay at `zIndex: 4`) so the distribution squares
+      // render on top of the backdrop, not under it. Because the two
+      // siblings can't share a parent without a stacking conflict, we
+      // mirror the height here instead of nesting them.
+      const backdrop = beat2PanelRef.current
+      if (backdrop) {
+        backdrop.style.height = `${rootRect.height}px`
+      }
     }
 
     const ro = new ResizeObserver(() => {
@@ -688,7 +705,7 @@ export default function BeatTextOverlay({
              *
              * The rest of the storyboard chrome (Back / N-of-T / Next)
              * lives in a bottom control row inside `beat1Ref` once the
-             * user has clicked Play; see below. In pre-play we show only
+             * user has clicked Play. See below. In pre-play we show only
              * the Play button here so the title + subtitle read as an
              * invitation rather than an in-progress UI. */
             <Box
@@ -886,17 +903,17 @@ export default function BeatTextOverlay({
           {/* Beat 1C narrative lives in the left panel, directly below the
            *  tier legend, so the overlay panel can be dedicated to graphics.
            *  These blocks inherit `beat1Ref`'s `textColor` / `textShadow`
-           *  automatically; sizing comes from MUI's native `body2` variant,
+           *  automatically. Sizing comes from MUI's native `body2` variant,
            *  so this panel stays in lockstep with the other Get Started
            *  panels.
            *
            *  Each block is a single-row CSS grid whose `grid-template-rows`
            *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
            *  by the progress handler (beat 1C paragraphs at 0.49 / 0.65,
-           *  fading out at 0.78 → 0.80; "For each scenario..." fading in
-           *  at 0.80 → 0.82), alongside an opacity fade. The browser
+           *  fading out at 0.78 -> 0.80. "For each scenario..." fading in
+           *  at 0.80 -> 0.82), alongside an opacity fade. The browser
            *  computes the min-content height
-           *  from document flow — no measurement — so the bottom control
+           *  from document flow - no measurement - so the bottom control
            *  row below naturally hugs the last text block that's actually
            *  visible. The top gap lives as `pt:` on the inner wrapper
            *  (which also carries `overflow: hidden`) so it collapses with
@@ -1051,20 +1068,43 @@ export default function BeatTextOverlay({
         </Box>
       </Box>
 
-      {/* Beat 2 - right-third column.
+      {/* Beat 2 - white backdrop on the right third.
        *
        * Top-aligned with the left panel's title bar (`top: padding`) so
        * tall content isn't visually cut off above the title line. Its
-       * left edge aligns with `panelWidth * 2/3`, which is the same
-       * origin the SVG overlay uses. Bottom is left unset so the column
-       * auto-sizes to its content (the two-column outcome grid which has
-       * explicit row heights). A small bottom padding gives the backdrop
-       * breathing room below the last row.
+       * height is synced to `rightColumnRootRef`'s natural height via
+       * a ResizeObserver below, so the backdrop tracks content size
+       * without any extra empty space below the last row.
        *
-       * The white backdrop (`beat2PanelRef`) lives inside as a sibling
-       * absolutely-pinned to `inset: 0`, so it inherits the column's
-       * natural height automatically — no JS height sync needed, and no
-       * extra empty space below the last content row. */}
+       * Lives as a sibling at `zIndex: 3` (below the SVG morph overlay
+       * at `zIndex: 4`) so the distribution squares render on top of
+       * the white backdrop, not under it - otherwise the semi-opaque
+       * white would wash out the polygon colors during their morph. */}
+      <Box
+        ref={beat2PanelRef}
+        sx={{
+          position: "absolute",
+          top: padding,
+          right: 0,
+          width: "33.33%",
+          height: 0,
+          zIndex: 3,
+          backgroundColor: alpha(theme.palette.common.white, 0.75),
+          borderRadius: 2,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Beat 2 - right-third content column.
+       *
+       * Top-aligned with the left panel's title bar (`top: padding`) so
+       * the top eyebrows and outcome titles aren't clipped above the
+       * panel's edge. Left edge aligns with `panelWidth * 2/3` -
+       * the same origin the SVG overlay uses for `pos.x`. Bottom is
+       * left unset so the column auto-sizes to its content (the two
+       * column outcome grid has explicit row heights). A small bottom
+       * padding gives the backdrop breathing room below the last row. */}
       <Box
         ref={rightColumnRootRef}
         sx={{
@@ -1081,19 +1121,8 @@ export default function BeatTextOverlay({
           },
         }}
       >
-        <Box
-          ref={beat2PanelRef}
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: -1,
-            backgroundColor: alpha(theme.palette.common.white, 0.75),
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-        />
         {/* Scenario header + encoding toggle.
-         *  Disabled per design direction — kept in-source (wrapped in
+         *  Disabled per design direction - kept in-source (wrapped in
          *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
         {false && (<Box
           ref={scenarioHeaderRef}
@@ -1283,12 +1312,12 @@ export default function BeatTextOverlay({
         </Box>)}
 
         {/* Beat 1C narrative lives in the left panel below the tier
-         *  legend; see `beat1Ref` above. The overlay panel is dedicated to
+         *  legend. See `beat1Ref` above. The overlay panel is dedicated to
          *  graphics (outcome titles, glyph morphs, location captions). */}
 
         {/* Two-column flow layout for outcome rows. Each row is a vertical
-         *  stack: Title → GlyphPlaceholder → Caption. Row/column spacing is
-         *  handled entirely by flex + rowGap; no cursor math. */}
+         *  stack: Title -> GlyphPlaceholder -> Caption. Row/column spacing is
+         *  handled entirely by flex + rowGap. No cursor math. */}
         {beat2Layout && (
           <Box
             sx={{
@@ -1417,7 +1446,7 @@ export default function BeatTextOverlay({
                     )
                   })}
                 {col === 0 && false && (
-                  /* "Add a location to track" CTA — disabled per design
+                  /* "Add a location to track" CTA - disabled per design
                    *  direction, kept in-source for future reuse. */
                   <Box
                     ref={addLocationCtaRef}
