@@ -9,25 +9,6 @@ export type {
   ScenarioComparisonChartProps,
 } from "./types"
 
-// Curated re-exports from d3: consumers (e.g. storyline-flow) import these from @repo/viz
-// so `d3` remains a dependency of this package only. Extend this list when something new is needed.
-export {
-  curveBasis,
-  timeFormat,
-  interpolateRgb,
-  range,
-  max,
-  scaleLinear,
-  area,
-  line,
-  mean,
-  extent,
-  ticks,
-  scaleBand,
-  select,
-} from "d3"
-export type { ScaleLinear, Area } from "d3"
-
 // Export components
 export { default as BarChart } from "./components/BarChart"
 export type { BarChartProps } from "./components/BarChart"
@@ -202,6 +183,9 @@ export type { ShapeMorphData } from "./utils/shape-morph"
 
 export { hierarchicalRowOrder } from "./utils/clustering"
 
+
+// Curated re-exports from d3: consumers (e.g. storyline-flow) import these from @repo/viz
+// so `d3` remains a dependency of this package only. Extend this list when something new is needed.
 export {
   area,
   autoType,
