@@ -153,6 +153,26 @@ const DU_CLASS_FILTER = [
   ["literal", ["Agriculture", "Urban", "Refuge"]],
 ]
 
+/** Filter used during Beat 1C so the map isolates the Agricultural
+ *  revenue story — only Agriculture demand-units are visible while the
+ *  tier-color blend and AG example popups play out. The full
+ *  DU_CLASS_FILTER is restored when Beat 2 starts. */
+const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"]
+
+/** Curated list of well-known agricultural water districts used to
+ *  illustrate what a single polygon represents during Beat 1C. Each popup
+ *  reuses the standard LocationHighlight styling from the rest of the app
+ *  so the visual language is consistent. The list is intentionally small
+ *  and geographically diverse (Sac Valley, San Joaquin/Delta, Westside,
+ *  Eastside), spanning multiple tier levels of AG_REV deliveries. */
+const BEAT1C_POPUP_DU_IDS: readonly string[] = [
+  "08N_SA2", // Glenn Colusa I.D. (Sacramento Valley)
+  "62_NA3", // Turlock I.D. (San Joaquin, Eastside)
+  "90_PA1", // Westlands W.D. East (San Joaquin, Westside)
+  "64_PA1", // Madera I.D. (Eastside, Madera)
+  "61_NA2", // Modesto I.D. (Stanislaus)
+]
+
 const ACTIVE_OUTCOMES = new Set([
   "CWS_DEL",
   "AG_REV",
@@ -1212,16 +1232,22 @@ export default function TierAnimationSection() {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let phase: "idle" | "beat1" | "beat2" = "idle"
+    let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
 
-    // Blues cycle until FREEZE_AT, then hold still.
-    // At CONVERGE_START the frozen blues collapse toward a single blue.
-    // At BLEND_START the per-DU tier-color blend begins.
-    // By BLEND_END the blend is complete and beat2 phase starts.
+    // Beat 1  (0.00 → 0.55): blues cycle until FREEZE_AT, then hold still
+    //          on all 3 DU classes (Agriculture, Urban, Refuge).
+    // Beat 1B (0.55 → 0.60): the frozen blues collapse toward a single blue.
+    // Beat 1C (0.60 → 0.78): demand-units are filtered to Agriculture only;
+    //          (0.60 → 0.66) each AG DU blends from mid-blue to its AG_REV
+    //          tier color; (0.66 → 0.78) tier colors are locked while the
+    //          Beat 1C text + example popups play.
+    // Beat 2  (0.78 → 1.00): DU filter restored, tier colors locked; SVG
+    //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.18
-    const CONVERGE_START = 0.55
-    const BLEND_START = 0.6
-    const BLEND_END = 0.67
+    const BEAT1B_START = 0.55
+    const BEAT1C_BLEND_START = 0.6
+    const BEAT1C_BLEND_END = 0.66
+    const BEAT2_START = 0.78
 
     let frozenColorPhase = 0
 
@@ -1233,6 +1259,9 @@ export default function TierAnimationSection() {
         if (phase !== "idle") {
           try {
             if (map.getLayer("demand-units")) {
+              // Restore the full DU_CLASS_FILTER on reset so the cycling
+              // blues show across all 3 classes again from the top.
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
               map.setPaintProperty("demand-units", "fill-opacity", 0)
               map.setPaintProperty("demand-units", "fill-color-transition", {
                 duration: 0,
@@ -1255,7 +1284,7 @@ export default function TierAnimationSection() {
         return
       }
 
-      if (v < CONVERGE_START) {
+      if (v < BEAT1B_START) {
         // Beat 1: blues cycling, then frozen
         const beat1T = v / FREEZE_AT
 
@@ -1298,10 +1327,10 @@ export default function TierAnimationSection() {
           }
         }
         phase = "beat1"
-      } else if (v < BLEND_START) {
-        // Converge: collapse the 3-blue palette toward a single blue
+      } else if (v < BEAT1C_BLEND_START) {
+        // Beat 1B: collapse the 3-blue palette toward a single blue
         const convergence =
-          (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
+          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
         const easedC = convergence * convergence
 
         try {
@@ -1317,10 +1346,21 @@ export default function TierAnimationSection() {
           /* ok */
         }
         phase = "beat1"
-      } else if (v < BLEND_END) {
-        // Blend: all polygons are now the same blue; smoothly shift
-        // each DU from that blue to its tier color.
-        const blendT = (v - BLEND_START) / (BLEND_END - BLEND_START)
+      } else if (v < BEAT1C_BLEND_END) {
+        // Beat 1C blend: filter to Agriculture only; each AG DU smoothly
+        // shifts from the converged mid-blue to its AG_REV tier color.
+        if (phase !== "beat1c") {
+          try {
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+            }
+          } catch {
+            /* ok */
+          }
+        }
+
+        const blendT =
+          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
         const easedT = 1 - Math.pow(1 - blendT, 2) // ease-out
 
         try {
@@ -1334,12 +1374,38 @@ export default function TierAnimationSection() {
         } catch {
           /* ok */
         }
-        phase = "beat1"
+        phase = "beat1c"
+      } else if (v < BEAT2_START) {
+        // Beat 1C tail: tier colors are fully blended; hold steady on
+        // AG-only while the example text and popups play.
+        if (phase !== "beat1c") {
+          try {
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+              const expr = buildBlendedTierExpr(BEAT1_MID, 1)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+          } catch {
+            /* ok */
+          }
+          phase = "beat1c"
+        }
       } else {
-        // Beat 2+: tier colors locked in; progressively hide features
-        // as their SVG copies start animating.
+        // Beat 2+: restore full DU filter so Urban + Refuge DUs become
+        // visible with their own tier colors for their morph slices.
+        // Progressively hide features as their SVG copies start animating.
         if (phase !== "beat2") {
           try {
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
+            }
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (expr && map.getLayer("demand-units")) {
               map.setPaintProperty("demand-units", "fill-color", expr as never)
@@ -1439,6 +1505,78 @@ export default function TierAnimationSection() {
       }
     }
   }, [progress, mapAPI.mapRef, isLoading])
+
+  /* ── Beat 1C: progressive popups on a curated handful of AG districts ──
+   *
+   * During the Beat 1C tail (after the tier-color blend completes and before
+   * Beat 2 starts), we reveal a few `LocationHighlight` popups to illustrate
+   * concretely what the colored polygons represent. Popups appear staggered
+   * across the window so the viewer's eye has time to read each one before
+   * the next is drawn. They reuse the same tooltip styling (via
+   * `mapActions.setLocationHighlights`) that's used elsewhere in the app when
+   * a user hovers or pins a demand unit. */
+  useEffect(() => {
+    if (isLoading) return
+    const agData = outcomeLocations["AG_REV"]
+    if (!agData) return
+
+    const POPUPS_IN = 0.69
+    const POPUPS_OUT = 0.78 // clear at start of Beat 2
+    const count = BEAT1C_POPUP_DU_IDS.length
+    const span = POPUPS_OUT - POPUPS_IN
+    const perPopup = span / count
+    let visibleCount = 0
+
+    const clearAll = () => {
+      if (visibleCount > 0) {
+        mapActions.clearLocationHighlights()
+        visibleCount = 0
+      }
+    }
+
+    const unsub = progress.on("change", (v) => {
+      if (v < POPUPS_IN || v >= POPUPS_OUT) {
+        clearAll()
+        return
+      }
+      const nextCount = Math.min(
+        count,
+        Math.floor((v - POPUPS_IN) / perPopup) + 1,
+      )
+      if (nextCount === visibleCount) return
+      visibleCount = nextCount
+
+      const highlights: import("../../map/store").LocationHighlight[] = []
+      for (let i = 0; i < nextCount; i++) {
+        const duId = BEAT1C_POPUP_DU_IDS[i]!
+        const tier = agData.tierMap[duId]
+        if (tier == null) continue
+        const color = agData.colorMap[duId] ?? "#888888"
+        const name =
+          agData.nameMap[duId] ??
+          getDemandUnitDisplayName(duId) ??
+          duId
+        const coord = centroidLookupRef.current.get(duId)
+        if (!coord) continue
+        highlights.push({
+          key: `beat1c:AG_REV:${duId}`,
+          longitude: coord.lng,
+          latitude: coord.lat,
+          name,
+          tierLevel: tier,
+          tierLabel: getTierLabel(tier),
+          tierColor: color,
+          pinned: true, // keep visible until we explicitly clear
+        })
+      }
+      mapActions.setLocationHighlights(highlights)
+    })
+
+    return () => {
+      unsub()
+      clearAll()
+    }
+  }, [progress, outcomeLocations, isLoading])
 
   /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {
@@ -1927,6 +2065,20 @@ export default function TierAnimationSection() {
     [outcomeGroups],
   )
 
+  /** Map of outcome code → the progress value at which its polygons
+   *  begin to morph in Beat 2. BeatTextOverlay uses this to fade in
+   *  each outcome's title just before its own morph slice starts. */
+  const outcomeMorphStarts = useMemo(() => {
+    const map: Record<string, number> = {}
+    const total = activeOutcomeGroups.length
+    if (total === 0) return map
+    for (let i = 0; i < total; i++) {
+      const [start] = getOutcomeProgressRange(i, total)
+      map[activeOutcomeGroups[i]!.code] = start
+    }
+    return map
+  }, [activeOutcomeGroups])
+
   useEffect(() => {
     const total = activeOutcomeGroups.length
     const schedule: HideScheduleEntry[] = []
@@ -1937,7 +2089,10 @@ export default function TierAnimationSection() {
       const config = getOutcomeConfig(group.code)
       if (!config) continue
       const [morphStart] = getOutcomeProgressRange(i, total)
-      const fadeStart = morphStart - 0.03
+      // Beat 2 slices are tighter now (0.22 span across 9 outcomes ≈ 0.024
+      // each); use a shorter fade lead so the DU fade doesn't bleed into
+      // the previous outcome's morph.
+      const fadeStart = morphStart - 0.01
 
       // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
       let locationIds = [...locData.ids]
@@ -1989,26 +2144,28 @@ export default function TierAnimationSection() {
     const EYEBROW_HEIGHT = 22
     const EYEBROW_GAP = 6
 
+    // Both column eyebrows now fade in together at the start of Beat 2,
+    // just before the first outcome's title/morph slice begins.
+    const EYEBROW_FADE_IN = 0.77
     const eyebrows = [
       {
         label: "Consumptive uses",
         x: colX[0],
         y: itemStartY,
         columnWidth: colWidth,
-        animationStart: 0.225,
+        animationStart: EYEBROW_FADE_IN,
       },
       {
         label: "Non-consumptive uses",
         x: colX[1],
         y: itemStartY,
         columnWidth: colWidth,
-        animationStart: 0,
+        animationStart: EYEBROW_FADE_IN,
       },
     ]
 
     const firstItemY = itemStartY + EYEBROW_HEIGHT + EYEBROW_GAP
     const cursors: [number, number] = [firstItemY, firstItemY]
-    let firstCol1Index = -1
 
     const items: OutcomeLayoutItem[] = []
 
@@ -2017,10 +2174,6 @@ export default function TierAnimationSection() {
       const label = getOutcomeName(code)
       const isActive = ACTIVE_OUTCOMES.has(code)
       const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
-
-      if (col === 1 && firstCol1Index === -1) {
-        firstCol1Index = idx
-      }
 
       const y = cursors[col]
       const x = colX[col]
@@ -2083,10 +2236,6 @@ export default function TierAnimationSection() {
         locationCount,
         spaceBelow,
       })
-    }
-
-    if (firstCol1Index >= 0) {
-      eyebrows[1]!.animationStart = 0.24 + firstCol1Index * 0.035 - 0.015
     }
 
     return { items, eyebrows, leftColumnBottom: cursors[0] }
@@ -2268,6 +2417,7 @@ export default function TierAnimationSection() {
             onEncodingChange={setEncodingMode}
             hydroclimate={hydroclimate}
             onHydroclimateChange={setHydroclimate}
+            outcomeMorphStarts={outcomeMorphStarts}
           />
 
           {isInteractive &&
