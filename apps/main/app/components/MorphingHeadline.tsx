@@ -25,6 +25,7 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  useRef,
   forwardRef,
 } from "react"
 import {
@@ -131,6 +132,24 @@ export interface MorphingHeadlineProps {
    * of floating over subsequent content. Use with the final panel ref.
    */
   dockRef?: React.RefObject<HTMLElement | null>
+  /**
+   * Scroll-progress window `[start, end]` during which the headline
+   * glides from its default top position down to the vertical center
+   * of the viewport. Outside this range (before `start` or between
+   * `end` and `centerExitRange[0]`), the headline stays at whichever
+   * anchor it last reached. Pair with `centerExitRange` to bring it
+   * back up.
+   *
+   * The component self-measures its own CSS `top` and rendered
+   * height, so the center offset is always pixel-accurate regardless
+   * of font size or viewport.
+   */
+  centerEnterRange?: [number, number]
+  /**
+   * Scroll-progress window `[start, end]` during which the headline
+   * glides back from the vertical center to its default top position.
+   */
+  centerExitRange?: [number, number]
 }
 
 const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
@@ -147,6 +166,8 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       shiftRange,
       shiftAmount = 100,
       dockRef,
+      centerEnterRange,
+      centerExitRange,
     },
     ref,
   ) {
@@ -290,6 +311,90 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       headlines.map((_, i) => (i === 0 ? 1 : 0)),
     )
 
+    // Self-measured CSS top (in px) and rendered height. Used to
+    // compute the translateY that centers the headline vertically
+    // in the viewport for centerEnter/centerExit transitions.
+    // Measured on mount, on resize, and whenever the headline's own
+    // box resizes (font swap, text change, language).
+    const internalRef = useRef<HTMLDivElement | null>(null)
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        internalRef.current = node
+        if (typeof ref === "function") ref(node)
+        else if (ref)
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node
+      },
+      [ref],
+    )
+    const [selfMetrics, setSelfMetrics] = useState<{
+      topPx: number
+      heightPx: number
+    }>({ topPx: 0, heightPx: 0 })
+    useEffect(() => {
+      if (typeof window === "undefined") return
+      const el = internalRef.current
+      if (!el) return
+      const measure = () => {
+        const cs = window.getComputedStyle(el)
+        const topPx = parseFloat(cs.top) || 0
+        const heightPx = el.getBoundingClientRect().height
+        setSelfMetrics((prev) =>
+          prev.topPx === topPx && prev.heightPx === heightPx
+            ? prev
+            : { topPx, heightPx },
+        )
+      }
+      measure()
+      const ro = new ResizeObserver(measure)
+      ro.observe(el)
+      window.addEventListener("resize", measure, { passive: true })
+      return () => {
+        ro.disconnect()
+        window.removeEventListener("resize", measure)
+      }
+    }, [])
+
+    // TranslateY that takes the headline from its default top anchor
+    // down to viewport-vertical-center during `centerEnterRange`, holds
+    // it there, then lifts it back during `centerExitRange`.
+    //
+    // centerOffset = (windowHeight / 2) - (headlineHeight / 2) - topPx
+    // so the element's vertical midpoint lands at the viewport midpoint.
+    const centerOffset = useMemo(() => {
+      if (!centerEnterRange && !centerExitRange) return 0
+      return windowHeight / 2 - selfMetrics.heightPx / 2 - selfMetrics.topPx
+    }, [windowHeight, selfMetrics, centerEnterRange, centerExitRange])
+
+    const centerYInput = useMemo<number[]>(() => {
+      if (!centerEnterRange && !centerExitRange) return [0, 1]
+      const enter = centerEnterRange ?? [0, 0]
+      const exit = centerExitRange ?? [1, 1]
+      // Build a monotonically increasing input array; clamp if ranges
+      // were passed out of order so useTransform doesn't throw.
+      const pts = [0, enter[0], enter[1], exit[0], exit[1], 1]
+      for (let i = 1; i < pts.length; i++) {
+        if ((pts[i] as number) < (pts[i - 1] as number))
+          pts[i] = pts[i - 1] as number
+      }
+      return pts
+    }, [centerEnterRange, centerExitRange])
+
+    const centerYOutput = useMemo<number[]>(() => {
+      if (!centerEnterRange && !centerExitRange) return [0, 0]
+      const hasEnter = !!centerEnterRange
+      const hasExit = !!centerExitRange
+      return [
+        0,
+        hasEnter ? 0 : centerOffset,
+        centerOffset,
+        centerOffset,
+        hasExit ? 0 : centerOffset,
+        0,
+      ]
+    }, [centerEnterRange, centerExitRange, centerOffset])
+
+    const centerY = useTransform(scrollYProgress, centerYInput, centerYOutput)
+
     // Dock offset.rAF-safe, no forced layout flush on scroll.
     // Returns a MotionValue that drives both the animated branch (direct DOM write)
     // and the reduced-motion branch (via useMotionValueEvent below).
@@ -338,10 +443,10 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       ease: exitYEase,
     })
 
-    // Combined y = scroll-driven exit + dock offset (keeps headline anchored to dockRef bottom)
+    // Combined y = scroll-driven exit + dock offset + center glide.
     const combinedY = useTransform(
-      [exitY, dockOffsetMV] as MotionValue<number>[],
-      ([e, d]: number[]) => (e ?? 0) + (d ?? 0),
+      [exitY, dockOffsetMV, centerY] as MotionValue<number>[],
+      ([e, d, c]: number[]) => (e ?? 0) + (d ?? 0) + (c ?? 0),
     )
 
     // Calculate opacity for a specific headline at a given scroll progress
@@ -428,7 +533,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       const activeHeadline = headlines[activeIndex]
       return (
         <Box
-          ref={ref}
+          ref={setRefs}
           sx={{
             position: "fixed",
             top: theme.space.panel.topOffset,
@@ -476,7 +581,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
 
     return (
       <motion.div
-        ref={ref}
+        ref={setRefs}
         style={{
           y: combinedY,
           opacity: combinedOpacity,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo } from "react"
+import { useRef, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
@@ -80,6 +80,14 @@ const IntroSection = () => {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const morphHeadlineRef = useRef<HTMLDivElement>(null)
+  // Invisible fixed marker at the viewport's vertical center.
+  // Used by `useMeetingProgress` to time the About→WaterThemes
+  // text crossfade against the *visible* headline position: during
+  // the About panel the headline has glided to viewport center, so
+  // the seam "visually" crosses the headline when the seam passes
+  // the center line — not when it passes the headline's default
+  // top anchor.
+  const viewportCenterRef = useRef<HTMLDivElement>(null)
   const videoHeroRef = useRef<HTMLDivElement>(null)
   const aboutPanelRef = useRef<HTMLDivElement>(null)
   const waterThemesPanelRef = useRef<HTMLDivElement>(null)
@@ -95,6 +103,31 @@ const IntroSection = () => {
   const heroScrollProgress = useScrollProgress(videoHeroRef, {
     offset: ["start start", "end start"],
   })
+
+  // Measure the morphing headline's rendered height so the
+  // viewport-center marker below can be sized to match. The marker
+  // is what `useMeetingProgress` compares against to time the
+  // About→WaterThemes text crossfade and the return-to-top glide;
+  // it needs a real (non-zero) height so gap2Start (seam reaches
+  // centered headline's bottom) and gap2End (seam reaches centered
+  // headline's top) are two distinct scroll events spanning the
+  // centered headline's vertical extent.
+  const [headlineHeight, setHeadlineHeight] = useState(0)
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const el = morphHeadlineRef.current
+    if (!el) return
+    const update = () =>
+      setHeadlineHeight(el.getBoundingClientRect().height)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener("resize", update, { passive: true })
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", update)
+    }
+  }, [])
 
   useEffect(() => {
     let wasPastHero = heroScrollProgress.get() > 0.5
@@ -156,17 +189,24 @@ const IntroSection = () => {
     { edgeA: "top", edgeB: "top" },
   )
 
-  // Transition 1 (About → WaterThemes): same pattern, one seam down.
+  // Transition 1 (About → WaterThemes): measure against the
+  // viewport-center marker, which is sized to the headline's own
+  // height and centered on the viewport. That way the two meeting
+  // events span the centered headline's vertical extent — gap2Start
+  // is when the seam reaches the centered headline's BOTTOM, gap2End
+  // is when the seam reaches its TOP — mirroring the gap1 pattern
+  // that uses the headline ref directly while it sits at its default
+  // top anchor.
   const gap2Start = useMeetingProgress(
     containerRef,
     aboutPanelRef,
-    morphHeadlineRef,
+    viewportCenterRef,
     { edgeA: "bottom", edgeB: "bottom" },
   )
   const gap2End = useMeetingProgress(
     containerRef,
     waterThemesPanelRef,
-    morphHeadlineRef,
+    viewportCenterRef,
     { edgeA: "top", edgeB: "top" },
   )
 
@@ -177,6 +217,30 @@ const IntroSection = () => {
     ],
     [gap1Start, gap1End, gap2Start, gap2End],
   )
+
+  // Motion-only ranges for the headline's center glide. Decoupled
+  // from the text crossfade (`crossfadeRanges`) so the vertical
+  // translation can take more scroll distance than the crossfade.
+  //
+  // Enter: starts as the VideoHero→About seam reaches the headline's
+  // bottom (gap1Start), finishes ~halfway between gap1End and the
+  // About→WaterThemes seam approach. That stretches the downward
+  // glide well past the text crossfade for a slower, smoother feel.
+  //
+  // Exit: text crossfade finishes at `gap2End` (right at the seam);
+  // then the headline holds at center for a short pause before
+  // slowly gliding back up to its default top anchor. Both the
+  // pause and the glide duration are scaled by the crossfade
+  // window so they track the scene's geometry.
+  const centerEnterEnd = gap1End + (gap2Start - gap1End) * 0.5
+  const centerEnterRange: [number, number] = [gap1Start, centerEnterEnd]
+  const gap2Duration = gap2End - gap2Start
+  const centerExitPause = gap2Duration * 0.5
+  const centerExitDuration = gap2Duration * 2.0
+  const centerExitRange: [number, number] = [
+    gap2End + centerExitPause,
+    gap2End + centerExitPause + centerExitDuration,
+  ]
 
   // Build panel boundaries for MorphingHeadline from the meeting points
   const panelBoundaries = useMemo(
@@ -245,6 +309,28 @@ const IntroSection = () => {
 
   return (
     <Box ref={containerRef} sx={{ pointerEvents: "auto" }}>
+      {/* Invisible viewport-center marker (see viewportCenterRef).
+          Sized to the morphing headline's own rendered height and
+          centered on the viewport via translateY(-50%), so its
+          top/bottom edges straddle the centered headline's extent:
+            marker.top    = windowHeight/2 - headlineHeight/2
+            marker.bottom = windowHeight/2 + headlineHeight/2
+          `useMeetingProgress` then produces a real, non-zero
+          scroll window during which the About→WaterThemes seam
+          sweeps through the centered headline. */}
+      <div
+        ref={viewportCenterRef}
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: 0,
+          width: 0,
+          height: headlineHeight,
+          transform: "translateY(-50%)",
+          pointerEvents: "none",
+        }}
+      />
       {/* Morphing headline.fixed overlay, upper-left.
           panelBoundaries is geometry-driven via useMeetingProgress.
           crossfadeAt synchronises the 0 to 1 fade precisely at the panel border.
@@ -259,6 +345,8 @@ const IntroSection = () => {
         crossfadeAt={crossfadeAt1 > 0 ? crossfadeAt1 : undefined}
         crossfadeRanges={crossfadeRanges}
         dockRef={waterThemesDockRef}
+        centerEnterRange={centerEnterRange}
+        centerExitRange={centerExitRange}
       />
 
       {/* Video Hero */}
