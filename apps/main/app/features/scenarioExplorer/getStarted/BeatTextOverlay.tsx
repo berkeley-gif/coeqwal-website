@@ -15,12 +15,13 @@ import {
   useTheme,
   alpha,
   ArrowForwardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   IconButton,
   PlayArrowIcon,
-  PauseIcon,
   ReplayIcon,
 } from "@repo/ui/mui"
-import { motion } from "@repo/motion"
+import { motion, useTransform } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
 import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
@@ -68,12 +69,23 @@ interface BeatTextOverlayProps {
   progress: MotionValue<number>
   headingOpacity: MotionValue<number>
   playState: "idle" | "playing" | "paused" | "finished"
-  onRewind?: () => void
+  /** Storyboard navigation. `beatIndex` is a 0-based cursor into the
+   *  storyboard; `totalBeats` is the length of that storyboard. Handlers
+   *  drive Play / Next / Back / Restart.
+   *
+   *  `hasPlayed` gates which control chrome is shown:
+   *    - false -> inline Play button beside the title (pre-play gate).
+   *    - true  -> bottom control row with Back / N-of-T / Next. */
+  beatIndex?: number
+  totalBeats?: number
+  hasPlayed?: boolean
   onPlay?: () => void
-  onPause?: () => void
-  /** When true (e.g. reduced-motion users), hide all playback controls and
-   *  let `beat1Ref` scroll internally so the fully revealed end-state body
-   *  content is reachable without the play affordance. */
+  onNext?: () => void
+  onBack?: () => void
+  onRestart?: () => void
+  /** When true (e.g. reduced-motion users), hide all storyboard controls
+   *  and let `beat1Ref` scroll internally so the fully revealed end-state
+   *  body content is reachable without the Next / Back affordances. */
   hideControls?: boolean
   beat2Layout?: Beat2Layout | null
   onOutcomeClick?: (code: string, force?: boolean) => void
@@ -109,9 +121,13 @@ export default function BeatTextOverlay({
   progress,
   headingOpacity,
   playState,
-  onRewind,
+  beatIndex = 0,
+  totalBeats = 1,
+  hasPlayed = false,
   onPlay,
-  onPause,
+  onNext,
+  onBack,
+  onRestart,
   beat2Layout,
   onOutcomeClick,
   selectedOutcomeCode,
@@ -276,6 +292,15 @@ export default function BeatTextOverlay({
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
+  /** Bottom Back / indicator / Next control row opacity.
+   *
+   *  Bound directly to `progress` via `useTransform` so the DOM stays in
+   *  sync reactively — no ref-timing gap between `setHasPlayed(true)`
+   *  flushing and the arrival tween's first tick. Fades in over the tail
+   *  of the arrival tween (which settles at 0.45) so the row lands just
+   *  as the Critical legend row does, and fades out symmetrically as
+   *  Back-from-1/6 reverses `progress` back to 0. */
+  const bottomControlsOpacity = useTransform(progress, [0.4, 0.45], [0, 1])
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
@@ -429,6 +454,11 @@ export default function BeatTextOverlay({
         const fadeIn = clamp01((v - 0.79) / 0.03)
         allOtherOutcomesRef.current.style.opacity = String(fadeIn)
       }
+
+      // NOTE: bottom control row opacity is bound via `useTransform`
+      // (see `bottomControlsOpacity` above). We intentionally do not
+      // write to a ref here — the MotionValue path stays in sync even
+      // across the `hasPlayed` mount boundary.
     })
     return unsub
   }, [progress])
@@ -574,68 +604,38 @@ export default function BeatTextOverlay({
           >
             Visualizing key outcomes
           </Typography>
-          {!hideControls && (
+          {!hideControls && !hasPlayed && (
+            /* ── Pre-play gate: inline Play button beside the title ──
+             *
+             * The rest of the storyboard chrome (Back / N-of-T / Next)
+             * lives in a bottom control row inside `beat1Ref` once the
+             * user has clicked Play; see below. In pre-play we show only
+             * the Play button here so the title + subtitle read as an
+             * invitation rather than an in-progress UI. */
             <Box
               sx={{
                 display: "flex",
-                gap: 0.75,
                 alignItems: "center",
                 pointerEvents: "auto",
               }}
             >
-              {playState !== "idle" && (
-                <IconButton
-                  onClick={onRewind}
-                  size="small"
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    backgroundColor: alpha(theme.palette.common.white, 0.15),
-                    backdropFilter: "blur(8px)",
-                    color: "text.secondary",
-                    "&:hover": {
-                      backgroundColor: alpha(theme.palette.common.white, 0.3),
-                    },
-                  }}
-                >
-                  <ReplayIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              )}
-              {playState === "playing" ? (
-                <IconButton
-                  onClick={onPause}
-                  size="small"
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    backgroundColor: alpha(theme.palette.common.white, 0.2),
-                    backdropFilter: "blur(8px)",
-                    color: "text.secondary",
-                    "&:hover": {
-                      backgroundColor: alpha(theme.palette.common.white, 0.35),
-                    },
-                  }}
-                >
-                  <PauseIcon sx={{ fontSize: 24 }} />
-                </IconButton>
-              ) : (
-                <IconButton
-                  onClick={onPlay}
-                  size="small"
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    backgroundColor: alpha(theme.palette.common.white, 0.2),
-                    backdropFilter: "blur(8px)",
-                    color: "text.secondary",
-                    "&:hover": {
-                      backgroundColor: alpha(theme.palette.common.white, 0.35),
-                    },
-                  }}
-                >
-                  <PlayArrowIcon sx={{ fontSize: 24 }} />
-                </IconButton>
-              )}
+              <IconButton
+                onClick={onPlay}
+                size="small"
+                aria-label="Play (→)"
+                sx={{
+                  width: 44,
+                  height: 44,
+                  backgroundColor: alpha(theme.palette.common.white, 0.2),
+                  backdropFilter: "blur(8px)",
+                  color: "text.secondary",
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.common.white, 0.35),
+                  },
+                }}
+              >
+                <PlayArrowIcon sx={{ fontSize: 24 }} />
+              </IconButton>
             </Box>
           )}
         </motion.div>
@@ -825,6 +825,106 @@ export default function BeatTextOverlay({
               All other key outcomes can be mapped and visualized in similar ways.
             </Typography>
           </Box>
+
+          {/* Bottom control row: Back / N-of-T / Next, plus Restart once
+           *  the user has moved past the first beat. Visible only after
+           *  the user has clicked Play (`hasPlayed`), and not at all in
+           *  reduced-motion mode (`hideControls`). Opacity is bound to
+           *  `bottomControlsOpacity` (a MotionValue derived from
+           *  `progress` via useTransform) so the row eases in during
+           *  the tail of the arrival tween and fades out symmetrically
+           *  if the user presses Back from 1/6. */}
+          {!hideControls && hasPlayed && (
+            <motion.div
+              style={{
+                marginTop: theme.spacing(theme.space.section.sm),
+                display: "flex",
+                gap: theme.spacing(0.75),
+                alignItems: "center",
+                pointerEvents: "auto",
+                opacity: bottomControlsOpacity,
+              }}
+            >
+              {(() => {
+                const isPlaying = playState === "playing"
+                const atStart = beatIndex <= 0
+                const atEnd = beatIndex >= totalBeats - 1
+                const pillBg = alpha(theme.palette.common.white, 0.2)
+                const pillHoverBg = alpha(theme.palette.common.white, 0.35)
+                const pillDisabledBg = alpha(theme.palette.common.white, 0.08)
+                const controlSx = {
+                  width: 44,
+                  height: 44,
+                  backgroundColor: pillBg,
+                  backdropFilter: "blur(8px)",
+                  color: "text.secondary",
+                  "&:hover": { backgroundColor: pillHoverBg },
+                  "&.Mui-disabled": {
+                    backgroundColor: pillDisabledBg,
+                    color: alpha(theme.palette.text.secondary, 0.35),
+                  },
+                } as const
+                return (
+                  <>
+                    <IconButton
+                      onClick={onBack}
+                      size="small"
+                      aria-label={
+                        atStart
+                          ? "Back to intro (←)"
+                          : "Previous beat (←)"
+                      }
+                      disabled={isPlaying}
+                      sx={controlSx}
+                    >
+                      <ChevronLeftIcon sx={{ fontSize: 24 }} />
+                    </IconButton>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        minWidth: 32,
+                        textAlign: "center",
+                        fontVariantNumeric: "tabular-nums",
+                        opacity: 0.7,
+                        userSelect: "none",
+                      }}
+                    >
+                      {beatIndex + 1} / {totalBeats}
+                    </Typography>
+                    <IconButton
+                      onClick={onNext}
+                      size="small"
+                      aria-label="Next beat (→)"
+                      disabled={atEnd || isPlaying}
+                      sx={controlSx}
+                    >
+                      <ChevronRightIcon sx={{ fontSize: 24 }} />
+                    </IconButton>
+                    {!atStart && (
+                      <IconButton
+                        onClick={onRestart}
+                        size="small"
+                        aria-label="Restart storyboard (Home)"
+                        sx={{
+                          ...controlSx,
+                          width: 36,
+                          height: 36,
+                          ml: 1,
+                          backgroundColor: alpha(
+                            theme.palette.common.white,
+                            0.15,
+                          ),
+                        }}
+                      >
+                        <ReplayIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    )}
+                  </>
+                )
+              })()}
+            </motion.div>
+          )}
         </Box>
       </Box>
 

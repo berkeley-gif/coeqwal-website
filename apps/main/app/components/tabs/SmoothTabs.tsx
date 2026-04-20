@@ -184,11 +184,16 @@ export default function SmoothTabs() {
         position: "sticky",
         top: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
-        marginTop: "-80px", // Pull tabs up to appear at bottom of ActionPanel
+        // Pull tabs up to sit just above the bottom of the preceding
+        // ActionPanel only while they're floating over it. Once the
+        // tabs have docked (entered the tabs area), reset the margin
+        // to 0 so the docked nav-bar sits cleanly at its sticky
+        // anchor instead of being pulled a further 100px above it.
+        marginTop: isInTabsArea ? 0 : "-100px",
         backgroundColor: isInTabsArea
           ? alpha(theme.palette.text.primary, 0.75)
           : "transparent",
-        transition: "background-color 0.4s ease",
+        transition: "background-color 0.4s ease, margin-top 0.4s ease",
         pointerEvents: "auto",
       }}
     >
@@ -234,8 +239,12 @@ export default function SmoothTabs() {
                 backgroundColor: panelColor,
                 cursor: "pointer",
                 color: theme.palette.common.white,
+                borderTopLeftRadius: isInTabsArea ? 0 : 16,
+                borderTopRightRadius: isInTabsArea ? 0 : 16,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
                 transition:
-                  "padding 0.4s ease, gap 0.4s ease, font-size 0.4s ease, width 0.4s ease",
+                  "padding 0.4s ease, gap 0.4s ease, font-size 0.4s ease, width 0.4s ease, border-radius 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
                 gap: 0,

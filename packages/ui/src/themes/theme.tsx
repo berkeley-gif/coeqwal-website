@@ -524,6 +524,13 @@ const border = {
 }
 
 // Background styles
+//
+// `modalBackdropOpacity` is the single source of truth for the opacity
+// used on black backdrops that sit behind modal-like surfaces — modal
+// dialogs, scrim curtains, full-screen dimming washes over the map,
+// etc. Compose with `alpha(palette.common.black, modalBackdropOpacity)`
+// at the call site (these backdrops always participate in a gradient,
+// so no flat-fill token is provided).
 const background = {
   transparent: "transparent",
   paragraph: "rgba(0, 0, 0, 0.4)",
@@ -537,6 +544,10 @@ const background = {
     85: alpha(palette.common.white, 0.85),
     95: alpha(palette.common.white, 0.95),
   },
+  /** Opacity (0–1) for the black backdrop used behind modal-like
+   *  surfaces and scrim curtains. Compose with `alpha()` at the call
+   *  site, e.g. `alpha(theme.palette.common.black, theme.background.modalBackdropOpacity)`. */
+  modalBackdropOpacity: 0.4,
 }
 
 /* ========================================================
