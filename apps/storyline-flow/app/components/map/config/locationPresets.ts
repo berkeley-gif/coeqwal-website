@@ -70,7 +70,6 @@ const Reclamation: LocationLabel = {
   longitude: -121.5407,
 }
 
-
 const YubaRiver: LocationLabel = {
   id: "yuba-river",
   name: "Yuba River",

@@ -1,6 +1,12 @@
 "use client"
 
-import { Box, LibraryBooksIcon, Stack, Typography, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  LibraryBooksIcon,
+  Stack,
+  Typography,
+  useTheme,
+} from "@repo/ui/mui"
 import { useStoryline } from "../store"
 import AnimatedWaves from "./helpers/AnimatedWave"
 import { useEffect, useRef, useState } from "react"
@@ -127,7 +133,7 @@ export function Resolution() {
                       fontSize: theme.typography.h4.fontSize,
                       verticalAlign: "middle",
                     }}
-                  /> {" "}
+                  />{" "}
                   {content?.ending.p12}
                 </Typography>
               </motion.div>
