@@ -184,16 +184,16 @@ export default function SmoothTabs() {
         position: "sticky",
         top: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
-        // Pull tabs up to sit just above the bottom of the preceding
-        // ActionPanel only while they're floating over it. Once the
-        // tabs have docked (entered the tabs area), reset the margin
-        // to 0 so the docked nav-bar sits cleanly at its sticky
-        // anchor instead of being pulled a further 100px above it.
-        marginTop: isInTabsArea ? 0 : "-100px",
+        // Pull the tabs up in normal flow so that, while still above
+        // their sticky threshold, they overlap the bottom of the
+        // preceding ActionPanel. Once they enter the sticky state,
+        // `top` takes over and pins the docked nav-bar at the correct
+        // anchor, so this margin has no effect on the docked position.
+        marginTop: "-100px",
         backgroundColor: isInTabsArea
           ? alpha(theme.palette.text.primary, 0.75)
           : "transparent",
-        transition: "background-color 0.4s ease, margin-top 0.4s ease",
+        transition: "background-color 0.4s ease",
         pointerEvents: "auto",
       }}
     >

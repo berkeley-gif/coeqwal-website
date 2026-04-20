@@ -37,6 +37,14 @@ const GET_STARTED_INSET_Y = tunerInsetY()
  *  itself comes from `theme.background.modalBackdrop(Opacity)`. */
 const DARK_WASH_FADE_PX = 160
 
+/** Extra vertical breathing room subtracted from each panel's inner
+ *  min-height (on top of the sticky-header-stack subtraction). This
+ *  shrinks the rounded card so there's visible air between its top/
+ *  bottom edges and the header stack / next panel, without changing
+ *  the inset-based gap between consecutive panels. Increase for more
+ *  breathing room, decrease to let the card fill more of the viewport. */
+const PANEL_BREATHING_PX = 80
+
 interface GetStartedPanelShellProps {
   children: ReactNode
   /** Card background colour (the rounded surface) */
@@ -53,9 +61,22 @@ function GetStartedPanelShell({
   children,
   background,
   frameBackground,
-  minHeight = "100vh",
+  minHeight,
 }: GetStartedPanelShellProps) {
   const theme = useTheme()
+  // Shrink each panel by the combined height of the persistent
+  // header stack that sits above get-started views:
+  //   collapsed main header + Learn/Explore/Share tabs row +
+  //   Explore sub-nav (get-started / go-to-tools).
+  // Add a further `PANEL_BREATHING_PX` so the rounded card doesn't
+  // consume the full remaining viewport — leaves a little air above
+  // and below the card before the next panel begins. (The *gap*
+  // between consecutive panels is still controlled by
+  // `GET_STARTED_INSET_Y` and is unchanged.)
+  const stickyStackPx =
+    theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight
+  const resolvedMinHeight =
+    minHeight ?? `calc(100vh - ${stickyStackPx + PANEL_BREATHING_PX}px)`
   return (
     <Box
       sx={{
@@ -70,7 +91,7 @@ function GetStartedPanelShell({
           backgroundColor: background,
           borderRadius: GET_STARTED_RADIUS,
           overflow: "hidden",
-          minHeight,
+          minHeight: resolvedMinHeight,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
