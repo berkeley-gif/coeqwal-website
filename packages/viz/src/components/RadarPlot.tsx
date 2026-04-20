@@ -767,8 +767,61 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             })
           })
 
-          // Build dot positions for polygon drawing
-          const dotPositions = new Map<string, { x: number; y: number }[]>()
+          // Build dot positions for polygon drawing.
+          // Dense array indexed by axis position; entries are null when the
+          // scenario has no value on that axis. This lets the polygon
+          // renderer split into open polylines around missing axes instead
+          // of closing a chord across the gap.
+          type DotPoint = { x: number; y: number }
+          const dotPositions = new Map<string, (DotPoint | null)[]>()
+
+          // Segment a circular dense array of points into runs of consecutive
+          // non-null entries, honoring the wrap from the last index back to
+          // the first. When every entry is non-null we emit a single closed
+          // run (the original polygon). When any entry is null we emit one
+          // open run per non-null streak; runs of length 1 carry a single
+          // dot and produce no line segment. Each run also reports the
+          // axis indices it covers so callers can rebuild matching paths
+          // (e.g. for morph replay) keyed by axis name.
+          type CircularRun = {
+            points: DotPoint[]
+            indices: number[]
+            closed: boolean
+          }
+          const buildCircularRuns = (
+            pts: (DotPoint | null)[],
+          ): CircularRun[] => {
+            const n = pts.length
+            if (n === 0) return []
+            if (pts.every((p) => p != null)) {
+              return [
+                {
+                  points: pts as DotPoint[],
+                  indices: pts.map((_, i) => i),
+                  closed: true,
+                },
+              ]
+            }
+            const start = pts.findIndex((p) => p == null)
+            const runs: { points: DotPoint[]; indices: number[] }[] = []
+            let cur: { points: DotPoint[]; indices: number[] } = {
+              points: [],
+              indices: [],
+            }
+            for (let k = 1; k <= n; k++) {
+              const idx = (start + k) % n
+              const p = pts[idx]
+              if (p == null) {
+                if (cur.points.length) runs.push(cur)
+                cur = { points: [], indices: [] }
+              } else {
+                cur.points.push(p)
+                cur.indices.push(idx)
+              }
+            }
+            if (cur.points.length) runs.push(cur)
+            return runs.map((r) => ({ ...r, closed: false }))
+          }
 
           const T_DUR = morphSnapshot
             ? HC_DUR
@@ -783,7 +836,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           ) => {
             pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
             const pts = dotPositions.get(scenarioId)
-            if (!pts || pts.length < 3) return
+            if (!pts) return
             const activeList = data
             const scenario = activeList.find((s) => s.id === scenarioId)
             if (!scenario) return
@@ -791,20 +844,49 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const color = hasScenarioColors
               ? lineColors[si] || colors.default
               : colors.default
-            const pathGen = line<{ x: number; y: number }>()
+            const pathGen = line<DotPoint>()
               .x((d) => d.x)
               .y((d) => d.y)
             const vis = resolveVisuals(scenarioId, focusId)
-            pathLayer
-              .append("path")
-              .attr("data-path-id", scenarioId)
-              .attr("d", pathGen([...pts, pts[0]!]) ?? "")
-              .attr("fill", "none")
-              .attr("stroke", color)
-              .attr("stroke-width", vis.strokeWidth)
-              .attr("stroke-opacity", vis.strokeOpacity)
-              .attr("stroke-linejoin", "round")
-              .attr("pointer-events", "none")
+
+            const runs = buildCircularRuns(pts)
+            // Need at least one run with 2+ points to draw a line. A closed
+            // run with 3+ points draws the original polygon. Open runs draw
+            // one polyline each, and runs of length 1 are skipped so we
+            // don't emit zero-length paths.
+            runs.forEach((run) => {
+              const axisKeys = run.indices.map((i) => axes[i]!).join(",")
+              if (run.closed) {
+                if (run.points.length < 3) return
+                pathLayer
+                  .append("path")
+                  .attr("data-path-id", scenarioId)
+                  .attr("data-axis-keys", axisKeys)
+                  .attr("data-closed", "1")
+                  .attr("d", pathGen([...run.points, run.points[0]!]) ?? "")
+                  .attr("fill", "none")
+                  .attr("stroke", color)
+                  .attr("stroke-width", vis.strokeWidth)
+                  .attr("stroke-opacity", vis.strokeOpacity)
+                  .attr("stroke-linejoin", "round")
+                  .attr("pointer-events", "none")
+              } else {
+                if (run.points.length < 2) return
+                pathLayer
+                  .append("path")
+                  .attr("data-path-id", scenarioId)
+                  .attr("data-axis-keys", axisKeys)
+                  .attr("data-closed", "0")
+                  .attr("d", pathGen(run.points) ?? "")
+                  .attr("fill", "none")
+                  .attr("stroke", color)
+                  .attr("stroke-width", vis.strokeWidth)
+                  .attr("stroke-opacity", vis.strokeOpacity)
+                  .attr("stroke-linejoin", "round")
+                  .attr("stroke-linecap", "round")
+                  .attr("pointer-events", "none")
+              }
+            })
           }
 
           const applyFocusVisuals = (focusId: string) => {
@@ -916,6 +998,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const perpAngle = angle + Math.PI / 2
 
             data.forEach((scenario, si) => {
+              // Ensure every scenario has a dense slot per axis so the
+              // polygon renderer can detect missing values and break the
+              // closing chord around the gap.
+              if (!dotPositions.has(scenario.id))
+                dotPositions.set(
+                  scenario.id,
+                  new Array(axes.length).fill(null) as (DotPoint | null)[],
+                )
+
               const sv = scenario.values[axis]
               if (sv == null) return
               const r = rScale(toTier(sv))
@@ -928,9 +1019,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 ? lineColors[si] || colors.default
                 : colors.default
 
-              if (!dotPositions.has(scenario.id))
-                dotPositions.set(scenario.id, [])
-              dotPositions.get(scenario.id)!.push({ x: dotX, y: dotY })
+              dotPositions.get(scenario.id)![axisIdx] = { x: dotX, y: dotY }
 
               const vis = resolveVisuals(scenario.id)
 
@@ -1136,33 +1225,63 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }
 
           if (highlightBaseline && baselineData) {
-            const blPts: [number, number][] = []
+            // Dense per-axis points for the baseline so missing axes break
+            // the highlighted polygon the same way scenario polygons break.
+            const blDense: (DotPoint | null)[] = new Array(axes.length).fill(
+              null,
+            )
             axes.forEach((axis, i) => {
               const bv = baselineData.values[axis]
               if (bv == null) return
               const r = rScale(toTier(bv))
               const angle = getAngle(i)
-              blPts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)])
+              blDense[i] = {
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle),
+              }
             })
-            if (blPts.length >= 3) {
-              const pathGen = line<[number, number]>()
-                .x((d) => d[0])
-                .y((d) => d[1])
+            const blRuns = buildCircularRuns(blDense)
+            if (blRuns.length > 0) {
+              const pathGen = line<DotPoint>()
+                .x((d) => d.x)
+                .y((d) => d.y)
               const blIdx = data.findIndex((s) => s.id === baselineData.id)
               const blStroke =
                 blIdx >= 0 && hasScenarioColors
                   ? lineColors[blIdx] || "#cc9a06"
                   : "#cc9a06"
-              baselineHighlightLayer
-                .append("path")
-                .attr("class", "baseline-polygon")
-                .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-                .attr("fill", "#cc9a06")
-                .attr("fill-opacity", 0.12)
-                .attr("stroke", blStroke)
-                .attr("stroke-width", 2.5)
-                .attr("stroke-opacity", 0.55)
-                .attr("pointer-events", "none")
+              blRuns.forEach((run) => {
+                const axisKeys = run.indices.map((i) => axes[i]!).join(",")
+                if (run.closed) {
+                  if (run.points.length < 3) return
+                  baselineHighlightLayer
+                    .append("path")
+                    .attr("class", "baseline-polygon")
+                    .attr("data-axis-keys", axisKeys)
+                    .attr("data-closed", "1")
+                    .attr("d", pathGen([...run.points, run.points[0]!]) ?? "")
+                    .attr("fill", "#cc9a06")
+                    .attr("fill-opacity", 0.12)
+                    .attr("stroke", blStroke)
+                    .attr("stroke-width", 2.5)
+                    .attr("stroke-opacity", 0.55)
+                    .attr("pointer-events", "none")
+                } else {
+                  if (run.points.length < 2) return
+                  baselineHighlightLayer
+                    .append("path")
+                    .attr("class", "baseline-polygon")
+                    .attr("data-axis-keys", axisKeys)
+                    .attr("data-closed", "0")
+                    .attr("d", pathGen(run.points) ?? "")
+                    .attr("fill", "none")
+                    .attr("stroke", blStroke)
+                    .attr("stroke-width", 2.5)
+                    .attr("stroke-opacity", 0.55)
+                    .attr("stroke-linecap", "round")
+                    .attr("pointer-events", "none")
+                }
+              })
             }
           }
 
@@ -1179,13 +1298,30 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 const sid = el.attr("data-path-id")
                 if (!sid) return
                 const finalD = el.attr("d")
+                // Each rendered path knows which axes its run covers and
+                // whether it was drawn closed; we replay only when the
+                // morph snapshot has an old position on every axis in the
+                // run. If anything is missing, fall back to a fade-in so
+                // we never animate from a half-built shape.
+                const axisKeys = (el.attr("data-axis-keys") ?? "").split(",")
+                const closed = el.attr("data-closed") === "1"
                 const oldPts: { x: number; y: number }[] = []
-                axes.forEach((a) => {
+                let allOld = axisKeys.length > 0
+                for (const a of axisKeys) {
                   const old = morphSnapshot!.dots.get(`${a}:${sid}`)
-                  if (old) oldPts.push({ x: old.cx, y: old.cy })
-                })
-                if (oldPts.length >= 3) {
-                  const oldD = morphPathGen([...oldPts, oldPts[0]!])
+                  if (!old) {
+                    allOld = false
+                    break
+                  }
+                  oldPts.push({ x: old.cx, y: old.cy })
+                }
+                const enoughForLine = closed
+                  ? oldPts.length >= 3
+                  : oldPts.length >= 2
+                if (allOld && enoughForLine) {
+                  const oldD = closed
+                    ? morphPathGen([...oldPts, oldPts[0]!])
+                    : morphPathGen(oldPts)
                   el.attr("d", oldD ?? "")
                     .transition()
                     .duration(HC_DUR)
