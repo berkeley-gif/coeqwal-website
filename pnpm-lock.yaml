@@ -172,6 +172,40 @@ importers:
         specifier: ^4.17.16
         version: 4.17.16
 
+  apps/storyline-equity:
+    dependencies:
+      '@mui/system':
+        specifier: ^7.3.2
+        version: 7.3.2(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0)
+      '@repo/motion':
+        specifier: workspace:*
+        version: link:../../packages/motion
+      '@repo/scrollytelling':
+        specifier: workspace:*
+        version: link:../../packages/scrollytelling
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      next:
+        specifier: ^15.2.1
+        version: 15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+      react:
+        specifier: ^19.0.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.1.0(react@19.1.0)
+      react-scrollama:
+        specifier: ^2.4.2
+        version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+
   apps/storyline-flow:
     dependencies:
       '@mui/system':
