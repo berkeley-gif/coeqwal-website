@@ -191,8 +191,7 @@ export default function ResilienceChartTuner({
             Found a few tiles worth comparing? Hover a tile and click the{" "}
             <strong>+</strong> icon to pin that scenario (or outcome) to your
             selection. A <em>Comparing N of M</em> chip appears once you&apos;ve
-            pinned anything. Click it to focus the grid on just your
-            picks.
+            pinned anything. Click it to focus the grid on just your picks.
           </>
         ),
       },
