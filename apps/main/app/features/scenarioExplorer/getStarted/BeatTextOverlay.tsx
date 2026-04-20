@@ -421,7 +421,9 @@ export default function BeatTextOverlay({
         // outcome titles + location captions, since the narrative text
         // lives on the left panel. It fades in with AG_REV's solo morph
         // so the backdrop arrives together with the first graphics.
-        const fadeIn = clamp01((v - 0.76) / 0.03)
+        // The fade completes by 0.78 (beat 3's settle point) so the
+        // backdrop is fully present when the AG_REV morph lands.
+        const fadeIn = clamp01((v - 0.755) / 0.02)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -444,10 +446,23 @@ export default function BeatTextOverlay({
       if (layoutItems) {
         for (const item of layoutItems) {
           const win = windows?.[item.code]
-          const morphStart = win?.start ?? 0.74
-          const morphEnd = win?.end ?? 0.99
-
           const titleEl = titleRefsMap.current.get(item.code)
+          const captionEl = captionRefsMap.current.get(item.code)
+
+          if (!win) {
+            // No morph window yet (outcome's polygons haven't populated
+            // `activeOutcomeGroups`, or it's not in ACTIVE_OUTCOMES).
+            // Keep the title + caption fully hidden so stale slots don't
+            // leak into earlier beats (e.g., "Winter-run salmon" showing
+            // at the end of beat 3 before its real morph slice arrives).
+            if (titleEl) titleEl.style.opacity = "0"
+            if (captionEl) captionEl.style.opacity = "0"
+            continue
+          }
+
+          const morphStart = win.start
+          const morphEnd = win.end
+
           if (titleEl) {
             const titleFadeStart = morphStart - TITLE_LEAD
             titleEl.style.opacity = String(
@@ -455,7 +470,6 @@ export default function BeatTextOverlay({
             )
           }
 
-          const captionEl = captionRefsMap.current.get(item.code)
           if (captionEl) {
             const rawFadeEnd = morphEnd + (CAPTION_FADE - CAPTION_LEAD)
             const captionFadeEnd = Math.min(
@@ -475,7 +489,9 @@ export default function BeatTextOverlay({
         for (let i = 0; i < eyebrows.length; i++) {
           const el = eyebrowRefs.current[i]
           if (!el) continue
-          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.03)
+          // 0.02 fade width matches the right-panel backdrop so both
+          // land together just before beat 3 settles at 0.78.
+          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.02)
           el.style.opacity = String(fadeIn)
         }
       }
@@ -509,22 +525,37 @@ export default function BeatTextOverlay({
       // Each slot opens during a tween (`playState === "playing"`), when
       // the bottom controls are invisible anyway, so the layout push on
       // the control row isn't perceived.
+      // Beat 1C paragraphs fade in during beat 2 and then fade out at
+      // the start of the merged final beat (0.78 → 0.80), freeing the
+      // left-panel slot for "For each scenario, outcome levels...".
+      // Their grid rows collapse once fully faded out so the new
+      // paragraph slides cleanly into their former document-flow slot.
       if (beat1cExampleRef.current) {
         const el = beat1cExampleRef.current
-        el.style.opacity = String(clamp01((v - 0.49) / 0.03))
-        el.style.gridTemplateRows = v >= 0.485 ? "1fr" : "0fr"
+        const fadeIn = clamp01((v - 0.49) / 0.03)
+        const fadeOut = clamp01((v - 0.78) / 0.02)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows =
+          v >= 0.485 && v < 0.80 ? "1fr" : "0fr"
       }
 
       if (beat1cDeliveryRef.current) {
         const el = beat1cDeliveryRef.current
-        el.style.opacity = String(clamp01((v - 0.65) / 0.03))
-        el.style.gridTemplateRows = v >= 0.645 ? "1fr" : "0fr"
+        const fadeIn = clamp01((v - 0.65) / 0.03)
+        const fadeOut = clamp01((v - 0.78) / 0.02)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows =
+          v >= 0.645 && v < 0.80 ? "1fr" : "0fr"
       }
 
+      // "For each scenario, outcome levels..." fades in during the
+      // merged final beat, right after the two Beat 1C paragraphs
+      // finish fading out (0.80 → 0.82). The remaining 8 outcome
+      // morphs then play alongside this sentence over [0.84, 1.0].
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
-        el.style.opacity = String(clamp01((v - 0.79) / 0.03))
-        el.style.gridTemplateRows = v >= 0.785 ? "1fr" : "0fr"
+        el.style.opacity = String(clamp01((v - 0.80) / 0.02))
+        el.style.gridTemplateRows = v >= 0.795 ? "1fr" : "0fr"
       }
 
       // NOTE: bottom control row opacity is driven by `playState`
@@ -848,8 +879,10 @@ export default function BeatTextOverlay({
            *
            *  Each block is a single-row CSS grid whose `grid-template-rows`
            *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
-           *  by the progress handler (0.49 / 0.65 / 0.79), alongside an
-           *  opacity fade. The browser computes the min-content height
+           *  by the progress handler (beat 1C paragraphs at 0.49 / 0.65,
+           *  fading out at 0.78 → 0.80; "For each scenario..." fading in
+           *  at 0.80 → 0.82), alongside an opacity fade. The browser
+           *  computes the min-content height
            *  from document flow — no measurement — so the bottom control
            *  row below naturally hugs the last text block that's actually
            *  visible. The top gap lives as `pt:` on the inner wrapper
@@ -897,7 +930,7 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
-                All other key outcomes can be mapped and visualized in similar ways.
+                For each scenario, outcome levels are calculated for all key outcomes across all locations of interest.
               </Typography>
             </Box>
           </Box>
