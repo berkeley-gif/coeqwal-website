@@ -262,7 +262,6 @@ export default function BeatTextOverlay({
   // climate chooser, "Add a location" CTA) is preserved behind
   // `{false && ...}` guards below for future reuse. They're not rendered.
   const scenarioHeaderRef = useRef<HTMLDivElement>(null)
-  const calsimTextRef = useRef<HTMLDivElement>(null)
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
@@ -294,12 +293,26 @@ export default function BeatTextOverlay({
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
+      // Intro collapse group: after the Critical row lands (~0.45) and a
+      // short hold, fade out the intro paragraphs first, then collapse
+      // their height so the tier legend slides up into the vacated space
+      // via document flow. Running the two sequentially (fade then slide)
+      // reads more cleanly than overlapping them.
+      if (introCollapseRef.current) {
+        const fadeOut = clamp01((v - 0.49) / 0.03)
+        const collapse = clamp01((v - 0.52) / 0.03)
+        const el = introCollapseRef.current
+        el.style.opacity = String(1 - fadeOut)
+        el.style.maxHeight =
+          introCollapseHeightRef.current * (1 - collapse) + "px"
+      }
+
       if (beat2PanelRef.current) {
-        // Beat 2 panel backdrop reveals during the Beat 1B blues-collapse
-        // (0.55 → 0.60) so the right third is a solid reading surface
-        // *before* the narrative text ("For example…") begins fading in
-        // at 0.60. The backdrop is fully opaque by 0.59.
-        const fadeIn = clamp01((v - 0.56) / 0.03)
+        // Beat 2 panel backdrop now serves purely as a reading surface for
+        // outcome titles + location captions, since the narrative text
+        // lives on the left panel. It fades in with AG_REV's solo morph
+        // so the backdrop arrives together with the first graphics.
+        const fadeIn = clamp01((v - 0.74) / 0.03)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -389,10 +402,11 @@ export default function BeatTextOverlay({
         beat1cDeliveryRef.current.style.opacity = String(fadeIn)
       }
 
-      // "All other key outcomes..." text: bridges AG_REV's solo morph and
-      // the remaining outcomes' fly-ins.
+      // "All other key outcomes..." text: bridges AG_REV's solo morph
+      // (ends at 0.765) and the remaining outcomes' fly-ins (start at
+      // 0.80). Text is fully visible just as the next morph wave begins.
       if (allOtherOutcomesRef.current) {
-        const fadeIn = clamp01((v - 0.82) / 0.03)
+        const fadeIn = clamp01((v - 0.77) / 0.03)
         allOtherOutcomesRef.current.style.opacity = String(fadeIn)
       }
     })
@@ -467,19 +481,6 @@ export default function BeatTextOverlay({
 
     return () => ro.disconnect()
   }, [onGlyphLayoutChange, beat2Layout])
-
-  useEffect(() => {
-    if (!interactive) {
-      if (calsimTextRef.current) calsimTextRef.current.style.opacity = "0"
-      return
-    }
-    const t1 = setTimeout(() => {
-      if (calsimTextRef.current) calsimTextRef.current.style.opacity = "1"
-    }, 400)
-    return () => {
-      clearTimeout(t1)
-    }
-  }, [interactive])
 
   // Kept live (unused while scenarioHeader JSX is disabled behind
   // `{false && ...}`). Restore usage in the JSX to re-enable.
@@ -662,6 +663,9 @@ export default function BeatTextOverlay({
               columnGap: 1.5,
               rowGap: 1,
               alignItems: "center",
+              "& .MuiTypography-root": {
+                lineHeight: 1.25,
+              },
             }}
           >
             {(
@@ -749,16 +753,24 @@ export default function BeatTextOverlay({
               </Box>
             ))}
           </Box>
-          {/* Beat 1C narrative moved to the overlay panel; see right-column
-           *  root below for "For example..." / "The colors correspond..." /
-           *  "All other key outcomes..." blocks. */}
-          {/* Calsim data beat - appears after morph completes */}
-          <Box
-            ref={calsimTextRef}
-            sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
-          >
+          {/* Beat 1C narrative lives in the left panel, directly below the
+           *  tier legend, so the overlay panel can be dedicated to graphics.
+           *  These blocks inherit `beat1Ref`'s `storyBody` font cascade and
+           *  `textColor` / `textShadow` automatically. Each block's opacity
+           *  is driven by the progress handler (0.60 / 0.70 / 0.82). */}
+          <Box ref={beat1cExampleRef} sx={{ mt: 2.5, opacity: 0 }}>
             <Typography variant="body1" component="p">
-              For each scenario, outcome levels are calculated for all key outcomes across their locations.
+              For example, each colored location on the map represents an agricultural water district receiving surface water deliveries.
+            </Typography>
+          </Box>
+          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              The colors correspond to different water delivery outcome levels that affect agricultural revenue, ranging from optimal levels (blue) to critical levels (red).
+            </Typography>
+          </Box>
+          <Box ref={allOtherOutcomesRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              All other key outcomes can be mapped and visualized in similar ways.
             </Typography>
           </Box>
         </Box>
@@ -990,42 +1002,9 @@ export default function BeatTextOverlay({
           </Box>
         </Box>)}
 
-        {/* Beat 1C narrative, promoted into the overlay panel now that the
-         *  scenario-header block is hidden. These replace the former
-         *  `beat1cExampleRef` / `beat1cDeliveryRef` blocks that lived on the
-         *  left panel.
-         *
-         *  Typography: matches the left-panel `storyBody` size/leading so
-         *  the narrative reads consistently whether it appears on the map
-         *  or in the overlay panel. Color continues to inherit the
-         *  right-column's `text.primary` cascade above. */}
-        <Box
-          sx={{
-            px: 3,
-            pt: 2,
-            flexShrink: 0,
-            "& .MuiTypography-root": {
-              fontSize: theme.typography.storyBody.fontSize,
-              lineHeight: theme.typography.storyBody.lineHeight,
-            },
-          }}
-        >
-          <Box ref={beat1cExampleRef} sx={{ opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              For example, each polygon on the map represents an agricultural water district receiving surface water deliveries.
-            </Typography>
-          </Box>
-          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              The colors correspond to different water delivery outcome levels that affect agricultural revenues, ranging from optimal levels (blue) to critical levels (red).
-            </Typography>
-          </Box>
-          <Box ref={allOtherOutcomesRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              All other key outcomes can be mapped and visualized in similar ways.
-            </Typography>
-          </Box>
-        </Box>
+        {/* Beat 1C narrative lives in the left panel below the tier
+         *  legend; see `beat1Ref` above. The overlay panel is dedicated to
+         *  graphics (outcome titles, glyph morphs, location captions). */}
 
         {/* Two-column flow layout for outcome rows. Each row is a vertical
          *  stack: Title → GlyphPlaceholder → Caption. Row/column spacing is

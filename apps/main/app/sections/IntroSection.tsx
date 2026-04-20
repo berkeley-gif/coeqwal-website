@@ -7,15 +7,18 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   CoeqwalPanel,
   NavArrow,
+  ScrollToButton,
   tunerRadius,
   tunerInsetX,
   tunerInsetY,
+  tunerInsetYPx,
 } from "@repo/ui"
 import { motion } from "@repo/motion"
 import {
   useScrollProgress,
   useMotionValue,
   useMeetingProgress,
+  StickyScrollSection,
 } from "@repo/scrollytelling"
 
 import { useTabs } from "../context/Tabs"
@@ -377,19 +380,41 @@ const IntroSection = () => {
       </div>
 
       {/* About COEQWAL.headline handled by MorphingHeadline overlay on lg+;
-          responsiveHeadline fills in on smaller screens */}
-      <div ref={aboutPanelRef}>
+          responsiveHeadline fills in on smaller screens.
+          Wrapped in a StickyScrollSection so the panel pins at the
+          header for a ~100vh scroll runway before unpinning into the
+          WaterThemesPanel. Mirrors the WaterThemesPanel geometry
+          (stickyTop=headerHeight, stickyHeight=100vh−headerHeight) so
+          both panels share the same pinned rectangle below the header.
+          The outer div is painted with the frame background so the
+          sticky region reads as continuous white frame, matching the
+          WaterThemesPanel pattern. */}
+      <div
+        ref={aboutPanelRef}
+        style={{ backgroundColor: theme.palette.common.white }}
+      >
+        <StickyScrollSection
+          height="200vh"
+          stickyTop={theme.layout.headerHeight}
+          stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
+        >
         <CoeqwalPanel
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
-          // Parent panel fills the viewport below the fixed header
-          // minus one gap-band at the bottom so the full rounded
-          // card (top + bottom corners) sits comfortably inside
-          // the viewport with a little breathing room beneath it.
-          // The inner rounded card is padded by the `inset` prop
-          // (insetY top and bottom, insetX left and right).
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - ${tunerInsetY()})`}
+          // Size the inner rounded card so the CoeqwalPanel's total
+          // outer height (minHeight + 2·insetY from its own py
+          // padding) exactly equals the StickyScrollSection's
+          // stickyHeight (`100vh − headerHeight`). This matches the
+          // WaterThemesPanel geometry — its content wrapper is
+          // `height: 100%` inside the sticky div, with `py: insetY`
+          // producing the same rounded-card extent. Without
+          // subtracting the second `insetY` the CoeqwalPanel is
+          // `insetY` taller than the sticky container, which clips
+          // the bottom frame-gap under `overflow: hidden` and makes
+          // the rounded card sit flush with the sticky bottom edge
+          // instead of floating with symmetric top/bottom padding.
+          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
           borderRadius={tunerRadius()}
           inset={{ x: tunerInsetX(), y: tunerInsetY() }}
           frameBackground={theme.palette.common.white}
@@ -429,7 +454,22 @@ const IntroSection = () => {
           }
           layout="split"
           descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
+          scrollIndicator={
+            <ScrollToButton
+              color={`${theme.palette.text.secondary}D9`}
+              size={52}
+              scrollToId="water-themes"
+              // Same offset math as VideoHero's scroll button: land
+              // the target panel's rounded card flush below the
+              // header by subtracting the header height and adding
+              // back one top frame-gap. Resolved at click time so
+              // live PanelTuner edits take effect.
+              scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+              ariaLabel="Scroll down to the water issues section"
+            />
+          }
         />
+        </StickyScrollSection>
       </div>
 
       {/* Water themes.sticky scrollytelling with circle overlays */}
@@ -453,6 +493,7 @@ const IntroSection = () => {
       >
         <Box
           component="section"
+          id="want-to-know-more"
           aria-label="On this site, you can"
           sx={{
             backgroundColor: "brand.panelLight",

@@ -104,6 +104,10 @@ export interface CoeqwalPanelProps {
   /** Background rendered in the frame around an inset panel.
    *  Ignored when `inset` is falsy. Default: transparent (inherits parent). */
   frameBackground?: string
+  /** Optional bottom-center slot rendered over the rounded card
+   *  (e.g. a ScrollToButton). Positioned absolute relative to the
+   *  rounded card, centered horizontally, anchored near the bottom. */
+  scrollIndicator?: React.ReactNode
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -128,6 +132,7 @@ export function CoeqwalPanel({
   borderRadius,
   inset,
   frameBackground,
+  scrollIndicator,
 }: CoeqwalPanelProps) {
   const theme = useTheme()
   const bg = background ?? theme.palette.common.white
@@ -242,6 +247,22 @@ export function CoeqwalPanel({
         }
       : {}
 
+  const scrollIndicatorSlot = scrollIndicator ? (
+    <Box
+      aria-hidden="false"
+      sx={{
+        position: "absolute",
+        bottom: "clamp(24px, 4vh, 48px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 1,
+        pointerEvents: "auto",
+      }}
+    >
+      {scrollIndicator}
+    </Box>
+  ) : null
+
   // Inset path: outer section is the frame, inner is the rounded card.
   if (insetCfg) {
     return (
@@ -257,6 +278,7 @@ export function CoeqwalPanel({
       >
         <Box
           sx={{
+            position: "relative",
             background: bg,
             borderRadius: radius,
             overflow: radius !== undefined ? "hidden" : undefined,
@@ -265,6 +287,7 @@ export function CoeqwalPanel({
           }}
         >
           {contentInner}
+          {scrollIndicatorSlot}
         </Box>
       </Box>
     )
@@ -276,6 +299,7 @@ export function CoeqwalPanel({
       component="section"
       id={id}
       sx={{
+        position: "relative",
         background: bg,
         borderBottom: borderBottom ?? "none",
         borderRadius: radius,
@@ -285,6 +309,7 @@ export function CoeqwalPanel({
       }}
     >
       {contentInner}
+      {scrollIndicatorSlot}
     </Box>
   )
 }
