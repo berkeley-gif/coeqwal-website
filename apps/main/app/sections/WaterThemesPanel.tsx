@@ -18,8 +18,10 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   NavArrow,
   InfoCard,
+  ScrollToButton,
   resolveRadius,
   resolveInset,
+  tunerInsetYPx,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -448,6 +450,33 @@ function WaterThemesPanelContent({
           })}
         </Box>
       </Box>
+
+      {/* Scroll-down arrow — matches the VideoHero and About panels.
+          Absolutely positioned against the rounded card (whose wrapper
+          has position:relative), bottom-center, above all other
+          layers so it stays visible throughout the sticky pin. */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "clamp(24px, 4vh, 48px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 3,
+          pointerEvents: "auto",
+        }}
+      >
+        <ScrollToButton
+          color={`${theme.palette.common.white}D9`}
+          size={52}
+          scrollToId="want-to-know-more"
+          // Same offset math as the VideoHero / About buttons: land
+          // the target section's rounded card flush below the fixed
+          // header. Resolved at click time so live PanelTuner edits
+          // take effect immediately.
+          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+          ariaLabel="Scroll down to the want to know more section"
+        />
+      </Box>
     </Box>
   )
 
@@ -516,20 +545,22 @@ export function WaterThemesPanel({
   // inner rounded card is inset on top and bottom by the `inset`
   // prop, so its visible height ends up
   //   100vh - headerHeight - 2 · insetY
-  // (one gap-band above and below the rounded rect). The 300vh
-  // scroll runway still drives the image-fade / circle-reveal
-  // phases. The wrapper is painted with the frame background so
-  // the pinned surface reads as continuous frame.
+  // (one gap-band above and below the rounded rect). The 200vh
+  // scroll runway gives a ~100vh pinned window that drives the
+  // image-fade / circle-reveal phases. The wrapper is painted
+  // with the frame background so the pinned surface reads as
+  // continuous frame.
   const headerHeight = theme.layout.headerHeight
   return (
     <div
       ref={panelRef}
+      id="water-themes"
       style={{
         backgroundColor: frameBackground,
       }}
     >
       <StickyScrollSection
-        height="300vh"
+        height="200vh"
         stickyTop={headerHeight}
         stickyHeight={`calc(100vh - ${headerHeight}px)`}
       >

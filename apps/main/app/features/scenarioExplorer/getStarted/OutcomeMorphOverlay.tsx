@@ -342,15 +342,21 @@ export function getOutcomeProgressRange(
   code: string,
   activeCodes: readonly string[],
 ): [number, number] {
-  if (code === "AG_REV") return [0.74, 0.82]
+  // All 9 morph windows share the same width so each outcome morphs at
+  // the same perceived speed. AG_REV runs first in a dedicated slot
+  // ([0.74, 0.765]); a short text beat ("All other key outcomes...") then
+  // plays before the remaining 8 morphs run back-to-back across
+  // [0.80, 1.00], each occupying a 0.025-wide slice.
+  const WINDOW = 0.025
+  if (code === "AG_REV") return [0.74, 0.74 + WINDOW]
   const others = activeCodes.filter((c) => c !== "AG_REV")
-  const beatStart = 0.85
+  const beatStart = 0.8
   const beatEnd = 1.0
   const slice = (beatEnd - beatStart) / Math.max(others.length, 1)
   const i = others.indexOf(code)
   if (i < 0) return [beatStart, beatEnd]
   const start = beatStart + i * slice
-  return [start, start + slice * 0.9]
+  return [start, start + slice]
 }
 
 export default function OutcomeMorphOverlay({
