@@ -37,7 +37,6 @@ import OutcomeMorphOverlay, {
   type EncodingMode,
   getOutcomeProgressRange,
   computeDistributionHeight,
-  GLYPH_SIZE,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import PinnedLocationsList from "./PinnedLocationsList"
@@ -184,8 +183,6 @@ const ACTIVE_OUTCOMES = new Set([
   "FW_EXP",
   "WRC_SALMON_AB",
 ])
-
-const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
@@ -2207,11 +2204,16 @@ export default function TierAnimationSection() {
             locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
           lockedHeightsRef.current.set(code, distributionHeight)
 
-          const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
-          const isSingleRow = distributionHeight <= SINGLE_ROW
-          targetHeight = isSingleRow
-            ? distributionHeight
-            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
+          // Hug the squares: use the squares' visual bottom as the
+          // placeholder height, so the caption sits just under the last
+          // row with an identical gap across every outcome.
+          // `distributionHeight` = totalRows * (SQUARE_SIZE + SQUARE_GAP)
+          // includes a trailing SQUARE_GAP (6px) of empty space below the
+          // last row; subtract it. No bar-height floor — bar/average
+          // mode centers on slotHeight and may overflow small slots,
+          // which we accept as a separate encoding-mode concern.
+          const SQUARE_GAP_PX = 6
+          targetHeight = Math.max(0, distributionHeight - SQUARE_GAP_PX)
         }
       }
 
