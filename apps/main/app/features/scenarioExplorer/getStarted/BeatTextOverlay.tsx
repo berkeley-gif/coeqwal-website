@@ -21,7 +21,7 @@ import {
   PlayArrowIcon,
   ReplayIcon,
 } from "@repo/ui/mui"
-import { motion, useTransform, useMotionValue, animate } from "@repo/motion"
+import { motion, useMotionValue, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
 import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
@@ -523,10 +523,10 @@ export default function BeatTextOverlay({
         allOtherOutcomesRef.current.style.gridTemplateRows = `${fadeIn}fr`
       }
 
-      // NOTE: bottom control row opacity is bound via `useTransform`
-      // (see `bottomControlsOpacity` above). We intentionally do not
-      // write to a ref here — the MotionValue path stays in sync even
-      // across the `hasPlayed` mount boundary.
+      // NOTE: bottom control row opacity is driven by `playState`
+      // (see the dedicated effect earlier in the file), not by
+      // `progress`. The row is only visible at the reading pauses
+      // between beats, so it doesn't need a progress-driven fade.
     })
     return unsub
   }, [progress])
@@ -931,13 +931,14 @@ export default function BeatTextOverlay({
           </Box>
 
           {/* Bottom control row: Back / N-of-T / Next, plus Restart once
-           *  the user has moved past the first beat. Visible only after
-           *  the user has clicked Play (`hasPlayed`), and not at all in
-           *  reduced-motion mode (`hideControls`). Opacity is bound to
-           *  `bottomControlsOpacity` (a MotionValue derived from
-           *  `progress` via useTransform) so the row eases in during
-           *  the tail of the arrival tween and fades out symmetrically
-           *  if the user presses Back from 1/6. */}
+           *  the user has moved past the first beat. Rendered only
+           *  after the user has clicked Play (`hasPlayed`) and not at
+           *  all in reduced-motion mode (`hideControls`). Opacity is
+           *  driven by `bottomControlsOpacity`, animated via a
+           *  dedicated `playState` effect: visible only at the reading
+           *  pauses between beats (`paused` / `finished`), faded out
+           *  during any tween (`playing`) and during Back-from-1/6
+           *  (`idle` + `hasPlayed=false` unmounts this block anyway). */}
           {!hideControls && hasPlayed && (
             <motion.div
               style={{

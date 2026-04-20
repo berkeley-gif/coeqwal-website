@@ -157,7 +157,7 @@ export default function ResilienceChartTuner({
   return (
     <ChartTuner
       triggerLabel="TUNE CHART"
-      description="Guided tour, preset views, and the full control set - all in one place."
+      description="Guided tour, preset views, and chart controls."
       walkthrough={walkthrough}
       presets={presets}
       controls={<ResilienceControls controls={controls} onChange={onChange} />}
