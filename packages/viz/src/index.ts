@@ -183,7 +183,6 @@ export type { ShapeMorphData } from "./utils/shape-morph"
 
 export { hierarchicalRowOrder } from "./utils/clustering"
 
-
 // Curated re-exports from d3: consumers (e.g. storyline-flow) import these from @repo/viz
 // so `d3` remains a dependency of this package only. Extend this list when something new is needed.
 export {
