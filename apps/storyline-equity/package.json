@@ -1,0 +1,27 @@
+{
+  "name": "storyline-equity",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0"
+  },
+  "dependencies": {
+    "@mui/system": "^7.3.2",
+    "@repo/motion": "workspace:*",
+    "@repo/scrollytelling": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-scrollama": "^2.4.2",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

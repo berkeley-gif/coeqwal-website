@@ -141,7 +141,7 @@ function FlowLineWithBand({
         d={lineGenerator(data) ?? ""}
         fill="none"
         stroke={"#F1b143"}
-        strokeWidth={2}
+        strokeWidth={4}
         initial={{ pathLength: 0, opacity: 0 }}
         animate={{ pathLength: 1, opacity: 1 }}
         transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
@@ -149,6 +149,7 @@ function FlowLineWithBand({
       <motion.path
         d={areaGenerator(data) ?? ""}
         fill={"#F1b143"}
+        className="glow-effect"
         fillOpacity={0.15}
         stroke="none"
         initial={{ opacity: 0 }}
