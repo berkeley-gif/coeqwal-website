@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Stack, Typography } from "@repo/ui/mui"
+import { Box, LibraryBooksIcon, Stack, Typography, useTheme } from "@repo/ui/mui"
 import { useStoryline } from "../store"
 import AnimatedWaves from "./helpers/AnimatedWave"
 import { useEffect, useRef, useState } from "react"
@@ -18,6 +18,7 @@ export function Resolution() {
   const sectionRef = useRef(null)
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
   const viewportRef = useRef<HTMLDivElement>(null)
+  const theme = useTheme()
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -111,9 +112,22 @@ export function Resolution() {
                   {content?.transition.p2}
                 </Typography>
                 <Typography variant="h4">
-                  <span style={{ fontWeight: "bold" }}>
-                    <u>{content?.ending.p11}</u>
-                  </span>{" "}
+                  <strong>
+                    <a
+                      href="https://dev.coeqwal.org/?tab=explore"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "inherit", textDecoration: "underline" }}
+                    >
+                      {content?.ending.p11}
+                    </a>
+                  </strong>{" "}
+                  <LibraryBooksIcon
+                    sx={{
+                      fontSize: theme.typography.h4.fontSize,
+                      verticalAlign: "middle",
+                    }}
+                  /> {" "}
                   {content?.ending.p12}
                 </Typography>
               </motion.div>

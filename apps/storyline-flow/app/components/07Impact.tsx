@@ -244,9 +244,16 @@ export function Climate() {
           style={{ opacity: firstParagraphOpacity }}
         >
           <Typography>
-            <span style={{ fontWeight: "bold" }}>
-              <u>{content?.p11}</u>
-            </span>{" "}
+              <strong>
+                <a
+                  href="https://climate.coeqwal.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "inherit", textDecoration: "underline" }}
+                >
+                  {content?.p11}
+                </a>
+              </strong>{" "}
             <LibraryBooksIcon
               sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
             />{" "}
