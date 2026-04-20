@@ -277,13 +277,13 @@ const IntroSection = () => {
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
-          // Parent panel occupies exactly the viewport below the
-          // fixed header. The inner rounded card is padded inside
-          // by the `inset` prop (insetY top and bottom, insetX
-          // left and right), so the parent's full height keeps the
-          // viewport fully covered (no map bleed-through) while the
-          // rounded card retains its frame strips above and below.
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
+          // Parent panel fills the viewport below the fixed header
+          // minus one gap-band at the bottom so the full rounded
+          // card (top + bottom corners) sits comfortably inside
+          // the viewport with a little breathing room beneath it.
+          // The inner rounded card is padded by the `inset` prop
+          // (insetY top and bottom, insetX left and right).
+          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - ${tunerInsetY()})`}
           borderRadius={tunerRadius()}
           inset={{ x: tunerInsetX(), y: tunerInsetY() }}
           frameBackground={theme.palette.common.white}

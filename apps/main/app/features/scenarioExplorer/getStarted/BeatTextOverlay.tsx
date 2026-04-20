@@ -291,6 +291,11 @@ export default function BeatTextOverlay({
       const TITLE_FADE = 0.018
       const CAPTION_LEAD = 0.002
       const CAPTION_FADE = 0.012
+      // Late morph slices (when activeOutcomeGroups is short) can push the
+      // caption's natural fadeEnd past 1.0, leaving the caption partially
+      // opaque at rest. Cap fadeEnd so every caption settles at opacity 1
+      // before progress reaches the end of the animation.
+      const CAPTION_FADE_END_CEILING = 0.99
       const layoutItems = beat2LayoutRef.current?.items
       if (layoutItems) {
         for (const item of layoutItems) {
@@ -300,17 +305,22 @@ export default function BeatTextOverlay({
 
           const titleEl = titleRefsMap.current.get(item.code)
           if (titleEl) {
-            const fadeStart = morphStart - TITLE_LEAD
+            const titleFadeStart = morphStart - TITLE_LEAD
             titleEl.style.opacity = String(
-              clamp01((v - fadeStart) / TITLE_FADE),
+              clamp01((v - titleFadeStart) / TITLE_FADE),
             )
           }
 
           const captionEl = captionRefsMap.current.get(item.code)
           if (captionEl) {
-            const fadeStart = morphEnd - CAPTION_LEAD
+            const rawFadeEnd = morphEnd + (CAPTION_FADE - CAPTION_LEAD)
+            const captionFadeEnd = Math.min(
+              rawFadeEnd,
+              CAPTION_FADE_END_CEILING,
+            )
+            const captionFadeStart = captionFadeEnd - CAPTION_FADE
             captionEl.style.opacity = String(
-              clamp01((v - fadeStart) / CAPTION_FADE),
+              clamp01((v - captionFadeStart) / CAPTION_FADE),
             )
           }
         }
