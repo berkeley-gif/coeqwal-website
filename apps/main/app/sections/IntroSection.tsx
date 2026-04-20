@@ -277,14 +277,13 @@ const IntroSection = () => {
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
-          // Shorter than 100vh by the header height plus one
-          // inter-panel gap band (2 × tunerInsetY), so the full
-          // rounded panel (top + bottom corners) sits below the
-          // fixed header with whitespace below it that visually
-          // matches the gap strips between panels. The frame-gap
-          // itself is preserved because `inset` is independent of
-          // `minHeight`.
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
+          // Parent panel occupies exactly the viewport below the
+          // fixed header. The inner rounded card is padded inside
+          // by the `inset` prop (insetY top and bottom, insetX
+          // left and right), so the parent's full height keeps the
+          // viewport fully covered (no map bleed-through) while the
+          // rounded card retains its frame strips above and below.
+          minHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
           borderRadius={tunerRadius()}
           inset={{ x: tunerInsetX(), y: tunerInsetY() }}
           frameBackground={theme.palette.common.white}
