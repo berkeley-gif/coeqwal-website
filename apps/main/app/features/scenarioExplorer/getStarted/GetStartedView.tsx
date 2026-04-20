@@ -31,6 +31,12 @@ const GET_STARTED_RADIUS = tunerRadius()
 const GET_STARTED_INSET_X = tunerInsetX()
 const GET_STARTED_INSET_Y = tunerInsetY()
 
+/** Height (in pixels) of the soft fade between the dark wash and the
+ *  transparent map panel window, applied at the bottom of the pre-map
+ *  wrapper and the top of the post-map wrapper. The wash colour/opacity
+ *  itself comes from `theme.background.modalBackdrop(Opacity)`. */
+const DARK_WASH_FADE_PX = 160
+
 interface GetStartedPanelShellProps {
   children: ReactNode
   /** Card background colour (the rounded surface) */
@@ -236,6 +242,14 @@ export default function GetStartedView() {
   const exploreBg = theme.palette.tabPanels.explore
   const sp = theme.space.component
 
+  // Dark wash tint used on both sides of the map panel; opacity is
+  // the single theme token (`modalBackdropOpacity`) so it can be
+  // re-tuned in one place.
+  const darkWash = alpha(
+    theme.palette.common.black,
+    theme.background.modalBackdropOpacity,
+  )
+
   const dropletIcon = <WaterDroplet />
 
   return (
@@ -247,12 +261,19 @@ export default function GetStartedView() {
         backgroundColor: mapActive ? "transparent" : exploreBg,
       }}
     >
+      {/* Pre-map dark wash: modal-style black backdrop (opacity from
+          theme.background.modalBackdropOpacity) behind panels 1-4 that
+          dims the persistent map. The bottom DARK_WASH_FADE_PX fades
+          to transparent so the map is fully revealed by the time we
+          reach Panel 5. */}
+      <Box
+        sx={{
+          backgroundImage: `linear-gradient(to bottom, ${darkWash} 0, ${darkWash} calc(100% - ${DARK_WASH_FADE_PX}px), transparent 100%)`,
+        }}
+      >
       {/* Welcome - custom layout (no ContentPanel) for full-width grid */}
       <GetStartedPanelShell
         background={theme.palette.tabPanels.exploreDeep}
-        frameBackground={
-          mapActive ? theme.palette.tabPanels.exploreDeep : undefined
-        }
       >
         <>
           {/* Heading */}
@@ -260,11 +281,9 @@ export default function GetStartedView() {
             variant="h3"
             component="h2"
             color="text.secondary"
-            sx={{ maxWidth: "66%" }}
+            sx={{ maxWidth: 850 }}
           >
-            What is the COEQWAL scenario library
-            <br />
-            and how should I use it?
+            What is the COEQWAL scenario library and how should I use it?
           </Typography>
 
           {/* Three-column grid */}
@@ -650,6 +669,7 @@ export default function GetStartedView() {
           </Typography>
         </>
       </GetStartedPanelShell>
+      </Box>
 
       {/* Map panel (TierAnimationSection).thin outer frame + rounded shell;
           radius applied around (not inside) the pinned map overlay so the
@@ -671,6 +691,16 @@ export default function GetStartedView() {
         </Box>
       </Box>
 
+      {/* Post-map dark wash: modal-style black backdrop (opacity from
+          theme.background.modalBackdropOpacity) behind panels 6-9 that
+          fades in from transparent over the top DARK_WASH_FADE_PX, so
+          the map smoothly re-darkens after Panel 5 instead of being
+          cut off by a hard seam. */}
+      <Box
+        sx={{
+          backgroundImage: `linear-gradient(to bottom, transparent 0, ${darkWash} ${DARK_WASH_FADE_PX}px)`,
+        }}
+      >
       {/* Data in Depth */}
       <GetStartedPanelShell background={theme.palette.nature.forest}>
         <>
@@ -908,6 +938,7 @@ export default function GetStartedView() {
           </Box>
         </>
       </GetStartedPanelShell>
+      </Box>
     </Box>
   )
 }

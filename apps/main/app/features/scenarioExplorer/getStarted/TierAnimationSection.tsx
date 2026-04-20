@@ -56,7 +56,55 @@ import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { useScenarioExplorerStore } from "../store"
 
-const TOTAL_DURATION = 30
+/* ── Storyboard beats ──
+ *
+ * The visualization is divided into discrete beats the user advances
+ * through with Next / Back. Each beat is a checkpoint on the existing
+ * `progress` MotionValue (0-1); clicking Next animates `progress` from
+ * the current beat's checkpoint to the next one over the next beat's
+ * `duration` seconds. All existing `progress.on("change")` listeners in
+ * BeatTextOverlay / OutcomeMorphOverlay / this file already interpolate
+ * smoothly between any two progress values, so beat navigation drops in
+ * without changing any of them.
+ *
+ * Reading pauses happen naturally between Next clicks; tuning a beat's
+ * duration tunes only that beat's perceived speed. */
+interface BeatDef {
+  /** Stable identifier (debug only). */
+  id: string
+  /** Target value of `progress` at the end of this beat. */
+  progress: number
+  /** Forward duration in seconds. Back uses 60% of this value. */
+  duration: number
+}
+
+const BEATS: readonly BeatDef[] = [
+  // B0 (displayed as 1/6) - intro paragraphs fade, tier legend fully
+  //      revealed. Played automatically on arrival. Durations are
+  //      3x the prior baseline so text + converging-blues beats give
+  //      readers time to absorb the narrative.
+  { id: "legend", progress: 0.45, duration: 12 },
+  // B1 - intro text collapses, tier legend floats to top, 3 blues
+  //      converge to a single blue on the map.
+  { id: "collapse-blues", progress: 0.59, duration: 7.5 },
+  // B2 - agriculture-only filter + tier-color blend + Beat 1C popups +
+  //      "The colors correspond to different water delivery outcome
+  //      levels that affect agricultural revenue..." text fully in.
+  { id: "colors-correspond", progress: 0.73, duration: 6 },
+  // B3 - AG_REV polygons morph to their distribution squares. Tween
+  //      plays the morph window [0.76, 0.78] and settles at 0.78.
+  { id: "ag-rev-morph", progress: 0.78, duration: 9 },
+  // B4 - "All other key outcomes can be mapped and visualized in
+  //      similar ways." text fades in; morph overlay backdrop is up;
+  //      we pause just before the other 8 morphs start at 0.84.
+  { id: "all-other-text", progress: 0.83, duration: 3.6 },
+  // B5 - remaining 8 outcome morphs play back-to-back over [0.84, 1.0].
+  { id: "eight-morphs", progress: 1.0, duration: 18 },
+] as const
+
+const FINAL_BEAT_INDEX = BEATS.length - 1
+const BACK_DURATION_FACTOR = 0.6
+const MIN_NAV_DURATION = 0.4
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
@@ -250,14 +298,34 @@ export default function TierAnimationSection() {
   // Stable as long as the map hasn't panned/zoomed.
   const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
   const [panelInView, setPanelInView] = useState(false)
+  /** Storyboard cursor: index into `BEATS`. Driven by Next / Back. */
+  const [beatIndex, setBeatIndex] = useState(0)
+  /** Ref mirror of `beatIndex` so navigation callbacks can read the
+   *  latest cursor without needing to be re-created on every change. */
+  const beatIndexRef = useRef(0)
+  /** `true` once the user has clicked Play at least since the last reset.
+   *  Gates which control affordances the BeatTextOverlay renders:
+   *    - `false` -> pre-play gate: inline Play button beside the title,
+   *                 subtitle only; no bottom Back/Next row.
+   *    - `true`  -> bottom control row (Back / N-of-6 / Next) visible;
+   *                 Play button hidden.
+   *  All animation math keys off `progress` + `beatIndex`, so `hasPlayed`
+   *  purely governs the visibility of chrome. */
+  const [hasPlayed, setHasPlayed] = useState(false)
+  const hasPlayedRef = useRef(false)
+  /** Derived state describing where the user is in the storyboard.
+   *  - `idle`: at B0, no advance yet
+   *  - `playing`: actively animating between two beats
+   *  - `paused`: settled on a non-final beat, waiting for user input
+   *  - `finished`: settled on the final beat (interactive UI lights up) */
   const [playState, setPlayState] = useState<
     "idle" | "playing" | "paused" | "finished"
   >("idle")
   /** `prefers-reduced-motion: reduce` honored at the orchestration level:
-   *  we skip the time-based `animate(progress, 1, ...)` entirely and jump
-   *  straight to the settled end-state the moment the panel becomes
-   *  visible. Child listeners on `progress` resolve themselves to their
-   *  v = 1 branches, so no per-listener reduced-motion code is needed. */
+   *  every `goTo` collapses to a 0-second snap and the auto-arrival path
+   *  jumps straight to the settled end-state. Child listeners on
+   *  `progress` resolve themselves to their v = 1 branches, so no
+   *  per-listener reduced-motion code is needed. */
   const prefersReducedMotion = useReducedMotion() ?? false
 
   const polygonsAllowedRef = useRef(false)
@@ -316,125 +384,192 @@ export default function TierAnimationSection() {
     }
   }, [mapAPI.mapRef])
 
-  /** Start (or resume) the progress animation. */
-  const beginProgressAnimation = useCallback(
-    (startFrom: number) => {
-      const remaining = (1 - startFrom) * TOTAL_DURATION
-      setPlayState("playing")
-      controlsRef.current = animate(progress, 1, {
-        duration: remaining,
-        ease: "linear",
-        onComplete: settleToFinishedState,
-      })
-    },
-    [progress, settleToFinishedState],
-  )
+  /* ── Storyboard navigation ──
+   *
+   * `goTo(targetIndex)` animates `progress` from its current value to
+   * `BEATS[targetIndex].progress`. Direction determines the duration
+   * source: forward uses the destination beat's `duration`, backward uses
+   * `BACK_DURATION_FACTOR` of the source beat's `duration` so Back feels
+   * snappier than Next. Under `prefers-reduced-motion`, every tween
+   * collapses to an instantaneous `progress.set` + settle.
+   *
+   * `playState` updates:
+   *   - "playing" during the tween
+   *   - "finished" iff we landed on the final beat (enables interactive UI)
+   *   - "paused" for any non-final landing
+   *   - "idle" iff we landed on beat 0 (restart or Back from B1)
+   *
+   * While animating between two beats, listeners on `progress` in
+   * BeatTextOverlay / OutcomeMorphOverlay already handle any intermediate
+   * value, so no per-beat branching is needed inside those listeners. */
+  const goTo = useCallback(
+    (targetIndex: number, opts?: { viaCamera?: boolean }) => {
+      const clamped = Math.max(0, Math.min(FINAL_BEAT_INDEX, targetIndex))
+      const fromIndex = beatIndexRef.current
+      if (controlsRef.current) controlsRef.current.stop()
 
-  const handlePlay = useCallback(() => {
-    if (controlsRef.current) controlsRef.current.stop()
+      const target = BEATS[clamped]!
+      const source = BEATS[fromIndex]!
+      const forward = clamped > fromIndex
+      const rawDuration = forward
+        ? target.duration
+        : source.duration * BACK_DURATION_FACTOR
+      const duration = prefersReducedMotion
+        ? 0
+        : Math.max(MIN_NAV_DURATION, rawDuration)
 
-    const currentVal = progress.get()
-    const startFrom = currentVal >= 1 ? 0 : currentVal
-    const isRestart = startFrom === 0
+      const runTween = () => {
+        setBeatIndex(clamped)
+        beatIndexRef.current = clamped
 
-    if (isRestart) {
-      progress.set(0)
-      mapActions.clearOutcomeVisualization()
-
-      // Suppress all map layers to their pre-animation state so nothing
-      // lingers from a previous run.
-      const resetMap = mapAPI.mapRef?.current?.getMap?.()
-      if (resetMap?.isStyleLoaded?.()) {
-        try {
-          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (resetMap.getLayer(fill)) {
-              resetMap.setLayoutProperty(fill, "visibility", "visible")
-              resetMap.setPaintProperty(fill, "fill-opacity-transition", {
-                duration: 0,
-                delay: 0,
-              })
-              resetMap.setPaintProperty(fill, "fill-opacity", 0)
-            }
-            if (resetMap.getLayer(outline)) {
-              resetMap.setLayoutProperty(outline, "visibility", "visible")
-              resetMap.setPaintProperty(outline, "line-opacity", 0)
-            }
+        const finalize = () => {
+          if (clamped === FINAL_BEAT_INDEX) {
+            settleToFinishedState()
+          } else if (clamped === 0) {
+            setPlayState("idle")
+          } else {
+            setPlayState("paused")
           }
-          for (const lineLayer of ANIM_LINE_LAYERS) {
-            if (resetMap.getLayer(lineLayer)) {
-              resetMap.setPaintProperty(lineLayer, "line-opacity", 0)
-            }
-          }
-          if (resetMap.getLayer("demand-units")) {
-            resetMap.setFilter("demand-units", DU_CLASS_FILTER as never)
-            resetMap.setPaintProperty(
-              "demand-units",
-              "fill-color",
-              beat1FillExpr(0) as never,
-            )
-            resetMap.setPaintProperty(
-              "demand-units",
-              "fill-outline-color",
-              "transparent",
-            )
-          }
-        } catch {
-          /* ok */
+        }
+
+        if (duration === 0) {
+          progress.set(target.progress)
+          finalize()
+          return
+        }
+
+        setPlayState("playing")
+        controlsRef.current = animate(progress, target.progress, {
+          duration,
+          ease: "linear",
+          onComplete: finalize,
+        })
+      }
+
+      // Ensure polygon coords are fresh before any forward tween that
+      // crosses into the morph region (the map may have been panned).
+      if (forward) computePolygonDataRef.current()
+
+      // Optionally fly the camera home first (used by Restart).
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (opts?.viaCamera && map) {
+        const currentCenter = map.getCenter()
+        const currentZoom = map.getZoom()
+        const needsMove =
+          Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+          Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+          Math.abs(currentZoom - CAM_ZOOM) > 0.05
+        if (needsMove) {
+          setPlayState("playing")
+          map.once("moveend", () => {
+            computePolygonDataRef.current()
+            runTween()
+          })
+          map.easeTo({
+            center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+            zoom: CAM_ZOOM,
+            duration: 800,
+          })
+          return
         }
       }
-    }
 
-    // When starting from the beginning, fly the camera home first so
-    // polygons align correctly even if the user panned/zoomed.
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (isRestart && map) {
-      const currentCenter = map.getCenter()
-      const currentZoom = map.getZoom()
-      const needsMove =
-        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
-        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
-        Math.abs(currentZoom - CAM_ZOOM) > 0.05
+      runTween()
+    },
+    [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
+  )
 
-      if (needsMove) {
-        setPlayState("playing")
-        map.once("moveend", () => {
-          computePolygonDataRef.current()
-          beginProgressAnimation(0)
-        })
-        map.easeTo({
-          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-          zoom: CAM_ZOOM,
-          duration: 800,
-        })
-        return
-      }
-    }
+  const handleNext = useCallback(() => {
+    if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
+    goTo(beatIndexRef.current + 1)
+  }, [goTo])
 
-    computePolygonDataRef.current()
-    beginProgressAnimation(startFrom)
-  }, [progress, mapAPI.mapRef, beginProgressAnimation])
-
-  const handlePause = useCallback(() => {
+  /* ── Intro tween (Play button entry point) ──
+   *
+   * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
+   * tweens the first beat's window (0 → `BEATS[0].progress`) while
+   * keeping `beatIndex` at 0 — so the storyboard indicator reads "1 / N"
+   * the entire time. Under `prefers-reduced-motion`, the tween collapses
+   * to an instant snap. */
+  const playArrival = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    setPlayState("paused")
-  }, [])
+    setBeatIndex(0)
+    beatIndexRef.current = 0
+    const target = BEATS[0]!
+    if (prefersReducedMotion) {
+      progress.set(target.progress)
+      setPlayState("paused")
+      return
+    }
+    setPlayState("playing")
+    controlsRef.current = animate(progress, target.progress, {
+      duration: target.duration,
+      ease: "linear",
+      onComplete: () => setPlayState("paused"),
+    })
+  }, [progress, prefersReducedMotion])
 
-  const handleRewind = useCallback(() => {
+  const handlePlay = useCallback(() => {
+    setHasPlayed(true)
+    hasPlayedRef.current = true
+    computePolygonDataRef.current()
+    playArrival()
+  }, [playArrival])
+
+  /* ── Back ──
+   *
+   * On beat index > 0: normal backward tween to the previous beat.
+   * On beat index === 0: reverse-tween `progress` 0.45 → 0 so the legend
+   * rows and intro paragraphs fade out in the reverse order they came in;
+   * on completion, flip `hasPlayed` back to false so the Play button
+   * re-appears and the bottom control row hides. */
+  const handleBack = useCallback(() => {
+    const i = beatIndexRef.current
+    if (i > 0) {
+      goTo(i - 1)
+      return
+    }
+    if (!hasPlayedRef.current) return // pre-play: Back is a no-op
+
+    if (controlsRef.current) controlsRef.current.stop()
+    const finish = () => {
+      setHasPlayed(false)
+      hasPlayedRef.current = false
+      setPlayState("idle")
+    }
+    const rawDuration = BEATS[0]!.duration * BACK_DURATION_FACTOR
+    const duration = prefersReducedMotion
+      ? 0
+      : Math.max(MIN_NAV_DURATION, rawDuration)
+    if (duration === 0) {
+      progress.set(0)
+      finish()
+      return
+    }
+    setPlayState("playing")
+    controlsRef.current = animate(progress, 0, {
+      duration,
+      ease: "linear",
+      onComplete: finish,
+    })
+  }, [goTo, progress, prefersReducedMotion])
+
+  const handleRestart = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
     mapActions.clearMapTooltips()
-    progress.set(0)
-    setPlayState("idle")
 
-    // Reset all Mapbox layers to their pre-animation state
+    // Reset all animation polygon/line layers explicitly so the map-phase
+    // effect's `v < 0.01` branch has a clean slate to rebuild from.
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (map?.isStyleLoaded?.()) {
       try {
         for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
           if (map.getLayer(fill)) {
+            map.setLayoutProperty(fill, "visibility", "visible")
             map.setPaintProperty(fill, "fill-opacity-transition", {
               duration: 0,
               delay: 0,
@@ -443,6 +578,7 @@ export default function TierAnimationSection() {
             map.setFilter(fill, null)
           }
           if (map.getLayer(outline)) {
+            map.setLayoutProperty(outline, "visibility", "visible")
             map.setPaintProperty(outline, "line-opacity", 0)
           }
         }
@@ -451,43 +587,110 @@ export default function TierAnimationSection() {
             map.setPaintProperty(lineLayer, "line-opacity", 0)
           }
         }
+        if (map.getLayer("demand-units")) {
+          map.setFilter("demand-units", DU_CLASS_FILTER as never)
+          map.setPaintProperty(
+            "demand-units",
+            "fill-color",
+            beat1FillExpr(0) as never,
+          )
+          map.setPaintProperty(
+            "demand-units",
+            "fill-outline-color",
+            "transparent",
+          )
+        }
       } catch {
         /* ok */
       }
 
-      // Fly camera back to starting position
-      map.easeTo({
-        center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-        zoom: CAM_ZOOM,
-        bearing: 0,
-        pitch: 0,
-        duration: 800,
-      })
+      // Fly the camera home so the polygon coordinates the SVG overlay
+      // computes on the next forward tween are anchored correctly.
+      const currentCenter = map.getCenter()
+      const currentZoom = map.getZoom()
+      const needsMove =
+        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+        Math.abs(currentZoom - CAM_ZOOM) > 0.05
+
+      if (needsMove) {
+        map.easeTo({
+          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+          zoom: CAM_ZOOM,
+          bearing: 0,
+          pitch: 0,
+          duration: 800,
+        })
+      }
     }
 
+    // Park in the pre-play gate: user has to click Play again to re-play.
+    progress.set(0)
+    setBeatIndex(0)
+    beatIndexRef.current = 0
+    setHasPlayed(false)
+    hasPlayedRef.current = false
+    setPlayState("idle")
     computePolygonDataRef.current()
   }, [progress, mapAPI.mapRef])
 
-  /* ── Reduced-motion path ──
+  /* ── Arrival behaviour ──
    *
-   * When the user has `prefers-reduced-motion: reduce`, we never run the
-   * 30s linear `animate(progress, 1, ...)`. Instead, as soon as the panel
-   * scrolls into view, we snap `progress` to 1 — every child listener on
-   * BeatTextOverlay / OutcomeMorphOverlay then resolves to its v = 1
-   * branch, which collapses the intro block, reveals the tier legend,
-   * reveals all narrative blocks, raises the backdrop, and parks every
-   * glyph at its settled square position. `settleToFinishedState()`
-   * applies the same map cleanup the normal onComplete runs, and
-   * `setPlayState("finished")` lights up the interactive UI. The
-   * BeatTextOverlay's `hideControls={prefersReducedMotion}` prop keeps the
-   * play affordance out of sight since it's non-functional here. */
+   * Normal motion: park in the pre-play gate. The user must click Play
+   * explicitly to start the storyboard (they see the title, the Play
+   * button, and the subtitle).
+   * Reduced motion: jump straight to the final beat so the full settled
+   * end-state is visible without any animation. */
+  const hasAutoAdvancedRef = useRef(false)
   useEffect(() => {
-    if (!prefersReducedMotion) return
     if (!panelInView) return
-    if (controlsRef.current) controlsRef.current.stop()
-    progress.set(1)
-    settleToFinishedState()
-  }, [prefersReducedMotion, panelInView, progress, settleToFinishedState])
+    if (hasAutoAdvancedRef.current) return
+    hasAutoAdvancedRef.current = true
+    if (prefersReducedMotion) {
+      goTo(FINAL_BEAT_INDEX)
+    }
+    // Normal motion: nothing to do here; we wait for the user to click Play.
+  }, [panelInView, prefersReducedMotion, goTo])
+
+  /* ── Keyboard shortcuts ──
+   *
+   * Gated on `panelInView` so shortcuts don't steal keys when the user
+   * has scrolled past. We only intercept ArrowRight / ArrowLeft / Home
+   * when no modifier keys are held and no text input is focused. */
+  useEffect(() => {
+    if (!panelInView) return
+    const isEditable = (el: EventTarget | null) => {
+      if (!(el instanceof HTMLElement)) return false
+      const tag = el.tagName
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        el.isContentEditable
+      )
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+      if (isEditable(e.target)) return
+      if (e.key === "ArrowRight") {
+        e.preventDefault()
+        // Pre-play: ArrowRight acts as Play. Post-play: it advances.
+        if (!hasPlayedRef.current) {
+          handlePlay()
+        } else {
+          handleNext()
+        }
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        handleBack()
+      } else if (e.key === "Home") {
+        e.preventDefault()
+        handleRestart()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [panelInView, handleNext, handleBack, handleRestart, handlePlay])
 
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
@@ -2458,9 +2661,13 @@ export default function TierAnimationSection() {
             progress={progress}
             headingOpacity={headingOpacity}
             playState={playState}
-            onRewind={handleRewind}
+            beatIndex={beatIndex}
+            totalBeats={BEATS.length}
+            hasPlayed={hasPlayed}
             onPlay={handlePlay}
-            onPause={handlePause}
+            onNext={handleNext}
+            onBack={handleBack}
+            onRestart={handleRestart}
             beat2Layout={outcomeLayout}
             onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}

@@ -512,7 +512,7 @@ const IntroSection = () => {
             overflow: "hidden",
             px: theme.space.panel.padding,
             pt: theme.space.panel.padding,
-            pb: `calc(${theme.space.panel.padding} + 80px)`,
+            pb: `calc(${theme.space.panel.padding} + 50px)`,
           }}
         >
         <MotionBox
@@ -561,11 +561,11 @@ const IntroSection = () => {
             {[
               {
                 verb: "Learn",
-                rest: "how water in California\u2019s Central Valley is managed,",
+                rest: "how water in California\u2019s Central Valley is managed",
               },
               {
                 verb: "Explore",
-                rest: "how water outcomes shift under different scenarios, and",
+                rest: "how water outcomes shift under different scenarios",
               },
               {
                 verb: "Share",
