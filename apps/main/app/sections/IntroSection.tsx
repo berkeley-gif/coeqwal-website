@@ -542,6 +542,13 @@ const IntroSection = () => {
             rowGap: { xs: theme.space.section.md },
           }}
         >
+          <Typography variant="body1">
+            Water is limited and every choice has trade-offs. COEQWAL allows you
+            to explore different water scenarios and understand how decisions
+            shape potential futures for communities, farms, rivers, and the
+            Delta.
+          </Typography>
+
           <Box
             component="ul"
             sx={{
@@ -578,13 +585,6 @@ const IntroSection = () => {
               </Box>
             ))}
           </Box>
-
-          <Typography variant="body1">
-            Water is limited and every choice has trade-offs. COEQWAL allows you
-            to explore different water scenarios and understand how decisions
-            shape potential futures for communities, farms, rivers, and the
-            Delta.
-          </Typography>
         </MotionBox>
         </Box>
       </Box>

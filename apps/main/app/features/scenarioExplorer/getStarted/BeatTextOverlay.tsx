@@ -664,6 +664,7 @@ export default function BeatTextOverlay({
               rowGap: 1,
               alignItems: "center",
               "& .MuiTypography-root": {
+                fontSize: theme.typography.body2.fontSize,
                 lineHeight: 1.25,
               },
             }}
@@ -736,7 +737,7 @@ export default function BeatTextOverlay({
                   }}
                 >
                   <Typography
-                    variant="body1"
+                    variant="body2"
                     component="span"
                     sx={{
                       fontWeight: 500,
@@ -747,7 +748,7 @@ export default function BeatTextOverlay({
                     {label}
                   </Typography>
                 </Box>
-                <Typography variant="body1" component="span">
+                <Typography variant="body2" component="span">
                   {description}
                 </Typography>
               </Box>
