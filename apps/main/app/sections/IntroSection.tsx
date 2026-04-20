@@ -52,7 +52,7 @@ function AboutCtaLink({
         }}
       >
         <Typography
-          variant="subtitle1"
+          variant="displayBody"
           sx={{ fontWeight: "fontWeightSemiBold" }}
         >
           {children}
@@ -488,8 +488,15 @@ const IntroSection = () => {
         frameBackground={theme.palette.common.white}
       />
 
-      {/* Want to know more?.frame + rounded inset panel */}
+      {/* Want to know more?.frame + rounded inset panel.
+          The `id` sits on the OUTER white frame wrapper (not the
+          inner rounded card) so the panel-3 scroll-advance arrow's
+          `scrollOffset = headerHeight - insetY` lands this panel
+          with the same geometry as panels 2 and 3: the frame's top
+          `insetY` tucks behind the fixed header and the inner
+          rounded card lines up flush at `y = headerHeight`. */}
       <Box
+        id="want-to-know-more"
         sx={{
           backgroundColor: theme.palette.common.white,
           px: tunerInsetX(),
@@ -498,7 +505,6 @@ const IntroSection = () => {
       >
         <Box
           component="section"
-          id="want-to-know-more"
           aria-label="On this site, you can"
           sx={{
             backgroundColor: "brand.panelLight",

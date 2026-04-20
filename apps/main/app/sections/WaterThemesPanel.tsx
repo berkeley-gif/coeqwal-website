@@ -411,7 +411,7 @@ function WaterThemesPanelContent({
           </Box>
 
           <Typography
-            variant="body2"
+            variant="body1"
             sx={{
               color: "text.primary",
               maxWidth: "66%",
@@ -443,9 +443,28 @@ function WaterThemesPanelContent({
                 title={c.label}
                 description={c.description}
                 onClick={active ? () => openThemePanel(c.id) : undefined}
-                dimmed={!active}
                 variant="onLight"
-              />
+                // Active cards: lift the translucent fill
+                // (rgba(210,228,242,0.8) by default) to full opacity
+                // on hover so the card "comes forward" and invites
+                // interaction. Non-active ("Coming soon") cards
+                // inherit the default hover behaviour (no click, so
+                // no hover lift is applied by InfoCard).
+                hoverBackground={active ? "rgb(210,228,242)" : undefined}
+              >
+                {!active && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: theme.space.component.sm,
+                      fontStyle: "italic",
+                      opacity: 0.85,
+                    }}
+                  >
+                    Coming soon
+                  </Typography>
+                )}
+              </InfoCard>
             )
           })}
         </Box>
