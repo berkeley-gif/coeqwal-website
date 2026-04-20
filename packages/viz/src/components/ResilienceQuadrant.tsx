@@ -17,20 +17,8 @@
  * updateChart deps, callbacks passed through refs by the parent).
  */
 
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react"
-import {
-  scaleLinear,
-  scaleSqrt,
-  axisBottom,
-  axisLeft,
-  select,
-} from "d3"
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import { scaleLinear, scaleSqrt, axisBottom, axisLeft, select } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
 export type ResilienceQuadrantUnit = "outcome" | "loi"
@@ -302,10 +290,30 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
           text: string
           anchor: "start" | "middle" | "end"
         }> = [
-          { xFrac: 0.5, yFrac: 0.85, text: quadrantLabels.robust, anchor: "middle" },
-          { xFrac: 0.08, yFrac: 0.85, text: quadrantLabels.exposed, anchor: "start" },
-          { xFrac: 0.5, yFrac: 0.12, text: quadrantLabels.policy, anchor: "middle" },
-          { xFrac: 0.92, yFrac: 0.12, text: quadrantLabels.double, anchor: "end" },
+          {
+            xFrac: 0.5,
+            yFrac: 0.85,
+            text: quadrantLabels.robust,
+            anchor: "middle",
+          },
+          {
+            xFrac: 0.08,
+            yFrac: 0.85,
+            text: quadrantLabels.exposed,
+            anchor: "start",
+          },
+          {
+            xFrac: 0.5,
+            yFrac: 0.12,
+            text: quadrantLabels.policy,
+            anchor: "middle",
+          },
+          {
+            xFrac: 0.92,
+            yFrac: 0.12,
+            text: quadrantLabels.double,
+            anchor: "end",
+          },
         ]
         labelSpec.forEach(({ xFrac, yFrac, text, anchor }) => {
           g.append("text")
@@ -348,9 +356,7 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
           .attr("font-size", 11)
           .attr("font-weight", 600)
           .attr("fill", paletteText)
-          .text(
-            `Climate shift (Δ tier vs historical at ${climateRefHcLabel})`,
-          )
+          .text(`Climate shift (Δ tier vs historical at ${climateRefHcLabel})`)
 
         g.append("text")
           .attr("transform", `translate(${-46},${innerH / 2}) rotate(-90)`)
@@ -371,7 +377,9 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
           .attr("opacity", 0.9)
 
         // Dots.
-        const plotLayer = g.append("g").attr("class", "resilience-quadrant-dots")
+        const plotLayer = g
+          .append("g")
+          .attr("class", "resilience-quadrant-dots")
 
         if (unit === "outcome") {
           data.forEach((d) => {
@@ -379,7 +387,9 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
             const px = available ? xScale(clamp(d.x!, -3, 3)) : 0
             const py = available ? yScale(clamp(d.y!, 0, 3)) : 0
             const fill =
-              d.tierAtRefHc != null ? colorScale(d.tierAtRefHc) : paletteUnavailFill
+              d.tierAtRefHc != null
+                ? colorScale(d.tierAtRefHc)
+                : paletteUnavailFill
             const stroke =
               d.tierAtRefHc != null ? "transparent" : paletteUnavailStroke
 

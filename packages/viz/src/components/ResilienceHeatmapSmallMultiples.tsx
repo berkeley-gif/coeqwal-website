@@ -125,9 +125,7 @@ function TileActionButton({
       title={title}
       onClick={onClick}
       className={
-        active
-          ? "resilience-tile-action is-active"
-          : "resilience-tile-action"
+        active ? "resilience-tile-action is-active" : "resilience-tile-action"
       }
       style={{
         display: "inline-flex",
@@ -179,12 +177,7 @@ function SharedTierLegend({
       {tierColors.map((color, i) => (
         <g key={i} transform={`translate(${i * entryW}, 0)`}>
           <rect x={0} y={6} width={14} height={14} rx={2} fill={color} />
-          <text
-            x={20}
-            y={17}
-            fontSize={11}
-            fill={palette.textMuted}
-          >
+          <text x={20} y={17} fontSize={11} fill={palette.textMuted}>
             {tierLabels[i] ?? ""}
           </text>
         </g>
@@ -200,12 +193,7 @@ function SharedTierLegend({
           stroke={palette.unavailableStroke}
           strokeWidth={1}
         />
-        <text
-          x={20}
-          y={17}
-          fontSize={11}
-          fill={palette.textMuted}
-        >
+        <text x={20} y={17} fontSize={11} fill={palette.textMuted}>
           Insufficient coverage
         </text>
       </g>
@@ -213,68 +201,66 @@ function SharedTierLegend({
   )
 }
 
-const ResilienceHeatmapSmallMultiples: React.FC<
-  ResilienceHeatmapSmallMultiplesProps
-> = React.memo(
-  ({
-    rows,
-    columns,
-    tiles,
-    tierColors,
-    tierLabels,
-    palette,
-    cellRender = "tier",
-    showCellNumbers = false,
-    tileAspect = "wide",
-    minTileWidth = 360,
-    maxColumns = 4,
-    onCellHover,
-    onCellClick,
-    formatRowTick,
-    distributionMode,
-    onSquareHover,
-    onSquareClick,
-    onTilePin,
-    isTilePinned,
-    onTileExpand,
-  }) => {
-    const tileHeight = useMemo(() => {
-      if (tileAspect === "tall") {
-        // Tall tiles: scenarios on Y (up to 24 rows). Scale with row count
-        // so 24-row tiles still breathe, but cap it so 6-row tiles aren't
-        // absurdly stubby.
-        const perRow = 16
-        const chrome = 96 // top margin + x-axis labels
-        return Math.max(320, chrome + rows.length * perRow)
+const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesProps> =
+  React.memo(
+    ({
+      rows,
+      columns,
+      tiles,
+      tierColors,
+      tierLabels,
+      palette,
+      cellRender = "tier",
+      showCellNumbers = false,
+      tileAspect = "wide",
+      minTileWidth = 360,
+      maxColumns = 4,
+      onCellHover,
+      onCellClick,
+      formatRowTick,
+      distributionMode,
+      onSquareHover,
+      onSquareClick,
+      onTilePin,
+      isTilePinned,
+      onTileExpand,
+    }) => {
+      const tileHeight = useMemo(() => {
+        if (tileAspect === "tall") {
+          // Tall tiles: scenarios on Y (up to 24 rows). Scale with row count
+          // so 24-row tiles still breathe, but cap it so 6-row tiles aren't
+          // absurdly stubby.
+          const perRow = 16
+          const chrome = 96 // top margin + x-axis labels
+          return Math.max(320, chrome + rows.length * perRow)
+        }
+        // Wide tiles: outcomes on Y (19 rows). More uniform height.
+        return 360
+      }, [tileAspect, rows.length])
+
+      // Compute a display column count the CSS grid can respect. We let
+      // auto-fit handle the actual responsive behavior, but clamp the max.
+      const gridTemplate = useMemo(
+        () => `repeat(auto-fit, minmax(${minTileWidth}px, 1fr))`,
+        [minTileWidth],
+      )
+
+      if (tiles.length === 0) {
+        return null
       }
-      // Wide tiles: outcomes on Y (19 rows). More uniform height.
-      return 360
-    }, [tileAspect, rows.length])
 
-    // Compute a display column count the CSS grid can respect. We let
-    // auto-fit handle the actual responsive behavior, but clamp the max.
-    const gridTemplate = useMemo(
-      () =>
-        `repeat(auto-fit, minmax(${minTileWidth}px, 1fr))`,
-      [minTileWidth],
-    )
-
-    if (tiles.length === 0) {
-      return null
-    }
-
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          height: "100%",
-          minHeight: 0,
-          gap: 12,
-        }}
-      >
-        <style>{`
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            minHeight: 0,
+            gap: 12,
+          }}
+        >
+          <style>{`
           .resilience-tile-action { opacity: 0.35; }
           .resilience-tile-action.is-active { opacity: 1; }
           .resilience-smt-tile:hover .resilience-tile-action,
@@ -282,170 +268,173 @@ const ResilienceHeatmapSmallMultiples: React.FC<
           .resilience-tile-action:hover { background-color: rgba(127,127,127,0.12); opacity: 1; }
           .resilience-tile-action:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; opacity: 1; }
         `}</style>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: gridTemplate,
-            gap: 16,
-            flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            overflowX: "hidden",
-            // Enforce a soft cap on columns via max-width.
-            maxWidth: `${maxColumns * 560}px`,
-            alignContent: "start",
-          }}
-        >
-          {tiles.map((tile) => {
-            const pinned = isTilePinned?.(tile.id) ?? false
-            const hasActions = !!onTilePin || !!onTileExpand
-            return (
-            <div
-              key={tile.id}
-              className="resilience-smt-tile"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                minWidth: 0,
-                minHeight: tileHeight,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "0 4px 4px",
-                  minHeight: 24,
-                }}
-              >
-                <span
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: gridTemplate,
+              gap: 16,
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              // Enforce a soft cap on columns via max-width.
+              maxWidth: `${maxColumns * 560}px`,
+              alignContent: "start",
+            }}
+          >
+            {tiles.map((tile) => {
+              const pinned = isTilePinned?.(tile.id) ?? false
+              const hasActions = !!onTilePin || !!onTileExpand
+              return (
+                <div
+                  key={tile.id}
+                  className="resilience-smt-tile"
                   style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: palette.text,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
                     minWidth: 0,
+                    minHeight: tileHeight,
                   }}
-                  title={tile.title}
                 >
-                  {tile.title}
-                </span>
-                {tile.subtitle && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: palette.textMuted,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {tile.subtitle}
-                  </span>
-                )}
-                {hasActions && (
                   <div
-                    className="resilience-tile-actions"
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
-                      gap: 2,
-                      flexShrink: 0,
+                      gap: 8,
+                      padding: "0 4px 4px",
+                      minHeight: 24,
                     }}
                   >
-                    {onTilePin && (
-                      <TileActionButton
-                        palette={palette}
-                        active={pinned}
-                        ariaLabel={
-                          pinned ? `Unpin ${tile.title}` : `Pin ${tile.title}`
-                        }
-                        title={
-                          pinned
-                            ? "Remove from selection"
-                            : "Pin to selection"
-                        }
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onTilePin(tile.id)
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: palette.text,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        flex: 1,
+                        minWidth: 0,
+                      }}
+                      title={tile.title}
+                    >
+                      {tile.title}
+                    </span>
+                    {tile.subtitle && (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: palette.textMuted,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
                         }}
                       >
-                        {pinned ? "✓" : "+"}
-                      </TileActionButton>
+                        {tile.subtitle}
+                      </span>
                     )}
-                    {onTileExpand && (
-                      <TileActionButton
-                        palette={palette}
-                        ariaLabel={`Expand ${tile.title}`}
-                        title="Expand to full size"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onTileExpand(tile.id)
+                    {hasActions && (
+                      <div
+                        className="resilience-tile-actions"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 2,
+                          flexShrink: 0,
                         }}
                       >
-                        {"\u2922"}
-                      </TileActionButton>
+                        {onTilePin && (
+                          <TileActionButton
+                            palette={palette}
+                            active={pinned}
+                            ariaLabel={
+                              pinned
+                                ? `Unpin ${tile.title}`
+                                : `Pin ${tile.title}`
+                            }
+                            title={
+                              pinned
+                                ? "Remove from selection"
+                                : "Pin to selection"
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onTilePin(tile.id)
+                            }}
+                          >
+                            {pinned ? "✓" : "+"}
+                          </TileActionButton>
+                        )}
+                        {onTileExpand && (
+                          <TileActionButton
+                            palette={palette}
+                            ariaLabel={`Expand ${tile.title}`}
+                            title="Expand to full size"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onTileExpand(tile.id)
+                            }}
+                          >
+                            {"\u2922"}
+                          </TileActionButton>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-              <div style={{ flex: 1, minHeight: tileHeight - 24 }}>
-                <ResilienceHeatmap
-                  rows={rows}
-                  columns={columns}
-                  cells={tile.cells}
-                  tierColors={tierColors}
-                  tierLabels={tierLabels}
-                  palette={palette}
-                  cellRender={cellRender}
-                  showCellNumbers={showCellNumbers}
-                  hideLegend
-                  onCellHover={onCellHover}
-                  onCellClick={onCellClick}
-                  formatRowTick={formatRowTick}
-                  distributionMode={distributionMode}
-                  onSquareHover={
-                    onSquareHover
-                      ? (info) =>
-                          onSquareHover(
-                            info ? { tileId: tile.id, ...info } : null,
-                          )
-                      : undefined
-                  }
-                  onSquareClick={
-                    onSquareClick
-                      ? (info) => onSquareClick({ tileId: tile.id, ...info })
-                      : undefined
-                  }
-                />
-              </div>
-            </div>
-            )
-          })}
-        </div>
+                  <div style={{ flex: 1, minHeight: tileHeight - 24 }}>
+                    <ResilienceHeatmap
+                      rows={rows}
+                      columns={columns}
+                      cells={tile.cells}
+                      tierColors={tierColors}
+                      tierLabels={tierLabels}
+                      palette={palette}
+                      cellRender={cellRender}
+                      showCellNumbers={showCellNumbers}
+                      hideLegend
+                      onCellHover={onCellHover}
+                      onCellClick={onCellClick}
+                      formatRowTick={formatRowTick}
+                      distributionMode={distributionMode}
+                      onSquareHover={
+                        onSquareHover
+                          ? (info) =>
+                              onSquareHover(
+                                info ? { tileId: tile.id, ...info } : null,
+                              )
+                          : undefined
+                      }
+                      onSquareClick={
+                        onSquareClick
+                          ? (info) =>
+                              onSquareClick({ tileId: tile.id, ...info })
+                          : undefined
+                      }
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
 
-        {/* One shared legend at the bottom of the trellis. */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-start",
-            padding: "4px 4px 0",
-          }}
-        >
-          <SharedTierLegend
-            tierColors={tierColors}
-            tierLabels={tierLabels}
-            palette={palette}
-          />
+          {/* One shared legend at the bottom of the trellis. */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              padding: "4px 4px 0",
+            }}
+          >
+            <SharedTierLegend
+              tierColors={tierColors}
+              tierLabels={tierLabels}
+              palette={palette}
+            />
+          </div>
         </div>
-      </div>
-    )
-  },
-)
+      )
+    },
+  )
 
 ResilienceHeatmapSmallMultiples.displayName = "ResilienceHeatmapSmallMultiples"
 

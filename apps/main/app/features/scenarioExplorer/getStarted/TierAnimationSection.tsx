@@ -1508,10 +1508,7 @@ export default function TierAnimationSection() {
               "line-color-transition",
               { duration: 0, delay: 0 },
             )
-            map.setFilter(
-              "demand-units-outline",
-              DU_CLASS_FILTER as never,
-            )
+            map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
             map.setPaintProperty(
               "demand-units-outline",
               "line-color",
@@ -1682,20 +1679,13 @@ export default function TierAnimationSection() {
               )
             }
             if (map.getLayer("demand-units-outline")) {
-              map.setFilter(
-                "demand-units-outline",
-                DU_CLASS_FILTER as never,
-              )
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
               map.setPaintProperty(
                 "demand-units-outline",
                 "line-color",
                 beat1FillExpr(0) as never,
               )
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                0,
-              )
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0)
             }
             // Snap the basemap dim overlay back to 0 so a full reset
             // shows the bright basemap again.
@@ -1747,11 +1737,7 @@ export default function TierAnimationSection() {
           try {
             const expr = beat1FillExpr(colorPhase)
             if (map.getLayer("demand-units")) {
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                expr as never,
-              )
+              map.setPaintProperty("demand-units", "fill-color", expr as never)
               map.setPaintProperty(
                 "demand-units",
                 "fill-outline-color",
@@ -1801,11 +1787,7 @@ export default function TierAnimationSection() {
                   expr as never,
                 )
               }
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                0.65,
-              )
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
             }
           } catch {
             /* ok */
@@ -1825,11 +1807,7 @@ export default function TierAnimationSection() {
             const expr = beat1FillExpr(frozenColorPhase)
             if (map.getLayer("demand-units")) {
               map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                expr as never,
-              )
+              map.setPaintProperty("demand-units", "fill-color", expr as never)
               map.setPaintProperty(
                 "demand-units",
                 "fill-outline-color",
@@ -1837,10 +1815,7 @@ export default function TierAnimationSection() {
               )
             }
             if (map.getLayer("demand-units-outline")) {
-              map.setFilter(
-                "demand-units-outline",
-                DU_CLASS_FILTER as never,
-              )
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
               map.setPaintProperty(
                 "demand-units-outline",
                 "line-color",
@@ -1859,11 +1834,7 @@ export default function TierAnimationSection() {
 
         try {
           if (map.getLayer("demand-units")) {
-            map.setPaintProperty(
-              "demand-units",
-              "fill-opacity",
-              fadeOutOpacity,
-            )
+            map.setPaintProperty("demand-units", "fill-opacity", fadeOutOpacity)
           }
           if (map.getLayer("demand-units-outline")) {
             map.setPaintProperty(
@@ -1902,10 +1873,7 @@ export default function TierAnimationSection() {
               }
             }
             if (map.getLayer("demand-units-outline")) {
-              map.setFilter(
-                "demand-units-outline",
-                DU_AG_ONLY_FILTER as never,
-              )
+              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
               if (expr) {
                 map.setPaintProperty(
                   "demand-units-outline",
@@ -1926,11 +1894,7 @@ export default function TierAnimationSection() {
 
         try {
           if (map.getLayer("demand-units")) {
-            map.setPaintProperty(
-              "demand-units",
-              "fill-opacity",
-              fadeInOpacity,
-            )
+            map.setPaintProperty("demand-units", "fill-opacity", fadeInOpacity)
           }
           if (map.getLayer("demand-units-outline")) {
             map.setPaintProperty(
@@ -1966,10 +1930,7 @@ export default function TierAnimationSection() {
               map.setPaintProperty("demand-units", "fill-opacity", 0.65)
             }
             if (map.getLayer("demand-units-outline")) {
-              map.setFilter(
-                "demand-units-outline",
-                DU_AG_ONLY_FILTER as never,
-              )
+              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
               if (expr) {
                 map.setPaintProperty(
                   "demand-units-outline",
@@ -1977,11 +1938,7 @@ export default function TierAnimationSection() {
                   expr as never,
                 )
               }
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                0.65,
-              )
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
             }
           } catch {
             /* ok */
@@ -2011,10 +1968,7 @@ export default function TierAnimationSection() {
               }
             }
             if (map.getLayer("demand-units-outline")) {
-              map.setFilter(
-                "demand-units-outline",
-                DU_CLASS_FILTER as never,
-              )
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
               if (expr) {
                 map.setPaintProperty(
                   "demand-units-outline",
@@ -2175,9 +2129,7 @@ export default function TierAnimationSection() {
         if (tier == null) continue
         const color = agData.colorMap[duId] ?? "#888888"
         const name =
-          agData.nameMap[duId] ??
-          getDemandUnitDisplayName(duId) ??
-          duId
+          agData.nameMap[duId] ?? getDemandUnitDisplayName(duId) ?? duId
         const coord = centroidLookupRef.current.get(duId)
         if (!coord) continue
         highlights.push({
@@ -2780,7 +2732,7 @@ export default function TierAnimationSection() {
     // Estimate the per-column inner width so the distribution height
     // heuristic uses a realistic number of columns. The precise width is
     // measured from the DOM later. This is only used to decide row count.
-    const approxColWidth = Math.max(80, panelSize.width * (1 / 3) / 2 - 36)
+    const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
 
     // Left column renders in this explicit order (AG_REV before CWS_DEL).
     // We don't touch OUTCOME_CODE_ORDER globally - radar axes + NOD/SOD
@@ -2880,33 +2832,36 @@ export default function TierAnimationSection() {
    *  anyway, so the missing positions only become visible once measured). */
   const [glyphLayout, setGlyphLayout] = useState<Record<string, GlyphRect>>({})
 
-  const handleGlyphLayoutChange = useCallback((layout: Record<string, GlyphRect>) => {
-    setGlyphLayout((prev) => {
-      // Shallow-compare to avoid redundant state updates (ResizeObserver can
-      // fire frequently. Same rects -> skip re-render).
-      const prevKeys = Object.keys(prev)
-      const nextKeys = Object.keys(layout)
-      if (prevKeys.length === nextKeys.length) {
-        let same = true
-        for (const k of nextKeys) {
-          const a = prev[k]
-          const b = layout[k]!
-          if (
-            !a ||
-            a.x !== b.x ||
-            a.y !== b.y ||
-            a.width !== b.width ||
-            a.height !== b.height
-          ) {
-            same = false
-            break
+  const handleGlyphLayoutChange = useCallback(
+    (layout: Record<string, GlyphRect>) => {
+      setGlyphLayout((prev) => {
+        // Shallow-compare to avoid redundant state updates (ResizeObserver can
+        // fire frequently. Same rects -> skip re-render).
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(layout)
+        if (prevKeys.length === nextKeys.length) {
+          let same = true
+          for (const k of nextKeys) {
+            const a = prev[k]
+            const b = layout[k]!
+            if (
+              !a ||
+              a.x !== b.x ||
+              a.y !== b.y ||
+              a.width !== b.width ||
+              a.height !== b.height
+            ) {
+              same = false
+              break
+            }
           }
+          if (same) return prev
         }
-        if (same) return prev
-      }
-      return layout
-    })
-  }, [])
+        return layout
+      })
+    },
+    [],
+  )
 
   const distributionPositionMap = useMemo(() => {
     const map: Record<

@@ -120,8 +120,7 @@ const IntroSection = () => {
     if (typeof window === "undefined") return
     const el = morphHeadlineRef.current
     if (!el) return
-    const update = () =>
-      setHeadlineHeight(el.getBoundingClientRect().height)
+    const update = () => setHeadlineHeight(el.getBoundingClientRect().height)
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
@@ -398,77 +397,79 @@ const IntroSection = () => {
           stickyTop={theme.layout.headerHeight}
           stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
         >
-        <CoeqwalPanel
-          id="about-coeqwal"
-          background={theme.palette.brand.water}
-          textColor={theme.palette.text.secondary}
-          // Size the inner rounded card so the CoeqwalPanel's total
-          // outer height (minHeight + 2·insetY from its own py
-          // padding) exactly equals the StickyScrollSection's
-          // stickyHeight (`100vh − headerHeight`). This matches the
-          // WaterThemesPanel geometry — its content wrapper is
-          // `height: 100%` inside the sticky div, with `py: insetY`
-          // producing the same rounded-card extent. Without
-          // subtracting the second `insetY` the CoeqwalPanel is
-          // `insetY` taller than the sticky container, which clips
-          // the bottom frame-gap under `overflow: hidden` and makes
-          // the rounded card sit flush with the sticky bottom edge
-          // instead of floating with symmetric top/bottom padding.
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
-          borderRadius={tunerRadius()}
-          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
-          frameBackground={theme.palette.common.white}
-          contentMotionStyle={{ opacity: aboutOpacity }}
-          responsiveHeadline={
-            <>
-              <Typography
-                variant="h2Main"
-                component="span"
-                sx={{ display: "block", color: "text.secondary" }}
-              >
-                What is
-              </Typography>
-              <Typography
-                variant="h1"
-                component="span"
-                sx={{ display: "block", color: "text.secondary" }}
-              >
-                COEQWAL?
-              </Typography>
-            </>
-          }
-          description={
-            <>
-              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
-              publicly-funded project that works with communities to better
-              understand how water is managed in California.
-              <br />
-              <br />
-              Using water planning models, COEQWAL sheds light on how
-              alternative decisions and climate change scenarios shape our water
-              future.
-            </>
-          }
-          cta={
-            <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
-          }
-          layout="split"
-          descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
-          scrollIndicator={
-            <ScrollToButton
-              color={`${theme.palette.text.secondary}D9`}
-              size={52}
-              scrollToId="water-themes"
-              // Same offset math as VideoHero's scroll button: land
-              // the target panel's rounded card flush below the
-              // header by subtracting the header height and adding
-              // back one top frame-gap. Resolved at click time so
-              // live PanelTuner edits take effect.
-              scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
-              ariaLabel="Scroll down to the water issues section"
-            />
-          }
-        />
+          <CoeqwalPanel
+            id="about-coeqwal"
+            background={theme.palette.brand.water}
+            textColor={theme.palette.text.secondary}
+            // Size the inner rounded card so the CoeqwalPanel's total
+            // outer height (minHeight + 2·insetY from its own py
+            // padding) exactly equals the StickyScrollSection's
+            // stickyHeight (`100vh − headerHeight`). This matches the
+            // WaterThemesPanel geometry — its content wrapper is
+            // `height: 100%` inside the sticky div, with `py: insetY`
+            // producing the same rounded-card extent. Without
+            // subtracting the second `insetY` the CoeqwalPanel is
+            // `insetY` taller than the sticky container, which clips
+            // the bottom frame-gap under `overflow: hidden` and makes
+            // the rounded card sit flush with the sticky bottom edge
+            // instead of floating with symmetric top/bottom padding.
+            minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
+            borderRadius={tunerRadius()}
+            inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+            frameBackground={theme.palette.common.white}
+            contentMotionStyle={{ opacity: aboutOpacity }}
+            responsiveHeadline={
+              <>
+                <Typography
+                  variant="h2Main"
+                  component="span"
+                  sx={{ display: "block", color: "text.secondary" }}
+                >
+                  What is
+                </Typography>
+                <Typography
+                  variant="h1"
+                  component="span"
+                  sx={{ display: "block", color: "text.secondary" }}
+                >
+                  COEQWAL?
+                </Typography>
+              </>
+            }
+            description={
+              <>
+                COEQWAL – the Collaboratory for Equity in Water Allocation – is
+                a publicly-funded project that works with communities to better
+                understand how water is managed in California.
+                <br />
+                <br />
+                Using water planning models, COEQWAL sheds light on how
+                alternative decisions and climate change scenarios shape our
+                water future.
+              </>
+            }
+            cta={
+              <AboutCtaLink href="/about">
+                Learn more about COEQWAL
+              </AboutCtaLink>
+            }
+            layout="split"
+            descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
+            scrollIndicator={
+              <ScrollToButton
+                color={`${theme.palette.text.secondary}D9`}
+                size={52}
+                scrollToId="water-themes"
+                // Same offset math as VideoHero's scroll button: land
+                // the target panel's rounded card flush below the
+                // header by subtracting the header height and adding
+                // back one top frame-gap. Resolved at click time so
+                // live PanelTuner edits take effect.
+                scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+                ariaLabel="Scroll down to the water issues section"
+              />
+            }
+          />
         </StickyScrollSection>
       </div>
 
@@ -515,77 +516,77 @@ const IntroSection = () => {
             pb: `calc(${theme.space.panel.padding} + 50px)`,
           }}
         >
-        <MotionBox
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <Typography variant="h2Main" component="h2">
-            Want to
-          </Typography>
-          <Typography variant="h1" component="h1">
-            know more?
-          </Typography>
-        </MotionBox>
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Typography variant="h2Main" component="h2">
+              Want to
+            </Typography>
+            <Typography variant="h1" component="h1">
+              know more?
+            </Typography>
+          </MotionBox>
 
-        <MotionBox
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
-          sx={{
-            mt: theme.space.section.lg,
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            columnGap: { md: theme.space.section.lg },
-            rowGap: { xs: theme.space.section.md },
-          }}
-        >
-          <Typography variant="body1">
-            Water is limited and every choice has trade-offs. COEQWAL allows you
-            to explore different water scenarios and understand how decisions
-            shape potential futures for communities, farms, rivers, and the
-            Delta.
-          </Typography>
-
-          <Box
-            component="ul"
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
             sx={{
-              listStyle: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: theme.space.gap.xl,
+              mt: theme.space.section.lg,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              columnGap: { md: theme.space.section.lg },
+              rowGap: { xs: theme.space.section.md },
             }}
           >
-            {[
-              {
-                verb: "Learn",
-                rest: "how water in California\u2019s Central Valley is managed",
-              },
-              {
-                verb: "Explore",
-                rest: "how water outcomes shift under different scenarios",
-              },
-              {
-                verb: "Share",
-                rest: "your insights about California\u2019s water future",
-              },
-            ].map(({ verb, rest }) => (
-              <Box component="li" key={verb}>
-                <Typography variant="body1">
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: "fontWeightSemiBold" }}
-                  >
-                    {verb}
-                  </Box>{" "}
-                  {rest}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </MotionBox>
+            <Typography variant="body1">
+              Water is limited and every choice has trade-offs. COEQWAL allows
+              you to explore different water scenarios and understand how
+              decisions shape potential futures for communities, farms, rivers,
+              and the Delta.
+            </Typography>
+
+            <Box
+              component="ul"
+              sx={{
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: theme.space.gap.xl,
+              }}
+            >
+              {[
+                {
+                  verb: "Learn",
+                  rest: "how water in California\u2019s Central Valley is managed",
+                },
+                {
+                  verb: "Explore",
+                  rest: "how water outcomes shift under different scenarios",
+                },
+                {
+                  verb: "Share",
+                  rest: "your insights about California\u2019s water future",
+                },
+              ].map(({ verb, rest }) => (
+                <Box component="li" key={verb}>
+                  <Typography variant="body1">
+                    <Box
+                      component="span"
+                      sx={{ fontWeight: "fontWeightSemiBold" }}
+                    >
+                      {verb}
+                    </Box>{" "}
+                    {rest}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </MotionBox>
         </Box>
       </Box>
     </Box>

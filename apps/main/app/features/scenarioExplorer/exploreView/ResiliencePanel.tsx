@@ -322,12 +322,7 @@ export default function ResiliencePanel({
 
   const tierLabels = useMemo(
     () =>
-      [
-        TIER_LABELS[1],
-        TIER_LABELS[2],
-        TIER_LABELS[3],
-        TIER_LABELS[4],
-      ] as const,
+      [TIER_LABELS[1], TIER_LABELS[2], TIER_LABELS[3], TIER_LABELS[4]] as const,
     [],
   )
 
@@ -532,7 +527,10 @@ export default function ResiliencePanel({
   // "displayable" value is whatever drives the primary visual encoding
   // (tier mean, delta, density fraction, aggregate mean); used both for
   // cells and for marginals / clustering.
-  type RowValueFn = (rowKey: string, col: ResilienceHydroclimate) => {
+  type RowValueFn = (
+    rowKey: string,
+    col: ResilienceHydroclimate,
+  ) => {
     continuousValue: number | null
     tierLevel: number | null
     available: boolean
@@ -548,7 +546,12 @@ export default function ResiliencePanel({
   }
 
   const buildValueFn = useCallback<
-    () => { rowKeys: string[]; rowLabels: Record<string, string>; valueFn: RowValueFn; subjectLabel: string }
+    () => {
+      rowKeys: string[]
+      rowLabels: Record<string, string>
+      valueFn: RowValueFn
+      subjectLabel: string
+    }
   >(() => {
     if (effectiveView === "scenario") {
       const focusId = effectiveFocusScenarioId
@@ -583,9 +586,7 @@ export default function ResiliencePanel({
         // Compute delta
         let reference: number | null = null
         if (deltaMode === "vs_historical") {
-          const ref = focusId
-            ? getCell(focusId, rowKey, HISTORICAL_HC)
-            : null
+          const ref = focusId ? getCell(focusId, rowKey, HISTORICAL_HC) : null
           reference = ref?.available ? ref.continuousValue : null
         } else {
           const ref = getCell(deltaBaselineScenarioId, rowKey, hc)
@@ -618,11 +619,8 @@ export default function ResiliencePanel({
       // produced here is never consumed. We still return a valid shape
       // (using the first visible outcome as the subject) so downstream
       // memos that depend on `buildValueFn` stay stable and typed.
-      const fallbackOutcome =
-        outcomeRowCodes[0] ?? OUTCOME_CODE_ORDER[0] ?? ""
-      const outcomeName = fallbackOutcome
-        ? getOutcomeName(fallbackOutcome)
-        : ""
+      const fallbackOutcome = outcomeRowCodes[0] ?? OUTCOME_CODE_ORDER[0] ?? ""
+      const outcomeName = fallbackOutcome ? getOutcomeName(fallbackOutcome) : ""
       const rowKeys = [...scenarioRowIds]
       const rowLabels: Record<string, string> = {}
       for (const sid of rowKeys) rowLabels[sid] = getDisplayName(sid)
@@ -909,15 +907,11 @@ export default function ResiliencePanel({
       let distribution: ReadonlyArray<ResilienceGlyphEntry> | undefined
       if (cellEncoding === "distribution" && cell.available) {
         if (distributionMode === "location") {
-          const isNodSod = (NOD_SOD_OUTCOME_CODES as readonly string[]).includes(
-            rowKey,
-          )
+          const isNodSod = (
+            NOD_SOD_OUTCOME_CODES as readonly string[]
+          ).includes(rowKey)
           if (!isNodSod) {
-            distribution = loiBuildEntriesForScope(
-              rowKey,
-              hc,
-              [scenarioId],
-            )
+            distribution = loiBuildEntriesForScope(rowKey, hc, [scenarioId])
           }
         } else {
           distribution = [
@@ -1072,15 +1066,13 @@ export default function ResiliencePanel({
       let distribution: ReadonlyArray<ResilienceGlyphEntry> | undefined
       if (cellEncoding === "distribution" && cell.available) {
         if (distributionMode === "location") {
-          const isNodSod = (NOD_SOD_OUTCOME_CODES as readonly string[]).includes(
-            outcomeCode,
-          )
+          const isNodSod = (
+            NOD_SOD_OUTCOME_CODES as readonly string[]
+          ).includes(outcomeCode)
           if (!isNodSod) {
-            distribution = loiBuildEntriesForScope(
-              outcomeCode,
-              hc,
-              [scenarioId],
-            )
+            distribution = loiBuildEntriesForScope(outcomeCode, hc, [
+              scenarioId,
+            ])
           }
         } else {
           distribution = [
@@ -1318,8 +1310,7 @@ export default function ResiliencePanel({
       if (!coords) return null
       const tierLevel = entry.tierLevel ?? 0
       const tierColorIndex = Math.max(1, Math.min(4, tierLevel)) - 1
-      const tierColor =
-        tierColors[tierColorIndex] ?? theme.palette.grey[300]
+      const tierColor = tierColors[tierColorIndex] ?? theme.palette.grey[300]
       return {
         outcomeCode,
         highlight: {
@@ -1328,9 +1319,7 @@ export default function ResiliencePanel({
           latitude: coords[1],
           name: entry.locationName ?? loiId,
           tierLevel: tierLevel || 1,
-          tierLabel: tierLevel
-            ? getTierLabel(tierLevel)
-            : (entry.label ?? ""),
+          tierLabel: tierLevel ? getTierLabel(tierLevel) : (entry.label ?? ""),
           tierColor,
         },
       }
@@ -1534,9 +1523,7 @@ export default function ResiliencePanel({
   // them. This section just names a couple of derived flags the JSX
   // uses below for the banner / chip rendering.
   const noOutcomesSelected =
-    !onboardingEmpty &&
-    outcomeRowCodes.length === 0 &&
-    view !== "quadrant"
+    !onboardingEmpty && outcomeRowCodes.length === 0 && view !== "quadrant"
 
   // Pin / expand wiring for the small-multiples tile headers. Pinning
   // either flips a scenario in `selectedScenarios` (by-scenario view)
@@ -1682,9 +1669,7 @@ export default function ResiliencePanel({
   }
 
   const hasData =
-    !!matrixCells &&
-    Object.keys(matrixCells).length > 0 &&
-    columns.length > 0
+    !!matrixCells && Object.keys(matrixCells).length > 0 && columns.length > 0
 
   if (isLoading && !hasData) {
     return (
@@ -1806,219 +1791,220 @@ export default function ResiliencePanel({
               minHeight: 0,
             }}
           >
-        {columns.length === 0 ? (
-          <Box
-            sx={{
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              Select at least one hydroclimate in the chart controls.
-            </Typography>
-          </Box>
-        ) : noOutcomesSelected ? (
-          <Box
-            sx={{
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              px: 3,
-            }}
-          >
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ textAlign: "center", maxWidth: 480 }}
-            >
-              No outcome rows selected. Open &ldquo;choose outcome rows&rdquo;
-              in the chart controls above to pick which outcomes to display.
-            </Typography>
-          </Box>
-        ) : onboardingEmpty ? (
-          <BrowseShell
-            banner={
-              <OnboardingBanner
-                variant="empty"
-                onBrowseScenarios={
-                  onControlsChange ? handleBrowseScenarios : undefined
+            {columns.length === 0 ? (
+              <Box
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Select at least one hydroclimate in the chart controls.
+                </Typography>
+              </Box>
+            ) : noOutcomesSelected ? (
+              <Box
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  px: 3,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ textAlign: "center", maxWidth: 480 }}
+                >
+                  No outcome rows selected. Open &ldquo;choose outcome
+                  rows&rdquo; in the chart controls above to pick which outcomes
+                  to display.
+                </Typography>
+              </Box>
+            ) : onboardingEmpty ? (
+              <BrowseShell
+                banner={
+                  <OnboardingBanner
+                    variant="empty"
+                    onBrowseScenarios={
+                      onControlsChange ? handleBrowseScenarios : undefined
+                    }
+                    onBrowseOutcomes={
+                      onControlsChange ? handleBrowseOutcomes : undefined
+                    }
+                    onOpenWalkthrough={handleOpenWalkthrough}
+                  />
                 }
-                onBrowseOutcomes={
-                  onControlsChange ? handleBrowseOutcomes : undefined
+              >
+                <ResilienceHeatmap
+                  rows={rows}
+                  columns={columns}
+                  cells={cells}
+                  tierColors={tierColors}
+                  tierLabels={tierLabels}
+                  palette={heatmapPalette}
+                  cellRender={effectiveCellRender}
+                  showCellNumbers={showCellNumbers}
+                  onCellHover={handleCellHover}
+                  onCellClick={isMapVisible ? handleCellClick : undefined}
+                  highlightedRowKeys={effectiveRowHighlight}
+                  formatRowTick={formatRowTick}
+                  marginals={marginalsData}
+                  showMarginals={showMarginals}
+                  distributionMode={distributionMode}
+                  onSquareHover={handleSquareHover}
+                  onSquareClick={handleSquareClick}
+                />
+              </BrowseShell>
+            ) : expandedTile ? (
+              <ExpandedTileView
+                tile={expandedTile}
+                rows={view === "scenario" ? byScenarioRows : byOutcomeRows}
+                columns={columns}
+                tierColors={tierColors}
+                tierLabels={tierLabels}
+                palette={heatmapPalette}
+                cellRender={effectiveCellRender}
+                showCellNumbers={showCellNumbers}
+                formatRowTick={formatRowTick}
+                distributionMode={distributionMode}
+                onCellHover={handleCellHover}
+                onCellClick={isMapVisible ? handleCellClick : undefined}
+                onSquareHover={(info) =>
+                  handleSquareHover(
+                    info ? { cell: info.cell, entry: info.entry } : null,
+                  )
                 }
-                onOpenWalkthrough={handleOpenWalkthrough}
+                onSquareClick={(info) =>
+                  handleSquareClick({ cell: info.cell, entry: info.entry })
+                }
+                onBack={handleBackToGrid}
+                backLabel={
+                  view === "scenario"
+                    ? "Back to all scenarios"
+                    : "Back to all outcomes"
+                }
               />
-            }
-          >
-            <ResilienceHeatmap
-              rows={rows}
-              columns={columns}
-              cells={cells}
-              tierColors={tierColors}
-              tierLabels={tierLabels}
-              palette={heatmapPalette}
-              cellRender={effectiveCellRender}
-              showCellNumbers={showCellNumbers}
-              onCellHover={handleCellHover}
-              onCellClick={isMapVisible ? handleCellClick : undefined}
-              highlightedRowKeys={effectiveRowHighlight}
-              formatRowTick={formatRowTick}
-              marginals={marginalsData}
-              showMarginals={showMarginals}
-              distributionMode={distributionMode}
-              onSquareHover={handleSquareHover}
-              onSquareClick={handleSquareClick}
-            />
-          </BrowseShell>
-        ) : expandedTile ? (
-          <ExpandedTileView
-            tile={expandedTile}
-            rows={view === "scenario" ? byScenarioRows : byOutcomeRows}
-            columns={columns}
-            tierColors={tierColors}
-            tierLabels={tierLabels}
-            palette={heatmapPalette}
-            cellRender={effectiveCellRender}
-            showCellNumbers={showCellNumbers}
-            formatRowTick={formatRowTick}
-            distributionMode={distributionMode}
-            onCellHover={handleCellHover}
-            onCellClick={isMapVisible ? handleCellClick : undefined}
-            onSquareHover={(info) =>
-              handleSquareHover(
-                info ? { cell: info.cell, entry: info.entry } : null,
-              )
-            }
-            onSquareClick={(info) =>
-              handleSquareClick({ cell: info.cell, entry: info.entry })
-            }
-            onBack={handleBackToGrid}
-            backLabel={
-              view === "scenario"
-                ? "Back to all scenarios"
-                : "Back to all outcomes"
-            }
-          />
-        ) : view === "scenario" ? (
-          <BrowseShell
-            banner={
-              onboardingVariant === "browse-scenarios" ? (
-                <OnboardingBanner
-                  variant="browse-scenarios"
-                  onBackToAggregate={
-                    onControlsChange ? handleBackToAggregate : undefined
+            ) : view === "scenario" ? (
+              <BrowseShell
+                banner={
+                  onboardingVariant === "browse-scenarios" ? (
+                    <OnboardingBanner
+                      variant="browse-scenarios"
+                      onBackToAggregate={
+                        onControlsChange ? handleBackToAggregate : undefined
+                      }
+                      onOpenWalkthrough={handleOpenWalkthrough}
+                    />
+                  ) : undefined
+                }
+                chip={
+                  showScenarioCurationChip
+                    ? {
+                        label: `Comparing ${selectedScenarios.length} of ${byScenarioScope.length} scenarios`,
+                        actionLabel: "Focus on my selection",
+                        onClick: () =>
+                          onControlsChange?.({ showAllScenarios: false }),
+                      }
+                    : null
+                }
+              >
+                <ResilienceHeatmapSmallMultiples
+                  rows={byScenarioRows}
+                  columns={columns}
+                  tiles={byScenarioTiles}
+                  tierColors={tierColors}
+                  tierLabels={tierLabels}
+                  palette={heatmapPalette}
+                  cellRender={effectiveCellRender}
+                  showCellNumbers={showCellNumbers}
+                  tileAspect="wide"
+                  onCellHover={handleCellHover}
+                  onCellClick={isMapVisible ? handleCellClick : undefined}
+                  formatRowTick={formatRowTick}
+                  distributionMode={distributionMode}
+                  onSquareHover={(info) =>
+                    handleSquareHover(
+                      info ? { cell: info.cell, entry: info.entry } : null,
+                    )
                   }
-                  onOpenWalkthrough={handleOpenWalkthrough}
+                  onSquareClick={(info) =>
+                    handleSquareClick({ cell: info.cell, entry: info.entry })
+                  }
+                  onTilePin={
+                    onControlsChange ? handleTilePinByScenario : undefined
+                  }
+                  isTilePinned={isScenarioPinned}
+                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                 />
-              ) : undefined
-            }
-            chip={
-              showScenarioCurationChip
-                ? {
-                    label: `Comparing ${selectedScenarios.length} of ${byScenarioScope.length} scenarios`,
-                    actionLabel: "Focus on my selection",
-                    onClick: () =>
-                      onControlsChange?.({ showAllScenarios: false }),
+              </BrowseShell>
+            ) : view === "outcome" ? (
+              <BrowseShell
+                banner={
+                  onboardingVariant === "browse-outcomes" ? (
+                    <OnboardingBanner
+                      variant="browse-outcomes"
+                      onBackToAggregate={
+                        onControlsChange ? handleBackToAggregate : undefined
+                      }
+                      onOpenWalkthrough={handleOpenWalkthrough}
+                    />
+                  ) : undefined
+                }
+              >
+                <ResilienceHeatmapSmallMultiples
+                  rows={byOutcomeRows}
+                  columns={columns}
+                  tiles={byOutcomeTiles}
+                  tierColors={tierColors}
+                  tierLabels={tierLabels}
+                  palette={heatmapPalette}
+                  cellRender={effectiveCellRender}
+                  showCellNumbers={showCellNumbers}
+                  tileAspect="tall"
+                  onCellHover={handleCellHover}
+                  onCellClick={isMapVisible ? handleCellClick : undefined}
+                  formatRowTick={formatRowTick}
+                  distributionMode={distributionMode}
+                  onSquareHover={(info) =>
+                    handleSquareHover(
+                      info ? { cell: info.cell, entry: info.entry } : null,
+                    )
                   }
-                : null
-            }
-          >
-            <ResilienceHeatmapSmallMultiples
-              rows={byScenarioRows}
-              columns={columns}
-              tiles={byScenarioTiles}
-              tierColors={tierColors}
-              tierLabels={tierLabels}
-              palette={heatmapPalette}
-              cellRender={effectiveCellRender}
-              showCellNumbers={showCellNumbers}
-              tileAspect="wide"
-              onCellHover={handleCellHover}
-              onCellClick={isMapVisible ? handleCellClick : undefined}
-              formatRowTick={formatRowTick}
-              distributionMode={distributionMode}
-              onSquareHover={(info) =>
-                handleSquareHover(
-                  info ? { cell: info.cell, entry: info.entry } : null,
-                )
-              }
-              onSquareClick={(info) =>
-                handleSquareClick({ cell: info.cell, entry: info.entry })
-              }
-              onTilePin={
-                onControlsChange ? handleTilePinByScenario : undefined
-              }
-              isTilePinned={isScenarioPinned}
-              onTileExpand={onControlsChange ? handleTileExpand : undefined}
-            />
-          </BrowseShell>
-        ) : view === "outcome" ? (
-          <BrowseShell
-            banner={
-              onboardingVariant === "browse-outcomes" ? (
-                <OnboardingBanner
-                  variant="browse-outcomes"
-                  onBackToAggregate={
-                    onControlsChange ? handleBackToAggregate : undefined
+                  onSquareClick={(info) =>
+                    handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onOpenWalkthrough={handleOpenWalkthrough}
+                  onTilePin={
+                    onControlsChange ? handleTilePinByOutcome : undefined
+                  }
+                  isTilePinned={isOutcomePinned}
+                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                 />
-              ) : undefined
-            }
-          >
-            <ResilienceHeatmapSmallMultiples
-              rows={byOutcomeRows}
-              columns={columns}
-              tiles={byOutcomeTiles}
-              tierColors={tierColors}
-              tierLabels={tierLabels}
-              palette={heatmapPalette}
-              cellRender={effectiveCellRender}
-              showCellNumbers={showCellNumbers}
-              tileAspect="tall"
-              onCellHover={handleCellHover}
-              onCellClick={isMapVisible ? handleCellClick : undefined}
-              formatRowTick={formatRowTick}
-              distributionMode={distributionMode}
-              onSquareHover={(info) =>
-                handleSquareHover(
-                  info ? { cell: info.cell, entry: info.entry } : null,
-                )
-              }
-              onSquareClick={(info) =>
-                handleSquareClick({ cell: info.cell, entry: info.entry })
-              }
-              onTilePin={
-                onControlsChange ? handleTilePinByOutcome : undefined
-              }
-              isTilePinned={isOutcomePinned}
-              onTileExpand={onControlsChange ? handleTileExpand : undefined}
-            />
-          </BrowseShell>
-        ) : (
-          <ResilienceHeatmap
-            rows={rows}
-            columns={columns}
-            cells={cells}
-            tierColors={tierColors}
-            tierLabels={tierLabels}
-            palette={heatmapPalette}
-            cellRender={effectiveCellRender}
-            showCellNumbers={showCellNumbers}
-            onCellHover={handleCellHover}
-            onCellClick={isMapVisible ? handleCellClick : undefined}
-            highlightedRowKeys={effectiveRowHighlight}
-            formatRowTick={formatRowTick}
-            marginals={marginalsData}
-            showMarginals={showMarginals}
-            distributionMode={distributionMode}
-            onSquareHover={handleSquareHover}
-            onSquareClick={handleSquareClick}
-          />
-        )}
+              </BrowseShell>
+            ) : (
+              <ResilienceHeatmap
+                rows={rows}
+                columns={columns}
+                cells={cells}
+                tierColors={tierColors}
+                tierLabels={tierLabels}
+                palette={heatmapPalette}
+                cellRender={effectiveCellRender}
+                showCellNumbers={showCellNumbers}
+                onCellHover={handleCellHover}
+                onCellClick={isMapVisible ? handleCellClick : undefined}
+                highlightedRowKeys={effectiveRowHighlight}
+                formatRowTick={formatRowTick}
+                marginals={marginalsData}
+                showMarginals={showMarginals}
+                distributionMode={distributionMode}
+                onSquareHover={handleSquareHover}
+                onSquareClick={handleSquareClick}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </Box>
@@ -2156,9 +2142,7 @@ function ResilienceOutcomeSelector({
         sx={checkboxSx}
       />
 
-      <Box
-        sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
-      />
+      <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }} />
 
       {withRegional.map((code) => {
         const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
@@ -2175,9 +2159,7 @@ function ResilienceOutcomeSelector({
               <OutcomeRow
                 key={vCode}
                 label={
-                  vCode.startsWith("NOD")
-                    ? "North of Delta"
-                    : "South of Delta"
+                  vCode.startsWith("NOD") ? "North of Delta" : "South of Delta"
                 }
                 checked={visibleSet.has(vCode)}
                 indent
@@ -2189,9 +2171,7 @@ function ResilienceOutcomeSelector({
         )
       })}
 
-      <Box
-        sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
-      />
+      <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }} />
 
       {withoutRegional.map((code) => (
         <OutcomeRow
@@ -2458,7 +2438,15 @@ function ExpandedTileView({
   const theme = useTheme()
   const prefersReducedMotion = useReducedMotion()
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, gap: 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+        gap: 1,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -2506,9 +2494,7 @@ function ExpandedTileView({
       </Box>
       <motion.div
         layoutId={`resilience-tile-${tile.id}`}
-        transition={
-          prefersReducedMotion ? { duration: 0 } : { duration: 0.25 }
-        }
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25 }}
         style={{ flex: 1, minHeight: 0 }}
       >
         <ResilienceHeatmap
@@ -2527,9 +2513,7 @@ function ExpandedTileView({
           onSquareHover={(info) =>
             onSquareHover(info ? { tileId: tile.id, ...info } : null)
           }
-          onSquareClick={(info) =>
-            onSquareClick({ tileId: tile.id, ...info })
-          }
+          onSquareClick={(info) => onSquareClick({ tileId: tile.id, ...info })}
         />
       </motion.div>
     </Box>
@@ -2555,19 +2539,25 @@ function BrowseShell({
   children,
 }: {
   banner?: React.ReactNode
-  chip?:
-    | {
-        label: string
-        actionLabel: string
-        onClick: () => void
-      }
-    | null
+  chip?: {
+    label: string
+    actionLabel: string
+    onClick: () => void
+  } | null
   children: React.ReactNode
 }) {
   const theme = useTheme()
   if (!banner && !chip) return <>{children}</>
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, gap: 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+        gap: 1,
+      }}
+    >
       {banner}
       {chip && (
         <Box

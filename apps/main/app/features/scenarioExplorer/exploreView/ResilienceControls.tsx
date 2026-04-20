@@ -166,9 +166,7 @@ export default function ResilienceControls({
       selectedHydroclimates.size === RESILIENCE_HYDROCLIMATES.length
     if (allSelected) {
       onChange({
-        selectedHydroclimates: new Set<ResilienceHydroclimate>([
-          "historical",
-        ]),
+        selectedHydroclimates: new Set<ResilienceHydroclimate>(["historical"]),
       })
     } else {
       onChange({
@@ -242,7 +240,8 @@ export default function ResilienceControls({
   // expose "tier" and "distribution" - the richer insight encodings don't
   // compose cleanly at the small-multiples scale.
   const showEncodingSelect =
-    SHOW_INSIGHT_MODES && (view === "aggregate" || view === "scenario" || view === "outcome")
+    SHOW_INSIGHT_MODES &&
+    (view === "aggregate" || view === "scenario" || view === "outcome")
   const isAggregate = view === "aggregate"
   const showDistributionModeToggle =
     SHOW_INSIGHT_MODES && cellEncoding === "distribution" && !isQuadrant

@@ -198,15 +198,15 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
-            <InlineToggleChip
-              label="show range"
-              active={showRadarRange}
-              onClick={() => setShowRadarRange(!showRadarRange)}
-            />
-            <Box
-              component="button"
-              type="button"
-              disabled={selectedScenarios.length === 0 && !radarShowAll}
+          <InlineToggleChip
+            label="show range"
+            active={showRadarRange}
+            onClick={() => setShowRadarRange(!showRadarRange)}
+          />
+          <Box
+            component="button"
+            type="button"
+            disabled={selectedScenarios.length === 0 && !radarShowAll}
             onClick={() => radarCaptureRef.current?.()}
             aria-label="capture view"
             sx={{
@@ -332,7 +332,10 @@ export default function ScenarioExplorer() {
                   )
                 }
                 toolbar={
-                  <ToolToolbar gridAligned={isListMode} hideTitle={!isListMode} />
+                  <ToolToolbar
+                    gridAligned={isListMode}
+                    hideTitle={!isListMode}
+                  />
                 }
                 chartControls={isListMode ? undefined : chartControls}
               >

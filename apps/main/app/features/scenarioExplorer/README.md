@@ -133,8 +133,8 @@ The Zustand store (with Immer) manages state shared across components.
 
 #### Hydroclimate
 
-| Property       | Type     | Default        | Description                                                                       |
-| -------------- | -------- | -------------- | --------------------------------------------------------------------------------- |
+| Property       | Type     | Default        | Description                                                    |
+| -------------- | -------- | -------------- | -------------------------------------------------------------- |
 | `hydroclimate` | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"cc50"`, `"cc95"`) |
 
 #### Other

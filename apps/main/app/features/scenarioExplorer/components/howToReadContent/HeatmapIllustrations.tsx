@@ -165,10 +165,7 @@ export function SummaryCellExample() {
             refY={4}
             orient="auto"
           >
-            <path
-              d="M0,0 L6,4 L0,8 Z"
-              fill={theme.palette.text.secondary}
-            />
+            <path d="M0,0 L6,4 L0,8 Z" fill={theme.palette.text.secondary} />
           </marker>
         </defs>
         <text
@@ -281,9 +278,7 @@ export function DensityCellExample() {
     const r = Math.round(fr + (tr - fr) * t)
     const g = Math.round(fg + (tg - fg) * t)
     const b = Math.round(fb + (tb - fb) * t)
-    return `#${[r, g, b]
-      .map((v) => v.toString(16).padStart(2, "0"))
-      .join("")}`
+    return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`
   }
 
   const gap = 12

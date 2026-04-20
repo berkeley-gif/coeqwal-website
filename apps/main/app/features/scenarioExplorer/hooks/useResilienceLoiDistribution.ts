@@ -196,10 +196,7 @@ export function useResilienceLoiDistribution({
       // Preserve display_order from the first response that mentions an LOI.
       const loiOrder: string[] = []
       const loiSeen = new Set<string>()
-      const loiMeta = new Map<
-        string,
-        { label: string; order: number }
-      >()
+      const loiMeta = new Map<string, { label: string; order: number }>()
 
       for (const sid of scopeIds) {
         const perHc = perScenario[sid]

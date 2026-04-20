@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useCallback,
-} from "react"
+import { useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -115,9 +109,7 @@ interface BeatTextOverlayProps {
    *  are laid out (or resized). The parent uses these rects as landing
    *  coordinates for the SVG morph overlay. Coordinates are relative to
    *  the right-column root Box (its left edge == panelWidth * 2/3). */
-  onGlyphLayoutChange?: (
-    layout: Record<string, GlyphRect>,
-  ) => void
+  onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
 }
 
 function clamp01(v: number) {
@@ -547,8 +539,7 @@ export default function BeatTextOverlay({
         const fadeIn = clamp01((v - 0.49) / 0.03)
         const fadeOut = clamp01((v - 0.78) / 0.02)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows =
-          v >= 0.485 && v < 0.80 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.485 && v < 0.8 ? "1fr" : "0fr"
       }
 
       if (beat1cDeliveryRef.current) {
@@ -556,8 +547,7 @@ export default function BeatTextOverlay({
         const fadeIn = clamp01((v - 0.65) / 0.03)
         const fadeOut = clamp01((v - 0.78) / 0.02)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows =
-          v >= 0.645 && v < 0.80 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.645 && v < 0.8 ? "1fr" : "0fr"
       }
 
       // "For each scenario, outcome levels..." fades in during the
@@ -566,7 +556,7 @@ export default function BeatTextOverlay({
       // morphs then play alongside this sentence over [0.84, 1.0].
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
-        el.style.opacity = String(clamp01((v - 0.80) / 0.02))
+        el.style.opacity = String(clamp01((v - 0.8) / 0.02))
         el.style.gridTemplateRows = v >= 0.795 ? "1fr" : "0fr"
       }
 
@@ -792,11 +782,13 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pb: 2.5 }}>
               <Typography variant="body2" component="p">
-                Different scenarios change how water is allocated among different users and the environment.
+                Different scenarios change how water is allocated among
+                different users and the environment.
               </Typography>
               <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
                 <Typography variant="body2" component="p">
-                  To compare results on a common scale, we group key outcomes into levels:
+                  To compare results on a common scale, we group key outcomes
+                  into levels:
                 </Typography>
               </Box>
             </Box>
@@ -928,7 +920,8 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2.5 }}>
               <Typography variant="body2" component="p">
-                For example, each colored location on the map represents an agricultural water district receiving surface water deliveries.
+                For example, each colored location on the map represents an
+                agricultural water district receiving surface water deliveries.
               </Typography>
             </Box>
           </Box>
@@ -942,7 +935,8 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
-                The colors correspond to different water delivery outcome levels that affect{" "}
+                The colors correspond to different water delivery outcome levels
+                that affect{" "}
                 <Box component="strong" sx={{ fontWeight: 600 }}>
                   agricultural revenue
                 </Box>
@@ -960,7 +954,8 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
-                For each scenario, outcome levels are calculated for all key outcomes across all locations of interest.
+                For each scenario, outcome levels are calculated for all key
+                outcomes across all locations of interest.
               </Typography>
             </Box>
           </Box>
@@ -1010,9 +1005,7 @@ export default function BeatTextOverlay({
                       onClick={onBack}
                       size="small"
                       aria-label={
-                        atStart
-                          ? "Back to intro (←)"
-                          : "Previous beat (←)"
+                        atStart ? "Back to intro (←)" : "Previous beat (←)"
                       }
                       disabled={isPlaying}
                       sx={controlSx}
@@ -1124,192 +1117,194 @@ export default function BeatTextOverlay({
         {/* Scenario header + encoding toggle.
          *  Disabled per design direction - kept in-source (wrapped in
          *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
-        {false && (<Box
-          ref={scenarioHeaderRef}
-          sx={{
-            px: 3,
-            pt: 2,
-            pb: 1.5,
-            flexShrink: 0,
-            pointerEvents: interactive ? "auto" : "none",
-            opacity: 0,
-            transition: "opacity 0.6s ease",
-            borderBottom: interactive
-              ? `1px solid ${theme.palette.grey[200]}`
-              : "none",
-          }}
-        >
-          {/* Two-column grid: title/toggle left, ops/climate right */}
+        {false && (
           <Box
+            ref={scenarioHeaderRef}
             sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto",
-              rowGap: scenarioDescription ? 0.5 : 1.5,
-              columnGap: 1.5,
-              alignItems: "center",
+              px: 3,
+              pt: 2,
+              pb: 1.5,
+              flexShrink: 0,
+              pointerEvents: interactive ? "auto" : "none",
+              opacity: 0,
+              transition: "opacity 0.6s ease",
+              borderBottom: interactive
+                ? `1px solid ${theme.palette.grey[200]}`
+                : "none",
             }}
           >
-            {/* Top-left: title */}
-            {scenarioName && (
-              <Typography
-                variant="subtitle1"
-                component="h3"
-                sx={{ fontWeight: 600, gridColumn: 1 }}
-              >
-                {scenarioName}
-              </Typography>
-            )}
-
-            {/* Top-right: key operations */}
-            {opsIconDefs.length > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  gridColumn: 2,
-                  justifySelf: "end",
-                }}
-              >
+            {/* Two-column grid: title/toggle left, ops/climate right */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                rowGap: scenarioDescription ? 0.5 : 1.5,
+                columnGap: 1.5,
+                alignItems: "center",
+              }}
+            >
+              {/* Top-left: title */}
+              {scenarioName && (
                 <Typography
-                  component="span"
+                  variant="subtitle1"
+                  component="h3"
+                  sx={{ fontWeight: 600, gridColumn: 1 }}
+                >
+                  {scenarioName}
+                </Typography>
+              )}
+
+              {/* Top-right: key operations */}
+              {opsIconDefs.length > 0 && (
+                <Box
                   sx={{
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.02em",
-                    color: theme.palette.grey[600],
-                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    gridColumn: 2,
+                    justifySelf: "end",
                   }}
                 >
-                  Key operations
-                </Typography>
-                {opsIconDefs.map((def) => (
-                  <HybridTooltip
-                    key={def.id}
-                    content={
-                      <>
-                        <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
-                          {def.label}
-                        </Typography>
-                        {def.description}
-                      </>
-                    }
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.02em",
+                      color: theme.palette.grey[600],
+                      whiteSpace: "nowrap",
+                    }}
                   >
-                    <Box
-                      tabIndex={0}
-                      aria-label={def.label}
-                      sx={{
-                        width: 26,
-                        height: 26,
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "50%",
-                        cursor: "default",
-                        "&:focus-visible": {
-                          outline: `2px solid ${theme.palette.blue.bright}`,
-                          outlineOffset: "2px",
-                        },
-                      }}
+                    Key operations
+                  </Typography>
+                  {opsIconDefs.map((def) => (
+                    <HybridTooltip
+                      key={def.id}
+                      content={
+                        <>
+                          <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
+                            {def.label}
+                          </Typography>
+                          {def.description}
+                        </>
+                      }
                     >
-                      {renderIconDef(def)}
-                    </Box>
-                  </HybridTooltip>
-                ))}
-              </Box>
-            )}
+                      <Box
+                        tabIndex={0}
+                        aria-label={def.label}
+                        sx={{
+                          width: 26,
+                          height: 26,
+                          flexShrink: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "50%",
+                          cursor: "default",
+                          "&:focus-visible": {
+                            outline: `2px solid ${theme.palette.blue.bright}`,
+                            outlineOffset: "2px",
+                          },
+                        }}
+                      >
+                        {renderIconDef(def)}
+                      </Box>
+                    </HybridTooltip>
+                  ))}
+                </Box>
+              )}
 
-            {/* Description spanning both columns */}
-            {scenarioDescription && (
-              <Typography
-                variant="compactSubtitle"
-                component="p"
-                sx={{
-                  color: theme.palette.grey[500],
-                  gridColumn: "1 / -1",
-                }}
-              >
-                {descriptionWithLinks}
-              </Typography>
-            )}
+              {/* Description spanning both columns */}
+              {scenarioDescription && (
+                <Typography
+                  variant="compactSubtitle"
+                  component="p"
+                  sx={{
+                    color: theme.palette.grey[500],
+                    gridColumn: "1 / -1",
+                  }}
+                >
+                  {descriptionWithLinks}
+                </Typography>
+              )}
 
-            {/* Bottom-left: encoding toggle */}
-            {encodingMode && onEncodingChange && (
-              <ToggleButtonGroup
-                value={encodingMode}
-                exclusive
-                onChange={(_, val) => {
-                  if (val) onEncodingChange?.(val as EncodingMode)
-                }}
-                size="small"
-                sx={{
-                  gridColumn: 1,
-                  "& .MuiToggleButton-root": {
-                    color: theme.palette.grey[600],
-                    border: `1px solid ${theme.palette.grey[300]}`,
-                    textTransform: "none",
-                    fontWeight: 500,
-                    fontSize: "0.75rem",
-                    letterSpacing: "0.02em",
-                    px: 1.25,
-                    py: 0.125,
-                    "&.Mui-selected": {
-                      backgroundColor: theme.palette.blue.bright,
-                      color: theme.palette.common.white,
-                      borderColor: theme.palette.blue.bright,
+              {/* Bottom-left: encoding toggle */}
+              {encodingMode && onEncodingChange && (
+                <ToggleButtonGroup
+                  value={encodingMode}
+                  exclusive
+                  onChange={(_, val) => {
+                    if (val) onEncodingChange?.(val as EncodingMode)
+                  }}
+                  size="small"
+                  sx={{
+                    gridColumn: 1,
+                    "& .MuiToggleButton-root": {
+                      color: theme.palette.grey[600],
+                      border: `1px solid ${theme.palette.grey[300]}`,
+                      textTransform: "none",
+                      fontWeight: 500,
+                      fontSize: "0.75rem",
+                      letterSpacing: "0.02em",
+                      px: 1.25,
+                      py: 0.125,
+                      "&.Mui-selected": {
+                        backgroundColor: theme.palette.blue.bright,
+                        color: theme.palette.common.white,
+                        borderColor: theme.palette.blue.bright,
+                        "&:hover": {
+                          backgroundColor: theme.palette.blue.dark,
+                        },
+                      },
                       "&:hover": {
-                        backgroundColor: theme.palette.blue.dark,
+                        backgroundColor: theme.palette.grey[100],
                       },
                     },
-                    "&:hover": {
-                      backgroundColor: theme.palette.grey[100],
-                    },
-                  },
-                }}
-              >
-                <ToggleButton value="distribution">Distribution</ToggleButton>
-                <ToggleButton value="bar">Bar</ToggleButton>
-                <ToggleButton value="average">Average</ToggleButton>
-              </ToggleButtonGroup>
-            )}
-
-            {/* Bottom-right: hydroclimate chooser */}
-            {onHydroclimateChange && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  gridColumn: 2,
-                  justifySelf: "end",
-                }}
-              >
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.02em",
-                    color: theme.palette.grey[600],
-                    whiteSpace: "nowrap",
                   }}
                 >
-                  View by climate
-                </Typography>
-                <HydroclimateChooser
-                  value={hydroclimate}
-                  onChange={onHydroclimateChange}
-                  showTitle={false}
-                  showLabels={false}
-                  hideDisabled
-                  iconSize="26px"
-                  iconFontSize="0.95rem"
-                />
-              </Box>
-            )}
+                  <ToggleButton value="distribution">Distribution</ToggleButton>
+                  <ToggleButton value="bar">Bar</ToggleButton>
+                  <ToggleButton value="average">Average</ToggleButton>
+                </ToggleButtonGroup>
+              )}
+
+              {/* Bottom-right: hydroclimate chooser */}
+              {onHydroclimateChange && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    gridColumn: 2,
+                    justifySelf: "end",
+                  }}
+                >
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.02em",
+                      color: theme.palette.grey[600],
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    View by climate
+                  </Typography>
+                  <HydroclimateChooser
+                    value={hydroclimate}
+                    onChange={onHydroclimateChange}
+                    showTitle={false}
+                    showLabels={false}
+                    hideDisabled
+                    iconSize="26px"
+                    iconFontSize="0.95rem"
+                  />
+                </Box>
+              )}
+            </Box>
           </Box>
-        </Box>)}
+        )}
 
         {/* Beat 1C narrative lives in the left panel below the tier
          *  legend. See `beat1Ref` above. The overlay panel is dedicated to
