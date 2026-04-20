@@ -106,6 +106,21 @@ const FINAL_BEAT_INDEX = BEATS.length - 1
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
 
+/** Extra pixels added to the map panel's height beyond the "fits one
+ *  viewport once the sticky header stack is subtracted" baseline. We
+ *  intentionally let the panel extend below the fold: the intended
+ *  reading posture for this panel is that the user scrolls so the
+ *  title + Play button + subtitle park at the top of the visible area,
+ *  and the extra pixels give the left text column enough room to hold
+ *  the intro paragraphs + tier legend + beat-1C reveals + bottom
+ *  controls without running against the bottom edge. Morph landing
+ *  coordinates (polygon → square) are measured from the DOM via
+ *  ResizeObserver in `BeatTextOverlay`, so the right-column geometry
+ *  adapts automatically to the taller panel — no other tuning needed.
+ *  Increase for more breathing room; decrease to bring the bottom
+ *  back toward the fold. */
+const TIER_PANEL_EXTRA_PX = 320
+
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
@@ -2595,11 +2610,19 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        // Shrink the map panel so it fits the viewport once the sticky
-        // header stack (collapsed header + Learn/Explore/Share tabs +
-        // Explore sub-nav) is subtracted, plus a small breathing-room
-        // constant matching GetStartedPanelShell's PANEL_BREATHING_PX.
-        height: `calc(100vh - ${theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight + 80}px)`,
+        // Baseline: shrink the panel so it fits the viewport once the
+        // sticky header stack (collapsed header + Learn/Explore/Share
+        // tabs + Explore sub-nav) is subtracted, plus the same 80 px
+        // breathing-room constant used by GetStartedPanelShell
+        // (PANEL_BREATHING_PX).
+        //
+        // Then add `TIER_PANEL_EXTRA_PX` so the left text column has
+        // room for all reveals + bottom controls. The panel is
+        // intentionally taller than one viewport — the user is
+        // expected to scroll so the title + Play button park at the
+        // top of the visible area; the extra pixels then extend below
+        // the fold rather than crowding the text.
+        height: `calc(100vh - ${theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight + 80 - TIER_PANEL_EXTRA_PX}px)`,
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
