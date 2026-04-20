@@ -472,12 +472,17 @@ const IntroSection = () => {
         </StickyScrollSection>
       </div>
 
-      {/* Water themes.sticky scrollytelling with circle overlays */}
+      {/* Water themes.sticky scrollytelling with circle overlays.
+          `borderBottom` is intentionally omitted: the outer frame
+          wrapper and the next section's outer Box are both pure
+          white, so the 1px theme.border.light divider that used to
+          render here appeared as a stray hairline at the panel 3 →
+          panel 4 seam and was inconsistent with the other
+          panel-to-panel transitions in this intro. */}
       <WaterThemesPanel
         panelRef={waterThemesPanelRef}
         dockRef={waterThemesDockRef}
         contentOpacity={waterThemesOpacity}
-        borderBottom={theme.border.light}
         borderRadius={tunerRadius()}
         inset={{ x: tunerInsetX(), y: tunerInsetY() }}
         frameBackground={theme.palette.common.white}
