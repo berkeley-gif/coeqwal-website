@@ -160,7 +160,7 @@ export default function ScenarioExplorer() {
       reorderBySimilarity: false,
       showMarginals: false,
       showAllScenarios: false,
-      focusOutcomeCode: "CWS_DEL",
+      expandedTileId: null,
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
       showCellNumbers: true,
       quadrantUnit: "outcome",

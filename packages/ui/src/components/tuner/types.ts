@@ -3,7 +3,7 @@ import type { SxProps, Theme } from "@mui/material"
 
 /**
  * A single step of a guided walkthrough. The walkthrough is intended to
- * teach a beginner how to read/interact with a chart — each step can
+ * teach a beginner how to read/interact with a chart. Each step can
  * describe a concept and (optionally) apply a concrete chart state via
  * `apply` so the user sees the idea in action.
  */
@@ -32,6 +32,13 @@ export interface TunerPreset {
   label: string
   /** Optional longer description shown as tooltip / secondary text. */
   description?: string
+  /**
+   * Optional section grouping. Presets sharing a `group` are rendered
+   * under a shared heading in the order they appear. Presets without a
+   * group fall back to a single "Preset views" section for backwards
+   * compatibility.
+   */
+  group?: string
   /** Apply the preset to the chart's state. */
   apply: () => void
 }
@@ -69,6 +76,18 @@ export interface ChartTunerProps {
    * state; the tuner copies it as pretty-printed JSON.
    */
   getSnapshot?: () => unknown
-  /** Initial open state (default: false). */
+  /** Initial open state (default: false). Ignored when `open` is provided. */
   defaultOpen?: boolean
+  /**
+   * Controlled open state. When provided, the tuner's open/closed state is
+   * fully driven by the parent; use with `onOpenChange` to react to the
+   * user opening/closing the overlay. Leave undefined for the default
+   * uncontrolled behavior (seeded by `defaultOpen`).
+   */
+  open?: boolean
+  /**
+   * Called whenever the tuner wants to open or close. Required when using
+   * the controlled `open` prop; ignored when uncontrolled.
+   */
+  onOpenChange?: (next: boolean) => void
 }

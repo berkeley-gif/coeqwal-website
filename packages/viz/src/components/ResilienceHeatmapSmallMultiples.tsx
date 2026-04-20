@@ -80,6 +80,75 @@ export interface ResilienceHeatmapSmallMultiplesProps {
     cell: ResilienceHeatmapCell
     entry: ResilienceGlyphEntry
   }) => void
+  /**
+   * Optional per-tile pin toggle. When provided, each tile header shows a
+   * pin icon that flips between "+" (unpinned) and "✓" (pinned) based on
+   * `isTilePinned(tileId)`. Clicking invokes `onTilePin(tileId)`; the
+   * consumer is expected to toggle its own selection state (e.g. a
+   * sidebar scenario list or outcome set). Omit all three props to hide
+   * the affordance.
+   */
+  onTilePin?: (tileId: string) => void
+  isTilePinned?: (tileId: string) => boolean
+  /**
+   * Optional per-tile expand button. When provided, each tile header
+   * shows an expand icon that fires `onTileExpand(tileId)` — typically
+   * used to swap the entire grid for a single full-size heatmap.
+   */
+  onTileExpand?: (tileId: string) => void
+}
+
+/**
+ * Tiny button used for per-tile actions. Muted at rest so the header
+ * stays quiet while browsing, full-opacity when the tile is hovered or
+ * the button itself is focused.
+ */
+function TileActionButton({
+  onClick,
+  ariaLabel,
+  title,
+  children,
+  active = false,
+  palette,
+}: {
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+  ariaLabel: string
+  title: string
+  children: React.ReactNode
+  active?: boolean
+  palette: ResilienceHeatmapPalette
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      title={title}
+      onClick={onClick}
+      className={
+        active
+          ? "resilience-tile-action is-active"
+          : "resilience-tile-action"
+      }
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 22,
+        height: 22,
+        padding: 0,
+        borderRadius: 4,
+        border: "none",
+        background: "transparent",
+        color: active ? palette.text : palette.textMuted,
+        cursor: "pointer",
+        fontSize: 13,
+        lineHeight: 1,
+        transition: "opacity .15s ease, background-color .15s ease",
+      }}
+    >
+      {children}
+    </button>
+  )
 }
 
 /**
@@ -165,6 +234,9 @@ const ResilienceHeatmapSmallMultiples: React.FC<
     distributionMode,
     onSquareHover,
     onSquareClick,
+    onTilePin,
+    isTilePinned,
+    onTileExpand,
   }) => {
     const tileHeight = useMemo(() => {
       if (tileAspect === "tall") {
@@ -202,6 +274,14 @@ const ResilienceHeatmapSmallMultiples: React.FC<
           gap: 12,
         }}
       >
+        <style>{`
+          .resilience-tile-action { opacity: 0.35; }
+          .resilience-tile-action.is-active { opacity: 1; }
+          .resilience-smt-tile:hover .resilience-tile-action,
+          .resilience-smt-tile:focus-within .resilience-tile-action { opacity: 1; }
+          .resilience-tile-action:hover { background-color: rgba(127,127,127,0.12); opacity: 1; }
+          .resilience-tile-action:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; opacity: 1; }
+        `}</style>
         <div
           style={{
             display: "grid",
@@ -216,9 +296,13 @@ const ResilienceHeatmapSmallMultiples: React.FC<
             alignContent: "start",
           }}
         >
-          {tiles.map((tile) => (
+          {tiles.map((tile) => {
+            const pinned = isTilePinned?.(tile.id) ?? false
+            const hasActions = !!onTilePin || !!onTileExpand
+            return (
             <div
               key={tile.id}
+              className="resilience-smt-tile"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -229,9 +313,10 @@ const ResilienceHeatmapSmallMultiples: React.FC<
               <div
                 style={{
                   display: "flex",
-                  alignItems: "baseline",
+                  alignItems: "center",
                   gap: 8,
                   padding: "0 4px 4px",
+                  minHeight: 24,
                 }}
               >
                 <span
@@ -242,6 +327,8 @@ const ResilienceHeatmapSmallMultiples: React.FC<
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
+                    flex: 1,
+                    minWidth: 0,
                   }}
                   title={tile.title}
                 >
@@ -259,6 +346,51 @@ const ResilienceHeatmapSmallMultiples: React.FC<
                   >
                     {tile.subtitle}
                   </span>
+                )}
+                {hasActions && (
+                  <div
+                    className="resilience-tile-actions"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 2,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {onTilePin && (
+                      <TileActionButton
+                        palette={palette}
+                        active={pinned}
+                        ariaLabel={
+                          pinned ? `Unpin ${tile.title}` : `Pin ${tile.title}`
+                        }
+                        title={
+                          pinned
+                            ? "Remove from selection"
+                            : "Pin to selection"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onTilePin(tile.id)
+                        }}
+                      >
+                        {pinned ? "✓" : "+"}
+                      </TileActionButton>
+                    )}
+                    {onTileExpand && (
+                      <TileActionButton
+                        palette={palette}
+                        ariaLabel={`Expand ${tile.title}`}
+                        title="Expand to full size"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onTileExpand(tile.id)
+                        }}
+                      >
+                        {"\u2922"}
+                      </TileActionButton>
+                    )}
+                  </div>
                 )}
               </div>
               <div style={{ flex: 1, minHeight: tileHeight - 24 }}>
@@ -292,7 +424,8 @@ const ResilienceHeatmapSmallMultiples: React.FC<
                 />
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* One shared legend at the bottom of the trellis. */}

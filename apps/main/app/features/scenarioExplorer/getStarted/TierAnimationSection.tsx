@@ -25,6 +25,7 @@ import {
   useMapStore,
 } from "../../map/store"
 import {
+  BASEMAP_DIM_OPACITY,
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
@@ -79,26 +80,42 @@ interface BeatDef {
 }
 
 const BEATS: readonly BeatDef[] = [
-  // B0 (displayed as 1/6) - intro paragraphs fade, tier legend fully
+  // B0 (displayed as 1/5) - intro paragraphs fade, tier legend fully
   //      revealed. Played automatically on arrival. Durations are
   //      3x the prior baseline so text + converging-blues beats give
   //      readers time to absorb the narrative.
   { id: "legend", progress: 0.45, duration: 12 },
-  // B1 - intro text collapses, tier legend floats to top, 3 blues
-  //      converge to a single blue on the map.
-  { id: "collapse-blues", progress: 0.59, duration: 7.5 },
-  // B2 - agriculture-only filter + tier-color blend + Beat 1C popups +
-  //      "The colors correspond to different water delivery outcome
-  //      levels that affect agricultural revenue..." text fully in.
-  { id: "colors-correspond", progress: 0.73, duration: 6 },
-  // B3 - AG_REV polygons morph to their distribution squares. Tween
+  // B1 (2/5) - Merged transition + narrative. Duration 9s over 0.28
+  //      progress (~0.32s per 0.01 progress). Sub-windows:
+  //      1. Intro text collapses, tier legend floats to top of the
+  //         left panel (0.46 → 0.49).
+  //      2. As soon as the legend parks (no settle pause):
+  //         (0.49 → 0.52, ~1s) the demand-units layer cross-fades
+  //         OUT 0.65 → 0 while still wearing its frozen 3-blue
+  //         palette; at 0.52, while invisible, the filter swaps to
+  //         Agriculture-only and the fill-color is set directly to
+  //         the AG_REV tier expression; (0.52 → 0.56, ~1.3s) the
+  //         layer fades back IN 0 → 0.65, appearing already in its
+  //         final tier colors. No solid-blue interstitial.
+  //      3. The Beat 1C narrative paragraphs are spaced for reading:
+  //         "For example, each colored location..." fades in at
+  //         0.49 → 0.52 (concurrent with the map cross-fade out, so
+  //         text and tier-colored polygons arrive together by 0.56),
+  //         then "The colors correspond to different water delivery
+  //         outcome levels..." fades in at 0.65 → 0.68, leaving a
+  //         ~1.6s reading pause before the beat settles at 0.73.
+  { id: "collapse-and-colors", progress: 0.73, duration: 9 },
+  // B2 - AG_REV polygons morph to their distribution squares. Tween
   //      plays the morph window [0.76, 0.78] and settles at 0.78.
-  { id: "ag-rev-morph", progress: 0.78, duration: 9 },
-  // B4 - "All other key outcomes can be mapped and visualized in
+  //      3.5s total over 0.05 progress: a brief lead-in (~2.1s from
+  //      0.73 → 0.76) lets the reader's eye reach the map, then the
+  //      morph itself plays over [0.76, 0.78] (~1.4s).
+  { id: "ag-rev-morph", progress: 0.78, duration: 3.5 },
+  // B3 - "All other key outcomes can be mapped and visualized in
   //      similar ways." text fades in; morph overlay backdrop is up;
   //      we pause just before the other 8 morphs start at 0.84.
   { id: "all-other-text", progress: 0.83, duration: 3.6 },
-  // B5 - remaining 8 outcome morphs play back-to-back over [0.84, 1.0].
+  // B4 - remaining 8 outcome morphs play back-to-back over [0.84, 1.0].
   { id: "eight-morphs", progress: 1.0, duration: 18 },
 ] as const
 
@@ -322,7 +339,7 @@ export default function TierAnimationSection() {
    *  Gates which control affordances the BeatTextOverlay renders:
    *    - `false` -> pre-play gate: inline Play button beside the title,
    *                 subtitle only; no bottom Back/Next row.
-   *    - `true`  -> bottom control row (Back / N-of-6 / Next) visible;
+   *    - `true`  -> bottom control row (Back / N-of-T / Next) visible;
    *                 Play button hidden.
    *  All animation math keys off `progress` + `beatIndex`, so `hasPlayed`
    *  purely governs the visibility of chrome. */
@@ -355,7 +372,7 @@ export default function TierAnimationSection() {
 
   /* ── Back-out opacity for the left-panel text ──
    *
-   * Normally 1 (no-op). When the user presses Back from beat 1/6 we
+   * Normally 1 (no-op). When the user presses Back from beat 1/N we
    * animate it to 0 while `progress` is parked at 0.45 — so the entire
    * text block (intro paragraphs, tier legend, bottom controls) fades
    * out together in one motion instead of reverse-tweening progress,
@@ -635,6 +652,17 @@ export default function TierAnimationSection() {
             "fill-outline-color",
             "transparent",
           )
+        }
+        // Reset shared `basemap-dim-overlay` to 0 here too, mirroring the
+        // styled-layer setup path. See the comment at the demand-units
+        // setup block below for why we override the transition.
+        if (map.getLayer("basemap-dim-overlay")) {
+          map.setPaintProperty(
+            "basemap-dim-overlay",
+            "fill-opacity-transition",
+            { duration: 0, delay: 0 },
+          )
+          map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
         }
       } catch {
         /* ok */
@@ -1431,6 +1459,20 @@ export default function TierAnimationSection() {
             if (map.getLayer(outline))
               map.setPaintProperty(outline, "line-opacity", 0)
           }
+          // Prep the shared `basemap-dim-overlay` (added by VisualizationLayers
+          // and pinned to opacity 0 in get-started mode) for progress-driven
+          // updates from this component. Override the 800ms transition
+          // VisualizationLayers configures for the Explore path; otherwise
+          // every per-frame setPaintProperty call below would smear and
+          // look broken.
+          if (map.getLayer("basemap-dim-overlay")) {
+            map.setPaintProperty(
+              "basemap-dim-overlay",
+              "fill-opacity-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
+          }
         } catch {
           /* ok */
         }
@@ -1512,19 +1554,32 @@ export default function TierAnimationSection() {
 
     let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
 
-    // Beat 1  (0.00 → 0.55): blues cycle until FREEZE_AT, then hold still
+    // Beat 1  (0.00 → 0.49): blues cycle until FREEZE_AT, then hold still
     //          on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.55 → 0.60): the frozen blues collapse toward a single blue.
-    // Beat 1C (0.60 → 0.78): demand-units are filtered to Agriculture only;
-    //          (0.60 → 0.66) each AG DU blends from mid-blue to its AG_REV
-    //          tier color; (0.66 → 0.78) tier colors are locked while the
-    //          Beat 1C text + example popups play.
+    // Beat 1B (0.49 → 0.52): cross-fade OUT — the demand-units layer
+    //          fades from 0.65 → 0 with the frozen 3-blue palette
+    //          intact. No "converge to mid-blue" interstitial; the
+    //          polygons just disappear. Begins the instant the
+    //          intro text collapse finishes (at 0.49) so there's
+    //          no dead air after the legend settles at the top.
+    // Beat 1C (0.52 → 0.78): at v = 0.52, while the layer is invisible,
+    //          we swap the filter to Agriculture-only and set the
+    //          fill-color directly to the AG_REV tier expression.
+    //          (0.52 → 0.56) the layer fades back IN from 0 → 0.65
+    //          already wearing its AG_REV tier colors — a clean
+    //          cross-fade with no blue interstitial. (0.56 → 0.78)
+    //          tier colors are locked while the Beat 1C text + example
+    //          popups play.
     // Beat 2  (0.78 → 1.00): DU filter restored, tier colors locked; SVG
     //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.18
-    const BEAT1B_START = 0.55
-    const BEAT1C_BLEND_START = 0.6
-    const BEAT1C_BLEND_END = 0.66
+    const BEAT1B_START = 0.49
+    // Cross-fade windows (renamed in spirit, kept for diff readability):
+    // BEAT1C_BLEND_START is the fade-out → fade-in pivot (filter swap
+    // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
+    // is when the AG_REV tier colors are fully visible at 0.65 opacity.
+    const BEAT1C_BLEND_START = 0.52
+    const BEAT1C_BLEND_END = 0.56
     // AG_REV now morphs solo starting at 0.76 (see getOutcomeProgressRange
     // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
     // DU filter restore + hide-schedule over in time for AG_REV's morph.
@@ -1556,6 +1611,11 @@ export default function TierAnimationSection() {
             }
             if (map.getLayer("demand-units-outline"))
               map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+            // Snap the basemap dim overlay back to 0 so a full reset
+            // shows the bright basemap again.
+            if (map.getLayer("basemap-dim-overlay")) {
+              map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
+            }
           } catch {
             /* ok */
           }
@@ -1563,6 +1623,26 @@ export default function TierAnimationSection() {
           frozenColorPhase = 0
         }
         return
+      }
+
+      // Drive the shared basemap-dim-overlay so visualization layers pop
+      // against the satellite basemap. Fades in in lockstep with the
+      // initial blue-polygon reveal (v = 0 → FREEZE_AT * 0.33 ≈ 0.06)
+      // and then holds steady through the blue cycle, cross-fade, AG_REV
+      // tier colors, and all subsequent morphs. Only the v < 0.01 reset
+      // branch above clears it.
+      try {
+        if (map.getLayer("basemap-dim-overlay")) {
+          const dimFadeT = Math.min(1, v / (FREEZE_AT * 0.33))
+          const dimOpacity = BASEMAP_DIM_OPACITY * dimFadeT
+          map.setPaintProperty(
+            "basemap-dim-overlay",
+            "fill-opacity",
+            dimOpacity,
+          )
+        }
+      } catch {
+        /* ok */
       }
 
       if (v < BEAT1B_START) {
@@ -1609,48 +1689,80 @@ export default function TierAnimationSection() {
         }
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
-        // Beat 1B: collapse the 3-blue palette toward a single blue
-        const convergence =
-          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
-        const easedC = convergence * convergence
-
-        try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty(
-              "demand-units",
-              "fill-color",
-              beat1FillExpr(frozenColorPhase, easedC) as never,
-            )
-            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-          }
-        } catch {
-          /* ok */
-        }
-        phase = "beat1"
-      } else if (v < BEAT1C_BLEND_END) {
-        // Beat 1C blend: filter to Agriculture only; each AG DU smoothly
-        // shifts from the converged mid-blue to its AG_REV tier color.
-        if (phase !== "beat1c") {
+        // Beat 1B: cross-fade OUT. Keep the frozen 3-blue colors and
+        // fade the layer's opacity from 0.65 → 0. No converge-to-mid
+        // -blue interstitial — the polygons simply dissolve away,
+        // freeing the eye to receive the AG_REV tier-colored polygons
+        // that fade in next. If we're scrubbing backwards from beat1c,
+        // first restore the full DU class filter and the frozen 3-blue
+        // expression so the cross-fade reverses cleanly.
+        if (phase !== "beat1") {
           try {
             if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
+              map.setPaintProperty(
+                "demand-units",
+                "fill-color",
+                beat1FillExpr(frozenColorPhase) as never,
+              )
             }
           } catch {
             /* ok */
           }
         }
 
-        const blendT =
-          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
-        const easedT = 1 - Math.pow(1 - blendT, 2) // ease-out
+        const fadeOutT =
+          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
+        const easedFadeOut = 1 - Math.pow(1 - fadeOutT, 2) // ease-out
 
         try {
           if (map.getLayer("demand-units")) {
-            const expr = buildBlendedTierExpr(BEAT1_MID, easedT)
-            if (expr) {
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
+            map.setPaintProperty(
+              "demand-units",
+              "fill-opacity",
+              0.65 * (1 - easedFadeOut),
+            )
+          }
+        } catch {
+          /* ok */
+        }
+        phase = "beat1"
+      } else if (v < BEAT1C_BLEND_END) {
+        // Beat 1C: cross-fade IN. While the layer is at opacity 0 we
+        // swap the filter to Agriculture-only and set fill-color to the
+        // pure AG_REV tier expression (no blue blend). Then the layer
+        // fades from 0 → 0.65 already wearing its tier colors, so the
+        // user sees a clean fade from "blank water" to the colorful
+        // visualization — no solid-blue intermediate.
+        if (phase !== "beat1c") {
+          try {
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+              const expr = buildBlendedTierExpr(BEAT1_MID, 1)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+              }
             }
-            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+          } catch {
+            /* ok */
+          }
+        }
+
+        const fadeInT =
+          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
+        const easedFadeIn = 1 - Math.pow(1 - fadeInT, 2) // ease-out
+
+        try {
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty(
+              "demand-units",
+              "fill-opacity",
+              0.65 * easedFadeIn,
+            )
           }
         } catch {
           /* ok */
@@ -2642,7 +2754,7 @@ export default function TierAnimationSection() {
         </Box>
       ) : (
         <>
-          {/* Background cover: transparent → forest green as map fades */}
+          {/* Background cover */}
           <MapFade opacity={mapOpacity} color={forestBg} />
 
           {/* Outcome polygon morph overlay - active during Beat 2 */}

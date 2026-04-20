@@ -30,6 +30,7 @@ import {
   CircularProgress,
   Typography,
   useTheme,
+  type Theme,
 } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
 import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
@@ -125,7 +126,16 @@ export interface ResilienceControlsState {
    * pattern in RadarPanel.
    */
   showAllScenarios: boolean
-  focusOutcomeCode: string
+  /**
+   * When non-null, the heatmap swaps its small-multiples grid for a
+   * single full-size tile matching this id. Used by the "click-to-expand"
+   * gesture on each tile's expand icon (and by drill-through actions
+   * like the quadrant view). The id is a scenario id in the by-scenario
+   * view, or an outcome code in the by-outcome view. The expanded view
+   * is dismissed with a Back button or the Esc key, which clears this
+   * back to null.
+   */
+  expandedTileId: string | null
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   showCellNumbers: boolean
   quadrantUnit: QuadrantUnit
@@ -196,12 +206,13 @@ export default function ResiliencePanel({
     reorderBySimilarity,
     showMarginals,
     showAllScenarios,
-    focusOutcomeCode,
+    expandedTileId,
     selectedHydroclimates,
     showCellNumbers,
   } = controls
 
   const { selectedScenarios } = useScenarioExplorerStore()
+  const toggleScenario = useScenarioExplorerStore((s) => s.toggleScenario)
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
   )
@@ -224,6 +235,12 @@ export default function ResiliencePanel({
     (s) => s.resilienceDistributionMode,
   )
 
+  // Controlled-open state for the ResilienceChartTuner overlay. We keep
+  // it in local state so the onboarding banner's "Open the walkthrough"
+  // link can imperatively pop the tuner open; the tuner itself manages
+  // everything else once open.
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false)
+
   // Effective per-view scenario scope. Mirrors the radar-panel pattern:
   // when showAllScenarios is off, respect sidebar `selectedScenarios`;
   // when on, fall back to all 24. Phase 1 renders a single heatmap; the
@@ -233,6 +250,31 @@ export default function ResiliencePanel({
     if (showAllScenarios) return [] // sentinel: "all" resolved from matrix
     return selectedScenarios
   }, [showAllScenarios, selectedScenarios])
+
+  // "Onboarding empty" covers the three shapes where the heatmap has
+  // nothing meaningful to render in the user-selected view:
+  //   • by-scenario view without any pinned scenarios and show-all off
+  //   • by-outcome view with no outcome rows selected
+  //   • aggregate view scoped to "selected" with no pinned scenarios
+  // In all three we auto-pivot to an aggregate heatmap over ALL data so
+  // the user always sees something, paired with an onboarding banner
+  // pointing back to the walkthrough. Computed from store-state inputs
+  // so we can thread `effectiveView` through downstream memos.
+  //
+  // `resilienceVisibleOutcomes.length === 0` is equivalent to
+  // `outcomeRowCodes.length === 0` because outcomeRowCodes only pushes
+  // codes (+ their NOD/SOD variants) that are already in
+  // resilienceVisibleOutcomes.
+  const onboardingEmpty =
+    (view === "scenario" &&
+      !showAllScenarios &&
+      selectedScenarios.length === 0) ||
+    (view === "outcome" && resilienceVisibleOutcomes.length === 0) ||
+    (view === "aggregate" &&
+      aggregateScope === "selected" &&
+      selectedScenarios.length === 0)
+
+  const effectiveView: ResilienceView = onboardingEmpty ? "aggregate" : view
 
   const {
     scenarioIds,
@@ -254,11 +296,15 @@ export default function ResiliencePanel({
   } = useOutcomeMapAction()
 
   // Aggregate hook reads the already-fetched matrix. We key it on the
-  // effective scope so it only recomputes when the set changes.
+  // effective scope so it only recomputes when the set changes. The
+  // onboarding-empty override means the aggregate we show in the
+  // fallback path always covers ALL scenarios, regardless of whether
+  // the user happens to have `aggregateScope === "selected"` set.
   const aggregateScenarioIds = useMemo(() => {
+    if (onboardingEmpty) return undefined
     if (aggregateScope === "selected") return selectedScenarios
     return undefined
-  }, [aggregateScope, selectedScenarios])
+  }, [onboardingEmpty, aggregateScope, selectedScenarios])
 
   const aggregate = useResilienceAggregate({
     scenarioIds: aggregateScenarioIds,
@@ -504,7 +550,7 @@ export default function ResiliencePanel({
   const buildValueFn = useCallback<
     () => { rowKeys: string[]; rowLabels: Record<string, string>; valueFn: RowValueFn; subjectLabel: string }
   >(() => {
-    if (view === "scenario") {
+    if (effectiveView === "scenario") {
       const focusId = effectiveFocusScenarioId
       const focusName = focusId ? getDisplayName(focusId) : ""
       const rowKeys = [...outcomeRowCodes]
@@ -566,65 +612,42 @@ export default function ResiliencePanel({
       }
     }
 
-    if (view === "outcome") {
-      const outcomeName = getOutcomeName(focusOutcomeCode)
+    if (effectiveView === "outcome") {
+      // The by-outcome view renders `byOutcomeTiles` via
+      // ResilienceHeatmapSmallMultiples, so the single-heatmap data
+      // produced here is never consumed. We still return a valid shape
+      // (using the first visible outcome as the subject) so downstream
+      // memos that depend on `buildValueFn` stay stable and typed.
+      const fallbackOutcome =
+        outcomeRowCodes[0] ?? OUTCOME_CODE_ORDER[0] ?? ""
+      const outcomeName = fallbackOutcome
+        ? getOutcomeName(fallbackOutcome)
+        : ""
       const rowKeys = [...scenarioRowIds]
       const rowLabels: Record<string, string> = {}
       for (const sid of rowKeys) rowLabels[sid] = getDisplayName(sid)
 
-      const valueFn: RowValueFn = (rowKey, hc) => {
-        const cell = getCell(rowKey, focusOutcomeCode, hc)
-        if (!cell) {
-          return {
-            continuousValue: null,
-            tierLevel: null,
-            available: false,
-            unavailableReason: "No data for this scenario",
-            rowLabel: rowLabels[rowKey] ?? rowKey,
-            signal: null,
-          }
-        }
-        const base = {
-          continuousValue: cell.continuousValue,
-          tierLevel: cell.tierLevel,
-          available: cell.available,
-          unavailableReason: cell.unavailableReason,
-          type: cell.type,
-          rowLabel: rowLabels[rowKey] ?? rowKey,
-        }
-        if (deltaMode === "none" || !cell.available) {
-          return { ...base, signal: cell.continuousValue }
-        }
-        let reference: number | null = null
-        if (deltaMode === "vs_historical") {
-          const ref = getCell(rowKey, focusOutcomeCode, HISTORICAL_HC)
-          reference = ref?.available ? ref.continuousValue : null
-        } else {
-          const ref = getCell(
-            deltaBaselineScenarioId,
-            focusOutcomeCode,
-            hc,
-          )
-          reference = ref?.available ? ref.continuousValue : null
-        }
-        if (reference == null || cell.continuousValue == null) {
-          return {
-            ...base,
-            available: false,
-            unavailableReason: "Delta baseline unavailable",
-            divergingValue: null,
-            signal: null,
-          }
-        }
-        const dv = cell.continuousValue - reference
-        return { ...base, divergingValue: dv, signal: dv }
-      }
+      const valueFn: RowValueFn = (rowKey) => ({
+        continuousValue: null,
+        tierLevel: null,
+        available: false,
+        unavailableReason: "",
+        rowLabel: rowLabels[rowKey] ?? rowKey,
+        signal: null,
+      })
 
       return { rowKeys, rowLabels, valueFn, subjectLabel: outcomeName }
     }
 
-    // view === "aggregate"
-    const rowKeys = [...outcomeRowCodes]
+    // effectiveView === "aggregate" (including the onboarding-empty
+    // fallback path). When the user has zero outcomes selected but
+    // we're auto-aggregating, we fall back to the canonical
+    // OUTCOME_CODE_ORDER so the heatmap has meaningful rows instead
+    // of an empty canvas.
+    const rowKeys =
+      onboardingEmpty && outcomeRowCodes.length === 0
+        ? [...OUTCOME_CODE_ORDER]
+        : [...outcomeRowCodes]
     const rowLabels: Record<string, string> = {}
     for (const code of rowKeys) rowLabels[code] = getOutcomeName(code)
 
@@ -753,14 +776,14 @@ export default function ResiliencePanel({
       subjectLabel: aggregate.subjectLabel,
     }
   }, [
-    view,
+    effectiveView,
+    onboardingEmpty,
     cellEncoding,
     deltaMode,
     deltaBaselineScenarioId,
     outcomeRowCodes,
     scenarioRowIds,
     effectiveFocusScenarioId,
-    focusOutcomeCode,
     getCell,
     getDisplayName,
     aggregate,
@@ -803,7 +826,7 @@ export default function ResiliencePanel({
     const out: ResilienceHeatmapCell[] = []
 
     const rowItems: ResilienceAxisItem[] = orderedRowKeys.map((rk) => {
-      if (view === "outcome") {
+      if (effectiveView === "outcome") {
         return {
           key: rk,
           label: rowLabels[rk] ?? rk,
@@ -835,17 +858,12 @@ export default function ResiliencePanel({
           colLabel: col.label,
           subjectLabel,
           scenarioId:
-            view === "scenario"
+            effectiveView === "scenario"
               ? (effectiveFocusScenarioId ?? undefined)
-              : view === "outcome"
+              : effectiveView === "outcome"
                 ? rk
                 : undefined,
-          outcomeCode:
-            view === "scenario"
-              ? rk
-              : view === "outcome"
-                ? focusOutcomeCode
-                : rk,
+          outcomeCode: rk,
           type: v.type,
           divergingValue: v.divergingValue,
           densityValue: v.densityValue,
@@ -862,9 +880,8 @@ export default function ResiliencePanel({
     valueGrid,
     rowLabels,
     subjectLabel,
-    view,
+    effectiveView,
     effectiveFocusScenarioId,
-    focusOutcomeCode,
     scenarios,
   ])
 
@@ -1014,10 +1031,11 @@ export default function ResiliencePanel({
   )
 
   // By-outcome small multiples - one tile per outcome, Y = scenarios,
-  // X = climates. Phase 3 renders all 19 outcomes always. The scenario
-  // rows inside each tile respect sidebar selection (falling back to
-  // all 24 when sidebar is empty or show-all is on, so the panel is
-  // always populated).
+  // X = climates. The tile set is driven by the user's
+  // `outcomeRowCodes` selection (see `byOutcomeTiles` below), and the
+  // scenario rows inside each tile respect sidebar selection (falling
+  // back to all 24 when sidebar is empty or show-all is on, so the
+  // panel is always populated).
   const byOutcomeScenarioRowIds = useMemo<readonly string[]>(() => {
     if (showAllScenarios) return scenarioRowIdsAll
     if (selectedScenarios.length === 0) return scenarioRowIdsAll
@@ -1124,9 +1142,18 @@ export default function ResiliencePanel({
 
   const byOutcomeTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
     if (view !== "outcome") return []
-    // Phase 3: always render all 19 outcomes (no subsetting yet).
+    // Tile set is driven by the user's outcome-row selection
+    // (`outcomeRowCodes`) — the same picker that populates the
+    // aggregate view's rows — so "choose outcome rows" now acts as a
+    // single curation control across all heatmap views. NOD/SOD
+    // regional variants are skipped at tile level (they don't have
+    // standalone outcome definitions) but are still valid row keys
+    // elsewhere.
     const tiles: ResilienceSmallMultiplesTile[] = []
-    for (const outcomeCode of OUTCOME_CODE_ORDER) {
+    for (const outcomeCode of outcomeRowCodes) {
+      if ((NOD_SOD_OUTCOME_CODES as readonly string[]).includes(outcomeCode)) {
+        continue
+      }
       const title = getOutcomeName(outcomeCode)
       const tileCells: ResilienceHeatmapCell[] = []
       for (const sid of byOutcomeScenarioRowIds) {
@@ -1148,6 +1175,7 @@ export default function ResiliencePanel({
     return tiles
   }, [
     view,
+    outcomeRowCodes,
     byOutcomeScenarioRowIds,
     columns,
     computeOutcomeTileCell,
@@ -1501,23 +1529,134 @@ export default function ResiliencePanel({
     [view],
   )
 
-  // Aggregate view with "selected" scope + empty selection → empty state.
-  const aggregateEmpty =
-    view === "aggregate" &&
-    aggregateScope === "selected" &&
-    selectedScenarios.length === 0
+  // `onboardingEmpty` and `effectiveView` are computed up top (near the
+  // store-state destructuring) so downstream memos can thread through
+  // them. This section just names a couple of derived flags the JSX
+  // uses below for the banner / chip rendering.
+  const noOutcomesSelected =
+    !onboardingEmpty &&
+    outcomeRowCodes.length === 0 &&
+    view !== "quadrant"
 
-  // By-scenario view with no sidebar selection and show-all off →
-  // "Select scenarios, or show all" prompt. By-outcome view always has
-  // tiles (it falls back to all-24 scenarios for the Y axis), so no
-  // global empty state there.
-  const sidebarEmpty =
+  // Pin / expand wiring for the small-multiples tile headers. Pinning
+  // either flips a scenario in `selectedScenarios` (by-scenario view)
+  // or an outcome in `resilienceVisibleOutcomes` (by-outcome view).
+  // Expand swaps the grid for a single full-size heatmap via the
+  // `expandedTileId` control state.
+  const handleTilePinByScenario = useCallback(
+    (sid: string) => {
+      toggleScenario(sid)
+    },
+    [toggleScenario],
+  )
+  const isScenarioPinned = useCallback(
+    (sid: string) => selectedScenarios.includes(sid),
+    [selectedScenarios],
+  )
+  const handleTilePinByOutcome = useCallback(
+    (code: string) => {
+      toggleResilienceOutcome(code)
+    },
+    [toggleResilienceOutcome],
+  )
+  const visibleOutcomeSet = useMemo(
+    () => new Set(resilienceVisibleOutcomes),
+    [resilienceVisibleOutcomes],
+  )
+  const isOutcomePinned = useCallback(
+    (code: string) => visibleOutcomeSet.has(code),
+    [visibleOutcomeSet],
+  )
+  const handleTileExpand = useCallback(
+    (tileId: string) => {
+      onControlsChange?.({ expandedTileId: tileId })
+    },
+    [onControlsChange],
+  )
+  const handleBackToGrid = useCallback(() => {
+    onControlsChange?.({ expandedTileId: null })
+  }, [onControlsChange])
+
+  // Resolve the expanded tile (if any) from the current per-view tile
+  // set. Guarded by effectiveView so an `expandedTileId` left over from
+  // a previous view doesn't accidentally render into the wrong grid.
+  const expandedTile = useMemo<ResilienceSmallMultiplesTile | null>(() => {
+    if (!expandedTileId) return null
+    if (view === "scenario") {
+      return byScenarioTiles.find((t) => t.id === expandedTileId) ?? null
+    }
+    if (view === "outcome") {
+      return byOutcomeTiles.find((t) => t.id === expandedTileId) ?? null
+    }
+    return null
+  }, [expandedTileId, view, byScenarioTiles, byOutcomeTiles])
+
+  // Esc dismisses the expanded view when it's open, mirroring the
+  // keyboard affordance on modals / tuner overlays elsewhere. The
+  // listener is only installed while an expanded tile is active so it
+  // doesn't fight the walkthrough panel's own Esc handler.
+  useEffect(() => {
+    if (!expandedTile) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation()
+        handleBackToGrid()
+      }
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [expandedTile, handleBackToGrid])
+
+  // Whether the "Comparing N of M · focus on my selection" chip should
+  // render above a show-all grid. Only meaningful for by-scenario right
+  // now; by-outcome uses the outcome-row picker instead of a show-all
+  // flag for curation.
+  const showScenarioCurationChip =
     view === "scenario" &&
-    !showAllScenarios &&
-    selectedScenarios.length === 0
+    showAllScenarios &&
+    selectedScenarios.length > 0 &&
+    !expandedTile
 
-  // All three heatmap views depend on at least one visible outcome row.
-  const noOutcomesSelected = outcomeRowCodes.length === 0 && view !== "quadrant"
+  // Onboarding banner variant. The banner persists across the Browse
+  // stage so the user keeps their bearings after switching from the
+  // empty-state aggregate into a gallery view. It goes away once they
+  // curate (pin ≥1 item) or expand a tile — the two signals that they
+  // understand the next step. Quadrant view has its own affordances, so
+  // skip the banner there.
+  const allPrimaryOutcomesVisible = useMemo(
+    () => OUTCOME_CODE_ORDER.every((c) => visibleOutcomeSet.has(c)),
+    [visibleOutcomeSet],
+  )
+  const onboardingVariant: OnboardingVariant | null = expandedTile
+    ? null
+    : onboardingEmpty
+      ? "empty"
+      : view === "scenario" &&
+          showAllScenarios &&
+          selectedScenarios.length === 0
+        ? "browse-scenarios"
+        : view === "outcome" && allPrimaryOutcomesVisible
+          ? "browse-outcomes"
+          : null
+
+  // Shared handlers for the onboarding banner's action links. Computed
+  // once so each render path passes a stable identity.
+  const handleBrowseScenarios = useCallback(() => {
+    onControlsChange?.({ view: "scenario", showAllScenarios: true })
+  }, [onControlsChange])
+  const handleBrowseOutcomes = useCallback(() => {
+    onControlsChange?.({ view: "outcome" })
+  }, [onControlsChange])
+  const handleBackToAggregate = useCallback(() => {
+    onControlsChange?.({
+      view: "aggregate",
+      showAllScenarios: false,
+      aggregateScope: "all",
+    })
+  }, [onControlsChange])
+  const handleOpenWalkthrough = useCallback(() => {
+    setWalkthroughOpen(true)
+  }, [])
 
   // Render states
 
@@ -1616,6 +1755,8 @@ export default function ResiliencePanel({
           <ResilienceChartTuner
             controls={controls}
             onChange={onControlsChange}
+            open={walkthroughOpen}
+            onOpenChange={setWalkthroughOpen}
           />
         )}
         <Typography
@@ -1678,39 +1819,6 @@ export default function ResiliencePanel({
               Select at least one hydroclimate in the chart controls.
             </Typography>
           </Box>
-        ) : aggregateEmpty ? (
-          <Box
-            sx={{
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="body2">
-              Select one or more scenarios in the sidebar to aggregate over,
-              or switch the aggregate scope to &ldquo;all scenarios&rdquo;.
-            </Typography>
-          </Box>
-        ) : sidebarEmpty ? (
-          <Box
-            sx={{
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              px: 3,
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{ textAlign: "center", maxWidth: 480 }}
-            >
-              Select one or more scenarios in the sidebar to populate this
-              view, or toggle &ldquo;show all scenarios&rdquo; in the chart
-              controls above.
-            </Typography>
-          </Box>
         ) : noOutcomesSelected ? (
           <Box
             sx={{
@@ -1730,21 +1838,59 @@ export default function ResiliencePanel({
               in the chart controls above to pick which outcomes to display.
             </Typography>
           </Box>
-        ) : view === "scenario" ? (
-          <ResilienceHeatmapSmallMultiples
-            rows={byScenarioRows}
+        ) : onboardingEmpty ? (
+          <OnboardingAggregate
+            view={view}
+            rows={rows}
             columns={columns}
-            tiles={byScenarioTiles}
+            cells={cells}
             tierColors={tierColors}
             tierLabels={tierLabels}
             palette={heatmapPalette}
             cellRender={effectiveCellRender}
             showCellNumbers={showCellNumbers}
-            tileAspect="wide"
             onCellHover={handleCellHover}
             onCellClick={isMapVisible ? handleCellClick : undefined}
+            highlightedRowKeys={effectiveRowHighlight}
+            formatRowTick={formatRowTick}
+            marginals={marginalsData}
+            showMarginals={showMarginals}
+            distributionMode={distributionMode}
+            onSquareHover={handleSquareHover}
+            onSquareClick={handleSquareClick}
+            onBrowseScenarios={
+              onControlsChange
+                ? () =>
+                    onControlsChange({
+                      view: "scenario",
+                      showAllScenarios: true,
+                    })
+                : undefined
+            }
+            onBrowseOutcomes={
+              onControlsChange
+                ? () =>
+                    onControlsChange({
+                      view: "outcome",
+                    })
+                : undefined
+            }
+            onOpenWalkthrough={() => setWalkthroughOpen(true)}
+          />
+        ) : expandedTile ? (
+          <ExpandedTileView
+            tile={expandedTile}
+            rows={view === "scenario" ? byScenarioRows : byOutcomeRows}
+            columns={columns}
+            tierColors={tierColors}
+            tierLabels={tierLabels}
+            palette={heatmapPalette}
+            cellRender={effectiveCellRender}
+            showCellNumbers={showCellNumbers}
             formatRowTick={formatRowTick}
             distributionMode={distributionMode}
+            onCellHover={handleCellHover}
+            onCellClick={isMapVisible ? handleCellClick : undefined}
             onSquareHover={(info) =>
               handleSquareHover(
                 info ? { cell: info.cell, entry: info.entry } : null,
@@ -1753,7 +1899,55 @@ export default function ResiliencePanel({
             onSquareClick={(info) =>
               handleSquareClick({ cell: info.cell, entry: info.entry })
             }
+            onBack={handleBackToGrid}
+            backLabel={
+              view === "scenario"
+                ? "Back to all scenarios"
+                : "Back to all outcomes"
+            }
           />
+        ) : view === "scenario" ? (
+          <GridWithCurationChip
+            chip={
+              showScenarioCurationChip
+                ? {
+                    label: `Comparing ${selectedScenarios.length} of ${byScenarioScope.length} scenarios`,
+                    actionLabel: "Focus on my selection",
+                    onClick: () =>
+                      onControlsChange?.({ showAllScenarios: false }),
+                  }
+                : null
+            }
+          >
+            <ResilienceHeatmapSmallMultiples
+              rows={byScenarioRows}
+              columns={columns}
+              tiles={byScenarioTiles}
+              tierColors={tierColors}
+              tierLabels={tierLabels}
+              palette={heatmapPalette}
+              cellRender={effectiveCellRender}
+              showCellNumbers={showCellNumbers}
+              tileAspect="wide"
+              onCellHover={handleCellHover}
+              onCellClick={isMapVisible ? handleCellClick : undefined}
+              formatRowTick={formatRowTick}
+              distributionMode={distributionMode}
+              onSquareHover={(info) =>
+                handleSquareHover(
+                  info ? { cell: info.cell, entry: info.entry } : null,
+                )
+              }
+              onSquareClick={(info) =>
+                handleSquareClick({ cell: info.cell, entry: info.entry })
+              }
+              onTilePin={
+                onControlsChange ? handleTilePinByScenario : undefined
+              }
+              isTilePinned={isScenarioPinned}
+              onTileExpand={onControlsChange ? handleTileExpand : undefined}
+            />
+          </GridWithCurationChip>
         ) : view === "outcome" ? (
           <ResilienceHeatmapSmallMultiples
             rows={byOutcomeRows}
@@ -1777,6 +1971,11 @@ export default function ResiliencePanel({
             onSquareClick={(info) =>
               handleSquareClick({ cell: info.cell, entry: info.entry })
             }
+            onTilePin={
+              onControlsChange ? handleTilePinByOutcome : undefined
+            }
+            isTilePinned={isOutcomePinned}
+            onTileExpand={onControlsChange ? handleTileExpand : undefined}
           />
         ) : (
           <ResilienceHeatmap
@@ -2042,6 +2241,344 @@ function OutcomeRow({
       >
         {label}
       </Typography>
+    </Box>
+  )
+}
+
+type OnboardingVariant = "empty" | "browse-scenarios" | "browse-outcomes"
+
+/**
+ * Persistent onboarding banner that guides the user through the
+ * Browse → Curate → Read path. Three variants map to the three states
+ * where the heatmap wants the user to take a next step:
+ *
+ *   • "empty"            — no selection yet; offer the two Browse
+ *                           entry points and the walkthrough link.
+ *   • "browse-scenarios" — user is viewing all scenarios; teach the
+ *                           pin gesture so they can curate a subset.
+ *   • "browse-outcomes"  — user is viewing all outcomes; same teach
+ *                           message, scoped to outcomes.
+ *
+ * The banner is intentionally slim and flex-wrapping so it never
+ * dominates the chart area, and it persists until the user either
+ * curates (pins ≥1 item) or expands a tile — the two acknowledgement
+ * signals that they understand the next step.
+ */
+function OnboardingBanner({
+  variant,
+  onBrowseScenarios,
+  onBrowseOutcomes,
+  onBackToAggregate,
+  onOpenWalkthrough,
+}: {
+  variant: OnboardingVariant
+  onBrowseScenarios?: () => void
+  onBrowseOutcomes?: () => void
+  onBackToAggregate?: () => void
+  onOpenWalkthrough: () => void
+}) {
+  const theme = useTheme()
+
+  const copy =
+    variant === "empty"
+      ? {
+          lead: "Showing the aggregate heatmap across all scenarios.",
+          hint: "Pick a few scenarios or outcomes to compare, or browse them all first.",
+        }
+      : variant === "browse-scenarios"
+        ? {
+            lead: "Browsing all scenarios.",
+            hint: "Hover a tile and click the + icon to pin scenarios you want to compare.",
+          }
+        : {
+            lead: "Browsing all outcomes.",
+            hint: "Hover a tile and click the + icon (or “choose outcome rows”) to narrow the set.",
+          }
+
+  return (
+    <Box
+      role="region"
+      aria-label="Onboarding"
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 1.25,
+        px: 1.25,
+        py: 0.75,
+        borderRadius: 1,
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.action.hover,
+      }}
+    >
+      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+        {copy.lead}
+      </Typography>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ flex: 1, minWidth: 160 }}
+      >
+        {copy.hint}
+      </Typography>
+      {variant === "empty" && onBrowseScenarios && (
+        <Box
+          component="button"
+          type="button"
+          onClick={onBrowseScenarios}
+          sx={onboardingLinkSx(theme)}
+        >
+          Browse all scenarios
+        </Box>
+      )}
+      {variant === "empty" && onBrowseOutcomes && (
+        <Box
+          component="button"
+          type="button"
+          onClick={onBrowseOutcomes}
+          sx={onboardingLinkSx(theme)}
+        >
+          Browse all outcomes
+        </Box>
+      )}
+      {variant !== "empty" && onBackToAggregate && (
+        <Box
+          component="button"
+          type="button"
+          onClick={onBackToAggregate}
+          sx={onboardingLinkSx(theme)}
+        >
+          Back to aggregate
+        </Box>
+      )}
+      <Box
+        component="button"
+        type="button"
+        onClick={onOpenWalkthrough}
+        sx={onboardingLinkSx(theme)}
+      >
+        Open the walkthrough
+      </Box>
+    </Box>
+  )
+}
+
+function onboardingLinkSx(theme: Theme) {
+  return {
+    appearance: "none",
+    border: "none",
+    background: "transparent",
+    color: theme.palette.primary.main,
+    cursor: "pointer",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    textDecoration: "underline",
+    p: 0,
+    "&:hover": { opacity: 0.85 },
+    "&:focus-visible": {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: 2,
+    },
+  } as const
+}
+
+/**
+ * Expanded single-tile view. Shows one scenario or outcome at full
+ * size with a "← Back" button that dismisses via `onBack`. Framer
+ * Motion's `layoutId` lets the browser interpolate between the grid
+ * tile and the full-size heatmap when the user reduced-motion pref is
+ * off; with reduced motion the transition degrades to a static swap.
+ */
+function ExpandedTileView({
+  tile,
+  rows,
+  columns,
+  tierColors,
+  tierLabels,
+  palette,
+  cellRender,
+  showCellNumbers,
+  formatRowTick,
+  distributionMode,
+  onCellHover,
+  onCellClick,
+  onSquareHover,
+  onSquareClick,
+  onBack,
+  backLabel,
+}: {
+  tile: ResilienceSmallMultiplesTile
+  rows: ResilienceAxisItem[]
+  columns: ResilienceAxisItem[]
+  tierColors: readonly [string, string, string, string]
+  tierLabels: readonly [string, string, string, string]
+  palette: ResilienceHeatmapPalette
+  cellRender: ResilienceCellRender
+  showCellNumbers: boolean
+  formatRowTick: (row: ResilienceAxisItem) => string
+  distributionMode: "scenario" | "location"
+  onCellHover: (cell: ResilienceHeatmapCell | null) => void
+  onCellClick?: (cell: ResilienceHeatmapCell) => void
+  onSquareHover: (
+    info: {
+      tileId: string
+      cell: ResilienceHeatmapCell
+      entry: ResilienceGlyphEntry
+    } | null,
+  ) => void
+  onSquareClick: (info: {
+    tileId: string
+    cell: ResilienceHeatmapCell
+    entry: ResilienceGlyphEntry
+  }) => void
+  onBack: () => void
+  backLabel: string
+}) {
+  const theme = useTheme()
+  const prefersReducedMotion = useReducedMotion()
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          px: 0.5,
+        }}
+      >
+        <Box
+          component="button"
+          type="button"
+          onClick={onBack}
+          sx={{
+            appearance: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            background: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderRadius: 999,
+            px: 1.25,
+            py: 0.4,
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            cursor: "pointer",
+            "&:hover": { backgroundColor: theme.palette.action.hover },
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
+          {`\u2190 ${backLabel}`}
+        </Box>
+        <Typography variant="dashboard" sx={{ fontWeight: 600 }}>
+          {tile.title}
+        </Typography>
+        {tile.subtitle && (
+          <Typography variant="caption" color="text.secondary">
+            {tile.subtitle}
+          </Typography>
+        )}
+        <Box sx={{ flex: 1 }} />
+        <Typography variant="caption" color="text.secondary">
+          Press Esc to return
+        </Typography>
+      </Box>
+      <motion.div
+        layoutId={`resilience-tile-${tile.id}`}
+        transition={
+          prefersReducedMotion ? { duration: 0 } : { duration: 0.25 }
+        }
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <ResilienceHeatmap
+          rows={rows}
+          columns={columns}
+          cells={tile.cells}
+          tierColors={tierColors}
+          tierLabels={tierLabels}
+          palette={palette}
+          cellRender={cellRender}
+          showCellNumbers={showCellNumbers}
+          onCellHover={onCellHover}
+          onCellClick={onCellClick}
+          formatRowTick={formatRowTick}
+          distributionMode={distributionMode}
+          onSquareHover={(info) =>
+            onSquareHover(info ? { tileId: tile.id, ...info } : null)
+          }
+          onSquareClick={(info) =>
+            onSquareClick({ tileId: tile.id, ...info })
+          }
+        />
+      </motion.div>
+    </Box>
+  )
+}
+
+/**
+ * Wraps a small-multiples grid with an optional curation chip above.
+ * The chip tells the user "Comparing N of M · focus on my selection"
+ * when they've pinned items while in show-all mode, and clicking it
+ * fires the supplied `onClick` (typically flipping show-all off).
+ */
+function GridWithCurationChip({
+  chip,
+  children,
+}: {
+  chip:
+    | {
+        label: string
+        actionLabel: string
+        onClick: () => void
+      }
+    | null
+  children: React.ReactNode
+}) {
+  const theme = useTheme()
+  if (!chip) return <>{children}</>
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, gap: 1 }}>
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignSelf: "flex-start",
+          alignItems: "center",
+          gap: 1,
+          px: 1.25,
+          py: 0.5,
+          borderRadius: 999,
+          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+          {chip.label}
+        </Typography>
+        <Box
+          component="button"
+          type="button"
+          onClick={chip.onClick}
+          sx={{
+            appearance: "none",
+            border: "none",
+            background: "transparent",
+            color: theme.palette.primary.main,
+            cursor: "pointer",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            textDecoration: "underline",
+            p: 0,
+            "&:hover": { opacity: 0.85 },
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
+          {chip.actionLabel}
+        </Box>
+      </Box>
+      <Box sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
     </Box>
   )
 }
