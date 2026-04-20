@@ -71,7 +71,7 @@ interface BeatTextOverlayProps {
   /** Multiplicative opacity applied on top of the progress-driven fade
    *  for the left-panel text block (`beat1Ref`). Defaults to a constant
    *  1 when omitted. The parent animates this from 1 to 0 during the
-   *  Back-from-1/6 gesture so the entire text block (intro paragraphs,
+   *  Back-from-first-beat gesture so the entire text block (intro paragraphs,
    *  tier legend, bottom controls) fades out together instead of each
    *  reveal being reversed through the progress timeline. */
   backOutOpacity?: MotionValue<number>
@@ -266,14 +266,10 @@ export default function BeatTextOverlay({
    *  fades out and collapses its height so the tier legend slides up into
    *  the vacated space via document flow. */
   const introCollapseRef = useRef<HTMLDivElement>(null)
-  /** Natural height of `introCollapseRef` (including padding), measured
-   *  via ResizeObserver. Used as the animating max-height target. */
-  const introCollapseHeightRef = useRef<number>(0)
   /** Wrapper around the "How are scenario results measured?" subtitle.
    *  Collapses on the same schedule as `introCollapseRef` so, post-reveal,
    *  only the page title sits above the tier legend. */
   const subtitleCollapseRef = useRef<HTMLDivElement>(null)
-  const subtitleCollapseHeightRef = useRef<number>(0)
   /** Root Box of the right-column (absolutely positioned at `right: 0`,
    *  `width: 33.33%`). Used as the reference frame for ResizeObserver
    *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
@@ -314,7 +310,7 @@ export default function BeatTextOverlay({
    *  The row is only visible when a text sequence has finished — i.e.,
    *  the parent is settled at a beat (`playState === "paused"` or
    *  `"finished"`) and the user has clicked Play. Any new sequence
-   *  (Play, Next, Back between beats, Back-from-1/6) flips `playState`
+   *  (Play, Next, Back between beats, Back-from-first-beat) flips `playState`
    *  to `"playing"` and fades the row back out until the tween
    *  completes. This keeps the controls out of the way during the
    *  animated storytelling and surfaces them only at the reading
@@ -333,7 +329,7 @@ export default function BeatTextOverlay({
   /* ── `beat1Ref` opacity: progress-driven fade-in × back-out fade-out ──
    *
    * We multiply the progress-derived fade-in (0.02 → 0.06 window) by
-   * `backOutOpacity` (default 1, animated to 0 on Back-from-1/6) so the
+   * `backOutOpacity` (default 1, animated to 0 on Back-from-first-beat) so the
    * entire text block (intro paragraphs, tier legend, beat 1C reveals,
    * bottom controls) fades out together during back-out instead of the
    * progress listener unwinding each reveal. Both `progress` and
@@ -365,7 +361,7 @@ export default function BeatTextOverlay({
    * a beat (`paused` or `finished`) and the user has clicked Play.
    * Any new sequence (Play, Next, Back) flips `playState` to `playing`
    * and this effect fades the row back out. Pre-play (`idle`) and the
-   * Back-from-1/6 completion (which sets `idle` + `hasPlayed=false`)
+   * Back-from-first-beat completion (which sets `idle` + `hasPlayed=false`)
    * also keep the row hidden. */
   useEffect(() => {
     if (hideControls) return
@@ -388,27 +384,36 @@ export default function BeatTextOverlay({
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
-      // Intro collapse group: after the Critical row lands (~0.45) and a
-      // short hold, fade out the intro paragraphs + subtitle first, then
-      // collapse their height so the tier legend slides up into the
-      // vacated space via document flow. The subtitle ("How are scenario
-      // results measured?") collapses on the same schedule as the intro
-      // paragraphs so only the page title sits above the legend at rest.
-      // Running the two sequentially (fade then slide) reads more cleanly
-      // than overlapping them.
-      const introFadeOut = clamp01((v - 0.49) / 0.03)
-      const introCollapse = clamp01((v - 0.52) / 0.03)
+      // Intro collapse group: after the Critical row lands (~0.45), fade
+      // out the intro paragraphs + subtitle immediately so the user sees
+      // a response to clicking Next, then collapse their height so the
+      // tier legend slides up into the vacated space via document flow.
+      // The subtitle ("How are scenario results measured?") collapses on
+      // the same schedule as the intro paragraphs so only the page title
+      // sits above the legend at rest. Running the two sequentially (fade
+      // then slide) reads more cleanly than overlapping them. Windows are
+      // kept tight (0.015 each, ~0.7s in the merged beat-2/5 tween) so
+      // the whole transition feels snappy and completes before Beat 1B's
+      // map convergence (starting at 0.50) takes over attention.
+      //
+      // Collapse is driven via `grid-template-rows: 1fr -> 0fr` on the
+      // outer wrapper; the browser interpolates each row's height from
+      // the inner overflow-hidden child's natural `min-content` height
+      // down to zero, so no JS measurement is needed (same pattern as
+      // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
+      // below).
+      const introFadeOut = clamp01((v - 0.46) / 0.015)
+      const introCollapse = clamp01((v - 0.475) / 0.015)
+      const rowsFrac = 1 - introCollapse
       if (introCollapseRef.current) {
         const el = introCollapseRef.current
         el.style.opacity = String(1 - introFadeOut)
-        el.style.maxHeight =
-          introCollapseHeightRef.current * (1 - introCollapse) + "px"
+        el.style.gridTemplateRows = `${rowsFrac}fr`
       }
       if (subtitleCollapseRef.current) {
         const el = subtitleCollapseRef.current
         el.style.opacity = String(1 - introFadeOut)
-        el.style.maxHeight =
-          subtitleCollapseHeightRef.current * (1 - introCollapse) + "px"
+        el.style.gridTemplateRows = `${rowsFrac}fr`
       }
 
       if (beat2PanelRef.current) {
@@ -477,7 +482,7 @@ export default function BeatTextOverlay({
 
       // Tier legend staggers in row by row (Optimal → Acceptable → At risk
       // → Critical) so the gap between "To compare results..." (0.20–0.24)
-      // and the map's Beat 1B collapse (0.55) fills with a meaningful
+      // and the map's Beat 1B collapse (0.50) fills with a meaningful
       // level-by-level reveal instead of a single 0.22-wide dead zone.
       const TIER_LEGEND_FIRST_START = 0.26
       const TIER_LEGEND_ROW_STEP = 0.05
@@ -490,37 +495,36 @@ export default function BeatTextOverlay({
         el.style.opacity = String(clamp01((v - start) / TIER_LEGEND_ROW_FADE))
       }
 
-      // Beat 1C example text ("each polygon on the map represents..."):
-      // kicks off the overlay narrative as soon as the AG-only filter +
-      // blue→tier blend begins (0.60), so the text and the color change
-      // register together. `grid-template-rows` interpolates from 0fr
-      // (collapsed row) to 1fr (min-content row) alongside the opacity
-      // fade, so the browser grows the block to its natural height via
-      // document flow — no JS measurement needed. The control row
-      // below therefore hugs the last-visible text rather than
-      // floating at the bottom behind reserved invisible space.
+      // Beat 1C + follow-on narrative paragraphs.
+      //
+      // Each paragraph fades in as a complete block via opacity only.
+      // The outer grid-row still collapses from `1fr` to `0fr` to keep
+      // the slot out of the document flow before the paragraph is due
+      // (so the bottom control row hugs the last visible text at rest),
+      // but the row-size change is a near-instant threshold rather than
+      // a synchronized ramp: the slot pops open a hair before the
+      // opacity fade begins, then the text fades in as one whole
+      // paragraph instead of vertically "unfolding" line by line.
+      //
+      // Each slot opens during a tween (`playState === "playing"`), when
+      // the bottom controls are invisible anyway, so the layout push on
+      // the control row isn't perceived.
       if (beat1cExampleRef.current) {
-        const fadeIn = clamp01((v - 0.6) / 0.03)
-        beat1cExampleRef.current.style.opacity = String(fadeIn)
-        beat1cExampleRef.current.style.gridTemplateRows = `${fadeIn}fr`
+        const el = beat1cExampleRef.current
+        el.style.opacity = String(clamp01((v - 0.49) / 0.03))
+        el.style.gridTemplateRows = v >= 0.485 ? "1fr" : "0fr"
       }
 
-      // Beat 1C delivery-levels text: appears once the tier colors are
-      // fully set and the example popups have had a moment to read.
       if (beat1cDeliveryRef.current) {
-        const fadeIn = clamp01((v - 0.7) / 0.03)
-        beat1cDeliveryRef.current.style.opacity = String(fadeIn)
-        beat1cDeliveryRef.current.style.gridTemplateRows = `${fadeIn}fr`
+        const el = beat1cDeliveryRef.current
+        el.style.opacity = String(clamp01((v - 0.65) / 0.03))
+        el.style.gridTemplateRows = v >= 0.645 ? "1fr" : "0fr"
       }
 
-      // "All other key outcomes..." text: bridges AG_REV's solo morph
-      // (ends at 0.78) and the remaining outcomes' fly-ins (start at
-      // 0.84). Fade in 0.79–0.82 leaves a 0.02 reading beat before the
-      // next morph wave begins.
       if (allOtherOutcomesRef.current) {
-        const fadeIn = clamp01((v - 0.79) / 0.03)
-        allOtherOutcomesRef.current.style.opacity = String(fadeIn)
-        allOtherOutcomesRef.current.style.gridTemplateRows = `${fadeIn}fr`
+        const el = allOtherOutcomesRef.current
+        el.style.opacity = String(clamp01((v - 0.79) / 0.03))
+        el.style.gridTemplateRows = v >= 0.785 ? "1fr" : "0fr"
       }
 
       // NOTE: bottom control row opacity is driven by `playState`
@@ -530,43 +534,6 @@ export default function BeatTextOverlay({
     })
     return unsub
   }, [progress])
-
-  /* ── Measure intro-collapse block ──
-   *
-   * The two intro paragraphs ("Different scenarios..." + "To compare
-   * results...") live inside `introCollapseRef`. We measure its natural
-   * `scrollHeight` (content + padding; `beat2IntroRef` is always in flow
-   * even when `opacity: 0`, so scrollHeight reflects the expanded height)
-   * and seed the element's initial `max-height` so the progress handler
-   * has a closed-form value to animate toward zero. */
-  useLayoutEffect(() => {
-    const intro = introCollapseRef.current
-    const subtitle = subtitleCollapseRef.current
-
-    const measure = () => {
-      if (intro) {
-        const h = intro.scrollHeight
-        introCollapseHeightRef.current = h
-        if (!intro.style.maxHeight || intro.style.maxHeight === "0px") {
-          intro.style.maxHeight = h + "px"
-        }
-      }
-      if (subtitle) {
-        const h = subtitle.scrollHeight
-        subtitleCollapseHeightRef.current = h
-        if (!subtitle.style.maxHeight || subtitle.style.maxHeight === "0px") {
-          subtitle.style.maxHeight = h + "px"
-        }
-      }
-    }
-
-    const ro = new ResizeObserver(() => measure())
-    if (intro) ro.observe(intro)
-    if (subtitle) ro.observe(subtitle)
-    measure()
-
-    return () => ro.disconnect()
-  }, [])
 
   /* ── Report glyph placeholder rects up to the parent ──
    *
@@ -709,14 +676,19 @@ export default function BeatTextOverlay({
         </motion.div>
 
         <motion.div style={{ opacity: headingOpacity, flexShrink: 0 }}>
-          <Box ref={subtitleCollapseRef} sx={{ overflow: "hidden" }}>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ maxWidth: "66%", opacity: 0.85 }}
-            >
-              How are scenario results measured?
-            </Typography>
+          <Box
+            ref={subtitleCollapseRef}
+            sx={{ display: "grid", gridTemplateRows: "1fr" }}
+          >
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ maxWidth: "66%", opacity: 0.85 }}
+              >
+                How are scenario results measured?
+              </Typography>
+            </Box>
           </Box>
         </motion.div>
 
@@ -726,7 +698,8 @@ export default function BeatTextOverlay({
          * heading-to-content precedent (see e.g. `apps/main/app/data/page.tsx`).
          * It acts as the gap below the subtitle pre-collapse, and becomes
          * the gap directly below the page title post-collapse once the
-         * subtitle + intro paragraphs both animate to height 0. */}
+         * subtitle + intro paragraphs both animate to height 0 via
+         * `grid-template-rows: 1fr -> 0fr`. */}
         <Box
           ref={beat1Ref}
           sx={{
@@ -744,8 +717,6 @@ export default function BeatTextOverlay({
             "& .MuiTypography-root": {
               color: textColor,
               textShadow: shadow,
-              fontSize: theme.typography.storyBody.fontSize,
-              lineHeight: theme.typography.storyBody.lineHeight,
             },
           }}
         >
@@ -756,18 +727,17 @@ export default function BeatTextOverlay({
            *  the whole spacing collapses together. */}
           <Box
             ref={introCollapseRef}
-            sx={{
-              pb: 2.5,
-              overflow: "hidden",
-            }}
+            sx={{ display: "grid", gridTemplateRows: "1fr" }}
           >
-            <Typography variant="body1" component="p">
-              Different scenarios change how water is allocated among different users and the environment.
-            </Typography>
-            <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
-              <Typography variant="body1" component="p">
-                To compare results on a common scale, we group key outcomes into levels:
+            <Box sx={{ overflow: "hidden", pb: 2.5 }}>
+              <Typography variant="body2" component="p">
+                Different scenarios change how water is allocated among different users and the environment.
               </Typography>
+              <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+                <Typography variant="body2" component="p">
+                  To compare results on a common scale, we group key outcomes into levels:
+                </Typography>
+              </Box>
             </Box>
           </Box>
           <Box
@@ -871,12 +841,14 @@ export default function BeatTextOverlay({
           </Box>
           {/* Beat 1C narrative lives in the left panel, directly below the
            *  tier legend, so the overlay panel can be dedicated to graphics.
-           *  These blocks inherit `beat1Ref`'s `storyBody` font cascade and
-           *  `textColor` / `textShadow` automatically.
+           *  These blocks inherit `beat1Ref`'s `textColor` / `textShadow`
+           *  automatically; sizing comes from MUI's native `body2` variant,
+           *  so this panel stays in lockstep with the other Get Started
+           *  panels.
            *
            *  Each block is a single-row CSS grid whose `grid-template-rows`
            *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
-           *  by the progress handler (0.60 / 0.70 / 0.79), alongside an
+           *  by the progress handler (0.49 / 0.65 / 0.79), alongside an
            *  opacity fade. The browser computes the min-content height
            *  from document flow — no measurement — so the bottom control
            *  row below naturally hugs the last text block that's actually
@@ -892,7 +864,7 @@ export default function BeatTextOverlay({
             }}
           >
             <Box sx={{ overflow: "hidden", pt: 2.5 }}>
-              <Typography variant="body1" component="p">
+              <Typography variant="body2" component="p">
                 For example, each colored location on the map represents an agricultural water district receiving surface water deliveries.
               </Typography>
             </Box>
@@ -906,7 +878,7 @@ export default function BeatTextOverlay({
             }}
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
-              <Typography variant="body1" component="p">
+              <Typography variant="body2" component="p">
                 The colors correspond to different water delivery outcome levels that affect{" "}
                 <Box component="strong" sx={{ fontWeight: 600 }}>
                   agricultural revenue
@@ -924,7 +896,7 @@ export default function BeatTextOverlay({
             }}
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
-              <Typography variant="body1" component="p">
+              <Typography variant="body2" component="p">
                 All other key outcomes can be mapped and visualized in similar ways.
               </Typography>
             </Box>
@@ -937,7 +909,7 @@ export default function BeatTextOverlay({
            *  driven by `bottomControlsOpacity`, animated via a
            *  dedicated `playState` effect: visible only at the reading
            *  pauses between beats (`paused` / `finished`), faded out
-           *  during any tween (`playing`) and during Back-from-1/6
+           *  during any tween (`playing`) and during Back-from-first-beat
            *  (`idle` + `hasPlayed=false` unmounts this block anyway). */}
           {!hideControls && hasPlayed && (
             <motion.div

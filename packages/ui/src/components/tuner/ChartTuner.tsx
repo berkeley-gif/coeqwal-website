@@ -48,9 +48,24 @@ export default function ChartTuner({
   onReset,
   getSnapshot,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
 }: ChartTunerProps) {
   const hostTheme = useTheme()
-  const [open, setOpen] = useState(defaultOpen)
+  const isControlled = controlledOpen !== undefined
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const setOpen = useCallback(
+    (next: boolean | ((prev: boolean) => boolean)) => {
+      const resolved =
+        typeof next === "function"
+          ? (next as (prev: boolean) => boolean)(open)
+          : next
+      if (!isControlled) setUncontrolledOpen(resolved)
+      onOpenChange?.(resolved)
+    },
+    [isControlled, onOpenChange, open],
+  )
   const [stepIdx, setStepIdx] = useState(0)
   const [activePresetId, setActivePresetId] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -414,62 +429,11 @@ function OverlayBody({
         ) : null}
 
         {hasPresets ? (
-          <Section label="Preset views">
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 0.75,
-              }}
-            >
-              {presets.map((p) => {
-                const active = p.id === activePresetId
-                return (
-                  <Box
-                    key={p.id}
-                    component="button"
-                    type="button"
-                    onClick={() => onPreset(p)}
-                    title={p.description}
-                    sx={{
-                      textAlign: "left",
-                      px: 1,
-                      py: 0.75,
-                      borderRadius: 1,
-                      border: `1px solid ${
-                        active
-                          ? theme.palette.primary.main
-                          : theme.palette.divider
-                      }`,
-                      background: active
-                        ? theme.palette.action.selected
-                        : "transparent",
-                      color: theme.palette.text.primary,
-                      cursor: "pointer",
-                      fontSize: 12,
-                      lineHeight: 1.3,
-                      "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
-                      },
-                    }}
-                  >
-                    <Box sx={{ fontWeight: 600 }}>{p.label}</Box>
-                    {p.description ? (
-                      <Box
-                        sx={{
-                          mt: 0.25,
-                          fontSize: 11,
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        {p.description}
-                      </Box>
-                    ) : null}
-                  </Box>
-                )
-              })}
-            </Box>
-          </Section>
+          <PresetSections
+            presets={presets}
+            activePresetId={activePresetId}
+            onPreset={onPreset}
+          />
         ) : null}
 
         {hasControls ? (
@@ -515,6 +479,121 @@ function OverlayBody({
           ) : null}
         </Box>
       ) : null}
+    </Box>
+  )
+}
+
+/**
+ * Render presets in groups. Presets with a shared `group` string are
+ * rendered under a single heading in the order they first appear; presets
+ * without a group fall back into a default "Preset views" section. Groups
+ * are rendered in first-seen order so the consumer controls the narrative
+ * (Start → Browse → Analyze, etc.).
+ */
+function PresetSections({
+  presets,
+  activePresetId,
+  onPreset,
+}: {
+  presets: TunerPreset[]
+  activePresetId: string | null
+  onPreset: (p: TunerPreset) => void
+}) {
+  const groups = useMemo(() => {
+    const order: string[] = []
+    const bucket = new Map<string, TunerPreset[]>()
+    for (const p of presets) {
+      const key = p.group ?? "__default__"
+      if (!bucket.has(key)) {
+        bucket.set(key, [])
+        order.push(key)
+      }
+      bucket.get(key)!.push(p)
+    }
+    return order.map((key) => ({
+      key,
+      label: key === "__default__" ? "Preset views" : key,
+      items: bucket.get(key)!,
+    }))
+  }, [presets])
+
+  return (
+    <>
+      {groups.map((g) => (
+        <Section key={g.key} label={g.label}>
+          <PresetGrid
+            presets={g.items}
+            activePresetId={activePresetId}
+            onPreset={onPreset}
+          />
+        </Section>
+      ))}
+    </>
+  )
+}
+
+function PresetGrid({
+  presets,
+  activePresetId,
+  onPreset,
+}: {
+  presets: TunerPreset[]
+  activePresetId: string | null
+  onPreset: (p: TunerPreset) => void
+}) {
+  const theme = useTheme()
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 0.75,
+      }}
+    >
+      {presets.map((p) => {
+        const active = p.id === activePresetId
+        return (
+          <Box
+            key={p.id}
+            component="button"
+            type="button"
+            onClick={() => onPreset(p)}
+            title={p.description}
+            sx={{
+              textAlign: "left",
+              px: 1,
+              py: 0.75,
+              borderRadius: 1,
+              border: `1px solid ${
+                active ? theme.palette.primary.main : theme.palette.divider
+              }`,
+              background: active
+                ? theme.palette.action.selected
+                : "transparent",
+              color: theme.palette.text.primary,
+              cursor: "pointer",
+              fontSize: 12,
+              lineHeight: 1.3,
+              "&:hover": {
+                backgroundColor: theme.palette.action.hover,
+              },
+            }}
+          >
+            <Box sx={{ fontWeight: 600 }}>{p.label}</Box>
+            {p.description ? (
+              <Box
+                sx={{
+                  mt: 0.25,
+                  fontSize: 11,
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {p.description}
+              </Box>
+            ) : null}
+          </Box>
+        )
+      })}
     </Box>
   )
 }
