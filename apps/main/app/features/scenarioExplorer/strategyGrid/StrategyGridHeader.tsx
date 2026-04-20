@@ -240,7 +240,7 @@ function ColumnHeaders({
         <SearchAndChips />
       </Box>
 
-      {/* Column 3: "Key operations" — fades in/out with showOperations */}
+      {/* Column 3: "Key operations" - fades in/out with showOperations */}
       {!hideColumnTitles && (
         <Box
           sx={{
@@ -272,7 +272,7 @@ function ColumnHeaders({
         </Box>
       )}
 
-      {/* Column 4: "Key outcomes" — only in full mode, hidden when titles hidden */}
+      {/* Column 4: "Key outcomes" - only in full mode, hidden when titles hidden */}
       {isFullMode && !hideColumnTitles && (
         <Box
           className="outcome-col"

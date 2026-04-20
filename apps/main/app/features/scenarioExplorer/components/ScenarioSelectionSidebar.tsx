@@ -27,6 +27,7 @@ import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
+import ScenarioListTuner from "./ScenarioListTuner"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -156,7 +157,7 @@ export default function ScenarioSelectionSidebar({
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <SearchAndChips />
+        <SearchAndChips afterSearch={<ScenarioListTuner />} />
       </Box>
 
       {/* Scrollable scenario list */}

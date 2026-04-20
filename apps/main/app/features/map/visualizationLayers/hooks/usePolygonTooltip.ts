@@ -48,7 +48,7 @@ export function usePolygonTooltip({
   } = useTooltipState()
 
   // Clear pinned tooltips when the outcome changes (different layer config).
-  // Scenario/hydroclimate changes keep tooltips — tier info updates reactively.
+  // Scenario/hydroclimate changes keep tooltips - tier info updates reactively.
   useEffect(() => {
     clearAllPinned()
   }, [config, clearAllPinned])

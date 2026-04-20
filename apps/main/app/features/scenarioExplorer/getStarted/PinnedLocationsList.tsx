@@ -106,7 +106,7 @@ export default function PinnedLocationsList({
 
   return (
     <>
-      {/* SVG leader lines — fixed viewport overlay so they aren't clipped */}
+      {/* SVG leader lines - fixed viewport overlay so they aren't clipped */}
       <svg
         style={{
           position: "fixed",

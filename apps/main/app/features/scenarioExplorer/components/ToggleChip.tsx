@@ -35,9 +35,12 @@ export default function ToggleChip({
         fontWeight: 500,
         lineHeight: 1.3,
         color: active ? theme.palette.blue.bright : theme.palette.grey[800],
+        // `action.disabledBackground` resolves to a light-grey in the
+        // normal light theme and to a subtle white overlay under the
+        // tuner dark theme, so the chip works in both without a prop.
         background: active
           ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
+          : theme.palette.action.disabledBackground,
         transition: "all 150ms ease",
         "&:hover": {
           background: theme.palette.interaction.selectedBackground,

@@ -71,6 +71,18 @@ export type { TruncatedTextProps } from "./common/TruncatedText"
 // Panel components
 export { Panel } from "./panels/Panel"
 export type { PanelProps } from "./panels/Panel"
+export {
+  resolveRadius,
+  resolveInset,
+  DEFAULT_PANEL_INSET_X,
+  DEFAULT_PANEL_INSET_Y,
+} from "./panels/resolveRadius"
+export type {
+  RadiusTokenKey,
+  RadiusValue,
+  RadiusTokens,
+  PanelInset,
+} from "./panels/resolveRadius"
 export { DisplayBlock } from "./panels/DisplayBlock"
 export type { DisplayBlockProps } from "./panels/DisplayBlock"
 export { TwoColumnInterstitial } from "./panels/TwoColumnInterstitial"
@@ -133,3 +145,19 @@ export type { ChartToastProps } from "./common/ChartToast"
 // Modal components
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"
+
+// Tuner widgets (design/review tools)
+export {
+  PanelTuner,
+  ChartTuner,
+  createTunerDarkTheme,
+  PANEL_RADIUS_VAR,
+  PANEL_INSET_X_VAR,
+  PANEL_INSET_Y_VAR,
+  tunerRadius,
+  tunerInsetX,
+  tunerInsetY,
+  tunerInsetXPx,
+  tunerInsetYPx,
+} from "./tuner"
+export type { ChartTunerProps, TunerPreset, WalkthroughStep } from "./tuner"

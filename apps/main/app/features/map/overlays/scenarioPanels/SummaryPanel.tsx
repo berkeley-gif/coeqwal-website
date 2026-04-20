@@ -32,7 +32,7 @@ import {
   getTierColorsFromTheme,
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
-// GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+// GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
 // TODO: replace with lightweight /locations endpoint + hardcoded centroids
 // import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { getOutcomeName } from "../../../../content/outcomes"
@@ -120,7 +120,7 @@ export function SummaryPanel({
 
         if (cancelled) return
 
-        // GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+        // GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
         // TODO: replace with lightweight /locations endpoint + hardcoded centroids
         // for demand units, or compute centroids from Mapbox tiles via querySourceFeatures.
         const apiNamesMap = new Map<string, string>()

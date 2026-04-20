@@ -52,10 +52,8 @@ interface OutcomeMorphOverlayProps {
     {
       x: number
       y: number
-      labelY: number
       maxWidth: number
       slotHeight: number
-      locationDescription: string
     }
   >
   onOutcomeClick?: (code: string) => void
@@ -327,19 +325,40 @@ function computeOutcomeLayout(
 }
 
 /**
- * Progress ranges for each outcome within Beat 2 (global progress 0.67–1.0).
+ * Progress ranges for each outcome within Beat 2 (global progress 0.78–1.0).
  * Each outcome gets a slice for its polygon morph animation.
- * Morphing begins at 0.67, after tier colors have settled on the map.
+ * Morphing begins at 0.78, after the Beat 1C tier-color blend, example
+ * text, and map popups have all played.
  */
+/** Beat 2 is split so AG_REV morphs first (solo), then the overlay narrates
+ *  "All other key outcomes...", then the remaining outcomes morph in their
+ *  existing order. AG_REV gets a dedicated early window; the rest divide the
+ *  tail of the progress track equally.
+ *
+ *  Returns the [start, end] progress window (in `progress` space, 0..1) for
+ *  the morph of a given outcome. `activeCodes` lets us size the tail slice
+ *  based on how many outcomes actually ended up with polygons to morph. */
 export function getOutcomeProgressRange(
-  index: number,
-  total: number,
+  code: string,
+  activeCodes: readonly string[],
 ): [number, number] {
-  const beat2Start = 0.67
-  const beat2End = 1.0
-  const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
-  const start = beat2Start + index * sliceWidth
-  return [start, start + sliceWidth * 0.9]
+  // All 9 morph windows share the same width so each outcome morphs at
+  // the same perceived speed. AG_REV runs first in a dedicated slot
+  // ([0.76, 0.78]) after the "The colors correspond..." narrative fully
+  // fades in (ending at 0.73) plus a short reading beat. A second text
+  // beat ("All other key outcomes...") then plays before the remaining 8
+  // morphs run back-to-back across [0.84, 1.00], each occupying a
+  // 0.02-wide slice matching AG_REV's width.
+  const WINDOW = 0.02
+  if (code === "AG_REV") return [0.76, 0.76 + WINDOW]
+  const others = activeCodes.filter((c) => c !== "AG_REV")
+  const beatStart = 0.84
+  const beatEnd = 1.0
+  const slice = (beatEnd - beatStart) / Math.max(others.length, 1)
+  const i = others.indexOf(code)
+  if (i < 0) return [beatStart, beatEnd]
+  const start = beatStart + i * slice
+  return [start, start + slice]
 }
 
 export default function OutcomeMorphOverlay({
@@ -366,13 +385,13 @@ export default function OutcomeMorphOverlay({
   const theme = useTheme()
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
-  const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
+    const activeCodes = outcomes.map((o) => o.code)
 
-    return outcomes.map((outcome, oi) => {
+    return outcomes.map((outcome) => {
       const sampled =
         outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME
           ? (() => {
@@ -419,27 +438,19 @@ export default function OutcomeMorphOverlay({
         }
       }
       const pad = SQUARE_SIZE / 2
-      const labelY = pos?.labelY ?? gridTargetY
-      const boundsTop =
-        shapes.length > 0 ? Math.min(labelY, minY - pad) : labelY
-      const boundsBottom = shapes.length > 0 ? maxY + pad : labelY + 32
+      const boundsTop = shapes.length > 0 ? minY - pad : gridTargetY
+      const boundsBottom =
+        shapes.length > 0 ? maxY + pad : gridTargetY + outcomeSlotHeight
       const boundsLeft = shapes.length > 0 ? minX - pad : gridTargetX
       const boundsRight =
         shapes.length > 0
           ? Math.max(maxX + pad, gridTargetX + maxColWidth)
           : gridTargetX + maxColWidth
-      const locationDescription =
-        pos?.locationDescription ?? `${outcome.polygons.length} locations`
-      const SLOT_COUNT_GAP = 16
-      const countY =
-        outcomeSlotHeight > 0
-          ? gridTargetY + outcomeSlotHeight + SLOT_COUNT_GAP
-          : gridTargetY + 46
       const bounds = {
         x: boundsLeft,
         y: boundsTop,
         width: boundsRight - boundsLeft,
-        height: Math.max(boundsBottom, countY + 11) - boundsTop,
+        height: Math.max(1, boundsBottom - boundsTop),
       }
 
       return {
@@ -449,10 +460,7 @@ export default function OutcomeMorphOverlay({
         hasData,
         glyphMeta: layout.glyphMeta,
         bounds,
-        locationDescription,
-        countY,
-        countX: gridTargetX + GRID_PAD,
-        progressRange: getOutcomeProgressRange(oi, outcomes.length),
+        progressRange: getOutcomeProgressRange(outcome.code, activeCodes),
       }
     })
   }, [
@@ -897,13 +905,6 @@ export default function OutcomeMorphOverlay({
             chromeEl.style.opacity = "0"
           }
         }
-
-        const countEl = countRefsMap.current.get(group.code)
-        if (countEl) {
-          const countFade =
-            v >= 1 ? 1 : v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.01)
-          countEl.style.opacity = String(countFade)
-        }
       }
     }
     const unsub = progress.on("change", handler)
@@ -1112,21 +1113,6 @@ export default function OutcomeMorphOverlay({
                 />
               )
             })}
-            {group.locationDescription && (
-              <text
-                ref={(el) => {
-                  countRefsMap.current.set(group.code, el)
-                }}
-                x={group.countX}
-                y={group.countY}
-                fontSize={11}
-                fontFamily="inherit"
-                fill={theme.palette.ink.body}
-                style={{ opacity: 0 }}
-              >
-                {group.locationDescription}
-              </text>
-            )}
             {!group.hasData &&
               interactive &&
               encodingMode !== "distribution" && (

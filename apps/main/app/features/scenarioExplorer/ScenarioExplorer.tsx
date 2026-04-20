@@ -25,6 +25,7 @@ import {
   ComparisonPanel,
   EquityPanel,
   ResiliencePanel,
+  ResilienceQuadrantPanel,
   RadarPanel,
 } from "./exploreView"
 import type {
@@ -80,7 +81,7 @@ export default function ScenarioExplorer() {
   /**
    * Hover coordination (sidebar ↔ tool panels in non-list modes).
    * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
-   * Charts must keep `chosenIds` (selected scenarios) visible when this is set —
+   * Charts must keep `chosenIds` (selected scenarios) visible when this is set -
    * it adds emphasis for hovered IDs; it does not replace selection visibility.
    */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
@@ -158,11 +159,12 @@ export default function ScenarioExplorer() {
       aggregateScope: "all",
       reorderBySimilarity: false,
       showMarginals: false,
-      focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
-      focusOutcomeCode: "CWS_DEL",
+      showAllScenarios: false,
+      expandedTileId: null,
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
-      showRegionalSplit: false,
       showCellNumbers: true,
+      quadrantUnit: "outcome",
+      quadrantOutcome: "CWS_DEL",
     })
 
   const handleResilienceControlsChange = useCallback(
@@ -177,7 +179,7 @@ export default function ScenarioExplorer() {
       return (
         <ChartControlsBar>
           <InlineToggleChip
-            label="choose axes"
+            label="choose outcome axes"
             active={showAxisSelector}
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
@@ -196,15 +198,15 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
-            <InlineToggleChip
-              label="show range"
-              active={showRadarRange}
-              onClick={() => setShowRadarRange(!showRadarRange)}
-            />
-            <Box
-              component="button"
-              type="button"
-              disabled={selectedScenarios.length === 0 && !radarShowAll}
+          <InlineToggleChip
+            label="show range"
+            active={showRadarRange}
+            onClick={() => setShowRadarRange(!showRadarRange)}
+          />
+          <Box
+            component="button"
+            type="button"
+            disabled={selectedScenarios.length === 0 && !radarShowAll}
             onClick={() => radarCaptureRef.current?.()}
             aria-label="capture view"
             sx={{
@@ -330,7 +332,10 @@ export default function ScenarioExplorer() {
                   )
                 }
                 toolbar={
-                  <ToolToolbar gridAligned={isListMode} hideTitle={!isListMode} />
+                  <ToolToolbar
+                    gridAligned={isListMode}
+                    hideTitle={!isListMode}
+                  />
                 }
                 chartControls={isListMode ? undefined : chartControls}
               >
@@ -356,13 +361,22 @@ export default function ScenarioExplorer() {
                     onScenarioHover={handleToolScenarioHover}
                   />
                 )}
-                {exploreMode === "resilience" && (
-                  <ResiliencePanel
-                    controls={resilienceControls}
-                    highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
-                  />
-                )}
+                {exploreMode === "resilience" &&
+                  (resilienceControls.view === "quadrant" ? (
+                    <ResilienceQuadrantPanel
+                      controls={resilienceControls}
+                      onControlsChange={handleResilienceControlsChange}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  ) : (
+                    <ResiliencePanel
+                      controls={resilienceControls}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                      onControlsChange={handleResilienceControlsChange}
+                    />
+                  ))}
                 {exploreMode === "data" && <DataExplorerView />}
               </UnifiedToolLayout>
             </Box>

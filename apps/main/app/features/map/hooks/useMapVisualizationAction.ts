@@ -10,7 +10,7 @@ import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
 
 const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
-// Only multi-value outcomes need prefetching via /locations — single-value
+// Only multi-value outcomes need prefetching via /locations - single-value
 // outcomes are served by SWR and shared with the glyph cache.
 const PREFETCHABLE_OUTCOMES = Object.entries(OUTCOME_LAYER_REGISTRY)
   .filter(([, cfg]) => cfg.requiresIdMatching)
@@ -21,10 +21,10 @@ const PREFETCHABLE_OUTCOMES = Object.entries(OUTCOME_LAYER_REGISTRY)
  *
  * Provides two entry points:
  *
- * - `showOnMap(outcomeCode, scenarioId)` — fixed-scenario call (Learn section).
+ * - `showOnMap(outcomeCode, scenarioId)` - fixed-scenario call (Learn section).
  *   Uses the scenarioId as-is; no hydroclimate tracking.
  *
- * - `showOnMapForGroup(outcomeCode, siblingGroupId)` — hydroclimate-aware call
+ * - `showOnMapForGroup(outcomeCode, siblingGroupId)` - hydroclimate-aware call
  *   (list view / explore tools). Resolves the sibling group ID to the current
  *   hydroclimate's scenario ID, and reactively re-resolves when the user
  *   switches hydroclimate. Also eagerly prefetches tier location data for all

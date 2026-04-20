@@ -6,7 +6,7 @@ const getFooterText = (k: TabKey) => {
     case "learn":
       return "Explore water allocation scenarios"
     case "explore":
-      return "Share your results"
+      return "Go to tools"
     case "share":
       return "Learn about water management in California"
     default:

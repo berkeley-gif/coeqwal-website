@@ -96,9 +96,20 @@ export function useMeetingProgress(
 
     requestAnimationFrame(measure)
 
+    // Observe the container plus refA and refB. Observing the ref
+    // elements is important when one of them is a dynamic-size
+    // marker (e.g. a viewport-center marker whose height is set
+    // from measured headline height after mount) — without it the
+    // initial measurement captures the pre-measured size and never
+    // updates. It also makes the hook self-healing against font
+    // loads, text changes, and reflows in the tracked elements.
     const observer = new ResizeObserver(() => requestAnimationFrame(measure))
     const container = containerRef.current
     if (container) observer.observe(container)
+    const elA = refA.current
+    if (elA) observer.observe(elA)
+    const elB = refB.current
+    if (elB) observer.observe(elB)
     window.addEventListener("resize", measure)
 
     return () => {

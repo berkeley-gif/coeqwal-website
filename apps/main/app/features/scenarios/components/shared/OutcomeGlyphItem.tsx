@@ -88,7 +88,7 @@ export interface OutcomeGlyphItemProps {
   displayName: string
   /** Internal name (used for tooltip key) */
   name: string
-  /** Outcome short code (e.g. "DELTA_ECO") — used for single-value square count */
+  /** Outcome short code (e.g. "DELTA_ECO") - used for single-value square count */
   outcomeCode?: string
   /** Chart data for this outcome */
   chartData: ChartDataPoint[] | undefined

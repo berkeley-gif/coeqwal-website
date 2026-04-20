@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ListView — Unified scenario grid with all 4 columns.
+ * ListView - Unified scenario grid with all 4 columns.
  *
  * Uses a single CSS Grid (checkbox | scenario | operations | outcomes)
  * with subgrid rows for pixel-perfect column alignment and a single
@@ -128,7 +128,7 @@ export default function ListView({
     } else if (!isWrappedLayout && stashedPinnedScenarioIds !== null) {
       restoreStashedPins()
     }
-    // Only react to layout mode changes — not to pin array changes
+    // Only react to layout mode changes - not to pin array changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWrappedLayout])
 
@@ -321,7 +321,7 @@ export default function ListView({
         autoHideDuration={3000}
         onClose={dismissPinCapReached}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="Pin limit reached — unpin a scenario to pin another"
+        message="Pin limit reached - unpin a scenario to pin another"
         ContentProps={{
           sx: {
             backgroundColor: theme.palette.grey[800],
@@ -339,7 +339,7 @@ export default function ListView({
         autoHideDuration={4000}
         onClose={dismissPinsTrimmedForMap}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="Pins reduced to 1 for this view — will restore at full width"
+        message="Pins reduced to 1 for this view - will restore at full width"
         ContentProps={{
           sx: {
             backgroundColor: theme.palette.grey[800],

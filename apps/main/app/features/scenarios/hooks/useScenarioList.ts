@@ -19,8 +19,8 @@ const HISTORICAL_HC_ID = 2
  * short_code), which maps into the local scenarioMetadata table.
  *
  * Exposes two views of the data:
- * - `scenarios` — all 72+ individual scenarios (for raw access)
- * - `siblingGroups` — 24 representative Scenario objects (historical variants),
+ * - `scenarios` - all 72+ individual scenarios (for raw access)
+ * - `siblingGroups` - 24 representative Scenario objects (historical variants),
  *   one per unique strategy. The UI renders these; the hydroclimate chooser
  *   determines which variant's tier data is fetched.
  */
@@ -69,7 +69,7 @@ export function useScenarioList() {
   }, [rawScenarios])
 
   /**
-   * 24 representative scenarios — the historical variant for each sibling group.
+   * 24 representative scenarios - the historical variant for each sibling group.
    * These are the rows shown in the sidebar and list views.
    */
   const siblingGroups = useMemo<Scenario[]>(() => {
@@ -122,7 +122,7 @@ export function useScenarioList() {
     return scenarioMap.get(scenarioId)
   }
 
-  /** Display name for a scenario — works with both individual IDs and sibling group IDs */
+  /** Display name for a scenario - works with both individual IDs and sibling group IDs */
   const getDisplayName = useCallback(
     (scenarioId: string): string => {
       return (

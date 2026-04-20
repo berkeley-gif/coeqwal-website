@@ -2,7 +2,13 @@
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
-import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
+import {
+  useMotionValue,
+  useTransform,
+  motion,
+  animate,
+  useReducedMotion,
+} from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
 import {
@@ -19,6 +25,7 @@ import {
   useMapStore,
 } from "../../map/store"
 import {
+  BASEMAP_DIM_OPACITY,
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
@@ -37,7 +44,6 @@ import OutcomeMorphOverlay, {
   type EncodingMode,
   getOutcomeProgressRange,
   computeDistributionHeight,
-  GLYPH_SIZE,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import PinnedLocationsList from "./PinnedLocationsList"
@@ -51,7 +57,89 @@ import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { useScenarioExplorerStore } from "../store"
 
-const TOTAL_DURATION = 30
+/* ── Storyboard beats ──
+ *
+ * The visualization is divided into discrete beats the user advances
+ * through with Next / Back. Each beat is a checkpoint on the existing
+ * `progress` MotionValue (0-1). Clicking Next animates `progress` from
+ * the current beat's checkpoint to the next one over the next beat's
+ * `duration` seconds. All existing `progress.on("change")` listeners in
+ * BeatTextOverlay / OutcomeMorphOverlay / this file already interpolate
+ * smoothly between any two progress values, so beat navigation drops in
+ * without changing any of them.
+ *
+ * Reading pauses happen naturally between Next clicks. Tuning a beat's
+ * duration tunes only that beat's perceived speed. */
+interface BeatDef {
+  /** Stable identifier (debug only). */
+  id: string
+  /** Target value of `progress` at the end of this beat. */
+  progress: number
+  /** Forward duration in seconds. Back uses 60% of this value. */
+  duration: number
+}
+
+const BEATS: readonly BeatDef[] = [
+  // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
+  //      Played automatically on arrival. Durations are 3x the prior
+  //      baseline so text + converging-blues beats give readers time
+  //      to absorb the narrative.
+  { id: "legend", progress: 0.45, duration: 12 },
+  // B1 (2/4) - Merged transition + narrative. Duration 9s over 0.28
+  //      progress (~0.32s per 0.01 progress). Sub-windows:
+  //      1. Intro text collapses, tier legend floats to top of the
+  //         left panel (0.46 -> 0.49).
+  //      2. As soon as the legend parks (no settle pause):
+  //         (0.49 -> 0.52, ~1s) the demand-units layer cross-fades
+  //         OUT 0.65 -> 0 while still wearing its frozen 3-blue
+  //         palette. At 0.52, while invisible, the filter swaps to
+  //         Agriculture-only and the fill-color is set directly to
+  //         the AG_REV tier expression. (0.52 -> 0.56, ~1.3s) the
+  //         layer fades back IN 0 -> 0.65, appearing already in its
+  //         final tier colors. No solid-blue interstitial.
+  //      3. The Beat 1C narrative paragraphs are spaced for reading:
+  //         "For example, each colored location..." fades in at
+  //         0.49 -> 0.52 (concurrent with the map cross-fade out, so
+  //         text and tier-colored polygons arrive together by 0.56),
+  //         then "The colors correspond to different water delivery
+  //         outcome levels..." fades in at 0.65 -> 0.68, leaving a
+  //         ~1.6s reading pause before the beat settles at 0.73.
+  { id: "collapse-and-colors", progress: 0.73, duration: 9 },
+  // B2 (3/4) - AG_REV polygons morph to their distribution squares.
+  //      Tween plays the morph window [0.76, 0.78] and settles at
+  //      0.78. 3.5s total over 0.05 progress: a brief lead-in (~2.1s
+  //      from 0.73 -> 0.76) lets the reader's eye reach the map, then
+  //      the morph itself plays over [0.76, 0.78] (~1.4s).
+  { id: "ag-rev-morph", progress: 0.78, duration: 3.5 },
+  // B3 (4/4) - Merged "remaining outcomes" beat. The two Beat 1C
+  //      paragraphs under the tier legend fade out (0.78 -> 0.80),
+  //      "For each scenario, outcome levels..." fades in in their
+  //      place (0.80 -> 0.82), and the remaining 8 outcome morphs play
+  //      back-to-back over [0.84, 1.0]. Tween velocity matches AG_REV
+  //      (~70s per progress unit), so each 0.02-wide morph window
+  //      takes ~1.4s, identical to AG_REV's morph speed. Total
+  //      duration 15.5s = 70 * 0.22 (the 0.78 -> 1.0 span).
+  { id: "all-other-morphs", progress: 1.0, duration: 15.5 },
+] as const
+
+const FINAL_BEAT_INDEX = BEATS.length - 1
+const BACK_DURATION_FACTOR = 0.6
+const MIN_NAV_DURATION = 0.4
+
+/** Extra pixels added to the map panel's height beyond the "fits one
+ *  viewport once the sticky header stack is subtracted" baseline. We
+ *  intentionally let the panel extend below the fold: the intended
+ *  reading posture for this panel is that the user scrolls so the
+ *  title + Play button + subtitle park at the top of the visible area,
+ *  and the extra pixels give the left text column enough room to hold
+ *  the intro paragraphs + tier legend + beat-1C reveals + bottom
+ *  controls without running against the bottom edge. Morph landing
+ *  coordinates (polygon -> square) are measured from the DOM via
+ *  ResizeObserver in `BeatTextOverlay`, so the right-column geometry
+ *  adapts automatically to the taller panel - no other tuning needed.
+ *  Increase for more breathing room. Decrease to bring the bottom
+ *  back toward the fold. */
+const TIER_PANEL_EXTRA_PX = 320
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
@@ -153,6 +241,26 @@ const DU_CLASS_FILTER = [
   ["literal", ["Agriculture", "Urban", "Refuge"]],
 ]
 
+/** Filter used during Beat 1C so the map isolates the Agricultural
+ *  revenue story - only Agriculture demand-units are visible while the
+ *  tier-color blend and AG example popups play out. The full
+ *  DU_CLASS_FILTER is restored when Beat 2 starts. */
+const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"]
+
+/** Curated list of well-known agricultural water districts used to
+ *  illustrate what a single polygon represents during Beat 1C. Each popup
+ *  reuses the standard LocationHighlight styling from the rest of the app
+ *  so the visual language is consistent. The list is intentionally small
+ *  and geographically diverse (Sac Valley, San Joaquin/Delta, Westside,
+ *  Eastside), spanning multiple tier levels of AG_REV deliveries. */
+const BEAT1C_POPUP_DU_IDS: readonly string[] = [
+  "08N_SA2", // Glenn Colusa I.D. (Sacramento Valley)
+  "62_NA3", // Turlock I.D. (San Joaquin, Eastside)
+  "90_PA1", // Westlands W.D. East (San Joaquin, Westside)
+  "64_PA1", // Madera I.D. (Eastside, Madera)
+  "61_NA2", // Modesto I.D. (Stanislaus)
+]
+
 const ACTIVE_OUTCOMES = new Set([
   "CWS_DEL",
   "AG_REV",
@@ -164,14 +272,6 @@ const ACTIVE_OUTCOMES = new Set([
   "FW_EXP",
   "WRC_SALMON_AB",
 ])
-
-const LAYOUT_LINE_HEIGHT = 20
-const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
-const LAYOUT_DIST_GAP = 6
-const SLOT_COUNT_GAP = 16 // fixed gap between slot bottom and "X locations" text
-const SLOT_COUNT_FONT = 11
-const SLOT_POST_GAP = 16 // fixed gap after "X locations" text before next header
-const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
@@ -188,16 +288,23 @@ const ZOOM_AWARE_BASE_OPACITY = [
 interface OutcomeLayoutItem {
   code: string
   label: string
-  y: number
-  x: number
   column: 0 | 1
   columnWidth: number
   isActive: boolean
-  distributionY: number
-  distributionHeight: number
-  slotHeight: number
   locationCount: number
-  spaceBelow: number
+  /** Pixel height of the glyph placeholder (0 when not active / no polygons).
+   *  BeatTextOverlay renders a transparent Box of this height to reserve
+   *  space in document flow. The SVG morph lands inside that rect. */
+  targetHeight: number
+  /** Caption text rendered in DOM below the glyph (e.g. "12 locations"). */
+  locationDescription: string
+}
+
+interface GlyphRect {
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
 interface ScreenPolygon {
@@ -226,9 +333,35 @@ export default function TierAnimationSection() {
   // Stable as long as the map hasn't panned/zoomed.
   const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
   const [panelInView, setPanelInView] = useState(false)
+  /** Storyboard cursor: index into `BEATS`. Driven by Next / Back. */
+  const [beatIndex, setBeatIndex] = useState(0)
+  /** Ref mirror of `beatIndex` so navigation callbacks can read the
+   *  latest cursor without needing to be re-created on every change. */
+  const beatIndexRef = useRef(0)
+  /** `true` once the user has clicked Play at least since the last reset.
+   *  Gates which control affordances the BeatTextOverlay renders:
+   *    - `false` -> pre-play gate: inline Play button beside the title,
+   *                 subtitle only. No bottom Back/Next row.
+   *    - `true`  -> bottom control row (Back / N-of-T / Next) visible.
+   *                 Play button hidden.
+   *  All animation math keys off `progress` + `beatIndex`, so `hasPlayed`
+   *  purely governs the visibility of chrome. */
+  const [hasPlayed, setHasPlayed] = useState(false)
+  const hasPlayedRef = useRef(false)
+  /** Derived state describing where the user is in the storyboard.
+   *  - `idle`: at B0, no advance yet
+   *  - `playing`: actively animating between two beats
+   *  - `paused`: settled on a non-final beat, waiting for user input
+   *  - `finished`: settled on the final beat (interactive UI lights up) */
   const [playState, setPlayState] = useState<
     "idle" | "playing" | "paused" | "finished"
   >("idle")
+  /** `prefers-reduced-motion: reduce` honored at the orchestration level:
+   *  every `goTo` collapses to a 0-second snap and the auto-arrival path
+   *  jumps straight to the settled end-state. Child listeners on
+   *  `progress` resolve themselves to their v = 1 branches, so no
+   *  per-listener reduced-motion code is needed. */
+  const prefersReducedMotion = useReducedMotion() ?? false
 
   const polygonsAllowedRef = useRef(false)
   const resolvedScenarioIdRef = useRef("s0020")
@@ -237,8 +370,19 @@ export default function TierAnimationSection() {
   const [textVisible, setTextVisible] = useState(true)
   const textVisibleRef = useRef(true)
 
-  /* ── Time-based progress (0 → 1) ── */
+  /* ── Time-based progress (0 -> 1) ── */
   const progress = useMotionValue(0)
+
+  /* ── Back-out opacity for the left-panel text ──
+   *
+   * Normally 1 (no-op). When the user presses Back from beat 1/N we
+   * animate it to 0 while `progress` is parked at 0.45 - so the entire
+   * text block (intro paragraphs, tier legend, bottom controls) fades
+   * out together in one motion instead of reverse-tweening progress,
+   * which would unwind every staggered reveal in reverse. On fade
+   * completion we snap `progress` to 0 and this value back to 1, and
+   * the pre-play gate re-renders from a clean slate. */
+  const backOutOpacity = useMotionValue(1)
 
   // Map visibility: stays visible through beat 2
   // TODO(beat3): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
@@ -249,150 +393,16 @@ export default function TierAnimationSection() {
 
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
 
-  /** Start (or resume) the progress animation. */
-  const beginProgressAnimation = useCallback(
-    (startFrom: number) => {
-      const remaining = (1 - startFrom) * TOTAL_DURATION
-      setPlayState("playing")
-      controlsRef.current = animate(progress, 1, {
-        duration: remaining,
-        ease: "linear",
-        onComplete: () => {
-          setPlayState("finished")
-          mapActions.clearOutcomeVisualization()
-          mapActions.clearLocationHighlights()
-
-          const map = mapAPI.mapRef?.current?.getMap?.()
-          if (map?.isStyleLoaded?.()) {
-            try {
-              for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-                if (map.getLayer(fill)) {
-                  map.setPaintProperty(fill, "fill-opacity-transition", {
-                    duration: 0,
-                    delay: 0,
-                  })
-                  map.setPaintProperty(fill, "fill-opacity", 0)
-                  map.setFilter(fill, null)
-                }
-                if (map.getLayer(outline)) {
-                  map.setPaintProperty(outline, "line-opacity", 0)
-                }
-              }
-              for (const lineLayer of ANIM_LINE_LAYERS) {
-                if (map.getLayer(lineLayer)) {
-                  map.setPaintProperty(lineLayer, "line-opacity", 0)
-                }
-              }
-            } catch {
-              /* ok */
-            }
-          }
-        },
-      })
-    },
-    [progress, mapAPI.mapRef],
-  )
-
-  const handlePlay = useCallback(() => {
-    if (controlsRef.current) controlsRef.current.stop()
-
-    const currentVal = progress.get()
-    const startFrom = currentVal >= 1 ? 0 : currentVal
-    const isRestart = startFrom === 0
-
-    if (isRestart) {
-      progress.set(0)
-      mapActions.clearOutcomeVisualization()
-
-      // Suppress all map layers to their pre-animation state so nothing
-      // lingers from a previous run.
-      const resetMap = mapAPI.mapRef?.current?.getMap?.()
-      if (resetMap?.isStyleLoaded?.()) {
-        try {
-          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (resetMap.getLayer(fill)) {
-              resetMap.setLayoutProperty(fill, "visibility", "visible")
-              resetMap.setPaintProperty(fill, "fill-opacity-transition", {
-                duration: 0,
-                delay: 0,
-              })
-              resetMap.setPaintProperty(fill, "fill-opacity", 0)
-            }
-            if (resetMap.getLayer(outline)) {
-              resetMap.setLayoutProperty(outline, "visibility", "visible")
-              resetMap.setPaintProperty(outline, "line-opacity", 0)
-            }
-          }
-          for (const lineLayer of ANIM_LINE_LAYERS) {
-            if (resetMap.getLayer(lineLayer)) {
-              resetMap.setPaintProperty(lineLayer, "line-opacity", 0)
-            }
-          }
-          if (resetMap.getLayer("demand-units")) {
-            resetMap.setFilter("demand-units", DU_CLASS_FILTER as never)
-            resetMap.setPaintProperty(
-              "demand-units",
-              "fill-color",
-              beat1FillExpr(0) as never,
-            )
-            resetMap.setPaintProperty(
-              "demand-units",
-              "fill-outline-color",
-              "transparent",
-            )
-          }
-        } catch {
-          /* ok */
-        }
-      }
-    }
-
-    // When starting from the beginning, fly the camera home first so
-    // polygons align correctly even if the user panned/zoomed.
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (isRestart && map) {
-      const currentCenter = map.getCenter()
-      const currentZoom = map.getZoom()
-      const needsMove =
-        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
-        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
-        Math.abs(currentZoom - CAM_ZOOM) > 0.05
-
-      if (needsMove) {
-        setPlayState("playing")
-        map.once("moveend", () => {
-          computePolygonDataRef.current()
-          beginProgressAnimation(0)
-        })
-        map.easeTo({
-          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-          zoom: CAM_ZOOM,
-          duration: 800,
-        })
-        return
-      }
-    }
-
-    computePolygonDataRef.current()
-    beginProgressAnimation(startFrom)
-  }, [progress, mapAPI.mapRef, beginProgressAnimation])
-
-  const handlePause = useCallback(() => {
-    if (controlsRef.current) controlsRef.current.stop()
-    setPlayState("paused")
-  }, [])
-
-  const handleRewind = useCallback(() => {
-    if (controlsRef.current) controlsRef.current.stop()
-    setHoveredLocation(null)
-    setPinnedLocations(new Map())
-    mapActions.clearLocationHighlights()
+  /** Settle the animation to its resting end-state: clear visualization +
+   *  highlights, hide all animation polygon/line layers, and flip
+   *  `playState` into "finished" so the interactive UI lights up. Shared
+   *  between the normal `animate(progress, 1, { onComplete })` finish and
+   *  the reduced-motion fast-forward path below. */
+  const settleToFinishedState = useCallback(() => {
+    setPlayState("finished")
     mapActions.clearOutcomeVisualization()
-    mapActions.clearMapTooltips()
-    progress.set(0)
-    setPlayState("idle")
+    mapActions.clearLocationHighlights()
 
-    // Reset all Mapbox layers to their pre-animation state
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (map?.isStyleLoaded?.()) {
       try {
@@ -417,19 +427,338 @@ export default function TierAnimationSection() {
       } catch {
         /* ok */
       }
+    }
+  }, [mapAPI.mapRef])
 
-      // Fly camera back to starting position
-      map.easeTo({
-        center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-        zoom: CAM_ZOOM,
-        bearing: 0,
-        pitch: 0,
-        duration: 800,
-      })
+  /* ── Storyboard navigation ──
+   *
+   * `goTo(targetIndex)` animates `progress` from its current value to
+   * `BEATS[targetIndex].progress`. Direction determines the duration
+   * source: forward uses the destination beat's `duration`, backward uses
+   * `BACK_DURATION_FACTOR` of the source beat's `duration` so Back feels
+   * snappier than Next. Under `prefers-reduced-motion`, every tween
+   * collapses to an instantaneous `progress.set` + settle.
+   *
+   * `playState` updates:
+   *   - "playing" during the tween
+   *   - "finished" iff we landed on the final beat (enables interactive UI)
+   *   - "paused" for any non-final landing
+   *   - "idle" iff we landed on beat 0 (restart or Back from B1)
+   *
+   * While animating between two beats, listeners on `progress` in
+   * BeatTextOverlay / OutcomeMorphOverlay already handle any intermediate
+   * value, so no per-beat branching is needed inside those listeners. */
+  const goTo = useCallback(
+    (targetIndex: number, opts?: { viaCamera?: boolean }) => {
+      const clamped = Math.max(0, Math.min(FINAL_BEAT_INDEX, targetIndex))
+      const fromIndex = beatIndexRef.current
+      if (controlsRef.current) controlsRef.current.stop()
+
+      const target = BEATS[clamped]!
+      const source = BEATS[fromIndex]!
+      const forward = clamped > fromIndex
+      const rawDuration = forward
+        ? target.duration
+        : source.duration * BACK_DURATION_FACTOR
+      const duration = prefersReducedMotion
+        ? 0
+        : Math.max(MIN_NAV_DURATION, rawDuration)
+
+      const runTween = () => {
+        setBeatIndex(clamped)
+        beatIndexRef.current = clamped
+
+        const finalize = () => {
+          if (clamped === FINAL_BEAT_INDEX) {
+            settleToFinishedState()
+          } else if (clamped === 0) {
+            setPlayState("idle")
+          } else {
+            setPlayState("paused")
+          }
+        }
+
+        if (duration === 0) {
+          progress.set(target.progress)
+          finalize()
+          return
+        }
+
+        setPlayState("playing")
+        controlsRef.current = animate(progress, target.progress, {
+          duration,
+          ease: "linear",
+          onComplete: finalize,
+        })
+      }
+
+      // Ensure polygon coords are fresh before any forward tween that
+      // crosses into the morph region (the map may have been panned).
+      if (forward) computePolygonDataRef.current()
+
+      // Optionally fly the camera home first (used by Restart).
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (opts?.viaCamera && map) {
+        const currentCenter = map.getCenter()
+        const currentZoom = map.getZoom()
+        const needsMove =
+          Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+          Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+          Math.abs(currentZoom - CAM_ZOOM) > 0.05
+        if (needsMove) {
+          setPlayState("playing")
+          map.once("moveend", () => {
+            computePolygonDataRef.current()
+            runTween()
+          })
+          map.easeTo({
+            center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+            zoom: CAM_ZOOM,
+            duration: 800,
+          })
+          return
+        }
+      }
+
+      runTween()
+    },
+    [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
+  )
+
+  const handleNext = useCallback(() => {
+    if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
+    goTo(beatIndexRef.current + 1)
+  }, [goTo])
+
+  /* ── Intro tween (Play button entry point) ──
+   *
+   * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
+   * tweens the first beat's window (0 -> `BEATS[0].progress`) while
+   * keeping `beatIndex` at 0 - so the storyboard indicator reads "1 / N"
+   * the entire time. Under `prefers-reduced-motion`, the tween collapses
+   * to an instant snap. */
+  const playArrival = useCallback(() => {
+    if (controlsRef.current) controlsRef.current.stop()
+    setBeatIndex(0)
+    beatIndexRef.current = 0
+    const target = BEATS[0]!
+    if (prefersReducedMotion) {
+      progress.set(target.progress)
+      setPlayState("paused")
+      return
+    }
+    setPlayState("playing")
+    controlsRef.current = animate(progress, target.progress, {
+      duration: target.duration,
+      ease: "linear",
+      onComplete: () => setPlayState("paused"),
+    })
+  }, [progress, prefersReducedMotion])
+
+  const handlePlay = useCallback(() => {
+    // Clear any lingering back-out fade before starting the arrival
+    // tween, in case Play is triggered mid-fade-out.
+    if (controlsRef.current) controlsRef.current.stop()
+    backOutOpacity.set(1)
+    setHasPlayed(true)
+    hasPlayedRef.current = true
+    computePolygonDataRef.current()
+    playArrival()
+  }, [playArrival, backOutOpacity])
+
+  /* ── Back ──
+   *
+   * On beat index > 0: normal backward tween to the previous beat.
+   * On beat index === 0: do not reverse-tween `progress` (that would
+   * unwind every staggered reveal). Instead, park `progress` at 0.45
+   * and animate `backOutOpacity` 1 -> 0 so the whole text block fades
+   * out together. On completion, snap `progress` to 0 and
+   * `backOutOpacity` back to 1, and flip `hasPlayed` off so the
+   * pre-play gate (title + subtitle + Play button) re-renders from a
+   * clean slate. */
+  const handleBack = useCallback(() => {
+    const i = beatIndexRef.current
+    if (i > 0) {
+      goTo(i - 1)
+      return
+    }
+    if (!hasPlayedRef.current) return // pre-play: Back is a no-op
+
+    if (controlsRef.current) controlsRef.current.stop()
+    const finish = () => {
+      // Snap underlying animation state back to pre-play in one frame
+      // while the text is already faded out. The pre-play render takes
+      // over with `backOutOpacity` reset to 1 (a no-op for the fresh
+      // state since `progress` is 0 and the text block's progress-driven
+      // opacity is already 0 at that value).
+      progress.set(0)
+      backOutOpacity.set(1)
+      setHasPlayed(false)
+      hasPlayedRef.current = false
+      setPlayState("idle")
+    }
+    const duration = prefersReducedMotion ? 0 : 0.6
+    if (duration === 0) {
+      finish()
+      return
+    }
+    setPlayState("playing")
+    controlsRef.current = animate(backOutOpacity, 0, {
+      duration,
+      ease: "easeOut",
+      onComplete: finish,
+    })
+  }, [goTo, progress, backOutOpacity, prefersReducedMotion])
+
+  const handleRestart = useCallback(() => {
+    if (controlsRef.current) controlsRef.current.stop()
+    setHoveredLocation(null)
+    setPinnedLocations(new Map())
+    mapActions.clearLocationHighlights()
+    mapActions.clearOutcomeVisualization()
+    mapActions.clearMapTooltips()
+
+    // Reset all animation polygon/line layers explicitly so the map-phase
+    // effect's `v < 0.01` branch has a clean slate to rebuild from.
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (map?.isStyleLoaded?.()) {
+      try {
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill)) {
+            map.setLayoutProperty(fill, "visibility", "visible")
+            map.setPaintProperty(fill, "fill-opacity-transition", {
+              duration: 0,
+              delay: 0,
+            })
+            map.setPaintProperty(fill, "fill-opacity", 0)
+            map.setFilter(fill, null)
+          }
+          if (map.getLayer(outline)) {
+            map.setLayoutProperty(outline, "visibility", "visible")
+            map.setPaintProperty(outline, "line-opacity", 0)
+          }
+        }
+        for (const lineLayer of ANIM_LINE_LAYERS) {
+          if (map.getLayer(lineLayer)) {
+            map.setPaintProperty(lineLayer, "line-opacity", 0)
+          }
+        }
+        if (map.getLayer("demand-units")) {
+          map.setFilter("demand-units", DU_CLASS_FILTER as never)
+          map.setPaintProperty(
+            "demand-units",
+            "fill-color",
+            beat1FillExpr(0) as never,
+          )
+          map.setPaintProperty(
+            "demand-units",
+            "fill-outline-color",
+            "transparent",
+          )
+        }
+        // Reset shared `basemap-dim-overlay` to 0 here too, mirroring the
+        // styled-layer setup path. See the comment at the demand-units
+        // setup block below for why we override the transition.
+        if (map.getLayer("basemap-dim-overlay")) {
+          map.setPaintProperty(
+            "basemap-dim-overlay",
+            "fill-opacity-transition",
+            { duration: 0, delay: 0 },
+          )
+          map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
+        }
+      } catch {
+        /* ok */
+      }
+
+      // Fly the camera home so the polygon coordinates the SVG overlay
+      // computes on the next forward tween are anchored correctly.
+      const currentCenter = map.getCenter()
+      const currentZoom = map.getZoom()
+      const needsMove =
+        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+        Math.abs(currentZoom - CAM_ZOOM) > 0.05
+
+      if (needsMove) {
+        map.easeTo({
+          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+          zoom: CAM_ZOOM,
+          bearing: 0,
+          pitch: 0,
+          duration: 800,
+        })
+      }
     }
 
+    // Park in the pre-play gate: user has to click Play again to re-play.
+    progress.set(0)
+    backOutOpacity.set(1)
+    setBeatIndex(0)
+    beatIndexRef.current = 0
+    setHasPlayed(false)
+    hasPlayedRef.current = false
+    setPlayState("idle")
     computePolygonDataRef.current()
-  }, [progress, mapAPI.mapRef])
+  }, [progress, backOutOpacity, mapAPI.mapRef])
+
+  /* ── Arrival behaviour ──
+   *
+   * Normal motion: park in the pre-play gate. The user must click Play
+   * explicitly to start the storyboard (they see the title, the Play
+   * button, and the subtitle).
+   * Reduced motion: jump straight to the final beat so the full settled
+   * end-state is visible without any animation. */
+  const hasAutoAdvancedRef = useRef(false)
+  useEffect(() => {
+    if (!panelInView) return
+    if (hasAutoAdvancedRef.current) return
+    hasAutoAdvancedRef.current = true
+    if (prefersReducedMotion) {
+      goTo(FINAL_BEAT_INDEX)
+    }
+    // Normal motion: nothing to do here. We wait for the user to click Play.
+  }, [panelInView, prefersReducedMotion, goTo])
+
+  /* ── Keyboard shortcuts ──
+   *
+   * Gated on `panelInView` so shortcuts don't steal keys when the user
+   * has scrolled past. We only intercept ArrowRight / ArrowLeft / Home
+   * when no modifier keys are held and no text input is focused. */
+  useEffect(() => {
+    if (!panelInView) return
+    const isEditable = (el: EventTarget | null) => {
+      if (!(el instanceof HTMLElement)) return false
+      const tag = el.tagName
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        el.isContentEditable
+      )
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+      if (isEditable(e.target)) return
+      if (e.key === "ArrowRight") {
+        e.preventDefault()
+        // Pre-play: ArrowRight acts as Play. Post-play: it advances.
+        if (!hasPlayedRef.current) {
+          handlePlay()
+        } else {
+          handleNext()
+        }
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        handleBack()
+      } else if (e.key === "Home") {
+        e.preventDefault()
+        handleRestart()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [panelInView, handleNext, handleBack, handleRestart, handlePlay])
 
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
@@ -916,7 +1245,7 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* ── Map hover/click → shared multi-pin state for visible outcome polygons ── */
+  /* ── Map hover/click -> shared multi-pin state for visible outcome polygons ── */
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
@@ -1101,7 +1430,7 @@ export default function TierAnimationSection() {
 
         try {
           // Ensure all animation layers have visibility "visible" at the
-          // layout level — OutcomePolygonLayer may have set them to "none"
+          // layout level - OutcomePolygonLayer may have set them to "none"
           // if it was previously mounted in another map mode.
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
             if (map.getLayer(fill))
@@ -1119,11 +1448,73 @@ export default function TierAnimationSection() {
               "fill-color",
               beat1FillExpr(0) as never,
             )
+            // Leave `fill-outline-color` unset so Mapbox defaults it to
+            // the current `fill-color` expression - this prevents the
+            // previous "transparent" override that produced visible
+            // subpixel slivers between adjacent demand-unit polygons.
             map.setPaintProperty(
               "demand-units",
               "fill-outline-color",
-              "transparent",
+              beat1FillExpr(0) as never,
             )
+          }
+
+          // Ensure the companion outline layer exists. In regular map
+          // modes it's created by `OutcomePolygonLayer`, but that
+          // component doesn't mount during the get-started animation -
+          // so without this block we'd have no stroke, and adjacent
+          // demand-unit polygons would render with ratty/gappy edges
+          // at low zooms. Create it once and mirror its color/opacity
+          // with the fill inside the progress handler below.
+          if (
+            map.getLayer("demand-units") &&
+            !map.getLayer("demand-units-outline")
+          ) {
+            try {
+              const fillLayer = map.getLayer("demand-units") as unknown as {
+                source: string
+                "source-layer": string
+              }
+              map.addLayer({
+                id: "demand-units-outline",
+                type: "line",
+                source: fillLayer.source,
+                "source-layer": fillLayer["source-layer"],
+                filter: DU_CLASS_FILTER as never,
+                paint: {
+                  "line-color": beat1FillExpr(0) as never,
+                  "line-width": 0.5,
+                  "line-opacity": 0,
+                  "line-offset": -0.25,
+                },
+                layout: { visibility: "visible" },
+              })
+            } catch {
+              /* layer may already exist from another map mode */
+            }
+          }
+
+          // Pin outline transitions to 0 so per-frame updates from the
+          // progress handler don't smear, and seed its initial state
+          // to match the fill (same color expression, opacity 0).
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-color-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-color",
+              beat1FillExpr(0) as never,
+            )
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
           }
           // Suppress all other polygon layers until their beat-2 turn
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
@@ -1132,6 +1523,20 @@ export default function TierAnimationSection() {
               map.setPaintProperty(fill, "fill-opacity", 0)
             if (map.getLayer(outline))
               map.setPaintProperty(outline, "line-opacity", 0)
+          }
+          // Prep the shared `basemap-dim-overlay` (added by VisualizationLayers
+          // and pinned to opacity 0 in get-started mode) for progress-driven
+          // updates from this component. Override the 800ms transition
+          // VisualizationLayers configures for the Explore path. Otherwise
+          // every per-frame setPaintProperty call below would smear and
+          // look broken.
+          if (map.getLayer("basemap-dim-overlay")) {
+            map.setPaintProperty(
+              "basemap-dim-overlay",
+              "fill-opacity-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
           }
         } catch {
           /* ok */
@@ -1212,16 +1617,37 @@ export default function TierAnimationSection() {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let phase: "idle" | "beat1" | "beat2" = "idle"
+    let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
 
-    // Blues cycle until FREEZE_AT, then hold still.
-    // At CONVERGE_START the frozen blues collapse toward a single blue.
-    // At BLEND_START the per-DU tier-color blend begins.
-    // By BLEND_END the blend is complete and beat2 phase starts.
+    // Beat 1  (0.00 -> 0.49): blues cycle until FREEZE_AT, then hold still
+    //          on all 3 DU classes (Agriculture, Urban, Refuge).
+    // Beat 1B (0.49 -> 0.52): cross-fade OUT - the demand-units layer
+    //          fades from 0.65 -> 0 with the frozen 3-blue palette
+    //          intact. Begins the instant the
+    //          intro text collapse finishes (at 0.49) so there's
+    //          no dead air after the legend settles at the top.
+    // Beat 1C (0.52 -> 0.78): at v = 0.52, while the layer is invisible,
+    //          we swap the filter to Agriculture-only and set the
+    //          fill-color directly to the AG_REV tier expression.
+    //          (0.52 -> 0.56) the layer fades back IN from 0 -> 0.65
+    //          already wearing its AG_REV tier colors - a clean
+    //          cross-fade with no blue interstitial. (0.56 -> 0.78)
+    //          tier colors are locked while the Beat 1C text + example
+    //          popups play.
+    // Beat 2  (0.78 -> 1.00): DU filter restored, tier colors locked. SVG
+    //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.18
-    const CONVERGE_START = 0.55
-    const BLEND_START = 0.6
-    const BLEND_END = 0.67
+    const BEAT1B_START = 0.49
+    // Cross-fade windows (renamed in spirit, kept for diff readability):
+    // BEAT1C_BLEND_START is the fade-out -> fade-in pivot (filter swap
+    // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
+    // is when the AG_REV tier colors are fully visible at 0.65 opacity.
+    const BEAT1C_BLEND_START = 0.52
+    const BEAT1C_BLEND_END = 0.56
+    // AG_REV now morphs solo starting at 0.76 (see getOutcomeProgressRange
+    // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
+    // DU filter restore + hide-schedule over in time for AG_REV's morph.
+    const BEAT2_START = 0.76
 
     let frozenColorPhase = 0
 
@@ -1233,6 +1659,9 @@ export default function TierAnimationSection() {
         if (phase !== "idle") {
           try {
             if (map.getLayer("demand-units")) {
+              // Restore the full DU_CLASS_FILTER on reset so the cycling
+              // blues show across all 3 classes again from the top.
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
               map.setPaintProperty("demand-units", "fill-opacity", 0)
               map.setPaintProperty("demand-units", "fill-color-transition", {
                 duration: 0,
@@ -1243,9 +1672,26 @@ export default function TierAnimationSection() {
                 "fill-color",
                 beat1FillExpr(0) as never,
               )
+              map.setPaintProperty(
+                "demand-units",
+                "fill-outline-color",
+                beat1FillExpr(0) as never,
+              )
             }
-            if (map.getLayer("demand-units-outline"))
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                beat1FillExpr(0) as never,
+              )
               map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+            }
+            // Snap the basemap dim overlay back to 0 so a full reset
+            // shows the bright basemap again.
+            if (map.getLayer("basemap-dim-overlay")) {
+              map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
+            }
           } catch {
             /* ok */
           }
@@ -1255,7 +1701,27 @@ export default function TierAnimationSection() {
         return
       }
 
-      if (v < CONVERGE_START) {
+      // Drive the shared basemap-dim-overlay so visualization layers pop
+      // against the satellite basemap. Fades in in lockstep with the
+      // initial blue-polygon reveal (v = 0 -> FREEZE_AT * 0.33 ≈ 0.06)
+      // and then holds steady through the blue cycle, cross-fade, AG_REV
+      // tier colors, and all subsequent morphs. Only the v < 0.01 reset
+      // branch above clears it.
+      try {
+        if (map.getLayer("basemap-dim-overlay")) {
+          const dimFadeT = Math.min(1, v / (FREEZE_AT * 0.33))
+          const dimOpacity = BASEMAP_DIM_OPACITY * dimFadeT
+          map.setPaintProperty(
+            "basemap-dim-overlay",
+            "fill-opacity",
+            dimOpacity,
+          )
+        }
+      } catch {
+        /* ok */
+      }
+
+      if (v < BEAT1B_START) {
         // Beat 1: blues cycling, then frozen
         const beat1T = v / FREEZE_AT
 
@@ -1269,13 +1735,27 @@ export default function TierAnimationSection() {
           const colorPhase = beat1T * BEAT1_CYCLE
           frozenColorPhase = colorPhase
           try {
+            const expr = beat1FillExpr(colorPhase)
             if (map.getLayer("demand-units")) {
+              map.setPaintProperty("demand-units", "fill-color", expr as never)
               map.setPaintProperty(
                 "demand-units",
-                "fill-color",
-                beat1FillExpr(colorPhase) as never,
+                "fill-outline-color",
+                expr as never,
               )
               map.setPaintProperty("demand-units", "fill-opacity", opacity)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                expr as never,
+              )
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                opacity,
+              )
             }
           } catch {
             /* ok */
@@ -1283,69 +1763,222 @@ export default function TierAnimationSection() {
         } else {
           // Frozen: keep the last color pattern, maintain opacity at 0.65
           try {
+            const expr = beat1FillExpr(frozenColorPhase)
             if (map.getLayer("demand-units")) {
               if (phase !== "beat1") {
                 map.setPaintProperty(
                   "demand-units",
                   "fill-color",
-                  beat1FillExpr(frozenColorPhase) as never,
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
                 )
               }
               map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              if (phase !== "beat1") {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
             }
           } catch {
             /* ok */
           }
         }
         phase = "beat1"
-      } else if (v < BLEND_START) {
-        // Converge: collapse the 3-blue palette toward a single blue
-        const convergence =
-          (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
-        const easedC = convergence * convergence
-
-        try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty(
-              "demand-units",
-              "fill-color",
-              beat1FillExpr(frozenColorPhase, easedC) as never,
-            )
-            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-          }
-        } catch {
-          /* ok */
-        }
-        phase = "beat1"
-      } else if (v < BLEND_END) {
-        // Blend: all polygons are now the same blue; smoothly shift
-        // each DU from that blue to its tier color.
-        const blendT = (v - BLEND_START) / (BLEND_END - BLEND_START)
-        const easedT = 1 - Math.pow(1 - blendT, 2) // ease-out
-
-        try {
-          if (map.getLayer("demand-units")) {
-            const expr = buildBlendedTierExpr(BEAT1_MID, easedT)
-            if (expr) {
+      } else if (v < BEAT1C_BLEND_START) {
+        // Beat 1B: cross-fade OUT. Keep the frozen 3-blue colors and
+        // fade the layer's opacity from 0.65 -> 0. No converge-to-mid
+        // -blue interstitial - the polygons simply dissolve away,
+        // freeing the eye to receive the AG_REV tier-colored polygons
+        // that fade in next. If we're scrubbing backwards from beat1c,
+        // first restore the full DU class filter and the frozen 3-blue
+        // expression so the cross-fade reverses cleanly.
+        if (phase !== "beat1") {
+          try {
+            const expr = beat1FillExpr(frozenColorPhase)
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
               map.setPaintProperty("demand-units", "fill-color", expr as never)
+              map.setPaintProperty(
+                "demand-units",
+                "fill-outline-color",
+                expr as never,
+              )
             }
-            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                expr as never,
+              )
+            }
+          } catch {
+            /* ok */
+          }
+        }
+
+        const fadeOutT =
+          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
+        const easedFadeOut = 1 - Math.pow(1 - fadeOutT, 2) // ease-out
+        const fadeOutOpacity = 0.65 * (1 - easedFadeOut)
+
+        try {
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty("demand-units", "fill-opacity", fadeOutOpacity)
+          }
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity",
+              fadeOutOpacity,
+            )
           }
         } catch {
           /* ok */
         }
         phase = "beat1"
+      } else if (v < BEAT1C_BLEND_END) {
+        // Beat 1C: cross-fade IN. While the layer is at opacity 0 we
+        // swap the filter to Agriculture-only and set fill-color to the
+        // pure AG_REV tier expression (no blue blend). Then the layer
+        // fades from 0 -> 0.65 already wearing its tier colors, so the
+        // user sees a clean fade from "blank water" to the colorful
+        // visualization - no solid-blue intermediate.
+        if (phase !== "beat1c") {
+          try {
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
+              }
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
+            }
+          } catch {
+            /* ok */
+          }
+        }
+
+        const fadeInT =
+          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
+        const easedFadeIn = 1 - Math.pow(1 - fadeInT, 2) // ease-out
+        const fadeInOpacity = 0.65 * easedFadeIn
+
+        try {
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty("demand-units", "fill-opacity", fadeInOpacity)
+          }
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity",
+              fadeInOpacity,
+            )
+          }
+        } catch {
+          /* ok */
+        }
+        phase = "beat1c"
+      } else if (v < BEAT2_START) {
+        // Beat 1C tail: tier colors are fully blended. Hold steady on
+        // AG-only while the example text and popups play.
+        if (phase !== "beat1c") {
+          try {
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
+            }
+          } catch {
+            /* ok */
+          }
+          phase = "beat1c"
+        }
       } else {
-        // Beat 2+: tier colors locked in; progressively hide features
-        // as their SVG copies start animating.
+        // Beat 2+: restore full DU filter so Urban + Refuge DUs become
+        // visible with their own tier colors for their morph slices.
+        // Progressively hide features as their SVG copies start animating.
         if (phase !== "beat2") {
           try {
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (expr && map.getLayer("demand-units")) {
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
+            if (map.getLayer("demand-units")) {
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
+              }
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
             }
             // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
-            // delta-detaw) stay hidden — the SVG overlay handles their outcomes.
+            // delta-detaw) stay hidden - the SVG overlay handles their outcomes.
             // Only demand-units is shown on the map during the animation.
           } catch {
             /* ok */
@@ -1369,9 +2002,9 @@ export default function TierAnimationSection() {
         }
 
         // Build demand-units opacity expression:
-        // - Fading entries: interpolated opacity (0.65 → 0)
+        // - Fading entries: interpolated opacity (0.65 -> 0)
         // - Not-yet-fading entries: 0.65 (still visible)
-        // - Untracked DUs: 0 (hidden — prevents ghost mid-blue polygons)
+        // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
         if (duEntries.length > 0 && map.getLayer("demand-units")) {
           const caseExpr: unknown[] = ["case"]
           for (const entry of duEntries) {
@@ -1397,6 +2030,15 @@ export default function TierAnimationSection() {
               "fill-opacity",
               caseExpr as never,
             )
+            // Mirror the per-DU case to the outline so strokes fade
+            // away in lockstep with their fills.
+            if (map.getLayer("demand-units-outline")) {
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                caseExpr as never,
+              )
+            }
           } catch {
             /* ok */
           }
@@ -1439,6 +2081,76 @@ export default function TierAnimationSection() {
       }
     }
   }, [progress, mapAPI.mapRef, isLoading])
+
+  /* ── Beat 1C: progressive popups on a curated handful of AG districts ──
+   *
+   * During the Beat 1C tail (after the tier-color blend completes and before
+   * Beat 2 starts), we reveal a few `LocationHighlight` popups to illustrate
+   * concretely what the colored polygons represent. Popups appear staggered
+   * across the window so the viewer's eye has time to read each one before
+   * the next is drawn. They reuse the same tooltip styling (via
+   * `mapActions.setLocationHighlights`) that's used elsewhere in the app when
+   * a user hovers or pins a demand unit. */
+  useEffect(() => {
+    if (isLoading) return
+    const agData = outcomeLocations["AG_REV"]
+    if (!agData) return
+
+    const POPUPS_IN = 0.69
+    const POPUPS_OUT = 0.76 // clear at start of AG_REV morph (Beat 2)
+    const count = BEAT1C_POPUP_DU_IDS.length
+    const span = POPUPS_OUT - POPUPS_IN
+    const perPopup = span / count
+    let visibleCount = 0
+
+    const clearAll = () => {
+      if (visibleCount > 0) {
+        mapActions.clearLocationHighlights()
+        visibleCount = 0
+      }
+    }
+
+    const unsub = progress.on("change", (v) => {
+      if (v < POPUPS_IN || v >= POPUPS_OUT) {
+        clearAll()
+        return
+      }
+      const nextCount = Math.min(
+        count,
+        Math.floor((v - POPUPS_IN) / perPopup) + 1,
+      )
+      if (nextCount === visibleCount) return
+      visibleCount = nextCount
+
+      const highlights: import("../../map/store").LocationHighlight[] = []
+      for (let i = 0; i < nextCount; i++) {
+        const duId = BEAT1C_POPUP_DU_IDS[i]!
+        const tier = agData.tierMap[duId]
+        if (tier == null) continue
+        const color = agData.colorMap[duId] ?? "#888888"
+        const name =
+          agData.nameMap[duId] ?? getDemandUnitDisplayName(duId) ?? duId
+        const coord = centroidLookupRef.current.get(duId)
+        if (!coord) continue
+        highlights.push({
+          key: `beat1c:AG_REV:${duId}`,
+          longitude: coord.lng,
+          latitude: coord.lat,
+          name,
+          tierLevel: tier,
+          tierLabel: getTierLabel(tier),
+          tierColor: color,
+          pinned: true, // keep visible until we explicitly clear
+        })
+      }
+      mapActions.setLocationHighlights(highlights)
+    })
+
+    return () => {
+      unsub()
+      clearAll()
+    }
+  }, [progress, outcomeLocations, isLoading])
 
   /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {
@@ -1695,7 +2407,7 @@ export default function TierAnimationSection() {
 
   /**
    * Re-project cached geographic data to screen without re-querying Mapbox.
-   * Safe to call on every map move/zoom — feature count stays stable.
+   * Safe to call on every map move/zoom - feature count stays stable.
    */
   const reprojectShapes = useCallback(() => {
     if (!mapAPI.mapRef?.current || !panelRef.current) return
@@ -1816,7 +2528,7 @@ export default function TierAnimationSection() {
     return () => window.removeEventListener("resize", onResize)
   }, [reprojectShapes])
 
-  // Re-apply offset on scroll (cheap — no Mapbox queries).
+  // Re-apply offset on scroll (cheap - no Mapbox queries).
   // With page-level scrolling, listen on window instead of a parent scroll container.
   useEffect(() => {
     if (!panelInView) return
@@ -1875,7 +2587,7 @@ export default function TierAnimationSection() {
       const override = tierOverrides[code]
       const polygons: ShapeMorphData[] = []
       for (const locId of locData.ids) {
-        // RES_STOR: API returns CalSim IDs; screen map uses gnisidlabel
+        // RES_STOR: API returns CalSim IDs. Screen map uses gnisidlabel
         let screenKey = locId
         if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
           const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
@@ -1927,17 +2639,34 @@ export default function TierAnimationSection() {
     [outcomeGroups],
   )
 
+  /** Map of outcome code - Beat 2 morph window `{start, end}`.
+   *  BeatTextOverlay uses `start` to fade in each outcome's title just
+   *  before its own morph slice begins, and `end` to fade in the "X
+   *  locations" caption once the polygons have settled as squares. */
+  const outcomeMorphWindows = useMemo(() => {
+    const map: Record<string, { start: number; end: number }> = {}
+    if (activeOutcomeGroups.length === 0) return map
+    const activeCodes = activeOutcomeGroups.map((g) => g.code)
+    for (const group of activeOutcomeGroups) {
+      const [start, end] = getOutcomeProgressRange(group.code, activeCodes)
+      map[group.code] = { start, end }
+    }
+    return map
+  }, [activeOutcomeGroups])
+
   useEffect(() => {
-    const total = activeOutcomeGroups.length
     const schedule: HideScheduleEntry[] = []
-    for (let i = 0; i < total; i++) {
-      const group = activeOutcomeGroups[i]!
+    const activeCodes = activeOutcomeGroups.map((g) => g.code)
+    for (const group of activeOutcomeGroups) {
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
       if (!config) continue
-      const [morphStart] = getOutcomeProgressRange(i, total)
-      const fadeStart = morphStart - 0.03
+      const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
+      // Beat 2 slices are tighter now (0.22 span across 9 outcomes ≈ 0.024
+      // each). Use a shorter fade lead so the DU fade doesn't bleed into
+      // the previous outcome's morph.
+      const fadeStart = morphStart - 0.01
 
       // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
       let locationIds = [...locData.ids]
@@ -1966,135 +2695,17 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
-  /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
-  const COLUMN_GAP = 12
+  /* Shared layout for Beat 2 text + distribution alignment (2 columns)
+   *
+   * The right-column layout lives in CSS document flow inside `BeatTextOverlay`.
+   * This memo only describes *what* each outcome needs (column, label, glyph
+   * height, caption). Actual x/y positions are measured from the DOM via
+   * `onGlyphLayoutChange` and flow back through `glyphLayout` state. The SVG
+   * morph overlay uses those measured rects as landing coordinates. */
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
-  const outcomeLayout = useMemo(() => {
-    if (!panelSize) return null
-    const { width } = panelSize
-    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
-    const insetPx = 24
-    const panelWidth3 = width * (1 / 3)
-    const availableWidth = panelWidth3 - insetPx * 2
-    const colWidth = (availableWidth - COLUMN_GAP) / 2
-    const headerOffset = 140
-    const topPad = headerOffset + Math.min(24, Math.max(16, width * 0.02))
-
-    const itemStartY = topPad
-
-    const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
-    const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
-
-    const EYEBROW_HEIGHT = 22
-    const EYEBROW_GAP = 6
-
-    const eyebrows = [
-      {
-        label: "Consumptive uses",
-        x: colX[0],
-        y: itemStartY,
-        columnWidth: colWidth,
-        animationStart: 0.225,
-      },
-      {
-        label: "Non-consumptive uses",
-        x: colX[1],
-        y: itemStartY,
-        columnWidth: colWidth,
-        animationStart: 0,
-      },
-    ]
-
-    const firstItemY = itemStartY + EYEBROW_HEIGHT + EYEBROW_GAP
-    const cursors: [number, number] = [firstItemY, firstItemY]
-    let firstCol1Index = -1
-
-    const items: OutcomeLayoutItem[] = []
-
-    for (let idx = 0; idx < OUTCOME_CODE_ORDER.length; idx++) {
-      const code = OUTCOME_CODE_ORDER[idx]!
-      const label = getOutcomeName(code)
-      const isActive = ACTIVE_OUTCOMES.has(code)
-      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
-
-      if (col === 1 && firstCol1Index === -1) {
-        firstCol1Index = idx
-      }
-
-      const y = cursors[col]
-      const x = colX[col]
-      cursors[col] += LAYOUT_LINE_HEIGHT
-
-      let distributionY = cursors[col] + LAYOUT_DIST_GAP
-      let distributionHeight = 0
-      let slotHeight = 0
-      let locationCount = 0
-
-      let spaceBelow = LAYOUT_LABEL_GAP
-      if (isActive) {
-        const group = outcomeGroups.find((g) => g.code === code)
-        if (group && group.polygons.length > 0) {
-          locationCount = group.polygons.length
-          const freshHeight = computeDistributionHeight(
-            group.polygons,
-            sqPerRow,
-            colWidth,
-          )
-          const locked = lockedHeightsRef.current.get(code)
-          distributionHeight =
-            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
-          lockedHeightsRef.current.set(code, distributionHeight)
-
-          const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
-          const isSingleRow = distributionHeight <= SINGLE_ROW
-          if (isSingleRow) {
-            distributionY = cursors[col] + 2
-          }
-          slotHeight = isSingleRow
-            ? distributionHeight
-            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
-          spaceBelow = isSingleRow
-            ? slotHeight + 4 + SLOT_COUNT_FONT + 12
-            : LAYOUT_DIST_GAP +
-              slotHeight +
-              SLOT_COUNT_GAP +
-              SLOT_COUNT_FONT +
-              SLOT_POST_GAP
-          cursors[col] += spaceBelow
-        } else {
-          cursors[col] += LAYOUT_LABEL_GAP
-        }
-      } else {
-        cursors[col] += LAYOUT_LABEL_GAP
-      }
-
-      items.push({
-        code,
-        label,
-        y,
-        x,
-        column: col,
-        columnWidth: colWidth,
-        isActive,
-        distributionY,
-        distributionHeight,
-        slotHeight,
-        locationCount,
-        spaceBelow,
-      })
-    }
-
-    if (firstCol1Index >= 0) {
-      eyebrows[1]!.animationStart = 0.24 + firstCol1Index * 0.035 - 0.015
-    }
-
-    return { items, eyebrows, leftColumnBottom: cursors[0] }
-  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
-
-  const distributionPositionMap = useMemo(() => {
-    if (!outcomeLayout) return {}
-    const describeLocations = (code: string, count: number): string => {
+  const describeLocations = useCallback(
+    (code: string, count: number): string => {
       switch (code) {
         case "ENV_FLOWS":
           return `${count} river & tributary reaches`
@@ -2111,33 +2722,166 @@ export default function TierAnimationSection() {
         default:
           return `${count} locations`
       }
+    },
+    [],
+  )
+
+  const outcomeLayout = useMemo(() => {
+    if (!panelSize) return null
+    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
+    // Estimate the per-column inner width so the distribution height
+    // heuristic uses a realistic number of columns. The precise width is
+    // measured from the DOM later. This is only used to decide row count.
+    const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
+
+    // Left column renders in this explicit order (AG_REV before CWS_DEL).
+    // We don't touch OUTCOME_CODE_ORDER globally - radar axes + NOD/SOD
+    // helpers depend on that list - so we just prepend the left-column codes
+    // in their desired order and iterate the rest of OUTCOME_CODE_ORDER after.
+    const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
+    const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
+    const orderedCodes: string[] = [
+      ...LEFT_COLUMN_ORDER,
+      ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
+    ]
+
+    // Eyebrow labels fade in alongside the right-panel backdrop so they're
+    // fully present by the time beat 3 (AG_REV morph) settles at 0.78. The
+    // 0.02 fade width is applied by BeatTextOverlay's progress handler.
+    const EYEBROW_FADE_IN = 0.755
+    const eyebrows = [
+      {
+        label: "Consumptive uses",
+        x: 0,
+        y: 0,
+        columnWidth: approxColWidth,
+        animationStart: EYEBROW_FADE_IN,
+      },
+      {
+        label: "Non-consumptive uses",
+        x: 0,
+        y: 0,
+        columnWidth: approxColWidth,
+        animationStart: EYEBROW_FADE_IN,
+      },
+    ]
+
+    const items: OutcomeLayoutItem[] = []
+
+    for (let idx = 0; idx < orderedCodes.length; idx++) {
+      const code = orderedCodes[idx]! as (typeof OUTCOME_CODE_ORDER)[number]
+      const label = getOutcomeName(code)
+      const isActive = ACTIVE_OUTCOMES.has(code)
+      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
+
+      let locationCount = 0
+      let targetHeight = 0
+
+      if (isActive) {
+        const group = outcomeGroups.find((g) => g.code === code)
+        if (group && group.polygons.length > 0) {
+          locationCount = group.polygons.length
+          const freshHeight = computeDistributionHeight(
+            group.polygons,
+            sqPerRow,
+            approxColWidth,
+          )
+          const locked = lockedHeightsRef.current.get(code)
+          const distributionHeight =
+            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
+          lockedHeightsRef.current.set(code, distributionHeight)
+
+          // Hug the squares: use the squares' visual bottom as the
+          // placeholder height, so the caption sits just under the last
+          // row with an identical gap across every outcome.
+          // `distributionHeight` = totalRows * (SQUARE_SIZE + SQUARE_GAP)
+          // includes a trailing SQUARE_GAP (6px) of empty space below the
+          // last row. Subtract it. No bar-height floor - bar/average
+          // mode centers on slotHeight and may overflow small slots,
+          // which we accept as a separate encoding-mode concern.
+          const SQUARE_GAP_PX = 6
+          targetHeight = Math.max(0, distributionHeight - SQUARE_GAP_PX)
+        }
+      }
+
+      items.push({
+        code,
+        label,
+        column: col,
+        columnWidth: approxColWidth,
+        isActive,
+        locationCount,
+        targetHeight,
+        locationDescription: describeLocations(code, locationCount),
+      })
     }
 
+    return { items, eyebrows }
+  }, [
+    panelSize,
+    outcomeGroups,
+    theme.scenarios.tierGrid.squaresPerRow,
+    describeLocations,
+  ])
+
+  /** DOM-measured glyph placeholder rects (relative to the right-column root
+   *  in BeatTextOverlay, which is absolutely positioned at `right: 0` with
+   *  `width: 33.33%`, i.e. its left edge aligns with `panelWidth * 2/3`).
+   *  Populated via `onGlyphLayoutChange` from BeatTextOverlay's
+   *  ResizeObserver. Empty on first render (outcomes are invisible in Beat 1
+   *  anyway, so the missing positions only become visible once measured). */
+  const [glyphLayout, setGlyphLayout] = useState<Record<string, GlyphRect>>({})
+
+  const handleGlyphLayoutChange = useCallback(
+    (layout: Record<string, GlyphRect>) => {
+      setGlyphLayout((prev) => {
+        // Shallow-compare to avoid redundant state updates (ResizeObserver can
+        // fire frequently. Same rects -> skip re-render).
+        const prevKeys = Object.keys(prev)
+        const nextKeys = Object.keys(layout)
+        if (prevKeys.length === nextKeys.length) {
+          let same = true
+          for (const k of nextKeys) {
+            const a = prev[k]
+            const b = layout[k]!
+            if (
+              !a ||
+              a.x !== b.x ||
+              a.y !== b.y ||
+              a.width !== b.width ||
+              a.height !== b.height
+            ) {
+              same = false
+              break
+            }
+          }
+          if (same) return prev
+        }
+        return layout
+      })
+    },
+    [],
+  )
+
+  const distributionPositionMap = useMemo(() => {
     const map: Record<
       string,
-      {
-        x: number
-        y: number
-        labelY: number
-        maxWidth: number
-        slotHeight: number
-        locationDescription: string
-      }
+      { x: number; y: number; maxWidth: number; slotHeight: number }
     > = {}
+    if (!outcomeLayout) return map
     for (const item of outcomeLayout.items) {
-      if (item.isActive && item.distributionHeight > 0) {
-        map[item.code] = {
-          x: item.x,
-          y: item.distributionY,
-          labelY: item.y,
-          maxWidth: item.columnWidth,
-          slotHeight: item.slotHeight,
-          locationDescription: describeLocations(item.code, item.locationCount),
-        }
+      if (!item.isActive || item.targetHeight <= 0) continue
+      const g = glyphLayout[item.code]
+      if (!g) continue
+      map[item.code] = {
+        x: g.x,
+        y: g.y,
+        maxWidth: g.width,
+        slotHeight: g.height,
       }
     }
     return map
-  }, [outcomeLayout])
+  }, [outcomeLayout, glyphLayout])
 
   /* ── Error state ── */
   if (error) {
@@ -2165,7 +2909,19 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: "100vh",
+        // Baseline: shrink the panel so it fits the viewport once the
+        // sticky header stack (collapsed header + Learn/Explore/Share
+        // tabs + Explore sub-nav) is subtracted, plus the same 80 px
+        // breathing-room constant used by GetStartedPanelShell
+        // (PANEL_BREATHING_PX).
+        //
+        // Then add `TIER_PANEL_EXTRA_PX` so the left text column has
+        // room for all reveals + bottom controls. The panel is
+        // intentionally taller than one viewport - the user is
+        // expected to scroll so the title + Play button park at the
+        // top of the visible area. The extra pixels then extend below
+        // the fold rather than crowding the text.
+        height: `calc(100vh - ${theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight + 80 - TIER_PANEL_EXTRA_PX}px)`,
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
@@ -2185,10 +2941,10 @@ export default function TierAnimationSection() {
         </Box>
       ) : (
         <>
-          {/* Background cover: transparent → forest green as map fades */}
+          {/* Background cover */}
           <MapFade opacity={mapOpacity} color={forestBg} />
 
-          {/* Outcome polygon morph overlay — active during Beat 2 */}
+          {/* Outcome polygon morph overlay - active during Beat 2 */}
           {activeOutcomeGroups.length > 0 && panelSize && (
             <motion.div
               style={{
@@ -2252,10 +3008,15 @@ export default function TierAnimationSection() {
           <BeatTextOverlay
             progress={progress}
             headingOpacity={headingOpacity}
+            backOutOpacity={backOutOpacity}
             playState={playState}
-            onRewind={handleRewind}
+            beatIndex={beatIndex}
+            totalBeats={BEATS.length}
+            hasPlayed={hasPlayed}
             onPlay={handlePlay}
-            onPause={handlePause}
+            onNext={handleNext}
+            onBack={handleBack}
+            onRestart={handleRestart}
             beat2Layout={outcomeLayout}
             onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
@@ -2268,6 +3029,9 @@ export default function TierAnimationSection() {
             onEncodingChange={setEncodingMode}
             hydroclimate={hydroclimate}
             onHydroclimateChange={setHydroclimate}
+            outcomeMorphWindows={outcomeMorphWindows}
+            onGlyphLayoutChange={handleGlyphLayoutChange}
+            hideControls={prefersReducedMotion}
           />
 
           {isInteractive &&
