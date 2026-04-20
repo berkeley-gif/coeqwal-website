@@ -61,14 +61,14 @@ import { useScenarioExplorerStore } from "../store"
  *
  * The visualization is divided into discrete beats the user advances
  * through with Next / Back. Each beat is a checkpoint on the existing
- * `progress` MotionValue (0-1); clicking Next animates `progress` from
+ * `progress` MotionValue (0-1). Clicking Next animates `progress` from
  * the current beat's checkpoint to the next one over the next beat's
  * `duration` seconds. All existing `progress.on("change")` listeners in
  * BeatTextOverlay / OutcomeMorphOverlay / this file already interpolate
  * smoothly between any two progress values, so beat navigation drops in
  * without changing any of them.
  *
- * Reading pauses happen naturally between Next clicks; tuning a beat's
+ * Reading pauses happen naturally between Next clicks. Tuning a beat's
  * duration tunes only that beat's perceived speed. */
 interface BeatDef {
   /** Stable identifier (debug only). */
@@ -88,37 +88,37 @@ const BEATS: readonly BeatDef[] = [
   // B1 (2/4) - Merged transition + narrative. Duration 9s over 0.28
   //      progress (~0.32s per 0.01 progress). Sub-windows:
   //      1. Intro text collapses, tier legend floats to top of the
-  //         left panel (0.46 → 0.49).
+  //         left panel (0.46 -> 0.49).
   //      2. As soon as the legend parks (no settle pause):
-  //         (0.49 → 0.52, ~1s) the demand-units layer cross-fades
-  //         OUT 0.65 → 0 while still wearing its frozen 3-blue
-  //         palette; at 0.52, while invisible, the filter swaps to
+  //         (0.49 -> 0.52, ~1s) the demand-units layer cross-fades
+  //         OUT 0.65 -> 0 while still wearing its frozen 3-blue
+  //         palette. At 0.52, while invisible, the filter swaps to
   //         Agriculture-only and the fill-color is set directly to
-  //         the AG_REV tier expression; (0.52 → 0.56, ~1.3s) the
-  //         layer fades back IN 0 → 0.65, appearing already in its
+  //         the AG_REV tier expression. (0.52 -> 0.56, ~1.3s) the
+  //         layer fades back IN 0 -> 0.65, appearing already in its
   //         final tier colors. No solid-blue interstitial.
   //      3. The Beat 1C narrative paragraphs are spaced for reading:
   //         "For example, each colored location..." fades in at
-  //         0.49 → 0.52 (concurrent with the map cross-fade out, so
+  //         0.49 -> 0.52 (concurrent with the map cross-fade out, so
   //         text and tier-colored polygons arrive together by 0.56),
   //         then "The colors correspond to different water delivery
-  //         outcome levels..." fades in at 0.65 → 0.68, leaving a
+  //         outcome levels..." fades in at 0.65 -> 0.68, leaving a
   //         ~1.6s reading pause before the beat settles at 0.73.
   { id: "collapse-and-colors", progress: 0.73, duration: 9 },
   // B2 (3/4) - AG_REV polygons morph to their distribution squares.
   //      Tween plays the morph window [0.76, 0.78] and settles at
   //      0.78. 3.5s total over 0.05 progress: a brief lead-in (~2.1s
-  //      from 0.73 → 0.76) lets the reader's eye reach the map, then
+  //      from 0.73 -> 0.76) lets the reader's eye reach the map, then
   //      the morph itself plays over [0.76, 0.78] (~1.4s).
   { id: "ag-rev-morph", progress: 0.78, duration: 3.5 },
   // B3 (4/4) - Merged "remaining outcomes" beat. The two Beat 1C
-  //      paragraphs under the tier legend fade out (0.78 → 0.80),
+  //      paragraphs under the tier legend fade out (0.78 -> 0.80),
   //      "For each scenario, outcome levels..." fades in in their
-  //      place (0.80 → 0.82), and the remaining 8 outcome morphs play
+  //      place (0.80 -> 0.82), and the remaining 8 outcome morphs play
   //      back-to-back over [0.84, 1.0]. Tween velocity matches AG_REV
   //      (~70s per progress unit), so each 0.02-wide morph window
   //      takes ~1.4s, identical to AG_REV's morph speed. Total
-  //      duration 15.5s = 70 * 0.22 (the 0.78 → 1.0 span).
+  //      duration 15.5s = 70 * 0.22 (the 0.78 -> 1.0 span).
   { id: "all-other-morphs", progress: 1.0, duration: 15.5 },
 ] as const
 
@@ -134,10 +134,10 @@ const MIN_NAV_DURATION = 0.4
  *  and the extra pixels give the left text column enough room to hold
  *  the intro paragraphs + tier legend + beat-1C reveals + bottom
  *  controls without running against the bottom edge. Morph landing
- *  coordinates (polygon → square) are measured from the DOM via
+ *  coordinates (polygon -> square) are measured from the DOM via
  *  ResizeObserver in `BeatTextOverlay`, so the right-column geometry
- *  adapts automatically to the taller panel — no other tuning needed.
- *  Increase for more breathing room; decrease to bring the bottom
+ *  adapts automatically to the taller panel - no other tuning needed.
+ *  Increase for more breathing room. Decrease to bring the bottom
  *  back toward the fold. */
 const TIER_PANEL_EXTRA_PX = 320
 
@@ -242,7 +242,7 @@ const DU_CLASS_FILTER = [
 ]
 
 /** Filter used during Beat 1C so the map isolates the Agricultural
- *  revenue story — only Agriculture demand-units are visible while the
+ *  revenue story - only Agriculture demand-units are visible while the
  *  tier-color blend and AG example popups play out. The full
  *  DU_CLASS_FILTER is restored when Beat 2 starts. */
 const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"]
@@ -294,7 +294,7 @@ interface OutcomeLayoutItem {
   locationCount: number
   /** Pixel height of the glyph placeholder (0 when not active / no polygons).
    *  BeatTextOverlay renders a transparent Box of this height to reserve
-   *  space in document flow; the SVG morph lands inside that rect. */
+   *  space in document flow. The SVG morph lands inside that rect. */
   targetHeight: number
   /** Caption text rendered in DOM below the glyph (e.g. "12 locations"). */
   locationDescription: string
@@ -341,8 +341,8 @@ export default function TierAnimationSection() {
   /** `true` once the user has clicked Play at least since the last reset.
    *  Gates which control affordances the BeatTextOverlay renders:
    *    - `false` -> pre-play gate: inline Play button beside the title,
-   *                 subtitle only; no bottom Back/Next row.
-   *    - `true`  -> bottom control row (Back / N-of-T / Next) visible;
+   *                 subtitle only. No bottom Back/Next row.
+   *    - `true`  -> bottom control row (Back / N-of-T / Next) visible.
    *                 Play button hidden.
    *  All animation math keys off `progress` + `beatIndex`, so `hasPlayed`
    *  purely governs the visibility of chrome. */
@@ -370,13 +370,13 @@ export default function TierAnimationSection() {
   const [textVisible, setTextVisible] = useState(true)
   const textVisibleRef = useRef(true)
 
-  /* ── Time-based progress (0 → 1) ── */
+  /* ── Time-based progress (0 -> 1) ── */
   const progress = useMotionValue(0)
 
   /* ── Back-out opacity for the left-panel text ──
    *
    * Normally 1 (no-op). When the user presses Back from beat 1/N we
-   * animate it to 0 while `progress` is parked at 0.45 — so the entire
+   * animate it to 0 while `progress` is parked at 0.45 - so the entire
    * text block (intro paragraphs, tier legend, bottom controls) fades
    * out together in one motion instead of reverse-tweening progress,
    * which would unwind every staggered reveal in reverse. On fade
@@ -533,8 +533,8 @@ export default function TierAnimationSection() {
   /* ── Intro tween (Play button entry point) ──
    *
    * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
-   * tweens the first beat's window (0 → `BEATS[0].progress`) while
-   * keeping `beatIndex` at 0 — so the storyboard indicator reads "1 / N"
+   * tweens the first beat's window (0 -> `BEATS[0].progress`) while
+   * keeping `beatIndex` at 0 - so the storyboard indicator reads "1 / N"
    * the entire time. Under `prefers-reduced-motion`, the tween collapses
    * to an instant snap. */
   const playArrival = useCallback(() => {
@@ -571,7 +571,7 @@ export default function TierAnimationSection() {
    * On beat index > 0: normal backward tween to the previous beat.
    * On beat index === 0: do not reverse-tween `progress` (that would
    * unwind every staggered reveal). Instead, park `progress` at 0.45
-   * and animate `backOutOpacity` 1 → 0 so the whole text block fades
+   * and animate `backOutOpacity` 1 -> 0 so the whole text block fades
    * out together. On completion, snap `progress` to 0 and
    * `backOutOpacity` back to 1, and flip `hasPlayed` off so the
    * pre-play gate (title + subtitle + Play button) re-renders from a
@@ -587,7 +587,7 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     const finish = () => {
       // Snap underlying animation state back to pre-play in one frame
-      // while the text is already faded out; the pre-play render takes
+      // while the text is already faded out. The pre-play render takes
       // over with `backOutOpacity` reset to 1 (a no-op for the fresh
       // state since `progress` is 0 and the text block's progress-driven
       // opacity is already 0 at that value).
@@ -717,7 +717,7 @@ export default function TierAnimationSection() {
     if (prefersReducedMotion) {
       goTo(FINAL_BEAT_INDEX)
     }
-    // Normal motion: nothing to do here; we wait for the user to click Play.
+    // Normal motion: nothing to do here. We wait for the user to click Play.
   }, [panelInView, prefersReducedMotion, goTo])
 
   /* ── Keyboard shortcuts ──
@@ -1245,7 +1245,7 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* ── Map hover/click → shared multi-pin state for visible outcome polygons ── */
+  /* ── Map hover/click -> shared multi-pin state for visible outcome polygons ── */
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
@@ -1449,7 +1449,7 @@ export default function TierAnimationSection() {
               beat1FillExpr(0) as never,
             )
             // Leave `fill-outline-color` unset so Mapbox defaults it to
-            // the current `fill-color` expression — this prevents the
+            // the current `fill-color` expression - this prevents the
             // previous "transparent" override that produced visible
             // subpixel slivers between adjacent demand-unit polygons.
             map.setPaintProperty(
@@ -1461,7 +1461,7 @@ export default function TierAnimationSection() {
 
           // Ensure the companion outline layer exists. In regular map
           // modes it's created by `OutcomePolygonLayer`, but that
-          // component doesn't mount during the get-started animation —
+          // component doesn't mount during the get-started animation -
           // so without this block we'd have no stroke, and adjacent
           // demand-unit polygons would render with ratty/gappy edges
           // at low zooms. Create it once and mirror its color/opacity
@@ -1530,7 +1530,7 @@ export default function TierAnimationSection() {
           // Prep the shared `basemap-dim-overlay` (added by VisualizationLayers
           // and pinned to opacity 0 in get-started mode) for progress-driven
           // updates from this component. Override the 800ms transition
-          // VisualizationLayers configures for the Explore path; otherwise
+          // VisualizationLayers configures for the Explore path. Otherwise
           // every per-frame setPaintProperty call below would smear and
           // look broken.
           if (map.getLayer("basemap-dim-overlay")) {
@@ -1622,28 +1622,27 @@ export default function TierAnimationSection() {
 
     let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
 
-    // Beat 1  (0.00 → 0.49): blues cycle until FREEZE_AT, then hold still
+    // Beat 1  (0.00 -> 0.49): blues cycle until FREEZE_AT, then hold still
     //          on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.49 → 0.52): cross-fade OUT — the demand-units layer
-    //          fades from 0.65 → 0 with the frozen 3-blue palette
-    //          intact. No "converge to mid-blue" interstitial; the
-    //          polygons just disappear. Begins the instant the
+    // Beat 1B (0.49 -> 0.52): cross-fade OUT - the demand-units layer
+    //          fades from 0.65 -> 0 with the frozen 3-blue palette
+    //          intact. Begins the instant the
     //          intro text collapse finishes (at 0.49) so there's
     //          no dead air after the legend settles at the top.
-    // Beat 1C (0.52 → 0.78): at v = 0.52, while the layer is invisible,
+    // Beat 1C (0.52 -> 0.78): at v = 0.52, while the layer is invisible,
     //          we swap the filter to Agriculture-only and set the
     //          fill-color directly to the AG_REV tier expression.
-    //          (0.52 → 0.56) the layer fades back IN from 0 → 0.65
-    //          already wearing its AG_REV tier colors — a clean
-    //          cross-fade with no blue interstitial. (0.56 → 0.78)
+    //          (0.52 -> 0.56) the layer fades back IN from 0 -> 0.65
+    //          already wearing its AG_REV tier colors - a clean
+    //          cross-fade with no blue interstitial. (0.56 -> 0.78)
     //          tier colors are locked while the Beat 1C text + example
     //          popups play.
-    // Beat 2  (0.78 → 1.00): DU filter restored, tier colors locked; SVG
+    // Beat 2  (0.78 -> 1.00): DU filter restored, tier colors locked. SVG
     //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.18
     const BEAT1B_START = 0.49
     // Cross-fade windows (renamed in spirit, kept for diff readability):
-    // BEAT1C_BLEND_START is the fade-out → fade-in pivot (filter swap
+    // BEAT1C_BLEND_START is the fade-out -> fade-in pivot (filter swap
     // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
     // is when the AG_REV tier colors are fully visible at 0.65 opacity.
     const BEAT1C_BLEND_START = 0.52
@@ -1714,7 +1713,7 @@ export default function TierAnimationSection() {
 
       // Drive the shared basemap-dim-overlay so visualization layers pop
       // against the satellite basemap. Fades in in lockstep with the
-      // initial blue-polygon reveal (v = 0 → FREEZE_AT * 0.33 ≈ 0.06)
+      // initial blue-polygon reveal (v = 0 -> FREEZE_AT * 0.33 ≈ 0.06)
       // and then holds steady through the blue cycle, cross-fade, AG_REV
       // tier colors, and all subsequent morphs. Only the v < 0.01 reset
       // branch above clears it.
@@ -1815,8 +1814,8 @@ export default function TierAnimationSection() {
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
         // Beat 1B: cross-fade OUT. Keep the frozen 3-blue colors and
-        // fade the layer's opacity from 0.65 → 0. No converge-to-mid
-        // -blue interstitial — the polygons simply dissolve away,
+        // fade the layer's opacity from 0.65 -> 0. No converge-to-mid
+        // -blue interstitial - the polygons simply dissolve away,
         // freeing the eye to receive the AG_REV tier-colored polygons
         // that fade in next. If we're scrubbing backwards from beat1c,
         // first restore the full DU class filter and the frozen 3-blue
@@ -1881,9 +1880,9 @@ export default function TierAnimationSection() {
         // Beat 1C: cross-fade IN. While the layer is at opacity 0 we
         // swap the filter to Agriculture-only and set fill-color to the
         // pure AG_REV tier expression (no blue blend). Then the layer
-        // fades from 0 → 0.65 already wearing its tier colors, so the
+        // fades from 0 -> 0.65 already wearing its tier colors, so the
         // user sees a clean fade from "blank water" to the colorful
-        // visualization — no solid-blue intermediate.
+        // visualization - no solid-blue intermediate.
         if (phase !== "beat1c") {
           try {
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
@@ -1945,7 +1944,7 @@ export default function TierAnimationSection() {
         }
         phase = "beat1c"
       } else if (v < BEAT2_START) {
-        // Beat 1C tail: tier colors are fully blended; hold steady on
+        // Beat 1C tail: tier colors are fully blended. Hold steady on
         // AG-only while the example text and popups play.
         if (phase !== "beat1c") {
           try {
@@ -2049,7 +2048,7 @@ export default function TierAnimationSection() {
         }
 
         // Build demand-units opacity expression:
-        // - Fading entries: interpolated opacity (0.65 → 0)
+        // - Fading entries: interpolated opacity (0.65 -> 0)
         // - Not-yet-fading entries: 0.65 (still visible)
         // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
         if (duEntries.length > 0 && map.getLayer("demand-units")) {
@@ -2636,7 +2635,7 @@ export default function TierAnimationSection() {
       const override = tierOverrides[code]
       const polygons: ShapeMorphData[] = []
       for (const locId of locData.ids) {
-        // RES_STOR: API returns CalSim IDs; screen map uses gnisidlabel
+        // RES_STOR: API returns CalSim IDs. Screen map uses gnisidlabel
         let screenKey = locId
         if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
           const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
@@ -2713,7 +2712,7 @@ export default function TierAnimationSection() {
       if (!config) continue
       const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
       // Beat 2 slices are tighter now (0.22 span across 9 outcomes ≈ 0.024
-      // each); use a shorter fade lead so the DU fade doesn't bleed into
+      // each). Use a shorter fade lead so the DU fade doesn't bleed into
       // the previous outcome's morph.
       const fadeStart = morphStart - 0.01
 
@@ -2748,7 +2747,7 @@ export default function TierAnimationSection() {
    *
    * The right-column layout lives in CSS document flow inside `BeatTextOverlay`.
    * This memo only describes *what* each outcome needs (column, label, glyph
-   * height, caption); actual x/y positions are measured from the DOM via
+   * height, caption). Actual x/y positions are measured from the DOM via
    * `onGlyphLayoutChange` and flow back through `glyphLayout` state. The SVG
    * morph overlay uses those measured rects as landing coordinates. */
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
@@ -2780,12 +2779,12 @@ export default function TierAnimationSection() {
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
     // Estimate the per-column inner width so the distribution height
     // heuristic uses a realistic number of columns. The precise width is
-    // measured from the DOM later; this is only used to decide row count.
+    // measured from the DOM later. This is only used to decide row count.
     const approxColWidth = Math.max(80, panelSize.width * (1 / 3) / 2 - 36)
 
     // Left column renders in this explicit order (AG_REV before CWS_DEL).
-    // We don't touch OUTCOME_CODE_ORDER globally — radar axes + NOD/SOD
-    // helpers depend on that list — so we just prepend the left-column codes
+    // We don't touch OUTCOME_CODE_ORDER globally - radar axes + NOD/SOD
+    // helpers depend on that list - so we just prepend the left-column codes
     // in their desired order and iterate the rest of OUTCOME_CODE_ORDER after.
     const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
     const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
@@ -2845,7 +2844,7 @@ export default function TierAnimationSection() {
           // row with an identical gap across every outcome.
           // `distributionHeight` = totalRows * (SQUARE_SIZE + SQUARE_GAP)
           // includes a trailing SQUARE_GAP (6px) of empty space below the
-          // last row; subtract it. No bar-height floor — bar/average
+          // last row. Subtract it. No bar-height floor - bar/average
           // mode centers on slotHeight and may overflow small slots,
           // which we accept as a separate encoding-mode concern.
           const SQUARE_GAP_PX = 6
@@ -2877,14 +2876,14 @@ export default function TierAnimationSection() {
    *  in BeatTextOverlay, which is absolutely positioned at `right: 0` with
    *  `width: 33.33%`, i.e. its left edge aligns with `panelWidth * 2/3`).
    *  Populated via `onGlyphLayoutChange` from BeatTextOverlay's
-   *  ResizeObserver; empty on first render (outcomes are invisible in Beat 1
+   *  ResizeObserver. Empty on first render (outcomes are invisible in Beat 1
    *  anyway, so the missing positions only become visible once measured). */
   const [glyphLayout, setGlyphLayout] = useState<Record<string, GlyphRect>>({})
 
   const handleGlyphLayoutChange = useCallback((layout: Record<string, GlyphRect>) => {
     setGlyphLayout((prev) => {
       // Shallow-compare to avoid redundant state updates (ResizeObserver can
-      // fire frequently; same rects -> skip re-render).
+      // fire frequently. Same rects -> skip re-render).
       const prevKeys = Object.keys(prev)
       const nextKeys = Object.keys(layout)
       if (prevKeys.length === nextKeys.length) {
@@ -2963,9 +2962,9 @@ export default function TierAnimationSection() {
         //
         // Then add `TIER_PANEL_EXTRA_PX` so the left text column has
         // room for all reveals + bottom controls. The panel is
-        // intentionally taller than one viewport — the user is
+        // intentionally taller than one viewport - the user is
         // expected to scroll so the title + Play button park at the
-        // top of the visible area; the extra pixels then extend below
+        // top of the visible area. The extra pixels then extend below
         // the fold rather than crowding the text.
         height: `calc(100vh - ${theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight + 80 - TIER_PANEL_EXTRA_PX}px)`,
         backgroundColor: "transparent",
