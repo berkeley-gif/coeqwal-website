@@ -21,7 +21,7 @@ import {
   PlayArrowIcon,
   ReplayIcon,
 } from "@repo/ui/mui"
-import { motion, useTransform } from "@repo/motion"
+import { motion, useTransform, useMotionValue, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
 import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
@@ -311,18 +311,20 @@ export default function BeatTextOverlay({
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   /** Bottom Back / indicator / Next control row opacity.
    *
-   *  Bound directly to `progress` via `useTransform` so the DOM stays in
-   *  sync reactively — no ref-timing gap between `setHasPlayed(true)`
-   *  flushing and the arrival tween's first tick. Fades in over the tail
-   *  of the arrival tween (which settles at 0.45) so the row lands just
-   *  as the Critical legend row does.
+   *  The row is only visible when a text sequence has finished — i.e.,
+   *  the parent is settled at a beat (`playState === "paused"` or
+   *  `"finished"`) and the user has clicked Play. Any new sequence
+   *  (Play, Next, Back between beats, Back-from-1/6) flips `playState`
+   *  to `"playing"` and fades the row back out until the tween
+   *  completes. This keeps the controls out of the way during the
+   *  animated storytelling and surfaces them only at the reading
+   *  pauses between beats.
    *
-   *  On Back-from-1/6 the parent parks `progress` at 0.45 and fades the
-   *  whole text block via `backOutOpacity` instead — this row is nested
-   *  inside `beat1Ref` so it fades together with the text (CSS opacity
-   *  compounds through the DOM) and doesn't need its own back-out
-   *  drive. */
-  const bottomControlsOpacity = useTransform(progress, [0.4, 0.45], [0, 1])
+   *  Animated via an imperative `animate()` on a local MotionValue in
+   *  the effect below, rather than bound to `progress`, because the
+   *  visibility rule is about *whether* an animation is running, not
+   *  about any specific progress window. */
+  const bottomControlsOpacity = useMotionValue(0)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
@@ -356,6 +358,25 @@ export default function BeatTextOverlay({
       uBackOut?.()
     }
   }, [progress, backOutOpacity, textHidden])
+
+  /* ── Bottom controls visibility follows `playState` ──
+   *
+   * Show only at reading pauses — i.e. when the parent has settled at
+   * a beat (`paused` or `finished`) and the user has clicked Play.
+   * Any new sequence (Play, Next, Back) flips `playState` to `playing`
+   * and this effect fades the row back out. Pre-play (`idle`) and the
+   * Back-from-1/6 completion (which sets `idle` + `hasPlayed=false`)
+   * also keep the row hidden. */
+  useEffect(() => {
+    if (hideControls) return
+    const settled = playState === "paused" || playState === "finished"
+    const target = hasPlayed && settled ? 1 : 0
+    const ctrl = animate(bottomControlsOpacity, target, {
+      duration: 0.3,
+      ease: "easeOut",
+    })
+    return () => ctrl.stop()
+  }, [playState, hasPlayed, hideControls, bottomControlsOpacity])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
