@@ -70,12 +70,6 @@ const Reclamation: LocationLabel = {
   longitude: -121.5407,
 }
 
-const Pumping: LocationLabel = {
-  id: "pumping",
-  name: "Byron Tract Pumping",
-  latitude: 37.8346,
-  longitude: -121.6404,
-}
 
 const YubaRiver: LocationLabel = {
   id: "yuba-river",
@@ -84,7 +78,7 @@ const YubaRiver: LocationLabel = {
   longitude: -121.4922,
 }
 
-export const GOLDRUSH_LABELS = [Reclamation, Pumping, YubaRiver]
+export const GOLDRUSH_LABELS = [Reclamation, YubaRiver]
 
 /* DRINKING */
 
