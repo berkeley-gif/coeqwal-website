@@ -211,9 +211,7 @@ export default function RadarPanel({
       // the last <text class="axis-label-title"> specifically rather than
       // the whole group's bbox (which would center across both lines and
       // right-align to the widest line).
-      const titles = g.querySelectorAll<SVGTextElement>(
-        "text.axis-label-title",
-      )
+      const titles = g.querySelectorAll<SVGTextElement>("text.axis-label-title")
       const last = titles[titles.length - 1]
       if (!last) return
       try {
