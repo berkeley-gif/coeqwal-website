@@ -1448,11 +1448,76 @@ export default function TierAnimationSection() {
               "fill-color",
               beat1FillExpr(0) as never,
             )
+            // Leave `fill-outline-color` unset so Mapbox defaults it to
+            // the current `fill-color` expression — this prevents the
+            // previous "transparent" override that produced visible
+            // subpixel slivers between adjacent demand-unit polygons.
             map.setPaintProperty(
               "demand-units",
               "fill-outline-color",
-              "transparent",
+              beat1FillExpr(0) as never,
             )
+          }
+
+          // Ensure the companion outline layer exists. In regular map
+          // modes it's created by `OutcomePolygonLayer`, but that
+          // component doesn't mount during the get-started animation —
+          // so without this block we'd have no stroke, and adjacent
+          // demand-unit polygons would render with ratty/gappy edges
+          // at low zooms. Create it once and mirror its color/opacity
+          // with the fill inside the progress handler below.
+          if (
+            map.getLayer("demand-units") &&
+            !map.getLayer("demand-units-outline")
+          ) {
+            try {
+              const fillLayer = map.getLayer("demand-units") as unknown as {
+                source: string
+                "source-layer": string
+              }
+              map.addLayer({
+                id: "demand-units-outline",
+                type: "line",
+                source: fillLayer.source,
+                "source-layer": fillLayer["source-layer"],
+                filter: DU_CLASS_FILTER as never,
+                paint: {
+                  "line-color": beat1FillExpr(0) as never,
+                  "line-width": 0.5,
+                  "line-opacity": 0,
+                  "line-offset": -0.25,
+                },
+                layout: { visibility: "visible" },
+              })
+            } catch {
+              /* layer may already exist from another map mode */
+            }
+          }
+
+          // Pin outline transitions to 0 so per-frame updates from the
+          // progress handler don't smear, and seed its initial state
+          // to match the fill (same color expression, opacity 0).
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-color-transition",
+              { duration: 0, delay: 0 },
+            )
+            map.setFilter(
+              "demand-units-outline",
+              DU_CLASS_FILTER as never,
+            )
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-color",
+              beat1FillExpr(0) as never,
+            )
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
           }
           // Suppress all other polygon layers until their beat-2 turn
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
@@ -1611,9 +1676,28 @@ export default function TierAnimationSection() {
                 "fill-color",
                 beat1FillExpr(0) as never,
               )
+              map.setPaintProperty(
+                "demand-units",
+                "fill-outline-color",
+                beat1FillExpr(0) as never,
+              )
             }
-            if (map.getLayer("demand-units-outline"))
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter(
+                "demand-units-outline",
+                DU_CLASS_FILTER as never,
+              )
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                beat1FillExpr(0) as never,
+              )
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                0,
+              )
+            }
             // Snap the basemap dim overlay back to 0 so a full reset
             // shows the bright basemap again.
             if (map.getLayer("basemap-dim-overlay")) {
@@ -1662,13 +1746,31 @@ export default function TierAnimationSection() {
           const colorPhase = beat1T * BEAT1_CYCLE
           frozenColorPhase = colorPhase
           try {
+            const expr = beat1FillExpr(colorPhase)
             if (map.getLayer("demand-units")) {
               map.setPaintProperty(
                 "demand-units",
                 "fill-color",
-                beat1FillExpr(colorPhase) as never,
+                expr as never,
+              )
+              map.setPaintProperty(
+                "demand-units",
+                "fill-outline-color",
+                expr as never,
               )
               map.setPaintProperty("demand-units", "fill-opacity", opacity)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                expr as never,
+              )
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                opacity,
+              )
             }
           } catch {
             /* ok */
@@ -1676,15 +1778,35 @@ export default function TierAnimationSection() {
         } else {
           // Frozen: keep the last color pattern, maintain opacity at 0.65
           try {
+            const expr = beat1FillExpr(frozenColorPhase)
             if (map.getLayer("demand-units")) {
               if (phase !== "beat1") {
                 map.setPaintProperty(
                   "demand-units",
                   "fill-color",
-                  beat1FillExpr(frozenColorPhase) as never,
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
                 )
               }
               map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              if (phase !== "beat1") {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                0.65,
+              )
             }
           } catch {
             /* ok */
@@ -1701,12 +1823,29 @@ export default function TierAnimationSection() {
         // expression so the cross-fade reverses cleanly.
         if (phase !== "beat1") {
           try {
+            const expr = beat1FillExpr(frozenColorPhase)
             if (map.getLayer("demand-units")) {
               map.setFilter("demand-units", DU_CLASS_FILTER as never)
               map.setPaintProperty(
                 "demand-units",
                 "fill-color",
-                beat1FillExpr(frozenColorPhase) as never,
+                expr as never,
+              )
+              map.setPaintProperty(
+                "demand-units",
+                "fill-outline-color",
+                expr as never,
+              )
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter(
+                "demand-units-outline",
+                DU_CLASS_FILTER as never,
+              )
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-color",
+                expr as never,
               )
             }
           } catch {
@@ -1717,13 +1856,21 @@ export default function TierAnimationSection() {
         const fadeOutT =
           (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
         const easedFadeOut = 1 - Math.pow(1 - fadeOutT, 2) // ease-out
+        const fadeOutOpacity = 0.65 * (1 - easedFadeOut)
 
         try {
           if (map.getLayer("demand-units")) {
             map.setPaintProperty(
               "demand-units",
               "fill-opacity",
-              0.65 * (1 - easedFadeOut),
+              fadeOutOpacity,
+            )
+          }
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity",
+              fadeOutOpacity,
             )
           }
         } catch {
@@ -1739,13 +1886,31 @@ export default function TierAnimationSection() {
         // visualization — no solid-blue intermediate.
         if (phase !== "beat1c") {
           try {
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (map.getLayer("demand-units")) {
               map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              const expr = buildBlendedTierExpr(BEAT1_MID, 1)
               if (expr) {
                 map.setPaintProperty(
                   "demand-units",
                   "fill-color",
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
+              }
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter(
+                "demand-units-outline",
+                DU_AG_ONLY_FILTER as never,
+              )
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
                   expr as never,
                 )
               }
@@ -1758,13 +1923,21 @@ export default function TierAnimationSection() {
         const fadeInT =
           (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
         const easedFadeIn = 1 - Math.pow(1 - fadeInT, 2) // ease-out
+        const fadeInOpacity = 0.65 * easedFadeIn
 
         try {
           if (map.getLayer("demand-units")) {
             map.setPaintProperty(
               "demand-units",
               "fill-opacity",
-              0.65 * easedFadeIn,
+              fadeInOpacity,
+            )
+          }
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity",
+              fadeInOpacity,
             )
           }
         } catch {
@@ -1776,17 +1949,40 @@ export default function TierAnimationSection() {
         // AG-only while the example text and popups play.
         if (phase !== "beat1c") {
           try {
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (map.getLayer("demand-units")) {
               map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              const expr = buildBlendedTierExpr(BEAT1_MID, 1)
               if (expr) {
                 map.setPaintProperty(
                   "demand-units",
                   "fill-color",
                   expr as never,
                 )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
               }
               map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter(
+                "demand-units-outline",
+                DU_AG_ONLY_FILTER as never,
+              )
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                0.65,
+              )
             }
           } catch {
             /* ok */
@@ -1799,12 +1995,34 @@ export default function TierAnimationSection() {
         // Progressively hide features as their SVG copies start animating.
         if (phase !== "beat2") {
           try {
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (map.getLayer("demand-units")) {
               map.setFilter("demand-units", DU_CLASS_FILTER as never)
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  expr as never,
+                )
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-outline-color",
+                  expr as never,
+                )
+              }
             }
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (expr && map.getLayer("demand-units")) {
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
+            if (map.getLayer("demand-units-outline")) {
+              map.setFilter(
+                "demand-units-outline",
+                DU_CLASS_FILTER as never,
+              )
+              if (expr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  expr as never,
+                )
+              }
             }
             // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
             // delta-detaw) stay hidden - the SVG overlay handles their outcomes.
@@ -1859,6 +2077,15 @@ export default function TierAnimationSection() {
               "fill-opacity",
               caseExpr as never,
             )
+            // Mirror the per-DU case to the outline so strokes fade
+            // away in lockstep with their fills.
+            if (map.getLayer("demand-units-outline")) {
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                caseExpr as never,
+              )
+            }
           } catch {
             /* ok */
           }

@@ -270,9 +270,15 @@ export default function BeatTextOverlay({
    *  Collapses on the same schedule as `introCollapseRef` so, post-reveal,
    *  only the page title sits above the tier legend. */
   const subtitleCollapseRef = useRef<HTMLDivElement>(null)
+  /** Outermost Box (`position: absolute; inset: 0` of the animation panel).
+   *  Used as the y-reference frame for placeholder measurements so glyph
+   *  positions map 1:1 to the SVG overlay's panel-top coordinate system,
+   *  regardless of where the right-column root is vertically offset. */
+  const panelRootRef = useRef<HTMLDivElement>(null)
   /** Root Box of the right-column (absolutely positioned at `right: 0`,
-   *  `width: 33.33%`). Used as the reference frame for ResizeObserver
-   *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
+   *  `width: 33.33%`). Its left edge aligns with `panelWidth * 2/3` which
+   *  matches the SVG overlay's `panelLeft` origin, so glyph `pos.x` is
+   *  measured relative to this root (while `pos.y` uses `panelRootRef`). */
   const rightColumnRootRef = useRef<HTMLDivElement>(null)
   /** Title row elements, keyed by outcome code. */
   const titleRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
@@ -568,27 +574,32 @@ export default function BeatTextOverlay({
 
   /* ── Report glyph placeholder rects up to the parent ──
    *
-   * We measure each transparent placeholder relative to the right-column
-   * root. Since the right-column is absolutely positioned at
-   * `right: 0; width: 33.33%`, its left edge aligns with `panelWidth * 2/3`
-   * — which is exactly the coordinate frame the SVG overlay uses
-   * (`pos.x` is the offset into the right-third, `pos.y` is panel-top
-   * relative). Measured rects can therefore be passed through to the SVG
-   * without further transformation. */
+   * `pos.x` must be the glyph's offset into the right-third column (the
+   * SVG adds `panelWidth * 2/3` to it), so we measure `x` relative to
+   * `rightColumnRootRef` whose left edge sits at `panelWidth * 2/3`.
+   *
+   * `pos.y` must be panel-top relative (the SVG is pinned with
+   * `inset: 0` of the same panel). Since the right-column root is now
+   * vertically offset (`top: padding`) so its top aligns with the
+   * title bar on the left panel, we measure `y` against `panelRootRef`
+   * (the outer `position: absolute; inset: 0` box) to keep the SVG
+   * landing rects at the true placeholder positions.  */
   useLayoutEffect(() => {
     if (!onGlyphLayoutChange) return
     const root = rightColumnRootRef.current
-    if (!root) return
+    const panel = panelRootRef.current
+    if (!root || !panel) return
 
     const measure = () => {
       const rootRect = root.getBoundingClientRect()
+      const panelRect = panel.getBoundingClientRect()
       const layout: Record<string, GlyphRect> = {}
       placeholderRefsMap.current.forEach((el, code) => {
         if (!el) return
         const r = el.getBoundingClientRect()
         layout[code] = {
           x: r.left - rootRect.left,
-          y: r.top - rootRect.top,
+          y: r.top - panelRect.top,
           width: r.width,
           height: r.height,
         }
@@ -600,6 +611,7 @@ export default function BeatTextOverlay({
       measure()
     })
     ro.observe(root)
+    ro.observe(panel)
     placeholderRefsMap.current.forEach((el) => {
       if (el) ro.observe(el)
     })
@@ -629,6 +641,7 @@ export default function BeatTextOverlay({
 
   return (
     <Box
+      ref={panelRootRef}
       sx={{
         position: "absolute",
         inset: 0,
@@ -1038,42 +1051,47 @@ export default function BeatTextOverlay({
         </Box>
       </Box>
 
-      {/* Beat 2 - white backdrop on the right third */}
-      <Box
-        ref={beat2PanelRef}
-        sx={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: "33.33%",
-          zIndex: 3,
-          backgroundColor: alpha(theme.palette.common.white, 0.75),
-          opacity: 0,
-        }}
-      />
-
-      {/* Beat 2 - text items in flow layout.
+      {/* Beat 2 - right-third column.
        *
-       * This Box's left edge aligns with `panelWidth * 2/3`, which is the
-       * same origin the SVG overlay uses. That's why we measure placeholder
-       * positions relative to this root (see ResizeObserver above). */}
+       * Top-aligned with the left panel's title bar (`top: padding`) so
+       * tall content isn't visually cut off above the title line. Its
+       * left edge aligns with `panelWidth * 2/3`, which is the same
+       * origin the SVG overlay uses. Bottom is left unset so the column
+       * auto-sizes to its content (the two-column outcome grid which has
+       * explicit row heights). A small bottom padding gives the backdrop
+       * breathing room below the last row.
+       *
+       * The white backdrop (`beat2PanelRef`) lives inside as a sibling
+       * absolutely-pinned to `inset: 0`, so it inherits the column's
+       * natural height automatically — no JS height sync needed, and no
+       * extra empty space below the last content row. */}
       <Box
         ref={rightColumnRootRef}
         sx={{
           position: "absolute",
-          top: 0,
+          top: padding,
           right: 0,
-          bottom: 0,
           width: "33.33%",
           zIndex: 5,
           display: "flex",
           flexDirection: "column",
+          pb: 2,
           "& .MuiTypography-root": {
             color: theme.palette.text.primary,
           },
         }}
       >
+        <Box
+          ref={beat2PanelRef}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            backgroundColor: alpha(theme.palette.common.white, 0.75),
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        />
         {/* Scenario header + encoding toggle.
          *  Disabled per design direction — kept in-source (wrapped in
          *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
@@ -1278,9 +1296,6 @@ export default function BeatTextOverlay({
               gap: "12px",
               px: 3,
               pt: 1.5,
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
             }}
           >
             {[0, 1].map((col) => (
