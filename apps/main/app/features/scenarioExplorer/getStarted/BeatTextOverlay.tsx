@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo, useCallback } from "react"
+import { Fragment, useRef, useEffect, useMemo, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -68,54 +68,10 @@ interface BeatTextOverlayProps {
   onEncodingChange?: (mode: EncodingMode) => void
   hydroclimate?: string
   onHydroclimateChange?: (value: string) => void
-  onTourStart?: () => void
   onAddLocation?: () => void
-}
-
-function StoryCtaButton({
-  label,
-  onClick,
-}: {
-  label: string
-  onClick?: () => void
-}) {
-  const theme = useTheme()
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 0.75,
-        px: 2,
-        py: 1,
-        border: "none",
-        borderRadius: 1.5,
-        background: theme.palette.blue.bright,
-        cursor: "pointer",
-        transition: "background 0.15s",
-        "&:hover": {
-          background: theme.palette.blue.dark,
-        },
-        "&:focus-visible": {
-          outline: `2px solid ${theme.palette.blue.bright}`,
-          outlineOffset: "2px",
-        },
-        "& .MuiTypography-root": {
-          color: theme.palette.text.secondary,
-        },
-      }}
-    >
-      <Typography variant="subtitle2" component="span" sx={{ fontWeight: 600 }}>
-        {label}
-      </Typography>
-      <ArrowForwardIcon
-        sx={{ fontSize: "1rem", color: theme.palette.text.secondary }}
-      />
-    </Box>
-  )
+  /** Map of outcome code → Beat 2 morph start progress value. Used to
+   *  time each outcome title's fade-in to just before its own morph slice. */
+  outcomeMorphStarts?: Record<string, number>
 }
 
 function clamp01(v: number) {
@@ -141,8 +97,8 @@ export default function BeatTextOverlay({
   onEncodingChange,
   hydroclimate,
   onHydroclimateChange,
-  onTourStart,
   onAddLocation,
+  outcomeMorphStarts,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -244,7 +200,6 @@ export default function BeatTextOverlay({
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
-  const levelsLineRef = useRef<HTMLDivElement>(null)
   const tierLegendRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
   const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -254,10 +209,13 @@ export default function BeatTextOverlay({
   beat2LayoutRef.current = beat2Layout
   const scenarioHeaderRef = useRef<HTMLDivElement>(null)
   const calsimTextRef = useRef<HTMLDivElement>(null)
-  const tourCtaRef = useRef<HTMLDivElement>(null)
+  const beat1cExampleRef = useRef<HTMLDivElement>(null)
+  const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
+  const outcomeMorphStartsRef = useRef(outcomeMorphStarts)
+  outcomeMorphStartsRef.current = outcomeMorphStarts
 
   useEffect(() => {
     if (!beat1Ref.current) return
@@ -282,21 +240,33 @@ export default function BeatTextOverlay({
       }
 
       if (beat2PanelRef.current) {
-        const fadeIn = clamp01((v - 0.22) / 0.04)
+        // Beat 2 panel backdrop reveals at Beat 2 start (0.78)
+        const fadeIn = clamp01((v - 0.78) / 0.03)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
+      // Outcome titles fade in per-slice, synced to each outcome's own morph.
+      // Each title appears just before its polygons begin morphing so the
+      // viewer can read the title while watching that slice animate.
+      const morphStarts = outcomeMorphStartsRef.current
+      const TITLE_LEAD = 0.008 // how far before morphStart the title appears
+      const TITLE_FADE = 0.018 // fade-in duration
       for (let i = 0; i < OUTCOME_CODE_ORDER.length; i++) {
         const el = beat2ItemRefs.current[i]
         if (!el) continue
-        const itemStart = 0.24 + i * 0.035
-        const fadeIn = clamp01((v - itemStart) / 0.03)
+        const code = OUTCOME_CODE_ORDER[i]!
+        const morphStart = morphStarts?.[code]
+        const fadeStart =
+          morphStart != null ? morphStart - TITLE_LEAD : 0.78 - TITLE_LEAD
+        const fadeIn = clamp01((v - fadeStart) / TITLE_FADE)
         el.style.opacity = String(fadeIn)
       }
 
-      // Spread items apart to make room for distribution charts
-      const SPREAD_START = 0.63
-      const SPREAD_END = 0.66
+      // Spread items apart to make room for distribution charts.
+      // Starts at Beat 2 start so the layout opens up just as the first
+      // outcome begins to morph.
+      const SPREAD_START = 0.78
+      const SPREAD_END = 0.82
       const spreadT = clamp01((v - SPREAD_START) / (SPREAD_END - SPREAD_START))
       const layoutItems = beat2LayoutRef.current?.items
       if (layoutItems) {
@@ -317,14 +287,24 @@ export default function BeatTextOverlay({
         }
       }
 
-      if (levelsLineRef.current) {
-        const fadeIn = clamp01((v - 0.54) / 0.04)
-        levelsLineRef.current.style.opacity = String(fadeIn)
+      if (tierLegendRef.current) {
+        const fadeIn = clamp01((v - 0.46) / 0.04)
+        tierLegendRef.current.style.opacity = String(fadeIn)
       }
 
-      if (tierLegendRef.current) {
-        const fadeIn = clamp01((v - 0.58) / 0.04)
-        tierLegendRef.current.style.opacity = String(fadeIn)
+      // Beat 1C example text: "each polygon on the map represents..."
+      // Appears just after the tier-color blend completes (0.66) so the
+      // viewer sees tier colors first, then reads the explanation.
+      if (beat1cExampleRef.current) {
+        const fadeIn = clamp01((v - 0.66) / 0.03)
+        beat1cExampleRef.current.style.opacity = String(fadeIn)
+      }
+
+      // Beat 1C delivery-levels text: appears after the popups have been
+      // on screen long enough to register (around 0.74).
+      if (beat1cDeliveryRef.current) {
+        const fadeIn = clamp01((v - 0.74) / 0.03)
+        beat1cDeliveryRef.current.style.opacity = String(fadeIn)
       }
     })
     return unsub
@@ -335,7 +315,6 @@ export default function BeatTextOverlay({
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "0"
       if (scenarioHeaderRef.current)
         scenarioHeaderRef.current.style.opacity = "0"
-      if (tourCtaRef.current) tourCtaRef.current.style.opacity = "0"
       if (addLocationCtaRef.current)
         addLocationCtaRef.current.style.opacity = "0"
       return
@@ -349,13 +328,9 @@ export default function BeatTextOverlay({
       if (addLocationCtaRef.current)
         addLocationCtaRef.current.style.opacity = "1"
     }, 1800)
-    const t3 = setTimeout(() => {
-      if (tourCtaRef.current) tourCtaRef.current.style.opacity = "1"
-    }, 2800)
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
-      clearTimeout(t3)
     }
   }, [interactive])
 
@@ -413,11 +388,11 @@ export default function BeatTextOverlay({
         >
           <Typography
             variant="h4"
-            component="h2"
+            component="h4"
             fontWeight={300}
             color="text.secondary"
           >
-            Key outcomes
+            Visualizing key outcomes
           </Typography>
           <Box
             sx={{
@@ -483,6 +458,16 @@ export default function BeatTextOverlay({
           </Box>
         </motion.div>
 
+        <motion.div style={{ opacity: headingOpacity, flexShrink: 0 }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.md, opacity: 0.85 }}
+          >
+            How are scenario results measured?
+          </Typography>
+        </motion.div>
+
         {/* Body content - same flow as ContentPanel children */}
         <Box
           ref={beat1Ref}
@@ -500,17 +485,11 @@ export default function BeatTextOverlay({
           }}
         >
           <Typography variant="body1" component="p">
-            Different water management scenarios bring water to different parts
-            of the system.
+            Different scenarios change how water is allocated among different users and the environment.
           </Typography>
           <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
             <Typography variant="body1" component="p">
-              We can group these parts of the system into categories.
-            </Typography>
-          </Box>
-          <Box ref={levelsLineRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              We can create levels of outcomes per location within these groups.
+              To compare results on a common scale, we group key outcomes into levels based on how parts of the water system perform under those different water supply conditions:
             </Typography>
           </Box>
           <Box
@@ -518,23 +497,42 @@ export default function BeatTextOverlay({
             sx={{
               mt: 2.5,
               opacity: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
+              display: "grid",
+              gridTemplateColumns: "auto auto 1fr",
+              columnGap: 1.5,
+              rowGap: 1,
+              alignItems: "center",
             }}
           >
             {(
               [
-                { color: theme.palette.tiers.tier1, label: "Thriving" },
-                { color: theme.palette.tiers.tier2, label: "Functioning" },
-                { color: theme.palette.tiers.tier3, label: "At risk" },
-                { color: theme.palette.tiers.tier4, label: "Critical" },
+                {
+                  color: theme.palette.tiers.tier1,
+                  label: "Optimal",
+                  description:
+                    "Water supplies support strong, desired system performance.",
+                },
+                {
+                  color: theme.palette.tiers.tier2,
+                  label: "Acceptable",
+                  description:
+                    "Water supply shortages occur, but impacts remain manageable.",
+                },
+                {
+                  color: theme.palette.tiers.tier3,
+                  label: "At risk",
+                  description:
+                    "Water supply shortages lead to significant impacts.",
+                },
+                {
+                  color: theme.palette.tiers.tier4,
+                  label: "Critical",
+                  description:
+                    "Severe water supply shortages threaten long-term viability.",
+                },
               ] as const
-            ).map(({ color, label }) => (
-              <Box
-                key={label}
-                sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-              >
+            ).map(({ color, label, description }) => (
+              <Fragment key={label}>
                 <Box
                   sx={{
                     width: 16,
@@ -545,54 +543,56 @@ export default function BeatTextOverlay({
                     boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
                   }}
                 />
+                <Box
+                  sx={{
+                    px: 1.25,
+                    py: 0.5,
+                    borderRadius: theme.borderRadius.md,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifySelf: "start",
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    component="span"
+                    sx={{
+                      fontWeight: 500,
+                      textShadow: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                </Box>
                 <Typography variant="body1" component="span">
-                  {label}
+                  {description}
                 </Typography>
-              </Box>
+              </Fragment>
             ))}
+          </Box>
+          {/* Beat 1C: example of what a single polygon represents */}
+          <Box ref={beat1cExampleRef} sx={{ mt: 2.5, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              For example, each polygon on the map represents an agricultural water district receiving surface water deliveries.
+            </Typography>
+          </Box>
+          {/* Beat 1C: how colors map to delivery/revenue outcomes */}
+          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              The colors correspond to different water delivery levels that affect agricultural revenues, ranging from optimal levels (blue) to critical levels (red).
+            </Typography>
           </Box>
           {/* Calsim data beat - appears after morph completes */}
           <Box
             ref={calsimTextRef}
             sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
           >
-            <Typography
-              component="p"
-              variant="overline"
-              sx={{
-                "&&": {
-                  color: theme.palette.grey[600],
-                  fontSize: "0.7rem",
-                  lineHeight: 1,
-                  textShadow: "none",
-                },
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                mb: 1,
-              }}
-            >
-              S0020
-            </Typography>
             <Typography variant="body1" component="p">
-              This is the CalSim water allocation data for these locations for
-              the Current operations water management scenario.
+              For each scenario, outcome levels are calculated for all key outcomes across their locations.
             </Typography>
-          </Box>
-          {/* Tour CTA - appears after scenario header */}
-          <Box
-            ref={tourCtaRef}
-            sx={{
-              mt: 3,
-              opacity: 0,
-              transition: "opacity 0.6s ease",
-              pointerEvents: "auto",
-              "& .MuiTypography-root": { textShadow: "none" },
-            }}
-          >
-            <StoryCtaButton
-              label="Take a tour of the data"
-              onClick={onTourStart}
-            />
           </Box>
         </Box>
       </Box>
