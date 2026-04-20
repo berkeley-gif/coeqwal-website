@@ -1,6 +1,13 @@
 "use client"
 
-import { Fragment, useRef, useEffect, useMemo, useCallback } from "react"
+import {
+  Fragment,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+} from "react"
 import {
   Box,
   Typography,
@@ -16,7 +23,6 @@ import {
 } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
-import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
 import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
 import { HybridTooltip } from "@repo/ui"
@@ -34,19 +40,29 @@ interface ColumnEyebrow {
   animationStart: number
 }
 
+interface Beat2LayoutItem {
+  code: string
+  label: string
+  column: 0 | 1
+  columnWidth: number
+  isActive: boolean
+  locationCount: number
+  /** Pixel height the glyph placeholder should reserve in document flow. */
+  targetHeight: number
+  /** Caption rendered under the glyph (e.g. "12 locations"). */
+  locationDescription: string
+}
+
 interface Beat2Layout {
-  items: {
-    code: string
-    label: string
-    y: number
-    x: number
-    column: 0 | 1
-    columnWidth: number
-    isActive: boolean
-    spaceBelow: number
-  }[]
+  items: Beat2LayoutItem[]
   eyebrows: ColumnEyebrow[]
-  leftColumnBottom?: number
+}
+
+export interface GlyphRect {
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
 interface BeatTextOverlayProps {
@@ -69,9 +85,17 @@ interface BeatTextOverlayProps {
   hydroclimate?: string
   onHydroclimateChange?: (value: string) => void
   onAddLocation?: () => void
-  /** Map of outcome code → Beat 2 morph start progress value. Used to
-   *  time each outcome title's fade-in to just before its own morph slice. */
-  outcomeMorphStarts?: Record<string, number>
+  /** Map of outcome code → Beat 2 morph progress window. `start` drives
+   *  each outcome title's fade-in (just before its polygons begin morphing);
+   *  `end` drives the caption fade-in (once the polygons settle as squares). */
+  outcomeMorphWindows?: Record<string, { start: number; end: number }>
+  /** Called by the ResizeObserver whenever per-outcome glyph placeholders
+   *  are laid out (or resized). The parent uses these rects as landing
+   *  coordinates for the SVG morph overlay. Coordinates are relative to
+   *  the right-column root Box (its left edge == panelWidth * 2/3). */
+  onGlyphLayoutChange?: (
+    layout: Record<string, GlyphRect>,
+  ) => void
 }
 
 function clamp01(v: number) {
@@ -98,7 +122,8 @@ export default function BeatTextOverlay({
   hydroclimate,
   onHydroclimateChange,
   onAddLocation,
-  outcomeMorphStarts,
+  outcomeMorphWindows,
+  onGlyphLayoutChange,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -201,7 +226,18 @@ export default function BeatTextOverlay({
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
   const tierLegendRef = useRef<HTMLDivElement>(null)
-  const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
+  /** Root Box of the right-column (absolutely positioned at `right: 0`,
+   *  `width: 33.33%`). Used as the reference frame for ResizeObserver
+   *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
+  const rightColumnRootRef = useRef<HTMLDivElement>(null)
+  /** Title row elements, keyed by outcome code. */
+  const titleRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  /** Transparent glyph-placeholder boxes that reserve SVG landing space. */
+  const placeholderRefsMap = useRef<Map<string, HTMLDivElement | null>>(
+    new Map(),
+  )
+  /** Caption Typographies under each glyph. */
+  const captionRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
   const eyebrowDataRef = useRef<ColumnEyebrow[] | undefined>(undefined)
   eyebrowDataRef.current = beat2Layout?.eyebrows
@@ -214,8 +250,8 @@ export default function BeatTextOverlay({
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
-  const outcomeMorphStartsRef = useRef(outcomeMorphStarts)
-  outcomeMorphStartsRef.current = outcomeMorphStarts
+  const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
+  outcomeMorphWindowsRef.current = outcomeMorphWindows
 
   useEffect(() => {
     if (!beat1Ref.current) return
@@ -248,32 +284,35 @@ export default function BeatTextOverlay({
       // Outcome titles fade in per-slice, synced to each outcome's own morph.
       // Each title appears just before its polygons begin morphing so the
       // viewer can read the title while watching that slice animate.
-      const morphStarts = outcomeMorphStartsRef.current
-      const TITLE_LEAD = 0.008 // how far before morphStart the title appears
-      const TITLE_FADE = 0.018 // fade-in duration
-      for (let i = 0; i < OUTCOME_CODE_ORDER.length; i++) {
-        const el = beat2ItemRefs.current[i]
-        if (!el) continue
-        const code = OUTCOME_CODE_ORDER[i]!
-        const morphStart = morphStarts?.[code]
-        const fadeStart =
-          morphStart != null ? morphStart - TITLE_LEAD : 0.78 - TITLE_LEAD
-        const fadeIn = clamp01((v - fadeStart) / TITLE_FADE)
-        el.style.opacity = String(fadeIn)
-      }
-
-      // Spread items apart to make room for distribution charts.
-      // Starts at Beat 2 start so the layout opens up just as the first
-      // outcome begins to morph.
-      const SPREAD_START = 0.78
-      const SPREAD_END = 0.82
-      const spreadT = clamp01((v - SPREAD_START) / (SPREAD_END - SPREAD_START))
+      // Captions fade in at the *end* of each morph window, after the
+      // polygons have settled as squares.
+      const windows = outcomeMorphWindowsRef.current
+      const TITLE_LEAD = 0.008
+      const TITLE_FADE = 0.018
+      const CAPTION_LEAD = 0.002
+      const CAPTION_FADE = 0.012
       const layoutItems = beat2LayoutRef.current?.items
       if (layoutItems) {
-        for (let i = 0; i < layoutItems.length; i++) {
-          const el = beat2ItemRefs.current[i]
-          if (!el) continue
-          el.style.marginBottom = `${layoutItems[i]!.spaceBelow * spreadT}px`
+        for (const item of layoutItems) {
+          const win = windows?.[item.code]
+          const morphStart = win?.start ?? 0.78
+          const morphEnd = win?.end ?? 0.99
+
+          const titleEl = titleRefsMap.current.get(item.code)
+          if (titleEl) {
+            const fadeStart = morphStart - TITLE_LEAD
+            titleEl.style.opacity = String(
+              clamp01((v - fadeStart) / TITLE_FADE),
+            )
+          }
+
+          const captionEl = captionRefsMap.current.get(item.code)
+          if (captionEl) {
+            const fadeStart = morphEnd - CAPTION_LEAD
+            captionEl.style.opacity = String(
+              clamp01((v - fadeStart) / CAPTION_FADE),
+            )
+          }
         }
       }
 
@@ -309,6 +348,48 @@ export default function BeatTextOverlay({
     })
     return unsub
   }, [progress])
+
+  /* ── Report glyph placeholder rects up to the parent ──
+   *
+   * We measure each transparent placeholder relative to the right-column
+   * root. Since the right-column is absolutely positioned at
+   * `right: 0; width: 33.33%`, its left edge aligns with `panelWidth * 2/3`
+   * — which is exactly the coordinate frame the SVG overlay uses
+   * (`pos.x` is the offset into the right-third, `pos.y` is panel-top
+   * relative). Measured rects can therefore be passed through to the SVG
+   * without further transformation. */
+  useLayoutEffect(() => {
+    if (!onGlyphLayoutChange) return
+    const root = rightColumnRootRef.current
+    if (!root) return
+
+    const measure = () => {
+      const rootRect = root.getBoundingClientRect()
+      const layout: Record<string, GlyphRect> = {}
+      placeholderRefsMap.current.forEach((el, code) => {
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        layout[code] = {
+          x: r.left - rootRect.left,
+          y: r.top - rootRect.top,
+          width: r.width,
+          height: r.height,
+        }
+      })
+      onGlyphLayoutChange(layout)
+    }
+
+    const ro = new ResizeObserver(() => {
+      measure()
+    })
+    ro.observe(root)
+    placeholderRefsMap.current.forEach((el) => {
+      if (el) ro.observe(el)
+    })
+    measure()
+
+    return () => ro.disconnect()
+  }, [onGlyphLayoutChange, beat2Layout])
 
   useEffect(() => {
     if (!interactive) {
@@ -612,8 +693,13 @@ export default function BeatTextOverlay({
         }}
       />
 
-      {/* Beat 2 - text items in flow layout */}
+      {/* Beat 2 - text items in flow layout.
+       *
+       * This Box's left edge aligns with `panelWidth * 2/3`, which is the
+       * same origin the SVG overlay uses. That's why we measure placeholder
+       * positions relative to this root (see ResizeObserver above). */}
       <Box
+        ref={rightColumnRootRef}
         sx={{
           position: "absolute",
           top: 0,
@@ -816,7 +902,9 @@ export default function BeatTextOverlay({
           </Box>
         </Box>
 
-        {/* Two-column flow layout for outcome labels */}
+        {/* Two-column flow layout for outcome rows. Each row is a vertical
+         *  stack: Title → GlyphPlaceholder → Caption. Row/column spacing is
+         *  handled entirely by flex + rowGap; no cursor math. */}
         {beat2Layout && (
           <Box
             sx={{
@@ -826,188 +914,177 @@ export default function BeatTextOverlay({
               pt: 1.5,
               flex: 1,
               minHeight: 0,
+              overflow: "hidden",
             }}
           >
-            {/* Left column - Consumptive uses */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              {beat2Layout.eyebrows[0] && (
-                <Box
-                  ref={(el: HTMLDivElement | null) => {
-                    eyebrowRefs.current[0] = el
-                  }}
-                  sx={{ opacity: 0, mb: 0.5 }}
-                >
-                  <Typography variant="smallSectionLabel" component="p">
-                    {beat2Layout.eyebrows[0].label}
-                  </Typography>
-                </Box>
-              )}
-              {beat2Layout.items
-                .map((item, i) => ({ item, i }))
-                .filter(({ item }) => item.column === 0)
-                .map(({ item, i }) => {
-                  const isSelected = selectedOutcomeCode === item.code
-                  return (
-                    <Box
-                      key={item.code}
-                      ref={(el: HTMLDivElement | null) => {
-                        beat2ItemRefs.current[i] = el
-                      }}
-                      onClick={
-                        interactive
-                          ? () => onOutcomeClick?.(item.code, true)
-                          : undefined
-                      }
-                      sx={{
-                        opacity: 0,
-                        pointerEvents: interactive ? "auto" : "none",
-                        cursor: interactive ? "pointer" : "default",
-                        borderRadius: 1,
-                        px: 0.5,
-                        mx: -0.5,
-                        height: 20, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
-                        display: "flex",
-                        alignItems: "center",
-                        boxSizing: "border-box",
-                        overflow: "hidden",
-                        transition: "color 0.15s",
-                        ...(interactive && {
-                          "&:hover .MuiTypography-root": {
-                            color: theme.palette.blue.bright,
-                          },
-                        }),
-                      }}
-                    >
-                      <Typography
-                        variant="overline"
-                        noWrap
-                        sx={{
-                          fontWeight: isSelected ? 700 : 500,
-                          textTransform: "none",
-                          transition: "color 0.15s",
-                          color: theme.palette.grey[900],
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {item.label}
-                      </Typography>
-                    </Box>
-                  )
-                })}
-              {/* "Add a location to track" CTA */}
+            {[0, 1].map((col) => (
               <Box
-                ref={addLocationCtaRef}
+                key={col}
                 sx={{
-                  opacity: 0,
-                  transition: "opacity 0.6s ease",
-                  pointerEvents: interactive ? "auto" : "none",
-                  mt: 6,
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  rowGap: 1.5,
                 }}
               >
-                <Box
-                  component="button"
-                  type="button"
-                  onClick={onAddLocation}
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    color: theme.palette.grey[600],
-                    border: `1px solid ${theme.palette.grey[300]}`,
-                    borderRadius: "4px",
-                    background: "transparent",
-                    textTransform: "none",
-                    fontWeight: 500,
-                    fontSize: "0.75rem",
-                    letterSpacing: "0.02em",
-                    fontFamily: "inherit",
-                    px: 1.25,
-                    py: 0.125,
-                    cursor: "pointer",
-                    transition: "background 0.15s, border-color 0.15s",
-                    "&:hover": {
-                      backgroundColor: theme.palette.grey[100],
-                      borderColor: theme.palette.grey[400],
-                    },
-                    "&:focus-visible": {
-                      outline: `2px solid ${theme.palette.blue.bright}`,
-                      outlineOffset: "2px",
-                    },
-                  }}
-                >
-                  Add a location to track
-                  <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Right column - Non-consumptive uses */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              {beat2Layout.eyebrows[1] && (
-                <Box
-                  ref={(el: HTMLDivElement | null) => {
-                    eyebrowRefs.current[1] = el
-                  }}
-                  sx={{ opacity: 0, mb: 0.5 }}
-                >
-                  <Typography variant="smallSectionLabel" component="p">
-                    {beat2Layout.eyebrows[1].label}
-                  </Typography>
-                </Box>
-              )}
-              {beat2Layout.items
-                .map((item, i) => ({ item, i }))
-                .filter(({ item }) => item.column === 1)
-                .map(({ item, i }) => {
-                  const isSelected = selectedOutcomeCode === item.code
-                  return (
-                    <Box
-                      key={item.code}
-                      ref={(el: HTMLDivElement | null) => {
-                        beat2ItemRefs.current[i] = el
-                      }}
-                      onClick={
-                        interactive
-                          ? () => onOutcomeClick?.(item.code, true)
-                          : undefined
-                      }
-                      sx={{
-                        opacity: 0,
-                        pointerEvents: interactive ? "auto" : "none",
-                        cursor: interactive ? "pointer" : "default",
-                        borderRadius: 1,
-                        px: 0.5,
-                        mx: -0.5,
-                        height: 20, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
-                        display: "flex",
-                        alignItems: "center",
-                        boxSizing: "border-box",
-                        overflow: "hidden",
-                        transition: "color 0.15s",
-                        ...(interactive && {
-                          "&:hover .MuiTypography-root": {
-                            color: theme.palette.blue.bright,
-                          },
-                        }),
-                      }}
-                    >
-                      <Typography
-                        variant="overline"
-                        noWrap
+                {beat2Layout.eyebrows[col] && (
+                  <Box
+                    ref={(el: HTMLDivElement | null) => {
+                      eyebrowRefs.current[col] = el
+                    }}
+                    sx={{ opacity: 0 }}
+                  >
+                    <Typography variant="smallSectionLabel" component="p">
+                      {beat2Layout.eyebrows[col]!.label}
+                    </Typography>
+                  </Box>
+                )}
+                {beat2Layout.items
+                  .filter((item) => item.column === col)
+                  .map((item) => {
+                    const isSelected = selectedOutcomeCode === item.code
+                    const hasGlyph = item.isActive && item.targetHeight > 0
+                    return (
+                      <Box
+                        key={item.code}
                         sx={{
-                          fontWeight: isSelected ? 700 : 500,
-                          textTransform: "none",
-                          transition: "color 0.15s",
-                          color: theme.palette.grey[900],
-                          lineHeight: 1.2,
+                          display: "flex",
+                          flexDirection: "column",
+                          rowGap: 0.5,
                         }}
                       >
-                        {item.label}
-                      </Typography>
+                        <Box
+                          ref={(el: HTMLDivElement | null) => {
+                            titleRefsMap.current.set(item.code, el)
+                          }}
+                          onClick={
+                            interactive
+                              ? () => onOutcomeClick?.(item.code, true)
+                              : undefined
+                          }
+                          sx={{
+                            opacity: 0,
+                            pointerEvents: interactive ? "auto" : "none",
+                            cursor: interactive ? "pointer" : "default",
+                            borderRadius: 1,
+                            px: 0.5,
+                            mx: -0.5,
+                            display: "flex",
+                            alignItems: "center",
+                            boxSizing: "border-box",
+                            overflow: "hidden",
+                            transition: "color 0.15s",
+                            ...(interactive && {
+                              "&:hover .MuiTypography-root": {
+                                color: theme.palette.blue.bright,
+                              },
+                            }),
+                          }}
+                        >
+                          <Typography
+                            variant="overline"
+                            noWrap
+                            sx={{
+                              fontWeight: isSelected ? 700 : 500,
+                              textTransform: "none",
+                              transition: "color 0.15s",
+                              color: theme.palette.grey[900],
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            {item.label}
+                          </Typography>
+                        </Box>
+                        {hasGlyph && (
+                          <>
+                            {/* Transparent placeholder reserving space for
+                             *  the SVG morph landing rect. The parent
+                             *  ResizeObserver reads its bounding rect and
+                             *  forwards panel-relative coords to the SVG. */}
+                            <Box
+                              ref={(el: HTMLDivElement | null) => {
+                                placeholderRefsMap.current.set(item.code, el)
+                              }}
+                              data-outcome-code={item.code}
+                              sx={{
+                                width: "100%",
+                                height: `${item.targetHeight}px`,
+                                pointerEvents: "none",
+                              }}
+                            />
+                            <Box
+                              ref={(el: HTMLDivElement | null) => {
+                                captionRefsMap.current.set(item.code, el)
+                              }}
+                              sx={{ opacity: 0 }}
+                            >
+                              <Typography
+                                component="span"
+                                sx={{
+                                  fontSize: 11,
+                                  lineHeight: 1.3,
+                                  color: theme.palette.grey[700],
+                                }}
+                              >
+                                {item.locationDescription}
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
+                      </Box>
+                    )
+                  })}
+                {col === 0 && (
+                  /* "Add a location to track" CTA, pinned to end of left col */
+                  <Box
+                    ref={addLocationCtaRef}
+                    sx={{
+                      opacity: 0,
+                      transition: "opacity 0.6s ease",
+                      pointerEvents: interactive ? "auto" : "none",
+                      mt: "auto",
+                      pt: 3,
+                    }}
+                  >
+                    <Box
+                      component="button"
+                      type="button"
+                      onClick={onAddLocation}
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        color: theme.palette.grey[600],
+                        border: `1px solid ${theme.palette.grey[300]}`,
+                        borderRadius: "4px",
+                        background: "transparent",
+                        textTransform: "none",
+                        fontWeight: 500,
+                        fontSize: "0.75rem",
+                        letterSpacing: "0.02em",
+                        fontFamily: "inherit",
+                        px: 1.25,
+                        py: 0.125,
+                        cursor: "pointer",
+                        transition: "background 0.15s, border-color 0.15s",
+                        "&:hover": {
+                          backgroundColor: theme.palette.grey[100],
+                          borderColor: theme.palette.grey[400],
+                        },
+                        "&:focus-visible": {
+                          outline: `2px solid ${theme.palette.blue.bright}`,
+                          outlineOffset: "2px",
+                        },
+                      }}
+                    >
+                      Add a location to track
+                      <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
                     </Box>
-                  )
-                })}
-            </Box>
+                  </Box>
+                )}
+              </Box>
+            ))}
           </Box>
         )}
       </Box>

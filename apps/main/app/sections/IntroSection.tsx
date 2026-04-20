@@ -109,9 +109,24 @@ const IntroSection = () => {
     })
   }, [heroScrollProgress, setIsPastHero])
 
-  // Geometry-driven crossfade timing:
-  // each value is the scroll progress when the panel border reaches the headline's top.
-  // useMeetingProgress accounts for the headline being position:fixed (scroll rate = 0).
+  // Geometry-driven crossfade timing.
+  //
+  // `crossfadeAt{1,2}` are the scroll progresses at which the seam
+  // between two adjacent panels sits at the headline's top edge. They
+  // are still used for panelBoundaries (drives activeIndex / screen
+  // reader state) and as a fallback if the range pair below isn't
+  // ready yet.
+  //
+  // `crossfadeRanges` below pair each seam with two meeting progresses
+  // so the opacity crossfade can span the exact scroll window during
+  // which the seam (and the inset-frame gap that straddles it) is
+  // within the headline's vertical extent. The fade starts when the
+  // trailing edge of panel A meets the BOTTOM of the headline (gap
+  // first overlaps) and ends when the leading edge of panel B meets
+  // the TOP of the headline (gap has fully passed). Because the
+  // headline is position:fixed, useMeetingProgress treats its scroll
+  // rate as 0, so each window's width equals the headline's own
+  // height — the text visibly changes as the gap swipes past it.
   const crossfadeAt1 = useMeetingProgress(
     containerRef,
     videoHeroRef,
@@ -123,6 +138,44 @@ const IntroSection = () => {
     aboutPanelRef,
     morphHeadlineRef,
     { edgeA: "bottom", edgeB: "top" },
+  )
+
+  // Transition 0 (VideoHero → About): gap enters when hero's bottom
+  // reaches the headline's bottom; leaves when About's top reaches the
+  // headline's top.
+  const gap1Start = useMeetingProgress(
+    containerRef,
+    videoHeroRef,
+    morphHeadlineRef,
+    { edgeA: "bottom", edgeB: "bottom" },
+  )
+  const gap1End = useMeetingProgress(
+    containerRef,
+    aboutPanelRef,
+    morphHeadlineRef,
+    { edgeA: "top", edgeB: "top" },
+  )
+
+  // Transition 1 (About → WaterThemes): same pattern, one seam down.
+  const gap2Start = useMeetingProgress(
+    containerRef,
+    aboutPanelRef,
+    morphHeadlineRef,
+    { edgeA: "bottom", edgeB: "bottom" },
+  )
+  const gap2End = useMeetingProgress(
+    containerRef,
+    waterThemesPanelRef,
+    morphHeadlineRef,
+    { edgeA: "top", edgeB: "top" },
+  )
+
+  const crossfadeRanges = useMemo<Array<[number, number] | undefined>>(
+    () => [
+      [gap1Start, gap1End],
+      [gap2Start, gap2End],
+    ],
+    [gap1Start, gap1End, gap2Start, gap2End],
   )
 
   // Build panel boundaries for MorphingHeadline from the meeting points
@@ -204,6 +257,7 @@ const IntroSection = () => {
         weights={[1, 1, 2]}
         panelBoundaries={panelBoundaries}
         crossfadeAt={crossfadeAt1 > 0 ? crossfadeAt1 : undefined}
+        crossfadeRanges={crossfadeRanges}
         dockRef={waterThemesDockRef}
       />
 
@@ -213,9 +267,6 @@ const IntroSection = () => {
           sources={VIDEO_SRCS}
           fallbackImage="/images/home_hero_fallback.png"
           hideHeadline
-          borderRadius={tunerRadius()}
-          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
-          frameBackground={theme.palette.common.white}
         />
       </div>
 
@@ -226,7 +277,12 @@ const IntroSection = () => {
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.text.secondary}
-          minHeight="120vh"
+          // Shorter than 100vh by the header height so the full
+          // rounded panel (top + bottom corners) fits below the
+          // fixed header when scrolled into view. The 2*insetY
+          // frame-gap around it is preserved because `inset` is
+          // independent of `minHeight`.
+          minHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
           borderRadius={tunerRadius()}
           inset={{ x: tunerInsetX(), y: tunerInsetY() }}
           frameBackground={theme.palette.common.white}

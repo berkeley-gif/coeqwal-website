@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { BaseHeader, tunerInsetX, tunerInsetY } from "@repo/ui"
+import { BaseHeader } from "@repo/ui"
 import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
@@ -94,14 +94,6 @@ export function Header() {
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}
       shrinkOnScroll
-      // While the hero video is on screen, push the header down by the
-      // rounded-panel top inset so it sits on the dark video (not on the
-      // white frame strip above), and pull its left/right in by the
-      // side inset so it matches the rounded-panel frame. Past the
-      // hero the header is dark-on-white and legible, so return it
-      // flush to all four edges.
-      topOffset={isPastHero ? 0 : tunerInsetY()}
-      sideOffset={isPastHero ? 0 : tunerInsetX()}
     />
   )
 }
