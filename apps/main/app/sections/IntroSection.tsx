@@ -210,12 +210,29 @@ const IntroSection = () => {
     { edgeA: "top", edgeB: "top" },
   )
 
+  // Delay the About→WaterThemes text crossfade until slightly after
+  // the seam has fully swept past the centered headline. Without
+  // this delay the dark-blue panel-3 text fades in while the white
+  // inset-frame seam is still crossing the headline, which reads as
+  // dark-blue text over a white band — visually muddy. Shifting the
+  // crossfade window forward by one gap2Duration (the headline's
+  // own height, i.e. the full time it takes the seam to cross the
+  // headline) means the text only starts morphing once the seam is
+  // above the headline's top edge and the dark-blue panel-3 frame
+  // has become the uninterrupted backdrop. Tweak `textDelayFactor`
+  // if the feel needs to be tighter or looser.
+  const gap2Duration = gap2End - gap2Start
+  const textDelayFactor = 1.0
+  const textCrossfadeDelay = gap2Duration * textDelayFactor
+  const textCrossfadeStart = gap2Start + textCrossfadeDelay
+  const textCrossfadeEnd = gap2End + textCrossfadeDelay
+
   const crossfadeRanges = useMemo<Array<[number, number] | undefined>>(
     () => [
       [gap1Start, gap1End],
-      [gap2Start, gap2End],
+      [textCrossfadeStart, textCrossfadeEnd],
     ],
-    [gap1Start, gap1End, gap2Start, gap2End],
+    [gap1Start, gap1End, textCrossfadeStart, textCrossfadeEnd],
   )
 
   // Motion-only ranges for the headline's center glide. Decoupled
@@ -227,14 +244,15 @@ const IntroSection = () => {
   // About→WaterThemes seam approach. That stretches the downward
   // glide well past the text crossfade for a slower, smoother feel.
   //
-  // Exit: text crossfade finishes at `gap2End` (right at the seam);
-  // then the headline holds at center for a short pause before
-  // slowly gliding back up to its default top anchor. Both the
-  // pause and the glide duration are scaled by the crossfade
-  // window so they track the scene's geometry.
+  // Exit: anchored off `gap2End` (seam reaches the top of the
+  // centered headline) — deliberately NOT off `textCrossfadeEnd`.
+  // The delay applied to the text crossfade is a cosmetic shift to
+  // avoid dark-blue text over the white seam; the motion pause +
+  // glide back up to the top anchor should still be scheduled
+  // relative to the seam itself so the overall return-to-top
+  // timing doesn't get pushed later as we tweak the text delay.
   const centerEnterEnd = gap1End + (gap2Start - gap1End) * 0.5
   const centerEnterRange: [number, number] = [gap1Start, centerEnterEnd]
-  const gap2Duration = gap2End - gap2Start
   const centerExitPause = gap2Duration * 0.5
   const centerExitDuration = gap2Duration * 2.0
   const centerExitRange: [number, number] = [

@@ -232,6 +232,14 @@ export default function BeatTextOverlay({
   /** Per-row refs (one per tier level) so the legend can fade in row by row
    *  instead of as a single block. Index 0 = Optimal (top row). */
   const tierLegendRowRefs = useRef<(HTMLDivElement | null)[]>([])
+  /** Wrapper around the two intro paragraphs ("Different scenarios..." +
+   *  "To compare results..."). After the legend fully lands, this block
+   *  fades out and collapses its height so the tier legend slides up into
+   *  the vacated space via document flow. */
+  const introCollapseRef = useRef<HTMLDivElement>(null)
+  /** Natural height of `introCollapseRef` (including padding), measured
+   *  via ResizeObserver. Used as the animating max-height target. */
+  const introCollapseHeightRef = useRef<number>(0)
   /** Root Box of the right-column (absolutely positioned at `right: 0`,
    *  `width: 33.33%`). Used as the reference frame for ResizeObserver
    *  measurements so glyph positions map 1:1 to the SVG's `pos.x`/`pos.y`. */
@@ -390,6 +398,33 @@ export default function BeatTextOverlay({
     })
     return unsub
   }, [progress])
+
+  /* ── Measure intro-collapse block ──
+   *
+   * The two intro paragraphs ("Different scenarios..." + "To compare
+   * results...") live inside `introCollapseRef`. We measure its natural
+   * `scrollHeight` (content + padding; `beat2IntroRef` is always in flow
+   * even when `opacity: 0`, so scrollHeight reflects the expanded height)
+   * and seed the element's initial `max-height` so the progress handler
+   * has a closed-form value to animate toward zero. */
+  useLayoutEffect(() => {
+    const el = introCollapseRef.current
+    if (!el) return
+
+    const measure = () => {
+      const h = el.scrollHeight
+      introCollapseHeightRef.current = h
+      if (!el.style.maxHeight || el.style.maxHeight === "0px") {
+        el.style.maxHeight = h + "px"
+      }
+    }
+
+    const ro = new ResizeObserver(() => measure())
+    ro.observe(el)
+    measure()
+
+    return () => ro.disconnect()
+  }, [])
 
   /* ── Report glyph placeholder rects up to the parent ──
    *
@@ -598,18 +633,30 @@ export default function BeatTextOverlay({
             },
           }}
         >
-          <Typography variant="body1" component="p">
-            Different scenarios change how water is allocated among different users and the environment.
-          </Typography>
-          <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+          {/* Intro paragraphs collapse + fade out after the tier legend's
+           *  last row ("Critical") lands, freeing vertical space so the
+           *  legend slides up to the top of the body. `pb: 2.5` absorbs
+           *  the gap that used to live on `tierLegendRef` as `mt: 2.5`, so
+           *  the whole spacing collapses together. */}
+          <Box
+            ref={introCollapseRef}
+            sx={{
+              pb: 2.5,
+              overflow: "hidden",
+            }}
+          >
             <Typography variant="body1" component="p">
-              To compare results on a common scale, we group key outcomes into levels:
+              Different scenarios change how water is allocated among different users and the environment.
             </Typography>
+            <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+              <Typography variant="body1" component="p">
+                To compare results on a common scale, we group key outcomes into levels:
+              </Typography>
+            </Box>
           </Box>
           <Box
             ref={tierLegendRef}
             sx={{
-              mt: 2.5,
               display: "grid",
               gridTemplateColumns: "auto auto 1fr",
               columnGap: 1.5,
