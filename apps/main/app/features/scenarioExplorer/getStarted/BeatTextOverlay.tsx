@@ -5,17 +5,17 @@ import {
   useRef,
   useEffect,
   useLayoutEffect,
-  useMemo,
-  useCallback,
+  // useMemo,
+  // useCallback,
 } from "react"
 import {
   Box,
   Typography,
-  ToggleButton,
-  ToggleButtonGroup,
+  // ToggleButton,
+  // ToggleButtonGroup,
   useTheme,
   alpha,
-  ArrowForwardIcon,
+  // ArrowForwardIcon,
   IconButton,
   PlayArrowIcon,
   PauseIcon,
@@ -24,13 +24,13 @@ import {
 import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
-import { HybridTooltip } from "@repo/ui"
-import {
-  getScenarioIconDefs,
-  renderIconDef,
-} from "../../scenarios/components/shared/opsIcons"
-import { useDrawerStore } from "@repo/state/drawer"
+// import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
+// import { HybridTooltip } from "@repo/ui"
+// import {
+//   getScenarioIconDefs,
+//   renderIconDef,
+// } from "../../scenarios/components/shared/opsIcons"
+// import { useDrawerStore } from "@repo/state/drawer"
 
 interface ColumnEyebrow {
   label: string
@@ -128,99 +128,100 @@ export default function BeatTextOverlay({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
 
-  const GLOSSARY_TERMS = useMemo(
-    () => [
-      {
-        pattern: /\bTUCPs?\b/g,
-        glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
-      },
-      {
-        pattern: /\bSGMA\b/g,
-        glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
-      },
-      {
-        pattern: /\bDelta Conveyance Project\b/g,
-        glossaryTerm: "Delta Conveyance Project",
-      },
-    ],
-    [],
-  )
-
-  const handleGlossaryClick = useCallback(
-    (term: string) => (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setDrawerContent({ selectedTerm: term })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  const glossaryLinkStyles = useMemo(
-    () => ({
-      color: theme.palette.blue.bright,
-      borderBottom: `2px solid ${theme.palette.blue.bright}`,
-      cursor: "pointer",
-      background: "none",
-      border: "none",
-      borderBottomStyle: "solid" as const,
-      borderBottomWidth: "2px",
-      borderBottomColor: theme.palette.blue.bright,
-      padding: 0,
-      font: "inherit",
-      "&:hover": { borderBottomWidth: "3px" },
-      "&:focus-visible": {
-        outline: `2px solid ${theme.palette.blue.bright}`,
-        outlineOffset: "2px",
-        borderRadius: "2px",
-      },
-    }),
-    [theme.palette.blue.bright],
-  )
-
-  const descriptionWithLinks = useMemo(() => {
-    if (!scenarioDescription) return null
-    const combined = new RegExp(
-      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
-      "g",
-    )
-    const result: React.ReactNode[] = []
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-    while ((match = combined.exec(scenarioDescription)) !== null) {
-      if (match.index > lastIndex)
-        result.push(scenarioDescription.slice(lastIndex, match.index))
-      const word = match[1] ?? ""
-      const punct = match[2] ?? ""
-      const term = GLOSSARY_TERMS.find((t) =>
-        new RegExp(`^${t.pattern.source}$`).test(word),
-      )
-      if (term) {
-        result.push(
-          <Box
-            component="button"
-            type="button"
-            key={`gl-${match.index}`}
-            onClick={handleGlossaryClick(term.glossaryTerm)}
-            tabIndex={0}
-            aria-label={`Open glossary for ${term.glossaryTerm}`}
-            sx={glossaryLinkStyles}
-          >
-            {word}
-          </Box>,
-        )
-        if (punct) result.push(punct)
-      }
-      lastIndex = match.index + match[0].length
-    }
-    if (lastIndex < scenarioDescription.length)
-      result.push(scenarioDescription.slice(lastIndex))
-    return result
-  }, [
-    scenarioDescription,
-    GLOSSARY_TERMS,
-    handleGlossaryClick,
-    glossaryLinkStyles,
-  ])
+  // TODO: restore with scenario header re-enable.
+  // const GLOSSARY_TERMS = useMemo(
+  //   () => [
+  //     {
+  //       pattern: /\bTUCPs?\b/g,
+  //       glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+  //     },
+  //     {
+  //       pattern: /\bSGMA\b/g,
+  //       glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
+  //     },
+  //     {
+  //       pattern: /\bDelta Conveyance Project\b/g,
+  //       glossaryTerm: "Delta Conveyance Project",
+  //     },
+  //   ],
+  //   [],
+  // )
+  //
+  // const handleGlossaryClick = useCallback(
+  //   (term: string) => (e: React.MouseEvent) => {
+  //     e.stopPropagation()
+  //     setDrawerContent({ selectedTerm: term })
+  //     openDrawer("glossary")
+  //   },
+  //   [setDrawerContent, openDrawer],
+  // )
+  //
+  // const glossaryLinkStyles = useMemo(
+  //   () => ({
+  //     color: theme.palette.blue.bright,
+  //     borderBottom: `2px solid ${theme.palette.blue.bright}`,
+  //     cursor: "pointer",
+  //     background: "none",
+  //     border: "none",
+  //     borderBottomStyle: "solid" as const,
+  //     borderBottomWidth: "2px",
+  //     borderBottomColor: theme.palette.blue.bright,
+  //     padding: 0,
+  //     font: "inherit",
+  //     "&:hover": { borderBottomWidth: "3px" },
+  //     "&:focus-visible": {
+  //       outline: `2px solid ${theme.palette.blue.bright}`,
+  //       outlineOffset: "2px",
+  //       borderRadius: "2px",
+  //     },
+  //   }),
+  //   [theme.palette.blue.bright],
+  // )
+  //
+  // const descriptionWithLinks = useMemo(() => {
+  //   if (!scenarioDescription) return null
+  //   const combined = new RegExp(
+  //     `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
+  //     "g",
+  //   )
+  //   const result: React.ReactNode[] = []
+  //   let lastIndex = 0
+  //   let match: RegExpExecArray | null
+  //   while ((match = combined.exec(scenarioDescription)) !== null) {
+  //     if (match.index > lastIndex)
+  //       result.push(scenarioDescription.slice(lastIndex, match.index))
+  //     const word = match[1] ?? ""
+  //     const punct = match[2] ?? ""
+  //     const term = GLOSSARY_TERMS.find((t) =>
+  //       new RegExp(`^${t.pattern.source}$`).test(word),
+  //     )
+  //     if (term) {
+  //       result.push(
+  //         <Box
+  //           component="button"
+  //           type="button"
+  //           key={`gl-${match.index}`}
+  //           onClick={handleGlossaryClick(term.glossaryTerm)}
+  //           tabIndex={0}
+  //           aria-label={`Open glossary for ${term.glossaryTerm}`}
+  //           sx={glossaryLinkStyles}
+  //         >
+  //           {word}
+  //         </Box>,
+  //       )
+  //       if (punct) result.push(punct)
+  //     }
+  //     lastIndex = match.index + match[0].length
+  //   }
+  //   if (lastIndex < scenarioDescription.length)
+  //     result.push(scenarioDescription.slice(lastIndex))
+  //   return result
+  // }, [
+  //   scenarioDescription,
+  //   GLOSSARY_TERMS,
+  //   handleGlossaryClick,
+  //   glossaryLinkStyles,
+  // ])
 
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
@@ -243,11 +244,15 @@ export default function BeatTextOverlay({
   eyebrowDataRef.current = beat2Layout?.eyebrows
   const beat2LayoutRef = useRef<Beat2Layout | null | undefined>(undefined)
   beat2LayoutRef.current = beat2Layout
-  const scenarioHeaderRef = useRef<HTMLDivElement>(null)
+  // TODO: restore scenario-header (current operations text, key-op icons,
+  // description, encoding toggle, climate chooser) + "Add a location" CTA
+  // when reintroducing those controls; see commented JSX blocks below.
+  // const scenarioHeaderRef = useRef<HTMLDivElement>(null)
   const calsimTextRef = useRef<HTMLDivElement>(null)
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
-  const addLocationCtaRef = useRef<HTMLDivElement>(null)
+  const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
+  // const addLocationCtaRef = useRef<HTMLDivElement>(null)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
@@ -404,31 +409,31 @@ export default function BeatTextOverlay({
   useEffect(() => {
     if (!interactive) {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "0"
-      if (scenarioHeaderRef.current)
-        scenarioHeaderRef.current.style.opacity = "0"
-      if (addLocationCtaRef.current)
-        addLocationCtaRef.current.style.opacity = "0"
+      // if (scenarioHeaderRef.current)
+      //   scenarioHeaderRef.current.style.opacity = "0"
+      // if (addLocationCtaRef.current)
+      //   addLocationCtaRef.current.style.opacity = "0"
       return
     }
     const t1 = setTimeout(() => {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "1"
     }, 400)
-    const t2 = setTimeout(() => {
-      if (scenarioHeaderRef.current)
-        scenarioHeaderRef.current.style.opacity = "1"
-      if (addLocationCtaRef.current)
-        addLocationCtaRef.current.style.opacity = "1"
-    }, 1800)
+    // const t2 = setTimeout(() => {
+    //   if (scenarioHeaderRef.current)
+    //     scenarioHeaderRef.current.style.opacity = "1"
+    //   if (addLocationCtaRef.current)
+    //     addLocationCtaRef.current.style.opacity = "1"
+    // }, 1800)
     return () => {
       clearTimeout(t1)
-      clearTimeout(t2)
+      // clearTimeout(t2)
     }
   }, [interactive])
 
-  const opsIconDefs = useMemo(
-    () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
-    [scenarioId],
-  )
+  // const opsIconDefs = useMemo(
+  //   () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
+  //   [scenarioId],
+  // )
 
   const padding = theme.space.panel.padding
   const textColor = theme.palette.undertone.warm
