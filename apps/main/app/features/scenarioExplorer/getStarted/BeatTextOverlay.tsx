@@ -68,6 +68,13 @@ export interface GlyphRect {
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
   headingOpacity: MotionValue<number>
+  /** Multiplicative opacity applied on top of the progress-driven fade
+   *  for the left-panel text block (`beat1Ref`). Defaults to a constant
+   *  1 when omitted. The parent animates this from 1 to 0 during the
+   *  Back-from-1/6 gesture so the entire text block (intro paragraphs,
+   *  tier legend, bottom controls) fades out together instead of each
+   *  reveal being reversed through the progress timeline. */
+  backOutOpacity?: MotionValue<number>
   playState: "idle" | "playing" | "paused" | "finished"
   /** Storyboard navigation. `beatIndex` is a 0-based cursor into the
    *  storyboard; `totalBeats` is the length of that storyboard. Handlers
@@ -120,6 +127,7 @@ function clamp01(v: number) {
 export default function BeatTextOverlay({
   progress,
   headingOpacity,
+  backOutOpacity,
   playState,
   beatIndex = 0,
   totalBeats = 1,
@@ -288,6 +296,15 @@ export default function BeatTextOverlay({
   // climate chooser, "Add a location" CTA) is preserved behind
   // `{false && ...}` guards below for future reuse. They're not rendered.
   const scenarioHeaderRef = useRef<HTMLDivElement>(null)
+  /** The three reveal blocks below the tier legend collapse their
+   *  vertical space while hidden so the bottom control row (which sits
+   *  in document flow below them) hugs whatever text is actually
+   *  visible — not some lower bound set by invisible-but-reserved
+   *  blocks. We use the CSS grid `grid-template-rows: Xfr` trick:
+   *  the ref points at a single-row grid whose row collapses at `0fr`
+   *  and expands to its min-content size at `1fr`, so the browser
+   *  computes the natural height itself from document flow — no
+   *  measurement needed. */
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
@@ -298,30 +315,52 @@ export default function BeatTextOverlay({
    *  sync reactively — no ref-timing gap between `setHasPlayed(true)`
    *  flushing and the arrival tween's first tick. Fades in over the tail
    *  of the arrival tween (which settles at 0.45) so the row lands just
-   *  as the Critical legend row does, and fades out symmetrically as
-   *  Back-from-1/6 reverses `progress` back to 0. */
+   *  as the Critical legend row does.
+   *
+   *  On Back-from-1/6 the parent parks `progress` at 0.45 and fades the
+   *  whole text block via `backOutOpacity` instead — this row is nested
+   *  inside `beat1Ref` so it fades together with the text (CSS opacity
+   *  compounds through the DOM) and doesn't need its own back-out
+   *  drive. */
   const bottomControlsOpacity = useTransform(progress, [0.4, 0.45], [0, 1])
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
   outcomeMorphWindowsRef.current = outcomeMorphWindows
 
+  /* ── `beat1Ref` opacity: progress-driven fade-in × back-out fade-out ──
+   *
+   * We multiply the progress-derived fade-in (0.02 → 0.06 window) by
+   * `backOutOpacity` (default 1, animated to 0 on Back-from-1/6) so the
+   * entire text block (intro paragraphs, tier legend, beat 1C reveals,
+   * bottom controls) fades out together during back-out instead of the
+   * progress listener unwinding each reveal. Both `progress` and
+   * `backOutOpacity` can change independently, so we listen to both and
+   * recompute on either change. */
   useEffect(() => {
-    if (!beat1Ref.current) return
-    if (textHidden) {
-      beat1Ref.current.style.opacity = "0"
-    } else {
+    const applyBeat1Opacity = () => {
+      const el = beat1Ref.current
+      if (!el) return
       const v = progress.get()
-      beat1Ref.current.style.opacity = String(clamp01((v - 0.02) / 0.04))
+      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / 0.04)
+      const mult = backOutOpacity ? backOutOpacity.get() : 1
+      el.style.opacity = String(fadeIn * mult)
     }
-  }, [textHidden, progress])
+    applyBeat1Opacity()
+    const uProgress = progress.on("change", applyBeat1Opacity)
+    const uBackOut = backOutOpacity
+      ? backOutOpacity.on("change", applyBeat1Opacity)
+      : null
+    return () => {
+      uProgress()
+      uBackOut?.()
+    }
+  }, [progress, backOutOpacity, textHidden])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
-      if (beat1Ref.current) {
-        const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / 0.04)
-        beat1Ref.current.style.opacity = String(fadeIn)
-      }
+      // NOTE: `beat1Ref.opacity` is handled in the combined effect above
+      // (it multiplies progress-driven fade-in by `backOutOpacity`).
 
       if (beat2IntroRef.current) {
         const fadeIn = clamp01((v - 0.2) / 0.04)
@@ -433,10 +472,16 @@ export default function BeatTextOverlay({
       // Beat 1C example text ("each polygon on the map represents..."):
       // kicks off the overlay narrative as soon as the AG-only filter +
       // blue→tier blend begins (0.60), so the text and the color change
-      // register together.
+      // register together. `grid-template-rows` interpolates from 0fr
+      // (collapsed row) to 1fr (min-content row) alongside the opacity
+      // fade, so the browser grows the block to its natural height via
+      // document flow — no JS measurement needed. The control row
+      // below therefore hugs the last-visible text rather than
+      // floating at the bottom behind reserved invisible space.
       if (beat1cExampleRef.current) {
         const fadeIn = clamp01((v - 0.6) / 0.03)
         beat1cExampleRef.current.style.opacity = String(fadeIn)
+        beat1cExampleRef.current.style.gridTemplateRows = `${fadeIn}fr`
       }
 
       // Beat 1C delivery-levels text: appears once the tier colors are
@@ -444,6 +489,7 @@ export default function BeatTextOverlay({
       if (beat1cDeliveryRef.current) {
         const fadeIn = clamp01((v - 0.7) / 0.03)
         beat1cDeliveryRef.current.style.opacity = String(fadeIn)
+        beat1cDeliveryRef.current.style.gridTemplateRows = `${fadeIn}fr`
       }
 
       // "All other key outcomes..." text: bridges AG_REV's solo morph
@@ -453,6 +499,7 @@ export default function BeatTextOverlay({
       if (allOtherOutcomesRef.current) {
         const fadeIn = clamp01((v - 0.79) / 0.03)
         allOtherOutcomesRef.current.style.opacity = String(fadeIn)
+        allOtherOutcomesRef.current.style.gridTemplateRows = `${fadeIn}fr`
       }
 
       // NOTE: bottom control row opacity is bound via `useTransform`
@@ -804,26 +851,62 @@ export default function BeatTextOverlay({
           {/* Beat 1C narrative lives in the left panel, directly below the
            *  tier legend, so the overlay panel can be dedicated to graphics.
            *  These blocks inherit `beat1Ref`'s `storyBody` font cascade and
-           *  `textColor` / `textShadow` automatically. Each block's opacity
-           *  is driven by the progress handler (0.60 / 0.70 / 0.82). */}
-          <Box ref={beat1cExampleRef} sx={{ mt: 2.5, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              For example, each colored location on the map represents an agricultural water district receiving surface water deliveries.
-            </Typography>
+           *  `textColor` / `textShadow` automatically.
+           *
+           *  Each block is a single-row CSS grid whose `grid-template-rows`
+           *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
+           *  by the progress handler (0.60 / 0.70 / 0.79), alongside an
+           *  opacity fade. The browser computes the min-content height
+           *  from document flow — no measurement — so the bottom control
+           *  row below naturally hugs the last text block that's actually
+           *  visible. The top gap lives as `pt:` on the inner wrapper
+           *  (which also carries `overflow: hidden`) so it collapses with
+           *  the content when the row is `0fr`. */}
+          <Box
+            ref={beat1cExampleRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2.5 }}>
+              <Typography variant="body1" component="p">
+                For example, each colored location on the map represents an agricultural water district receiving surface water deliveries.
+              </Typography>
+            </Box>
           </Box>
-          <Box ref={beat1cDeliveryRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              The colors correspond to different water delivery outcome levels that affect{" "}
-              <Box component="strong" sx={{ fontWeight: 600 }}>
-                agricultural revenue
-              </Box>
-              , ranging from optimal levels (blue) to critical levels (red).
-            </Typography>
+          <Box
+            ref={beat1cDeliveryRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body1" component="p">
+                The colors correspond to different water delivery outcome levels that affect{" "}
+                <Box component="strong" sx={{ fontWeight: 600 }}>
+                  agricultural revenue
+                </Box>
+                , ranging from optimal levels (blue) to critical levels (red).
+              </Typography>
+            </Box>
           </Box>
-          <Box ref={allOtherOutcomesRef} sx={{ mt: 2, opacity: 0 }}>
-            <Typography variant="body1" component="p">
-              All other key outcomes can be mapped and visualized in similar ways.
-            </Typography>
+          <Box
+            ref={allOtherOutcomesRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body1" component="p">
+                All other key outcomes can be mapped and visualized in similar ways.
+              </Typography>
+            </Box>
           </Box>
 
           {/* Bottom control row: Back / N-of-T / Next, plus Restart once

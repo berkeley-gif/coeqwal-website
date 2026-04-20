@@ -338,6 +338,17 @@ export default function TierAnimationSection() {
   /* ── Time-based progress (0 → 1) ── */
   const progress = useMotionValue(0)
 
+  /* ── Back-out opacity for the left-panel text ──
+   *
+   * Normally 1 (no-op). When the user presses Back from beat 1/6 we
+   * animate it to 0 while `progress` is parked at 0.45 — so the entire
+   * text block (intro paragraphs, tier legend, bottom controls) fades
+   * out together in one motion instead of reverse-tweening progress,
+   * which would unwind every staggered reveal in reverse. On fade
+   * completion we snap `progress` to 0 and this value back to 1, and
+   * the pre-play gate re-renders from a clean slate. */
+  const backOutOpacity = useMotionValue(1)
+
   // Map visibility: stays visible through beat 2
   // TODO(beat3): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
   const mapOpacity = useTransform(progress, [0, 1], [1, 1])
@@ -510,19 +521,26 @@ export default function TierAnimationSection() {
   }, [progress, prefersReducedMotion])
 
   const handlePlay = useCallback(() => {
+    // Clear any lingering back-out fade before starting the arrival
+    // tween, in case Play is triggered mid-fade-out.
+    if (controlsRef.current) controlsRef.current.stop()
+    backOutOpacity.set(1)
     setHasPlayed(true)
     hasPlayedRef.current = true
     computePolygonDataRef.current()
     playArrival()
-  }, [playArrival])
+  }, [playArrival, backOutOpacity])
 
   /* ── Back ──
    *
    * On beat index > 0: normal backward tween to the previous beat.
-   * On beat index === 0: reverse-tween `progress` 0.45 → 0 so the legend
-   * rows and intro paragraphs fade out in the reverse order they came in;
-   * on completion, flip `hasPlayed` back to false so the Play button
-   * re-appears and the bottom control row hides. */
+   * On beat index === 0: do not reverse-tween `progress` (that would
+   * unwind every staggered reveal). Instead, park `progress` at 0.45
+   * and animate `backOutOpacity` 1 → 0 so the whole text block fades
+   * out together. On completion, snap `progress` to 0 and
+   * `backOutOpacity` back to 1, and flip `hasPlayed` off so the
+   * pre-play gate (title + subtitle + Play button) re-renders from a
+   * clean slate. */
   const handleBack = useCallback(() => {
     const i = beatIndexRef.current
     if (i > 0) {
@@ -533,26 +551,29 @@ export default function TierAnimationSection() {
 
     if (controlsRef.current) controlsRef.current.stop()
     const finish = () => {
+      // Snap underlying animation state back to pre-play in one frame
+      // while the text is already faded out; the pre-play render takes
+      // over with `backOutOpacity` reset to 1 (a no-op for the fresh
+      // state since `progress` is 0 and the text block's progress-driven
+      // opacity is already 0 at that value).
+      progress.set(0)
+      backOutOpacity.set(1)
       setHasPlayed(false)
       hasPlayedRef.current = false
       setPlayState("idle")
     }
-    const rawDuration = BEATS[0]!.duration * BACK_DURATION_FACTOR
-    const duration = prefersReducedMotion
-      ? 0
-      : Math.max(MIN_NAV_DURATION, rawDuration)
+    const duration = prefersReducedMotion ? 0 : 0.6
     if (duration === 0) {
-      progress.set(0)
       finish()
       return
     }
     setPlayState("playing")
-    controlsRef.current = animate(progress, 0, {
+    controlsRef.current = animate(backOutOpacity, 0, {
       duration,
-      ease: "linear",
+      ease: "easeOut",
       onComplete: finish,
     })
-  }, [goTo, progress, prefersReducedMotion])
+  }, [goTo, progress, backOutOpacity, prefersReducedMotion])
 
   const handleRestart = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
@@ -626,13 +647,14 @@ export default function TierAnimationSection() {
 
     // Park in the pre-play gate: user has to click Play again to re-play.
     progress.set(0)
+    backOutOpacity.set(1)
     setBeatIndex(0)
     beatIndexRef.current = 0
     setHasPlayed(false)
     hasPlayedRef.current = false
     setPlayState("idle")
     computePolygonDataRef.current()
-  }, [progress, mapAPI.mapRef])
+  }, [progress, backOutOpacity, mapAPI.mapRef])
 
   /* ── Arrival behaviour ──
    *
@@ -2573,7 +2595,11 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: "100vh",
+        // Shrink the map panel so it fits the viewport once the sticky
+        // header stack (collapsed header + Learn/Explore/Share tabs +
+        // Explore sub-nav) is subtracted, plus a small breathing-room
+        // constant matching GetStartedPanelShell's PANEL_BREATHING_PX.
+        height: `calc(100vh - ${theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight + 80}px)`,
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
@@ -2660,6 +2686,7 @@ export default function TierAnimationSection() {
           <BeatTextOverlay
             progress={progress}
             headingOpacity={headingOpacity}
+            backOutOpacity={backOutOpacity}
             playState={playState}
             beatIndex={beatIndex}
             totalBeats={BEATS.length}
