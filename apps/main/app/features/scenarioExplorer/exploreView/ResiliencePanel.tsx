@@ -1685,7 +1685,7 @@ export default function ResiliencePanel({
         }}
       >
         <CircularProgress size={32} />
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2">
           Loading resilience data...
         </Typography>
       </Box>
@@ -1752,7 +1752,6 @@ export default function ResiliencePanel({
         </Typography>
         <Typography
           variant="compactCaption"
-          sx={{ color: theme.palette.text.secondary }}
         >
           {subjectLabel}
         </Typography>
@@ -1816,7 +1815,6 @@ export default function ResiliencePanel({
               >
                 <Typography
                   variant="body2"
-                  color="text.secondary"
                   sx={{ textAlign: "center", maxWidth: 480 }}
                 >
                   No outcome rows selected. Open &ldquo;choose outcome
@@ -2317,7 +2315,6 @@ function OnboardingBanner({
       </Typography>
       <Typography
         variant="caption"
-        color="text.secondary"
         sx={{ flex: 1, minWidth: 160 }}
       >
         {copy.hint}
