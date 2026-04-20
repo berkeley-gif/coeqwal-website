@@ -24,12 +24,7 @@ import React, {
   useRef,
   startTransition,
 } from "react"
-import {
-  Box,
-  CircularProgress,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, CircularProgress, Typography, useTheme } from "@repo/ui/mui"
 import {
   ResilienceQuadrant,
   type ResilienceQuadrantDatum,
@@ -81,8 +76,7 @@ export default function ResilienceQuadrantPanel({
   // Scenario used for LOI-level map focus. Prefer the user's first
   // sidebar selection; fall back to the baseline so "show on map" still
   // works when nothing is pinned.
-  const loiMapScenarioId =
-    selectedScenarios[0] ?? PRIMARY_SCENARIO_BASELINE_ID
+  const loiMapScenarioId = selectedScenarios[0] ?? PRIMARY_SCENARIO_BASELINE_ID
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
   )
@@ -153,7 +147,16 @@ export default function ResilienceQuadrantPanel({
       onDarkTier: commonWhite,
       onLightTier: textPrimary,
     }),
-    [textPrimary, grey100, grey300, grey400, grey500, grey600, grey700, commonWhite],
+    [
+      textPrimary,
+      grey100,
+      grey300,
+      grey400,
+      grey500,
+      grey600,
+      grey700,
+      commonWhite,
+    ],
   )
 
   // Build outcome-level data using useResilienceMatrix. For each outcome:
@@ -292,8 +295,7 @@ export default function ResilienceQuadrantPanel({
   )
 
   // Render.
-  const climateRefLabel =
-    HYDROCLIMATE_LABELS[CLIMATE_REF_HC] ?? CLIMATE_REF_HC
+  const climateRefLabel = HYDROCLIMATE_LABELS[CLIMATE_REF_HC] ?? CLIMATE_REF_HC
 
   const titleForUnit =
     quadrantUnit === "loi"
@@ -410,8 +412,8 @@ export default function ResilienceQuadrantPanel({
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Select one or more scenarios in the sidebar to aggregate over,
-              or switch the aggregate scope to &ldquo;all&rdquo;.
+              Select one or more scenarios in the sidebar to aggregate over, or
+              switch the aggregate scope to &ldquo;all&rdquo;.
             </Typography>
           </Box>
         ) : showLoiEmptyState ? (
@@ -424,8 +426,8 @@ export default function ResilienceQuadrantPanel({
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Pick an outcome in the chart controls to drill into its
-              locations of interest.
+              Pick an outcome in the chart controls to drill into its locations
+              of interest.
             </Typography>
           </Box>
         ) : (

@@ -73,10 +73,7 @@ export default function ChartTuner({
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
 
-  const darkTheme = useMemo(
-    () => createTunerDarkTheme(hostTheme),
-    [hostTheme],
-  )
+  const darkTheme = useMemo(() => createTunerDarkTheme(hostTheme), [hostTheme])
 
   const updateAnchor = useCallback(() => {
     if (!triggerRef.current) return
@@ -168,7 +165,10 @@ export default function ChartTuner({
     const top = anchorRect.bottom + 8
     let left = anchorRect.left
     if (left + width > window.innerWidth - OVERLAY_GUTTER) {
-      left = Math.max(OVERLAY_GUTTER, window.innerWidth - width - OVERLAY_GUTTER)
+      left = Math.max(
+        OVERLAY_GUTTER,
+        window.innerWidth - width - OVERLAY_GUTTER,
+      )
     }
     if (left < OVERLAY_GUTTER) left = OVERLAY_GUTTER
     return {
@@ -391,7 +391,9 @@ function OverlayBody({
         }}
       >
         {hasWalkthrough ? (
-          <Section label={`Walkthrough · ${stepIdx + 1} / ${walkthrough.length}`}>
+          <Section
+            label={`Walkthrough · ${stepIdx + 1} / ${walkthrough.length}`}
+          >
             <Box sx={{ fontWeight: 700, fontSize: 13, mb: 0.5 }}>
               {currentStep?.title}
             </Box>
@@ -653,7 +655,9 @@ function StepButton({
         fontSize: 11,
         opacity: disabled ? 0.4 : 1,
         "&:hover": {
-          backgroundColor: disabled ? "transparent" : theme.palette.action.hover,
+          backgroundColor: disabled
+            ? "transparent"
+            : theme.palette.action.hover,
         },
       }}
     >

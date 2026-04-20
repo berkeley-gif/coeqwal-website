@@ -100,8 +100,7 @@ export default function ResilienceChartTuner({
         id: "browse-all-outcomes",
         group: "Browse",
         label: "All outcomes",
-        description:
-          "By-outcome small-multiples · one tile per outcome row.",
+        description: "By-outcome small-multiples · one tile per outcome row.",
         apply: () =>
           onChange({
             view: "outcome",
@@ -114,8 +113,7 @@ export default function ResilienceChartTuner({
         id: "analyze-scenario-distribution",
         group: "Analyze",
         label: "Scenario distribution",
-        description:
-          "Distribution cells across scenarios for each outcome.",
+        description: "Distribution cells across scenarios for each outcome.",
         apply: () =>
           onChange({
             view: "scenario",
@@ -145,8 +143,7 @@ export default function ResilienceChartTuner({
         id: "analyze-risk-density",
         group: "Analyze",
         label: "Risk density",
-        description:
-          "Aggregate view encoded by fraction of tier-3/4 results.",
+        description: "Aggregate view encoded by fraction of tier-3/4 results.",
         apply: () =>
           onChange({
             view: "aggregate",
@@ -172,10 +169,10 @@ export default function ResilienceChartTuner({
           <>
             Start with the whole picture. Columns are{" "}
             <strong>hydroclimates</strong> and cells summarise how{" "}
-            <strong>scenarios</strong> perform on each{" "}
-            <strong>outcome</strong>. The <em>Browse</em> presets below
-            swap between the overview, all scenarios, and all outcomes so
-            you can orient yourself before narrowing in.
+            <strong>scenarios</strong> perform on each <strong>outcome</strong>.
+            The <em>Browse</em> presets below swap between the overview, all
+            scenarios, and all outcomes so you can orient yourself before
+            narrowing in.
           </>
         ),
         apply: () =>
@@ -192,10 +189,10 @@ export default function ResilienceChartTuner({
         body: (
           <>
             Found a few tiles worth comparing? Hover a tile and click the{" "}
-            <strong>+</strong> icon to pin that scenario (or outcome) to
-            your selection. A <em>Comparing N of M</em> chip appears once
-            you&apos;ve pinned anything &ndash; click it to focus the grid
-            on just your picks.
+            <strong>+</strong> icon to pin that scenario (or outcome) to your
+            selection. A <em>Comparing N of M</em> chip appears once you&apos;ve
+            pinned anything &ndash; click it to focus the grid on just your
+            picks.
           </>
         ),
       },
@@ -203,12 +200,11 @@ export default function ResilienceChartTuner({
         title: "Read",
         body: (
           <>
-            Click the <strong>⤢</strong> icon on any tile to expand it to
-            full size for a closer read. Press <kbd>Esc</kbd> or the{" "}
-            <em>Back</em> button to return to the grid. Swap encodings
-            (tier, distribution, climate shift) from the <em>Analyze</em>{" "}
-            presets to keep the same curated set while changing what each
-            cell tells you.
+            Click the <strong>⤢</strong> icon on any tile to expand it to full
+            size for a closer read. Press <kbd>Esc</kbd> or the <em>Back</em>{" "}
+            button to return to the grid. Swap encodings (tier, distribution,
+            climate shift) from the <em>Analyze</em> presets to keep the same
+            curated set while changing what each cell tells you.
           </>
         ),
       },

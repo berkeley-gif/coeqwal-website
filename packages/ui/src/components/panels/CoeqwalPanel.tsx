@@ -243,7 +243,9 @@ export function CoeqwalPanel({
           display: "flex",
           flexDirection: "column" as const,
           justifyContent:
-            contentAlign === "top" ? ("flex-start" as const) : ("center" as const),
+            contentAlign === "top"
+              ? ("flex-start" as const)
+              : ("center" as const),
         }
       : {}
 

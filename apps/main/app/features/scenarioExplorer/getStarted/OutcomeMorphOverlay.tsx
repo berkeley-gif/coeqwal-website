@@ -438,8 +438,7 @@ export default function OutcomeMorphOverlay({
         }
       }
       const pad = SQUARE_SIZE / 2
-      const boundsTop =
-        shapes.length > 0 ? minY - pad : gridTargetY
+      const boundsTop = shapes.length > 0 ? minY - pad : gridTargetY
       const boundsBottom =
         shapes.length > 0 ? maxY + pad : gridTargetY + outcomeSlotHeight
       const boundsLeft = shapes.length > 0 ? minX - pad : gridTargetX
@@ -906,7 +905,6 @@ export default function OutcomeMorphOverlay({
             chromeEl.style.opacity = "0"
           }
         }
-
       }
     }
     const unsub = progress.on("change", handler)

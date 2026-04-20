@@ -8,9 +8,9 @@ export function ComparisonHowToRead() {
   return (
     <Section title="Coming soon">
       <Typography variant="storyBody" component="p">
-        The comparison view lets you line up two or more scenarios on the
-        same outcomes. A dedicated &ldquo;how to read&rdquo; section for
-        this view is on the way.
+        The comparison view lets you line up two or more scenarios on the same
+        outcomes. A dedicated &ldquo;how to read&rdquo; section for this view is
+        on the way.
       </Typography>
     </Section>
   )

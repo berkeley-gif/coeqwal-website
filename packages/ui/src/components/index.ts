@@ -160,8 +160,4 @@ export {
   tunerInsetXPx,
   tunerInsetYPx,
 } from "./tuner"
-export type {
-  ChartTunerProps,
-  TunerPreset,
-  WalkthroughStep,
-} from "./tuner"
+export type { ChartTunerProps, TunerPreset, WalkthroughStep } from "./tuner"

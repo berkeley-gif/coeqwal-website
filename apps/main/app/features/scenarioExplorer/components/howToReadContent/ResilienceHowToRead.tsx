@@ -40,14 +40,13 @@ export function ResilienceHowToRead() {
           <li>
             <Typography variant="storyBody" component="span">
               <strong>By scenario</strong> - one small-multiple tile per
-              scenario, with outcomes on the Y axis and climates on the X
-              axis.
+              scenario, with outcomes on the Y axis and climates on the X axis.
             </Typography>
           </li>
           <li>
             <Typography variant="storyBody" component="span">
-              <strong>By outcome</strong> - one tile per outcome, with
-              scenarios on the Y axis and climates on the X axis.
+              <strong>By outcome</strong> - one tile per outcome, with scenarios
+              on the Y axis and climates on the X axis.
             </Typography>
           </li>
           <li>
@@ -61,8 +60,8 @@ export function ResilienceHowToRead() {
 
       <Section title="How a cell is colored and numbered">
         <Typography variant="storyBody" component="p">
-          Colors map to the four categorical performance tiers from the
-          COEQWAL scale - the same palette used in the list and radar views.
+          Colors map to the four categorical performance tiers from the COEQWAL
+          scale - the same palette used in the list and radar views.
         </Typography>
         <TierLegend />
         <Typography variant="storyBody" component="p">
@@ -72,9 +71,8 @@ export function ResilienceHowToRead() {
         </Typography>
         <SummaryCellExample />
         <Typography variant="storyBody" component="p">
-          The number is only shown in summary mode. In the other encoding
-          modes it is replaced by the encoding&rsquo;s own visual - see
-          below.
+          The number is only shown in summary mode. In the other encoding modes
+          it is replaced by the encoding&rsquo;s own visual - see below.
         </Typography>
       </Section>
 
@@ -82,43 +80,43 @@ export function ResilienceHowToRead() {
         <Typography variant="storyBody" component="p">
           Open the <strong>Cell:</strong> dropdown in the chart controls to
           switch how each cell is drawn. The <strong>Summary</strong> (mean
-          tier) and <strong>Distribution</strong> encodings are available in
-          all three views. The richer aggregate-only encodings below
-          (<strong>Climate shift</strong>, <strong>Risk / opportunity
-          density</strong>) only appear in the <strong>Aggregate</strong>{" "}
-          view.
+          tier) and <strong>Distribution</strong> encodings are available in all
+          three views. The richer aggregate-only encodings below (
+          <strong>Climate shift</strong>,{" "}
+          <strong>Risk / opportunity density</strong>) only appear in the{" "}
+          <strong>Aggregate</strong> view.
         </Typography>
         <Typography variant="storyBody" component="p">
-          <strong>Climate shift (delta vs historical / vs baseline)</strong>{" "}
-          - signed deviation from a reference, shown on a diverging palette.
-          Warm colors mean worse-than-reference, cool colors mean better.
-          This one lives next to the cell encoding as the{" "}
-          <strong>Climate shift:</strong> dropdown.
+          <strong>Climate shift (delta vs historical / vs baseline)</strong> -
+          signed deviation from a reference, shown on a diverging palette. Warm
+          colors mean worse-than-reference, cool colors mean better. This one
+          lives next to the cell encoding as the <strong>Climate shift:</strong>{" "}
+          dropdown.
         </Typography>
         <DeltaCellExample />
         <Typography variant="storyBody" component="p">
-          <strong>Risk density / opportunity density</strong> - share of LOIs
-          in the bottom tiers (risk, red) or in the top tiers (opportunity,
-          green). Useful for spotting outcomes where the average hides a lot
-          of stressed locations.
+          <strong>Risk density / opportunity density</strong> - share of LOIs in
+          the bottom tiers (risk, red) or in the top tiers (opportunity, green).
+          Useful for spotting outcomes where the average hides a lot of stressed
+          locations.
         </Typography>
         <DensityCellExample />
         <Typography variant="storyBody" component="p">
           <strong>Distribution</strong> - each cell becomes a small grid of
-          rounded squares. Same visual language as the key-outcomes glyph in
-          the get-started section. Reach for this when the mean hides bimodal
+          rounded squares. Same visual language as the key-outcomes glyph in the
+          get-started section. Reach for this when the mean hides bimodal
           behavior or when you want to identify the specific scenario or
-          location driving a cell&rsquo;s color. When distribution is active,
-          a <strong>Distribution:</strong> sub-toggle appears with two modes:
+          location driving a cell&rsquo;s color. When distribution is active, a{" "}
+          <strong>Distribution:</strong> sub-toggle appears with two modes:
         </Typography>
         <ul>
           <li>
             <Typography variant="storyBody" component="span">
               <strong>By scenario</strong> - one square per scenario in the
               current scope, colored by that scenario&rsquo;s tier for the
-              cell&rsquo;s (outcome, climate). Hovering a square highlights
-              that scenario in the sidebar and scrolls it into view - the
-              same pattern as the radar chart. Clicking a square opens that
+              cell&rsquo;s (outcome, climate). Hovering a square highlights that
+              scenario in the sidebar and scrolls it into view - the same
+              pattern as the radar chart. Clicking a square opens that
               outcome&rsquo;s layer on the map for the clicked scenario.
             </Typography>
           </li>
@@ -128,15 +126,14 @@ export function ResilienceHowToRead() {
           <li>
             <Typography variant="storyBody" component="span">
               <strong>By location</strong> - one square per LOI (location of
-              interest) inside the outcome, colored by the mean tier across
-              the scope&rsquo;s scenarios for that (outcome, climate).
-              Hovering a square highlights that LOI on the map when the map
-              panel is open, exactly like the get-started key-outcomes
-              animation. Clicking a square opens that outcome&rsquo;s layer
-              on the map and pins the LOI&rsquo;s popup so it persists after
-              the cursor moves away (click again to unpin). NOD/SOD
-              outcomes (which are already pre-aggregated regions) are not
-              broken out by LOI in this mode.
+              interest) inside the outcome, colored by the mean tier across the
+              scope&rsquo;s scenarios for that (outcome, climate). Hovering a
+              square highlights that LOI on the map when the map panel is open,
+              exactly like the get-started key-outcomes animation. Clicking a
+              square opens that outcome&rsquo;s layer on the map and pins the
+              LOI&rsquo;s popup so it persists after the cursor moves away
+              (click again to unpin). NOD/SOD outcomes (which are already
+              pre-aggregated regions) are not broken out by LOI in this mode.
             </Typography>
           </li>
         </ul>
@@ -169,15 +166,14 @@ export function ResilienceHowToRead() {
         <ul>
           <li>
             <Typography variant="storyBody" component="span">
-              <strong>Choose outcome rows</strong> adds or removes outcome
-              rows, including their regional NOD/SOD variants where
-              applicable.
+              <strong>Choose outcome rows</strong> adds or removes outcome rows,
+              including their regional NOD/SOD variants where applicable.
             </Typography>
           </li>
           <li>
             <Typography variant="storyBody" component="span">
-              The hydroclimate chip in the toolbar filters columns
-              (historical, cc50, cc95, or all three).
+              The hydroclimate chip in the toolbar filters columns (historical,
+              cc50, cc95, or all three).
             </Typography>
           </li>
         </ul>
@@ -185,23 +181,23 @@ export function ResilienceHowToRead() {
 
       <Section title="The quadrant view">
         <Typography variant="storyBody" component="p">
-          The fourth toggle swaps the heatmap for a scatter. One dot per
-          outcome (or per outcome + LOI, depending on the scope toggle).
+          The fourth toggle swaps the heatmap for a scatter. One dot per outcome
+          (or per outcome + LOI, depending on the scope toggle).
         </Typography>
         <QuadrantDiagram />
         <ul>
           <li>
             <Typography variant="storyBody" component="span">
-              <strong>X axis - climate sensitivity.</strong> How much the
-              tier shifts between historical and warmer climates. Points to
-              the right are more climate-exposed.
+              <strong>X axis - climate sensitivity.</strong> How much the tier
+              shifts between historical and warmer climates. Points to the right
+              are more climate-exposed.
             </Typography>
           </li>
           <li>
             <Typography variant="storyBody" component="span">
-              <strong>Y axis - operational leverage.</strong> How much the
-              tier varies across sibling scenarios under the same climate.
-              Points higher up respond more to management choices.
+              <strong>Y axis - operational leverage.</strong> How much the tier
+              varies across sibling scenarios under the same climate. Points
+              higher up respond more to management choices.
             </Typography>
           </li>
         </ul>
