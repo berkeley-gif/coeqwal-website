@@ -52,10 +52,8 @@ interface OutcomeMorphOverlayProps {
     {
       x: number
       y: number
-      labelY: number
       maxWidth: number
       slotHeight: number
-      locationDescription: string
     }
   >
   onOutcomeClick?: (code: string) => void
@@ -367,7 +365,6 @@ export default function OutcomeMorphOverlay({
   const theme = useTheme()
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
-  const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
 
   const outcomeShapes = useMemo(() => {
@@ -420,27 +417,20 @@ export default function OutcomeMorphOverlay({
         }
       }
       const pad = SQUARE_SIZE / 2
-      const labelY = pos?.labelY ?? gridTargetY
       const boundsTop =
-        shapes.length > 0 ? Math.min(labelY, minY - pad) : labelY
-      const boundsBottom = shapes.length > 0 ? maxY + pad : labelY + 32
+        shapes.length > 0 ? minY - pad : gridTargetY
+      const boundsBottom =
+        shapes.length > 0 ? maxY + pad : gridTargetY + outcomeSlotHeight
       const boundsLeft = shapes.length > 0 ? minX - pad : gridTargetX
       const boundsRight =
         shapes.length > 0
           ? Math.max(maxX + pad, gridTargetX + maxColWidth)
           : gridTargetX + maxColWidth
-      const locationDescription =
-        pos?.locationDescription ?? `${outcome.polygons.length} locations`
-      const SLOT_COUNT_GAP = 16
-      const countY =
-        outcomeSlotHeight > 0
-          ? gridTargetY + outcomeSlotHeight + SLOT_COUNT_GAP
-          : gridTargetY + 46
       const bounds = {
         x: boundsLeft,
         y: boundsTop,
         width: boundsRight - boundsLeft,
-        height: Math.max(boundsBottom, countY + 11) - boundsTop,
+        height: Math.max(1, boundsBottom - boundsTop),
       }
 
       return {
@@ -450,9 +440,6 @@ export default function OutcomeMorphOverlay({
         hasData,
         glyphMeta: layout.glyphMeta,
         bounds,
-        locationDescription,
-        countY,
-        countX: gridTargetX + GRID_PAD,
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
@@ -899,12 +886,6 @@ export default function OutcomeMorphOverlay({
           }
         }
 
-        const countEl = countRefsMap.current.get(group.code)
-        if (countEl) {
-          const countFade =
-            v >= 1 ? 1 : v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.01)
-          countEl.style.opacity = String(countFade)
-        }
       }
     }
     const unsub = progress.on("change", handler)
@@ -1113,21 +1094,6 @@ export default function OutcomeMorphOverlay({
                 />
               )
             })}
-            {group.locationDescription && (
-              <text
-                ref={(el) => {
-                  countRefsMap.current.set(group.code, el)
-                }}
-                x={group.countX}
-                y={group.countY}
-                fontSize={11}
-                fontFamily="inherit"
-                fill={theme.palette.ink.body}
-                style={{ opacity: 0 }}
-              >
-                {group.locationDescription}
-              </text>
-            )}
             {!group.hasData &&
               interactive &&
               encodingMode !== "distribution" && (

@@ -510,9 +510,19 @@ export function WaterThemesPanel({
   inset,
   frameBackground,
 }: WaterThemesPanelProps) {
+  const theme = useTheme()
+  // Pin the sticky content just below the fixed header and shrink its
+  // height by the same amount so the whole rounded panel (top + bottom
+  // corners) is visible below the header. The 300vh scroll runway and
+  // the surrounding frame-gap (2 × insetY) are unchanged.
+  const headerHeight = theme.layout.headerHeight
   return (
     <div ref={panelRef}>
-      <StickyScrollSection height="300vh">
+      <StickyScrollSection
+        height="300vh"
+        stickyTop={headerHeight}
+        stickyHeight={`calc(100vh - ${headerHeight}px)`}
+      >
         <WaterThemesPanelContent
           contentOpacity={contentOpacity}
           borderBottom={borderBottom}

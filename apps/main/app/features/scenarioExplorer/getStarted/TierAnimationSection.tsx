@@ -185,12 +185,6 @@ const ACTIVE_OUTCOMES = new Set([
   "WRC_SALMON_AB",
 ])
 
-const LAYOUT_LINE_HEIGHT = 20
-const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
-const LAYOUT_DIST_GAP = 6
-const SLOT_COUNT_GAP = 16 // fixed gap between slot bottom and "X locations" text
-const SLOT_COUNT_FONT = 11
-const SLOT_POST_GAP = 16 // fixed gap after "X locations" text before next header
 const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
 
 const HIGHLIGHT_GOLD = "#ffd87e"
@@ -208,16 +202,23 @@ const ZOOM_AWARE_BASE_OPACITY = [
 interface OutcomeLayoutItem {
   code: string
   label: string
-  y: number
-  x: number
   column: 0 | 1
   columnWidth: number
   isActive: boolean
-  distributionY: number
-  distributionHeight: number
-  slotHeight: number
   locationCount: number
-  spaceBelow: number
+  /** Pixel height of the glyph placeholder (0 when not active / no polygons).
+   *  BeatTextOverlay renders a transparent Box of this height to reserve
+   *  space in document flow; the SVG morph lands inside that rect. */
+  targetHeight: number
+  /** Caption text rendered in DOM below the glyph (e.g. "12 locations"). */
+  locationDescription: string
+}
+
+interface GlyphRect {
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
 interface ScreenPolygon {
@@ -2065,16 +2066,17 @@ export default function TierAnimationSection() {
     [outcomeGroups],
   )
 
-  /** Map of outcome code → the progress value at which its polygons
-   *  begin to morph in Beat 2. BeatTextOverlay uses this to fade in
-   *  each outcome's title just before its own morph slice starts. */
-  const outcomeMorphStarts = useMemo(() => {
-    const map: Record<string, number> = {}
+  /** Map of outcome code - Beat 2 morph window `{start, end}`.
+   *  BeatTextOverlay uses `start` to fade in each outcome's title just
+   *  before its own morph slice begins, and `end` to fade in the "X
+   *  locations" caption once the polygons have settled as squares. */
+  const outcomeMorphWindows = useMemo(() => {
+    const map: Record<string, { start: number; end: number }> = {}
     const total = activeOutcomeGroups.length
     if (total === 0) return map
     for (let i = 0; i < total; i++) {
-      const [start] = getOutcomeProgressRange(i, total)
-      map[activeOutcomeGroups[i]!.code] = start
+      const [start, end] = getOutcomeProgressRange(i, total)
+      map[activeOutcomeGroups[i]!.code] = { start, end }
     }
     return map
   }, [activeOutcomeGroups])
@@ -2121,129 +2123,17 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
-  /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
-  const COLUMN_GAP = 12
+  /* Shared layout for Beat 2 text + distribution alignment (2 columns)
+   *
+   * The right-column layout lives in CSS document flow inside `BeatTextOverlay`.
+   * This memo only describes *what* each outcome needs (column, label, glyph
+   * height, caption); actual x/y positions are measured from the DOM via
+   * `onGlyphLayoutChange` and flow back through `glyphLayout` state. The SVG
+   * morph overlay uses those measured rects as landing coordinates. */
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
-  const outcomeLayout = useMemo(() => {
-    if (!panelSize) return null
-    const { width } = panelSize
-    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
-    const insetPx = 24
-    const panelWidth3 = width * (1 / 3)
-    const availableWidth = panelWidth3 - insetPx * 2
-    const colWidth = (availableWidth - COLUMN_GAP) / 2
-    const headerOffset = 140
-    const topPad = headerOffset + Math.min(24, Math.max(16, width * 0.02))
-
-    const itemStartY = topPad
-
-    const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
-    const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
-
-    const EYEBROW_HEIGHT = 22
-    const EYEBROW_GAP = 6
-
-    // Both column eyebrows now fade in together at the start of Beat 2,
-    // just before the first outcome's title/morph slice begins.
-    const EYEBROW_FADE_IN = 0.77
-    const eyebrows = [
-      {
-        label: "Consumptive uses",
-        x: colX[0],
-        y: itemStartY,
-        columnWidth: colWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-      {
-        label: "Non-consumptive uses",
-        x: colX[1],
-        y: itemStartY,
-        columnWidth: colWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-    ]
-
-    const firstItemY = itemStartY + EYEBROW_HEIGHT + EYEBROW_GAP
-    const cursors: [number, number] = [firstItemY, firstItemY]
-
-    const items: OutcomeLayoutItem[] = []
-
-    for (let idx = 0; idx < OUTCOME_CODE_ORDER.length; idx++) {
-      const code = OUTCOME_CODE_ORDER[idx]!
-      const label = getOutcomeName(code)
-      const isActive = ACTIVE_OUTCOMES.has(code)
-      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
-
-      const y = cursors[col]
-      const x = colX[col]
-      cursors[col] += LAYOUT_LINE_HEIGHT
-
-      let distributionY = cursors[col] + LAYOUT_DIST_GAP
-      let distributionHeight = 0
-      let slotHeight = 0
-      let locationCount = 0
-
-      let spaceBelow = LAYOUT_LABEL_GAP
-      if (isActive) {
-        const group = outcomeGroups.find((g) => g.code === code)
-        if (group && group.polygons.length > 0) {
-          locationCount = group.polygons.length
-          const freshHeight = computeDistributionHeight(
-            group.polygons,
-            sqPerRow,
-            colWidth,
-          )
-          const locked = lockedHeightsRef.current.get(code)
-          distributionHeight =
-            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
-          lockedHeightsRef.current.set(code, distributionHeight)
-
-          const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
-          const isSingleRow = distributionHeight <= SINGLE_ROW
-          if (isSingleRow) {
-            distributionY = cursors[col] + 2
-          }
-          slotHeight = isSingleRow
-            ? distributionHeight
-            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
-          spaceBelow = isSingleRow
-            ? slotHeight + 4 + SLOT_COUNT_FONT + 12
-            : LAYOUT_DIST_GAP +
-              slotHeight +
-              SLOT_COUNT_GAP +
-              SLOT_COUNT_FONT +
-              SLOT_POST_GAP
-          cursors[col] += spaceBelow
-        } else {
-          cursors[col] += LAYOUT_LABEL_GAP
-        }
-      } else {
-        cursors[col] += LAYOUT_LABEL_GAP
-      }
-
-      items.push({
-        code,
-        label,
-        y,
-        x,
-        column: col,
-        columnWidth: colWidth,
-        isActive,
-        distributionY,
-        distributionHeight,
-        slotHeight,
-        locationCount,
-        spaceBelow,
-      })
-    }
-
-    return { items, eyebrows, leftColumnBottom: cursors[0] }
-  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
-
-  const distributionPositionMap = useMemo(() => {
-    if (!outcomeLayout) return {}
-    const describeLocations = (code: string, count: number): string => {
+  const describeLocations = useCallback(
+    (code: string, count: number): string => {
       switch (code) {
         case "ENV_FLOWS":
           return `${count} river & tributary reaches`
@@ -2260,33 +2150,146 @@ export default function TierAnimationSection() {
         default:
           return `${count} locations`
       }
+    },
+    [],
+  )
+
+  const outcomeLayout = useMemo(() => {
+    if (!panelSize) return null
+    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
+    // Estimate the per-column inner width so the distribution height
+    // heuristic uses a realistic number of columns. The precise width is
+    // measured from the DOM later; this is only used to decide row count.
+    const approxColWidth = Math.max(80, panelSize.width * (1 / 3) / 2 - 36)
+
+    const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
+
+    const EYEBROW_FADE_IN = 0.77
+    const eyebrows = [
+      {
+        label: "Consumptive uses",
+        x: 0,
+        y: 0,
+        columnWidth: approxColWidth,
+        animationStart: EYEBROW_FADE_IN,
+      },
+      {
+        label: "Non-consumptive uses",
+        x: 0,
+        y: 0,
+        columnWidth: approxColWidth,
+        animationStart: EYEBROW_FADE_IN,
+      },
+    ]
+
+    const items: OutcomeLayoutItem[] = []
+
+    for (let idx = 0; idx < OUTCOME_CODE_ORDER.length; idx++) {
+      const code = OUTCOME_CODE_ORDER[idx]!
+      const label = getOutcomeName(code)
+      const isActive = ACTIVE_OUTCOMES.has(code)
+      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
+
+      let locationCount = 0
+      let targetHeight = 0
+
+      if (isActive) {
+        const group = outcomeGroups.find((g) => g.code === code)
+        if (group && group.polygons.length > 0) {
+          locationCount = group.polygons.length
+          const freshHeight = computeDistributionHeight(
+            group.polygons,
+            sqPerRow,
+            approxColWidth,
+          )
+          const locked = lockedHeightsRef.current.get(code)
+          const distributionHeight =
+            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
+          lockedHeightsRef.current.set(code, distributionHeight)
+
+          const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
+          const isSingleRow = distributionHeight <= SINGLE_ROW
+          targetHeight = isSingleRow
+            ? distributionHeight
+            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
+        }
+      }
+
+      items.push({
+        code,
+        label,
+        column: col,
+        columnWidth: approxColWidth,
+        isActive,
+        locationCount,
+        targetHeight,
+        locationDescription: describeLocations(code, locationCount),
+      })
     }
 
+    return { items, eyebrows }
+  }, [
+    panelSize,
+    outcomeGroups,
+    theme.scenarios.tierGrid.squaresPerRow,
+    describeLocations,
+  ])
+
+  /** DOM-measured glyph placeholder rects (relative to the right-column root
+   *  in BeatTextOverlay, which is absolutely positioned at `right: 0` with
+   *  `width: 33.33%`, i.e. its left edge aligns with `panelWidth * 2/3`).
+   *  Populated via `onGlyphLayoutChange` from BeatTextOverlay's
+   *  ResizeObserver; empty on first render (outcomes are invisible in Beat 1
+   *  anyway, so the missing positions only become visible once measured). */
+  const [glyphLayout, setGlyphLayout] = useState<Record<string, GlyphRect>>({})
+
+  const handleGlyphLayoutChange = useCallback((layout: Record<string, GlyphRect>) => {
+    setGlyphLayout((prev) => {
+      // Shallow-compare to avoid redundant state updates (ResizeObserver can
+      // fire frequently; same rects -> skip re-render).
+      const prevKeys = Object.keys(prev)
+      const nextKeys = Object.keys(layout)
+      if (prevKeys.length === nextKeys.length) {
+        let same = true
+        for (const k of nextKeys) {
+          const a = prev[k]
+          const b = layout[k]!
+          if (
+            !a ||
+            a.x !== b.x ||
+            a.y !== b.y ||
+            a.width !== b.width ||
+            a.height !== b.height
+          ) {
+            same = false
+            break
+          }
+        }
+        if (same) return prev
+      }
+      return layout
+    })
+  }, [])
+
+  const distributionPositionMap = useMemo(() => {
     const map: Record<
       string,
-      {
-        x: number
-        y: number
-        labelY: number
-        maxWidth: number
-        slotHeight: number
-        locationDescription: string
-      }
+      { x: number; y: number; maxWidth: number; slotHeight: number }
     > = {}
+    if (!outcomeLayout) return map
     for (const item of outcomeLayout.items) {
-      if (item.isActive && item.distributionHeight > 0) {
-        map[item.code] = {
-          x: item.x,
-          y: item.distributionY,
-          labelY: item.y,
-          maxWidth: item.columnWidth,
-          slotHeight: item.slotHeight,
-          locationDescription: describeLocations(item.code, item.locationCount),
-        }
+      if (!item.isActive || item.targetHeight <= 0) continue
+      const g = glyphLayout[item.code]
+      if (!g) continue
+      map[item.code] = {
+        x: g.x,
+        y: g.y,
+        maxWidth: g.width,
+        slotHeight: g.height,
       }
     }
     return map
-  }, [outcomeLayout])
+  }, [outcomeLayout, glyphLayout])
 
   /* ── Error state ── */
   if (error) {
@@ -2417,7 +2420,8 @@ export default function TierAnimationSection() {
             onEncodingChange={setEncodingMode}
             hydroclimate={hydroclimate}
             onHydroclimateChange={setHydroclimate}
-            outcomeMorphStarts={outcomeMorphStarts}
+            outcomeMorphWindows={outcomeMorphWindows}
+            onGlyphLayoutChange={handleGlyphLayoutChange}
           />
 
           {isInteractive &&
