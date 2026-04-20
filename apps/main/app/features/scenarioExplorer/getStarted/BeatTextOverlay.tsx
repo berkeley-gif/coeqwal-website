@@ -287,9 +287,11 @@ export default function BeatTextOverlay({
       }
 
       if (beat2PanelRef.current) {
-        // Beat 2 panel backdrop reveals at Beat 2 start (0.74 — AG_REV's
-        // solo morph). Also mirrors the BEAT2_START map-side boundary.
-        const fadeIn = clamp01((v - 0.74) / 0.03)
+        // Beat 2 panel backdrop reveals during the Beat 1B blues-collapse
+        // (0.55 → 0.60) so the right third is a solid reading surface
+        // *before* the narrative text ("For example…") begins fading in
+        // at 0.60. The backdrop is fully opaque by 0.59.
+        const fadeIn = clamp01((v - 0.56) / 0.03)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -944,12 +946,21 @@ export default function BeatTextOverlay({
         {/* Beat 1C narrative, promoted into the overlay panel now that the
          *  scenario-header block is hidden. These replace the former
          *  `beat1cExampleRef` / `beat1cDeliveryRef` blocks that lived on the
-         *  left panel. */}
+         *  left panel.
+         *
+         *  Typography: matches the left-panel `storyBody` size/leading so
+         *  the narrative reads consistently whether it appears on the map
+         *  or in the overlay panel. Color continues to inherit the
+         *  right-column's `text.primary` cascade above. */}
         <Box
           sx={{
             px: 3,
             pt: 2,
             flexShrink: 0,
+            "& .MuiTypography-root": {
+              fontSize: theme.typography.storyBody.fontSize,
+              lineHeight: theme.typography.storyBody.lineHeight,
+            },
           }}
         >
           <Box ref={beat1cExampleRef} sx={{ opacity: 0 }}>
