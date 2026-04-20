@@ -458,7 +458,6 @@ function WaterThemesPanelContent({
                     sx={{
                       mt: theme.space.component.sm,
                       fontStyle: "italic",
-                      opacity: 0.85,
                     }}
                   >
                     Coming soon

@@ -101,7 +101,7 @@ export function InfoCard({
       {description && (
         <Typography
           variant="body2"
-          sx={{ color: descColor, mt: theme.space.component.sm, opacity: 0.85 }}
+          sx={{ color: descColor, mt: theme.space.component.sm }}
         >
           {description}
         </Typography>
