@@ -20,7 +20,6 @@ import {
   InfoCard,
   resolveRadius,
   resolveInset,
-  tunerInsetY,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -512,12 +511,12 @@ export function WaterThemesPanel({
   frameBackground,
 }: WaterThemesPanelProps) {
   const theme = useTheme()
-  // Pin the sticky content just below the fixed header and shrink
-  // its height by the header height plus one inter-panel gap band
-  // (2 × tunerInsetY), so the whole rounded panel (top + bottom
-  // corners) sits below the header with whitespace below that
-  // visually matches the gap strips between panels. The 300vh
-  // scroll runway and the surrounding frame-gap itself are
+  // Pin the sticky child just below the fixed header and size it
+  // to exactly the viewport below the header. The inner rounded
+  // card is padded inside via the `inset` prop, so the sticky
+  // parent fully covers the viewport (no map bleed-through) while
+  // the rounded card retains its frame strips above and below.
+  // The 300vh scroll runway and the surrounding frame-gap are
   // unchanged.
   const headerHeight = theme.layout.headerHeight
   return (
@@ -525,7 +524,7 @@ export function WaterThemesPanel({
       <StickyScrollSection
         height="300vh"
         stickyTop={headerHeight}
-        stickyHeight={`calc(100vh - ${headerHeight}px - 2 * ${tunerInsetY()})`}
+        stickyHeight={`calc(100vh - ${headerHeight}px)`}
       >
         <WaterThemesPanelContent
           contentOpacity={contentOpacity}

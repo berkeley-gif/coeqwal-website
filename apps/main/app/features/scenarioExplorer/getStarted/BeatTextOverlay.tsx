@@ -951,7 +951,6 @@ export default function BeatTextOverlay({
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          rowGap: 0.5,
                         }}
                       >
                         <Box
@@ -1010,6 +1009,7 @@ export default function BeatTextOverlay({
                               sx={{
                                 width: "100%",
                                 height: `${item.targetHeight}px`,
+                                mt: "12px",
                                 pointerEvents: "none",
                               }}
                             />
@@ -1017,7 +1017,7 @@ export default function BeatTextOverlay({
                               ref={(el: HTMLDivElement | null) => {
                                 captionRefsMap.current.set(item.code, el)
                               }}
-                              sx={{ opacity: 0 }}
+                              sx={{ opacity: 0, mt: "4px" }}
                             >
                               <Typography
                                 component="span"
