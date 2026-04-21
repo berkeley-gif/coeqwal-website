@@ -301,6 +301,8 @@ export default function BeatTextOverlay({
    *  measurement needed. */
   const beat1cExampleRef = useRef<HTMLDivElement>(null)
   const beat1cDeliveryRef = useRef<HTMLDivElement>(null)
+  const beat3BeforeRef = useRef<HTMLDivElement>(null)
+  const beat3AfterRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   /** Bottom Back / indicator / Next control row opacity.
@@ -529,35 +531,57 @@ export default function BeatTextOverlay({
       // Each slot opens during a tween (`playState === "playing"`), when
       // the bottom controls are invisible anyway, so the layout push on
       // the control row isn't perceived.
-      // Beat 1C paragraphs fade in during beat 2 and then fade out at
-      // the start of the merged final beat (0.78 -> 0.80), freeing the
-      // left-panel slot for "For each scenario, outcome levels...".
+      // Beat 1C paragraphs fade in during beat 2 (0.49 / 0.65) and then
+      // fade out at the start of beat 3 (0.73 -> 0.735), freeing the
+      // left-panel slot below the tier legend for the Beat 3 narration.
       // Their grid rows collapse once fully faded out so the new
       // paragraph slides cleanly into their former document-flow slot.
       if (beat1cExampleRef.current) {
         const el = beat1cExampleRef.current
         const fadeIn = clamp01((v - 0.49) / 0.03)
-        const fadeOut = clamp01((v - 0.78) / 0.02)
+        const fadeOut = clamp01((v - 0.73) / 0.005)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.485 && v < 0.8 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.485 && v < 0.735 ? "1fr" : "0fr"
       }
 
       if (beat1cDeliveryRef.current) {
         const el = beat1cDeliveryRef.current
         const fadeIn = clamp01((v - 0.65) / 0.03)
-        const fadeOut = clamp01((v - 0.78) / 0.02)
+        const fadeOut = clamp01((v - 0.73) / 0.005)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.645 && v < 0.8 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.645 && v < 0.735 ? "1fr" : "0fr"
+      }
+
+      // Step 3 narration splits into two slots sharing the document-flow
+      // slot freed by the Beat 1C paragraphs. The "before" paragraph
+      // fades in (0.735 -> 0.745) before the AG_REV morph fires at
+      // [0.76, 0.78], then fades out (0.78 -> 0.785) once the morph
+      // completes so the "after" paragraph can slide into the same slot
+      // (fade in 0.785 -> 0.795) and land with Beat 3's settle at 0.80.
+      if (beat3BeforeRef.current) {
+        const el = beat3BeforeRef.current
+        const fadeIn = clamp01((v - 0.735) / 0.01)
+        const fadeOut = clamp01((v - 0.78) / 0.005)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.735 && v < 0.785 ? "1fr" : "0fr"
+      }
+
+      if (beat3AfterRef.current) {
+        const el = beat3AfterRef.current
+        const fadeIn = clamp01((v - 0.785) / 0.01)
+        const fadeOut = clamp01((v - 0.8) / 0.02)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.785 && v < 0.82 ? "1fr" : "0fr"
       }
 
       // "For each scenario, outcome levels..." fades in during the
-      // merged final beat, right after the two Beat 1C paragraphs
-      // finish fading out (0.80 -> 0.82). The remaining 8 outcome
-      // morphs then play alongside this sentence over [0.84, 1.0].
+      // final beat, right after the Beat 3 "after" paragraph finishes
+      // fading out (0.80 -> 0.82). The remaining 8 outcome morphs then
+      // play alongside this sentence over [0.84, 1.0].
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
-        el.style.opacity = String(clamp01((v - 0.8) / 0.02))
-        el.style.gridTemplateRows = v >= 0.795 ? "1fr" : "0fr"
+        el.style.opacity = String(clamp01((v - 0.82) / 0.02))
+        el.style.gridTemplateRows = v >= 0.82 ? "1fr" : "0fr"
       }
 
       // NOTE: bottom control row opacity is driven by `playState`
@@ -892,21 +916,29 @@ export default function BeatTextOverlay({
               </Box>
             ))}
           </Box>
-          {/* Beat 1C narrative lives in the left panel, directly below the
-           *  tier legend, so the overlay panel can be dedicated to graphics.
-           *  These blocks inherit `beat1Ref`'s `textColor` / `textShadow`
-           *  automatically. Sizing comes from MUI's native `body2` variant,
-           *  so this panel stays in lockstep with the other Get Started
-           *  panels.
+          {/* Beat 1C + Beat 3 narrative lives in the left panel, directly
+           *  below the tier legend, so the overlay panel can be dedicated
+           *  to graphics. These blocks inherit `beat1Ref`'s `textColor` /
+           *  `textShadow` automatically. Sizing comes from MUI's native
+           *  `body2` variant, so this panel stays in lockstep with the
+           *  other Get Started panels.
            *
            *  Each block is a single-row CSS grid whose `grid-template-rows`
            *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
-           *  by the progress handler (beat 1C paragraphs at 0.49 / 0.65,
-           *  fading out at 0.78 -> 0.80. "For each scenario..." fading in
-           *  at 0.80 -> 0.82), alongside an opacity fade. The browser
-           *  computes the min-content height
-           *  from document flow - no measurement - so the bottom control
-           *  row below naturally hugs the last text block that's actually
+           *  by the progress handler. Swaps share the same document-flow
+           *  slot below the tier legend:
+           *    - Beat 1C "example" / "delivery" fade in at 0.49 / 0.65,
+           *      fade out together 0.73 -> 0.735 at the start of beat 3.
+           *    - Beat 3 "before" fades in 0.735 -> 0.745 in the freed slot,
+           *      then fades out 0.78 -> 0.785 once the AG_REV morph ends.
+           *    - Beat 3 "after" fades in 0.785 -> 0.795, lands as beat 3
+           *      settles at 0.80, then fades out 0.80 -> 0.82 at the start
+           *      of beat 4.
+           *    - "For each scenario..." fades in 0.82 -> 0.84 before the
+           *      remaining 8 outcome morphs play over [0.84, 1.0].
+           *  The browser computes each block's min-content height from
+           *  document flow - no measurement - so the bottom control row
+           *  below naturally hugs the last text block that's actually
            *  visible. The top gap lives as `pt:` on the inner wrapper
            *  (which also carries `overflow: hidden`) so it collapses with
            *  the content when the row is `0fr`. */}
@@ -921,7 +953,7 @@ export default function BeatTextOverlay({
             <Box sx={{ overflow: "hidden", pt: 2.5 }}>
               <Typography variant="body2" component="p">
                 For example, each colored location on the map represents an
-                agricultural water district receiving surface water deliveries.
+                agricultural water district in the Central Valley receiving surface water deliveries.
               </Typography>
             </Box>
           </Box>
@@ -945,6 +977,39 @@ export default function BeatTextOverlay({
             </Box>
           </Box>
           <Box
+            ref={beat3BeforeRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                Each location can be symbolized as a square colored with the
+                outcome level.
+              </Typography>
+              <Typography variant="body2" component="p" sx={{ mt: 1 }}>
+                These can be gathered together in a distribution view.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            ref={beat3AfterRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                The distribution shows how agricultural revenue plays out in
+                this scenario across all the districts at a glance.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
             ref={allOtherOutcomesRef}
             sx={{
               display: "grid",
@@ -955,7 +1020,7 @@ export default function BeatTextOverlay({
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
                 For each scenario, outcome levels are calculated for all key
-                outcomes across all locations of interest.
+                outcomes across locations.
               </Typography>
             </Box>
           </Box>

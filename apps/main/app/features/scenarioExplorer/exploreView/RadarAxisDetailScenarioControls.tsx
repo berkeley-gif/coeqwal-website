@@ -123,7 +123,7 @@ function RadarAxisDetailScenarioControlsInner({
         <InlineRowActions
           scenarioId={scenarioId}
           scenarioLabel={scenarioLabel}
-          displayMode={outcomeDisplayMode as "summary" | "distribution"}
+        displayMode={outcomeDisplayMode}
           isPinned={isPinned}
           accentColor={accentColor}
           hidePinning

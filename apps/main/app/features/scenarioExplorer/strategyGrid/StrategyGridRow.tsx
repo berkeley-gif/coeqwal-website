@@ -29,7 +29,7 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
-import type { ShareItem } from "../store"
+import type { OutcomeDisplayMode, ShareItem } from "../store"
 import { useOutcomeMapAction } from "../../map/hooks"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
@@ -156,15 +156,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
 
   const handleShare = useCallback(async () => {
-    const viewMode: "summary" | "distribution" =
-      outcomeDisplayMode === "distribution" ? "distribution" : "summary"
-
     const itemId = crypto.randomUUID()
     const item: ShareItem = {
       id: itemId,
       type: "barChart",
       scenarioId: scenario.scenarioId,
-      viewMode,
+      viewMode: outcomeDisplayMode,
       hydroclimate,
       cachedChartData: scenarioChartData as Record<string, unknown>,
     }
@@ -205,11 +202,13 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
    * current tool context and the outcomeDisplayMode toggle:
    *
    * List view:
-   *   summary      → OutcomeGlyphItem (bars)
+   *   average      → TierSummaryCell
+   *   bar          → OutcomeGlyphItem (bars)
    *   distribution → OutcomeGlyphItem (distribution squares)
    *
    * Other tools:
-   *   summary      → TierSummaryCell (compact heatmap)
+   *   average      → TierSummaryCell (compact heatmap)
+   *   bar          → OutcomeGlyphItem (bars)
    *   distribution → OutcomeGlyphItem (bars)
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
@@ -218,8 +217,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === shortCode
 
-    // Non-list + summary toggle → compact heatmap cell
-    if (!isListMode && outcomeDisplayMode === "summary") {
+    if (outcomeDisplayMode === "average") {
       return (
         <Box
           key={shortCode}
@@ -232,6 +230,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
             isActive={isActive}
             isTooltipActive={activeTooltip === shortCode}
             onClick={() => handleOutcomeClick(shortCode)}
+            mode={isListMode ? "numeric" : "label"}
           />
         </Box>
       )
@@ -433,7 +432,7 @@ export function InlineRowActions({
 }: {
   scenarioId: string
   scenarioLabel: string
-  displayMode: "summary" | "distribution"
+  displayMode: OutcomeDisplayMode
   isPinned: boolean
   accentColor: string
   onShare: () => void
@@ -461,9 +460,11 @@ export function InlineRowActions({
   }, [justShared])
 
   const viewLabel =
-    displayMode === "distribution"
-      ? "Key outcomes distribution"
-      : "Key outcomes bar chart"
+    displayMode === "average"
+      ? "Key outcomes average"
+      : displayMode === "distribution"
+        ? "Key outcomes distribution"
+        : "Key outcomes bar chart"
 
   const shareTooltip = justShared ? (
     <span>
@@ -784,7 +785,7 @@ function NonCompactRowContent({
       <InlineRowActions
         scenarioId={scenario.scenarioId}
         scenarioLabel={scenario.label}
-        displayMode={outcomeDisplayMode as "summary" | "distribution"}
+        displayMode={outcomeDisplayMode}
         isPinned={isPinned}
         accentColor={accentColor}
         onShare={handleShare}

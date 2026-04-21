@@ -413,7 +413,7 @@ export default function ResilienceQuadrantPanel({
           >
             <Typography variant="body2" color="text.secondary">
               Select one or more scenarios in the sidebar to aggregate over, or
-              switch the aggregate scope to &ldquo;all&rdquo;.
+              switch Scope to &ldquo;all scenarios&rdquo;.
             </Typography>
           </Box>
         ) : showLoiEmptyState ? (

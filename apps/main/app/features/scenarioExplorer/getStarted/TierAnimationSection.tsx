@@ -75,7 +75,7 @@ interface BeatDef {
   id: string
   /** Target value of `progress` at the end of this beat. */
   progress: number
-  /** Forward duration in seconds. Back uses 60% of this value. */
+  /** Forward duration in seconds. */
   duration: number
 }
 
@@ -105,21 +105,30 @@ const BEATS: readonly BeatDef[] = [
   //         outcome levels..." fades in at 0.65 -> 0.68, leaving a
   //         ~1.6s reading pause before the beat settles at 0.73.
   { id: "collapse-and-colors", progress: 0.73, duration: 9 },
-  // B2 (3/4) - AG_REV polygons morph to their distribution squares.
-  //      Tween plays the morph window [0.76, 0.78] and settles at
-  //      0.78. 3.5s total over 0.05 progress: a brief lead-in (~2.1s
-  //      from 0.73 -> 0.76) lets the reader's eye reach the map, then
-  //      the morph itself plays over [0.76, 0.78] (~1.4s).
-  { id: "ag-rev-morph", progress: 0.78, duration: 3.5 },
-  // B3 (4/4) - Merged "remaining outcomes" beat. The two Beat 1C
-  //      paragraphs under the tier legend fade out (0.78 -> 0.80),
-  //      "For each scenario, outcome levels..." fades in in their
-  //      place (0.80 -> 0.82), and the remaining 8 outcome morphs play
-  //      back-to-back over [0.84, 1.0]. Tween velocity matches AG_REV
-  //      (~70s per progress unit), so each 0.02-wide morph window
-  //      takes ~1.4s, identical to AG_REV's morph speed. Total
-  //      duration 15.5s = 70 * 0.22 (the 0.78 -> 1.0 span).
-  { id: "all-other-morphs", progress: 1.0, duration: 15.5 },
+  // B2 (3/4) - Text swap + AG_REV morph + post-morph caption. 10s
+  //      total over 0.07 progress (~143s per progress unit). The two
+  //      Beat 1C paragraphs below the tier legend fade out 0.73 ->
+  //      0.735 and collapse; the Beat 3 "before" paragraph ("Each
+  //      location can be symbolized as a square colored with the
+  //      outcome level. These can be gathered together in a
+  //      distribution view.") fades in 0.735 -> 0.745 into the same
+  //      document-flow slot, giving ~3.5s of reading time before the
+  //      AG_REV polygons morph to their distribution squares over
+  //      [0.76, 0.78] (~2.9s). Once the morph completes, the "before"
+  //      paragraph fades out 0.78 -> 0.785 and the "after" paragraph
+  //      ("The distribution shows how agricultural revenue plays out
+  //      in this scenario across all the districts at a glance.")
+  //      fades in 0.785 -> 0.795 into the same slot, landing as the
+  //      beat settles at 0.80. The tier legend stays put throughout.
+  { id: "ag-rev-morph", progress: 0.8, duration: 10 },
+  // B3 (4/4) - Merged "remaining outcomes" beat. 14s over 0.20
+  //      progress (~70s per progress unit, same velocity as AG_REV's
+  //      morph). The Beat 3 "after" paragraph fades out 0.80 -> 0.82;
+  //      "For each scenario, outcome levels..." fades in in its place
+  //      0.82 -> 0.84, and the remaining 8 outcome morphs play
+  //      back-to-back over [0.84, 1.0] (each a 0.02-wide slice, ~1.4s
+  //      each, matching AG_REV's morph speed).
+  { id: "all-other-morphs", progress: 1.0, duration: 14 },
 ] as const
 
 const FINAL_BEAT_INDEX = BEATS.length - 1
@@ -433,11 +442,14 @@ export default function TierAnimationSection() {
   /* ── Storyboard navigation ──
    *
    * `goTo(targetIndex)` animates `progress` from its current value to
-   * `BEATS[targetIndex].progress`. Direction determines the duration
-   * source: forward uses the destination beat's `duration`, backward uses
-   * `BACK_DURATION_FACTOR` of the source beat's `duration` so Back feels
-   * snappier than Next. Under `prefers-reduced-motion`, every tween
-   * collapses to an instantaneous `progress.set` + settle.
+   * `BEATS[targetIndex].progress`. Forward navigation uses the
+   * destination beat's `duration`. Backward navigation (only reachable
+   * today via `handleRestart`, which masks the reverse tween behind a
+   * camera fly) uses `BACK_DURATION_FACTOR` of the source beat's
+   * `duration` so the rewind feels snappier than Next. The regular Back
+   * button bypasses `goTo` entirely and snaps instead; see `handleBack`.
+   * Under `prefers-reduced-motion`, every tween collapses to an
+   * instantaneous `progress.set` + settle.
    *
    * `playState` updates:
    *   - "playing" during the tween
@@ -568,7 +580,10 @@ export default function TierAnimationSection() {
 
   /* ── Back ──
    *
-   * On beat index > 0: normal backward tween to the previous beat.
+   * On beat index > 0: snap `progress` directly to the previous beat's
+   * checkpoint. All `progress.on("change")` listeners are pure functions
+   * of `v`, so the next frame recomputes the correct state for that beat
+   * without winding the UI backward through every staggered reveal.
    * On beat index === 0: do not reverse-tween `progress` (that would
    * unwind every staggered reveal). Instead, park `progress` at 0.45
    * and animate `backOutOpacity` 1 -> 0 so the whole text block fades
@@ -579,7 +594,13 @@ export default function TierAnimationSection() {
   const handleBack = useCallback(() => {
     const i = beatIndexRef.current
     if (i > 0) {
-      goTo(i - 1)
+      if (controlsRef.current) controlsRef.current.stop()
+      const targetIndex = i - 1
+      const target = BEATS[targetIndex]!
+      progress.set(target.progress)
+      setBeatIndex(targetIndex)
+      beatIndexRef.current = targetIndex
+      setPlayState("paused")
       return
     }
     if (!hasPlayedRef.current) return // pre-play: Back is a no-op
@@ -608,7 +629,7 @@ export default function TierAnimationSection() {
       ease: "easeOut",
       onComplete: finish,
     })
-  }, [goTo, progress, backOutOpacity, prefersReducedMotion])
+  }, [progress, backOutOpacity, prefersReducedMotion])
 
   const handleRestart = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
@@ -2044,11 +2065,22 @@ export default function TierAnimationSection() {
           }
         }
 
-        // Line outcome fade
+        // Line outcome fade. Mirrors the polygon branch's three-state shape.
+        // Pre-window (v < fadeStart): line fully visible (opacity 1).
+        // In-window: opacity = 1 - t over the tight 0.01 fade span.
+        // Post-window: Math.min(1, t) keeps opacity at 0.
+        // Without the pre-window guard, the 0.01 fadeDuration amplifies
+        // any negative (v - fadeStart) into a huge negative t, and
+        // `1 - t` overflows Mapbox's [0, 1] line-opacity range.
         for (const entry of lineEntries) {
-          const fadeDuration = entry.morphStart - entry.fadeStart
-          const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
-          const opacity = 1 - t
+          let opacity: number
+          if (v < entry.fadeStart) {
+            opacity = 1
+          } else {
+            const fadeDuration = entry.morphStart - entry.fadeStart
+            const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+            opacity = 1 - t
+          }
           try {
             if (map.getLayer(entry.mapboxLayerId)) {
               map.setPaintProperty(entry.mapboxLayerId, "line-opacity", opacity)

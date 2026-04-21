@@ -117,9 +117,11 @@ export default function TabPanels() {
               type: "barChart" as const,
               scenarioId,
               viewMode:
-                modeSuffix === "distribution"
-                  ? ("distribution" as const)
-                  : ("summary" as const),
+                modeSuffix === "average"
+                  ? ("average" as const)
+                  : modeSuffix === "distribution"
+                    ? ("distribution" as const)
+                    : ("bar" as const),
               hydroclimate: climateParam || "historical",
             }
           })

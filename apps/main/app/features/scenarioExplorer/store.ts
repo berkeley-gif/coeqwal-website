@@ -32,6 +32,8 @@ export type ExploreMode =
  */
 export type MainView = "get-started" | "explorer" | "data"
 
+export type OutcomeDisplayMode = "average" | "bar" | "distribution"
+
 /**
  * A single item staged for the Share tab composition grid.
  * The union discriminant `type` determines which rendering path is used.
@@ -41,7 +43,7 @@ export type ShareItem =
       id: string
       type: "barChart"
       scenarioId: string
-      viewMode: "summary" | "distribution"
+      viewMode: OutcomeDisplayMode
       hydroclimate: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
@@ -144,7 +146,7 @@ interface ScenarioExplorerState {
   showAlternativeBaselines: boolean
   showDefinitions: boolean
   showKeyOperations: boolean
-  outcomeDisplayMode: "summary" | "distribution"
+  outcomeDisplayMode: OutcomeDisplayMode
   showMap: boolean
   showLocationPicker: boolean
 
@@ -230,7 +232,7 @@ interface ScenarioExplorerActions {
   setShowAlternativeBaselines: (show: boolean) => void
   setShowDefinitions: (show: boolean) => void
   setShowKeyOperations: (show: boolean) => void
-  setOutcomeDisplayMode: (mode: "summary" | "distribution") => void
+  setOutcomeDisplayMode: (mode: OutcomeDisplayMode) => void
   setShowMap: (show: boolean) => void
   setShowLocationPicker: (show: boolean) => void
 
@@ -320,7 +322,7 @@ const initialState: ScenarioExplorerState = {
   showAlternativeBaselines: false,
   showDefinitions: true,
   showKeyOperations: false,
-  outcomeDisplayMode: "summary",
+  outcomeDisplayMode: "bar",
   showMap: false,
   showLocationPicker: false,
   shareItems: persisted.shareItems,
