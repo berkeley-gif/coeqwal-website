@@ -38,13 +38,62 @@ import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
-import { useMapMode } from "../map/store"
+import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
+
+function SimpleButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "5px",
+        px: 1.25,
+        py: 0.5,
+        border: "none",
+        borderRadius: "12px",
+        cursor: "pointer",
+        fontSize: "0.8125rem",
+        fontWeight: 500,
+        lineHeight: 1.3,
+        whiteSpace: "nowrap",
+        "&:hover": {
+          background: theme.palette.interaction.selectedBackground,
+          color: theme.palette.blue.bright,
+        },
+      }}
+    >
+      {label}
+    </Box>
+  )
+}
+
 import { InlineToggleChip } from "./components/InlineToggleChip"
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, exploreMode, showMap } = useScenarioExplorerStore()
+  const {
+    mainView,
+    setMainView,
+    exploreMode,
+    setExploreMode,
+    showMap,
+    setShowMap,
+    showEquityComparison,
+    setShowEquityComparison,
+  } = useScenarioExplorerStore()
   const mapMode = useMapMode()
 
   usePrefetchTiers()
@@ -285,6 +334,21 @@ export default function ScenarioExplorer() {
         </ChartControlsBar>
       )
     }
+    if (exploreMode === "equity") {
+      return (
+        <ChartControlsBar>
+          <InlineToggleChip
+            label="Compare to Baseline"
+            active={showEquityComparison}
+            onClick={() => setShowEquityComparison(!showEquityComparison)}
+          />
+          <SimpleButton
+            label="Clear Map Selection"
+            onClick={() => mapActions.clearLocationHighlights()}
+          />
+        </ChartControlsBar>
+      )
+    }
     return null
   }, [
     exploreMode,
@@ -298,6 +362,8 @@ export default function ScenarioExplorer() {
     setHighlightBaseline,
     radarShowAll,
     setRadarShowAll,
+    showEquityComparison,
+    setShowEquityComparison,
     selectedScenarios,
     theme,
     resilienceControls,
@@ -354,6 +420,7 @@ export default function ScenarioExplorer() {
                       }
                       hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
+                      singleSelect={exploreMode === "equity"}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
                     />
                   )

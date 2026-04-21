@@ -182,6 +182,9 @@ interface ScenarioExplorerState {
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
 
+  // Equity comparison mode
+  showEquityComparison: boolean
+
   // Theme grouping
   groupByTheme: boolean
 
@@ -278,6 +281,9 @@ interface ScenarioExplorerActions {
   // Hydroclimate
   setHydroclimate: (value: string) => void
 
+  // Equity comparison mode
+  setShowEquityComparison: (show: boolean) => void
+
   // Theme grouping
   setGroupByTheme: (group: boolean) => void
 
@@ -343,6 +349,7 @@ const initialState: ScenarioExplorerState = {
   resilienceVisibleOutcomes: [...OUTCOME_CODE_ORDER],
   resilienceDistributionMode: "scenario",
   hydroclimate: "historical",
+  showEquityComparison: false,
   groupByTheme: true,
   sortBy: null,
   sortDirection: "asc",
@@ -684,6 +691,12 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setHydroclimate: (value) =>
       set((state) => {
         state.hydroclimate = value
+      }),
+
+    // Equity comparison mode
+    setShowEquityComparison: (show) =>
+      set((state) => {
+        state.showEquityComparison = show
       }),
 
     // Theme grouping
