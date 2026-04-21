@@ -171,7 +171,6 @@ export default function ResilienceControls({
     deltaMode,
     deltaBaselineScenarioId,
     reorderBySimilarity,
-    showMarginals,
     selectedHydroclimates,
     showCellNumbers,
     quadrantUnit,
@@ -542,24 +541,6 @@ export default function ResilienceControls({
                   />
                 )}
                 Reorder rows by similarity
-              </MenuItem>
-              <MenuItem
-                onClick={() => onChange({ showMarginals: !showMarginals })}
-                sx={{ fontSize: "0.8125rem", gap: 1 }}
-              >
-                {showMarginals ? (
-                  <icons.CheckCircle
-                    sx={{
-                      fontSize: "1rem",
-                      color: theme.palette.blue.bright,
-                    }}
-                  />
-                ) : (
-                  <icons.RadioButtonUnchecked
-                    sx={{ fontSize: "1rem", color: theme.palette.grey[500] }}
-                  />
-                )}
-                Show marginals
               </MenuItem>
               <MenuItem
                 onClick={() =>
