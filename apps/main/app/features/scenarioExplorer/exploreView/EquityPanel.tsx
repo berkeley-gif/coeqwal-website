@@ -673,7 +673,6 @@ export default function EquityPanel() {
   useEffect(() => {
     if (selectedObjectives.length > 0 && showMap) {
       const locationIds = selectedObjectives.map((obj) => obj.locationId)
-      console.log("Highlighting on map for location IDs:", locationIds)
       handleShowOnMap(locationIds)
     } else if (setMotionChildren) {
       // Clear markers when no objectives selected or map hidden
