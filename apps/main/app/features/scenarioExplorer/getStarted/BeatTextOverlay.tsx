@@ -337,6 +337,13 @@ export default function BeatTextOverlay({
   const beat6ListRef = useRef<HTMLDivElement>(null)
   const beat7RadarRef = useRef<HTMLDivElement>(null)
   const beat8HeatmapRef = useRef<HTMLDivElement>(null)
+  /* View-mode headers layered above the two-column eyebrow row in the
+   * right panel. One ref per Beat 5-8; opacity is driven by the same
+   * progress windows as the matching narration paragraph. */
+  const distributionHeaderRef = useRef<HTMLDivElement>(null)
+  const listHeaderRef = useRef<HTMLDivElement>(null)
+  const radarHeaderRef = useRef<HTMLDivElement>(null)
+  const heatmapHeaderRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   /** Bottom Back / indicator / Next control row opacity.
    *
@@ -531,7 +538,12 @@ export default function BeatTextOverlay({
           // 0.01 fade width matches the right-panel backdrop so both
           // land together just before beat 3 settles at 0.39.
           const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.01)
-          el.style.opacity = String(fadeIn)
+          // Hand off to the view-mode header at Beat 5 start: mirror the
+          // "For each scenario..." paragraph exit (0.50 -> 0.51) so the
+          // two column eyebrows vacate the slot just as the
+          // "Distribution view" header fades in.
+          const fadeOut = clamp01((v - 0.5) / B4_EXIT)
+          el.style.opacity = String(fadeIn * (1 - fadeOut))
         }
       }
 
@@ -676,6 +688,34 @@ export default function BeatTextOverlay({
         const el = beat8HeatmapRef.current
         el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
         el.style.gridTemplateRows = v >= 0.88 ? "1fr" : "0fr"
+      }
+
+      // View-mode headers: a single centered label at the top of the
+      // right panel, occupying the slot vacated by the two column
+      // eyebrows ("Consumptive / Non-consumptive uses"). Each header
+      // rides the same fade window as its matching narration paragraph
+      // so label + paragraph arrive and depart together.
+      if (distributionHeaderRef.current) {
+        const el = distributionHeaderRef.current
+        const fadeIn = clamp01((v - 0.51) / B4_PARA)
+        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+      }
+      if (listHeaderRef.current) {
+        const el = listHeaderRef.current
+        const fadeIn = clamp01((v - 0.63) / B5_PARA)
+        const fadeOut = clamp01((v - 0.72) / B6_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+      }
+      if (radarHeaderRef.current) {
+        const el = radarHeaderRef.current
+        const fadeIn = clamp01((v - 0.73) / B6_PARA)
+        const fadeOut = clamp01((v - 0.87) / B6_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+      }
+      if (heatmapHeaderRef.current) {
+        const el = heatmapHeaderRef.current
+        el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
       }
 
       // NOTE: bottom control row opacity is driven by `playState`
@@ -1539,6 +1579,52 @@ export default function BeatTextOverlay({
          *  stack: Title -> GlyphPlaceholder -> Caption. Row/column spacing is
          *  handled entirely by flex + rowGap. No cursor math. */}
         {beat2Layout && (
+          <Box sx={{ position: "relative" }}>
+            {/* View-mode header for Beats 5-8. Absolutely positioned
+             *  over the eyebrow row at the top of the two-column flex,
+             *  so it occupies the slot vacated by "Consumptive uses /
+             *  Non-consumptive uses" without affecting glyph layout.
+             *  Four labels stack in the same slot; each is driven by
+             *  its own progress-keyed opacity ref in the main progress
+             *  handler, so at most one is visible at a time. */}
+            <Box
+              aria-hidden
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                pt: 1.5,
+                px: 3,
+                pointerEvents: "none",
+                textAlign: "center",
+              }}
+            >
+              {(
+                [
+                  { ref: distributionHeaderRef, label: "Distribution view" },
+                  { ref: listHeaderRef, label: "List view" },
+                  { ref: radarHeaderRef, label: "Radar chart" },
+                  { ref: heatmapHeaderRef, label: "Heat map" },
+                ] as const
+              ).map(({ ref, label }) => (
+                <Box
+                  key={label}
+                  ref={ref}
+                  sx={{
+                    position: "absolute",
+                    top: (t) => t.spacing(1.5),
+                    left: 0,
+                    right: 0,
+                    opacity: 0,
+                  }}
+                >
+                  <Typography variant="smallSectionLabel" component="p">
+                    {label}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           <Box
             sx={{
               display: "flex",
@@ -1716,6 +1802,7 @@ export default function BeatTextOverlay({
                 )}
               </Box>
             ))}
+          </Box>
           </Box>
         )}
       </Box>
