@@ -47,6 +47,13 @@ const B1_EXIT = secondsToProgress(1, BLOCK_EXIT_SEC)
 const B2_PARA = secondsToProgress(2, PARAGRAPH_FADE_SEC)
 const B2_EXIT = secondsToProgress(2, BLOCK_EXIT_SEC)
 const B3_PARA = secondsToProgress(3, PARAGRAPH_FADE_SEC)
+const B4_PARA = secondsToProgress(4, PARAGRAPH_FADE_SEC)
+const B4_EXIT = secondsToProgress(4, BLOCK_EXIT_SEC)
+const B5_PARA = secondsToProgress(5, PARAGRAPH_FADE_SEC)
+const B5_EXIT = secondsToProgress(5, BLOCK_EXIT_SEC)
+const B6_PARA = secondsToProgress(6, PARAGRAPH_FADE_SEC)
+const B6_EXIT = secondsToProgress(6, BLOCK_EXIT_SEC)
+const B7_PARA = secondsToProgress(7, PARAGRAPH_FADE_SEC)
 
 interface ColumnEyebrow {
   label: string
@@ -326,6 +333,10 @@ export default function BeatTextOverlay({
   const beat3BeforeRef = useRef<HTMLDivElement>(null)
   const beat3AfterRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
+  const beat5LoiRef = useRef<HTMLDivElement>(null)
+  const beat6ListRef = useRef<HTMLDivElement>(null)
+  const beat7RadarRef = useRef<HTMLDivElement>(null)
+  const beat8HeatmapRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
   /** Bottom Back / indicator / Next control row opacity.
    *
@@ -362,7 +373,7 @@ export default function BeatTextOverlay({
       const el = beat1Ref.current
       if (!el) return
       const v = progress.get()
-      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / B0_PARA)
+      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.01) / B0_PARA)
       const mult = backOutOpacity ? backOutOpacity.get() : 1
       el.style.opacity = String(fadeIn * mult)
     }
@@ -402,7 +413,7 @@ export default function BeatTextOverlay({
       // (it multiplies progress-driven fade-in by `backOutOpacity`).
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.2) / B0_PARA)
+        const fadeIn = clamp01((v - 0.1) / B0_PARA)
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
@@ -424,8 +435,8 @@ export default function BeatTextOverlay({
       // down to zero, so no JS measurement is needed (same pattern as
       // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
       // below).
-      const introFadeOut = clamp01((v - 0.46) / B1_EXIT)
-      const introCollapse = clamp01((v - 0.475) / B1_EXIT)
+      const introFadeOut = clamp01((v - 0.23) / B1_EXIT)
+      const introCollapse = clamp01((v - 0.2375) / B1_EXIT)
       const rowsFrac = 1 - introCollapse
       if (introCollapseRef.current) {
         const el = introCollapseRef.current
@@ -443,9 +454,9 @@ export default function BeatTextOverlay({
         // outcome titles + location captions, since the narrative text
         // lives on the left panel. It fades in with AG_REV's solo morph
         // so the backdrop arrives together with the first graphics.
-        // The fade completes by 0.78 (beat 3's settle point) so the
+        // The fade completes by 0.39 (beat 3's settle point) so the
         // backdrop is fully present when the AG_REV morph lands.
-        const fadeIn = clamp01((v - 0.755) / 0.02)
+        const fadeIn = clamp01((v - 0.3775) / 0.01)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -458,18 +469,18 @@ export default function BeatTextOverlay({
       // caption only partially faded in when beat 3 ends at AG_REV's
       // morphEnd of 0.78.)
       const windows = outcomeMorphWindowsRef.current
-      const TITLE_LEAD = 0.008
-      const TITLE_FADE = 0.018
+      const TITLE_LEAD = 0.004
+      const TITLE_FADE = 0.009
       // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
       // exactly at morphEnd, so the "x locations" text is fully opaque
       // the instant the squares lock in.
-      const CAPTION_FADE = 0.012
+      const CAPTION_FADE = 0.006
       const CAPTION_LEAD = CAPTION_FADE
       // Late morph slices (when activeOutcomeGroups is short) can push the
-      // caption's natural fadeEnd past 1.0, leaving the caption partially
-      // opaque at rest. Cap fadeEnd so every caption settles at opacity 1
-      // before progress reaches the end of the animation.
-      const CAPTION_FADE_END_CEILING = 0.99
+      // caption's natural fadeEnd past the end of beat 4 (0.5), leaving
+      // the caption partially opaque at rest. Cap fadeEnd so every
+      // caption settles at opacity 1 before beat 4 ends.
+      const CAPTION_FADE_END_CEILING = 0.495
       const layoutItems = beat2LayoutRef.current?.items
       if (layoutItems) {
         for (const item of layoutItems) {
@@ -517,21 +528,21 @@ export default function BeatTextOverlay({
         for (let i = 0; i < eyebrows.length; i++) {
           const el = eyebrowRefs.current[i]
           if (!el) continue
-          // 0.02 fade width matches the right-panel backdrop so both
-          // land together just before beat 3 settles at 0.78.
-          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.02)
+          // 0.01 fade width matches the right-panel backdrop so both
+          // land together just before beat 3 settles at 0.39.
+          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.01)
           el.style.opacity = String(fadeIn)
         }
       }
 
       // Tier legend staggers in row by row (Optimal -> Acceptable -> At risk
-      // -> Critical) so the gap between "To compare results..." (0.20–0.24)
-      // and the map's Beat 1B collapse (0.50) fills with a meaningful
-      // level-by-level reveal instead of a single 0.22-wide dead zone.
+      // -> Critical) so the gap between "To compare results..." (0.10–0.12)
+      // and the map's Beat 1B collapse (0.245) fills with a meaningful
+      // level-by-level reveal instead of a single wide dead zone.
       // Per-row fade uses `ITEM_FADE_SEC` (~0.55s) - half the paragraph
       // pace - so the list reads staccato against the slower paragraph
       // reveals. The row-to-row cadence is `ITEM_STAGGER_SEC` (~1.3s).
-      const TIER_LEGEND_FIRST_START = 0.26
+      const TIER_LEGEND_FIRST_START = 0.13
       const TIER_LEGEND_ROW_STEP = B0_STEP
       const TIER_LEGEND_ROW_FADE = B0_ITEM
       const legendRows = tierLegendRowRefs.current
@@ -556,61 +567,115 @@ export default function BeatTextOverlay({
       // Each slot opens during a tween (`playState === "playing"`), when
       // the bottom controls are invisible anyway, so the layout push on
       // the control row isn't perceived.
-      // Beat 1C paragraphs fade in during beat 2 (0.49 / 0.65) and then
-      // fade out at the start of beat 3 (0.73 -> 0.735), freeing the
-      // left-panel slot below the tier legend for the Beat 3 narration.
-      // Their grid rows collapse once fully faded out so the new
-      // paragraph slides cleanly into their former document-flow slot.
+      // Beat 1C paragraphs fade in during beat 2 (0.245 / 0.325) and
+      // then fade out at the start of beat 3 (0.365 -> 0.3675), freeing
+      // the left-panel slot below the tier legend for the Beat 3
+      // narration. Their grid rows collapse once fully faded out so the
+      // new paragraph slides cleanly into their former document-flow
+      // slot.
       if (beat1cExampleRef.current) {
         const el = beat1cExampleRef.current
-        const fadeIn = clamp01((v - 0.49) / B1_PARA)
-        const fadeOut = clamp01((v - 0.73) / B2_EXIT)
+        const fadeIn = clamp01((v - 0.245) / B1_PARA)
+        const fadeOut = clamp01((v - 0.365) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.485 && v < 0.735 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.2425 && v < 0.3675 ? "1fr" : "0fr"
       }
 
       if (beat1cDeliveryRef.current) {
         const el = beat1cDeliveryRef.current
-        const fadeIn = clamp01((v - 0.65) / B1_PARA)
-        const fadeOut = clamp01((v - 0.73) / B2_EXIT)
+        const fadeIn = clamp01((v - 0.325) / B1_PARA)
+        const fadeOut = clamp01((v - 0.365) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.645 && v < 0.735 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.3225 && v < 0.3675 ? "1fr" : "0fr"
       }
 
       // Step 3 narration splits into two slots sharing the document-flow
       // slot freed by the Beat 1C paragraphs. The "before" paragraph
-      // fades in (0.735 -> 0.745) before the AG_REV morph fires at
-      // [0.76, 0.78], then fades out (0.78 -> 0.785) once the morph
+      // fades in (0.3675 -> 0.3725) before the AG_REV morph fires at
+      // [0.38, 0.39], then fades out (0.39 -> 0.3925) once the morph
       // completes so the "after" paragraph can slide into the same slot
-      // (fade in 0.785 -> 0.795) and land with Beat 3's settle at 0.80.
+      // (fade in 0.3925 -> 0.3975) and land with Beat 3's settle at 0.40.
       if (beat3BeforeRef.current) {
         const el = beat3BeforeRef.current
-        const fadeIn = clamp01((v - 0.735) / B2_PARA)
-        const fadeOut = clamp01((v - 0.78) / B2_EXIT)
+        const fadeIn = clamp01((v - 0.3675) / B2_PARA)
+        const fadeOut = clamp01((v - 0.39) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.735 && v < 0.785 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.3675 && v < 0.3925 ? "1fr" : "0fr"
       }
 
       if (beat3AfterRef.current) {
         const el = beat3AfterRef.current
-        const fadeIn = clamp01((v - 0.785) / B2_PARA)
+        const fadeIn = clamp01((v - 0.3925) / B2_PARA)
         // beat3After's fade-out cross-fades with `allOtherOutcomesRef`'s
-        // fade-in (both width 0.02 in Beat 3 time), so it intentionally
+        // fade-in (both width 0.01 in Beat 3 time), so it intentionally
         // runs slower than BLOCK_EXIT to keep the two paragraphs visually
         // tethered across the swap. Left as a bespoke width for now.
-        const fadeOut = clamp01((v - 0.8) / 0.02)
+        const fadeOut = clamp01((v - 0.4) / 0.01)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.785 && v < 0.82 ? "1fr" : "0fr"
+        el.style.gridTemplateRows = v >= 0.3925 && v < 0.41 ? "1fr" : "0fr"
       }
 
-      // "For each scenario, outcome levels..." fades in during the
-      // final beat, right after the Beat 3 "after" paragraph finishes
-      // fading out (0.80 -> 0.82). The remaining 8 outcome morphs then
-      // play alongside this sentence over [0.84, 1.0].
+      // "For each scenario, outcome levels..." fades in during beat 4,
+      // right after the Beat 3 "after" paragraph finishes fading out
+      // (0.40 -> 0.41). The remaining 8 outcome morphs then play
+      // alongside this sentence over [0.42, 0.50]. Once beat 4 settles
+      // it fades out (0.50 -> 0.51, B4_EXIT) so the Beat 5 narration can
+      // slide into the same document-flow slot.
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
-        el.style.opacity = String(clamp01((v - 0.82) / B3_PARA))
-        el.style.gridTemplateRows = v >= 0.82 ? "1fr" : "0fr"
+        const fadeIn = clamp01((v - 0.41) / B3_PARA)
+        const fadeOut = clamp01((v - 0.5) / B4_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.41 && v < 0.51 ? "1fr" : "0fr"
+      }
+
+      // Beat 5 narration ("Outcomes can be displayed in different
+      // ways... / Locations of interest can be selected on the map or
+      // from the chart.") fades in 0.51 -> 0.53 as beat 5 begins, stays
+      // visible while the map + overlay demo highlights play across
+      // [0.53, 0.62], then fades out 0.62 -> 0.63 at the start of beat 6
+      // so the Beat 6 paragraph can slide into the same slot.
+      if (beat5LoiRef.current) {
+        const el = beat5LoiRef.current
+        const fadeIn = clamp01((v - 0.51) / B4_PARA)
+        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.51 && v < 0.63 ? "1fr" : "0fr"
+      }
+
+      // Beat 6 narration ("The list view summarizes key outcomes as bar
+      // charts.") fades in 0.63 -> 0.65 into the freed document-flow
+      // slot, landing just before the bar morph completes at 0.72. It
+      // fades back out 0.72 -> 0.73 to make room for Beat 7.
+      if (beat6ListRef.current) {
+        const el = beat6ListRef.current
+        const fadeIn = clamp01((v - 0.63) / B5_PARA)
+        const fadeOut = clamp01((v - 0.72) / B6_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.63 && v < 0.73 ? "1fr" : "0fr"
+      }
+
+      // Beat 7 narration ("The radar chart displays the average values
+      // of key outcomes...") fades in 0.73 -> 0.75 into the freed slot
+      // while the bars collapse into dots (0.72 -> 0.75) and migrate to
+      // their polar vertices (0.75 -> 0.82). It fades back out
+      // 0.87 -> 0.88 to make room for Beat 8.
+      if (beat7RadarRef.current) {
+        const el = beat7RadarRef.current
+        const fadeIn = clamp01((v - 0.73) / B6_PARA)
+        const fadeOut = clamp01((v - 0.87) / B6_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.73 && v < 0.88 ? "1fr" : "0fr"
+      }
+
+      // Beat 8 narration ("The heat map displays how key outcomes change
+      // under different hydroclimate futures.") fades in 0.88 -> 0.90
+      // into the freed slot, while the radar chrome fades out and the
+      // radar vertices morph into a column of tier-colored cells.
+      if (beat8HeatmapRef.current) {
+        const el = beat8HeatmapRef.current
+        el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
+        el.style.gridTemplateRows = v >= 0.88 ? "1fr" : "0fr"
       }
 
       // NOTE: bottom control row opacity is driven by `playState`
@@ -956,15 +1021,15 @@ export default function BeatTextOverlay({
            *  is driven from `0fr` (collapsed) to `1fr` (natural min-content)
            *  by the progress handler. Swaps share the same document-flow
            *  slot below the tier legend:
-           *    - Beat 1C "example" / "delivery" fade in at 0.49 / 0.65,
-           *      fade out together 0.73 -> 0.735 at the start of beat 3.
-           *    - Beat 3 "before" fades in 0.735 -> 0.745 in the freed slot,
-           *      then fades out 0.78 -> 0.785 once the AG_REV morph ends.
-           *    - Beat 3 "after" fades in 0.785 -> 0.795, lands as beat 3
-           *      settles at 0.80, then fades out 0.80 -> 0.82 at the start
+           *    - Beat 1C "example" / "delivery" fade in at 0.245 / 0.325,
+           *      fade out together 0.365 -> 0.3675 at the start of beat 3.
+           *    - Beat 3 "before" fades in 0.3675 -> 0.3725 in the freed
+           *      slot, then fades out 0.39 -> 0.3925 once AG_REV ends.
+           *    - Beat 3 "after" fades in 0.3925 -> 0.3975, lands as beat 3
+           *      settles at 0.40, then fades out 0.40 -> 0.41 at the start
            *      of beat 4.
-           *    - "For each scenario..." fades in 0.82 -> 0.84 before the
-           *      remaining 8 outcome morphs play over [0.84, 1.0].
+           *    - "For each scenario..." fades in 0.41 -> 0.42 before the
+           *      remaining 8 outcome morphs play over [0.42, 0.50].
            *  The browser computes each block's min-content height from
            *  document flow - no measurement - so the bottom control row
            *  below naturally hugs the last text block that's actually
@@ -1050,6 +1115,72 @@ export default function BeatTextOverlay({
               <Typography variant="body2" component="p">
                 For each scenario, outcome levels are calculated for all key
                 outcomes across locations.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            ref={beat5LoiRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                Outcomes can be displayed in different ways. The{" "}
+                <strong>distribution view</strong> displays outcomes at
+                individual locations of interest.
+              </Typography>
+              <Typography variant="body2" component="p" sx={{ mt: 1 }}>
+                Locations of interest can be selected on the map or from the
+                chart.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            ref={beat6ListRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                The <strong>list view</strong> summarizes key outcomes as bar
+                charts.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            ref={beat7RadarRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                The <strong>radar chart</strong> displays the average values of
+                key outcomes on a circular plot and is useful for scenario
+                comparison.
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            ref={beat8HeatmapRef}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 2 }}>
+              <Typography variant="body2" component="p">
+                The <strong>heat map</strong> displays how key outcomes change
+                under different hydroclimate futures.
               </Typography>
             </Box>
           </Box>
