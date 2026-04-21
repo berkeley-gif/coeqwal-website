@@ -125,13 +125,18 @@ export function useOutcomeDefinitions() {
 export function useScenarioTiers(scenarioId: string | null) {
   const theme = useTheme()
 
-  // Fetch scenario-specific tier data
+  // Fetch scenario-specific tier data. `keepPreviousData` avoids a flash
+  // of empty tiers (the "no data available" fallback in glyphs/charts) when
+  // the scenarioId changes - e.g. when the user switches hydroclimate and
+  // the sibling group resolves to a different variant short_code.
   const {
     data: scenarioData,
     error: scenarioError,
     isLoading: scenarioLoading,
-  } = useSWR(scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null, () =>
-    scenarioId ? fetchScenarioTiers(scenarioId) : null,
+  } = useSWR(
+    scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null,
+    () => (scenarioId ? fetchScenarioTiers(scenarioId) : null),
+    { keepPreviousData: true },
   )
 
   // Use shared hooks for tier list (cached, deduplicated)

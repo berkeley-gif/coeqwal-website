@@ -180,6 +180,7 @@ export default function MapOverlayPanels() {
     keyOperations: {
       target: useRef<HTMLDivElement>(null),
       container: useRef<HTMLDivElement>(null),
+      hydroclimateTarget: useRef<HTMLDivElement>(null),
     },
     keyOutcomes: {
       target: useRef<HTMLDivElement>(null),
@@ -791,7 +792,6 @@ export default function MapOverlayPanels() {
                         offsetY={30}
                         opacity={strategyInfoTooltipOpacity}
                         isClosed={closedTooltips.has("strategy")}
-                        onClose={() => closeTooltip("strategy")}
                       />
                     }
                   >
@@ -842,12 +842,14 @@ export default function MapOverlayPanels() {
                           offsetY={20}
                           opacity={keyOperationsTooltipOpacity}
                           isClosed={closedTooltips.has("keyOps")}
-                          onClose={() => closeTooltip("keyOps")}
                         />
 
                         <ScrollTooltip
                           targetRef={panelRefs.keyOperations.target}
                           containerRef={panelRefs.keyOperations.container}
+                          alignTargetRef={
+                            panelRefs.keyOperations.hydroclimateTarget
+                          }
                           content={
                             <>
                               <Typography
@@ -858,15 +860,28 @@ export default function MapOverlayPanels() {
                               </Typography>
                               This describes the temperature and patterns of
                               rainfall and snow that determine how much water is
-                              available over time. Soon you will be able to see
-                              the scenario results for different climates.
+                              available over time. Choose a hydroclimate to see
+                              how the outcomes below change under different
+                              conditions.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
+                              <Box component="span" sx={{ display: "block" }}>
+                                Click an icon to update the key outcomes; hover
+                                to learn about each hydroclimate.
+                              </Box>
                             </>
                           }
                           position="left"
                           offsetY={20}
                           opacity={viewByClimateTooltipOpacity}
                           isClosed={closedTooltips.has("viewByClimate")}
-                          onClose={() => closeTooltip("viewByClimate")}
                         />
                       </>
                     }
@@ -874,6 +889,7 @@ export default function MapOverlayPanels() {
                     <KeyOperationsPanel
                       scenarioId={LEARN_SCENARIO_ID}
                       onTitleClick={() => reopenTooltip("keyOps")}
+                      hydroclimateRef={panelRefs.keyOperations.hydroclimateTarget}
                     />
                   </RightPanelSlot>
 
@@ -936,7 +952,6 @@ export default function MapOverlayPanels() {
                         offsetY={20}
                         opacity={keyOutcomesTooltipOpacity}
                         isClosed={closedTooltips.has("keyOutcomes")}
-                        onClose={() => closeTooltip("keyOutcomes")}
                       />
                     }
                   >

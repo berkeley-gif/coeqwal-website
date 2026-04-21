@@ -102,6 +102,14 @@ export interface OutcomeGlyphItemProps {
   variant?: GlyphVariant
   /** When true, use the morphable glyph that animates between bars and distribution */
   morphEnabled?: boolean
+  /**
+   * Compact view. When true, the `size` prop is forwarded to the underlying
+   * morphable bar glyph so it renders in a `size x size` box instead of the
+   * default 120px-wide distribution-aligned container. Use in tight
+   * layouts (e.g. Learn-section panels) where the full bar container
+   * overruns and no distribution-mode morph is needed.
+   */
+  compact?: boolean
   /** Size of the glyph (default: responsive 50/60px) */
   size?: number
   /** Whether to show the outcome label */
@@ -131,6 +139,7 @@ export function OutcomeGlyphItem({
   isTooltipActive = false,
   variant: variantOverride,
   morphEnabled = false,
+  compact = false,
   size,
   showLabel = true,
   showInfoButton = true,
@@ -281,6 +290,8 @@ export function OutcomeGlyphItem({
             tierColors={tierColors}
             mode={morphMode}
             locationCounts={locationCounts}
+            compact={compact}
+            size={compact ? actualSize : undefined}
           />
         </Box>
       ) : isActive ? (

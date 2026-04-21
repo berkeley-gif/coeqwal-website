@@ -7,6 +7,7 @@
  * Uses shared OperationsIconGroup component.
  */
 
+import { RefObject } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { HydroclimateChooser } from "../../../scenarios/components"
@@ -16,11 +17,13 @@ import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
 interface KeyOperationsPanelProps {
   scenarioId?: string
   onTitleClick?: () => void
+  hydroclimateRef?: RefObject<HTMLDivElement | null>
 }
 
 export function KeyOperationsPanel({
   scenarioId = "s0020",
   onTitleClick,
+  hydroclimateRef,
 }: KeyOperationsPanelProps) {
   const theme = useTheme()
   const { getScenario, isLoading } = useScenarioList()
@@ -92,13 +95,15 @@ export function KeyOperationsPanel({
         />
 
         {/* Hydroclimate section */}
-        <HydroclimateChooser
-          layout="horizontal"
-          showTitle={true}
-          showLabels={false}
-          value={hydroclimate}
-          onChange={setHydroclimate}
-        />
+        <Box ref={hydroclimateRef}>
+          <HydroclimateChooser
+            layout="horizontal"
+            showTitle={true}
+            showLabels={false}
+            value={hydroclimate}
+            onChange={setHydroclimate}
+          />
+        </Box>
       </Box>
     </Box>
   )
