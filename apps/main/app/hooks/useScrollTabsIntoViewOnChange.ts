@@ -28,8 +28,7 @@ export function useScrollTabsIntoViewOnChange({
 
   useEffect(() => {
     const tabsEl = tabsRef.current
-    const panelEl = panelRef.current
-    if (!tabsEl || !panelEl) return
+    if (!tabsEl) return
 
     const wasInArea = wasInAreaRef.current
     wasInAreaRef.current = isInTabsArea
@@ -51,9 +50,28 @@ export function useScrollTabsIntoViewOnChange({
     if (lastAlignedTabRef.current === activeTab) return
     lastAlignedTabRef.current = activeTab
 
-    const raf = requestAnimationFrame(() => {
+    // TabPanels wraps the active panel in AnimatePresence mode="wait", so the
+    // new panel does not mount until the previous panel's exit spring finishes
+    // (a few hundred ms). Until then `panelRef.current` still points at the
+    // exiting panel (or is briefly null), and a single-frame measure would
+    // scroll to the wrong element. Each TabPanel renders
+    // id={`panel-${tabKey}`}, so we poll rAF until the ref matches the
+    // expected id for the new activeTab, then align. Bail after MAX_FRAMES.
+    const expectedId = `panel-${activeTab}`
+    const MAX_FRAMES = 60
+    let rafId = 0
+    let framesTried = 0
+
+    const tryAlign = () => {
+      const panelEl = panelRef.current
+      if (!panelEl || panelEl.id !== expectedId) {
+        if (++framesTried < MAX_FRAMES) {
+          rafId = requestAnimationFrame(tryAlign)
+        }
+        return
+      }
+
       const panelRect = panelEl.getBoundingClientRect()
-      // tabsHeight includes ExploreSubNav (it's a child of SmoothTabs)
       const tabsHeight = tabsEl.offsetHeight
       const absolutePanelTop = window.scrollY + panelRect.top
       const rawTarget = absolutePanelTop - tabsHeight - offsetPx
@@ -66,8 +84,9 @@ export function useScrollTabsIntoViewOnChange({
       if (Math.abs(window.scrollY - targetY) > epsilon) {
         window.scrollTo({ top: targetY, behavior })
       }
-    })
+    }
 
-    return () => cancelAnimationFrame(raf)
+    rafId = requestAnimationFrame(tryAlign)
+    return () => cancelAnimationFrame(rafId)
   }, [activeTab, behavior, offsetPx, tabsRef, isInTabsArea, panelRef])
 }
