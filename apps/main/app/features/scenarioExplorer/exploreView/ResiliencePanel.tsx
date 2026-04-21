@@ -246,7 +246,6 @@ export default function ResiliencePanel({
   } = controls
 
   const { selectedScenarios } = useScenarioExplorerStore()
-  const toggleScenario = useScenarioExplorerStore((s) => s.toggleScenario)
   const setHighlightedScenario = useScenarioExplorerStore(
     (s) => s.setHighlightedScenario,
   )
@@ -1662,35 +1661,12 @@ export default function ResiliencePanel({
   const noOutcomesSelected =
     !anyEmpty && view === "aggregate" && outcomeRowCodes.length === 0
 
-  // Pin / expand wiring for the small-multiples tile headers. Pinning
-  // either flips a scenario in `selectedScenarios` (by-scenario view)
-  // or an outcome in `resilienceVisibleOutcomes` (by-outcome view).
-  // Expand swaps the grid for a single full-size heatmap via the
-  // `expandedTileId` control state.
-  const handleTilePinByScenario = useCallback(
-    (sid: string) => {
-      toggleScenario(sid)
-    },
-    [toggleScenario],
-  )
-  const isScenarioPinned = useCallback(
-    (sid: string) => selectedScenarios.includes(sid),
-    [selectedScenarios],
-  )
-  const handleTilePinByOutcome = useCallback(
-    (code: string) => {
-      toggleResilienceOutcome(code)
-    },
-    [toggleResilienceOutcome],
-  )
-  const visibleOutcomeSet = useMemo(
-    () => new Set(resilienceVisibleOutcomes),
-    [resilienceVisibleOutcomes],
-  )
-  const isOutcomePinned = useCallback(
-    (code: string) => visibleOutcomeSet.has(code),
-    [visibleOutcomeSet],
-  )
+  // Expand wiring for the small-multiples tile headers. Expand swaps
+  // the grid for a single full-size heatmap via the `expandedTileId`
+  // control state. The per-tile pin/check affordance was removed so
+  // the sidebar is the single source of truth for scenario selection;
+  // outcome visibility is driven by the "choose outcomes" chip in the
+  // chart controls.
   const handleTileExpand = useCallback(
     (tileId: string) => {
       onControlsChange?.({ expandedTileId: tileId })
@@ -1747,10 +1723,10 @@ export default function ResiliencePanel({
   // curate (pin ≥1 item) or expand a tile — the two signals that they
   // understand the next step. Quadrant view has its own affordances, so
   // skip the banner there.
-  const allPrimaryOutcomesVisible = useMemo(
-    () => OUTCOME_CODE_ORDER.every((c) => visibleOutcomeSet.has(c)),
-    [visibleOutcomeSet],
-  )
+  const allPrimaryOutcomesVisible = useMemo(() => {
+    const set = new Set(resilienceVisibleOutcomes)
+    return OUTCOME_CODE_ORDER.every((c) => set.has(c))
+  }, [resilienceVisibleOutcomes])
   const onboardingVariant: OnboardingVariant | null = expandedTile
     ? null
     : anyEmpty
@@ -2076,10 +2052,6 @@ export default function ResiliencePanel({
                     onSquareClick={(info) =>
                       handleSquareClick({ cell: info.cell, entry: info.entry })
                     }
-                    onTilePin={
-                      onControlsChange ? handleTilePinByScenario : undefined
-                    }
-                    isTilePinned={isScenarioPinned}
                     onTileExpand={
                       onControlsChange ? handleTileExpand : undefined
                     }
@@ -2121,10 +2093,6 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTilePin={
-                    onControlsChange ? handleTilePinByOutcome : undefined
-                  }
-                  isTilePinned={isOutcomePinned}
                   onTileExpand={onControlsChange ? handleTileExpand : undefined}
                 />
               </BrowseShell>

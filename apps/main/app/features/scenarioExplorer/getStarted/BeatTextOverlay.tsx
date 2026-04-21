@@ -25,6 +25,28 @@ import {
   renderIconDef,
 } from "../../scenarios/components/shared/opsIcons"
 import { useDrawerStore } from "@repo/state/drawer"
+import {
+  PARAGRAPH_FADE_SEC,
+  ITEM_FADE_SEC,
+  ITEM_STAGGER_SEC,
+  BLOCK_EXIT_SEC,
+  secondsToProgress,
+} from "./animationTiming"
+
+/* ── Per-beat progress-fraction widths, derived from the seconds-based
+ *    primitives in `animationTiming.ts`. ──
+ *
+ * Each beat has a different progress-per-second rate, so the same wall-clock
+ * duration maps to different progress widths. Precomputing once at module
+ * scope keeps the hot `progress.on("change")` listener free of arithmetic. */
+const B0_PARA = secondsToProgress(0, PARAGRAPH_FADE_SEC)
+const B0_ITEM = secondsToProgress(0, ITEM_FADE_SEC)
+const B0_STEP = secondsToProgress(0, ITEM_STAGGER_SEC)
+const B1_PARA = secondsToProgress(1, PARAGRAPH_FADE_SEC)
+const B1_EXIT = secondsToProgress(1, BLOCK_EXIT_SEC)
+const B2_PARA = secondsToProgress(2, PARAGRAPH_FADE_SEC)
+const B2_EXIT = secondsToProgress(2, BLOCK_EXIT_SEC)
+const B3_PARA = secondsToProgress(3, PARAGRAPH_FADE_SEC)
 
 interface ColumnEyebrow {
   label: string
@@ -340,7 +362,7 @@ export default function BeatTextOverlay({
       const el = beat1Ref.current
       if (!el) return
       const v = progress.get()
-      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / 0.04)
+      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / B0_PARA)
       const mult = backOutOpacity ? backOutOpacity.get() : 1
       el.style.opacity = String(fadeIn * mult)
     }
@@ -380,7 +402,7 @@ export default function BeatTextOverlay({
       // (it multiplies progress-driven fade-in by `backOutOpacity`).
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.2) / 0.04)
+        const fadeIn = clamp01((v - 0.2) / B0_PARA)
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
@@ -402,8 +424,8 @@ export default function BeatTextOverlay({
       // down to zero, so no JS measurement is needed (same pattern as
       // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
       // below).
-      const introFadeOut = clamp01((v - 0.46) / 0.015)
-      const introCollapse = clamp01((v - 0.475) / 0.015)
+      const introFadeOut = clamp01((v - 0.46) / B1_EXIT)
+      const introCollapse = clamp01((v - 0.475) / B1_EXIT)
       const rowsFrac = 1 - introCollapse
       if (introCollapseRef.current) {
         const el = introCollapseRef.current
@@ -506,9 +528,12 @@ export default function BeatTextOverlay({
       // -> Critical) so the gap between "To compare results..." (0.20–0.24)
       // and the map's Beat 1B collapse (0.50) fills with a meaningful
       // level-by-level reveal instead of a single 0.22-wide dead zone.
+      // Per-row fade uses `ITEM_FADE_SEC` (~0.55s) - half the paragraph
+      // pace - so the list reads staccato against the slower paragraph
+      // reveals. The row-to-row cadence is `ITEM_STAGGER_SEC` (~1.3s).
       const TIER_LEGEND_FIRST_START = 0.26
-      const TIER_LEGEND_ROW_STEP = 0.05
-      const TIER_LEGEND_ROW_FADE = 0.04
+      const TIER_LEGEND_ROW_STEP = B0_STEP
+      const TIER_LEGEND_ROW_FADE = B0_ITEM
       const legendRows = tierLegendRowRefs.current
       for (let i = 0; i < legendRows.length; i++) {
         const el = legendRows[i]
@@ -538,16 +563,16 @@ export default function BeatTextOverlay({
       // paragraph slides cleanly into their former document-flow slot.
       if (beat1cExampleRef.current) {
         const el = beat1cExampleRef.current
-        const fadeIn = clamp01((v - 0.49) / 0.03)
-        const fadeOut = clamp01((v - 0.73) / 0.005)
+        const fadeIn = clamp01((v - 0.49) / B1_PARA)
+        const fadeOut = clamp01((v - 0.73) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
         el.style.gridTemplateRows = v >= 0.485 && v < 0.735 ? "1fr" : "0fr"
       }
 
       if (beat1cDeliveryRef.current) {
         const el = beat1cDeliveryRef.current
-        const fadeIn = clamp01((v - 0.65) / 0.03)
-        const fadeOut = clamp01((v - 0.73) / 0.005)
+        const fadeIn = clamp01((v - 0.65) / B1_PARA)
+        const fadeOut = clamp01((v - 0.73) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
         el.style.gridTemplateRows = v >= 0.645 && v < 0.735 ? "1fr" : "0fr"
       }
@@ -560,15 +585,19 @@ export default function BeatTextOverlay({
       // (fade in 0.785 -> 0.795) and land with Beat 3's settle at 0.80.
       if (beat3BeforeRef.current) {
         const el = beat3BeforeRef.current
-        const fadeIn = clamp01((v - 0.735) / 0.01)
-        const fadeOut = clamp01((v - 0.78) / 0.005)
+        const fadeIn = clamp01((v - 0.735) / B2_PARA)
+        const fadeOut = clamp01((v - 0.78) / B2_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
         el.style.gridTemplateRows = v >= 0.735 && v < 0.785 ? "1fr" : "0fr"
       }
 
       if (beat3AfterRef.current) {
         const el = beat3AfterRef.current
-        const fadeIn = clamp01((v - 0.785) / 0.01)
+        const fadeIn = clamp01((v - 0.785) / B2_PARA)
+        // beat3After's fade-out cross-fades with `allOtherOutcomesRef`'s
+        // fade-in (both width 0.02 in Beat 3 time), so it intentionally
+        // runs slower than BLOCK_EXIT to keep the two paragraphs visually
+        // tethered across the swap. Left as a bespoke width for now.
         const fadeOut = clamp01((v - 0.8) / 0.02)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
         el.style.gridTemplateRows = v >= 0.785 && v < 0.82 ? "1fr" : "0fr"
@@ -580,7 +609,7 @@ export default function BeatTextOverlay({
       // play alongside this sentence over [0.84, 1.0].
       if (allOtherOutcomesRef.current) {
         const el = allOtherOutcomesRef.current
-        el.style.opacity = String(clamp01((v - 0.82) / 0.02))
+        el.style.opacity = String(clamp01((v - 0.82) / B3_PARA))
         el.style.gridTemplateRows = v >= 0.82 ? "1fr" : "0fr"
       }
 

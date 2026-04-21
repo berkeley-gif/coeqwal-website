@@ -778,9 +778,16 @@ export const themeValues = {
     learnPanel: {
       base: {
         backgroundColor: background.whiteOverlay[95],
-        borderRadius: borderRadius.none,
+        // Standard panel radius, matching other cards/panels/tooltips
+        // in the design system (see SummaryPanel inline, etc).
+        borderRadius: borderRadius.md,
         pointerEvents: "auto" as const,
-        padding: { xs: 2, sm: 2.5, md: 3 }, // matches space.card.xs
+        // Horizontal padding is unchanged so the panel chrome still
+        // breathes at the edges. Vertical padding is reduced to 3/4
+        // of the horizontal scale so the three stacked learn panels
+        // fit on shorter viewports without clipping.
+        px: { xs: 2, sm: 2.5, md: 3 },
+        py: { xs: 1.5, sm: 1.875, md: 2.25 },
       },
       maxWidth: "540px",
     },

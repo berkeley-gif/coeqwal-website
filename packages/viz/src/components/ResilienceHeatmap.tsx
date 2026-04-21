@@ -666,13 +666,19 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           : 0
 
         // Reclaim legend space when the tile is embedded in small-multiples
-        // (the wrapper renders one shared legend outside). Reserve extra
-        // room for a grouped-column header band when columnGroups is set.
+        // (the wrapper renders one shared legend outside), but keep enough
+        // room below the plot for the x-axis (hydroclimate) labels. The
+        // tick text is placed with dominant-baseline "hanging" at y = 18
+        // (or + group band) at font-size 11, so labels extend to ~30px
+        // past the plot. A 40px reserve covers that plus a small safety
+        // pad so labels aren't clipped in small-multiples tiles. Reserve
+        // extra room for a grouped-column header band when columnGroups
+        // is set.
         const hasColumnGroups = !!columnGroups && columnGroups.length > 0
         const groupBand = hasColumnGroups ? COLUMN_GROUP_BAND : 0
+        const X_AXIS_LABEL_RESERVE = 40
         const effectiveMarginBottom =
-          (hideLegend ? MARGIN.bottom - LEGEND_HEIGHT : MARGIN.bottom) +
-          groupBand
+          (hideLegend ? X_AXIS_LABEL_RESERVE : MARGIN.bottom) + groupBand
 
         const innerW = w - MARGIN.left - MARGIN.right - extraRight
         const innerH = h - MARGIN.top - effectiveMarginBottom - extraBottom

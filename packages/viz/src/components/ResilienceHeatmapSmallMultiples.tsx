@@ -81,18 +81,8 @@ export interface ResilienceHeatmapSmallMultiplesProps {
     entry: ResilienceGlyphEntry
   }) => void
   /**
-   * Optional per-tile pin toggle. When provided, each tile header shows a
-   * pin icon that flips between "+" (unpinned) and "✓" (pinned) based on
-   * `isTilePinned(tileId)`. Clicking invokes `onTilePin(tileId)`; the
-   * consumer is expected to toggle its own selection state (e.g. a
-   * sidebar scenario list or outcome set). Omit all three props to hide
-   * the affordance.
-   */
-  onTilePin?: (tileId: string) => void
-  isTilePinned?: (tileId: string) => boolean
-  /**
    * Optional per-tile expand button. When provided, each tile header
-   * shows an expand icon that fires `onTileExpand(tileId)` — typically
+   * shows an expand icon that fires `onTileExpand(tileId)`, typically
    * used to swap the entire grid for a single full-size heatmap.
    */
   onTileExpand?: (tileId: string) => void
@@ -221,8 +211,6 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       distributionMode,
       onSquareHover,
       onSquareClick,
-      onTilePin,
-      isTilePinned,
       onTileExpand,
     }) => {
       const tileHeight = useMemo(() => {
@@ -283,8 +271,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             }}
           >
             {tiles.map((tile) => {
-              const pinned = isTilePinned?.(tile.id) ?? false
-              const hasActions = !!onTilePin || !!onTileExpand
+              const hasActions = !!onTileExpand
               return (
                 <div
                   key={tile.id}
@@ -343,28 +330,6 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                           flexShrink: 0,
                         }}
                       >
-                        {onTilePin && (
-                          <TileActionButton
-                            palette={palette}
-                            active={pinned}
-                            ariaLabel={
-                              pinned
-                                ? `Unpin ${tile.title}`
-                                : `Pin ${tile.title}`
-                            }
-                            title={
-                              pinned
-                                ? "Remove from selection"
-                                : "Pin to selection"
-                            }
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onTilePin(tile.id)
-                            }}
-                          >
-                            {pinned ? "✓" : "+"}
-                          </TileActionButton>
-                        )}
                         {onTileExpand && (
                           <TileActionButton
                             palette={palette}
