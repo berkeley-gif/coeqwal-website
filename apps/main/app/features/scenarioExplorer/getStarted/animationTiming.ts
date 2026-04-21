@@ -77,16 +77,22 @@ export const BEATS: readonly BeatDef[] = [
   //      back-to-back across [0.42, 0.50] (each a 0.01-wide slice,
   //      ~1.4s each, matching AG_REV's speed).
   { id: "all-other-morphs", progress: 0.5, duration: 14 },
-  // B4 (5/8) - Distribution view + LOI highlight. 7s over 0.12
+  // B4 (5/8) - Distribution view + LOI highlight. 9s over 0.12
   //      progress. "For each scenario..." fades out 0.50 -> 0.51;
-  //      the Beat 5 narration ("Outcomes can be displayed... /
-  //      Locations of interest can be selected...") fades in
-  //      0.51 -> 0.53 into the same document-flow slot. A first
-  //      demo LOI (AG_REV polygon) is highlighted in both the map
-  //      and its distribution square across [0.53, 0.575]; then a
-  //      second AG_REV LOI highlights across [0.575, 0.62] to
-  //      reinforce the concept. Beat settles at 0.62.
-  { id: "loi-highlight", progress: 0.62, duration: 7 },
+  //      sentence 1 of the Beat 5 narration ("Outcomes can be
+  //      displayed in different ways...") fades in 0.51 -> 0.53;
+  //      sentence 2 ("Locations of interest can be selected on
+  //      the map or from the chart") fades in 0.545 -> 0.560.
+  //      Five-step LOI choreography plays across the second half
+  //      of the beat on a single AG_REV LOI (Glenn Colusa I.D.):
+  //        [0.555, 0.575] AG demand-unit layer fades in on the map
+  //        [0.580, 0.590] gold ring on the distribution square
+  //        [0.590, 0.600] popup near the square
+  //        [0.600, 0.610] gold stroke on the map polygon
+  //        [0.610, 0.620] popup near the polygon
+  //      Beat settles at 0.62; tail [0.62, 0.63] clears all demo
+  //      state so Beat 6 starts clean.
+  { id: "loi-highlight", progress: 0.62, duration: 9 },
   // B5 (6/8) - List view. 5s over 0.10 progress. The Beat 5
   //      narration fades out 0.62 -> 0.63; "The list view
   //      summarizes key outcomes as bar charts." fades in

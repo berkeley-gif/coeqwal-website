@@ -333,7 +333,11 @@ export default function BeatTextOverlay({
   const beat3BeforeRef = useRef<HTMLDivElement>(null)
   const beat3AfterRef = useRef<HTMLDivElement>(null)
   const allOtherOutcomesRef = useRef<HTMLDivElement>(null)
-  const beat5LoiRef = useRef<HTMLDivElement>(null)
+  // Beat 5 splits into two sentences so S2 can reveal right before the
+  // five-step LOI choreography starts (~0.555). Keeping them in separate
+  // grid-rows collapses avoids S2's reveal pushing S1 around.
+  const beat5LoiS1Ref = useRef<HTMLDivElement>(null)
+  const beat5LoiS2Ref = useRef<HTMLDivElement>(null)
   const beat6ListRef = useRef<HTMLDivElement>(null)
   const beat7RadarRef = useRef<HTMLDivElement>(null)
   const beat8HeatmapRef = useRef<HTMLDivElement>(null)
@@ -641,18 +645,28 @@ export default function BeatTextOverlay({
         el.style.gridTemplateRows = v >= 0.41 && v < 0.51 ? "1fr" : "0fr"
       }
 
-      // Beat 5 narration ("Outcomes can be displayed in different
-      // ways... / Locations of interest can be selected on the map or
-      // from the chart.") fades in 0.51 -> 0.53 as beat 5 begins, stays
-      // visible while the map + overlay demo highlights play across
-      // [0.53, 0.62], then fades out 0.62 -> 0.63 at the start of beat 6
-      // so the Beat 6 paragraph can slide into the same slot.
-      if (beat5LoiRef.current) {
-        const el = beat5LoiRef.current
+      // Beat 5 narration splits into two sentences so the five-step LOI
+      // choreography (starting at 0.555 in TierAnimationSection) can lead
+      // with the matching second sentence.
+      //  S1 "Outcomes can be displayed... / distribution view..."
+      //     fades in 0.51 -> 0.53 and holds through the beat.
+      //  S2 "Locations of interest can be selected..." fades in
+      //     0.545 -> 0.560 just before step 1 kicks in.
+      // Both share the beat-exit window 0.62 -> 0.63 so the Beat 6
+      // paragraph can slide into the same slot.
+      if (beat5LoiS1Ref.current) {
+        const el = beat5LoiS1Ref.current
         const fadeIn = clamp01((v - 0.51) / B4_PARA)
         const fadeOut = clamp01((v - 0.62) / B5_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
         el.style.gridTemplateRows = v >= 0.51 && v < 0.63 ? "1fr" : "0fr"
+      }
+      if (beat5LoiS2Ref.current) {
+        const el = beat5LoiS2Ref.current
+        const fadeIn = clamp01((v - 0.545) / B4_PARA)
+        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+        el.style.opacity = String(fadeIn * (1 - fadeOut))
+        el.style.gridTemplateRows = v >= 0.545 && v < 0.63 ? "1fr" : "0fr"
       }
 
       // Beat 6 narration ("The list view summarizes key outcomes as bar
@@ -1159,7 +1173,7 @@ export default function BeatTextOverlay({
             </Box>
           </Box>
           <Box
-            ref={beat5LoiRef}
+            ref={beat5LoiS1Ref}
             sx={{
               display: "grid",
               gridTemplateRows: "0fr",
@@ -1172,7 +1186,18 @@ export default function BeatTextOverlay({
                 <strong>distribution view</strong> displays outcomes at
                 individual locations of interest.
               </Typography>
-              <Typography variant="body2" component="p" sx={{ mt: 1 }}>
+            </Box>
+          </Box>
+          <Box
+            ref={beat5LoiS2Ref}
+            sx={{
+              display: "grid",
+              gridTemplateRows: "0fr",
+              opacity: 0,
+            }}
+          >
+            <Box sx={{ overflow: "hidden", pt: 1 }}>
+              <Typography variant="body2" component="p">
                 Locations of interest can be selected on the map or from the
                 chart.
               </Typography>
