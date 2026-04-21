@@ -7,18 +7,27 @@
  * Uses shared OutcomeGlyphItem components with ClickTooltip wrappers.
  */
 
+import { useEffect } from "react"
+import { preload } from "swr"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
+import { fetchScenarioTiers } from "@repo/data/coeqwal"
+import { CACHE_KEYS } from "@repo/data/cache"
 import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
   useScenarioTiers,
 } from "../../../scenarios/hooks"
+import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { useMapVisualizationAction, useActiveMapOutcome } from "../../hooks"
+import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
+import { HYDROCLIMATE_ID_MAP } from "../../../../content/scenarios"
 import type { OutcomeCode } from "../../../../content/outcomes"
+
+const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 interface KeyOutcomesPanelProps {
   scenarioId?: string
@@ -38,17 +47,39 @@ export function KeyOutcomesPanel({
   // Use unified tooltip state management
   const { openTooltip, handleToggle, handleClose } = useTierTooltipState()
 
-  // Fetch tier data for the scenario
-  const { chartData, isLoading } = useScenarioTiers(scenarioId)
+  // Resolve the sibling-group scenarioId (e.g. "s0020") to the per-hydroclimate
+  // variant short_code so the bar chart tiers reflect the user's hydroclimate
+  // selection in the KeyOperationsPanel above.
+  const { hydroclimate } = useScenarioExplorerStore()
+  const { buildIdMapping } = useScenarioList()
+  const resolvedScenarioId =
+    buildIdMapping(hydroclimate)[scenarioId] ?? scenarioId
 
-  // Shared map visualization action and active state
-  const { showOnMap } = useMapVisualizationAction()
+  // Warm SWR for every hydroclimate variant so switching climates never
+  // triggers a round-trip (and therefore never flashes "no data").
+  useEffect(() => {
+    for (const hc of ALL_HYDROCLIMATES) {
+      const variantId = buildIdMapping(hc)[scenarioId]
+      if (!variantId) continue
+      preload(CACHE_KEYS.scenarioTiers(variantId), () =>
+        fetchScenarioTiers(variantId),
+      )
+    }
+  }, [scenarioId, buildIdMapping])
+
+  // Fetch tier data for the scenario
+  const { chartData, isLoading } = useScenarioTiers(resolvedScenarioId)
+
+  // Shared map visualization action and active state. Use the
+  // hydroclimate-aware variant so the map layer updates when the user
+  // changes hydroclimate via the chooser in the KeyOperationsPanel.
+  const { showOnMapForGroup } = useMapVisualizationAction()
   const activeVisualization = useActiveMapOutcome()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
   const handleShowOnMap = (code: OutcomeCode) => {
     handleClose()
-    showOnMap(code, scenarioId)
+    showOnMapForGroup(code, scenarioId)
   }
 
   // Helper to check if outcome has valid data (by code)
@@ -115,6 +146,8 @@ export function KeyOutcomesPanel({
             showLabel={true}
             showInfoButton={true}
             showSortButton={false}
+            morphEnabled
+            compact
             onGlyphClick={() => handleShowOnMap(code)}
             onInfoClick={(e) => {
               e.stopPropagation()

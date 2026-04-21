@@ -37,11 +37,21 @@ const MotionBox = motion.create(Box)
 interface ScrollTooltipProps {
   targetRef: RefObject<HTMLElement | null>
   containerRef: RefObject<HTMLElement | null>
+  /**
+   * Optional separate target used only to anchor the tooltip's horizontal
+   * position (for `position="left"` / `"right"`) or vertical position
+   * (for `position="top"` / `"bottom"`). Useful when you want the tooltip
+   * to keep its size/vertical center based on a parent, but point at a
+   * specific child element's edge.
+   */
+  alignTargetRef?: RefObject<HTMLElement | null>
   content: ReactNode
   position?: "top" | "bottom" | "left" | "right"
   opacity: MotionValue<number> // Framer Motion value for scroll-driven opacity
   /** Vertical offset in pixels (positive = down, negative = up) */
   offsetY?: number
+  /** Horizontal offset in pixels (positive = right, negative = left) */
+  offsetX?: number
   /** Whether the tooltip has been manually closed */
   isClosed?: boolean
   /** Callback when the close button is clicked */
@@ -55,10 +65,12 @@ interface ScrollTooltipProps {
 export default function ScrollTooltip({
   targetRef,
   containerRef,
+  alignTargetRef,
   content,
   position = "right",
   opacity,
   offsetY = 0,
+  offsetX = 0,
   isClosed = false,
   onClose,
 }: ScrollTooltipProps) {
@@ -91,6 +103,19 @@ export default function ScrollTooltip({
       const relativeTop = targetRect.top - containerRect.top
       const relativeLeft = targetRect.left - containerRect.left
 
+      // Optional align target overrides just one axis based on `position`,
+      // leaving the other axis anchored to `targetRef`.
+      const alignEl = alignTargetRef?.current
+      const alignRect = alignEl ? alignEl.getBoundingClientRect() : null
+      const alignRelativeLeft = alignRect
+        ? alignRect.left - containerRect.left
+        : relativeLeft
+      const alignWidth = alignRect ? alignRect.width : targetRect.width
+      const alignRelativeTop = alignRect
+        ? alignRect.top - containerRect.top
+        : relativeTop
+      const alignHeight = alignRect ? alignRect.height : targetRect.height
+
       // Tooltip dimensions
       const tooltipWidth = 300 // max-width from styles
       const gap = 40 // Gap to avoid overlapping
@@ -98,28 +123,30 @@ export default function ScrollTooltip({
       let top = 0
       let left = 0
 
-      // Position relative to target element
+      // Position relative to target element.
+      // For left/right positions, `alignTargetRef` overrides the horizontal
+      // anchor only; for top/bottom it overrides the vertical anchor only.
       switch (position) {
         case "right":
           top = relativeTop + targetRect.height / 2
-          left = relativeLeft + targetRect.width + gap
+          left = alignRelativeLeft + alignWidth + gap
           break
         case "left":
           top = relativeTop + targetRect.height / 2 - 32 // Slightly raised
-          left = relativeLeft - tooltipWidth - gap
+          left = alignRelativeLeft - tooltipWidth - gap
           break
         case "top":
-          top = relativeTop - 80 - gap // Approximate tooltip height
+          top = alignRelativeTop - 80 - gap // Approximate tooltip height
           left = relativeLeft + targetRect.width / 2
           break
         case "bottom":
-          top = relativeTop + targetRect.height + gap
+          top = alignRelativeTop + alignHeight + gap
           left = relativeLeft + targetRect.width / 2
           break
       }
 
       const newTop = Math.round(top + offsetY)
-      const newLeft = Math.round(left)
+      const newLeft = Math.round(left + offsetX)
       setTooltipPosition((prev) => {
         if (
           Math.round(prev.top) === newTop &&
@@ -139,7 +166,7 @@ export default function ScrollTooltip({
       window.removeEventListener("scroll", updatePosition)
       window.removeEventListener("resize", updatePosition)
     }
-  }, [targetRef, containerRef, position, offsetY])
+  }, [targetRef, containerRef, alignTargetRef, position, offsetY, offsetX])
 
   // Using MUI Tooltip
   const arrowSize = 8
