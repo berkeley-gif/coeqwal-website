@@ -31,6 +31,9 @@ export interface OutcomeVisualization {
   siblingGroupId?: string
 }
 
+/** Shape for location highlight marker */
+export type LocationHighlightShape = "square" | "triangle-up" | "triangle-down"
+
 /** Lightweight tooltip driven by the tier animation overlay hover/pin */
 export interface LocationHighlight {
   key: string
@@ -41,6 +44,7 @@ export interface LocationHighlight {
   tierLabel: string
   tierColor: string
   pinned?: boolean
+  shape?: LocationHighlightShape
 }
 
 // ============================================================================

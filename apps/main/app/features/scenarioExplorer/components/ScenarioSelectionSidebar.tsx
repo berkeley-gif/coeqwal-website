@@ -36,6 +36,7 @@ interface ScenarioSelectionSidebarProps {
     tierValue?: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
+  singleSelect?: boolean
   onCaptureRadarScenario?: (scenarioId: string) => Promise<{
     dataUrl: string
     color: string
@@ -47,6 +48,7 @@ export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredInteraction,
   onRowHover,
+  singleSelect = false,
   onCaptureRadarScenario,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
@@ -55,6 +57,7 @@ export default function ScenarioSelectionSidebar({
   const {
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
     highlightedScenario,
     pinnedScenarioIds,
     togglePinnedScenario,
@@ -73,10 +76,26 @@ export default function ScenarioSelectionSidebar({
     showDotsOnly,
   } = useScenarioExplorerStore()
 
+  const handleScenarioSelect = (scenarioId: string) => {
+    return singleSelect
+      ? selectScenarios([scenarioId])
+      : toggleScenario(scenarioId)
+  }
+
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = hoveredScenarioId ?? highlightedScenario ?? null
   const hasActiveScenario = activeScenarioId !== null
+
+  // When switching to single-select mode, keep only the first selected scenario
+  useEffect(() => {
+    if (singleSelect && selectedScenarios.length > 1) {
+      const firstScenario = selectedScenarios[0]
+      if (firstScenario) {
+        selectScenarios([firstScenario])
+      }
+    }
+  }, [singleSelect, selectedScenarios, selectScenarios])
 
   useEffect(() => {
     if (!activeScenarioId) return
@@ -225,6 +244,7 @@ export default function ScenarioSelectionSidebar({
                 isFirst={index === 0}
                 layout="flex"
                 onRowHover={onRowHover}
+                singleSelect={singleSelect}
               />,
             )
           }
@@ -265,22 +285,47 @@ export default function ScenarioSelectionSidebar({
                 },
               }}
             >
-              <Checkbox
-                size="small"
-                checked={isChosen}
-                onChange={() => toggleScenario(scenario.scenarioId)}
-                onClick={(e) => e.stopPropagation()}
-                sx={{
-                  ...theme.scenarios.checkbox.sm,
-                  flexShrink: 0,
-                  alignSelf: "flex-start",
-                  // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
-                  mt: "1px",
-                }}
-              />
+              {singleSelect ? (
+                <Box
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleScenarioSelect(scenario.scenarioId)
+                  }}
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    border: `2px solid ${isChosen ? theme.palette.primary.main : theme.palette.grey[400]}`,
+                    backgroundColor: isChosen
+                      ? theme.palette.primary.main
+                      : "transparent",
+                    flexShrink: 0,
+                    mt: "16px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                />
+              ) : (
+                <Checkbox
+                  size="small"
+                  checked={isChosen}
+                  onChange={() => toggleScenario(scenario.scenarioId)}
+                  onClick={(e) => e.stopPropagation()}
+                  sx={{
+                    ...theme.scenarios.checkbox.sm,
+                    flexShrink: 0,
+                    alignSelf: "flex-start",
+                    // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
+                    mt: "1px",
+                  }}
+                />
+              )}
 
               <Box
-                onClick={() => toggleScenario(scenario.scenarioId)}
+                onClick={() => handleScenarioSelect(scenario.scenarioId)}
                 sx={{
                   flex: 1,
                   minWidth: 0,
