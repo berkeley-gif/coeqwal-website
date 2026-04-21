@@ -12,13 +12,13 @@ applications:
         build:
           commands:
             - pnpm rebuild
-            - npx turbo run build --filter=storyline-climate
+            - npx turbo run build --filter=main
       artifacts:
-        baseDirectory: apps/storyline-climate/out
+        baseDirectory: apps/main/out
         files:
           - "**/*"
       buildPath: /
-    appRoot: apps/storyline-climate
+    appRoot: apps/main
     environment:
       variables:
         NODE_VERSION: 22
