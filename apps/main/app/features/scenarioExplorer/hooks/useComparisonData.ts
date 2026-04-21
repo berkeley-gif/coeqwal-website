@@ -18,7 +18,10 @@ import {
   NOD_SOD_OUTCOME_CODES,
   ALL_RADAR_AXES_ORDER,
 } from "../../../content/outcomes"
-import nodSodTiers from "../data/nod-sod-tiers.json"
+import {
+  getRegionalTierMean,
+  type RegionalOutcomeCode,
+} from "@repo/data/coeqwal"
 import {
   PRIMARY_SCENARIO_BASELINE_ID,
   buildIndexWithinThemeMap,
@@ -26,8 +29,6 @@ import {
 
 const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
-
-const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
 
 const HC_HISTORICAL = "historical"
 
@@ -184,14 +185,20 @@ export function useComparisonData() {
           }
         })
 
-        // NOD/SOD tier means are only defined for the historical hydroclimate;
-        // for cc50/cc95 we mark them unavailable so the radar does not mix
-        // climate-varied aggregate tiers with historical NOD/SOD numbers.
-        const localScores =
-          hydroclimate === HC_HISTORICAL ? nodSodData[scenarioId] : undefined
+        // Radar pulls NOD/SOD means only under the historical hydroclimate
+        // today so it stays comparable to the current axis reference. The
+        // underlying data package now carries cc50 and cc95 too, so opening
+        // this up later is a matter of removing the guard.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
-          const raw = localScores?.[code]
+          const raw =
+            hydroclimate === HC_HISTORICAL
+              ? getRegionalTierMean(
+                  scenarioId,
+                  code as RegionalOutcomeCode,
+                  "historical",
+                )
+              : null
           values[displayName] = raw != null ? tierMeanToRadarValue(raw) : null
         })
 
@@ -239,10 +246,12 @@ export function useComparisonData() {
       }
 
       if (hydroclimate !== HC_HISTORICAL) continue
-      const localScores = nodSodData[scenarioId]
-      if (!localScores) continue
       for (const code of NOD_SOD_OUTCOME_CODES) {
-        const raw = localScores[code]
+        const raw = getRegionalTierMean(
+          scenarioId,
+          code as RegionalOutcomeCode,
+          "historical",
+        )
         if (raw == null) continue
         const v = tierMeanToRadarValue(raw)
         const name = getOutcomeName(code)
@@ -281,13 +290,16 @@ export function useComparisonData() {
       values[name] =
         s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
     })
-    const baselineLocal =
-      hydroclimate === HC_HISTORICAL
-        ? nodSodData[PRIMARY_BASELINE_ID]
-        : undefined
     NOD_SOD_OUTCOME_CODES.forEach((code) => {
       const name = getOutcomeName(code)
-      const raw = baselineLocal?.[code]
+      const raw =
+        hydroclimate === HC_HISTORICAL
+          ? getRegionalTierMean(
+              PRIMARY_BASELINE_ID,
+              code as RegionalOutcomeCode,
+              "historical",
+            )
+          : null
       values[name] = raw != null ? tierMeanToRadarValue(raw) : null
     })
     return {

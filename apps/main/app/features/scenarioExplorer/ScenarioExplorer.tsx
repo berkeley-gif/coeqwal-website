@@ -150,9 +150,14 @@ export default function ScenarioExplorer() {
 
   // Resilience heatmap controls (panel-local state, lifted here so the
   // toolbar and panel share one source of truth without store changes).
+  // Default view is Aggregate because the sidebar starts empty; the
+  // sync effect below flips to "scenario" the moment the sidebar has
+  // at least one scenario selected, and back to "aggregate" when the
+  // selection is cleared. Explicit user choices of "outcome" or
+  // "quadrant" are preserved by the effect.
   const [resilienceControls, setResilienceControls] =
     useState<ResilienceControlsState>({
-      view: "scenario",
+      view: "aggregate",
       cellEncoding: "tier",
       deltaMode: "none",
       deltaBaselineScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
@@ -165,6 +170,10 @@ export default function ScenarioExplorer() {
       showCellNumbers: true,
       quadrantUnit: "outcome",
       quadrantOutcome: "CWS_DEL",
+      primaryOutcomeCode: null,
+      compareOutcomeCodes: [],
+      expandedRegionalOutcomes: [],
+      scenarioLayout: "small_multiples",
     })
 
   const handleResilienceControlsChange = useCallback(
@@ -173,6 +182,24 @@ export default function ScenarioExplorer() {
     },
     [],
   )
+
+  // Keep the Resilience "View:" rail in sync with the sidebar
+  // selection. Empty selection anchors the rail on "View aggregate";
+  // as soon as the user picks a scenario we flip to "View by
+  // scenarios". Outcome and Leverage modes are explicit user choices
+  // and are not overridden by this effect.
+  const hasSelectedScenarios = selectedScenarios.length > 0
+  useEffect(() => {
+    setResilienceControls((prev) => {
+      if (hasSelectedScenarios && prev.view === "aggregate") {
+        return { ...prev, view: "scenario" }
+      }
+      if (!hasSelectedScenarios && prev.view === "scenario") {
+        return { ...prev, view: "aggregate" }
+      }
+      return prev
+    })
+  }, [hasSelectedScenarios])
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {

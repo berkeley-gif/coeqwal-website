@@ -123,6 +123,7 @@ export type {
   ResilienceHeatmapMarginals,
   ResilienceCellRender,
   ResilienceGlyphEntry,
+  ResilienceColumnGroup,
 } from "./components/ResilienceHeatmap"
 export { default as ResilienceHeatmapSmallMultiples } from "./components/ResilienceHeatmapSmallMultiples"
 export type {

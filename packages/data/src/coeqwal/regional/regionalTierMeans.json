@@ -1,0 +1,914 @@
+{
+  "s0011": {
+    "cc50": {
+      "NOD_AG": 2.01,
+      "NOD_DW": 2.54,
+      "NOD_EFLOWS": 3.55,
+      "NOD_GW": 1.9333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.32,
+      "SOD_DW": 2.78,
+      "SOD_EFLOWS": 3.48,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.5
+    },
+    "cc95": {
+      "NOD_AG": 2.22,
+      "NOD_DW": 2.69,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.0333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.53,
+      "SOD_DW": 2.99,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.25,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.7808,
+      "NOD_DW": 2.3514,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.3,
+      "NOD_RES": 2.5,
+      "SOD_AG": 1.9831,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.25,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0020": {
+    "cc50": {
+      "NOD_AG": 2.01,
+      "NOD_DW": 2.54,
+      "NOD_EFLOWS": 3.65,
+      "NOD_GW": 1.9,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.36,
+      "SOD_DW": 2.84,
+      "SOD_EFLOWS": 3.49,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.27,
+      "NOD_DW": 2.66,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.7,
+      "SOD_DW": 3.03,
+      "SOD_EFLOWS": 3.99,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.7397,
+      "NOD_DW": 2.3514,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0339,
+      "SOD_DW": 2.6053,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0021": {
+    "cc50": {
+      "NOD_AG": 1.98,
+      "NOD_DW": 2.69,
+      "NOD_EFLOWS": 3.66,
+      "NOD_GW": 1.9333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.29,
+      "SOD_DW": 2.78,
+      "SOD_EFLOWS": 3.56,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.25,
+      "NOD_DW": 2.89,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.0,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.56,
+      "SOD_DW": 3.06,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.7534,
+      "NOD_DW": 2.4865,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0169,
+      "SOD_DW": 2.5789,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0023": {
+    "cc50": {
+      "NOD_AG": 2.1,
+      "NOD_DW": 2.8,
+      "NOD_EFLOWS": 3.6,
+      "NOD_GW": 2.2667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.32,
+      "SOD_DW": 2.7,
+      "SOD_EFLOWS": 3.54,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.32,
+      "NOD_DW": 3.0,
+      "NOD_EFLOWS": 3.98,
+      "NOD_GW": 2.5667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.66,
+      "SOD_DW": 2.89,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.8356,
+      "NOD_DW": 2.6216,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0,
+      "SOD_DW": 2.5128,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0024": {
+    "cc50": {
+      "NOD_AG": 2.04,
+      "NOD_DW": 2.71,
+      "NOD_EFLOWS": 3.59,
+      "NOD_GW": 2.2667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.28,
+      "SOD_DW": 2.73,
+      "SOD_EFLOWS": 3.61,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.32,
+      "NOD_DW": 2.92,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.5,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.63,
+      "SOD_DW": 2.92,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.8082,
+      "NOD_DW": 2.5135,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0169,
+      "SOD_DW": 2.5128,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0025": {
+    "cc50": {
+      "NOD_AG": 1.88,
+      "NOD_DW": 2.48,
+      "NOD_EFLOWS": 3.67,
+      "NOD_GW": 2.2333,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.56,
+      "SOD_DW": 2.78,
+      "SOD_EFLOWS": 3.55,
+      "SOD_GW": 3.25,
+      "SOD_RES": 2.5
+    },
+    "cc95": {
+      "NOD_AG": 2.16,
+      "NOD_DW": 2.65,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.2667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.97,
+      "SOD_DW": 3.08,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.25,
+      "SOD_RES": 2.5
+    },
+    "historical": {
+      "NOD_AG": 1.6301,
+      "NOD_DW": 2.3243,
+      "NOD_EFLOWS": 3.1818,
+      "NOD_GW": 2.2333,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.2881,
+      "SOD_DW": 2.6053,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.5
+    }
+  },
+  "s0026": {
+    "cc50": {
+      "NOD_AG": 2.05,
+      "NOD_DW": 2.53,
+      "NOD_EFLOWS": 3.54,
+      "NOD_GW": 1.9667,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.42,
+      "SOD_DW": 2.85,
+      "SOD_EFLOWS": 3.52,
+      "SOD_GW": 2.0833,
+      "SOD_RES": 2.25
+    },
+    "cc95": {
+      "NOD_AG": 2.33,
+      "NOD_DW": 2.74,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.0333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.68,
+      "SOD_DW": 2.99,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.5
+    },
+    "historical": {
+      "NOD_AG": 1.8356,
+      "NOD_DW": 2.3514,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.1186,
+      "SOD_DW": 2.6053,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.0,
+      "SOD_RES": 2.5
+    }
+  },
+  "s0027": {
+    "cc50": {
+      "NOD_AG": 2.18,
+      "NOD_DW": 2.59,
+      "NOD_EFLOWS": 3.69,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.62,
+      "SOD_DW": 2.81,
+      "SOD_EFLOWS": 3.61,
+      "SOD_GW": 3.25,
+      "SOD_RES": 2.5
+    },
+    "cc95": {
+      "NOD_AG": 2.47,
+      "NOD_DW": 2.79,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.96,
+      "SOD_DW": 2.98,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.25,
+      "SOD_RES": 2.5
+    },
+    "historical": {
+      "NOD_AG": 1.9589,
+      "NOD_DW": 2.4054,
+      "NOD_EFLOWS": 3.1818,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.2881,
+      "SOD_DW": 2.6053,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.5
+    }
+  },
+  "s0028": {
+    "cc50": {
+      "NOD_AG": 2.57,
+      "NOD_DW": 2.45,
+      "NOD_EFLOWS": 3.56,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.44,
+      "SOD_DW": 2.74,
+      "SOD_EFLOWS": 3.46,
+      "SOD_GW": 2.0833,
+      "SOD_RES": 2.25
+    },
+    "cc95": {
+      "NOD_AG": 2.84,
+      "NOD_DW": 2.67,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.66,
+      "SOD_DW": 2.96,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 2.75,
+      "SOD_RES": 2.5
+    },
+    "historical": {
+      "NOD_AG": 2.3425,
+      "NOD_DW": 2.2973,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.1017,
+      "SOD_DW": 2.5526,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 1.6667,
+      "SOD_RES": 2.5
+    }
+  },
+  "s0030": {
+    "cc50": {
+      "NOD_AG": 1.85,
+      "NOD_DW": 2.38,
+      "NOD_EFLOWS": 3.49,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 2.0,
+      "SOD_AG": 2.25,
+      "SOD_DW": 2.68,
+      "SOD_EFLOWS": 3.3,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.25
+    },
+    "cc95": {
+      "NOD_AG": 2.17,
+      "NOD_DW": 2.62,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.3,
+      "NOD_RES": 2.25,
+      "SOD_AG": 2.63,
+      "SOD_DW": 2.85,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.6301,
+      "NOD_DW": 2.2162,
+      "NOD_EFLOWS": 2.9091,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 2.0,
+      "SOD_AG": 1.9492,
+      "SOD_DW": 2.4359,
+      "SOD_EFLOWS": 2.8333,
+      "SOD_GW": 2.6667,
+      "SOD_RES": 2.5
+    }
+  },
+  "s0031": {
+    "cc50": {
+      "NOD_AG": 2.01,
+      "NOD_DW": 2.5,
+      "NOD_EFLOWS": 3.35,
+      "NOD_GW": 2.2333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.78,
+      "SOD_DW": 2.84,
+      "SOD_EFLOWS": 3.21,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 3.0
+    },
+    "cc95": {
+      "NOD_AG": 2.25,
+      "NOD_DW": 2.7,
+      "NOD_EFLOWS": 3.83,
+      "NOD_GW": 2.3333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.96,
+      "SOD_DW": 3.03,
+      "SOD_EFLOWS": 3.78,
+      "SOD_GW": 3.3333,
+      "SOD_RES": 3.0
+    },
+    "historical": {
+      "NOD_AG": 1.7397,
+      "NOD_DW": 2.2973,
+      "NOD_EFLOWS": 2.8182,
+      "NOD_GW": 2.2333,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.4407,
+      "SOD_DW": 2.6154,
+      "SOD_EFLOWS": 2.6667,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0032": {
+    "cc50": {
+      "NOD_AG": 2.44,
+      "NOD_DW": 2.67,
+      "NOD_EFLOWS": 1.93,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 3.25,
+      "SOD_AG": 2.78,
+      "SOD_DW": 2.77,
+      "SOD_EFLOWS": 1.87,
+      "SOD_GW": 2.6667,
+      "SOD_RES": 3.0
+    },
+    "cc95": {
+      "NOD_AG": 2.65,
+      "NOD_DW": 2.89,
+      "NOD_EFLOWS": 2.47,
+      "NOD_GW": 2.2,
+      "NOD_RES": 3.25,
+      "SOD_AG": 3.04,
+      "SOD_DW": 3.0,
+      "SOD_EFLOWS": 2.41,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    },
+    "historical": {
+      "NOD_AG": 2.2192,
+      "NOD_DW": 2.4865,
+      "NOD_EFLOWS": 1.3636,
+      "NOD_GW": 2.0,
+      "NOD_RES": 3.25,
+      "SOD_AG": 2.5254,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 1.3333,
+      "SOD_GW": 2.25,
+      "SOD_RES": 3.25
+    }
+  },
+  "s0033": {
+    "cc50": {
+      "NOD_AG": 2.63,
+      "NOD_DW": 2.5,
+      "NOD_EFLOWS": 3.4,
+      "NOD_GW": 2.2667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.95,
+      "SOD_DW": 2.71,
+      "SOD_EFLOWS": 3.13,
+      "SOD_GW": 3.25,
+      "SOD_RES": 3.25
+    },
+    "cc95": {
+      "NOD_AG": 2.82,
+      "NOD_DW": 2.73,
+      "NOD_EFLOWS": 3.88,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 2.5,
+      "SOD_AG": 3.28,
+      "SOD_DW": 2.9,
+      "SOD_EFLOWS": 3.79,
+      "SOD_GW": 2.5833,
+      "SOD_RES": 2.25
+    },
+    "historical": {
+      "NOD_AG": 2.3699,
+      "NOD_DW": 2.3243,
+      "NOD_EFLOWS": 2.8182,
+      "NOD_GW": 2.1,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.661,
+      "SOD_DW": 2.5128,
+      "SOD_EFLOWS": 2.6667,
+      "SOD_GW": 2.0833,
+      "SOD_RES": 2.25
+    }
+  },
+  "s0035": {
+    "cc50": {
+      "NOD_AG": 1.98,
+      "NOD_DW": 2.5,
+      "NOD_EFLOWS": 3.62,
+      "NOD_GW": 1.9,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.31,
+      "SOD_DW": 2.76,
+      "SOD_EFLOWS": 3.48,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.24,
+      "NOD_DW": 2.67,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.7,
+      "SOD_DW": 2.95,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.726,
+      "NOD_DW": 2.3158,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0339,
+      "SOD_DW": 2.5526,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0036": {
+    "cc50": {
+      "NOD_AG": 1.96,
+      "NOD_DW": 2.43,
+      "NOD_EFLOWS": 3.66,
+      "NOD_GW": 1.9,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.34,
+      "SOD_DW": 2.75,
+      "SOD_EFLOWS": 3.49,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.21,
+      "NOD_DW": 2.59,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.72,
+      "SOD_DW": 2.97,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.726,
+      "NOD_DW": 2.2703,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0339,
+      "SOD_DW": 2.5263,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0037": {
+    "cc50": {
+      "NOD_AG": 2.0,
+      "NOD_DW": 2.49,
+      "NOD_EFLOWS": 3.66,
+      "NOD_GW": 1.9667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.35,
+      "SOD_DW": 2.74,
+      "SOD_EFLOWS": 3.61,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.14,
+      "NOD_DW": 2.62,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.55,
+      "SOD_DW": 3.03,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.726,
+      "NOD_DW": 2.2973,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0339,
+      "SOD_DW": 2.5526,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0039": {
+    "cc50": {
+      "NOD_AG": 2.12,
+      "NOD_DW": 2.7,
+      "NOD_EFLOWS": 3.44,
+      "NOD_GW": 2.5333,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.34,
+      "SOD_DW": 2.79,
+      "SOD_EFLOWS": 3.3,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.3,
+      "NOD_DW": 2.86,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.8333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.63,
+      "SOD_DW": 3.0,
+      "SOD_EFLOWS": 3.84,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.863,
+      "NOD_DW": 2.5405,
+      "NOD_EFLOWS": 3.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0847,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 2.8333,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 3.0
+    }
+  },
+  "s0040": {
+    "cc50": {
+      "NOD_AG": 2.01,
+      "NOD_DW": 2.66,
+      "NOD_EFLOWS": 3.46,
+      "NOD_GW": 2.4,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.43,
+      "SOD_DW": 2.76,
+      "SOD_EFLOWS": 3.34,
+      "SOD_GW": 3.0,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.26,
+      "NOD_DW": 2.79,
+      "NOD_EFLOWS": 3.98,
+      "NOD_GW": 2.6333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.72,
+      "SOD_DW": 3.0,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.7945,
+      "NOD_DW": 2.4865,
+      "NOD_EFLOWS": 3.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0847,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 2.8333,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0041": {
+    "cc50": {
+      "NOD_AG": 2.12,
+      "NOD_DW": 2.68,
+      "NOD_EFLOWS": 3.52,
+      "NOD_GW": 2.4,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.32,
+      "SOD_DW": 2.8,
+      "SOD_EFLOWS": 3.44,
+      "SOD_GW": 3.0,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.34,
+      "NOD_DW": 2.9,
+      "NOD_EFLOWS": 3.97,
+      "NOD_GW": 2.6333,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.66,
+      "SOD_DW": 3.0,
+      "SOD_EFLOWS": 3.79,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.8493,
+      "NOD_DW": 2.4865,
+      "NOD_EFLOWS": 3.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0678,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 2.8333,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0042": {
+    "cc50": {
+      "NOD_AG": 2.07,
+      "NOD_DW": 2.69,
+      "NOD_EFLOWS": 3.51,
+      "NOD_GW": 2.5,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.34,
+      "SOD_DW": 2.78,
+      "SOD_EFLOWS": 3.41,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.29,
+      "NOD_DW": 2.94,
+      "NOD_EFLOWS": 3.98,
+      "NOD_GW": 2.8,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.66,
+      "SOD_DW": 2.98,
+      "SOD_EFLOWS": 3.91,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.8356,
+      "NOD_DW": 2.5405,
+      "NOD_EFLOWS": 3.0,
+      "NOD_GW": 2.2,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0678,
+      "SOD_DW": 2.5641,
+      "SOD_EFLOWS": 2.8333,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0044": {
+    "cc50": {
+      "NOD_AG": 2.03,
+      "NOD_DW": 2.59,
+      "NOD_EFLOWS": 3.6,
+      "NOD_GW": 1.9,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.32,
+      "SOD_DW": 2.89,
+      "SOD_EFLOWS": 3.47,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 2.5
+    },
+    "cc95": {
+      "NOD_AG": 2.31,
+      "NOD_DW": 2.73,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.0667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.62,
+      "SOD_DW": 3.05,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.5
+    },
+    "historical": {
+      "NOD_AG": 1.8219,
+      "NOD_DW": 2.3784,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 1.9333,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0169,
+      "SOD_DW": 2.6579,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0045": {
+    "cc50": {
+      "NOD_AG": 1.98,
+      "NOD_DW": 2.48,
+      "NOD_EFLOWS": 3.53,
+      "NOD_GW": 1.9667,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.35,
+      "SOD_DW": 2.84,
+      "SOD_EFLOWS": 3.55,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.17,
+      "NOD_DW": 2.7,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.68,
+      "SOD_DW": 3.07,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.4167,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.7123,
+      "NOD_DW": 2.3243,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.1667,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0339,
+      "SOD_DW": 2.6053,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.75
+    }
+  },
+  "s0046": {
+    "cc50": {
+      "NOD_AG": 1.96,
+      "NOD_DW": 2.64,
+      "NOD_EFLOWS": 1.65,
+      "NOD_GW": 2.2,
+      "NOD_RES": 3.25,
+      "SOD_AG": 2.77,
+      "SOD_DW": 2.83,
+      "SOD_EFLOWS": 1.78,
+      "SOD_GW": 3.1667,
+      "SOD_RES": 3.0
+    },
+    "cc95": {
+      "NOD_AG": 2.17,
+      "NOD_DW": 2.87,
+      "NOD_EFLOWS": 2.19,
+      "NOD_GW": 2.4,
+      "NOD_RES": 3.25,
+      "SOD_AG": 3.18,
+      "SOD_DW": 2.99,
+      "SOD_EFLOWS": 2.4,
+      "SOD_GW": 3.25,
+      "SOD_RES": 3.0
+    },
+    "historical": {
+      "NOD_AG": 1.726,
+      "NOD_DW": 2.4595,
+      "NOD_EFLOWS": 1.1818,
+      "NOD_GW": 2.2,
+      "NOD_RES": 3.25,
+      "SOD_AG": 2.5085,
+      "SOD_DW": 2.6154,
+      "SOD_EFLOWS": 1.1667,
+      "SOD_GW": 2.9167,
+      "SOD_RES": 3.25
+    }
+  },
+  "s0065": {
+    "cc50": {
+      "NOD_AG": 2.21,
+      "NOD_DW": 3.26,
+      "NOD_EFLOWS": 3.59,
+      "NOD_GW": 1.9,
+      "NOD_RES": 2.75,
+      "SOD_AG": 2.32,
+      "SOD_DW": 2.79,
+      "SOD_EFLOWS": 3.55,
+      "SOD_GW": 3.0833,
+      "SOD_RES": 2.75
+    },
+    "cc95": {
+      "NOD_AG": 2.44,
+      "NOD_DW": 3.44,
+      "NOD_EFLOWS": 4.0,
+      "NOD_GW": 2.1,
+      "NOD_RES": 3.0,
+      "SOD_AG": 2.59,
+      "SOD_DW": 2.97,
+      "SOD_EFLOWS": 4.0,
+      "SOD_GW": 3.3333,
+      "SOD_RES": 2.75
+    },
+    "historical": {
+      "NOD_AG": 1.9589,
+      "NOD_DW": 3.0541,
+      "NOD_EFLOWS": 3.0909,
+      "NOD_GW": 2.0333,
+      "NOD_RES": 2.5,
+      "SOD_AG": 2.0508,
+      "SOD_DW": 2.5789,
+      "SOD_EFLOWS": 3.0,
+      "SOD_GW": 2.8333,
+      "SOD_RES": 2.75
+    }
+  }
+}

@@ -22,6 +22,7 @@ export interface TierSummaryCellProps {
   isActive: boolean
   isTooltipActive?: boolean
   onClick?: () => void
+  mode?: "label" | "numeric"
 }
 
 export const TierSummaryCell = React.memo(function TierSummaryCell({
@@ -29,6 +30,7 @@ export const TierSummaryCell = React.memo(function TierSummaryCell({
   isActive,
   isTooltipActive,
   onClick,
+  mode = "label",
 }: TierSummaryCellProps) {
   const theme = useTheme()
 
@@ -106,16 +108,42 @@ export const TierSummaryCell = React.memo(function TierSummaryCell({
             flexShrink: 0,
           }}
         />
-        <Typography
-          variant="compactCaption"
-          sx={{
-            color: theme.palette.grey[800],
-            lineHeight: 1.2,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label}
-        </Typography>
+        {mode === "numeric" ? (
+          <Box sx={{ display: "grid", gap: 0.125 }}>
+            <Typography
+              variant="dashboard"
+              sx={{
+                color: theme.palette.grey[900],
+                fontWeight: 700,
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {score.toFixed(1)}
+            </Typography>
+            <Typography
+              variant="compactCaption"
+              sx={{
+                color: theme.palette.grey[600],
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}
+            >
+              avg tier
+            </Typography>
+          </Box>
+        ) : (
+          <Typography
+            variant="compactCaption"
+            sx={{
+              color: theme.palette.grey[800],
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </Typography>
+        )}
       </Box>
     </Box>
   )

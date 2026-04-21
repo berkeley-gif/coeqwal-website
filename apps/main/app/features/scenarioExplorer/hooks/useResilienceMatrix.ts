@@ -12,9 +12,10 @@
  *   - Aggregate outcomes use the API's weighted_score (multi-value) or
  *     level (single-value). The continuous value is the arithmetic mean
  *     of LOI tier levels, matching V3's tiers_df[cols].mean(axis=1).
- *   - NOD/SOD rows use the locally-committed nod-sod-tiers.json, which
- *     mirrors V3's tier_df.csv. Only the historical hydroclimate has
- *     precomputed means today; the other two HCs emit `available: false`.
+ *   - NOD/SOD rows read the dashboard-derived regional tier means from
+ *     @repo/data/coeqwal. Coverage spans all three website hydroclimates
+ *     (historical, cc50, cc95); cells fall back to `available: false`
+ *     only when the dataset lacks a specific (scenario, outcome, HC).
  *
  * Panels build their scenario-view / outcome-view pivots from this matrix.
  */
@@ -27,7 +28,11 @@ import {
 import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import type { OutcomeScoreData } from "../../scenarios/hooks/useTierData"
-import nodSodTiers from "../data/nod-sod-tiers.json"
+import {
+  getRegionalTierMean,
+  type RegionalHydroclimate,
+  type RegionalOutcomeCode,
+} from "@repo/data/coeqwal"
 import {
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
@@ -47,8 +52,6 @@ export const RESILIENCE_HYDROCLIMATES = [
 ] as const
 
 export type ResilienceHydroclimate = (typeof RESILIENCE_HYDROCLIMATES)[number]
-
-const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
 
 /**
  * Rows shown in scenario view (Y axis): 9 aggregate outcomes interleaved
@@ -134,28 +137,18 @@ function buildNodSodCell(
   outcomeCode: NodSodCode,
   hydroclimate: ResilienceHydroclimate,
 ): ResilienceCell {
-  if (hydroclimate !== HC_HISTORICAL) {
-    return {
-      scenarioId,
-      outcomeCode,
-      hydroclimate,
-      available: false,
-      unavailableReason:
-        "NOD/SOD tier means are only available for the historical hydroclimate",
-      continuousValue: null,
-      tierLevel: null,
-      type: "nod_sod",
-    }
-  }
-
-  const raw = nodSodData[scenarioId]?.[outcomeCode]
+  const raw = getRegionalTierMean(
+    scenarioId,
+    outcomeCode as RegionalOutcomeCode,
+    hydroclimate as RegionalHydroclimate,
+  )
   if (raw == null) {
     return {
       scenarioId,
       outcomeCode,
       hydroclimate,
       available: false,
-      unavailableReason: "No NOD/SOD data for this scenario",
+      unavailableReason: "No regional data for this scenario and climate",
       continuousValue: null,
       tierLevel: null,
       type: "nod_sod",

@@ -11,7 +11,7 @@ import {
 import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
-import { useScenarioExplorerStore } from "../store"
+import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
 
 interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme
@@ -48,8 +48,7 @@ export default function ThemeGroupHeader({
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
     !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
-  const viewMode =
-    outcomeDisplayMode === "distribution" ? "distribution" : "summary"
+  const viewMode: OutcomeDisplayMode = outcomeDisplayMode
   const allShared =
     scenarioIds.length > 0 &&
     scenarioIds.every((sid) =>
@@ -186,7 +185,7 @@ export default function ThemeGroupHeader({
                   id: crypto.randomUUID(),
                   type: "barChart",
                   scenarioId: sid,
-                  viewMode: viewMode as "summary" | "distribution",
+                  viewMode,
                   hydroclimate,
                 })
               })

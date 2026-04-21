@@ -42,9 +42,11 @@ function ShareItemCard({
   if (item.type === "barChart") {
     const info = scenarioLookup.get(item.scenarioId)
     const viewLabel =
-      item.viewMode === "distribution"
-        ? "Key outcomes distribution"
-        : "Key outcomes bar chart"
+      item.viewMode === "average"
+        ? "Key outcomes average"
+        : item.viewMode === "distribution"
+          ? "Key outcomes distribution"
+          : "Key outcomes bar chart"
     const chartData =
       (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
       (allChartData[item.scenarioId] as

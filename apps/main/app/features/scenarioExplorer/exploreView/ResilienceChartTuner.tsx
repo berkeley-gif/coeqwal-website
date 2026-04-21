@@ -52,6 +52,10 @@ const DEFAULT_CONTROLS: ResilienceControlsState = {
   showCellNumbers: true,
   quadrantUnit: "outcome",
   quadrantOutcome: "CWS_DEL",
+  primaryOutcomeCode: null,
+  compareOutcomeCodes: [],
+  expandedRegionalOutcomes: [],
+  scenarioLayout: "small_multiples",
 }
 
 export default function ResilienceChartTuner({

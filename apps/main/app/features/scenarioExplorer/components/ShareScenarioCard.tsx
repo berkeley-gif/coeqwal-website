@@ -3,12 +3,14 @@
 import React from "react"
 import { Box, Typography, IconButton, useTheme, icons } from "@repo/ui/mui"
 import { OutcomeGlyphItem } from "../../scenarios/components/shared/OutcomeGlyphItem"
+import { TierSummaryCell } from "../../scenarios/components/shared/TierSummaryCell"
 import { MorphableDistributionGlyph, SQUARE_SIZE, SQUARE_GAP } from "@repo/viz"
 import {
   isSingleValueTier,
   type ChartDataPoint,
 } from "../../scenarios/components/shared/types"
 import { getSingleValueLocationCount } from "../../../content/outcomes"
+import type { OutcomeDisplayMode } from "../store"
 import {
   hydroclimateOptions,
   type HydroclimateOption,
@@ -24,7 +26,7 @@ interface ShareScenarioCardProps {
   chartData?: Record<string, ChartDataPoint[]>
   outcomeNames: { shortCode: string; displayName: string }[]
   onRemove?: (id: string) => void
-  viewMode?: "summary" | "distribution"
+  viewMode?: OutcomeDisplayMode
 }
 
 export default function ShareScenarioCard({
@@ -331,6 +333,48 @@ export default function ShareScenarioCard({
               </Box>
             )
           })()
+        ) : viewMode === "average" ? (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(86px, 1fr))",
+              rowGap: 1,
+              columnGap: 0.75,
+              mt: 1,
+              alignItems: "start",
+            }}
+          >
+            {outcomeNames.map(({ shortCode, displayName }) => {
+              const data = chartData[shortCode]
+              return (
+                <Box
+                  key={shortCode}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    gap: 0.375,
+                  }}
+                >
+                  <TierSummaryCell
+                    chartData={data}
+                    isActive={!!data && data.length > 0}
+                    mode="numeric"
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: "0.5625rem",
+                      lineHeight: 1.2,
+                      color: theme.palette.grey[700],
+                      textAlign: "center",
+                    }}
+                  >
+                    {displayName}
+                  </Typography>
+                </Box>
+              )
+            })}
+          </Box>
         ) : (
           <Box
             sx={{

@@ -3,20 +3,23 @@
 /**
  * ToolToolbar. Shared toolbar rendered above the active tool content.
  *
- * Always shows: search + visibility toggle chips + view controls (map,
- * distribution, locations, climate).
+ * Always shows: search + visibility toggle chips + view controls (outcome
+ * view, map, locations, climate).
  *
  * When `gridAligned` is true (list mode), uses CSS Grid that aligns
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
  */
 
-import React, { useState } from "react"
+import React from "react"
 import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
-import { useScenarioExplorerStore } from "../store"
-import { HowToReadChartModal } from "./HowToReadChartModal"
+import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
+// HowToReadChartModal import kept as a reference pointer for
+// reactivation; re-import when the "How to read this chart?" entry
+// is restored.
+// import { HowToReadChartModal } from "./HowToReadChartModal"
 
 interface ToolToolbarProps {
   gridAligned?: boolean
@@ -45,44 +48,32 @@ export default function ToolToolbar({
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
-  const [howToReadOpen, setHowToReadOpen] = useState(false)
+  // `How to read this chart?` modal + the list-view Outcome view
+  // toggle (Average / Bar / Distribution) are intentionally
+  // deactivated for the current demo build. The underlying modal
+  // content files and the `outcomeDisplayMode` store field are
+  // retained so we can reactivate both in one place when the content
+  // is demo-ready (restore the useState, the HowToReadChartModal
+  // render at the end of viewControls, the button styling above, and
+  // flip the `false &&` guard on the OutcomeViewToggle branch).
 
   const viewControls = (
     <>
       <Box
         sx={{
-          display: "none",
-          "@media (min-width: 1475px)": {
-            display: "contents",
-          },
+          display: "contents",
         }}
       >
         <Box
-          component="button"
-          type="button"
-          onClick={() => setHowToReadOpen(true)}
-          aria-haspopup="dialog"
-          aria-expanded={howToReadOpen}
+          component="span"
+          aria-disabled="true"
           sx={{
             display: "inline-flex",
             alignItems: "center",
             gap: 0.5,
-            p: 0,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: theme.palette.text.primary,
-            font: "inherit",
-            textDecoration: "none",
-            transition: "color 120ms",
-            "&:hover": {
-              color: theme.palette.blue.bright,
-            },
-            "&:focus-visible": {
-              outline: `2px solid ${theme.palette.blue.bright}`,
-              outlineOffset: 2,
-              borderRadius: theme.borderRadius.sm,
-            },
+            color: "grey.400",
+            pointerEvents: "none",
+            userSelect: "none",
           }}
         >
           <Typography
@@ -96,32 +87,19 @@ export default function ToolToolbar({
             How to read this chart?
           </Typography>
         </Box>
-
-        {/* Show distribution - temporarily hidden
-        <VerticalDivider />
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Typography
-            variant="dashboard"
-            sx={{
-              fontWeight: 500,
-              color: theme.palette.text.primary,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Show distribution
-          </Typography>
-          <Switch
-            size="small"
-            checked={outcomeDisplayMode === "distribution"}
-            onChange={(_, checked) =>
-              setOutcomeDisplayMode(checked ? "distribution" : "summary")
-            }
-            sx={{ ml: -0.5 }}
-          />
-        </Box>
-        */}
-
+        {/* Outcome view toggle (Average / Bar / Distribution) hidden
+            for the demo. The list view reverts to its bar-chart
+            default; the glyph click-through to map layers is
+            unaffected. */}
+        {false && exploreMode === "list" ? (
+          <>
+            <VerticalDivider />
+            <OutcomeViewToggle
+              value={outcomeDisplayMode}
+              onChange={setOutcomeDisplayMode}
+            />
+          </>
+        ) : null}
         <VerticalDivider />
       </Box>
 
@@ -207,11 +185,6 @@ export default function ToolToolbar({
           />
         )}
       </Box>
-      <HowToReadChartModal
-        open={howToReadOpen}
-        onClose={() => setHowToReadOpen(false)}
-        exploreMode={exploreMode}
-      />
     </>
   )
 
@@ -322,5 +295,98 @@ function VerticalDivider() {
         flexShrink: 0,
       }}
     />
+  )
+}
+
+function OutcomeViewToggle({
+  value,
+  onChange,
+}: {
+  value: OutcomeDisplayMode
+  onChange: (mode: OutcomeDisplayMode) => void
+}) {
+  const theme = useTheme()
+  const options: Array<{ id: OutcomeDisplayMode; label: string }> = [
+    { id: "average", label: "Average" },
+    { id: "bar", label: "Bar" },
+    { id: "distribution", label: "Distribution" },
+  ]
+
+  return (
+    <Box
+      role="group"
+      aria-label="Outcome view"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.75,
+        flexWrap: "wrap",
+      }}
+    >
+      <Typography
+        variant="dashboard"
+        sx={{
+          fontWeight: 500,
+          color: theme.palette.text.primary,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Outcome view
+      </Typography>
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          p: 0.25,
+          borderRadius: theme.borderRadius.circle,
+          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        {options.map((option) => {
+          const active = option.id === value
+          return (
+            <Box
+              key={option.id}
+              component="button"
+              type="button"
+              onClick={() => onChange(option.id)}
+              aria-pressed={active}
+              sx={{
+                minWidth: option.id === "distribution" ? 96 : 72,
+                px: 1.25,
+                py: 0.5,
+                border: "none",
+                borderRadius: theme.borderRadius.circle,
+                backgroundColor: active
+                  ? theme.palette.blue.bright
+                  : "transparent",
+                color: active
+                  ? theme.palette.common.white
+                  : theme.palette.text.primary,
+                cursor: "pointer",
+                font: "inherit",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+                transition: "background-color 120ms, color 120ms",
+                "&:hover": {
+                  backgroundColor: active
+                    ? theme.palette.blue.dark
+                    : theme.palette.action.hover,
+                },
+                "&:focus-visible": {
+                  outline: `2px solid ${theme.palette.blue.bright}`,
+                  outlineOffset: 1,
+                },
+              }}
+            >
+              {option.label}
+            </Box>
+          )
+        })}
+      </Box>
+    </Box>
   )
 }

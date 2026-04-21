@@ -55,7 +55,13 @@ function encodeShareItems(
   const encoded = items.map((item) => {
     const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
     if (item.type === "barChart") {
-      return `b.${item.scenarioId}.${item.viewMode === "summary" ? "s" : "d"}.${hc}`
+      const modeToken =
+        item.viewMode === "average"
+          ? "a"
+          : item.viewMode === "distribution"
+            ? "d"
+            : "b"
+      return `b.${item.scenarioId}.${modeToken}.${hc}`
     }
     const ids = item.scenarioIds.join("~")
     const axes = item.axes.join("~")
@@ -82,6 +88,106 @@ function encodeShareItems(
 // Shared URL parsing (exported for use by TabPanels restore logic)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Resilience controls URL schema (forward-compatible, legacy-safe).
+//
+// The resilience heatmap panel owns its own state locally in
+// ScenarioExplorer.tsx (see `resilienceControls`). It is not part of
+// ShareItem[] because it isn't a pinned card; it is the active tool
+// configuration. Shared URLs created before this reset never carried
+// resilience state, so existing URLs continue to parse identically and
+// the panel falls through to its initial defaults.
+//
+// The token schema below is available for a future "share this chart
+// configuration" surface. It deliberately uses short keys so the URL
+// stays compact, and skips any field at its initial default so
+// round-tripped URLs stay as short as possible.
+//
+// Schema (order-independent, each segment "key:value"):
+//   v:s|o|a|q             view (scenario / outcome / aggregate / quadrant)
+//   po:<outcomeCode>      primaryOutcomeCode
+//   co:<code>~<code>      compareOutcomeCodes
+//   er:<code>~<code>      expandedRegionalOutcomes
+//   sc:s|a                aggregateScope (selected / all)
+//
+// Scenarios mode is sidebar-driven: the ShareItem encoding already
+// carries the scenario selection, so no per-chart scenario tokens
+// are required.
+// ---------------------------------------------------------------------------
+
+export interface ResilienceShareShape {
+  view?: "scenario" | "outcome" | "aggregate" | "quadrant"
+  primaryOutcomeCode?: string | null
+  compareOutcomeCodes?: string[]
+  expandedRegionalOutcomes?: string[]
+  aggregateScope?: "selected" | "all"
+}
+
+const RESILIENCE_VIEW_TOKEN: Record<
+  NonNullable<ResilienceShareShape["view"]>,
+  string
+> = {
+  scenario: "s",
+  outcome: "o",
+  aggregate: "a",
+  quadrant: "q",
+}
+
+export function encodeResilienceControls(
+  shape: ResilienceShareShape,
+): string {
+  const parts: string[] = []
+  if (shape.view && shape.view !== "scenario") {
+    parts.push(`v:${RESILIENCE_VIEW_TOKEN[shape.view]}`)
+  }
+  if (shape.primaryOutcomeCode) parts.push(`po:${shape.primaryOutcomeCode}`)
+  if (shape.compareOutcomeCodes && shape.compareOutcomeCodes.length > 0) {
+    parts.push(`co:${shape.compareOutcomeCodes.join("~")}`)
+  }
+  if (
+    shape.expandedRegionalOutcomes &&
+    shape.expandedRegionalOutcomes.length > 0
+  ) {
+    parts.push(`er:${shape.expandedRegionalOutcomes.join("~")}`)
+  }
+  if (shape.aggregateScope === "selected") parts.push("sc:s")
+  return parts.join(",")
+}
+
+export function parseResilienceControlsParam(
+  param: string | null | undefined,
+): ResilienceShareShape {
+  if (!param) return {}
+  const out: ResilienceShareShape = {}
+  for (const tok of param.split(",")) {
+    const sepIndex = tok.indexOf(":")
+    if (sepIndex <= 0) continue
+    const key = tok.slice(0, sepIndex)
+    const value = tok.slice(sepIndex + 1)
+    switch (key) {
+      case "v":
+        if (value === "s") out.view = "scenario"
+        else if (value === "o") out.view = "outcome"
+        else if (value === "a") out.view = "aggregate"
+        else if (value === "q") out.view = "quadrant"
+        break
+      case "po":
+        out.primaryOutcomeCode = value
+        break
+      case "co":
+        out.compareOutcomeCodes = value.split("~").filter(Boolean)
+        break
+      case "er":
+        out.expandedRegionalOutcomes = value.split("~").filter(Boolean)
+        break
+      case "sc":
+        out.aggregateScope = value === "s" ? "selected" : "all"
+        break
+    }
+  }
+  return out
+}
+
 export function parseShareItemsParam(
   param: string,
   storyParam?: string,
@@ -92,11 +198,17 @@ export function parseShareItemsParam(
     .map((token): ShareItem | null => {
       const parts = token.split(".")
       if (parts[0] === "b" && parts.length >= 3) {
+        const modeToken = parts[2]
         return {
           id: crypto.randomUUID(),
           type: "barChart",
           scenarioId: parts[1]!,
-          viewMode: parts[2] === "d" ? "distribution" : "summary",
+          viewMode:
+            modeToken === "a"
+              ? "average"
+              : modeToken === "d"
+                ? "distribution"
+                : "bar",
           hydroclimate: parts[3] || "historical",
         }
       }
@@ -173,9 +285,11 @@ function TrayCard({
     if (item.type === "barChart") {
       const info = scenarioLookup.get(item.scenarioId)
       const viewLabel =
-        item.viewMode === "distribution"
-          ? "Key outcomes distribution"
-          : "Key outcomes bar chart"
+        item.viewMode === "average"
+          ? "Key outcomes average"
+          : item.viewMode === "distribution"
+            ? "Key outcomes distribution"
+            : "Key outcomes bar chart"
       const chartData =
         (item.cachedChartData as
           | Record<string, ChartDataPoint[]>
@@ -345,9 +459,11 @@ function StoryCard({
     if (item.type === "barChart") {
       const info = scenarioLookup.get(item.scenarioId)
       const viewLabel =
-        item.viewMode === "distribution"
-          ? "Key outcomes distribution"
-          : "Key outcomes bar chart"
+        item.viewMode === "average"
+          ? "Key outcomes average"
+          : item.viewMode === "distribution"
+            ? "Key outcomes distribution"
+            : "Key outcomes bar chart"
       const chartData =
         (item.cachedChartData as
           | Record<string, ChartDataPoint[]>

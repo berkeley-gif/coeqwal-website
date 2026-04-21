@@ -27,7 +27,6 @@ import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
-import ScenarioListTuner from "./ScenarioListTuner"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -157,7 +156,7 @@ export default function ScenarioSelectionSidebar({
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <SearchAndChips afterSearch={<ScenarioListTuner />} />
+        <SearchAndChips chipsEyebrow="Tune scenario list" />
       </Box>
 
       {/* Scrollable scenario list */}
@@ -318,9 +317,7 @@ export default function ScenarioSelectionSidebar({
                     <InlineRowActions
                       scenarioId={scenario.scenarioId}
                       scenarioLabel={scenario.label}
-                      displayMode={
-                        outcomeDisplayMode as "summary" | "distribution"
-                      }
+                      displayMode={outcomeDisplayMode}
                       isPinned={isPinned}
                       accentColor={accentColor}
                       shareIconNudgeTop="-2px"
@@ -350,15 +347,11 @@ export default function ScenarioSelectionSidebar({
                             cachedChartData: result?.chartData,
                           })
                         } else {
-                          const vm =
-                            outcomeDisplayMode === "distribution"
-                              ? "distribution"
-                              : "summary"
                           addShareItem({
                             id: crypto.randomUUID(),
                             type: "barChart",
                             scenarioId: scenario.scenarioId,
-                            viewMode: vm as "summary" | "distribution",
+                            viewMode: outcomeDisplayMode,
                             hydroclimate,
                           })
                         }

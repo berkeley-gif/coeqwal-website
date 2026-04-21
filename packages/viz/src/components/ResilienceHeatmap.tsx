@@ -193,12 +193,27 @@ export interface ResilienceHeatmapProps {
    * consumed.
    */
   hideLegend?: boolean
+  /**
+   * Optional grouped column header drawn above the per-column tick
+   * labels. Each group is labelled with `label` and spans the next
+   * `span` columns (in `columns` order). Spans must sum to
+   * `columns.length`. When supplied, the x-axis area is extended to
+   * fit a second header line with a subtle rule underneath each group.
+   */
+  columnGroups?: ResilienceColumnGroup[]
+}
+
+export interface ResilienceColumnGroup {
+  key: string
+  label: string
+  span: number
 }
 
 const MARGIN = { top: 16, right: 24, bottom: 72, left: 200 }
 const MARGINAL_BAND = 22
 const MARGINAL_GAP = 6
 const LEGEND_HEIGHT = 48
+const COLUMN_GROUP_BAND = 24
 const HATCH_ID = "resilience-unavailable-hatch"
 
 function clampTier(value: number): 1 | 2 | 3 | 4 {
@@ -304,6 +319,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     marginals,
     showMarginals = false,
     hideLegend = false,
+    columnGroups,
   }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -650,10 +666,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           : 0
 
         // Reclaim legend space when the tile is embedded in small-multiples
-        // (the wrapper renders one shared legend outside).
-        const effectiveMarginBottom = hideLegend
-          ? MARGIN.bottom - LEGEND_HEIGHT
-          : MARGIN.bottom
+        // (the wrapper renders one shared legend outside). Reserve extra
+        // room for a grouped-column header band when columnGroups is set.
+        const hasColumnGroups = !!columnGroups && columnGroups.length > 0
+        const groupBand = hasColumnGroups ? COLUMN_GROUP_BAND : 0
+        const effectiveMarginBottom =
+          (hideLegend ? MARGIN.bottom - LEGEND_HEIGHT : MARGIN.bottom) +
+          groupBand
 
         const innerW = w - MARGIN.left - MARGIN.right - extraRight
         const innerH = h - MARGIN.top - effectiveMarginBottom - extraBottom
@@ -1132,12 +1151,15 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           .append("g")
           .attr("class", "resilience-x-axis")
           .attr("transform", `translate(0,${xAxisY})`)
+        // Per-column tick labels (hydroclimate names). When column
+        // groups are present the ticks move down below the group band.
+        const tickY = hasColumnGroups ? 18 + COLUMN_GROUP_BAND : 18
         columns.forEach((col) => {
           const cx = (xScale(col.key) ?? 0) + bandW / 2
           const node = xAxis
             .append("text")
             .attr("x", cx)
-            .attr("y", 18)
+            .attr("y", tickY)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "hanging")
             .attr("font-size", 11)
@@ -1162,6 +1184,50 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .on("mouseleave", hideAxisTooltip)
           }
         })
+
+        // Column group header band: one bold label per group, centered
+        // over its span, with a thin rule spanning the group columns.
+        if (hasColumnGroups && columnGroups) {
+          const groupG = xAxis
+            .append("g")
+            .attr("class", "resilience-x-axis-groups")
+          let cursor = 0
+          for (const group of columnGroups) {
+            const span = Math.max(0, group.span)
+            if (span === 0 || cursor >= columns.length) {
+              cursor += span
+              continue
+            }
+            const firstCol = columns[cursor]
+            const lastCol = columns[Math.min(cursor + span - 1, columns.length - 1)]
+            if (!firstCol || !lastCol) {
+              cursor += span
+              continue
+            }
+            const x1 = xScale(firstCol.key) ?? 0
+            const x2 = (xScale(lastCol.key) ?? 0) + bandW
+            const midX = (x1 + x2) / 2
+            groupG
+              .append("text")
+              .attr("x", midX)
+              .attr("y", 14)
+              .attr("text-anchor", "middle")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", 11)
+              .attr("font-weight", 700)
+              .attr("fill", paletteText)
+              .text(group.label)
+            groupG
+              .append("line")
+              .attr("x1", x1 + 2)
+              .attr("x2", x2 - 2)
+              .attr("y1", 30)
+              .attr("y2", 30)
+              .attr("stroke", paletteAxisHint)
+              .attr("stroke-width", 1)
+            cursor += span
+          }
+        }
 
         // Legend — skipped entirely when the parent opts out (e.g., the
         // small-multiples wrapper renders one shared legend outside).
@@ -1471,6 +1537,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         marginalCol,
         hideLegend,
         distributionMode,
+        columnGroups,
       ],
     )
 

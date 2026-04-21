@@ -9,118 +9,13 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { TIER_LABELS } from "../../../../content/tiers"
+import { Figure } from "./Figure"
+
+export { TierLegend } from "./TierLegend"
 
 const CELL = 48
 const CELL_RADIUS = 6
 const CELL_GAP = 6
-
-function Figure({
-  caption,
-  children,
-}: {
-  caption: string
-  children: React.ReactNode
-}) {
-  const theme = useTheme()
-  return (
-    <Box
-      sx={{
-        my: theme.space.component.sm,
-        p: theme.space.component.md,
-        border: theme.border.light,
-        borderRadius: theme.borderRadius.sm,
-        backgroundColor: theme.palette.grey[50],
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: theme.space.component.xs,
-      }}
-    >
-      {children}
-      <Typography
-        variant="caption"
-        sx={{
-          color: theme.palette.text.secondary,
-          textAlign: "center",
-          maxWidth: 520,
-        }}
-      >
-        {caption}
-      </Typography>
-    </Box>
-  )
-}
-
-/** Row of four tier swatches with their labels underneath. */
-export function TierLegend() {
-  const theme = useTheme()
-  const tiers = theme.palette.tiers
-  const entries: Array<{ level: 1 | 2 | 3 | 4; color: string }> = [
-    { level: 1, color: tiers.tier1 },
-    { level: 2, color: tiers.tier2 },
-    { level: 3, color: tiers.tier3 },
-    { level: 4, color: tiers.tier4 },
-  ]
-  const width = entries.length * CELL + (entries.length - 1) * CELL_GAP
-  const textY = CELL + 22
-  const labelY = CELL + 38
-  return (
-    <Figure caption="The four categorical tiers. Lower numbers are better.">
-      <svg
-        width={width}
-        height={CELL + 48}
-        role="img"
-        aria-label="Tier color scale"
-      >
-        {entries.map((e, i) => {
-          const x = i * (CELL + CELL_GAP)
-          return (
-            <g key={e.level}>
-              <rect
-                x={x}
-                y={0}
-                width={CELL}
-                height={CELL}
-                rx={CELL_RADIUS}
-                fill={e.color}
-              />
-              <text
-                x={x + CELL / 2}
-                y={CELL / 2 + 5}
-                textAnchor="middle"
-                fontSize={16}
-                fontWeight={600}
-                fill="#ffffff"
-              >
-                {e.level}
-              </text>
-              <text
-                x={x + CELL / 2}
-                y={textY}
-                textAnchor="middle"
-                fontSize={11}
-                fontWeight={600}
-                fill={theme.palette.text.primary}
-              >
-                Tier {e.level}
-              </text>
-              <text
-                x={x + CELL / 2}
-                y={labelY}
-                textAnchor="middle"
-                fontSize={10}
-                fill={theme.palette.text.secondary}
-              >
-                {TIER_LABELS[e.level]}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-    </Figure>
-  )
-}
 
 /** Summary cell with an arrow pointing to the continuous mean value. */
 export function SummaryCellExample() {
@@ -152,7 +47,7 @@ export function SummaryCellExample() {
           y1={size / 2 + 10}
           x2={size + 60}
           y2={size / 2 + 10}
-          stroke={theme.palette.text.secondary}
+          stroke={theme.palette.grey[700]}
           strokeWidth={1.2}
           markerEnd="url(#arrowHead)"
         />
@@ -165,7 +60,7 @@ export function SummaryCellExample() {
             refY={4}
             orient="auto"
           >
-            <path d="M0,0 L6,4 L0,8 Z" fill={theme.palette.text.secondary} />
+            <path d="M0,0 L6,4 L0,8 Z" fill={theme.palette.grey[700]} />
           </marker>
         </defs>
         <text
@@ -181,7 +76,7 @@ export function SummaryCellExample() {
           x={size + 66}
           y={size / 2 + 18}
           fontSize={10}
-          fill={theme.palette.text.secondary}
+          fill={theme.palette.grey[700]}
         >
           colored as tier 2
         </text>
@@ -240,7 +135,7 @@ export function DeltaCellExample() {
                   y={CELL + 18}
                   textAnchor="middle"
                   fontSize={10}
-                  fill={theme.palette.text.secondary}
+                  fill={theme.palette.grey[700]}
                 >
                   {e.caption}
                 </text>
@@ -321,7 +216,7 @@ export function DensityCellExample() {
                 y={size * 2 + 22}
                 textAnchor="middle"
                 fontSize={10}
-                fill={theme.palette.text.secondary}
+                fill={theme.palette.grey[700]}
               >
                 {s.label}
               </text>
@@ -432,7 +327,7 @@ export function DistributionCellExample() {
                 textAnchor="middle"
                 fontSize={10}
                 fontWeight={600}
-                fill={theme.palette.text.secondary}
+                fill={theme.palette.grey[700]}
               >
                 {s.title}
               </text>
@@ -539,7 +434,7 @@ export function DistributionCellLocationExample() {
                 textAnchor="middle"
                 fontSize={10}
                 fontWeight={600}
-                fill={theme.palette.text.secondary}
+                fill={theme.palette.grey[700]}
               >
                 {s.title}
               </text>
@@ -657,7 +552,7 @@ export function QuadrantDiagram() {
               y={l.y + 8}
               textAnchor="middle"
               fontSize={9}
-              fill={theme.palette.text.secondary}
+              fill={theme.palette.grey[700]}
             >
               {l.subtitle}
             </text>
