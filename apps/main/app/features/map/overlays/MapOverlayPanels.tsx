@@ -75,8 +75,18 @@ const SUMMARY_PHASE_THRESHOLDS = {
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
 const PANEL_POSITIONS = {
+  // Sticky top for the left intro paragraph. Unchanged, since the
+  // paragraph is short and reads well at this vertical position.
   paragraphTop: "15vh",
 } as const
+
+// Sticky top for the right-side panel stack, in pixels. The Learn
+// page's visual top-chrome (site header + any tab/sub-nav rows) is
+// ~90px on production builds; we add a small pad below that so the
+// panels sit just clear of the header stack. Kept as a single
+// explicit pixel constant (rather than adding theme tokens for every
+// sticky band) so it's trivial to tune for demo.
+const RIGHT_PANELS_TOP_PX = 110
 
 const ACCENT_TEXT_SX = {
   fontFamily: themeValues.fontFamily.accent,
@@ -726,11 +736,15 @@ export default function MapOverlayPanels() {
                 </Box>
               </StickyElement>
 
-              {/* All right-side panels in a single sticky container */}
+              {/* All right-side panels in a single sticky container.
+                  Anchored a fixed pixel distance from the top so the
+                  stack always clears the full header chrome (header +
+                  any sub-nav rows) on any viewport while still having
+                  room to fit without overflowing the bottom. */}
               <Box
                 sx={{
                   position: "sticky",
-                  top: PANEL_POSITIONS.paragraphTop,
+                  top: `${RIGHT_PANELS_TOP_PX}px`,
                   zIndex: 1,
                   mt: "80vh",
                   pointerEvents: "none",

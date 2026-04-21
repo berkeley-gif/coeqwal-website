@@ -144,7 +144,10 @@ export function KeyOutcomesPanel({
         onClick={onTitleClick}
         sx={{
           ...theme.scenarios.panelTitle,
-          mb: theme.space.component.md,
+          // Tightened so the section labels below sit closer to the
+          // panel title; reclaims vertical runway so the full panel
+          // stack fits on shorter screens.
+          mb: theme.space.component.xs,
         }}
       >
         Key outcomes
@@ -153,7 +156,7 @@ export function KeyOutcomesPanel({
       {/* Multiple location outcomes - first 5 */}
       <Typography
         variant="smallSectionLabel"
-        sx={{ mb: theme.space.component.md }}
+        sx={{ mb: theme.space.component.sm }}
       >
         Multiple location outcomes
       </Typography>
@@ -163,7 +166,10 @@ export function KeyOutcomesPanel({
           gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(5, 1fr)" },
           gap: theme.space.gap.sm,
           alignItems: "start",
-          mb: theme.space.component.md,
+          // Tightened gap between the two grids so "Single location
+          // outcomes" sits closer to the "Multiple location outcomes"
+          // grid above it.
+          mb: theme.space.component.xs,
         }}
       >
         {multipleLocationOutcomes.map(renderOutcomeItem)}
@@ -172,7 +178,7 @@ export function KeyOutcomesPanel({
       {/* Single location outcomes - last 4 */}
       <Typography
         variant="smallSectionLabel"
-        sx={{ mb: theme.space.component.md }}
+        sx={{ mb: theme.space.component.sm }}
       >
         Single location outcomes
       </Typography>
