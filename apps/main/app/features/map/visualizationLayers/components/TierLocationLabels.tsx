@@ -146,7 +146,7 @@ export function TierLocationLabels({
           highlightedIds?.has(location.id) ||
           highlightedIds?.has(location.name) ||
           false
-        const goldAccent = "#ffd87e"
+        const goldAccent = theme.palette.accent.glossary
 
         return (
           <Marker

@@ -209,6 +209,37 @@ const ACTIVE_OUTCOMES = new Set([
 ])
 
 const HIGHLIGHT_GOLD = "#ffd87e"
+
+/* ── Beat 5 (loi-highlight) shared timing & identity ──
+ *
+ * Beat 5 choreographs a single AG_REV LOI through five sub-steps. These
+ * constants are shared between the main choreography effect (which owns
+ * Mapbox paint writes for demand-units / demand-units-outline) and the
+ * Beat 5 driver effect (which owns React state + the locationHighlights
+ * store). Hoisted to module scope so exactly one source of truth defines
+ * each threshold.
+ *
+ *   [0.500, BEAT5_S1_LAYER_IN_START)  pre-roll (narration settles)
+ *   [BEAT5_S1_LAYER_IN_START, BEAT5_S1_LAYER_IN_END)  step 1: AG layer fades in
+ *   [BEAT5_S2_SQUARE_RING_AT,    settle)  step 2: gold ring on the square
+ *   [BEAT5_S3_SQUARE_POPUP_AT,   settle)  step 3: popup near the square
+ *   [BEAT5_S4_POLYGON_RING_AT,   settle)  step 4: gold stroke on the polygon
+ *   [BEAT5_S5_POLYGON_POPUP_AT,  settle)  step 5: popup near the polygon
+ *   [BEAT5_SETTLE, BEAT5_TAIL_END)  tail: fade layer back out, clear state
+ */
+const BEAT5_ENTER = 0.5
+const BEAT5_S1_LAYER_IN_START = 0.555
+const BEAT5_S1_LAYER_IN_END = 0.575
+const BEAT5_S2_SQUARE_RING_AT = 0.58
+const BEAT5_S3_SQUARE_POPUP_AT = 0.59
+const BEAT5_S4_POLYGON_RING_AT = 0.6
+const BEAT5_S5_POLYGON_POPUP_AT = 0.61
+const BEAT5_SETTLE = 0.62
+const BEAT5_TAIL_END = 0.63
+const BEAT5_LAYER_OPACITY = 0.65
+/** DU_ID of the LOI spotlighted during Beat 5 (Glenn Colusa I.D.). */
+const BEAT5_LOI_ID = "08N_SA2"
+
 const BASE_FILL_OPACITY = 0.75
 const ZOOM_THRESHOLD = 8
 const ZOOMED_IN_OPACITY = 0.75
@@ -786,16 +817,21 @@ export default function TierAnimationSection() {
 
   /* ── Beat 5 demo-LOI highlight state ──
    *
-   * During Beat 5 (`loi-highlight`) the storyboard alternates a map +
-   * distribution-square ring between two AG_REV LOIs. The progress window
-   * is driven by the listener below; the resulting `demoLocation` is:
-   *   - passed to `OutcomeMorphOverlay` via `demoHighlightedLocationKey`
-   *     so the square ring renders even though `isInteractive` is false,
-   *   - and pushed to `mapActions.setLocationHighlights` so the map
-   *     Popup + gold outline already wired elsewhere in the app fire for
-   *     the beat-5 demo without any bespoke map code. */
+   * During Beat 5 (`loi-highlight`) the storyboard choreographs a single
+   * AG_REV LOI through five sub-steps (map layer fade-in, square ring,
+   * square popup, polygon ring, polygon popup). Two pieces of state back
+   * this choreography:
+   *   - `demoLocation` drives the square's gold ring via
+   *     `OutcomeMorphOverlay`'s `demoHighlightedLocationKey` prop, and
+   *   - `demoHoveredLocation` drives the square's foreignObject popup via
+   *     the same `hoveredLocation` prop used in interactive hover mode.
+   * The map-side gold polygon stroke and map popup are driven directly
+   * from the Beat 5 driver effect via Mapbox paint properties and
+   * `mapActions.setLocationHighlights` respectively. */
   const [demoLocation, setDemoLocation] = useState<LocationInfo | null>(null)
   const demoLocationKey = demoLocation ? locKey(demoLocation) : null
+  const [demoHoveredLocation, setDemoHoveredLocation] =
+    useState<LocationInfo | null>(null)
 
   const prevOutcomeRef = useRef<string | null>(null)
   useEffect(() => {
@@ -1577,7 +1613,14 @@ export default function TierAnimationSection() {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
+    let phase: "idle" | "beat1" | "beat1c" | "beat2" | "beat5" = "idle"
+    // Beat 5 polygon-ring state (step 4). When true, the
+    // `demand-units-outline` layer is currently carrying a case
+    // expression that strokes BEAT5_LOI_ID in HIGHLIGHT_GOLD. We
+    // track it here so entering / leaving the step 4 window and
+    // exiting Beat 5 entirely can cleanly restore the blended tier
+    // expression without re-writing on every tick.
+    let beat5PolyRingOn = false
 
     // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
     //          still on all 3 DU classes (Agriculture, Urban, Refuge).
@@ -1906,10 +1949,28 @@ export default function TierAnimationSection() {
           phase = "beat1c"
         }
       } else {
-        // Beat 2+: restore full DU filter so Urban + Refuge DUs become
-        // visible with their own tier colors for their morph slices.
-        // Progressively hide features as their SVG copies start animating.
-        if (phase !== "beat2") {
+        // Beat 2+: this branch owns all `demand-units` / `demand-units-outline`
+        // paint + filter writes from here on, including the Beat 5 window.
+        // Keeping a single writer for these two Mapbox layers prevents
+        // cross-effect races that would otherwise leak a flicker whenever
+        // two progress listeners tried to interpolate conflicting values
+        // on the same tick.
+        //
+        // Sub-structure:
+        //   [BEAT2_START, BEAT5_ENTER)    beat2 through beat4: full DU
+        //                                  filter + blended tier expr,
+        //                                  per-DU hide schedule case expr.
+        //   [BEAT5_ENTER, BEAT5_TAIL_END) beat5: AG-only filter, scalar
+        //                                  opacity piecewise function,
+        //                                  LOI gold ring via case expr.
+        //   [BEAT5_TAIL_END, 1]           beat6+: restore full DU filter
+        //                                  and blended tier expr, hand
+        //                                  back to per-DU case expr (all
+        //                                  morphs are settled so it's
+        //                                  effectively the "all zeros"
+        //                                  terminal state).
+
+        const enterBeat2Phase = () => {
           try {
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (map.getLayer("demand-units")) {
@@ -1936,6 +1997,11 @@ export default function TierAnimationSection() {
                   expr as never,
                 )
               }
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-width",
+                0.5,
+              )
             }
             // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
             // delta-detaw) stay hidden - the SVG overlay handles their outcomes.
@@ -1943,10 +2009,10 @@ export default function TierAnimationSection() {
           } catch {
             /* ok */
           }
-          phase = "beat2"
         }
 
-        // Collect demand-units hide schedule entries and line entries
+        // Collect demand-units hide schedule entries and line entries.
+        // Shared across all sub-branches below.
         const duEntries: typeof hideScheduleRef.current = []
         const lineEntries: typeof hideScheduleRef.current = []
 
@@ -1961,11 +2027,12 @@ export default function TierAnimationSection() {
           }
         }
 
-        // Build demand-units opacity expression:
-        // - Fading entries: interpolated opacity (0.65 -> 0)
-        // - Not-yet-fading entries: 0.65 (still visible)
-        // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
-        if (duEntries.length > 0 && map.getLayer("demand-units")) {
+        const paintDuHideSchedule = () => {
+          // Build demand-units opacity expression:
+          // - Fading entries: interpolated opacity (0.65 -> 0)
+          // - Not-yet-fading entries: 0.65 (still visible)
+          // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
+          if (duEntries.length === 0 || !map.getLayer("demand-units")) return
           const caseExpr: unknown[] = ["case"]
           for (const entry of duEntries) {
             if (v < entry.fadeStart) {
@@ -2002,6 +2069,171 @@ export default function TierAnimationSection() {
           } catch {
             /* ok */
           }
+        }
+
+        if (v < BEAT5_ENTER) {
+          // ── Beat 2 through Beat 4 ──
+          if (phase !== "beat2") {
+            enterBeat2Phase()
+            phase = "beat2"
+          }
+          paintDuHideSchedule()
+        } else if (v < BEAT5_TAIL_END) {
+          // ── Beat 5 ──
+          // One-time entry: swap to the AG-only filter so only
+          // Agriculture DUs show, clear any lingering step-4 gold ring
+          // state, and seed opacity to 0 (step 1's fade-in will ramp
+          // it up from here).
+          if (phase !== "beat5") {
+            try {
+              if (map.getLayer("demand-units")) {
+                map.setFilter(
+                  "demand-units",
+                  DU_AG_ONLY_FILTER as never,
+                )
+                map.setPaintProperty("demand-units", "fill-opacity", 0)
+              }
+              if (map.getLayer("demand-units-outline")) {
+                map.setFilter(
+                  "demand-units-outline",
+                  DU_AG_ONLY_FILTER as never,
+                )
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-opacity",
+                  0,
+                )
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-width",
+                  0.5,
+                )
+              }
+            } catch {
+              /* ok */
+            }
+            beat5PolyRingOn = false
+            phase = "beat5"
+          }
+
+          // Compute desired layer opacity as a piecewise function
+          // of v so the layer fades in over step 1, holds steady
+          // through steps 2-5, and fades out over the tail.
+          let targetOpacity: number
+          if (v < BEAT5_S1_LAYER_IN_START) {
+            targetOpacity = 0
+          } else if (v < BEAT5_S1_LAYER_IN_END) {
+            const t =
+              (v - BEAT5_S1_LAYER_IN_START) /
+              (BEAT5_S1_LAYER_IN_END - BEAT5_S1_LAYER_IN_START)
+            targetOpacity = BEAT5_LAYER_OPACITY * t
+          } else if (v < BEAT5_SETTLE) {
+            targetOpacity = BEAT5_LAYER_OPACITY
+          } else {
+            const t =
+              (v - BEAT5_SETTLE) / (BEAT5_TAIL_END - BEAT5_SETTLE)
+            targetOpacity = BEAT5_LAYER_OPACITY * (1 - t)
+          }
+
+          try {
+            if (map.getLayer("demand-units")) {
+              map.setPaintProperty(
+                "demand-units",
+                "fill-opacity",
+                targetOpacity,
+              )
+            }
+            if (map.getLayer("demand-units-outline")) {
+              map.setPaintProperty(
+                "demand-units-outline",
+                "line-opacity",
+                targetOpacity,
+              )
+            }
+          } catch {
+            /* ok */
+          }
+
+          // Step 4: gold stroke on the LOI polygon during [S4, settle).
+          const wantPolyRing =
+            v >= BEAT5_S4_POLYGON_RING_AT && v < BEAT5_SETTLE
+          if (wantPolyRing && !beat5PolyRingOn) {
+            try {
+              const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+              if (map.getLayer("demand-units-outline") && baseExpr) {
+                const match = [
+                  "==",
+                  ["get", "DU_ID"],
+                  BEAT5_LOI_ID,
+                ]
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  ["case", match, HIGHLIGHT_GOLD, baseExpr] as never,
+                )
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-width",
+                  ["case", match, 2, 0.5] as never,
+                )
+              }
+            } catch {
+              /* ok */
+            }
+            beat5PolyRingOn = true
+          } else if (!wantPolyRing && beat5PolyRingOn) {
+            try {
+              const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+              if (map.getLayer("demand-units-outline") && baseExpr) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-color",
+                  baseExpr as never,
+                )
+              }
+              if (map.getLayer("demand-units-outline")) {
+                map.setPaintProperty(
+                  "demand-units-outline",
+                  "line-width",
+                  0.5,
+                )
+              }
+            } catch {
+              /* ok */
+            }
+            beat5PolyRingOn = false
+          }
+        } else {
+          // ── Beat 6+ (post Beat 5 tail) ──
+          // One-time exit from Beat 5: restore the full DU filter,
+          // blended tier expression, default outline line-width, and
+          // clear any lingering step-4 case expression. Then hand
+          // ownership back to the per-DU hide-schedule case expr,
+          // which by now evaluates to 0 for every tracked DU (all
+          // morphs have completed).
+          if (phase === "beat5") {
+            if (beat5PolyRingOn) {
+              try {
+                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+                if (map.getLayer("demand-units-outline") && baseExpr) {
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-color",
+                    baseExpr as never,
+                  )
+                }
+              } catch {
+                /* ok */
+              }
+              beat5PolyRingOn = false
+            }
+            enterBeat2Phase()
+            phase = "beat2"
+          } else if (phase !== "beat2") {
+            enterBeat2Phase()
+            phase = "beat2"
+          }
+          paintDuHideSchedule()
         }
 
         // Line outcome fade. Mirrors the polygon branch's three-state shape.
@@ -2125,82 +2357,127 @@ export default function TierAnimationSection() {
 
   /* ── Beat 5 demo-LOI driver ──
    *
-   * Beat 5 spans [0.50, 0.62] in the compressed progress domain. After
-   * the Beat 5 narration fades in (0.51 -> 0.53), we highlight two
-   * AG_REV LOIs in sequence:
-   *   [0.53, 0.575]  -> LOI A (Glenn Colusa I.D., typically high tier)
-   *   [0.575, 0.62]  -> LOI B (Westlands East, typically low tier)
+   * Beat 5 spans [BEAT5_ENTER, BEAT5_TAIL_END] in the compressed progress
+   * domain. It choreographs a single AG_REV LOI (Glenn Colusa I.D.)
+   * through five sub-steps, each tied to the "Locations of interest can
+   * be selected on the map or from the chart" sentence:
    *
-   * When `demoLocation` is set we also push it to
-   * `mapActions.setLocationHighlights` so the map polygon lights up with
-   * the same gold ring + name popup used by the interactive hover path.
-   * The BEAT1C popup effect above clears its own highlights at v >= 0.38
-   * so there's no contention with this range. */
+   *   [S1_LAYER_IN_START, S1_LAYER_IN_END]  Step 1: AG layer fades in
+   *   [S2_SQUARE_RING_AT, SETTLE)           Step 2: gold ring on square
+   *   [S3_SQUARE_POPUP_AT, SETTLE)          Step 3: popup near square
+   *   [S4_POLYGON_RING_AT, SETTLE)          Step 4: gold stroke on polygon
+   *   [S5_POLYGON_POPUP_AT, SETTLE)         Step 5: popup near polygon
+   *   [SETTLE, TAIL_END]                    Tail: AG layer fades out
+   *
+   * This effect is React + Zustand only: it drives `demoLocation`
+   * (square ring, via OutcomeMorphOverlay's `demoHighlightedLocationKey`),
+   * `demoHoveredLocation` (square popup, via the overlay's hoverTooltip),
+   * and `mapActions.setLocationHighlights` (polygon popup).
+   *
+   * All Mapbox paint + filter writes for `demand-units` /
+   * `demand-units-outline` during Beat 5 - including step 1's
+   * fill-opacity ramp, step 4's gold line-color case expression, and
+   * the tail fade-out - are owned by the main choreography effect
+   * above. Keeping exactly one writer per Mapbox layer eliminates the
+   * cross-effect races that used to produce flicker during the beat. */
   useEffect(() => {
     if (isLoading) return
     const agData = outcomeLocations["AG_REV"]
     if (!agData || agData.ids.size === 0) return
 
-    const LOI_A = "08N_SA2" // Glenn Colusa I.D.
-    const LOI_B = "90_PA1" // Westlands W.D. East
-    const BEAT5_START = 0.53
-    const SWITCH = 0.575
-    const BEAT5_END = 0.62
+    const tier = agData.tierMap[BEAT5_LOI_ID]
+    if (tier == null) return
 
-    const buildInfo = (duId: string): LocationInfo | null => {
-      const tier = agData.tierMap[duId]
-      if (tier == null) return null
-      return { code: "AG_REV", sourceId: duId, tier }
+    const info: LocationInfo = {
+      code: "AG_REV",
+      sourceId: BEAT5_LOI_ID,
+      tier,
     }
-    const buildHighlight = (info: LocationInfo) => {
-      const coord = centroidLookupRef.current.get(info.sourceId)
-      if (!coord) return null
-      const color = agData.colorMap[info.sourceId] ?? "#888888"
-      const name =
-        agData.nameMap[info.sourceId] ??
-        getDemandUnitDisplayName(info.sourceId) ??
-        info.sourceId
-      return {
-        key: `beat5:${info.code}:${info.sourceId}`,
-        longitude: coord.lng,
-        latitude: coord.lat,
-        name,
-        tierLevel: info.tier,
-        tierLabel: getTierLabel(info.tier),
-        tierColor: color,
-        pinned: true,
-      } satisfies import("../../map/store").LocationHighlight
-    }
+    const coord = centroidLookupRef.current.get(BEAT5_LOI_ID)
+    const tierColor = agData.colorMap[BEAT5_LOI_ID] ?? "#888888"
+    const name =
+      agData.nameMap[BEAT5_LOI_ID] ??
+      getDemandUnitDisplayName(BEAT5_LOI_ID) ??
+      BEAT5_LOI_ID
+    const highlight = coord
+      ? ({
+          key: `beat5:${info.code}:${info.sourceId}`,
+          longitude: coord.lng,
+          latitude: coord.lat,
+          name,
+          tierLevel: info.tier,
+          tierLabel: getTierLabel(info.tier),
+          tierColor,
+          // `pinned: false` lets the get-started-mode filter in
+          // VisualizationLayers render the Popup (pinned highlights
+          // are filtered out in that mode).
+          pinned: false,
+        } satisfies import("../../map/store").LocationHighlight)
+      : null
 
-    let lastKey: string | null = null
-    const apply = (info: LocationInfo | null) => {
-      const key = info ? `${info.code}:${info.sourceId}` : null
-      if (key === lastKey) return
-      lastKey = key
-      setDemoLocation(info)
-      if (!info) {
-        mapActions.clearLocationHighlights()
-        return
+    let ringActive = false
+    let hoverActive = false
+    let popupActive = false
+
+    const teardown = () => {
+      if (ringActive) {
+        setDemoLocation(null)
+        ringActive = false
       }
-      const h = buildHighlight(info)
-      if (h) mapActions.setLocationHighlights([h])
+      if (hoverActive) {
+        setDemoHoveredLocation(null)
+        hoverActive = false
+      }
+      if (popupActive) {
+        mapActions.clearLocationHighlights()
+        popupActive = false
+      }
     }
 
     const unsub = progress.on("change", (v) => {
-      if (v < BEAT5_START || v >= BEAT5_END) {
-        apply(null)
+      if (v < BEAT5_ENTER || v >= BEAT5_TAIL_END) {
+        teardown()
         return
       }
-      if (v < SWITCH) {
-        apply(buildInfo(LOI_A))
-      } else {
-        apply(buildInfo(LOI_B))
+
+      // Step 2: gold ring on the distribution square.
+      const wantRing =
+        v >= BEAT5_S2_SQUARE_RING_AT && v < BEAT5_SETTLE
+      if (wantRing && !ringActive) {
+        setDemoLocation(info)
+        ringActive = true
+      } else if (!wantRing && ringActive) {
+        setDemoLocation(null)
+        ringActive = false
+      }
+
+      // Step 3: popup near the square (drives the overlay's
+      // foreignObject hoverTooltip via demoHoveredLocation).
+      const wantHover =
+        v >= BEAT5_S3_SQUARE_POPUP_AT && v < BEAT5_SETTLE
+      if (wantHover && !hoverActive) {
+        setDemoHoveredLocation(info)
+        hoverActive = true
+      } else if (!wantHover && hoverActive) {
+        setDemoHoveredLocation(null)
+        hoverActive = false
+      }
+
+      // Step 5: location-highlight Popup near the polygon.
+      const wantPopup =
+        v >= BEAT5_S5_POLYGON_POPUP_AT && v < BEAT5_SETTLE
+      if (wantPopup && !popupActive && highlight) {
+        mapActions.setLocationHighlights([highlight])
+        popupActive = true
+      } else if (!wantPopup && popupActive) {
+        mapActions.clearLocationHighlights()
+        popupActive = false
       }
     })
 
     return () => {
       unsub()
-      apply(null)
+      teardown()
     }
   }, [progress, outcomeLocations, isLoading])
 
@@ -3021,7 +3298,9 @@ export default function TierAnimationSection() {
                 activeLocationSet={
                   isInteractive ? activeLocationSet : undefined
                 }
-                hoveredLocation={isInteractive ? hoveredLocation : null}
+                hoveredLocation={
+                  isInteractive ? hoveredLocation : demoHoveredLocation
+                }
                 demoHighlightedLocationKey={demoLocationKey}
                 onLocationEnter={
                   isInteractive ? locHandlers.onMouseEnter : undefined

@@ -1408,9 +1408,9 @@ export default function OutcomeMorphOverlay({
                     isBarOrAvg
                       ? "none"
                       : isLocationActive
-                        ? "#ffd87e"
+                        ? theme.palette.accent.glossary
                         : spotlightedTier === shape.tier
-                          ? "#ffd87e"
+                          ? theme.palette.accent.glossary
                           : shape.color
                   }
                   strokeWidth={

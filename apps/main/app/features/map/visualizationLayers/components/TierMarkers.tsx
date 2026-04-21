@@ -98,7 +98,7 @@ export default function TierMarkers({
         )
 
         const isHighlighted = highlightedIds?.has(loc.location_id) ?? false
-        const goldAccent = "#ffd87e"
+        const goldAccent = theme.palette.accent.glossary
 
         return (
           <Marker
