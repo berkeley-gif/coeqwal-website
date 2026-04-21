@@ -28,56 +28,100 @@ export interface BeatDef {
   duration: number
 }
 
+/* Progress thresholds were compressed from [0, 1.0] into [0, 0.5] to make
+ *  room for Beats 5-8 (loi-highlight, list-bar, radar, heatmap) in the
+ *  remaining [0.5, 1.0]. Every threshold below (and in BeatTextOverlay,
+ *  TierAnimationSection, and OutcomeMorphOverlay.getOutcomeProgressRange)
+ *  is half of its pre-compression value. Durations are unchanged, so each
+ *  beat's per-second rate doubled; seconds-based fades still feel the same
+ *  because they flow through `secondsToProgress`. */
 export const BEATS: readonly BeatDef[] = [
   // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
-  //      Played automatically on arrival. Durations are 3x the prior
-  //      baseline so text + converging-blues beats give readers time
-  //      to absorb the narrative.
-  { id: "legend", progress: 0.45, duration: 12 },
-  // B1 (2/4) - Merged transition + narrative. Duration 9s over 0.28
-  //      progress (~0.32s per 0.01 progress). Sub-windows:
+  //      Played automatically on arrival.
+  { id: "legend", progress: 0.225, duration: 12 },
+  // B1 (2/4) - Merged transition + narrative. 9s over 0.14 progress.
+  //      Sub-windows (all in the compressed progress domain):
   //      1. Intro text collapses, tier legend floats to top of the
-  //         left panel (0.46 -> 0.49).
+  //         left panel (0.23 -> 0.245).
   //      2. As soon as the legend parks (no settle pause):
-  //         (0.49 -> 0.52, ~1s) the demand-units layer cross-fades
+  //         (0.245 -> 0.26, ~1s) the demand-units layer cross-fades
   //         OUT 0.65 -> 0 while still wearing its frozen 3-blue
-  //         palette. At 0.52, while invisible, the filter swaps to
+  //         palette. At 0.26, while invisible, the filter swaps to
   //         Agriculture-only and the fill-color is set directly to
-  //         the AG_REV tier expression. (0.52 -> 0.56, ~1.3s) the
+  //         the AG_REV tier expression. (0.26 -> 0.28, ~1.3s) the
   //         layer fades back IN 0 -> 0.65, appearing already in its
-  //         final tier colors. No solid-blue interstitial.
-  //      3. The Beat 1C narrative paragraphs are spaced for reading:
-  //         "For example, each colored location..." fades in at
-  //         0.49 -> 0.52 (concurrent with the map cross-fade out, so
-  //         text and tier-colored polygons arrive together by 0.56),
-  //         then "The colors correspond to different water delivery
-  //         outcome levels..." fades in at 0.65 -> 0.68, leaving a
-  //         ~1.6s reading pause before the beat settles at 0.73.
-  { id: "collapse-and-colors", progress: 0.73, duration: 9 },
+  //         final tier colors.
+  //      3. Beat 1C narration paces for reading: "For example, each
+  //         colored location..." fades in at 0.245 -> 0.26
+  //         (concurrent with the map cross-fade out, so text + tier
+  //         colors arrive together by 0.28); then "The colors
+  //         correspond to different water delivery outcome
+  //         levels..." fades in at 0.325 -> 0.34, leaving a ~1.6s
+  //         reading pause before the beat settles at 0.365.
+  { id: "collapse-and-colors", progress: 0.365, duration: 9 },
   // B2 (3/4) - Text swap + AG_REV morph + post-morph caption. 10s
-  //      total over 0.07 progress (~143s per progress unit). The two
-  //      Beat 1C paragraphs below the tier legend fade out 0.73 ->
-  //      0.735 and collapse; the Beat 3 "before" paragraph ("Each
-  //      location can be symbolized as a square colored with the
-  //      outcome level. These can be gathered together in a
-  //      distribution view.") fades in 0.735 -> 0.745 into the same
-  //      document-flow slot, giving ~3.5s of reading time before the
-  //      AG_REV polygons morph to their distribution squares over
-  //      [0.76, 0.78] (~2.9s). Once the morph completes, the "before"
-  //      paragraph fades out 0.78 -> 0.785 and the "after" paragraph
-  //      ("The distribution shows how agricultural revenue plays out
-  //      in this scenario across all the districts at a glance.")
-  //      fades in 0.785 -> 0.795 into the same slot, landing as the
-  //      beat settles at 0.80. The tier legend stays put throughout.
-  { id: "ag-rev-morph", progress: 0.8, duration: 10 },
-  // B3 (4/4) - Merged "remaining outcomes" beat. 14s over 0.20
-  //      progress (~70s per progress unit, same velocity as AG_REV's
-  //      morph). The Beat 3 "after" paragraph fades out 0.80 -> 0.82;
-  //      "For each scenario, outcome levels..." fades in in its place
-  //      0.82 -> 0.84, and the remaining 8 outcome morphs play
-  //      back-to-back over [0.84, 1.0] (each a 0.02-wide slice, ~1.4s
-  //      each, matching AG_REV's morph speed).
-  { id: "all-other-morphs", progress: 1.0, duration: 14 },
+  //      over 0.035 progress. Beat 1C paragraphs fade out
+  //      0.365 -> 0.3675 and collapse; the Beat 3 "before" paragraph
+  //      fades in 0.3675 -> 0.3725 into the same slot, giving a
+  //      reading beat before AG_REV morphs to its distribution
+  //      squares over [0.38, 0.39]. Once the morph completes the
+  //      "before" paragraph fades out 0.39 -> 0.3925 and the "after"
+  //      paragraph fades in 0.3925 -> 0.3975, landing as the beat
+  //      settles at 0.40.
+  { id: "ag-rev-morph", progress: 0.4, duration: 10 },
+  // B3 (4/8) - "Remaining outcomes" beat. 14s over 0.10 progress
+  //      (same per-progress velocity as AG_REV's morph). The Beat 3
+  //      "after" paragraph fades out 0.40 -> 0.41; "For each
+  //      scenario, outcome levels..." fades in in its place
+  //      0.41 -> 0.42, and the remaining 8 outcome morphs play
+  //      back-to-back across [0.42, 0.50] (each a 0.01-wide slice,
+  //      ~1.4s each, matching AG_REV's speed).
+  { id: "all-other-morphs", progress: 0.5, duration: 14 },
+  // B4 (5/8) - Distribution view + LOI highlight. 7s over 0.12
+  //      progress. "For each scenario..." fades out 0.50 -> 0.51;
+  //      the Beat 5 narration ("Outcomes can be displayed... /
+  //      Locations of interest can be selected...") fades in
+  //      0.51 -> 0.53 into the same document-flow slot. A first
+  //      demo LOI (AG_REV polygon) is highlighted in both the map
+  //      and its distribution square across [0.53, 0.575]; then a
+  //      second AG_REV LOI highlights across [0.575, 0.62] to
+  //      reinforce the concept. Beat settles at 0.62.
+  { id: "loi-highlight", progress: 0.62, duration: 7 },
+  // B5 (6/8) - List view. 5s over 0.10 progress. The Beat 5
+  //      narration fades out 0.62 -> 0.63; "The list view
+  //      summarizes key outcomes as bar charts." fades in
+  //      0.63 -> 0.65. Simultaneously, all 9 distribution grids
+  //      morph into their per-outcome bar glyphs across
+  //      [0.62, 0.72] (OutcomeMorphOverlay applies `barBlend`
+  //      on top of the settled square targets) and the bar
+  //      track + guide chrome fades in. Beat settles at 0.72.
+  { id: "list-bar", progress: 0.72, duration: 5 },
+  // B6 (7/8) - Radar chart. 7s over 0.15 progress. The Beat 6
+  //      narration fades out 0.72 -> 0.73; "The radar chart displays
+  //      the average values of key outcomes..." fades in
+  //      0.73 -> 0.75. In parallel: the per-outcome bars collapse
+  //      into single dots at each grid center across [0.72, 0.75]
+  //      (`avgBlend`); the dots then glide from their grid columns
+  //      out to their polar-vertex positions across [0.75, 0.82]
+  //      (`radarBlend`); finally the radar chrome (axes, rings,
+  //      connecting polygon) fades in across [0.82, 0.87]
+  //      (`radarChromeBlend`). Beat settles at 0.87.
+  { id: "radar", progress: 0.87, duration: 7 },
+  // B7 (8/8) - Heat map. 5s over 0.13 progress. Radar chrome (rings,
+  //      axes, connecting polygon) fades out 0.87 -> 0.90; in the
+  //      same window the Beat 7 narration fades out and the Beat 8
+  //      narration ("The heat map displays how key outcomes change
+  //      under different hydroclimate futures.") fades in
+  //      0.88 -> 0.90. Representative dots migrate from their polar
+  //      vertices into a single stacked column of tier-colored cells
+  //      across [0.87, 0.95] (`heatmapBlend`), then the heatmap
+  //      chrome (outcome labels on the side) fades in over
+  //      [0.95, 1.0] (`heatmapChromeBlend`). Because the demo is
+  //      scoped to a single hydroclimate (`s0020`), the heatmap is a
+  //      single column; the layout generalizes trivially to multiple
+  //      columns when additional hydroclimates are added. Beat
+  //      settles at 1.0.
+  { id: "heatmap", progress: 1.0, duration: 5 },
 ] as const
 
 export const FINAL_BEAT_INDEX = BEATS.length - 1

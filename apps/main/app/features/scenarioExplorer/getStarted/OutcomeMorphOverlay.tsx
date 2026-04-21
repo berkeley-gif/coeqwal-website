@@ -73,6 +73,11 @@ interface OutcomeMorphOverlayProps {
   tierChartData?: Record<string, ChartDataPoint[]>
   spotlightedTier?: number | null
   onBarClick?: (code: string, tier: number) => void
+  /** Beat-driven highlight (Beat 5): a single `${code}:${sourceId}` whose
+   *  distribution square gets the same gold ring as an interactive hover.
+   *  Rendered regardless of `interactive` so the storyboard can drive it
+   *  during non-interactive playback. */
+  demoHighlightedLocationKey?: string | null
 }
 
 function getLocationName(code: string, sourceId: string): string {
@@ -344,16 +349,16 @@ export function getOutcomeProgressRange(
 ): [number, number] {
   // All 9 morph windows share the same width so each outcome morphs at
   // the same perceived speed. AG_REV runs first in a dedicated slot
-  // ([0.76, 0.78]) after the "The colors correspond..." narrative fully
-  // fades in (ending at 0.73) plus a short reading beat. A second text
+  // ([0.38, 0.39]) after the "The colors correspond..." narrative fully
+  // fades in (ending at 0.365) plus a short reading beat. A second text
   // beat ("All other key outcomes...") then plays before the remaining 8
-  // morphs run back-to-back across [0.84, 1.00], each occupying a
-  // 0.02-wide slice matching AG_REV's width.
-  const WINDOW = 0.02
-  if (code === "AG_REV") return [0.76, 0.76 + WINDOW]
+  // morphs run back-to-back across [0.42, 0.50], each occupying a
+  // 0.01-wide slice matching AG_REV's width.
+  const WINDOW = 0.01
+  if (code === "AG_REV") return [0.38, 0.38 + WINDOW]
   const others = activeCodes.filter((c) => c !== "AG_REV")
-  const beatStart = 0.84
-  const beatEnd = 1.0
+  const beatStart = 0.42
+  const beatEnd = 0.5
   const slice = (beatEnd - beatStart) / Math.max(others.length, 1)
   const i = others.indexOf(code)
   if (i < 0) return [beatStart, beatEnd]
@@ -381,11 +386,14 @@ export default function OutcomeMorphOverlay({
   tierChartData,
   spotlightedTier,
   onBarClick,
+  demoHighlightedLocationKey = null,
 }: OutcomeMorphOverlayProps) {
   const theme = useTheme()
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
+  const radarChromeRef = useRef<SVGGElement | null>(null)
+  const heatmapChromeRef = useRef<SVGGElement | null>(null)
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
@@ -471,6 +479,120 @@ export default function OutcomeMorphOverlay({
     tierChartData,
     theme.palette.tiers,
   ])
+
+  /* ── Radar geometry (Beat 7) ──
+   *
+   * Each outcome's representative shapes converge to a single vertex on
+   * a radar chart during Beat 7. The center sits in the middle of the
+   * right third of the panel (where the distribution glyphs live). rMax
+   * is sized to leave room for HTML labels at the edge.
+   *
+   * Per-outcome vertex:
+   *   angle   = (2π * i) / N - π/2    (first outcome at top)
+   *   radius  = rMax * normalizedAvg   (tier 1 = inner, tier 4 = outer)
+   *
+   * All shapes in an outcome share the same `radarTarget`, so the
+   * converging "dot" in average mode migrates as one to its vertex.
+   * Non-representative shapes are invisible in average mode, so only
+   * one dot per outcome is actually drawn at the vertex. */
+  const radarGeometry = useMemo(() => {
+    const N = outcomeShapes.length
+    const panelLeft = panelWidth * (2 / 3)
+    const rightWidth = panelWidth - panelLeft
+    const cx = panelLeft + rightWidth / 2
+    const cy = panelHeight / 2
+    const rMax = Math.min(rightWidth / 2, panelHeight / 2) * 0.6
+
+    const vertices: Array<{
+      code: string
+      cx: number
+      cy: number
+      angle: number
+      radius: number
+    }> = []
+    for (let i = 0; i < N; i++) {
+      const group = outcomeShapes[i]!
+      const rep = group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
+      const tier = rep?.tier ?? 2
+      const normAvg = Math.max(0.2, tier / 4)
+      const angle = (2 * Math.PI * i) / Math.max(N, 1) - Math.PI / 2
+      const radius = rMax * normAvg
+      vertices.push({
+        code: group.code,
+        cx: cx + radius * Math.cos(angle),
+        cy: cy + radius * Math.sin(angle),
+        angle,
+        radius,
+      })
+    }
+    return { cx, cy, rMax, vertices }
+  }, [outcomeShapes, panelWidth, panelHeight])
+
+  /** Per-shape `radarTarget`: every shape in an outcome shares the
+   *  outcome's vertex position. Used only in the [0.75, 0.82] window
+   *  during Beat 7. */
+  const radarTargetsByCode = useMemo(() => {
+    const map = new Map<string, [number, number][]>()
+    for (const v of radarGeometry.vertices) {
+      map.set(
+        v.code,
+        circlePoints(v.cx, v.cy, DOT_RADIUS, POINTS_PER_SHAPE),
+      )
+    }
+    return map
+  }, [radarGeometry])
+
+  /* ── Heatmap geometry (Beat 8) ──
+   *
+   * The demo uses a single hydroclimate (`s0020`), so the heatmap is a
+   * single column with one cell per outcome. Cells stack vertically
+   * centered in the right third of the panel, sized to fit. The layout
+   * generalizes trivially to multiple columns when additional
+   * hydroclimates are added.
+   *
+   * Each cell target is a rect the size of `cellW x cellH`, centered on
+   * `(heatCx, cellCy_i)`. The rep shape in each outcome morphs from the
+   * radar vertex (circle at polar coordinate) to the cell rectangle. */
+  const heatmapGeometry = useMemo(() => {
+    const N = outcomeShapes.length
+    const panelLeft = panelWidth * (2 / 3)
+    const rightWidth = panelWidth - panelLeft
+    const heatCx = panelLeft + rightWidth / 2
+    const cellW = Math.min(120, rightWidth * 0.35)
+    const availableH = panelHeight * 0.8
+    const cellH = Math.min(44, availableH / Math.max(N, 1))
+    const totalH = N * cellH
+    const columnTop = panelHeight / 2 - totalH / 2
+
+    const cells: Array<{
+      code: string
+      cx: number
+      cy: number
+      w: number
+      h: number
+    }> = []
+    for (let i = 0; i < N; i++) {
+      const group = outcomeShapes[i]!
+      const cy = columnTop + (i + 0.5) * cellH
+      cells.push({ code: group.code, cx: heatCx, cy, w: cellW, h: cellH })
+    }
+    return { heatCx, columnTop, cellW, cellH, cells }
+  }, [outcomeShapes, panelWidth, panelHeight])
+
+  /** Per-shape `heatmapTarget`: a rectangle sized to the outcome's
+   *  heatmap cell. All shapes in an outcome share the same target (only
+   *  the representative shape is visible in average/radar/heatmap
+   *  modes, so non-reps collapse onto the same cell invisibly). */
+  const heatmapTargetsByCode = useMemo(() => {
+    const map = new Map<string, [number, number][]>()
+    for (const cell of heatmapGeometry.cells) {
+      map.set(
+        cell.code,
+        rectPoints(cell.cx, cell.cy, cell.w, cell.h, POINTS_PER_SHAPE),
+      )
+    }
+    return map
+  }, [heatmapGeometry])
 
   const hoverTooltip = useMemo(() => {
     if (!hoveredLocation) return null
@@ -823,16 +945,75 @@ export default function OutcomeMorphOverlay({
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
 
+    // Beat 6+ morph chain driven by progress, applied once all outcomes
+    // have settled as squares (post-Beat 2 morphEnd):
+    //   [0.62, 0.72] squareTarget -> barTarget     (barBlend)
+    //   [0.72, 0.75] barTarget    -> dotTarget     (avgBlend)
+    //   [0.75, 0.82] dotTarget    -> radarTarget   (radarBlend)
+    //   [0.82, 0.87] radar chrome fades in         (radarChromeIn)
+    //   [0.87, 0.90] radar chrome fades out        (radarChromeOut)
+    //   [0.87, 0.95] radarTarget  -> heatmapTarget (heatmapBlend)
+    //   [0.95, 1.00] heatmap chrome fades in       (heatmapChromeBlend)
+    // Runs regardless of the `encodingMode` prop (which defaults to
+    // "distribution" during non-interactive playback), so the storyboard
+    // can drive the transforms independently of the post-settle user
+    // toggle that still animates via the 500ms encoding-mode RAF above.
+    const BEAT6_START = 0.62
+    const BEAT6_END = 0.72
+    const BEAT7_AVG_END = 0.75
+    const BEAT7_RADAR_END = 0.82
+    const BEAT7_CHROME_END = 0.87
+    const BEAT8_CHROME_OUT_END = 0.9
+    const BEAT8_CELL_END = 0.95
+    const BEAT8_CHROME_IN_END = 1.0
+
+    const computeBlends = (v: number) => {
+      const clampRange = (lo: number, hi: number) =>
+        v <= lo ? 0 : v >= hi ? 1 : easeInOut((v - lo) / (hi - lo))
+      const radarChromeIn = clampRange(BEAT7_RADAR_END, BEAT7_CHROME_END)
+      const radarChromeOut = clampRange(BEAT7_CHROME_END, BEAT8_CHROME_OUT_END)
+      return {
+        barBlend: clampRange(BEAT6_START, BEAT6_END),
+        avgBlend: clampRange(BEAT6_END, BEAT7_AVG_END),
+        radarBlend: clampRange(BEAT7_AVG_END, BEAT7_RADAR_END),
+        radarChromeBlend: radarChromeIn * (1 - radarChromeOut),
+        heatmapBlend: clampRange(BEAT7_CHROME_END, BEAT8_CELL_END),
+        heatmapChromeBlend: clampRange(BEAT8_CELL_END, BEAT8_CHROME_IN_END),
+      }
+    }
+
     const handler = (v: number) => {
       if (encodingRafRef.current != null) return
       if (tierChangeRafRef.current != null) return
+
+      const {
+        barBlend,
+        avgBlend,
+        radarBlend,
+        radarChromeBlend,
+        heatmapBlend,
+        heatmapChromeBlend,
+      } = computeBlends(v)
+
+      // Update radar chrome opacity once per tick. (Rises in Beat 7,
+      // falls at the start of Beat 8.)
+      const radarChromeEl = radarChromeRef.current
+      if (radarChromeEl) {
+        radarChromeEl.style.opacity = String(radarChromeBlend)
+      }
+
+      // Update heatmap chrome opacity (outcome-label column, etc.).
+      const heatmapChromeEl = heatmapChromeRef.current
+      if (heatmapChromeEl) {
+        heatmapChromeEl.style.opacity = String(heatmapChromeBlend)
+      }
 
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
         if (!refs) continue
 
         const [morphStart, morphEnd] = group.progressRange
-        const fadeStart = morphStart - 0.03
+        const fadeStart = morphStart - 0.015
 
         const chromeEl = chromeRefsMap.current.get(group.code)
 
@@ -853,7 +1034,7 @@ export default function OutcomeMorphOverlay({
             el.setAttribute("fill", shape.color)
             el.style.opacity = String(baseOpacity)
             el.setAttribute("stroke-opacity", "0.4")
-            if (chromeEl) chromeEl.style.opacity = "0"
+            if (chromeEl && !isBar) chromeEl.style.opacity = "0"
             continue
           }
 
@@ -886,6 +1067,78 @@ export default function OutcomeMorphOverlay({
           if (isBarOrAvg) {
             el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
           }
+
+          // Beats 6/7: once this outcome has settled as squares, drive the
+          // chained morph (square -> bar -> dot -> radar vertex) directly
+          // from progress. Overrides the post-morph resting state above
+          // when any of the beat blends are non-zero. Skipped when the
+          // parent has already toggled `encodingMode` to bar/avg (the
+          // existing isBarOrAvg branches already handle that case).
+          const chainActive =
+            v >= morphEnd &&
+            encodingMode === "distribution" &&
+            (barBlend > 0 ||
+              avgBlend > 0 ||
+              radarBlend > 0 ||
+              heatmapBlend > 0)
+          if (chainActive) {
+            const radarTarget =
+              radarTargetsByCode.get(group.code) ?? shape.dotTarget
+            const heatmapTarget =
+              heatmapTargetsByCode.get(group.code) ?? radarTarget
+
+            // Compose the blended target: lerp through square -> bar ->
+            // dot -> radar -> heatmap cell in sequence. Each blend is
+            // clamped to its own window so the chain progresses smoothly
+            // without abrupt handoffs.
+            let pts = shape.squareTarget
+            if (barBlend > 0) {
+              pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
+            }
+            if (avgBlend > 0) {
+              // From settled bar position -> dot (grid-center).
+              pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
+            }
+            if (radarBlend > 0) {
+              // From dot position -> radar vertex (per-outcome polar).
+              pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
+            }
+            if (heatmapBlend > 0) {
+              // From radar vertex -> heatmap cell rectangle.
+              pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
+            }
+            el.setAttribute("d", pointsToD(pts))
+
+            // Non-representative shapes fade to 0 once we leave pure-bar
+            // territory (same as average-mode behavior).
+            if (!shape.isRepresentative) {
+              const repFade = Math.max(barBlend, avgBlend, radarBlend)
+              el.style.opacity = String(baseOpacity * (1 - repFade))
+            } else {
+              el.style.opacity = String(baseOpacity)
+              // In pure bar, use bar-mode fill-opacity. Once we start
+              // collapsing into dot/radar, flip back to full opacity
+              // (matches average-mode styling).
+              const barOnlyFraction = barBlend * (1 - Math.max(avgBlend, radarBlend))
+              el.setAttribute(
+                "fill-opacity",
+                String(0.9 + (0.8 - 0.9) * barOnlyFraction),
+              )
+
+              // Swap representative fill color to averageColor as we
+              // cross into dot/radar/heatmap territory. All of
+              // avgBlend/radarBlend/heatmapBlend imply "show average
+              // color", so use max of them.
+              const avgMix = Math.max(avgBlend, radarBlend, heatmapBlend)
+              if (avgMix > 0 && shape.averageColor) {
+                el.setAttribute(
+                  "fill",
+                  lerpColor(shape.color, shape.averageColor, avgMix),
+                )
+              }
+            }
+            el.setAttribute("stroke-opacity", String(0.4 * (1 - barBlend)))
+          }
         }
 
         if (chromeEl) {
@@ -901,6 +1154,14 @@ export default function OutcomeMorphOverlay({
               )
               chromeEl.style.opacity = String(easeInOut(morphT))
             }
+          } else if (encodingMode === "distribution" && v >= morphEnd) {
+            // Beat 6 chrome fade-in rides barBlend once the outcome has
+            // settled. Before morphEnd the chrome stays hidden (the
+            // squares are still morphing into place). Once `avgBlend`
+            // starts the bar-track chrome fades back out so the dot/
+            // radar view isn't cluttered by bar tracks.
+            const chromeOpacity = barBlend * (1 - avgBlend)
+            chromeEl.style.opacity = String(chromeOpacity)
           } else {
             chromeEl.style.opacity = "0"
           }
@@ -923,6 +1184,8 @@ export default function OutcomeMorphOverlay({
     getColorForMode,
     interactive,
     selectedOutcomeCode,
+    radarTargetsByCode,
+    heatmapTargetsByCode,
   ])
 
   return (
@@ -938,6 +1201,94 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
     >
+      {/* Radar chrome (Beat 7): concentric tier rings, radial axes, and
+          a connecting polygon through the per-outcome vertices. Opacity
+          driven by `radarChromeBlend` in the main progress handler. */}
+      <g
+        ref={(el) => {
+          radarChromeRef.current = el
+        }}
+        style={{ opacity: 0 }}
+      >
+        {[1, 2, 3, 4].map((tier) => {
+          const r = radarGeometry.rMax * (tier / 4)
+          return (
+            <circle
+              key={`radar-ring-${tier}`}
+              cx={radarGeometry.cx}
+              cy={radarGeometry.cy}
+              r={r}
+              fill="none"
+              stroke={theme.palette.grey[400]}
+              strokeWidth={0.5}
+              strokeDasharray="2,3"
+            />
+          )
+        })}
+        {radarGeometry.vertices.map((v) => (
+          <line
+            key={`radar-axis-${v.code}`}
+            x1={radarGeometry.cx}
+            y1={radarGeometry.cy}
+            x2={radarGeometry.cx + radarGeometry.rMax * Math.cos(v.angle)}
+            y2={radarGeometry.cy + radarGeometry.rMax * Math.sin(v.angle)}
+            stroke={theme.palette.grey[400]}
+            strokeWidth={0.5}
+          />
+        ))}
+        {radarGeometry.vertices.length >= 3 && (
+          <polygon
+            points={radarGeometry.vertices
+              .map((v) => `${v.cx},${v.cy}`)
+              .join(" ")}
+            fill={alpha(theme.palette.primary.main, 0.15)}
+            stroke={theme.palette.primary.main}
+            strokeWidth={1.5}
+          />
+        )}
+      </g>
+      {/* Heatmap chrome (Beat 8): outcome labels along the left edge of
+          the cell column, plus a single column header. Opacity driven
+          by `heatmapChromeBlend` in the main progress handler. */}
+      <g
+        ref={(el) => {
+          heatmapChromeRef.current = el
+        }}
+        style={{ opacity: 0 }}
+      >
+        {heatmapGeometry.cells.map((cell) => {
+          const label =
+            outcomes.find((o) => o.code === cell.code)?.label ?? cell.code
+          return (
+            <text
+              key={`heat-label-${cell.code}`}
+              x={cell.cx - cell.w / 2 - 8}
+              y={cell.cy}
+              fontSize={11}
+              fontFamily="inherit"
+              fill={theme.palette.text.primary}
+              textAnchor="end"
+              dominantBaseline="central"
+            >
+              {label}
+            </text>
+          )
+        })}
+        {heatmapGeometry.cells.length > 0 && (
+          <text
+            x={heatmapGeometry.heatCx}
+            y={heatmapGeometry.columnTop - 14}
+            fontSize={11}
+            fontFamily="inherit"
+            fontWeight={600}
+            fill={theme.palette.text.secondary}
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            Current hydroclimate
+          </text>
+        )}
+      </g>
       {outcomeShapes.map((group) => {
         if (!pathRefsMap.current.has(group.code)) {
           pathRefsMap.current.set(group.code, [])
@@ -1016,10 +1367,12 @@ export default function OutcomeMorphOverlay({
               )}
             </g>
             {group.shapes.map((shape, i) => {
+              const locKey = `${group.code}:${shape.sourceId}`
               const isLocationActive =
-                interactive &&
-                activeLocationSet != null &&
-                activeLocationSet.has(`${group.code}:${shape.sourceId}`)
+                (interactive &&
+                  activeLocationSet != null &&
+                  activeLocationSet.has(locKey)) ||
+                demoHighlightedLocationKey === locKey
               const isDimmed =
                 interactive &&
                 spotlightedTier != null &&

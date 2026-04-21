@@ -784,6 +784,19 @@ export default function TierAnimationSection() {
     return set
   }, [pinnedLocations, hoveredLocation, locKey])
 
+  /* ── Beat 5 demo-LOI highlight state ──
+   *
+   * During Beat 5 (`loi-highlight`) the storyboard alternates a map +
+   * distribution-square ring between two AG_REV LOIs. The progress window
+   * is driven by the listener below; the resulting `demoLocation` is:
+   *   - passed to `OutcomeMorphOverlay` via `demoHighlightedLocationKey`
+   *     so the square ring renders even though `isInteractive` is false,
+   *   - and pushed to `mapActions.setLocationHighlights` so the map
+   *     Popup + gold outline already wired elsewhere in the app fire for
+   *     the beat-5 demo without any bespoke map code. */
+  const [demoLocation, setDemoLocation] = useState<LocationInfo | null>(null)
+  const demoLocationKey = demoLocation ? locKey(demoLocation) : null
+
   const prevOutcomeRef = useRef<string | null>(null)
   useEffect(() => {
     const prev = prevOutcomeRef.current
@@ -1566,35 +1579,35 @@ export default function TierAnimationSection() {
 
     let phase: "idle" | "beat1" | "beat1c" | "beat2" = "idle"
 
-    // Beat 1  (0.00 -> 0.49): blues cycle until FREEZE_AT, then hold still
-    //          on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.49 -> 0.52): cross-fade OUT - the demand-units layer
+    // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
+    //          still on all 3 DU classes (Agriculture, Urban, Refuge).
+    // Beat 1B (0.245 -> 0.26): cross-fade OUT - the demand-units layer
     //          fades from 0.65 -> 0 with the frozen 3-blue palette
-    //          intact. Begins the instant the
-    //          intro text collapse finishes (at 0.49) so there's
-    //          no dead air after the legend settles at the top.
-    // Beat 1C (0.52 -> 0.78): at v = 0.52, while the layer is invisible,
+    //          intact. Begins the instant the intro text collapse
+    //          finishes (at 0.245) so there's no dead air after the
+    //          legend settles at the top.
+    // Beat 1C (0.26 -> 0.39): at v = 0.26, while the layer is invisible,
     //          we swap the filter to Agriculture-only and set the
     //          fill-color directly to the AG_REV tier expression.
-    //          (0.52 -> 0.56) the layer fades back IN from 0 -> 0.65
+    //          (0.26 -> 0.28) the layer fades back IN from 0 -> 0.65
     //          already wearing its AG_REV tier colors - a clean
-    //          cross-fade with no blue interstitial. (0.56 -> 0.78)
+    //          cross-fade with no blue interstitial. (0.28 -> 0.39)
     //          tier colors are locked while the Beat 1C text + example
     //          popups play.
-    // Beat 2  (0.78 -> 1.00): DU filter restored, tier colors locked. SVG
+    // Beat 2  (0.39 -> 0.50): DU filter restored, tier colors locked. SVG
     //          morphs take over and features fade out on their slice.
-    const FREEZE_AT = 0.18
-    const BEAT1B_START = 0.49
+    const FREEZE_AT = 0.09
+    const BEAT1B_START = 0.245
     // Cross-fade windows (renamed in spirit, kept for diff readability):
     // BEAT1C_BLEND_START is the fade-out -> fade-in pivot (filter swap
     // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
     // is when the AG_REV tier colors are fully visible at 0.65 opacity.
-    const BEAT1C_BLEND_START = 0.52
-    const BEAT1C_BLEND_END = 0.56
-    // AG_REV now morphs solo starting at 0.76 (see getOutcomeProgressRange
+    const BEAT1C_BLEND_START = 0.26
+    const BEAT1C_BLEND_END = 0.28
+    // AG_REV now morphs solo starting at 0.38 (see getOutcomeProgressRange
     // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
     // DU filter restore + hide-schedule over in time for AG_REV's morph.
-    const BEAT2_START = 0.76
+    const BEAT2_START = 0.38
 
     let frozenColorPhase = 0
 
@@ -1993,9 +2006,9 @@ export default function TierAnimationSection() {
 
         // Line outcome fade. Mirrors the polygon branch's three-state shape.
         // Pre-window (v < fadeStart): line fully visible (opacity 1).
-        // In-window: opacity = 1 - t over the tight 0.01 fade span.
+        // In-window: opacity = 1 - t over the tight 0.005 fade span.
         // Post-window: Math.min(1, t) keeps opacity at 0.
-        // Without the pre-window guard, the 0.01 fadeDuration amplifies
+        // Without the pre-window guard, the 0.005 fadeDuration amplifies
         // any negative (v - fadeStart) into a huge negative t, and
         // `1 - t` overflows Mapbox's [0, 1] line-opacity range.
         for (const entry of lineEntries) {
@@ -2054,8 +2067,8 @@ export default function TierAnimationSection() {
     const agData = outcomeLocations["AG_REV"]
     if (!agData) return
 
-    const POPUPS_IN = 0.69
-    const POPUPS_OUT = 0.76 // clear at start of AG_REV morph (Beat 2)
+    const POPUPS_IN = 0.345
+    const POPUPS_OUT = 0.38 // clear at start of AG_REV morph (Beat 2)
     const count = BEAT1C_POPUP_DU_IDS.length
     const span = POPUPS_OUT - POPUPS_IN
     const perPopup = span / count
@@ -2107,6 +2120,87 @@ export default function TierAnimationSection() {
     return () => {
       unsub()
       clearAll()
+    }
+  }, [progress, outcomeLocations, isLoading])
+
+  /* ── Beat 5 demo-LOI driver ──
+   *
+   * Beat 5 spans [0.50, 0.62] in the compressed progress domain. After
+   * the Beat 5 narration fades in (0.51 -> 0.53), we highlight two
+   * AG_REV LOIs in sequence:
+   *   [0.53, 0.575]  -> LOI A (Glenn Colusa I.D., typically high tier)
+   *   [0.575, 0.62]  -> LOI B (Westlands East, typically low tier)
+   *
+   * When `demoLocation` is set we also push it to
+   * `mapActions.setLocationHighlights` so the map polygon lights up with
+   * the same gold ring + name popup used by the interactive hover path.
+   * The BEAT1C popup effect above clears its own highlights at v >= 0.38
+   * so there's no contention with this range. */
+  useEffect(() => {
+    if (isLoading) return
+    const agData = outcomeLocations["AG_REV"]
+    if (!agData || agData.ids.size === 0) return
+
+    const LOI_A = "08N_SA2" // Glenn Colusa I.D.
+    const LOI_B = "90_PA1" // Westlands W.D. East
+    const BEAT5_START = 0.53
+    const SWITCH = 0.575
+    const BEAT5_END = 0.62
+
+    const buildInfo = (duId: string): LocationInfo | null => {
+      const tier = agData.tierMap[duId]
+      if (tier == null) return null
+      return { code: "AG_REV", sourceId: duId, tier }
+    }
+    const buildHighlight = (info: LocationInfo) => {
+      const coord = centroidLookupRef.current.get(info.sourceId)
+      if (!coord) return null
+      const color = agData.colorMap[info.sourceId] ?? "#888888"
+      const name =
+        agData.nameMap[info.sourceId] ??
+        getDemandUnitDisplayName(info.sourceId) ??
+        info.sourceId
+      return {
+        key: `beat5:${info.code}:${info.sourceId}`,
+        longitude: coord.lng,
+        latitude: coord.lat,
+        name,
+        tierLevel: info.tier,
+        tierLabel: getTierLabel(info.tier),
+        tierColor: color,
+        pinned: true,
+      } satisfies import("../../map/store").LocationHighlight
+    }
+
+    let lastKey: string | null = null
+    const apply = (info: LocationInfo | null) => {
+      const key = info ? `${info.code}:${info.sourceId}` : null
+      if (key === lastKey) return
+      lastKey = key
+      setDemoLocation(info)
+      if (!info) {
+        mapActions.clearLocationHighlights()
+        return
+      }
+      const h = buildHighlight(info)
+      if (h) mapActions.setLocationHighlights([h])
+    }
+
+    const unsub = progress.on("change", (v) => {
+      if (v < BEAT5_START || v >= BEAT5_END) {
+        apply(null)
+        return
+      }
+      if (v < SWITCH) {
+        apply(buildInfo(LOI_A))
+      } else {
+        apply(buildInfo(LOI_B))
+      }
+    })
+
+    return () => {
+      unsub()
+      apply(null)
     }
   }, [progress, outcomeLocations, isLoading])
 
@@ -2621,10 +2715,11 @@ export default function TierAnimationSection() {
       const config = getOutcomeConfig(group.code)
       if (!config) continue
       const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
-      // Beat 2 slices are tighter now (0.22 span across 9 outcomes ≈ 0.024
-      // each). Use a shorter fade lead so the DU fade doesn't bleed into
-      // the previous outcome's morph.
-      const fadeStart = morphStart - 0.01
+      // Beat 2 slices are tight (0.08 span across 8 outcomes + AG_REV's
+      // 0.01 slice in the compressed progress domain). Use a short fade
+      // lead so the DU fade doesn't bleed into the previous outcome's
+      // morph.
+      const fadeStart = morphStart - 0.005
 
       // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
       let locationIds = [...locData.ids]
@@ -2704,9 +2799,9 @@ export default function TierAnimationSection() {
     ]
 
     // Eyebrow labels fade in alongside the right-panel backdrop so they're
-    // fully present by the time beat 3 (AG_REV morph) settles at 0.78. The
-    // 0.02 fade width is applied by BeatTextOverlay's progress handler.
-    const EYEBROW_FADE_IN = 0.755
+    // fully present by the time beat 3 (AG_REV morph) settles at 0.39. The
+    // 0.01 fade width is applied by BeatTextOverlay's progress handler.
+    const EYEBROW_FADE_IN = 0.3775
     const eyebrows = [
       {
         label: "Consumptive uses",
@@ -2927,6 +3022,7 @@ export default function TierAnimationSection() {
                   isInteractive ? activeLocationSet : undefined
                 }
                 hoveredLocation={isInteractive ? hoveredLocation : null}
+                demoHighlightedLocationKey={demoLocationKey}
                 onLocationEnter={
                   isInteractive ? locHandlers.onMouseEnter : undefined
                 }
