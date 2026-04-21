@@ -14,7 +14,7 @@ import {
   VerticalParallelLinePlot,
   VerticalParallelLinePlotPeak,
 } from "@repo/viz"
-import { useComparisonData } from "../features/scenarioExplorer/hooks/useComparisonData"
+import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
 
 export default function TestVplpPage() {
   const theme = useTheme()

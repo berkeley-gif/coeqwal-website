@@ -7,16 +7,16 @@
  */
 import React, { useEffect, Suspense } from "react"
 import { useTheme } from "@repo/ui/mui"
-import { Header } from "../components/Header"
-import { CenterImageText } from "../components/CenterImageText"
-import { TieredImageText } from "../components/TieredImageText"
-import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
-import { LogoGrid } from "../components/LogoGrid"
-import { CenteredTextSection } from "../components/CenteredTextSection"
-import type { ImageTextBlock } from "../components/ScrollImageTextBlocks"
-import type { GridLogo } from "../components/LogoGrid"
+import { Header } from "../../components/Header"
+import { CenterImageText } from "../../components/CenterImageText"
+import { TieredImageText } from "../../components/TieredImageText"
+import { ScrollImageTextBlocks } from "../../components/ScrollImageTextBlocks"
+import { LogoGrid } from "../../components/LogoGrid"
+import { CenteredTextSection } from "../../components/CenteredTextSection"
+import type { ImageTextBlock } from "../../components/ScrollImageTextBlocks"
+import type { GridLogo } from "../../components/LogoGrid"
 
-export default function AboutPage() {
+export default function AboutClient() {
   const theme = useTheme()
 
   const imageTextBlocks: ImageTextBlock[] = [
@@ -162,3 +162,4 @@ export default function AboutPage() {
     </>
   )
 }
+

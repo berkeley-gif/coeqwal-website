@@ -11,20 +11,18 @@
  * exist at build time. They're only available on the client. useSearchParams() suspends
  * until the client hydrates and the actual URL params are readable.
  */
-
 import { Suspense } from "react"
 import { SkipLink } from "@repo/ui"
-import { ClientProviders } from "./components/ClientProviders"
-import { MainContent } from "./components/MainContent"
-import { DynamicMap } from "./components/DynamicMap"
-import { Header } from "./components/Header"
-import { FloatingGlossary } from "./features/glossary"
-import IntroSection from "./sections/IntroSection"
-import SmoothTabs from "./components/tabs/SmoothTabs"
-import TabPanels from "./components/tabs/TabPanels"
+import { ClientProviders } from "./../components/ClientProviders"
+import { MainContent } from "./../components/MainContent"
+import { DynamicMap } from "./../components/DynamicMap"
+import { Header } from "./../components/Header"
+import { FloatingGlossary } from "./../features/glossary"
+import IntroSection from "./../sections/IntroSection"
+import SmoothTabs from "./../components/tabs/SmoothTabs"
+import TabPanels from "./../components/tabs/TabPanels"
 
-export default function Home() {
-
+export default function Home({ params }: { params: Promise<{ locale: string }> }) {
   return (
     <ClientProviders>
       {/* WCAG 2.4.1: Skip link must be first focusable element in DOM */}

@@ -22,18 +22,18 @@ import {
   Alert,
   useTheme,
 } from "@repo/ui/mui"
-import { Header } from "../components/Header"
+import { Header } from "../../components/Header"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
-import DownloadButton from "../components/DownloadButton"
-import { CenteredTextSection } from "../components/CenteredTextSection"
-import type { Scenario } from "../types/scenarioDownloads"
+import DownloadButton from "../../components/DownloadButton"
+import { CenteredTextSection } from "../../components/CenteredTextSection"
+import type { Scenario } from "../../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
   fetchScenariosForDownload,
-} from "../lib/api/fileDownloadApi"
-import { type ScenarioTheme } from "../content/scenarios"
-import { useScenarioList } from "../features/scenarios/hooks"
-import { THEME_LABEL_CONFIG } from "../content/themes"
+} from "../../lib/api/fileDownloadApi"
+import { type ScenarioTheme } from "../../content/scenarios"
+import { useScenarioList } from "../../features/scenarios/hooks"
+import { THEME_LABEL_CONFIG } from "../../content/themes"
 
 const THEME_ORDER: ScenarioTheme[] = [
   "baseline",
