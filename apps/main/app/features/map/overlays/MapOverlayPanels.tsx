@@ -922,7 +922,7 @@ export default function MapOverlayPanels() {
                             >
                               Outcomes represented by a bar chart show the
                               percentage of locations in each tier. For other
-                              outcomes, there is only one location of interest.
+                              outcomes, there is only one location.
                             </Box>
                             <Typography
                               variant="tooltipHeader"
@@ -944,7 +944,16 @@ export default function MapOverlayPanels() {
                                 }}
                               />{" "}
                               icons to learn more about each outcome. Click on
-                              the chart to see the outcome on a map.
+                              the chart to see the outcome on a map. 
+                            </Box>
+                            <Box
+                              component="span"
+                              sx={{
+                                display: "block",
+                                mt: theme.space.component.sm,
+                              }}
+                            >
+                              When outcomes are visible on the map, you can hover over them to get more information.
                             </Box>
                           </>
                         }
