@@ -2227,8 +2227,7 @@ export default function ResiliencePanel({
 
   // Empty state detection derived from the per-mode flags computed up
   // top near the store-state destructuring. This section just names a
-  // couple of derived flags the JSX uses below for banner / chip
-  // rendering.
+  // couple of derived flags the JSX uses below for chip rendering.
   const noOutcomesSelected =
     !anyEmpty && view === "aggregate" && outcomeRowCodes.length === 0
 
@@ -2287,25 +2286,6 @@ export default function ResiliencePanel({
     return () => document.removeEventListener("keydown", onKey)
   }, [expandedTile, handleBackToGrid])
 
-  // Onboarding banner variant. The sentence header is now the primary
-  // self-documentation surface, so the banner only appears in the empty
-  // state (no selection + default aggregate) as a first-launch cue; it
-  // goes away as soon as the user selects scenarios, pivots the view,
-  // or expands a tile.
-  const showEmptyOnboarding =
-    !expandedTile &&
-    view === "aggregate" &&
-    aggregateOver === "scenarios" &&
-    selectedScenarios.length === 0
-  const handleBrowseScenarios = useCallback(() => {
-    onControlsChange?.({ view: "scenario", showAllScenarios: true })
-  }, [onControlsChange])
-  const handleBrowseOutcomes = useCallback(() => {
-    onControlsChange?.({ view: "outcome" })
-  }, [onControlsChange])
-  const handleBrowseHydroclimates = useCallback(() => {
-    onControlsChange?.({ view: "hydroclimate" })
-  }, [onControlsChange])
   const handleToggleTranspose = useCallback(() => {
     onControlsChange?.({ transposed: !transposed })
   }, [onControlsChange, transposed])
@@ -2852,25 +2832,7 @@ export default function ResiliencePanel({
                 )}
               </BrowseShell>
             ) : (
-              <BrowseShell
-                banner={
-                  showEmptyOnboarding ? (
-                    <OnboardingBanner
-                      onBrowseScenarios={
-                        onControlsChange ? handleBrowseScenarios : undefined
-                      }
-                      onBrowseOutcomes={
-                        onControlsChange ? handleBrowseOutcomes : undefined
-                      }
-                      onBrowseHydroclimates={
-                        onControlsChange
-                          ? handleBrowseHydroclimates
-                          : undefined
-                      }
-                    />
-                  ) : undefined
-                }
-              >
+              <BrowseShell>
                 <ResilienceHeatmap
                   rows={displayRows}
                   columns={displayColumns}
@@ -3136,101 +3098,6 @@ function OutcomeRow({
 }
 
 /**
- * Slim onboarding banner shown only in the empty state - no scenarios
- * selected, default aggregate view. Its job is one thing: nudge the
- * user toward the three "Browse all …" entry points before the
- * sentence header takes over as the primary control surface. It
- * disappears the moment the user selects a scenario, pivots the view,
- * or expands a tile.
- */
-function OnboardingBanner({
-  onBrowseScenarios,
-  onBrowseOutcomes,
-  onBrowseHydroclimates,
-}: {
-  onBrowseScenarios?: () => void
-  onBrowseOutcomes?: () => void
-  onBrowseHydroclimates?: () => void
-}) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      role="region"
-      aria-label="Onboarding"
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: 1.25,
-        px: 1.25,
-        py: 0.75,
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.action.hover,
-      }}
-    >
-      <Typography variant="caption" sx={{ fontWeight: 600 }}>
-        Showing the aggregate heatmap across all scenarios.
-      </Typography>
-      <Typography variant="caption" sx={{ flex: 1, minWidth: 160 }}>
-        Pick a few scenarios, outcomes, or hydroclimates to compare, or
-        browse them all first.
-      </Typography>
-      {onBrowseScenarios && (
-        <Box
-          component="button"
-          type="button"
-          onClick={onBrowseScenarios}
-          sx={onboardingLinkSx(theme)}
-        >
-          Browse all scenarios
-        </Box>
-      )}
-      {onBrowseOutcomes && (
-        <Box
-          component="button"
-          type="button"
-          onClick={onBrowseOutcomes}
-          sx={onboardingLinkSx(theme)}
-        >
-          Browse all outcomes
-        </Box>
-      )}
-      {onBrowseHydroclimates && (
-        <Box
-          component="button"
-          type="button"
-          onClick={onBrowseHydroclimates}
-          sx={onboardingLinkSx(theme)}
-        >
-          Browse all hydroclimates
-        </Box>
-      )}
-    </Box>
-  )
-}
-
-function onboardingLinkSx(theme: Theme) {
-  return {
-    appearance: "none",
-    border: "none",
-    background: "transparent",
-    color: theme.palette.primary.main,
-    cursor: "pointer",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    textDecoration: "underline",
-    p: 0,
-    "&:hover": { opacity: 0.85 },
-    "&:focus-visible": {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: 2,
-    },
-  } as const
-}
-
-/**
  * Expanded single-tile view. Shows one scenario or outcome at full
  * size with a "← Back" button that dismisses via `onBack`. Framer
  * Motion's `layoutId` lets the browser interpolate between the grid
@@ -3374,18 +3241,16 @@ function ExpandedTileView({
  * fires the supplied `onClick` (typically flipping show-all off).
  */
 /**
- * Layout shell for the chart area. Stacks an optional onboarding
- * banner and an optional curation chip above the children so every
- * view path (empty-state aggregate, by-scenario gallery, by-outcome
- * gallery) can render consistent header affordances without each
- * branch having to rebuild its own flex column.
+ * Layout shell for the chart area. Stacks an optional curation chip
+ * above the children so every view path (by-scenario gallery,
+ * by-outcome gallery, aggregate) can render consistent header
+ * affordances without each branch having to rebuild its own flex
+ * column.
  */
 function BrowseShell({
-  banner,
   chip,
   children,
 }: {
-  banner?: React.ReactNode
   /**
    * Compact status/hint chip pinned above the chart. When `content` is
    * set, it fully replaces the default `label` + `actionLabel` layout,
@@ -3401,7 +3266,7 @@ function BrowseShell({
   children: React.ReactNode
 }) {
   const theme = useTheme()
-  if (!banner && !chip) return <>{children}</>
+  if (!chip) return <>{children}</>
   return (
     <Box
       sx={{
@@ -3412,7 +3277,6 @@ function BrowseShell({
         gap: 1,
       }}
     >
-      {banner}
       {chip && (
         <Box
           sx={{
