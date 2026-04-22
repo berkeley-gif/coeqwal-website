@@ -5,12 +5,15 @@
  *
  * The control surface is a single one-line sentence:
  *
- *   "Showing {pivot} of {scenarios} x {outcomes} x {climates},
- *    read as {encoding}."                            [Configure]
+ *   "Showing {pivot}, covering {scenarios}, {outcomes}, and
+ *    {climates}. Each cell is colored by its {encoding}."   [Options]
  *
- * The phrases run from broad (pivot / layout) to narrow (encoding /
- * how to read each cell), so a new user reads the sentence in the
- * same order they would make decisions.
+ * The phrases run from broad (chart layout) to narrow (what cell
+ * colors mean), so a new user reads the sentence in the same order
+ * they would make decisions. Wording avoids data jargon (no "per",
+ * "aggregate", "mean", "read as", "x" / cross-product); terms of art
+ * that the project already defines in its glossary (scenario,
+ * outcome, climate future / hydroclimate, tier) are kept as-is.
  *
  * Each bold phrase is a click-target that opens a focused popover for
  * that dimension. Transpose and display-overflow live as a floating
@@ -67,12 +70,15 @@ interface ResilienceControlsProps {
   onChange: (next: Partial<ResilienceControlsState>) => void
 }
 
-// User-facing short labels for the pivot popover.
+// User-facing labels used inside the pivot popover's option list.
+// These describe the layout in a single plain-English phrase; the
+// sentence header builds richer phrases on top of them (see
+// `pivotLabel` below).
 const PIVOT_LABEL: Record<ResilienceView, string> = {
-  scenario: "per scenario",
-  outcome: "per outcome",
-  hydroclimate: "per hydroclimate",
-  aggregate: "aggregate",
+  scenario: "one chart per scenario",
+  outcome: "one chart per outcome",
+  hydroclimate: "one chart per climate future",
+  aggregate: "everything combined",
   quadrant: "leverage",
 }
 
@@ -83,10 +89,12 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
   "aggregate",
 ]
 
+// Labels for the "averaged across X" chip row inside the pivot
+// popover, and for the sentence header when in aggregate mode.
 const AGGREGATE_OVER_LABEL: Record<AggregateOver, string> = {
-  scenarios: "over scenarios",
-  outcomes: "over outcomes",
-  hydroclimates: "over hydroclimates",
+  scenarios: "averaged across scenarios",
+  outcomes: "averaged across outcomes",
+  hydroclimates: "averaged across climate futures",
 }
 
 const AGGREGATE_OVER_ORDER: readonly AggregateOver[] = [
@@ -108,12 +116,12 @@ type ReadAs =
   | "operational_leverage"
 
 const READ_AS_LABEL: Record<ReadAs, string> = {
-  mean_tier: "mean tier",
-  climate_shift: "climate shift",
-  risk_density: "risk density",
-  opportunity_density: "opportunity density",
-  distribution: "distribution",
-  operational_leverage: "operational leverage",
+  mean_tier: "average tier",
+  climate_shift: "change vs. historical",
+  risk_density: "share that are at-risk",
+  opportunity_density: "share that are optimal",
+  distribution: "spread of results",
+  operational_leverage: "sensitivity to climate",
 }
 
 function deriveReadAs(
@@ -572,19 +580,30 @@ export default function ResilienceControls({
       ? `all ${outcomeTotal} outcomes`
       : `${outcomeCount} of ${outcomeTotal} outcomes`
   const climatesLabel = allHcsSelected
-    ? "all climates"
+    ? "all climate futures"
     : selectedHydroclimates.size === 1
-      ? "1 climate"
-      : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climates`
+      ? "1 climate future"
+      : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climate futures`
   const pivotLabel = (() => {
     if (isAggregate) {
-      return `aggregate ${AGGREGATE_OVER_LABEL[aggregateOver]}`
+      return `one combined chart, ${AGGREGATE_OVER_LABEL[aggregateOver]}`
     }
-    const base = PIVOT_LABEL[view]
-    if (view === "scenario" || view === "outcome" || view === "hydroclimate") {
-      return scenarioLayout === "combined" ? `${base}, one chart` : base
+    if (view === "scenario") {
+      return scenarioLayout === "combined"
+        ? "all scenarios in one merged chart"
+        : "one chart per scenario"
     }
-    return base
+    if (view === "outcome") {
+      return scenarioLayout === "combined"
+        ? "all outcomes in one merged chart"
+        : "one chart per outcome"
+    }
+    if (view === "hydroclimate") {
+      return scenarioLayout === "combined"
+        ? "all climate futures in one merged chart"
+        : "one chart per climate future"
+    }
+    return PIVOT_LABEL[view]
   })()
 
   const cellSize = { fontSize: "0.8125rem" } as const
@@ -611,16 +630,16 @@ export default function ResilienceControls({
           variant="compactCaption"
           sx={{ fontSize: "0.8125rem", color: theme.palette.grey[800] }}
         >
-          Leverage plot.
+          Showing each point as
         </Typography>
         <Box sx={{ display: "flex", gap: 0.5 }}>
           <InlineToggleChip
-            label="by outcome"
+            label="an outcome"
             active={quadrantUnit === "outcome"}
             onClick={() => handleQuadrantUnitChange("outcome")}
           />
           <InlineToggleChip
-            label="by LOI"
+            label="a location"
             active={quadrantUnit === "loi"}
             onClick={() => handleQuadrantUnitChange("loi")}
           />
@@ -699,43 +718,43 @@ export default function ResilienceControls({
           label={pivotLabel}
           active={Boolean(pivotAnchor)}
           onClick={(e) => setPivotAnchor(e.currentTarget)}
-          ariaLabel={`Heatmap layout: ${pivotLabel}. Click to change.`}
+          ariaLabel={`Chart layout: ${pivotLabel}. Click to change.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          of
+          , covering
         </Box>
         <PhraseButton
           label={scenariosLabel}
           active={Boolean(scenariosAnchor)}
           onClick={(e) => setScenariosAnchor(e.currentTarget)}
-          ariaLabel={`Scenarios: ${scenariosLabel}. Click for details.`}
+          ariaLabel={`Scenarios on the chart: ${scenariosLabel}. Click for details.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
-          ×
+          ,
         </Box>
         <PhraseButton
           label={outcomesLabel}
           active={Boolean(outcomesAnchor)}
           onClick={(e) => setOutcomesAnchor(e.currentTarget)}
-          ariaLabel={`Outcomes: ${outcomesLabel}. Click to change.`}
+          ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
         />
-        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
-          ×
+        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
+          , and
         </Box>
         <PhraseButton
           label={climatesLabel}
           active={Boolean(climatesAnchor)}
           onClick={(e) => setClimatesAnchor(e.currentTarget)}
-          ariaLabel={`Climates: ${climatesLabel}. Click to change.`}
+          ariaLabel={`Climate futures on the chart: ${climatesLabel}. Click to change.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          , read as
+          . Each cell is colored by its
         </Box>
         <PhraseButton
           label={encodingLabel}
           active={Boolean(encodingAnchor)}
           onClick={(e) => setEncodingAnchor(e.currentTarget)}
-          ariaLabel={`Encoding: ${encodingLabel}. Click to change.`}
+          ariaLabel={`Cell colors show: ${encodingLabel}. Click to change.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700] }}>
           .
@@ -774,8 +793,8 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Read each cell as"
-          subtitle="How to interpret the colour of each cell."
+          title="What cell colors show"
+          subtitle="Pick what each cell's color tells you."
           width={320}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
@@ -846,7 +865,7 @@ export default function ResilienceControls({
                   letterSpacing: "0.05em",
                 }}
               >
-                Reference
+                Compared to
               </Typography>
               <Select
                 size="small"
@@ -855,10 +874,10 @@ export default function ResilienceControls({
                 sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
               >
                 <MenuItem value="vs_historical" sx={cellSize}>
-                  vs historical HC
+                  historical climate
                 </MenuItem>
                 <MenuItem value="vs_baseline" sx={cellSize}>
-                  vs baseline scenario
+                  a baseline scenario
                 </MenuItem>
               </Select>
               {deltaMode === "vs_baseline" && (
@@ -889,7 +908,7 @@ export default function ResilienceControls({
                   letterSpacing: "0.05em",
                 }}
               >
-                Distribution grouping
+                Group dots by
               </Typography>
               <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 <InlineToggleChip
@@ -917,17 +936,17 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Scenario scope"
+          title="Which scenarios?"
           subtitle={
             scenarioCount === 0
-              ? `Nothing selected in the sidebar, so the chart shows the full set of ${scenarioTotal} scenarios.`
-              : `Driven by the sidebar on the left. ${scenarioCount} of ${scenarioTotal} selected.`
+              ? `You haven't picked any in the sidebar, so the chart is showing all ${scenarioTotal}.`
+              : `${scenarioCount} of ${scenarioTotal} picked from the sidebar.`
           }
           width={300}
         >
           <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
-            To change which scenarios appear, tick or untick scenarios in the
-            sidebar. Select none to see the full set.
+            Tick or untick scenarios in the sidebar to change what's on the
+            chart. Leave none picked to see them all.
           </Typography>
           {scenarioCount > 0 && (
             <Box
@@ -966,15 +985,15 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Outcome scope"
-          subtitle={`${outcomeCount} of ${outcomeTotal} outcomes appear as rows (or columns, when transposed).`}
+          title="Which outcomes?"
+          subtitle={`${outcomeCount} of ${outcomeTotal} outcomes are on the chart.`}
           width={320}
         >
           <InlineToggleChip
             label={
               showResilienceOutcomeSelector
-                ? "hide outcome picker"
-                : "choose outcomes…"
+                ? "hide picker"
+                : "pick outcomes…"
             }
             active={showResilienceOutcomeSelector}
             onClick={() =>
@@ -993,7 +1012,7 @@ export default function ResilienceControls({
                   letterSpacing: "0.05em",
                 }}
               >
-                Primary outcome
+                Main outcome
               </Typography>
               <Select
                 size="small"
@@ -1003,7 +1022,7 @@ export default function ResilienceControls({
                 sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
               >
                 <MenuItem value="" sx={cellSize}>
-                  Pick a primary outcome
+                  Pick a main outcome
                 </MenuItem>
                 {aggregateOutcomeItems.map((o) => (
                   <MenuItem key={o.code} value={o.code} sx={cellSize}>
@@ -1098,8 +1117,8 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Climate scope"
-          subtitle={`${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} hydroclimates in the chart.`}
+          title="Which climate futures?"
+          subtitle={`${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climate futures on the chart.`}
           width={280}
         >
           <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
@@ -1132,8 +1151,8 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Heatmap layout"
-          subtitle="Which axis splits into tiles, or should the chart collapse to a single aggregate view?"
+          title="How to lay out the chart"
+          subtitle="Show one small chart per scenario, per outcome, or per climate future — or pull everything together into a single combined chart."
           width={340}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
@@ -1199,7 +1218,7 @@ export default function ResilienceControls({
                   letterSpacing: "0.05em",
                 }}
               >
-                Aggregate
+                Average across
               </Typography>
               <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 {AGGREGATE_OVER_ORDER.map((axis) => (
@@ -1225,18 +1244,18 @@ export default function ResilienceControls({
                   letterSpacing: "0.05em",
                 }}
               >
-                Layout
+                Show tiles as
               </Typography>
               <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 <InlineToggleChip
-                  label="small multiples"
+                  label="side-by-side tiles"
                   active={scenarioLayout === "small_multiples"}
                   onClick={() =>
                     onChange({ scenarioLayout: "small_multiples" })
                   }
                 />
                 <InlineToggleChip
-                  label="one chart"
+                  label="merged into one"
                   active={scenarioLayout === "combined"}
                   onClick={() => onChange({ scenarioLayout: "combined" })}
                 />

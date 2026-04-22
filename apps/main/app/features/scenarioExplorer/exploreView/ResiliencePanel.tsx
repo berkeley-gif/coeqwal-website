@@ -2647,10 +2647,10 @@ export default function ResiliencePanel({
                     ? {
                         label: `${selectedScenarios.length} scenario${
                           selectedScenarios.length === 1 ? "" : "s"
-                        } selected · ${
+                        } picked, shown ${
                           scenarioLayout === "combined"
-                            ? "one chart"
-                            : "small multiples"
+                            ? "together in one chart"
+                            : "side by side"
                         }`,
                       }
                     : null

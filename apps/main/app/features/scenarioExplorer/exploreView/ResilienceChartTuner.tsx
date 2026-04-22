@@ -291,7 +291,7 @@ export default function ResilienceChartTuner({
 
   return (
     <ChartTuner
-      triggerLabel="CONFIGURE"
+      triggerLabel="More options"
       description="Browse the whole grid, curate a focused subset, then read tiles up close. Each preset maps to a step of that path."
       walkthrough={walkthrough}
       presets={presets}
