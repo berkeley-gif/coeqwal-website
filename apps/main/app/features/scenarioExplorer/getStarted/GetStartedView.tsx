@@ -45,6 +45,14 @@ const DARK_WASH_FADE_PX = 160
  *  breathing room, decrease to let the card fill more of the viewport. */
 const PANEL_BREATHING_PX = 80
 
+/** Extra top margin applied ONLY to the Welcome panel (the first
+ *  get-started panel). Provides clearance between the Explore tab's
+ *  expandable description strip above the tabs stack and the Welcome
+ *  card below it, so that when the strip collapses while scrolling
+ *  the Welcome card can't be pulled up into the docked sticky bar.
+ *  Tune to taste. */
+const WELCOME_TOP_MARGIN_PX = 160
+
 interface GetStartedPanelShellProps {
   children: ReactNode
   /** Card background colour (the rounded surface) */
@@ -292,7 +300,14 @@ export default function GetStartedView() {
           backgroundImage: `linear-gradient(to bottom, ${darkWash} 0, ${darkWash} calc(100% - ${DARK_WASH_FADE_PX}px), transparent 100%)`,
         }}
       >
-        {/* Welcome - custom layout (no ContentPanel) for full-width grid */}
+        {/* Welcome - custom layout (no ContentPanel) for full-width grid.
+            Wrapped in a Box with top PADDING (not margin) so the card
+            sits clear of the Explore tab's expandable description
+            strip above the sticky tabs stack, AND the enclosing
+            pre-map dark wash still extends up through this clearance
+            area (padding doesn't margin-collapse out of the parent,
+            unlike `mt`). See WELCOME_TOP_MARGIN_PX. */}
+        <Box sx={{ pt: `${WELCOME_TOP_MARGIN_PX}px` }}>
         <GetStartedPanelShell background={theme.palette.tabPanels.exploreDeep}>
           <>
             {/* Heading */}
@@ -466,6 +481,7 @@ export default function GetStartedView() {
             </Box>
           </>
         </GetStartedPanelShell>
+        </Box>
 
         {/* Water Issues - custom layout for five-column grid */}
         <GetStartedPanelShell background={theme.palette.blue.dark}>
