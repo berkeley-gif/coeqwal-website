@@ -40,19 +40,19 @@ The repository is managed with **Turborepo + pnpm workspaces** and split into tw
 
 #### How it works
 
-All routes in `apps/main` live under `app/[locale]/` — the locale is part of the URL (`/en/about`, `/es/about`). The `[locale]/layout.tsx` loads the correct messages file and wraps the app in `NextIntlClientProvider`.
+All routes in `apps/main` live under `app/[locale]/` - the locale is part of the URL (`/en/about`, `/es/about`). The `[locale]/layout.tsx` loads the correct messages file and wraps the app in `NextIntlClientProvider`.
 
 Since the app uses `output: "export"` (static HTML), there is no server middleware. Locale detection happens client-side via `LocaleDetector`, which reads `navigator.language` on first visit and redirects if needed. Once a user manually switches locale via the language switcher, `window.location.href` is used for a hard navigation so `NextIntlClientProvider` reinitializes correctly.
 
 #### Translation files
 
-Messages live in `apps/main/messages/en.json` and `apps/main/messages/es.json`. Strings are organized by namespace — `Common` for shared strings and `App` for app-specific strings, with sub-namespaces per page or feature. The current structure is:
+Messages live in `apps/main/messages/en.json` and `apps/main/messages/es.json`. Strings are organized by namespace - `Common` for shared strings and `App` for app-specific strings, with sub-namespaces per page or feature. The current structure is:
 
-- `Common` — shared strings (e.g. skip link)
-- `App.HomePage` — home page strings, including `aboutPanel`, `waterIssuesPanel`, and `knowMore`
-- `App.mapPanel`, `App.californiaWater`, `App.managingWater`, `App.challenges`, `App.calsim` — learn section content
-- `App.questionBuilder` — scenario explorer question builder UI
-- `App.scenarioResults`, `App.invitation`, `App.secondaryNavigation` — misc UI strings
+- `Common` - shared strings (e.g. skip link)
+- `App.HomePage` - home page strings, including `aboutPanel`, `waterIssuesPanel`, and `knowMore`
+- `App.mapPanel`, `App.californiaWater`, `App.managingWater`, `App.challenges`, `App.calsim` - learn section content
+- `App.questionBuilder` - scenario explorer question builder UI
+- `App.scenarioResults`, `App.invitation`, `App.secondaryNavigation` - misc UI strings
 
 #### Using translations in components
 
@@ -64,7 +64,7 @@ t("titleLine1")
 // Nested key
 t("aboutPanel.cta")
 
-// Rich text — renders bold, italic, paragraph breaks
+// Rich text - renders bold, italic, paragraph breaks
 import { richTextComponent } from "@repo/i18n"
 t.rich("aboutPanel.description", richTextComponent) // renders <p> tags
 t.rich("knowMore.items.0", richTextComponent)        // renders <bold> tags
