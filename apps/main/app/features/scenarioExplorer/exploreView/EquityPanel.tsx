@@ -15,7 +15,7 @@ import { mapActions, useMapStore } from "../../map/store"
 import { getTierColorsFromTheme } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-import { OUTCOME_NAMES } from "../../../content/outcomes"
+import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
 import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
@@ -459,7 +459,8 @@ export default function EquityPanel() {
               {obj.locationName}
             </Box>
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
-              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+              {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
+                obj.tierCode}
             </Box>
             <Box
               sx={{
@@ -520,7 +521,8 @@ export default function EquityPanel() {
               {obj.locationName}
             </Box>
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
-              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+              {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
+                obj.tierCode}
             </Box>
             <Box
               sx={{
