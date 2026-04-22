@@ -1,34 +1,44 @@
-import { create } from "zustand"
-import { MarkerType } from "./components/helpers/mapLayers"
+import { create, immer } from "@repo/state/zustand"
 
-interface StoryState {
+interface AppState {
   activeSection: string
-  isMapReady: boolean
-  breakpoint: string
-  textMarkerLayer: {
-    points: MarkerType[]
-    style: string
-  }
-  cancelTextLayer: string
-  setActiveSection: (section: string) => void
-  setMapReady: (isReady: boolean) => void
-  setBreakpoint: (bp: string) => void
-  setTextMarkers: (markers: MarkerType[], style: string) => void
-  setCancelTextLayer: (text: string) => void
 }
 
-const useStoryStore = create<StoryState>((set) => ({
+export type SectionId =
+  | "opener"
+  | "temperature"
+  | "snowmelt"
+  | "groundwater"
+  | "delta"
+  | "adapt-transition"
+  | "resolution"
+
+const initialState: AppState = {
   activeSection: "opener",
-  isMapReady: false,
-  breakpoint: "md",
-  textMarkerLayer: { points: [], style: "text" },
-  cancelTextLayer: "",
-  setActiveSection: (section: string) => set({ activeSection: section }),
-  setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
-  setBreakpoint: (bp: string) => set({ breakpoint: bp }),
-  setTextMarkers: (markers: MarkerType[], style: string) =>
-    set({ textMarkerLayer: { points: markers, style: style } }),
-  setCancelTextLayer: (text: string) => set({ cancelTextLayer: text }),
-}))
+}
+
+// ============================================================================
+// Store
+// ============================================================================
+
+export const useStoryStore = create<AppState>()(immer(() => initialState))
+
+// ============================================================================
+// Actions
+// ============================================================================
+
+export const appActions = {
+  // Story
+  setActiveSection: (section: SectionId) =>
+    useStoryStore.setState({ activeSection: section }),
+}
+
+// ============================================================================
+// Selectors (subscribing)
+// ============================================================================
+
+// Core
+export const useActiveSectionStore = () =>
+  useStoryStore((state) => state.activeSection)
 
 export default useStoryStore

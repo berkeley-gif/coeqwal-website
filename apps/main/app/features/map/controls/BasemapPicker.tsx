@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { MAP_THEME_URLS, type MapThemeKey } from "@repo/map"
 import { mapActions, useMapStyle, useMapMode } from "../store"
 
@@ -25,9 +25,11 @@ function getThumbUrl(key: MapThemeKey): string {
 }
 
 export function BasemapPicker() {
+  const theme = useTheme()
   const currentStyle = useMapStyle()
   const mapMode = useMapMode()
-  const isExploreMode = mapMode === "explore"
+
+  if (mapMode !== "explore") return null
 
   const activeKey =
     (Object.entries(MAP_THEME_URLS) as [MapThemeKey, string][]).find(
@@ -41,32 +43,17 @@ export function BasemapPicker() {
         zIndex: 2,
         display: "flex",
         pointerEvents: "auto",
-        bgcolor: "rgba(255,255,255,0.92)",
+        bgcolor: alpha(theme.palette.common.white, 0.92),
         backdropFilter: "blur(6px)",
         borderRadius: 1.5,
         p: 0.75,
         boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
-        transition:
-          "left 0.3s ease, right 0.3s ease, bottom 0.3s ease, transform 0.3s ease",
-        ...(isExploreMode
-          ? {
-              // Center within the right 25% map strip: strip starts at 75vw,
-              // center is at 87.5vw → left 87.5% + translateX(-50%)
-              flexDirection: "row",
-              gap: 1,
-              left: "87.5%",
-              right: "auto",
-              bottom: 40,
-              transform: "translateX(-50%)",
-            }
-          : {
-              flexDirection: "row",
-              gap: 1,
-              left: 84,
-              right: "auto",
-              bottom: 12,
-              transform: "none",
-            }),
+        flexDirection: "row",
+        gap: 1,
+        left: "87.5%",
+        right: "auto",
+        bottom: 40,
+        transform: "translateX(-50%)",
       }}
     >
       {BASEMAP_OPTIONS.map(({ key, label }) => {

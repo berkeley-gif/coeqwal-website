@@ -16,8 +16,17 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslations } from "next-intl"  
-import { richTextComponent } from "@repo/i18n"   
-import { NavArrow } from "@repo/ui"
+import { richTextComponent } from "@repo/i18n"  
+import {
+  NavArrow,
+  InfoCard,
+  ScrollToButton,
+  resolveRadius,
+  resolveInset,
+  tunerInsetYPx,
+  type RadiusValue,
+  type PanelInset,
+} from "@repo/ui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
   StickyScrollSection,
@@ -302,9 +311,15 @@ function ThemeCircleLabel({
 function WaterThemesPanelContent({
   contentOpacity,
   borderBottom,
+  borderRadius,
+  inset,
+  frameBackground,
 }: {
   contentOpacity: MotionValue<number>
   borderBottom?: string
+  borderRadius?: RadiusValue
+  inset?: PanelInset
+  frameBackground?: string
 }) {
   const theme = useTheme()
   const t = useTranslations("App.HomePage")
@@ -315,26 +330,25 @@ function WaterThemesPanelContent({
   const progress = useScrollProgress()
 
   // Phase opacities.when reduced motion, show final state
-  // Image fades out after the last theme circle/label has appeared
+  // Image stays visible while cards are fully opaque, then fades out late
   const imageOpacity = useScrollValue(
     progress,
-    [0.75, 0.88],
+    [0.85, 0.95],
     prefersReducedMotion ? [0, 0] : [1, 0],
   )
-  const circleOutlineOpacity = useScrollValue(
-    progress,
-    [0.15, 0.3],
-    prefersReducedMotion ? [1, 1] : [0, 1],
-  )
 
-  return (
+  const radius = resolveRadius(borderRadius, theme.borderRadius)
+  const insetCfg = resolveInset(inset)
+
+  const content = (
     <Box
       sx={{
         position: "relative",
         width: "100%",
         height: "100%",
         overflow: "hidden",
-        borderBottom: borderBottom ?? "none",
+        borderBottom: insetCfg ? "none" : (borderBottom ?? "none"),
+        borderRadius: radius,
       }}
     >
       {/* Layer 1: Gradient background (always visible) */}
@@ -342,6 +356,7 @@ function WaterThemesPanelContent({
         sx={{
           position: "absolute",
           inset: 0,
+          zIndex: 0,
           background: `linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`,
         }}
       />
@@ -357,129 +372,159 @@ function WaterThemesPanelContent({
           left: 0,
           width: "100%",
           height: "auto",
+          zIndex: 0,
           opacity: imageOpacity,
           pointerEvents: "none",
         }}
       />
 
-      {/* Layer 3: SVG overlay.circles, photos, labels */}
-      <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
-        preserveAspectRatio="xMidYMax meet"
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          height: "auto",
-          pointerEvents: "none",
-        }}
-      >
-        {/* Photo fills.commented out; re-enable if circle photos return
-        <defs>
-          {CIRCLE_CONFIG.map((c) => (
-            <clipPath key={`clip-${c.id}`} id={`clip-${c.id}`}>
-              <circle cx={c.cx} cy={c.cy} r={c.r} />
-            </clipPath>
-          ))}
-        </defs>
-
-        {CIRCLE_CONFIG.map((c, i) => (
-          <ThemeCirclePhoto
-            key={`photo-${c.id}`}
-            circle={c}
-            index={i}
-            progress={progress}
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        ))}
-        */}
-
-        {/* Dashed circle outlines (on top of photos) */}
-        {CIRCLE_CONFIG.map((c) => (
-          <motion.circle
-            key={`outline-${c.id}`}
-            cx={c.cx}
-            cy={c.cy}
-            r={c.r}
-            fill="none"
-            stroke="white"
-            strokeWidth={8}
-            strokeDasharray="18 20"
-            style={{ opacity: circleOutlineOpacity }}
-          />
-        ))}
-
-        {/* Labels via foreignObject */}
-        {CIRCLE_CONFIG.map((c, i) => {
-          const active = c.id === "eco" || c.id === "delta"
-          return (
-            <ThemeCircleLabel
-              key={`label-${c.id}`}
-              circle={c}
-              index={i}
-              progress={progress}
-              prefersReducedMotion={prefersReducedMotion}
-              onLearnMore={active ? () => openThemePanel(c.id) : undefined}
-              comingSoon={!active}
-            />
-          )
-        })}
-      </svg>
-
-      {/* Layer 4: Text content.headline + description */}
-      <motion.div
-        style={{
+      {/* Layer 3: Text content + theme cards */}
+      <Box
+        sx={{
           position: "relative",
-          zIndex: 1,
-          opacity: contentOpacity,
-          paddingLeft: theme.space.panel.padding,
-          paddingRight: theme.space.panel.padding,
-          paddingTop: theme.space.panel.topOffset,
+          zIndex: 2,
+          px: theme.space.panel.padding,
+          pt: theme.space.panel.topOffset,
+          pb: theme.space.panel.padding,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          height: "100%",
+          boxSizing: "border-box",
         }}
       >
-        {/* Responsive headline.visible on xs–md only */}
-        <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
-          <Typography
-            variant="h2Main"
-            component="span"
-            sx={{ display: "block", color: "text.primary" }}
-          >
-            What water issues
-          </Typography>
-          <Typography
-            variant="h1"
-            component="span"
-            sx={{ display: "block", color: "text.primary" }}
-          >
-            matter to you?
-          </Typography>
-        </Box>
+        {/* Headline + intro - fades in with crossfade */}
+        <motion.div style={{ opacity: contentOpacity }}>
+          {/* Responsive headline - visible on xs–md only */}
+          <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
+            <Typography
+              variant="h2Main"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              What water issues
+            </Typography>
+            <Typography
+              variant="h1"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              matter to you?
+            </Typography>
+          </Box>
 
-        {/* Description.right column on md+, matching CoeqwalPanel split layout */}
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.primary",
+              maxWidth: "66%",
+              mb: theme.space.section.md,
+            }}
+          >
+<<<<<<< HEAD
+            {t.rich("waterIssuesPanel.description", richTextComponent)}
+=======
+            Water is important to all of us — from farmers in the Central Valley
+            to communities in the Delta, from salmon in the Sacramento River to
+            urban water users in Los Angeles. We can consider how decisions
+            affect the issues people care about.
+>>>>>>> dev
+          </Typography>
+        </motion.div>
+
+        {/* Five theme cards - horizontal grid */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            columnGap: { md: 6 },
+            gridTemplateColumns: "repeat(5, 1fr)",
+            alignItems: "stretch",
+            columnGap: theme.space.section.sm,
+            rowGap: theme.space.component.lg,
           }}
         >
-          <Box />
-          <Typography
-            variant="displayBody"
-            component="div"
-            sx={{
-              color: "text.primary",
-              maxWidth: "calc(100% - 40px)",
-            }}
-          >
-            {t.rich("waterIssuesPanel.description", richTextComponent)}
-          </Typography>
+          {CIRCLE_CONFIG.map((c) => {
+            const active = c.id !== "governance"
+            return (
+              <InfoCard
+                key={c.id}
+                title={c.label}
+                description={c.description}
+                onClick={active ? () => openThemePanel(c.id) : undefined}
+                variant="onLight"
+                // Active cards: lift the translucent fill
+                // (rgba(210,228,242,0.8) by default) to full opacity
+                // on hover so the card "comes forward" and invites
+                // interaction. Non-active ("Coming soon") cards
+                // inherit the default hover behaviour (no click, so
+                // no hover lift is applied by InfoCard).
+                hoverBackground={active ? "rgb(210,228,242)" : undefined}
+              >
+                {!active && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: theme.space.component.sm,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Coming soon
+                  </Typography>
+                )}
+              </InfoCard>
+            )
+          })}
         </Box>
-      </motion.div>
+      </Box>
+
+      {/* Scroll-down arrow — matches the VideoHero and About panels.
+          Absolutely positioned against the rounded card (whose wrapper
+          has position:relative), bottom-center, above all other
+          layers so it stays visible throughout the sticky pin. */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "clamp(24px, 4vh, 48px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 3,
+          pointerEvents: "auto",
+        }}
+      >
+        <ScrollToButton
+          color={`${theme.palette.common.white}D9`}
+          size={52}
+          scrollToId="want-to-know-more"
+          // Same offset math as the VideoHero / About buttons: land
+          // the target section's rounded card flush below the fixed
+          // header. Resolved at click time so live PanelTuner edits
+          // take effect immediately.
+          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+          ariaLabel="Scroll down to the want to know more section"
+        />
+      </Box>
     </Box>
   )
+
+  if (insetCfg) {
+    return (
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          background: frameBackground ?? "transparent",
+          borderBottom: borderBottom ?? "none",
+          px: insetCfg.x,
+          py: insetCfg.y,
+          boxSizing: "border-box",
+        }}
+      >
+        {content}
+      </Box>
+    )
+  }
+
+  return content
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -501,6 +546,13 @@ export interface WaterThemesPanelProps {
   contentOpacity: MotionValue<number>
   /** Bottom border style */
   borderBottom?: string
+  /** Rounded corner radius for the pinned panel surface. */
+  borderRadius?: RadiusValue
+  /** Pull the panel in from the viewport edges so all four rounded
+   *  corners are visible against a `frameBackground`. */
+  inset?: PanelInset
+  /** Background rendered in the frame around an inset panel. */
+  frameBackground?: string
 }
 
 export function WaterThemesPanel({
@@ -508,13 +560,41 @@ export function WaterThemesPanel({
   dockRef,
   contentOpacity,
   borderBottom,
+  borderRadius,
+  inset,
+  frameBackground,
 }: WaterThemesPanelProps) {
+  const theme = useTheme()
+  // Pin the sticky child `headerHeight` px from the top of the
+  // viewport and size it to the viewport below the header. The
+  // inner rounded card is inset on top and bottom by the `inset`
+  // prop, so its visible height ends up
+  //   100vh - headerHeight - 2 · insetY
+  // (one gap-band above and below the rounded rect). The 200vh
+  // scroll runway gives a ~100vh pinned window that drives the
+  // image-fade / circle-reveal phases. The wrapper is painted
+  // with the frame background so the pinned surface reads as
+  // continuous frame.
+  const headerHeight = theme.layout.headerHeight
   return (
-    <div ref={panelRef}>
-      <StickyScrollSection height="300vh">
+    <div
+      ref={panelRef}
+      id="water-themes"
+      style={{
+        backgroundColor: frameBackground,
+      }}
+    >
+      <StickyScrollSection
+        height="200vh"
+        stickyTop={headerHeight}
+        stickyHeight={`calc(100vh - ${headerHeight}px)`}
+      >
         <WaterThemesPanelContent
           contentOpacity={contentOpacity}
           borderBottom={borderBottom}
+          borderRadius={borderRadius}
+          inset={inset}
+          frameBackground={frameBackground}
         />
       </StickyScrollSection>
       {/* Dock marker.positioned 75vh above the section end via

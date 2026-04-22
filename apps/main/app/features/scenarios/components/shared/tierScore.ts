@@ -3,12 +3,12 @@
  *
  * computeTierScore:    ChartDataPoint[] → weighted mean tier (1.0–4.0)
  * interpolateTierColor: score + theme tier colors → blended hex string
- * getTierLabelForScore: score → "Optimal" | "Sub-optimal" | "At-risk" | "Critical"
+ * getTierLabelForScore: score → "Optimal" | "Acceptable" | "At-risk" | "Critical"
  */
 
 import type { ChartDataPoint } from "./types"
 import { isSingleValueTier } from "./types"
-import type { TierColors } from "../../../../content/tiers"
+import { getTierLabel, type TierColors } from "../../../../content/tiers"
 
 /**
  * Compute a weighted-mean tier score from chart data.
@@ -43,10 +43,7 @@ export function computeTierScore(
  * Map a tier score to a human-readable label.
  */
 export function getTierLabelForScore(score: number): string {
-  if (score < 1.5) return "Optimal"
-  if (score < 2.5) return "Sub-optimal"
-  if (score < 3.5) return "At-risk"
-  return "Critical"
+  return getTierLabel(getTierLevelForScore(score))
 }
 
 /**

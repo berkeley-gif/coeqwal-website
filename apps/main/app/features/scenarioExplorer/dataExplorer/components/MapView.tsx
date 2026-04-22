@@ -20,7 +20,7 @@ import {
   outcomeCategories,
   getOutcomeCategoryColor,
 } from "../../config/outcomeDefinitions"
-// GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+// GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
 // TODO: replace with lightweight /locations endpoint when MapView is re-enabled.
 // import {
 //   fetchTierLocationData,
@@ -77,7 +77,7 @@ function MapViewContent() {
   // Map container ref for screenshot
   const mapContainerRef = React.useRef<HTMLDivElement>(null)
 
-  // GeoJSON fetch disabled — heavy on bandwidth. MapView is currently not rendered.
+  // GeoJSON fetch disabled - heavy on bandwidth. MapView is currently not rendered.
   // TODO: replace with lightweight /locations endpoint when MapView is re-enabled.
   const tierLocationData = null
   const [isLoadingMap, _setIsLoadingMap] = React.useState(false)
@@ -391,7 +391,7 @@ function MapViewContent() {
         >
           <NavigationControl position="bottom-right" />
 
-          {/* TierMarkers disabled — GeoJSON fetch removed.
+          {/* TierMarkers disabled - GeoJSON fetch removed.
               TODO: re-enable with lightweight data when MapView is brought back. */}
         </Map>
 
@@ -449,7 +449,7 @@ function MapViewContent() {
           </Box>
         )}
 
-        {/* Info overlay disabled — tierLocationData is null while MapView is disabled. */}
+        {/* Info overlay disabled - tierLocationData is null while MapView is disabled. */}
       </Box>
     </Box>
   )

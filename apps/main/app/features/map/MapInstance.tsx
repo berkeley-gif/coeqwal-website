@@ -18,6 +18,7 @@ import {
   type MapMode,
 } from "./store"
 import { CALIFORNIA_VIEW } from "./config/cameraPresets"
+import { ensureCustomLayers } from "./config/tilesetSources"
 import type { SectionId } from "./config/sectionLayers"
 import { BasemapPicker } from "./controls/BasemapPicker"
 import "./styles/mapboxControlStyles.css"
@@ -50,6 +51,7 @@ const MAPBOX_LAYER_IDS = [
   "central-valley-polygon-halo",
   "central-valley-label",
   "inflow-watersheds",
+  "delta-water",
 ] as const
 
 // ============================================================================
@@ -142,7 +144,13 @@ export default function MapInstance({
       }
     })
 
+    ensureCustomLayers(mapboxInstance)
     mapActions.setMapReady(true)
+
+    if (process.env.NODE_ENV === "development") {
+      ;(window as unknown as Record<string, unknown>).__mapInstance =
+        mapboxInstance
+    }
   }, [map.mapRef])
 
   /** When the style URL changes, cycle mapReady so layer-setup hooks re-run.
@@ -168,6 +176,7 @@ export default function MapInstance({
           /* layer may not exist in this style */
         }
       })
+      ensureCustomLayers(mapboxInstance)
       mapActions.setMapReady(true)
     }
 

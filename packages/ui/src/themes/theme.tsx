@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { createTheme, Theme } from "@mui/material/styles"
 import React from "react"
+=======
+import { createTheme, Theme, alpha } from "@mui/material/styles"
+>>>>>>> dev
 
 /* ========================================================
  * COEQWAL MUI THEME
@@ -21,7 +25,8 @@ import React from "react"
  *                       palette, typography, components
  *                       Typography variants: h1, h2–h6, body1, body2,
  *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
- *                       dashboard, panelTitle, subtitle1/2, caption, overline
+ *                       dashboard, panelTitle, subtitle1/2, caption, overline,
+ *                       compactTitle–micro, axisLabel, scenarioTitle, …
  *
  * 5. Post-creation    - Attach design tokens to theme object (theme.space, etc.)
  *
@@ -315,7 +320,7 @@ const palette = {
 
   // Common colors (mirrored in MUI palette.common for consistency)
   common: {
-    white: "#f2f0ef", // Off-white
+    white: "#fcfbfa",
     black: "#000000",
   },
 
@@ -361,9 +366,39 @@ const palette = {
     tier4: "#ee5d32", // Red, tier 4
   },
 
+  // Diverging scale for signed tier deltas. Higher tier # = worse, so
+  // positive delta = degradation (warm), negative delta = improvement (cool).
+  // Anchors at -3, -1.5, 0, +1.5, +3.
+  tierDiverging: {
+    negStrong: "#0f7a4a", // Deep green, max improvement
+    negWeak: "#a8e0c3", // Light green, small improvement
+    zero: "#f0efec", // Neutral off-white, no change
+    posWeak: "#fbd4b4", // Light orange, small degradation
+    posStrong: "#c44022", // Deep red, max degradation
+  },
+
+  // Monochromatic density ramps for aggregate "fraction-at-risk" and
+  // "fraction-acceptable-or-better" cell encodings.
+  tierDensity: {
+    riskMin: "#f4f4f2", // Near-white (0% of scenarios at risk)
+    riskMax: "#c44022", // Deep red (100% at risk)
+    oppMin: "#f4f4f2", // Near-white (0% acceptable)
+    oppMax: "#0f7a4a", // Deep green (100% acceptable)
+  },
+
+  // Monochromatic ramp for operational-leverage cell encoding: how much
+  // tier spread is possible across sibling operations at a given HC.
+  // Reads as a neutral "how much does policy move this?" signal, so we
+  // use a purple ramp to keep it distinct from the risk/opportunity ramps.
+  tierLeverage: {
+    min: "#f4f4f2", // Near-white (0 tier range — operations don't move it)
+    max: "#5f3b8a", // Deep purple (max 3 tier range)
+  },
+
   tabPanels: {
     learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
+    exploreDeep: "#2f6fa8", // Darker explore — welcome panel background
     share: "#193D6B", // brand.panelDark
   },
 
@@ -407,6 +442,8 @@ const borderRadius = {
   sm: "4px", // Small (input fields, tags)
   md: "8px", // Standard (cards, panels, tooltips)
   lg: "12px", // Mobile nav drawer corners (BaseHeader)
+  xl: "16px", // Large card / soft panel corner
+  "2xl": "24px", // Prominent panel corner (homepage panel redesign)
   pill: "999px", // Full pill/capsule shape
   circle: "50%", // Perfect circles
 }
@@ -475,7 +512,8 @@ const zIndex = {
 
 // Stroke width - design system line weight
 const strokeWidth = {
-  rule: 0.5, // Primary line weight (px) used for borders, outlines, and SVG strokes
+  rule: 0.5, // Hairline rule (px) used for subtle dividers
+  accent: 1.25, // Primary accent line weight (px) used for navigation arrows, circular buttons, icon outlines, and hero-header borders
 }
 
 // Border styles
@@ -493,6 +531,13 @@ const border = {
 }
 
 // Background styles
+//
+// `modalBackdropOpacity` is the single source of truth for the opacity
+// used on black backdrops that sit behind modal-like surfaces — modal
+// dialogs, scrim curtains, full-screen dimming washes over the map,
+// etc. Compose with `alpha(palette.common.black, modalBackdropOpacity)`
+// at the call site (these backdrops always participate in a gradient,
+// so no flat-fill token is provided).
 const background = {
   transparent: "transparent",
   paragraph: "rgba(0, 0, 0, 0.4)",
@@ -502,10 +547,14 @@ const background = {
     dark: "rgba(0, 0, 0, 0.8)",
   },
   whiteOverlay: {
-    50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
-    85: "rgba(255, 255, 255, 0.85)", // Readable overlay with map context showing through
-    95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
+    50: alpha(palette.common.white, 0.5),
+    85: alpha(palette.common.white, 0.85),
+    95: alpha(palette.common.white, 0.95),
   },
+  /** Opacity (0–1) for the black backdrop used behind modal-like
+   *  surfaces and scrim curtains. Compose with `alpha()` at the call
+   *  site, e.g. `alpha(theme.palette.common.black, theme.background.modalBackdropOpacity)`. */
+  modalBackdropOpacity: 0.4,
 }
 
 /* ========================================================
@@ -736,9 +785,16 @@ export const themeValues = {
     learnPanel: {
       base: {
         backgroundColor: background.whiteOverlay[95],
-        borderRadius: borderRadius.none,
+        // Standard panel radius, matching other cards/panels/tooltips
+        // in the design system (see SummaryPanel inline, etc).
+        borderRadius: borderRadius.md,
         pointerEvents: "auto" as const,
-        padding: { xs: 2, sm: 2.5, md: 3 }, // matches space.card.xs
+        // Horizontal padding is unchanged so the panel chrome still
+        // breathes at the edges. Vertical padding is reduced to 3/4
+        // of the horizontal scale so the three stacked learn panels
+        // fit on shorter viewports without clipping.
+        px: { xs: 2, sm: 2.5, md: 3 },
+        py: { xs: 1.5, sm: 1.875, md: 2.25 },
       },
       maxWidth: "540px",
     },
@@ -754,17 +810,21 @@ export const themeValues = {
 
     // Reusable checkbox sx presets
     // Usage: <Checkbox sx={theme.scenarios.checkbox.sm} />
+    // md is 1.2× sm (5:6 scale factors) so group/theme headers read slightly larger than scenario rows.
     checkbox: {
-      /** Small checkbox — for individual scenario rows */
+      /** Small checkbox — individual scenario rows (list, grid, sidebar) */
       sm: {
         padding: 0,
         margin: 0,
         transform: "scale(0.7)",
+        transformOrigin: "100% 50%",
       } as const,
-      /** Standard checkbox — for group headers (theme, section) */
+      /** Group header checkbox — theme/section “select all”; visually ~20% larger than sm */
       md: {
         padding: 0,
-        transform: "scale(0.8)",
+        margin: 0,
+        transform: "scale(0.84)",
+        transformOrigin: "100% 50%",
       } as const,
     },
   },
@@ -850,10 +910,10 @@ const theme = createTheme({
       background: "#94B8DA",
       text: themeValues.palette.blue.darkest,
     },
-    // MUI standard colors
+    // MUI standard colors (surfaces use warm off-white = common.white)
     background: {
-      default: "#FFFFFF",
-      paper: "#FFFFFF", // Solid white for UI backgrounds
+      default: themeValues.palette.common.white,
+      paper: themeValues.palette.common.white,
     },
     text: {
       primary: themeValues.palette.brand.panelDark,
@@ -864,7 +924,7 @@ const theme = createTheme({
       hover: themeValues.palette.grey[100],
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
-      disabledBackground: "#FFFFFF",
+      disabledBackground: themeValues.palette.common.white,
     },
     interaction: {
       hoverBackground: themeValues.palette.grey[100],
@@ -917,8 +977,9 @@ const theme = createTheme({
     h3: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h3,
-      fontWeight: 500,
-      lineHeight: 1.1,
+      fontWeight: 300,
+      lineHeight: 1.15,
+      letterSpacing: "0.01em",
     },
     h4: {
       fontFamily: themeValues.fontFamily.display,
@@ -1064,13 +1125,24 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.title, // 0.9rem (14.4px)
       fontWeight: 500,
-      lineHeight: 1.4,
+      lineHeight: 1.5,
     },
     compactSubtitle: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.subtitle, // 0.8rem (12.8px)
       fontWeight: 400,
       lineHeight: 1.4,
+    },
+    /**
+     * Radar chart (and similar): static spoke labels and scenario title in SVG hover cards.
+     * Matches former 13px / 500 / 0.04em axis styling (0.8125rem at 16px root).
+     */
+    axisLabel: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.8125rem", // 13px
+      fontWeight: 500,
+      lineHeight: 1.2,
+      letterSpacing: "0.04em",
     },
     compactCaption: {
       fontFamily: themeValues.fontFamily.text,
@@ -1512,6 +1584,7 @@ const theme = createTheme({
           nav: "span",
           compactTitle: "span",
           compactSubtitle: "span",
+          axisLabel: "span",
           compactCaption: "span",
           compactMicro: "span",
         },
@@ -1794,6 +1867,9 @@ declare module "@mui/material/styles" {
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
+    tierDiverging: typeof themeValues.palette.tierDiverging
+    tierDensity: typeof themeValues.palette.tierDensity
+    tierLeverage: typeof themeValues.palette.tierLeverage
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
     waterThemes: typeof themeValues.palette.waterThemes
@@ -1813,6 +1889,9 @@ declare module "@mui/material/styles" {
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
+    tierDiverging?: Partial<typeof themeValues.palette.tierDiverging>
+    tierDensity?: Partial<typeof themeValues.palette.tierDensity>
+    tierLeverage?: Partial<typeof themeValues.palette.tierLeverage>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
     waterThemes?: Partial<typeof themeValues.palette.waterThemes>
@@ -1886,6 +1965,7 @@ declare module "@mui/material/styles" {
     outcomeHeader: React.CSSProperties
     compactTitle: React.CSSProperties
     compactSubtitle: React.CSSProperties
+    axisLabel: React.CSSProperties
     compactCaption: React.CSSProperties
     compactMicro: React.CSSProperties
     tooltipHeader: React.CSSProperties
@@ -1907,6 +1987,7 @@ declare module "@mui/material/styles" {
     outcomeHeader?: React.CSSProperties
     compactTitle?: React.CSSProperties
     compactSubtitle?: React.CSSProperties
+    axisLabel?: React.CSSProperties
     compactCaption?: React.CSSProperties
     compactMicro?: React.CSSProperties
     tooltipHeader?: React.CSSProperties
@@ -1939,6 +2020,7 @@ declare module "@mui/material/Typography" {
     outcomeHeader: true
     compactTitle: true
     compactSubtitle: true
+    axisLabel: true
     compactCaption: true
     compactMicro: true
     tooltipHeader: true

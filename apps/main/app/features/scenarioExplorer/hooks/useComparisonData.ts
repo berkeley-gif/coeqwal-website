@@ -18,12 +18,19 @@ import {
   NOD_SOD_OUTCOME_CODES,
   ALL_RADAR_AXES_ORDER,
 } from "../../../content/outcomes"
-import nodSodTiers from "../data/nod-sod-tiers.json"
+import {
+  getRegionalTierMean,
+  type RegionalOutcomeCode,
+} from "@repo/data/coeqwal"
+import {
+  PRIMARY_SCENARIO_BASELINE_ID,
+  buildIndexWithinThemeMap,
+} from "../utils/scenarioIdSort"
 
-const PRIMARY_BASELINE_ID = "s0020"
+const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
-const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
+const HC_HISTORICAL = "historical"
 
 /** Convert a tier mean (1-4 scale) to the radar chart's internal format,
  *  matching the API path: normalized_score = (4 - ws) / 3, then * 2 - 1. */
@@ -103,36 +110,52 @@ export function useComparisonData() {
     getThemeForScenario,
   ])
 
+  const scenarioIndexWithinTheme = useMemo(
+    () => buildIndexWithinThemeMap(scenarioIds, getThemeForScenario),
+    [scenarioIds, getThemeForScenario],
+  )
+
+  const allScenarioIndexWithinTheme = useMemo(
+    () => buildIndexWithinThemeMap(allScenarioIds, getThemeForScenario),
+    [allScenarioIds, getThemeForScenario],
+  )
+
   // Build scenarios array with dynamic names and theme-aligned colors.
-  // Per-theme counters ensure each scenario gets the next step in its theme's
-  // ColorBrewer multi-hue ramp (baseline = YlOrBr, ag_gw = YlGn, etc.).
+  // Within each theme, palette index follows the same order as the scenario sidebar
+  // (primary baseline first, then ascending short code).
   const scenarios = useMemo(() => {
-    const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return scenarioIds.map((id) => {
       const theme = getThemeForScenario(id) as ThemeKey
-      const idx = themeCounters[theme] ?? 0
-      themeCounters[theme] = idx + 1
+      const idx = scenarioIndexWithinTheme.get(id) ?? 0
       return {
         id,
         name: getDisplayName(id),
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [scenarioIds, getDisplayName, getThemeForScenario])
+  }, [
+    scenarioIds,
+    getDisplayName,
+    getThemeForScenario,
+    scenarioIndexWithinTheme,
+  ])
 
   const allScenarios = useMemo(() => {
-    const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return allScenarioIds.map((id) => {
       const theme = getThemeForScenario(id) as ThemeKey
-      const idx = themeCounters[theme] ?? 0
-      themeCounters[theme] = idx + 1
+      const idx = allScenarioIndexWithinTheme.get(id) ?? 0
       return {
         id,
         name: getDisplayName(id),
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [allScenarioIds, getDisplayName, getThemeForScenario])
+  }, [
+    allScenarioIds,
+    getDisplayName,
+    getThemeForScenario,
+    allScenarioIndexWithinTheme,
+  ])
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
     if (!allScoreData || Object.keys(allScoreData).length === 0) {
@@ -148,16 +171,34 @@ export function useComparisonData() {
           const outcomeScore = scenarioScores[code]
           const displayName = getOutcomeName(code)
           if (outcomeScore?.normalized_score !== undefined) {
-            values[displayName] = outcomeScore.normalized_score * 2 - 1
+            let v = outcomeScore.normalized_score * 2 - 1
+            // Winter-run salmon tier scores sometimes come through above 4
+            // on the 1-4 tier scale, which maps to radar values below -1.
+            // Clip anything over 4 back to 4 (radar value -1) so those
+            // scenarios still render at the bottom of the axis instead of
+            // clipping off-chart. Not clear why the upstream scores exceed
+            // 4; leaving that for someone else to figure out.
+            if (code === "WRC_SALMON_AB" && v < -1) v = -1
+            values[displayName] = v
           } else {
             values[displayName] = null
           }
         })
 
-        const localScores = nodSodData[scenarioId]
+        // Radar pulls NOD/SOD means only under the historical hydroclimate
+        // today so it stays comparable to the current axis reference. The
+        // underlying data package now carries cc50 and cc95 too, so opening
+        // this up later is a matter of removing the guard.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
-          const raw = localScores?.[code]
+          const raw =
+            hydroclimate === HC_HISTORICAL
+              ? getRegionalTierMean(
+                  scenarioId,
+                  code as RegionalOutcomeCode,
+                  "historical",
+                )
+              : null
           values[displayName] = raw != null ? tierMeanToRadarValue(raw) : null
         })
 
@@ -171,7 +212,7 @@ export function useComparisonData() {
       .filter((scenario) => {
         return Object.keys(scenario.values).length > 0
       })
-  }, [allScoreData, scenarios])
+  }, [allScoreData, scenarios, hydroclimate])
 
   // Axes use display names for user-facing labels (standard + NOD/SOD)
   const axes = useMemo(() => {
@@ -190,7 +231,10 @@ export function useComparisonData() {
       for (const code of OUTCOME_CODE_ORDER) {
         const s = scores[code]
         if (s?.normalized_score === undefined) continue
-        const v = s.normalized_score * 2 - 1
+        let v = s.normalized_score * 2 - 1
+        // Match the salmon clamp in parallelPlotData so axis min/max does
+        // not get dragged off the bottom of the radar.
+        if (code === "WRC_SALMON_AB" && v < -1) v = -1
         const name = getOutcomeName(code)
         const cur = range[name]
         if (cur) {
@@ -201,10 +245,13 @@ export function useComparisonData() {
         }
       }
 
-      const localScores = nodSodData[scenarioId]
-      if (!localScores) continue
+      if (hydroclimate !== HC_HISTORICAL) continue
       for (const code of NOD_SOD_OUTCOME_CODES) {
-        const raw = localScores[code]
+        const raw = getRegionalTierMean(
+          scenarioId,
+          code as RegionalOutcomeCode,
+          "historical",
+        )
         if (raw == null) continue
         const v = tierMeanToRadarValue(raw)
         const name = getOutcomeName(code)
@@ -218,7 +265,7 @@ export function useComparisonData() {
       }
     }
     return range
-  }, [allScoreData, allScenarioIds])
+  }, [allScoreData, allScenarioIds, hydroclimate])
 
   const lineColors = useMemo(() => {
     // Create a lookup from the scenarios array
@@ -243,10 +290,16 @@ export function useComparisonData() {
       values[name] =
         s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
     })
-    const baselineLocal = nodSodData[PRIMARY_BASELINE_ID]
     NOD_SOD_OUTCOME_CODES.forEach((code) => {
       const name = getOutcomeName(code)
-      const raw = baselineLocal?.[code]
+      const raw =
+        hydroclimate === HC_HISTORICAL
+          ? getRegionalTierMean(
+              PRIMARY_BASELINE_ID,
+              code as RegionalOutcomeCode,
+              "historical",
+            )
+          : null
       values[name] = raw != null ? tierMeanToRadarValue(raw) : null
     })
     return {
@@ -255,7 +308,7 @@ export function useComparisonData() {
       values,
       highlighted: false,
     }
-  }, [parallelPlotData, allScoreData, getDisplayName])
+  }, [parallelPlotData, allScoreData, getDisplayName, hydroclimate])
 
   // Tier heatmap data: scenario × outcome matrix
   const heatmapCells = useMemo<TierHeatmapCell[]>(() => {

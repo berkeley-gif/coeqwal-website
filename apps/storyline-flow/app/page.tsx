@@ -84,7 +84,7 @@ export default function StoryContainer() {
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
-      <BaseHeader backgroundColor="overlay.waterDark" />
+      <BaseHeader />
       <SectionIndicator />
       {tooltipContent && (
         <>

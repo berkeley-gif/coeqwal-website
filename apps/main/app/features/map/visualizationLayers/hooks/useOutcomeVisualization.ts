@@ -32,8 +32,8 @@ import {
 } from "../../store"
 import { useTierData, type UseTierDataResult } from "./useTierData"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
-import { CALIFORNIA_CENTERED_VIEW } from "../../config/cameraPresets"
 import { EXPLORE_BOUNDS } from "../../MapInstance"
+import { resolveOutcomeCamera } from "../../config/resolveOutcomeCamera"
 import { getOutcomeName } from "../../../../content/outcomes"
 import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 
@@ -115,7 +115,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // return to the overview when the user deselects an outcome.
   const wasActiveRef = useRef(false)
 
-  // Camera control — zoom to camera preset on outcome click, return to
+  // Camera control - zoom to camera preset on outcome click, return to
   // overview on deselect. In explore mode, all easeTo/fitBounds calls
   // include left padding so the camera centers within the visible strip.
   useEffect(() => {
@@ -152,32 +152,21 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
     wasActiveRef.current = true
 
-    const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
+    const action = resolveOutcomeCamera(outcomeCode!, mapMode, explorePad)
 
     mapAPI.withMap((mapRef) => {
-      const map = mapRef.getMap()
-
-      if (config.cameraPreset) {
-        // Outcome has a specific camera preset (e.g., Delta) → zoom in
-        map.easeTo({
-          center: { lng: target.longitude, lat: target.latitude },
-          zoom: target.zoom,
-          padding: explorePad,
-          duration: 1000,
-        })
-      } else if (isExplore) {
-        // No preset in explore → fit Central Valley overview
-        mapRef.fitBounds(EXPLORE_BOUNDS, {
-          padding: explorePad,
-          maxZoom: 10,
-          duration: 1000,
+      if (action.type === "fitBounds") {
+        mapRef.fitBounds(action.bounds, {
+          padding: action.padding,
+          maxZoom: action.maxZoom,
+          duration: action.duration,
         })
       } else {
-        // Learn mode, no preset → centered California view
-        map.easeTo({
-          center: { lng: target.longitude, lat: target.latitude },
-          zoom: target.zoom,
-          duration: 1000,
+        mapRef.getMap().easeTo({
+          center: action.center,
+          zoom: action.zoom,
+          padding: action.padding,
+          duration: action.duration,
         })
       }
     })
@@ -187,6 +176,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
     tierDataResult.featureIds.length,
     mapAPI,
     mapMode,
+    outcomeCode,
     outcome,
     explorePanelWidth,
   ])

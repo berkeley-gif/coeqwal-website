@@ -10,6 +10,7 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
+import ExploreSubNav from "../../features/scenarioExplorer/components/ExploreSubNav"
 
 /** Renders the active tab's description panel content */
 function TabDescription({
@@ -70,7 +71,7 @@ function TabDescription({
 }
 
 export default function SmoothTabs() {
-  const { state, tabsRef, isInTabsArea } = useTabs()
+  const { state, tabsRef, isInTabsArea, setDescriptionsExpanded } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const theme = useTheme()
@@ -92,6 +93,11 @@ export default function SmoothTabs() {
     if (isInTabsArea) setForceHideDescriptions(false)
   }, [isInTabsArea])
 
+  // Keep context in sync so ExploreSubNav can follow the same visibility.
+  useEffect(() => {
+    setDescriptionsExpanded(showDescriptions)
+  }, [showDescriptions, setDescriptionsExpanded])
+
   // Expand interstitial when activeTab changes while docked (covers both
   // tab clicks and AutoAdvanceFooter navigation).
   const prevTabRef = useRef(activeTab)
@@ -103,29 +109,30 @@ export default function SmoothTabs() {
   }, [activeTab, isInTabsArea])
 
   // When user scrolls after a click-open, retract the descriptions.
-  // Delayed so the programmatic smooth-scroll from tab navigation
-  // doesn't immediately close the interstitial.
+  // Uses wheel/touchmove instead of scroll to avoid false triggers from
+  // animation-driven layout shifts (AutoHeight spring, ExploreSubNav entrance).
   const scrollHandlerRef = useRef<(() => void) | null>(null)
   useEffect(() => {
     if (!clickOpened) return
 
-    const timer = setTimeout(() => {
-      const handleScroll = () => {
-        scrollHandlerRef.current = null
-        setClickOpened(false)
-      }
-      scrollHandlerRef.current = handleScroll
+    const close = () => {
+      window.removeEventListener("wheel", close)
+      window.removeEventListener("touchmove", close)
+      scrollHandlerRef.current = null
+      setClickOpened(false)
+    }
 
-      window.addEventListener("scroll", handleScroll, {
-        passive: true,
-        once: true,
-      })
-    }, 800)
+    const timer = setTimeout(() => {
+      scrollHandlerRef.current = close
+      window.addEventListener("wheel", close, { passive: true })
+      window.addEventListener("touchmove", close, { passive: true })
+    }, 600)
 
     return () => {
       clearTimeout(timer)
       if (scrollHandlerRef.current) {
-        window.removeEventListener("scroll", scrollHandlerRef.current)
+        window.removeEventListener("wheel", scrollHandlerRef.current)
+        window.removeEventListener("touchmove", scrollHandlerRef.current)
         scrollHandlerRef.current = null
       }
     }
@@ -147,10 +154,9 @@ export default function SmoothTabs() {
     (tab: TabKey | undefined) => {
       if (tab && tab !== activeTab) {
         navigateToTab(tab)
-      }
-      // Always show descriptions on tab click, even if already on this tab
-      if (isInTabsArea) {
-        setClickOpened(true)
+        if (isInTabsArea) setClickOpened(true)
+      } else if (isInTabsArea) {
+        setClickOpened((prev) => !prev)
       }
     },
     [activeTab, navigateToTab, isInTabsArea],
@@ -178,7 +184,12 @@ export default function SmoothTabs() {
         position: "sticky",
         top: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
-        marginTop: "-80px", // Pull tabs up to appear at bottom of ActionPanel
+        // Pull the tabs up in normal flow so that, while still above
+        // their sticky threshold, they overlap the bottom of the
+        // preceding ActionPanel. Once they enter the sticky state,
+        // `top` takes over and pins the docked nav-bar at the correct
+        // anchor, so this margin has no effect on the docked position.
+        marginTop: "-100px",
         backgroundColor: isInTabsArea
           ? alpha(theme.palette.text.primary, 0.75)
           : "transparent",
@@ -192,13 +203,16 @@ export default function SmoothTabs() {
         onKeyDown={handleKeyDown}
         className="tab-container"
         style={{
-          display: "flex",
-          gap: 0,
+          // Grid with 3 equal columns so each tab lives in a cell that
+          // is exactly 1/3 of the viewport wide. When expanded, each
+          // tab is narrower than its cell and centered inside it
+          // (halo on both sides). When docked, tabs stretch to fill
+          // their cells for the continuous nav-bar look.
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
           width: "100%",
           pointerEvents: "auto",
-          paddingLeft: 0,
-          paddingRight: 0,
-          transition: "padding 0.3s ease",
+          boxSizing: "border-box",
         }}
       >
         {TABS.map(({ key, label, panelColor }) => {
@@ -214,20 +228,29 @@ export default function SmoothTabs() {
               type="button"
               tabIndex={selected ? 0 : -1}
               style={{
-                flex: 1,
+                // Each tab sits inside a 1/3-wide grid cell. When
+                // expanded, the tab is 85% of its cell and centered
+                // via justifySelf. When docked, width = 100% makes
+                // tabs stretch edge-to-edge.
+                justifySelf: "center",
+                width: isInTabsArea ? "100%" : "85%",
                 position: "relative",
                 border: "none",
                 backgroundColor: panelColor,
                 cursor: "pointer",
                 color: theme.palette.common.white,
+                borderTopLeftRadius: isInTabsArea ? 0 : 16,
+                borderTopRightRadius: isInTabsArea ? 0 : 16,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
                 transition:
-                  "padding 0.4s ease, clip-path 0.4s ease, gap 0.4s ease, font-size 0.4s ease",
+                  "padding 0.4s ease, gap 0.4s ease, font-size 0.4s ease, width 0.4s ease, border-radius 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
                 gap: 0,
-                alignItems: isInTabsArea ? "center" : "flex-start",
+                alignItems: "center",
                 justifyContent: "center",
-                textAlign: isInTabsArea ? "center" : "left",
+                textAlign: "center",
                 padding: isInTabsArea
                   ? "0 20px"
                   : `14px ${theme.space.panel.padding}`,
@@ -236,11 +259,6 @@ export default function SmoothTabs() {
                   : undefined,
                 borderTop: "none",
                 borderBottom: "none",
-                // File-tab shape: triangle cut from upper-right corner (80px).
-                // No cutout when docked for a clean layered look.
-                clipPath: isInTabsArea
-                  ? "none"
-                  : "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -272,14 +290,14 @@ export default function SmoothTabs() {
         })}
       </div>
 
-      {/* Full-width tab description — visible when expanded or opened by click */}
+      {/* Full-width tab description - visible when expanded or opened by click */}
       <AnimatePresence initial={false}>
         {showDescriptions && (
           <motion.div
             key="tab-desc-wrapper"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
             transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
             style={{
               overflow: "hidden",
@@ -309,6 +327,8 @@ export default function SmoothTabs() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ExploreSubNav />
     </div>
   )
 }

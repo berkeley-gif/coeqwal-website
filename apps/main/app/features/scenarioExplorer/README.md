@@ -46,88 +46,6 @@ All tools are rendered inside `UnifiedToolLayout`, which provides a persistent t
 - **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
-## Folder structure
-
-```
-apps/main/app/features/scenarioExplorer/
-├── ScenarioExplorer.tsx              # Main orchestrator.tab bar + UnifiedToolLayout
-├── store.ts                          # Zustand state management
-├── types.ts                          # Shared TypeScript types
-├── README.md                         # This file
-│
-├── getStarted/                       # "Get started" onboarding view
-│   ├── GetStartedView.tsx            # Main get-started component
-│   ├── TierAnimationSection.tsx      # Animated tier intro
-│   ├── useTierAnimationData.ts       # Data hook for tier animation
-│   └── PolygonMorphOverlay.tsx       # Decorative polygon morph
-│
-├── exploreView/                      # Tool panels (list/comparison/equity/resilience)
-│   ├── index.ts                      # Barrel exports
-│   ├── ListView.tsx                  # Scenario grid (StrategyGrid wrapper)
-│   ├── ComparisonPanel.tsx           # Tradeoffs.multiple chart types
-│   ├── EquityPanel.tsx               # Equity tool (placeholder)
-│   └── ResiliencePanel.tsx           # Resilience tool (placeholder)
-│
-├── dataExplorer/                     # "Data in depth" view
-│   ├── DataExplorerView.tsx          # Main data explorer component
-│   ├── README.md                     # Data explorer documentation
-│   ├── hooks/
-│   │   └── useMetricData.ts          # Data transformation for metrics
-│   ├── utils/
-│   │   └── exportUtils.ts            # CSV/image export utilities
-│   └── components/
-│       ├── CategoryView.tsx          # Category-based data view
-│       ├── ChartGridContext.tsx       # Aligned chart grid provider
-│       ├── AlignedScenarioGrid.tsx   # Scenario-aligned grid layout
-│       ├── ReservoirView.tsx         # Reservoir-specific view
-│       ├── ReservoirPercentilesSection.tsx
-│       ├── SpillFrequencySection.tsx
-│       ├── CwsSection.tsx            # Community water system section
-│       ├── AgSection.tsx             # Agricultural delivery section
-│       ├── RefugeSection.tsx         # Wildlife refuge section
-│       ├── EnvFlowSection.tsx        # Environmental flow section
-│       ├── DeltaSection.tsx          # Delta statistics section
-│       ├── TableView.tsx             # Tabular data view
-│       ├── MapView.tsx               # Standalone map visualization
-│       ├── TemporalControls.tsx      # Time-period controls
-│       └── PercentileMatrixSkeleton.tsx  # Loading skeleton
-│
-├── components/                       # Shared UI components
-│   ├── UnifiedToolLayout.tsx         # Shared layout chrome (optional sidebar + toolbar + map)
-│   ├── ToolToolbar.tsx               # Shared toolbar (search, chips, toggles, hydroclimate)
-│   ├── ScenarioSelectionSidebar.tsx  # Sidebar with checkboxes, theme filter, pinning
-│   ├── ToggleChip.tsx                # Reusable toggle chip button
-│   ├── SearchBar.tsx                 # Search input connected to store
-│   ├── ThemeFilter.tsx               # Theme badge filter
-│   ├── SelectionBanner.tsx           # Shows selected scenario count
-│   ├── ComparisonHeader.tsx          # Header/legend for comparison view
-│   ├── ShareDrawer.tsx               # Share staging drawer
-│   ├── ShareScenarioCard.tsx         # Card for shared scenario
-│   ├── KeyboardShortcuts.tsx         # Global keyboard handler
-│   ├── TogglePair.tsx                # Toggle button component
-│   └── useScrollSync.ts             # Scroll synchronization hook
-│
-├── strategyGrid/                     # Reusable grid layout system
-│   ├── index.ts                      # Barrel exports
-│   ├── types.ts                      # Grid types
-│   ├── StrategyGrid.tsx              # Main grid component
-│   ├── StrategyGridRow.tsx           # Individual row component
-│   ├── StrategyGridHeader.tsx        # Grid header with sorting
-│   ├── StrategyGridContent.tsx       # Grid content wrapper
-│   └── GridControls.tsx              # Grid control buttons
-│
-├── hooks/
-│   ├── useComparisonData.ts          # Data transformation for comparison charts
-│   ├── usePrefetchTiers.ts           # Prefetches tier data for all hydroclimates on tab load
-│   └── useResolvedScenarioTiers.ts   # Resolves hydroclimate + fetches tier data (main data hook)
-│
-├── config/
-│   └── outcomeDefinitions.tsx        # Outcome/metric definitions and colors
-│
-└── data/
-    └── mockHydroclimateTiers.json    # Mock data for development
-```
-
 ## Key components
 
 ### ScenarioExplorer.tsx (main orchestrator)
@@ -153,21 +71,6 @@ Shared layout chrome for all explore modes. Receives `sidebar` (optional), `tool
 - Sidebar: omitted in list mode, 320px normally, 480px with key operations visible
 - Map panel: transparent 25% reveal area when `showMap` is true
 - Manages map mode via `mapActions` from the map store
-
-### ComparisonPanel.tsx
-
-The most complex tool panel. Supports six experimental chart modes (to be reduced to radar chart):
-
-| Chart    | Component                      |
-| -------- | ------------------------------ |
-| Radar    | `RadarPlot`                    |
-| Parallel | `VerticalParallelLinePlotPeak` |
-| Parity   | `ParityPlot`                   |
-| Column   | `DeviationPlot`                |
-| Heatmap  | `TierHeatmap`                  |
-| Sankey   | `TierSankey`                   |
-
-All chart components are from `@repo/viz`. Each chart mode has its own set of toggle controls (checkboxes). Data comes from `useComparisonData()`.
 
 ### EquityPanel.tsx / ResiliencePanel.tsx
 
@@ -230,9 +133,9 @@ The Zustand store (with Immer) manages state shared across components.
 
 #### Hydroclimate
 
-| Property       | Type     | Default        | Description                                                                       |
-| -------------- | -------- | -------------- | --------------------------------------------------------------------------------- |
-| `hydroclimate` | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`) |
+| Property       | Type     | Default        | Description                                                    |
+| -------------- | -------- | -------------- | -------------------------------------------------------------- |
+| `hydroclimate` | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"cc50"`, `"cc95"`) |
 
 #### Other
 
@@ -466,7 +369,7 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 
 ### Reference implementations
 
-- **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) — Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
-- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) — Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
+- **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) - Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
+- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
 
 For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.

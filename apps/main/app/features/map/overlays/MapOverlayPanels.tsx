@@ -44,7 +44,7 @@ import {
   StrategyInfoPanel,
   KeyOperationsPanel,
   KeyOutcomesPanel,
-  // SummaryPanel temporarily disabled — fetches heavy GeoJSON for polygon centroids
+  // SummaryPanel temporarily disabled - fetches heavy GeoJSON for polygon centroids
   // SummaryPanel,
 } from "./scenarioPanels"
 import { mapActions, useIsOutcomeVisualizationActive } from "../store"
@@ -75,8 +75,18 @@ const SUMMARY_PHASE_THRESHOLDS = {
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
 const PANEL_POSITIONS = {
+  // Sticky top for the left intro paragraph. Unchanged, since the
+  // paragraph is short and reads well at this vertical position.
   paragraphTop: "15vh",
 } as const
+
+// Sticky top for the right-side panel stack, in pixels. The Learn
+// page's visual top-chrome (site header + any tab/sub-nav rows) is
+// ~90px on production builds; we add a small pad below that so the
+// panels sit just clear of the header stack. Kept as a single
+// explicit pixel constant (rather than adding theme tokens for every
+// sticky band) so it's trivial to tune for demo.
+const RIGHT_PANELS_TOP_PX = 110
 
 const ACCENT_TEXT_SX = {
   fontFamily: themeValues.fontFamily.accent,
@@ -170,6 +180,7 @@ export default function MapOverlayPanels() {
     keyOperations: {
       target: useRef<HTMLDivElement>(null),
       container: useRef<HTMLDivElement>(null),
+      hydroclimateTarget: useRef<HTMLDivElement>(null),
     },
     keyOutcomes: {
       target: useRef<HTMLDivElement>(null),
@@ -726,11 +737,15 @@ export default function MapOverlayPanels() {
                 </Box>
               </StickyElement>
 
-              {/* All right-side panels in a single sticky container */}
+              {/* All right-side panels in a single sticky container.
+                  Anchored a fixed pixel distance from the top so the
+                  stack always clears the full header chrome (header +
+                  any sub-nav rows) on any viewport while still having
+                  room to fit without overflowing the bottom. */}
               <Box
                 sx={{
                   position: "sticky",
-                  top: PANEL_POSITIONS.paragraphTop,
+                  top: `${RIGHT_PANELS_TOP_PX}px`,
                   zIndex: 1,
                   mt: "80vh",
                   pointerEvents: "none",
@@ -777,7 +792,6 @@ export default function MapOverlayPanels() {
                         offsetY={30}
                         opacity={strategyInfoTooltipOpacity}
                         isClosed={closedTooltips.has("strategy")}
-                        onClose={() => closeTooltip("strategy")}
                       />
                     }
                   >
@@ -828,12 +842,14 @@ export default function MapOverlayPanels() {
                           offsetY={20}
                           opacity={keyOperationsTooltipOpacity}
                           isClosed={closedTooltips.has("keyOps")}
-                          onClose={() => closeTooltip("keyOps")}
                         />
 
                         <ScrollTooltip
                           targetRef={panelRefs.keyOperations.target}
                           containerRef={panelRefs.keyOperations.container}
+                          alignTargetRef={
+                            panelRefs.keyOperations.hydroclimateTarget
+                          }
                           content={
                             <>
                               <Typography
@@ -844,15 +860,28 @@ export default function MapOverlayPanels() {
                               </Typography>
                               This describes the temperature and patterns of
                               rainfall and snow that determine how much water is
-                              available over time. Soon you will be able to see
-                              the scenario results for different climates.
+                              available over time. Choose a hydroclimate to see
+                              how the outcomes below change under different
+                              conditions.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
+                              <Box component="span" sx={{ display: "block" }}>
+                                Click an icon to update the key outcomes; hover
+                                to learn about each hydroclimate.
+                              </Box>
                             </>
                           }
                           position="left"
                           offsetY={20}
                           opacity={viewByClimateTooltipOpacity}
                           isClosed={closedTooltips.has("viewByClimate")}
-                          onClose={() => closeTooltip("viewByClimate")}
                         />
                       </>
                     }
@@ -860,6 +889,7 @@ export default function MapOverlayPanels() {
                     <KeyOperationsPanel
                       scenarioId={LEARN_SCENARIO_ID}
                       onTitleClick={() => reopenTooltip("keyOps")}
+                      hydroclimateRef={panelRefs.keyOperations.hydroclimateTarget}
                     />
                   </RightPanelSlot>
 
@@ -892,7 +922,7 @@ export default function MapOverlayPanels() {
                             >
                               Outcomes represented by a bar chart show the
                               percentage of locations in each tier. For other
-                              outcomes, there is only one location of interest.
+                              outcomes, there is only one location.
                             </Box>
                             <Typography
                               variant="tooltipHeader"
@@ -914,7 +944,16 @@ export default function MapOverlayPanels() {
                                 }}
                               />{" "}
                               icons to learn more about each outcome. Click on
-                              the chart to see the outcome on a map.
+                              the chart to see the outcome on a map. 
+                            </Box>
+                            <Box
+                              component="span"
+                              sx={{
+                                display: "block",
+                                mt: theme.space.component.sm,
+                              }}
+                            >
+                              When outcomes are visible on the map, you can hover over them to get more information.
                             </Box>
                           </>
                         }
@@ -922,7 +961,6 @@ export default function MapOverlayPanels() {
                         offsetY={20}
                         opacity={keyOutcomesTooltipOpacity}
                         isClosed={closedTooltips.has("keyOutcomes")}
-                        onClose={() => closeTooltip("keyOutcomes")}
                       />
                     }
                   >
@@ -932,7 +970,7 @@ export default function MapOverlayPanels() {
                     />
                   </RightPanelSlot>
 
-                  {/* SummaryPanel temporarily disabled — fetches heavy GeoJSON
+                  {/* SummaryPanel temporarily disabled - fetches heavy GeoJSON
                      for polygon centroids. Re-enable once centroids are available
                      from a lightweight endpoint or hardcoded. */}
                   {/* <RightPanelSlot

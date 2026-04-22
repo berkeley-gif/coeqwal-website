@@ -8,7 +8,7 @@
 import type { ScenarioTheme } from "./scenarios"
 
 // =============================================================================
-// Block types.content blocks for theme sections
+// Block types — content blocks for theme sections
 // =============================================================================
 
 export type ParagraphBlock = {
@@ -25,7 +25,7 @@ export type ImageBlock = {
   type: "image"
   src: string
   alt: string
-  caption?: string
+  caption?: string // USAGE NOTE: Use \n to create paragraph-like breaks between lines
 }
 
 export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
@@ -37,7 +37,7 @@ export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
 export interface MixedSection {
   type: "mixed"
   blocks: ContentBlock[]
-  /** Optional gap between blocks.defaults to theme spacing if omitted */
+  /** Optional gap between blocks — defaults to theme spacing if omitted */
   gap?: string | number
 }
 
@@ -76,7 +76,7 @@ export type ThemeSectionId = (typeof THEME_SECTION_IDS)[number]
 export interface Theme {
   /** Stable identifier (e.g. "delta") */
   id: string
-  /** Display label.may contain \n for line-breaks in circle layouts */
+  /** Display label — may contain \n for line-breaks in circle layouts */
   label: string
   /** Short label for compact UI contexts (tabs, chips, dropdowns) */
   shortLabel: string
@@ -119,7 +119,9 @@ export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   unthemed: { label: "Other scenarios" },
 }
 
-/** Active themes available for filtering */
+// WATER_THEMES contains narrative content for thematic themes only.
+// `baseline` and `unthemed` appear in ACTIVE_THEMES for scenario filtering
+// but have no narrative panel, so they are intentionally excluded here.
 export const ACTIVE_THEMES: ScenarioTheme[] = [
   "baseline",
   "ag_gw",
@@ -130,7 +132,7 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 ]
 
 // =============================================================================
-// WATER_THEMES.content for each theme page
+// WATER_THEMES — content for each theme page
 // =============================================================================
 
 export const WATER_THEMES: Theme[] = [
@@ -140,9 +142,177 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Community water systems",
     description:
       "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
-    heroImage: "",
-    inquiry: "",
-    sections: [],
+    heroImage: "/images/themes/cws_hero_cred_dan_bacher.jpg",
+    inquiry:
+      "Can California's communities reliably access safe and affordable drinking water — in wet years, dry years, and a changing climate?",
+    sections: [
+      {
+        id: "intro",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Millions of Californians depend on community water systems for daily life, for drinking, cooking, bathing, schools, hospitals, and local businesses. When these systems are stressed, the impacts are immediate and personal.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-01.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-02.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-03.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+            {
+              type: "image",
+              src: "/images/themes/water_supply-04.svg",
+              alt: "Community water systems",
+              caption: "",
+            },
+          ],
+        },
+      },
+      {
+        id: "why-this-matters",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Community water systems serve cities, towns, and rural communities across California. Some rely on surface water delivered through rivers and canals, while others depend heavily on groundwater wells, many use a combination of both.",
+            },
+            {
+              type: "paragraph",
+              text: "In wet years, water supplies are generally more stable. In dry years, shortages can emerge, especially when reservoir storage is low or groundwater levels decline. Smaller and rural systems are often more vulnerable because they have fewer backup options and limited financial resources.",
+            },
+            {
+              type: "paragraph",
+              text: "Water rights and operating rules also shape outcomes. Senior water rights holders may continue to receive deliveries even when supplies shrink, while lower-priority users may face larger reductions. This can create uneven impacts across communities.",
+            },
+            {
+              type: "paragraph",
+              text: "Climate change adds new uncertainty. Snowpack is declining, heat increases evaporation, and droughts may become longer and more severe. These shifts affect how much water is available and when. Understanding how reliable water supplies are under changing conditions helps communities anticipate risks, plan ahead, and ensure consistent access to water.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-this-theme-focuses-on",
+        content: {
+          type: "boxes",
+          items: [
+            {
+              title: "Water sources & system diversity",
+              paragraphs: [
+                "Community water systems rely on different combinations of surface water and groundwater. These differences shape how systems experience risk. Surface water systems are sensitive to changes in reservoir storage and delivery conditions, while groundwater-dependent systems are influenced by aquifer levels, recharge rates, and pumping patterns.",
+              ],
+            },
+            {
+              title: "Storage, groundwater & drought response",
+              paragraphs: [
+                "Reservoir storage and groundwater act as buffers during dry periods. When surface water deliveries decline, systems may increase groundwater pumping or rely on stored supplies. However, groundwater responds slowly and if pumping exceeds recharge over time, water levels can drop, increasing costs and long-term risks.",
+              ],
+            },
+            {
+              title: "Water rights & distribution of impacts",
+              paragraphs: [
+                "Water deliveries are often determined by contracts and water rights, not just need. During shortages, senior rights holders are more likely to maintain deliveries, while lower-priority users may face greater reductions. This creates uneven impacts across regions and communities, with implications for fairness and equity.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-to-keep-in-mind",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "list",
+              items: [
+                "Community water systems depend on different water sources — risks are not the same everywhere.",
+                "A shortage does not necessarily mean taps run dry. Systems can adapt by drawing on water storage, purchases, operational changes, or demand management.",
+                "Reliability reflects patterns over time, not just single-year conditions.",
+                "Multiple consecutive drought years tend to have greater impacts than a single dry year, as stresses on both surface water and groundwater systems accumulate over time.",
+                "Water deliveries are shaped by contracts and water rights, not necessarily actual demand.",
+                "Impacts are not evenly distributed across systems. Smaller and lower-priority systems often experience greater variability in water supply.",
+                "Big-picture summaries show overall trends, but local differences remain important.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-management-strategies-are-explored",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This theme allows you to explore how different water management choices affect:",
+            },
+            {
+              type: "list",
+              items: [
+                "Drinking water delivery reliability",
+                "Reservoir storage patterns",
+                "Groundwater availability and trends",
+                "Regional differences across communities",
+                "Performance during drought and extreme conditions",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: "Looking at these factors together helps show how communities experience water security under different conditions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-the-models-show",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "**Trade-offs** – Water is limited. Protecting reservoir storage may improve long-term drought reliability but reduce short-term deliveries. Increasing deliveries in one region may reduce availability elsewhere. When supply declines, reductions are distributed across users, often unevenly.",
+            },
+            {
+              type: "paragraph",
+              text: "**Equity** – Water rights priorities and geographic differences shape who is affected most. Senior contractors often maintain deliveries, while lower-priority users may face larger reductions. Smaller or groundwater-dependent systems may experience different risks than large urban suppliers.",
+            },
+            {
+              type: "paragraph",
+              text: "**Resilience** – A resilient community water system can handle drought, heat, and variability without severe disruption. Resilience is influenced by many factors, which can include diversified supplies, stable groundwater levels, reservoir carryover storage, and flexible management strategies. Results reflect patterns over many years. They are not predictions of any single year, but tools to understand relative reliability and vulnerability under different conditions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "how-to-explore-further",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Explore how water management choices affect community water reliability across regions, water sources, and climate conditions, and how these differences shape community outcomes.",
+            },
+          ],
+        },
+      },
+    ],
   },
   {
     id: "ag_gw",
@@ -161,7 +331,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Farms depend on reliable water. But water comes from two main sources: rivers and reservoirs (surface water), and groundwater stored underground. These two systems are closely connected. When one is stressed, pressure shifts to the other.",
+              text: "Farms need reliable water to grow crops and stay economically viable. This water comes from two main sources, surface water from rivers and reservoirs and groundwater stored underground. These two sources are closely connected. When one becomes limited, the other is used more heavily. During droughts or periods of high demand, farmers often rely more on groundwater. If too much groundwater is pumped, it can become unsustainable, putting farms, drinking water supplies, and ecosystems at risk.",
             },
           ],
         },
@@ -187,6 +357,13 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "Understanding how surface water deliveries, groundwater use, agricultural production, and climate stress interact is essential for planning a stable and sustainable food future.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/Groundwater_theme.svg",
+              alt: "Groundwater diagram",
+              caption:
+                "Agricultural water demand is met by surface water and groundwater. During droughts, surface water supply falls short and groundwater pumping fills the gap. In response, water tables decline. The Sustainable Groundwater Management Act (SGMA) introduces pumping limits to protect aquifers and agricultural land uses over decades.\nThe graphics compare two scenarios over 10 years. Without pumping limits (Scenario 1), groundwater use increases during drought, causing significant declines in groundwater levels. With limits (Scenario 2), some agricultural water demand goes unmet in during drought, but groundwater levels remain relatively stable.\nThese tradeoffs affect the economics of Central Valley agriculture. Pumping limits can agricultural reduce revenue during drought, but help sustain groundwater and support productive land use over the long term.",
             },
           ],
         },
@@ -225,12 +402,12 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Farms rely on both surface water deliveries and groundwater pumping. When one source becomes less available, the other often compensates.",
-                "Groundwater systems respond slowly. Long-term trends are more important than year-to-year changes.",
-                "Changes in water availability do not always lead to immediate impacts. Farmers can adapt by shifting crops, using stored water, or reducing planted acreage.",
-                "Results reflect long-term patterns across many years, not predictions for a single year.",
-                "Different regions experience change differently. For example, the Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints.",
-                "System-wide averages may appear stable, but important differences can exist across regions and communities.",
+                "Farms rely on both surface water and groundwater. When surface water is limited, groundwater often helps fill the gap, but when groundwater is restricted, surface supplies usually cannot increase, leading to shortages.",
+                "Groundwater systems respond slowly. Conditions over multiple years (3–5 years) matter more than single wet or dry years.",
+                "Results reflect long-term patterns across many years, rather than predictions for any one year, and highlight risks when dry conditions persist.",
+                "Farmers can adapt by shifting crops, using stored water, or reducing acreage, but many of these decisions require long-term planning.",
+                "Perennial crops (such as nuts and fruit trees) require continuous water and years of investment, making them difficult to adjust in response to short-term shortages.",
+                "Impacts vary by region. The Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints, so system-wide averages can mask important local challenges.",
               ],
             },
           ],
@@ -315,7 +492,7 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "Rivers are essential sources of water, but they are more than channels that move water from mountains to farms and cities. They are living systems. Salmon depend on them to migrate, spawn, and survive. Wetlands, birds, and wildlife depend on them too.",
+              text: "Rivers are essential sources of water, but they are more than channels that move water from mountains to farms and cities. They are also living systems supporting a great diversity of species. Salmon depend on cold water in rivers for spawning and rearing, and to migrate to and from the ocean. Wetlands, birds, other fish, and other wildlife depend on rivers too.",
             },
           ],
         },
@@ -328,15 +505,48 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "California's rivers begin in the mountains and flow through valleys before reaching the Delta and the ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Salmon are an important part of this story. They travel hundreds of miles between rivers and the ocean. They are part of Tribal traditions, fishing economies, and California's natural heritage. When salmon struggle, it signals stress in the broader river system.",
+              text: "California's rivers begin in the mountains and flow through valleys to the Delta and ocean. Along the way, they sustain ecosystems and provide water for farms and communities. River systems are deeply interconnected. Decisions about storage, environmental flows, and water deliveries create trade-offs, where changes in one part of the system can ripple elsewhere.",
             },
             {
               type: "paragraph",
-              text: "Over time, dams, reservoirs, diversions, and land use changes have reshaped how rivers flow. Spring floods that once spread across floodplains are now captured in reservoirs. Water is stored for later use. Channels are straighter and more controlled. These changes have improved water reliability, but they have also reduced natural habitat, changed water temperatures, and altered the timing of flows.",
+              text: "Salmon are central to this story. They travel hundreds of miles between rivers and the ocean and are part of Tribal traditions, fishing economies, our food supply, and California's natural heritage. When salmon struggle, it signals stress in the broader river system.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-01.svg",
+              alt: "Fish theme",
+              caption:
+                "Sacramento River winter-run Chinook have a unique life history. Spawning adults (age 2, 3, or 4 years old) enter the Sacramento River as early as November, and migrate far up the Sacramento River, where they hold in the upper river for several months before spawning.\nAfter spawning, the eggs incubate in the gravel for 3 months before emerging as fry. Fry can rear in freshwater environment for 5-10 months before transitioning to the smolt outmigration lifestage. From January through April, smolts migrate downstream and enter the Gulf of the Farallones. Once in the Pacific Ocean, they mature for 1-3 years before re-entering the Sacramento River to spawn again to start the next generation.",
             },
             {
               type: "paragraph",
-              text: "Climate change adds new pressures. The snowpack is shrinking. Snow melts earlier in the year. Droughts are becoming more intense. Heat waves raise river temperatures. These changes affect how much water is available and when it moves through the system. Understanding how rivers function as living ecosystems, not just water delivery systems, is essential for shaping future water management decisions.",
+              text: "Over time, dams, reservoirs, diversions, and land use changes have reshaped rivers. Spring floods that once spread across floodplains are now captured or confined. These changes have improved water reliability for people, but reduced habitat, changed temperatures, and altered the timing of flows.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-02.svg",
+              alt: "Fish theme",
+              caption:
+                "Functional flows capture important hydrological features, including natural patterns of seasonal baseflows and flows from rain and snowmelt. The life stages of Sacramento River winter-run Chinook have adapted with these natural flow patterns, and rely on sufficient water to provide habitat for rearing fry, and to aid in their migrations, including downstream outmigration as smolts head to the ocean, and upstream migration as adults navigate to their spawning grounds to deposit eggs. Shasta Dam blocks their historical access the cool headwaters of Mount Shasta, and now they rely on artificially regulated flows downstream of Shasta Dam to maintain cool water temperatures required for egg survival. ",
+            },
+            {
+              type: "paragraph",
+              text: "Rivers respond not only to single events, but to stress over time. Sustained drought and repeated dry years can have compounding effects on ecosystems and water availability.",
+            },
+            {
+              type: "paragraph",
+              text: "Climate change adds new pressures. Snowpack is shrinking, snow melts earlier, and droughts and heat waves are intensifying. These changes affect how much cold water is available and when it moves through the system.",
+            },
+            {
+              type: "paragraph",
+              text: "Understanding rivers as living ecosystems, not just water delivery systems, is essential for future water management. A key idea explored here is that river flows can be managed to better resemble natural patterns while still delivering water to people.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/RiversFishEco_Theme-03.svg",
+              alt: "Fish theme",
+              caption:
+                "Historically, Sacramento River winter-run Chinook salmon spawned and deposited eggs in the cool headwater streams near Mount Shasta. The construction of Shasta Dam blocked access to these spawning grounds and they now spawn and deposit eggs near the town of Redding. Fry can rear in the mainstem Sacramento River, Yolo Bypass, Delta, and Bay before outmigrating to the Gulf of the Farallones.  \nFrom the gulf, they embark on an extensive migration in the Pacific Ocean before traversing the 300+ miles back to their spawning ground in the upper Sacramento River to start the next generation. Their success at each life stage is dependent on habitat – they need flow in the mainstem Sacramento and Delta for rearing and outmigration, and cool water temperatures from releases at Shasta Reservoir for their eggs to survive.",
             },
           ],
         },
@@ -349,19 +559,19 @@ export const WATER_THEMES: Theme[] = [
             {
               title: "Seasonal flow & ecosystem rhythms",
               paragraphs: [
-                "Rivers naturally follow seasonal patterns. In winter and spring, snow and rain increase flows. Rivers may spill onto floodplains, creating habitat and supporting young fish. In summer and fall, flows decrease and temperatures rise. These seasonal rhythms shape habitat conditions for salmon and other species.",
+                "Wild rivers follow natural seasonal patterns. Winter and spring rains and snowmelt increase flows, sometimes spreading onto floodplains and creating habitat for fish and other species. In summer and fall, flows decrease and water temperatures rise. These seasonal rhythms support native ecosystems, including many salmon species, which evolved to depend on these changing conditions.",
               ],
             },
             {
-              title: "Water management & salmon survival",
+              title: "Winter-run Chinook & cold-water refuges",
               paragraphs: [
-                "Water management decisions influence both flow and temperature. Reservoir releases determine how much water moves downstream and when. Storage decisions affect cold-water availability, which is critical for species like winter-run Chinook salmon. If cold-water pools in reservoirs are depleted during hot months, winter-run Chinook salmon eggs may not survive, even if flow targets are met. This means that both timing and temperature matter.",
+                "Winter-run Chinook salmon are different. They spawn in summer, when rivers are warm, and evolved in cold, spring-fed habitats. Today, dams block access to these areas, and winter-run salmon depend on cold-water releases from reservoirs (like Shasta) to survive. If cold-water pools are depleted during hot months, their eggs may not survive, even if flow targets are met. This means both timing and temperature are critical for their survival.",
               ],
             },
             {
               title: "System connections & trade-offs",
               paragraphs: [
-                "River systems are deeply connected. Decisions about reservoir storage, environmental flow requirements, and water deliveries affect multiple outcomes. Efforts to create more natural flow patterns, such as seasonal pulse flows, can improve habitat but may reduce water available for other uses. Choices in one part of the system can create ripple effects elsewhere.",
+                "River systems are deeply interconnected. Limited water means that decisions about reservoir storage, environmental flows, and water deliveries create trade-offs across multiple outcomes. Efforts to create more natural flow patterns, such as seasonal pulse flows, can improve habitat but may reduce water available for other uses. Choices in one part of the system can create ripple effects elsewhere.",
               ],
             },
           ],
@@ -375,12 +585,13 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "list",
               items: [
-                "Rivers are shaped not only by how much water flows, but by when it flows. Timing can be as important as quantity.",
+                "Rivers are shaped not only by how much water flows, but by when it flows and water temperature. Timing and water temperature can be as important as quantity.",
                 "Salmon depend on different conditions at different life stages, including cold water, sufficient flow, and connected habitat.",
                 "Reservoirs improve water storage for people and farms, but they also alter natural flow patterns and temperatures.",
                 "River ecosystems respond to droughts, floods, and sequences of extreme years. Short periods of stress can have lasting impacts.",
                 "Improving flows alone does not fully restore ecosystems. Habitat conditions, landscape changes, and invasive species also play a role.",
-                "For winter-run salmon, water temperature.especially cold water stored in reservoirs.can matter as much as flow volume.",
+                "This theme focuses on flows, so scenarios that perform poorly here may still achieve better outcomes when paired with habitat restoration or other management actions.",
+                "For winter-run Chinook salmon, water temperature, especially cold water stored in reservoirs, can matter as much as flow volume.",
               ],
             },
           ],
@@ -400,14 +611,14 @@ export const WATER_THEMES: Theme[] = [
               items: [
                 "Seasonal flow patterns in rivers",
                 "Storage in reservoirs",
-                "Salmon survival across life stages",
+                "Winter-run Chinook salmon survival across life stages",
                 "Outflows to the Bay-Delta estuary",
                 "Water deliveries for communities and farms",
               ],
             },
             {
               type: "paragraph",
-              text: "Looking at these factors together helps show how river systems respond under different climate and water use conditions.",
+              text: "Looking at these factors together shows how river systems respond under different climate and water use conditions.",
             },
           ],
         },
@@ -420,15 +631,15 @@ export const WATER_THEMES: Theme[] = [
           blocks: [
             {
               type: "paragraph",
-              text: "**Trade-offs** – Water stored in reservoirs supports cities and farms, but holding water can reduce natural spring flows that benefit ecosystems. Releasing water to improve river conditions may reduce storage needed later for temperature control or supply reliability. Decisions about timing and volume of releases can shift outcomes across regions and sectors.",
+              text: "**Trade-offs** – Water stored in reservoirs supports cities and farms, but can reduce natural winter and spring flows that benefit ecosystems. Releasing water to support salmon can limit storage needed later for temperature control or supply. For example, prioritizing cold-water storage in Shasta Reservoir can improve egg survival, but reduce flows for juvenile outmigration. Increasing flows can benefit juveniles, but deplete cold-water pools and increase egg mortality. Decisions about when and how much water to release shift outcomes across life stages, regions, and sectors.",
             },
             {
               type: "paragraph",
-              text: "**Equity** – River conditions affect communities differently. Tribal nations, fishing communities, farmers, and downstream towns may experience changes in distinct ways. Salmon declines can affect cultural traditions and local economies. Water rights and geographic location also shape who experiences shortages or protections first.",
+              text: "**Equity** – River conditions affect communities differently. Tribal nations, fishing communities, farmers, and downstream towns may experience changes in distinct ways. Salmon declines can impact cultural practices, subsistence, and local economies. Water rights and location also shape who experiences shortages or protections first. For example, decisions that benefit one salmon life stage may help some communities while increasing risks for others who depend on salmon at different times.",
             },
             {
               type: "paragraph",
-              text: "**Resilience** – Resilience in rivers means being able to handle droughts, floods, and warming temperatures while maintaining ecosystem health. Protecting cold-water storage, maintaining habitat connectivity, and managing flows flexibly across seasons all influence how well river systems can adapt. Rivers respond not only to averages, but to stress over time.",
+              text: "**Resilience** – Resilience means rivers can withstand droughts, floods, and warming while maintaining ecosystem health. Protecting cold-water storage, maintaining habitat connectivity, and managing flows across seasons all support this. Because salmon depend on multiple life stages, actions that help one stage but harm another can still lead to decline. River systems respond to average conditions, extreme events, and cumulative stress over time.",
             },
           ],
         },
@@ -466,12 +677,6 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: "Millions of Californians rely on water pumped from the Sacramento-San Joaquin Delta. At the same time, the Delta is a living place – home to communities, farms that grow food, and fish and birds that depend on healthy rivers and wetlands.",
             },
-            {
-              type: "image",
-              src: "/images/themes/delta_salinity_overview_graph.png",
-              alt: "Delta flow diagram",
-              caption: "Rising tides and saline waters flowing into the Delta",
-            },
           ],
         },
       },
@@ -497,6 +702,20 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: "Understanding how the Delta functions – as both infrastructure and living ecosystem – helps inform decisions about its future.",
             },
+            {
+              type: "image",
+              src: "/images/themes/Delta_Salinity_Flows-01.svg",
+              alt: "Delta flow diagram",
+              caption:
+                "Water flow in the Delta changes with seasons, tides, and infrastructure operations. Winter storms and spring snowmelt bring in freshwater flows, while daily high tides push saltwater inland. Pumps in the southwest corner of the Delta export water to meet demand. \n When pumping is high relative to inflows, flow directions can reverse, pulling water and fish toward pumps and drawing saltwater deeper into the Delta.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/Delta_Salinity_Flows-02.svg",
+              alt: "Delta flow diagram",
+              caption:
+                "Pumping water from the Delta into water supply canals changes the flow direction and salinity in rivers and wetlands.\nWith low pumping (left), high freshwater inflows keep water moving seaward and salinity low. In summer, low freshwater flows allow tides to push saltwater farther inland.\n With high pumping (right), water is pulled toward export canals. Even with strong inflows, flows shift toward pumps. In dry periods, rivers can reverse and salty water moves deeper into the Delta.\n Demand for water peaks in late summer when freshwater inflows are at their lowest. At this time, high pumping rates are most needed, but create tradeoffs for ecosystems and salinity control.",
+            },
           ],
         },
       },
@@ -515,7 +734,7 @@ export const WATER_THEMES: Theme[] = [
               title: "Water management & ecosystem health",
               paragraphs: [
                 "Water management decisions shape what happens inside the Delta. Freshwater flows influence salinity levels and where they occur. Pumping shifts how water moves through the system. Reservoir storage affects both supply and temperature. These forces interact to influence habitat conditions and ecosystem resilience.",
-                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta.sometimes improving habitat, sometimes increasing stress.",
+                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress.",
               ],
             },
             {
@@ -586,7 +805,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "paragraph",
-              text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health,water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
+              text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health, water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
             },
           ],
         },

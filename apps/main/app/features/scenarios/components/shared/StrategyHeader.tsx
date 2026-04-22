@@ -45,6 +45,10 @@ export interface StrategyHeaderProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Optional inline actions rendered at the end of the shortcode/badge row */
   inlineActions?: React.ReactNode
+  /** When true, force-expand a truncated compact description */
+  expandDescription?: boolean
+  /** Optional adornment rendered before the title text (e.g. a legend dot) */
+  titleStartAdornment?: React.ReactNode
 }
 
 /**
@@ -164,7 +168,7 @@ function DescriptionWithGlossaryLinks({
         </Box>
       </motion.div>
 
-      {/* Truncated view — height-clipped with "… more" overlay at bottom-right */}
+      {/* Truncated view - height-clipped with "… more" overlay at bottom-right */}
       <motion.div
         initial={false}
         animate={{
@@ -313,7 +317,13 @@ function useGlossaryRenderer(description: string) {
   }, [description, handleClick, handleKeyDown, linkStyles])
 }
 
-function CompactDescription({ description }: { description: string }) {
+function CompactDescription({
+  description,
+  forceExpanded = false,
+}: {
+  description: string
+  forceExpanded?: boolean
+}) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
   const renderGlossaryText = useGlossaryRenderer(description)
@@ -341,20 +351,22 @@ function CompactDescription({ description }: { description: string }) {
         position: "relative",
       }}
     >
-      {expanded ? (
+      {expanded || forceExpanded ? (
         <>
           {renderGlossaryText()}
-          <Box
-            component="button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded(false)
-            }}
-            sx={{ ...toggleStyles, float: "right" }}
-          >
-            less
-          </Box>
+          {!forceExpanded && (
+            <Box
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded(false)
+              }}
+              sx={{ ...toggleStyles, float: "right" }}
+            >
+              less
+            </Box>
+          )}
         </>
       ) : (
         <Box sx={{ position: "relative" }}>
@@ -374,8 +386,7 @@ function CompactDescription({ description }: { description: string }) {
               bottom: 0,
               right: 0,
               pl: 3,
-              background:
-                "linear-gradient(to right, transparent, var(--row-bg, #fff) 40%)",
+              background: `linear-gradient(to right, transparent, var(--row-bg, ${theme.palette.common.white}) 40%)`,
             }}
           >
             … more
@@ -397,6 +408,8 @@ export function StrategyHeader({
   onTitleClick,
   onThemeBadgeClick,
   inlineActions,
+  expandDescription = false,
+  titleStartAdornment,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = showThemeBadge
@@ -413,6 +426,9 @@ export function StrategyHeader({
       : strategy.label
 
   if (compact) {
+    /** Matches title line box height for first-line-only legend dot alignment */
+    const compactTitleLineHeight = 1.3
+
     return (
       <Box sx={{ m: 0, p: 0 }}>
         <Box
@@ -442,20 +458,39 @@ export function StrategyHeader({
           component="span"
           onClick={onTitleClick}
           sx={{
-            display: "block",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: titleStartAdornment ? "6px" : 0,
             color: theme.palette.text.primary,
             cursor: onTitleClick ? "pointer" : "default",
             fontSize: "0.8125rem",
             fontWeight: 500,
-            lineHeight: 1.3,
+            lineHeight: compactTitleLineHeight,
             m: 0,
             p: 0,
           }}
         >
-          {displayLabel}
+          {titleStartAdornment ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexShrink: 0,
+                height: `${compactTitleLineHeight}em`,
+              }}
+            >
+              {titleStartAdornment}
+            </Box>
+          ) : null}
+          <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
+            {displayLabel}
+          </Box>
         </Box>
         {showDescription && (
-          <CompactDescription description={strategy.description} />
+          <CompactDescription
+            description={strategy.description}
+            forceExpanded={expandDescription}
+          />
         )}
       </Box>
     )

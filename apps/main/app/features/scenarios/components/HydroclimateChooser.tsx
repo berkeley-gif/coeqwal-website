@@ -13,7 +13,6 @@ import {
   Typography,
   useTheme,
   HistoryIcon,
-  ThunderstormIcon,
   WbSunnyIcon,
   LocalFireDepartmentIcon,
 } from "@repo/ui/mui"
@@ -26,8 +25,6 @@ import {
 /** Set of hydroclimate option values that have actual scenario data */
 const AVAILABLE_HYDROCLIMATES = new Set(Object.keys(HYDROCLIMATE_ID_MAP))
 
-// Icon and background color configuration for each hydroclimate
-// Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
 export const HYDROCLIMATE_CONFIG: Record<
   string,
   {
@@ -37,27 +34,15 @@ export const HYDROCLIMATE_CONFIG: Record<
 > = {
   historical: {
     icon: HistoryIcon,
-    bgColor: "#2d89b7", // Cool blue - historical baseline
+    bgColor: "#2d89b7",
   },
-  "warmer-wetter": {
-    icon: ThunderstormIcon,
-    bgColor: "#4caf50", // Green - wetter conditions
-  },
-  "warmer-drier-i": {
+  cc50: {
     icon: WbSunnyIcon,
-    bgColor: "#f5a623", // Yellow-orange - mild dry
+    bgColor: "#e89830",
   },
-  "warmer-drier-ii": {
-    icon: WbSunnyIcon,
-    bgColor: "#e65100", // Orange - moderate dry
-  },
-  "warmer-drier-iii": {
+  cc95: {
     icon: LocalFireDepartmentIcon,
-    bgColor: "#bf360c", // Red-orange - severe dry
-  },
-  "warmer-drier-iv": {
-    icon: LocalFireDepartmentIcon,
-    bgColor: "#8b0000", // Dark red - extreme dry
+    bgColor: "#c62828",
   },
 }
 
@@ -190,12 +175,16 @@ export function HydroclimateChooser({
                       backgroundColor: isDisabled
                         ? theme.palette.grey[400]
                         : config?.bgColor || theme.palette.blue.bright,
-                      border: isSelected
-                        ? `3px solid ${theme.palette.common.white}`
-                        : "3px solid transparent",
-                      boxShadow: isSelected
-                        ? theme.shadow.sm
-                        : theme.shadow.none,
+                    border: isSelected
+                      ? `3px solid ${theme.palette.common.white}`
+                      : "3px solid transparent",
+                    outline: isSelected
+                      ? `2px solid ${config?.bgColor || theme.palette.blue.bright}`
+                      : "2px solid transparent",
+                    outlineOffset: "0px",
+                    boxShadow: isSelected
+                      ? theme.shadow.sm
+                      : theme.shadow.none,
                       transition: theme.transition.default,
                       "&:hover": !isDisabled
                         ? {

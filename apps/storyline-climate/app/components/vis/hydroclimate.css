@@ -1,5 +1,5 @@
 .axis {
-  stroke: #f2f0ef;
+  stroke: #fcfbfa;
   stroke-width: 2px;
 }
 
@@ -7,7 +7,7 @@
 .y-axis text,
 .x-axis-ticks text,
 .x-axis text {
-  fill: #f2f0ef;
+  fill: #fcfbfa;
 }
 
 #hydroclimate-line-title,

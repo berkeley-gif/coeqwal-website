@@ -25,6 +25,7 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  useRef,
   forwardRef,
 } from "react"
 import {
@@ -100,9 +101,23 @@ export interface MorphingHeadlineProps {
    * value when VideoHero's bottom meets the MorphingHeadline's top. The crossfade
    * spans from crossfadeAt * 0.5 (midpoint of Panel 0) to crossfadeAt.
    *
-   * Falls back to weight/boundary-based timing when not provided.
+   * Falls back to weight/boundary-based timing when not provided. When
+   * `crossfadeRanges[0]` is provided it takes precedence over this prop.
    */
   crossfadeAt?: number
+  /**
+   * Explicit scroll-progress window for each consecutive headline
+   * transition: `crossfadeRanges[i] = [start, end]` fades headline `i`
+   * out and headline `i+1` in over exactly that window.
+   *
+   * Intended for geometry-driven timing, e.g. the window during which
+   * the inter-panel seam sweeps through the headline's vertical extent,
+   * so the text changes precisely as the rounded-panel gap swipes past
+   * the headline. Array length is typically `headlines.length - 1`.
+   * Any entry where `end <= start` is treated as "not ready" and falls
+   * back to `crossfadeAt` (for transition 0) or weight/boundary timing.
+   */
+  crossfadeRanges?: Array<[number, number] | undefined>
   /** Scroll progress range [start, end] where headline fades in (hidden before start) */
   appearRange?: [number, number]
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
@@ -117,6 +132,24 @@ export interface MorphingHeadlineProps {
    * of floating over subsequent content. Use with the final panel ref.
    */
   dockRef?: React.RefObject<HTMLElement | null>
+  /**
+   * Scroll-progress window `[start, end]` during which the headline
+   * glides from its default top position down to the vertical center
+   * of the viewport. Outside this range (before `start` or between
+   * `end` and `centerExitRange[0]`), the headline stays at whichever
+   * anchor it last reached. Pair with `centerExitRange` to bring it
+   * back up.
+   *
+   * The component self-measures its own CSS `top` and rendered
+   * height, so the center offset is always pixel-accurate regardless
+   * of font size or viewport.
+   */
+  centerEnterRange?: [number, number]
+  /**
+   * Scroll-progress window `[start, end]` during which the headline
+   * glides back from the vertical center to its default top position.
+   */
+  centerExitRange?: [number, number]
 }
 
 const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
@@ -127,11 +160,14 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       weights,
       panelBoundaries,
       crossfadeAt,
+      crossfadeRanges,
       appearRange,
       exitRange,
       shiftRange,
       shiftAmount = 100,
       dockRef,
+      centerEnterRange,
+      centerExitRange,
     },
     ref,
   ) {
@@ -227,78 +263,137 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
         )
       }
 
-      // Crossfade width: how much progress the crossfade takes (as fraction of panel size)
-      const cw = 0.05
+      // Resolve the scroll-progress window for transition `i` (headline i
+      // -> headline i+1). Prefers an explicit, geometry-driven
+      // `crossfadeRanges[i]` when valid, otherwise falls back to the
+      // single-point `crossfadeAt` (for transition 0) or to a narrow
+      // weight/boundary-based window near the panel seam.
+      const transitionRange = (i: number): [number, number] => {
+        const explicit = crossfadeRanges?.[i]
+        if (explicit && explicit[1] > explicit[0]) return explicit
 
-      return headlines.map((_, index) => {
-        const panelStart = panelStarts[index] ?? 0
-        const panelEnd = panelStarts[index + 1] ?? 1
-        const panelSize = panelEnd - panelStart
-
-        if (index === 0) {
-          // Video hero: fade out toward Panel 1 boundary.
-          // If crossfadeAt is provided (geometry-driven), the crossfade completes
-          // exactly when the two elements meet; it starts at the midpoint.
-          // Otherwise fall back to a narrow window around panelEnd.
-          const fadeOutEnd = crossfadeAt ?? panelEnd
-          const fadeOutStart = crossfadeAt
-            ? crossfadeAt * 0.25
-            : panelEnd - cw * panelSize
-          return {
-            input: [0, fadeOutStart, fadeOutEnd],
-            output: [1, 1, 0],
-          }
+        if (i === 0 && crossfadeAt !== undefined) {
+          return [crossfadeAt * 0.25, crossfadeAt]
         }
 
-        if (index === 1 && crossfadeAt !== undefined) {
-          // "What is COEQWAL?".fade in synchronized with Panel 0 fade-out.
-          // Starts at crossfadeAt * 0.25, completes at crossfadeAt.
-          const fadeInStart = crossfadeAt * 0.25
-          const fadeInEnd = crossfadeAt
+        const boundary = panelStarts[i + 1] ?? 1
+        const prevSize = boundary - (panelStarts[i] ?? 0)
+        return [boundary - 0.3 * prevSize, boundary - 0.15 * prevSize]
+      }
+
+      // For each headline build its opacity keyframes from two
+      // (at most) overlapping-but-disjoint ranges: a fade-in drawn
+      // from the previous transition, and a fade-out drawn from the
+      // next transition. First headline has no fade-in; last has no
+      // fade-out.
+      return headlines.map((_, index) => {
+        const fadeIn = index > 0 ? transitionRange(index - 1) : null
+        const fadeOut = index < count - 1 ? transitionRange(index) : null
+
+        if (!fadeIn && fadeOut) {
+          return { input: [0, fadeOut[0], fadeOut[1]], output: [1, 1, 0] }
+        }
+        if (fadeIn && !fadeOut) {
+          return { input: [fadeIn[0], fadeIn[1], 1], output: [0, 1, 1] }
+        }
+        if (fadeIn && fadeOut) {
           return {
-            input: [
-              fadeInStart,
-              fadeInEnd,
-              panelEnd - 0.3 * panelSize,
-              panelEnd - 0.15 * panelSize,
-            ],
+            input: [fadeIn[0], fadeIn[1], fadeOut[0], fadeOut[1]],
             output: [0, 1, 1, 0],
           }
         }
-
-        if (index === count - 1) {
-          // Fade in simultaneously with the previous headline's fade-out
-          // so it reads as a crossfade rather than a solo appear.
-          const prevPanelSize = panelStart - (panelStarts[index - 1] ?? 0)
-          const fadeInStart = panelStart - 0.3 * prevPanelSize
-          const fadeInEnd = panelStart - 0.15 * prevPanelSize
-          return {
-            input: [fadeInStart, fadeInEnd, 1.0],
-            output: [0, 1, 1],
-          }
-        }
-
-        // Middle headlines: fade in mirroring the previous headline's fade-out window
-        // (based on the previous panel's size), fade out before this panel ends.
-        // Using the previous panel's size ensures the crossfade is simultaneous -
-        // both headlines are animating over the exact same scroll range.
-        const prevPanelSize = panelStart - (panelStarts[index - 1] ?? 0)
-        return {
-          input: [
-            panelStart - 0.3 * prevPanelSize,
-            panelStart - 0.15 * prevPanelSize,
-            panelEnd - 0.3 * panelSize,
-            panelEnd - 0.15 * panelSize,
-          ],
-          output: [0, 1, 1, 0],
-        }
+        return { input: [0, 1], output: [1, 1] }
       })
-    }, [headlines, weights, panelBoundaries, crossfadeAt])
+    }, [headlines, weights, panelBoundaries, crossfadeAt, crossfadeRanges])
 
     // Track opacities for all headlines (dynamic array)
     const [opacities, setOpacities] = useState<number[]>(() =>
       headlines.map((_, i) => (i === 0 ? 1 : 0)),
     )
+
+    // Self-measured CSS top (in px) and rendered height. Used to
+    // compute the translateY that centers the headline vertically
+    // in the viewport for centerEnter/centerExit transitions.
+    // Measured on mount, on resize, and whenever the headline's own
+    // box resizes (font swap, text change, language).
+    const internalRef = useRef<HTMLDivElement | null>(null)
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        internalRef.current = node
+        if (typeof ref === "function") ref(node)
+        else if (ref)
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node
+      },
+      [ref],
+    )
+    const [selfMetrics, setSelfMetrics] = useState<{
+      topPx: number
+      heightPx: number
+    }>({ topPx: 0, heightPx: 0 })
+    useEffect(() => {
+      if (typeof window === "undefined") return
+      const el = internalRef.current
+      if (!el) return
+      const measure = () => {
+        const cs = window.getComputedStyle(el)
+        const topPx = parseFloat(cs.top) || 0
+        const heightPx = el.getBoundingClientRect().height
+        setSelfMetrics((prev) =>
+          prev.topPx === topPx && prev.heightPx === heightPx
+            ? prev
+            : { topPx, heightPx },
+        )
+      }
+      measure()
+      const ro = new ResizeObserver(measure)
+      ro.observe(el)
+      window.addEventListener("resize", measure, { passive: true })
+      return () => {
+        ro.disconnect()
+        window.removeEventListener("resize", measure)
+      }
+    }, [])
+
+    // TranslateY that takes the headline from its default top anchor
+    // down to viewport-vertical-center during `centerEnterRange`, holds
+    // it there, then lifts it back during `centerExitRange`.
+    //
+    // centerOffset = (windowHeight / 2) - (headlineHeight / 2) - topPx
+    // so the element's vertical midpoint lands at the viewport midpoint.
+    const centerOffset = useMemo(() => {
+      if (!centerEnterRange && !centerExitRange) return 0
+      return windowHeight / 2 - selfMetrics.heightPx / 2 - selfMetrics.topPx
+    }, [windowHeight, selfMetrics, centerEnterRange, centerExitRange])
+
+    const centerYInput = useMemo<number[]>(() => {
+      if (!centerEnterRange && !centerExitRange) return [0, 1]
+      const enter = centerEnterRange ?? [0, 0]
+      const exit = centerExitRange ?? [1, 1]
+      // Build a monotonically increasing input array; clamp if ranges
+      // were passed out of order so useTransform doesn't throw.
+      const pts = [0, enter[0], enter[1], exit[0], exit[1], 1]
+      for (let i = 1; i < pts.length; i++) {
+        if ((pts[i] as number) < (pts[i - 1] as number))
+          pts[i] = pts[i - 1] as number
+      }
+      return pts
+    }, [centerEnterRange, centerExitRange])
+
+    const centerYOutput = useMemo<number[]>(() => {
+      if (!centerEnterRange && !centerExitRange) return [0, 0]
+      const hasEnter = !!centerEnterRange
+      const hasExit = !!centerExitRange
+      return [
+        0,
+        hasEnter ? 0 : centerOffset,
+        centerOffset,
+        centerOffset,
+        hasExit ? 0 : centerOffset,
+        0,
+      ]
+    }, [centerEnterRange, centerExitRange, centerOffset])
+
+    const centerY = useTransform(scrollYProgress, centerYInput, centerYOutput)
 
     // Dock offset.rAF-safe, no forced layout flush on scroll.
     // Returns a MotionValue that drives both the animated branch (direct DOM write)
@@ -348,10 +443,10 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       ease: exitYEase,
     })
 
-    // Combined y = scroll-driven exit + dock offset (keeps headline anchored to dockRef bottom)
+    // Combined y = scroll-driven exit + dock offset + center glide.
     const combinedY = useTransform(
-      [exitY, dockOffsetMV] as MotionValue<number>[],
-      ([e, d]: number[]) => (e ?? 0) + (d ?? 0),
+      [exitY, dockOffsetMV, centerY] as MotionValue<number>[],
+      ([e, d, c]: number[]) => (e ?? 0) + (d ?? 0) + (c ?? 0),
     )
 
     // Calculate opacity for a specific headline at a given scroll progress
@@ -438,7 +533,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       const activeHeadline = headlines[activeIndex]
       return (
         <Box
-          ref={ref}
+          ref={setRefs}
           sx={{
             position: "fixed",
             top: theme.space.panel.topOffset,
@@ -486,7 +581,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
 
     return (
       <motion.div
-        ref={ref}
+        ref={setRefs}
         style={{
           y: combinedY,
           opacity: combinedOpacity,

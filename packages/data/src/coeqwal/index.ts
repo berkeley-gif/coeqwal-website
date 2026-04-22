@@ -183,3 +183,15 @@ export {
 
 // Re-export hooks for convenience
 export * from "./hooks"
+
+// Regional tier means (NOD / SOD) sourced from the dashboard dataset.
+export {
+  getRegionalTierMean,
+  hasRegionalCoverage,
+  getRegionalTierMeansData,
+} from "./regional"
+export type {
+  RegionalHydroclimate,
+  RegionalOutcomeCode,
+  RegionalTierMeans,
+} from "./regional"

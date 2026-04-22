@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * SearchAndChips — Search input + visibility toggle chips.
+ * SearchAndChips - Search input + visibility toggle chips.
  *
  * Shared across the sidebar (non-list modes) and the toolbar (list mode).
  * Reads all state from the scenario-explorer store so consumers just render
@@ -9,16 +9,33 @@
  */
 
 import React from "react"
-import { Box, IconButton, InputBase, useTheme, icons } from "@repo/ui/mui"
+import {
+  Box,
+  IconButton,
+  InputBase,
+  Typography,
+  useTheme,
+  icons,
+} from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import ToggleChip from "./ToggleChip"
 
 interface SearchAndChipsProps {
   /** Show a vertical divider between search and chips (toolbar layout) */
   showDivider?: boolean
+  /**
+   * Optional small-caps subheader rendered above the chip row to
+   * categorize it. Used by the sidebar to label the visibility chips
+   * as the scenario-list tuner; omitted in the toolbar variant where
+   * the chips are inline with the rest of the toolbar controls.
+   */
+  chipsEyebrow?: string
 }
 
-export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
+export default function SearchAndChips({
+  showDivider,
+  chipsEyebrow,
+}: SearchAndChipsProps) {
   const theme = useTheme()
   const {
     searchQuery,
@@ -99,36 +116,62 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
-          gap: 0.25,
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 0.5,
+          flexBasis: chipsEyebrow ? "100%" : "auto",
+          minWidth: 0,
         }}
       >
-        <ToggleChip
-          label="definitions"
-          active={showDefinitions}
-          onClick={() => setShowDefinitions(!showDefinitions)}
-        />
-        <ToggleChip
-          label="baselines"
-          active={showAlternativeBaselines}
-          onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
-        />
-        <ToggleChip
-          label="key operations"
-          active={showKeyOperations}
-          onClick={() => setShowKeyOperations(!showKeyOperations)}
-        />
-        <ToggleChip
-          label="selected only"
-          active={showOnlyChosen}
-          onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-        />
-        <ToggleChip
-          label="group by theme"
-          active={groupByTheme}
-          onClick={() => setGroupByTheme(!groupByTheme)}
-        />
+        {chipsEyebrow && (
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {chipsEyebrow}
+          </Typography>
+        )}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.25,
+            flexWrap: "wrap",
+          }}
+        >
+          <ToggleChip
+            label="definitions"
+            active={showDefinitions}
+            onClick={() => setShowDefinitions(!showDefinitions)}
+          />
+          <ToggleChip
+            label="baselines"
+            active={showAlternativeBaselines}
+            onClick={() =>
+              setShowAlternativeBaselines(!showAlternativeBaselines)
+            }
+          />
+          <ToggleChip
+            label="key operations"
+            active={showKeyOperations}
+            onClick={() => setShowKeyOperations(!showKeyOperations)}
+          />
+          <ToggleChip
+            label="selected only"
+            active={showOnlyChosen}
+            onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+          />
+          <ToggleChip
+            label="group by theme"
+            active={groupByTheme}
+            onClick={() => setGroupByTheme(!groupByTheme)}
+          />
+        </Box>
       </Box>
     </>
   )

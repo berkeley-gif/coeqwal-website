@@ -13,8 +13,10 @@
 
 import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
+import { HydroclimateBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
+import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -37,6 +39,9 @@ export default function UnifiedToolLayout({
   const showMap = useScenarioExplorerStore((s) => s.showMap)
   const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
   const showKeyOperations = useScenarioExplorerStore((s) => s.showKeyOperations)
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
+
+  const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   const sidebarWidth = showKeyOperations
     ? SIDEBAR_WIDTH_EXPANDED
@@ -128,10 +133,11 @@ export default function UnifiedToolLayout({
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map reveal area — always rendered, width transitions between 0 and 25%.
+      {/* Map reveal area - always rendered, width transitions between 0 and 25%.
           pointer-events:none so clicks pass through to the persistent map behind. */}
       <Box
         sx={{
+          position: "relative",
           width: showMap ? `${MAP_WIDTH_PERCENT}%` : 0,
           flexShrink: 0,
           height: "100%",
@@ -139,7 +145,28 @@ export default function UnifiedToolLayout({
           backgroundColor: "transparent",
           transition: "width 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
         }}
-      />
+      >
+        {showMap && mapHydroBadge && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: theme.spacing(1),
+              left: theme.spacing(1),
+              right: theme.spacing(1),
+              zIndex: 2,
+              display: "flex",
+              justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <HydroclimateBadge
+              title={mapHydroBadge.title}
+              accentColor={mapHydroBadge.accentColor}
+              surface="solid"
+            />
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 }

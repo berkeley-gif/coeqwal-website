@@ -53,6 +53,17 @@ export type {
   CompactSelectGroup,
 } from "./common/CompactSelect"
 
+// Content components
+export { LinedList } from "./common/LinedList"
+export type { LinedListProps, LinedListItem } from "./common/LinedList"
+export { InfoCard } from "./common/InfoCard"
+export type { InfoCardProps } from "./common/InfoCard"
+export { BarredColumns } from "./common/BarredColumns"
+export type {
+  BarredColumnsProps,
+  BarredColumnItem,
+} from "./common/BarredColumns"
+
 // Text utilities
 export { TruncatedText } from "./common/TruncatedText"
 export type { TruncatedTextProps } from "./common/TruncatedText"
@@ -60,6 +71,18 @@ export type { TruncatedTextProps } from "./common/TruncatedText"
 // Panel components
 export { Panel } from "./panels/Panel"
 export type { PanelProps } from "./panels/Panel"
+export {
+  resolveRadius,
+  resolveInset,
+  DEFAULT_PANEL_INSET_X,
+  DEFAULT_PANEL_INSET_Y,
+} from "./panels/resolveRadius"
+export type {
+  RadiusTokenKey,
+  RadiusValue,
+  RadiusTokens,
+  PanelInset,
+} from "./panels/resolveRadius"
 export { DisplayBlock } from "./panels/DisplayBlock"
 export type { DisplayBlockProps } from "./panels/DisplayBlock"
 export { TwoColumnInterstitial } from "./panels/TwoColumnInterstitial"
@@ -81,18 +104,27 @@ export {
   CurrentOpsIcon,
   CurrentOpsMultipleIcon,
 } from "./icons/DocumentIcons"
+export { WaterDroplet } from "./icons/WaterDroplet"
+export type { WaterDropletProps } from "./icons/WaterDroplet"
 
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
 
 // Chip components
-export { ToggleChip, TierChip, LocationChip, ScenarioBadge } from "./Chip"
+export {
+  ToggleChip,
+  TierChip,
+  LocationChip,
+  ScenarioBadge,
+  HydroclimateBadge,
+} from "./Chip"
 export type {
   ToggleChipProps,
   TierChipProps,
   LocationChipProps,
   ScenarioBadgeProps,
+  HydroclimateBadgeProps,
 } from "./Chip"
 
 // Error handling
@@ -106,6 +138,26 @@ export type {
   PanelFeedbackVariant,
 } from "./common/PanelFeedback"
 
+// Chart toast (centered overlay pill for chart guidance states)
+export { ChartToast } from "./common/ChartToast"
+export type { ChartToastProps } from "./common/ChartToast"
+
 // Modal components
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"
+
+// Tuner widgets (design/review tools)
+export {
+  PanelTuner,
+  ChartTuner,
+  createTunerDarkTheme,
+  PANEL_RADIUS_VAR,
+  PANEL_INSET_X_VAR,
+  PANEL_INSET_Y_VAR,
+  tunerRadius,
+  tunerInsetX,
+  tunerInsetY,
+  tunerInsetXPx,
+  tunerInsetYPx,
+} from "./tuner"
+export type { ChartTunerProps, TunerPreset, WalkthroughStep } from "./tuner"

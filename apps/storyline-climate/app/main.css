@@ -4,7 +4,7 @@
   --dark-color-transparent: #21212195;
   --dark-color: #021224;
   --light-color: #1a3a5c;
-  --text-color: #f2f0ef;
+  --text-color: #fcfbfa;
   --highlight-color: #ffb347; /* #f1b143;*/
 }
 
@@ -15,7 +15,6 @@ header {
 /* TODO: might need to set this in the story container */
 body {
   background-color: #172a48 !important;
-  /* background: var(--primary-color) !important;*/
 }
 
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
@@ -45,8 +44,6 @@ html {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  padding-left: 5rem;
-  padding-right: 5rem;
   width: max-content;
   pointer-events: auto;
 }
@@ -89,6 +86,25 @@ html {
 .filled-container {
   background-color: #172a48;
   /* background-color: var(--primary-color); */
+}
+
+#month-slider {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 1536px) {
+  #month-slider {
+    width: calc(100% - 210px);
+    margin-left: 140px;
+  }
+}
+
+@media (min-width: 1200px) {
+  #month-slider {
+    width: calc(100% - 180px);
+    margin-left: 124px;
+  }
 }
 
 .sticky-container {
@@ -164,7 +180,7 @@ html {
 }
 
 .MuiFormControlLabel-label {
-  color: #f2f0ef !important;
+  color: #fcfbfa !important;
 }
 
 .img-container {
@@ -184,8 +200,6 @@ html {
   position: absolute; /* needs to be there*/
   left: 0;
   right: 0;
-  padding-left: 5rem;
-  padding-right: 5rem;
 }
 
 .top-paragraph-container {
@@ -234,7 +248,7 @@ html {
 }
 
 .toggle-button {
-  background-color: #f2f0ef;
+  background-color: #fcfbfa;
 }
 
 .stroked-text {
@@ -250,4 +264,35 @@ html {
     0px 1px 0 #104472,
     -1px 1px 0 #104472,
     -1px 0px 0 #104472;
+}
+
+.story-step-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: max-content;
+  pointer-events: none;
+}
+
+.glow-effect {
+  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pathGlowFlicker 3s ease-in-out infinite;
+}
+
+@keyframes pathGlowFlicker {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgba(255, 179, 71, 0.7))
+      drop-shadow(0 0 6px rgba(255, 179, 71, 0.5));
+  }
+  25%,
+  70% {
+    filter: drop-shadow(0 0 2px rgba(255, 179, 71, 0.4))
+      drop-shadow(0 0 4px rgba(255, 179, 71, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(255, 179, 71, 0.5))
+      drop-shadow(0 0 7px rgba(255, 179, 71, 0.3));
+  }
 }

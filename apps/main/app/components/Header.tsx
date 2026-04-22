@@ -90,7 +90,7 @@ export function Header() {
       borderBottom={
         isPastHero
           ? "none"
-          : `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}`
+          : `${theme.strokeWidth.accent}px solid ${theme.palette.common.white}`
       }
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}

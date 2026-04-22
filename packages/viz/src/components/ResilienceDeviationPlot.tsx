@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { scaleBand, scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 
 // ---------------------------------------------------------------------------
@@ -438,7 +439,13 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
 
           const getOpacity = (id: string) => {
             if (sidebarHighlightActive) {
-              return highlightedIds!.has(id) ? 1.0 : 0.08
+              return isFullOpacityDuringSidebarHighlight(
+                id,
+                highlightedIds,
+                chosenIds,
+              )
+                ? 1.0
+                : 0.08
             }
             if (chosenIds && chosenIds.size > 0) {
               return chosenIds.has(id) ? 0.9 : 0.25

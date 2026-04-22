@@ -1,120 +1,60 @@
 "use client"
 
 /**
- * ScenarioExplorer. Main scenario exploration interface.
+ * ScenarioExplorer - Content area for the Explore tab.
  *
- * Top-level navigation: Get Started | Go to tools
+ * Navigation (ExploreSubNav) has been lifted to the page shell so it
+ * participates in the sticky stacking alongside SmoothTabs. This
+ * component only renders the active view content.
  *
  * All explore modes route through UnifiedToolLayout:
  *   - List mode: no sidebar, ToolToolbar with grid-aligned search/chips
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  PlayArrowIcon,
-  ViewListIcon,
-  ExploreIcon,
-  AdjustIcon,
-  AppsIcon,
-  CompareArrowsIcon,
-  InsightsIcon,
-  icons,
-} from "@repo/ui/mui"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
 import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
 import ShareDrawer from "./components/ShareDrawer"
-// import SelectionBanner from "./components/SelectionBanner"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import {
   ComparisonPanel,
   EquityPanel,
   ResiliencePanel,
+  ResilienceQuadrantPanel,
   RadarPanel,
 } from "./exploreView"
+import type {
+  SingleScenarioCaptureFn,
+  ResilienceControlsState,
+} from "./exploreView"
+import ResilienceControls from "./exploreView/ResilienceControls"
+import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
+import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
-import {
-  useScenarioExplorerStore,
-  type MainView,
-  type ExploreMode,
-} from "./store"
-import { useMapMode } from "../map/store"
+import { useScenarioExplorerStore } from "./store"
+import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
-// Top-level navigation tabs
-
-const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
-  {
-    view: "get-started",
-    icon: <PlayArrowIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Get started",
-  },
-  {
-    view: "explorer",
-    icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Go to tools",
-  },
-]
-
-const TOOL_TABS: {
-  mode: ExploreMode
-  icon: React.ReactNode
-  label: string
-  research?: boolean
-}[] = [
-  {
-    mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "List",
-  },
-  {
-    mode: "radar",
-    icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Radar chart",
-  },
-  {
-    mode: "comparison",
-    icon: <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Scenario comparison",
-    research: true,
-  },
-  {
-    mode: "equity",
-    icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Distribution comparison",
-  },
-  {
-    mode: "data",
-    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Data in depth",
-  },
-]
-
-function RadarToggleChip({
+function SimpleButton({
   label,
-  active,
   onClick,
 }: {
   label: string
-  active: boolean
   onClick: () => void
 }) {
   const theme = useTheme()
-  const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
 
   return (
     <Box
       component="button"
       type="button"
       onClick={onClick}
-      aria-pressed={active}
       aria-label={label}
       sx={{
         display: "inline-flex",
@@ -129,30 +69,54 @@ function RadarToggleChip({
         fontWeight: 500,
         lineHeight: 1.3,
         whiteSpace: "nowrap",
-        color: active ? theme.palette.blue.bright : theme.palette.grey[800],
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
-        transition: "all 150ms ease",
         "&:hover": {
           background: theme.palette.interaction.selectedBackground,
           color: theme.palette.blue.bright,
         },
       }}
     >
-      <Icon sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
       {label}
     </Box>
   )
 }
 
+import { InlineToggleChip } from "./components/InlineToggleChip"
+
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, setMainView, exploreMode, setExploreMode, showMap } =
-    useScenarioExplorerStore()
+  const {
+    mainView,
+    setMainView,
+    exploreMode,
+    setExploreMode,
+    showMap,
+    setShowMap,
+    showEquityComparison,
+    setShowEquityComparison,
+  } = useScenarioExplorerStore()
   const mapMode = useMapMode()
 
   usePrefetchTiers()
+
+  // When switching to explorer tools, scroll so the tabs are docked and
+  // the ToolToolbar is visible right below the sticky header + sub-nav.
+  const prevMainViewRef = useRef(mainView)
+  useEffect(() => {
+    const prev = prevMainViewRef.current
+    prevMainViewRef.current = mainView
+    if (prev === mainView) return
+    if (mainView !== "explorer") return
+
+    const tabsEl = document.getElementById("tabs")
+    if (!tabsEl) return
+
+    requestAnimationFrame(() => {
+      const tabsRect = tabsEl.getBoundingClientRect()
+      const targetY =
+        window.scrollY + tabsRect.top - theme.layout.collapsedHeaderHeight
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    })
+  }, [mainView, theme.layout.collapsedHeaderHeight])
 
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
@@ -163,40 +127,40 @@ export default function ScenarioExplorer() {
   // Child elements opt back in with pointer-events:auto as needed.
   const isMapPassThrough = isGetStartedMapMode || isExploreMapMode
 
-  // Hover coordination (for sidebar ↔ tool panels in non-list modes)
+  /**
+   * Hover coordination (sidebar ↔ tool panels in non-list modes).
+   * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
+   * Charts must keep `chosenIds` (selected scenarios) visible when this is set -
+   * it adds emphasis for hovered IDs; it does not replace selection visibility.
+   */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
-  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
-    null,
-  )
 
-  // Research-only tools hidden by default, toggled with "A" key
-  const [showResearchTools, setShowResearchTools] = useState(false)
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement
-      if (
-        t.tagName === "INPUT" ||
-        t.tagName === "TEXTAREA" ||
-        t.isContentEditable
-      )
-        return
-      if (e.key === "a" || e.key === "A") {
-        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
-          setShowResearchTools((v) => !v)
-        }
-      }
-    }
-    document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [])
+  const [hoveredInteraction, setHoveredInteraction] = useState<{
+    scenarioId: string
+    outcome?: string
+    tierValue?: number
+  } | null>(null)
+
+  const [radarScenarioColors, setRadarScenarioColors] = useState<
+    Record<string, string>
+  >({})
 
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
   }, [])
 
   const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
-    setHoveredScenarioId(scenarioId)
+    setHoveredInteraction(scenarioId ? { scenarioId } : null)
   }, [])
+
+  const handleOutcomeHover = useCallback(
+    (
+      info: { scenarioId: string; outcome: string; tierValue: number } | null,
+    ) => {
+      setHoveredInteraction(info)
+    },
+    [],
+  )
 
   const {
     highlightBaseline,
@@ -205,40 +169,182 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     showDotsOnly,
     setShowDotsOnly,
-    radarSelectedOnly,
-    setRadarSelectedOnly,
+    radarShowAll,
+    setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
+    selectedScenarios,
   } = useScenarioExplorerStore()
+
+  const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
+  const radarSingleCaptureRef = useRef<SingleScenarioCaptureFn | null>(null)
+
+  const handleRadarCaptureReady = useCallback(
+    (capture: () => Promise<void>) => {
+      radarCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleRadarSingleCaptureReady = useCallback(
+    (capture: SingleScenarioCaptureFn) => {
+      radarSingleCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
+    return radarSingleCaptureRef.current?.(scenarioId) ?? null
+  }, [])
+
+  // Resilience heatmap controls (panel-local state, lifted here so the
+  // toolbar and panel share one source of truth without store changes).
+  // Default view is Aggregate because the sidebar starts empty; the
+  // sync effect below flips to "scenario" the moment the sidebar has
+  // at least one scenario selected, and back to "aggregate" when the
+  // selection is cleared. Explicit user choices of "outcome" or
+  // "quadrant" are preserved by the effect.
+  const [resilienceControls, setResilienceControls] =
+    useState<ResilienceControlsState>({
+      view: "aggregate",
+      cellEncoding: "tier",
+      deltaMode: "none",
+      deltaBaselineScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
+      aggregateScope: "all",
+      reorderBySimilarity: false,
+      showMarginals: false,
+      showAllScenarios: false,
+      expandedTileId: null,
+      selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
+      showCellNumbers: true,
+      quadrantUnit: "outcome",
+      quadrantOutcome: "CWS_DEL",
+      primaryOutcomeCode: null,
+      compareOutcomeCodes: [],
+      expandedRegionalOutcomes: [],
+      scenarioLayout: "small_multiples",
+    })
+
+  const handleResilienceControlsChange = useCallback(
+    (next: Partial<ResilienceControlsState>) => {
+      setResilienceControls((prev) => ({ ...prev, ...next }))
+    },
+    [],
+  )
+
+  // Keep the Resilience "View:" rail in sync with the sidebar
+  // selection. Empty selection anchors the rail on "View aggregate";
+  // as soon as the user picks a scenario we flip to "View by
+  // scenarios". Outcome and Leverage modes are explicit user choices
+  // and are not overridden by this effect.
+  const hasSelectedScenarios = selectedScenarios.length > 0
+  useEffect(() => {
+    setResilienceControls((prev) => {
+      if (hasSelectedScenarios && prev.view === "aggregate") {
+        return { ...prev, view: "scenario" }
+      }
+      if (!hasSelectedScenarios && prev.view === "scenario") {
+        return { ...prev, view: "aggregate" }
+      }
+      return prev
+    })
+  }, [hasSelectedScenarios])
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <RadarToggleChip
-            label="choose axes"
+          <InlineToggleChip
+            label="choose outcome axes"
             active={showAxisSelector}
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
-          <RadarToggleChip
-            label="selected only"
-            active={radarSelectedOnly}
-            onClick={() => setRadarSelectedOnly(!radarSelectedOnly)}
+          <InlineToggleChip
+            label="show all scenarios"
+            active={radarShowAll}
+            onClick={() => setRadarShowAll(!radarShowAll)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="dots only"
             active={showDotsOnly}
             onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
+            label="highlight current operations"
+            active={highlightBaseline}
+            onClick={() => setHighlightBaseline(!highlightBaseline)}
+          />
+          <InlineToggleChip
             label="show range"
             active={showRadarRange}
             onClick={() => setShowRadarRange(!showRadarRange)}
           />
-          <RadarToggleChip
-            label="highlight current operations"
-            active={highlightBaseline}
-            onClick={() => setHighlightBaseline(!highlightBaseline)}
+          <Box
+            component="button"
+            type="button"
+            disabled={selectedScenarios.length === 0 && !radarShowAll}
+            onClick={() => radarCaptureRef.current?.()}
+            aria-label="capture view"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              transition: "all 150ms ease",
+              cursor:
+                selectedScenarios.length === 0 && !radarShowAll
+                  ? "default"
+                  : "pointer",
+              opacity:
+                selectedScenarios.length === 0 && !radarShowAll ? 0.4 : 1,
+              "&:hover": {
+                background:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.interaction.selectedBackground,
+                color:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.blue.bright,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            capture view
+          </Box>
+        </ChartControlsBar>
+      )
+    }
+    if (exploreMode === "resilience") {
+      return (
+        <ChartControlsBar>
+          <ResilienceControls
+            controls={resilienceControls}
+            onChange={handleResilienceControlsChange}
+          />
+        </ChartControlsBar>
+      )
+    }
+    if (exploreMode === "equity") {
+      return (
+        <ChartControlsBar>
+          <InlineToggleChip
+            label="Compare to Baseline"
+            active={showEquityComparison}
+            onClick={() => setShowEquityComparison(!showEquityComparison)}
+          />
+          <SimpleButton
+            label="Clear Map Selection"
+            onClick={() => mapActions.clearLocationHighlights()}
           />
         </ChartControlsBar>
       )
@@ -254,8 +360,14 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     highlightBaseline,
     setHighlightBaseline,
-    radarSelectedOnly,
-    setRadarSelectedOnly,
+    radarShowAll,
+    setRadarShowAll,
+    showEquityComparison,
+    setShowEquityComparison,
+    selectedScenarios,
+    theme,
+    resilienceControls,
+    handleResilienceControlsChange,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -273,164 +385,7 @@ export default function ScenarioExplorer() {
         ...(isGetStartedMapMode ? {} : { height: "100%", overflow: "hidden" }),
       }}
     >
-      {/* Tab navigation */}
-      <Box
-        role="tablist"
-        aria-label="Explore section tabs"
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: theme.zIndex.pageContent,
-          flexShrink: 0,
-          pointerEvents: "auto",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          height: theme.layout.collapsedTabHeight,
-          background: theme.palette.tabPanels.explore,
-          lineHeight: 1,
-          color: theme.palette.common.white,
-          justifyContent: "center",
-          gap: 1,
-        }}
-      >
-        {MAIN_VIEWS.map(({ view, icon, label }) => {
-          const active = mainView === view
-          return (
-            <Box
-              key={view}
-              component="button"
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setMainView(view)}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                px: 1.25,
-                py: 0.5,
-                border: "none",
-                borderRadius: theme.borderRadius.sm ?? "4px",
-                cursor: "pointer",
-                background: active ? "rgba(255,255,255,0.2)" : "transparent",
-                color: theme.palette.common.white,
-                transition: "background-color 0.15s",
-                "&:hover": { background: "rgba(255,255,255,0.15)" },
-              }}
-            >
-              {icon}
-              <Typography
-                component="span"
-                variant="dashboard"
-                sx={{
-                  fontWeight: active ? 600 : 500,
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  color: theme.palette.text.secondary,
-                }}
-              >
-                {label}
-              </Typography>
-            </Box>
-          )
-        })}
-
-        {mainView === "explorer" && (
-          <>
-            <Box
-              sx={{
-                width: "1px",
-                height: 20,
-                backgroundColor: "rgba(255,255,255,0.35)",
-                flexShrink: 0,
-                mx: 0.5,
-              }}
-            />
-            <Typography
-              component="span"
-              sx={{
-                fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                fontSize: "0.9375rem",
-                fontWeight: 500,
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-                color: theme.palette.text.secondary,
-                letterSpacing: "0.01em",
-                px: 0.5,
-              }}
-            >
-              Select scenarios using key outcomes:
-            </Typography>
-            {TOOL_TABS.filter((tab) => !tab.research || showResearchTools).map(
-              ({ mode, icon, label }) => {
-                const active = exploreMode === mode
-                return (
-                  <React.Fragment key={mode}>
-                    {mode === "data" && (
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontFamily:
-                            theme.typography.tabLabelDocked.fontFamily,
-                          fontSize: "0.9375rem",
-                          fontWeight: 500,
-                          lineHeight: 1,
-                          letterSpacing: "0.01em",
-                          whiteSpace: "nowrap",
-                          color: theme.palette.text.secondary,
-                          px: 0.5,
-                        }}
-                      >
-                        View data for selected scenarios:
-                      </Typography>
-                    )}
-                    <Box
-                      component="button"
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => setExploreMode(mode)}
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        px: 1.25,
-                        py: 0.5,
-                        border: "none",
-                        borderRadius: theme.borderRadius.sm ?? "4px",
-                        cursor: "pointer",
-                        background: active
-                          ? "rgba(255,255,255,0.2)"
-                          : "transparent",
-                        color: theme.palette.common.white,
-                        transition: "background-color 0.15s",
-                        "&:hover": { background: "rgba(255,255,255,0.15)" },
-                      }}
-                    >
-                      {icon}
-                      <Typography
-                        component="span"
-                        variant="dashboard"
-                        sx={{
-                          fontWeight: active ? 600 : 500,
-                          lineHeight: 1,
-                          whiteSpace: "nowrap",
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        {label}
-                      </Typography>
-                    </Box>
-                  </React.Fragment>
-                )
-              },
-            )}
-          </>
-        )}
-      </Box>
-
-      {/* Content area — when the map is pass-through (get-started or explore
+      {/* Content area -- when the map is pass-through (get-started or explore
           with map), these wrappers stay pointer-events:none so clicks in the
           map strip fall through to Mapbox. Child tool areas opt back in. */}
       <Box
@@ -458,12 +413,24 @@ export default function ScenarioExplorer() {
                 sidebar={
                   isListMode ? undefined : (
                     <ScenarioSelectionSidebar
-                      hoveredScenarioId={hoveredScenarioId}
+                      scenarioColors={
+                        exploreMode === "radar"
+                          ? radarScenarioColors
+                          : undefined
+                      }
+                      hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
+                      singleSelect={exploreMode === "equity"}
+                      onCaptureRadarScenario={handleCaptureRadarScenario}
                     />
                   )
                 }
-                toolbar={<ToolToolbar gridAligned hideTitle={!isListMode} />}
+                toolbar={
+                  <ToolToolbar
+                    gridAligned={isListMode}
+                    hideTitle={!isListMode}
+                  />
+                }
                 chartControls={isListMode ? undefined : chartControls}
               >
                 {isListMode && (
@@ -475,7 +442,10 @@ export default function ScenarioExplorer() {
                 {exploreMode === "radar" && (
                   <RadarPanel
                     highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
+                    onOutcomeHover={handleOutcomeHover}
+                    onScenarioColors={setRadarScenarioColors}
+                    onCaptureReady={handleRadarCaptureReady}
+                    onSingleCaptureReady={handleRadarSingleCaptureReady}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}
@@ -485,7 +455,22 @@ export default function ScenarioExplorer() {
                     onScenarioHover={handleToolScenarioHover}
                   />
                 )}
-                {exploreMode === "resilience" && <ResiliencePanel />}
+                {exploreMode === "resilience" &&
+                  (resilienceControls.view === "quadrant" ? (
+                    <ResilienceQuadrantPanel
+                      controls={resilienceControls}
+                      onControlsChange={handleResilienceControlsChange}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  ) : (
+                    <ResiliencePanel
+                      controls={resilienceControls}
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                      onControlsChange={handleResilienceControlsChange}
+                    />
+                  ))}
                 {exploreMode === "data" && <DataExplorerView />}
               </UnifiedToolLayout>
             </Box>

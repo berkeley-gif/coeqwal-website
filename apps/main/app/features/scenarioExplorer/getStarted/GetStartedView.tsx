@@ -1,30 +1,255 @@
 "use client"
 
-import { useRef } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { ContentPanel } from "@repo/ui"
+import { useRef, type ReactNode } from "react"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
+import {
+  LinedList,
+  InfoCard,
+  BarredColumns,
+  WaterDroplet,
+  tunerRadius,
+  tunerInsetX,
+  tunerInsetY,
+} from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
-import { useScenarioExplorerStore } from "../store"
 import TierAnimationSection from "./TierAnimationSection"
 
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Rounded-panel shell for get-started sections.                               */
+/* Frame (outer) holds the inset; card (inner) holds the rounded corners.      */
+/* Tune these three constants to adjust all nine sections at once.             */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Corner radius + inset values are read from CSS custom properties so they
+ * can be tuned live via the PanelTuner widget (summoned with Cmd/Ctrl+K).
+ * The `tuner*()` helpers expand to `var(<name>, <fallback>)` so panels
+ * render with sensible defaults whenever the tuner hasn't written values.
+ */
+const GET_STARTED_RADIUS = tunerRadius()
+const GET_STARTED_INSET_X = tunerInsetX()
+const GET_STARTED_INSET_Y = tunerInsetY()
+
+/** Height (in pixels) of the soft fade between the dark wash and the
+ *  transparent map panel window, applied at the bottom of the pre-map
+ *  wrapper and the top of the post-map wrapper. The wash colour/opacity
+ *  itself comes from `theme.background.modalBackdrop(Opacity)`. */
+const DARK_WASH_FADE_PX = 160
+
+/** Extra vertical breathing room subtracted from each panel's inner
+ *  min-height (on top of the sticky-header-stack subtraction). This
+ *  shrinks the rounded card so there's visible air between its top/
+ *  bottom edges and the header stack / next panel, without changing
+ *  the inset-based gap between consecutive panels. Increase for more
+ *  breathing room, decrease to let the card fill more of the viewport. */
+const PANEL_BREATHING_PX = 80
+
+interface GetStartedPanelShellProps {
+  children: ReactNode
+  /** Card background colour (the rounded surface) */
+  background: string
+  /** Optional frame background; defaults to transparent so the frame blends
+   *  into the scroll container. Pass a colour to cover content behind
+   *  (e.g. the persistent map when `mapMode === "get-started"`). */
+  frameBackground?: string
+  /** Inner min-height (default: 100vh) */
+  minHeight?: string | number
+}
+
+function GetStartedPanelShell({
+  children,
+  background,
+  frameBackground,
+  minHeight,
+}: GetStartedPanelShellProps) {
+  const theme = useTheme()
+  // Shrink each panel by the combined height of the persistent
+  // header stack that sits above get-started views:
+  //   collapsed main header + Learn/Explore/Share tabs row +
+  //   Explore sub-nav (get-started / go-to-tools).
+  // Add a further `PANEL_BREATHING_PX` so the rounded card doesn't
+  // consume the full remaining viewport — leaves a little air above
+  // and below the card before the next panel begins. (The *gap*
+  // between consecutive panels is still controlled by
+  // `GET_STARTED_INSET_Y` and is unchanged.)
+  const stickyStackPx =
+    theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight
+  const resolvedMinHeight =
+    minHeight ?? `calc(100vh - ${stickyStackPx + PANEL_BREATHING_PX}px)`
+  return (
+    <Box
+      sx={{
+        pointerEvents: "auto",
+        backgroundColor: frameBackground ?? "transparent",
+        px: GET_STARTED_INSET_X,
+        py: GET_STARTED_INSET_Y,
+      }}
+    >
+      <Box
+        sx={{
+          backgroundColor: background,
+          borderRadius: GET_STARTED_RADIUS,
+          overflow: "hidden",
+          minHeight: resolvedMinHeight,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          px: theme.space.panel.padding,
+          py: theme.space.panel.padding,
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  )
+}
+
 const WATER_ISSUE_THEMES = [
-  { label: "Drinking water for community water systems", themeKey: "cws" },
-  { label: "Groundwater management for agriculture", themeKey: "ag_gw" },
-  { label: "Water for salmon, rivers, and the estuary", themeKey: "eco" },
-  { label: "Balancing water needs in the Delta", themeKey: "delta" },
   {
-    label: "Understanding impacts of operations",
+    title: "Community water systems",
+    description:
+      "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
+    themeKey: "cws",
+  },
+  {
+    title: "Farms and groundwater",
+    description:
+      "Whether agricultural water deliveries can sustain food production, while preventing over-draft of groundwater basins",
+    themeKey: "ag_gw",
+  },
+  {
+    title: "Rivers, salmon and the Delta ecosystem",
+    description:
+      "Whether rivers, salmon, and the Delta estuary receive the flows they need to thrive",
+    themeKey: "eco",
+  },
+  {
+    title: "The Delta as a living place",
+    description:
+      "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive",
+    themeKey: "delta",
+  },
+  {
+    title: "Operations and impacts",
+    description:
+      "How management decisions affect trade-offs, equity and resilience",
     themeKey: "governance",
   },
 ] as const
 
+const HYDROCLIMATES = [
+  {
+    title: "Historical hydroclimate (baseline)",
+    description:
+      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+  },
+  {
+    title: "Moderate-dry climate risk",
+    description:
+      "Warmer and slightly drier conditions (\u22121% runoff change) - 50th percentile level of concern",
+  },
+  {
+    title: "Moderate-wet climate risk",
+    description:
+      "Warmer and wetter conditions (+7% runoff change) - 44th percentile level of concern",
+  },
+  {
+    title: "High climate risk",
+    description:
+      "Warmer and much drier conditions (\u22127% runoff change) - 95th percentile level of concern",
+  },
+  {
+    title: "Extreme climate risk",
+    description:
+      "Much warmer and extremely drier conditions (\u221221% runoff change) - 99th percentile level of concern",
+  },
+] as const
+
+const KEY_OUTCOMES = [
+  {
+    title: "Community water deliveries",
+    description:
+      "Reliability of water supplies to communities to satisfy essential drinking water needs",
+  },
+  {
+    title: "Agricultural revenue",
+    description:
+      "Economic productivity of agricultural crops based on water availability",
+  },
+  {
+    title: "Environmental flows",
+    description:
+      "Seasonal patterns of river flows needed to support healthy ecosystems",
+  },
+  {
+    title: "Delta estuary ecology",
+    description:
+      "Seasonal patterns of flows needed to support the health of the Bay Delta estuary",
+  },
+  {
+    title: "Winter-run salmon",
+    description:
+      "Population status of Sacramento River winter-run Chinook salmon",
+  },
+  {
+    title: "Freshwater for in-Delta uses",
+    description:
+      "Availability of freshwater in the Delta to support local communities and farms",
+  },
+  {
+    title: "Freshwater for Delta exports",
+    description: "Availability of freshwater for export to other regions",
+  },
+  {
+    title: "Reservoir storage",
+    description: "Levels of water stored in major reservoirs",
+  },
+  {
+    title: "Groundwater storage",
+    description: "Amount and trends of water stored in groundwater basins",
+  },
+] as const
+
+const VIZ_TOOLS: ReadonlyArray<{
+  title: string
+  description: string
+  dimmed?: boolean
+}> = [
+  {
+    title: "Map view",
+    description:
+      "Displays how outcomes vary across locations of interest and reveals spatial patterns in outcomes.",
+  },
+  {
+    title: "Distribution viewer",
+    description:
+      "Highlights how outcomes vary across key outcomes and among different locations of interest and communities, revealing who benefits and who is most impacted.",
+  },
+  {
+    title: "Radar chart",
+    description:
+      "Shows how outcomes vary within a scenario and enables comparisons across scenarios, highlighting commonalities, differences, and trade-offs.",
+  },
+  {
+    title: "Scatterplot",
+    description:
+      "Compares scenarios at the system level to reveal the relative effects of operational decisions and climate change on outcomes.",
+    dimmed: true,
+  },
+  {
+    title: "Heatmaps",
+    description:
+      "Show how scenarios perform across increasing levels of climate stress, highlighting which management strategies are most resilient or vulnerable to climate impacts.",
+  },
+]
+
 const CAVEATS = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
   "The scenarios do not include all regions of California nor certain aspects of our water system that may be of interest.",
-  "Key outcomes summarize scenario results over a 100-year period. Annual variation in outcomes can be explored with the DATA IN DEPTH VIEW.",
+  "Key outcomes summarize scenario results over a 100-year period. Annual variation in outcomes can be explored with the DATA IN DEPTH view and in the GET DATA section.",
   "The hydroclimates used in scenarios approximate the range of historical and potential future conditions that our system may experience. They do not represent historical observations or predicted future conditions according to climate models.",
-  "Predictions of water deliveries to location of interest with small water demands are less reliable than predictions for water users that receive large water volumes.",
+  "Estimates of water deliveries to locations of interest with small water demands may be less reliable than delivery estimates for water users that receive larger volumes.",
   "The outcomes of CalSim scenarios are best interpreted in a comparative manner \u2014 evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
 ] as const
 
@@ -34,10 +259,19 @@ export default function GetStartedView() {
   const mapMode = useMapMode()
   const mapActive = mapMode === "get-started"
   const { openThemePanel } = usePanelRoute()
-  const setMainView = useScenarioExplorerStore((s) => s.setMainView)
 
   const exploreBg = theme.palette.tabPanels.explore
   const sp = theme.space.component
+
+  // Dark wash tint used on both sides of the map panel; opacity is
+  // the single theme token (`modalBackdropOpacity`) so it can be
+  // re-tuned in one place.
+  const darkWash = alpha(
+    theme.palette.common.black,
+    theme.background.modalBackdropOpacity,
+  )
+
+  const dropletIcon = <WaterDroplet />
 
   return (
     <Box
@@ -48,164 +282,712 @@ export default function GetStartedView() {
         backgroundColor: mapActive ? "transparent" : exploreBg,
       }}
     >
-      {/* Welcome */}
-      <ContentPanel
-        background={exploreBg}
-        heading="Welcome"
+      {/* Pre-map dark wash: modal-style black backdrop (opacity from
+          theme.background.modalBackdropOpacity) behind panels 1-4 that
+          dims the persistent map. The bottom DARK_WASH_FADE_PX fades
+          to transparent so the map is fully revealed by the time we
+          reach Panel 5. */}
+      <Box
         sx={{
-          pointerEvents: "auto",
-          backgroundColor: mapActive ? exploreBg : "transparent",
+          backgroundImage: `linear-gradient(to bottom, ${darkWash} 0, ${darkWash} calc(100% - ${DARK_WASH_FADE_PX}px), transparent 100%)`,
         }}
       >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          COEQWAL uses the CalSim3 water planning model to evaluate how
-          different water management strategies and climate futures affect
-          outcomes for communities, farms, and the environment.
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          The library of scenarios can be explored in this section of the
-          website.
-        </Typography>
-      </ContentPanel>
+        {/* Welcome - custom layout (no ContentPanel) for full-width grid */}
+        <GetStartedPanelShell background={theme.palette.tabPanels.exploreDeep}>
+          <>
+            {/* Heading */}
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: 850 }}
+            >
+              What is the COEQWAL scenario library and how should I use it?
+            </Typography>
 
-      {/* Water Issues */}
-      <ContentPanel
-        background={theme.palette.blue.dark}
-        heading="Water Issues"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          COEQWAL scenarios are designed to address specific water issues. These
-          include:
-        </Typography>
-        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
-          {WATER_ISSUE_THEMES.map(({ label, themeKey }) => (
-            <Box component="li" key={themeKey} sx={{ mt: sp.sm }}>
+            {/* Three-column grid */}
+            <Box
+              sx={{
+                mt: theme.space.section.xl,
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                columnGap: theme.space.section.lg,
+                rowGap: sp.lg,
+              }}
+            >
+              {/* Column 1 - The model */}
+              <Box>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                >
+                  The model
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  COEQWAL uses the{" "}
+                  <Typography component="span" variant="body2" fontWeight={600}>
+                    CalSim3
+                  </Typography>{" "}
+                  water planning model to evaluate how different{" "}
+                  <Typography component="span" variant="body2" fontWeight={600}>
+                    scenarios
+                  </Typography>{" "}
+                  affect outcomes for communities, farms, and the environment.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.md }}
+                >
+                  Each scenario pairs a{" "}
+                  <Typography component="span" variant="body2" fontWeight={600}>
+                    water management strategy
+                  </Typography>{" "}
+                  (the operating rules, policies, and infrastructure decisions
+                  that determine how water is allocated) with a{" "}
+                  <Typography component="span" variant="body2" fontWeight={600}>
+                    hydroclimate
+                  </Typography>{" "}
+                  (the temperature and precipitation patterns that determine how
+                  much water is available).
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.md }}
+                >
+                  The management strategy represents what we can control and the
+                  hydroclimate represents what we can&rsquo;t control and must
+                  prepare for.
+                </Typography>
+              </Box>
+
+              {/* Column 2 - The library */}
+              <Box>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                >
+                  The library
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  COEQWAL has compiled a library of over 100 scenarios.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.md }}
+                >
+                  Each scenario is associated with dozens of outcome variables
+                  that describe how water is allocated to different locations
+                  and users.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.md }}
+                >
+                  Visualization tools can be used to compare scenarios, examine
+                  outcomes, and interpret results across different perspectives.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.md }}
+                >
+                  A summary of all scenarios can be accessed{" "}
+                  <Typography
+                    component="button"
+                    variant="body2"
+                    sx={{
+                      background: "none",
+                      border: "none",
+                      p: 0,
+                      color: "text.secondary",
+                      textDecoration: "underline",
+                      textDecorationColor: alpha(
+                        theme.palette.common.white,
+                        0.4,
+                      ),
+                      textUnderlineOffset: "3px",
+                      cursor: "pointer",
+                      font: "inherit",
+                      "&:hover": {
+                        textDecorationColor: alpha(
+                          theme.palette.common.white,
+                          0.8,
+                        ),
+                      },
+                    }}
+                  >
+                    here
+                  </Typography>
+                  .
+                </Typography>
+              </Box>
+
+              {/* Column 3 - What you'll learn */}
+              <Box>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                >
+                  What you&rsquo;ll learn
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  By exploring the scenario library, you will gain understanding
+                  of how:
+                </Typography>
+                <LinedList
+                  items={[
+                    {
+                      label:
+                        "Management strategies affect trade-offs and synergies among outcomes",
+                    },
+                    {
+                      label:
+                        "Benefits and impacts are distributed among water users and locations",
+                    },
+                    {
+                      label:
+                        "Different strategies perform under varying levels of climate stress",
+                    },
+                  ]}
+                  color={theme.palette.common.white}
+                  arrows={false}
+                  icon={dropletIcon}
+                  labelVariant="body2"
+                  sx={{ mt: sp.sm }}
+                />
+              </Box>
+            </Box>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Water Issues - custom layout for five-column grid */}
+        <GetStartedPanelShell background={theme.palette.blue.dark}>
+          <>
+            {/* Five-column grid */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                alignItems: "stretch",
+                columnGap: theme.space.section.sm,
+                rowGap: sp.lg,
+              }}
+            >
+              {/* Heading - full width */}
+              <Typography
+                variant="h3"
+                component="h2"
+                color="text.secondary"
+                sx={{
+                  gridColumn: "1 / -1",
+                  maxWidth: "66%",
+                  mb: theme.space.section.md,
+                }}
+              >
+                What water issues interest you?
+              </Typography>
+
+              {/* Intro - full width, below the gap */}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: sp.lg }}
+              >
+                COEQWAL scenarios are designed to address key water challenges
+                across California, including:
+              </Typography>
+
+              {/* Five issue columns */}
+              {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
+                const active = themeKey !== "governance"
+                return (
+                  <InfoCard
+                    key={themeKey}
+                    title={title}
+                    description={description}
+                    onClick={
+                      active ? () => openThemePanel(themeKey) : undefined
+                    }
+                    dimmed={!active}
+                    variant="onDark"
+                  />
+                )
+              })}
+
+              {/* Footer CTA - full width */}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ gridColumn: "1 / -1", mt: sp.lg }}
+              >
+                Click on each water issue to learn more.
+              </Typography>
+            </Box>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Hydroclimate Futures */}
+        <GetStartedPanelShell background={theme.palette.nature.forest}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: sp.sm }}
+            >
+              Hydroclimate futures
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                maxWidth: "66%",
+                mb: theme.space.section.md,
+                opacity: 0.85,
+              }}
+            >
+              How are climate change impacts evaluated?
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                columnGap: theme.space.section.lg,
+                rowGap: sp.lg,
+                mb: theme.space.section.lg,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                COEQWAL evaluates how the outcomes of different water management
+                strategies are affected by alternative hydroclimate futures. We
+                specifically evaluate how the outcomes of water management
+                strategies change with climate-driven shifts in water supplies
+                and temperature.
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                The COEQWAL scenario library evaluates various hydroclimates
+                that represent different levels of risk to the water supply
+                system:
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                alignItems: "stretch",
+                columnGap: theme.space.section.sm,
+                rowGap: sp.lg,
+              }}
+            >
+              {HYDROCLIMATES.map(({ title, description }, i) => (
+                <InfoCard
+                  key={title}
+                  title={title}
+                  description={description}
+                  dimmed={i === 2 || i === 4}
+                  variant="onDark"
+                />
+              ))}
+            </Box>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: sp.lg }}
+            >
+              A summary of each hydroclimate future can be accessed{" "}
               <Typography
                 component="button"
-                variant="body1"
-                onClick={() => openThemePanel(themeKey)}
+                variant="body2"
                 sx={{
                   background: "none",
                   border: "none",
                   p: 0,
                   color: "text.secondary",
                   textDecoration: "underline",
-                  textDecorationColor: "rgba(255,255,255,0.4)",
+                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
                   textUnderlineOffset: "3px",
                   cursor: "pointer",
                   font: "inherit",
-                  textAlign: "left",
                   "&:hover": {
-                    textDecorationColor: "rgba(255,255,255,0.8)",
+                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
                   },
                 }}
               >
-                {label}
+                here
               </Typography>
+              .
+            </Typography>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Key Outcomes */}
+        <GetStartedPanelShell background={exploreBg}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: sp.sm }}
+            >
+              Key outcomes
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                maxWidth: "66%",
+                mb: theme.space.section.md,
+                opacity: 0.85,
+              }}
+            >
+              How are scenario results described?
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+            >
+              The results of each scenario are summarized by nine key outcomes:
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                alignItems: "stretch",
+                columnGap: theme.space.section.sm,
+                rowGap: theme.space.section.sm,
+              }}
+            >
+              {KEY_OUTCOMES.map(({ title, description }) => (
+                <InfoCard
+                  key={title}
+                  title={title}
+                  description={description}
+                  variant="onDark"
+                />
+              ))}
             </Box>
-          ))}
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          If you are interested in one of these issues, we suggest you click on
-          the text above.
-        </Typography>
-      </ContentPanel>
 
-      {/* Map panel (TierAnimationSection) */}
-      <TierAnimationSection />
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: sp.lg }}
+            >
+              A summary of all key outcomes can be accessed{" "}
+              <Typography
+                component="button"
+                variant="body2"
+                sx={{
+                  background: "none",
+                  border: "none",
+                  p: 0,
+                  color: "text.secondary",
+                  textDecoration: "underline",
+                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
+                  textUnderlineOffset: "3px",
+                  cursor: "pointer",
+                  font: "inherit",
+                  "&:hover": {
+                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
+                  },
+                }}
+              >
+                here
+              </Typography>
+              .
+            </Typography>
+          </>
+        </GetStartedPanelShell>
+      </Box>
 
-      {/* Tools */}
-      <ContentPanel
-        background={theme.palette.nature.forest}
-        heading="Tools"
-        sx={{ pointerEvents: "auto" }}
+      {/* Map panel (TierAnimationSection).thin outer frame + rounded shell;
+          radius applied around (not inside) the pinned map overlay so the
+          tier animation's own 100vh geometry is preserved. */}
+      <Box
+        sx={{
+          pointerEvents: "auto",
+          px: GET_STARTED_INSET_X,
+          py: GET_STARTED_INSET_Y,
+        }}
       >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          We have prepared a series of tools to help you understand, compare,
-          and share data from the scenarios. You can find them in the Tools
-          section of this Explore tab.
-        </Typography>
-        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
-          {["Bar chart", "Radar chart", "Distribution viewer"].map((tool) => (
-            <Box component="li" key={tool} sx={{ mt: sp.sm }}>
-              <Typography variant="body1" color="text.secondary">
-                {tool}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          You can go back and forth between the charts and a map.
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg, fontStyle: "italic" }}
+        <Box
+          sx={{
+            borderRadius: GET_STARTED_RADIUS,
+            overflow: "hidden",
+          }}
         >
-          Coming soon: you can find locations you are interested in, and track
-          them across the charts.
-        </Typography>
-      </ContentPanel>
+          <TierAnimationSection />
+        </Box>
+      </Box>
 
-      {/* Data in depth */}
-      <ContentPanel
-        background={exploreBg}
-        heading="Data in depth"
-        sx={{ pointerEvents: "auto" }}
+      {/* Post-map dark wash: modal-style black backdrop (opacity from
+          theme.background.modalBackdropOpacity) behind panels 6-9 that
+          fades in from transparent over the top DARK_WASH_FADE_PX, so
+          the map smoothly re-darkens after Panel 5 instead of being
+          cut off by a hard seam. */}
+      <Box
+        sx={{
+          backgroundImage: `linear-gradient(to bottom, transparent 0, ${darkWash} ${DARK_WASH_FADE_PX}px)`,
+        }}
       >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          In addition to the key outcomes, there are dozens of detailed scenario
-          outcome variables that describe different features of the systems,
-          including river flows, reservoir and groundwater storage, water
-          deliveries, and Delta salinity.
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          A full list of outcome variables can be accessed{" "}
-          <Typography
-            component="button"
-            variant="body1"
-            onClick={() => setMainView("data")}
-            sx={{
-              background: "none",
-              border: "none",
-              p: 0,
-              color: "text.secondary",
-              textDecoration: "underline",
-              cursor: "pointer",
-              font: "inherit",
-            }}
-          >
-            here
-          </Typography>
-          .
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          Using the &ldquo;Data in Depth&rdquo; tool, users can generate
-          summaries and plots of these different outcome variables to explore
-          how they vary over space and time.
-        </Typography>
-      </ContentPanel>
+        {/* Data in Depth */}
+        <GetStartedPanelShell background={theme.palette.nature.forest}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: sp.sm }}
+            >
+              Data in depth
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                maxWidth: "66%",
+                mb: theme.space.section.lg,
+                opacity: 0.85,
+              }}
+            >
+              What are the data behind these key outcomes?
+            </Typography>
 
-      {/* Before you start your exploration */}
-      <ContentPanel
-        background={theme.palette.blue.dark}
-        heading="Before you start your exploration"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          There are a few important things to keep in mind:
-        </Typography>
-        <Box component="ul" sx={{ pl: 2, mt: sp.md, color: "text.secondary" }}>
-          {CAVEATS.map((caveat, i) => (
-            <Box component="li" key={i} sx={{ mt: sp.sm }}>
-              <Typography variant="body1" color="text.secondary">
-                {caveat}
+            <Box sx={{ maxWidth: "50%" }}>
+              <Typography variant="body2" color="text.secondary">
+                The key outcomes are calculated from additional variables that
+                can be viewed in the{" "}
+                <Typography component="span" variant="body2" fontWeight={600}>
+                  DATA IN DEPTH
+                </Typography>{" "}
+                section. These describe different features of the water system,
+                including river flows, water delivery amounts, reservoir and
+                groundwater storage levels, and salinity conditions within the
+                Bay-Delta estuary.
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: sp.md }}
+              >
+                Using the{" "}
+                <Typography component="span" variant="body2" fontWeight={600}>
+                  DATA IN DEPTH
+                </Typography>{" "}
+                tool, you can generate summaries and plots of these different
+                outcome variables to explore how they vary over space and time
+                for different scenarios.
               </Typography>
             </Box>
-          ))}
-        </Box>
-      </ContentPanel>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Interpreting Scenario Outcomes */}
+        <GetStartedPanelShell background={exploreBg}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: theme.space.section.lg }}
+            >
+              Interpreting scenario outcomes
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                columnGap: theme.space.section.xl,
+              }}
+            >
+              {/* Left - three lenses */}
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: theme.space.section.md }}
+                >
+                  The visualization tools help to understand how different
+                  management strategies and hydroclimate conditions affect:
+                </Typography>
+                <LinedList
+                  items={[
+                    {
+                      label: "Trade-offs",
+                      description:
+                        "How outcomes improve or decline together across scenarios",
+                    },
+                    {
+                      label: "Equity",
+                      description:
+                        "How benefits and impacts are distributed across outcomes and locations of interest",
+                    },
+                    {
+                      label: "Resilience",
+                      description:
+                        "How outcomes change under increasing levels of climate stress",
+                    },
+                  ]}
+                  color={theme.palette.common.white}
+                  arrows={false}
+                  labelVariant="body2"
+                  descriptionVariant="body2"
+                />
+              </Box>
+
+              {/* Right - visualization tools */}
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: sp.sm }}
+                >
+                  Each tool highlights these perspectives in different ways:
+                </Typography>
+                <LinedList
+                  items={VIZ_TOOLS.map(({ title, description, dimmed }) => ({
+                    label: title,
+                    description,
+                    opacity: dimmed ? 0.45 : 1,
+                  }))}
+                  color={theme.palette.common.white}
+                  arrows={false}
+                  labelVariant="body2"
+                  descriptionVariant="body2"
+                />
+              </Box>
+            </Box>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Choose Your Scenarios */}
+        <GetStartedPanelShell background={theme.palette.blue.dark}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: sp.sm }}
+            >
+              Choose your scenarios
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                maxWidth: "66%",
+                mb: theme.space.section.md,
+                opacity: 0.85,
+              }}
+            >
+              Which water management strategies do you want to explore?
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+            >
+              To use the library effectively, you may want to start by asking
+              these questions:
+            </Typography>
+
+            <BarredColumns
+              items={[
+                {
+                  title: "How is my water interest doing now?",
+                  description:
+                    "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
+                },
+                {
+                  title:
+                    "How could alternative strategies impact my water interest?",
+                  description:
+                    "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
+                },
+                {
+                  title: "How does climate change shift the picture?",
+                  description:
+                    "Select scenarios that represent how current operations and alternative strategies perform under alternative hydroclimates.",
+                },
+              ]}
+              color={theme.palette.common.white}
+              columnGap={theme.space.section.xl}
+              sx={{ mb: theme.space.section.lg }}
+            />
+
+            <Typography variant="body2" color="text.secondary">
+              As you explore scenarios with different visualization tools, use
+              the &ldquo;share&rdquo; icon to save graphs, text, or maps of
+              interest. These will be saved in the{" "}
+              <Typography component="span" variant="body2" fontWeight={600}>
+                SHARE
+              </Typography>{" "}
+              section of the site.
+            </Typography>
+          </>
+        </GetStartedPanelShell>
+
+        {/* Before You Begin Your Exploration */}
+        <GetStartedPanelShell background={theme.palette.tabPanels.exploreDeep}>
+          <>
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ maxWidth: "66%", mb: theme.space.section.md }}
+            >
+              Before you begin your exploration
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+            >
+              There are a few things to keep in mind:
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                columnGap: theme.space.section.xl,
+                maxWidth: "85%",
+              }}
+            >
+              <LinedList
+                items={CAVEATS.slice(0, 3).map((c) => ({ label: c }))}
+                color={theme.palette.common.white}
+                arrows={false}
+                icon={dropletIcon}
+                labelVariant="body2"
+                labelWeight={400}
+              />
+              <LinedList
+                items={CAVEATS.slice(3).map((c) => ({ label: c }))}
+                color={theme.palette.common.white}
+                arrows={false}
+                icon={dropletIcon}
+                labelVariant="body2"
+                labelWeight={400}
+              />
+            </Box>
+          </>
+        </GetStartedPanelShell>
+      </Box>
     </Box>
   )
 }

@@ -32,6 +32,84 @@ export type ExploreMode =
  */
 export type MainView = "get-started" | "explorer" | "data"
 
+export type OutcomeDisplayMode = "average" | "bar" | "distribution"
+
+/**
+ * A single item staged for the Share tab composition grid.
+ * The union discriminant `type` determines which rendering path is used.
+ */
+export type ShareItem =
+  | {
+      id: string
+      type: "barChart"
+      scenarioId: string
+      viewMode: OutcomeDisplayMode
+      hydroclimate: string
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+    }
+  | {
+      id: string
+      type: "radar"
+      scenarioIds: string[]
+      scenarioColors?: string[]
+      axes: string[]
+      showRange: boolean
+      highlightBaseline: boolean
+      showDotsOnly: boolean
+      hydroclimate: string
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+    }
+
+// ============================================================================
+// Manual localStorage persistence for shareItems + storyItemIds
+// ============================================================================
+
+const SHARE_STORAGE_KEY = "coeqwal-share-v1"
+
+function loadShareState(): {
+  shareItems: ShareItem[]
+  storyItemIds: string[]
+} {
+  try {
+    if (typeof window === "undefined") {
+      return { shareItems: [], storyItemIds: [] }
+    }
+    const raw = localStorage.getItem(SHARE_STORAGE_KEY)
+    if (!raw) return { shareItems: [], storyItemIds: [] }
+    const parsed = JSON.parse(raw)
+    return {
+      shareItems: Array.isArray(parsed.shareItems) ? parsed.shareItems : [],
+      storyItemIds: Array.isArray(parsed.storyItemIds)
+        ? parsed.storyItemIds
+        : [],
+    }
+  } catch {
+    return { shareItems: [], storyItemIds: [] }
+  }
+}
+
+function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
+  try {
+    if (typeof window === "undefined") return
+    const stripped = shareItems.map((item) => {
+      if (item.type === "barChart") {
+        const { cachedImageDataUrl, cachedChartData, ...rest } = item
+        return rest
+      }
+      const { cachedChartData, ...rest } = item
+      return rest
+    })
+    localStorage.setItem(
+      SHARE_STORAGE_KEY,
+      JSON.stringify({ shareItems: stripped, storyItemIds }),
+    )
+  } catch {
+    // localStorage full or unavailable - silently ignore
+  }
+}
+
 // ============================================================================
 // State Interface
 // ============================================================================
@@ -68,12 +146,13 @@ interface ScenarioExplorerState {
   showAlternativeBaselines: boolean
   showDefinitions: boolean
   showKeyOperations: boolean
-  outcomeDisplayMode: "summary" | "distribution"
+  outcomeDisplayMode: OutcomeDisplayMode
   showMap: boolean
   showLocationPicker: boolean
 
   // Share staging
-  sharedScenarioIds: string[]
+  shareItems: ShareItem[]
+  storyItemIds: string[]
   showShareDrawer: boolean
 
   // Chart toggles (shared across chart panels)
@@ -85,14 +164,26 @@ interface ScenarioExplorerState {
   dimUnpinned: boolean
   showRadarRange: boolean
   showDotsOnly: boolean
-  radarSelectedOnly: boolean
+  radarShowAll: boolean
   showAxisSelector: boolean
 
   // Radar axis visibility
   radarVisibleAxes: string[]
 
+  // Resilience heatmap outcome-row visibility
+  showResilienceOutcomeSelector: boolean
+  resilienceVisibleOutcomes: string[]
+
+  // Resilience heatmap distribution sub-mode (within the "distribution"
+  // cell encoding). "scenario" = one square per scenario; "location" =
+  // one square per LOI (mean tier across scope scenarios).
+  resilienceDistributionMode: "scenario" | "location"
+
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
+
+  // Equity comparison mode
+  showEquityComparison: boolean
 
   // Theme grouping
   groupByTheme: boolean
@@ -144,16 +235,24 @@ interface ScenarioExplorerActions {
   setShowAlternativeBaselines: (show: boolean) => void
   setShowDefinitions: (show: boolean) => void
   setShowKeyOperations: (show: boolean) => void
-  setOutcomeDisplayMode: (mode: "summary" | "distribution") => void
+  setOutcomeDisplayMode: (mode: OutcomeDisplayMode) => void
   setShowMap: (show: boolean) => void
   setShowLocationPicker: (show: boolean) => void
 
   // Share staging
-  addToShare: (id: string) => void
-  removeFromShare: (id: string) => void
-  clearShared: () => void
-  setSharedScenarioIds: (ids: string[]) => void
+  addShareItem: (item: ShareItem) => void
+  removeShareItem: (id: string) => void
+  reorderShareItems: (orderedIds: string[]) => void
+  clearShareItems: () => void
+  setShareItems: (items: ShareItem[]) => void
+  updateShareItem: (id: string, patch: Partial<ShareItem>) => void
   setShowShareDrawer: (open: boolean) => void
+
+  // Story arrangement
+  addToStory: (id: string) => void
+  removeFromStory: (id: string) => void
+  reorderStory: (orderedIds: string[]) => void
+  clearStory: () => void
 
   // Chart toggles
   setRelativeToBaseline: (show: boolean) => void
@@ -164,15 +263,26 @@ interface ScenarioExplorerActions {
   setDimUnpinned: (show: boolean) => void
   setShowRadarRange: (show: boolean) => void
   setShowDotsOnly: (show: boolean) => void
-  setRadarSelectedOnly: (show: boolean) => void
+  setRadarShowAll: (show: boolean) => void
   setShowAxisSelector: (show: boolean) => void
 
   // Radar axis visibility
   toggleRadarAxis: (code: string) => void
   setRadarVisibleAxes: (codes: string[]) => void
 
+  // Resilience heatmap outcome-row visibility
+  setShowResilienceOutcomeSelector: (show: boolean) => void
+  toggleResilienceOutcome: (code: string) => void
+  setResilienceVisibleOutcomes: (codes: string[]) => void
+
+  // Resilience heatmap distribution sub-mode
+  setResilienceDistributionMode: (mode: "scenario" | "location") => void
+
   // Hydroclimate
   setHydroclimate: (value: string) => void
+
+  // Equity comparison mode
+  setShowEquityComparison: (show: boolean) => void
 
   // Theme grouping
   setGroupByTheme: (group: boolean) => void
@@ -197,6 +307,8 @@ type ScenarioExplorerStore = ScenarioExplorerState & ScenarioExplorerActions
 // Initial State
 // ============================================================================
 
+const persisted = loadShareState()
+
 const initialState: ScenarioExplorerState = {
   mainView: "get-started",
   exploreMode: "list",
@@ -216,10 +328,11 @@ const initialState: ScenarioExplorerState = {
   showAlternativeBaselines: false,
   showDefinitions: true,
   showKeyOperations: false,
-  outcomeDisplayMode: "summary",
+  outcomeDisplayMode: "bar",
   showMap: false,
   showLocationPicker: false,
-  sharedScenarioIds: [],
+  shareItems: persisted.shareItems,
+  storyItemIds: persisted.storyItemIds,
   showShareDrawer: false,
   relativeToBaseline: true,
   highlightBaseline: false,
@@ -229,10 +342,14 @@ const initialState: ScenarioExplorerState = {
   dimUnpinned: false,
   showRadarRange: false,
   showDotsOnly: false,
-  radarSelectedOnly: false,
+  radarShowAll: false,
   showAxisSelector: false,
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
+  showResilienceOutcomeSelector: false,
+  resilienceVisibleOutcomes: [...OUTCOME_CODE_ORDER],
+  resilienceDistributionMode: "scenario",
   hydroclimate: "historical",
+  showEquityComparison: false,
   groupByTheme: true,
   sortBy: null,
   sortDirection: "asc",
@@ -404,33 +521,82 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
 
     // Share staging
-    addToShare: (id) =>
+    addShareItem: (item) =>
       set((state) => {
-        if (!state.sharedScenarioIds.includes(id)) {
-          state.sharedScenarioIds.push(id)
+        if (item.type === "barChart") {
+          const exists = state.shareItems.some(
+            (s) =>
+              s.type === "barChart" &&
+              s.scenarioId === item.scenarioId &&
+              s.viewMode === item.viewMode &&
+              s.hydroclimate === item.hydroclimate,
+          )
+          if (exists) return
         }
+        state.shareItems.push(item)
         state.showShareDrawer = true
       }),
 
-    removeFromShare: (id) =>
+    removeShareItem: (id) =>
       set((state) => {
-        const idx = state.sharedScenarioIds.indexOf(id)
-        if (idx > -1) state.sharedScenarioIds.splice(idx, 1)
+        const idx = state.shareItems.findIndex((s) => s.id === id)
+        if (idx > -1) state.shareItems.splice(idx, 1)
+        const storyIdx = state.storyItemIds.indexOf(id)
+        if (storyIdx > -1) state.storyItemIds.splice(storyIdx, 1)
       }),
 
-    clearShared: () =>
+    reorderShareItems: (orderedIds) =>
       set((state) => {
-        state.sharedScenarioIds = []
+        const byId = new Map(state.shareItems.map((s) => [s.id, s]))
+        state.shareItems = orderedIds
+          .map((id) => byId.get(id))
+          .filter(Boolean) as ShareItem[]
       }),
 
-    setSharedScenarioIds: (ids) =>
+    clearShareItems: () =>
       set((state) => {
-        state.sharedScenarioIds = ids
+        state.shareItems = []
+        state.storyItemIds = []
+      }),
+
+    setShareItems: (items) =>
+      set((state) => {
+        state.shareItems = items
+      }),
+
+    updateShareItem: (id, patch) =>
+      set((state) => {
+        const item = state.shareItems.find((s) => s.id === id)
+        if (item) Object.assign(item, patch)
       }),
 
     setShowShareDrawer: (open) =>
       set((state) => {
         state.showShareDrawer = open
+      }),
+
+    // Story arrangement
+    addToStory: (id) =>
+      set((state) => {
+        if (!state.storyItemIds.includes(id)) {
+          state.storyItemIds.push(id)
+        }
+      }),
+
+    removeFromStory: (id) =>
+      set((state) => {
+        const idx = state.storyItemIds.indexOf(id)
+        if (idx > -1) state.storyItemIds.splice(idx, 1)
+      }),
+
+    reorderStory: (orderedIds) =>
+      set((state) => {
+        state.storyItemIds = orderedIds
+      }),
+
+    clearStory: () =>
+      set((state) => {
+        state.storyItemIds = []
       }),
 
     // Chart toggles
@@ -472,9 +638,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.showDotsOnly = show
       }),
-    setRadarSelectedOnly: (show) =>
+    setRadarShowAll: (show) =>
       set((state) => {
-        state.radarSelectedOnly = show
+        state.radarShowAll = show
       }),
     setShowAxisSelector: (show) =>
       set((state) => {
@@ -496,10 +662,41 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.radarVisibleAxes = codes
       }),
 
+    setShowResilienceOutcomeSelector: (show) =>
+      set((state) => {
+        state.showResilienceOutcomeSelector = show
+      }),
+
+    toggleResilienceOutcome: (code) =>
+      set((state) => {
+        const idx = state.resilienceVisibleOutcomes.indexOf(code)
+        if (idx >= 0) {
+          state.resilienceVisibleOutcomes.splice(idx, 1)
+        } else {
+          state.resilienceVisibleOutcomes.push(code)
+        }
+      }),
+
+    setResilienceVisibleOutcomes: (codes) =>
+      set((state) => {
+        state.resilienceVisibleOutcomes = codes
+      }),
+
+    setResilienceDistributionMode: (mode) =>
+      set((state) => {
+        state.resilienceDistributionMode = mode
+      }),
+
     // Hydroclimate
     setHydroclimate: (value) =>
       set((state) => {
         state.hydroclimate = value
+      }),
+
+    // Equity comparison mode
+    setShowEquityComparison: (show) =>
+      set((state) => {
+        state.showEquityComparison = show
       }),
 
     // Theme grouping
@@ -564,3 +761,17 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
   })),
 )
+
+// Auto-save shareItems + storyItemIds to localStorage on every change
+let prevShareRef: ShareItem[] = persisted.shareItems
+let prevStoryRef: string[] = persisted.storyItemIds
+useScenarioExplorerStore.subscribe((state) => {
+  if (
+    state.shareItems !== prevShareRef ||
+    state.storyItemIds !== prevStoryRef
+  ) {
+    prevShareRef = state.shareItems
+    prevStoryRef = state.storyItemIds
+    saveShareState(state.shareItems, state.storyItemIds)
+  }
+})

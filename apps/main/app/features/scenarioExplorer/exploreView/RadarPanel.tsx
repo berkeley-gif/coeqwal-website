@@ -5,52 +5,104 @@
  *
  * Wraps the @repo/viz RadarPlot component with store-driven data
  * via the shared useComparisonData hook. Supports hover coordination
- * with the sidebar and other panels.
+ * with the sidebar and other panels. Sidebar `highlightedIds` append
+ * scenarios to the chart so their traces render even when not selected.
  */
 
-import React, {
-  useMemo,
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  startTransition,
-} from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
+import { createRoot, type Root } from "react-dom/client"
 import {
   Box,
   Typography,
   useTheme,
   CircularProgress,
   Checkbox,
+  InfoOutlinedIcon,
 } from "@repo/ui/mui"
-import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
+import {
+  RadarPlot,
+  mergeRadarAxisLabelDetailStyle,
+  type RadarPlotAxisLabelDetailStyle,
+  type RadarAxisLabelDetailChromeOptions,
+} from "@repo/viz"
+import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
+import type { ShareItem } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
   getOutcomeName,
+  getOutcomeCode,
+  getOutcomeDefinition,
+  OUTCOME_DEFINITIONS,
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
+  NOD_SOD_NAMES,
   OUTCOME_REGIONAL_VARIANTS,
   type OutcomeCode,
+  type NodSodCode,
 } from "../../../content/outcomes"
+import {
+  captureSvgToBlob,
+  inlineStyles,
+  rasterizeSvgClone,
+} from "../dataExplorer/utils/exportUtils"
+import { InlineToggleChip } from "../components/InlineToggleChip"
+import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
+
+export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
+  dataUrl: string
+  color: string
+  chartData: Record<string, unknown>
+} | null>
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
-  onScenarioHover?: (scenarioId: string | null) => void
+  onOutcomeHover?: (
+    info: { scenarioId: string; outcome: string; tierValue: number } | null,
+  ) => void
+  /** Notifies parent of the current scenarioId → color mapping for the radar chart */
+  onScenarioColors?: (colors: Record<string, string>) => void
+  /** Exposes a capture function to the parent so it can trigger radar capture */
+  onCaptureReady?: (capture: () => Promise<void>) => void
+  /** Exposes a single-scenario capture function for sidebar share */
+  onSingleCaptureReady?: (capture: SingleScenarioCaptureFn) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
-  onScenarioHover,
+  onOutcomeHover,
+  onScenarioColors,
+  onCaptureReady,
+  onSingleCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
 
+  const radarAxisLabelDetailStyle =
+    useMemo((): RadarPlotAxisLabelDetailStyle => {
+      const axisTypo = theme.typography.axisLabel
+
+      return mergeRadarAxisLabelDetailStyle({
+        fontFamily: axisTypo.fontFamily as string,
+        scenarioFontSize: axisTypo.fontSize as string,
+        scenarioFontWeight: Number(axisTypo.fontWeight),
+        scenarioLetterSpacing: axisTypo.letterSpacing as string,
+        tierFontSize: theme.typography.compactCaption.fontSize as string,
+        tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
+        panelFill: theme.palette.common.white,
+        panelStroke: "none",
+        scenarioFill: "#193D6B",
+        tierFill: "#193D6B",
+        axisTitleFill: "#193D6B",
+        scenarioControlsRowHeightPx: 26,
+        scenarioControlsRowGapPx: 4,
+      })
+    }, [theme])
+
   const {
-    highlightedScenario,
-    setHighlightedScenario,
     selectedScenarios,
+    toggleScenario,
     highlightBaseline,
     showTierZones,
     dimUnpinned,
@@ -60,13 +112,22 @@ export default function RadarPanel({
     toggleRadarAxis,
     showRadarRange,
     showDotsOnly,
-    radarSelectedOnly,
+    radarShowAll,
+    setRadarShowAll,
     showAxisSelector,
+    setShowAxisSelector,
     hydroclimate,
   } = useScenarioExplorerStore()
 
-  const { getThemeForScenario } = useScenarioList()
+  const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+
+  const { getThemeForScenario, getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
+
+  const radarSvgRef = useRef<SVGSVGElement | null>(null)
+  const handleSvgRef = useCallback((svg: SVGSVGElement | null) => {
+    radarSvgRef.current = svg
+  }, [])
 
   const activeMapDot = useMemo(
     () =>
@@ -90,38 +151,134 @@ export default function RadarPanel({
     [pinnedScenarioIds],
   )
 
-  // Hover state with debounce (same pattern as ComparisonPanel)
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastHoveredIdRef = useRef<string | null>(null)
+  const handleDotHover = useCallback(
+    (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
+      onOutcomeHover?.(
+        info
+          ? {
+              scenarioId: info.scenarioId,
+              outcome: info.axis,
+              tierValue: info.tierValue,
+            }
+          : null,
+      )
+    },
+    [onOutcomeHover],
+  )
 
-  const [hoveredScenario, setHoveredScenarioRaw] =
-    useState<VerticalParallelLineData | null>(null)
+  const [axisPositions, setAxisPositions] = useState<
+    { axis: string; x: number; y: number; anchor: "start" | "end" | "middle" }[]
+  >([])
 
-  const setHoveredScenario = useCallback(
-    (scenario: VerticalParallelLineData | null) => {
-      const nextId = scenario?.id ?? null
-      if (nextId === lastHoveredIdRef.current) return
-      lastHoveredIdRef.current = nextId
-
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current)
-        hoverTimerRef.current = null
-      }
-      if (scenario) {
-        startTransition(() => setHoveredScenarioRaw(scenario))
-      } else {
-        hoverTimerRef.current = setTimeout(
-          () => startTransition(() => setHoveredScenarioRaw(null)),
-          200,
-        )
-      }
+  const handleAxisPositions = useCallback(
+    (
+      positions: {
+        axis: string
+        x: number
+        y: number
+        anchor: "start" | "end" | "middle"
+      }[],
+    ) => {
+      setAxisPositions(positions)
     },
     [],
   )
 
+  // Measured bounding boxes of each axis label group in the SVG, keyed by
+  // axis display name. Used to place the info icon flush against the
+  // rendered text rather than guessing from the anchor point. Re-measured
+  // whenever the chart re-renders (new axisPositions array).
+  const [axisLabelRects, setAxisLabelRects] = useState<
+    Record<string, { x: number; y: number; width: number; height: number }>
+  >({})
+
   useEffect(() => {
-    onScenarioHover?.(hoveredScenario?.id ?? null)
-  }, [hoveredScenario, onScenarioHover])
+    const svg = radarSvgRef.current
+    if (!svg || axisPositions.length === 0) {
+      setAxisLabelRects({})
+      return
+    }
+    const rects: Record<
+      string,
+      { x: number; y: number; width: number; height: number }
+    > = {}
+    svg.querySelectorAll<SVGGElement>("g.axis-label").forEach((g) => {
+      const axis = g.getAttribute("data-axis")
+      if (!axis) return
+      // For two-line curated labels the group contains two <text> title
+      // elements; the last appended one is the bottom line. We want the
+      // icon to land after the last word of that last line, so we measure
+      // the last <text class="axis-label-title"> specifically rather than
+      // the whole group's bbox (which would center across both lines and
+      // right-align to the widest line).
+      const titles = g.querySelectorAll<SVGTextElement>("text.axis-label-title")
+      const last = titles[titles.length - 1]
+      if (!last) return
+      try {
+        const bb = last.getBBox()
+        if (bb.width > 0 && bb.height > 0) {
+          rects[axis] = {
+            x: bb.x,
+            y: bb.y,
+            width: bb.width,
+            height: bb.height,
+          }
+        }
+      } catch {
+        // getBBox can throw on detached nodes; ignore and skip.
+      }
+    })
+    setAxisLabelRects(rects)
+  }, [axisPositions])
+
+  // Which axis label's info popover is currently open (by display name).
+  // Only one open at a time; clicking another closes the previous.
+  const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
+  const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
+
+  // Map an axis display name back to its outcome code, handling both the
+  // aggregate outcomes (OUTCOME_NAMES) and the regional NOD/SOD codes
+  // (NOD_SOD_NAMES). Returns the code string or undefined.
+  const axisDisplayNameToCode = useCallback(
+    (displayName: string): string | undefined => {
+      const primary = getOutcomeCode(displayName)
+      if (primary) return primary
+      const nodSodEntry = (
+        Object.entries(NOD_SOD_NAMES) as [NodSodCode, string][]
+      ).find(([, name]) => name === displayName)
+      return nodSodEntry?.[0]
+    },
+    [],
+  )
+
+  // Reverse lookup from a NOD/SOD code to its parent aggregate outcome,
+  // so regional spokes can fall back to the parent outcome's definition
+  // (we don't carry separate NOD/SOD definition copy on the radar).
+  const nodSodToParent = useMemo(() => {
+    const map = new Map<NodSodCode, OutcomeCode>()
+    for (const [parent, variants] of Object.entries(
+      OUTCOME_REGIONAL_VARIANTS,
+    ) as [OutcomeCode, [NodSodCode, NodSodCode]][]) {
+      const [nod, sod] = variants
+      map.set(nod, parent)
+      map.set(sod, parent)
+    }
+    return map
+  }, [])
+
+  // Resolve an axis display name to its definition text. For NOD/SOD spokes,
+  // we intentionally show the parent outcome's definition (no regional
+  // variants of the copy today). Returns undefined if no definition exists.
+  const resolveAxisDefinition = useCallback(
+    (displayName: string): string | undefined => {
+      const code = axisDisplayNameToCode(displayName)
+      if (!code) return undefined
+      const parent = nodSodToParent.get(code as NodSodCode)
+      if (parent) return OUTCOME_DEFINITIONS[parent]
+      return getOutcomeDefinition(code)
+    },
+    [axisDisplayNameToCode, nodSodToParent],
+  )
 
   // Prevent browser text-selection inside the chart area
   const chartWrapperRef = useRef<HTMLDivElement>(null)
@@ -144,27 +301,252 @@ export default function RadarPanel({
     morphGeneration,
   } = useComparisonData()
 
+  const selectedSet = useMemo(
+    () => new Set(selectedScenarios),
+    [selectedScenarios],
+  )
+
+  /** Stable palette index aligned with `comparisonData`. */
+  const scenarioColorById = useMemo(() => {
+    const m = new Map<string, string>()
+    comparisonData.forEach((d, i) => {
+      m.set(d.id, lineColors[i] ?? "#666666")
+    })
+    return m
+  }, [comparisonData, lineColors])
+
+  const filteredData = useMemo(() => {
+    let base: typeof comparisonData
+    if (radarShowAll) base = comparisonData
+    else if (selectedScenarios.length === 0) base = []
+    else base = comparisonData.filter((d) => selectedSet.has(d.id))
+
+    if (highlightedIds == null || highlightedIds.size === 0) return base
+
+    const seen = new Set(base.map((d) => d.id))
+    const merged = [...base]
+    for (const id of highlightedIds) {
+      if (seen.has(id)) continue
+      const row = comparisonData.find((d) => d.id === id)
+      if (row) {
+        merged.push(row)
+        seen.add(id)
+      }
+    }
+    return merged
+  }, [
+    comparisonData,
+    selectedSet,
+    selectedScenarios.length,
+    radarShowAll,
+    highlightedIds,
+  ])
+
+  const filteredLineColors = useMemo(
+    () => filteredData.map((d) => scenarioColorById.get(d.id) ?? "#666666"),
+    [filteredData, scenarioColorById],
+  )
+
+  const scenarioColorMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    filteredData.forEach((d, i) => {
+      map[d.id] = filteredLineColors[i] ?? "#666666"
+    })
+    return map
+  }, [filteredData, filteredLineColors])
+
+  useEffect(() => {
+    onScenarioColors?.(scenarioColorMap)
+  }, [scenarioColorMap, onScenarioColors])
+
   const scenarioThemes = useMemo(() => {
     const map: Record<string, string> = {}
-    comparisonData.forEach((d) => {
+    filteredData.forEach((d) => {
       map[d.id] = getThemeForScenario(d.id) ?? "unthemed"
     })
     return map
-  }, [comparisonData, getThemeForScenario])
+  }, [filteredData, getThemeForScenario])
 
   const visibleAxisNames = useMemo(() => {
     const nameSet = new Set(radarVisibleAxes.map(getOutcomeName))
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
 
-  const highlightedData = useMemo(
-    () =>
-      comparisonData.map((scenario) => ({
-        ...scenario,
-        highlighted: scenario.id === highlightedScenario,
-      })),
-    [comparisonData, highlightedScenario],
+  // Radar capture function - exposed to parent via onCaptureReady
+  const captureRadar = useCallback(async () => {
+    const svg = radarSvgRef.current
+    if (!svg) {
+      console.warn("[RadarPanel] captureRadar: SVG ref is null")
+      return
+    }
+    try {
+      const { dataUrl } = await captureSvgToBlob(svg)
+      const scenarioIds = filteredData.map((d) => d.id)
+
+      const item: ShareItem = {
+        id: crypto.randomUUID(),
+        type: "radar",
+        scenarioIds,
+        scenarioColors: [...filteredLineColors],
+        axes: [...radarVisibleAxes],
+        showRange: showRadarRange,
+        highlightBaseline,
+        showDotsOnly: showDotsOnly,
+        hydroclimate,
+        cachedImageDataUrl: dataUrl,
+        cachedChartData: Object.fromEntries(
+          filteredData.map((d) => [d.id, d.values]),
+        ),
+      }
+      addShareItem(item)
+    } catch (err) {
+      console.error("[RadarPanel] captureRadar failed:", err)
+    }
+  }, [
+    filteredData,
+    filteredLineColors,
+    radarVisibleAxes,
+    showRadarRange,
+    highlightBaseline,
+    showDotsOnly,
+    hydroclimate,
+    addShareItem,
+  ])
+
+  useEffect(() => {
+    onCaptureReady?.(captureRadar)
+  }, [captureRadar, onCaptureReady])
+
+  const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
+    async (scenarioId) => {
+      if (!radarSvgRef.current) return null
+
+      const alreadyVisible =
+        radarShowAll || selectedScenarios.includes(scenarioId)
+      let didToggle = false
+
+      if (!alreadyVisible) {
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = "0"
+        toggleScenario(scenarioId)
+        didToggle = true
+        const deadline = Date.now() + 2000
+        await new Promise<void>((resolve) => {
+          const check = () => {
+            const svg = radarSvgRef.current
+            if (
+              svg?.querySelector(`path[data-path-id="${scenarioId}"]`) ||
+              Date.now() > deadline
+            ) {
+              resolve()
+            } else {
+              requestAnimationFrame(check)
+            }
+          }
+          requestAnimationFrame(check)
+        })
+      }
+
+      try {
+        const svg = radarSvgRef.current
+        if (!svg) return null
+
+        const clone = svg.cloneNode(true) as SVGSVGElement
+        inlineStyles(clone, svg)
+
+        clone
+          .querySelectorAll<SVGPathElement>("path[data-path-id]")
+          .forEach((p) => {
+            if (p.getAttribute("data-path-id") !== scenarioId) p.remove()
+          })
+        clone
+          .querySelectorAll<SVGCircleElement>("circle.radar-dot")
+          .forEach((d) => {
+            if (d.getAttribute("data-scenario-id") !== scenarioId) d.remove()
+          })
+
+        const rect = svg.getBoundingClientRect()
+        const w = rect.width || svg.clientWidth || 600
+        const h = rect.height || svg.clientHeight || 600
+        const { dataUrl } = await rasterizeSvgClone(clone, w, h)
+
+        const allData = comparisonData
+        const allColors = lineColors
+        const idx = allData.findIndex((d) => d.id === scenarioId)
+        const color = idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
+
+        const scenarioEntry = allData.find((d) => d.id === scenarioId)
+        const chartData: Record<string, unknown> = scenarioEntry
+          ? { [scenarioId]: scenarioEntry.values }
+          : {}
+
+        return { dataUrl, color, chartData }
+      } catch (err) {
+        console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
+        return null
+      } finally {
+        if (didToggle) {
+          toggleScenario(scenarioId)
+        }
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = ""
+      }
+    },
+    [
+      comparisonData,
+      lineColors,
+      selectedScenarios,
+      radarShowAll,
+      toggleScenario,
+    ],
   )
+
+  useEffect(() => {
+    onSingleCaptureReady?.(captureSingleScenarioRadar)
+  }, [captureSingleScenarioRadar, onSingleCaptureReady])
+
+  const axisDetailChromeRootsRef = useRef(new Map<HTMLDivElement, Root>())
+
+  const axisLabelDetailChrome =
+    useMemo((): RadarAxisLabelDetailChromeOptions => {
+      return {
+        onBeforeSvgDomClear() {
+          const map = axisDetailChromeRootsRef.current
+          for (const root of map.values()) {
+            root.unmount()
+          }
+          map.clear()
+        },
+        onScenarioControlsMount(host, payload) {
+          const map = axisDetailChromeRootsRef.current
+          let root = map.get(host)
+          if (!root) {
+            root = createRoot(host)
+            map.set(host, root)
+          }
+          const scenarioLabel = getDisplayName(payload.scenarioId)
+          const lineColor = scenarioColorMap[payload.scenarioId] ?? "#666666"
+          const accentColor = lineColor || theme.palette.blue.bright
+
+          root.render(
+            <RadarAxisDetailScenarioControlsRoot
+              theme={theme}
+              scenarioId={payload.scenarioId}
+              scenarioLabel={scenarioLabel}
+              lineColor={lineColor}
+              accentColor={accentColor}
+              chromePaddingLeftPx={payload.chromePaddingLeftPx}
+              captureSingle={captureSingleScenarioRadar}
+            />,
+          )
+        },
+        onScenarioControlsUnmount(host) {
+          const r = axisDetailChromeRootsRef.current.get(host)
+          r?.unmount()
+          axisDetailChromeRootsRef.current.delete(host)
+        },
+      }
+    }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
 
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 
@@ -247,23 +629,7 @@ export default function RadarPanel({
     )
   }
 
-  if (!hasData && !radarSelectedOnly) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          px: theme.space.component.lg,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Select scenarios to view the radar chart.
-        </Typography>
-      </Box>
-    )
-  }
+  const hasRadarTraceData = filteredData.length > 0
 
   return (
     <Box
@@ -294,6 +660,10 @@ export default function RadarPanel({
               px: 1,
             }}
           >
+            <TooltipCloseButton
+              onClick={() => setShowAxisSelector(false)}
+              ariaLabel="Close choose outcome axes panel"
+            />
             <Typography
               variant="caption"
               sx={{
@@ -304,9 +674,10 @@ export default function RadarPanel({
                 mb: 1,
                 display: "block",
                 pl: 0.5,
+                pr: 5,
               }}
             >
-              Choose axes
+              Choose outcome axes
             </Typography>
             <AxisRow
               label="All key outcomes"
@@ -396,13 +767,15 @@ export default function RadarPanel({
             alignItems: "center",
             justifyContent: "center",
             p: 0,
+            // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
+            transform: "translateY(-10px)",
           }}
         >
           <RadarPlot
-            data={highlightedData}
+            data={filteredData}
             axes={visibleAxisNames}
             responsive
-            lineColors={lineColors}
+            lineColors={filteredLineColors}
             baselineData={baselineScenario ?? undefined}
             highlightBaseline={highlightBaseline}
             chosenIds={chosenIds}
@@ -419,14 +792,182 @@ export default function RadarPanel({
             showTierZones={showTierZones}
             showAllPaths
             showDotsOnly={showDotsOnly}
-            dimUnselected={radarSelectedOnly}
+            dimUnselected={radarShowAll && selectedScenarios.length > 0}
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
-            onLineHover={setHoveredScenario}
-            onLineClick={(d) => {
-              setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
-            }}
+            enableTooltip={false}
+            svgRefCallback={handleSvgRef}
+            onDotHover={handleDotHover}
+            onAxisPositions={handleAxisPositions}
+            axisLabelDetailStyle={radarAxisLabelDetailStyle}
+            axisLabelDetailChrome={axisLabelDetailChrome}
           />
+
+          {/* Per-axis info icons with click-to-open definition popover.
+              Positioned using the same pixel coordinates the RadarPlot
+              reports via onAxisPositions (SVG width/height are set to the
+              container's pixel size, so SVG user units == DOM pixels here,
+              and this overlay shares the same bounds and transform as the
+              chart wrapper). */}
+          {axisPositions.length > 0 && (
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              {axisPositions.map(({ axis, x, y }) => {
+                const definition = resolveAxisDefinition(axis)
+                if (!definition) return null
+
+                // Always place the icon inline after the last word of the
+                // label (i.e. flush against the right edge of the rendered
+                // text), vertically centered. When we haven't measured the
+                // label's bbox yet, fall back to a rough offset from the
+                // anchor point so the icon still appears on first paint.
+                const rect = axisLabelRects[axis]
+                const GAP = 3
+                const iconLeft = rect ? rect.x + rect.width + GAP : x + GAP
+                const iconTop = rect ? rect.y + rect.height / 2 : y
+
+                const isOpen = openInfoAxis === axis
+
+                return (
+                  <Box
+                    key={axis}
+                    sx={{
+                      position: "absolute",
+                      left: iconLeft,
+                      top: iconTop,
+                      transform: "translate(0, -50%)",
+                      pointerEvents: "auto",
+                      lineHeight: 0,
+                    }}
+                  >
+                    <ClickTooltip
+                      open={isOpen}
+                      onClose={closeInfoTooltip}
+                      placement="top"
+                      maxWidth="320px"
+                      content={
+                        <Box sx={{ pr: theme.space.component.md }}>
+                          <Typography
+                            variant="compactSubtitle"
+                            sx={{
+                              fontWeight: 700,
+                              display: "block",
+                              mb: theme.space.component.sm,
+                            }}
+                          >
+                            {axis}
+                          </Typography>
+                          <Typography
+                            variant="compactCaption"
+                            sx={{ display: "block" }}
+                          >
+                            {definition}
+                          </Typography>
+                        </Box>
+                      }
+                    >
+                      {/* span wrapper: gives MUI Tooltip a native element it
+                          can attach its ref and extra ARIA props to. */}
+                      <span style={{ display: "inline-flex" }}>
+                        <Box
+                          component="button"
+                          type="button"
+                          aria-label={`About ${axis}`}
+                          aria-expanded={isOpen}
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation()
+                            setOpenInfoAxis(isOpen ? null : axis)
+                          }}
+                          sx={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "2px",
+                            borderRadius: "50%",
+                            color: isOpen
+                              ? theme.palette.primary.main
+                              : theme.palette.text.primary,
+                            transition:
+                              "color 120ms ease, background-color 120ms ease",
+                            "&:hover": {
+                              color: theme.palette.primary.main,
+                            },
+                            "&:focus-visible": {
+                              outline: `2px solid ${theme.palette.primary.main}`,
+                              outlineOffset: "1px",
+                            },
+                          }}
+                        >
+                          <InfoOutlinedIcon
+                            sx={{ fontSize: 14, display: "block" }}
+                          />
+                        </Box>
+                      </span>
+                    </ClickTooltip>
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
         </Box>
+
+        {!hasRadarTraceData && !isLoading && (
+          <ChartToast maxWidth={480}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">
+                Select scenarios on the left to see them on the chart, or use
+              </Box>
+              <InlineToggleChip
+                label="show all scenarios"
+                active={radarShowAll}
+                onClick={() => setRadarShowAll(!radarShowAll)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
+          </ChartToast>
+        )}
+
+        {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
+          <ChartToast maxWidth={440}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">To show data, use</Box>
+              <InlineToggleChip
+                label="choose outcome axes"
+                active={showAxisSelector}
+                onClick={() => setShowAxisSelector(!showAxisSelector)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
+          </ChartToast>
+        )}
       </Box>
 
       {isLoading && hasData && (

@@ -9,7 +9,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useState, useEffect, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -29,10 +29,12 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
+import type { OutcomeDisplayMode, ShareItem } from "../store"
 import { useOutcomeMapAction } from "../../map/hooks"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
+import { captureElementToBlob } from "../dataExplorer/utils/exportUtils"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -137,12 +139,14 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   )
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
-  const addToShare = useScenarioExplorerStore((s) => s.addToShare)
+  const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
   const togglePinnedScenario = useScenarioExplorerStore(
     (s) => s.togglePinnedScenario,
   )
 
   const accentColor = scenarioColor || theme.palette.blue.bright
+  const outcomeColRef = useRef<HTMLDivElement>(null)
 
   // Map visualization hook
   const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
@@ -150,6 +154,36 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
+
+  const handleShare = useCallback(async () => {
+    const itemId = crypto.randomUUID()
+    const item: ShareItem = {
+      id: itemId,
+      type: "barChart",
+      scenarioId: scenario.scenarioId,
+      viewMode: outcomeDisplayMode,
+      hydroclimate,
+      cachedChartData: scenarioChartData as Record<string, unknown>,
+    }
+
+    const el = outcomeColRef.current
+    if (el) {
+      try {
+        const { dataUrl } = await captureElementToBlob(el)
+        item.cachedImageDataUrl = dataUrl
+      } catch {
+        // capture failed - scorecard still renders from live data
+      }
+    }
+
+    addShareItem(item)
+  }, [
+    scenario.scenarioId,
+    outcomeDisplayMode,
+    scenarioChartData,
+    addShareItem,
+    hydroclimate,
+  ])
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
   // Refs to store glyph container elements for tooltip anchoring
@@ -168,11 +202,13 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
    * current tool context and the outcomeDisplayMode toggle:
    *
    * List view:
-   *   summary      → OutcomeGlyphItem (bars)
+   *   average      → TierSummaryCell
+   *   bar          → OutcomeGlyphItem (bars)
    *   distribution → OutcomeGlyphItem (distribution squares)
    *
    * Other tools:
-   *   summary      → TierSummaryCell (compact heatmap)
+   *   average      → TierSummaryCell (compact heatmap)
+   *   bar          → OutcomeGlyphItem (bars)
    *   distribution → OutcomeGlyphItem (bars)
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
@@ -181,8 +217,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === shortCode
 
-    // Non-list + summary toggle → compact heatmap cell
-    if (!isListMode && outcomeDisplayMode === "summary") {
+    if (outcomeDisplayMode === "average") {
       return (
         <Box
           key={shortCode}
@@ -195,6 +230,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
             isActive={isActive}
             isTooltipActive={activeTooltip === shortCode}
             onClick={() => handleOutcomeClick(shortCode)}
+            mode={isListMode ? "numeric" : "label"}
           />
         </Box>
       )
@@ -319,7 +355,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               alignSelf: "start",
               mr: -0.5,
               ...(!compact && {
-                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
+                pt: isListMode
+                  ? theme.spacing(theme.scenarios.grid.row.padding as number)
+                  : `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
                 pb: theme.scenarios.grid.row.padding,
               }),
               ...(compact && { gridRow: "1 / -1" }),
@@ -335,6 +373,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               sx={{
                 ...theme.scenarios.checkbox.sm,
                 cursor: "pointer",
+                ...(isListMode && { mt: "1px" }),
               }}
             />
           </Box>
@@ -364,8 +403,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               scenarioChartData={scenarioChartData}
               isPinned={isPinned}
               accentColor={accentColor}
-              addToShare={addToShare}
+              handleShare={handleShare}
               togglePinnedScenario={togglePinnedScenario}
+              outcomeColRef={outcomeColRef}
             />
           )}
         </>
@@ -384,23 +424,33 @@ export function InlineRowActions({
   displayMode,
   isPinned,
   accentColor,
-  addToShare,
+  onShare,
   togglePinnedScenario,
   hidePinning,
+  shareIconNudgeTop,
+  dense,
 }: {
   scenarioId: string
   scenarioLabel: string
-  displayMode: "summary" | "distribution"
+  displayMode: OutcomeDisplayMode
   isPinned: boolean
   accentColor: string
-  addToShare: (id: string) => void
+  onShare: () => void
   togglePinnedScenario: (id: string) => void
   hidePinning?: boolean
+  /** Optional visual offset for the share control (e.g. sidebar alignment) */
+  shareIconNudgeTop?: string
+  /** Tighter padding and gaps (e.g. radar axis detail foreignObject row) */
+  dense?: boolean
 }) {
   const theme = useTheme()
-  const sharedScenarioIds = useScenarioExplorerStore((s) => s.sharedScenarioIds)
-  const shareKey = `${scenarioId}:${displayMode}`
-  const isShared = sharedScenarioIds.includes(shareKey)
+  const shareItems = useScenarioExplorerStore((s) => s.shareItems)
+  const isShared = shareItems.some(
+    (s) =>
+      s.type === "barChart" &&
+      s.scenarioId === scenarioId &&
+      s.viewMode === displayMode,
+  )
   const [justShared, setJustShared] = useState(false)
 
   useEffect(() => {
@@ -410,9 +460,11 @@ export function InlineRowActions({
   }, [justShared])
 
   const viewLabel =
-    displayMode === "distribution"
-      ? "Key outcomes distribution"
-      : "Key outcomes bar chart"
+    displayMode === "average"
+      ? "Key outcomes average"
+      : displayMode === "distribution"
+        ? "Key outcomes distribution"
+        : "Key outcomes bar chart"
 
   const shareTooltip = justShared ? (
     <span>
@@ -444,13 +496,16 @@ export function InlineRowActions({
     </span>
   )
 
+  const iconPad = dense ? 0.25 : 0.375
+  const iconSize = dense ? "0.875rem" : "1rem"
+
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 0.25,
-        ml: 0.25,
+        gap: dense ? 0 : 0.25,
+        ml: dense ? 0 : 0.25,
       }}
     >
       {!hidePinning && (
@@ -478,13 +533,16 @@ export function InlineRowActions({
               togglePinnedScenario(scenarioId)
             }}
             sx={{
-              p: 0.25,
-              color: isPinned ? accentColor : theme.palette.grey[400],
+              p: iconPad,
+              color: isPinned ? accentColor : theme.palette.grey[500],
+              "&:hover": {
+                color: isPinned ? accentColor : theme.palette.grey[700],
+              },
             }}
           >
             <icons.PushPin
               sx={{
-                fontSize: "0.85rem",
+                fontSize: iconSize,
                 transform: isPinned ? "none" : "rotate(45deg)",
               }}
             />
@@ -512,17 +570,26 @@ export function InlineRowActions({
           size="small"
           onClick={(e) => {
             e.stopPropagation()
-            addToShare(shareKey)
+            onShare()
             setJustShared(true)
           }}
           sx={{
-            p: 0.25,
+            p: iconPad,
+            ...(shareIconNudgeTop != null && {
+              position: "relative",
+              top: shareIconNudgeTop,
+            }),
             color: isShared
               ? theme.palette.blue.bright
-              : theme.palette.grey[400],
+              : theme.palette.grey[500],
+            "&:hover": {
+              color: isShared
+                ? theme.palette.blue.bright
+                : theme.palette.grey[700],
+            },
           }}
         >
-          <icons.IosShare sx={{ fontSize: "0.85rem" }} />
+          <icons.IosShare sx={{ fontSize: iconSize }} />
         </IconButton>
       </Tooltip>
     </Box>
@@ -693,13 +760,15 @@ function NonCompactRowContent({
   scenarioChartData = {},
   isPinned = false,
   accentColor,
-  addToShare,
+  handleShare,
   togglePinnedScenario,
+  outcomeColRef,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
   accentColor?: string
-  addToShare?: (id: string) => void
+  handleShare?: () => void
   togglePinnedScenario?: (id: string) => void
+  outcomeColRef?: React.RefObject<HTMLDivElement | null>
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
@@ -712,14 +781,14 @@ function NonCompactRowContent({
   const isFullMode = layoutMode === "full"
 
   const inlineActionsNode =
-    isListMode && addToShare && togglePinnedScenario && accentColor ? (
+    isListMode && handleShare && togglePinnedScenario && accentColor ? (
       <InlineRowActions
         scenarioId={scenario.scenarioId}
         scenarioLabel={scenario.label}
-        displayMode={outcomeDisplayMode as "summary" | "distribution"}
+        displayMode={outcomeDisplayMode}
         isPinned={isPinned}
         accentColor={accentColor}
-        addToShare={addToShare}
+        onShare={handleShare}
         togglePinnedScenario={togglePinnedScenario}
       />
     ) : undefined
@@ -728,6 +797,7 @@ function NonCompactRowContent({
     <StrategyHeader
       strategy={scenario}
       titleVariant="body2"
+      compact={isListMode}
       showDescription={showDescription}
       disableTruncation={disableTrunc}
       descriptionMaxWidth="none"
@@ -833,8 +903,9 @@ function NonCompactRowContent({
         </Box>
       )}
 
-      {/* Column 4: Outcome glyphs — wraps below in wrapped mode */}
+      {/* Column 4: Outcome glyphs - wraps below in wrapped mode */}
       <Box
+        ref={outcomeColRef}
         className="outcome-col"
         sx={{
           gridColumn:
@@ -857,7 +928,7 @@ function NonCompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        {/* Key outcomes label — compact mode only (wrapped uses header row) */}
+        {/* Key outcomes label - compact mode only (wrapped uses header row) */}
         {layoutMode === "compact" && (
           <Typography
             variant="dashboard"
@@ -932,7 +1003,7 @@ function NonCompactRowContent({
 }
 
 /**
- * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
+ * Outcomes-only row content - just the outcome glyphs, no title/ops/checkbox.
  * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
  *
  * In distribution view, a second grid row of location descriptions is appended

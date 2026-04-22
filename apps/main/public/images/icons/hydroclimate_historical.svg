@@ -3,7 +3,7 @@
   <defs>
     <style>
       .bg { fill: #2d89b7; }
-      .fg { fill: #fff; }
+      .fg { fill: #fcfbfa; }
     </style>
   </defs>
   <!-- Blue background circle -->
@@ -11,10 +11,10 @@
   <!-- Clock icon for historical -->
   <g class="fg">
     <!-- Clock face -->
-    <circle cx="60" cy="60" r="35" fill="none" stroke="#fff" stroke-width="5"/>
+    <circle cx="60" cy="60" r="35" fill="none" stroke="#fcfbfa" stroke-width="5"/>
     <!-- Clock hands -->
-    <line x1="60" y1="60" x2="60" y2="35" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
-    <line x1="60" y1="60" x2="78" y2="60" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="60" y1="60" x2="60" y2="35" stroke="#fcfbfa" stroke-width="5" stroke-linecap="round"/>
+    <line x1="60" y1="60" x2="78" y2="60" stroke="#fcfbfa" stroke-width="4" stroke-linecap="round"/>
     <!-- Center dot -->
     <circle cx="60" cy="60" r="4"/>
   </g>

@@ -141,12 +141,6 @@ export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
   "SOD_GW",
 ]
 
-/** All radar axes: standard API outcomes + NOD/SOD split axes */
-export const ALL_RADAR_AXES_ORDER: string[] = [
-  ...OUTCOME_CODE_ORDER,
-  ...NOD_SOD_OUTCOME_CODES,
-]
-
 /** NOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
 export const NOD_CODES: NodSodCode[] = [
   "NOD_DW",
@@ -175,6 +169,19 @@ export const OUTCOME_REGIONAL_VARIANTS: Partial<
   RES_STOR: ["NOD_RES", "SOD_RES"],
   GW_STOR: ["NOD_GW", "SOD_GW"],
 }
+
+/**
+ * Radar spoke order (codes): each aggregate outcome, then its NOD and SOD axes
+ * when those exist - so e.g. Community deliveries → NOD → SOD clockwise.
+ * Outcomes without regional splits appear alone. Selected-only subsets keep
+ * this relative order (see RadarPanel `visibleAxisNames`).
+ */
+export const ALL_RADAR_AXES_ORDER: string[] = OUTCOME_CODE_ORDER.flatMap(
+  (code) => {
+    const v = OUTCOME_REGIONAL_VARIANTS[code]
+    return v ? [code, v[0], v[1]] : [code]
+  },
+)
 
 // =============================================================================
 // OUTCOME LOCATION DESCRIPTIONS
@@ -252,7 +259,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   FW_EXP:
     "Tier reflects the amount of fresh water exported from the Delta pumps (Banks, Jones) over a 100-year simulation period. For this tier calculation, the volume of water pumped at either pumping location is reduced proportionally by the amount the salinity of that water exceeds 900 uS/cm. Water pumped with salinity greater than 2500 uS/cm is assigned a 0 value. Tiers are defined based on the combined total volume pumped at each pumping location for the 100-year period.",
   FW_DELTA_USES:
-    "Tiers reflect the frequency with which water in the western Delta falls into fresh, moderate, or saline categories as an indicator of its suitability for in-Delta uses. Tiers are defined based on the frequency with which two west-Delta salinity stations (Emmaton [EM], Jersey Point [JP]) are below/above three salinity thresholds (measured in microSiemens/cm, uS/cm): **900 uS/cm** low salinity — **1600 uS/cm** moderate — **2500 uS/cm** high",
+    "Tiers reflect the frequency with which water in the western Delta falls into fresh, moderate, or saline categories as an indicator of its suitability for in-Delta uses. Tiers are defined based on the frequency with which two west-Delta salinity stations (Emmaton [EM], Jersey Point [JP]) are below/above three salinity thresholds (measured in microSiemens/cm, uS/cm): **900 uS/cm** low salinity - **1600 uS/cm** moderate - **2500 uS/cm** high",
   WRC_SALMON_AB:
     "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
 }

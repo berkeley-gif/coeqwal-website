@@ -128,4 +128,7 @@ export interface OutcomeLayerConfig {
   circleRadius?: number
   circleStrokeWidth?: number
   cameraPreset?: CameraView
+  cameraBounds?: [[number, number], [number, number]]
+  featureIdMap?: Record<string, string>
+  outlineOnly?: boolean
 }

@@ -32,11 +32,12 @@ import {
   getTierColorsFromTheme,
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
-// GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+// GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
 // TODO: replace with lightweight /locations endpoint + hardcoded centroids
 // import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { getOutcomeName } from "../../../../content/outcomes"
 import { useActiveOutcomeVisualization } from "../../store"
+import { resolveSourceForQuery } from "../../config/tilesetSources"
 import { useMap } from "@repo/map"
 
 // ============================================================================
@@ -119,7 +120,7 @@ export function SummaryPanel({
 
         if (cancelled) return
 
-        // GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+        // GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
         // TODO: replace with lightweight /locations endpoint + hardcoded centroids
         // for demand units, or compute centroids from Mapbox tiles via querySourceFeatures.
         const apiNamesMap = new Map<string, string>()
@@ -137,7 +138,8 @@ export function SummaryPanel({
                 const resultMap = new Map<string, DemandUnitProperties>()
 
                 // Query source features to get properties
-                const features = map.querySourceFeatures("composite", {
+                const source = resolveSourceForQuery(map, "demand-units")
+                const features = map.querySourceFeatures(source, {
                   sourceLayer: "demand_units",
                 })
 

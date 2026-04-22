@@ -1,29 +1,25 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
-import useActiveSection from "../hooks/useActiveSection"
+import { Box, Typography, Stack, useTheme } from "@repo/ui/mui"
 import TemperatureLineChart from "./vis/TemperatureLineChart"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import StickyContainer from "./helpers/StickyContainer"
 import { motion, useScroll, useTransform } from "@repo/motion"
-
-function SectionStarter() {
-  return (
-    <>
-      <BuilderText />
-      <Temperature />
-    </>
-  )
-}
+import { useRef } from "react"
 
 //TODO: update text-section styles
-function BuilderText() {
-  const { sectionRef } = useActiveSection("opener-builder", { amount: 0.5 })
+export function TemperatureBuilder() {
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   })
   const linePath = useTransform(scrollYProgress, [0.3, 0.7], [0, 1])
+  const sectionBg = useTransform(
+    scrollYProgress,
+    [0, 0.5],
+    ["rgba(46, 82, 130, 0.34)", "rgba(34, 63, 103, 0.56)"],
+  )
 
   return (
     <StickyContainer
@@ -31,16 +27,20 @@ function BuilderText() {
       stickyRollHeight="150vh"
       sectionRef={sectionRef}
     >
+      <motion.div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: sectionBg,
+          pointerEvents: "none",
+        }}
+      />
+
       <SVGLineContainer viewBox="0 0 1728 1095">
         <motion.path
           d="M1723 -29C1723 -29 2356 503 1440 211C524 -80.9998 -199 473 463 543C1125 613 1549 567 1187 811C825 1055 -181 1093 -181 1093"
           className="svg-line"
           pathLength={linePath}
-          /*style={{
-                strokeDasharray: pathLength,
-                strokeDashoffset: pathLength * (1 - lineProgress),
-                willChange: 'stroke-dashoffset'
-            }}*/
         />
       </SVGLineContainer>
 
@@ -99,23 +99,22 @@ function BuilderText() {
   )
 }
 
-function Temperature() {
-  const { sectionRef } = useActiveSection("temperature", { amount: 0.5 })
+export function Temperature() {
+  const sectionRef = useRef(null)
+  const theme = useTheme()
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   })
 
-  /*
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (v) => { 
-      console.log("Temperature scrollYProgress:", v);
-    })
-    return () => unsubscribe()
-  }, [scrollYProgress]);*/
-
   const linePath = useTransform(scrollYProgress, [0.6, 0.8], [0, 1])
+  const textOpacity = useTransform(scrollYProgress, [0.65, 0.75], [0, 1])
+  const sectionBg = useTransform(
+    scrollYProgress,
+    [0.35, 0.7],
+    ["rgba(34, 63, 103, 0.56)", "#172a48"],
+  )
 
   return (
     <StickyContainer
@@ -123,11 +122,22 @@ function Temperature() {
       stickyRollHeight="200vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="0 0 1728 367">
+      <motion.div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: sectionBg,
+          pointerEvents: "none",
+        }}
+      />
+
+      <SVGLineContainer viewBox="0 0 1728 952">
         <motion.path
-          d="M-120 364.258C-120 364.258 976 229.257 1264 47.2572C1400.13 -38.7677 1585.63 8.97369 1728 110.281"
-          className="svg-line"
-          transform="translate(0, -270)"
+          id="warmingTrendPath"
+          //d="M-124 290.308C-124 290.308 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          d="M-112 262.094C-112 262.094 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          className="svg-line glow-effect"
+          transform="translate(50, 187)"
           pathLength={linePath}
           /*style={{
                 strokeDasharray: pathLength,
@@ -136,7 +146,30 @@ function Temperature() {
                 willChange: 'stroke-dashoffset'
             }}*/
         />
-
+        <motion.path
+          id="warmingTrendTextPath"
+          //d="M-124 290.308C-124 290.308 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          d="M-112 262.094C-112 262.094 1255 121.095 1546 21.0942C1837 -78.9061 1824 234.095 1678 490.095C1532 746.095 1767 1062.06 1273 1030.06"
+          fill="none"
+          stroke="none"
+          transform="translate(50, 155)"
+        />
+        <motion.text
+          fill="#F1B143"
+          fontWeight="bold"
+          style={{
+            fontSize: theme.typography.caption.fontSize,
+            opacity: textOpacity,
+          }}
+        >
+          <textPath
+            href="#warmingTrendTextPath"
+            startOffset="38.5%"
+            textAnchor="middle"
+          >
+            Overall Warming Trend
+          </textPath>
+        </motion.text>
         {/* Arrow  */}
         {/* <g 
             transform="translate(1680, 80) rotate(-20)"
@@ -156,12 +189,35 @@ function Temperature() {
         sx={{
           position: "relative",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           paddingTop: "5rem",
+          pointerEvents: "auto",
         }}
       >
-        <TemperatureLineChart scrollProgress={scrollYProgress} />
+        <Stack
+          direction="column"
+          spacing={1}
+          alignItems="flex-start"
+          sx={{ width: "100%" }}
+        >
+          <Typography variant="h5" sx={{ textAlign: "left" }}>
+            California Annual Average Temperature
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ opacity: 0.7, textAlign: "left" }}
+          >
+            Data source:{" "}
+            <a
+              href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/4/tavg/12/12/1960-2026"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              NOAA
+            </a>
+          </Typography>
+          <TemperatureLineChart scrollProgress={scrollYProgress} />
+        </Stack>
       </Box>
 
       <Box
@@ -171,8 +227,10 @@ function Temperature() {
         sx={{
           position: "relative",
           display: "flex",
+          marginTop: "-5rem",
           flexDirection: "column",
           justifyContent: "start",
+          pointerEvents: "auto",
         }}
       >
         <Box className="paragraph">
@@ -195,7 +253,7 @@ function Temperature() {
           </Typography>
           <Typography variant="body1">
             {
-              "Climate models predict that average temperatures may increase by an additional 6-9°F by end of century."
+              "Climate models predict that average temperatures may increase by an additional 6-9°F by the end of the century."
             }
           </Typography>
         </Box>
@@ -204,4 +262,4 @@ function Temperature() {
   )
 }
 
-export default SectionStarter
+export default Temperature

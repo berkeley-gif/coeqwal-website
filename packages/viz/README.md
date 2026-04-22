@@ -21,6 +21,10 @@ import { PercentileMatrix, DumbbellChart } from "@repo/viz"
 
 All components are default-exported from their files and re-exported as named exports from the barrel.
 
+### D3 re-exports
+
+`d3` is listed only in this package’s dependencies. Apps that need raw D3 helpers should import the curated named exports from `@repo/viz` (for example `scaleLinear`, `select`, `mean`, `extent`) rather than adding `d3` to the app. New symbols can be added to the barrel in `src/index.ts` when required.
+
 ## Component conventions
 
 Every component in `src/components/` follows these patterns. New components should attempt to match.
@@ -279,6 +283,7 @@ useEffect(() => {
 The barrel file (`src/index.ts`) re-exports every component as a named export alongside its
 props type. It also exports:
 
+- **D3 (curated)** - `curveBasis`, `timeFormat`, `interpolateRgb`, `range`, `max`, `scaleLinear`, `area`, `line`, `mean`, `extent`, `ticks`, `scaleBand`, `select`, and types `ScaleLinear`, `Area`
 - **`useResizeObserver`** - shared responsive sizing hook
 - **D3 utilities** - `parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
-- **Color palettes** - `THEME_LINE_PALETTES`, `getThemeLineColor` from `utils/themeLineColors.ts`
+- **Color palettes** - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light→dark for chart indices), `getThemeLineColor` from `utils/themeLineColors.ts`

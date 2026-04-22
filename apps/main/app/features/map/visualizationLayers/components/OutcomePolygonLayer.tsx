@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { useMapReady } from "../../store"
 import type { TierColorMap, LayerType } from "../types"
 import {
   LAYER_IDS,
@@ -40,6 +41,10 @@ interface OutcomePolygonLayerProps {
   visible: boolean
   /** Mapbox layer ID (optional, defaults based on layerType) */
   mapboxLayerId?: string
+  /** Maps tier-data IDs to Mapbox feature property values */
+  featureIdMap?: Record<string, string>
+  /** Transparent fill with a broad tier-colored outline */
+  outlineOnly?: boolean
 }
 
 // Mapbox expression type
@@ -103,27 +108,26 @@ function getLayerIds(layerType: LayerType, mapboxLayerId?: string) {
 }
 
 /**
- * Translate CalSim IDs to gnisidlabel for reservoir layer
+ * Translate feature IDs using a mapping (API IDs → Mapbox property values).
+ * Reservoir layer uses the hardcoded RESERVOIR_CALSIM_TO_GNISIDLABEL mapping;
+ * other layers may supply a per-outcome featureIdMap from the registry.
  */
-function translateReservoirIds(
+function translateFeatureIds(
   featureIds: string[],
   tierColorMap: TierColorMap,
+  mapping: Record<string, string>,
 ): { translatedIds: string[]; translatedColorMap: TierColorMap } {
   const translatedIds = featureIds
-    .map((id) => RESERVOIR_CALSIM_TO_GNISIDLABEL[id])
+    .map((id) => mapping[id])
     .filter((v): v is string => !!v)
 
-  // Dedupe (SLUIS_CVP and SLUIS_SWP both map to "San Luis Reservoir")
   const uniqueIds = [...new Set(translatedIds)]
 
   const translatedColorMap: TierColorMap = {}
-  Object.entries(tierColorMap).forEach(([calsimId, color]) => {
-    const gnisLabel = RESERVOIR_CALSIM_TO_GNISIDLABEL[calsimId]
-    if (gnisLabel) {
-      // Keep the first color (or could take worst tier)
-      if (!translatedColorMap[gnisLabel]) {
-        translatedColorMap[gnisLabel] = color
-      }
+  Object.entries(tierColorMap).forEach(([id, color]) => {
+    const mapped = mapping[id]
+    if (mapped && !translatedColorMap[mapped]) {
+      translatedColorMap[mapped] = color
     }
   })
 
@@ -152,14 +156,18 @@ export function OutcomePolygonLayer({
   classFilter,
   visible,
   mapboxLayerId,
+  featureIdMap,
+  outlineOnly,
 }: OutcomePolygonLayerProps) {
   const theme = useTheme()
   const { mapRef } = useMap()
+  const mapReady = useMapReady()
   const outlineCreatedRef = useRef(false)
   /** RAF handle for the deferred fade-in; cancelled if the effect re-runs first */
   const fadeRafRef = useRef<number | null>(null)
   /** Tracks whether the layer was already showing colored data (for crossfade vs fade-in) */
   const wasShowingDataRef = useRef(false)
+  const prevFillIdRef = useRef<string>("")
 
   // Get layer IDs based on type
   const { fillId, outlineId } = useMemo(
@@ -167,13 +175,27 @@ export function OutcomePolygonLayer({
     [layerType, mapboxLayerId],
   )
 
-  // For reservoir layer, translate IDs
+  // Reset showing-data flag when the underlying Mapbox layer changes so we
+  // always go through the full fade-in path for the new layer.
+  if (fillId !== prevFillIdRef.current) {
+    prevFillIdRef.current = fillId
+    wasShowingDataRef.current = false
+  }
+
+  // Translate API IDs → Mapbox feature property values when needed
   const { translatedIds, translatedColorMap } = useMemo(() => {
     if (layerType === "reservoir") {
-      return translateReservoirIds(featureIds, tierColorMap)
+      return translateFeatureIds(
+        featureIds,
+        tierColorMap,
+        RESERVOIR_CALSIM_TO_GNISIDLABEL,
+      )
+    }
+    if (featureIdMap && Object.keys(featureIdMap).length > 0) {
+      return translateFeatureIds(featureIds, tierColorMap, featureIdMap)
     }
     return { translatedIds: featureIds, translatedColorMap: tierColorMap }
-  }, [layerType, featureIds, tierColorMap])
+  }, [layerType, featureIds, tierColorMap, featureIdMap])
 
   // Check if we have tier data loaded
   const hasTierData = Object.keys(translatedColorMap).length > 0
@@ -222,8 +244,20 @@ export function OutcomePolygonLayer({
   useEffect(() => {
     if (!mapRef?.current || !fillId) return
 
+    // Style is being reloaded - reset state so the next run (mapReady = true)
+    // always uses the full fade-in path with proper paint initialization.
+    if (!mapReady) {
+      wasShowingDataRef.current = false
+      outlineCreatedRef.current = false
+      return
+    }
+
     const map = mapRef.current.getMap()
-    if (!map.getLayer(fillId)) return
+    if (!map.getLayer(fillId)) {
+      outlineCreatedRef.current = false
+      wasShowingDataRef.current = false
+      return
+    }
 
     // Cancel any pending deferred fade-in from a previous run
     if (fadeRafRef.current !== null) {
@@ -279,17 +313,26 @@ export function OutcomePolygonLayer({
     // ── Crossfade path: data was already showing, just update colors ──
     // Mapbox interpolates fill-color and line-color natively, so we only
     // need to set the transition duration and update the expression.
+    // Always ensure visibility is "visible" - the layer may have been hidden
+    // by a previous unmount cleanup when switching between different polygon
+    // layer types (e.g. demand-units → calsim-wba).
     if (wasShowingDataRef.current) {
+      map.setLayoutProperty(fillId, "visibility", "visible")
       map.setPaintProperty(fillId, "fill-color-transition", {
         duration: COLOR_TRANSITION_DURATION,
         delay: 0,
       })
       map.setPaintProperty(fillId, "fill-color", colorExpression)
 
+      if (outlineOnly) {
+        map.setPaintProperty(fillId, "fill-opacity", 0)
+      }
+
       if (map.getLayer(outlineId)) {
         if (filterExpression) {
           map.setFilter(outlineId, filterExpression)
         }
+        map.setLayoutProperty(outlineId, "visibility", "visible")
         map.setPaintProperty(outlineId, "line-color-transition", {
           duration: COLOR_TRANSITION_DURATION,
           delay: 0,
@@ -309,6 +352,11 @@ export function OutcomePolygonLayer({
     })
     map.setPaintProperty(fillId, "fill-opacity", 0)
     map.setLayoutProperty(fillId, "visibility", "visible")
+
+    // Reset stale ref if the outline was destroyed (e.g. basemap style change)
+    if (!map.getLayer(outlineId) && outlineCreatedRef.current) {
+      outlineCreatedRef.current = false
+    }
 
     // Create outline layer if it doesn't exist, starting at opacity 0
     if (!map.getLayer(outlineId) && !outlineCreatedRef.current) {
@@ -352,7 +400,10 @@ export function OutcomePolygonLayer({
       })
       map.setPaintProperty(outlineId, "line-opacity", 0)
 
-      if (layerType === "delta") {
+      if (outlineOnly) {
+        map.setPaintProperty(outlineId, "line-width", 4)
+        map.setPaintProperty(outlineId, "line-offset", 0)
+      } else if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else {
@@ -393,7 +444,9 @@ export function OutcomePolygonLayer({
       fadeRafRef.current = null
       if (!map.getLayer(fillId)) return
 
-      if (layerType === "delta") {
+      if (outlineOnly) {
+        map.setPaintProperty(fillId, "fill-opacity", 0)
+      } else if (layerType === "delta") {
         map.setPaintProperty(fillId, "fill-opacity", 0.9)
       } else {
         map.setPaintProperty(fillId, "fill-opacity", [
@@ -432,6 +485,8 @@ export function OutcomePolygonLayer({
     filterExpression,
     layerType,
     hasTierData,
+    outlineOnly,
+    mapReady,
   ])
 
   // Cleanup on unmount
@@ -449,14 +504,17 @@ export function OutcomePolygonLayer({
         map.setFilter(fillId, ["==", idProperty || "id", ""])
       }
 
-      // Remove outline layer we created
-      if (map.getLayer(outlineId) && outlineCreatedRef.current) {
-        try {
-          map.removeLayer(outlineId)
-        } catch {
-          /* ignore */
+      if (map.getLayer(outlineId)) {
+        if (outlineCreatedRef.current) {
+          try {
+            map.removeLayer(outlineId)
+          } catch {
+            /* ignore */
+          }
+          outlineCreatedRef.current = false
+        } else {
+          map.setLayoutProperty(outlineId, "visibility", "none")
         }
-        outlineCreatedRef.current = false
       }
     }
   }, [mapRef, fillId, outlineId, idProperty])

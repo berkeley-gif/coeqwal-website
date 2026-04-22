@@ -1,28 +1,22 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
-import useActiveSection from "../hooks/useActiveSection"
-import GroundwaterContainer from "./vis/Groundwater"
+import GroundwaterLine from "./vis/GroundwaterLine"
 import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
-
-function SectionGroundwater() {
-  return (
-    <>
-      <Groundwater />
-    </>
-  )
-}
+import { useRef } from "react"
 
 function Groundwater() {
-  const { sectionRef } = useActiveSection("groundwater", { amount: 0.5 })
+  const sectionRef = useRef(null)
+  const theme = useTheme()
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   })
 
   const linePath = useTransform(scrollYProgress, [0.7, 0.9], [0, 1])
+  const textOpacity = useTransform(scrollYProgress, [0.7, 0.8], [0, 1])
 
   return (
     <StickyContainer
@@ -30,13 +24,37 @@ function Groundwater() {
       stickyRollHeight="120vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="0 0 1291 630">
+      <SVGLineContainer viewBox="0 20 1728 1115" zIndex={1}>
         <motion.path
-          d="M0.390137 -9 C0.390137 -9 443.39 80 560.39 290 C677.39 500 1044.83 496.033 1318.39 628"
-          className="svg-line"
+          id="groundwaterPumpingPath"
+          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          className="svg-line glow-effect"
           pathLength={linePath}
-          transform="translate(0, -250)"
+          transform={"translate(0, -14)"}
         />
+        <motion.path
+          id="groundwaterPumpingTextPath"
+          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          fill="none"
+          stroke="none"
+          transform="translate(0, -38)"
+        />
+        <motion.text
+          fill="#F1B143"
+          fontWeight="bold"
+          style={{
+            fontSize: theme.typography.caption.fontSize,
+            opacity: textOpacity,
+          }}
+        >
+          <textPath
+            href="#groundwaterPumpingTextPath"
+            startOffset="35%"
+            textAnchor="middle"
+          >
+            The pumping below
+          </textPath>
+        </motion.text>
       </SVGLineContainer>
 
       <Box
@@ -53,12 +71,15 @@ function Groundwater() {
         }}
       >
         <Box className="paragraph" component="article">
-          <Typography variant="h4">{"Increasing Droughts"}</Typography>
+          <Typography variant="h3">{"Increasing Droughts"}</Typography>
         </Box>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
+            {"Droughts are not new to California."}
+          </Typography>
+          <Typography variant="body1">
             {
-              "Droughts are not new to California. But in a changing climate, droughts are expected to occur more often. "
+              "But in a changing climate, droughts are expected to occur more often. "
             }
           </Typography>
         </Box>
@@ -109,137 +130,34 @@ function Groundwater() {
           paddingRight: "5rem",
         }}
       >
-        <Box width="100%" height="40%" sx={{ marginBottom: "1rem" }}>
-          <GroundwaterContainer scrollProgress={scrollYProgress} />
+        <Box
+          className="paragraph"
+          component="article"
+          sx={{ pointerEvents: "auto" }}
+        >
+          <Typography variant="h5" align="left">
+            {"Cumulative Groundwater Loss in Central Valley"}
+          </Typography>
+          <Typography variant="caption" align="left" sx={{ opacity: 0.7 }}>
+            {
+              "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: "
+            }
+            <a
+              href="https://doi.org/10.1038/s41467-022-35582-x"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              {"Liu et al., 2022"}
+            </a>
+          </Typography>
         </Box>
-        <Typography
-          variant="h6"
-          textAlign={"center"}
-          gutterBottom
-          sx={{ fontSize: "1.5rem" }}
-        >
-          {"Cumulative Groundwater Loss in Central Valley"}
-        </Typography>
-        <Typography
-          variant="caption"
-          textAlign={"center"}
-          sx={{ padding: "0 5rem" }}
-        >
-          {
-            "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: Liu et al., 2022"
-          }
-        </Typography>
+        <Box width="100%" height="50%">
+          <GroundwaterLine scrollProgress={scrollYProgress} />
+        </Box>
       </Box>
     </StickyContainer>
   )
 }
 
-/*
-function Conservation() {
-  const { sectionRef } = useActiveSection("conservation", { amount: 0.5 })
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end center"],
-  })
-
-  const firstParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.4],
-    [0, 1],
-  )
-  const secondParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.7],
-    [0, 1],
-  )
-
-  return (
-    <Box
-      id="conservation"
-      ref={sectionRef}
-      className="container-row"
-      height="100vh"
-      width="100%"
-      tabIndex={-1}
-      role="region"
-    >
-      <Box
-        width="50%"
-        height="100%"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <motion.div
-          className="text-container-left"
-          style={{ opacity: firstParagraphOpacity }}
-        >
-          <Box className="paragraph" component="article">
-            <Typography variant="h4">
-              {"Making the Most of Limited Water"}
-            </Typography>
-          </Box>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "Water conservation in cities and community water systems can also help us adapt to a future with less water."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Upgrades like drought-tolerant landscaping, water-efficient appliances, and water recycling all help "
-              }
-              <span className="highlight-text">
-                {"lower human water demands"}
-              </span>
-              {" and make the most of available supplies."}
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div
-          className="text-container-left"
-          style={{ opacity: secondParagraphOpacity }}
-        >
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "In fact, California has already made water conservation gains \u2014 cities today use about the same amount of water they did in 2000, "
-              }
-            </Typography>
-            <Typography variant="body1">
-              {"even though 5.5 million more people now live here."}
-            </Typography>
-          </Box>
-        </motion.div>
-      </Box>
-      <Box
-        width="50%"
-        height="100%"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "0 20px",
-        }}
-      >
-        <Box
-          width="100%"
-          height="100%"
-          sx={{
-            position: "relative",
-            justifyContent: "center",
-            backgroundImage: "url('/drafts/supply-conservation.png')",
-            backgroundSize: "100% auto",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        ></Box>
-      </Box>
-    </Box>
-  )
-}
-*/
-
-export default SectionGroundwater
+export default Groundwater

@@ -8,7 +8,7 @@
  */
 
 import React from "react"
-import { Box } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { hydroclimateOptions } from "../content/scenarios"
 import { HYDROCLIMATE_CONFIG } from "../features/scenarios/components/HydroclimateChooser"
 
@@ -18,6 +18,7 @@ interface HydroclimateIconsProps {
 }
 
 export default function HydroclimateIcons({ size }: HydroclimateIconsProps) {
+  const theme = useTheme()
   const iconSize = Math.max(14, size * 0.22)
   const gap = 3
 
@@ -65,7 +66,7 @@ export default function HydroclimateIcons({ size }: HydroclimateIconsProps) {
             >
               <IconComponent
                 sx={{
-                  color: "#ffffff",
+                  color: theme.palette.common.white,
                   fontSize: iconSize * 0.6,
                 }}
               />

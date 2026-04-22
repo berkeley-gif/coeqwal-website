@@ -19,8 +19,12 @@ import type { OutcomeScoreData } from "../../scenarios/hooks"
 import type { OutcomeName } from "../../scenarios/components/shared"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
+import {
+  PRIMARY_SCENARIO_BASELINE_ID,
+  compareScenarioIdsForThemeSubgroupOrder,
+} from "../utils/scenarioIdSort"
 
-const PRIMARY_BASELINE_ID = "s0020"
+const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 
 const THEME_ORDER: Record<ScenarioTheme, number> = {
   baseline: 0,
@@ -102,18 +106,33 @@ export function useOrderedScenarios(): OrderedScenariosResult {
       baseScenarios.sort((a, b) => {
         const aScores = allScoreData[a.scenarioId]
         const bScores = allScoreData[b.scenarioId]
-        if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
+        if (!aScores?.[sortBy] && !bScores?.[sortBy]) {
+          return compareScenarioIdsForThemeSubgroupOrder(
+            a.scenarioId,
+            b.scenarioId,
+          )
+        }
         if (!aScores?.[sortBy]) return 1
         if (!bScores?.[sortBy]) return -1
         const aScore = aScores[sortBy].weighted_score
         const bScore = bScores[sortBy].weighted_score
-        return sortDirection === "asc" ? aScore - bScore : bScore - aScore
+        const delta =
+          sortDirection === "asc" ? aScore - bScore : bScore - aScore
+        if (delta !== 0) return delta
+        return compareScenarioIdsForThemeSubgroupOrder(
+          a.scenarioId,
+          b.scenarioId,
+        )
       })
     } else {
       baseScenarios.sort((a, b) => {
         const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
         const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
-        return aOrder - bOrder
+        if (aOrder !== bOrder) return aOrder - bOrder
+        return compareScenarioIdsForThemeSubgroupOrder(
+          a.scenarioId,
+          b.scenarioId,
+        )
       })
     }
 

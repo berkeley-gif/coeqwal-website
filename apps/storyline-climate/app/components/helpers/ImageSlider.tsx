@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Box, UnfoldMoreIcon } from "@repo/ui/mui"
+import { Box, UnfoldMoreIcon, useTheme } from "@repo/ui/mui"
 
 type HorizontalCompareProps = {
   leftSrc: string
@@ -11,6 +11,8 @@ type HorizontalCompareProps = {
   height?: number | string
   width?: number | string
   initial?: number // 0..100 (% from left)
+  leftKnobLabel?: string
+  rightKnobLabel?: string
 }
 
 type VerticalCompareProps = {
@@ -39,11 +41,14 @@ export function HorizontalImageSlider({
   width = "100%",
   height = "100vh",
   initial = 50,
+  leftKnobLabel,
+  rightKnobLabel,
 }: HorizontalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
+  const theme = useTheme()
 
   const updateFromPointer = useCallback((clientX: number) => {
     const el = wrapRef.current
@@ -169,7 +174,7 @@ export function HorizontalImageSlider({
           width: 44,
           height: 44,
           borderRadius: "50%",
-          backgroundColor: "#f2f0ef",
+          backgroundColor: "#fcfbfa",
           display: "grid",
           placeItems: "center",
           cursor: "ew-resize",
@@ -187,6 +192,61 @@ export function HorizontalImageSlider({
           style={{ fill: "#104472", transform: "rotate(90deg)" }}
         />
       </Box>
+
+      {(leftKnobLabel || rightKnobLabel) && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: `${pos}%`,
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            pointerEvents: "none",
+          }}
+        >
+          {leftKnobLabel && (
+            <Box
+              sx={{
+                mr: 4.5,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: "10px",
+                backgroundColor: "common.white",
+                backdropFilter: "blur(2px)",
+                color: "blue.darkest",
+                fontSize: theme.typography.caption.fontSize,
+                fontWeight: "bold",
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {leftKnobLabel}
+            </Box>
+          )}
+
+          {rightKnobLabel && (
+            <Box
+              sx={{
+                ml: 4.5,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: "10px",
+                backgroundColor: "common.white",
+                backdropFilter: "blur(2px)",
+                color: "blue.darkest",
+                fontSize: theme.typography.caption.fontSize,
+                fontWeight: "bold",
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {rightKnobLabel}
+            </Box>
+          )}
+        </Box>
+      )}
     </Box>
   )
 }
@@ -424,7 +484,7 @@ export function VerticalImageSlider({
             width: 44,
             height: 44,
             borderRadius: "50%",
-            backgroundColor: "#f2f0ef",
+            backgroundColor: "#fcfbfa",
             display: "grid",
             placeItems: "center",
             cursor: "pointer",

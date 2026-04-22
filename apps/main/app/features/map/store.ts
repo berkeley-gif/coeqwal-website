@@ -31,6 +31,9 @@ export interface OutcomeVisualization {
   siblingGroupId?: string
 }
 
+/** Shape for location highlight marker */
+export type LocationHighlightShape = "square" | "triangle-up" | "triangle-down"
+
 /** Lightweight tooltip driven by the tier animation overlay hover/pin */
 export interface LocationHighlight {
   key: string
@@ -41,6 +44,7 @@ export interface LocationHighlight {
   tierLabel: string
   tierColor: string
   pinned?: boolean
+  shape?: LocationHighlightShape
 }
 
 // ============================================================================
@@ -113,13 +117,20 @@ let _onLocationHover:
 export const mapActions = {
   // Core
   setMapMode: (mode: MapMode) => {
-    useMapStore.setState({
+    const updates: Partial<MapState> = {
       mapMode: mode,
       activeOutcomeVisualization:
         mode === "hidden"
           ? null
           : useMapStore.getState().activeOutcomeVisualization,
-    })
+    }
+
+    // Learn and get-started always use the satellite basemap
+    if (mode === "learn" || mode === "get-started") {
+      updates.mapStyle = MAP_THEME_URLS.satellite
+    }
+
+    useMapStore.setState(updates)
   },
 
   setMapReady: (ready: boolean) => useMapStore.setState({ mapReady: ready }),

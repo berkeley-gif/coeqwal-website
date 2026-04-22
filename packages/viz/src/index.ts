@@ -95,18 +95,58 @@ export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps } from "./components/RadarPlot"
+export type {
+  RadarPlotAxisLabelDetailStyle,
+  RadarAxisDetailBottomMode,
+  RadarAxisLabelDetailPayload,
+  RadarAxisLabelDetailChromeMountPayload,
+  RadarAxisLabelDetailChromeOptions,
+  RadarAxisLabelDetailPointerBridge,
+} from "./components/radarAxisLabelDetail"
+export {
+  mergeRadarAxisLabelDetailStyle,
+  DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE,
+  radarAxisDetailBottomModeForIndex,
+} from "./components/radarAxisLabelDetail"
 
 export { default as TierHeatmap } from "./components/TierHeatmap"
 export type {
   TierHeatmapProps,
   TierHeatmapCell,
 } from "./components/TierHeatmap"
+export { default as ResilienceHeatmap } from "./components/ResilienceHeatmap"
+export type {
+  ResilienceHeatmapProps,
+  ResilienceHeatmapCell,
+  ResilienceAxisItem,
+  ResilienceHeatmapPalette,
+  ResilienceHeatmapMarginals,
+  ResilienceCellRender,
+  ResilienceGlyphEntry,
+  ResilienceColumnGroup,
+} from "./components/ResilienceHeatmap"
+export { default as ResilienceHeatmapSmallMultiples } from "./components/ResilienceHeatmapSmallMultiples"
+export type {
+  ResilienceHeatmapSmallMultiplesProps,
+  ResilienceSmallMultiplesTile,
+  ResilienceSmallMultiplesTileAspect,
+} from "./components/ResilienceHeatmapSmallMultiples"
+export { default as ResilienceQuadrant } from "./components/ResilienceQuadrant"
+export type {
+  ResilienceQuadrantProps,
+  ResilienceQuadrantDatum,
+  ResilienceQuadrantPalette,
+  ResilienceQuadrantUnit,
+} from "./components/ResilienceQuadrant"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,
   SankeyScenarioFlow,
   TierSankeyGroup,
 } from "./components/TierSankey"
+
+export { default as TierGrid } from "./components/TierGrid"
+export type { TierGridProps } from "./components/TierGrid"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
@@ -121,7 +161,13 @@ export {
   getNestedValue,
 } from "./utils/d3-utils"
 
-export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
+export { isFullOpacityDuringSidebarHighlight } from "./utils/sidebarHighlightPolicy"
+
+export {
+  THEME_LINE_PALETTES,
+  THEME_LINE_PALETTES_LIGHT_TO_DARK,
+  getThemeLineColor,
+} from "./utils/themeLineColors"
 export type { ThemeKey } from "./utils/themeLineColors"
 
 export {
@@ -138,3 +184,36 @@ export {
   lerp,
 } from "./utils/shape-morph"
 export type { ShapeMorphData } from "./utils/shape-morph"
+
+export { hierarchicalRowOrder } from "./utils/clustering"
+
+// Curated re-exports from d3: consumers (e.g. storyline-flow) import these from @repo/viz
+// so `d3` remains a dependency of this package only. Extend this list when something new is needed.
+export {
+  area,
+  autoType,
+  bisector,
+  csv,
+  curveBasis,
+  curveCatmullRom,
+  curveLinear,
+  curveMonotoneX,
+  csvParse,
+  extent,
+  format,
+  interpolateRgb,
+  line,
+  max,
+  mean,
+  min,
+  range,
+  scaleBand,
+  scaleLinear,
+  scalePoint,
+  scaleTime,
+  select,
+  ticks,
+  timeFormat,
+} from "d3"
+
+export type { Area, ScaleLinear, ScalePoint, ScaleTime } from "d3"
