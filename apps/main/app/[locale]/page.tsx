@@ -22,7 +22,7 @@ import IntroSection from "./../sections/IntroSection"
 import SmoothTabs from "./../components/tabs/SmoothTabs"
 import TabPanels from "./../components/tabs/TabPanels"
 
-export default function Home({ params }: { params: Promise<{ locale: string }> }) {
+export default function Home() {
   return (
     <ClientProviders>
       {/* WCAG 2.4.1: Skip link must be first focusable element in DOM */}
