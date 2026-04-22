@@ -8,11 +8,14 @@
  * preset group ("Start", "Browse", "Analyze") presents a
  * narrative-appropriate menu of one-click configurations.
  *
- * The tuner is controlled-open so the onboarding banner in the
- * resilience panel can pop it open with a link. The chart-controls bar
- * above the heatmap still renders the same `ResilienceControls`
- * component - this tuner is additive, not a replacement, so existing
- * workflows keep working.
+ * The tuner is now walkthrough + preset gallery + footer only. The
+ * inline `ResilienceControls` render was removed when the panel moved
+ * to the sentence-style header - that header already exposes every
+ * per-axis control inline, so embedding the same widgets here would
+ * just duplicate them. The tuner remains reachable via the Configure
+ * pill inside the sentence header (and programmatically via the
+ * controlled `open` prop, which the empty-state onboarding banner
+ * can drive in the future).
  */
 
 import { useMemo } from "react"
@@ -20,7 +23,6 @@ import { ChartTuner } from "@repo/ui"
 import type { TunerPreset, WalkthroughStep } from "@repo/ui"
 import { RESILIENCE_HYDROCLIMATES } from "../hooks/useResilienceMatrix"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
-import ResilienceControls from "./ResilienceControls"
 import type { ResilienceControlsState } from "./ResiliencePanel"
 
 interface ResilienceChartTunerProps {
@@ -56,6 +58,8 @@ const DEFAULT_CONTROLS: ResilienceControlsState = {
   compareOutcomeCodes: [],
   expandedRegionalOutcomes: [],
   scenarioLayout: "small_multiples",
+  transposed: false,
+  aggregateOver: "scenarios",
 }
 
 export default function ResilienceChartTuner({
@@ -114,6 +118,61 @@ export default function ResilienceChartTuner({
           }),
       },
       {
+        id: "browse-all-hydroclimates",
+        group: "Browse",
+        label: "All hydroclimates",
+        description:
+          "Per-hydroclimate small-multiples · one tile per climate scenario.",
+        apply: () =>
+          onChange({
+            view: "hydroclimate",
+            cellEncoding: "tier",
+            deltaMode: "none",
+            expandedTileId: null,
+          }),
+      },
+      {
+        id: "browse-transpose",
+        group: "Browse",
+        label: "Flip rows / columns",
+        description:
+          "Transpose the current view so rows become columns and vice versa.",
+        apply: () =>
+          onChange({
+            transposed: !controls.transposed,
+          }),
+      },
+      {
+        id: "analyze-aggregate-over-outcomes",
+        group: "Analyze",
+        label: "Aggregate over outcomes",
+        description:
+          "Mean across outcomes per scenario × hydroclimate - read scenarios directly.",
+        apply: () =>
+          onChange({
+            view: "aggregate",
+            aggregateOver: "outcomes",
+            cellEncoding: "tier",
+            deltaMode: "none",
+            expandedTileId: null,
+          }),
+      },
+      {
+        id: "analyze-aggregate-over-hydroclimates",
+        group: "Analyze",
+        label: "Aggregate over hydroclimates",
+        description:
+          "Mean across hydroclimates per scenario × outcome - climate-agnostic profile.",
+        apply: () =>
+          onChange({
+            view: "aggregate",
+            aggregateOver: "hydroclimates",
+            cellEncoding: "tier",
+            deltaMode: "none",
+            expandedTileId: null,
+          }),
+      },
+      {
         id: "analyze-scenario-distribution",
         group: "Analyze",
         label: "Scenario distribution",
@@ -158,7 +217,7 @@ export default function ResilienceChartTuner({
           }),
       },
     ],
-    [onChange],
+    [onChange, controls.transposed],
   )
 
   // Walkthrough: Browse → Curate → Read. Each step's `apply` sets up a
@@ -175,8 +234,10 @@ export default function ResilienceChartTuner({
             <strong>hydroclimates</strong> and cells summarise how{" "}
             <strong>scenarios</strong> perform on each <strong>outcome</strong>.
             The <em>Browse</em> presets below swap between the overview, all
-            scenarios, and all outcomes so you can orient yourself before
-            narrowing in.
+            scenarios, all outcomes, and all hydroclimates so you can orient
+            yourself before narrowing in. <em>Flip rows / columns</em>{" "}
+            transposes the active view if a different pivot reads more
+            naturally.
           </>
         ),
         apply: () =>
@@ -230,11 +291,10 @@ export default function ResilienceChartTuner({
 
   return (
     <ChartTuner
-      triggerLabel="TUNE CHART"
+      triggerLabel="CONFIGURE"
       description="Browse the whole grid, curate a focused subset, then read tiles up close. Each preset maps to a step of that path."
       walkthrough={walkthrough}
       presets={presets}
-      controls={<ResilienceControls controls={controls} onChange={onChange} />}
       onReset={handleReset}
       getSnapshot={getSnapshot}
       open={open}

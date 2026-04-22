@@ -411,11 +411,21 @@ export default function VisualizationLayers({
             />
           )}
 
-          {/* Lightweight tooltips from tier animation overlay hover/pin */}
+          {/* Lightweight tooltips from tier animation overlay hover/pin.
+           * Only *pinned* highlights render on the map (anchored to the
+           * upper-left of the polygon). Hovered-but-unpinned highlights
+           * show up in the overlay only — keeping the map quiet during
+           * hover. Beat 5's storyboard demo participates in this popup
+           * by setting `pinned: true` on its pseudo-highlight so the
+           * demo renders the map popup alongside the gold polygon stroke;
+           * the driver's teardown() clears it at the end of the beat.
+           * The older right-side card + dashed leader-line layout
+           * (`PinnedLocationsList`) has been retired in favor of this
+           * simpler, in-place popup. */}
           {locationHighlights
             .filter((hl) => {
               if (!isGetStartedMode) return true
-              if (hl.pinned) return false
+              if (!hl.pinned) return false
               const code = hl.key.split(":")[0]
               return (
                 code !== "RES_STOR" &&
@@ -429,10 +439,10 @@ export default function VisualizationLayers({
                 className="location-highlight-popup"
                 longitude={hl.longitude}
                 latitude={hl.latitude}
-                anchor="bottom"
+                anchor="bottom-right"
                 closeButton={false}
                 closeOnClick={false}
-                offset={12}
+                offset={10}
                 style={{ zIndex: 10 }}
               >
                 <Box
