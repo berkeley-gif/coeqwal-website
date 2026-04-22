@@ -34,6 +34,63 @@ The repository is managed with **Turborepo + pnpm workspaces** and split into tw
 - **`@repo/typescript-config`** Shared TypeScript configuration presets (base, Next.js, React library).
 - **`@repo/eslint-config`** Shared ESLint configuration.
 
+### Internationalization
+
+`apps/main` uses **next-intl** for translations. The other apps (`storyline-flow`, `storyline-climate`) still use the legacy `TranslationProvider` from `@repo/i18n` and will be migrated in a future iteration.
+
+#### How it works
+
+All routes in `apps/main` live under `app/[locale]/` — the locale is part of the URL (`/en/about`, `/es/about`). The `[locale]/layout.tsx` loads the correct messages file and wraps the app in `NextIntlClientProvider`.
+
+Since the app uses `output: "export"` (static HTML), there is no server middleware. Locale detection happens client-side via `LocaleDetector`, which reads `navigator.language` on first visit and redirects if needed. Once a user manually switches locale via the language switcher, `window.location.href` is used for a hard navigation so `NextIntlClientProvider` reinitializes correctly.
+
+#### Translation files
+
+Messages live in `apps/main/messages/en.json` and `apps/main/messages/es.json`. Strings are organized by namespace — `Common` for shared strings and `App` for app-specific strings, with sub-namespaces per page or feature. The current structure is:
+
+- `Common` — shared strings (e.g. skip link)
+- `App.HomePage` — home page strings, including `aboutPanel`, `waterIssuesPanel`, and `knowMore`
+- `App.mapPanel`, `App.californiaWater`, `App.managingWater`, `App.challenges`, `App.calsim` — learn section content
+- `App.questionBuilder` — scenario explorer question builder UI
+- `App.scenarioResults`, `App.invitation`, `App.secondaryNavigation` — misc UI strings
+
+#### Using translations in components
+
+```tsx
+// Simple string
+const t = useTranslations("App.HomePage")
+t("titleLine1")
+
+// Nested key
+t("aboutPanel.cta")
+
+// Rich text — renders bold, italic, paragraph breaks
+import { richTextComponent } from "@repo/i18n"
+t.rich("aboutPanel.description", richTextComponent) // renders <p> tags
+t.rich("knowMore.items.0", richTextComponent)        // renders <bold> tags
+```
+
+#### Rich text tags
+
+The `richTextComponent` from `@repo/i18n` supports these tags in any translation string:
+
+| Tag | Renders as |
+|---|---|
+| `<bold>text</bold>` | Semibold span, inherits parent font size |
+| `<italic>text</italic>` | Merriweather italic, inherits parent font size |
+| `<p>text</p>` | Paragraph with bottom margin |
+| `<br></br>` | Line break |
+
+#### Adding a new translated string
+
+1. Add the key to `messages/en.json` and `messages/es.json`
+2. Use `t("your.key")` in the component
+3. Use `t.rich("your.key", richTextComponent)` if the string contains markup tags
+
+#### Migrating another app to next-intl
+
+The `TranslationProvider` and `useTranslation` exports in `packages/i18n` are deprecated but intentionally kept for `storyline-flow` and `storyline-climate`. Do not remove them until those apps are migrated. See `packages/i18n/index.ts` for the deprecation notice.
+
 ### Main app architecture
 
 The main app (`apps/main`) has three routes:
