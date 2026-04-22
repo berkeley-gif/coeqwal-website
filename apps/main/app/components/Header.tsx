@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react"
 import { BaseHeader } from "@repo/ui"
 import { useRouter, usePathname } from "next/navigation"
+import { useLocale } from "next-intl"
 import { useTheme } from "@repo/ui/mui"
+import { switchLocale } from "../lib/switchLocale"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
@@ -20,6 +22,7 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const theme = useTheme()
+  const currentLocale = useLocale()
 
   // -- Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
@@ -66,6 +69,14 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
+  const handleLocaleChange = (newLocale: string) => {
+    // Replace the locale segment in the current URL
+    // e.g. /en/about -> /es/about
+    const segments = pathname.split("/")
+    segments[1] = newLocale
+    window.location.href = segments.join("/")
+  }
+
   const waterThemesOptions = useMemo(
     () =>
       WATER_THEMES.map((wt) => ({
@@ -84,6 +95,8 @@ export function Header() {
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
       waterThemesOptions={waterThemesOptions}
+      onLocaleChange={handleLocaleChange}
+      locale={currentLocale as "en" | "es"}
       showLanguageSwitcher
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}

@@ -9,9 +9,12 @@ import { NextIntlClientProvider } from "next-intl"
 import { notFound } from "next/navigation"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { DataProvider } from "@repo/data/providers"
+import { PanelTuner } from "@repo/ui"
+import { LocaleDetector } from "../components/localeDetector"
 import { FontLoader } from "../components/FontLoader"
 import { ActiveThemePanel } from "../components/ActiveThemePanel"
 import { locales, type Locale } from "../../i18n.config"
+
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -25,7 +28,7 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children, params }: RootLayoutProps) {
   const { locale } = await params
-  setRequestLocale(locale) 
+  setRequestLocale(locale)
 
   if (!locales.includes(locale as Locale)) {
     notFound()
@@ -44,7 +47,9 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
                 <Suspense fallback={null}>
                   <ActiveThemePanel />
                 </Suspense>
+                <LocaleDetector />
                 {children}
+                <PanelTuner />
               </ThemeRegistry>
             </DataProvider>
           </NextIntlClientProvider>
