@@ -14,7 +14,8 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { useTranslation } from "@repo/i18n"
+import { useTranslations } from "next-intl"  
+import { richTextComponent } from "@repo/i18n"  
 import { useReducedMotion } from "@repo/motion"
 import { ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
@@ -38,7 +39,7 @@ export default function VideoHero({
   fallbackImage,
   hideHeadline = false,
 }: VideoHeroProps) {
-  const { t } = useTranslation()
+  const t = useTranslations("App.HomePage")
   const theme = useTheme()
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [canPlay, setCanPlay] = useState(false)
@@ -252,30 +253,6 @@ export default function VideoHero({
           pointerEvents: "none",
         }}
       >
-        {/* Headline.marginTop offsets exactly the fixed header height */}
-        <Box
-          sx={{
-            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
-            alignSelf: "flex-start",
-            marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
-            maxWidth: { xs: "100%", sm: "720px" },
-            color: "text.secondary",
-            textShadow: theme.textShadow.display,
-            pointerEvents: "auto",
-          }}
-        >
-          <Typography
-            variant="h2Main"
-            component="h2"
-            sx={{ display: "block", mb: 0.5 }}
-          >
-            {t("homePanel.titleLine1")}
-          </Typography>
-          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-            {t("homePanel.titleLine2")}
-          </Typography>
-        </Box>
-
         {/* Paragraph.lower left */}
         <Typography
           variant="displayBody"
@@ -291,7 +268,7 @@ export default function VideoHero({
             pointerEvents: "auto",
           }}
         >
-          {t("homePanel.content")}
+          {t("content")}
         </Typography>
       </Box>
 

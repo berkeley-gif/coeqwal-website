@@ -3,72 +3,99 @@
     "skipToContent": "Saltar al contenido principal"
   },
   "App": {
-    "homePanel": {
-      "title": "Los californianos están conectados por su agua",
-      "content": "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo. La mayor parte del agua de California cae lejos de donde se necesita. Fluye-a través de ríos, túneles y canales-hacia ciudades, campos agrícolas y ecosistemas en todo el estado.",
-      "headlines": [
-        "¿Cómo afectan las operaciones de embalses a la calidad del agua del Delta?",
-        "¿Qué futuros hídricos apoyan la supervivencia del salmón?",
-        "¿Cómo comparten el agua las ciudades y las granjas en un futuro más caluroso y seco?",
-        "¿Qué políticas ayudan a cumplir los objetivos ambientales?",
-        "¿Qué sucede si dejamos que nuestros ríos fluyan?"
-      ],
-      "scrollText": "El agua nos conecta. Explora el sistema hídrico de California y descubre posibilidades para el futuro del agua en nuestro estado.",
-      "combinedPanelScrollText": "Los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo."
+    "HomePage": {
+      "titleLine1": "¿Cuál es el futuro del",
+      "titleLine2": "agua en California?",
+      "content": "El agua conecta a todos los californianos y es vital para nuestras comunidades, granjas y el medio ambiente. Satisfacer todas las necesidades no es fácil, especialmente con el cambio climático.",
+      "callToAction": "En este sitio, puede aprender cómo se gestiona el agua en el Valle Central de California, explorar cómo cambian las asignaciones bajo diferentes escenarios, y usar las mismas herramientas que los tomadores de decisiones.",
+      "aboutPanel": {
+        "headingLine1": "¿Qué es",
+        "headingLine2": "COEQWAL?",
+        "description": "<p>COEQWAL – el Laboratorio para la Equidad en la Asignación del Agua – es un proyecto de financiamiento público que trabaja con comunidades para entender mejor cómo se gestiona el agua en California.</p><p>Usando modelos de planificación hídrica, COEQWAL ilumina cómo las decisiones alternativas y los escenarios de cambio climático moldean nuestro futuro hídrico.</p>",
+        "cta": "Conozca más sobre COEQWAL"
+      },
+      "waterIssuesPanel": {
+        "headingLine1": "¿Que temas del agua",
+        "headingLine2": "le importan?",
+        "description": "El agua es importante para todos nosotros. De los granjeros en el Valle Central hasta las comunidades en el Delta, del salmón en el Río Sacramento hasta los usuarios citadinos en Los Angeles. Podemos considerar como las decisiones afectan los temas que a las personas les interesan."
+      },
+      "knowMore": {
+        "line1": "¿Quiere",
+        "line2": "saber más?",
+        "items": [
+          "<bold>Aprenda</bold> cómo se gestiona el agua en el Valle Central de California,",
+          "<bold>Explore</bold> cómo cambian los resultados hídricos bajo diferentes escenarios, y",
+          "<bold>Comparta</bold> sus ideas sobre el futuro del agua en California"
+        ],
+        "body": "El agua es limitada y cada decisión tiene sus compensaciones. COEQWAL le permite explorar diferentes escenarios hídricos y entender cómo las decisiones moldean los futuros posibles para comunidades, granjas, ríos y el Delta."
+      }
+    },
+    "mapPanel": {
+      "panelOne": {
+        "boldText": "¿Sabía que California tiene uno de los sistemas de agua más complejos del mundo?"
+      }
+    },
+    "scenariosPanel": {
+      "part1": "Trabajando con comunidades de toda California, el equipo de COEQWAL usa CalSim para modelar 30 formas alternativas de gestionar el sistema hídrico de California.",
+      "part2": "Estos escenarios – combinaciones únicas de estrategias operativas e hidroclimatología – proporcionan información sobre cómo funciona nuestro sistema hídrico y los compromisos que existen entre los objetivos."
+    },
+    "interstitialPanel": {
+      "content": "En este sitio, puede aprender sobre el agua de California y explorar cómo cambian las asignaciones de agua bajo diferentes escenarios."
     },
     "interstitial": {
       "content": [
-        "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo. La mayor parte del agua de California cae lejos de donde se necesita. Fluye-a través de ríos, túneles y canales-hacia ciudades, campos agrícolas y ecosistemas en todo el estado.",
+        "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo.",
         "El proyecto COEQWAL te ayuda a entender cómo se mueve el agua en California, cómo podrían ser las alternativas y los efectos de un clima cambiante."
       ],
       "boldText": "Desde las montañas hasta la costa, y de norte a sur,",
-      "part1": "los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo. La mayor parte del agua de California cae lejos de donde se necesita. Fluye-a través de ríos, túneles y canales-hacia ciudades, campos agrícolas y ecosistemas en todo el estado.",
-      "part2": "El proyecto COEQWAL te ayuda a entender cómo se mueve el agua en California, cómo podrían ser las alternativas y los efectos de un clima cambiante."
+      "part1": "los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo.",
+      "part2": "El clima determina cuánta agua cae en nuestro estado. Los derechos de agua, las políticas y las leyes guían quién recibe agua, la cantidad y cuándo la recibe.",
+      "part3": "El proyecto COEQWAL usa CalSim para modelar una amplia gama de escenarios alternativos de gestión del agua, cada uno diseñado para preguntar,"
     },
     "secondaryNavigation": {
-      "tab1": "Learn",
-      "tab2": "Current Operations",
-      "tab3": "Scenario Themes"
+      "tab1": "Aprender",
+      "tab2": "Operaciones actuales",
+      "tab3": "Temas del agua"
     },
     "CaliforniaWaterPanel": {
-      "title": "Agua California"
+      "title": "Agua de California"
     },
     "californiaWater": {
       "title": "Agua de California",
-      "paragraph1": "La mayor parte del agua de California cae en invierno como lluvia y nieve en el norte de California y la Sierra Nevada. Esta precipitación, muy variable de un año a otro, es la principal fuente de agua del estado.",
-      "paragraph2": "La capa de nieve sirve como un embalse natural, liberando agua durante la primavera. A medida que la lluvia y el deshielo fluyen desde las montañas hacia los ríos del Valle Central, parte de ella se filtra bajo tierra y recarga grandes acuíferos.",
-      "paragraph3": "El río Sacramento, el más grande de California, fluye desde el norte y se une con el río San Joaquín, que sube desde el sur, en el Delta. Estos flujos crean uno de los estuarios ecológicamente más ricos de la Costa Oeste antes de desembocar en la Bahía de San Francisco y el Océano Pacífico. En el Delta, el agua dulce se mezcla con agua salada, creando un equilibrio de salinidad cambiante determinado por la cantidad de flujo y las mareas.",
-      "paragraph4": "Aunque California tiene abundancia de agua, la mayor parte de nuestra agua cae lejos de donde vive, trabaja y cultiva la mayoría de la gente. Para suministrar agua a la agricultura y a una población creciente en las partes más secas del estado, hemos transformado cómo se mueve el agua a través de California.",
+      "paragraph1": "La mayor parte del agua de California cae en invierno como lluvia y nieve en el norte de California y la Sierra Nevada.",
+      "paragraph2": "La capa de nieve sirve como un embalse natural, liberando agua durante la primavera.",
+      "paragraph3": "El río Sacramento, el más grande de California, fluye desde el norte y se une con el río San Joaquín en el Delta.",
+      "paragraph4": "Aunque California tiene abundancia de agua, la mayor parte cae lejos de donde vive, trabaja y cultiva la mayoría de la gente.",
       "arLabel": {
         "title": "Río atmosférico",
         "date": "diciembre de 2024"
       }
     },
     "managingWater": {
-      "title": "Managing Water",
-      "paragraph1": "California's vast water system includes over a thousand dams and hundreds of miles of canals. Our large reservoirs, such as Lake Shasta and Lake Oroville, collect water from rain and melting snow in the winter and spring. Reservoirs reduce the risk of flooding in the winter and store water into the dry season for use by farms, communities, and ecosystems.",
-      "paragraph2": "Much of the freshwater flowing from the Sacramento and San Joaquin rivers into the Delta is pumped into canals that deliver water back to farms in the San Joaquin Valley and communities in Southern California.",
-      "paragraph3": "Managing California's water is no easy task. Precipitation varies unpredictably both seasonally and year to year, and a web of laws, regulations, and institutions shapes how water is managed and allocated across the state."
+      "title": "Gestión del agua",
+      "paragraph1": "El vasto sistema hídrico de California incluye más de mil presas y cientos de millas de canales.",
+      "paragraph2": "Gran parte del agua dulce que fluye desde los ríos Sacramento y San Joaquín hacia el Delta se bombea hacia canales.",
+      "paragraph3": "Gestionar el agua de California no es tarea fácil. La precipitación varía de manera impredecible tanto estacionalmente como de año a año."
     },
     "challenges": {
-      "title": "Growing Challenges",
-      "paragraph1": "California's water is essential for farms, communities, and the environment-but not everyone has equal access to it. Historically, laws prevented Indigenous communities and people of color from securing land and water rights, and the effects of these injustices are still felt today. Many communities continue to struggle with limited or unsafe drinking water, and the state is facing a growing population.",
-      "paragraph2": "The transformation of our water system has taken a toll on freshwater ecosystems. Dams have reduced river flows and blocked migratory fish like the endangered Sacramento River winter-run Chinook salmon. For more than a century, farms have relied heavily on groundwater for irrigation, depleting aquifers throughout the Central Valley.",
-      "paragraph3": "Climate change is making things even more challenging. California is experiencing more extreme weather, and rising temperatures mean less snow in the mountains. Meanwhile, rising sea levels are pushing saltwater farther inland, threatening ecosystems, farms, communities, and the water supply system in the Delta.",
-      "paragraph4": "Despite these challenges, California has opportunities to adapt. By improving the way we manage water, we can better meet future needs and ensure a more fair and sustainable water supply for everyone."
+      "title": "Desafíos crecientes",
+      "paragraph1": "El agua de California es esencial para las granjas, las comunidades y el medio ambiente, pero no todos tienen igual acceso.",
+      "paragraph2": "La transformación de nuestro sistema hídrico ha afectado a los ecosistemas de agua dulce.",
+      "paragraph3": "El cambio climático hace las cosas aún más difíciles. California experimenta condiciones climáticas más extremas.",
+      "paragraph4": "A pesar de estos desafíos, California tiene oportunidades para adaptarse."
     },
     "calsim": {
-      "title": "Exploring Alternatives with CalSim",
-      "paragraph1": "To explore alternative ways of managing water, we need to understand how much water is available, where it's needed, and how decisions in one part of the system can affect everything else. That's where CalSim comes in. CalSim is a powerful water modeling tool that simulates how water moves through California's major water projects within the Central Valley and connected regions.",
-      "paragraph2": "The model tracks how much water flows into reservoirs, how much is stored and released, and where it gets delivered across the state. The advantage of CalSim is in its flexibility-we can change the rules for distributing water and see the effects. For example, we can adjust priorities, modify regulations, and even test what happens if new infrastructure is added. We can also see how the system might respond to different climate conditions. This is the model that the state Department of Water Resources and the U.S. Bureau of Reclamation uses to model water management across the state.",
-      "paragraph3": "Each unique combination of rules and climate conditions creates a scenario that shows how water might be allocated under different circumstances. The COEQWAL project is using CalSim to build a library of these scenarios for you to explore on this website. We've also developed tools to help you see how different choices impact the outcomes that you care about and the tradeoffs of those outcomes."
+      "title": "Explorando alternativas con CalSim",
+      "paragraph1": "Para explorar formas alternativas de gestionar el agua, necesitamos entender cuánta agua está disponible, dónde se necesita y cómo las decisiones en una parte del sistema pueden afectar todo lo demás.",
+      "paragraph2": "El modelo rastrea cuánta agua fluye hacia los embalses, cuánta se almacena y libera, dónde se entrega y cuánta agua subterránea se usa o preserva.",
+      "paragraph3": "Cada combinación única de reglas y condiciones climáticas crea un escenario que muestra cómo podría asignarse el agua bajo diferentes circunstancias."
     },
     "invitation": {
-      "title": "Begin your Exploration",
-      "paragraph1": "We invite you to explore the current operations scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
-      "paragraph2": "We have organized our library of scenarios into themes that address specific water issues. You can explore the in-depth description of these themes and their scenarios.",
-      "paragraph3": "You can also go straight to the source and access the unprocessed scenario run data for the COEQWAL scenarios by clicking the Raw Data button above.",
-      "paragraph4": "Below you can search our library of scenarios for specific outcomes."
+      "title": "Comience su exploración",
+      "paragraph1": "Le invitamos a explorar el escenario de operaciones actuales, que representa cómo se gestiona actualmente el agua en California.",
+      "paragraph2": "Hemos organizado nuestra biblioteca de escenarios en temas que abordan problemas específicos del agua.",
+      "paragraph3": "También puede ir directamente a la fuente y acceder a los datos de ejecución de escenarios sin procesar.",
+      "paragraph4": "A continuación puede buscar en nuestra biblioteca de escenarios resultados específicos."
     },
     "scenarioResults": {
       "title": "Resultados de Escenarios",

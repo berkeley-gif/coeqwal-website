@@ -84,6 +84,7 @@ export function Header() {
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
       waterThemesOptions={waterThemesOptions}
+      showLanguageSwitcher
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}
       borderBottom={

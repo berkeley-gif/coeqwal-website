@@ -15,6 +15,8 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useTranslations } from "next-intl"  
+import { richTextComponent } from "@repo/i18n"   
 import { NavArrow } from "@repo/ui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
@@ -305,6 +307,7 @@ function WaterThemesPanelContent({
   borderBottom?: string
 }) {
   const theme = useTheme()
+  const t = useTranslations("App.HomePage")
   const prefersReducedMotion = useReducedMotion()
   const { openThemePanel } = usePanelRoute()
 
@@ -471,10 +474,7 @@ function WaterThemesPanelContent({
               maxWidth: "calc(100% - 40px)",
             }}
           >
-            Water is important to all of us.from farmers in the Central Valley
-            to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions
-            affect the issues people care about.
+            {t.rich("waterIssuesPanel.description", richTextComponent)}
           </Typography>
         </Box>
       </motion.div>

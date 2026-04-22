@@ -1119,8 +1119,6 @@ const theme = createTheme({
       fontFamily: `"Merriweather", Georgia, "Times New Roman", serif`,
       fontStyle: "italic" as const,
       fontWeight: 500,
-      fontSize: "1.4rem",
-      lineHeight: 1.4,
     },
   },
   shape: {
@@ -1946,6 +1944,5 @@ declare module "@mui/material/Typography" {
     tooltipHeader: true
     scenarioTitle: true
     storyBody: true
-    accentItalic: true
   }
 }

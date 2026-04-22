@@ -63,6 +63,7 @@ export function LanguageSwitcher({
     _event: React.MouseEvent<HTMLElement>,
     newLocale: string | null,
   ) {
+    
     // MUI ToggleButtonGroup passes null when the user clicks the
     // already-selected option. Guard here to avoid a no-op navigation
     // or unnecessary state update in the caller.

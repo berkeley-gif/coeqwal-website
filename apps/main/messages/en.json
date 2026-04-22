@@ -3,14 +3,32 @@
     "skipToContent": "Skip to main content"
   },
   "App": {
-    "homePanel": {
+    "HomePage": {
       "titleLine1": "What is the future of",
       "titleLine2": "California's water?",
       "content": "Water connects all Californians and is vital to our communities, farms, and the environment. Delivering water to meet all needs is not easy, especially as our climate changes.",
-      "callToAction": "On this site, you can learn how water in California's Central Valley is managed, explore how allocations shift under different scenarios, and use the same tools as decision-makers to empower new pathways toward a sustainable and equitable water future."
-    },
-    "frontmatterPanel": {
-      "boldText": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future."
+      "callToAction": "On this site, you can learn how water in California's Central Valley is managed, explore how allocations shift under different scenarios, and use the same tools as decision-makers to empower new pathways toward a sustainable and equitable water future.",
+      "aboutPanel": {
+        "headingLine1": "What is",
+        "headingLine2": "COEQWAL?",
+        "description": "<p>COEQWAL – the Collaboratory for Equity in Water Allocation – is a publicly-funded project that works with communities to better understand how water is managed in California.</p><p>Using water planning models, COEQWAL sheds light on how alternative decisions and climate change scenarios shape our water future.</p>",
+        "cta": "Learn more about COEQWAL"
+      },
+      "waterIssuesPanel": {
+        "headingLine1": "What water issues",
+        "headingLine2": "matter to you?",
+        "description": "Water is important to all of us. From farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
+      },
+      "knowMore": {
+        "line1": "Want to",
+        "line2": "know more?",
+        "items": [
+          "<bold>Learn</bold> how water in California\u2019s Central Valley is managed,",
+          "<bold>Explore</bold> how water outcomes shift under different scenarios, and",
+          "<bold>Share</bold> your insights about California\u2019s water future"
+        ],
+        "body": "Water is limited and every choice has trade-offs. COEQWAL allows you to explore different water scenarios and understand how decisions shape potential futures for communities, farms, rivers, and the Delta."
+      }
     },
     "mapPanel": {
       "panelOne": {
