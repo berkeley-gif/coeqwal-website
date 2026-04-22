@@ -20,7 +20,7 @@ export interface Objective {
   locationId: string
   locationName: string
   tierLevel: number
-  tierCode?: string // Optional: tier/outcome code for coordinate lookup
+  tierCode: string // Optional: tier/outcome code for coordinate lookup
 }
 
 export interface Position {
@@ -331,7 +331,7 @@ const calculateTierPositions = (
         }
 
         positions.push({
-          id: obj.locationId,
+          id: `${obj.tierCode}:${obj.locationId}`, // Location ID is not unique
           x: globalX,
           y: globalY,
           width: dotSize,
@@ -579,8 +579,11 @@ export default function TierGrid({
     [],
   )
 
-  const selectedLocationIds = useMemo(
-    () => new Set(selectedObjectives.map((obj) => obj.locationId)),
+  const selectedOutcomeLocationCodes = useMemo(
+    () =>
+      new Set(
+        selectedObjectives.map((obj) => `${obj.tierCode}:${obj.locationId}`),
+      ),
     [selectedObjectives],
   )
 
@@ -665,10 +668,10 @@ export default function TierGrid({
           ),
         )
         .attr("stroke", (d) =>
-          selectedLocationIds.has(String(d.id)) ? "#333" : "#fff",
+          selectedOutcomeLocationCodes.has(String(d.id)) ? "#333" : "#fff",
         )
         .attr("stroke-width", (d) =>
-          selectedLocationIds.has(String(d.id)) ? 3 : 1,
+          selectedOutcomeLocationCodes.has(String(d.id)) ? 3 : 1,
         )
         .style("cursor", showMapView ? "pointer" : "default")
         .attr("opacity", 0)
@@ -692,10 +695,10 @@ export default function TierGrid({
           ),
         )
         .attr("stroke", (d) =>
-          selectedLocationIds.has(String(d.id)) ? "#333" : "#fff",
+          selectedOutcomeLocationCodes.has(String(d.id)) ? "#333" : "#fff",
         )
         .attr("stroke-width", (d) =>
-          selectedLocationIds.has(String(d.id)) ? 3 : 1,
+          selectedOutcomeLocationCodes.has(String(d.id)) ? 3 : 1,
         )
         .attr("opacity", 1)
 
@@ -707,7 +710,7 @@ export default function TierGrid({
           }
         })
         .on("mouseover", function (this: SVGPathElement, event, d) {
-          if (showMapView && !selectedLocationIds.has(String(d.id))) {
+          if (showMapView && !selectedOutcomeLocationCodes.has(String(d.id))) {
             d3.select(this).attr("stroke", "#333").attr("stroke-width", 2)
           }
 
@@ -757,7 +760,7 @@ export default function TierGrid({
           }
         })
         .on("mouseout", function (this: SVGPathElement, _event, d) {
-          if (!selectedLocationIds.has(String(d.id))) {
+          if (!selectedOutcomeLocationCodes.has(String(d.id))) {
             d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1)
           }
 
@@ -778,7 +781,7 @@ export default function TierGrid({
       colorMode,
       tierColorMap,
       categoryColorScale,
-      selectedLocationIds,
+      selectedOutcomeLocationCodes,
       onObjectiveClick,
       showComparison,
       showMapView,
