@@ -15,6 +15,9 @@ importers:
 
   .:
     dependencies:
+      next-intl:
+        specifier: ^4.9.1
+        version: 4.9.1(next@15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1))(react@19.1.0)(typescript@5.8.2)
       react:
         specifier: ^19.0.0
         version: 19.1.0

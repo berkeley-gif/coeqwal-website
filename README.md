@@ -36,7 +36,7 @@ The repository is managed with **Turborepo + pnpm workspaces** and split into tw
 
 ### Internationalization
 
-`apps/main` uses **next-intl** for translations. The other apps (`storyline-flow`, `storyline-climate`) still use the legacy `TranslationProvider` from `@repo/i18n` and will be migrated in a future iteration.
+`apps/main` uses **next-intl** for translations. `next-intl` is installed at the monorepo root and available to all apps. The other apps (`storyline-flow`, `storyline-climate`) still use the legacy `TranslationProvider` from `@repo/i18n` and will be migrated in a future iteration.
 
 #### How it works
 

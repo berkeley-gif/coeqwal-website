@@ -21,6 +21,7 @@
     "qa": "pnpm lint && pnpm check-types && pnpm turbo run build"
   },
   "dependencies": {
+    "next-intl": "^4.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sass": "^1.86.0"
