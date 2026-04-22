@@ -60,6 +60,28 @@ import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { useScenarioExplorerStore } from "../store"
 import { BEATS, FINAL_BEAT_INDEX } from "./animationTiming"
+import {
+  useBeatEngine,
+  BEAT_TABLE,
+  MapPaintArbiter,
+  MapPopupArbiter,
+  OverlayPopupArbiter,
+  type BeatEngineApi,
+  type BeatEngineContext,
+  type Arbiter,
+} from "./engine"
+
+/** Phase 0 refactor spike flag. When true, the declarative beat engine
+ *  owns Beat 4 (loi-highlight) end to end. That covers the Mapbox
+ *  paint sequence (filter swap, layer fade, gold polygon ring), the
+ *  overlay square ring, the square popup (via `demoLocation` and
+ *  `demoHoveredLocation`), and the map-side polygon
+ *  `LocationHighlight` popup. When false, the legacy per-effect code
+ *  paths in this file own Beat 4 and the engine subscription is inert.
+ *  Used to ship the spike mergeably while visual QA runs. Phase 1
+ *  expands the engine's responsibilities to the rest of the beats and
+ *  deletes the else branches. */
+const ENGINE_OWNS_BEAT4 = true
 
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
@@ -510,11 +532,22 @@ export default function TierAnimationSection() {
    * carry over into the next beat, where the layer and overlay content
    * will generally belong to a different outcome. Mirrors the clearing
    * block in `handleRestart`. */
+  /** Ref mirror of the beat engine's api so `clearInteractiveState`
+   *  (declared before the engine setup to match the existing
+   *  nav-handler ordering) can call `teardown()` without depending on
+   *  the memoized `engineApi` identity. The ref is assigned right
+   *  after `useBeatEngine` runs later in this component body. */
+  const engineApiRef = useRef<BeatEngineApi | null>(null)
+
   const clearInteractiveState = useCallback(() => {
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
+    // Force the engine to clear any actors still in-window so a mid-beat
+    // nav away from Beat 4 doesn't strand the gold polygon ring, the
+    // square popup, or the LOI highlight.
+    engineApiRef.current?.teardown()
   }, [])
 
   const handleNext = useCallback(() => {
@@ -1039,6 +1072,16 @@ export default function TierAnimationSection() {
   const origLineWidthRef = useRef<number | null>(null)
 
   useEffect(() => {
+    // Fully inert during storyboard playback. The main choreography
+    // listener owns every `demand-units` paint and filter write during
+    // playback, and the beat engine owns Beat 4. Running this effect
+    // while `playState !== "finished" / "paused"` races them: a hover
+    // during Beat 0 flips `hoveredLocation`, `activeLocationSet` grows,
+    // this effect reruns, and because no outcome is selected yet its
+    // reset branch sets `demand-units` fill-opacity to 0 and wipes the
+    // blue cycle that the Beat 0 listener just painted.
+    if (!isInteractive) return
+
     const config = selectedOutcomeCode
       ? getOutcomeConfig(selectedOutcomeCode)
       : null
@@ -1267,6 +1310,7 @@ export default function TierAnimationSection() {
       }
     }
   }, [
+    isInteractive,
     activeLocationSet,
     hoveredLocation,
     pinnedLocations,
@@ -1313,6 +1357,14 @@ export default function TierAnimationSection() {
     })
   }, [])
   useEffect(() => {
+    // Only wire map hover and click dispatchers while interactive. During
+    // storyboard playback the map must be read-only. Any `TierMarkers` /
+    // `TierLocationLabels` that render mid-beat (e.g. the first tick an
+    // outcome briefly becomes visualization-active during a preview)
+    // would otherwise hand hover events into `locHandlers`, which flips
+    // `hoveredLocation` state, invalidates `activeLocationSet`, and
+    // reruns the paint effect mid-beat.
+    if (!isInteractive) return
     mapActions.setOnLocationToggle(handleTooltipToggle)
     mapActions.setOnLocationClick(locHandlers.onClick)
     mapActions.setOnLocationHover((info) => {
@@ -1324,7 +1376,7 @@ export default function TierAnimationSection() {
       mapActions.setOnLocationClick(null)
       mapActions.setOnLocationHover(null)
     }
-  }, [handleTooltipToggle, locHandlers])
+  }, [isInteractive, handleTooltipToggle, locHandlers])
 
   const fadeOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -1777,6 +1829,66 @@ export default function TierAnimationSection() {
     }
     return ["match", ["get", "DU_ID"], ...pairs, fromHex]
   }
+
+  // Engine arbiter instances (stable for the lifetime of this mount).
+  const arbitersRef = useRef<readonly Arbiter[] | null>(null)
+  if (arbitersRef.current === null) {
+    arbitersRef.current = [
+      new MapPaintArbiter(),
+      new MapPopupArbiter(),
+      new OverlayPopupArbiter(),
+    ]
+  }
+
+  // Engine context. Rebuilt every render, but the engine reads via a
+  // ref so no re-subscription happens. Every actor thunk (e.g.
+  // `buildHighlight`) closes over whatever `ctx` was current at
+  // dispatch time, so the latest React-state snapshot flows through.
+  // Fresh Map per `centroids` change so `buildHighlight` thunks that
+  // read `ctx.centroidLookup` never pick up a stale empty Map. An earlier
+  // version of this memo read `centroidLookupRef.current` once at memo
+  // time and cached it. The ref body later swapped to the real Map when
+  // data loaded, but the memoized context still held the initial empty
+  // Map, so Beat 4 step 5's map popup thunk always returned null (no
+  // coord) and the popup never wrote to the store.
+  const engineCentroidLookup = useMemo(
+    () =>
+      new Map<string, { lng: number; lat: number }>(
+        centroids.map((c) => [c.id, { lng: c.lng, lat: c.lat }] as const),
+      ),
+    [centroids],
+  )
+
+  const engineContext: BeatEngineContext = useMemo(
+    () => ({
+      mapRef: mapAPI.mapRef ?? null,
+      outcomeLocations,
+      centroidLookup: engineCentroidLookup,
+      setDemoLocation,
+      setDemoHoveredLocation,
+      buildBlendedTierExpr,
+      resolveDuName: (duId) =>
+        outcomeLocations["AG_REV"]?.nameMap[duId] ??
+        getDemandUnitDisplayName(duId) ??
+        duId,
+      resolveTierLabel: getTierLabel,
+    }),
+    // `buildBlendedTierExpr` is a non-stable inner function. It closes
+    // over `tierColorLookupRef` (a ref) so its identity doesn't
+    // matter. Explicit deps keep the context memoized only when its
+    // identity-stable inputs change. The engine reads via a ref so the
+    // dep set here does not drive re-subscription.
+    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup],
+  )
+
+  const engineApi = useBeatEngine({
+    progress,
+    beatTable: BEAT_TABLE,
+    context: engineContext,
+    arbiters: arbitersRef.current,
+    enabled: ENGINE_OWNS_BEAT4 && !isLoading,
+  })
+  engineApiRef.current = engineApi
 
   /* ── Beat-1 map effects + Beat-2 tier color transition ── */
   useEffect(() => {
@@ -2250,128 +2362,141 @@ export default function TierAnimationSection() {
           paintDuHideSchedule()
         } else if (v < BEAT5_TAIL_END) {
           // ── Beat 5 ──
-          // One-time entry: swap to the AG-only filter so only
-          // Agriculture DUs show, clear any lingering step-4 gold ring
-          // state, and seed opacity to 0 (step 1's fade-in will ramp
-          // it up from here).
-          if (phase !== "beat5") {
+          // Phase 0 refactor spike. When `ENGINE_OWNS_BEAT4` is true,
+          // the declarative beat engine owns every Mapbox paint and
+          // filter write in this window. We still advance the `phase`
+          // local to "beat5" so the post-tail branch below takes its
+          // `phase === "beat5"` path and runs `enterBeat2Phase()` on
+          // the first tick after the window closes. `beat5PolyRingOn`
+          // stays false (the engine's MapPaintArbiter owns the gold
+          // ring), so the restore block in the post-tail branch is a
+          // no-op.
+          if (ENGINE_OWNS_BEAT4) {
+            phase = "beat5"
+          } else {
+            // One-time entry: swap to the AG-only filter so only
+            // Agriculture DUs show, clear any lingering step-4 gold ring
+            // state, and seed opacity to 0 (step 1's fade-in will ramp
+            // it up from here).
+            if (phase !== "beat5") {
+              try {
+                if (map.getLayer("demand-units")) {
+                  map.setFilter(
+                    "demand-units",
+                    DU_AG_ONLY_FILTER as never,
+                  )
+                  map.setPaintProperty("demand-units", "fill-opacity", 0)
+                }
+                if (map.getLayer("demand-units-outline")) {
+                  map.setFilter(
+                    "demand-units-outline",
+                    DU_AG_ONLY_FILTER as never,
+                  )
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-opacity",
+                    0,
+                  )
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-width",
+                    0.5,
+                  )
+                }
+              } catch {
+                /* ok */
+              }
+              beat5PolyRingOn = false
+              phase = "beat5"
+            }
+
+            // Compute desired layer opacity as a piecewise function
+            // of v so the layer fades in over step 1, holds steady
+            // through steps 2-5, and fades out over the tail.
+            let targetOpacity: number
+            if (v < BEAT5_S1_LAYER_IN_START) {
+              targetOpacity = 0
+            } else if (v < BEAT5_S1_LAYER_IN_END) {
+              const t =
+                (v - BEAT5_S1_LAYER_IN_START) /
+                (BEAT5_S1_LAYER_IN_END - BEAT5_S1_LAYER_IN_START)
+              targetOpacity = BEAT5_LAYER_OPACITY * t
+            } else if (v < BEAT5_SETTLE) {
+              targetOpacity = BEAT5_LAYER_OPACITY
+            } else {
+              const t =
+                (v - BEAT5_SETTLE) / (BEAT5_TAIL_END - BEAT5_SETTLE)
+              targetOpacity = BEAT5_LAYER_OPACITY * (1 - t)
+            }
+
             try {
               if (map.getLayer("demand-units")) {
-                map.setFilter(
+                map.setPaintProperty(
                   "demand-units",
-                  DU_AG_ONLY_FILTER as never,
+                  "fill-opacity",
+                  targetOpacity,
                 )
-                map.setPaintProperty("demand-units", "fill-opacity", 0)
               }
               if (map.getLayer("demand-units-outline")) {
-                map.setFilter(
-                  "demand-units-outline",
-                  DU_AG_ONLY_FILTER as never,
-                )
                 map.setPaintProperty(
                   "demand-units-outline",
                   "line-opacity",
-                  0,
-                )
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-width",
-                  0.5,
+                  targetOpacity,
                 )
               }
             } catch {
               /* ok */
             }
-            beat5PolyRingOn = false
-            phase = "beat5"
-          }
 
-          // Compute desired layer opacity as a piecewise function
-          // of v so the layer fades in over step 1, holds steady
-          // through steps 2-5, and fades out over the tail.
-          let targetOpacity: number
-          if (v < BEAT5_S1_LAYER_IN_START) {
-            targetOpacity = 0
-          } else if (v < BEAT5_S1_LAYER_IN_END) {
-            const t =
-              (v - BEAT5_S1_LAYER_IN_START) /
-              (BEAT5_S1_LAYER_IN_END - BEAT5_S1_LAYER_IN_START)
-            targetOpacity = BEAT5_LAYER_OPACITY * t
-          } else if (v < BEAT5_SETTLE) {
-            targetOpacity = BEAT5_LAYER_OPACITY
-          } else {
-            const t =
-              (v - BEAT5_SETTLE) / (BEAT5_TAIL_END - BEAT5_SETTLE)
-            targetOpacity = BEAT5_LAYER_OPACITY * (1 - t)
-          }
-
-          try {
-            if (map.getLayer("demand-units")) {
-              map.setPaintProperty(
-                "demand-units",
-                "fill-opacity",
-                targetOpacity,
-              )
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                targetOpacity,
-              )
-            }
-          } catch {
-            /* ok */
-          }
-
-          // Step 4: gold stroke on the LOI polygon during [S4, settle).
-          const wantPolyRing =
-            v >= BEAT5_S4_POLYGON_RING_AT && v < BEAT5_SETTLE
-          if (wantPolyRing && !beat5PolyRingOn) {
-            try {
-              const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-              if (map.getLayer("demand-units-outline") && baseExpr) {
-                const match = [
-                  "==",
-                  ["get", "DU_ID"],
-                  BEAT5_LOI_ID,
-                ]
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  ["case", match, HIGHLIGHT_GOLD, baseExpr] as never,
-                )
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-width",
-                  ["case", match, 2, 0.5] as never,
-                )
+            // Step 4: gold stroke on the LOI polygon during [S4, settle).
+            const wantPolyRing =
+              v >= BEAT5_S4_POLYGON_RING_AT && v < BEAT5_SETTLE
+            if (wantPolyRing && !beat5PolyRingOn) {
+              try {
+                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+                if (map.getLayer("demand-units-outline") && baseExpr) {
+                  const match = [
+                    "==",
+                    ["get", "DU_ID"],
+                    BEAT5_LOI_ID,
+                  ]
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-color",
+                    ["case", match, HIGHLIGHT_GOLD, baseExpr] as never,
+                  )
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-width",
+                    ["case", match, 2, 0.5] as never,
+                  )
+                }
+              } catch {
+                /* ok */
               }
-            } catch {
-              /* ok */
-            }
-            beat5PolyRingOn = true
-          } else if (!wantPolyRing && beat5PolyRingOn) {
-            try {
-              const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-              if (map.getLayer("demand-units-outline") && baseExpr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  baseExpr as never,
-                )
+              beat5PolyRingOn = true
+            } else if (!wantPolyRing && beat5PolyRingOn) {
+              try {
+                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+                if (map.getLayer("demand-units-outline") && baseExpr) {
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-color",
+                    baseExpr as never,
+                  )
+                }
+                if (map.getLayer("demand-units-outline")) {
+                  map.setPaintProperty(
+                    "demand-units-outline",
+                    "line-width",
+                    0.5,
+                  )
+                }
+              } catch {
+                /* ok */
               }
-              if (map.getLayer("demand-units-outline")) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-width",
-                  0.5,
-                )
-              }
-            } catch {
-              /* ok */
+              beat5PolyRingOn = false
             }
-            beat5PolyRingOn = false
           }
         } else {
           // ── Beat 6+ (post Beat 5 tail) ──
@@ -2455,75 +2580,14 @@ export default function TierAnimationSection() {
     }
   }, [progress, mapAPI.mapRef, isLoading])
 
-  /* ── Beat 1C: progressive popups on a curated handful of AG districts ──
-   *
-   * During the Beat 1C tail (after the tier-color blend completes and before
-   * Beat 2 starts), we reveal a few `LocationHighlight` popups to illustrate
-   * concretely what the colored polygons represent. Popups appear staggered
-   * across the window so the viewer's eye has time to read each one before
-   * the next is drawn. They reuse the same tooltip styling (via
-   * `mapActions.setLocationHighlights`) that's used elsewhere in the app when
-   * a user hovers or pins a demand unit. */
-  useEffect(() => {
-    if (isLoading) return
-    const agData = outcomeLocations["AG_REV"]
-    if (!agData) return
-
-    const POPUPS_IN = 0.345
-    const POPUPS_OUT = 0.38 // clear at start of AG_REV morph (Beat 2)
-    const count = BEAT1C_POPUP_DU_IDS.length
-    const span = POPUPS_OUT - POPUPS_IN
-    const perPopup = span / count
-    let visibleCount = 0
-
-    const clearAll = () => {
-      if (visibleCount > 0) {
-        mapActions.clearLocationHighlights()
-        visibleCount = 0
-      }
-    }
-
-    const unsub = progress.on("change", (v) => {
-      if (v < POPUPS_IN || v >= POPUPS_OUT) {
-        clearAll()
-        return
-      }
-      const nextCount = Math.min(
-        count,
-        Math.floor((v - POPUPS_IN) / perPopup) + 1,
-      )
-      if (nextCount === visibleCount) return
-      visibleCount = nextCount
-
-      const highlights: import("../../map/store").LocationHighlight[] = []
-      for (let i = 0; i < nextCount; i++) {
-        const duId = BEAT1C_POPUP_DU_IDS[i]!
-        const tier = agData.tierMap[duId]
-        if (tier == null) continue
-        const color = agData.colorMap[duId] ?? "#888888"
-        const name =
-          agData.nameMap[duId] ?? getDemandUnitDisplayName(duId) ?? duId
-        const coord = centroidLookupRef.current.get(duId)
-        if (!coord) continue
-        highlights.push({
-          key: `beat1c:AG_REV:${duId}`,
-          longitude: coord.lng,
-          latitude: coord.lat,
-          name,
-          tierLevel: tier,
-          tierLabel: getTierLabel(tier),
-          tierColor: color,
-          pinned: true, // keep visible until we explicitly clear
-        })
-      }
-      mapActions.setLocationHighlights(highlights)
-    })
-
-    return () => {
-      unsub()
-      clearAll()
-    }
-  }, [progress, outcomeLocations, isLoading])
+  /* Beat 1C demo popups removed. The five curated AG district popups
+   * (Glenn Colusa, Turlock, Westlands, Madera, Modesto) read as noise
+   * during playback and also shared the `locationHighlights` store slot
+   * with the hover-driven paint effect, causing popups to reappear on
+   * hover. Removed entirely. The `BEAT1C_POPUP_DU_IDS` constant is kept
+   * because `overlayMustIncludeSourceIds` still pins those DU sourceIds
+   * in the overlay so their distribution squares render deterministically
+   * in the morph. */
 
   /* ── Beat 5 demo-LOI driver ──
    *
@@ -2551,6 +2615,12 @@ export default function TierAnimationSection() {
    * above. Keeping exactly one writer per Mapbox layer eliminates the
    * cross-effect races that used to produce flicker during the beat. */
   useEffect(() => {
+    // Phase 0 refactor spike. When the declarative engine owns Beat
+    // 4, the Beat 5 driver effect is inert. The engine's
+    // `OverlayPopupArbiter` drives `demoLocation` and
+    // `demoHoveredLocation`, and its `MapPopupArbiter` drives
+    // `mapActions.setLocationHighlights`.
+    if (ENGINE_OWNS_BEAT4) return
     if (isLoading) return
     const agData = outcomeLocations["AG_REV"]
     if (!agData || agData.ids.size === 0) return
