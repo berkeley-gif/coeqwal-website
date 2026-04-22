@@ -362,10 +362,18 @@ export default function EquityPanel() {
   const handleObjectiveClick = (objective: TierGridProps["objectives"][0]) => {
     setSelectedObjectives((prev) => {
       const isSelected = prev.some(
-        (obj) => obj.locationId === objective.locationId,
+        (obj) =>
+          obj.locationId === objective.locationId &&
+          obj.tierCode === objective.tierCode,
       )
       if (isSelected) {
-        return prev.filter((obj) => obj.locationId !== objective.locationId)
+        return prev.filter(
+          (obj) =>
+            !(
+              obj.locationId === objective.locationId &&
+              obj.tierCode === objective.tierCode
+            ),
+        )
       } else {
         return [...prev, objective]
       }
@@ -380,14 +388,14 @@ export default function EquityPanel() {
   }
 
   const handleShowOnMap = useCallback(
-    (locationIds: string[]) => {
+    (outcomeLocationCodes: string[]) => {
       // Get the Mapbox map instance
       const map = mapRef?.current?.getMap()
 
       // Filter objectives array to only the requested locations
-      const locationIdSet = new Set(locationIds)
+      const outcomeLocationIDSet = new Set(outcomeLocationCodes)
       const objectivesToShow = objectives.filter((obj) =>
-        locationIdSet.has(obj.locationId),
+        outcomeLocationIDSet.has(`${obj.tierCode}:${obj.locationId}`),
       )
 
       if (objectivesToShow.length === 0) {
@@ -427,7 +435,6 @@ export default function EquityPanel() {
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
-
         if (obj.tierCode && map) {
           // Try to get centroid from polygon layer
           coords = getPolygonCentroidFromMapbox(
@@ -442,8 +449,13 @@ export default function EquityPanel() {
           coords = getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
         }
 
-        const lng = coords?.[0] ?? -121
-        const lat = coords?.[1] ?? 38.5
+        // Skip marker if no coordinates available
+        if (!coords) {
+          return null
+        }
+
+        const lng = coords[0]
+        const lat = coords[1]
 
         // Build tooltip content
         const tooltipContent = showEquityComparison ? (
@@ -674,8 +686,11 @@ export default function EquityPanel() {
   // Update highlights when selected objectives changes
   useEffect(() => {
     if (selectedObjectives.length > 0 && showMap) {
-      const locationIds = selectedObjectives.map((obj) => obj.locationId)
-      handleShowOnMap(locationIds)
+      // const locationIds = selectedObjectives.map((obj) => obj.locationId)
+      const selectedTierLocationCodes = selectedObjectives.map(
+        (obj) => `${obj.tierCode}:${obj.locationId}`,
+      )
+      handleShowOnMap(selectedTierLocationCodes)
     } else if (setMotionChildren) {
       // Clear markers when no objectives selected or map hidden
       setMotionChildren(null)
