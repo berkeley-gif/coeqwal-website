@@ -53,6 +53,7 @@ import type {
   ChannelsPeriodSummaryResponse,
   DeltaMonthlyResponse,
   TierLocationAssignmentsResponse,
+  TierLocationAssignmentsBatchResponse,
 } from "./types"
 
 /**
@@ -275,6 +276,71 @@ export async function fetchTierLocationAssignments(
       baseUrl: DEFAULT_API_BASE,
     },
   )
+}
+
+/**
+ * Fetch tier-location assignments for multiple outcomes in a single batched
+ * request.
+ *
+ * Uses the `/api/tier-map/{scenario}/locations?codes=...` endpoint which runs
+ * one SQL query for all requested outcomes instead of N parallel requests.
+ * Falls back to parallel per-code requests if the batch endpoint is
+ * unavailable (older API deployment), mirroring `fetchAllScenarioTiers`.
+ *
+ * Codes are normalized (deduplicated and sorted) before being used in the
+ * URL, so cache keys do not depend on caller ordering.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param tierCodes - Tier short codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"])
+ * @returns Batch response with per-code results and a `missing` list of codes
+ *          that have no active rows for this scenario
+ *
+ * @example
+ * ```typescript
+ * const batch = await fetchTierLocationAssignmentsBatch("s0020", [
+ *   "CWS_DEL", "AG_REV", "ENV_FLOWS",
+ * ])
+ * const cwsDel = batch.results["CWS_DEL"]
+ * const absent = batch.missing // e.g. [] or ["WRC_SALMON_AB"] on s0065
+ * ```
+ */
+export async function fetchTierLocationAssignmentsBatch(
+  scenarioId: string,
+  tierCodes: string[],
+): Promise<TierLocationAssignmentsBatchResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  const normalized = Array.from(new Set(tierCodes)).sort()
+  if (normalized.length === 0) {
+    return { scenario: scenarioId, results: {}, missing: [] }
+  }
+
+  try {
+    return await apiFetcher<TierLocationAssignmentsBatchResponse>(
+      ENDPOINTS.tierLocationAssignmentsBatch(scenarioId, normalized),
+      { baseUrl: DEFAULT_API_BASE, timeout: 20000 },
+    )
+  } catch {
+    // Fallback for older deployments without the batch endpoint. allSettled
+    // so a single 404 (e.g. WRC_SALMON_AB on s0065) does not fail the whole
+    // batch; any absent codes populate `missing` just like the server would.
+    const settled = await Promise.allSettled(
+      normalized.map((code) => fetchTierLocationAssignments(scenarioId, code)),
+    )
+    const results: Record<string, TierLocationAssignmentsResponse> = {}
+    const missing: string[] = []
+    normalized.forEach((code, i) => {
+      const r = settled[i]
+      if (r?.status === "fulfilled") {
+        results[code] = r.value
+      } else {
+        missing.push(code)
+      }
+    })
+    return { scenario: scenarioId, results, missing }
+  }
 }
 
 // ============================================================================

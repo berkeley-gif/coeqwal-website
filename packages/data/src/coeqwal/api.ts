@@ -59,6 +59,20 @@ export const ENDPOINTS = {
   tierLocationAssignments: (scenarioId: string, tierCode: string) =>
     `/tier-map/${scenarioId}/${tierCode}/locations`,
 
+  /**
+   * Batch: lightweight tier assignments per location for multiple outcomes in
+   * one request. One SQL query server-side instead of N parallel per-code
+   * calls. Additive. the single-outcome route above still works.
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param codes - Tier short codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"]).
+   *                Order is normalized (sorted+deduped) so cache keys and
+   *                URLs do not depend on caller order.
+   */
+  tierLocationAssignmentsBatch: (scenarioId: string, codes: string[]) => {
+    const normalized = Array.from(new Set(codes)).sort().join(",")
+    return `/tier-map/${scenarioId}/locations?codes=${normalized}`
+  },
+
   // Statistics endpoints (reservoir percentiles)
 
   /** List of reservoirs with percentile data (grouped) */

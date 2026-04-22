@@ -73,3 +73,5 @@ export {
 } from "./useEnvFlowStatistics"
 export { useDeltaMonthly } from "./useDeltaStatistics"
 export { useTierLocationAssignments } from "./useTierLocationAssignments"
+export { useTierLocationAssignmentsBatch } from "./useTierLocationAssignmentsBatch"
+export { useScenarioTierByCode } from "./useScenarioTierByCode"

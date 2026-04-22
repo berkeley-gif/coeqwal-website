@@ -1,20 +1,22 @@
 "use client"
 
 import { useCallback, useEffect } from "react"
+import { preload } from "swr"
 import { useScenarioExplorerStore } from "../../scenarioExplorer/store"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { mapActions, useMapMode, useMapStore } from "../store"
 import { OUTCOME_LAYER_REGISTRY } from "../config/outcomeLayerRegistry"
-import { fetchTierLocations } from "../visualizationLayers/hooks/useTierData"
+import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
+import { CACHE_KEYS } from "@repo/data/cache"
 import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
 
 const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 // Only multi-value outcomes need prefetching via /locations - single-value
 // outcomes are served by SWR and shared with the glyph cache.
-const PREFETCHABLE_OUTCOMES = Object.entries(OUTCOME_LAYER_REGISTRY)
+const PREFETCHABLE_TIER_CODES: string[] = Object.entries(OUTCOME_LAYER_REGISTRY)
   .filter(([, cfg]) => cfg.requiresIdMatching)
-  .map(([code, cfg]) => ({ code, tierCode: cfg.tierCode }))
+  .map(([, cfg]) => cfg.tierCode)
 
 /**
  * Shared hook for driving map outcome visualizations from any context.
@@ -54,21 +56,26 @@ export function useMapVisualizationAction() {
   )
 
   /**
-   * Warm the tierLocationCache for ALL outcomes × ALL hydroclimates of a
-   * given scenario so that subsequent glyph clicks are instant.
+   * Warm the SWR cache for ALL outcomes x ALL hydroclimates of a given
+   * scenario so subsequent glyph clicks are instant. One batched HTTP
+   * request covers every multi-value outcome per scenario, and we preload
+   * under the batch cache key so any useTierLocationAssignmentsBatch /
+   * useTierLocationAssignments consumer shares the in-flight request.
    */
   const prefetchAllOutcomesForScenario = useCallback(
     (resolvedScenarioId: string, siblingGroupId: string) => {
-      for (const { tierCode } of PREFETCHABLE_OUTCOMES) {
-        fetchTierLocations(resolvedScenarioId, tierCode).catch(() => {})
-
-        for (const hc of ALL_HYDROCLIMATES) {
-          const mapping = buildIdMapping(hc)
-          const resolvedId = mapping[siblingGroupId]
-          if (resolvedId && resolvedId !== resolvedScenarioId) {
-            fetchTierLocations(resolvedId, tierCode).catch(() => {})
-          }
-        }
+      const ids = new Set<string>([resolvedScenarioId])
+      for (const hc of ALL_HYDROCLIMATES) {
+        const mapping = buildIdMapping(hc)
+        const resolved = mapping[siblingGroupId]
+        if (resolved) ids.add(resolved)
+      }
+      for (const id of ids) {
+        preload(
+          CACHE_KEYS.tierLocationsBatch(id, PREFETCHABLE_TIER_CODES),
+          () =>
+            fetchTierLocationAssignmentsBatch(id, PREFETCHABLE_TIER_CODES),
+        ).catch(() => {})
       }
     },
     [buildIdMapping],
@@ -109,18 +116,24 @@ export function useMapVisualizationAction() {
     mapActions.clearMapTooltips()
   }, [])
 
-  // When the map becomes visible, eagerly prefetch tier location data for all
-  // multi-value outcomes × selected scenarios (current hydroclimate only) so
-  // that the first glyph click is instant.
+  // When the map becomes visible, eagerly prefetch tier location data for
+  // all multi-value outcomes x selected scenarios (current hydroclimate
+  // only) so the first glyph click is instant. One batched request per
+  // scenario covers every multi-value outcome.
   useEffect(() => {
     if (!isMapVisible || selectedScenarios.length === 0) return
 
     const mapping = buildIdMapping(hydroclimate)
     for (const siblingGroupId of selectedScenarios) {
       const resolvedId = mapping[siblingGroupId] ?? siblingGroupId
-      for (const { tierCode } of PREFETCHABLE_OUTCOMES) {
-        fetchTierLocations(resolvedId, tierCode).catch(() => {})
-      }
+      preload(
+        CACHE_KEYS.tierLocationsBatch(resolvedId, PREFETCHABLE_TIER_CODES),
+        () =>
+          fetchTierLocationAssignmentsBatch(
+            resolvedId,
+            PREFETCHABLE_TIER_CODES,
+          ),
+      ).catch(() => {})
     }
   }, [isMapVisible, selectedScenarios, hydroclimate, buildIdMapping])
 

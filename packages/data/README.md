@@ -21,6 +21,8 @@ React components
 - **Type safety**: Typed fetchers and responses, i.e. no type assertions at consumer level
 - **Consistent pattern**: All hooks return `{ <data>, isLoading, error }` where the data property name varies by hook
 
+**Active-scenario policy:** All tier and tier-map endpoints filter server-side on `tier_result.is_active = TRUE`. API consumers (hooks, fetchers, prefetch routines) never need to filter retired scenarios on the client. If a scenario is retired, it will simply be absent from list endpoints and 404 from per-scenario endpoints.
+
 ## Installation (for new apps)
 
 Install in monorepo apps via workspace dependencies.
@@ -219,6 +221,34 @@ const { data } = useTierLocationAssignments(
 )
 ```
 
+#### `useTierLocationAssignmentsBatch(scenarioId, tierCodes)`
+
+Fetches per-location tier assignments for **multiple outcomes** in a single request. Prefer this over calling `useTierLocationAssignments` N times when a panel needs several outcomes at once (equity heatmaps, tier animations, resilience distributions). One SQL query server-side instead of N parallel HTTP calls.
+
+On success the hook also writes each per-code sub-response into the single-hook cache key, so any component using `useTierLocationAssignments(scenarioId, code)` elsewhere in the tree renders instantly from cache.
+
+Pass an empty array or `null` scenario to skip fetching. Codes are deduplicated and sorted internally, so caller ordering does not fragment the cache.
+
+```tsx
+import { useTierLocationAssignmentsBatch } from "@repo/data/coeqwal/hooks"
+import { OUTCOME_CODE_ORDER } from "@/content/outcomes"
+
+const { data, isLoading, error } = useTierLocationAssignmentsBatch(
+  "s0020",
+  OUTCOME_CODE_ORDER, // ["CWS_DEL", "AG_REV", "ENV_FLOWS", ...]
+)
+// data.results["CWS_DEL"].locations: TierLocationAssignment[]
+// data.results["AG_REV"].metadata.tier_counts
+// data.missing: string[]  e.g. [] or ["WRC_SALMON_AB"] on s0065
+
+// Memoize downstream objects like usual to avoid re-render churn.
+const allAssignments = React.useMemo(() => data?.results ?? {}, [data])
+```
+
+#### `useScenarioTierByCode(scenarioId, tierCode)`
+
+Parallel to `useScenarioTiers` but scoped to one outcome. Returns aggregate tier scores (weighted_score, normalized_score, gini, distribution data) for a single scenario+outcome pair. Use when a component only cares about one outcome and fetching the full scenario payload would be wasteful. Pass `null` for either argument to skip fetching.
+
 ### Fetchers
 
 **Prefer hooks** in React components. They handle caching, deduplication, loading states, and errors automatically.
@@ -229,14 +259,16 @@ Use fetchers when you need to:
 - Build custom hooks with different caching behavior
 - Fetch data outside of React (scripts, tests)
 
-| Fetcher                                  | Description                                                                                                                                                                                                                                                                |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fetchTierList()`                        | Tier definitions (short codes, names, types)                                                                                                                                                                                                                               |
-| `fetchScenarioList()`                    | All scenario metadata                                                                                                                                                                                                                                                      |
-| `fetchScenarioTiers(id)`                 | Tier data for a single scenario                                                                                                                                                                                                                                            |
-| `fetchAllScenarioTiers(ids)`             | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.                                                                   |
-| `fetchTierLocationAssignments(id, code)` | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                                                                            |
-| `fetchTierLocationData(id, code)`        | **GeoJSON** FeatureCollection with full polygon geometry - heavy on bandwidth. Currently not called anywhere in the app (all callers have been migrated to the lightweight endpoint or commented out). Retained for future use if raw polygon coordinates are ever needed. |
+| Fetcher                                          | Description                                                                                                                                                                                                                                                                |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                                                                               |
+| `fetchScenarioList()`                            | All scenario metadata. Includes `hydroclimate_short_code` on recent API deployments (prefer over the numeric `hydroclimate_id`).                                                                                                                                          |
+| `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                                                                                            |
+| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                                                                                 |
+| `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.                                                                   |
+| `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                                                                            |
+| `fetchTierLocationAssignmentsBatch(id, codes[])` | **Batch** per-location tier assignments for multiple outcomes in one request. Hits `/api/tier-map/{id}/locations?codes=...`. Falls back to parallel per-code requests if the batch endpoint is unavailable.                                                                |
+| `fetchTierLocationData(id, code)`                | **Reserved.** GeoJSON FeatureCollection with full polygon geometry - heavy on bandwidth. No current callers; the app uses Mapbox vector tiles for polygon geometry and pairs them with the lightweight `assignments` endpoint above. Retained for future consumers that need server-rendered GeoJSON (e.g. exports).                                                                                              |
 
 ```tsx
 import {

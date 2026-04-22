@@ -21,8 +21,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { preload } from "swr"
-import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
-import type { TierLocationAssignmentsResponse } from "@repo/data/coeqwal"
+import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
+import type {
+  TierLocationAssignmentsResponse,
+  TierLocationAssignmentsBatchResponse,
+} from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import {
@@ -113,11 +116,18 @@ export function useResilienceLoiSensitivity({
       cc95: buildIdMapping("cc95"),
     }
 
+    // Use the batch endpoint even for a single outcome so the resulting
+    // cache key lines up with `CACHE_KEYS.tierLocationsBatch`. That way
+    // any `useTierLocationAssignmentsBatch` / prefetch that requested the
+    // same (scenario, [outcomeCode]) combination shares in-flight requests
+    // and cached results with this hook.
+    const codes: string[] = [outcomeCode]
+
     const tasks: Array<
       Promise<{
         sid: string
         hc: ResilienceHydroclimate
-        response: TierLocationAssignmentsResponse | null
+        batch: TierLocationAssignmentsBatchResponse | null
       }>
     > = []
 
@@ -125,15 +135,15 @@ export function useResilienceLoiSensitivity({
       for (const sid of siblingGroupIds) {
         const mapped = mappings[hc][sid]
         if (!mapped) continue
-        const cacheKey = CACHE_KEYS.tierLocations(mapped, outcomeCode)
+        const cacheKey = CACHE_KEYS.tierLocationsBatch(mapped, codes)
         const p = preload(cacheKey, () =>
-          fetchTierLocationAssignments(mapped, outcomeCode),
+          fetchTierLocationAssignmentsBatch(mapped, codes),
         )
-          .then((r) => ({ sid, hc, response: r }))
+          .then((r) => ({ sid, hc, batch: r }))
           .catch(() => ({
             sid,
             hc,
-            response: null as TierLocationAssignmentsResponse | null,
+            batch: null as TierLocationAssignmentsBatchResponse | null,
           }))
         tasks.push(p)
       }
@@ -143,10 +153,12 @@ export function useResilienceLoiSensitivity({
       .then((results) => {
         if (cancelled) return
         const next: PerScenarioByHc = {}
-        for (const { sid, hc, response } of results) {
-          if (!response) continue
+        for (const { sid, hc, batch } of results) {
+          if (!batch) continue
+          const resp = batch.results[outcomeCode]
+          if (!resp) continue
           if (!next[sid]) next[sid] = {}
-          next[sid]![hc] = response
+          next[sid]![hc] = resp
         }
         setPerScenario(next)
         setIsLoading(false)

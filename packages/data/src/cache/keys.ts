@@ -64,6 +64,21 @@ export const CACHE_KEYS = {
   tierLocations: (scenarioId: string, tierCode: string) =>
     `/tier-map/${scenarioId}/${tierCode}/locations`,
 
+  /**
+   * Batch key for fetching tier locations across multiple outcomes in one
+   * request. Uses array format so SWR tracks changes in the code list, and
+   * codes are sorted+deduplicated so caller ordering does not fragment the
+   * cache across hooks that happen to pass the same codes in different orders.
+   * @param scenarioId - Scenario ID
+   * @param codes - Tier codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"])
+   */
+  tierLocationsBatch: (scenarioId: string, codes: string[]) =>
+    [
+      "tier-locations-batch",
+      scenarioId,
+      ...Array.from(new Set(codes)).sort(),
+    ] as const,
+
   // Statistics cache keys (reservoir percentiles)
 
   /** List of reservoirs with percentile data (grouped) */
@@ -359,3 +374,4 @@ export type DynamicCacheKey =
   | ReturnType<typeof CACHE_KEYS.allScenarioTiers>
   | ReturnType<typeof CACHE_KEYS.lazyScenarioTiers>
   | ReturnType<typeof CACHE_KEYS.tierLocations>
+  | ReturnType<typeof CACHE_KEYS.tierLocationsBatch>
