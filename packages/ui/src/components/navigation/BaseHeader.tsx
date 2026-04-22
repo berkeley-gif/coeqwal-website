@@ -250,13 +250,10 @@ export function BaseHeader({
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
   logoVariant = "light",
-<<<<<<< HEAD
   locale,
   onLocaleChange,
-=======
   topOffset,
   sideOffset,
->>>>>>> dev
 }: BaseHeaderProps) {
   /* ========================================
    * THEME & LAYOUT

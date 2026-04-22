@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { createTheme, Theme } from "@mui/material/styles"
-import React from "react"
-=======
 import { createTheme, Theme, alpha } from "@mui/material/styles"
->>>>>>> dev
+import React from "react"
 
 /* ========================================================
  * COEQWAL MUI THEME
