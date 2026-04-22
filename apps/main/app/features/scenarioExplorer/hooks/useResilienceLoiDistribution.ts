@@ -16,8 +16,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { preload } from "swr"
-import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
-import type { TierLocationAssignmentsResponse } from "@repo/data/coeqwal"
+import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
+import type {
+  TierLocationAssignmentsResponse,
+  TierLocationAssignmentsBatchResponse,
+} from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import type { ResilienceGlyphEntry } from "@repo/viz"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
@@ -119,33 +122,36 @@ export function useResilienceLoiDistribution({
       cc95: buildIdMapping("cc95"),
     }
 
+    // Batch per (scenario, hc): one HTTP call covers every outcomeCode
+    // instead of one call per outcome. For 24 scenarios × 3 hcs × 9 outcomes
+    // this reduces 648 requests to 72. Preload with a stable batch key so
+    // in-flight requests are shared with any useTierLocationAssignmentsBatch
+    // hook that mounts with the same (scenario, codes) pair.
+    const outcomeCodesArr: string[] = [...outcomeCodes]
+
     const tasks: Array<
       Promise<{
-        outcomeCode: string
         sid: string
         hc: ResilienceHydroclimate
-        response: TierLocationAssignmentsResponse | null
+        batch: TierLocationAssignmentsBatchResponse | null
       }>
     > = []
 
-    for (const outcomeCode of outcomeCodes) {
-      for (const hc of hydroclimates) {
-        for (const sid of scopeIds) {
-          const mapped = mappings[hc][sid]
-          if (!mapped) continue
-          const cacheKey = CACHE_KEYS.tierLocations(mapped, outcomeCode)
-          const p = preload(cacheKey, () =>
-            fetchTierLocationAssignments(mapped, outcomeCode),
-          )
-            .then((r) => ({ outcomeCode, sid, hc, response: r }))
-            .catch(() => ({
-              outcomeCode,
-              sid,
-              hc,
-              response: null as TierLocationAssignmentsResponse | null,
-            }))
-          tasks.push(p)
-        }
+    for (const hc of hydroclimates) {
+      for (const sid of scopeIds) {
+        const mapped = mappings[hc][sid]
+        if (!mapped) continue
+        const cacheKey = CACHE_KEYS.tierLocationsBatch(mapped, outcomeCodesArr)
+        const p = preload(cacheKey, () =>
+          fetchTierLocationAssignmentsBatch(mapped, outcomeCodesArr),
+        )
+          .then((r) => ({ sid, hc, batch: r }))
+          .catch(() => ({
+            sid,
+            hc,
+            batch: null as TierLocationAssignmentsBatchResponse | null,
+          }))
+        tasks.push(p)
       }
     }
 
@@ -153,11 +159,13 @@ export function useResilienceLoiDistribution({
       .then((results) => {
         if (cancelled) return
         const next: PerScenarioByHcByOutcome = {}
-        for (const { outcomeCode, sid, hc, response } of results) {
-          if (!response) continue
-          const perOutcome = next[outcomeCode] ?? (next[outcomeCode] = {})
-          const perScenario = perOutcome[sid] ?? (perOutcome[sid] = {})
-          perScenario[hc] = response
+        for (const { sid, hc, batch } of results) {
+          if (!batch) continue
+          for (const [outcomeCode, response] of Object.entries(batch.results)) {
+            const perOutcome = next[outcomeCode] ?? (next[outcomeCode] = {})
+            const perScenario = perOutcome[sid] ?? (perOutcome[sid] = {})
+            perScenario[hc] = response
+          }
         }
         setData(next)
         setIsLoading(false)

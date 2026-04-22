@@ -100,11 +100,19 @@ export interface ScenarioListItem {
   short_description: string | null
   /** Whether this scenario is active/visible */
   is_active: boolean
-  /** Hydroclimate variant (2 = historical, 3 = moderate-dry climate risk, 4 = high climate risk) */
+  /** Hydroclimate variant numeric id (internal). Prefer hydroclimate_short_code. */
   hydroclimate_id: number
+  /**
+   * Hydroclimate short code, e.g. "historical", "cc50", "cc95".
+   * Prefer this over `hydroclimate_id` when resolving sibling groups to
+   * concrete scenario runs; it removes the need for a hardcoded numeric map
+   * on the client. Present on recent API deployments; may be null/absent on
+   * older deployments, in which case fall back to `hydroclimate_id`.
+   */
+  hydroclimate_short_code?: string | null
   /** Short code of the baseline scenario this derives from, or null for baselines */
   baseline_scenario: string | null
-  /** Sibling group ID — same scenario under different hydroclimates share this value */
+  /** Sibling group ID.same scenario under different hydroclimates share this value */
   sibling_group: string
 }
 
@@ -189,6 +197,20 @@ export interface TierLocationAssignmentsResponse {
     total_locations: number
     tier_counts: Record<string, number>
   }
+}
+
+/**
+ * Response from the batch tier-location-assignments endpoint.
+ *
+ * `results` is keyed by the tier short code (e.g. `"CWS_DEL"`) and each entry
+ * matches the per-code shape returned by `fetchTierLocationAssignments`. Codes
+ * that were requested but have no active rows for this scenario land in
+ * `missing` (this is a normal case, e.g. `WRC_SALMON_AB` on `s0065`).
+ */
+export interface TierLocationAssignmentsBatchResponse {
+  scenario: string
+  results: Record<string, TierLocationAssignmentsResponse>
+  missing: string[]
 }
 
 // ============================================================================

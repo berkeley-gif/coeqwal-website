@@ -34,6 +34,7 @@ export type {
   TierLocationResponse,
   TierLocationAssignment,
   TierLocationAssignmentsResponse,
+  TierLocationAssignmentsBatchResponse,
   // Statistics types
   ReservoirInfo,
   AllReservoirInfo,
@@ -138,6 +139,7 @@ export {
   fetchAllScenarioTiers,
   fetchTierLocationData,
   fetchTierLocationAssignments,
+  fetchTierLocationAssignmentsBatch,
   // Statistics fetchers
   fetchReservoirList,
   fetchAllReservoirsList,

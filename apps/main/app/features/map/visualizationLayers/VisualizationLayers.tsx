@@ -13,7 +13,7 @@
  * - Tooltips (unified via useMapTooltips hook)
  */
 
-import { useEffect, useState, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useMap, Source, Layer, Popup } from "@repo/map"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
 
@@ -34,8 +34,7 @@ import { BASEMAP_DIM_OPACITY, LAYER_IDS } from "../config/outcomeLayerRegistry"
 import { MapFeatureTooltip } from "../../tooltips/MapFeatureTooltip"
 
 // API
-import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
-import { FetchError } from "@repo/data/fetching"
+import { useTierLocationAssignments } from "@repo/data/coeqwal"
 import type { TierLocation } from "./types"
 
 // Store
@@ -89,7 +88,6 @@ export default function VisualizationLayers({
   // Get outcome visualization data
   const {
     outcomeCode,
-    outcome,
     scenarioId,
     config,
     geometryType,
@@ -130,55 +128,32 @@ export default function VisualizationLayers({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearTooltipsSignal])
 
-  // Lightweight tier location assignments for React-rendered markers (non-polygon outcomes)
-  const [tierLocations, setTierLocations] = useState<TierLocation[]>([])
-  const [tierCode, setTierCode] = useState<string | null>(null)
-
-  // Fetch tier assignments (no geometry) for non-Mapbox outcomes
-  useEffect(() => {
-    if (!config || !scenarioId || usesMapboxLayers) {
-      setTierLocations([])
-      setTierCode(null)
-      return
-    }
-
-    if (mapMode === "hidden") {
-      setTierLocations([])
-      setTierCode(null)
-      return
-    }
-
-    const code = config.tierCode
-    let cancelled = false
-
-    async function fetchData() {
-      try {
-        const data = await fetchTierLocationAssignments(scenarioId, code)
-        if (!cancelled) {
-          setTierLocations(data.locations)
-          setTierCode(data.tier_code)
-        }
-      } catch (err) {
-        if (
-          err instanceof FetchError &&
-          (err.status === 404 || err.status >= 500)
-        ) {
-          console.warn(`Tier data unavailable for ${code} (HTTP ${err.status})`)
-        } else {
-          console.error("Failed to fetch tier location data:", err)
-        }
-        if (!cancelled) {
-          setTierLocations([])
-          setTierCode(null)
-        }
-      }
-    }
-
-    fetchData()
-    return () => {
-      cancelled = true
-    }
-  }, [outcome, scenarioId, usesMapboxLayers, map, mapMode, config])
+  // Lightweight tier location assignments for React-rendered markers
+  // (non-polygon outcomes). Use the SWR-backed hook so this data shares
+  // cache with useTierLocationAssignmentsBatch and the prefetch in
+  // usePrefetchTiers: when the scenario explorer warms the batch cache, a
+  // subsequent mount here hits memory, not the network.
+  const shouldFetchAssignments = Boolean(
+    config && scenarioId && !usesMapboxLayers && mapMode !== "hidden",
+  )
+  const { data: assignmentsData } = useTierLocationAssignments(
+    shouldFetchAssignments && config ? scenarioId : null,
+    shouldFetchAssignments && config ? config.tierCode : null,
+  )
+  const tierLocations: TierLocation[] = useMemo(
+    () =>
+      shouldFetchAssignments && assignmentsData
+        ? assignmentsData.locations
+        : [],
+    [shouldFetchAssignments, assignmentsData],
+  )
+  const tierCode: string | null = useMemo(
+    () =>
+      shouldFetchAssignments && assignmentsData
+        ? assignmentsData.tier_code
+        : null,
+    [shouldFetchAssignments, assignmentsData],
+  )
 
   const isLearnMode = mapMode === "learn"
   const isGetStartedMode = mapMode === "get-started"

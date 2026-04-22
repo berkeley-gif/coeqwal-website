@@ -2,12 +2,17 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
+import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
 import { getTierColorsFromTheme, type TierLevel } from "../../../content/tiers"
 import { API_BASE } from "../../../lib/constants/api"
 
 const DEMO_SCENARIO_ID = "s0020"
 const TIER_CODE = "AG_REV"
 
+// Keep as readonly literal for autocomplete in the component, but normalize
+// once here so both the batch-fetcher call and the outcome bookkeeping use the
+// same ordered list. Also export the mutable copy passed to the batch fetcher
+// so callers of useOutcomeTierOverrides stay in sync.
 const OUTCOME_CODES_FOR_ANIMATION = [
   "CWS_DEL",
   "AG_REV",
@@ -19,6 +24,7 @@ const OUTCOME_CODES_FOR_ANIMATION = [
   "FW_DELTA_USES",
   "WRC_SALMON_AB",
 ] as const
+const OUTCOME_CODES_ARR: string[] = [...OUTCOME_CODES_FOR_ANIMATION]
 
 interface TierLocationRaw {
   location_id: string
@@ -146,36 +152,41 @@ export function useTierAnimationData(): TierAnimationData {
 
     async function fetchData() {
       try {
-        const outcomeFetches = OUTCOME_CODES_FOR_ANIMATION.map((code) =>
-          fetch(
-            `${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${code}/locations`,
-          ).then(async (res) => {
-            if (!res.ok) return { code, data: null }
-            const data: TierLocationsResponse = await res.json()
-            return { code, data }
-          }),
-        )
-
-        const [locRes, geoRes, ...outcomeResults] = await Promise.all([
-          fetch(
-            `${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}/locations`,
+        // One batch call covers all N outcomes (including AG_REV, which we
+        // reuse below for tierColorMap / tierDistribution). The GeoJSON
+        // endpoint is still the sole source of polygon centroids for the
+        // animation; no batch equivalent exists, so it stays as a direct
+        // fetch. All other per-outcome calls are consolidated.
+        const [batch, geoRes] = await Promise.all([
+          fetchTierLocationAssignmentsBatch(
+            DEMO_SCENARIO_ID,
+            OUTCOME_CODES_ARR,
           ),
           fetch(`${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}`),
-          ...outcomeFetches,
         ])
 
-        if (!locRes.ok || !geoRes.ok) {
-          throw new Error(
-            `API error: locations=${locRes.status}, geojson=${geoRes.status}`,
-          )
+        if (!geoRes.ok) {
+          throw new Error(`API error: geojson=${geoRes.status}`)
         }
 
-        const locData: TierLocationsResponse = await locRes.json()
         const geoData: GeoJSONResponse = await geoRes.json()
 
         const outcomeMap: Record<string, TierLocationsResponse> = {}
-        for (const result of outcomeResults) {
-          if (result.data) outcomeMap[result.code] = result.data
+        for (const [code, resp] of Object.entries(batch.results)) {
+          outcomeMap[code] = {
+            locations: resp.locations,
+            metadata: {
+              total_locations: resp.metadata.total_locations,
+              tier_counts: resp.metadata.tier_counts,
+            },
+          }
+        }
+
+        const locData = outcomeMap[TIER_CODE] ?? null
+        if (!locData) {
+          throw new Error(
+            `API error: no active rows for ${TIER_CODE} on ${DEMO_SCENARIO_ID}`,
+          )
         }
 
         if (!cancelled) {
@@ -307,28 +318,24 @@ export function useOutcomeTierOverrides(scenarioId: string) {
     const colors = tierColorsRef.current
 
     async function fetchOverrides() {
-      const results = await Promise.all(
-        OUTCOME_CODES_FOR_ANIMATION.map((code) =>
-          fetch(`${API_BASE}/tier-map/${scenarioId}/${code}/locations`)
-            .then(async (res) => {
-              if (!res.ok) return { code, data: null }
-              return {
-                code,
-                data: (await res.json()) as TierLocationsResponse,
-              }
-            })
-            .catch(() => ({
-              code,
-              data: null as TierLocationsResponse | null,
-            })),
-        ),
-      )
+      // One batched request (server-side ANY($codes)) instead of N parallel
+      // per-outcome fetches. Outcomes absent for this scenario land in
+      // batch.missing and are silently skipped, matching the previous
+      // per-outcome try/catch behavior.
+      let batch
+      try {
+        batch = await fetchTierLocationAssignmentsBatch(
+          scenarioId,
+          OUTCOME_CODES_ARR,
+        )
+      } catch {
+        return
+      }
 
       if (cancelled) return
 
       const map: Record<string, OutcomeLocationData> = {}
-      for (const { code, data } of results) {
-        if (!data) continue
+      for (const [code, data] of Object.entries(batch.results)) {
         const ids = new Set<string>()
         const tierMap: Record<string, TierLevel> = {}
         const colorMap: Record<string, string> = {}
