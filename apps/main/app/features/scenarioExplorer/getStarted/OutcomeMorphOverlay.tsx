@@ -78,6 +78,13 @@ interface OutcomeMorphOverlayProps {
    *  Rendered regardless of `interactive` so the storyboard can drive it
    *  during non-interactive playback. */
   demoHighlightedLocationKey?: string | null
+  /** Source IDs that must survive the per-outcome subsample. Any polygon
+   *  whose `sourceId` is in this set is kept verbatim; the remaining quota
+   *  is filled with a uniform stride over the untouched polygons. Used by
+   *  the storyboard to guarantee that beat-specific LOIs (e.g. the Beat 5
+   *  Glenn Colusa spotlight, the Beat 1C popup DUs) always have a square
+   *  to highlight, even when `outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME`. */
+  mustIncludeSourceIds?: ReadonlySet<string>
 }
 
 function getLocationName(code: string, sourceId: string): string {
@@ -387,6 +394,7 @@ export default function OutcomeMorphOverlay({
   spotlightedTier,
   onBarClick,
   demoHighlightedLocationKey = null,
+  mustIncludeSourceIds,
 }: OutcomeMorphOverlayProps) {
   const theme = useTheme()
   const svgRef = useRef<SVGSVGElement>(null)
@@ -403,11 +411,38 @@ export default function OutcomeMorphOverlay({
       const sampled =
         outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME
           ? (() => {
-              const step = outcome.polygons.length / MAX_POLYGONS_PER_OUTCOME
-              return Array.from(
-                { length: MAX_POLYGONS_PER_OUTCOME },
-                (_, i) => outcome.polygons[Math.floor(i * step)]!,
+              // Seed the kept set with any explicitly required source IDs so
+              // beat-driven highlights (Beat 5 LOI, Beat 1C popup DUs) never
+              // get silently culled by the stride sampler. Then fill the
+              // remaining quota with a uniform stride over the polygons that
+              // weren't already pinned, preserving the roughly even visual
+              // distribution the uniform sampler was providing.
+              const keptIndices = new Set<number>()
+              const pinned: ShapeMorphData[] = []
+              if (mustIncludeSourceIds && mustIncludeSourceIds.size > 0) {
+                for (let i = 0; i < outcome.polygons.length; i++) {
+                  const p = outcome.polygons[i]!
+                  if (mustIncludeSourceIds.has(p.sourceId)) {
+                    keptIndices.add(i)
+                    pinned.push(p)
+                    if (pinned.length >= MAX_POLYGONS_PER_OUTCOME) break
+                  }
+                }
+              }
+              const remaining = MAX_POLYGONS_PER_OUTCOME - pinned.length
+              if (remaining <= 0) return pinned
+              // Build the pool of candidates (indices not already pinned) and
+              // stride across it so gaps between kept squares stay even.
+              const pool: number[] = []
+              for (let i = 0; i < outcome.polygons.length; i++) {
+                if (!keptIndices.has(i)) pool.push(i)
+              }
+              const step = pool.length / remaining
+              const strided: ShapeMorphData[] = Array.from(
+                { length: remaining },
+                (_, i) => outcome.polygons[pool[Math.floor(i * step)]!]!,
               )
+              return [...pinned, ...strided]
             })()
           : outcome.polygons
 
@@ -478,6 +513,7 @@ export default function OutcomeMorphOverlay({
     distributionPositionMap,
     tierChartData,
     theme.palette.tiers,
+    mustIncludeSourceIds,
   ])
 
   /* ── Radar geometry (Beat 7) ──
@@ -1380,7 +1416,12 @@ export default function OutcomeMorphOverlay({
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
-              const isClickable = interactive && isSelected && !isAvgMode
+              // Squares are clickable whenever the overlay is interactive
+              // and we're not in average mode. The `isSelected` gate was
+              // dropped because outcome-title clicks no longer precede
+              // square clicks; clicking a square is now the sole entry
+              // point for activating an outcome's map layer.
+              const isClickable = interactive && !isAvgMode
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -1433,7 +1474,7 @@ export default function OutcomeMorphOverlay({
                   }}
                   pointerEvents={isClickable ? "all" : "none"}
                   onMouseEnter={
-                    interactive && isSelected && !isBarOrAvg
+                    interactive && !isBarOrAvg
                       ? () =>
                           onLocationEnter?.({
                             code: group.code,
@@ -1443,12 +1484,12 @@ export default function OutcomeMorphOverlay({
                       : undefined
                   }
                   onMouseLeave={
-                    interactive && isSelected && !isBarOrAvg
+                    interactive && !isBarOrAvg
                       ? () => onLocationLeave?.()
                       : undefined
                   }
                   onClick={
-                    interactive && isSelected
+                    interactive
                       ? (e) => {
                           e.stopPropagation()
                           if (isBarMode && onBarClick) {

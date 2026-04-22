@@ -50,6 +50,7 @@ export {
   IconButton,
   Menu,
   MenuItem,
+  Popover,
   Select,
   FormControl,
   InputLabel,

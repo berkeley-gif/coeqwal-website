@@ -223,6 +223,8 @@ export default function ScenarioExplorer() {
       compareOutcomeCodes: [],
       expandedRegionalOutcomes: [],
       scenarioLayout: "small_multiples",
+      transposed: false,
+      aggregateOver: "scenarios",
     })
 
   const handleResilienceControlsChange = useCallback(

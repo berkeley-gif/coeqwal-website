@@ -1153,7 +1153,7 @@ export default function BeatTextOverlay({
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
                 The distribution shows how agricultural revenue plays out in
-                this scenario across all the districts at a glance.
+                this scenario across the Central Valley agricultural districts in CalSim at a glance.
               </Typography>
             </Box>
           </Box>

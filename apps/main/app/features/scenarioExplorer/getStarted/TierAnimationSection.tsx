@@ -46,7 +46,10 @@ import OutcomeMorphOverlay, {
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
-import PinnedLocationsList from "./PinnedLocationsList"
+// Retired in favor of the anchored upper-left map popup rendered by
+// `VisualizationLayers`; kept imported (prefixed to silence the unused-var
+// lint) so un-commenting the card-list mount below is a one-line change.
+import _PinnedLocationsList from "./PinnedLocationsList"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
@@ -233,7 +236,7 @@ const BEAT5_S1_LAYER_IN_END = 0.575
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
 const BEAT5_S4_POLYGON_RING_AT = 0.6
-const BEAT5_S5_POLYGON_POPUP_AT = 0.61
+const BEAT5_S5_POLYGON_POPUP_AT = 0.605
 const BEAT5_SETTLE = 0.62
 const BEAT5_TAIL_END = 0.63
 const BEAT5_LAYER_OPACITY = 0.65
@@ -332,9 +335,15 @@ export default function TierAnimationSection() {
   const polygonsAllowedRef = useRef(false)
   const resolvedScenarioIdRef = useRef("s0020")
 
-  /* ── Hide left-panel text when zoomed past threshold ── */
-  const [textVisible, setTextVisible] = useState(true)
-  const textVisibleRef = useRef(true)
+  /* ── Left-panel text visibility.
+   *
+   * The zoom-based fade-out was retired (see the reprojection effect
+   * further down) to keep the bottom navigation controls accessible
+   * while the map is zoomed into a clicked square. The state is kept
+   * so a future visibility trigger can set it without a wider refactor.
+   * Setter and ref are underscored to keep the unused-var lint quiet. */
+  const [textVisible, _setTextVisible] = useState(true)
+  const _textVisibleRef = useRef(true)
 
   /* ── Time-based progress (0 -> 1) ── */
   const progress = useMotionValue(0)
@@ -494,10 +503,28 @@ export default function TierAnimationSection() {
     [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
   )
 
+  /* ── Clear any interactive overlay/map state tied to a sticky pin.
+   *
+   * Called when the user navigates between beats so that a previously
+   * clicked square (and its pinned popups + outcome map layer) doesn't
+   * carry over into the next beat, where the layer and overlay content
+   * will generally belong to a different outcome. Mirrors the clearing
+   * block in `handleRestart`. */
+  const clearInteractiveState = useCallback(() => {
+    setHoveredLocation(null)
+    setPinnedLocations(new Map())
+    mapActions.clearLocationHighlights()
+    mapActions.clearOutcomeVisualization()
+  }, [])
+
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
-    goTo(beatIndexRef.current + 1)
-  }, [goTo])
+    clearInteractiveState()
+    // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
+    // (a no-op when already home) before running the beat tween, so a
+    // square-click zoom doesn't persist into the next beat.
+    goTo(beatIndexRef.current + 1, { viaCamera: true })
+  }, [goTo, clearInteractiveState])
 
   /* ── Intro tween (Play button entry point) ──
    *
@@ -551,17 +578,49 @@ export default function TierAnimationSection() {
   const handleBack = useCallback(() => {
     const i = beatIndexRef.current
     if (i > 0) {
+      clearInteractiveState()
       if (controlsRef.current) controlsRef.current.stop()
       const targetIndex = i - 1
       const target = BEATS[targetIndex]!
-      progress.set(target.progress)
-      setBeatIndex(targetIndex)
-      beatIndexRef.current = targetIndex
-      setPlayState("paused")
+
+      const applyBeat = () => {
+        progress.set(target.progress)
+        setBeatIndex(targetIndex)
+        beatIndexRef.current = targetIndex
+        setPlayState("paused")
+      }
+
+      // Fly the map back to the default home view first if a square-click
+      // (or any other interaction) pushed the camera elsewhere. Mirrors
+      // the `viaCamera` branch in `goTo`; Back snaps the beat progress
+      // instead of tweening, so we inline the camera easeTo + `moveend`
+      // completion here rather than routing through `goTo`.
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (map) {
+        const currentCenter = map.getCenter()
+        const currentZoom = map.getZoom()
+        const needsMove =
+          Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+          Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+          Math.abs(currentZoom - CAM_ZOOM) > 0.05
+        if (needsMove) {
+          setPlayState("playing")
+          map.once("moveend", applyBeat)
+          map.easeTo({
+            center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+            zoom: CAM_ZOOM,
+            duration: 800,
+          })
+          return
+        }
+      }
+
+      applyBeat()
       return
     }
     if (!hasPlayedRef.current) return // pre-play: Back is a no-op
 
+    clearInteractiveState()
     if (controlsRef.current) controlsRef.current.stop()
     const finish = () => {
       // Snap underlying animation state back to pre-play in one frame
@@ -586,7 +645,13 @@ export default function TierAnimationSection() {
       ease: "easeOut",
       onComplete: finish,
     })
-  }, [progress, backOutOpacity, prefersReducedMotion])
+  }, [
+    progress,
+    backOutOpacity,
+    prefersReducedMotion,
+    clearInteractiveState,
+    mapAPI.mapRef,
+  ])
 
   const handleRestart = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
@@ -741,7 +806,14 @@ export default function TierAnimationSection() {
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
-  const isInteractive = playState === "finished"
+  // Interactive-UI gate. "finished" lights up after navigating all beats
+  // (the canonical finish state, set by `settleToFinishedState`). We also
+  // treat "paused" as interactive so clicks work whenever the storyboard
+  // is parked between beats -- important because the 8-beat structure now
+  // ends at the Beat 8 heatmap stub, so requiring the animation to run all
+  // the way through would otherwise lock out the manual pipeline during
+  // iteration on any mid-storyboard beat.
+  const isInteractive = playState === "finished" || playState === "paused"
 
   /* ── Encoding mode: distribution | bar | average ── */
   const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
@@ -776,34 +848,102 @@ export default function TierAnimationSection() {
   const [pinnedLocations, setPinnedLocations] = useState<
     Map<string, LocationInfo>
   >(new Map())
-  const [cardHoveredKey, setCardHoveredKey] = useState<string | null>(null)
-  const pinnedCacheRef = useRef<Map<string, Map<string, LocationInfo>>>(
-    new Map(),
-  )
+  // `cardHoveredKey` was read only by `PinnedLocationsList` (now retired).
+  // The setter is still invoked by the hover-enter/leave handlers below, so
+  // the state is harmless to keep as a no-op bridge for any future card UI.
+  const [_cardHoveredKey, setCardHoveredKey] = useState<string | null>(null)
 
   const locKey = useCallback(
     (info: LocationInfo) => `${info.code}:${info.sourceId}`,
     [],
   )
 
+  // Ref for reading the latest pinnedLocations inside locHandlers.onClick
+  // without forcing the memo to re-create (which in turn would re-render
+  // OutcomeMorphOverlay on every selection change).
+  const pinnedLocationsRef = useRef(pinnedLocations)
+  useEffect(() => {
+    pinnedLocationsRef.current = pinnedLocations
+  }, [pinnedLocations])
+
   const locHandlers = useMemo(
     () => ({
       onMouseEnter: (info: LocationInfo) => setHoveredLocation(info),
       onMouseLeave: () => setHoveredLocation(null),
       onClick: (info: LocationInfo) => {
-        setPinnedLocations((prev) => {
-          const key = locKey(info)
-          const next = new Map(prev)
-          if (next.has(key)) {
-            next.delete(key)
-          } else {
-            next.set(key, info)
+        // Sticky single-select: clicking a square makes that location the
+        // active one (gold ring on the square, gold stroke on the polygon,
+        // popup on both) and brings up the corresponding outcome's map
+        // layer. Clicking the same square again deselects and hides the
+        // layer. Clicking a square in a different outcome swaps both the
+        // pin and the map layer and flies the camera to the new outcome
+        // (mirroring the old outcome-title-click camera behavior).
+        const key = locKey(info)
+        const prevPins = pinnedLocationsRef.current
+        const wasSelected = prevPins.has(key)
+
+        // -- Commented out: previous multi-pin toggle behavior. Re-enable
+        //    if we ever want several pinned locations with tethered
+        //    popups again.
+        // setPinnedLocations((prev) => {
+        //   const next = new Map(prev)
+        //   if (next.has(key)) next.delete(key)
+        //   else next.set(key, info)
+        //   return next
+        // })
+
+        // Determine the current outcome of the pinned selection (if any)
+        // so we can detect cross-outcome switches. We look at the first
+        // entry because sticky single-select holds at most one pin.
+        const prevEntry = prevPins.values().next().value as
+          | LocationInfo
+          | undefined
+        const prevOutcomeCode = prevEntry?.code ?? null
+        const isCrossOutcome =
+          !wasSelected && prevOutcomeCode != null && prevOutcomeCode !== info.code
+
+        if (wasSelected) {
+          setPinnedLocations(new Map())
+        } else {
+          setPinnedLocations(new Map([[key, info]]))
+        }
+
+        // Clear hover so the sticky selection is the sole highlight owner
+        // and no ephemeral tooltip stacks on top of it.
+        setHoveredLocation(null)
+
+        // Keep the outcome map layer in sync with the sticky selection.
+        if (wasSelected) {
+          mapActions.clearOutcomeVisualization()
+        } else {
+          mapActions.setOutcomeVisualization(info.code, resolvedScenarioId)
+        }
+
+        // Fly the camera to the new outcome on cross-outcome switches so
+        // the user can see the polygon that just became active. Same-outcome
+        // swaps keep the camera still (both polygons are already in view).
+        if (isCrossOutcome) {
+          const map = mapAPI.mapRef?.current?.getMap?.()
+          if (map) {
+            const action = resolveOutcomeCamera(info.code, "get-started")
+            if (action.type === "fitBounds") {
+              mapAPI.mapRef?.current?.fitBounds(action.bounds, {
+                padding: action.padding,
+                maxZoom: action.maxZoom,
+                duration: action.duration,
+              })
+            } else {
+              map.easeTo({
+                center: action.center,
+                zoom: action.zoom,
+                duration: action.duration,
+              })
+            }
           }
-          return next
-        })
+        }
       },
     }),
-    [locKey],
+    [locKey, resolvedScenarioId, mapAPI.mapRef],
   )
 
   const activeLocationSet = useMemo(() => {
@@ -833,33 +973,52 @@ export default function TierAnimationSection() {
   const [demoHoveredLocation, setDemoHoveredLocation] =
     useState<LocationInfo | null>(null)
 
+  /* Source IDs that must survive `OutcomeMorphOverlay`'s stride subsample.
+   * When an outcome has more polygons than `MAX_POLYGONS_PER_OUTCOME` the
+   * overlay drops a roughly uniform subset, which can silently cull any
+   * specific DU the storyboard references. Pin the Beat 5 LOI and the Beat
+   * 1C popup IDs here so their squares are guaranteed to render. */
+  const overlayMustIncludeSourceIds = useMemo(
+    () => new Set<string>([BEAT5_LOI_ID, ...BEAT1C_POPUP_DU_IDS]),
+    [],
+  )
+
   const prevOutcomeRef = useRef<string | null>(null)
   useEffect(() => {
-    const prev = prevOutcomeRef.current
     prevOutcomeRef.current = selectedOutcomeCode
 
-    if (prev && prev !== selectedOutcomeCode) {
-      setPinnedLocations((current) => {
-        if (current.size > 0) {
-          pinnedCacheRef.current.set(prev, new Map(current))
-        } else {
-          pinnedCacheRef.current.delete(prev)
+    // Under sticky single-select, clicking a square atomically sets both
+    // `pinnedLocations` and `selectedOutcomeCode`. If the pins already
+    // belong to the new outcome (common case: user clicked a square in
+    // outcome B while outcome A was pinned), keep them untouched — the
+    // click handler is the source of truth. Only clear stale pins whose
+    // outcome no longer matches (e.g. the storyboard animation switched
+    // outcomes out from under a leftover selection).
+    setPinnedLocations((current) => {
+      if (current.size === 0) return current
+      if (selectedOutcomeCode) {
+        for (const pin of current.values()) {
+          if (pin.code === selectedOutcomeCode) return current
         }
-        return new Map()
-      })
-    }
+      }
+      return new Map()
+    })
 
+    // Dropping the ephemeral hover on outcome change prevents a stale
+    // hover tooltip (from the previous outcome) surviving into the new
+    // outcome's view.
     setHoveredLocation(null)
 
-    const cached = selectedOutcomeCode
-      ? pinnedCacheRef.current.get(selectedOutcomeCode)
-      : undefined
-    if (cached && cached.size > 0) {
-      setPinnedLocations(new Map(cached))
-    }
-
+    // The interactive paint effect caches original line-color / line-width
+    // values per layer; invalidate them so the new outcome's layer starts
+    // from a clean baseline.
     origLineColorRef.current = null
     origLineWidthRef.current = null
+
+    // NOTE: pinnedCacheRef (stash/restore per-outcome pins) was used by
+    // the older multi-pin + outcome-title-click flow. It is intentionally
+    // not read or written here any more; a cross-outcome click replaces
+    // the pin outright rather than reviving a cached selection.
   }, [selectedOutcomeCode])
 
   const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
@@ -1118,12 +1277,18 @@ export default function TierAnimationSection() {
   ])
 
   const storeHighlights = useLocationHighlights()
-  const pinnedHighlights = useMemo(
+  // Kept (prefixed with `_` to silence the unused-var lint) only so that
+  // re-enabling the retired `PinnedLocationsList` mount below is a one-line
+  // change. Currently no consumer reads this memo.
+  const _pinnedHighlights = useMemo(
     () => storeHighlights.filter((h) => pinnedLocations.has(h.key)),
     [storeHighlights, pinnedLocations],
   )
 
-  const handlePinnedHoverEnter = useCallback(
+  // Prefixed with `_` so the unused-var lint stays silent while the retired
+  // `PinnedLocationsList` mount sits commented out. Still functional; just
+  // re-wire (and rename) when restoring the card-list UI.
+  const _handlePinnedHoverEnter = useCallback(
     (key: string) => {
       setCardHoveredKey(key)
       const info = pinnedLocations.get(key)
@@ -1132,7 +1297,7 @@ export default function TierAnimationSection() {
     [pinnedLocations],
   )
 
-  const handlePinnedHoverLeave = useCallback(() => {
+  const _handlePinnedHoverLeave = useCallback(() => {
     setCardHoveredKey(null)
     setHoveredLocation(null)
   }, [])
@@ -1163,7 +1328,12 @@ export default function TierAnimationSection() {
 
   const fadeOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleOutcomeClick = useCallback(
+  // Kept defined (prefixed with `_` to silence the unused-var lint) but no
+  // longer wired up: outcome titles are display-only and layer visibility is
+  // now driven by `locHandlers.onClick` (sticky square selection). Restore by
+  // passing this back into OutcomeMorphOverlay / BeatTextOverlay if we ever
+  // want outcome-title clicks back.
+  const _handleOutcomeClick = useCallback(
     (code: string, force?: boolean) => {
       const isToggleOff = selectedOutcomeCode === code
 
@@ -2408,10 +2578,13 @@ export default function TierAnimationSection() {
           tierLevel: info.tier,
           tierLabel: getTierLabel(info.tier),
           tierColor,
-          // `pinned: false` lets the get-started-mode filter in
-          // VisualizationLayers render the Popup (pinned highlights
-          // are filtered out in that mode).
-          pinned: false,
+          // `pinned: true` satisfies the get-started-mode filter in
+          // VisualizationLayers, which now renders only pinned highlights
+          // so that user-hover never produces a map-side popup. The Beat 5
+          // demo popup is effectively a "pseudo-pin" driven by the
+          // storyboard progress; teardown() clears it when the Beat 5
+          // window closes, so it never leaks into Beat 6.
+          pinned: true,
         } satisfies import("../../map/store").LocationHighlight)
       : null
 
@@ -2463,9 +2636,15 @@ export default function TierAnimationSection() {
         hoverActive = false
       }
 
-      // Step 5: location-highlight Popup near the polygon.
+      // Step 5: location-highlight Popup near the polygon. The window runs
+      // from the step onset through the end of the Beat 5 tail (not just the
+      // BEAT5_SETTLE settle point) so the popup remains readable during the
+      // ~0.01-wide tail before Beat 6 clears it. The popup is set to
+      // `pinned: false` in VisualizationLayers' get-started filter, so it
+      // won't survive into Beat 6 on its own -- the teardown() in the
+      // Beat-5 driver's cleanup clears it when the window closes.
       const wantPopup =
-        v >= BEAT5_S5_POLYGON_POPUP_AT && v < BEAT5_SETTLE
+        v >= BEAT5_S5_POLYGON_POPUP_AT && v < BEAT5_TAIL_END
       if (wantPopup && !popupActive && highlight) {
         mapActions.setLocationHighlights([highlight])
         popupActive = true
@@ -2879,23 +3058,26 @@ export default function TierAnimationSection() {
   }, [panelInView])
 
   // Re-project cached shapes when the map pans/zooms (no Mapbox re-query).
+  //
+  // NOTE: an earlier version of this effect also faded the text column out
+  // when the map zoom exceeded `TEXT_FADE_ZOOM = 7`, on the theory that
+  // the text would otherwise overlap a zoomed-in polygon during the
+  // storytelling phase. It was disabled because (a) under the interactive
+  // sticky single-select flow, clicking a square legitimately zooms past
+  // that threshold, and (b) hiding the text column also hides the bottom
+  // Back / step / Next controls, which the user needs to navigate beats.
+  // `textVisible` and `textVisibleRef` are kept around as a hook in case
+  // we want to wire up a different visibility trigger later.
   useEffect(() => {
     if (!panelInView) return
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (!map) return
-
-    const TEXT_FADE_ZOOM = 7
 
     let rafId: number | null = null
     const onMove = () => {
       if (rafId !== null) return
       rafId = requestAnimationFrame(() => {
         reprojectRef.current()
-        const shouldShow = map.getZoom() < TEXT_FADE_ZOOM
-        if (shouldShow !== textVisibleRef.current) {
-          textVisibleRef.current = shouldShow
-          setTextVisible(shouldShow)
-        }
         rafId = null
       })
     }
@@ -3292,7 +3474,12 @@ export default function TierAnimationSection() {
                 progress={progress}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
                 distributionPositionMap={distributionPositionMap}
-                onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
+                // Click-to-show-outcome-layer is intentionally disabled: the
+                // layer is now driven by clicking a distribution square
+                // (see `locHandlers.onClick`), so outcome titles are
+                // display-only. `handleOutcomeClick` is still defined but no
+                // longer wired up here.
+                onOutcomeClick={undefined}
                 selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
                 interactive={isInteractive}
                 activeLocationSet={
@@ -3302,6 +3489,7 @@ export default function TierAnimationSection() {
                   isInteractive ? hoveredLocation : demoHoveredLocation
                 }
                 demoHighlightedLocationKey={demoLocationKey}
+                mustIncludeSourceIds={overlayMustIncludeSourceIds}
                 onLocationEnter={
                   isInteractive ? locHandlers.onMouseEnter : undefined
                 }
@@ -3351,7 +3539,9 @@ export default function TierAnimationSection() {
             onBack={handleBack}
             onRestart={handleRestart}
             beat2Layout={outcomeLayout}
-            onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
+            // Outcome-title clicks no longer drive layer visibility; see the
+            // matching comment above on OutcomeMorphOverlay.
+            onOutcomeClick={undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
             interactive={isInteractive}
             textHidden={!textVisible}
@@ -3367,20 +3557,27 @@ export default function TierAnimationSection() {
             hideControls={prefersReducedMotion}
           />
 
-          {isInteractive &&
-            pinnedHighlights.length > 0 &&
-            selectedOutcomeCode !== "RES_STOR" &&
-            selectedOutcomeCode !== "FW_EXP" &&
-            selectedOutcomeCode !== "FW_DELTA_USES" && (
-              <PinnedLocationsList
-                highlights={pinnedHighlights}
-                onUnpin={handleTooltipToggle}
-                onHoverEnter={handlePinnedHoverEnter}
-                onHoverLeave={handlePinnedHoverLeave}
-                hoveredKey={cardHoveredKey}
-                mapRef={mapAPI.mapRef}
-              />
-            )}
+          {/* Retired: right-side pinned-location cards with dashed leader
+           * lines. Pinned highlights now render as a simple anchored popup
+           * to the upper-left of the polygon, via the lightweight popup in
+           * `VisualizationLayers`. Left commented out so we can revive the
+           * card-list layout if the design calls for it again.
+           *
+           * {isInteractive &&
+           *   pinnedHighlights.length > 0 &&
+           *   selectedOutcomeCode !== "RES_STOR" &&
+           *   selectedOutcomeCode !== "FW_EXP" &&
+           *   selectedOutcomeCode !== "FW_DELTA_USES" && (
+           *     <PinnedLocationsList
+           *       highlights={pinnedHighlights}
+           *       onUnpin={handleTooltipToggle}
+           *       onHoverEnter={handlePinnedHoverEnter}
+           *       onHoverLeave={handlePinnedHoverLeave}
+           *       hoveredKey={cardHoveredKey}
+           *       mapRef={mapAPI.mapRef}
+           *     />
+           *   )}
+           */}
         </>
       )}
     </Box>

@@ -1,46 +1,45 @@
 "use client"
 
 /**
- * ResilienceControls - chart-controls bar for the resilience heatmap.
+ * ResilienceControls - sentence-style header for the resilience heatmap.
  *
- * Layout follows the "mode-by-mode first paint" pattern from the
- * Resilience Heatmap Reset plan: a single compact header with the
- * primary mode rail, a one-line helper sentence, a mode-specific
- * action row, and hydroclimate chips docked above the matrix.
+ * The control surface is a single one-line sentence:
  *
- * Primary modes in the rail: View by scenarios | View by outcomes |
- * View aggregate. Leverage (the scatter quadrant view) is hidden for
- * now; the enum value and branch code stay so we can reintroduce it.
- * View by scenarios is sidebar-driven: it renders small multiples of
- * the sidebar selection when non-empty and falls through to the
- * Overview aggregate when empty.
+ *   "Showing {pivot} of {scenarios} x {outcomes} x {climates},
+ *    read as {encoding}."                            [Configure]
  *
- * View by scenarios first paint: choose outcomes + Regional detail.
- * View by outcomes first paint: primary outcome picker + Compare.
- * View aggregate first paint: choose outcomes (+ advanced Read as /
- * Reference / Display when surfaced).
+ * The phrases run from broad (pivot / layout) to narrow (encoding /
+ * how to read each cell), so a new user reads the sentence in the
+ * same order they would make decisions.
  *
- * Advanced controls (Read as, Reference, Display) surface only when
- * the active view is showing the Overview aggregate so the other
- * modes stay focused on the dominant decision.
+ * Each bold phrase is a click-target that opens a focused popover for
+ * that dimension. Transpose and display-overflow live as a floating
+ * toolbar on the chart itself (see `ResiliencePanel`); the Configure
+ * button opens the existing `ResilienceChartTuner` overlay for
+ * presets, walkthrough, reset, and snapshot.
+ *
+ * Quadrant / Leverage retains its own compact two-card control set
+ * because its mental model differs from the 3-axis cube.
  */
 
 import React, { useCallback, useMemo, useState } from "react"
 import {
   Box,
   Divider,
-  IconButton,
-  Menu,
   MenuItem,
+  Popover,
   Select,
   type SelectChangeEvent,
   Typography,
   icons,
   useTheme,
 } from "@repo/ui/mui"
+import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../components/InlineToggleChip"
+import ResilienceChartTuner from "./ResilienceChartTuner"
 import { useScenarioExplorerStore } from "../store"
 import type {
+  AggregateOver,
   CellEncoding,
   DeltaMode,
   QuadrantUnit,
@@ -68,31 +67,37 @@ interface ResilienceControlsProps {
   onChange: (next: Partial<ResilienceControlsState>) => void
 }
 
-// User-facing mode labels for the primary rail. Internal enum values
-// remain unchanged (`scenario` / `outcome` / `aggregate` / `quadrant`).
-// All three non-leverage modes are peers in the rail. "View by
-// scenarios" is also sidebar-driven; when the sidebar is empty the
-// panel falls through to the Overview aggregate for continuity.
-const MODE_LABEL: Record<ResilienceView, string> = {
-  scenario: "View by scenarios",
-  outcome: "View by outcomes",
-  aggregate: "View aggregate",
-  quadrant: "Leverage",
+// User-facing short labels for the pivot popover.
+const PIVOT_LABEL: Record<ResilienceView, string> = {
+  scenario: "per scenario",
+  outcome: "per outcome",
+  hydroclimate: "per hydroclimate",
+  aggregate: "aggregate",
+  quadrant: "leverage",
 }
 
-// Primary mode rail order. Three peer entries; Leverage is hidden for
-// now (the "More analysis" affordance has been removed) but the enum
-// value remains so we can reintroduce it later.
-const PRIMARY_MODE_ORDER: readonly ResilienceView[] = [
+const PIVOT_ORDER: readonly ResilienceView[] = [
   "scenario",
   "outcome",
+  "hydroclimate",
   "aggregate",
+]
+
+const AGGREGATE_OVER_LABEL: Record<AggregateOver, string> = {
+  scenarios: "over scenarios",
+  outcomes: "over outcomes",
+  hydroclimates: "over hydroclimates",
+}
+
+const AGGREGATE_OVER_ORDER: readonly AggregateOver[] = [
+  "scenarios",
+  "outcomes",
+  "hydroclimates",
 ]
 
 /**
  * Virtual "Read as" enum. Combines cellEncoding + deltaMode into a
- * single user-facing read mode. Only exposed in Overview mode for now;
- * Scenario and Outcome stay on mean tier to keep the first paint clean.
+ * single user-facing read mode.
  */
 type ReadAs =
   | "mean_tier"
@@ -103,12 +108,12 @@ type ReadAs =
   | "operational_leverage"
 
 const READ_AS_LABEL: Record<ReadAs, string> = {
-  mean_tier: "Mean tier",
-  climate_shift: "Climate shift",
-  risk_density: "Risk density",
-  opportunity_density: "Opportunity density",
-  distribution: "Distribution",
-  operational_leverage: "Operational leverage",
+  mean_tier: "mean tier",
+  climate_shift: "climate shift",
+  risk_density: "risk density",
+  opportunity_density: "opportunity density",
+  distribution: "distribution",
+  operational_leverage: "operational leverage",
 }
 
 function deriveReadAs(
@@ -149,7 +154,7 @@ function applyReadAs(
   }
 }
 
-const READ_AS_OPTIONS_OVERVIEW: readonly ReadAs[] = [
+const READ_AS_OPTIONS: readonly ReadAs[] = [
   "mean_tier",
   "climate_shift",
   "distribution",
@@ -157,6 +162,172 @@ const READ_AS_OPTIONS_OVERVIEW: readonly ReadAs[] = [
   "opportunity_density",
   "operational_leverage",
 ]
+
+/**
+ * Gate options that don't compose with the current pivot /
+ * aggregation. Densities + leverage need the underlying scenario ×
+ * hydroclimate cube; they're only coherent in aggregate. Climate shift
+ * needs a historical HC column, so it's disabled when aggregating over
+ * hydroclimates.
+ */
+function isReadAsOptionDisabled(
+  opt: ReadAs,
+  view: ResilienceView,
+  aggregateOver: AggregateOver,
+): boolean {
+  if (
+    (opt === "risk_density" ||
+      opt === "opportunity_density" ||
+      opt === "operational_leverage") &&
+    view !== "aggregate"
+  ) {
+    return true
+  }
+  if (opt === "operational_leverage" && aggregateOver !== "scenarios") {
+    return true
+  }
+  if (opt === "climate_shift" && aggregateOver === "hydroclimates") {
+    return true
+  }
+  return false
+}
+
+// --------------------------------------------------------------------
+// Sentence-phrase trigger
+// --------------------------------------------------------------------
+
+interface PhraseButtonProps {
+  label: React.ReactNode
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+  active?: boolean
+  ariaLabel?: string
+}
+
+function phraseButtonSx(theme: Theme, active: boolean) {
+  return {
+    display: "inline-flex",
+    alignItems: "baseline",
+    gap: 0.25,
+    px: 0.5,
+    py: 0.25,
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontFamily: "inherit",
+    fontSize: "inherit",
+    fontWeight: 600,
+    color: active ? theme.palette.blue.bright : theme.palette.text.primary,
+    background: active
+      ? theme.palette.interaction.selectedBackground
+      : "transparent",
+    textDecoration: "underline",
+    textDecorationColor: theme.palette.grey[400],
+    textUnderlineOffset: "3px",
+    transition: "color 150ms ease, background 150ms ease",
+    "&:hover, &:focus-visible": {
+      color: theme.palette.blue.bright,
+      background: theme.palette.action.hover,
+      textDecorationColor: theme.palette.blue.bright,
+      outline: "none",
+    },
+  } as const
+}
+
+function PhraseButton({
+  label,
+  onClick,
+  active = false,
+  ariaLabel,
+}: PhraseButtonProps) {
+  const theme = useTheme()
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-haspopup="dialog"
+      aria-expanded={active}
+      aria-label={ariaLabel}
+      sx={phraseButtonSx(theme, active)}
+    >
+      {label}
+      <icons.KeyboardArrowDown
+        sx={{ fontSize: "0.9em", transform: "translateY(2px)" }}
+      />
+    </Box>
+  )
+}
+
+// --------------------------------------------------------------------
+// Reusable popover shell
+// --------------------------------------------------------------------
+
+interface PopoverShellProps {
+  title: string
+  subtitle?: string
+  children: React.ReactNode
+  width?: number
+}
+
+function PopoverShell({
+  title,
+  subtitle,
+  children,
+  width = 280,
+}: PopoverShellProps) {
+  const theme = useTheme()
+  return (
+    <Box
+      sx={{
+        width,
+        maxWidth: "90vw",
+        p: 1.25,
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+      }}
+    >
+      <Box>
+        <Typography
+          variant="compactCaption"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            color: theme.palette.grey[800],
+          }}
+        >
+          {title}
+        </Typography>
+        {subtitle && (
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              fontSize: "0.72rem",
+              color: theme.palette.grey[600],
+              mt: 0.25,
+              lineHeight: 1.3,
+            }}
+          >
+            {subtitle}
+          </Typography>
+        )}
+      </Box>
+      <Divider sx={{ borderColor: theme.palette.divider }} />
+      <Box
+        sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}
+      >
+        {children}
+      </Box>
+    </Box>
+  )
+}
+
+// --------------------------------------------------------------------
+// ResilienceControls
+// --------------------------------------------------------------------
 
 export default function ResilienceControls({
   controls,
@@ -170,14 +341,13 @@ export default function ResilienceControls({
     cellEncoding,
     deltaMode,
     deltaBaselineScenarioId,
-    reorderBySimilarity,
     selectedHydroclimates,
-    showCellNumbers,
     quadrantUnit,
     quadrantOutcome,
     primaryOutcomeCode,
     compareOutcomeCodes,
     scenarioLayout,
+    aggregateOver,
   } = controls
 
   const selectedScenarios = useScenarioExplorerStore(
@@ -227,8 +397,8 @@ export default function ResilienceControls({
     }))
   }, [siblingGroups])
 
-  // Aggregate-only outcomes (no regional variants) for the Outcome-mode
-  // primary picker and the Compare sheet.
+  // Aggregate-only outcomes (no regional variants) for the Compare sheet
+  // and the per-outcome primary picker.
   const aggregateOutcomeItems = useMemo(
     () =>
       OUTCOME_CODE_ORDER.map((code) => ({
@@ -238,12 +408,14 @@ export default function ResilienceControls({
     [],
   )
 
+  // --------------------------------------------------------------
+  // Handlers
+  // --------------------------------------------------------------
+
   const handleViewChange = useCallback(
     (next: ResilienceView) => {
       if (view === next) return
       const patch: Partial<ResilienceControlsState> = { view: next }
-      // Density / glyph / leverage encodings only compose cleanly in
-      // Overview; reset them when leaving.
       if (
         next !== "aggregate" &&
         (cellEncoding === "density_risk" ||
@@ -256,6 +428,21 @@ export default function ResilienceControls({
       onChange(patch)
     },
     [view, cellEncoding, onChange],
+  )
+
+  const handleAggregateOverChange = useCallback(
+    (next: AggregateOver) => {
+      if (aggregateOver === next) return
+      const patch: Partial<ResilienceControlsState> = { aggregateOver: next }
+      if (next === "outcomes" && cellEncoding === "leverage") {
+        patch.cellEncoding = "tier"
+      }
+      if (next === "hydroclimates" && deltaMode !== "none") {
+        patch.deltaMode = "none"
+      }
+      onChange(patch)
+    },
+    [aggregateOver, cellEncoding, deltaMode, onChange],
   )
 
   const toggleHydroclimate = useCallback(
@@ -292,10 +479,11 @@ export default function ResilienceControls({
     selectedHydroclimates.size === RESILIENCE_HYDROCLIMATES.length
 
   const handleReadAsChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onChange(applyReadAs(e.target.value as ReadAs, controls))
+    (next: ReadAs) => {
+      if (isReadAsOptionDisabled(next, view, aggregateOver)) return
+      onChange(applyReadAs(next, controls))
     },
-    [controls, onChange],
+    [controls, onChange, view, aggregateOver],
   )
 
   const handleDeltaModeChange = useCallback(
@@ -335,21 +523,6 @@ export default function ResilienceControls({
     [onChange],
   )
 
-  // Display overflow menu (Overview mode only).
-  const [displayAnchor, setDisplayAnchor] = useState<HTMLElement | null>(null)
-  const openDisplayMenu = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setDisplayAnchor(e.currentTarget)
-  }, [])
-  const closeDisplayMenu = useCallback(() => {
-    setDisplayAnchor(null)
-  }, [])
-
-  // Compare chooser menu. Scenario mode no longer has a compare
-  // picker (the sidebar is now the source of truth), so only the
-  // outcome compare menu remains.
-  const [compareOutcomeAnchor, setCompareOutcomeAnchor] =
-    useState<HTMLElement | null>(null)
-
   const toggleCompareOutcome = useCallback(
     (code: string) => {
       const next = [...compareOutcomeCodes]
@@ -361,392 +534,364 @@ export default function ResilienceControls({
     [compareOutcomeCodes, onChange],
   )
 
-  const isScenario = view === "scenario"
-  const isOutcome = view === "outcome"
+  // --------------------------------------------------------------
+  // Popover anchors
+  // --------------------------------------------------------------
+
+  const [encodingAnchor, setEncodingAnchor] =
+    useState<HTMLElement | null>(null)
+  const [scenariosAnchor, setScenariosAnchor] =
+    useState<HTMLElement | null>(null)
+  const [outcomesAnchor, setOutcomesAnchor] =
+    useState<HTMLElement | null>(null)
+  const [climatesAnchor, setClimatesAnchor] =
+    useState<HTMLElement | null>(null)
+  const [pivotAnchor, setPivotAnchor] = useState<HTMLElement | null>(null)
+
   const isQuadrant = view === "quadrant"
-  // Overview is now an implicit state: it renders whenever we are in
-  // Scenarios mode with an empty sidebar selection, and also when the
-  // view is explicitly "aggregate" (legacy/programmatic entry). The
-  // rail itself no longer offers Overview as a peer.
-  const isOverviewActive =
-    view === "aggregate" || (isScenario && selectedScenarios.length === 0)
-
+  const isAggregate = view === "aggregate"
   const readAs = deriveReadAs(view, cellEncoding, deltaMode)
-  const showReadAs = isOverviewActive
-  const showReference = isOverviewActive && readAs === "climate_shift"
-  const showDistributionSubmode = isOverviewActive && readAs === "distribution"
-  const showDisplayMenu = isOverviewActive
 
-  const captionSx = {
-    fontWeight: 500,
-    color: theme.palette.text.primary,
-    mr: 0.5,
-  } as const
+  // --------------------------------------------------------------
+  // Sentence phrase labels
+  // --------------------------------------------------------------
 
-  // Subheader that prefixes each of the three control rows
-  // ("View:", "Mode:", "Hydroclimate:"). Uses the same caption weight
-  // as the inline group captions so the rail reads as a single,
-  // coherent stack of three labelled rows.
-  const rowLabelSx = {
-    ...captionSx,
-    textTransform: "uppercase",
-    letterSpacing: "0.04em",
-    fontSize: "0.75rem",
-    color: theme.palette.grey[700],
-    minWidth: 84,
-    flexShrink: 0,
-  } as const
+  const encodingLabel = READ_AS_LABEL[readAs]
+  const scenarioCount = selectedScenarios.length
+  const scenarioTotal = scenarioItems.length
+  const scenariosLabel =
+    scenarioCount === 0
+      ? `all ${scenarioTotal} scenarios`
+      : scenarioCount === 1
+        ? "1 scenario"
+        : `${scenarioCount} of ${scenarioTotal} scenarios`
+  const outcomeCount = resilienceVisibleOutcomes.length
+  const outcomeTotal = OUTCOME_CODE_ORDER.length
+  const outcomesLabel =
+    outcomeCount === outcomeTotal
+      ? `all ${outcomeTotal} outcomes`
+      : `${outcomeCount} of ${outcomeTotal} outcomes`
+  const climatesLabel = allHcsSelected
+    ? "all climates"
+    : selectedHydroclimates.size === 1
+      ? "1 climate"
+      : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climates`
+  const pivotLabel = (() => {
+    if (isAggregate) {
+      return `aggregate ${AGGREGATE_OVER_LABEL[aggregateOver]}`
+    }
+    const base = PIVOT_LABEL[view]
+    if (view === "scenario" || view === "outcome" || view === "hydroclimate") {
+      return scenarioLayout === "combined" ? `${base}, one chart` : base
+    }
+    return base
+  })()
 
-  const groupSx = {
-    display: "flex",
-    alignItems: "center",
-    gap: 0.5,
-    flexWrap: "wrap",
-  } as const
+  const cellSize = { fontSize: "0.8125rem" } as const
 
-  const rowSx = {
-    display: "flex",
-    alignItems: "center",
-    gap: 1.25,
-    flexWrap: "wrap",
-    rowGap: 0.5,
-  } as const
+  // --------------------------------------------------------------
+  // Quadrant / Leverage: keep the compact two-card surface.
+  // --------------------------------------------------------------
 
-  const verticalDivider = (
-    <Divider
-      orientation="vertical"
-      flexItem
-      sx={{ mx: 0.25, borderColor: theme.palette.divider, my: 0.25 }}
-    />
-  )
+  if (isQuadrant) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 1,
+          py: 0.25,
+          flex: 1,
+          minWidth: 0,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="compactCaption"
+          sx={{ fontSize: "0.8125rem", color: theme.palette.grey[800] }}
+        >
+          Leverage plot.
+        </Typography>
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          <InlineToggleChip
+            label="by outcome"
+            active={quadrantUnit === "outcome"}
+            onClick={() => handleQuadrantUnitChange("outcome")}
+          />
+          <InlineToggleChip
+            label="by LOI"
+            active={quadrantUnit === "loi"}
+            onClick={() => handleQuadrantUnitChange("loi")}
+          />
+        </Box>
+        {quadrantUnit === "loi" && (
+          <Select
+            size="small"
+            value={quadrantOutcome ?? ""}
+            onChange={handleQuadrantOutcomeChange}
+            displayEmpty
+            sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
+          >
+            <MenuItem value="" disabled sx={cellSize}>
+              Pick an outcome
+            </MenuItem>
+            {outcomeItems.map((o) => (
+              <MenuItem
+                key={o.code}
+                value={o.code}
+                sx={{ ...cellSize, pl: o.indent ? 4 : 2 }}
+              >
+                {o.label}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
+        <Box sx={{ flex: 1 }} />
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          {PIVOT_ORDER.map((mode) => (
+            <InlineToggleChip
+              key={mode}
+              label={PIVOT_LABEL[mode]}
+              active={view === mode}
+              onClick={() => handleViewChange(mode)}
+            />
+          ))}
+        </Box>
+      </Box>
+    )
+  }
 
-  const selectSx = {
-    minWidth: 200,
-    maxWidth: 320,
-    fontSize: "0.8125rem",
-    ".MuiSelect-select": { py: 0.5 },
-  } as const
-
-  const compareButtonSx = (active: boolean) => ({
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 0.5,
-    px: 1.25,
-    py: 0.5,
-    border: "none",
-    borderRadius: "12px",
-    cursor: "pointer",
-    fontSize: "0.8125rem",
-    fontWeight: 500,
-    lineHeight: 1.3,
-    whiteSpace: "nowrap",
-    color: active ? theme.palette.blue.bright : theme.palette.grey[800],
-    background: active
-      ? theme.palette.interaction.selectedBackground
-      : theme.palette.grey[100],
-    transition: "all 150ms ease",
-    "&:hover": {
-      background: theme.palette.interaction.selectedBackground,
-      color: theme.palette.blue.bright,
-    },
-  })
+  // --------------------------------------------------------------
+  // Sentence header
+  // --------------------------------------------------------------
 
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
-        gap: 0.75,
-        py: 0.25,
+        alignItems: "center",
+        gap: 1,
+        py: 0.5,
         flex: 1,
         minWidth: 0,
       }}
     >
-      {/* Row 1 - "View:" subheader + primary mode rail + (Overview only) Display overflow */}
-      <Box
+      <Typography
+        variant="compactCaption"
+        component="div"
         sx={{
+          fontSize: "0.875rem",
+          lineHeight: 1.7,
+          color: theme.palette.grey[800],
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 1,
+          flexWrap: "wrap",
+          gap: 0.25,
+          minWidth: 0,
+          flex: 1,
         }}
       >
-        <Box sx={{ ...rowSx, minWidth: 0 }}>
-          <Typography variant="compactCaption" sx={rowLabelSx}>
-            View:
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            {PRIMARY_MODE_ORDER.map((mode) => (
-              <InlineToggleChip
-                key={mode}
-                label={MODE_LABEL[mode]}
-                active={view === mode}
-                onClick={() => handleViewChange(mode)}
-              />
-            ))}
-          </Box>
+        <Box component="span" sx={{ color: theme.palette.grey[700], mr: 0.25 }}>
+          Showing
         </Box>
+        <PhraseButton
+          label={pivotLabel}
+          active={Boolean(pivotAnchor)}
+          onClick={(e) => setPivotAnchor(e.currentTarget)}
+          ariaLabel={`Heatmap layout: ${pivotLabel}. Click to change.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
+          of
+        </Box>
+        <PhraseButton
+          label={scenariosLabel}
+          active={Boolean(scenariosAnchor)}
+          onClick={(e) => setScenariosAnchor(e.currentTarget)}
+          ariaLabel={`Scenarios: ${scenariosLabel}. Click for details.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
+          ×
+        </Box>
+        <PhraseButton
+          label={outcomesLabel}
+          active={Boolean(outcomesAnchor)}
+          onClick={(e) => setOutcomesAnchor(e.currentTarget)}
+          ariaLabel={`Outcomes: ${outcomesLabel}. Click to change.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
+          ×
+        </Box>
+        <PhraseButton
+          label={climatesLabel}
+          active={Boolean(climatesAnchor)}
+          onClick={(e) => setClimatesAnchor(e.currentTarget)}
+          ariaLabel={`Climates: ${climatesLabel}. Click to change.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
+          , read as
+        </Box>
+        <PhraseButton
+          label={encodingLabel}
+          active={Boolean(encodingAnchor)}
+          onClick={(e) => setEncodingAnchor(e.currentTarget)}
+          ariaLabel={`Encoding: ${encodingLabel}. Click to change.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[700] }}>
+          .
+        </Box>
+      </Typography>
 
-        {showDisplayMenu && (
-          <Box sx={{ flexShrink: 0 }}>
-            <IconButton
-              size="small"
-              onClick={openDisplayMenu}
-              aria-label="Display options"
-              aria-haspopup="menu"
-              aria-expanded={Boolean(displayAnchor)}
-              sx={{
-                color: theme.palette.grey[800],
-                px: 0.75,
-                py: 0.25,
-                borderRadius: "12px",
-                "&:hover": {
-                  backgroundColor: theme.palette.action.hover,
-                  color: theme.palette.blue.bright,
-                },
-              }}
-            >
-              <icons.Tune sx={{ fontSize: "1rem", mr: 0.5 }} />
-              <Typography
-                variant="compactCaption"
-                sx={{ fontWeight: 500, fontSize: "0.8125rem" }}
-              >
-                Display
-              </Typography>
-            </IconButton>
-            <Menu
-              anchorEl={displayAnchor}
-              open={Boolean(displayAnchor)}
-              onClose={closeDisplayMenu}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              slotProps={{ paper: { sx: { minWidth: 220 } } }}
-            >
-              <MenuItem
-                onClick={() =>
-                  onChange({ reorderBySimilarity: !reorderBySimilarity })
-                }
-                sx={{ fontSize: "0.8125rem", gap: 1 }}
-              >
-                {reorderBySimilarity ? (
-                  <icons.CheckCircle
-                    sx={{
-                      fontSize: "1rem",
-                      color: theme.palette.blue.bright,
-                    }}
-                  />
-                ) : (
-                  <icons.RadioButtonUnchecked
-                    sx={{ fontSize: "1rem", color: theme.palette.grey[500] }}
-                  />
-                )}
-                Reorder rows by similarity
-              </MenuItem>
-              <MenuItem
-                onClick={() =>
-                  onChange({ showCellNumbers: !showCellNumbers })
-                }
-                sx={{ fontSize: "0.8125rem", gap: 1 }}
-              >
-                {showCellNumbers ? (
-                  <icons.CheckCircle
-                    sx={{
-                      fontSize: "1rem",
-                      color: theme.palette.blue.bright,
-                    }}
-                  />
-                ) : (
-                  <icons.RadioButtonUnchecked
-                    sx={{ fontSize: "1rem", color: theme.palette.grey[500] }}
-                  />
-                )}
-                Show cell values
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          flexShrink: 0,
+          // Style the ResilienceChartTuner's pill trigger to read as a
+          // "Configure" affordance without inventing a separate widget.
+          // The tuner owns its own open state + overlay positioning.
+          "& button[aria-haspopup='dialog']": {
+            borderRadius: "8px !important",
+            fontSize: "0.8125rem !important",
+            letterSpacing: "0 !important",
+            fontWeight: "500 !important",
+            textTransform: "none !important",
+          },
+        }}
+      >
+        <ResilienceChartTuner
+          controls={controls}
+          onChange={onChange}
+        />
       </Box>
 
-      {/* Row 2 - mode-specific action row */}
-      <Box sx={rowSx}>
-        <Typography variant="compactCaption" sx={rowLabelSx}>
-          Mode:
-        </Typography>
-
-        {/* Row-filter chip. Visible in View by scenarios (small
-            multiples) and View aggregate (Overview). Outcome mode
-            drives rows from its own primary picker instead. */}
-        {(isScenario || isOverviewActive) && (
-          <InlineToggleChip
-            label={
-              resilienceVisibleOutcomes.length === OUTCOME_CODE_ORDER.length
-                ? "choose outcomes"
-                : `choose outcomes (${resilienceVisibleOutcomes.length})`
-            }
-            active={showResilienceOutcomeSelector}
-            onClick={() =>
-              setShowResilienceOutcomeSelector(!showResilienceOutcomeSelector)
-            }
-          />
-        )}
-
-        {/* Scenarios mode: sidebar is the source of truth for which
-            scenarios appear, so the action row only exposes a layout
-            toggle (small multiples vs one combined chart). */}
-        {isScenario && selectedScenarios.length > 0 && (
-          <Box sx={{ ...groupSx, gap: 0.5 }}>
-            <Typography variant="compactCaption" sx={captionSx}>
-              Layout:
-            </Typography>
-            <InlineToggleChip
-              label="small multiples"
-              active={scenarioLayout === "small_multiples"}
-              onClick={() =>
-                onChange({ scenarioLayout: "small_multiples" })
-              }
-            />
-            <InlineToggleChip
-              label="one chart"
-              active={scenarioLayout === "combined"}
-              onClick={() => onChange({ scenarioLayout: "combined" })}
-            />
+      {/* Popover: Encoding (Read as) */}
+      <Popover
+        open={Boolean(encodingAnchor)}
+        anchorEl={encodingAnchor}
+        onClose={() => setEncodingAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Read each cell as"
+          subtitle="How to interpret the colour of each cell."
+          width={320}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            {READ_AS_OPTIONS.map((opt) => {
+              const disabled = isReadAsOptionDisabled(opt, view, aggregateOver)
+              const active = readAs === opt
+              return (
+                <Box
+                  key={opt}
+                  component="button"
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => handleReadAsChange(opt)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    px: 0.75,
+                    py: 0.5,
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: disabled ? "default" : "pointer",
+                    textAlign: "left",
+                    background: active
+                      ? theme.palette.interaction.selectedBackground
+                      : "transparent",
+                    color: disabled
+                      ? theme.palette.grey[400]
+                      : active
+                        ? theme.palette.blue.bright
+                        : theme.palette.text.primary,
+                    fontSize: "0.8125rem",
+                    opacity: disabled ? 0.6 : 1,
+                    "&:hover:not(:disabled)": {
+                      background: theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  {active ? (
+                    <icons.RadioButtonChecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.blue.bright,
+                      }}
+                    />
+                  ) : (
+                    <icons.RadioButtonUnchecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.grey[400],
+                      }}
+                    />
+                  )}
+                  {READ_AS_LABEL[opt]}
+                </Box>
+              )
+            })}
           </Box>
-        )}
-
-        {/* Outcome mode: primary outcome picker + Compare */}
-        {isOutcome && (
-          <>
-            <Box sx={{ ...groupSx, gap: 0.75 }}>
-              <Typography variant="compactCaption" sx={captionSx}>
-                Outcome:
+          {readAs === "climate_shift" && (
+            <>
+              <Divider sx={{ borderColor: theme.palette.divider }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.7rem",
+                  color: theme.palette.grey[700],
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Reference
               </Typography>
               <Select
                 size="small"
-                value={primaryOutcomeCode ?? ""}
-                onChange={handlePrimaryOutcomeChange}
-                displayEmpty
-                sx={selectSx}
+                value={deltaMode}
+                onChange={handleDeltaModeChange}
+                sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
               >
-                <MenuItem value="" sx={{ fontSize: "0.8125rem" }}>
-                  Pick an outcome
+                <MenuItem value="vs_historical" sx={cellSize}>
+                  vs historical HC
                 </MenuItem>
-                {aggregateOutcomeItems.map((o) => (
-                  <MenuItem
-                    key={o.code}
-                    value={o.code}
-                    sx={{ fontSize: "0.8125rem" }}
-                  >
-                    {o.label}
-                  </MenuItem>
-                ))}
+                <MenuItem value="vs_baseline" sx={cellSize}>
+                  vs baseline scenario
+                </MenuItem>
               </Select>
-            </Box>
-            {verticalDivider}
-            <Box
-              component="button"
-              type="button"
-              onClick={(e) =>
-                setCompareOutcomeAnchor(
-                  compareOutcomeAnchor ? null : e.currentTarget,
-                )
-              }
-              aria-haspopup="dialog"
-              aria-expanded={Boolean(compareOutcomeAnchor)}
-              disabled={!primaryOutcomeCode}
-              sx={{
-                ...compareButtonSx(compareOutcomeCodes.length > 0),
-                opacity: primaryOutcomeCode ? 1 : 0.5,
-                cursor: primaryOutcomeCode ? "pointer" : "default",
-              }}
-            >
-              <icons.Compare sx={{ fontSize: "0.875rem" }} />
-              Compare
-              {compareOutcomeCodes.length > 0 &&
-                ` (${compareOutcomeCodes.length})`}
-              <icons.KeyboardArrowDown sx={{ fontSize: "0.875rem" }} />
-            </Box>
-            <Menu
-              anchorEl={compareOutcomeAnchor}
-              open={Boolean(compareOutcomeAnchor)}
-              onClose={() => setCompareOutcomeAnchor(null)}
-              slotProps={{ paper: { sx: { maxHeight: 380, minWidth: 260 } } }}
-            >
-              {aggregateOutcomeItems
-                .filter((o) => o.code !== primaryOutcomeCode)
-                .map((o) => {
-                  const active = compareOutcomeCodes.includes(o.code)
-                  return (
-                    <MenuItem
-                      key={o.code}
-                      onClick={() => toggleCompareOutcome(o.code)}
-                      sx={{ fontSize: "0.8125rem", gap: 1 }}
-                    >
-                      {active ? (
-                        <icons.CheckCircle
-                          sx={{
-                            fontSize: "1rem",
-                            color: theme.palette.blue.bright,
-                          }}
-                        />
-                      ) : (
-                        <icons.RadioButtonUnchecked
-                          sx={{
-                            fontSize: "1rem",
-                            color: theme.palette.grey[500],
-                          }}
-                        />
-                      )}
-                      {o.label}
+              {deltaMode === "vs_baseline" && (
+                <Select
+                  size="small"
+                  value={deltaBaselineScenarioId}
+                  onChange={handleDeltaBaselineChange}
+                  sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
+                >
+                  {scenarioItems.map((s) => (
+                    <MenuItem key={s.id} value={s.id} sx={cellSize}>
+                      {s.label}
                     </MenuItem>
-                  )
-                })}
-            </Menu>
-          </>
-        )}
-
-        {/* Overview aggregate: active either because the view is
-            explicitly "aggregate" or because Scenarios mode has an
-            empty sidebar selection and is falling through. The
-            control row exposes Rows and (advanced) Read as /
-            Reference. Scope is no longer user-facing - sidebar
-            selection is the only way to narrow the aggregate. */}
-        {isOverviewActive && (
-          <>
-            {showReadAs && (
-              <>
-                {verticalDivider}
-                <Box sx={{ ...groupSx, gap: 0.75 }}>
-                  <Typography variant="compactCaption" sx={captionSx}>
-                    Read as:
-                  </Typography>
-                  <Select
-                    size="small"
-                    value={readAs}
-                    onChange={handleReadAsChange}
-                    sx={{
-                      minWidth: 180,
-                      fontSize: "0.8125rem",
-                      ".MuiSelect-select": { py: 0.5 },
-                    }}
-                  >
-                    {READ_AS_OPTIONS_OVERVIEW.map((opt) => (
-                      <MenuItem
-                        key={opt}
-                        value={opt}
-                        sx={{ fontSize: "0.8125rem" }}
-                      >
-                        {READ_AS_LABEL[opt]}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Box>
-              </>
-            )}
-            {showDistributionSubmode && (
-              <Box sx={groupSx}>
-                <Typography variant="compactCaption" sx={captionSx}>
-                  Distribution:
-                </Typography>
+                  ))}
+                </Select>
+              )}
+            </>
+          )}
+          {readAs === "distribution" && (
+            <>
+              <Divider sx={{ borderColor: theme.palette.divider }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.7rem",
+                  color: theme.palette.grey[700],
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Distribution grouping
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 <InlineToggleChip
                   label="by scenario"
                   active={distributionMode === "scenario"}
@@ -758,129 +903,206 @@ export default function ResilienceControls({
                   onClick={() => setDistributionMode("location")}
                 />
               </Box>
-            )}
-            {showReference && (
-              <>
-                {verticalDivider}
-                <Box sx={{ ...groupSx, gap: 0.75 }}>
-                  <Typography variant="compactCaption" sx={captionSx}>
-                    Reference:
+            </>
+          )}
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Scenarios (read-only summary; sidebar is the source) */}
+      <Popover
+        open={Boolean(scenariosAnchor)}
+        anchorEl={scenariosAnchor}
+        onClose={() => setScenariosAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Scenario scope"
+          subtitle={
+            scenarioCount === 0
+              ? `Nothing selected in the sidebar, so the chart shows the full set of ${scenarioTotal} scenarios.`
+              : `Driven by the sidebar on the left. ${scenarioCount} of ${scenarioTotal} selected.`
+          }
+          width={300}
+        >
+          <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
+            To change which scenarios appear, tick or untick scenarios in the
+            sidebar. Select none to see the full set.
+          </Typography>
+          {scenarioCount > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.25,
+                maxHeight: 200,
+                overflowY: "auto",
+                borderTop: `1px solid ${theme.palette.divider}`,
+                pt: 0.75,
+              }}
+            >
+              {scenarioItems
+                .filter((s) => selectedScenarios.includes(s.id))
+                .map((s) => (
+                  <Typography
+                    key={s.id}
+                    variant="caption"
+                    sx={{ fontSize: "0.75rem" }}
+                  >
+                    · {s.label}
                   </Typography>
-                  <Select
-                    size="small"
-                    value={deltaMode}
-                    onChange={handleDeltaModeChange}
+                ))}
+            </Box>
+          )}
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Outcomes */}
+      <Popover
+        open={Boolean(outcomesAnchor)}
+        anchorEl={outcomesAnchor}
+        onClose={() => setOutcomesAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Outcome scope"
+          subtitle={`${outcomeCount} of ${outcomeTotal} outcomes appear as rows (or columns, when transposed).`}
+          width={320}
+        >
+          <InlineToggleChip
+            label={
+              showResilienceOutcomeSelector
+                ? "hide outcome picker"
+                : "choose outcomes…"
+            }
+            active={showResilienceOutcomeSelector}
+            onClick={() =>
+              setShowResilienceOutcomeSelector(!showResilienceOutcomeSelector)
+            }
+          />
+          {view === "outcome" && (
+            <>
+              <Divider sx={{ borderColor: theme.palette.divider }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.7rem",
+                  color: theme.palette.grey[700],
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Primary outcome
+              </Typography>
+              <Select
+                size="small"
+                value={primaryOutcomeCode ?? ""}
+                onChange={handlePrimaryOutcomeChange}
+                displayEmpty
+                sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
+              >
+                <MenuItem value="" sx={cellSize}>
+                  Pick a primary outcome
+                </MenuItem>
+                {aggregateOutcomeItems.map((o) => (
+                  <MenuItem key={o.code} value={o.code} sx={cellSize}>
+                    {o.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {primaryOutcomeCode && (
+                <>
+                  <Typography
+                    variant="caption"
                     sx={{
-                      minWidth: 170,
-                      fontSize: "0.8125rem",
-                      ".MuiSelect-select": { py: 0.5 },
+                      fontSize: "0.7rem",
+                      color: theme.palette.grey[700],
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      mt: 0.5,
                     }}
                   >
-                    <MenuItem
-                      value="vs_historical"
-                      sx={{ fontSize: "0.8125rem" }}
-                    >
-                      vs historical HC
-                    </MenuItem>
-                    <MenuItem
-                      value="vs_baseline"
-                      sx={{ fontSize: "0.8125rem" }}
-                    >
-                      vs baseline scenario
-                    </MenuItem>
-                  </Select>
-                  {deltaMode === "vs_baseline" && (
-                    <Select
-                      size="small"
-                      value={deltaBaselineScenarioId}
-                      onChange={handleDeltaBaselineChange}
-                      sx={{
-                        minWidth: 180,
-                        maxWidth: 260,
-                        fontSize: "0.8125rem",
-                        ".MuiSelect-select": { py: 0.5 },
-                      }}
-                    >
-                      {scenarioItems.map((s) => (
-                        <MenuItem
-                          key={s.id}
-                          value={s.id}
-                          sx={{ fontSize: "0.8125rem" }}
-                        >
-                          {s.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                </Box>
-              </>
-            )}
-          </>
-        )}
+                    Compare with
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 0.25,
+                      maxHeight: 200,
+                      overflowY: "auto",
+                    }}
+                  >
+                    {aggregateOutcomeItems
+                      .filter((o) => o.code !== primaryOutcomeCode)
+                      .map((o) => {
+                        const active = compareOutcomeCodes.includes(o.code)
+                        return (
+                          <Box
+                            key={o.code}
+                            component="button"
+                            type="button"
+                            onClick={() => toggleCompareOutcome(o.code)}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              px: 0.5,
+                              py: 0.375,
+                              border: "none",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              background: "transparent",
+                              color: theme.palette.text.primary,
+                              fontSize: "0.8125rem",
+                              textAlign: "left",
+                              "&:hover": {
+                                background: theme.palette.action.hover,
+                              },
+                            }}
+                          >
+                            {active ? (
+                              <icons.CheckCircle
+                                sx={{
+                                  fontSize: "1rem",
+                                  color: theme.palette.blue.bright,
+                                }}
+                              />
+                            ) : (
+                              <icons.RadioButtonUnchecked
+                                sx={{
+                                  fontSize: "1rem",
+                                  color: theme.palette.grey[400],
+                                }}
+                              />
+                            )}
+                            {o.label}
+                          </Box>
+                        )
+                      })}
+                  </Box>
+                </>
+              )}
+            </>
+          )}
+        </PopoverShell>
+      </Popover>
 
-        {/* Leverage: Unit + (optional) LOI Outcome. Scope is no
-            longer user-facing; sidebar selection is the single way to
-            narrow the scenario set. */}
-        {isQuadrant && (
-          <>
-            <Box sx={groupSx}>
-              <Typography variant="compactCaption" sx={captionSx}>
-                Unit:
-              </Typography>
-              <InlineToggleChip
-                label="by outcome"
-                active={quadrantUnit === "outcome"}
-                onClick={() => handleQuadrantUnitChange("outcome")}
-              />
-              <InlineToggleChip
-                label="by LOI"
-                active={quadrantUnit === "loi"}
-                onClick={() => handleQuadrantUnitChange("loi")}
-              />
-            </Box>
-            {quadrantUnit === "loi" && (
-              <Box sx={{ ...groupSx, gap: 0.75 }}>
-                <Typography variant="compactCaption" sx={captionSx}>
-                  Outcome:
-                </Typography>
-                <Select
-                  size="small"
-                  value={quadrantOutcome ?? ""}
-                  onChange={handleQuadrantOutcomeChange}
-                  displayEmpty
-                  sx={selectSx}
-                >
-                  <MenuItem value="" disabled sx={{ fontSize: "0.8125rem" }}>
-                    Pick an outcome
-                  </MenuItem>
-                  {outcomeItems.map((o) => (
-                    <MenuItem
-                      key={o.code}
-                      value={o.code}
-                      sx={{
-                        fontSize: "0.8125rem",
-                        pl: o.indent ? 4 : 2,
-                      }}
-                    >
-                      {o.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-            )}
-          </>
-        )}
-      </Box>
-
-      {/* Row 3 - "Hydroclimate:" subheader + chips. Docked above the
-          matrix so they read as a property of the chart, not the global
-          controls. */}
-      {!isQuadrant && (
-        <Box sx={rowSx}>
-          <Typography variant="compactCaption" sx={rowLabelSx}>
-            Hydroclimate:
-          </Typography>
-          <Box sx={groupSx}>
+      {/* Popover: Climates (hydroclimates) */}
+      <Popover
+        open={Boolean(climatesAnchor)}
+        anchorEl={climatesAnchor}
+        onClose={() => setClimatesAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Climate scope"
+          subtitle={`${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} hydroclimates in the chart.`}
+          width={280}
+        >
+          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
             <InlineToggleChip
               label="all"
               active={allHcsSelected}
@@ -898,8 +1120,131 @@ export default function ResilienceControls({
               )
             })}
           </Box>
-        </Box>
-      )}
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Pivot (heatmap layout) */}
+      <Popover
+        open={Boolean(pivotAnchor)}
+        anchorEl={pivotAnchor}
+        onClose={() => setPivotAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Heatmap layout"
+          subtitle="Which axis splits into tiles, or should the chart collapse to a single aggregate view?"
+          width={340}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            {PIVOT_ORDER.map((mode) => {
+              const active = view === mode
+              return (
+                <Box
+                  key={mode}
+                  component="button"
+                  type="button"
+                  onClick={() => handleViewChange(mode)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    px: 0.75,
+                    py: 0.5,
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    background: active
+                      ? theme.palette.interaction.selectedBackground
+                      : "transparent",
+                    color: active
+                      ? theme.palette.blue.bright
+                      : theme.palette.text.primary,
+                    fontSize: "0.8125rem",
+                    "&:hover": {
+                      background: theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  {active ? (
+                    <icons.RadioButtonChecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.blue.bright,
+                      }}
+                    />
+                  ) : (
+                    <icons.RadioButtonUnchecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.grey[400],
+                      }}
+                    />
+                  )}
+                  {PIVOT_LABEL[mode]}
+                </Box>
+              )
+            })}
+          </Box>
+          {isAggregate && (
+            <>
+              <Divider sx={{ borderColor: theme.palette.divider }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.7rem",
+                  color: theme.palette.grey[700],
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Aggregate
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                {AGGREGATE_OVER_ORDER.map((axis) => (
+                  <InlineToggleChip
+                    key={axis}
+                    label={AGGREGATE_OVER_LABEL[axis]}
+                    active={aggregateOver === axis}
+                    onClick={() => handleAggregateOverChange(axis)}
+                  />
+                ))}
+              </Box>
+            </>
+          )}
+          {!isAggregate && (
+            <>
+              <Divider sx={{ borderColor: theme.palette.divider }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.7rem",
+                  color: theme.palette.grey[700],
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                Layout
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                <InlineToggleChip
+                  label="small multiples"
+                  active={scenarioLayout === "small_multiples"}
+                  onClick={() =>
+                    onChange({ scenarioLayout: "small_multiples" })
+                  }
+                />
+                <InlineToggleChip
+                  label="one chart"
+                  active={scenarioLayout === "combined"}
+                  onClick={() => onChange({ scenarioLayout: "combined" })}
+                />
+              </Box>
+            </>
+          )}
+        </PopoverShell>
+      </Popover>
     </Box>
   )
 }

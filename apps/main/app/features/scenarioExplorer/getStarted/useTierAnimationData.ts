@@ -109,13 +109,29 @@ function computeCentroid(
 
 export function useTierAnimationData(): TierAnimationData {
   const theme = useTheme()
-  const tierColors = getTierColorsFromTheme(theme)
-  const colorTuple: [string, string, string, string] = [
-    tierColors[1],
-    tierColors[2],
-    tierColors[3],
-    tierColors[4],
-  ]
+  // Stabilize the tier-color lookup against render-identity churn. `theme`
+  // itself is a stable MUI object across renders, but
+  // `getTierColorsFromTheme(theme)` returns a fresh `{1,2,3,4}` object on
+  // every call. Without this memo, every render produces a new `tierColors`
+  // identity, which in turn invalidates every downstream memo that lists
+  // `tierColors` as a dep (centroids, outcomeLocations, tierColorMap). That
+  // cascade caused consumer effects keyed on those memos (most notably the
+  // Beat 5 driver in TierAnimationSection, which has `outcomeLocations` in
+  // its deps) to tear down and remount on every parent render, clearing
+  // local `ringActive`/`hoverActive`/`popupActive` flags and preventing the
+  // Beat 5 choreography from ever settling into its visible state.
+  const t1 = theme.palette.tiers.tier1
+  const t2 = theme.palette.tiers.tier2
+  const t3 = theme.palette.tiers.tier3
+  const t4 = theme.palette.tiers.tier4
+  const tierColors = useMemo<Record<TierLevel, string>>(
+    () => ({ 1: t1, 2: t2, 3: t3, 4: t4 }),
+    [t1, t2, t3, t4],
+  )
+  const colorTuple = useMemo<[string, string, string, string]>(
+    () => [t1, t2, t3, t4],
+    [t1, t2, t3, t4],
+  )
 
   const [locations, setLocations] = useState<TierLocationsResponse | null>(null)
   const [geojson, setGeojson] = useState<GeoJSONResponse | null>(null)
