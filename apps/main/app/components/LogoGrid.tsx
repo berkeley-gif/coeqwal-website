@@ -72,8 +72,13 @@ export function LogoGrid({ id, ariaLabel, title, logos }: LogoGridProps) {
         sx={{
           width: "100%",
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)", // 4 columns
-          gap: "16px",
+          gridTemplateColumns: {
+            xs: "repeat(2, 1fr)",
+            sm: "repeat(3, 1fr)",
+            md: "repeat(4, 1fr)",
+          },
+          gap: { xs: "24px", md: "16px" },
+          paddingX: { xs: "24px", md: "0" },
           maxWidth: "900px", // Max width of grid
           margin: "60px auto", // Centers the grid horizontally
           placeItems: "center",
