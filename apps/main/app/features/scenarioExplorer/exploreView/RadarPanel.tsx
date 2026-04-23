@@ -29,6 +29,7 @@ import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
+import ToolIntroStrip from "../components/ToolIntroStrip"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -50,6 +51,7 @@ import {
 } from "../dataExplorer/utils/exportUtils"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -289,6 +291,28 @@ export default function RadarPanel({
     el.addEventListener("mousedown", prevent)
     return () => el.removeEventListener("mousedown", prevent)
   }, [])
+
+  // Tour anchors. The polygon and rings both highlight the chart area
+  // (one highlights the data, the other highlights the grid behind it;
+  // we use the same DOM target since the rings live inside the SVG).
+  const polygonAnchorRef = useTourAnchor("radar.polygon")
+  const ringsAnchorRef = useTourAnchor("radar.rings")
+  // Axis label + info icon point at the first axis. Bridged through
+  // an effect because the SVG label and overlay icons mount after
+  // first paint, when axisPositions is populated.
+  const axisLabelAnchorRef = useTourAnchor("radar.axisLabel")
+  const infoIconAnchorRef = useTourAnchor("radar.infoIcon")
+  // Bridge chartWrapperRef into both polygon + rings anchors. They
+  // share the same target element because the rings live inside the
+  // same SVG; the tour copy distinguishes them by step.
+  useEffect(() => {
+    polygonAnchorRef(chartWrapperRef.current)
+    ringsAnchorRef(chartWrapperRef.current)
+    return () => {
+      polygonAnchorRef(null)
+      ringsAnchorRef(null)
+    }
+  }, [polygonAnchorRef, ringsAnchorRef])
 
   const {
     data: comparisonData,
@@ -643,6 +667,26 @@ export default function RadarPanel({
         position: "relative",
       }}
     >
+      <ToolIntroStrip
+        mode="radar"
+        title="Compare scenarios as shapes, not rows"
+        summary="Each polygon is one scenario. Axes are the outcomes you care about. Look at the overall shape: a balanced read looks round, a lopsided one shows spikes and pinches."
+        bullets={[
+          {
+            label: "Closer to the center is better.",
+            body: "Same tier idea as the list: tier 1 hugs the center, tier 4 sits near the edge.",
+          },
+          {
+            label: "Compare shapes, not just numbers.",
+            body: "Where one scenario bulges another may pinch. That is the trade-off.",
+          },
+          {
+            label: "Use the climate toggle.",
+            body: "The same scenarios can read very differently under wet, dry, or warm futures.",
+          },
+        ]}
+        tourStep={1}
+      />
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
           <Box
@@ -817,7 +861,7 @@ export default function RadarPanel({
                 zIndex: 1,
               }}
             >
-              {axisPositions.map(({ axis, x, y }) => {
+              {axisPositions.map(({ axis, x, y }, idx) => {
                 const definition = resolveAxisDefinition(axis)
                 if (!definition) return null
 
@@ -832,10 +876,20 @@ export default function RadarPanel({
                 const iconTop = rect ? rect.y + rect.height / 2 : y
 
                 const isOpen = openInfoAxis === axis
+                // Register the first axis info icon as both the
+                // axis-label and info-icon tour anchors so the radar
+                // tour can speak about either without changing target.
+                const isFirst = idx === 0
+                const setRefs = (el: HTMLElement | null) => {
+                  if (!isFirst) return
+                  axisLabelAnchorRef(el)
+                  infoIconAnchorRef(el)
+                }
 
                 return (
                   <Box
                     key={axis}
+                    ref={setRefs}
                     sx={{
                       position: "absolute",
                       left: iconLeft,

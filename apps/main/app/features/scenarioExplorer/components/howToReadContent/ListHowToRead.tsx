@@ -22,7 +22,7 @@ export function ListHowToRead() {
       <StoryHero
         eyebrow="START HERE"
         title="This table is your scenario library."
-        deck="Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry into Radar and Resilience."
+        deck="Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry forward."
         points={[
           {
             label: "Tune the library first.",
@@ -127,7 +127,7 @@ export function ListHowToRead() {
         callouts={[
           {
             number: "01",
-            title: "Select the scenarios you want to keep",
+            title: "Select the scenarios that you want to keep",
             body: "Use the row check controls to gather a working set without losing the rest of the library.",
             top: 8,
             left: 3,
@@ -223,7 +223,7 @@ export function ListHowToRead() {
           {
             number: "02",
             label: "Radar",
-            description: "Compare the shortlisted scenarios as full portfolios instead of isolated cells.",
+            description: "Compare the shortlisted scenarios across every chosen outcome at once instead of isolated cells.",
             state: "next",
           },
           {

@@ -30,6 +30,53 @@ import type { LocationInfo } from "../OutcomeMorphOverlay"
 import type { LocationHighlight } from "../../../map/store"
 import type { MapRef } from "@repo/map"
 
+/**
+ * Per-outcome schedule entry describing when and where a set of Mapbox
+ * features should hide as their SVG distribution-square morph takes
+ * over the visual. One entry per `(outcomeCode, layer)` tuple.
+ *
+ * `code` is the outcome code the entry belongs to (`"AG_REV"`, `"DS"`,
+ * ...). Used for provenance and debugging only.
+ *
+ * `geometryType` distinguishes the three rendering shapes the
+ * storyboard uses. Only `"polygon"` entries with
+ * `mapboxLayerId === "demand-units"` drive the Beat 2 fill-opacity
+ * case expression. `"line"` entries drive a per-layer line-opacity
+ * write in the main listener (not owned by the engine yet).
+ * `"react-marker"` entries have no Mapbox layer to hide. They exist
+ * so the overlay knows which DUs are tracked by the outcome.
+ *
+ * `mapboxLayerId` is the literal Mapbox layer id the entry fades.
+ * Empty for `"react-marker"`.
+ *
+ * `idProperty` is the Mapbox feature property used to match
+ * individual features (`"DU_ID"` for demand-units). Kept on the
+ * entry so line layers with different id properties can coexist.
+ *
+ * `fadeStart` and `morphStart` are half-open progress interval
+ * endpoints on the compressed `progress` domain. Opacity writes are
+ * `1` before `fadeStart`, interpolate to `0` across the window, and
+ * stay at `0` after `morphStart`.
+ *
+ * `locationIds` enumerates the individual feature ids (DU_IDs, line
+ * ids) whose Mapbox paint this entry fades. Used as the literal
+ * array in the Mapbox `["in", ["get", idProperty], ["literal",
+ * locationIds]]` match clause.
+ *
+ * Populated by the outcome-schedule builder effect in
+ * `TierAnimationSection.tsx` once tier data loads, and held on a
+ * ref the engine reads via `ctx.getHideSchedule()`.
+ */
+export interface HideScheduleEntry {
+  code: string
+  geometryType: "polygon" | "line" | "react-marker"
+  mapboxLayerId: string
+  idProperty: string
+  fadeStart: number
+  morphStart: number
+  locationIds: string[]
+}
+
 // Actor discriminants
 
 export type ActorKind =
@@ -61,6 +108,138 @@ export interface ActorBase {
  */
 export type MapPaintPayload =
   | {
+      /**
+       * Pre-beat-1 reset. Fires once when the user scrubs or snaps
+       * `progress` back to 0 (Restart button, or Back from Beat 0).
+       * Restores the DU layers to their pre-animation baseline: the
+       * full `DU_CLASS_FILTER`, the blue-cycle fill expression seeded
+       * at phase 0, opacity 0 (Beat 1 will fade them in from 0), and
+       * the `basemap-dim-overlay` fill-opacity cleared to 0.
+       */
+      kind: "reset"
+    }
+  | {
+      /**
+       * Beat 1 blue-cycle. Window `[RESET_END, FREEZE_AT)`. Per-tick
+       * opacity ramp and rotating `beat1FillExpr(colorPhase)`. The
+       * arbiter tracks `frozenColorPhase` on itself so the subsequent
+       * `beat1-hold` actor can resume at the same color pattern the
+       * cycle settled on.
+       *
+       * `cycleStart` and `cycleEnd` bound the window. `colorPhase =
+       * ((v - cycleStart) / (cycleEnd - cycleStart)) * cycleRotations`
+       * so that a single `cycleRotations` value controls how many
+       * palette turns the blues make across the window.
+       *
+       * `peakOpacity` is what the ramp lands on (`0.65`). `fadeInFrac`
+       * is the fraction of the window spent ramping in from 0.
+       * `breathAmplitude` rides on top once the fade-in completes
+       * (`0.05` in the legacy listener).
+       */
+      kind: "beat1-cycle"
+      cycleStart: number
+      cycleEnd: number
+      cycleRotations: number
+      peakOpacity: number
+      fadeInFrac: number
+      breathAmplitude: number
+    }
+  | {
+      /**
+       * Beat 1 hold. Window `[FREEZE_AT, BEAT1C_BLEND_START)`. Covers
+       * both the "frozen" tail of the old `v < BEAT1B_START` branch
+       * and the `BEAT1B_START <= v < BEAT1C_BLEND_START` hold, which
+       * are visually identical (frozen palette, full filter, opacity
+       * pinned at `peakOpacity`). The arbiter re-asserts the full
+       * baseline on enter (using its stored `frozenColorPhase`) and
+       * re-asserts opacity on each update tick so stray writers that
+       * land on the layer during this window are self-healing.
+       */
+      kind: "beat1-hold"
+      peakOpacity: number
+    }
+  | {
+      /**
+       * Beat 1C blend. Window `[blendStart, blendEnd)`. Two-stage
+       * color morph from the frozen 3-blue palette to AG tier colors.
+       *
+       * `[blendStart, convergeEnd)` shrinks the 3-blue palette toward
+       * `BEAT1_MID` (convergence ramps 0 to 1). Driven by
+       * `beat1FillExpr(this.frozenColorPhase, convergence)` using the
+       * arbiter's stored phase from Beat 1.
+       *
+       * `[convergeEnd, blendEnd)` morphs `BEAT1_MID` into each AG
+       * DU's tier color. Driven by
+       * `ctx.buildBlendedTierExpr(BEAT1_MID, t)` with `t` ramping 0
+       * to 1.
+       *
+       * The DU class filter stays full across the whole window so
+       * Urban and Refuge stay painted during the blend. The
+       * subsequent `beat1c-tail` actor flips to AG-only.
+       *
+       * `peakOpacity` is the constant opacity held across the blend
+       * (typically 0.65, matching the Beat 1 hold).
+       */
+      kind: "beat1c-blend"
+      blendStart: number
+      convergeEnd: number
+      blendEnd: number
+      peakOpacity: number
+    }
+  | {
+      /**
+       * Beat 1C tail. Window `[blendEnd, beat2Start)`. Static hold
+       * on AG-only with fully blended tier colors. The arbiter
+       * performs a full-state baseline assertion on `onEnter`
+       * (`DU_AG_ONLY_FILTER`, `buildBlendedTierExpr(BEAT1_MID, 1)`,
+       * `peakOpacity`) and no per-tick writes. Matches the legacy
+       * listener's `phase !== "beat1c"` guard behavior.
+       */
+      kind: "beat1c-tail"
+      peakOpacity: number
+    }
+  | {
+      /**
+       * Beat 2 hide-schedule. Window `[BEAT2_START, BEAT5_ENTER)`.
+       * Drives the per-DU fade-out that escorts each outcome's
+       * polygons off the map as the SVG distribution-square morph
+       * takes over.
+       *
+       * `onEnter` re-asserts the full-state baseline (`DU_CLASS_FILTER`,
+       * blended tier fill expression from
+       * `ctx.buildBlendedTierExpr(BEAT1_MID, 1)`, line-width 0.5,
+       * visibility visible) with `fillOpacity` and `lineOpacity`
+       * preserved. The first `onUpdate` tick (same tick as enter)
+       * overwrites opacity with the per-DU Mapbox `"case"` expression.
+       *
+       * `onUpdate` builds the case expression every tick from the
+       * live hide schedule returned by `ctx.getHideSchedule()`. Each
+       * polygon entry whose `mapboxLayerId` is `"demand-units"`
+       * contributes a branch:
+       *  - If `v < fadeStart`: hold at `peakOpacity`.
+       *  - Else: interpolate `peakOpacity * (1 - t)` where
+       *    `t = (v - fadeStart) / (morphStart - fadeStart)`, clamped.
+       *
+       * An Agriculture-class fallback branch covers AG_REV (which is
+       * excluded from the schedule) and any untracked AG DUs. It
+       * holds at `peakOpacity` before `agFadeOutStart`, ramps to 0
+       * across `[agFadeOutStart, agFadeOutEnd)`, and stays at 0
+       * after. The window straddles `BEAT2_START` so the fade
+       * completes just as the SVG shapes start to deform, handing
+       * the visual off cleanly to the morph overlay.
+       *
+       * The terminal `0` branch hides Urban, Refuge, and any other
+       * DU that is neither tracked nor AG.
+       *
+       * The same case expression is written to both `fill-opacity`
+       * and `line-opacity` so outlines fade in lockstep with fills.
+       */
+      kind: "beat2-hide-schedule"
+      agFadeOutStart: number
+      agFadeOutEnd: number
+      peakOpacity: number
+    }
+  | {
       kind: "beat5-enter"
       /** LOI demand-unit id to gold-stroke during step 4 (`BEAT5_LOI_ID`). */
       loiDuId: string
@@ -88,6 +267,49 @@ export type MapPaintPayload =
       kind: "beat5-exit"
       /** Whether to clear the gold ring (true if step 4 was active). */
       clearRing: boolean
+    }
+  | {
+      /** Beat 6+ DU restore. Window `[BEAT5_TAIL_END, 1]`. One-shot
+       * `onEnter` performs a full `writeDemandUnitsBaseline` assertion
+       * to take ownership back from the Beat 5 actor cluster. The
+       * baseline restores the full DU class filter, the blended AG
+       * tier color expression, the default outline line-width, and
+       * pins both fill-opacity and line-opacity at scalar 0.
+       *
+       * The legacy listener accomplished the same end state via
+       * `enterBeat2Phase()` (filter + colors + line-width) followed
+       * by `paintDuHideSchedule()` (per-tick case expression that
+       * evaluates to 0 for every DU at this point in the timeline).
+       * We collapse both into a single one-shot scalar opacity write
+       * because at v >= BEAT5_TAIL_END the case expression has no
+       * remaining transitions to drive (every tracked DU is past its
+       * morphStart and the AG-class fallback is past
+       * `agFadeOutEnd`), so a scalar zero is observably equivalent
+       * and avoids the per-tick Mapbox style cost.
+       *
+       * `onUpdate` and `onExit` are no-ops. Reverse scrubs back into
+       * Beat 5 are handled by the Beat 5 cluster's own `onEnter`,
+       * which performs its own full-state baseline assertion. */
+      kind: "beat6-restore"
+    }
+  | {
+      /** Per-line-layer fade-out for outcomes whose geometries are
+       * lines rather than polygons. Window `[0, 1]`. The arbiter
+       * iterates `ctx.getHideSchedule()` every tick, picks entries
+       * with `geometryType === "line"`, and writes their
+       * `line-opacity` per a three-state piecewise function:
+       *   v < fadeStart                 -> opacity = 1
+       *   fadeStart <= v <= morphStart  -> opacity = 1 - t
+       *   v > morphStart                -> opacity = 0
+       * Mirrors the legacy listener's trailing line-fade loop at
+       * TierAnimationSection.tsx lines 2458 to 2481. The actor's
+       * window is the full progress range so reverse scrubs (back
+       * past a morphStart, then forward) re-establish the correct
+       * opacity. There is no resource conflict with the polygon
+       * arbiters because line layers (e.g. `cwf-flowline`,
+       * `delta-detaw-line`) are disjoint from `demand-units` and
+       * `demand-units-outline`. */
+      kind: "beat-line-fades"
     }
 
 export interface MapPaintActor extends ActorBase {
@@ -216,6 +438,17 @@ export interface BeatEngineContext {
   resolveDuName: (duId: string) => string
   /** Tier-label resolver (1 becomes "Optimal", etc.). */
   resolveTierLabel: (tier: number) => string
+  /**
+   * Live accessor for the per-outcome hide schedule. Returns the
+   * current contents of the component-local `hideScheduleRef` so
+   * arbiters read the latest entries without depending on React
+   * state or re-memoizing `ctx` on every schedule rebuild.
+   *
+   * The returned array's entries are mutated/replaced when the
+   * schedule rebuilds. Arbiters must not retain the reference across
+   * ticks and must not mutate the array.
+   */
+  getHideSchedule: () => readonly HideScheduleEntry[]
 }
 
 // Arbiter interface

@@ -68,7 +68,7 @@ export const BEATS: readonly BeatDef[] = [
   //      "before" paragraph fades out 0.39 -> 0.3925 and the "after"
   //      paragraph fades in 0.3925 -> 0.3975, landing as the beat
   //      settles at 0.40.
-  { id: "ag-rev-morph", progress: 0.4, duration: 10 },
+  { id: "ag-rev-morph", progress: 0.4, duration: 5 },
   // B3 (4/8) - "Remaining outcomes" beat. 14s over 0.10 progress
   //      (same per-progress velocity as AG_REV's morph). The Beat 3
   //      "after" paragraph fades out 0.40 -> 0.41; "For each

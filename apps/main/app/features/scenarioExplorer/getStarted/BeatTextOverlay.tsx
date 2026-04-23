@@ -15,10 +15,9 @@ import {
   PlayArrowIcon,
   ReplayIcon,
 } from "@repo/ui/mui"
-import { motion, useMotionValue, animate } from "@repo/motion"
+import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
 import { HybridTooltip } from "@repo/ui"
 import {
   getScenarioIconDefs,
@@ -127,8 +126,6 @@ interface BeatTextOverlayProps {
   scenarioDescription?: string
   encodingMode?: EncodingMode
   onEncodingChange?: (mode: EncodingMode) => void
-  hydroclimate?: string
-  onHydroclimateChange?: (value: string) => void
   onAddLocation?: () => void
   /** Map of outcome code -> Beat 2 morph progress window. `start` drives
    *  each outcome title's fade-in (just before its polygons begin morphing).
@@ -167,8 +164,6 @@ export default function BeatTextOverlay({
   scenarioDescription,
   encodingMode,
   onEncodingChange,
-  hydroclimate,
-  onHydroclimateChange,
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
@@ -349,22 +344,6 @@ export default function BeatTextOverlay({
   const radarHeaderRef = useRef<HTMLDivElement>(null)
   const heatmapHeaderRef = useRef<HTMLDivElement>(null)
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
-  /** Bottom Back / indicator / Next control row opacity.
-   *
-   *  The row is only visible when a text sequence has finished - i.e.,
-   *  the parent is settled at a beat (`playState === "paused"` or
-   *  `"finished"`) and the user has clicked Play. Any new sequence
-   *  (Play, Next, Back between beats, Back-from-first-beat) flips `playState`
-   *  to `"playing"` and fades the row back out until the tween
-   *  completes. This keeps the controls out of the way during the
-   *  animated storytelling and surfaces them only at the reading
-   *  pauses between beats.
-   *
-   *  Animated via an imperative `animate()` on a local MotionValue in
-   *  the effect below, rather than bound to `progress`, because the
-   *  visibility rule is about *whether* an animation is running, not
-   *  about any specific progress window. */
-  const bottomControlsOpacity = useMotionValue(0)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
@@ -398,25 +377,6 @@ export default function BeatTextOverlay({
       uBackOut?.()
     }
   }, [progress, backOutOpacity, textHidden])
-
-  /* ── Bottom controls visibility follows `playState` ──
-   *
-   * Show only at reading pauses - i.e. when the parent has settled at
-   * a beat (`paused` or `finished`) and the user has clicked Play.
-   * Any new sequence (Play, Next, Back) flips `playState` to `playing`
-   * and this effect fades the row back out. Pre-play (`idle`) and the
-   * Back-from-first-beat completion (which sets `idle` + `hasPlayed=false`)
-   * also keep the row hidden. */
-  useEffect(() => {
-    if (hideControls) return
-    const settled = playState === "paused" || playState === "finished"
-    const target = hasPlayed && settled ? 1 : 0
-    const ctrl = animate(bottomControlsOpacity, target, {
-      duration: 0.3,
-      ease: "easeOut",
-    })
-    return () => ctrl.stop()
-  }, [playState, hasPlayed, hideControls, bottomControlsOpacity])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
@@ -1250,105 +1210,115 @@ export default function BeatTextOverlay({
             </Box>
           </Box>
 
-          {/* Bottom control row: Back / N-of-T / Next, plus Restart once
-           *  the user has moved past the first beat. Rendered only
-           *  after the user has clicked Play (`hasPlayed`) and not at
-           *  all in reduced-motion mode (`hideControls`). Opacity is
-           *  driven by `bottomControlsOpacity`, animated via a
-           *  dedicated `playState` effect: visible only at the reading
-           *  pauses between beats (`paused` / `finished`), faded out
-           *  during any tween (`playing`) and during Back-from-first-beat
-           *  (`idle` + `hasPlayed=false` unmounts this block anyway). */}
-          {!hideControls && hasPlayed && (
-            <motion.div
-              style={{
-                marginTop: theme.spacing(theme.space.section.sm),
-                display: "flex",
-                gap: theme.spacing(0.75),
-                alignItems: "center",
-                pointerEvents: "auto",
-                opacity: bottomControlsOpacity,
-              }}
-            >
-              {(() => {
-                const isPlaying = playState === "playing"
-                const atStart = beatIndex <= 0
-                const atEnd = beatIndex >= totalBeats - 1
-                const pillBg = alpha(theme.palette.common.white, 0.2)
-                const pillHoverBg = alpha(theme.palette.common.white, 0.35)
-                const pillDisabledBg = alpha(theme.palette.common.white, 0.08)
-                const controlSx = {
-                  width: 44,
-                  height: 44,
-                  backgroundColor: pillBg,
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": { backgroundColor: pillHoverBg },
-                  "&.Mui-disabled": {
-                    backgroundColor: pillDisabledBg,
-                    color: alpha(theme.palette.text.secondary, 0.35),
-                  },
-                } as const
-                return (
-                  <>
+        </Box>
+
+        {/* Bottom control row: Back / N-of-T / Next, plus Restart once
+         *  the user has moved past the first beat. Rendered only after
+         *  the user has clicked Play (`hasPlayed`) and not at all in
+         *  reduced-motion mode (`hideControls`). Pulled out of the
+         *  `beat1Ref` document flow and pinned at a fixed 600px from
+         *  the panel top, horizontally centered in the left third of
+         *  the viewport (panel inset is the full viewport, so the
+         *  left third spans `0 -> 33.33vw`). Using `translateX(-50%)`
+         *  on `left: 16.67vw` keeps the row's center on the third's
+         *  midline. Stays fully visible for the entire run of the
+         *  storyboard. Buttons are disabled while a tween is in flight
+         *  (`playState === "playing"`) so the user cannot click
+         *  mid-beat. */}
+        {!hideControls && hasPlayed && (
+          <motion.div
+            style={{
+              position: "absolute",
+              top: 600,
+              left: "16.6667vw",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: theme.spacing(0.75),
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "auto",
+              opacity: 1,
+            }}
+          >
+            {(() => {
+              const isPlaying = playState === "playing"
+              const atStart = beatIndex <= 0
+              const atEnd = beatIndex >= totalBeats - 1
+              const pillBg = alpha(theme.palette.common.white, 0.2)
+              const pillHoverBg = alpha(theme.palette.common.white, 0.35)
+              const pillDisabledBg = alpha(theme.palette.common.white, 0.08)
+              const controlSx = {
+                width: 44,
+                height: 44,
+                backgroundColor: pillBg,
+                backdropFilter: "blur(8px)",
+                color: "text.secondary",
+                "&:hover": { backgroundColor: pillHoverBg },
+                "&.Mui-disabled": {
+                  backgroundColor: pillDisabledBg,
+                  color: alpha(theme.palette.text.secondary, 0.35),
+                },
+              } as const
+              return (
+                <>
+                  <IconButton
+                    onClick={onBack}
+                    size="small"
+                    aria-label={
+                      atStart ? "Back to intro (←)" : "Previous beat (←)"
+                    }
+                    disabled={isPlaying}
+                    sx={controlSx}
+                  >
+                    <ChevronLeftIcon sx={{ fontSize: 24 }} />
+                  </IconButton>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      minWidth: 32,
+                      textAlign: "center",
+                      fontVariantNumeric: "tabular-nums",
+                      opacity: 0.7,
+                      userSelect: "none",
+                    }}
+                  >
+                    {beatIndex + 1} / {totalBeats}
+                  </Typography>
+                  <IconButton
+                    onClick={onNext}
+                    size="small"
+                    aria-label="Next beat (→)"
+                    disabled={atEnd || isPlaying}
+                    sx={controlSx}
+                  >
+                    <ChevronRightIcon sx={{ fontSize: 24 }} />
+                  </IconButton>
+                  {!atStart && (
                     <IconButton
-                      onClick={onBack}
+                      onClick={onRestart}
                       size="small"
-                      aria-label={
-                        atStart ? "Back to intro (←)" : "Previous beat (←)"
-                      }
+                      aria-label="Restart storyboard (Home)"
                       disabled={isPlaying}
-                      sx={controlSx}
-                    >
-                      <ChevronLeftIcon sx={{ fontSize: 24 }} />
-                    </IconButton>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
                       sx={{
-                        minWidth: 32,
-                        textAlign: "center",
-                        fontVariantNumeric: "tabular-nums",
-                        opacity: 0.7,
-                        userSelect: "none",
+                        ...controlSx,
+                        width: 36,
+                        height: 36,
+                        ml: 1,
+                        backgroundColor: alpha(
+                          theme.palette.common.white,
+                          0.15,
+                        ),
                       }}
                     >
-                      {beatIndex + 1} / {totalBeats}
-                    </Typography>
-                    <IconButton
-                      onClick={onNext}
-                      size="small"
-                      aria-label="Next beat (→)"
-                      disabled={atEnd || isPlaying}
-                      sx={controlSx}
-                    >
-                      <ChevronRightIcon sx={{ fontSize: 24 }} />
+                      <ReplayIcon sx={{ fontSize: 18 }} />
                     </IconButton>
-                    {!atStart && (
-                      <IconButton
-                        onClick={onRestart}
-                        size="small"
-                        aria-label="Restart storyboard (Home)"
-                        sx={{
-                          ...controlSx,
-                          width: 36,
-                          height: 36,
-                          ml: 1,
-                          backgroundColor: alpha(
-                            theme.palette.common.white,
-                            0.15,
-                          ),
-                        }}
-                      >
-                        <ReplayIcon sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    )}
-                  </>
-                )
-              })()}
-            </motion.div>
-          )}
-        </Box>
+                  )}
+                </>
+              )
+            })()}
+          </motion.div>
+        )}
       </Box>
 
       {/* Beat 2 - white backdrop on the right third.
@@ -1557,41 +1527,14 @@ export default function BeatTextOverlay({
                   <ToggleButton value="average">Average</ToggleButton>
                 </ToggleButtonGroup>
               )}
-
-              {/* Bottom-right: hydroclimate chooser */}
-              {onHydroclimateChange && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    gridColumn: 2,
-                    justifySelf: "end",
-                  }}
-                >
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.02em",
-                      color: theme.palette.grey[600],
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    View by climate
-                  </Typography>
-                  <HydroclimateChooser
-                    value={hydroclimate}
-                    onChange={onHydroclimateChange}
-                    showTitle={false}
-                    showLabels={false}
-                    hideDisabled
-                    iconSize="26px"
-                    iconFontSize="0.95rem"
-                  />
-                </Box>
-              )}
+              {/* The Get Started storyboard is permanently pinned to the
+               *  s0020 baseline under the historical hydroclimate, so no
+               *  in-storyboard hydroclimate chooser is rendered here. The
+               *  Beat 8 heatmap is a single-column placeholder for future
+               *  multi-hydroclimate columns. To restore an inline chooser,
+               *  re-add `hydroclimate` / `onHydroclimateChange` props plus
+               *  the `HydroclimateChooser` import and the wiring removed
+               *  from `TierAnimationSection`. */}
             </Box>
           </Box>
         )}

@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "audit:writers": "node scripts/storyboard-writers-audit.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

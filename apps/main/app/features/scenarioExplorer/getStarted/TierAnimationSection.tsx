@@ -34,10 +34,8 @@ import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
 } from "../../map/config/outcomeLocations"
-import {
-  useTierAnimationData,
-  useOutcomeTierOverrides,
-} from "./useTierAnimationData"
+import { useTierAnimationData } from "./useTierAnimationData"
+import type { OutcomeLocationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
   type LocationInfo,
@@ -57,8 +55,6 @@ import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
-import { useScenarioExplorerStore } from "../store"
 import { BEATS, FINAL_BEAT_INDEX } from "./animationTiming"
 import {
   useBeatEngine,
@@ -66,9 +62,14 @@ import {
   MapPaintArbiter,
   MapPopupArbiter,
   OverlayPopupArbiter,
+  debugLog,
+  logDuState,
+  DU_CLASS_FILTER,
+  writeDemandUnitsBaseline,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
+  type HideScheduleEntry,
 } from "./engine"
 
 /** Phase 0 refactor spike flag. When true, the declarative beat engine
@@ -192,20 +193,22 @@ const ANIM_POLYGON_LAYERS = [
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
 
-/** Filter demand-units to only classes that correspond to tracked outcomes.
- *  Excludes "N/A" and other untracked classes that would otherwise show
- *  as spurious polygons during the beat-1 cycling animation. */
-const DU_CLASS_FILTER = [
-  "in",
-  ["get", "Class"],
-  ["literal", ["Agriculture", "Urban", "Refuge"]],
-]
+/** Index of the LOI-highlight beat in BEATS (the "loi-highlight"
+ *  entry, progress target 0.62). `MapPaintArbiter` owns
+ *  `demand-units` paint/filter/visibility while this beat is active,
+ *  so other writers (notably the post-interactive teardown effect)
+ *  must refuse to write during this window. */
+const LOI_BEAT_INDEX = 4
 
-/** Filter used during Beat 1C so the map isolates the Agricultural
- *  revenue story - only Agriculture demand-units are visible while the
- *  tier-color blend and AG example popups play out. The full
- *  DU_CLASS_FILTER is restored when Beat 2 starts. */
-const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"]
+// `logDuState`, `debugLog`, and `DU_CLASS_FILTER` all live in
+// `./engine` now and are imported at the top of the file.
+// `DU_AG_ONLY_FILTER` is no longer referenced from this file. Its only
+// caller, the legacy Beat 5 paint branch, moved to the engine's
+// `MapPaintArbiter` in Phase 1.f, so the import was dropped. The
+// constant itself still lives in `engine/index.ts` for use by the
+// arbiter. Single source of truth for demand-units filters and
+// storyboard diagnostics. See `engine/debug.ts` and
+// `engine/demandUnitsBaseline.ts`.
 
 /** Curated list of well-known agricultural water districts used to
  *  illustrate what a single polygon represents during Beat 1C. Each popup
@@ -238,30 +241,33 @@ const HIGHLIGHT_GOLD = "#ffd87e"
 /* ── Beat 5 (loi-highlight) shared timing & identity ──
  *
  * Beat 5 choreographs a single AG_REV LOI through five sub-steps. These
- * constants are shared between the main choreography effect (which owns
- * Mapbox paint writes for demand-units / demand-units-outline) and the
- * Beat 5 driver effect (which owns React state + the locationHighlights
- * store). Hoisted to module scope so exactly one source of truth defines
- * each threshold.
+ * constants drive the Beat 5 driver effect (which owns React state and
+ * the locationHighlights store) and the popup driver. Mapbox paint writes
+ * for demand-units / demand-units-outline (AG-only filter swap, layer
+ * fade-in and fade-out, step-4 gold polygon ring) moved to the
+ * declarative beat engine's `MapPaintArbiter` via the `beat4:mapPaint:*`
+ * actor cluster in `engine/beats.ts`. The corresponding paint thresholds
+ * (`BEAT5_S1_LAYER_IN_START`, `BEAT5_S1_LAYER_IN_END`,
+ * `BEAT5_S4_POLYGON_RING_AT`, `BEAT5_LAYER_OPACITY`) live alongside
+ * those actors and are no longer mirrored here.
  *
- *   [0.500, BEAT5_S1_LAYER_IN_START)  pre-roll (narration settles)
- *   [BEAT5_S1_LAYER_IN_START, BEAT5_S1_LAYER_IN_END)  step 1: AG layer fades in
+ *   [BEAT5_ENTER, BEAT5_S2_SQUARE_RING_AT)   AG layer fades in then holds
  *   [BEAT5_S2_SQUARE_RING_AT,    settle)  step 2: gold ring on the square
  *   [BEAT5_S3_SQUARE_POPUP_AT,   settle)  step 3: popup near the square
- *   [BEAT5_S4_POLYGON_RING_AT,   settle)  step 4: gold stroke on the polygon
  *   [BEAT5_S5_POLYGON_POPUP_AT,  settle)  step 5: popup near the polygon
  *   [BEAT5_SETTLE, BEAT5_TAIL_END)  tail: fade layer back out, clear state
+ *
+ * AG polygons enter Beat 4 at opacity 0 because the engine's
+ * `MapPaintArbiter` fades them out at the tail of Beat 2 (see
+ * `applyBeat2HideScheduleUpdate`, AG-class fallback). The Beat 5 entry
+ * actor ramps them back up.
  */
 const BEAT5_ENTER = 0.5
-const BEAT5_S1_LAYER_IN_START = 0.555
-const BEAT5_S1_LAYER_IN_END = 0.575
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
-const BEAT5_S4_POLYGON_RING_AT = 0.6
 const BEAT5_S5_POLYGON_POPUP_AT = 0.605
 const BEAT5_SETTLE = 0.62
 const BEAT5_TAIL_END = 0.63
-const BEAT5_LAYER_OPACITY = 0.65
 /** DU_ID of the LOI spotlighted during Beat 5 (Glenn Colusa I.D.). */
 const BEAT5_LOI_ID = "08N_SA2"
 
@@ -468,7 +474,19 @@ export default function TierAnimationSection() {
         setBeatIndex(clamped)
         beatIndexRef.current = clamped
 
+        debugLog(
+          `runTween START fromV=${progress.get().toFixed(4)} targetV=${target.progress} duration=${duration}`,
+        )
+        logDuState("runTween START", mapAPI.mapRef?.current?.getMap?.())
+
         const finalize = () => {
+          debugLog(
+            `runTween FINALIZE clamped=${clamped} v=${progress.get().toFixed(4)}`,
+          )
+          logDuState(
+            "runTween FINALIZE",
+            mapAPI.mapRef?.current?.getMap?.(),
+          )
           if (clamped === FINAL_BEAT_INDEX) {
             settleToFinishedState()
           } else if (clamped === 0) {
@@ -540,19 +558,31 @@ export default function TierAnimationSection() {
   const engineApiRef = useRef<BeatEngineApi | null>(null)
 
   const clearInteractiveState = useCallback(() => {
+    const diagMap = mapAPI.mapRef?.current?.getMap?.()
+    logDuState("clearInteractiveState START", diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
+    logDuState("clearInteractiveState after store clears", diagMap)
     // Force the engine to clear any actors still in-window so a mid-beat
     // nav away from Beat 4 doesn't strand the gold polygon ring, the
     // square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
-  }, [])
+    logDuState("clearInteractiveState after engine teardown", diagMap)
+
+    // Visibility restore runs separately in the selectedOutcomeCode
+    // transition effect below. That effect fires after React commits
+    // the `OutcomePolygonLayer` unmount triggered by
+    // `clearOutcomeVisualization`, guaranteeing the restore wins the
+    // race against the unmount's `visibility: "none"` write.
+  }, [mapAPI])
 
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
+    debugLog(`handleNext START beatIndex=${beatIndexRef.current}`)
     clearInteractiveState()
+    debugLog(`handleNext goTo called`)
     // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
     // (a no-op when already home) before running the beat tween, so a
     // square-click zoom doesn't persist into the next beat.
@@ -850,16 +880,24 @@ export default function TierAnimationSection() {
 
   /* ── Encoding mode: distribution | bar | average ── */
   const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
-  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
-  const setHydroclimate = useScenarioExplorerStore((s) => s.setHydroclimate)
   const [spotlightedTier, setSpotlightedTier] = useState<number | null>(null)
-  const { buildIdMapping } = useScenarioList()
-  const resolvedScenarioId = useMemo(() => {
-    const mapping = buildIdMapping(hydroclimate)
-    return mapping["s0020"] ?? "s0020"
-  }, [buildIdMapping, hydroclimate])
+  // The Get Started storyboard is permanently pinned to the s0020 baseline
+  // under the historical hydroclimate. The narrative is calibrated to that
+  // single combination (Beat 8's heatmap is a single-column placeholder for
+  // future multi-hydroclimate columns), so we deliberately ignore the global
+  // `useScenarioExplorerStore.hydroclimate` value and do not expose an
+  // in-storyboard hydroclimate chooser. If multi-hydroclimate playback is
+  // ever desired, reintroduce the store read here, the `buildIdMapping`
+  // resolution, the `useOutcomeTierOverrides` call below, and the
+  // `hydroclimate` / `onHydroclimateChange` props on `BeatTextOverlay`.
+  const resolvedScenarioId = "s0020"
   const { chartData: tierChartData } = useScenarioTiers(resolvedScenarioId)
-  const tierOverrides = useOutcomeTierOverrides(resolvedScenarioId)
+  // No per-location tier overrides are applied. Kept as an empty record so
+  // the screen-polygon color-resolution path below stays unchanged.
+  const tierOverrides: Record<string, OutcomeLocationData> = useMemo(
+    () => ({}),
+    [],
+  )
   const { scenarios } = useScenarios()
   const s0020Scenario = useMemo(
     () => scenarios?.find((s) => s.short_code === "s0020"),
@@ -873,6 +911,168 @@ export default function TierAnimationSection() {
   useEffect(() => {
     setSpotlightedTier(null)
   }, [selectedOutcomeCode])
+
+  /* ── Post-interactive teardown on outcome deselect.
+   *
+   * When the user clicks a distribution square during any interactive
+   * `paused` / `finished` state, `OutcomePolygonLayer` mounts and
+   * writes a set of paint properties onto the shared `demand-units`
+   * and `demand-units-outline` layers: non-zero opacity and color
+   * transitions (350ms), a feature-id match filter, a match-based
+   * fill-color / line-color, and a non-default line-width / offset.
+   *
+   * Its unmount cleanup only hides the layers (`visibility: "none"`)
+   * and sets a match-nothing filter on the fill. It does not reset
+   * the transitions, filter on outline, or colors. Those stale writes
+   * linger on the layer and break the rest of the storyboard. Most
+   * visibly: a 350ms `fill-opacity-transition` causes every per-tick
+   * opacity write by the beat engine or choreography to lag behind
+   * its target, so Beat 4's AG fade-in (0 to 0.65 over ~1.5s) never
+   * actually renders.
+   *
+   * This effect fires only on the truthy to null transition of
+   * `selectedOutcomeCode` (i.e. the user exits interactive mode),
+   * which happens after React has committed `OutcomePolygonLayer`'s
+   * unmount cleanup (child unmount effects run before parent
+   * effects in the same commit). So the writes here are the last
+   * ones applied. We fully reset `demand-units` and
+   * `demand-units-outline` back to the clean choreography-ready
+   * state: instant transitions, class filter, blended tier color,
+   * default outline width/offset, visibility visible. For every
+   * other animation polygon layer we only need to restore
+   * visibility.
+   *
+   * Truthy to different-truthy transitions (cross-outcome swap
+   * during interactive play) are OPL's job to handle. Running this
+   * teardown for those would create a second writer that races OPL
+   * on `demand-units`, which regressed Beat 5 by stomping the
+   * arbiter's Agriculture-only filter.
+   *
+   * If the map style is not loaded at the moment the effect fires
+   * (camera ease mid-flight, source update, layer swap just
+   * committed), the restore is deferred to the next `idle` event
+   * instead of silently dropped. An earlier version of this effect
+   * bailed in that case, which was the root cause of the Step 4 to
+   * Step 5 AG layer being invisible after a distribution-square
+   * click. Before the deferred restore actually runs, it
+   * re-validates that `selectedOutcomeCode` is still null and that
+   * we have not navigated into the Beat 5 window
+   * (`beatIndexRef.current < LOI_BEAT_INDEX`). Otherwise it bails
+   * and yields ownership to whoever claimed the layer in the
+   * meantime. The final line of defense is
+   * `MapPaintArbiter.applyBeat5Enter` which reasserts the Beat 5
+   * preconditions regardless. */
+  const prevSelectedOutcomeCodeRef = useRef<string | null>(null)
+  // Live ref used by the idle-deferred callback below so we can bail
+  // out if `selectedOutcomeCode` changed (user clicked another square,
+  // or the beat engine entered a window that owns `demand-units`)
+  // while we were waiting for `idle`.
+  const selectedOutcomeCodeLiveRef = useRef<string | null>(selectedOutcomeCode)
+  useEffect(() => {
+    selectedOutcomeCodeLiveRef.current = selectedOutcomeCode
+  }, [selectedOutcomeCode])
+  useEffect(() => {
+    const prev = prevSelectedOutcomeCodeRef.current
+    prevSelectedOutcomeCodeRef.current = selectedOutcomeCode
+    // Only fire on the truthy to null transition, i.e. when the user
+    // *exits* interactive mode. A truthy to truthy transition (swap
+    // between outcomes during interactive play) is OPL's job to
+    // handle; running the teardown in that case creates a second
+    // writer for `demand-units` that races OPL and (via the deferred
+    // idle path) can also clobber the beat engine's Beat 5 setup if
+    // the user clicks Next before the idle fires.
+    if (!(prev !== null && selectedOutcomeCode === null)) return
+    debugLog(
+      `selectedOutcomeCode-transition START prev=${prev} now=${selectedOutcomeCode}`,
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map: any = mapAPI.mapRef?.current?.getMap?.()
+    logDuState("selectedOutcomeCode-transition PRE-write", map)
+
+    // Extracted so we can invoke it either synchronously (style loaded)
+    // or deferred via `map.once("idle", ...)` (style busy).
+    //
+    // `fillOpacity` / `lineOpacity` are `preserve`, not a scalar: the
+    // main choreography listener's next tick re-writes opacity for
+    // whatever phase we are in (beat1 cycle, beat2 hide-schedule, or
+    // the interactive baseline), and we do not want to land a
+    // transient scalar on the layer between this write and that one.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const runTeardownWrites = (m: any) => {
+      try {
+        writeDemandUnitsBaseline(m, {
+          filter: DU_CLASS_FILTER,
+          fillExpr: buildBlendedTierExpr(BEAT1_MID, 1) as
+            | readonly unknown[]
+            | null,
+          fillOpacity: { kind: "preserve" },
+          lineOpacity: { kind: "preserve" },
+          lineWidth: 0.5,
+          lineOffset: -0.25,
+          visibility: "visible",
+        })
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (fill === "demand-units") continue
+          if (m.getLayer(fill))
+            m.setLayoutProperty(fill, "visibility", "visible")
+          if (m.getLayer(outline))
+            m.setLayoutProperty(outline, "visibility", "visible")
+        }
+        logDuState("selectedOutcomeCode-transition POST-write", m)
+      } catch (e) {
+        debugLog(`selectedOutcomeCode-transition ERROR`, e)
+      }
+    }
+
+    if (!map) return
+    if (map.isStyleLoaded?.()) {
+      runTeardownWrites(map)
+      return
+    }
+
+    // Style is busy (camera ease mid-flight, layer swap, source
+    // update, etc). Defer to the next `idle` event instead of
+    // silently dropping the restore. Track the listener so we can
+    // detach it if another transition supersedes us first.
+    //
+    // Before actually running the restore on the `idle` callback, we
+    // re-validate preconditions. If the user has clicked another
+    // square in the meantime, or navigated into the Beat 5 window
+    // where `MapPaintArbiter` owns `demand-units`, we bail. Running
+    // an out-of-date restore would either stomp OPL's live interactive
+    // paint or overwrite the arbiter's Agriculture-only filter with
+    // the full class filter, which was the cause of the "AG layer
+    // bleeds across all demand-unit classes in Beat 5" regression.
+    debugLog(`selectedOutcomeCode-transition deferred to idle`)
+    let ran = false
+    const onIdle = () => {
+      if (ran) return
+      ran = true
+      const liveOutcome = selectedOutcomeCodeLiveRef.current
+      const liveBeat = beatIndexRef.current
+      if (liveOutcome !== null || liveBeat >= LOI_BEAT_INDEX) {
+        debugLog(
+          `selectedOutcomeCode-transition idle-bail liveOutcome=${liveOutcome} liveBeat=${liveBeat}`,
+        )
+        return
+      }
+      debugLog(`selectedOutcomeCode-transition running after idle`)
+      runTeardownWrites(map)
+    }
+    try {
+      map.once("idle", onIdle)
+    } catch {
+      /* ok */
+    }
+    return () => {
+      if (ran) return
+      try {
+        map.off?.("idle", onIdle)
+      } catch {
+        /* ok */
+      }
+    }
+  }, [selectedOutcomeCode, mapAPI.mapRef])
 
   /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
   const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(
@@ -914,6 +1114,14 @@ export default function TierAnimationSection() {
         const key = locKey(info)
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
+
+        debugLog(
+          `square click outcome=${info.code} sourceId=${info.sourceId} wasSelected=${wasSelected}`,
+        )
+        logDuState(
+          "square click (pre-state-change)",
+          mapAPI.mapRef?.current?.getMap?.(),
+        )
 
         // -- Commented out: previous multi-pin toggle behavior. Re-enable
         //    if we ever want several pinned locations with tethered
@@ -1087,8 +1295,17 @@ export default function TierAnimationSection() {
       : null
 
     if (!config) {
+      // The null-config reset slams `demand-units` to opacity 0 and
+      // restores the full class filter, intended for the interactive
+      // idle state after the storyboard ends. `playState` briefly
+      // flips to `paused` at every beat settle mid-run, which also
+      // makes `isInteractive` true. Without this extra guard the
+      // reset fires at every step boundary and wipes the map layer
+      // the choreography listener just painted (blues at end of step
+      // 1, AG tier colors at end of step 2, and so on). Only run the
+      // reset once the storyboard has truly finished.
+      if (playState !== "finished") return
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
-      // Reset demand-units when no outcome is selected
       const resetMap = mapAPI.mapRef?.current?.getMap?.()
       if (resetMap?.isStyleLoaded?.()) {
         try {
@@ -1311,6 +1528,7 @@ export default function TierAnimationSection() {
     }
   }, [
     isInteractive,
+    playState,
     activeLocationSet,
     hoveredLocation,
     pinnedLocations,
@@ -1798,18 +2016,11 @@ export default function TierAnimationSection() {
     tierColorLookupRef.current = lookup
   }, [outcomeLocations])
 
-  /** Pre-compute the schedule for hiding map features as SVG takes over.
-   *  Supports polygon layers (per-feature fade), line layers (global opacity),
-   *  and react-marker (no Mapbox layer to hide). */
-  interface HideScheduleEntry {
-    code: string
-    geometryType: "polygon" | "line" | "react-marker"
-    mapboxLayerId: string
-    idProperty: string
-    fadeStart: number
-    morphStart: number
-    locationIds: string[]
-  }
+  /* Per-outcome schedule for hiding map features as the SVG morph
+   * takes over. See `HideScheduleEntry` in `engine/types.ts` for the
+   * field contract. Populated by the outcome-schedule effect below
+   * and read by both the legacy listener and the engine's
+   * `MapPaintArbiter` via `ctx.getHideSchedule()`. */
   const hideScheduleRef = useRef<HideScheduleEntry[]>([])
 
   /** Build a Mapbox match expression blending from `fromHex` to each DU's
@@ -1872,6 +2083,7 @@ export default function TierAnimationSection() {
         getDemandUnitDisplayName(duId) ??
         duId,
       resolveTierLabel: getTierLabel,
+      getHideSchedule: () => hideScheduleRef.current,
     }),
     // `buildBlendedTierExpr` is a non-stable inner function. It closes
     // over `tierColorLookupRef` (a ref) so its identity doesn't
@@ -1895,93 +2107,65 @@ export default function TierAnimationSection() {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let phase: "idle" | "beat1" | "beat1c" | "beat2" | "beat5" = "idle"
-    // Beat 5 polygon-ring state (step 4). When true, the
-    // `demand-units-outline` layer is currently carrying a case
-    // expression that strokes BEAT5_LOI_ID in HIGHLIGHT_GOLD. We
-    // track it here so entering / leaving the step 4 window and
-    // exiting Beat 5 entirely can cleanly restore the blended tier
-    // expression without re-writing on every tick.
-    let beat5PolyRingOn = false
+    let phase:
+      | "idle"
+      | "beat1"
+      | "beat1c-blend"
+      | "beat1c"
+      | "beat2"
+      | "beat5"
+      | "beat6" = "idle"
+    // (Beat 5 polygon-ring state previously tracked via the
+    // `beat5PolyRingOn` closure here. Now owned by `MapPaintArbiter`
+    // and removed in Phase 1.g together with the Beat 6+ branch that
+    // was its only remaining reader.)
 
     // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
     //          still on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.245 -> 0.26): cross-fade OUT - the demand-units layer
-    //          fades from 0.65 -> 0 with the frozen 3-blue palette
-    //          intact. Begins the instant the intro text collapse
-    //          finishes (at 0.245) so there's no dead air after the
-    //          legend settles at the top.
-    // Beat 1C (0.26 -> 0.39): at v = 0.26, while the layer is invisible,
-    //          we swap the filter to Agriculture-only and set the
-    //          fill-color directly to the AG_REV tier expression.
-    //          (0.26 -> 0.28) the layer fades back IN from 0 -> 0.65
-    //          already wearing its AG_REV tier colors - a clean
-    //          cross-fade with no blue interstitial. (0.28 -> 0.39)
-    //          tier colors are locked while the Beat 1C text + example
-    //          popups play.
+    // Beat 1B (0.245 -> 0.26): hold. The 3-blue palette stays painted
+    //          at fill-opacity 0.65 with the full DU class filter.
+    //          Earlier versions cross-faded the layer out across this
+    //          window, but that read as a distracting blink between the
+    //          intro legend and the AG tier-color reveal. The blues now
+    //          stay visible right up to the swap at BEAT1C_BLEND_START.
+    // Beat 1C (0.26 -> 0.39): at v = 0.26 we swap the filter to
+    //          Agriculture-only and set fill-color to the AG_REV tier
+    //          expression. The swap is instant and happens while the
+    //          layer is still painted at 0.65, so the user sees a hard
+    //          cut from 3-blue to AG tier colors without an opacity
+    //          dip. (0.28 -> 0.39) tier colors are locked while the
+    //          Beat 1C text and popups play.
     // Beat 2  (0.39 -> 0.50): DU filter restored, tier colors locked. SVG
     //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.09
     const BEAT1B_START = 0.245
-    // Cross-fade windows (renamed in spirit, kept for diff readability):
-    // BEAT1C_BLEND_START is the fade-out -> fade-in pivot (filter swap
-    // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
-    // is when the AG_REV tier colors are fully visible at 0.65 opacity.
+    // BEAT1C_BLEND_START is the filter + color swap boundary. Opacity
+    // stays at 0.65 across this boundary; only the filter and fill
+    // expression flip.
     const BEAT1C_BLEND_START = 0.26
+    // Kept so downstream branches and comments that still reference the
+    // end of the old cross-fade window compile. The 0.26 -> 0.28 span
+    // is now just a hold at the AG tier colors.
     const BEAT1C_BLEND_END = 0.28
     // AG_REV now morphs solo starting at 0.38 (see getOutcomeProgressRange
     // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
     // DU filter restore + hide-schedule over in time for AG_REV's morph.
     const BEAT2_START = 0.38
 
-    let frozenColorPhase = 0
-
     const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
 
       if (v < 0.01) {
+        // Paint writes for the reset window moved to
+        // `MapPaintArbiter.applyReset`, fired by the `beat0:mapPaint:reset`
+        // actor on its `onEnter` hook. This block retains only the
+        // listener-local phase bookkeeping so downstream branches that
+        // gate on `phase !== "idle"` still re-fire on their next
+        // transition. See the Storyboard Engine Hardening Plan v2,
+        // Phase 1.b.
         if (phase !== "idle") {
-          try {
-            if (map.getLayer("demand-units")) {
-              // Restore the full DU_CLASS_FILTER on reset so the cycling
-              // blues show across all 3 classes again from the top.
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              map.setPaintProperty("demand-units", "fill-opacity", 0)
-              map.setPaintProperty("demand-units", "fill-color-transition", {
-                duration: 0,
-                delay: 0,
-              })
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                beat1FillExpr(0) as never,
-              )
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                beat1FillExpr(0) as never,
-              )
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                beat1FillExpr(0) as never,
-              )
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-            }
-            // Snap the basemap dim overlay back to 0 so a full reset
-            // shows the bright basemap again.
-            if (map.getLayer("basemap-dim-overlay")) {
-              map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
-            }
-          } catch {
-            /* ok */
-          }
           phase = "idle"
-          frozenColorPhase = 0
         }
         return
       }
@@ -2007,553 +2191,91 @@ export default function TierAnimationSection() {
       }
 
       if (v < BEAT1B_START) {
-        // Beat 1: blues cycling, then frozen
-        const beat1T = v / FREEZE_AT
-
-        const fadeIn = Math.min(1, beat1T / 0.33)
-        const base = 0.65 * fadeIn
-        const breath = fadeIn >= 1 ? 0.05 * Math.sin(beat1T * Math.PI * 4) : 0
-        const opacity = base + breath
-
-        if (v < FREEZE_AT) {
-          // Actively cycling
-          const colorPhase = beat1T * BEAT1_CYCLE
-          frozenColorPhase = colorPhase
-          try {
-            const expr = beat1FillExpr(colorPhase)
-            if (map.getLayer("demand-units")) {
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                expr as never,
-              )
-              map.setPaintProperty("demand-units", "fill-opacity", opacity)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                expr as never,
-              )
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                opacity,
-              )
-            }
-          } catch {
-            /* ok */
-          }
-        } else {
-          // Frozen: keep the last color pattern, maintain opacity at 0.65
-          try {
-            const expr = beat1FillExpr(frozenColorPhase)
-            if (map.getLayer("demand-units")) {
-              if (phase !== "beat1") {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              if (phase !== "beat1") {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-            }
-          } catch {
-            /* ok */
-          }
-        }
+        // Beat 1 paint writes (cycling sub-branch `v < FREEZE_AT` and
+        // frozen sub-branch `FREEZE_AT <= v < BEAT1B_START`) moved to
+        // `MapPaintArbiter.applyBeat1Cycle*` and
+        // `MapPaintArbiter.applyBeat1Hold*`, fired by the
+        // `beat0:mapPaint:cycle` and `beat0:mapPaint:hold` actors.
+        // This block retains only the `phase = "beat1"` assignment
+        // that downstream branches still key off. The arbiter tracks
+        // its own `frozenColorPhase` across the cycle and blend
+        // actors, so no listener-local bookkeeping is needed here.
+        // See Storyboard Engine Hardening Plan v2, Phases 1.c and 1.d.
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
-        // Beat 1B: cross-fade OUT. Keep the frozen 3-blue colors and
-        // fade the layer's opacity from 0.65 -> 0. No converge-to-mid
-        // -blue interstitial - the polygons simply dissolve away,
-        // freeing the eye to receive the AG_REV tier-colored polygons
-        // that fade in next. If we're scrubbing backwards from beat1c,
-        // first restore the full DU class filter and the frozen 3-blue
-        // expression so the cross-fade reverses cleanly.
-        if (phase !== "beat1") {
-          try {
-            const expr = beat1FillExpr(frozenColorPhase)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                expr as never,
-              )
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                expr as never,
-              )
-            }
-          } catch {
-            /* ok */
-          }
-        }
-
-        const fadeOutT =
-          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
-        const easedFadeOut = 1 - Math.pow(1 - fadeOutT, 2) // ease-out
-        const fadeOutOpacity = 0.65 * (1 - easedFadeOut)
-
-        try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity", fadeOutOpacity)
-          }
-          if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-opacity",
-              fadeOutOpacity,
-            )
-          }
-        } catch {
-          /* ok */
-        }
+        // Beat 1B paint writes moved to
+        // `MapPaintArbiter.applyBeat1Hold*`. This block retains only
+        // the `phase = "beat1"` bookkeeping so downstream branches
+        // still re-fire their transitions. See Phase 1.c.
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_END) {
-        // Beat 1C: cross-fade IN. While the layer is at opacity 0 we
-        // swap the filter to Agriculture-only and set fill-color to the
-        // pure AG_REV tier expression (no blue blend). Then the layer
-        // fades from 0 -> 0.65 already wearing its tier colors, so the
-        // user sees a clean fade from "blank water" to the colorful
-        // visualization - no solid-blue intermediate.
-        if (phase !== "beat1c") {
-          try {
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-            }
-          } catch {
-            /* ok */
-          }
-        }
-
-        const fadeInT =
-          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
-        const easedFadeIn = 1 - Math.pow(1 - fadeInT, 2) // ease-out
-        const fadeInOpacity = 0.65 * easedFadeIn
-
-        try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity", fadeInOpacity)
-          }
-          if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-opacity",
-              fadeInOpacity,
-            )
-          }
-        } catch {
-          /* ok */
-        }
-        phase = "beat1c"
+        // Beat 1C blend paint writes (two-stage convergence plus
+        // tier-color morph) moved to
+        // `MapPaintArbiter.applyBeat1cBlendEnter` and
+        // `MapPaintArbiter.applyBeat1cBlendUpdate`, fired by the
+        // `beat1:mapPaint:blend` actor. The arbiter reads its own
+        // `frozenColorPhase` (set during the cycle actor) so no
+        // listener-local bookkeeping is needed. This block retains
+        // only the `phase = "beat1c-blend"` assignment to match the
+        // legacy transition shape. See Storyboard Engine Hardening
+        // Plan v2, Phase 1.d.
+        phase = "beat1c-blend"
       } else if (v < BEAT2_START) {
-        // Beat 1C tail: tier colors are fully blended. Hold steady on
-        // AG-only while the example text and popups play.
-        if (phase !== "beat1c") {
-          try {
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-            }
-          } catch {
-            /* ok */
-          }
-          phase = "beat1c"
-        }
+        // Beat 1C tail (static AG-only hold on fully blended tier
+        // colors) moved to `MapPaintArbiter.applyBeat1cTailEnter`,
+        // fired by the `beat1:mapPaint:tail` actor. This block
+        // retains only the `phase = "beat1c"` assignment. The arbiter
+        // performs a full-state baseline assertion on `onEnter`, so
+        // scrub-back into the tail from a later beat is self-healing.
+        // See Storyboard Engine Hardening Plan v2, Phase 1.d.
+        phase = "beat1c"
       } else {
-        // Beat 2+: this branch owns all `demand-units` / `demand-units-outline`
-        // paint + filter writes from here on, including the Beat 5 window.
-        // Keeping a single writer for these two Mapbox layers prevents
-        // cross-effect races that would otherwise leak a flicker whenever
-        // two progress listeners tried to interpolate conflicting values
-        // on the same tick.
+        // Beat 2+: phase bookkeeping only. All `demand-units` /
+        // `demand-units-outline` paint and filter writes for this
+        // window are owned by the engine's `MapPaintArbiter`:
         //
-        // Sub-structure:
-        //   [BEAT2_START, BEAT5_ENTER)    beat2 through beat4: full DU
-        //                                  filter + blended tier expr,
-        //                                  per-DU hide schedule case expr.
-        //   [BEAT5_ENTER, BEAT5_TAIL_END) beat5: AG-only filter, scalar
-        //                                  opacity piecewise function,
-        //                                  LOI gold ring via case expr.
-        //   [BEAT5_TAIL_END, 1]           beat6+: restore full DU filter
-        //                                  and blended tier expr, hand
-        //                                  back to per-DU case expr (all
-        //                                  morphs are settled so it's
-        //                                  effectively the "all zeros"
-        //                                  terminal state).
-
-        const enterBeat2Phase = () => {
-          try {
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-width",
-                0.5,
-              )
-            }
-            // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
-            // delta-detaw) stay hidden - the SVG overlay handles their outcomes.
-            // Only demand-units is shown on the map during the animation.
-          } catch {
-            /* ok */
-          }
-        }
-
-        // Collect demand-units hide schedule entries and line entries.
-        // Shared across all sub-branches below.
-        const duEntries: typeof hideScheduleRef.current = []
-        const lineEntries: typeof hideScheduleRef.current = []
-
-        for (const entry of hideScheduleRef.current) {
-          if (
-            entry.geometryType === "polygon" &&
-            entry.mapboxLayerId === "demand-units"
-          ) {
-            duEntries.push(entry)
-          } else if (entry.geometryType === "line" && entry.mapboxLayerId) {
-            lineEntries.push(entry)
-          }
-        }
-
-        const paintDuHideSchedule = () => {
-          // Build demand-units opacity expression:
-          // - Fading entries: interpolated opacity (0.65 -> 0)
-          // - Not-yet-fading entries: 0.65 (still visible)
-          // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
-          if (duEntries.length === 0 || !map.getLayer("demand-units")) return
-          const caseExpr: unknown[] = ["case"]
-          for (const entry of duEntries) {
-            if (v < entry.fadeStart) {
-              caseExpr.push(
-                ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
-                0.65,
-              )
-            } else {
-              const fadeDuration = entry.morphStart - entry.fadeStart
-              const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
-              const opacity = 0.65 * (1 - t)
-              caseExpr.push(
-                ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
-                opacity,
-              )
-            }
-          }
-          caseExpr.push(0)
-          try {
-            map.setPaintProperty(
-              "demand-units",
-              "fill-opacity",
-              caseExpr as never,
-            )
-            // Mirror the per-DU case to the outline so strokes fade
-            // away in lockstep with their fills.
-            if (map.getLayer("demand-units-outline")) {
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                caseExpr as never,
-              )
-            }
-          } catch {
-            /* ok */
-          }
-        }
+        //   [BEAT2_START, BEAT5_ENTER)     `beat2:mapPaint:hideSchedule`
+        //                                   per-DU fade-out case expr
+        //                                   (see Phase 1.e).
+        //   [BEAT5_ENTER, BEAT5_TAIL_END)  `beat4:mapPaint:*` cluster
+        //                                   AG-only filter, layer fade
+        //                                   ramps, gold polygon ring
+        //                                   (see Phase 0 spike, 1.f).
+        //   [BEAT5_TAIL_END, 1]            `beat6:mapPaint:restore`
+        //                                   full filter restore, blended
+        //                                   tier expr, scalar 0 opacity
+        //                                   pin (see Phase 1.g).
+        //
+        // The line-geometry fade-out (`cwf-flowline`,
+        // `delta-detaw-line`, etc.) is owned by
+        // `beat2:mapPaint:lineFades` across `[BEAT2_START, 1]` (see
+        // Phase 1.g). Line layers are disjoint from demand-units, so
+        // the schedule splits cleanly.
 
         if (v < BEAT5_ENTER) {
-          // ── Beat 2 through Beat 4 ──
-          if (phase !== "beat2") {
-            enterBeat2Phase()
-            phase = "beat2"
-          }
-          paintDuHideSchedule()
+          // Beat 2 through Beat 4 paint writes are owned by the
+          // engine's `MapPaintArbiter` via the
+          // `beat2:mapPaint:hideSchedule` actor (see Phase 1.e). The
+          // arbiter reads the live hide schedule via
+          // `ctx.getHideSchedule()`. This block is `phase`
+          // bookkeeping only. Phase 1.h removes the `phase` variable
+          // once the listener has no remaining gates.
+          phase = "beat2"
         } else if (v < BEAT5_TAIL_END) {
-          // ── Beat 5 ──
-          // Phase 0 refactor spike. When `ENGINE_OWNS_BEAT4` is true,
-          // the declarative beat engine owns every Mapbox paint and
-          // filter write in this window. We still advance the `phase`
-          // local to "beat5" so the post-tail branch below takes its
-          // `phase === "beat5"` path and runs `enterBeat2Phase()` on
-          // the first tick after the window closes. `beat5PolyRingOn`
-          // stays false (the engine's MapPaintArbiter owns the gold
-          // ring), so the restore block in the post-tail branch is a
-          // no-op.
-          if (ENGINE_OWNS_BEAT4) {
-            phase = "beat5"
-          } else {
-            // One-time entry: swap to the AG-only filter so only
-            // Agriculture DUs show, clear any lingering step-4 gold ring
-            // state, and seed opacity to 0 (step 1's fade-in will ramp
-            // it up from here).
-            if (phase !== "beat5") {
-              try {
-                if (map.getLayer("demand-units")) {
-                  map.setFilter(
-                    "demand-units",
-                    DU_AG_ONLY_FILTER as never,
-                  )
-                  map.setPaintProperty("demand-units", "fill-opacity", 0)
-                }
-                if (map.getLayer("demand-units-outline")) {
-                  map.setFilter(
-                    "demand-units-outline",
-                    DU_AG_ONLY_FILTER as never,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-opacity",
-                    0,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    0.5,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = false
-              phase = "beat5"
-            }
-
-            // Compute desired layer opacity as a piecewise function
-            // of v so the layer fades in over step 1, holds steady
-            // through steps 2-5, and fades out over the tail.
-            let targetOpacity: number
-            if (v < BEAT5_S1_LAYER_IN_START) {
-              targetOpacity = 0
-            } else if (v < BEAT5_S1_LAYER_IN_END) {
-              const t =
-                (v - BEAT5_S1_LAYER_IN_START) /
-                (BEAT5_S1_LAYER_IN_END - BEAT5_S1_LAYER_IN_START)
-              targetOpacity = BEAT5_LAYER_OPACITY * t
-            } else if (v < BEAT5_SETTLE) {
-              targetOpacity = BEAT5_LAYER_OPACITY
-            } else {
-              const t =
-                (v - BEAT5_SETTLE) / (BEAT5_TAIL_END - BEAT5_SETTLE)
-              targetOpacity = BEAT5_LAYER_OPACITY * (1 - t)
-            }
-
-            try {
-              if (map.getLayer("demand-units")) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-opacity",
-                  targetOpacity,
-                )
-              }
-              if (map.getLayer("demand-units-outline")) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-opacity",
-                  targetOpacity,
-                )
-              }
-            } catch {
-              /* ok */
-            }
-
-            // Step 4: gold stroke on the LOI polygon during [S4, settle).
-            const wantPolyRing =
-              v >= BEAT5_S4_POLYGON_RING_AT && v < BEAT5_SETTLE
-            if (wantPolyRing && !beat5PolyRingOn) {
-              try {
-                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-                if (map.getLayer("demand-units-outline") && baseExpr) {
-                  const match = [
-                    "==",
-                    ["get", "DU_ID"],
-                    BEAT5_LOI_ID,
-                  ]
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-color",
-                    ["case", match, HIGHLIGHT_GOLD, baseExpr] as never,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    ["case", match, 2, 0.5] as never,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = true
-            } else if (!wantPolyRing && beat5PolyRingOn) {
-              try {
-                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-                if (map.getLayer("demand-units-outline") && baseExpr) {
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-color",
-                    baseExpr as never,
-                  )
-                }
-                if (map.getLayer("demand-units-outline")) {
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    0.5,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = false
-            }
-          }
+          // Beat 5 paint writes are owned by the engine's
+          // `MapPaintArbiter` via the `beat4:mapPaint:*` actor cluster
+          // (Phase 1.f). This block is `phase` bookkeeping only.
+          phase = "beat5"
         } else {
-          // ── Beat 6+ (post Beat 5 tail) ──
-          // One-time exit from Beat 5: restore the full DU filter,
-          // blended tier expression, default outline line-width, and
-          // clear any lingering step-4 case expression. Then hand
-          // ownership back to the per-DU hide-schedule case expr,
-          // which by now evaluates to 0 for every tracked DU (all
-          // morphs have completed).
-          if (phase === "beat5") {
-            if (beat5PolyRingOn) {
-              try {
-                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-                if (map.getLayer("demand-units-outline") && baseExpr) {
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-color",
-                    baseExpr as never,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = false
-            }
-            enterBeat2Phase()
-            phase = "beat2"
-          } else if (phase !== "beat2") {
-            enterBeat2Phase()
-            phase = "beat2"
-          }
-          paintDuHideSchedule()
-        }
-
-        // Line outcome fade. Mirrors the polygon branch's three-state shape.
-        // Pre-window (v < fadeStart): line fully visible (opacity 1).
-        // In-window: opacity = 1 - t over the tight 0.005 fade span.
-        // Post-window: Math.min(1, t) keeps opacity at 0.
-        // Without the pre-window guard, the 0.005 fadeDuration amplifies
-        // any negative (v - fadeStart) into a huge negative t, and
-        // `1 - t` overflows Mapbox's [0, 1] line-opacity range.
-        for (const entry of lineEntries) {
-          let opacity: number
-          if (v < entry.fadeStart) {
-            opacity = 1
-          } else {
-            const fadeDuration = entry.morphStart - entry.fadeStart
-            const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
-            opacity = 1 - t
-          }
-          try {
-            if (map.getLayer(entry.mapboxLayerId)) {
-              map.setPaintProperty(entry.mapboxLayerId, "line-opacity", opacity)
-            }
-          } catch {
-            /* ok */
-          }
+          // Beat 6+ paint writes (DU class filter restore, blended
+          // tier expression, scalar 0 opacity pin, plus the per-line
+          // hide-schedule fade-out) are owned by the engine's
+          // `MapPaintArbiter` via `beat6:mapPaint:restore` and
+          // `beat2:mapPaint:lineFades` in `engine/beats.ts`. This
+          // block is `phase` bookkeeping only. Phase 1.h removes the
+          // `phase` variable entirely once the listener has no
+          // remaining gates.
+          phase = "beat6"
         }
       }
     })
@@ -3239,6 +2961,13 @@ export default function TierAnimationSection() {
     const schedule: HideScheduleEntry[] = []
     const activeCodes = activeOutcomeGroups.map((g) => g.code)
     for (const group of activeOutcomeGroups) {
+      // AG_REV is excluded from the map-side hide schedule. The overlay
+      // morph in OutcomeMorphOverlay still fades its SVG polygons into
+      // distribution squares on its own 0.01-wide slice, but the map's
+      // `demand-units` polygons stay painted at 0.65 through Beat 2 and
+      // Beat 3 so the user keeps visual anchoring to the AG districts
+      // while the other outcomes morph in.
+      if (group.code === "AG_REV") continue
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
@@ -3620,8 +3349,6 @@ export default function TierAnimationSection() {
             scenarioDescription={s0020Scenario?.short_description ?? undefined}
             encodingMode={encodingMode}
             onEncodingChange={setEncodingMode}
-            hydroclimate={hydroclimate}
-            onHydroclimateChange={setHydroclimate}
             outcomeMorphWindows={outcomeMorphWindows}
             onGlyphLayoutChange={handleGlyphLayoutChange}
             hideControls={prefersReducedMotion}

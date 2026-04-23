@@ -25,7 +25,10 @@ import {
   isSingleValueTier,
   type ChartDataPoint,
 } from "../../scenarios/components/shared/types"
-import { getTierLevelForScore } from "../../scenarios/components/shared/tierScore"
+import {
+  getTierLevelForScore,
+  computeTierScore,
+} from "../../scenarios/components/shared/tierScore"
 
 export interface OutcomeGroup {
   code: string
@@ -193,8 +196,24 @@ function computeOutcomeLayout(
   const isSingleValue = isSingleValueTier(chartPoints)
   const totalPolygons = polygons.length
 
-  // Average color: weighted mean of tiers based on actual square counts
-  const weightedScore =
+  // Sum of the API normalized values across the four tiers. Used below to
+  // express each tier's bar as a fraction of the row total, matching
+  // `BarOnly` in `MorphableDistributionGlyph` (the renderer the list view
+  // uses). Without this row-total normalization the storyboard bars look
+  // narrower than the list view's whenever `sum(values) < 1`.
+  const apiValueSum = chartPoints
+    ? chartPoints.reduce((s, p) => s + (p?.value ?? 0), 0)
+    : 0
+
+  // Weighted-mean tier score. Primary source is the same
+  // `computeTierScore(chartPoints)` helper the list view uses in
+  // `TierSummaryCell`, which operates on the API's normalized tier values
+  // returned by `useScenarioTiers`. Falls back to a count-based mean over
+  // the on-screen squares only when `chartPoints` is missing (network
+  // failure or still loading) so the glyph always renders something
+  // sensible.
+  const apiWeightedScore = computeTierScore(chartPoints)
+  const countWeightedScore =
     totalPolygons > 0
       ? tierKeys.reduce(
           (sum, tier) =>
@@ -202,6 +221,7 @@ function computeOutcomeLayout(
           0,
         )
       : null
+  const weightedScore = apiWeightedScore ?? countWeightedScore
   const avgTierLevel =
     weightedScore != null ? getTierLevelForScore(weightedScore) : null
   const avgColor =
@@ -251,9 +271,22 @@ function computeOutcomeLayout(
     const group = byTier.get(tier)!
     const tierRow = tier - 1 // 0-indexed position in the fixed 4-row layout
 
-    // Bar widths derived from distribution squares, not chartData
-    const normVal = totalPolygons > 0 ? group.length / totalPolygons : 0
-    const barW = Math.max(2, normVal * maxBarWidth)
+    // Bar widths derived from the same `ChartDataPoint.value` the list view
+    // feeds into `OutcomeGlyphItem`, normalized by the row total exactly
+    // the way `BarOnly` in `MorphableDistributionGlyph` does it (each bar
+    // is a fraction of `sum(values)`, not the raw normalized value). This
+    // is what makes the storyboard and list view draw identical tier
+    // distributions for a given (scenario, outcome). Falls back to the
+    // on-screen square count ratio when `chartPoints` is missing,
+    // preserving graceful render on API failure. The 2px minimum is only
+    // applied when the value is positive, again matching `BarOnly`, so a
+    // truly empty tier renders an empty bar rather than a sliver.
+    const apiVal = chartPoints?.[tier - 1]?.value
+    const apiNorm =
+      apiVal != null && apiValueSum > 0 ? apiVal / apiValueSum : null
+    const countRatio = totalPolygons > 0 ? group.length / totalPolygons : 0
+    const normVal = apiNorm ?? countRatio
+    const barW = normVal > 0 ? Math.max(2, normVal * maxBarWidth) : 0
 
     let barPts: [number, number][]
     if (isSingleValue) {
@@ -580,7 +613,7 @@ export default function OutcomeMorphOverlay({
 
   /* ── Heatmap geometry (Beat 8) ──
    *
-   * The demo uses a single hydroclimate (`s0020`), so the heatmap is a
+   * A single hydroclimate (`s0020`), so the heatmap is a
    * single column with one cell per outcome. Cells stack vertically
    * centered in the right third of the panel, sized to fit. The layout
    * generalizes trivially to multiple columns when additional
@@ -983,18 +1016,25 @@ export default function OutcomeMorphOverlay({
 
     // Beat 6+ morph chain driven by progress, applied once all outcomes
     // have settled as squares (post-Beat 2 morphEnd):
-    //   [0.62, 0.72] squareTarget -> barTarget     (barBlend)
+    //   [0.62, 0.68] squareTarget -> barTarget     (barBlend, easeOutCubic)
+    //   [0.68, 0.72] bars hold at final pose       (settled plateau)
     //   [0.72, 0.75] barTarget    -> dotTarget     (avgBlend)
     //   [0.75, 0.82] dotTarget    -> radarTarget   (radarBlend)
     //   [0.82, 0.87] radar chrome fades in         (radarChromeIn)
     //   [0.87, 0.90] radar chrome fades out        (radarChromeOut)
     //   [0.87, 0.95] radarTarget  -> heatmapTarget (heatmapBlend)
     //   [0.95, 1.00] heatmap chrome fades in       (heatmapChromeBlend)
+    // The bar morph uses a tightened window and a front-loaded easeOutCubic
+    // so it feels snappy under both auto-play and scroll, recovering the
+    // perceived tempo of the legacy switcher-driven 500ms RAF morph while
+    // preserving v-deterministic scrubbing. The remaining blends keep the
+    // shared easeInOut for continuity with the rest of the chain.
     // Runs regardless of the `encodingMode` prop (which defaults to
     // "distribution" during non-interactive playback), so the storyboard
     // can drive the transforms independently of the post-settle user
     // toggle that still animates via the 500ms encoding-mode RAF above.
     const BEAT6_START = 0.62
+    const BEAT6_BAR_END = 0.68
     const BEAT6_END = 0.72
     const BEAT7_AVG_END = 0.75
     const BEAT7_RADAR_END = 0.82
@@ -1006,10 +1046,13 @@ export default function OutcomeMorphOverlay({
     const computeBlends = (v: number) => {
       const clampRange = (lo: number, hi: number) =>
         v <= lo ? 0 : v >= hi ? 1 : easeInOut((v - lo) / (hi - lo))
+      const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
+      const clampRangeEaseOut = (lo: number, hi: number) =>
+        v <= lo ? 0 : v >= hi ? 1 : easeOutCubic((v - lo) / (hi - lo))
       const radarChromeIn = clampRange(BEAT7_RADAR_END, BEAT7_CHROME_END)
       const radarChromeOut = clampRange(BEAT7_CHROME_END, BEAT8_CHROME_OUT_END)
       return {
-        barBlend: clampRange(BEAT6_START, BEAT6_END),
+        barBlend: clampRangeEaseOut(BEAT6_START, BEAT6_BAR_END),
         avgBlend: clampRange(BEAT6_END, BEAT7_AVG_END),
         radarBlend: clampRange(BEAT7_AVG_END, BEAT7_RADAR_END),
         radarChromeBlend: radarChromeIn * (1 - radarChromeOut),
