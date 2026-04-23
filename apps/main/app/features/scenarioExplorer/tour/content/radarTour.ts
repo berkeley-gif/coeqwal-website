@@ -9,7 +9,7 @@ import type { TourStep } from "../types"
 export const RADAR_TOUR: TourStep[] = [
   {
     id: "radar.hero",
-    eyebrow: "THE PORTFOLIO VIEW",
+    eyebrow: "THE RADAR VIEW",
     title: "Read a shortlist as shapes, not isolated cells.",
     body: "Radar is where the shortlist stops behaving like a spreadsheet. Each selected scenario becomes a polygon across the outcomes you chose, so trade-offs appear as shape, balance, and deformation instead of as row-by-row arithmetic.",
   },
@@ -42,7 +42,7 @@ export const RADAR_TOUR: TourStep[] = [
     anchorId: "radar.climateChips",
     eyebrow: "STEP 1 - READ THE POLYGON",
     title: "Hydroclimate changes the shape",
-    body: "Switch climates and watch the same portfolio contract or stretch. That is climate exposure made legible.",
+    body: "Switch climates and watch each polygon contract or stretch. That is climate exposure made legible.",
     placement: "bottom",
   },
   {

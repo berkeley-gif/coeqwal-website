@@ -223,7 +223,7 @@ export function ListHowToRead() {
           {
             number: "02",
             label: "Radar",
-            description: "Compare the shortlisted scenarios as full portfolios instead of isolated cells.",
+            description: "Compare the shortlisted scenarios across every chosen outcome at once instead of isolated cells.",
             state: "next",
           },
           {
