@@ -22,7 +22,7 @@ export function ListHowToRead() {
       <StoryHero
         eyebrow="START HERE"
         title="This table is your scenario library."
-        deck="Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry into Radar and Resilience."
+        deck="Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry forward."
         points={[
           {
             label: "Tune the library first.",

@@ -580,7 +580,7 @@ export default function OutcomeMorphOverlay({
 
   /* ── Heatmap geometry (Beat 8) ──
    *
-   * The demo uses a single hydroclimate (`s0020`), so the heatmap is a
+   * A single hydroclimate (`s0020`), so the heatmap is a
    * single column with one cell per outcome. Cells stack vertically
    * centered in the right third of the panel, sized to fit. The layout
    * generalizes trivially to multiple columns when additional
