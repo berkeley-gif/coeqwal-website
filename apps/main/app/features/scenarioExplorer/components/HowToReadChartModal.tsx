@@ -53,7 +53,7 @@ function getModeMeta(mode: ExploreMode, theme: Theme) {
       }
     case "radar":
       return {
-        eyebrow: "PORTFOLIO",
+        eyebrow: "SHAPES",
         summary:
           "Read each scenario as a shape, then compare your shortlist against the range of the full library.",
         chapters: ["Read the shape", "Use live controls"],

@@ -17,6 +17,7 @@ import { HydroclimateBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
+import ToolJourneyStrip from "./ToolJourneyStrip"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -115,6 +116,19 @@ export default function UnifiedToolLayout({
           pointerEvents: "auto",
         }}
       >
+        {/* Chart title row. Renders the chart name on the left, the
+            purpose tagline next to it, and the "next step" CTA on the
+            right. Sits at the very top of the tool column, above the
+            optional welcome strip and the shared toolbar, so the
+            chart's identity is the first thing under ExploreSubNav.
+            Hidden in research-only modes (comparison, data) where the
+            journey metadata is intentionally sparse. */}
+        {exploreMode !== "comparison" && exploreMode !== "data" && (
+          <Box sx={{ flexShrink: 0 }}>
+            <ToolJourneyStrip mode={exploreMode} />
+          </Box>
+        )}
+
         {/* Shared toolbar */}
         <Box
           sx={{

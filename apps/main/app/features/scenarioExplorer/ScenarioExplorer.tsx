@@ -12,7 +12,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -21,6 +21,8 @@ import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
 import ShareDrawer from "./components/ShareDrawer"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
+import ToolTour from "./components/ToolTour"
+import { TourAnchorProvider, useTourAnchor } from "./tour/TourAnchorContext"
 import {
   ComparisonPanel,
   EquityPanel,
@@ -38,6 +40,7 @@ import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
+import type { ShareItem } from "./store"
 import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
@@ -83,6 +86,14 @@ function SimpleButton({
 import { InlineToggleChip } from "./components/InlineToggleChip"
 
 export default function ScenarioExplorer() {
+  return (
+    <TourAnchorProvider>
+      <ScenarioExplorerInner />
+    </TourAnchorProvider>
+  )
+}
+
+function ScenarioExplorerInner() {
   const theme = useTheme()
   const {
     mainView,
@@ -93,8 +104,19 @@ export default function ScenarioExplorer() {
     setShowMap,
     showEquityComparison,
     setShowEquityComparison,
+    ensureBaselinePrePin,
   } = useScenarioExplorerStore()
   const mapMode = useMapMode()
+
+  // On first entry to the explorer, pre-pin the baseline scenario so
+  // downstream tools (Radar, Distribution, Resilience) are never empty.
+  // The action is idempotent via the persisted `baselinePrePinned` flag,
+  // so subsequent entries do nothing.
+  useEffect(() => {
+    if (mainView === "explorer") {
+      ensureBaselinePrePin()
+    }
+  }, [mainView, ensureBaselinePrePin])
 
   usePrefetchTiers()
 
@@ -174,7 +196,36 @@ export default function ScenarioExplorer() {
     showAxisSelector,
     setShowAxisSelector,
     selectedScenarios,
+    hydroclimate,
+    resilienceVisibleOutcomes,
+    addShareItem,
   } = useScenarioExplorerStore()
+
+  // Build a share item for the current Equity panel state and stage
+  // it into the Share drawer. Image capture is a future enhancement;
+  // for now we persist the metadata needed to reconstruct the view.
+  const handleEquitySnapshot = useCallback(() => {
+    const firstSelected = selectedScenarios[0]
+    if (!firstSelected) return
+    const item: ShareItem = {
+      id: `equity-${firstSelected}-${Date.now()}`,
+      type: "equity",
+      scenarioId: firstSelected,
+      outcomeCodes: resilienceVisibleOutcomes,
+      compareToBaseline: showEquityComparison,
+      hydroclimate,
+    }
+    addShareItem(item)
+  }, [
+    selectedScenarios,
+    resilienceVisibleOutcomes,
+    showEquityComparison,
+    hydroclimate,
+    addShareItem,
+  ])
+
+  // Resilience snapshot builder is defined below (after resilienceControls
+  // state is declared) because it closes over that state.
 
   const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
   const radarSingleCaptureRef = useRef<SingleScenarioCaptureFn | null>(null)
@@ -234,6 +285,24 @@ export default function ScenarioExplorer() {
     [],
   )
 
+  const handleResilienceSnapshot = useCallback(() => {
+    const item: ShareItem = {
+      id: `resilience-${Date.now()}`,
+      type: "resilience",
+      view: resilienceControls.view,
+      cellEncoding: resilienceControls.cellEncoding,
+      scenarioIds: [...selectedScenarios],
+      hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
+      outcomeCodes: resilienceVisibleOutcomes,
+    }
+    addShareItem(item)
+  }, [
+    resilienceControls,
+    selectedScenarios,
+    resilienceVisibleOutcomes,
+    addShareItem,
+  ])
+
   // Keep the Resilience "View:" rail in sync with the sidebar
   // selection. Empty selection anchors the rail on "View aggregate";
   // as soon as the user picks a scenario we flip to "View by
@@ -256,11 +325,13 @@ export default function ScenarioExplorer() {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <InlineToggleChip
-            label="choose outcome axes"
-            active={showAxisSelector}
-            onClick={() => setShowAxisSelector(!showAxisSelector)}
-          />
+          <RadarTourAnchor anchorId="radar.axisChooser">
+            <InlineToggleChip
+              label="choose outcome axes"
+              active={showAxisSelector}
+              onClick={() => setShowAxisSelector(!showAxisSelector)}
+            />
+          </RadarTourAnchor>
           <InlineToggleChip
             label="show all scenarios"
             active={radarShowAll}
@@ -276,11 +347,13 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
-          <InlineToggleChip
-            label="show range"
-            active={showRadarRange}
-            onClick={() => setShowRadarRange(!showRadarRange)}
-          />
+          <RadarTourAnchor anchorId="radar.libraryRange">
+            <InlineToggleChip
+              label="show range"
+              active={showRadarRange}
+              onClick={() => setShowRadarRange(!showRadarRange)}
+            />
+          </RadarTourAnchor>
           <Box
             component="button"
             type="button"
@@ -333,10 +406,41 @@ export default function ScenarioExplorer() {
             controls={resilienceControls}
             onChange={handleResilienceControlsChange}
           />
+          <Box
+            component="button"
+            type="button"
+            onClick={handleResilienceSnapshot}
+            aria-label="save snapshot"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              cursor: "pointer",
+              transition: "all 150ms ease",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+                color: theme.palette.blue.bright,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            save snapshot
+          </Box>
         </ChartControlsBar>
       )
     }
     if (exploreMode === "equity") {
+      const canSnapshot = selectedScenarios.length > 0
       return (
         <ChartControlsBar>
           <InlineToggleChip
@@ -348,6 +452,40 @@ export default function ScenarioExplorer() {
             label="Clear Map Selection"
             onClick={() => mapActions.clearLocationHighlights()}
           />
+          <Box
+            component="button"
+            type="button"
+            disabled={!canSnapshot}
+            onClick={handleEquitySnapshot}
+            aria-label="save snapshot"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              cursor: canSnapshot ? "pointer" : "default",
+              opacity: canSnapshot ? 1 : 0.4,
+              transition: "all 150ms ease",
+              "&:hover": {
+                background: canSnapshot
+                  ? theme.palette.interaction.selectedBackground
+                  : undefined,
+                color: canSnapshot ? theme.palette.blue.bright : undefined,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            save snapshot
+          </Box>
         </ChartControlsBar>
       )
     }
@@ -370,6 +508,8 @@ export default function ScenarioExplorer() {
     theme,
     resilienceControls,
     handleResilienceControlsChange,
+    handleEquitySnapshot,
+    handleResilienceSnapshot,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -482,6 +622,27 @@ export default function ScenarioExplorer() {
 
       <KeyboardShortcuts />
       {mainView === "explorer" && <ShareDrawer />}
+      {mainView === "explorer" && <ToolTour />}
+    </Box>
+  )
+}
+
+/**
+ * Tiny inline-flex wrapper that registers its child node as a tour
+ * anchor by id. Used to attach anchors to the Radar tool's chart
+ * controls without restructuring the existing chip layout.
+ */
+function RadarTourAnchor({
+  anchorId,
+  children,
+}: {
+  anchorId: string
+  children: React.ReactNode
+}) {
+  const ref = useTourAnchor(anchorId)
+  return (
+    <Box ref={ref} sx={{ display: "inline-flex", alignItems: "center" }}>
+      {children}
     </Box>
   )
 }

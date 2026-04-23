@@ -10,16 +10,40 @@
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
  */
 
-import React from "react"
-import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
+import React, { useEffect, useState } from "react"
+import {
+  Box,
+  Typography,
+  useTheme,
+  LocationOnIcon,
+  Switch,
+  InfoOutlinedIcon,
+} from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
-import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
-// HowToReadChartModal import kept as a reference pointer for
-// reactivation; re-import when the "How to read this chart?" entry
-// is restored.
-// import { HowToReadChartModal } from "./HowToReadChartModal"
+import {
+  useScenarioExplorerStore,
+  type OutcomeDisplayMode,
+  type ToolIntroMode,
+} from "../store"
+import { HowToReadChartModal } from "./HowToReadChartModal"
+import { useTourAnchor } from "../tour/TourAnchorContext"
+
+/** Modes that own a `ToolIntroStrip`. The "How to read this chart?"
+ *  chip re-opens that strip for these modes instead of opening the
+ *  HowToRead modal. */
+const TOOL_INTRO_MODES = new Set<ToolIntroMode>(["radar", "resilience"])
+function isToolIntroMode(mode: string): mode is ToolIntroMode {
+  return TOOL_INTRO_MODES.has(mode as ToolIntroMode)
+}
+
+/** Temporarily hide the "How to read this chart?" entry point across
+ *  all tools. The modal content is not ready for external viewing yet;
+ *  the modal itself, HowToReadChartModal, and the per-tool content
+ *  under howToReadContent/ are intentionally preserved. Flip this
+ *  flag back to `true` to restore the chip + first-visit auto-open. */
+const HOW_TO_READ_ENABLED = false
 
 interface ToolToolbarProps {
   gridAligned?: boolean
@@ -31,7 +55,6 @@ export default function ToolToolbar({
   hideTitle,
 }: ToolToolbarProps) {
   const theme = useTheme()
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   const {
     hydroclimate,
     setHydroclimate,
@@ -43,19 +66,82 @@ export default function ToolToolbar({
     setShowLocationPicker,
     showKeyOperations,
     exploreMode,
+    seenHowToRead,
+    markHowToReadSeen,
+    bumpReopenToolIntro,
   } = useScenarioExplorerStore()
-  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
-  // `How to read this chart?` modal + the list-view Outcome view
-  // toggle (Average / Bar / Distribution) are intentionally
-  // deactivated for the current demo build. The underlying modal
-  // content files and the `outcomeDisplayMode` store field are
-  // retained so we can reactivate both in one place when the content
-  // is demo-ready (restore the useState, the HowToReadChartModal
-  // render at the end of viewControls, the button styling above, and
-  // flip the `false &&` guard on the OutcomeViewToggle branch).
+  // "How to read this chart?" modal. Each tool has its own content
+  // keyed by exploreMode (see HowToReadChartModal + howToReadContent/).
+  //
+  // Auto-open: only for modes that DON'T own a ToolIntroStrip. For
+  // those (radar, resilience), the inline strip is the first-visit
+  // surface. List no longer auto-opens a welcome strip. Equity is
+  // owned by another developer and gets the legacy modal flow.
+  //
+  // Click behavior of the toolbar chip:
+  //   - radar / resilience: re-expands the inline ToolIntroStrip
+  //   - everything else with content: opens the modal
+  const [howToReadOpen, setHowToReadOpen] = useState(false)
+
+  useEffect(() => {
+    if (!HOW_TO_READ_ENABLED) return
+    if (
+      exploreMode !== "comparison" &&
+      exploreMode !== "data" &&
+      exploreMode !== "list" &&
+      !isToolIntroMode(exploreMode) &&
+      !seenHowToRead[exploreMode]
+    ) {
+      setHowToReadOpen(true)
+      markHowToReadSeen(exploreMode)
+    }
+  }, [exploreMode, seenHowToRead, markHowToReadSeen])
+
+  // Dev-only keystroke: press "?" to force-open the "How to read this
+  // chart?" modal for the active tool, even while HOW_TO_READ_ENABLED is
+  // false. Lets content authors review the legacy copy without flipping
+  // the flag or exposing the chip to end users. Ignored when typing in
+  // inputs or when any modifier key is held.
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (
+        t &&
+        (t.tagName === "INPUT" ||
+          t.tagName === "TEXTAREA" ||
+          t.isContentEditable)
+      ) {
+        return
+      }
+      if (e.altKey || e.ctrlKey || e.metaKey) return
+      if (e.key === "?") {
+        e.preventDefault()
+        setHowToReadOpen((v) => !v)
+      }
+    }
+    document.addEventListener("keydown", handleKey)
+    return () => document.removeEventListener("keydown", handleKey)
+  }, [])
+
+  const handleHowToReadClick = () => {
+    if (isToolIntroMode(exploreMode)) {
+      bumpReopenToolIntro(exploreMode)
+    } else {
+      setHowToReadOpen(true)
+    }
+  }
+
+  // Register the climate-chip group as a tour anchor for the radar
+  // tour. Resilience reuses this control too but its tour does not
+  // step through it, so a single id is fine.
+  const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
+
+  // The list view's "Outcome view" toggle (Average / Bar /
+  // Distribution) is intentionally deactivated for the current demo
+  // build; flip the `false &&` guard below to bring it back.
 
   const viewControls = (
     <>
@@ -64,31 +150,44 @@ export default function ToolToolbar({
           display: "contents",
         }}
       >
-        <Box
-          component="span"
-          aria-disabled="true"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: "grey.400",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          <Typography
-            variant="dashboard"
+        {HOW_TO_READ_ENABLED && (
+          <Box
+            component="button"
+            type="button"
+            onClick={handleHowToReadClick}
+            aria-label="How to read this chart"
             sx={{
-              fontWeight: 500,
-              whiteSpace: "nowrap",
-              color: "inherit",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 0.75,
+              py: 0.25,
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              background: "transparent",
+              color: theme.palette.blue.bright,
+              transition: "background-color 120ms",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+              },
             }}
           >
-            How to read this chart?
-          </Typography>
-        </Box>
+            <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                color: "inherit",
+              }}
+            >
+              How to read this chart?
+            </Typography>
+          </Box>
+        )}
         {/* Outcome view toggle (Average / Bar / Distribution) hidden
-            for the demo. The list view reverts to its bar-chart
+            . The list view reverts to its bar-chart
             default; the glyph click-through to map layers is
             unaffected. */}
         {false && exploreMode === "list" ? (
@@ -151,6 +250,7 @@ export default function ToolToolbar({
       <VerticalDivider />
 
       <Box
+        ref={climateChipsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -188,11 +288,20 @@ export default function ToolToolbar({
     </>
   )
 
+  const howToReadModal = (
+    <HowToReadChartModal
+      open={howToReadOpen}
+      onClose={() => setHowToReadOpen(false)}
+      exploreMode={exploreMode}
+    />
+  )
+
   if (gridAligned) {
     const SM = 600
     const FULL = theme.scenarios.grid.fullBreakpoint
 
     return (
+      <>
       <Box
         sx={{
           display: "grid",
@@ -245,13 +354,10 @@ export default function ToolToolbar({
         <Box
           sx={{
             gridColumn: "1 / -1",
-            borderLeft: "none",
             pl: 0,
             ...(!hideTitle && {
               [`@container strategy-grid (min-width: ${FULL}px)`]: {
                 gridColumn: "4",
-                borderLeft: `1px solid rgba(0,0,0,0.2)`,
-                pl: theme.scenarios.grid.divider.gap,
               },
             }),
             display: "flex",
@@ -263,24 +369,29 @@ export default function ToolToolbar({
           {viewControls}
         </Box>
       </Box>
+      {howToReadModal}
+      </>
     )
   }
 
   // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        px: 1.5,
-        py: 0.5,
-        minHeight: 44,
-        flexWrap: "wrap",
-      }}
-    >
-      {viewControls}
-    </Box>
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          px: theme.space.tool.px,
+          py: 0.5,
+          minHeight: 44,
+          flexWrap: "wrap",
+        }}
+      >
+        {viewControls}
+      </Box>
+      {howToReadModal}
+    </>
   )
 }
 

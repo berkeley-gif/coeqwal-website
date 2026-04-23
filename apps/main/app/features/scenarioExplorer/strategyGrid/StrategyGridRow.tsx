@@ -31,6 +31,7 @@ import {
 import { useScenarioExplorerStore } from "../store"
 import type { OutcomeDisplayMode, ShareItem } from "../store"
 import { useOutcomeMapAction } from "../../map/hooks"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
@@ -147,6 +148,22 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   const accentColor = scenarioColor || theme.palette.blue.bright
   const outcomeColRef = useRef<HTMLDivElement>(null)
+
+  // Tour anchors. Only the first row registers, so the tour highlights
+  // a single exemplar row instead of bulk-registering all of them.
+  const rowSelectAnchorRef = useTourAnchor("list.select.row")
+  const pinShareAnchorRef = useTourAnchor("list.toolbar.pinShare")
+  const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
+
+  // Bridge the outcome column ref into the tour registry as well. We
+  // cannot replace `outcomeColRef` with the tour callback ref because
+  // it is also used for the share-image capture above, so we mirror it
+  // through an effect.
+  useEffect(() => {
+    if (!isFirst) return
+    outcomeColAnchorRef(outcomeColRef.current)
+    return () => outcomeColAnchorRef(null)
+  }, [isFirst, outcomeColAnchorRef])
 
   // Map visualization hook
   const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
@@ -348,6 +365,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <>
           {/* Column 1: Checkbox */}
           <Box
+            ref={isFirst ? rowSelectAnchorRef : undefined}
             sx={{
               display: "flex",
               justifyContent: "flex-end",
@@ -406,6 +424,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               handleShare={handleShare}
               togglePinnedScenario={togglePinnedScenario}
               outcomeColRef={outcomeColRef}
+              pinShareTourRef={isFirst ? pinShareAnchorRef : undefined}
             />
           )}
         </>
@@ -763,12 +782,16 @@ function NonCompactRowContent({
   handleShare,
   togglePinnedScenario,
   outcomeColRef,
+  pinShareTourRef,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
   accentColor?: string
   handleShare?: () => void
   togglePinnedScenario?: (id: string) => void
   outcomeColRef?: React.RefObject<HTMLDivElement | null>
+  /** When provided, the inline pin/share actions block registers itself
+   *  as the `list.toolbar.pinShare` tour anchor via this ref callback. */
+  pinShareTourRef?: (el: HTMLElement | null) => void
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
@@ -782,15 +805,20 @@ function NonCompactRowContent({
 
   const inlineActionsNode =
     isListMode && handleShare && togglePinnedScenario && accentColor ? (
-      <InlineRowActions
-        scenarioId={scenario.scenarioId}
-        scenarioLabel={scenario.label}
-        displayMode={outcomeDisplayMode}
-        isPinned={isPinned}
-        accentColor={accentColor}
-        onShare={handleShare}
-        togglePinnedScenario={togglePinnedScenario}
-      />
+      <Box
+        ref={pinShareTourRef}
+        sx={{ display: "inline-flex", alignItems: "center" }}
+      >
+        <InlineRowActions
+          scenarioId={scenario.scenarioId}
+          scenarioLabel={scenario.label}
+          displayMode={outcomeDisplayMode}
+          isPinned={isPinned}
+          accentColor={accentColor}
+          onShare={handleShare}
+          togglePinnedScenario={togglePinnedScenario}
+        />
+      </Box>
     ) : undefined
 
   const strategyHeaderBlock = (disableTrunc: boolean) => (

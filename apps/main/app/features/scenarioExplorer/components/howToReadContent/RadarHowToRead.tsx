@@ -17,7 +17,7 @@ export function RadarHowToRead() {
   return (
     <HowToReadBody>
       <StoryHero
-        eyebrow="THE PORTFOLIO VIEW"
+        eyebrow="THE RADAR VIEW"
         title="Read a shortlist as shapes, not isolated cells."
         deck="Radar is where the shortlist stops behaving like a spreadsheet. Each selected scenario becomes a polygon across the outcomes you chose, so trade-offs appear as shape, balance, and deformation instead of as row-by-row arithmetic."
         points={[
@@ -73,7 +73,7 @@ export function RadarHowToRead() {
           {
             number: "04",
             title: "Hydroclimate changes the shape",
-            body: "Switch climates and watch the same portfolio contract or stretch. That is climate exposure made legible.",
+            body: "Switch climates and watch each polygon contract or stretch. That is climate exposure made legible.",
             bottom: 3,
             right: 3,
             maxWidth: "220px",
@@ -106,7 +106,7 @@ export function RadarHowToRead() {
       <AnnotatedStage
         eyebrow="STEP 2"
         title="Axes and climate chips turn the radar from a picture into a comparison tool."
-        deck="The labels around the chart are not passive. They are handles into more detail: choose which outcomes become axes, open the per-axis scenario slice, and switch hydroclimates to see whether a portfolio keeps its shape."
+        deck="The labels around the chart are not passive. They are handles into more detail: choose which outcomes become axes, open the per-axis scenario slice, and switch hydroclimates to see whether each scenario keeps its shape."
         visual={<RadarAxisSliceGraphic />}
         accentColor={theme.palette.nature.forest}
         minHeight={380}
@@ -153,7 +153,7 @@ export function RadarHowToRead() {
           {
             number: "02",
             label: "Radar",
-            description: "See portfolio balance and trade-offs at a glance.",
+            description: "See balance across outcomes and trade-offs at a glance.",
             state: "current",
           },
           {

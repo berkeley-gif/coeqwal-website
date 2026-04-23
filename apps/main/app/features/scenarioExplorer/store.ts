@@ -9,6 +9,9 @@
 import { create, immer } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
+import { BASELINE_SCENARIO_ID } from "./constants"
+import type { TourTool } from "./tour/types"
+export type { TourTool } from "./tour/types"
 
 // ============================================================================
 // Types
@@ -37,6 +40,9 @@ export type OutcomeDisplayMode = "average" | "bar" | "distribution"
 /**
  * A single item staged for the Share tab composition grid.
  * The union discriminant `type` determines which rendering path is used.
+ *
+ * All variants support an optional `note` so users can annotate why
+ * they saved an item. Notes are rendered as captions in the Share tab.
  */
 export type ShareItem =
   | {
@@ -47,6 +53,7 @@ export type ShareItem =
       hydroclimate: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
+      note?: string
     }
   | {
       id: string
@@ -60,6 +67,35 @@ export type ShareItem =
       hydroclimate: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
+      note?: string
+    }
+  | {
+      id: string
+      type: "equity"
+      scenarioId: string
+      outcomeCodes: string[]
+      compareToBaseline: boolean
+      hydroclimate: string
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+      note?: string
+    }
+  | {
+      id: string
+      type: "resilience"
+      /** Which cell encoding was used, e.g. "tier" | "delta" | "density_risk" | ... */
+      cellEncoding: string
+      /** Which top-level view was active, e.g. "scenario" | "outcome" | "aggregate" */
+      view: string
+      /** Scenario ids that were in-scope at capture time (may be empty for aggregate). */
+      scenarioIds: string[]
+      /** Hydroclimates that were selected at capture time. */
+      hydroclimates: string[]
+      /** Outcome codes that were visible at capture time. */
+      outcomeCodes: string[]
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+      note?: string
     }
 
 // ============================================================================
@@ -67,6 +103,7 @@ export type ShareItem =
 // ============================================================================
 
 const SHARE_STORAGE_KEY = "coeqwal-share-v1"
+const JOURNEY_STORAGE_KEY = "coeqwal-journey-v1"
 
 function loadShareState(): {
   shareItems: ShareItem[]
@@ -93,18 +130,98 @@ function loadShareState(): {
 function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
   try {
     if (typeof window === "undefined") return
+    // ShareItem variants that cache images are stripped on persist to
+    // keep localStorage small; the in-memory state keeps the images so
+    // the current session can still render thumbnails.
     const stripped = shareItems.map((item) => {
-      if (item.type === "barChart") {
-        const { cachedImageDataUrl, cachedChartData, ...rest } = item
+      if (
+        item.type === "barChart" ||
+        item.type === "equity" ||
+        item.type === "resilience"
+      ) {
+        const { cachedImageDataUrl, cachedChartData, ...rest } = item as {
+          cachedImageDataUrl?: string
+          cachedChartData?: Record<string, unknown>
+        } & ShareItem
         return rest
       }
-      const { cachedChartData, ...rest } = item
+      const { cachedChartData, ...rest } = item as {
+        cachedChartData?: Record<string, unknown>
+      } & ShareItem
       return rest
     })
     localStorage.setItem(
       SHARE_STORAGE_KEY,
       JSON.stringify({ shareItems: stripped, storyItemIds }),
     )
+  } catch {
+    // localStorage full or unavailable - silently ignore
+  }
+}
+
+/** Tools that get a per-chart `ToolIntroStrip`. Equity is excluded
+ *  because it is owned by another developer; List uses the global
+ *  `WelcomeStrip` instead. */
+export type ToolIntroMode = "radar" | "resilience"
+
+type JourneyPersist = {
+  seenHowToRead: Record<ExploreMode, boolean>
+  /** True once the welcome strip has been dismissed with "Don't show again". */
+  welcomeDismissedPermanently: boolean
+  /** True once the baseline has been auto-pinned on first visit. */
+  baselinePrePinned: boolean
+  /** True once the user has dismissed the baseline pre-pin hint on the list. */
+  seenBaselinePinHint: boolean
+  /** Per-tool flag: has the user dismissed the ToolIntroStrip for this tool? */
+  seenToolIntro: Record<ToolIntroMode, boolean>
+}
+
+function defaultJourney(): JourneyPersist {
+  return {
+    seenHowToRead: {
+      list: false,
+      radar: false,
+      equity: false,
+      comparison: false,
+      resilience: false,
+      data: false,
+    },
+    welcomeDismissedPermanently: false,
+    baselinePrePinned: false,
+    seenBaselinePinHint: false,
+    seenToolIntro: { radar: false, resilience: false },
+  }
+}
+
+function loadJourneyState(): JourneyPersist {
+  try {
+    if (typeof window === "undefined") return defaultJourney()
+    const raw = localStorage.getItem(JOURNEY_STORAGE_KEY)
+    if (!raw) return defaultJourney()
+    const parsed = JSON.parse(raw) as Partial<JourneyPersist>
+    const base = defaultJourney()
+    return {
+      seenHowToRead: {
+        ...base.seenHowToRead,
+        ...(parsed.seenHowToRead ?? {}),
+      },
+      welcomeDismissedPermanently: Boolean(parsed.welcomeDismissedPermanently),
+      baselinePrePinned: Boolean(parsed.baselinePrePinned),
+      seenBaselinePinHint: Boolean(parsed.seenBaselinePinHint),
+      seenToolIntro: {
+        ...base.seenToolIntro,
+        ...(parsed.seenToolIntro ?? {}),
+      },
+    }
+  } catch {
+    return defaultJourney()
+  }
+}
+
+function saveJourneyState(state: JourneyPersist) {
+  try {
+    if (typeof window === "undefined") return
+    localStorage.setItem(JOURNEY_STORAGE_KEY, JSON.stringify(state))
   } catch {
     // localStorage full or unavailable - silently ignore
   }
@@ -195,6 +312,27 @@ interface ScenarioExplorerState {
 
   // Tier selection (for map visualization)
   selectedTier: { strategy: string; outcome: string } | null
+
+  // Beginner journey
+  /** Per-mode flag: has the user seen the HowToRead modal for this tool yet? Drives first-visit auto-open. */
+  seenHowToRead: Record<ExploreMode, boolean>
+  /** Whether the welcome strip has been permanently dismissed (persisted). */
+  welcomeDismissedPermanently: boolean
+  /** Whether the welcome strip was dismissed in this session only (not persisted). */
+  welcomeDismissedThisSession: boolean
+  /** Whether the baseline scenario has been pre-pinned once (persisted). */
+  baselinePrePinned: boolean
+  /** Whether the user has dismissed the baseline pre-pin hint on the list. */
+  seenBaselinePinHint: boolean
+  /** Per-tool flag: has the user dismissed the ToolIntroStrip for this tool? */
+  seenToolIntro: Record<ToolIntroMode, boolean>
+  /** Per-tool monotonically-increasing counter; bumped to request a re-open
+   *  of the ToolIntroStrip from outside (e.g., the toolbar info chip). */
+  reopenToolIntroPulse: Record<ToolIntroMode, number>
+  /** Which per-tool tour (if any) is active and which step is current.
+   *  `tool` is null when no tour is running. Tours are always opt-in
+   *  and session-scoped (not persisted). */
+  tour: { tool: TourTool | null; step: number }
 }
 
 // ============================================================================
@@ -295,6 +433,27 @@ interface ScenarioExplorerActions {
   // Tier selection
   setSelectedTier: (tier: { strategy: string; outcome: string } | null) => void
 
+  // Beginner journey
+  markHowToReadSeen: (mode: ExploreMode) => void
+  dismissWelcome: (permanent: boolean) => void
+  /** Re-open the WelcomeStrip after it has been dismissed. Clears
+   *  both the session and persisted dismissal flags so the strip
+   *  renders again on the List view. */
+  reopenWelcome: () => void
+  /** Idempotently pre-pin the baseline scenario on first visit. */
+  ensureBaselinePrePin: () => void
+  setSeenBaselinePinHint: (seen: boolean) => void
+  /** Mark a tool's intro strip as seen so it stops auto-expanding. */
+  markToolIntroSeen: (mode: ToolIntroMode) => void
+  /** Request the tool's intro strip to re-open (used by the toolbar chip). */
+  bumpReopenToolIntro: (mode: ToolIntroMode) => void
+  /** Start the tour for a specific tool and auto-switch `exploreMode`
+   *  to that tool so anchors are mounted when the runner looks them
+   *  up. */
+  startToolTour: (tool: TourTool) => void
+  endTour: () => void
+  setTourStep: (step: number) => void
+
   // Reset functions
   resetFilters: () => void
   resetSelections: () => void
@@ -308,6 +467,7 @@ type ScenarioExplorerStore = ScenarioExplorerState & ScenarioExplorerActions
 // ============================================================================
 
 const persisted = loadShareState()
+const persistedJourney = loadJourneyState()
 
 const initialState: ScenarioExplorerState = {
   mainView: "get-started",
@@ -355,6 +515,14 @@ const initialState: ScenarioExplorerState = {
   sortDirection: "asc",
   isSortActive: false,
   selectedTier: null,
+  seenHowToRead: persistedJourney.seenHowToRead,
+  welcomeDismissedPermanently: persistedJourney.welcomeDismissedPermanently,
+  welcomeDismissedThisSession: false,
+  baselinePrePinned: persistedJourney.baselinePrePinned,
+  seenBaselinePinHint: persistedJourney.seenBaselinePinHint,
+  seenToolIntro: persistedJourney.seenToolIntro,
+  reopenToolIntroPulse: { radar: 0, resilience: 0 },
+  tour: { tool: null, step: 0 },
 }
 
 // ============================================================================
@@ -735,6 +903,69 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.selectedTier = tier
       }),
 
+    // Beginner journey
+    markHowToReadSeen: (mode) =>
+      set((state) => {
+        state.seenHowToRead[mode] = true
+      }),
+
+    dismissWelcome: (permanent) =>
+      set((state) => {
+        state.welcomeDismissedThisSession = true
+        if (permanent) state.welcomeDismissedPermanently = true
+      }),
+
+    reopenWelcome: () =>
+      set((state) => {
+        state.welcomeDismissedThisSession = false
+        state.welcomeDismissedPermanently = false
+      }),
+
+    ensureBaselinePrePin: () =>
+      set((state) => {
+        if (state.baselinePrePinned) return
+        if (state.pinnedScenarioIds.length > 0) {
+          state.baselinePrePinned = true
+          return
+        }
+        state.pinnedScenarioIds.push(BASELINE_SCENARIO_ID)
+        state.baselinePrePinned = true
+      }),
+
+    setSeenBaselinePinHint: (seen) =>
+      set((state) => {
+        state.seenBaselinePinHint = seen
+      }),
+
+    markToolIntroSeen: (mode) =>
+      set((state) => {
+        state.seenToolIntro[mode] = true
+      }),
+
+    bumpReopenToolIntro: (mode) =>
+      set((state) => {
+        state.reopenToolIntroPulse[mode] =
+          (state.reopenToolIntroPulse[mode] ?? 0) + 1
+      }),
+
+    startToolTour: (tool) =>
+      set((state) => {
+        state.tour = { tool, step: 0 }
+        // Align the active tool so anchors for this tour are mounted
+        // when the runner resolves them.
+        state.exploreMode = tool
+      }),
+
+    endTour: () =>
+      set((state) => {
+        state.tour = { tool: null, step: 0 }
+      }),
+
+    setTourStep: (step) =>
+      set((state) => {
+        state.tour.step = step
+      }),
+
     // Reset functions
     resetFilters: () =>
       set((state) => {
@@ -773,5 +1004,27 @@ useScenarioExplorerStore.subscribe((state) => {
     prevShareRef = state.shareItems
     prevStoryRef = state.storyItemIds
     saveShareState(state.shareItems, state.storyItemIds)
+  }
+})
+
+// Auto-save journey progress (first-visit flags) to localStorage.
+let prevJourneyRef: JourneyPersist = persistedJourney
+useScenarioExplorerStore.subscribe((state) => {
+  if (
+    state.seenHowToRead !== prevJourneyRef.seenHowToRead ||
+    state.welcomeDismissedPermanently !==
+      prevJourneyRef.welcomeDismissedPermanently ||
+    state.baselinePrePinned !== prevJourneyRef.baselinePrePinned ||
+    state.seenBaselinePinHint !== prevJourneyRef.seenBaselinePinHint ||
+    state.seenToolIntro !== prevJourneyRef.seenToolIntro
+  ) {
+    prevJourneyRef = {
+      seenHowToRead: state.seenHowToRead,
+      welcomeDismissedPermanently: state.welcomeDismissedPermanently,
+      baselinePrePinned: state.baselinePrePinned,
+      seenBaselinePinHint: state.seenBaselinePinHint,
+      seenToolIntro: state.seenToolIntro,
+    }
+    saveJourneyState(prevJourneyRef)
   }
 })

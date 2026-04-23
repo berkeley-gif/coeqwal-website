@@ -10,8 +10,8 @@
  * Beat 4 comment map (progress domain, compressed).
  *
  *   BEAT5_ENTER               0.500  main-choreography filter swap
- *   BEAT5_S1_LAYER_IN_START   0.555  AG layer begins fading in
- *   BEAT5_S1_LAYER_IN_END     0.575  AG layer at full opacity
+ *   BEAT5_S1_LAYER_IN_START   0.500  AG layer begins fading in
+ *   BEAT5_S1_LAYER_IN_END     0.520  AG layer at full opacity
  *   BEAT5_S2_SQUARE_RING_AT   0.580  gold ring on distribution square
  *   BEAT5_S3_SQUARE_POPUP_AT  0.590  overlay popup near square
  *   BEAT5_S4_POLYGON_RING_AT  0.600  gold stroke on map polygon
@@ -32,8 +32,8 @@ import { getTierLabel } from "../../../../content/tiers"
 // dependency on the component. Must stay in sync with those
 // declarations (there is a check in the spec doc's H3).
 const BEAT5_ENTER = 0.5
-const BEAT5_S1_LAYER_IN_START = 0.555
-const BEAT5_S1_LAYER_IN_END = 0.575
+const BEAT5_S1_LAYER_IN_START = 0.5
+const BEAT5_S1_LAYER_IN_END = 0.52
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
 const BEAT5_S4_POLYGON_RING_AT = 0.6
@@ -184,15 +184,196 @@ const BEAT4_ENTRY: BeatTableEntry = {
   ],
 }
 
+// Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
+
+// Reset window. Half-open `[0, RESET_END)`. Mirrors the
+// main-choreography listener's `v < 0.01` branch at
+// TierAnimationSection.tsx line 2166. The arbiter's `onEnter` hook
+// does a full-state baseline assertion on `demand-units` and
+// `demand-units-outline`. `onExit` is unused. Hosted under the
+// "legend" beat (the first beat, whose window starts at 0) because
+// actor windows are independent of beat checkpoints. Beats are just
+// a grouping key for the table.
+const RESET_END = 0.01
+
+// Beat 1 thresholds. Mirror the inline `FREEZE_AT`, `BEAT1B_START`,
+// `BEAT1C_BLEND_START`, `BEAT1C_BLEND_END`, and `BEAT2_START`
+// declarations at TierAnimationSection.tsx lines 2145 to 2158.
+// Must stay in sync.
+const FREEZE_AT = 0.09
+const BEAT1C_BLEND_START = 0.26
+// Sub-window divider inside Beat 1C blend. `[BEAT1C_BLEND_START,
+// BEAT1C_CONVERGE_END)` shrinks the 3-blue palette to BEAT1_MID.
+// `[BEAT1C_CONVERGE_END, BEAT1C_BLEND_END)` blends BEAT1_MID to AG
+// tier colors. Matches the inline `CONVERGE_END = 0.27` at
+// TierAnimationSection.tsx line 2243.
+const BEAT1C_CONVERGE_END = 0.27
+const BEAT1C_BLEND_END = 0.28
+const BEAT2_START = 0.38
+
+// Beat 2 hide-schedule thresholds. Mirror the inline
+// `BEAT2_AG_FADE_OUT_START`, `BEAT2_AG_FADE_OUT_END` declarations at
+// TierAnimationSection.tsx lines 2330 and 2331. The AG fade-out
+// window straddles `BEAT2_START` so the map layer finishes fading
+// out just as the SVG distribution-square morph begins its shape
+// deformation. `BEAT5_ENTER` is declared above at line 34 (mirror of
+// the module-level constant at TierAnimationSection.tsx line 261).
+const BEAT2_AG_FADE_OUT_START = 0.378
+const BEAT2_AG_FADE_OUT_END = 0.383
+// Reference point for `cycleRotations`. The legacy cycling expression
+// was `beat1T * BEAT1_CYCLE` where `beat1T = v / FREEZE_AT`, so the
+// full cycle window runs one rotation of `BEAT1_CYCLE = 90` phase
+// units across `[0, FREEZE_AT)`. We pass that rotation count to the
+// arbiter as a payload number rather than importing `BEAT1_CYCLE`
+// so the beat table stays free of palette internals.
+const BEAT1_CYCLE_ROTATIONS = 90
+// `beat1T / 0.33` is the legacy fade-in ramp, i.e. the first third
+// of the cycle window is fade-in, the rest is hold with breath.
+const BEAT1_FADE_IN_FRAC = 0.33
+const BEAT1_PEAK_OPACITY = 0.65
+const BEAT1_BREATH_AMPLITUDE = 0.05
+
+const BEAT0_ENTRY: BeatTableEntry = {
+  id: "legend",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:reset",
+      window: [0, RESET_END],
+      payload: { kind: "reset" },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:cycle",
+      window: [RESET_END, FREEZE_AT],
+      payload: {
+        kind: "beat1-cycle",
+        cycleStart: 0,
+        cycleEnd: FREEZE_AT,
+        cycleRotations: BEAT1_CYCLE_ROTATIONS,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+        fadeInFrac: BEAT1_FADE_IN_FRAC,
+        breathAmplitude: BEAT1_BREATH_AMPLITUDE,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:hold",
+      window: [FREEZE_AT, BEAT1C_BLEND_START],
+      payload: {
+        kind: "beat1-hold",
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// Beat 1 (collapse-and-colors) actors. Covers the two-stage color
+// morph from the 3-blue palette to AG tier colors (`beat1c-blend`)
+// and the subsequent AG-only tier-color hold (`beat1c-tail`). The
+// tail actor's window extends past the `collapse-and-colors`
+// checkpoint (0.365) into the start of `ag-rev-morph` (ending at
+// `BEAT2_START` = 0.38), but actor windows are independent of beat
+// checkpoints so hosting under `collapse-and-colors` stays
+// consistent with this beat's semantic role.
+const BEAT1_ENTRY: BeatTableEntry = {
+  id: "collapse-and-colors",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat1:mapPaint:blend",
+      window: [BEAT1C_BLEND_START, BEAT1C_BLEND_END],
+      payload: {
+        kind: "beat1c-blend",
+        blendStart: BEAT1C_BLEND_START,
+        convergeEnd: BEAT1C_CONVERGE_END,
+        blendEnd: BEAT1C_BLEND_END,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat1:mapPaint:tail",
+      window: [BEAT1C_BLEND_END, BEAT2_START],
+      payload: {
+        kind: "beat1c-tail",
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// Beat 2 (ag-rev-morph) actors. Covers the per-DU fade-out that
+// escorts each outcome's polygons off the map as the SVG
+// distribution-square morph takes over. The arbiter reads the
+// current hide schedule every tick via `ctx.getHideSchedule()`
+// because the schedule is built after tier data loads and can
+// re-build as outcomes change. Window end
+// (`BEAT5_ENTER`) is where the Beat 5 actor takes ownership and
+// writes its own AG-only baseline.
+//
+// The `beat2:mapPaint:lineFades` companion actor handles the
+// line-geometry side of the same hide schedule. Its window extends
+// past `BEAT5_ENTER` because the line layers (e.g. `cwf-flowline`,
+// `delta-detaw-line`) stay at opacity 0 through the rest of the
+// storyboard, and a wider window ensures reverse scrubs (back past
+// a `morphStart`, then forward) re-establish the correct opacity.
+// Line layers are disjoint from `demand-units` and
+// `demand-units-outline`, so coexisting with the Beat 5 cluster and
+// `beat6:mapPaint:restore` is conflict-free.
+const BEAT2_ENTRY: BeatTableEntry = {
+  id: "ag-rev-morph",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat2:mapPaint:hideSchedule",
+      window: [BEAT2_START, BEAT5_ENTER],
+      payload: {
+        kind: "beat2-hide-schedule",
+        agFadeOutStart: BEAT2_AG_FADE_OUT_START,
+        agFadeOutEnd: BEAT2_AG_FADE_OUT_END,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat2:mapPaint:lineFades",
+      window: [BEAT2_START, 1],
+      payload: { kind: "beat-line-fades" },
+    },
+  ],
+}
+
+// Beat 6 (post-Beat-5 tail) actors. One-shot DU restore at
+// `BEAT5_TAIL_END`. Hosted under the `list-bar` checkpoint because
+// actor windows are independent of beat checkpoints and `list-bar`
+// is the first beat checkpoint at or after `BEAT5_TAIL_END`. The
+// arbiter performs a full-state baseline that takes ownership back
+// from the Beat 5 cluster's AG-only filter and pins both DU
+// opacities at scalar 0 for the rest of the storyboard. Reverse
+// scrubs back into Beat 5 are handled by the Beat 5 cluster's own
+// `onEnter`.
+const BEAT6_ENTRY: BeatTableEntry = {
+  id: "list-bar",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat6:mapPaint:restore",
+      window: [BEAT5_TAIL_END, 1],
+      payload: { kind: "beat6-restore" },
+    },
+  ],
+}
+
 // The table
 
 export const BEAT_TABLE: readonly BeatTableEntry[] = [
-  { id: "legend", actors: [] },
-  { id: "collapse-and-colors", actors: [] },
-  { id: "ag-rev-morph", actors: [] },
+  BEAT0_ENTRY,
+  BEAT1_ENTRY,
+  BEAT2_ENTRY,
   { id: "all-other-morphs", actors: [] },
   BEAT4_ENTRY,
-  { id: "list-bar", actors: [] },
+  BEAT6_ENTRY,
   { id: "radar", actors: [] },
   { id: "heatmap", actors: [] },
 ]

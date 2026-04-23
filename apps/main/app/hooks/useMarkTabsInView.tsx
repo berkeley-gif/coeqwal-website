@@ -22,10 +22,11 @@ export function useMarkTabsInView(stickyOffsetPx: number = 0) {
 
       // Hysteresis: different thresholds for entering vs leaving collapsed state
       // - Collapse when within 1px of sticky position
-      // - Stay collapsed until 50px away from sticky position
+      // - Stay collapsed until far enough from sticky (large enough to ignore
+      //   small programmatic scrolls e.g. tour scrollIntoView)
       // This prevents jitter when tabs collapse and page height changes
       const enterThreshold = 1
-      const exitThreshold = 50
+      const exitThreshold = 100
 
       if (isInTabsArea) {
         // Currently collapsed - only expand if we scroll far enough away

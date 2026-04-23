@@ -32,7 +32,9 @@ import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
+import ShareSnapshotCard from "../../features/scenarioExplorer/components/ShareSnapshotCard"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
+import { OUTCOME_NAMES, type OutcomeCode } from "../../content/outcomes"
 import { toPng } from "html-to-image"
 import {
   downloadFromDataUrl,
@@ -53,8 +55,8 @@ function encodeShareItems(
   const parts = [`tab=share`]
   if (climate !== "historical") parts.push(`climate=${climate}`)
   const encoded = items.map((item) => {
-    const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
     if (item.type === "barChart") {
+      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
       const modeToken =
         item.viewMode === "average"
           ? "a"
@@ -63,13 +65,33 @@ function encodeShareItems(
             : "b"
       return `b.${item.scenarioId}.${modeToken}.${hc}`
     }
-    const ids = item.scenarioIds.join("~")
-    const axes = item.axes.join("~")
-    let flags = ""
-    if (item.showRange) flags += "r"
-    if (item.highlightBaseline) flags += "b"
-    if (item.showDotsOnly) flags += "d"
-    return `r.${ids}.${axes}.${flags}.${hc}`
+    if (item.type === "radar") {
+      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
+      const ids = item.scenarioIds.join("~")
+      const axes = item.axes.join("~")
+      let flags = ""
+      if (item.showRange) flags += "r"
+      if (item.highlightBaseline) flags += "b"
+      if (item.showDotsOnly) flags += "d"
+      return `r.${ids}.${axes}.${flags}.${hc}`
+    }
+    if (item.type === "equity") {
+      // Note and cached image are intentionally not URL-encoded. Notes
+      // are a private annotation; images are too large to fit a URL.
+      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
+      const outcomes = item.outcomeCodes.join("~")
+      const cmp = item.compareToBaseline ? "c" : ""
+      return `e.${item.scenarioId}.${outcomes}.${cmp}.${hc}`
+    }
+    if (item.type === "resilience") {
+      const view = item.view
+      const encoding = item.cellEncoding
+      const ids = item.scenarioIds.join("~")
+      const climates = item.hydroclimates.join("~")
+      const outcomes = item.outcomeCodes.join("~")
+      return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}`
+    }
+    return ""
   })
   if (encoded.length > 0) parts.push(`items=${encoded.join(",")}`)
 
@@ -227,6 +249,28 @@ export function parseShareItemsParam(
           hydroclimate: parts[4] || "historical",
         }
       }
+      if (parts[0] === "e" && parts.length >= 3) {
+        const outcomeCodes = (parts[2] ?? "").split("~").filter(Boolean)
+        return {
+          id: crypto.randomUUID(),
+          type: "equity",
+          scenarioId: parts[1] ?? "",
+          outcomeCodes,
+          compareToBaseline: (parts[3] ?? "").includes("c"),
+          hydroclimate: parts[4] || "historical",
+        }
+      }
+      if (parts[0] === "q" && parts.length >= 3) {
+        return {
+          id: crypto.randomUUID(),
+          type: "resilience",
+          view: parts[1] ?? "aggregate",
+          cellEncoding: parts[2] ?? "tier",
+          scenarioIds: (parts[3] ?? "").split("~").filter(Boolean),
+          hydroclimates: (parts[4] ?? "").split("~").filter(Boolean),
+          outcomeCodes: (parts[5] ?? "").split("~").filter(Boolean),
+        }
+      }
       return null
     })
     .filter(Boolean) as ShareItem[]
@@ -241,6 +285,152 @@ export function parseShareItemsParam(
   }
 
   return { items, storyItemIds }
+}
+
+// ---------------------------------------------------------------------------
+// Shared rendering helper for share-item cards
+// ---------------------------------------------------------------------------
+
+function outcomeCodesToLabels(codes: string[]): string[] {
+  return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
+}
+
+/**
+ * Render a ShareItem using the appropriate card component. Used by
+ * both the tray and the story canvas. Equity and resilience items
+ * render via the lightweight text-forward `ShareSnapshotCard` until
+ * full image capture is wired for those panels.
+ */
+function renderShareItemBody(
+  item: ShareItem,
+  outcomeNames: { shortCode: string; displayName: string }[],
+  scenarioLookup: Map<
+    string,
+    {
+      name: string
+      description: string
+      definition: string
+      shortLabel: string
+    }
+  >,
+  allChartData: Record<string, Record<string, unknown> | undefined>,
+  onNoteChange?: (id: string, note: string) => void,
+): React.ReactNode {
+  if (item.type === "barChart") {
+    const info = scenarioLookup.get(item.scenarioId)
+    const viewLabel =
+      item.viewMode === "average"
+        ? "Key outcomes average"
+        : item.viewMode === "distribution"
+          ? "Key outcomes distribution"
+          : "Key outcomes bar chart"
+    const chartData =
+      (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
+      (allChartData[item.scenarioId] as
+        | Record<string, ChartDataPoint[]>
+        | undefined)
+    return (
+      <ShareScenarioCard
+        scenarioId={item.id}
+        name={info?.description ?? info?.name ?? item.scenarioId}
+        scenarioDefinition={info?.definition}
+        description={viewLabel}
+        hydroclimate={item.hydroclimate}
+        chartData={chartData}
+        outcomeNames={outcomeNames}
+        viewMode={item.viewMode}
+      />
+    )
+  }
+  if (item.type === "radar") {
+    const names = item.scenarioIds.map(
+      (id) =>
+        scenarioLookup.get(id)?.description ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+    const definitions = item.scenarioIds.map(
+      (id) => scenarioLookup.get(id)?.definition ?? "",
+    )
+    return (
+      <ShareRadarCard
+        scenarioNames={names}
+        scenarioDefinitions={definitions}
+        scenarioColors={item.scenarioColors}
+        hydroclimate={item.hydroclimate}
+        showRange={item.showRange}
+        highlightBaseline={item.highlightBaseline}
+        showDotsOnly={item.showDotsOnly}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+      />
+    )
+  }
+  if (item.type === "equity") {
+    const info = scenarioLookup.get(item.scenarioId)
+    return (
+      <ShareSnapshotCard
+        id={item.id}
+        toolLabel="Distribution"
+        title={info?.description ?? info?.name ?? item.scenarioId}
+        subtitle={
+          item.compareToBaseline
+            ? "Compared to today's operations"
+            : "Single scenario view"
+        }
+        chips={outcomeCodesToLabels(item.outcomeCodes)}
+        hydroclimate={item.hydroclimate}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+        note={item.note}
+        onNoteChange={
+          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
+        }
+      />
+    )
+  }
+  if (item.type === "resilience") {
+    const scenarioChips = item.scenarioIds.map(
+      (id) =>
+        scenarioLookup.get(id)?.shortLabel ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+    const viewLabel =
+      item.view === "aggregate"
+        ? "Aggregate across library"
+        : item.view === "scenario"
+          ? "By scenario"
+          : item.view === "outcome"
+            ? "By outcome"
+            : item.view
+    const encodingLabel = item.cellEncoding
+      .replace(/_/g, " ")
+      .replace(/^./, (c) => c.toUpperCase())
+    return (
+      <ShareSnapshotCard
+        id={item.id}
+        toolLabel="Resilience"
+        title={`${viewLabel}: ${encodingLabel}`}
+        subtitle={
+          item.scenarioIds.length
+            ? `${item.scenarioIds.length} scenario${
+                item.scenarioIds.length === 1 ? "" : "s"
+              } in scope`
+            : "Full library"
+        }
+        chips={[
+          ...scenarioChips.slice(0, 4),
+          ...outcomeCodesToLabels(item.outcomeCodes),
+        ]}
+        hydroclimate={item.hydroclimates[0]}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+        note={item.note}
+        onNoteChange={
+          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
+        }
+      />
+    )
+  }
+  return null
 }
 
 // ---------------------------------------------------------------------------
@@ -275,65 +465,19 @@ function TrayCard({
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<
     string,
-    { name: string; description: string; definition: string }
+    {
+      name: string
+      description: string
+      definition: string
+      shortLabel: string
+    }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
 }) {
   const theme = useTheme()
 
-  const renderContent = () => {
-    if (item.type === "barChart") {
-      const info = scenarioLookup.get(item.scenarioId)
-      const viewLabel =
-        item.viewMode === "average"
-          ? "Key outcomes average"
-          : item.viewMode === "distribution"
-            ? "Key outcomes distribution"
-            : "Key outcomes bar chart"
-      const chartData =
-        (item.cachedChartData as
-          | Record<string, ChartDataPoint[]>
-          | undefined) ??
-        (allChartData[item.scenarioId] as
-          | Record<string, ChartDataPoint[]>
-          | undefined)
-      return (
-        <ShareScenarioCard
-          scenarioId={item.id}
-          name={info?.description ?? info?.name ?? item.scenarioId}
-          scenarioDefinition={info?.definition}
-          description={viewLabel}
-          hydroclimate={item.hydroclimate}
-          chartData={chartData}
-          outcomeNames={outcomeNames}
-          viewMode={item.viewMode}
-        />
-      )
-    }
-
-    const radarScenarioNames = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.description ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const radarScenarioDefinitions = item.scenarioIds.map(
-      (id) => scenarioLookup.get(id)?.definition ?? "",
-    )
-
-    return (
-      <ShareRadarCard
-        scenarioNames={radarScenarioNames}
-        scenarioDefinitions={radarScenarioDefinitions}
-        scenarioColors={item.scenarioColors}
-        hydroclimate={item.hydroclimate}
-        showRange={item.showRange}
-        highlightBaseline={item.highlightBaseline}
-        showDotsOnly={item.showDotsOnly}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-      />
-    )
-  }
+  const renderContent = () =>
+    renderShareItemBody(item, outcomeNames, scenarioLookup, allChartData)
 
   return (
     <Box
@@ -395,6 +539,7 @@ function StoryCard({
   onDelete,
   onDownloadData,
   onRegisterContentRef,
+  onNoteChange,
   outcomeNames,
   scenarioLookup,
   allChartData,
@@ -404,10 +549,16 @@ function StoryCard({
   onDelete: (id: string) => void
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
+  onNoteChange: (id: string, note: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<
     string,
-    { name: string; description: string; definition: string }
+    {
+      name: string
+      description: string
+      definition: string
+      shortLabel: string
+    }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
 }) {
@@ -435,7 +586,11 @@ function StoryCard({
       const label =
         item.type === "barChart"
           ? `coeqwal-${item.scenarioId}-${item.viewMode}`
-          : `coeqwal-radar-${item.scenarioIds.length}scenarios`
+          : item.type === "radar"
+            ? `coeqwal-radar-${item.scenarioIds.length}scenarios`
+            : item.type === "equity"
+              ? `coeqwal-distribution-${item.scenarioId}`
+              : `coeqwal-resilience-${item.view}`
       await downloadFromDataUrl(dataUrl, getTimestampedFilename(label, "png"))
     } catch {
       if (item.cachedImageDataUrl) {
@@ -455,63 +610,17 @@ function StoryCard({
     zIndex: isDragging ? 100 : "auto",
   }
 
-  const renderContent = () => {
-    if (item.type === "barChart") {
-      const info = scenarioLookup.get(item.scenarioId)
-      const viewLabel =
-        item.viewMode === "average"
-          ? "Key outcomes average"
-          : item.viewMode === "distribution"
-            ? "Key outcomes distribution"
-            : "Key outcomes bar chart"
-      const chartData =
-        (item.cachedChartData as
-          | Record<string, ChartDataPoint[]>
-          | undefined) ??
-        (allChartData[item.scenarioId] as
-          | Record<string, ChartDataPoint[]>
-          | undefined)
-      return (
-        <Box sx={{ px: 0.5, pb: 0.5 }}>
-          <ShareScenarioCard
-            scenarioId={item.id}
-            name={info?.description ?? info?.name ?? item.scenarioId}
-            scenarioDefinition={info?.definition}
-            description={viewLabel}
-            hydroclimate={item.hydroclimate}
-            chartData={chartData}
-            outcomeNames={outcomeNames}
-            viewMode={item.viewMode}
-          />
-        </Box>
-      )
-    }
-
-    const radarScenarioNames = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.description ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const radarScenarioDefinitions = item.scenarioIds.map(
-      (id) => scenarioLookup.get(id)?.definition ?? "",
-    )
-
-    return (
-      <Box sx={{ px: 0.5, pb: 0.5 }}>
-        <ShareRadarCard
-          scenarioNames={radarScenarioNames}
-          scenarioDefinitions={radarScenarioDefinitions}
-          scenarioColors={item.scenarioColors}
-          hydroclimate={item.hydroclimate}
-          showRange={item.showRange}
-          highlightBaseline={item.highlightBaseline}
-          showDotsOnly={item.showDotsOnly}
-          cachedImageDataUrl={item.cachedImageDataUrl}
-        />
-      </Box>
-    )
-  }
+  const renderContent = () => (
+    <Box sx={{ px: 0.5, pb: 0.5 }}>
+      {renderShareItemBody(
+        item,
+        outcomeNames,
+        scenarioLookup,
+        allChartData,
+        onNoteChange,
+      )}
+    </Box>
+  )
 
   return (
     <Box
@@ -650,6 +759,13 @@ export default function SharePanel() {
     updateShareItem,
   } = useScenarioExplorerStore()
 
+  const handleNoteChange = useCallback(
+    (id: string, note: string) => {
+      updateShareItem(id, { note })
+    },
+    [updateShareItem],
+  )
+
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
 
@@ -675,13 +791,19 @@ export default function SharePanel() {
   const scenarioLookup = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; description: string; definition: string }
+      {
+        name: string
+        description: string
+        definition: string
+        shortLabel: string
+      }
     >()
     siblingGroups.forEach((s) => {
       map.set(s.scenarioId, {
         name: s.shortLabel,
         description: s.label,
         definition: s.description,
+        shortLabel: s.shortLabel,
       })
     })
     return map
@@ -773,7 +895,11 @@ export default function SharePanel() {
           const label =
             item.type === "barChart"
               ? `coeqwal-${item.scenarioId}-${item.viewMode}`
-              : `coeqwal-radar-${item.scenarioIds.length}scenarios`
+              : item.type === "radar"
+                ? `coeqwal-radar-${item.scenarioIds.length}scenarios`
+                : item.type === "equity"
+                  ? `coeqwal-distribution-${item.scenarioId}`
+                  : `coeqwal-resilience-${item.view}`
           await downloadFromDataUrl(
             dataUrl,
             getTimestampedFilename(label, "png"),
@@ -838,7 +964,7 @@ export default function SharePanel() {
           }}
         >
           No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios you want to share, and click the share icon on each one.
+          scenarios that you want to share, and click the share icon on each one.
         </Typography>
         <Button
           variant="outlined"
@@ -958,6 +1084,7 @@ export default function SharePanel() {
                       onDelete={removeShareItem}
                       onDownloadData={handleDownloadData}
                       onRegisterContentRef={registerCardRef}
+                      onNoteChange={handleNoteChange}
                       outcomeNames={outcomeNames}
                       scenarioLookup={scenarioLookup}
                       allChartData={
