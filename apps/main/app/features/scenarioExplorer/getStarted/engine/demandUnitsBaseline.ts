@@ -1,0 +1,189 @@
+/* Baseline writer for the `demand-units` and `demand-units-outline`
+ * Mapbox layers.
+ *
+ * Invariant 2 of the Storyboard Engine Hardening Plan v2 states that
+ * every writer that takes ownership of these layers must assert the
+ * full set of properties the next consumer depends on. Partial writes
+ * cause bugs like the Step 4 to Step 5 "semi-transparent AG layer"
+ * regression, where one writer set filter and opacity correctly but
+ * inherited a stale `fill-color` from a previous writer. See the
+ * plan at `.cursor/plans/storyboard_engine_hardening_plan_v2_*.plan.md`
+ * for the full invariant list.
+ *
+ * This module centralizes the full-state write so all callers
+ * (MapPaintArbiter beat enters, the interactive teardown effect, any
+ * future arbiter that needs to reset these layers) go through one
+ * function. Properties are listed exhaustively, not merged from
+ * whatever was there, so it is impossible to accidentally leak state
+ * from the previous writer.
+ *
+ * The helper does not know about storyboard beats or interactive
+ * modes. Callers pass a `DemandUnitsBaselineSpec` describing the
+ * state they need. That keeps the helper a pure, testable function
+ * of its inputs.
+ */
+
+/** Filter for normal choreography. Shows Agriculture, Urban, and
+ *  Refuge demand-units, which correspond to tracked outcomes.
+ *  Excludes "N/A" and other untracked classes. */
+export const DU_CLASS_FILTER: readonly unknown[] = [
+  "in",
+  ["get", "Class"],
+  ["literal", ["Agriculture", "Urban", "Refuge"]],
+] as const
+
+/** Filter used when the storyboard isolates Agriculture (Beat 1C tail
+ *  and Beat 5). */
+export const DU_AG_ONLY_FILTER: readonly unknown[] = [
+  "==",
+  ["get", "Class"],
+  "Agriculture",
+] as const
+
+/** Narrow structural type for the Mapbox map methods the baseline
+ *  writer calls. Kept permissive so this module does not import
+ *  `@repo/map` types. */
+export type BaselineMap = {
+  getLayer: (id: string) => unknown
+  setFilter: (id: string, f: unknown) => void
+  setPaintProperty: (id: string, prop: string, value: unknown) => void
+  setLayoutProperty: (id: string, prop: string, value: unknown) => void
+}
+
+/** Complete specification of the demand-units baseline state.
+ *
+ *  Every field is required. If you find yourself wanting to make
+ *  something optional, think first about whether "inherit from the
+ *  previous writer" is really what you want. The whole point of this
+ *  helper is that the answer is no.
+ *
+ *  `fillExpr` is the result of `ctx.buildBlendedTierExpr(fromHex, t)`
+ *  or equivalent. Callers that do not have a tier expression ready
+ *  can pass `null` and fill-color / fill-outline-color will be left
+ *  in place. That path is for the initial pre-playback setup when
+ *  the tier table has not loaded yet. All playback and teardown
+ *  callers should supply a non-null expression.
+ *
+ *  Opacity is a tagged union so the interactive-to-playback handoff
+ *  can opt out of writing opacity explicitly. The teardown path
+ *  deliberately preserves whatever opacity expression the next
+ *  writer (the main choreography listener's per-tick branch) is
+ *  about to set. Playback entries that need a definite opacity
+ *  seeding the ramp pass `{ kind: "scalar", value }`. */
+export type DemandUnitsOpacity =
+  | { kind: "scalar"; value: number }
+  | { kind: "preserve" }
+
+export interface DemandUnitsBaselineSpec {
+  /** Mapbox filter applied to both fill and outline layers. Typical
+   *  values: `DU_CLASS_FILTER` or `DU_AG_ONLY_FILTER`. */
+  filter: readonly unknown[]
+  /** Tier color expression for fill, fill-outline, and outline line
+   *  color. Pass `null` only in pre-playback setup when the tier data
+   *  is not yet loaded. */
+  fillExpr: readonly unknown[] | null
+  /** Fill-layer opacity directive. `{ kind: "scalar", value }` writes
+   *  a scalar opacity (callers seeding a fade-in write 0; callers
+   *  landing at peak write the peak value, typically 0.65).
+   *  `{ kind: "preserve" }` leaves fill-opacity alone so an
+   *  immediately following writer can set it without a spurious
+   *  intermediate value landing on the layer. */
+  fillOpacity: DemandUnitsOpacity
+  /** Outline-layer opacity directive. Same semantics as
+   *  `fillOpacity`. Usually matches so fill and stroke move in
+   *  lockstep. */
+  lineOpacity: DemandUnitsOpacity
+  /** Outline line width. Default baseline is `0.5`. Callers styling a
+   *  gold LOI ring temporarily bump it via `setPaintProperty`
+   *  directly in their own code path; this helper stays with the
+   *  baseline value. */
+  lineWidth: number
+  /** Outline line offset. Baseline is `-0.25` to keep strokes inside
+   *  polygon boundaries. */
+  lineOffset: number
+  /** Layout visibility. Always `"visible"` during active playback or
+   *  interactive modes. `"none"` is only appropriate when the map is
+   *  being torn down. */
+  visibility: "visible" | "none"
+}
+
+/** Apply a complete baseline spec to `demand-units` and
+ *  `demand-units-outline`. Idempotent: calling it twice in a row
+ *  yields the same final Mapbox state.
+ *
+ *  Always clears fill-opacity-transition, fill-color-transition,
+ *  line-opacity-transition, and line-color-transition to zero first
+ *  so that subsequent opacity or color writes by per-frame ramps are
+ *  not smoothed away by a stale 350 ms or 400 ms transition
+ *  inherited from `OutcomePolygonLayer`. This is the single most
+ *  important thing this helper does and it was the root cause of
+ *  multiple Step 4 to Step 5 regressions. */
+export function writeDemandUnitsBaseline(
+  map: BaselineMap,
+  spec: DemandUnitsBaselineSpec,
+): void {
+  try {
+    if (map.getLayer("demand-units")) {
+      map.setPaintProperty("demand-units", "fill-opacity-transition", {
+        duration: 0,
+        delay: 0,
+      })
+      map.setPaintProperty("demand-units", "fill-color-transition", {
+        duration: 0,
+        delay: 0,
+      })
+      map.setFilter("demand-units", spec.filter)
+      if (spec.fillExpr) {
+        map.setPaintProperty("demand-units", "fill-color", spec.fillExpr)
+        map.setPaintProperty(
+          "demand-units",
+          "fill-outline-color",
+          spec.fillExpr,
+        )
+      }
+      if (spec.fillOpacity.kind === "scalar") {
+        map.setPaintProperty(
+          "demand-units",
+          "fill-opacity",
+          spec.fillOpacity.value,
+        )
+      }
+      map.setLayoutProperty("demand-units", "visibility", spec.visibility)
+    }
+    if (map.getLayer("demand-units-outline")) {
+      map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
+        duration: 0,
+        delay: 0,
+      })
+      map.setPaintProperty("demand-units-outline", "line-color-transition", {
+        duration: 0,
+        delay: 0,
+      })
+      map.setFilter("demand-units-outline", spec.filter)
+      if (spec.fillExpr) {
+        map.setPaintProperty("demand-units-outline", "line-color", spec.fillExpr)
+      }
+      if (spec.lineOpacity.kind === "scalar") {
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity",
+          spec.lineOpacity.value,
+        )
+      }
+      map.setPaintProperty("demand-units-outline", "line-width", spec.lineWidth)
+      map.setPaintProperty(
+        "demand-units-outline",
+        "line-offset",
+        spec.lineOffset,
+      )
+      map.setLayoutProperty(
+        "demand-units-outline",
+        "visibility",
+        spec.visibility,
+      )
+    }
+  } catch {
+    /* Mapbox can throw transiently during style reloads. The caller
+     *  re-asserts on the next valid tick, so swallowing here is safe. */
+  }
+}

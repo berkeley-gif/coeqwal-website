@@ -66,6 +66,11 @@ import {
   MapPaintArbiter,
   MapPopupArbiter,
   OverlayPopupArbiter,
+  debugLog,
+  logDuState,
+  DU_CLASS_FILTER,
+  DU_AG_ONLY_FILTER,
+  writeDemandUnitsBaseline,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
@@ -199,80 +204,10 @@ const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
  *  must refuse to write during this window. */
 const LOI_BEAT_INDEX = 4
 
-/* ── DIAG S4/S5 ───────────────────────────────────────────────────────────
- * Temporary diagnostic helper for the Step 4 / Step 5 AG layer bug.
- * Emits a single compact line describing the current Mapbox state of
- * `demand-units` and `demand-units-outline`. Remove all [DIAG S4/S5]
- * references once the root cause is identified and the fix is in. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logDuState(label: string, map: any): void {
-  try {
-    if (!map?.getLayer) {
-      // eslint-disable-next-line no-console
-      console.log(`[DIAG S4/S5] ${label} <no map>`)
-      return
-    }
-    const short = (v: unknown) => {
-      try {
-        const s = JSON.stringify(v)
-        return s && s.length > 80 ? s.slice(0, 80) + "..." : s
-      } catch {
-        return String(v)
-      }
-    }
-    const fill = map.getLayer("demand-units")
-      ? {
-          opacity: short(map.getPaintProperty("demand-units", "fill-opacity")),
-          opTrans: short(
-            map.getPaintProperty("demand-units", "fill-opacity-transition"),
-          ),
-          colorTrans: short(
-            map.getPaintProperty("demand-units", "fill-color-transition"),
-          ),
-          vis: map.getLayoutProperty("demand-units", "visibility"),
-          filter: short(map.getFilter("demand-units")),
-        }
-      : "<no demand-units>"
-    const outline = map.getLayer("demand-units-outline")
-      ? {
-          opacity: short(
-            map.getPaintProperty("demand-units-outline", "line-opacity"),
-          ),
-          opTrans: short(
-            map.getPaintProperty(
-              "demand-units-outline",
-              "line-opacity-transition",
-            ),
-          ),
-          width: short(
-            map.getPaintProperty("demand-units-outline", "line-width"),
-          ),
-          vis: map.getLayoutProperty("demand-units-outline", "visibility"),
-          filter: short(map.getFilter("demand-units-outline")),
-        }
-      : "<no demand-units-outline>"
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label}`, { fill, outline })
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label} <error>`, e)
-  }
-}
-
-/** Filter demand-units to only classes that correspond to tracked outcomes.
- *  Excludes "N/A" and other untracked classes that would otherwise show
- *  as spurious polygons during the beat-1 cycling animation. */
-const DU_CLASS_FILTER = [
-  "in",
-  ["get", "Class"],
-  ["literal", ["Agriculture", "Urban", "Refuge"]],
-]
-
-/** Filter used during Beat 1C so the map isolates the Agricultural
- *  revenue story - only Agriculture demand-units are visible while the
- *  tier-color blend and AG example popups play out. The full
- *  DU_CLASS_FILTER is restored when Beat 2 starts. */
-const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"]
+// `logDuState`, `debugLog`, `DU_CLASS_FILTER`, and `DU_AG_ONLY_FILTER`
+// all live in `./engine` now and are imported at the top of the file.
+// Single source of truth for demand-units filters and storyboard
+// diagnostics; see `engine/debug.ts` and `engine/demandUnitsBaseline.ts`.
 
 /** Curated list of well-known agricultural water districts used to
  *  illustrate what a single polygon represents during Beat 1C. Each popup
@@ -544,18 +479,14 @@ export default function TierAnimationSection() {
         setBeatIndex(clamped)
         beatIndexRef.current = clamped
 
-        // [DIAG S4/S5]
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DIAG S4/S5] runTween START fromV=${progress.get().toFixed(4)} targetV=${target.progress} duration=${duration}`,
+        debugLog(
+          `runTween START fromV=${progress.get().toFixed(4)} targetV=${target.progress} duration=${duration}`,
         )
         logDuState("runTween START", mapAPI.mapRef?.current?.getMap?.())
 
         const finalize = () => {
-          // [DIAG S4/S5]
-          // eslint-disable-next-line no-console
-          console.log(
-            `[DIAG S4/S5] runTween FINALIZE clamped=${clamped} v=${progress.get().toFixed(4)}`,
+          debugLog(
+            `runTween FINALIZE clamped=${clamped} v=${progress.get().toFixed(4)}`,
           )
           logDuState(
             "runTween FINALIZE",
@@ -632,19 +563,18 @@ export default function TierAnimationSection() {
   const engineApiRef = useRef<BeatEngineApi | null>(null)
 
   const clearInteractiveState = useCallback(() => {
-    // [DIAG S4/S5]
-    const _diagMap = mapAPI.mapRef?.current?.getMap?.()
-    logDuState("clearInteractiveState START", _diagMap)
+    const diagMap = mapAPI.mapRef?.current?.getMap?.()
+    logDuState("clearInteractiveState START", diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
-    logDuState("clearInteractiveState after store clears", _diagMap)
+    logDuState("clearInteractiveState after store clears", diagMap)
     // Force the engine to clear any actors still in-window so a mid-beat
     // nav away from Beat 4 doesn't strand the gold polygon ring, the
     // square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
-    logDuState("clearInteractiveState after engine teardown", _diagMap)
+    logDuState("clearInteractiveState after engine teardown", diagMap)
 
     // Visibility restore runs separately in the selectedOutcomeCode
     // transition effect below. That effect fires after React commits
@@ -655,15 +585,9 @@ export default function TierAnimationSection() {
 
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
-    // [DIAG S4/S5]
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DIAG S4/S5] handleNext START beatIndex=${beatIndexRef.current}`,
-    )
+    debugLog(`handleNext START beatIndex=${beatIndexRef.current}`)
     clearInteractiveState()
-    // [DIAG S4/S5]
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] handleNext goTo called`)
+    debugLog(`handleNext goTo called`)
     // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
     // (a no-op when already home) before running the beat tween, so a
     // square-click zoom doesn't persist into the next beat.
@@ -1055,10 +979,8 @@ export default function TierAnimationSection() {
     // idle path) can also clobber the beat engine's Beat 5 setup if
     // the user clicks Next before the idle fires.
     if (!(prev !== null && selectedOutcomeCode === null)) return
-    // [DIAG S4/S5]
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DIAG S4/S5] selectedOutcomeCode-transition START prev=${prev} now=${selectedOutcomeCode}`,
+    debugLog(
+      `selectedOutcomeCode-transition START prev=${prev} now=${selectedOutcomeCode}`,
     )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const map: any = mapAPI.mapRef?.current?.getMap?.()
@@ -1066,60 +988,26 @@ export default function TierAnimationSection() {
 
     // Extracted so we can invoke it either synchronously (style loaded)
     // or deferred via `map.once("idle", ...)` (style busy).
+    //
+    // `fillOpacity` / `lineOpacity` are `preserve`, not a scalar: the
+    // main choreography listener's next tick re-writes opacity for
+    // whatever phase we are in (beat1 cycle, beat2 hide-schedule, or
+    // the interactive baseline), and we do not want to land a
+    // transient scalar on the layer between this write and that one.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const runTeardownWrites = (m: any) => {
       try {
-        const tierExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-
-        if (m.getLayer("demand-units")) {
-          m.setPaintProperty("demand-units", "fill-opacity-transition", {
-            duration: 0,
-            delay: 0,
-          })
-          m.setPaintProperty("demand-units", "fill-color-transition", {
-            duration: 0,
-            delay: 0,
-          })
-          m.setFilter("demand-units", DU_CLASS_FILTER as never)
-          if (tierExpr) {
-            m.setPaintProperty("demand-units", "fill-color", tierExpr as never)
-            m.setPaintProperty(
-              "demand-units",
-              "fill-outline-color",
-              tierExpr as never,
-            )
-          }
-          m.setLayoutProperty("demand-units", "visibility", "visible")
-        }
-
-        if (m.getLayer("demand-units-outline")) {
-          m.setPaintProperty(
-            "demand-units-outline",
-            "line-opacity-transition",
-            { duration: 0, delay: 0 },
-          )
-          m.setPaintProperty(
-            "demand-units-outline",
-            "line-color-transition",
-            { duration: 0, delay: 0 },
-          )
-          m.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-          if (tierExpr) {
-            m.setPaintProperty(
-              "demand-units-outline",
-              "line-color",
-              tierExpr as never,
-            )
-          }
-          m.setPaintProperty("demand-units-outline", "line-width", 0.5)
-          m.setPaintProperty("demand-units-outline", "line-offset", -0.25)
-          m.setLayoutProperty(
-            "demand-units-outline",
-            "visibility",
-            "visible",
-          )
-        }
-
+        writeDemandUnitsBaseline(m, {
+          filter: DU_CLASS_FILTER,
+          fillExpr: buildBlendedTierExpr(BEAT1_MID, 1) as
+            | readonly unknown[]
+            | null,
+          fillOpacity: { kind: "preserve" },
+          lineOpacity: { kind: "preserve" },
+          lineWidth: 0.5,
+          lineOffset: -0.25,
+          visibility: "visible",
+        })
         for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
           if (fill === "demand-units") continue
           if (m.getLayer(fill))
@@ -1129,9 +1017,7 @@ export default function TierAnimationSection() {
         }
         logDuState("selectedOutcomeCode-transition POST-write", m)
       } catch (e) {
-        // [DIAG S4/S5]
-        // eslint-disable-next-line no-console
-        console.log(`[DIAG S4/S5] selectedOutcomeCode-transition ERROR`, e)
+        debugLog(`selectedOutcomeCode-transition ERROR`, e)
       }
     }
 
@@ -1154,11 +1040,7 @@ export default function TierAnimationSection() {
     // paint or overwrite the arbiter's Agriculture-only filter with
     // the full class filter, which was the cause of the "AG layer
     // bleeds across all demand-unit classes in Beat 5" regression.
-    // [DIAG S4/S5]
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DIAG S4/S5] selectedOutcomeCode-transition deferred to idle`,
-    )
+    debugLog(`selectedOutcomeCode-transition deferred to idle`)
     let ran = false
     const onIdle = () => {
       if (ran) return
@@ -1166,18 +1048,12 @@ export default function TierAnimationSection() {
       const liveOutcome = selectedOutcomeCodeLiveRef.current
       const liveBeat = beatIndexRef.current
       if (liveOutcome !== null || liveBeat >= LOI_BEAT_INDEX) {
-        // [DIAG S4/S5]
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DIAG S4/S5] selectedOutcomeCode-transition idle-bail liveOutcome=${liveOutcome} liveBeat=${liveBeat}`,
+        debugLog(
+          `selectedOutcomeCode-transition idle-bail liveOutcome=${liveOutcome} liveBeat=${liveBeat}`,
         )
         return
       }
-      // [DIAG S4/S5]
-      // eslint-disable-next-line no-console
-      console.log(
-        `[DIAG S4/S5] selectedOutcomeCode-transition running after idle`,
-      )
+      debugLog(`selectedOutcomeCode-transition running after idle`)
       runTeardownWrites(map)
     }
     try {
@@ -1236,10 +1112,8 @@ export default function TierAnimationSection() {
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
 
-        // [DIAG S4/S5]
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DIAG S4/S5] square click outcome=${info.code} sourceId=${info.sourceId} wasSelected=${wasSelected}`,
+        debugLog(
+          `square click outcome=${info.code} sourceId=${info.sourceId} wasSelected=${wasSelected}`,
         )
         logDuState(
           "square click (pre-state-change)",

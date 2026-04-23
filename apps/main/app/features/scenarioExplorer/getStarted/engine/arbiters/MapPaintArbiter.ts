@@ -11,6 +11,12 @@
  * so the spike is a pure structural refactor, not a behavior change.
  * Named constants live on actor payloads in the beat table. No magic
  * numbers in this file.
+ *
+ * Full-state assertion on beat enter goes through
+ * `writeDemandUnitsBaseline` so the set of properties this arbiter
+ * writes is locked to the plan's invariant 2 (every ownership
+ * handoff asserts the full property set). Adding a new property to
+ * the baseline spec propagates to every writer automatically.
  */
 
 import type {
@@ -19,67 +25,16 @@ import type {
   MapPaintActor,
   MapPaintPayload,
 } from "../types"
+import {
+  DU_AG_ONLY_FILTER,
+  writeDemandUnitsBaseline,
+} from "../demandUnitsBaseline"
+import { debugLog, logDuState } from "../debug"
 
-// Shared with the beat table. Kept as module constants here because
-// they are Mapbox-filter and layer-id strings, not beat timings.
-const DU_AG_ONLY_FILTER = ["==", ["get", "Class"], "Agriculture"] as const
+// Blue-cycle mid color. Kept here rather than in the baseline helper
+// because it is an arbiter-specific seed for the tier expression,
+// not a property of the baseline itself.
 const BEAT1_MID = "#92C1D5"
-
-/* ── DIAG S4/S5 ───────────────────────────────────────────────────────────
- * Temporary diagnostic helper for the Step 4 / Step 5 AG layer bug.
- * Snapshots demand-units state. Remove with the other [DIAG S4/S5]
- * references once root cause is identified. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logDuState(label: string, map: any): void {
-  try {
-    if (!map?.getLayer) {
-      // eslint-disable-next-line no-console
-      console.log(`[DIAG S4/S5] ${label} <no map>`)
-      return
-    }
-    const short = (v: unknown) => {
-      try {
-        const s = JSON.stringify(v)
-        return s && s.length > 80 ? s.slice(0, 80) + "..." : s
-      } catch {
-        return String(v)
-      }
-    }
-    const fill = map.getLayer("demand-units")
-      ? {
-          opacity: short(map.getPaintProperty("demand-units", "fill-opacity")),
-          opTrans: short(
-            map.getPaintProperty("demand-units", "fill-opacity-transition"),
-          ),
-          vis: map.getLayoutProperty?.("demand-units", "visibility"),
-          filter: short(map.getFilter?.("demand-units")),
-        }
-      : "<no demand-units>"
-    const outline = map.getLayer("demand-units-outline")
-      ? {
-          opacity: short(
-            map.getPaintProperty("demand-units-outline", "line-opacity"),
-          ),
-          opTrans: short(
-            map.getPaintProperty(
-              "demand-units-outline",
-              "line-opacity-transition",
-            ),
-          ),
-          width: short(
-            map.getPaintProperty("demand-units-outline", "line-width"),
-          ),
-          vis: map.getLayoutProperty?.("demand-units-outline", "visibility"),
-          filter: short(map.getFilter?.("demand-units-outline")),
-        }
-      : "<no demand-units-outline>"
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label}`, { fill, outline })
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label} <error>`, e)
-  }
-}
 
 export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   readonly kind = "mapPaint" as const
@@ -153,9 +108,8 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       const key = stage
       if (!this.diagBoundariesLogged.has(key)) {
         this.diagBoundariesLogged.add(key)
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DIAG S4/S5] MapPaintArbiter beat5-layer-fade stage=${stage} v=${v.toFixed(4)} target=${targetOpacity.toFixed(3)}`,
+        debugLog(
+          `MapPaintArbiter beat5-layer-fade stage=${stage} v=${v.toFixed(4)} target=${targetOpacity.toFixed(3)}`,
         )
         logDuState(`beat5-layer-fade stage=${stage}`, map)
       }
@@ -213,87 +167,29 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   // Paint sequences
 
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {
-    // [DIAG S4/S5]
     logDuState("MapPaintArbiter.applyBeat5Enter PRE", map)
     // The arbiter is the sole authority on the Mapbox state of
     // `demand-units` and `demand-units-outline` for the duration of
     // Beat 5. We cannot trust whoever ran before us (OPL unmount,
     // interactive paint effect, half-completed teardown) to leave
-    // these layers in a clean, renderable state. So we assert the
-    // full set of preconditions our per-tick ramp needs:
-    //   1. Agriculture-only filter.
-    //   2. Instant transitions (opTrans = 0, colorTrans = 0), so the
-    //      per-tick opacity writes are not smoothed away by a stale
-    //      350 ms transition inherited from `OutcomePolygonLayer`,
-    //      and the fill-color swap below is instant.
-    //   3. Scalar opacity seeded to 0, overwriting any stale `case`
-    //      / `step` expression the interactive pass left behind.
-    //   4. Tier-color fill/outline expression for AG DUs, overwriting
-    //      any interactive outcome's per-feature color map (which
-    //      would leave AG features on the default gray fallback and
-    //      make the layer look washed out at peak-hold).
-    //   5. `visibility: visible`, overwriting the `none` that
-    //      `OutcomePolygonLayer`'s unmount cleanup sets when an
-    //      interactive outcome is deselected.
-    //   6. Default outline width (0.5) and offset (-0.25).
-    // The companion `beat5-layer-fade` actor then ramps opacity from
-    // 0 up to `peakOpacity` across the fade-in window.
-    try {
-      const baseExpr = ctx.buildBlendedTierExpr(BEAT1_MID, 1)
-      if (map.getLayer("demand-units")) {
-        map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-        map.setPaintProperty("demand-units", "fill-opacity-transition", {
-          duration: 0,
-          delay: 0,
-        })
-        map.setPaintProperty("demand-units", "fill-color-transition", {
-          duration: 0,
-          delay: 0,
-        })
-        map.setPaintProperty("demand-units", "fill-opacity", 0)
-        if (baseExpr) {
-          map.setPaintProperty("demand-units", "fill-color", baseExpr as never)
-          map.setPaintProperty(
-            "demand-units",
-            "fill-outline-color",
-            baseExpr as never,
-          )
-        }
-        map.setLayoutProperty("demand-units", "visibility", "visible")
-      }
-      if (map.getLayer("demand-units-outline")) {
-        map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-opacity-transition",
-          { duration: 0, delay: 0 },
-        )
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-color-transition",
-          { duration: 0, delay: 0 },
-        )
-        map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-        if (baseExpr) {
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-color",
-            baseExpr as never,
-          )
-        }
-        map.setPaintProperty("demand-units-outline", "line-width", 0.5)
-        map.setPaintProperty("demand-units-outline", "line-offset", -0.25)
-        map.setLayoutProperty(
-          "demand-units-outline",
-          "visibility",
-          "visible",
-        )
-      }
-    } catch {
-      /* ok */
-    }
+    // these layers in a clean, renderable state, so we delegate to
+    // `writeDemandUnitsBaseline`, which asserts the full property
+    // set invariant 2 of the hardening plan requires:
+    //   filter, fill/outline color, fill/line opacity, all four
+    //   transitions zeroed, line width, line offset, visibility.
+    // The opacity is seeded to 0. The companion `beat5-layer-fade`
+    // actor then ramps it up to `peakOpacity` across the fade-in
+    // window.
+    writeDemandUnitsBaseline(map, {
+      filter: DU_AG_ONLY_FILTER,
+      fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1),
+      fillOpacity: { kind: "scalar", value: 0 },
+      lineOpacity: { kind: "scalar", value: 0 },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
     this.beat5PolyRingOn = false
-    // [DIAG S4/S5]
     this.diagBoundariesLogged.clear()
     logDuState("MapPaintArbiter.applyBeat5Enter POST", map)
   }
