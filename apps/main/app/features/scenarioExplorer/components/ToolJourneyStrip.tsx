@@ -1,21 +1,23 @@
 "use client"
 
 /**
- * ToolJourneyStrip. Thin header rendered above each tool panel that
- * turns four sibling tabs into a coherent curation loop:
+ * ToolJourneyStrip. Title row rendered at the very top of each tool
+ * panel, directly under the Explore secondary nav and above the
+ * shared toolbar. Layout:
  *
- *   [Purpose line]                          [Next: Now try <X>]
+ *   [Chart name]  [purpose]  [Take the tour]
  *
- * The purpose sentence comes from journey.ts per ExploreMode. The
- * Next nudge is a suggestion only; all tool tabs remain reachable
- * via ExploreSubNav.
+ * The chart name on the left doubles as the panel title (e.g.
+ * "Radar chart", "Resilience heatmap"). The Take the tour link sits
+ * after the purpose for tour-enabled modes. The purpose sentence comes
+ * from journey.ts. Users switch tools via ExploreSubNav.
  */
 
 import React from "react"
-import { Box, Typography, useTheme, icons } from "@repo/ui/mui"
-import { useScenarioExplorerStore, type ExploreMode } from "../store"
-import { getJourneyStage } from "../journey"
-import { useTabNavigation } from "../../../hooks/useTabNavigation"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import type { ExploreMode } from "../store"
+import { getExploreModeViewName, getJourneyStage } from "../journey"
+import TakeTheTourButton from "./TakeTheTourButton"
 
 interface ToolJourneyStripProps {
   mode: ExploreMode
@@ -23,29 +25,10 @@ interface ToolJourneyStripProps {
 
 export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
   const theme = useTheme()
-  const { navigateToTab } = useTabNavigation()
   const stage = getJourneyStage(mode)
-  const setExploreMode = useScenarioExplorerStore((s) => s.setExploreMode)
-  const setShowShareDrawer = useScenarioExplorerStore(
-    (s) => s.setShowShareDrawer,
-  )
+  const viewName = getExploreModeViewName(mode)
 
   if (!stage) return null
-
-  const handleNext = () => {
-    if (stage.nextMode) {
-      setExploreMode(stage.nextMode)
-    } else if (stage.nextLabel === "Open Share") {
-      // Final stage of the curation loop: surface the Share drawer to
-      // remind the user of what they've collected, then send them to
-      // the Share tab if they want to review it end-to-end.
-      setShowShareDrawer(true)
-      navigateToTab("share")
-    }
-  }
-
-  const hasNextAction =
-    stage.nextMode !== null || stage.nextLabel === "Open Share"
 
   return (
     <Box
@@ -53,58 +36,52 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
         display: "flex",
         alignItems: "center",
         gap: 2,
-        px: 1.5,
+        // Match [ToolToolbar.tsx] and other tool rows: list grid uses
+        // theme.space.tool.px; keep this strip on the same horizontal
+        // rhythm as the "Scenario library" block.
+        px: theme.space.tool.px,
         py: 0.5,
-        minHeight: 36,
+        minHeight: 44,
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
         flexWrap: "wrap",
       }}
     >
-      <Box sx={{ flex: 1, minWidth: 0, display: "flex", gap: 1, alignItems: "baseline" }}>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          alignItems: "baseline",
+          gap: 1.25,
+          flexWrap: "wrap",
+        }}
+      >
         <Typography
-          variant="dashboard"
+          component="h2"
+          variant="h6"
           sx={{
-            fontWeight: 400,
-            color: theme.palette.text.secondary,
-            lineHeight: 1.3,
-          }}
-        >
-          {stage.purpose}
-        </Typography>
-      </Box>
-
-      {hasNextAction && (
-        <Box
-          component="button"
-          type="button"
-          onClick={handleNext}
-          title={stage.nextRationale}
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: 1.25,
-            py: 0.5,
-            border: "none",
-            borderRadius: "12px",
-            cursor: "pointer",
-            fontSize: "0.8125rem",
-            fontWeight: 500,
+            color: theme.palette.text.primary,
             lineHeight: 1.3,
             whiteSpace: "nowrap",
-            color: theme.palette.blue.bright,
-            background: "transparent",
-            transition: "all 150ms ease",
-            "&:hover": {
-              background: theme.palette.interaction.selectedBackground,
-            },
           }}
         >
-          {stage.nextLabel}
-          <icons.ArrowForward sx={{ fontSize: "1rem" }} />
+          {viewName}
+        </Typography>
+        <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.25, minWidth: 0 }}>
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontWeight: 400,
+              color: theme.palette.text.primary,
+              lineHeight: 1.3,
+            }}
+          >
+            {stage.purpose}
+          </Typography>
+          <TakeTheTourButton />
         </Box>
-      )}
+      </Box>
     </Box>
   )
 }

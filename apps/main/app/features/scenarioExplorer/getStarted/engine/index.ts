@@ -27,6 +27,7 @@ export type {
   Arbiter,
   BeatEngineContext,
   BeatTableEntry,
+  HideScheduleEntry,
   MapPaintActor,
   MapPaintPayload,
   MapPopupActor,

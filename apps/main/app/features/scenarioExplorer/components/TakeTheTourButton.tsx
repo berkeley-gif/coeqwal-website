@@ -2,10 +2,9 @@
 
 /**
  * TakeTheTourButton. Small inline link-style button that starts the
- * per-tool tour for the active explore mode. Designed to sit next to
- * the panel title (e.g. "Scenario library: List view") rather than in
- * the toolbar action cluster, so the entry point reads as part of the
- * panel's identity instead of a tool option.
+ * per-tool tour for the active explore mode. Used in the
+ * [ToolJourneyStrip.tsx] title row so the play icon and "Take the
+ * tour" label read as a single action.
  *
  * Renders nothing for explore modes that do not have a tour
  * (Distribution and other research-only views), so callers can drop
@@ -41,27 +40,38 @@ export default function TakeTheTourButton() {
         alignItems: "center",
         gap: 0.4,
         px: 0.6,
-        py: 0.1,
+        py: 0,
         ml: 1,
         border: "none",
         borderRadius: "10px",
         cursor: "pointer",
         background: "transparent",
         color: theme.palette.blue.bright,
+        verticalAlign: "middle",
         transition: "background-color 120ms",
         "&:hover": {
           background: theme.palette.interaction.selectedBackground,
         },
       }}
     >
-      <icons.PlayCircleOutline sx={{ fontSize: "0.95rem" }} />
+      <icons.PlayCircleOutline
+        sx={(t) => ({
+          // Match label cap height: dashboard text is 0.875rem; keep
+          // the glyph optically aligned with the cap line without
+          // baseline hacks on the text span.
+          fontSize: t.typography.dashboard.fontSize,
+          lineHeight: 0,
+          display: "block",
+        })}
+      />
       <Typography
         variant="dashboard"
+        component="span"
         sx={{
           fontWeight: 500,
           whiteSpace: "nowrap",
           color: "inherit",
-          fontSize: "0.8125rem",
+          lineHeight: 1.3,
         }}
       >
         Take the tour

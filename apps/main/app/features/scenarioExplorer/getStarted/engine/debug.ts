@@ -36,7 +36,7 @@ export function debugLog(label: string, ...rest: unknown[]): void {
  *  (which uses a strict keyof-PaintSpecification overload that does
  *  not assignable-down to a plain `(id: string, prop: string) =>
  *  unknown`). We duck-type inside the function. Diagnostic code
- *  only; production behavior is always governed by
+ *  only. Production behavior is always governed by
  *  `STORYBOARD_DEBUG`. */
 export function logDuState(label: string, map: unknown): void {
   if (!STORYBOARD_DEBUG) return

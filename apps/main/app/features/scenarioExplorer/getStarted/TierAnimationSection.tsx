@@ -69,11 +69,11 @@ import {
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
-  DU_AG_ONLY_FILTER,
   writeDemandUnitsBaseline,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
+  type HideScheduleEntry,
 } from "./engine"
 
 /** Phase 0 refactor spike flag. When true, the declarative beat engine
@@ -204,10 +204,15 @@ const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
  *  must refuse to write during this window. */
 const LOI_BEAT_INDEX = 4
 
-// `logDuState`, `debugLog`, `DU_CLASS_FILTER`, and `DU_AG_ONLY_FILTER`
-// all live in `./engine` now and are imported at the top of the file.
-// Single source of truth for demand-units filters and storyboard
-// diagnostics; see `engine/debug.ts` and `engine/demandUnitsBaseline.ts`.
+// `logDuState`, `debugLog`, and `DU_CLASS_FILTER` all live in
+// `./engine` now and are imported at the top of the file.
+// `DU_AG_ONLY_FILTER` is no longer referenced from this file. Its only
+// caller, the legacy Beat 5 paint branch, moved to the engine's
+// `MapPaintArbiter` in Phase 1.f, so the import was dropped. The
+// constant itself still lives in `engine/index.ts` for use by the
+// arbiter. Single source of truth for demand-units filters and
+// storyboard diagnostics. See `engine/debug.ts` and
+// `engine/demandUnitsBaseline.ts`.
 
 /** Curated list of well-known agricultural water districts used to
  *  illustrate what a single polygon represents during Beat 1C. Each popup
@@ -240,39 +245,33 @@ const HIGHLIGHT_GOLD = "#ffd87e"
 /* ── Beat 5 (loi-highlight) shared timing & identity ──
  *
  * Beat 5 choreographs a single AG_REV LOI through five sub-steps. These
- * constants are shared between the main choreography effect (which owns
- * Mapbox paint writes for demand-units / demand-units-outline) and the
- * Beat 5 driver effect (which owns React state + the locationHighlights
- * store). Hoisted to module scope so exactly one source of truth defines
- * each threshold.
+ * constants drive the Beat 5 driver effect (which owns React state and
+ * the locationHighlights store) and the popup driver. Mapbox paint writes
+ * for demand-units / demand-units-outline (AG-only filter swap, layer
+ * fade-in and fade-out, step-4 gold polygon ring) moved to the
+ * declarative beat engine's `MapPaintArbiter` via the `beat4:mapPaint:*`
+ * actor cluster in `engine/beats.ts`. The corresponding paint thresholds
+ * (`BEAT5_S1_LAYER_IN_START`, `BEAT5_S1_LAYER_IN_END`,
+ * `BEAT5_S4_POLYGON_RING_AT`, `BEAT5_LAYER_OPACITY`) live alongside
+ * those actors and are no longer mirrored here.
  *
- *   [BEAT5_S1_LAYER_IN_START, BEAT5_S1_LAYER_IN_END)  AG layer fades in
- *   [BEAT5_S1_LAYER_IN_END, BEAT5_S2_SQUARE_RING_AT)   hold at full opacity
+ *   [BEAT5_ENTER, BEAT5_S2_SQUARE_RING_AT)   AG layer fades in then holds
  *   [BEAT5_S2_SQUARE_RING_AT,    settle)  step 2: gold ring on the square
  *   [BEAT5_S3_SQUARE_POPUP_AT,   settle)  step 3: popup near the square
- *   [BEAT5_S4_POLYGON_RING_AT,   settle)  step 4: gold stroke on the polygon
  *   [BEAT5_S5_POLYGON_POPUP_AT,  settle)  step 5: popup near the polygon
  *   [BEAT5_SETTLE, BEAT5_TAIL_END)  tail: fade layer back out, clear state
  *
- * AG polygons enter Beat 4 at opacity 0 because the main choreography
- * effect fades them out at the tail of Beat 2 (see `paintDuHideSchedule`,
- * AG-class fallback). The fade-in window above ramps them back up.
+ * AG polygons enter Beat 4 at opacity 0 because the engine's
+ * `MapPaintArbiter` fades them out at the tail of Beat 2 (see
+ * `applyBeat2HideScheduleUpdate`, AG-class fallback). The Beat 5 entry
+ * actor ramps them back up.
  */
 const BEAT5_ENTER = 0.5
-// AG polygons fade back in at the start of Beat 4 (Step 5 in the UI
-// numbering). The fade-in window is ~1.5s at Beat 4's per-progress
-// velocity. Chosen to land well before the step 2 square ring at
-// BEAT5_S2_SQUARE_RING_AT = 0.58 so the layer is at full opacity by
-// the time the LOI sequence begins.
-const BEAT5_S1_LAYER_IN_START = 0.5
-const BEAT5_S1_LAYER_IN_END = 0.52
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
-const BEAT5_S4_POLYGON_RING_AT = 0.6
 const BEAT5_S5_POLYGON_POPUP_AT = 0.605
 const BEAT5_SETTLE = 0.62
 const BEAT5_TAIL_END = 0.63
-const BEAT5_LAYER_OPACITY = 0.65
 /** DU_ID of the LOI spotlighted during Beat 5 (Glenn Colusa I.D.). */
 const BEAT5_LOI_ID = "08N_SA2"
 
@@ -2013,18 +2012,11 @@ export default function TierAnimationSection() {
     tierColorLookupRef.current = lookup
   }, [outcomeLocations])
 
-  /** Pre-compute the schedule for hiding map features as SVG takes over.
-   *  Supports polygon layers (per-feature fade), line layers (global opacity),
-   *  and react-marker (no Mapbox layer to hide). */
-  interface HideScheduleEntry {
-    code: string
-    geometryType: "polygon" | "line" | "react-marker"
-    mapboxLayerId: string
-    idProperty: string
-    fadeStart: number
-    morphStart: number
-    locationIds: string[]
-  }
+  /* Per-outcome schedule for hiding map features as the SVG morph
+   * takes over. See `HideScheduleEntry` in `engine/types.ts` for the
+   * field contract. Populated by the outcome-schedule effect below
+   * and read by both the legacy listener and the engine's
+   * `MapPaintArbiter` via `ctx.getHideSchedule()`. */
   const hideScheduleRef = useRef<HideScheduleEntry[]>([])
 
   /** Build a Mapbox match expression blending from `fromHex` to each DU's
@@ -2087,6 +2079,7 @@ export default function TierAnimationSection() {
         getDemandUnitDisplayName(duId) ??
         duId,
       resolveTierLabel: getTierLabel,
+      getHideSchedule: () => hideScheduleRef.current,
     }),
     // `buildBlendedTierExpr` is a non-stable inner function. It closes
     // over `tierColorLookupRef` (a ref) so its identity doesn't
@@ -2117,12 +2110,16 @@ export default function TierAnimationSection() {
       | "beat1c"
       | "beat2"
       | "beat5" = "idle"
-    // Beat 5 polygon-ring state (step 4). When true, the
-    // `demand-units-outline` layer is currently carrying a case
-    // expression that strokes BEAT5_LOI_ID in HIGHLIGHT_GOLD. We
-    // track it here so entering / leaving the step 4 window and
-    // exiting Beat 5 entirely can cleanly restore the blended tier
-    // expression without re-writing on every tick.
+    // Beat 5 polygon-ring state (step 4). After Phase 1.f, the engine's
+    // `MapPaintArbiter` owns the Beat 5 gold polygon ring lifecycle
+    // (apply on entering the [BEAT5_S4_POLYGON_RING_AT, BEAT5_SETTLE)
+    // window, restore on exiting). The legacy Beat 5 paint branch that
+    // used to flip this flag to `true` was deleted, so the variable is
+    // now write-only `false`. The Beat 6+ branch below still reads it
+    // (the `if (beat5PolyRingOn)` restore block becomes a permanent
+    // no-op as a result), and Phase 1.g will port that branch and
+    // delete the flag entirely. Kept here only to preserve the
+    // structural shape of the legacy Beat 6+ path until then.
     let beat5PolyRingOn = false
 
     // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
@@ -2397,150 +2394,34 @@ export default function TierAnimationSection() {
         }
 
         if (v < BEAT5_ENTER) {
-          // ── Beat 2 through Beat 4 ──
-          if (phase !== "beat2") {
-            enterBeat2Phase()
-            phase = "beat2"
-          }
-          paintDuHideSchedule()
+          // Beat 2 through Beat 4 paint writes moved to
+          // `MapPaintArbiter.applyBeat2HideScheduleEnter` and
+          // `MapPaintArbiter.applyBeat2HideScheduleUpdate`, fired by
+          // the `beat2:mapPaint:hideSchedule` actor. The arbiter
+          // reads the live hide schedule via
+          // `ctx.getHideSchedule()`. This block retains only the
+          // `phase = "beat2"` bookkeeping so the downstream Beat 6+
+          // branch's `phase === "beat5"` transition re-fires
+          // `enterBeat2Phase()` on the first tick after Beat 5 ends.
+          // Phase 1.g ports the Beat 6+ branch and removes the
+          // closures above. See Storyboard Engine Hardening Plan v2,
+          // Phase 1.e.
+          phase = "beat2"
         } else if (v < BEAT5_TAIL_END) {
-          // ── Beat 5 ──
-          // Phase 0 refactor spike. When `ENGINE_OWNS_BEAT4` is true,
-          // the declarative beat engine owns every Mapbox paint and
-          // filter write in this window. We still advance the `phase`
-          // local to "beat5" so the post-tail branch below takes its
-          // `phase === "beat5"` path and runs `enterBeat2Phase()` on
-          // the first tick after the window closes. `beat5PolyRingOn`
-          // stays false (the engine's MapPaintArbiter owns the gold
-          // ring), so the restore block in the post-tail branch is a
-          // no-op.
-          if (ENGINE_OWNS_BEAT4) {
-            phase = "beat5"
-          } else {
-            // One-time entry: swap to the AG-only filter so only
-            // Agriculture DUs show, clear any lingering step-4 gold ring
-            // state, and seed opacity to 0 (step 1's fade-in will ramp
-            // it up from here).
-            if (phase !== "beat5") {
-              try {
-                if (map.getLayer("demand-units")) {
-                  map.setFilter(
-                    "demand-units",
-                    DU_AG_ONLY_FILTER as never,
-                  )
-                  map.setPaintProperty("demand-units", "fill-opacity", 0)
-                }
-                if (map.getLayer("demand-units-outline")) {
-                  map.setFilter(
-                    "demand-units-outline",
-                    DU_AG_ONLY_FILTER as never,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-opacity",
-                    0,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    0.5,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = false
-              phase = "beat5"
-            }
-
-            // Compute desired layer opacity as a piecewise function
-            // of v so the layer fades in over step 1, holds steady
-            // through steps 2-5, and fades out over the tail.
-            let targetOpacity: number
-            if (v < BEAT5_S1_LAYER_IN_START) {
-              targetOpacity = 0
-            } else if (v < BEAT5_S1_LAYER_IN_END) {
-              const t =
-                (v - BEAT5_S1_LAYER_IN_START) /
-                (BEAT5_S1_LAYER_IN_END - BEAT5_S1_LAYER_IN_START)
-              targetOpacity = BEAT5_LAYER_OPACITY * t
-            } else if (v < BEAT5_SETTLE) {
-              targetOpacity = BEAT5_LAYER_OPACITY
-            } else {
-              const t =
-                (v - BEAT5_SETTLE) / (BEAT5_TAIL_END - BEAT5_SETTLE)
-              targetOpacity = BEAT5_LAYER_OPACITY * (1 - t)
-            }
-
-            try {
-              if (map.getLayer("demand-units")) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-opacity",
-                  targetOpacity,
-                )
-              }
-              if (map.getLayer("demand-units-outline")) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-opacity",
-                  targetOpacity,
-                )
-              }
-            } catch {
-              /* ok */
-            }
-
-            // Step 4: gold stroke on the LOI polygon during [S4, settle).
-            const wantPolyRing =
-              v >= BEAT5_S4_POLYGON_RING_AT && v < BEAT5_SETTLE
-            if (wantPolyRing && !beat5PolyRingOn) {
-              try {
-                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-                if (map.getLayer("demand-units-outline") && baseExpr) {
-                  const match = [
-                    "==",
-                    ["get", "DU_ID"],
-                    BEAT5_LOI_ID,
-                  ]
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-color",
-                    ["case", match, HIGHLIGHT_GOLD, baseExpr] as never,
-                  )
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    ["case", match, 2, 0.5] as never,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = true
-            } else if (!wantPolyRing && beat5PolyRingOn) {
-              try {
-                const baseExpr = buildBlendedTierExpr(BEAT1_MID, 1)
-                if (map.getLayer("demand-units-outline") && baseExpr) {
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-color",
-                    baseExpr as never,
-                  )
-                }
-                if (map.getLayer("demand-units-outline")) {
-                  map.setPaintProperty(
-                    "demand-units-outline",
-                    "line-width",
-                    0.5,
-                  )
-                }
-              } catch {
-                /* ok */
-              }
-              beat5PolyRingOn = false
-            }
-          }
+          // Beat 5 paint writes (AG-only filter swap, layer fade-in
+          // and fade-out, step-4 gold polygon ring) are owned by the
+          // declarative beat engine's `MapPaintArbiter` via the
+          // `beat4:mapPaint:*` actor cluster in
+          // `engine/beats.ts`. Originally introduced as the Phase 0
+          // spike behind the `ENGINE_OWNS_BEAT4` flag, now the only
+          // code path. This block retains the `phase = "beat5"`
+          // assignment so the downstream Beat 6+ branch's
+          // `phase === "beat5"` transition re-fires
+          // `enterBeat2Phase()` on the first tick after Beat 5 ends.
+          // Phase 1.g ports the Beat 6+ branch and removes both the
+          // closures above and the `phase` variable entirely. See
+          // Storyboard Engine Hardening Plan v2, Phase 1.f.
+          phase = "beat5"
         } else {
           // ── Beat 6+ (post Beat 5 tail) ──
           // One-time exit from Beat 5: restore the full DU filter,

@@ -210,6 +210,16 @@ const BEAT1C_BLEND_START = 0.26
 const BEAT1C_CONVERGE_END = 0.27
 const BEAT1C_BLEND_END = 0.28
 const BEAT2_START = 0.38
+
+// Beat 2 hide-schedule thresholds. Mirror the inline
+// `BEAT2_AG_FADE_OUT_START`, `BEAT2_AG_FADE_OUT_END` declarations at
+// TierAnimationSection.tsx lines 2330 and 2331. The AG fade-out
+// window straddles `BEAT2_START` so the map layer finishes fading
+// out just as the SVG distribution-square morph begins its shape
+// deformation. `BEAT5_ENTER` is declared above at line 34 (mirror of
+// the module-level constant at TierAnimationSection.tsx line 261).
+const BEAT2_AG_FADE_OUT_START = 0.378
+const BEAT2_AG_FADE_OUT_END = 0.383
 // Reference point for `cycleRotations`. The legacy cycling expression
 // was `beat1T * BEAT1_CYCLE` where `beat1T = v / FREEZE_AT`, so the
 // full cycle window runs one rotation of `BEAT1_CYCLE = 90` phase
@@ -293,12 +303,37 @@ const BEAT1_ENTRY: BeatTableEntry = {
   ],
 }
 
+// Beat 2 (ag-rev-morph) actors. Covers the per-DU fade-out that
+// escorts each outcome's polygons off the map as the SVG
+// distribution-square morph takes over. The arbiter reads the
+// current hide schedule every tick via `ctx.getHideSchedule()`
+// because the schedule is built after tier data loads and can
+// re-build as outcomes change. Window end
+// (`BEAT5_ENTER`) is where the Beat 5 actor takes ownership and
+// writes its own AG-only baseline.
+const BEAT2_ENTRY: BeatTableEntry = {
+  id: "ag-rev-morph",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat2:mapPaint:hideSchedule",
+      window: [BEAT2_START, BEAT5_ENTER],
+      payload: {
+        kind: "beat2-hide-schedule",
+        agFadeOutStart: BEAT2_AG_FADE_OUT_START,
+        agFadeOutEnd: BEAT2_AG_FADE_OUT_END,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
 // The table
 
 export const BEAT_TABLE: readonly BeatTableEntry[] = [
   BEAT0_ENTRY,
   BEAT1_ENTRY,
-  { id: "ag-rev-morph", actors: [] },
+  BEAT2_ENTRY,
   { id: "all-other-morphs", actors: [] },
   BEAT4_ENTRY,
   { id: "list-bar", actors: [] },

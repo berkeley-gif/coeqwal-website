@@ -30,6 +30,53 @@ import type { LocationInfo } from "../OutcomeMorphOverlay"
 import type { LocationHighlight } from "../../../map/store"
 import type { MapRef } from "@repo/map"
 
+/**
+ * Per-outcome schedule entry describing when and where a set of Mapbox
+ * features should hide as their SVG distribution-square morph takes
+ * over the visual. One entry per `(outcomeCode, layer)` tuple.
+ *
+ * `code` is the outcome code the entry belongs to (`"AG_REV"`, `"DS"`,
+ * ...). Used for provenance and debugging only.
+ *
+ * `geometryType` distinguishes the three rendering shapes the
+ * storyboard uses. Only `"polygon"` entries with
+ * `mapboxLayerId === "demand-units"` drive the Beat 2 fill-opacity
+ * case expression. `"line"` entries drive a per-layer line-opacity
+ * write in the main listener (not owned by the engine yet).
+ * `"react-marker"` entries have no Mapbox layer to hide. They exist
+ * so the overlay knows which DUs are tracked by the outcome.
+ *
+ * `mapboxLayerId` is the literal Mapbox layer id the entry fades.
+ * Empty for `"react-marker"`.
+ *
+ * `idProperty` is the Mapbox feature property used to match
+ * individual features (`"DU_ID"` for demand-units). Kept on the
+ * entry so line layers with different id properties can coexist.
+ *
+ * `fadeStart` and `morphStart` are half-open progress interval
+ * endpoints on the compressed `progress` domain. Opacity writes are
+ * `1` before `fadeStart`, interpolate to `0` across the window, and
+ * stay at `0` after `morphStart`.
+ *
+ * `locationIds` enumerates the individual feature ids (DU_IDs, line
+ * ids) whose Mapbox paint this entry fades. Used as the literal
+ * array in the Mapbox `["in", ["get", idProperty], ["literal",
+ * locationIds]]` match clause.
+ *
+ * Populated by the outcome-schedule builder effect in
+ * `TierAnimationSection.tsx` once tier data loads, and held on a
+ * ref the engine reads via `ctx.getHideSchedule()`.
+ */
+export interface HideScheduleEntry {
+  code: string
+  geometryType: "polygon" | "line" | "react-marker"
+  mapboxLayerId: string
+  idProperty: string
+  fadeStart: number
+  morphStart: number
+  locationIds: string[]
+}
+
 // Actor discriminants
 
 export type ActorKind =
@@ -149,6 +196,47 @@ export type MapPaintPayload =
        * listener's `phase !== "beat1c"` guard behavior.
        */
       kind: "beat1c-tail"
+      peakOpacity: number
+    }
+  | {
+      /**
+       * Beat 2 hide-schedule. Window `[BEAT2_START, BEAT5_ENTER)`.
+       * Drives the per-DU fade-out that escorts each outcome's
+       * polygons off the map as the SVG distribution-square morph
+       * takes over.
+       *
+       * `onEnter` re-asserts the full-state baseline (`DU_CLASS_FILTER`,
+       * blended tier fill expression from
+       * `ctx.buildBlendedTierExpr(BEAT1_MID, 1)`, line-width 0.5,
+       * visibility visible) with `fillOpacity` and `lineOpacity`
+       * preserved. The first `onUpdate` tick (same tick as enter)
+       * overwrites opacity with the per-DU Mapbox `"case"` expression.
+       *
+       * `onUpdate` builds the case expression every tick from the
+       * live hide schedule returned by `ctx.getHideSchedule()`. Each
+       * polygon entry whose `mapboxLayerId` is `"demand-units"`
+       * contributes a branch:
+       *  - If `v < fadeStart`: hold at `peakOpacity`.
+       *  - Else: interpolate `peakOpacity * (1 - t)` where
+       *    `t = (v - fadeStart) / (morphStart - fadeStart)`, clamped.
+       *
+       * An Agriculture-class fallback branch covers AG_REV (which is
+       * excluded from the schedule) and any untracked AG DUs. It
+       * holds at `peakOpacity` before `agFadeOutStart`, ramps to 0
+       * across `[agFadeOutStart, agFadeOutEnd)`, and stays at 0
+       * after. The window straddles `BEAT2_START` so the fade
+       * completes just as the SVG shapes start to deform, handing
+       * the visual off cleanly to the morph overlay.
+       *
+       * The terminal `0` branch hides Urban, Refuge, and any other
+       * DU that is neither tracked nor AG.
+       *
+       * The same case expression is written to both `fill-opacity`
+       * and `line-opacity` so outlines fade in lockstep with fills.
+       */
+      kind: "beat2-hide-schedule"
+      agFadeOutStart: number
+      agFadeOutEnd: number
       peakOpacity: number
     }
   | {
@@ -307,6 +395,17 @@ export interface BeatEngineContext {
   resolveDuName: (duId: string) => string
   /** Tier-label resolver (1 becomes "Optimal", etc.). */
   resolveTierLabel: (tier: number) => string
+  /**
+   * Live accessor for the per-outcome hide schedule. Returns the
+   * current contents of the component-local `hideScheduleRef` so
+   * arbiters read the latest entries without depending on React
+   * state or re-memoizing `ctx` on every schedule rebuild.
+   *
+   * The returned array's entries are mutated/replaced when the
+   * schedule rebuilds. Arbiters must not retain the reference across
+   * ticks and must not mutate the array.
+   */
+  getHideSchedule: () => readonly HideScheduleEntry[]
 }
 
 // Arbiter interface

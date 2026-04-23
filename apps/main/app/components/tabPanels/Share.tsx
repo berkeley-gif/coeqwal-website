@@ -964,7 +964,7 @@ export default function SharePanel() {
           }}
         >
           No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios you want to share, and click the share icon on each one.
+          scenarios that you want to share, and click the share icon on each one.
         </Typography>
         <Button
           variant="outlined"

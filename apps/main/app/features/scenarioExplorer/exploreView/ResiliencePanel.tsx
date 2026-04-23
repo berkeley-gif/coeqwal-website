@@ -2463,7 +2463,7 @@ export default function ResiliencePanel({
             body: "That is one outcome across all scenarios: who handles this risk best?",
           },
           {
-            label: "Hot spots are honest.",
+            label: "Hot spots",
             body: "Red cells show issues.",
           },
         ]}
