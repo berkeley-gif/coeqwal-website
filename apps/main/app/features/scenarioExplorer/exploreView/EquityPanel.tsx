@@ -8,7 +8,16 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, use } from "react"
-import { Box, useTheme, Tooltip, Snackbar, Alert } from "@repo/ui/mui"
+import {
+  Box,
+  useTheme,
+  Tooltip,
+  Snackbar,
+  Alert,
+  Menu,
+  MenuItem,
+  Divider,
+} from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
@@ -287,6 +296,12 @@ export default function EquityPanel() {
   >([])
   const [hasShownMapHint, setHasShownMapHint] = useState(false)
   const [showMapHintSnackbar, setShowMapHintSnackbar] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{
+    mouseX: number
+    mouseY: number
+    category: string
+    tier: string
+  } | null>(null)
 
   // Watch for map location highlights being cleared to deselect all objectives
   const locationHighlights = useMapStore((state) => state.locationHighlights)
@@ -389,11 +404,57 @@ export default function EquityPanel() {
     setSelectedObjectives(categoryObjectives)
   }
 
-  const handleTierCategoryClick = (categoryName: string, tier: string) => {
-    const tierCategoryObjectives = objectives.filter(
-      (obj) => obj.category === categoryName && obj.tier === tier,
+  const handleTierCategoryClick = (
+    categoryName: string,
+    tier: string,
+    event: MouseEvent,
+  ) => {
+    event.preventDefault()
+    if (showEquityComparison) {
+      // Show context menu for filtering
+      setContextMenu({
+        mouseX: event.clientX,
+        mouseY: event.clientY,
+        category: categoryName,
+        tier: tier,
+      })
+    } else {
+      // Direct selection in non-comparison mode
+      const tierCategoryObjectives = objectives.filter(
+        (obj) => obj.category === categoryName && obj.tier === tier,
+      )
+      setSelectedObjectives(tierCategoryObjectives)
+    }
+  }
+
+  const handleContextMenuSelect = (
+    filter: "all" | "improved" | "nochange" | "worsened",
+  ) => {
+    if (!contextMenu) return
+
+    const { category, tier } = contextMenu
+    let filtered = objectives.filter(
+      (obj) => obj.category === category && obj.tier === tier,
     )
-    setSelectedObjectives(tierCategoryObjectives)
+
+    if (filter === "improved") {
+      filtered = filtered.filter((obj) => {
+        const currentTier = parseInt(obj.tier.replace("Tier ", ""))
+        const baselineTier = parseInt(obj.baselineTier.replace("Tier ", ""))
+        return currentTier < baselineTier
+      })
+    } else if (filter === "nochange") {
+      filtered = filtered.filter((obj) => obj.tier === obj.baselineTier)
+    } else if (filter === "worsened") {
+      filtered = filtered.filter((obj) => {
+        const currentTier = parseInt(obj.tier.replace("Tier ", ""))
+        const baselineTier = parseInt(obj.baselineTier.replace("Tier ", ""))
+        return currentTier > baselineTier
+      })
+    }
+
+    setSelectedObjectives(filtered)
+    setContextMenu(null)
   }
 
   const handleShowOnMap = useCallback(
@@ -762,6 +823,44 @@ export default function EquityPanel() {
         />
       </Box>
 
+      {/* Context menu for filtering tier-category cells */}
+      <Menu
+        open={contextMenu !== null}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem
+          onClick={() => handleContextMenuSelect("all")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          All in this cell
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => handleContextMenuSelect("improved")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          Improved only
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleContextMenuSelect("nochange")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          No change only
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleContextMenuSelect("worsened")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          Worsened only
+        </MenuItem>
+      </Menu>
+
       <Snackbar
         open={showMapHintSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -775,7 +874,7 @@ export default function EquityPanel() {
           sx={{
             width: "100%",
             border: 2,
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           Click on squares in the grid to view their locations on the map
