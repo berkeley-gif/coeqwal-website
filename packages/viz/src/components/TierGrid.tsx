@@ -45,7 +45,11 @@ export interface TierGridProps {
   selectedObjectives?: Objective[]
   onObjectiveClick?: (objective: Objective) => void
   onCategoryClick?: (category: string) => void
-  onTierCategoryClick?: (category: string, tier: string) => void
+  onTierCategoryClick?: (
+    category: string,
+    tier: string,
+    event: MouseEvent,
+  ) => void
   onShowOnMap?: (locationIds: string[]) => void
   tierColorMap?: Record<string, string>
   showMapView?: boolean
@@ -401,7 +405,11 @@ const drawTierGrid = (
   height: number,
   categoryLayouts: CategoryLayout[],
   tiers: string[],
-  onTierCategoryClick?: (category: string, tier: string) => void,
+  onTierCategoryClick?: (
+    category: string,
+    tier: string,
+    event: MouseEvent,
+  ) => void,
   showMapView: boolean = false,
 ) => {
   const gridWidth = width - MARGIN.left - MARGIN.right
@@ -425,7 +433,9 @@ const drawTierGrid = (
           .attr("height", tierHeight)
           .attr("fill", "transparent")
           .style("cursor", "pointer")
-          .on("click", () => onTierCategoryClick(layout.category, tier))
+          .on("click", (event) =>
+            onTierCategoryClick(layout.category, tier, event),
+          )
           .on("mouseover", function () {
             d3.select(this).attr("fill", "rgba(0, 0, 0, 0.1)")
           })
