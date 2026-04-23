@@ -89,7 +89,7 @@ export function CenterImageText({
         src={imgSrc}
         alt={imgAlt}
         sx={{
-          width: { xs: "200px", sm: "240px", md: "280px", lg: "300px", xl: "600px" },
+          width: { xs: "200px", sm: "500px", md: "280px", lg: "300px", xl: "600px" },
           height: "auto",
           objectFit: "contain",
         }}

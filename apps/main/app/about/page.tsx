@@ -23,19 +23,19 @@ export default function AboutPage() {
     {
       imgSrc: "/images/about/approach-person-whiteboard.png",
       imgAlt: "A person writing on a whiteboard",
-      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim) to develop and analyze a broad range of alternative water management scenarios for the state.",
+      text: "Our work is structured around a participatory scenario planning approach. It is an iterative process that involves the use of a water resources planning model (CalSim) to develop and analyze a broad range of alternative water management strategies for the state.",
       imagePosition: "left",
     },
     {
       imgSrc: "/images/about/approach-person-projector.png",
       imgAlt: "A person on a podium with a projection behind",
-      text: "We next share the results of the scenarios – describing patterns and amounts of water allocated to different water users and the environment – with community partners, who provide feedback on the specific scenarios that were run, how they were evaluated, and the manner in which they were presented. ",
+      text: "Using CalSim, we simulate how these strategies affect water allocation outcomes – the patterns and amounts of water allocated to different water users and the environment – under a range of possible climate futures. We then convene community partners in workshops to receive feedback on the scenarios that are run and how they are interpreted.",
       imagePosition: "right",
     },
     {
       imgSrc: "/images/about/approach-discussion-field.png",
       imgAlt: "Three people discussing on the field",
-      text: "Community feedback is then used to refine our scenarios and inform the next phase of work, which again, is shared with our partners for additional input. This is an intensive, collaborative process that has involved engagement with over 60 representatives from state and federal agencies, water districts, NGOs, community-based organizations, academic institutions, and Native American Tribes. ",
+      text: "Community feedback is used to refine our scenarios and inform the next phase of work, which again, is shared with our partners for additional input. This is an intensive, collaborative process that has involved engagement with over 60 representatives from state and federal agencies, water districts, NGOs, community-based organizations, academic institutions, and Native American Tribes.",
       imagePosition: "left",
     },
   ]
@@ -111,10 +111,8 @@ export default function AboutPage() {
         id="intro"
         ariaLabel="intro"
         backgroundColor={theme.palette.brand.panelMedium}
-        bodyTextBold="COEQWAL – the Collaboratory for Equity in Water Allocation"
-        bodyText="- is a collaborative, community-engaged research project aimed at delivering actionable information for water management planning in California. 
-                    Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. 
-                    COEQWAL is working to change that. "
+        bodyTextBold="COEQWAL – the Collaboratory for Equity in Water Allocation - "
+        bodyText="is a collaborative, community-engaged research project aimed at delivering actionable information for water management planning in California. Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. COEQWAL is working to change that. "
         scrollToId="projectGoals"
         imgSrc="/images/about/collage-intro.png"
         imgAlt="A collage showing a person advocating on a podium, birds flying, a river flowing, a farmer holding grapes and a child looking at a salmon inside a fish tank"
@@ -124,19 +122,13 @@ export default function AboutPage() {
         id="projectGoals"
         ariaLabel="project goals"
         title="Project Goals"
-        body1="Our overall project goal is to democratize access to data used in water planning and decision-making. 
-                    Our website invites visitors to learn about California’s water system and explore how alternative water management strategies affect outcomes for cities, 
-                    agriculture, and the environment. "
-        body2="Tools on the sites are designed to guide visitors to specific scenarios that align with their interests. 
-                    We aim to help users to better understand the nature of trade-offs among management objectives and to provide data that empowers communities 
-                    to shape our water future."
+        body1="Our overall project goal is to make data used in water planning and decision-making more accessible. Our website invites visitors to learn about California’s water system and explore how alternative water management strategies affect outcomes for cities, agriculture, and the environment."
+        body2="Tools on the sites are designed to guide visitors to specific scenarios that align with their interests. We aim to help users to better understand the nature of trade-offs among management objectives and to provide data that empower communities to shape our water future."
         imgSrc="/images/about/tiered-image-text-hills.png"
         imgAlt="Photo of hills and farmland in california"
         logoSrc="/images/about/logo-uc-ri.png"
         logoAlt="University of California Research and Innovation"
-        logoText="This project is supported by funds from the California Climate Action Seed and Matching Grants of the University of California, 
-                    Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, 
-                    a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
+        logoText="This project is supported by funds from the California Climate Action Seed and Matching Grants of the University of California, Grant Number R02CM7222. This funding is part of the California Climate Action Initiative, a $100 million investment in climate action research and innovation projects in the California State Budget Act of 2022-23."
       />
       <ScrollImageTextBlocks
         id="ourApproach"
