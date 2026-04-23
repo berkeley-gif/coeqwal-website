@@ -64,7 +64,6 @@ import {
 } from "@mui/material"
 import MenuIcon from "@mui/icons-material/Menu"
 import CloseIcon from "@mui/icons-material/Close"
-import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
@@ -153,6 +152,18 @@ export interface BaseHeaderProps {
   shrinkOnScroll?: boolean // default: true
   showLanguageSwitcher?: boolean // default: false
 
+  /**
+ * Current locale — controls which language the header renders in.
+ * Only required when showLanguageSwitcher is true.
+ */
+  locale?: "en" | "es"
+
+  /**
+ * Called when user selects a new locale via the LanguageSwitcher.
+ * Only required when showLanguageSwitcher is true.
+ */
+  onLocaleChange?: (locale: string) => void
+
   /* --- Action handlers (optional overrides) --- */
   onLogoClick?: () => void
   onGetDataClick?: () => void
@@ -239,6 +250,8 @@ export function BaseHeader({
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
   logoVariant = "light",
+  locale,
+  onLocaleChange,
   topOffset,
   sideOffset,
 }: BaseHeaderProps) {
@@ -418,9 +431,8 @@ export function BaseHeader({
   /* ========================================
    * TRANSLATIONS (i18n)
    * ======================================== */
-  const { locale, isLoading } = useTranslation()
-  const safeLocale = !locale || isLoading ? "en" : locale
-  const t = translations[safeLocale as keyof TranslationsMap] || translations.en
+  const safeLocale = locale ?? "en"
+  const t = translations[safeLocale] ?? translations.en
 
   /* ========================================
    * RENDER
@@ -561,13 +573,13 @@ export function BaseHeader({
                     {
                       key: "managed",
                       label: t.waterStories.managed,
-                      onClick: () => {},
+                      onClick: () => { },
                       disabled: true,
                     },
                     {
                       key: "equity",
                       label: t.waterStories.equity,
-                      onClick: () => {},
+                      onClick: () => { },
                       disabled: true,
                     },
                   ]}
@@ -607,7 +619,15 @@ export function BaseHeader({
                 </Button>
 
                 {/* Language switcher (OPTIONAL) */}
-                {showLanguageSwitcher && <LanguageSwitcher />}
+                {showLanguageSwitcher && (
+                  <LanguageSwitcher
+                    currentLocale={safeLocale}
+                    // Fall back to no-op if caller doesn't provide onLocaleChange.
+                    // This prevents a crash in apps that show the switcher but haven't
+                    // wired up the handler yet during migration.
+                    onLocaleChange={onLocaleChange ?? (() => { })}
+                  />
+                )}
               </Stack>
             </Box>
           )}
@@ -619,7 +639,15 @@ export function BaseHeader({
           {isMobile && (
             <Stack direction="row" spacing={1} alignItems="center">
               {/* Language switcher stays visible on mobile (if enabled) */}
-              {showLanguageSwitcher && <LanguageSwitcher />}
+              {showLanguageSwitcher && (
+                <LanguageSwitcher
+                  currentLocale={safeLocale}
+                  // Fall back to no-op if caller doesn't provide onLocaleChange.
+                  // This prevents a crash in apps that show the switcher but haven't
+                  // wired up the handler yet during migration.
+                  onLocaleChange={onLocaleChange ?? (() => { })}
+                />
+              )}
 
               {/* Hamburger menu button */}
               <IconButton

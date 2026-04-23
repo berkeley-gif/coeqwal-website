@@ -1,3 +1,7 @@
+export function generateStaticParams() {
+  return [{ locale: "en" }, { locale: "es" }]
+}
+
 export default function VerificationPage() {
   return (
     <div style={{ padding: 40 }}>

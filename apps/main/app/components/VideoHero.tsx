@@ -14,7 +14,8 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { useTranslation } from "@repo/i18n"
+import { useTranslations } from "next-intl"  
+import { richTextComponent } from "@repo/i18n"   
 import { useReducedMotion } from "@repo/motion"
 import {
   ScrollToButton,
@@ -55,7 +56,7 @@ export default function VideoHero({
   inset,
   frameBackground,
 }: VideoHeroProps) {
-  const { t } = useTranslation()
+  const t = useTranslations("App.HomePage")
   const theme = useTheme()
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [canPlay, setCanPlay] = useState(false)
@@ -290,10 +291,10 @@ export default function VideoHero({
           component="h2"
           sx={{ display: "block", mb: 0.5 }}
         >
-          {t("homePanel.titleLine1")}
+          {t.rich("titleLine1", richTextComponent)}
         </Typography>
         <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-          {t("homePanel.titleLine2")}
+          {t.rich("titleLine2", richTextComponent)}
         </Typography>
       </Box>
 
@@ -319,7 +320,7 @@ export default function VideoHero({
           zIndex: theme.zIndex.heroContent,
         }}
       >
-        {t("homePanel.content")}
+        {t.rich("content", richTextComponent)}
       </Typography>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}

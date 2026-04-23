@@ -2,7 +2,8 @@
 
 import { useRef, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { useTranslation } from "@repo/i18n"
+import { useTranslations } from "next-intl"  
+import { richTextComponent } from "@repo/i18n"   
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   CoeqwalPanel,
@@ -80,7 +81,7 @@ const VIDEO_SRCS: VideoSource[] = [
 
 const IntroSection = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const t = useTranslations("App.HomePage")
   const containerRef = useRef<HTMLDivElement>(null)
   const morphHeadlineRef = useRef<HTMLDivElement>(null)
   // Invisible fixed marker at the viewport's vertical center.
@@ -309,19 +310,19 @@ const IntroSection = () => {
 
   const headlines = [
     {
-      line1: t("homePanel.titleLine1"),
-      line2: t("homePanel.titleLine2"),
+      line1: t("titleLine1"),
+      line2: t("titleLine2"),
       textShadow: true,
     },
     {
-      line1: "What is",
-      line2: "COEQWAL?",
+      line1: t("aboutPanel.headingLine1"),
+      line2: t("aboutPanel.headingLine2"),
       textShadow: false,
       textColor: "text.secondary",
     },
     {
-      line1: "What water issues",
-      line2: "matter to you?",
+      line1: t("waterIssuesPanel.headingLine1"),
+      line2: t("waterIssuesPanel.headingLine2"),
       textShadow: false,
       textColor: "text.primary",
     },
@@ -425,32 +426,25 @@ const IntroSection = () => {
                   component="span"
                   sx={{ display: "block", color: "text.secondary" }}
                 >
-                  What is
+                  {t.rich("aboutPanel.headingLine1", richTextComponent)}
                 </Typography>
                 <Typography
                   variant="h1"
                   component="span"
                   sx={{ display: "block", color: "text.secondary" }}
                 >
-                  COEQWAL?
+                  {t.rich("aboutPanel.headingLine2", richTextComponent)}
                 </Typography>
               </>
             }
             description={
               <>
-                COEQWAL – the Collaboratory for Equity in Water Allocation – is
-                a publicly-funded project that works with communities to better
-                understand how water is managed in California.
-                <br />
-                <br />
-                Using water planning models, COEQWAL sheds light on how
-                alternative decisions and climate change scenarios shape our
-                water future.
+                {t.rich("aboutPanel.description", richTextComponent)}
               </>
             }
             cta={
               <AboutCtaLink href="/about">
-                Learn more about COEQWAL
+                {t.rich("aboutPanel.cta", richTextComponent)}
               </AboutCtaLink>
             }
             layout="split"

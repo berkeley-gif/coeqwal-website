@@ -1,17 +1,10 @@
 /**
- * Root layout - Application root with providers
- *
- * Sets up theme, translations, and font loading for the entire app.
+ * Root layout - pass-through shell.
+ * HTML structure, providers, and theme are handled by
+ * app/[locale]/layout.tsx which sets lang dynamically
+ * based on the active locale.
  */
-
-import { StrictMode, Suspense } from "react"
 import type { Metadata } from "next"
-import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
-import { TranslationProvider } from "@repo/i18n"
-import { DataProvider } from "@repo/data/providers"
-import { PanelTuner } from "@repo/ui"
-import { FontLoader } from "./components/FontLoader"
-import { ActiveThemePanel } from "./components/ActiveThemePanel"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -23,27 +16,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    // position: relative on html AND body required for Framer Motion useScroll offset calculations
-    <html lang="en" style={{ position: "relative" }}>
-      <body style={{ position: "relative" }}>
-        <StrictMode>
-          <FontLoader kitId="rxm7kha" />
-          <TranslationProvider initialLocale="en">
-            <DataProvider>
-              <ThemeRegistry>
-                <Suspense fallback={null}>
-                  <ActiveThemePanel />
-                </Suspense>
-
-                {children}
-
-                <PanelTuner />
-              </ThemeRegistry>
-            </DataProvider>
-          </TranslationProvider>
-        </StrictMode>
-      </body>
-    </html>
-  )
+  return <>{children}</>
 }

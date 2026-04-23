@@ -1,0 +1,163 @@
+{
+  "Common": {
+    "skipToContent": "Saltar al contenido principal"
+  },
+  "App": {
+    "HomePage": {
+      "titleLine1": "¿Cuál es el futuro del",
+      "titleLine2": "agua en California?",
+      "content": "El agua conecta a todos los californianos y es vital para nuestras comunidades, granjas y el medio ambiente. Satisfacer todas las necesidades no es fácil, especialmente con el cambio climático.",
+      "callToAction": "En este sitio, puede aprender cómo se gestiona el agua en el Valle Central de California, explorar cómo cambian las asignaciones bajo diferentes escenarios, y usar las mismas herramientas que los tomadores de decisiones.",
+      "aboutPanel": {
+        "headingLine1": "¿Qué es",
+        "headingLine2": "COEQWAL?",
+        "description": "<p>COEQWAL – el Laboratorio para la Equidad en la Asignación del Agua – es un proyecto de financiamiento público que trabaja con comunidades para entender mejor cómo se gestiona el agua en California.</p><p>Usando modelos de planificación hídrica, COEQWAL ilumina cómo las decisiones alternativas y los escenarios de cambio climático moldean nuestro futuro hídrico.</p>",
+        "cta": "Conozca más sobre COEQWAL"
+      },
+      "waterIssuesPanel": {
+        "headingLine1": "¿Que temas del agua",
+        "headingLine2": "le importan?",
+        "description": "El agua es importante para todos nosotros. De los granjeros en el Valle Central hasta las comunidades en el Delta, del salmón en el Río Sacramento hasta los usuarios citadinos en Los Angeles. Podemos considerar como las decisiones afectan los temas que a las personas les interesan."
+      },
+      "knowMore": {
+        "line1": "¿Quiere",
+        "line2": "saber más?",
+        "items": [
+          "<bold>Aprenda</bold> cómo se gestiona el agua en el Valle Central de California,",
+          "<bold>Explore</bold> cómo cambian los resultados hídricos bajo diferentes escenarios, y",
+          "<bold>Comparta</bold> sus ideas sobre el futuro del agua en California"
+        ],
+        "body": "El agua es limitada y cada decisión tiene sus compensaciones. COEQWAL le permite explorar diferentes escenarios hídricos y entender cómo las decisiones moldean los futuros posibles para comunidades, granjas, ríos y el Delta."
+      }
+    },
+    "mapPanel": {
+      "panelOne": {
+        "boldText": "¿Sabía que California tiene uno de los sistemas de agua más complejos del mundo?"
+      }
+    },
+    "scenariosPanel": {
+      "part1": "Trabajando con comunidades de toda California, el equipo de COEQWAL usa CalSim para modelar 30 formas alternativas de gestionar el sistema hídrico de California.",
+      "part2": "Estos escenarios – combinaciones únicas de estrategias operativas e hidroclimatología – proporcionan información sobre cómo funciona nuestro sistema hídrico y los compromisos que existen entre los objetivos."
+    },
+    "interstitialPanel": {
+      "content": "En este sitio, puede aprender sobre el agua de California y explorar cómo cambian las asignaciones de agua bajo diferentes escenarios."
+    },
+    "interstitial": {
+      "content": [
+        "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo.",
+        "El proyecto COEQWAL te ayuda a entender cómo se mueve el agua en California, cómo podrían ser las alternativas y los efectos de un clima cambiante."
+      ],
+      "boldText": "Desde las montañas hasta la costa, y de norte a sur,",
+      "part1": "los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo.",
+      "part2": "El clima determina cuánta agua cae en nuestro estado. Los derechos de agua, las políticas y las leyes guían quién recibe agua, la cantidad y cuándo la recibe.",
+      "part3": "El proyecto COEQWAL usa CalSim para modelar una amplia gama de escenarios alternativos de gestión del agua, cada uno diseñado para preguntar,"
+    },
+    "secondaryNavigation": {
+      "tab1": "Aprender",
+      "tab2": "Operaciones actuales",
+      "tab3": "Temas del agua"
+    },
+    "CaliforniaWaterPanel": {
+      "title": "Agua de California"
+    },
+    "californiaWater": {
+      "title": "Agua de California",
+      "paragraph1": "La mayor parte del agua de California cae en invierno como lluvia y nieve en el norte de California y la Sierra Nevada.",
+      "paragraph2": "La capa de nieve sirve como un embalse natural, liberando agua durante la primavera.",
+      "paragraph3": "El río Sacramento, el más grande de California, fluye desde el norte y se une con el río San Joaquín en el Delta.",
+      "paragraph4": "Aunque California tiene abundancia de agua, la mayor parte cae lejos de donde vive, trabaja y cultiva la mayoría de la gente.",
+      "arLabel": {
+        "title": "Río atmosférico",
+        "date": "diciembre de 2024"
+      }
+    },
+    "managingWater": {
+      "title": "Gestión del agua",
+      "paragraph1": "El vasto sistema hídrico de California incluye más de mil presas y cientos de millas de canales.",
+      "paragraph2": "Gran parte del agua dulce que fluye desde los ríos Sacramento y San Joaquín hacia el Delta se bombea hacia canales.",
+      "paragraph3": "Gestionar el agua de California no es tarea fácil. La precipitación varía de manera impredecible tanto estacionalmente como de año a año."
+    },
+    "challenges": {
+      "title": "Desafíos crecientes",
+      "paragraph1": "El agua de California es esencial para las granjas, las comunidades y el medio ambiente, pero no todos tienen igual acceso.",
+      "paragraph2": "La transformación de nuestro sistema hídrico ha afectado a los ecosistemas de agua dulce.",
+      "paragraph3": "El cambio climático hace las cosas aún más difíciles. California experimenta condiciones climáticas más extremas.",
+      "paragraph4": "A pesar de estos desafíos, California tiene oportunidades para adaptarse."
+    },
+    "calsim": {
+      "title": "Explorando alternativas con CalSim",
+      "paragraph1": "Para explorar formas alternativas de gestionar el agua, necesitamos entender cuánta agua está disponible, dónde se necesita y cómo las decisiones en una parte del sistema pueden afectar todo lo demás.",
+      "paragraph2": "El modelo rastrea cuánta agua fluye hacia los embalses, cuánta se almacena y libera, dónde se entrega y cuánta agua subterránea se usa o preserva.",
+      "paragraph3": "Cada combinación única de reglas y condiciones climáticas crea un escenario que muestra cómo podría asignarse el agua bajo diferentes circunstancias."
+    },
+    "invitation": {
+      "title": "Comience su exploración",
+      "paragraph1": "Le invitamos a explorar el escenario de operaciones actuales, que representa cómo se gestiona actualmente el agua en California.",
+      "paragraph2": "Hemos organizado nuestra biblioteca de escenarios en temas que abordan problemas específicos del agua.",
+      "paragraph3": "También puede ir directamente a la fuente y acceder a los datos de ejecución de escenarios sin procesar.",
+      "paragraph4": "A continuación puede buscar en nuestra biblioteca de escenarios resultados específicos."
+    },
+    "scenarioResults": {
+      "title": "Resultados de Escenarios",
+      "description": "Ver y comparar resultados de diferentes escenarios de gestión del agua.",
+      "search": "Buscar"
+    },
+    "questionBuilder": {
+      "defaultTerms": {
+        "waterAvailability": "disponibilidad de agua",
+        "outcomes": "resultados",
+        "decisions": "decisiones"
+      },
+      "scenarioSingular": "escenario",
+      "scenarioPlural": "escenarios",
+      "singularVerb": "afecta",
+      "pluralVerb": "afectan",
+      "questionFormat": "¿Cómo {verb} {operation} a {outcome}?",
+      "questionFormatWithClimate": "¿Cómo {verb} {operation} a {outcome} con {climate}?",
+      "swappedFormat": "Para estos {outcome}, ¿qué {operation} podríamos probar?",
+      "swappedFormatNoChange": "Para {outcome}, ¿qué {operation} podríamos considerar?",
+      "connectors": {
+        "and": "y",
+        "in": "en",
+        "to": "a",
+        "under": "bajo",
+        "increase": "aumentar",
+        "decrease": "disminuir",
+        "affect": "afectar",
+        "with": "con"
+      },
+      "ui": {
+        "switch": "cambiar",
+        "clearSelection": "Borrar selección",
+        "clearOperations": "Borrar operaciones",
+        "clearOutcomes": "Borrar resultados",
+        "clearSelections": "Borrar selecciones"
+      },
+      "operationsSelector": {
+        "title": "{decisions}",
+        "swappedTitle": "podríamos considerar?",
+        "searchPlaceholder": "Escribe para buscar...",
+        "searchOperations": "Buscar operaciones",
+        "comingSoon": "Próximamente"
+      },
+      "outcomesSelector": {
+        "title": "{waterAvailability}",
+        "swappedTitle": "Para cambiar {waterAvailability}",
+        "includeClimate": "Incluir futuros climáticos",
+        "chooseLocation": "Elegir ubicación en el mapa",
+        "mapPlaceholder": "Placeholder del Mapa"
+      },
+      "climateSelector": {
+        "title": "clima",
+        "options": {
+          "hist_adj": "condiciones actuales",
+          "cc50": "futuro moderadamente más caluroso y seco",
+          "cc95": "futuro severamente más caluroso y seco"
+        }
+      },
+      "sectionAccordion": {
+        "comingSoon": "Próximamente"
+      }
+    }
+  }
+}

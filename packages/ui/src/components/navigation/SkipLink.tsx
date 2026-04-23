@@ -33,19 +33,10 @@
 
 import { useCallback } from "react"
 import { Box, useTheme } from "@mui/material"
-import { useTranslation } from "@repo/i18n"
-
-// Translations for skip link text
-const translations = {
-  en: {
-    skipToContent: "Skip to main content",
-  },
-  es: {
-    skipToContent: "Saltar al contenido principal",
-  },
-} as const
 
 interface SkipLinkProps {
+  /**  Translated label for the skip link */
+  label: string
   /**
    * Target element ID (without #)
    * @default "main-content"
@@ -60,12 +51,11 @@ interface SkipLinkProps {
 }
 
 export function SkipLink({
+  label,
   targetId = "main-content",
   zIndex = 10000,
 }: SkipLinkProps) {
   const theme = useTheme()
-  const { locale } = useTranslation()
-  const t = translations[locale as keyof typeof translations] ?? translations.en
 
   // Handle click to ensure focus moves to target element
   // Native anchor behavior scrolls but doesn't always move focus reliably
@@ -124,7 +114,7 @@ export function SkipLink({
         },
       }}
     >
-      {t.skipToContent}
+      {label}
     </Box>
   )
 }

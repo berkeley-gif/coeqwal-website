@@ -1,4 +1,5 @@
 import { createTheme, Theme, alpha } from "@mui/material/styles"
+import React from "react"
 
 /* ========================================================
  * COEQWAL MUI THEME
@@ -177,6 +178,8 @@ const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
 // GT-Alpina accent typeface: local .otf files in apps/main/public/fonts/
 const accentFontFaces = `
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
   @font-face {
     font-family: "GT Alpina";
     src: url("/fonts/GT-Alpina-Standard-Thin-Trial.otf") format("opentype");
@@ -1177,6 +1180,14 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.5,
     },
+    // Accent italic - for proper nouns, key terms, and emphasis
+    // Uses GT Alpina accent typeface in italic
+    // e.g. "Central Valley", "CalSim", "Sacramento River"
+    accentItalic: {
+      fontFamily: `"Merriweather", Georgia, "Times New Roman", serif`,
+      fontStyle: "italic" as const,
+      fontWeight: 500,
+    },
   },
   shape: {
     borderRadius: parseInt(themeValues.borderRadius.md, 10),
@@ -1956,6 +1967,7 @@ declare module "@mui/material/styles" {
     tooltipHeader: React.CSSProperties
     scenarioTitle: React.CSSProperties
     storyBody: React.CSSProperties
+    accentItalic: React.CSSProperties
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
@@ -1977,6 +1989,7 @@ declare module "@mui/material/styles" {
     tooltipHeader?: React.CSSProperties
     scenarioTitle?: React.CSSProperties
     storyBody?: React.CSSProperties
+    accentItalic?: React.CSSProperties
   }
 }
 
