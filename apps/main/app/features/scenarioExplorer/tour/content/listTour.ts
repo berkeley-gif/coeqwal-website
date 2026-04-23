@@ -53,7 +53,7 @@ export const LIST_TOUR: TourStep[] = [
     anchorId: "list.outcome.infoButton",
     eyebrow: "STEP 2 - READ THE OUTCOMES",
     title: "Outcome summary",
-    body: "Click the i when you need a reminder of what the outcome measures.",
+    body: "Click the {{infoIcon}} when you need a reminder of what the outcome measures.",
     placement: "bottom",
   },
   {
@@ -68,13 +68,12 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.step2.column",
     anchorId: "list.outcome.column",
     eyebrow: "STEP 2 - READ THE OUTCOMES",
-    title: "Read down one column for the answer",
-    body: "You can compare down the column instead of many across the row.",
+    title: "Read down the column to compare",
     placement: "left",
   },
   {
     id: "list.step3.row",
-    anchorId: "list.select.row",
+    anchorId: "list.select.checkbox",
     eyebrow: "STEP 3 - GATHER A SHORTLIST",
     title: "Select the scenarios that you want to focus on",
     body: "Use the checkboxes to gather a working set without losing the rest of the library.",
@@ -88,14 +87,11 @@ export const LIST_TOUR: TourStep[] = [
     body: "Once the strongest candidates are checked, hide the rest so the shortlist becomes easier to compare.",
     placement: "bottom",
   },
-  {
-    id: "list.step3.showBaselines",
-    anchorId: "list.select.showBaselines",
-    eyebrow: "STEP 3 - GATHER A SHORTLIST",
-    title: "Baselines stay nearby when better than what matters",
-    body: "Reveal alternative baselines when your shortlist looks strong only relative to one reference case.",
-    placement: "bottom",
-  },
+  /*
+   * Outcome view toggles (Average / Bar / Distribution). Omitted from the
+   * active tour for now; were steps 11-13/14. Uncomment the block below to
+   * restore. ToolTour renumbers n/N from LIST_TOUR.length automatically.
+   *
   {
     id: "list.step4.average",
     anchorId: "list.viewControl.average",
@@ -120,10 +116,11 @@ export const LIST_TOUR: TourStep[] = [
     body: "Use it when you need to inspect which locations are driving the result, compare climates, or connect the cell back to spatial detail.",
     placement: "bottom",
   },
+  */
   {
     id: "list.journey",
     eyebrow: "TAKE YOUR SHORTLIST FORWARD",
-    title: "What to do after the List view",
-    body: "Radar compares the shortlisted scenarios across every chosen outcome at once instead of isolated cells. Distribution inspects the spread across locations more directly.  Resilience tests the same scenarios across climate futures and operational leverage.",
+    title: "What to do after this chart",
+    body: "Your shortlist stays with you in the other views. Use the links above to go to the next tool when you are ready.",
   },
 ]

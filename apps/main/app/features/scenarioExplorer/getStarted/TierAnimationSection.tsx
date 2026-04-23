@@ -68,7 +68,6 @@ import {
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
-  writeDemandUnitsBaseline,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
@@ -193,13 +192,6 @@ const ANIM_POLYGON_LAYERS = [
 ] as const
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
-
-/** Index of the LOI-highlight beat in BEATS (the "loi-highlight"
- *  entry, progress target 0.62). `MapPaintArbiter` owns
- *  `demand-units` paint/filter/visibility while this beat is active,
- *  so other writers (notably the post-interactive teardown effect)
- *  must refuse to write during this window. */
-const LOI_BEAT_INDEX = 4
 
 // `logDuState`, `debugLog`, and `DU_CLASS_FILTER` all live in
 // `./engine` now and are imported at the top of the file.
@@ -886,173 +878,70 @@ export default function TierAnimationSection() {
 
   /* ── Post-interactive teardown on outcome deselect.
    *
-   * When the user clicks a distribution square during any interactive
-   * `paused` / `finished` state, `OutcomePolygonLayer` mounts and
-   * writes a set of paint properties onto the shared `demand-units`
-   * and `demand-units-outline` layers: non-zero opacity and color
-   * transitions (350ms), a feature-id match filter, a match-based
-   * fill-color / line-color, and a non-default line-width / offset.
+   * As of Phase 3c step 1 the `demand-units` / `demand-units-outline`
+   * teardown (filter reset, opacity 0, visibility visible, blended
+   * tier color, default outline width, plus the deferred-to-idle
+   * handling for post-`removeLayer` style-busy windows) is owned by
+   * `InteractivePaintArbiter.onExit`. That is driven from the sync
+   * effect further below; nothing here has to replicate it.
    *
-   * Its unmount cleanup only hides the layers (`visibility: "none"`)
-   * and sets a match-nothing filter on the fill. It does not reset
-   * the transitions, filter on outline, or colors. Those stale writes
-   * linger on the layer and break the rest of the storyboard. Most
-   * visibly: a 350ms `fill-opacity-transition` causes every per-tick
-   * opacity write by the beat engine or choreography to lag behind
-   * its target, so Beat 4's AG fade-in (0 to 0.65 over ~1.5s) never
-   * actually renders.
+   * What remains here is the NON-demand-units half of the old
+   * teardown: flip visibility back to `"visible"` on the animation
+   * polygon layers the storyboard doesn't own (`calsim-wba`,
+   * `california-reservoir`, `delta-detaw`, plus their outlines).
+   * `OutcomePolygonLayer`'s unmount cleanup set those to `"none"` when
+   * the user deselected a non-DU outcome; leaving them hidden means a
+   * subsequent click on the same layer -- or any other code that
+   * assumes the base style's default visibility -- has to discover
+   * the layer is hidden and flip it back. Cheap and idempotent to do
+   * it once on deselect instead. */
+  /* Restore non-DU layer visibility AND zero their opacity on deselect.
    *
-   * This effect fires only on the truthy to null transition of
-   * `selectedOutcomeCode` (i.e. the user exits interactive mode),
-   * which happens after React has committed `OutcomePolygonLayer`'s
-   * unmount cleanup (child unmount effects run before parent
-   * effects in the same commit). So the writes here are the last
-   * ones applied. We fully reset `demand-units` and
-   * `demand-units-outline` back to the clean choreography-ready
-   * state: instant transitions, class filter, blended tier color,
-   * default outline width/offset, visibility visible. For every
-   * other animation polygon layer we only need to restore
-   * visibility.
+   * Two things need to be undone when an interactive non-DU selection
+   * ends (truthy -> null `selectedOutcomeCode`):
    *
-   * Truthy to different-truthy transitions (cross-outcome swap
-   * during interactive play) are OPL's job to handle. Running this
-   * teardown for those would create a second writer that races OPL
-   * on `demand-units`, which regressed Beat 5 by stomping the
-   * arbiter's Agriculture-only filter.
+   *   1. `OutcomePolygonLayer`'s unmount flipped the fill + outline
+   *      layout `visibility` to `"none"`. A subsequent storyboard
+   *      Restart would then try to render Beat 5's non-DU polygons
+   *      through a `visibility: "none"` layer and silently show
+   *      nothing. We must put `visibility` back to `"visible"`.
    *
-   * If the map style is not loaded at the moment the effect fires
-   * (camera ease mid-flight, source update, layer swap just
-   * committed), the restore is deferred to the next `idle` event
-   * instead of silently dropped. An earlier version of this effect
-   * bailed in that case, which was the root cause of the Step 4 to
-   * Step 5 AG layer being invisible after a distribution-square
-   * click. Before the deferred restore actually runs, it
-   * re-validates that `selectedOutcomeCode` is still null and that
-   * we have not navigated into the Beat 5 window
-   * (`beatIndexRef.current < LOI_BEAT_INDEX`). Otherwise it bails
-   * and yields ownership to whoever claimed the layer in the
-   * meantime. The final line of defense is
-   * `MapPaintArbiter.applyBeat5Enter` which reasserts the Beat 5
-   * preconditions regardless. */
+   *   2. The `applyPaintChanges` effect (below) writes `["case", ...]`
+   *      expressions to `fill-opacity` / `line-opacity` (and a gold
+   *      `line-color` expression) while a selection is active. OPL's
+   *      unmount does NOT reset those paint properties -- it only
+   *      toggles `visibility`. So if we restore `visibility` without
+   *      also zeroing the opacities, the stale case expressions
+   *      render (e.g. a gold-outlined `delta-detaw` stuck on the map
+   *      after the user switched from DELTA_ECO to a marker outcome
+   *      and then pressed Next). Writing scalar 0 for both opacities
+   *      is enough: the next OPL mount for that outcome will raise
+   *      them back to 1 as part of its fade-in path, and the
+   *      in-between storyboard beats don't read these layers. */
   const prevSelectedOutcomeCodeRef = useRef<string | null>(null)
-  // Live ref used by the idle-deferred callback below so we can bail
-  // out if `selectedOutcomeCode` changed (user clicked another square,
-  // or the beat engine entered a window that owns `demand-units`)
-  // while we were waiting for `idle`.
-  const selectedOutcomeCodeLiveRef = useRef<string | null>(selectedOutcomeCode)
-  useEffect(() => {
-    selectedOutcomeCodeLiveRef.current = selectedOutcomeCode
-  }, [selectedOutcomeCode])
   useEffect(() => {
     const prev = prevSelectedOutcomeCodeRef.current
     prevSelectedOutcomeCodeRef.current = selectedOutcomeCode
-    // Only fire on the truthy to null transition, i.e. when the user
-    // *exits* interactive mode. A truthy to truthy transition (swap
-    // between outcomes during interactive play) is OPL's job to
-    // handle; running the teardown in that case creates a second
-    // writer for `demand-units` that races OPL and (via the deferred
-    // idle path) can also clobber the beat engine's Beat 5 setup if
-    // the user clicks Next before the idle fires.
     if (!(prev !== null && selectedOutcomeCode === null)) return
-    debugLog(
-      `selectedOutcomeCode-transition START prev=${prev} now=${selectedOutcomeCode}`,
-    )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map: any = mapAPI.mapRef?.current?.getMap?.()
-    logDuState("selectedOutcomeCode-transition PRE-write", map)
-
-    // Extracted so we can invoke it either synchronously (style loaded)
-    // or deferred via `map.once("idle", ...)` (style busy).
-    //
-    // `fillOpacity` / `lineOpacity` are `scalar 0`, not `preserve`:
-    // this effect only fires on the truthy-to-null transition, i.e.
-    // after the storyboard has already settled into interactive
-    // mode. There is no choreography tick about to re-write opacity
-    // here, so "preserve" would leave whatever OPL last wrote
-    // (typically a zoom-aware interpolate expression) on the layer.
-    // The post-deselect interactive baseline is "invisible", so we
-    // explicitly zero opacity instead of relying on the sibling
-    // `applyPaintChanges` reset branch, which silently drops when
-    // `isStyleLoaded()` returns false (which happens right after
-    // OPL's unmount cleanup calls `removeLayer("demand-units-
-    // outline")`, causing the map to toggle between the CWS view
-    // and the full "all demand-units" baseline on every click).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const runTeardownWrites = (m: any) => {
-      try {
-        writeDemandUnitsBaseline(m, {
-          filter: DU_CLASS_FILTER,
-          fillExpr: buildBlendedTierExpr(BEAT1_MID, 1) as
-            | readonly unknown[]
-            | null,
-          fillOpacity: { kind: "scalar", value: 0 },
-          lineOpacity: { kind: "scalar", value: 0 },
-          lineWidth: 0.5,
-          lineOffset: -0.25,
-          visibility: "visible",
-        })
-        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-          if (fill === "demand-units") continue
-          if (m.getLayer(fill))
+    mapAPI.withMap((mapRef) => {
+      const m = mapRef.getMap()
+      for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+        if (fill === "demand-units") continue
+        try {
+          if (m.getLayer(fill)) {
             m.setLayoutProperty(fill, "visibility", "visible")
-          if (m.getLayer(outline))
+            m.setPaintProperty(fill, "fill-opacity", 0 as never)
+          }
+          if (m.getLayer(outline)) {
             m.setLayoutProperty(outline, "visibility", "visible")
+            m.setPaintProperty(outline, "line-opacity", 0 as never)
+          }
+        } catch {
+          /* ok */
         }
-        logDuState("selectedOutcomeCode-transition POST-write", m)
-      } catch (e) {
-        debugLog(`selectedOutcomeCode-transition ERROR`, e)
       }
-    }
-
-    if (!map) return
-    if (map.isStyleLoaded?.()) {
-      runTeardownWrites(map)
-      return
-    }
-
-    // Style is busy (camera ease mid-flight, layer swap, source
-    // update, etc). Defer to the next `idle` event instead of
-    // silently dropping the restore. Track the listener so we can
-    // detach it if another transition supersedes us first.
-    //
-    // Before actually running the restore on the `idle` callback, we
-    // re-validate preconditions. If the user has clicked another
-    // square in the meantime, or navigated into the Beat 5 window
-    // where `MapPaintArbiter` owns `demand-units`, we bail. Running
-    // an out-of-date restore would either stomp OPL's live interactive
-    // paint or overwrite the arbiter's Agriculture-only filter with
-    // the full class filter, which was the cause of the "AG layer
-    // bleeds across all demand-unit classes in Beat 5" regression.
-    debugLog(`selectedOutcomeCode-transition deferred to idle`)
-    let ran = false
-    const onIdle = () => {
-      if (ran) return
-      ran = true
-      const liveOutcome = selectedOutcomeCodeLiveRef.current
-      const liveBeat = beatIndexRef.current
-      if (liveOutcome !== null || liveBeat >= LOI_BEAT_INDEX) {
-        debugLog(
-          `selectedOutcomeCode-transition idle-bail liveOutcome=${liveOutcome} liveBeat=${liveBeat}`,
-        )
-        return
-      }
-      debugLog(`selectedOutcomeCode-transition running after idle`)
-      runTeardownWrites(map)
-    }
-    try {
-      map.once("idle", onIdle)
-    } catch {
-      /* ok */
-    }
-    return () => {
-      if (ran) return
-      try {
-        map.off?.("idle", onIdle)
-      } catch {
-        /* ok */
-      }
-    }
-  }, [selectedOutcomeCode, mapAPI.mapRef])
+    })
+  }, [selectedOutcomeCode, mapAPI])
 
   /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
   const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(

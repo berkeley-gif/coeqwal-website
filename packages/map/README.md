@@ -369,8 +369,9 @@ The `useMap` hook provides access to:
 
 ## TypeScript Support
 
-This package provides full TypeScript definitions. Types for the mapbox-gl API are
-imported directly from the mapbox-gl package, which provides its own type definitions.
+This package provides full TypeScript definitions. Application code should import map-related types from `@repo/map` (for example `MapRef`, `MapboxGLMap`, `LngLatLike`), not from `mapbox-gl` or `react-map-gl` directly. Those dependencies remain encapsulated inside `@repo/map`.
+
+Types for the mapbox-gl API are re-exported where needed; `mapbox-gl` ships its own type definitions.
 
 Version Compatibility:
 
@@ -464,5 +465,5 @@ mapOperations.flyTo({
    - Avoid frequent state updates during animations
 
 5. **Type errors**:
-   - Import types from the map package, not directly from mapbox-gl
+   - Import types from the map package, not directly from mapbox-gl (for example `MapboxGLMap` for the instance returned by `mapRef.current?.getMap()`)
    - Use proper type casting for layer types

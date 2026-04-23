@@ -156,9 +156,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const accentColor = scenarioColor || theme.palette.blue.bright
   const outcomeColRef = useRef<HTMLDivElement>(null)
 
-  // Tour anchors. Only the first row registers, so the tour highlights
-  // a single exemplar row instead of bulk-registering all of them.
-  const rowSelectAnchorRef = useTourAnchor("list.select.row")
+  // Tour anchors. Only the first list exemplar row registers (see
+  // `tourListFirstItem`), so the tour highlights one checkbox / pin / share
+  // instead of bulk-registering all rows.
+  const listSelectCheckboxTourRef = useTourAnchor("list.select.checkbox")
   const listRowPinTourRef = useTourAnchor("list.row.pin")
   const listRowShareTourRef = useTourAnchor("list.row.share")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
@@ -373,7 +374,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <>
           {/* Column 1: Checkbox */}
           <Box
-            ref={isFirst ? rowSelectAnchorRef : undefined}
+            ref={
+              tourListFirstItem && isListMode
+                ? listSelectCheckboxTourRef
+                : undefined
+            }
             sx={{
               display: "flex",
               justifyContent: "flex-end",

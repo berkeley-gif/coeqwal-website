@@ -32,6 +32,52 @@ import { useTourAnchorResolver } from "../tour/TourAnchorContext"
 
 const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
 
+const INFO_ICON_PLACEHOLDER = "{{infoIcon}}"
+
+function TourBodyContent({
+  body,
+  infoIconColor,
+}: {
+  body: string
+  infoIconColor: string
+}) {
+  if (!body.includes(INFO_ICON_PLACEHOLDER)) {
+    return <>{body}</>
+  }
+  const parts = body.split(INFO_ICON_PLACEHOLDER)
+  const InfoGlyph = icons.InfoOutlined
+  return (
+    <>
+      {parts.map((part, i) => (
+        <React.Fragment key={i}>
+          {part}
+          {i < parts.length - 1 ? (
+            <Box
+              component="span"
+              role="img"
+              aria-label="info"
+              sx={{
+                display: "inline-flex",
+                verticalAlign: "middle",
+                position: "relative",
+                top: -1,
+                mx: 0.2,
+              }}
+            >
+              <InfoGlyph
+                sx={{
+                  fontSize: "1.1em",
+                  color: infoIconColor,
+                }}
+              />
+            </Box>
+          ) : null}
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
 export default function ToolTour() {
   const theme = useTheme()
 
@@ -44,6 +90,10 @@ export default function ToolTour() {
 
   const steps = tourTool ? TOUR_STEPS[tourTool] : []
   const step = steps[tourStep] ?? null
+
+  const hasTourBody = Boolean(
+    step && (step.body?.trim() ?? "").length > 0,
+  )
 
   // Re-resolve the current anchor whenever the registry changes or the
   // step moves. We keep this in state so the Popper re-positions when
@@ -221,8 +271,9 @@ export default function ToolTour() {
     [step],
   )
   const bodyId = useMemo(
-    () => (step ? `tour-body-${step.id}` : undefined),
-    [step],
+    () =>
+      step && hasTourBody ? `tour-body-${step.id}` : undefined,
+    [step, hasTourBody],
   )
 
   if (!tourTool || !step) return null
@@ -245,7 +296,7 @@ export default function ToolTour() {
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      aria-describedby={bodyId}
+      aria-describedby={hasTourBody ? bodyId : undefined}
       elevation={8}
       sx={{
         width: "min(440px, calc(100vw - 32px))",
@@ -342,24 +393,30 @@ export default function ToolTour() {
         )}
         <span>{step.title}</span>
       </Box>
-      <Typography
-        id={bodyId}
-        sx={{
-          fontSize: "0.875rem",
-          color: theme.palette.text.primary,
-          lineHeight: 1.5,
-          whiteSpace: "pre-line",
-        }}
-      >
-        {step.body}
-      </Typography>
+      {hasTourBody ? (
+        <Typography
+          id={bodyId}
+          sx={{
+            fontSize: "0.875rem",
+            color: theme.palette.text.primary,
+            lineHeight: 1.5,
+            whiteSpace: "pre-line",
+          }}
+          component="div"
+        >
+          <TourBodyContent
+            body={step.body ?? ""}
+            infoIconColor={theme.palette.grey[700]}
+          />
+        </Typography>
+      ) : null}
 
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           gap: 1,
-          mt: 0.5,
+          mt: hasTourBody ? 0.5 : 0,
           width: "100%",
           minWidth: 0,
         }}

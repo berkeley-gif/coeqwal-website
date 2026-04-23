@@ -42,7 +42,7 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   {
     view: "explorer",
     icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Go to tools",
+    label:"Tools",
   },
 ]
 

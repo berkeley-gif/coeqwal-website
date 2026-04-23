@@ -20,7 +20,10 @@ export interface TourStep {
   /** Small uppercase eyebrow rendered above the title. */
   eyebrow?: string
   title: string
-  body: string
+  /** Main copy. Omit, or use empty or whitespace-only, to show title only
+   *  with no body block. May include `{{infoIcon}}` to render the outlined
+   *  info glyph inline (see ToolTour). */
+  body?: string
   /** Preferred Popper placement relative to the anchor. Popper will
    *  flip automatically if it does not fit. */
   placement?: TourPlacement

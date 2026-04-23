@@ -107,7 +107,7 @@ export function ListHowToRead() {
           },
           {
             number: "03",
-            title: "Read down one column for the answer",
+            title: "Read down the column to compare",
             body: "Leaders, laggards, and trade-offs appear faster when you compare one question down the column instead of many across the row.",
             bottom: 2,
             right: 3,

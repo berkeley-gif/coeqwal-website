@@ -20,6 +20,8 @@ export type {
   LngLatLike,
   FitBoundsOptions,
   DataDrivenPropertyValueSpecification,
+  /** Underlying Mapbox GL map instance (e.g. from MapRef.getMap()). Prefer importing this type from @repo/map in apps, not from mapbox-gl. */
+  Map as MapboxGLMap,
 } from "mapbox-gl"
 
 // Export core types from our types file

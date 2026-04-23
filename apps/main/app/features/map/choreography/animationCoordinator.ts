@@ -2,6 +2,9 @@
  * AnimationCoordinator - centralized management for map animations
  */
 
+import type { RefObject } from "react"
+import type { MapboxGLMap, MapRef } from "@repo/map"
+
 type AnimationId = string
 type CleanupFn = () => void
 
@@ -103,8 +106,8 @@ class AnimationCoordinator {
    * Safely handles cases where map is unmounted or invalid.
    */
   getValidMap(
-    mapRef: React.RefObject<{ getMap: () => mapboxgl.Map } | null> | null,
-  ): mapboxgl.Map | null {
+    mapRef: RefObject<MapRef | null> | null,
+  ): MapboxGLMap | null {
     try {
       const instance = mapRef?.current?.getMap?.()
       if (instance && typeof instance.getLayer === "function") {
@@ -120,7 +123,7 @@ class AnimationCoordinator {
    * Safely check if a layer exists on the map
    */
   hasLayer(
-    mapRef: React.RefObject<{ getMap: () => mapboxgl.Map } | null> | null,
+    mapRef: RefObject<MapRef | null> | null,
     layerId: string,
   ): boolean {
     const map = this.getValidMap(mapRef)
