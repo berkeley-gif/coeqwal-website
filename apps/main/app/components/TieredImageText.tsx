@@ -64,7 +64,7 @@ export function TieredImageText({
         justifyContent: "center",
         alignItems: "center",
         boxSizing: "border-box",
-        paddingTop: "130px",
+        paddingTop: { xs: "80px", md: "130px" },
         height: "auto",
         backgroundColor: theme.palette.blue.pale,
       }}
@@ -74,13 +74,13 @@ export function TieredImageText({
         component={motion.div}
         sx={{
           listStyle: "none",
-          padding: 0,
+          padding: { xs: "0 24px", md: 0 },
           margin: 0,
           display: "flex",
-          flexDirection: "row",
-          gap: "45px",
+          flexDirection: { xs: "column", md: "row" },
+          gap: { xs: "24px", md: "45px" },
           color: theme.palette.blue.darkest,
-          width: { md: "50vw", xl: "40vw" },
+          width: { xs: "100%", md: "70vw", lg: "50vw", xl: "40vw" },
         }}
         initial="hidden"
         whileInView="show"
@@ -90,7 +90,8 @@ export function TieredImageText({
         <Typography
           variant="h4"
           sx={{
-            maxWidth: "150px",
+            maxWidth: { xs: "100%", md: "150px" },
+            flexShrink: 0,
           }}
         >
           {title}
@@ -136,7 +137,8 @@ export function TieredImageText({
         sx={{
           position: "relative",
           width: "100%",
-          height: "clamp(220px, 35vw, 420px)",
+          marginTop: { xs: "48px", md: "25px", lg: "0" },
+          height: "clamp(180px, 30vw, 420px)",
           overflow: "hidden",
         }}
       >
@@ -147,7 +149,7 @@ export function TieredImageText({
           sx={{
             width: "100%",
             inset: 0,
-            height: { md: "150%", lg: "215%" },
+            height: { xs: "130%", md: "150%", lg: "215%" },
             objectFit: "cover",
             objectPosition: "center-bottom",
             position: "absolute",
@@ -173,12 +175,15 @@ export function TieredImageText({
         <Box
           component="div"
           sx={{
-            maxWidth: { md: "60vw", xl: "50vw" },
+            maxWidth: { xs: "100%", md: "60vw", xl: "50vw" },
             display: "flex",
-            flexDirection: "row",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "center", md: "flex-start" },
+            textAlign: { xs: "center", md: "left" },
             justifyContent: "center",
-            gap: "25px",
-            margin: "75px 0",
+            gap: { xs: "24px", md: "25px" },
+            margin: { xs: "48px 24px", md: "75px 0" },
+            padding: { xs: "0 24px", md: "0" },
           }}
         >
           <Box
