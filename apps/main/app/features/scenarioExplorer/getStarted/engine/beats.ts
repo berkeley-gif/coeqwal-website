@@ -197,10 +197,19 @@ const BEAT4_ENTRY: BeatTableEntry = {
 const RESET_END = 0.01
 
 // Beat 1 thresholds. Mirror the inline `FREEZE_AT`, `BEAT1B_START`,
-// and `BEAT1C_BLEND_START` declarations at
-// TierAnimationSection.tsx lines 2145 to 2150. Must stay in sync.
+// `BEAT1C_BLEND_START`, `BEAT1C_BLEND_END`, and `BEAT2_START`
+// declarations at TierAnimationSection.tsx lines 2145 to 2158.
+// Must stay in sync.
 const FREEZE_AT = 0.09
 const BEAT1C_BLEND_START = 0.26
+// Sub-window divider inside Beat 1C blend. `[BEAT1C_BLEND_START,
+// BEAT1C_CONVERGE_END)` shrinks the 3-blue palette to BEAT1_MID.
+// `[BEAT1C_CONVERGE_END, BEAT1C_BLEND_END)` blends BEAT1_MID to AG
+// tier colors. Matches the inline `CONVERGE_END = 0.27` at
+// TierAnimationSection.tsx line 2243.
+const BEAT1C_CONVERGE_END = 0.27
+const BEAT1C_BLEND_END = 0.28
+const BEAT2_START = 0.38
 // Reference point for `cycleRotations`. The legacy cycling expression
 // was `beat1T * BEAT1_CYCLE` where `beat1T = v / FREEZE_AT`, so the
 // full cycle window runs one rotation of `BEAT1_CYCLE = 90` phase
@@ -249,11 +258,46 @@ const BEAT0_ENTRY: BeatTableEntry = {
   ],
 }
 
+// Beat 1 (collapse-and-colors) actors. Covers the two-stage color
+// morph from the 3-blue palette to AG tier colors (`beat1c-blend`)
+// and the subsequent AG-only tier-color hold (`beat1c-tail`). The
+// tail actor's window extends past the `collapse-and-colors`
+// checkpoint (0.365) into the start of `ag-rev-morph` (ending at
+// `BEAT2_START` = 0.38), but actor windows are independent of beat
+// checkpoints so hosting under `collapse-and-colors` stays
+// consistent with this beat's semantic role.
+const BEAT1_ENTRY: BeatTableEntry = {
+  id: "collapse-and-colors",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat1:mapPaint:blend",
+      window: [BEAT1C_BLEND_START, BEAT1C_BLEND_END],
+      payload: {
+        kind: "beat1c-blend",
+        blendStart: BEAT1C_BLEND_START,
+        convergeEnd: BEAT1C_CONVERGE_END,
+        blendEnd: BEAT1C_BLEND_END,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat1:mapPaint:tail",
+      window: [BEAT1C_BLEND_END, BEAT2_START],
+      payload: {
+        kind: "beat1c-tail",
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
 // The table
 
 export const BEAT_TABLE: readonly BeatTableEntry[] = [
   BEAT0_ENTRY,
-  { id: "collapse-and-colors", actors: [] },
+  BEAT1_ENTRY,
   { id: "ag-rev-morph", actors: [] },
   { id: "all-other-morphs", actors: [] },
   BEAT4_ENTRY,

@@ -29,6 +29,7 @@ import {
   type ToolIntroMode,
 } from "../store"
 import { HowToReadChartModal } from "./HowToReadChartModal"
+import TakeTheTourButton from "./TakeTheTourButton"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 import type { TourTool } from "../tour/types"
 
@@ -82,10 +83,32 @@ export default function ToolToolbar({
     seenHowToRead,
     markHowToReadSeen,
     bumpReopenToolIntro,
-    startToolTour,
     reopenWelcome,
+    dismissWelcome,
+    welcomeDismissedThisSession,
+    welcomeDismissedPermanently,
     setExploreMode,
   } = useScenarioExplorerStore()
+
+  // The WelcomeStrip is visible only on the List view, only when not
+  // dismissed for the session and not dismissed permanently. The
+  // toolbar chip toggles that visibility: when the strip is showing,
+  // the chip dismisses it for this session (the persistent "don't
+  // show again" flag is intentionally not touched); otherwise it
+  // switches to List and clears any session/permanent dismissal so
+  // the strip mounts.
+  const welcomeVisible =
+    exploreMode === "list" &&
+    !welcomeDismissedThisSession &&
+    !welcomeDismissedPermanently
+  const handleToggleWelcome = () => {
+    if (welcomeVisible) {
+      dismissWelcome(false)
+    } else {
+      if (exploreMode !== "list") setExploreMode("list")
+      reopenWelcome()
+    }
+  }
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
@@ -171,12 +194,18 @@ export default function ToolToolbar({
           <Box
             component="button"
             type="button"
-            onClick={() => {
-              if (exploreMode !== "list") setExploreMode("list")
-              reopenWelcome()
-            }}
-            aria-label="Show overview of the scenario explorer"
-            title="Show overview of the scenario explorer"
+            onClick={handleToggleWelcome}
+            aria-pressed={welcomeVisible}
+            aria-label={
+              welcomeVisible
+                ? "Hide overview of the scenario explorer"
+                : "Show overview of the scenario explorer"
+            }
+            title={
+              welcomeVisible
+                ? "Hide overview of the scenario explorer"
+                : "Show overview of the scenario explorer"
+            }
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -186,7 +215,9 @@ export default function ToolToolbar({
               border: "none",
               borderRadius: "12px",
               cursor: "pointer",
-              background: "transparent",
+              background: welcomeVisible
+                ? theme.palette.interaction.selectedBackground
+                : "transparent",
               color: theme.palette.blue.bright,
               transition: "background-color 120ms",
               "&:hover": {
@@ -194,7 +225,11 @@ export default function ToolToolbar({
               },
             }}
           >
-            <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
+            {welcomeVisible ? (
+              <icons.Close sx={{ fontSize: "1rem" }} />
+            ) : (
+              <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
+            )}
             <Typography
               variant="dashboard"
               sx={{
@@ -203,43 +238,7 @@ export default function ToolToolbar({
                 color: "inherit",
               }}
             >
-              Show overview
-            </Typography>
-          </Box>
-        )}
-        {isTourTool(exploreMode) && (
-          <Box
-            component="button"
-            type="button"
-            onClick={() => startToolTour(exploreMode)}
-            aria-label="Take the tour for this chart"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 0.75,
-              py: 0.25,
-              border: "none",
-              borderRadius: "12px",
-              cursor: "pointer",
-              background: "transparent",
-              color: theme.palette.blue.bright,
-              transition: "background-color 120ms",
-              "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-              },
-            }}
-          >
-            <icons.PlayCircleOutline sx={{ fontSize: "1rem" }} />
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                color: "inherit",
-              }}
-            >
-              Take the tour
+              {welcomeVisible ? "Hide overview" : "Show overview"}
             </Typography>
           </Box>
         )}
@@ -450,6 +449,7 @@ export default function ToolToolbar({
                 </Box>
               ) : null}
             </Typography>
+            <TakeTheTourButton />
           </Box>
         )}
 

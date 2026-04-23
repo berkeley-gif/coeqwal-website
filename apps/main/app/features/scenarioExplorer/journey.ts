@@ -25,12 +25,12 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
       "Browse the full library and narrow it down to a shortlist of scenarios you want to study more closely.",
     nextMode: "radar",
     nextLabel: "Compare on Radar",
-    nextRationale: "See your shortlist side by side as portfolios, not cells.",
+    nextRationale: "See your shortlist side by side.",
   },
   radar: {
     mode: "radar",
     purpose:
-      "Compare the scenarios you selected as whole portfolios across the outcomes that matter to you.",
+      "Compare the scenarios you selected across all the outcomes that matter to you in one view.",
     nextMode: "equity",
     nextLabel: "Inspect by location",
     nextRationale:

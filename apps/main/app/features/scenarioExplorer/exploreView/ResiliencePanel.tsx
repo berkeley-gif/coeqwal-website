@@ -2464,7 +2464,7 @@ export default function ResiliencePanel({
           },
           {
             label: "Hot spots are honest.",
-            body: "Red cells show where real failures hide behind average tier scores.",
+            body: "Red cells show issues.",
           },
         ]}
         tourStep={3}

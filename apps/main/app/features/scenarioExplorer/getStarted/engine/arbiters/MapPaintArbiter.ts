@@ -73,6 +73,12 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       case "beat1-hold":
         this.applyBeat1HoldEnter(map, p)
         return
+      case "beat1c-blend":
+        this.applyBeat1cBlendEnter(map, p)
+        return
+      case "beat1c-tail":
+        this.applyBeat1cTailEnter(map, p, ctx)
+        return
       case "beat5-enter":
         this.applyBeat5Enter(map, ctx)
         return
@@ -111,6 +117,13 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       this.applyBeat1HoldUpdate(map, p)
       return
     }
+    if (p.kind === "beat1c-blend") {
+      this.applyBeat1cBlendUpdate(map, p, v, ctx)
+      return
+    }
+    // `beat1c-tail` is a static hold written once by `onEnter`. No
+    // per-tick work, matching the legacy listener's `phase !==
+    // "beat1c"` guard behavior.
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
 
@@ -331,6 +344,95 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     } catch {
       /* ok */
     }
+  }
+
+  private applyBeat1cBlendEnter(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1c-blend" }>,
+  ): void {
+    // Full-state baseline seeded for the convergence sub-window. The
+    // first `onUpdate` tick overwrites fill-color with the real
+    // ramping expression. Opacity is seeded at `peakOpacity` (not 0)
+    // so the handoff from the Beat 1 hold does not flash invisible
+    // for one frame. Filter stays on `DU_CLASS_FILTER` across the
+    // whole blend. `beat1c-tail.onEnter` is what flips to AG-only.
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: beat1FillExpr(this.frozenColorPhase, 0),
+      fillOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+  }
+
+  private applyBeat1cBlendUpdate(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1c-blend" }>,
+    v: number,
+    ctx: BeatEngineContext,
+  ): void {
+    // Two-stage blend. First half shrinks the 3-blue palette toward
+    // `BEAT1_MID` via `beat1FillExpr(frozenColorPhase, convergence)`.
+    // Second half morphs `BEAT1_MID` into each AG DU's tier color via
+    // `ctx.buildBlendedTierExpr(BEAT1_MID, t)`.
+    let expr: readonly unknown[] | null
+    if (v < p.convergeEnd) {
+      const convergence =
+        (v - p.blendStart) / (p.convergeEnd - p.blendStart)
+      expr = beat1FillExpr(this.frozenColorPhase, convergence)
+    } else {
+      const t = (v - p.convergeEnd) / (p.blendEnd - p.convergeEnd)
+      expr = ctx.buildBlendedTierExpr(BEAT1_MID, t) as readonly unknown[] | null
+    }
+
+    if (!expr) return
+
+    try {
+      if (map.getLayer("demand-units")) {
+        map.setPaintProperty("demand-units", "fill-color", expr)
+        map.setPaintProperty("demand-units", "fill-outline-color", expr)
+        map.setPaintProperty("demand-units", "fill-opacity", p.peakOpacity)
+      }
+      if (map.getLayer("demand-units-outline")) {
+        map.setPaintProperty("demand-units-outline", "line-color", expr)
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity",
+          p.peakOpacity,
+        )
+      }
+    } catch {
+      /* ok */
+    }
+  }
+
+  private applyBeat1cTailEnter(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1c-tail" }>,
+    ctx: BeatEngineContext,
+  ): void {
+    // Static hold. AG-only filter, fully blended tier colors, pinned
+    // opacity. The legacy listener wrote this once on the
+    // `phase !== "beat1c"` transition and never re-asserted. The
+    // baseline helper makes this full-state assertion idempotent,
+    // which also makes scrub-back from Beat 2 into the tail window
+    // self-healing. `buildBlendedTierExpr` may return null if the
+    // tier table has not loaded. In that case we fall back to the
+    // last fill expression on the layer (no `fillExpr` write).
+    const blendedTier = ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
+      | readonly unknown[]
+      | null
+    writeDemandUnitsBaseline(map, {
+      filter: DU_AG_ONLY_FILTER,
+      fillExpr: blendedTier,
+      fillOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
   }
 
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {
