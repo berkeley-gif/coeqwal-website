@@ -184,10 +184,34 @@ const BEAT4_ENTRY: BeatTableEntry = {
   ],
 }
 
+// Beat 0 (legend) actors
+
+// Reset window. Half-open `[0, RESET_END)`. Mirrors the
+// main-choreography listener's `v < 0.01` branch at
+// TierAnimationSection.tsx line 2166. The arbiter's `onEnter` hook
+// does a full-state baseline assertion on `demand-units` and
+// `demand-units-outline`. `onExit` is unused. Hosted under the
+// "legend" beat (the first beat, whose window starts at 0) because
+// actor windows are independent of beat checkpoints. Beats are just
+// a grouping key for the table.
+const RESET_END = 0.01
+
+const BEAT0_ENTRY: BeatTableEntry = {
+  id: "legend",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:reset",
+      window: [0, RESET_END],
+      payload: { kind: "reset" },
+    },
+  ],
+}
+
 // The table
 
 export const BEAT_TABLE: readonly BeatTableEntry[] = [
-  { id: "legend", actors: [] },
+  BEAT0_ENTRY,
   { id: "collapse-and-colors", actors: [] },
   { id: "ag-rev-morph", actors: [] },
   { id: "all-other-morphs", actors: [] },

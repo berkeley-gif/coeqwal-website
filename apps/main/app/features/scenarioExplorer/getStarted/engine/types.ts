@@ -61,6 +61,17 @@ export interface ActorBase {
  */
 export type MapPaintPayload =
   | {
+      /**
+       * Pre-beat-1 reset. Fires once when the user scrubs or snaps
+       * `progress` back to 0 (Restart button, or Back from Beat 0).
+       * Restores the DU layers to their pre-animation baseline: the
+       * full `DU_CLASS_FILTER`, the blue-cycle fill expression seeded
+       * at phase 0, opacity 0 (Beat 1 will fade them in from 0), and
+       * the `basemap-dim-overlay` fill-opacity cleared to 0.
+       */
+      kind: "reset"
+    }
+  | {
       kind: "beat5-enter"
       /** LOI demand-unit id to gold-stroke during step 4 (`BEAT5_LOI_ID`). */
       loiDuId: string

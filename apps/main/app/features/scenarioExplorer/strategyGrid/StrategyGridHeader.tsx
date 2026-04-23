@@ -26,6 +26,7 @@ import {
   type OutcomeName,
 } from "../../scenarios/components/shared"
 import SearchAndChips from "../components/SearchAndChips"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 
 /**
  * Layout mode for responsive grid behavior (see theme.scenarios.grid.fullBreakpoint).
@@ -399,63 +400,23 @@ function OutcomeCategoryLabels({
           width: "100%",
         }}
       >
-        {outcomeNames.map(({ shortCode, displayName }) => {
+        {outcomeNames.map(({ shortCode, displayName }, index) => {
           const isSorted = sortBy === shortCode
+          const isFirst = index === 0
 
           return (
-            <Box
+            <OutcomeHeaderCell
               key={shortCode}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <Typography
-                component="div"
-                sx={{
-                  fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  letterSpacing: "0.01em",
-                  color: theme.palette.text.primary,
-                  textAlign: "center",
-                }}
-              >
-                {formatOutcomeLabel(displayName)}
-              </Typography>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 0.5,
-                }}
-              >
-                <InfoIconButton
-                  isActive={activeTooltip === shortCode}
-                  onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
-                  title="Click for outcome details"
-                />
-
-                {sortEnabled && onSortChange && (
-                  <ToggleSortButton
-                    sortState={isSorted ? sortDirection : null}
-                    onToggle={(newState) => {
-                      if (newState === null) {
-                        onSortChange(null, "asc")
-                      } else {
-                        onSortChange(shortCode, newState)
-                      }
-                    }}
-                    title="Sort by this outcome"
-                  />
-                )}
-              </Box>
-            </Box>
+              isFirst={isFirst}
+              isSorted={isSorted}
+              sortDirection={sortDirection}
+              activeTooltip={activeTooltip}
+              shortCode={shortCode}
+              displayName={displayName}
+              sortEnabled={sortEnabled}
+              onTooltipToggle={onTooltipToggle}
+              onSortChange={onSortChange}
+            />
           )
         })}
       </Box>
@@ -464,3 +425,102 @@ function OutcomeCategoryLabels({
 }
 
 export default StrategyGridHeader
+
+/**
+ * A single outcome column header cell. Factored out so we can attach
+ * tour anchors to the first outcome column's info button and sort
+ * button without bulk-registering all columns (the tour only needs
+ * one exemplar anchor).
+ */
+interface OutcomeHeaderCellProps {
+  isFirst: boolean
+  isSorted: boolean
+  sortDirection: "asc" | "desc"
+  activeTooltip: string | null
+  shortCode: string
+  displayName: string
+  sortEnabled: boolean
+  onTooltipToggle: (name: string, anchor: HTMLElement) => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+}
+
+function OutcomeHeaderCell({
+  isFirst,
+  isSorted,
+  sortDirection,
+  activeTooltip,
+  shortCode,
+  displayName,
+  sortEnabled,
+  onTooltipToggle,
+  onSortChange,
+}: OutcomeHeaderCellProps) {
+  const theme = useTheme()
+  const infoAnchorRef = useTourAnchor("list.outcome.infoButton")
+  const sortAnchorRef = useTourAnchor("list.outcome.sortButton")
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "6px",
+      }}
+    >
+      <Typography
+        component="div"
+        sx={{
+          fontFamily: theme.typography.tabLabelDocked.fontFamily,
+          fontSize: "0.8125rem",
+          fontWeight: 600,
+          lineHeight: 1.2,
+          letterSpacing: "0.01em",
+          color: theme.palette.text.primary,
+          textAlign: "center",
+        }}
+      >
+        {formatOutcomeLabel(displayName)}
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.5,
+        }}
+      >
+        <Box
+          ref={isFirst ? infoAnchorRef : undefined}
+          sx={{ display: "inline-flex" }}
+        >
+          <InfoIconButton
+            isActive={activeTooltip === shortCode}
+            onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
+            title="Click for outcome details"
+          />
+        </Box>
+
+        {sortEnabled && onSortChange && (
+          <Box
+            ref={isFirst ? sortAnchorRef : undefined}
+            sx={{ display: "inline-flex" }}
+          >
+            <ToggleSortButton
+              sortState={isSorted ? sortDirection : null}
+              onToggle={(newState) => {
+                if (newState === null) {
+                  onSortChange(null, "asc")
+                } else {
+                  onSortChange(shortCode, newState)
+                }
+              }}
+              title="Sort by this outcome"
+            />
+          </Box>
+        )}
+      </Box>
+    </Box>
+  )
+}

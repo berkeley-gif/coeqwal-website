@@ -12,7 +12,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -21,7 +21,8 @@ import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
 import ShareDrawer from "./components/ShareDrawer"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
-import TourOverlay from "./components/TourOverlay"
+import ToolTour from "./components/ToolTour"
+import { TourAnchorProvider, useTourAnchor } from "./tour/TourAnchorContext"
 import {
   ComparisonPanel,
   EquityPanel,
@@ -85,6 +86,14 @@ function SimpleButton({
 import { InlineToggleChip } from "./components/InlineToggleChip"
 
 export default function ScenarioExplorer() {
+  return (
+    <TourAnchorProvider>
+      <ScenarioExplorerInner />
+    </TourAnchorProvider>
+  )
+}
+
+function ScenarioExplorerInner() {
   const theme = useTheme()
   const {
     mainView,
@@ -316,11 +325,13 @@ export default function ScenarioExplorer() {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <InlineToggleChip
-            label="choose outcome axes"
-            active={showAxisSelector}
-            onClick={() => setShowAxisSelector(!showAxisSelector)}
-          />
+          <RadarTourAnchor anchorId="radar.axisChooser">
+            <InlineToggleChip
+              label="choose outcome axes"
+              active={showAxisSelector}
+              onClick={() => setShowAxisSelector(!showAxisSelector)}
+            />
+          </RadarTourAnchor>
           <InlineToggleChip
             label="show all scenarios"
             active={radarShowAll}
@@ -336,11 +347,13 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
-          <InlineToggleChip
-            label="show range"
-            active={showRadarRange}
-            onClick={() => setShowRadarRange(!showRadarRange)}
-          />
+          <RadarTourAnchor anchorId="radar.libraryRange">
+            <InlineToggleChip
+              label="show range"
+              active={showRadarRange}
+              onClick={() => setShowRadarRange(!showRadarRange)}
+            />
+          </RadarTourAnchor>
           <Box
             component="button"
             type="button"
@@ -609,7 +622,27 @@ export default function ScenarioExplorer() {
 
       <KeyboardShortcuts />
       {mainView === "explorer" && <ShareDrawer />}
-      {mainView === "explorer" && <TourOverlay />}
+      {mainView === "explorer" && <ToolTour />}
+    </Box>
+  )
+}
+
+/**
+ * Tiny inline-flex wrapper that registers its child node as a tour
+ * anchor by id. Used to attach anchors to the Radar tool's chart
+ * controls without restructuring the existing chip layout.
+ */
+function RadarTourAnchor({
+  anchorId,
+  children,
+}: {
+  anchorId: string
+  children: React.ReactNode
+}) {
+  const ref = useTourAnchor(anchorId)
+  return (
+    <Box ref={ref} sx={{ display: "inline-flex", alignItems: "center" }}>
+      {children}
     </Box>
   )
 }

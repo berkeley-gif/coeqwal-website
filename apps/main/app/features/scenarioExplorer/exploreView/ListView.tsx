@@ -97,6 +97,7 @@ export default function ListView({
     baselinePrePinned,
     seenBaselinePinHint,
     setSeenBaselinePinHint,
+    startToolTour,
   } = useScenarioExplorerStore()
 
   const showBaselineHint = baselinePrePinned && !seenBaselinePinHint
@@ -316,7 +317,29 @@ export default function ListView({
             }}
           >
             Baseline (today&rsquo;s operations) is pre-pinned so the other
-            tools have something to show. Unpin anytime.
+            tools have something to show. Unpin anytime.{" "}
+            <Box
+              component="button"
+              type="button"
+              onClick={() => {
+                setSeenBaselinePinHint(true)
+                startToolTour("list")
+              }}
+              sx={{
+                border: "none",
+                background: "transparent",
+                p: 0,
+                cursor: "pointer",
+                color: theme.palette.blue.bright,
+                fontWeight: 600,
+                fontSize: "inherit",
+                fontFamily: "inherit",
+                textDecoration: "underline",
+                "&:hover": { color: theme.palette.blue.dark },
+              }}
+            >
+              Take the tour
+            </Box>
           </Typography>
           <Box
             component="button"

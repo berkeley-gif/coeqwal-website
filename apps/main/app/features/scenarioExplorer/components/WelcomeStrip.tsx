@@ -87,7 +87,6 @@ export default function WelcomeStrip() {
   )
   const dismissWelcome = useScenarioExplorerStore((s) => s.dismissWelcome)
   const setExploreMode = useScenarioExplorerStore((s) => s.setExploreMode)
-  const startTour = useScenarioExplorerStore((s) => s.startTour)
   const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
 
   const [dontShowAgain, setDontShowAgain] = useState(false)
@@ -104,11 +103,6 @@ export default function WelcomeStrip() {
 
   const handleDismiss = () => {
     dismissWelcome(dontShowAgain)
-  }
-
-  const handleTour = () => {
-    dismissWelcome(false)
-    startTour()
   }
 
   return (
@@ -298,18 +292,6 @@ export default function WelcomeStrip() {
               Don&rsquo;t show again
             </Typography>
           </Box>
-          <Button
-            size="small"
-            onClick={handleTour}
-            sx={{
-              textTransform: "none",
-              color: theme.palette.blue.bright,
-              fontSize: "0.8125rem",
-              px: 1.25,
-            }}
-          >
-            Take a tour
-          </Button>
           <Button
             size="small"
             variant="contained"

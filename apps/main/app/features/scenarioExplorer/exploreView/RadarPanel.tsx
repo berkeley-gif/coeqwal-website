@@ -52,6 +52,7 @@ import {
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import ToolEmptyState from "../components/ToolEmptyState"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -291,6 +292,28 @@ export default function RadarPanel({
     el.addEventListener("mousedown", prevent)
     return () => el.removeEventListener("mousedown", prevent)
   }, [])
+
+  // Tour anchors. The polygon and rings both highlight the chart area
+  // (one highlights the data, the other highlights the grid behind it;
+  // we use the same DOM target since the rings live inside the SVG).
+  const polygonAnchorRef = useTourAnchor("radar.polygon")
+  const ringsAnchorRef = useTourAnchor("radar.rings")
+  // Axis label + info icon point at the first axis. Bridged through
+  // an effect because the SVG label and overlay icons mount after
+  // first paint, when axisPositions is populated.
+  const axisLabelAnchorRef = useTourAnchor("radar.axisLabel")
+  const infoIconAnchorRef = useTourAnchor("radar.infoIcon")
+  // Bridge chartWrapperRef into both polygon + rings anchors. They
+  // share the same target element because the rings live inside the
+  // same SVG; the tour copy distinguishes them by step.
+  useEffect(() => {
+    polygonAnchorRef(chartWrapperRef.current)
+    ringsAnchorRef(chartWrapperRef.current)
+    return () => {
+      polygonAnchorRef(null)
+      ringsAnchorRef(null)
+    }
+  }, [polygonAnchorRef, ringsAnchorRef])
 
   const {
     data: comparisonData,
@@ -854,7 +877,7 @@ export default function RadarPanel({
                 zIndex: 1,
               }}
             >
-              {axisPositions.map(({ axis, x, y }) => {
+              {axisPositions.map(({ axis, x, y }, idx) => {
                 const definition = resolveAxisDefinition(axis)
                 if (!definition) return null
 
@@ -869,10 +892,20 @@ export default function RadarPanel({
                 const iconTop = rect ? rect.y + rect.height / 2 : y
 
                 const isOpen = openInfoAxis === axis
+                // Register the first axis info icon as both the
+                // axis-label and info-icon tour anchors so the radar
+                // tour can speak about either without changing target.
+                const isFirst = idx === 0
+                const setRefs = (el: HTMLElement | null) => {
+                  if (!isFirst) return
+                  axisLabelAnchorRef(el)
+                  infoIconAnchorRef(el)
+                }
 
                 return (
                   <Box
                     key={axis}
+                    ref={setRefs}
                     sx={{
                       position: "absolute",
                       left: iconLeft,

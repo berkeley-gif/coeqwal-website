@@ -18,6 +18,7 @@ import {
   LocationOnIcon,
   Switch,
   InfoOutlinedIcon,
+  icons,
 } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -28,6 +29,13 @@ import {
   type ToolIntroMode,
 } from "../store"
 import { HowToReadChartModal } from "./HowToReadChartModal"
+import { useTourAnchor } from "../tour/TourAnchorContext"
+import type { TourTool } from "../tour/types"
+
+const TOUR_TOOLS = new Set<TourTool>(["list", "radar", "resilience"])
+function isTourTool(mode: string): mode is TourTool {
+  return TOUR_TOOLS.has(mode as TourTool)
+}
 
 /** Modes that own a `ToolIntroStrip`. The "How to read this chart?"
  *  chip re-opens that strip for these modes instead of opening the
@@ -69,6 +77,7 @@ export default function ToolToolbar({
     seenHowToRead,
     markHowToReadSeen,
     bumpReopenToolIntro,
+    startToolTour,
   } = useScenarioExplorerStore()
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
@@ -135,6 +144,11 @@ export default function ToolToolbar({
     }
   }
 
+  // Register the climate-chip group as a tour anchor for the radar
+  // tour. Resilience reuses this control too but its tour does not
+  // step through it, so a single id is fine.
+  const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
+
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
   // build; flip the `false &&` guard below to bring it back.
@@ -146,6 +160,42 @@ export default function ToolToolbar({
           display: "contents",
         }}
       >
+        {isTourTool(exploreMode) && (
+          <Box
+            component="button"
+            type="button"
+            onClick={() => startToolTour(exploreMode)}
+            aria-label="Take the tour for this chart"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 0.75,
+              py: 0.25,
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              background: "transparent",
+              color: theme.palette.blue.bright,
+              transition: "background-color 120ms",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+              },
+            }}
+          >
+            <icons.PlayCircleOutline sx={{ fontSize: "1rem" }} />
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                color: "inherit",
+              }}
+            >
+              Take the tour
+            </Typography>
+          </Box>
+        )}
         {HOW_TO_READ_ENABLED && (
           <Box
             component="button"
@@ -246,6 +296,7 @@ export default function ToolToolbar({
       <VerticalDivider />
 
       <Box
+        ref={climateChipsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",

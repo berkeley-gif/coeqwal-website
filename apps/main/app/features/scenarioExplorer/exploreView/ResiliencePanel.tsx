@@ -73,6 +73,7 @@ import { hydroclimateOptions } from "../../../content/scenarios"
 import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import ToolIntroStrip from "../components/ToolIntroStrip"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 // ResilienceChartTuner is intentionally not imported: the "TUNE
 // CHART" entry point is hidden for now while the controls settle.
 // Re-import and re-mount below when we want to bring it back.
@@ -2428,6 +2429,15 @@ export default function ResiliencePanel({
     ? { opacity: 1, y: 0 }
     : { opacity: 0, y: -8 }
 
+  // Tour anchors. The mode rail and matrix row both highlight the
+  // chart wrapper because the underlying SVG cells are not addressable
+  // individually in this component; the tour copy is precise enough to
+  // describe what to look at.
+  const matrixRowAnchorRef = useTourAnchor("resilience.matrix.row")
+  const modeRailAnchorRef = useTourAnchor("resilience.modeRail")
+  const moreAnalysisAnchorRef = useTourAnchor("resilience.moreAnalysis")
+  const leverageAnchorRef = useTourAnchor("resilience.leverage")
+
   return (
     <Box
       sx={{
@@ -2466,6 +2476,12 @@ export default function ResiliencePanel({
           title here just doubled the wording the user had to read. */}
 
       <Box
+        ref={(el: HTMLDivElement | null) => {
+          matrixRowAnchorRef(el)
+          modeRailAnchorRef(el)
+          moreAnalysisAnchorRef(el)
+          leverageAnchorRef(el)
+        }}
         sx={{
           flex: 1,
           minHeight: 0,

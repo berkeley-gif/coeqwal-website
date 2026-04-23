@@ -27,14 +27,11 @@ import type {
 } from "../types"
 import {
   DU_AG_ONLY_FILTER,
+  DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
 } from "../demandUnitsBaseline"
+import { BEAT1_MID, beat1FillExpr } from "../beat1Palette"
 import { debugLog, logDuState } from "../debug"
-
-// Blue-cycle mid color. Kept here rather than in the baseline helper
-// because it is an arbiter-specific seed for the tier expression,
-// not a property of the baseline itself.
-const BEAT1_MID = "#92C1D5"
 
 export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   readonly kind = "mapPaint" as const
@@ -59,6 +56,9 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
 
     const p = actor.payload
     switch (p.kind) {
+      case "reset":
+        this.applyReset(map)
+        return
       case "beat5-enter":
         this.applyBeat5Enter(map, ctx)
         return
@@ -165,6 +165,45 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   // Paint sequences
+
+  private applyReset(map: StyledMap): void {
+    // Pre-beat-1 baseline. Mirrors the main-choreography listener's
+    // `v < 0.01` branch at TierAnimationSection.tsx lines 2166 to 2210.
+    // Full-state assertion via `writeDemandUnitsBaseline` so we do not
+    // inherit a partial paint from whatever was on the layer before
+    // (a previous Beat 4 tail, an interactive OPL teardown, etc.).
+    //
+    // Opacity is seeded to 0 here. Beat 1's fade-in ramp then takes
+    // over and brings the layer up from 0 as `v` moves past the reset
+    // window into the Beat 1 cycle.
+    const resetExpr = beat1FillExpr(0)
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: resetExpr,
+      fillOpacity: { kind: "scalar", value: 0 },
+      lineOpacity: { kind: "scalar", value: 0 },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+    // Basemap-dim overlay is not a demand-units layer, so the baseline
+    // helper does not touch it. The pre-beat-1 state has the basemap
+    // undimmed. Beat 1's first-tick fade-in ramp then drives it up to
+    // `BASEMAP_DIM_OPACITY`.
+    try {
+      if (map.getLayer("basemap-dim-overlay")) {
+        map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
+      }
+    } catch {
+      /* ok */
+    }
+    // Reset arbiter-owned ring state. If we are arriving at reset from
+    // a mid-Beat 4 Restart, the gold ring closure has already been
+    // cleared by `clearInteractiveState` -> `teardown()`. Clearing it
+    // here a second time is idempotent and keeps the invariant local.
+    this.beat5PolyRingOn = false
+    this.diagBoundariesLogged.clear()
+  }
 
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {
     logDuState("MapPaintArbiter.applyBeat5Enter PRE", map)
