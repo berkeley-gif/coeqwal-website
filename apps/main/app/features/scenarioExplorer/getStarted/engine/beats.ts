@@ -311,6 +311,16 @@ const BEAT1_ENTRY: BeatTableEntry = {
 // re-build as outcomes change. Window end
 // (`BEAT5_ENTER`) is where the Beat 5 actor takes ownership and
 // writes its own AG-only baseline.
+//
+// The `beat2:mapPaint:lineFades` companion actor handles the
+// line-geometry side of the same hide schedule. Its window extends
+// past `BEAT5_ENTER` because the line layers (e.g. `cwf-flowline`,
+// `delta-detaw-line`) stay at opacity 0 through the rest of the
+// storyboard, and a wider window ensures reverse scrubs (back past
+// a `morphStart`, then forward) re-establish the correct opacity.
+// Line layers are disjoint from `demand-units` and
+// `demand-units-outline`, so coexisting with the Beat 5 cluster and
+// `beat6:mapPaint:restore` is conflict-free.
 const BEAT2_ENTRY: BeatTableEntry = {
   id: "ag-rev-morph",
   actors: [
@@ -325,6 +335,33 @@ const BEAT2_ENTRY: BeatTableEntry = {
         peakOpacity: BEAT1_PEAK_OPACITY,
       },
     },
+    {
+      kind: "mapPaint",
+      id: "beat2:mapPaint:lineFades",
+      window: [BEAT2_START, 1],
+      payload: { kind: "beat-line-fades" },
+    },
+  ],
+}
+
+// Beat 6 (post-Beat-5 tail) actors. One-shot DU restore at
+// `BEAT5_TAIL_END`. Hosted under the `list-bar` checkpoint because
+// actor windows are independent of beat checkpoints and `list-bar`
+// is the first beat checkpoint at or after `BEAT5_TAIL_END`. The
+// arbiter performs a full-state baseline that takes ownership back
+// from the Beat 5 cluster's AG-only filter and pins both DU
+// opacities at scalar 0 for the rest of the storyboard. Reverse
+// scrubs back into Beat 5 are handled by the Beat 5 cluster's own
+// `onEnter`.
+const BEAT6_ENTRY: BeatTableEntry = {
+  id: "list-bar",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "beat6:mapPaint:restore",
+      window: [BEAT5_TAIL_END, 1],
+      payload: { kind: "beat6-restore" },
+    },
   ],
 }
 
@@ -336,7 +373,7 @@ export const BEAT_TABLE: readonly BeatTableEntry[] = [
   BEAT2_ENTRY,
   { id: "all-other-morphs", actors: [] },
   BEAT4_ENTRY,
-  { id: "list-bar", actors: [] },
+  BEAT6_ENTRY,
   { id: "radar", actors: [] },
   { id: "heatmap", actors: [] },
 ]

@@ -268,6 +268,49 @@ export type MapPaintPayload =
       /** Whether to clear the gold ring (true if step 4 was active). */
       clearRing: boolean
     }
+  | {
+      /** Beat 6+ DU restore. Window `[BEAT5_TAIL_END, 1]`. One-shot
+       * `onEnter` performs a full `writeDemandUnitsBaseline` assertion
+       * to take ownership back from the Beat 5 actor cluster. The
+       * baseline restores the full DU class filter, the blended AG
+       * tier color expression, the default outline line-width, and
+       * pins both fill-opacity and line-opacity at scalar 0.
+       *
+       * The legacy listener accomplished the same end state via
+       * `enterBeat2Phase()` (filter + colors + line-width) followed
+       * by `paintDuHideSchedule()` (per-tick case expression that
+       * evaluates to 0 for every DU at this point in the timeline).
+       * We collapse both into a single one-shot scalar opacity write
+       * because at v >= BEAT5_TAIL_END the case expression has no
+       * remaining transitions to drive (every tracked DU is past its
+       * morphStart and the AG-class fallback is past
+       * `agFadeOutEnd`), so a scalar zero is observably equivalent
+       * and avoids the per-tick Mapbox style cost.
+       *
+       * `onUpdate` and `onExit` are no-ops. Reverse scrubs back into
+       * Beat 5 are handled by the Beat 5 cluster's own `onEnter`,
+       * which performs its own full-state baseline assertion. */
+      kind: "beat6-restore"
+    }
+  | {
+      /** Per-line-layer fade-out for outcomes whose geometries are
+       * lines rather than polygons. Window `[0, 1]`. The arbiter
+       * iterates `ctx.getHideSchedule()` every tick, picks entries
+       * with `geometryType === "line"`, and writes their
+       * `line-opacity` per a three-state piecewise function:
+       *   v < fadeStart                 -> opacity = 1
+       *   fadeStart <= v <= morphStart  -> opacity = 1 - t
+       *   v > morphStart                -> opacity = 0
+       * Mirrors the legacy listener's trailing line-fade loop at
+       * TierAnimationSection.tsx lines 2458 to 2481. The actor's
+       * window is the full progress range so reverse scrubs (back
+       * past a morphStart, then forward) re-establish the correct
+       * opacity. There is no resource conflict with the polygon
+       * arbiters because line layers (e.g. `cwf-flowline`,
+       * `delta-detaw-line`) are disjoint from `demand-units` and
+       * `demand-units-outline`. */
+      kind: "beat-line-fades"
+    }
 
 export interface MapPaintActor extends ActorBase {
   kind: "mapPaint"

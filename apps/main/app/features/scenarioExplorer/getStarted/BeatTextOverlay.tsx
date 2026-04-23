@@ -18,7 +18,6 @@ import {
 import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
 import { HybridTooltip } from "@repo/ui"
 import {
   getScenarioIconDefs,
@@ -127,8 +126,6 @@ interface BeatTextOverlayProps {
   scenarioDescription?: string
   encodingMode?: EncodingMode
   onEncodingChange?: (mode: EncodingMode) => void
-  hydroclimate?: string
-  onHydroclimateChange?: (value: string) => void
   onAddLocation?: () => void
   /** Map of outcome code -> Beat 2 morph progress window. `start` drives
    *  each outcome title's fade-in (just before its polygons begin morphing).
@@ -167,8 +164,6 @@ export default function BeatTextOverlay({
   scenarioDescription,
   encodingMode,
   onEncodingChange,
-  hydroclimate,
-  onHydroclimateChange,
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
@@ -1532,41 +1527,14 @@ export default function BeatTextOverlay({
                   <ToggleButton value="average">Average</ToggleButton>
                 </ToggleButtonGroup>
               )}
-
-              {/* Bottom-right: hydroclimate chooser */}
-              {onHydroclimateChange && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    gridColumn: 2,
-                    justifySelf: "end",
-                  }}
-                >
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.02em",
-                      color: theme.palette.grey[600],
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    View by climate
-                  </Typography>
-                  <HydroclimateChooser
-                    value={hydroclimate}
-                    onChange={onHydroclimateChange}
-                    showTitle={false}
-                    showLabels={false}
-                    hideDisabled
-                    iconSize="26px"
-                    iconFontSize="0.95rem"
-                  />
-                </Box>
-              )}
+              {/* The Get Started storyboard is permanently pinned to the
+               *  s0020 baseline under the historical hydroclimate, so no
+               *  in-storyboard hydroclimate chooser is rendered here. The
+               *  Beat 8 heatmap is a single-column placeholder for future
+               *  multi-hydroclimate columns. To restore an inline chooser,
+               *  re-add `hydroclimate` / `onHydroclimateChange` props plus
+               *  the `HydroclimateChooser` import and the wiring removed
+               *  from `TierAnimationSection`. */}
             </Box>
           </Box>
         )}

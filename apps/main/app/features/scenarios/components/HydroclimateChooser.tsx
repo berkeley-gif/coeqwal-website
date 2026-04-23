@@ -96,6 +96,7 @@ export function HydroclimateChooser({
         alignItems: "flex-start",
         gap: theme.space.gap.sm,
         flexShrink: 0,
+        overflow: "visible",
       }}
     >
       {showTitle && (
@@ -116,6 +117,13 @@ export function HydroclimateChooser({
           flexDirection: isVertical ? "column" : "row",
           gap: theme.space.gap.xs,
           alignItems: isVertical ? "flex-start" : "center",
+          // White border + 2px color outline on the selected icon extend
+          // past the circle; a little padding and visible overflow keep
+          // the ring from being clipped by flex ancestors
+          // (e.g. explore ToolToolbar under overflow: hidden columns).
+          px: 0.5,
+          py: 0.5,
+          overflow: "visible",
         }}
       >
         {hydroclimateOptions.map(
