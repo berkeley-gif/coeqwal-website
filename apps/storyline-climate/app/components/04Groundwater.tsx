@@ -17,6 +17,28 @@ function Groundwater() {
 
   const linePath = useTransform(scrollYProgress, [0.7, 0.9], [0, 1])
   const textOpacity = useTransform(scrollYProgress, [0.7, 0.8], [0, 1])
+  const titleOpacity = useTransform(scrollYProgress, [0.2, 0.35], [0, 1])
+  const paragraphOneOpacity = useTransform(
+    scrollYProgress,
+    [0.28, 0.44],
+    [0, 1],
+  )
+  const paragraphTwoOpacity = useTransform(
+    scrollYProgress,
+    [0.36, 0.52],
+    [0, 1],
+  )
+  const paragraphThreeOpacity = useTransform(
+    scrollYProgress,
+    [0.44, 0.6],
+    [0, 1],
+  )
+  const paragraphFourOpacity = useTransform(
+    scrollYProgress,
+    [0.52, 0.68],
+    [0, 1],
+  )
+  const chartHeadingOpacity = useTransform(scrollYProgress, [0.6, 0.75], [0, 1])
 
   return (
     <StickyContainer
@@ -52,7 +74,7 @@ function Groundwater() {
             startOffset="35%"
             textAnchor="middle"
           >
-            The pumping below
+            Droughts drive groundwater pumping
           </textPath>
         </motion.text>
       </SVGLineContainer>
@@ -70,51 +92,61 @@ function Groundwater() {
           justifyContent: "center",
         }}
       >
-        <Box className="paragraph" component="article">
-          <Typography variant="h3">{"Increasing Droughts"}</Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {"Droughts are not new to California."}
-          </Typography>
-          <Typography variant="body1">
-            {
-              "But in a changing climate, droughts are expected to occur more often. "
-            }
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "In past droughts, when water available in rivers and reservoirs is reduced, "
-            }
-            {"communities and farmers in California turned to "}
-            <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
-            {" to meet their needs."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {"Unfortunately, "}
-            <span className="highlight-text">
+        <motion.div style={{ opacity: titleOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="h3">{"Increasing Droughts"}</Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {"Droughts are not new to California."}
+            </Typography>
+            <Typography variant="body1">
               {
-                "overpumping of groundwater has depleted underground water storage"
+                "But in a changing climate, droughts are expected to occur more often. "
               }
-            </span>
-            {" , causing wells to dry and the land to sink."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {"In 2014, the state enacted "}
-            <span style={{ fontWeight: "bold" }}>
-              {"Sustainable Groundwater Management Act (SGMA)"}
-            </span>
-            {
-              ". This law is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
-            }
-          </Typography>
-        </Box>
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphTwoOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "In past droughts, when water available in rivers and reservoirs is reduced, "
+              }
+              {"communities and farmers in California turned to "}
+              <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
+              {" to meet their needs."}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphThreeOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {"Unfortunately, "}
+              <span className="highlight-text">
+                {
+                  "overpumping of groundwater has depleted underground water storage"
+                }
+              </span>
+              {" , causing wells to dry and the land to sink."}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphFourOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {"In 2014, the state enacted "}
+              <span style={{ fontWeight: "bold" }}>
+                {"Sustainable Groundwater Management Act (SGMA)"}
+              </span>
+              {
+                ". This law is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
 
       <Box
@@ -135,22 +167,24 @@ function Groundwater() {
           component="article"
           sx={{ pointerEvents: "auto" }}
         >
-          <Typography variant="h5" align="left">
-            {"Cumulative Groundwater Loss in Central Valley"}
-          </Typography>
-          <Typography variant="caption" align="left" sx={{ opacity: 0.7 }}>
-            {
-              "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: "
-            }
-            <a
-              href="https://doi.org/10.1038/s41467-022-35582-x"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
-            >
-              {"Liu et al., 2022"}
-            </a>
-          </Typography>
+          <motion.div style={{ opacity: chartHeadingOpacity }}>
+            <Typography variant="h5" align="left">
+              {"Cumulative Groundwater Loss in Central Valley"}
+            </Typography>
+            <Typography variant="caption" align="left" sx={{ opacity: 0.7 }}>
+              {
+                "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: "
+              }
+              <a
+                href="https://doi.org/10.1038/s41467-022-35582-x"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", textDecoration: "underline" }}
+              >
+                {"Liu et al., 2022"}
+              </a>
+            </Typography>
+          </motion.div>
         </Box>
         <Box width="100%" height="50%">
           <GroundwaterLine scrollProgress={scrollYProgress} />

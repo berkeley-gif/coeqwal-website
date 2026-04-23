@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
@@ -17,15 +18,33 @@ import SierraNevada, { Snowmelt } from "./components/03Snowmelt"
 import Groundwater from "./components/04Groundwater"
 import DeltaFarms, { DeltaAqueduct } from "./components/05Delta"
 import Balance, { Bullet } from "./components/06AdaptTransition"
-import { Conclusion, Hydroclimate, Themes } from "./components/07Resolution"
+import {
+  Conclusion,
+  Hydroclimate,
+  HydroclimateTransition,
+  Themes,
+} from "./components/07Resolution"
+import {
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "./components/helpers/header"
 
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
+  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
 
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
-      <BaseHeader backgroundColor="overlay.waterDark" />
+      <BaseHeader
+        backgroundColor="overlay.waterDark"
+        onLogoClick={goToMainHome}
+        onAboutClick={goToMainAbout}
+        onGetDataClick={goToMainData}
+        waterThemesOptions={waterThemesOptions}
+      />
       <ContentContainer />
     </>
   )
@@ -86,6 +105,20 @@ function ContentContainer() {
           </Box>
         </Step>
 
+        <Step data={"groundwaterTransition" as SectionId}>
+          <Box
+            aria-hidden
+            sx={{
+              width: "100%",
+              height: "30vh",
+              backgroundImage: [
+                "linear-gradient(180deg, #172a48 0%, #172a4850 35%, rgba(130, 157, 171, 0) 90%)",
+                "linear-gradient(90deg, #5c737a 0%, #68828c 16%, #7892A1 35%, #829DAB 50%, #81A4B1 75%, #82A2B0 88%, #7c9ca9 100%)",
+              ].join(", "),
+            }}
+          />
+        </Step>
+
         <Step data={"deltaFarms" as SectionId}>
           <Box width="100%">
             <DeltaFarms />
@@ -110,19 +143,25 @@ function ContentContainer() {
           </Box>
         </Step>
 
-        <Step data={"bullet" as SectionId}>
+        <Step data={"hydroclimate" as SectionId}>
           <Box width="100%">
             <Hydroclimate />
           </Box>
         </Step>
 
-        <Step data={"bullet" as SectionId}>
+        <Step data={"hydroclimateTransition" as SectionId}>
+          <Box width="100%">
+            <HydroclimateTransition />
+          </Box>
+        </Step>
+
+        <Step data={"themes" as SectionId}>
           <Box width="100%">
             <Themes />
           </Box>
         </Step>
 
-        <Step data={"bullet" as SectionId}>
+        <Step data={"conclusion" as SectionId}>
           <Box width="100%">
             <Conclusion />
           </Box>

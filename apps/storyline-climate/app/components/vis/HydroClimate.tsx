@@ -19,27 +19,15 @@ type Model = {
 
 const models: Model[] = [
   {
-    model: "Warmer & Drier I",
-    background: "#d08b2f",
-    hover: "#b87222",
+    model: "Moderate-dry climate risk",
+    background: "#c28433",
+    hover: "rgb(160, 101, 25)",
     text: "#fcfbfa",
   },
   {
-    model: "Warmer & Drier II",
-    background: "#b86a2f",
-    hover: "#a55b28",
-    text: "#fcfbfa",
-  },
-  {
-    model: "Warmer & Drier III",
-    background: "#b86a2f",
-    hover: "#a55b28",
-    text: "#fcfbfa",
-  },
-  {
-    model: "Warmer & Drier IV",
-    background: "#a23e2b",
-    hover: "#913526",
+    model: "High climate risk",
+    background: "#a72525",
+    hover: "#961919",
     text: "#fcfbfa",
   },
   {
@@ -50,10 +38,17 @@ const models: Model[] = [
   },
 ]
 
+const modelQueryMap: Record<string, string> = {
+  "Moderate-dry climate risk": "Warmer & Drier I",
+  "High climate risk": "Warmer & Drier II",
+  "Warmer & Wetter": "Warmer & Wetter",
+}
+
 export default function HydroClimateContainer() {
   const [flowData, setFlowData] = useState<FlowEntry[]>([])
   const [flowYExtents, setFlowYExtents] = useState<[number, number]>([0, 0])
   const [selectedModel, setSelectedModel] = useState<string>("")
+  const selectedDataModel = modelQueryMap[selectedModel] ?? selectedModel
 
   useFetchData(
     "./data/hydroclimate_streamflow_change.json",
@@ -105,7 +100,7 @@ export default function HydroClimateContainer() {
         {selectedModel && (
           <FlowLine
             selected={selectedModel}
-            data={flowData.filter((d) => d.model == selectedModel)}
+            data={flowData.filter((d) => d.model === selectedDataModel)}
             yExtents={flowYExtents}
           />
         )}

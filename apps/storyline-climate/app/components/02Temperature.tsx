@@ -15,6 +15,16 @@ export function TemperatureBuilder() {
     offset: ["start end", "end start"],
   })
   const linePath = useTransform(scrollYProgress, [0.3, 0.7], [0, 1])
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.45],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.65],
+    [0, 1],
+  )
   const sectionBg = useTransform(
     scrollYProgress,
     [0, 0.5],
@@ -57,43 +67,47 @@ export function TemperatureBuilder() {
           paddingRight: "20%",
         }}
       >
-        <Box className="paragraph">
-          <Typography variant="body1">
-            {
-              "California’s water system is under pressure to meet multiple demands."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {"People need clean drinking water."}
-          </Typography>
-          <Typography variant="body1">
-            {"Farms need water to grow food."}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            {"Fish and wildlife need water to survive."}
-          </Typography>
-          <Typography variant="body1" style={{ fontWeight: "bold" }}>
-            {"Climate change is making matters worse."}
-          </Typography>
-        </Box>
-        <Box
-          className="paragraph"
-          sx={{ marginTop: "6rem", marginBottom: "5rem" }}
-        >
-          <Typography variant="body1">
-            <span className="highlight-text">{"Warmer temperatures"}</span>
-            {", "}
-          </Typography>
-          <Typography variant="body1">
-            {"less predictable rain and snow, "}
-          </Typography>
-          <Typography variant="body1">
-            {"and higher sea levels are stressing"}
-          </Typography>
-          <Typography variant="body1">
-            {"both our water infrastructure and living environment."}
-          </Typography>
-        </Box>
+        <motion.div style={{ opacity: firstParagraphOpacity }}>
+          <Box className="paragraph">
+            <Typography variant="body1">
+              {
+                "California’s water system is under pressure to meet multiple demands."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {"People need clean drinking water."}
+            </Typography>
+            <Typography variant="body1">
+              {"Farms need water to grow food."}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {"Fish and wildlife need water to survive."}
+            </Typography>
+            <Typography variant="body1" style={{ fontWeight: "bold" }}>
+              {"Climate change is making matters worse."}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: secondParagraphOpacity }}>
+          <Box
+            className="paragraph"
+            sx={{ marginTop: "6rem", marginBottom: "5rem" }}
+          >
+            <Typography variant="body1">
+              <span className="highlight-text">{"Warmer temperatures"}</span>
+              {", "}
+            </Typography>
+            <Typography variant="body1">
+              {"less predictable rain and snow, "}
+            </Typography>
+            <Typography variant="body1">
+              {"and higher sea levels are stressing"}
+            </Typography>
+            <Typography variant="body1">
+              {"both our water infrastructure and living environment."}
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
     </StickyContainer>
   )
@@ -110,6 +124,13 @@ export function Temperature() {
 
   const linePath = useTransform(scrollYProgress, [0.6, 0.8], [0, 1])
   const textOpacity = useTransform(scrollYProgress, [0.65, 0.75], [0, 1])
+  const chartHeadingOpacity = useTransform(scrollYProgress, [0, 0.4], [0, 1])
+  const bottomTitleOpacity = useTransform(scrollYProgress, [0.5, 0.72], [0, 1])
+  const bottomParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.7, 0.8],
+    [0, 1],
+  )
   const sectionBg = useTransform(
     scrollYProgress,
     [0.35, 0.7],
@@ -119,7 +140,7 @@ export function Temperature() {
   return (
     <StickyContainer
       sectionID="temperature"
-      stickyRollHeight="200vh"
+      stickyRollHeight="150vh"
       sectionRef={sectionRef}
     >
       <motion.div
@@ -199,23 +220,25 @@ export function Temperature() {
           alignItems="flex-start"
           sx={{ width: "100%" }}
         >
-          <Typography variant="h5" sx={{ textAlign: "left" }}>
-            California Annual Average Temperature
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ opacity: 0.7, textAlign: "left" }}
-          >
-            Data source:{" "}
-            <a
-              href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/4/tavg/12/12/1960-2026"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
+          <motion.div style={{ opacity: chartHeadingOpacity }}>
+            <Typography variant="h5" sx={{ textAlign: "left" }}>
+              California Annual Average Temperature
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ opacity: 0.7, textAlign: "left" }}
             >
-              NOAA
-            </a>
-          </Typography>
+              Data source:{" "}
+              <a
+                href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/4/tavg/12/12/1960-2026"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", textDecoration: "underline" }}
+              >
+                NOAA
+              </a>
+            </Typography>
+          </motion.div>
           <TemperatureLineChart scrollProgress={scrollYProgress} />
         </Stack>
       </Box>
@@ -233,30 +256,34 @@ export function Temperature() {
           pointerEvents: "auto",
         }}
       >
-        <Box className="paragraph">
-          <Typography variant="h3">
-            {"A "}
-            <span className="highlight-text">Warmer</span>
-            {" Future"}
-          </Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">
-            {
-              "Year after year, rising global temperatures reveal that our climate is changing. "
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "Since 1960, California’s average temperature has increased by about 2°F (1.1°C). "
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "Climate models predict that average temperatures may increase by an additional 6-9°F by the end of the century."
-            }
-          </Typography>
-        </Box>
+        <motion.div style={{ opacity: bottomTitleOpacity }}>
+          <Box className="paragraph">
+            <Typography variant="h3">
+              {"A "}
+              <span className="highlight-text">Warmer</span>
+              {" Future"}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: bottomParagraphOpacity }}>
+          <Box className="paragraph">
+            <Typography variant="body1">
+              {
+                "Year after year, rising global temperatures reveal that our climate is changing. "
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Since 1960, California’s average temperature has increased by about 2°F (1.1°C). "
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Climate models predict that average temperatures may increase by an additional 6-9°F by the end of the century."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
     </StickyContainer>
   )

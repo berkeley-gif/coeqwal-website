@@ -1,0 +1,652 @@
+﻿[
+  {
+    "Date": 189512,
+    "Value": 56.5,
+    "Anomaly": -0.9
+  },
+  {
+    "Date": 189612,
+    "Value": 57.5,
+    "Anomaly": 0.1
+  },
+  {
+    "Date": 189712,
+    "Value": 56.5,
+    "Anomaly": -0.9
+  },
+  {
+    "Date": 189812,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 189912,
+    "Value": 56.6,
+    "Anomaly": -0.8
+  },
+  {
+    "Date": 190012,
+    "Value": 57.5,
+    "Anomaly": 0.1
+  },
+  {
+    "Date": 190112,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 190212,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 190312,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 190412,
+    "Value": 57.4,
+    "Anomaly": 0
+  },
+  {
+    "Date": 190512,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 190612,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 190712,
+    "Value": 56.5,
+    "Anomaly": -0.9
+  },
+  {
+    "Date": 190812,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 190912,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 191012,
+    "Value": 57.7,
+    "Anomaly": 0.3
+  },
+  {
+    "Date": 191112,
+    "Value": 55.4,
+    "Anomaly": -2
+  },
+  {
+    "Date": 191212,
+    "Value": 55.5,
+    "Anomaly": -1.9
+  },
+  {
+    "Date": 191312,
+    "Value": 56.5,
+    "Anomaly": -0.9
+  },
+  {
+    "Date": 191412,
+    "Value": 57.4,
+    "Anomaly": 0
+  },
+  {
+    "Date": 191512,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 191612,
+    "Value": 55.6,
+    "Anomaly": -1.8
+  },
+  {
+    "Date": 191712,
+    "Value": 56.6,
+    "Anomaly": -0.8
+  },
+  {
+    "Date": 191812,
+    "Value": 56.8,
+    "Anomaly": -0.6
+  },
+  {
+    "Date": 191912,
+    "Value": 56.3,
+    "Anomaly": -1.1
+  },
+  {
+    "Date": 192012,
+    "Value": 56.1,
+    "Anomaly": -1.3
+  },
+  {
+    "Date": 192112,
+    "Value": 57.3,
+    "Anomaly": -0.1
+  },
+  {
+    "Date": 192212,
+    "Value": 56.1,
+    "Anomaly": -1.3
+  },
+  {
+    "Date": 192312,
+    "Value": 56.4,
+    "Anomaly": -1
+  },
+  {
+    "Date": 192412,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 192512,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 192612,
+    "Value": 58.8,
+    "Anomaly": 1.4
+  },
+  {
+    "Date": 192712,
+    "Value": 56.9,
+    "Anomaly": -0.5
+  },
+  {
+    "Date": 192812,
+    "Value": 57.7,
+    "Anomaly": 0.3
+  },
+  {
+    "Date": 192912,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 193012,
+    "Value": 56.9,
+    "Anomaly": -0.5
+  },
+  {
+    "Date": 193112,
+    "Value": 58.3,
+    "Anomaly": 0.9
+  },
+  {
+    "Date": 193212,
+    "Value": 56.9,
+    "Anomaly": -0.5
+  },
+  {
+    "Date": 193312,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 193412,
+    "Value": 59.7,
+    "Anomaly": 2.3
+  },
+  {
+    "Date": 193512,
+    "Value": 56.8,
+    "Anomaly": -0.6
+  },
+  {
+    "Date": 193612,
+    "Value": 58.6,
+    "Anomaly": 1.2
+  },
+  {
+    "Date": 193712,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 193812,
+    "Value": 57.3,
+    "Anomaly": -0.1
+  },
+  {
+    "Date": 193912,
+    "Value": 58.3,
+    "Anomaly": 0.9
+  },
+  {
+    "Date": 194012,
+    "Value": 58.8,
+    "Anomaly": 1.4
+  },
+  {
+    "Date": 194112,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 194212,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 194312,
+    "Value": 57.8,
+    "Anomaly": 0.4
+  },
+  {
+    "Date": 194412,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 194512,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 194612,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 194712,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 194812,
+    "Value": 55.7,
+    "Anomaly": -1.7
+  },
+  {
+    "Date": 194912,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 195012,
+    "Value": 58.1,
+    "Anomaly": 0.7
+  },
+  {
+    "Date": 195112,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 195212,
+    "Value": 56.8,
+    "Anomaly": -0.6
+  },
+  {
+    "Date": 195312,
+    "Value": 57.2,
+    "Anomaly": -0.2
+  },
+  {
+    "Date": 195412,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 195512,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 195612,
+    "Value": 57,
+    "Anomaly": -0.4
+  },
+  {
+    "Date": 195712,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 195812,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 195912,
+    "Value": 59,
+    "Anomaly": 1.6
+  },
+  {
+    "Date": 196012,
+    "Value": 58.1,
+    "Anomaly": 0.7
+  },
+  {
+    "Date": 196112,
+    "Value": 57.8,
+    "Anomaly": 0.4
+  },
+  {
+    "Date": 196212,
+    "Value": 57.4,
+    "Anomaly": 0
+  },
+  {
+    "Date": 196312,
+    "Value": 57.1,
+    "Anomaly": -0.3
+  },
+  {
+    "Date": 196412,
+    "Value": 56.6,
+    "Anomaly": -0.8
+  },
+  {
+    "Date": 196512,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 196612,
+    "Value": 58,
+    "Anomaly": 0.6
+  },
+  {
+    "Date": 196712,
+    "Value": 57.5,
+    "Anomaly": 0.1
+  },
+  {
+    "Date": 196812,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 196912,
+    "Value": 57.5,
+    "Anomaly": 0.1
+  },
+  {
+    "Date": 197012,
+    "Value": 57.8,
+    "Anomaly": 0.4
+  },
+  {
+    "Date": 197112,
+    "Value": 56.2,
+    "Anomaly": -1.2
+  },
+  {
+    "Date": 197212,
+    "Value": 57.3,
+    "Anomaly": -0.1
+  },
+  {
+    "Date": 197312,
+    "Value": 57.3,
+    "Anomaly": -0.1
+  },
+  {
+    "Date": 197412,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 197512,
+    "Value": 56.3,
+    "Anomaly": -1.1
+  },
+  {
+    "Date": 197612,
+    "Value": 57.5,
+    "Anomaly": 0.1
+  },
+  {
+    "Date": 197712,
+    "Value": 58,
+    "Anomaly": 0.6
+  },
+  {
+    "Date": 197812,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 197912,
+    "Value": 57.7,
+    "Anomaly": 0.3
+  },
+  {
+    "Date": 198012,
+    "Value": 58.1,
+    "Anomaly": 0.7
+  },
+  {
+    "Date": 198112,
+    "Value": 59.3,
+    "Anomaly": 1.9
+  },
+  {
+    "Date": 198212,
+    "Value": 56.3,
+    "Anomaly": -1.1
+  },
+  {
+    "Date": 198312,
+    "Value": 57.6,
+    "Anomaly": 0.2
+  },
+  {
+    "Date": 198412,
+    "Value": 58.2,
+    "Anomaly": 0.8
+  },
+  {
+    "Date": 198512,
+    "Value": 57.3,
+    "Anomaly": -0.1
+  },
+  {
+    "Date": 198612,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 198712,
+    "Value": 58.3,
+    "Anomaly": 0.9
+  },
+  {
+    "Date": 198812,
+    "Value": 58.8,
+    "Anomaly": 1.4
+  },
+  {
+    "Date": 198912,
+    "Value": 58.1,
+    "Anomaly": 0.7
+  },
+  {
+    "Date": 199012,
+    "Value": 58,
+    "Anomaly": 0.6
+  },
+  {
+    "Date": 199112,
+    "Value": 58.1,
+    "Anomaly": 0.7
+  },
+  {
+    "Date": 199212,
+    "Value": 59.3,
+    "Anomaly": 1.9
+  },
+  {
+    "Date": 199312,
+    "Value": 57.7,
+    "Anomaly": 0.3
+  },
+  {
+    "Date": 199412,
+    "Value": 58,
+    "Anomaly": 0.6
+  },
+  {
+    "Date": 199512,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 199612,
+    "Value": 59.6,
+    "Anomaly": 2.2
+  },
+  {
+    "Date": 199712,
+    "Value": 59.1,
+    "Anomaly": 1.7
+  },
+  {
+    "Date": 199812,
+    "Value": 56.7,
+    "Anomaly": -0.7
+  },
+  {
+    "Date": 199912,
+    "Value": 58,
+    "Anomaly": 0.6
+  },
+  {
+    "Date": 200012,
+    "Value": 58.8,
+    "Anomaly": 1.4
+  },
+  {
+    "Date": 200112,
+    "Value": 59.1,
+    "Anomaly": 1.7
+  },
+  {
+    "Date": 200212,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 200312,
+    "Value": 59.4,
+    "Anomaly": 2
+  },
+  {
+    "Date": 200412,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 200512,
+    "Value": 58.6,
+    "Anomaly": 1.2
+  },
+  {
+    "Date": 200612,
+    "Value": 58.6,
+    "Anomaly": 1.2
+  },
+  {
+    "Date": 200712,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 200812,
+    "Value": 58.9,
+    "Anomaly": 1.5
+  },
+  {
+    "Date": 200912,
+    "Value": 58.8,
+    "Anomaly": 1.4
+  },
+  {
+    "Date": 201012,
+    "Value": 57.7,
+    "Anomaly": 0.3
+  },
+  {
+    "Date": 201112,
+    "Value": 57.4,
+    "Anomaly": 0
+  },
+  {
+    "Date": 201212,
+    "Value": 59.5,
+    "Anomaly": 2.1
+  },
+  {
+    "Date": 201312,
+    "Value": 59.3,
+    "Anomaly": 1.9
+  },
+  {
+    "Date": 201412,
+    "Value": 61.5,
+    "Anomaly": 4.1
+  },
+  {
+    "Date": 201512,
+    "Value": 60.8,
+    "Anomaly": 3.4
+  },
+  {
+    "Date": 201612,
+    "Value": 60.1,
+    "Anomaly": 2.7
+  },
+  {
+    "Date": 201712,
+    "Value": 60.3,
+    "Anomaly": 2.9
+  },
+  {
+    "Date": 201812,
+    "Value": 60.1,
+    "Anomaly": 2.7
+  },
+  {
+    "Date": 201912,
+    "Value": 58.4,
+    "Anomaly": 1
+  },
+  {
+    "Date": 202012,
+    "Value": 60.5,
+    "Anomaly": 3.1
+  },
+  {
+    "Date": 202112,
+    "Value": 60.4,
+    "Anomaly": 3
+  },
+  {
+    "Date": 202212,
+    "Value": 60.1,
+    "Anomaly": 2.7
+  },
+  {
+    "Date": 202312,
+    "Value": 58.3,
+    "Anomaly": 0.9
+  },
+  {
+    "Date": 202412,
+    "Value": 60.5,
+    "Anomaly": 3.1
+  }
+]

@@ -16,6 +16,22 @@ export default function DeltaFarms() {
   })
   const linePathLength = useTransform(scrollYProgress, [0.6, 0.9], [0, 1])
   const lineOpacity = useTransform(scrollYProgress, [0.55, 0.7], [0, 1])
+  const titleOpacity = useTransform(scrollYProgress, [0.18, 0.32], [0, 1])
+  const paragraphOneOpacity = useTransform(
+    scrollYProgress,
+    [0.28, 0.42],
+    [0, 1],
+  )
+  const paragraphTwoOpacity = useTransform(
+    scrollYProgress,
+    [0.38, 0.54],
+    [0, 1],
+  )
+  const paragraphThreeOpacity = useTransform(
+    scrollYProgress,
+    [0.48, 0.64],
+    [0, 1],
+  )
 
   return (
     <StickyContainer
@@ -23,6 +39,12 @@ export default function DeltaFarms() {
       stickyRollHeight="100vh"
       sectionRef={sectionRef}
     >
+      <DeltaSourceAnnouncer
+        lines={[
+          "Aerial view of farmland and waterways in Sacramento-San Joaquin Delta, California",
+          "Source: DWR Gallery, photo by Paul Hames",
+        ]}
+      />
       <Box
         width="100%"
         height="100%"
@@ -63,39 +85,47 @@ export default function DeltaFarms() {
           textShadow: theme.textShadow.displayBody,
         }}
       >
-        <Box className="paragraph" component="article">
-          <Typography variant="h3">{"Rising seas, rising risks"}</Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "You may be aware that climate change melts polar ice, raising sea levels worldwide."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {"But do you know how this will affect California? "}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            One of the most vulnerable places to rising sea levels is the Delta,
-            where two of the state&apos;s largest rivers {"\u2014"}{" "}
-            <span style={{ fontWeight: "bold", color: FreshWaterColor }}>
-              the Sacramento and San Joaquin
-            </span>{" "}
-            {"\u2014"} meet the San Francisco Bay.{" "}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {"This area is home to many small communities and farms."}
-          </Typography>
-          <Typography variant="body1">
-            {
-              "It is also where huge pumps move freshwater south to the Delta to supply large farms in the San Joaquin Valley and cities in Southern California."
-            }
-          </Typography>
-        </Box>
+        <motion.div style={{ opacity: titleOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="h3">{"Rising seas, rising risks"}</Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "You may be aware that climate change melts polar ice, raising sea levels worldwide."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {"But do you know how this will affect California? "}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphTwoOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              One of the most vulnerable places to rising sea levels is the
+              Delta, where two of the state&apos;s largest rivers {"\u2014"}{" "}
+              <span style={{ fontWeight: "bold", color: FreshWaterColor }}>
+                the Sacramento and San Joaquin
+              </span>{" "}
+              {"\u2014"} meet the San Francisco Bay.{" "}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphThreeOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {"This area is home to many small communities and farms."}
+            </Typography>
+            <Typography variant="body1">
+              {
+                "It is also where huge pumps move freshwater south to the Delta to supply large farms in the San Joaquin Valley and cities in Southern California."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
     </StickyContainer>
   )
@@ -110,6 +140,16 @@ export function DeltaAqueduct() {
   })
   const linePathLength = useTransform(scrollYProgress, [0.6, 0.9], [0, 1])
   const lineOpacity = useTransform(scrollYProgress, [0.55, 0.7], [0, 1])
+  const paragraphOneOpacity = useTransform(
+    scrollYProgress,
+    [0.24, 0.42],
+    [0, 1],
+  )
+  const paragraphTwoOpacity = useTransform(
+    scrollYProgress,
+    [0.38, 0.56],
+    [0, 1],
+  )
 
   return (
     <StickyContainer
@@ -117,6 +157,12 @@ export function DeltaAqueduct() {
       stickyRollHeight="100vh"
       sectionRef={sectionRef}
     >
+      <DeltaSourceAnnouncer
+        lines={[
+          "California Aqueduct near Crows Landing, Stanislaus County, California",
+          "Source: DWR Gallery, photo by Nick Shockey",
+        ]}
+      />
       <Box
         width="100%"
         height="100%"
@@ -156,53 +202,82 @@ export function DeltaAqueduct() {
           color: "text.primary",
         }}
       >
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "As sea levels rise, salty ocean water can extend further into the Delta."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "Increasing salinity threatens local communities and farms that rely on fresh water flowing through the Delta."
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "It also puts water exports to San Joaquin Valley and Southern California at risk."
-            }
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "People are looking for ways to manage salinity in the Delta, which is becoming more difficult as the climate changes."
-            }
-          </Typography>
-          <Typography variant="body1">
-            For example,{" "}
-            <strong>
-              <a
-                href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "inherit", textDecoration: "underline" }}
-              >
-                Just Transitions in the Delta
-              </a>
-            </strong>{" "}
-            <LibraryBooksIcon
-              sx={{
-                fontSize: theme.typography.body1.fontSize,
-                verticalAlign: "middle",
-              }}
-            />{" "}
-            {
-              " is a research project exploring a wide range of adaptation strategies to address salinity intrusion in the Delta"
-            }
-          </Typography>
-        </Box>
+        <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "As sea levels rise, salty ocean water can extend further into the Delta."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Increasing salinity threatens local communities and farms that rely on fresh water flowing through the Delta."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "It also puts water exports to San Joaquin Valley and Southern California at risk."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphTwoOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "People are looking for ways to manage salinity in the Delta, which is becoming more difficult as the climate changes."
+              }
+            </Typography>
+            <Typography variant="body1">
+              For example,{" "}
+              <strong>
+                <a
+                  href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "inherit", textDecoration: "underline" }}
+                >
+                  Just Transitions in the Delta
+                </a>
+              </strong>{" "}
+              <LibraryBooksIcon
+                sx={{
+                  fontSize: theme.typography.body1.fontSize,
+                  verticalAlign: "middle",
+                }}
+              />{" "}
+              {
+                " is a research project exploring a wide range of adaptation strategies to address salinity intrusion in the Delta"
+              }
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
     </StickyContainer>
+  )
+}
+
+function DeltaSourceAnnouncer({ lines }: { lines: string[] }) {
+  return (
+    <motion.div
+      className="panel"
+      style={{
+        position: "absolute",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        color: "common.white",
+        backgroundColor: "overlay.waterDark",
+        zIndex: 3,
+        pointerEvents: "none",
+        bottom: "5rem",
+      }}
+    >
+      <Box>
+        {lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </Box>
+    </motion.div>
   )
 }

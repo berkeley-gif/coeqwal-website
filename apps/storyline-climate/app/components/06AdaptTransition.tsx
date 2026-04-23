@@ -22,11 +22,21 @@ export default function Balance() {
   const secondaryLinePath = useTransform(scrollYProgress, [0.45, 0.85], [0, 1])
   const thirdLinePath = useTransform(scrollYProgress, [0.5, 1], [0, 1])
   const opacity = useTransform(scrollYProgress, [0.5, 0.6], [0, 1])
+  const paragraphOneOpacity = useTransform(
+    scrollYProgress,
+    [0.22, 0.42],
+    [0, 1],
+  )
+  const paragraphTwoOpacity = useTransform(
+    scrollYProgress,
+    [0.38, 0.58],
+    [0, 1],
+  )
 
   return (
     <StickyContainer
       sectionID="balance"
-      stickyRollHeight="150vh"
+      stickyRollHeight="120vh"
       sectionRef={sectionRef}
     >
       <Box
@@ -75,38 +85,42 @@ export default function Balance() {
           justifyContent: "center",
         }}
       >
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" gutterBottom>
-            {
-              "While some aspects of climate change \u2014 such as rising temperatures \u2014 are well understood, it is hard to predict exactly "
-            }
-            <span className="highlight-text">
-              {"how climate will affect California’s water system"}
-            </span>
-            {" in the future."}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            {"This is, in part, because "}
-            <span style={{ fontWeight: "bold" }}>
+        <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1" gutterBottom>
               {
-                "the impacts of climate change depend on the actions that we take"
+                "While some aspects of climate change \u2014 such as rising temperatures \u2014 are well understood, it is hard to predict exactly "
               }
-            </span>
-            {"."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" gutterBottom>
-            {
-              "We may choose to sustainably manage our groundwater, restore watersheds, modify reservoir operations, or build new water engineering projects. "
-            }
-          </Typography>
-          <Typography variant="body1">
-            {
-              "The key is finding the right combination of approaches that work for California's diverse communities, farms, and ecosystems."
-            }
-          </Typography>
-        </Box>
+              <span className="highlight-text">
+                {"how climate will affect California’s water system"}
+              </span>
+              {" in the future."}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {"This is, in part, because "}
+              <span style={{ fontWeight: "bold" }}>
+                {
+                  "the impacts of climate change depend on the actions that we take"
+                }
+              </span>
+              {"."}
+            </Typography>
+          </Box>
+        </motion.div>
+        <motion.div style={{ opacity: paragraphTwoOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1" gutterBottom>
+              {
+                "We may choose to sustainably manage our groundwater, restore watersheds, modify reservoir operations, or build new water engineering projects. "
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "The key is finding the right combination of approaches that work for California's diverse communities, farms, and ecosystems."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
       </Box>
     </StickyContainer>
   )
@@ -168,6 +182,7 @@ export function Bullet() {
     [0.1, 0.3],
     [0, 0.5],
   )
+  const textOpacity = useTransform(scrollYProgress, [0.25, 0.45], [0, 1])
 
   useEffect(() => {
     const svgEl = svgRef.current
@@ -219,18 +234,20 @@ export function Bullet() {
       </motion.svg>
 
       {/* text overlay */}
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{ position: "relative" }}
-      >
-        <Typography variant="h2">
-          What is clear is that there is no simple solution
-        </Typography>
-        <Typography variant="h2">
-          to the challenge that climate change poses to California water.
-        </Typography>
-      </Box>
+      <motion.div style={{ opacity: textOpacity }}>
+        <Box
+          className="paragraph"
+          component="article"
+          sx={{ position: "relative" }}
+        >
+          <Typography variant="h2">
+            What is clear is that there is no simple solution
+          </Typography>
+          <Typography variant="h2">
+            to the challenge that climate change poses to California water.
+          </Typography>
+        </Box>
+      </motion.div>
     </Box>
   )
 }
