@@ -386,8 +386,8 @@ const getFillColor = (
     }
 
     // In normal mode, use tier colors
-    // return tierColorMap[obj.tier] || "#999"
-    return "#999"
+    return tierColorMap[obj.tier] || "#999"
+    // return "#999"
   } else if (colorMode === "category") {
     return categoryColorScale(obj.category)
   }
@@ -401,6 +401,8 @@ const drawTierGrid = (
   height: number,
   categoryLayouts: CategoryLayout[],
   tiers: string[],
+  onTierCategoryClick?: (category: string, tier: string) => void,
+  showMapView: boolean = false,
 ) => {
   const gridWidth = width - MARGIN.left - MARGIN.right
   const gridHeight = height - MARGIN.top - MARGIN.bottom
@@ -409,6 +411,30 @@ const drawTierGrid = (
   const gridLayer = svg.append("g").attr("class", "grid-layer")
 
   const tierHeight = gridHeight / tiers.length
+
+  // Draw clickable cell backgrounds
+  if (onTierCategoryClick && showMapView) {
+    tiers.forEach((tier, tierIndex) => {
+      categoryLayouts.forEach((layout) => {
+        gridLayer
+          .append("rect")
+          .attr("class", "grid-cell-bg")
+          .attr("x", MARGIN.left + layout.startX)
+          .attr("y", MARGIN.top + tierIndex * tierHeight)
+          .attr("width", layout.width)
+          .attr("height", tierHeight)
+          .attr("fill", "transparent")
+          .style("cursor", "pointer")
+          .on("click", () => onTierCategoryClick(layout.category, tier))
+          .on("mouseover", function () {
+            d3.select(this).attr("fill", "rgba(0, 0, 0, 0.1)")
+          })
+          .on("mouseout", function () {
+            d3.select(this).attr("fill", "transparent")
+          })
+      })
+    })
+  }
 
   // Horizontal lines (tier separators)
   tiers.forEach((_, i) => {
@@ -420,6 +446,7 @@ const drawTierGrid = (
       .attr("y2", MARGIN.top + i * tierHeight)
       .attr("stroke", "#ddd")
       .attr("stroke-width", 1)
+      .style("pointer-events", "none")
   })
 
   // Bottom border
@@ -431,6 +458,7 @@ const drawTierGrid = (
     .attr("y2", MARGIN.top + gridHeight)
     .attr("stroke", "#ddd")
     .attr("stroke-width", 1)
+    .style("pointer-events", "none")
 
   // Vertical lines (category separators)
   categoryLayouts.forEach((layout) => {
@@ -442,6 +470,7 @@ const drawTierGrid = (
       .attr("y2", MARGIN.top + gridHeight)
       .attr("stroke", "#ddd")
       .attr("stroke-width", 1)
+      .style("pointer-events", "none")
   })
 
   // Right border
@@ -453,6 +482,7 @@ const drawTierGrid = (
     .attr("y2", MARGIN.top + gridHeight)
     .attr("stroke", "#ddd")
     .attr("stroke-width", 1)
+    .style("pointer-events", "none")
 
   // Tier labels on the left
   tiers.forEach((tier, i) => {
@@ -464,6 +494,7 @@ const drawTierGrid = (
       .attr("dominant-baseline", "middle")
       .style("font-size", "11px")
       .style("fill", "#666")
+      .style("pointer-events", "none")
       .text(tier)
   })
 }
@@ -541,6 +572,7 @@ export default function TierGrid({
   selectedObjectives = [],
   onObjectiveClick,
   onCategoryClick,
+  onTierCategoryClick,
   tierColorMap = DEFAULT_TIER_COLORS,
   showMapView = false,
 }: TierGridProps) {
@@ -610,10 +642,25 @@ export default function TierGrid({
         w - MARGIN.left - MARGIN.right,
       )
 
-      drawTierGrid(svg, w, h, categoryLayouts, tiers)
+      drawTierGrid(
+        svg,
+        w,
+        h,
+        categoryLayouts,
+        tiers,
+        onTierCategoryClick,
+        showMapView,
+      )
       drawCategoryLabels(svg, h, categoryLayouts, onCategoryClick)
     },
-    [getSvgSelection, categories, tiers, onCategoryClick],
+    [
+      getSvgSelection,
+      categories,
+      tiers,
+      onCategoryClick,
+      onTierCategoryClick,
+      showMapView,
+    ],
   )
 
   const animate = useCallback(
@@ -648,7 +695,15 @@ export default function TierGrid({
         }
       }
 
-      const shapes = svg
+      // Create dots layer if it doesn't exist, otherwise move it to top
+      let dotsLayer = svg.select<SVGGElement>(".dots-layer")
+      if (dotsLayer.empty()) {
+        dotsLayer = svg.append("g").attr("class", "dots-layer")
+      } else {
+        dotsLayer.raise()
+      }
+
+      const shapes = dotsLayer
         .selectAll<SVGPathElement, Position>(".tier-dot")
         .data(positions, (d) => String(d.id))
 

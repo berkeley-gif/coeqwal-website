@@ -7,8 +7,8 @@
  * using an interactive tier-based grid visualization.
  */
 
-import { useMemo, useState, useCallback, useEffect } from "react"
-import { Box, useTheme, Tooltip } from "@repo/ui/mui"
+import { useMemo, useState, useCallback, useEffect, use } from "react"
+import { Box, useTheme, Tooltip, Snackbar, Alert } from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
@@ -285,6 +285,8 @@ export default function EquityPanel() {
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
   >([])
+  const [hasShownMapHint, setHasShownMapHint] = useState(false)
+  const [showMapHintSnackbar, setShowMapHintSnackbar] = useState(false)
 
   // Watch for map location highlights being cleared to deselect all objectives
   const locationHighlights = useMapStore((state) => state.locationHighlights)
@@ -385,6 +387,13 @@ export default function EquityPanel() {
       (obj) => obj.category === categoryName,
     )
     setSelectedObjectives(categoryObjectives)
+  }
+
+  const handleTierCategoryClick = (categoryName: string, tier: string) => {
+    const tierCategoryObjectives = objectives.filter(
+      (obj) => obj.category === categoryName && obj.tier === tier,
+    )
+    setSelectedObjectives(tierCategoryObjectives)
   }
 
   const handleShowOnMap = useCallback(
@@ -599,7 +608,7 @@ export default function EquityPanel() {
                   gap: 0.5,
                 }}
               >
-                <Box
+                {/* <Box
                   sx={{
                     px: 1,
                     py: 0.5,
@@ -613,7 +622,7 @@ export default function EquityPanel() {
                   }}
                 >
                   {obj.locationName}
-                </Box>
+                </Box> */}
                 {isTriangle ? (
                   <Box
                     component="svg"
@@ -698,6 +707,14 @@ export default function EquityPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedObjectives, showMap])
 
+  useEffect(() => {
+    if (showMap && !hasShownMapHint) {
+      setHasShownMapHint(true)
+      setShowMapHintSnackbar(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMap])
+
   // Cleanup markers on unmount
   useEffect(() => {
     return () => {
@@ -739,10 +756,31 @@ export default function EquityPanel() {
           selectedObjectives={selectedObjectives}
           onObjectiveClick={handleObjectiveClick}
           onCategoryClick={handleCategoryClick}
+          onTierCategoryClick={handleTierCategoryClick}
           onShowOnMap={handleShowOnMap}
           showMapView={showMap}
         />
       </Box>
+
+      <Snackbar
+        open={showMapHintSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          top: "50% !important",
+        }}
+      >
+        <Alert
+          onClose={() => setShowMapHintSnackbar(false)}
+          severity="info"
+          sx={{
+            width: "100%",
+            border: 2,
+            alignItems: "center"
+          }}
+        >
+          Click on squares in the grid to view their locations on the map
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
