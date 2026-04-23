@@ -23,6 +23,7 @@ import { motion } from "@repo/motion"
 import type { ScenarioForDisplay } from "./types"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import type { ScenarioTheme } from "../../../../content/scenarios"
+import { shouldWrapThemeBadgeLabel } from "../../utils/themeLabelWrap"
 
 export interface StrategyHeaderProps {
   /** Scenario data */
@@ -425,6 +426,11 @@ export function StrategyHeader({
       ? "Current operations with historical agricultural land use"
       : strategy.label
 
+  /** Long row labels only: wrap inside ScenarioBadge; all other theme chips stay one line + ellipsis. */
+  const themeBadgeMultiline = Boolean(
+    showAllThemeBadges && themeLabel && shouldWrapThemeBadgeLabel(themeLabel),
+  )
+
   if (compact) {
     /** Matches title line box height for first-line-only legend dot alignment */
     const compactTitleLineHeight = 1.3
@@ -437,10 +443,10 @@ export function StrategyHeader({
           textAlign: "left" as const,
           minWidth: 0,
           display: "inline-flex" as const,
-          alignItems: "center" as const,
+          alignItems: themeBadgeMultiline ? "flex-start" : "center",
           flex: 1,
           flexBasis: 0,
-          overflow: "hidden",
+          overflow: themeBadgeMultiline ? "visible" : "hidden",
           flexShrink: 1,
           "&:hover > span": { opacity: 0.8 },
           "&:focus-visible": {
@@ -452,26 +458,28 @@ export function StrategyHeader({
       : {
           minWidth: 0,
           display: "inline-flex" as const,
-          alignItems: "center" as const,
+          alignItems: themeBadgeMultiline ? "flex-start" : "center",
           flex: 1,
           flexBasis: 0,
-          overflow: "hidden",
+          overflow: themeBadgeMultiline ? "visible" : "hidden",
           flexShrink: 1,
         }
-    const themeBadgeTextSx = {
-      whiteSpace: "nowrap" as const,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      minWidth: 0,
-      flexShrink: 0,
-    }
+    const themeBadgeTextSx = themeBadgeMultiline
+      ? { minWidth: 0, maxWidth: "100%" }
+      : {
+          whiteSpace: "nowrap" as const,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          minWidth: 0,
+          flexShrink: 0,
+        }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: themeBadgeMultiline ? "flex-start" : "center",
             gap: "4px",
             mb: "1px",
             minHeight: "16px",
@@ -520,8 +528,9 @@ export function StrategyHeader({
               sx={{
                 flexShrink: 0,
                 display: "inline-flex",
-                alignItems: "center",
+                alignItems: themeBadgeMultiline ? "flex-start" : "center",
                 gap: 0.5,
+                alignSelf: themeBadgeMultiline ? "flex-start" : undefined,
               }}
             >
               {inlineActions}
@@ -575,7 +584,7 @@ export function StrategyHeader({
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          alignItems: themeBadgeMultiline ? "flex-start" : "center",
           gap: "6px",
           mb: "4px",
           minHeight: "18px",
@@ -619,10 +628,10 @@ export function StrategyHeader({
                     textAlign: "left",
                     minWidth: 0,
                     display: "inline-flex",
-                    alignItems: "center",
+                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
                     flex: 1,
                     flexBasis: 0,
-                    overflow: "hidden",
+                    overflow: themeBadgeMultiline ? "visible" : "hidden",
                     flexShrink: 1,
                     "&:hover > span": { opacity: 0.8 },
                     "&:focus-visible": {
@@ -634,10 +643,10 @@ export function StrategyHeader({
                 : {
                     minWidth: 0,
                     display: "inline-flex",
-                    alignItems: "center",
+                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
                     flex: 1,
                     flexBasis: 0,
-                    overflow: "hidden",
+                    overflow: themeBadgeMultiline ? "visible" : "hidden",
                     flexShrink: 1,
                   }
             }
@@ -646,13 +655,17 @@ export function StrategyHeader({
               label={themeLabel}
               backgroundColor={themeColors.background}
               color={themeColors.text}
-              sx={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                minWidth: 0,
-                flexShrink: 0,
-              }}
+              sx={
+                themeBadgeMultiline
+                  ? { minWidth: 0, maxWidth: "100%" }
+                  : {
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      minWidth: 0,
+                      flexShrink: 0,
+                    }
+              }
             />
           </Box>
         ) : (
@@ -664,8 +677,9 @@ export function StrategyHeader({
             sx={{
               flexShrink: 0,
               display: "inline-flex",
-              alignItems: "center",
+              alignItems: themeBadgeMultiline ? "flex-start" : "center",
               gap: 0.5,
+              alignSelf: themeBadgeMultiline ? "flex-start" : undefined,
             }}
           >
             {inlineActions}

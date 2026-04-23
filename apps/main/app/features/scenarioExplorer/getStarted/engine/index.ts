@@ -6,6 +6,8 @@ export { MapPopupArbiter } from "./arbiters/MapPopupArbiter"
 export { OverlayPopupArbiter } from "./arbiters/OverlayPopupArbiter"
 export { NarrationArbiter } from "./arbiters/NarrationArbiter"
 export { OverlayMorphArbiter } from "./arbiters/OverlayMorphArbiter"
+export { CameraArbiter } from "./arbiters/CameraArbiter"
+export type { CameraHome, FlyHomeOpts } from "./arbiters/CameraArbiter"
 export { STORYBOARD_DEBUG, debugLog, logDuState } from "./debug"
 export {
   DU_CLASS_FILTER,

@@ -63,6 +63,7 @@ import {
   OverlayPopupArbiter,
   NarrationArbiter,
   OverlayMorphArbiter,
+  CameraArbiter,
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
@@ -93,6 +94,16 @@ const TIER_PANEL_EXTRA_PX = 320
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
+
+/** Stateless camera helper shared by `goTo({ viaCamera: true })`,
+ *  `handleBack`, and `handleRestart`. Centralizes the "ease back to
+ *  home if not already there, with optional moveend continuation"
+ *  pattern that was previously inlined three times. Module-scope
+ *  because `home` is fixed for this storyboard. */
+const CAMERA_ARBITER = new CameraArbiter({
+  center: CAM_CENTER,
+  zoom: CAM_ZOOM,
+})
 
 const BEAT1_COLORS = ["#BDE1E4", "#92C1D5", "#186b88"] as const
 const BEAT1_CYCLE = 90
@@ -483,28 +494,21 @@ export default function TierAnimationSection() {
       // crosses into the morph region (the map may have been panned).
       if (forward) computePolygonDataRef.current()
 
-      // Optionally fly the camera home first (used by Restart).
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      if (opts?.viaCamera && map) {
-        const currentCenter = map.getCenter()
-        const currentZoom = map.getZoom()
-        const needsMove =
-          Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
-          Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
-          Math.abs(currentZoom - CAM_ZOOM) > 0.05
-        if (needsMove) {
-          setPlayState("playing")
-          map.once("moveend", () => {
+      // Optionally fly the camera home first (used by Next/viaCamera).
+      // `CAMERA_ARBITER.flyHome` always calls `onArrive` exactly once -
+      // synchronously when already home or `map` is null, async via
+      // `moveend` otherwise - so we can hand off `runTween` without the
+      // caller-side branching this block used to carry.
+      if (opts?.viaCamera) {
+        CAMERA_ARBITER.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
+          duration: 800,
+          onStart: () => setPlayState("playing"),
+          onArrive: () => {
             computePolygonDataRef.current()
             runTween()
-          })
-          map.easeTo({
-            center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-            zoom: CAM_ZOOM,
-            duration: 800,
-          })
-          return
-        }
+          },
+        })
+        return
       }
 
       runTween()
@@ -623,31 +627,16 @@ export default function TierAnimationSection() {
       }
 
       // Fly the map back to the default home view first if a square-click
-      // (or any other interaction) pushed the camera elsewhere. Mirrors
-      // the `viaCamera` branch in `goTo`; Back snaps the beat progress
-      // instead of tweening, so we inline the camera easeTo + `moveend`
-      // completion here rather than routing through `goTo`.
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      if (map) {
-        const currentCenter = map.getCenter()
-        const currentZoom = map.getZoom()
-        const needsMove =
-          Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
-          Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
-          Math.abs(currentZoom - CAM_ZOOM) > 0.05
-        if (needsMove) {
-          setPlayState("playing")
-          map.once("moveend", applyBeat)
-          map.easeTo({
-            center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-            zoom: CAM_ZOOM,
-            duration: 800,
-          })
-          return
-        }
-      }
-
-      applyBeat()
+      // (or any other interaction) pushed the camera elsewhere. Back
+      // snaps the beat `progress` in `applyBeat` rather than tweening,
+      // so we route through `CAMERA_ARBITER.flyHome` (which fires
+      // `onArrive` synchronously when the map is already home, and
+      // otherwise waits for `moveend` before applying the snap).
+      CAMERA_ARBITER.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
+        duration: 800,
+        onStart: () => setPlayState("playing"),
+        onArrive: applyBeat,
+      })
       return
     }
     if (!hasPlayedRef.current) return // pre-play: Back is a no-op
@@ -748,22 +737,14 @@ export default function TierAnimationSection() {
 
       // Fly the camera home so the polygon coordinates the SVG overlay
       // computes on the next forward tween are anchored correctly.
-      const currentCenter = map.getCenter()
-      const currentZoom = map.getZoom()
-      const needsMove =
-        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
-        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
-        Math.abs(currentZoom - CAM_ZOOM) > 0.05
-
-      if (needsMove) {
-        map.easeTo({
-          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-          zoom: CAM_ZOOM,
-          bearing: 0,
-          pitch: 0,
-          duration: 800,
-        })
-      }
+      // Fire-and-forget: Restart parks in the pre-play gate immediately
+      // regardless of whether a flight runs, so no `onArrive` is needed.
+      // `resetOrientation: true` restores bearing/pitch to 0 when a
+      // flight actually runs (matches pre-refactor behavior).
+      CAMERA_ARBITER.flyHome(map, {
+        duration: 800,
+        resetOrientation: true,
+      })
     }
 
     // Park in the pre-play gate: user has to click Play again to re-play.
