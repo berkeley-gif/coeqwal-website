@@ -486,22 +486,23 @@ export default function EquityPanel() {
             obj.baselineTier.replace("Tier ", ""),
           )
           if (currentTierNum === baselineTierNum) {
-            markerColor = "#64b5f6" // Light blue - no change
+            // markerColor = "#64b5f6" // Light blue - no change
             isTriangle = false // Circle for no change
           } else if (currentTierNum < baselineTierNum) {
-            markerColor = "#1976d2" // Blue - improved
+            // markerColor = "#1976d2" // Blue - improved
             isTriangle = true
             triangleDirection = "up" // Triangle pointing up for improvement
           } else {
-            markerColor = "#d32f2f" // Red - worsened
+            // markerColor = "#d32f2f" // Red - worsened
             isTriangle = true
             triangleDirection = "down" // Triangle pointing down for worse
           }
         } else {
           // Use tier color when not in comparison mode
-          markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
+          // markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
           isTriangle = false
         }
+        markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
@@ -688,8 +689,8 @@ export default function EquityPanel() {
                   <Box
                     component="svg"
                     sx={{
-                      width: 14,
-                      height: 14,
+                      width: 16,
+                      height: 16,
                       filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
                     }}
                     viewBox="0 0 14 14"
@@ -699,26 +700,27 @@ export default function EquityPanel() {
                         points="7,2 2,12 12,12"
                         fill={markerColor}
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="1"
                       />
                     ) : (
                       <polygon
                         points="7,12 2,2 12,2"
                         fill={markerColor}
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="1"
                       />
                     )}
                   </Box>
                 ) : (
                   <Box
                     sx={{
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       borderRadius: "50%",
                       backgroundColor: markerColor,
-                      border: "2px solid white",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                      border: "1px solid white",
+                      // boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                      // opacity: showEquityComparison ? 0.5 : 1,
                     }}
                   />
                 )}
