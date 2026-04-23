@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Box, Typography, Snackbar, useTheme, alpha, icons } from "@repo/ui/mui"
+import { Box, Typography, Snackbar, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
@@ -94,13 +94,7 @@ export default function ListView({
     restoreStashedPins,
     pinsTrimmedForMap,
     dismissPinsTrimmedForMap,
-    baselinePrePinned,
-    seenBaselinePinHint,
-    setSeenBaselinePinHint,
-    startToolTour,
   } = useScenarioExplorerStore()
-
-  const showBaselineHint = baselinePrePinned && !seenBaselinePinHint
 
   const ROW_HEIGHT_ESTIMATE = 80
   const MAX_STICKY_RATIO = 0.35
@@ -280,88 +274,6 @@ export default function ListView({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Baseline pre-pin hint. Shown once when we auto-pinned the
-          baseline on first visit so the user understands why a row is
-          already pinned. Separate from the welcome strip because the
-          two have different lifetimes. */}
-      {showBaselineHint && (
-        <Box
-          role="status"
-          sx={{
-            flexShrink: 0,
-            mx: theme.space.tool.px,
-            mt: 1,
-            px: 1.5,
-            py: 0.75,
-            borderRadius: 1,
-            border: `1px solid ${alpha(theme.palette.blue.bright, 0.35)}`,
-            background: alpha(theme.palette.blue.bright, 0.06),
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <icons.PushPin
-            sx={{
-              fontSize: "1rem",
-              color: theme.palette.blue.bright,
-              flexShrink: 0,
-            }}
-          />
-          <Typography
-            sx={{
-              fontSize: "0.8125rem",
-              color: theme.palette.text.primary,
-              flex: 1,
-              lineHeight: 1.4,
-            }}
-          >
-            Baseline (today&rsquo;s operations) is pre-pinned so the other
-            tools have something to show. Unpin anytime.{" "}
-            <Box
-              component="button"
-              type="button"
-              onClick={() => {
-                setSeenBaselinePinHint(true)
-                startToolTour("list")
-              }}
-              sx={{
-                border: "none",
-                background: "transparent",
-                p: 0,
-                cursor: "pointer",
-                color: theme.palette.blue.bright,
-                fontWeight: 600,
-                fontSize: "inherit",
-                fontFamily: "inherit",
-                textDecoration: "underline",
-                "&:hover": { color: theme.palette.blue.dark },
-              }}
-            >
-              Take the tour
-            </Box>
-          </Typography>
-          <Box
-            component="button"
-            type="button"
-            onClick={() => setSeenBaselinePinHint(true)}
-            aria-label="Dismiss hint"
-            sx={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: theme.palette.text.secondary,
-              display: "inline-flex",
-              alignItems: "center",
-              p: 0.25,
-              "&:hover": { color: theme.palette.text.primary },
-            }}
-          >
-            <icons.Close sx={{ fontSize: "1rem" }} />
-          </Box>
-        </Box>
-      )}
-
       {/* Fixed header area */}
       <Box
         sx={{

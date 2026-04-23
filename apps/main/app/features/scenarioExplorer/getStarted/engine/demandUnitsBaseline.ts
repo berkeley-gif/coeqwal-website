@@ -83,7 +83,7 @@ export interface DemandUnitsBaselineSpec {
    *  is not yet loaded. */
   fillExpr: readonly unknown[] | null
   /** Fill-layer opacity directive. `{ kind: "scalar", value }` writes
-   *  a scalar opacity (callers seeding a fade-in write 0; callers
+   *  a scalar opacity (callers seeding a fade-in write 0, callers
    *  landing at peak write the peak value, typically 0.65).
    *  `{ kind: "preserve" }` leaves fill-opacity alone so an
    *  immediately following writer can set it without a spurious
@@ -95,7 +95,7 @@ export interface DemandUnitsBaselineSpec {
   lineOpacity: DemandUnitsOpacity
   /** Outline line width. Default baseline is `0.5`. Callers styling a
    *  gold LOI ring temporarily bump it via `setPaintProperty`
-   *  directly in their own code path; this helper stays with the
+   *  directly in their own code path. This helper stays with the
    *  baseline value. */
   lineWidth: number
   /** Outline line offset. Baseline is `-0.25` to keep strokes inside

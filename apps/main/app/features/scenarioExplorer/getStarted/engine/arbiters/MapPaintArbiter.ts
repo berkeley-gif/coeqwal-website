@@ -79,6 +79,9 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       case "beat1c-tail":
         this.applyBeat1cTailEnter(map, p, ctx)
         return
+      case "beat2-hide-schedule":
+        this.applyBeat2HideScheduleEnter(map, ctx)
+        return
       case "beat5-enter":
         this.applyBeat5Enter(map, ctx)
         return
@@ -124,6 +127,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // `beat1c-tail` is a static hold written once by `onEnter`. No
     // per-tick work, matching the legacy listener's `phase !==
     // "beat1c"` guard behavior.
+    if (p.kind === "beat2-hide-schedule") {
+      this.applyBeat2HideScheduleUpdate(map, p, v, ctx)
+      return
+    }
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
 
@@ -433,6 +440,118 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       lineOffset: -0.25,
       visibility: "visible",
     })
+  }
+
+  private applyBeat2HideScheduleEnter(
+    map: StyledMap,
+    ctx: BeatEngineContext,
+  ): void {
+    // Restore the full DU class filter and the blended tier fill
+    // expression. The previous actor (`beat1c-tail`) left the layer
+    // on an AG-only filter with a scalar opacity. The baseline helper
+    // preserves opacity here because `applyBeat2HideScheduleUpdate`
+    // fires on the same tick and overwrites `fill-opacity` and
+    // `line-opacity` with the full per-DU case expression. Preserving
+    // in between means the last tick's opacity stays on the layer for
+    // one tick's worth of time, not one frame's worth. Mapbox commits
+    // once per frame and both writes land before the next commit, so
+    // no flicker is observable.
+    //
+    // If `buildBlendedTierExpr` returns null (tier data not loaded),
+    // the baseline helper leaves `fill-color` on its last value, which
+    // matches legacy's `if (expr && ...)` guard.
+    const blendedTier = ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
+      | readonly unknown[]
+      | null
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: blendedTier,
+      fillOpacity: { kind: "preserve" },
+      lineOpacity: { kind: "preserve" },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+  }
+
+  private applyBeat2HideScheduleUpdate(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat2-hide-schedule" }>,
+    v: number,
+    ctx: BeatEngineContext,
+  ): void {
+    // Build the per-DU opacity case expression from the live hide
+    // schedule. Matches the legacy `paintDuHideSchedule` closure at
+    // TierAnimationSection.tsx lines 2333 to 2397.
+    //
+    //   Tracked DU, pre-fade (v < fadeStart)       peakOpacity
+    //   Tracked DU, in-fade (fadeStart .. morphStart) peakOpacity * (1 - t)
+    //   Agriculture fallback, pre-window           peakOpacity
+    //   Agriculture fallback, in-window            peakOpacity * (1 - t)
+    //   Agriculture fallback, post-window          0
+    //   Everything else (Urban, Refuge, untracked) 0
+    //
+    // AG_REV is excluded from the per-outcome schedule (the schedule
+    // builder skips it) so its DUs flow through the Agriculture
+    // fallback and fade across `[agFadeOutStart, agFadeOutEnd)`.
+    if (!map.getLayer("demand-units")) return
+
+    const schedule = ctx.getHideSchedule()
+    const duEntries: { fadeStart: number; morphStart: number; locationIds: readonly string[] }[] = []
+    for (const entry of schedule) {
+      if (
+        entry.geometryType === "polygon" &&
+        entry.mapboxLayerId === "demand-units"
+      ) {
+        duEntries.push(entry)
+      }
+    }
+
+    if (duEntries.length === 0) return
+
+    const caseExpr: unknown[] = ["case"]
+    for (const entry of duEntries) {
+      if (v < entry.fadeStart) {
+        caseExpr.push(
+          ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
+          p.peakOpacity,
+        )
+      } else {
+        const fadeDuration = entry.morphStart - entry.fadeStart
+        const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+        const opacity = p.peakOpacity * (1 - t)
+        caseExpr.push(
+          ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
+          opacity,
+        )
+      }
+    }
+
+    let agOpacity: number
+    if (v < p.agFadeOutStart) {
+      agOpacity = p.peakOpacity
+    } else if (v < p.agFadeOutEnd) {
+      const t =
+        (v - p.agFadeOutStart) / (p.agFadeOutEnd - p.agFadeOutStart)
+      agOpacity = p.peakOpacity * (1 - t)
+    } else {
+      agOpacity = 0
+    }
+    caseExpr.push(["==", ["get", "Class"], "Agriculture"], agOpacity)
+    caseExpr.push(0)
+
+    try {
+      map.setPaintProperty("demand-units", "fill-opacity", caseExpr)
+      if (map.getLayer("demand-units-outline")) {
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity",
+          caseExpr,
+        )
+      }
+    } catch {
+      /* ok */
+    }
   }
 
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {

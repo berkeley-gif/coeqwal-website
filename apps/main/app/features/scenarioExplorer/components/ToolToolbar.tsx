@@ -18,7 +18,6 @@ import {
   LocationOnIcon,
   Switch,
   InfoOutlinedIcon,
-  icons,
 } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -29,14 +28,7 @@ import {
   type ToolIntroMode,
 } from "../store"
 import { HowToReadChartModal } from "./HowToReadChartModal"
-import TakeTheTourButton from "./TakeTheTourButton"
 import { useTourAnchor } from "../tour/TourAnchorContext"
-import type { TourTool } from "../tour/types"
-
-const TOUR_TOOLS = new Set<TourTool>(["list", "radar", "resilience"])
-function isTourTool(mode: string): mode is TourTool {
-  return TOUR_TOOLS.has(mode as TourTool)
-}
 
 /** Modes that own a `ToolIntroStrip`. The "How to read this chart?"
  *  chip re-opens that strip for these modes instead of opening the
@@ -56,19 +48,13 @@ const HOW_TO_READ_ENABLED = false
 interface ToolToolbarProps {
   gridAligned?: boolean
   hideTitle?: boolean
-  /** Name of the active tool view (e.g. "List view"). When present
-   *  the gridAligned title row reads "Scenario library: {viewName}"
-   *  so users can locate themselves inside the explorer. */
-  viewName?: string
 }
 
 export default function ToolToolbar({
   gridAligned,
   hideTitle,
-  viewName,
 }: ToolToolbarProps) {
   const theme = useTheme()
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   const {
     hydroclimate,
     setHydroclimate,
@@ -83,33 +69,7 @@ export default function ToolToolbar({
     seenHowToRead,
     markHowToReadSeen,
     bumpReopenToolIntro,
-    reopenWelcome,
-    dismissWelcome,
-    welcomeDismissedThisSession,
-    welcomeDismissedPermanently,
-    setExploreMode,
   } = useScenarioExplorerStore()
-
-  // The WelcomeStrip is visible only on the List view, only when not
-  // dismissed for the session and not dismissed permanently. The
-  // toolbar chip toggles that visibility: when the strip is showing,
-  // the chip dismisses it for this session (the persistent "don't
-  // show again" flag is intentionally not touched); otherwise it
-  // switches to List and clears any session/permanent dismissal so
-  // the strip mounts.
-  const welcomeVisible =
-    exploreMode === "list" &&
-    !welcomeDismissedThisSession &&
-    !welcomeDismissedPermanently
-  const handleToggleWelcome = () => {
-    if (welcomeVisible) {
-      dismissWelcome(false)
-    } else {
-      if (exploreMode !== "list") setExploreMode("list")
-      reopenWelcome()
-    }
-  }
-  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
@@ -118,7 +78,7 @@ export default function ToolToolbar({
   //
   // Auto-open: only for modes that DON'T own a ToolIntroStrip. For
   // those (radar, resilience), the inline strip is the first-visit
-  // surface; for list, the WelcomeStrip plays that role. Equity is
+  // surface. List no longer auto-opens a welcome strip. Equity is
   // owned by another developer and gets the legacy modal flow.
   //
   // Click behavior of the toolbar chip:
@@ -190,58 +150,6 @@ export default function ToolToolbar({
           display: "contents",
         }}
       >
-        {isTourTool(exploreMode) && (
-          <Box
-            component="button"
-            type="button"
-            onClick={handleToggleWelcome}
-            aria-pressed={welcomeVisible}
-            aria-label={
-              welcomeVisible
-                ? "Hide overview of the scenario explorer"
-                : "Show overview of the scenario explorer"
-            }
-            title={
-              welcomeVisible
-                ? "Hide overview of the scenario explorer"
-                : "Show overview of the scenario explorer"
-            }
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 0.75,
-              py: 0.25,
-              border: "none",
-              borderRadius: "12px",
-              cursor: "pointer",
-              background: welcomeVisible
-                ? theme.palette.interaction.selectedBackground
-                : "transparent",
-              color: theme.palette.blue.bright,
-              transition: "background-color 120ms",
-              "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-              },
-            }}
-          >
-            {welcomeVisible ? (
-              <icons.Close sx={{ fontSize: "1rem" }} />
-            ) : (
-              <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
-            )}
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                color: "inherit",
-              }}
-            >
-              {welcomeVisible ? "Hide overview" : "Show overview"}
-            </Typography>
-          </Box>
-        )}
         {HOW_TO_READ_ENABLED && (
           <Box
             component="button"
@@ -279,7 +187,7 @@ export default function ToolToolbar({
           </Box>
         )}
         {/* Outcome view toggle (Average / Bar / Distribution) hidden
-            for the demo. The list view reverts to its bar-chart
+            . The list view reverts to its bar-chart
             default; the glyph click-through to map layers is
             unaffected. */}
         {false && exploreMode === "list" ? (
@@ -439,17 +347,7 @@ export default function ToolToolbar({
               }}
             >
               Scenario library
-              {viewName ? (
-                <Box
-                  component="span"
-                  sx={{ fontWeight: 400, color: theme.palette.grey[700] }}
-                >
-                  {": "}
-                  {viewName}
-                </Box>
-              ) : null}
             </Typography>
-            <TakeTheTourButton />
           </Box>
         )}
 
@@ -487,7 +385,7 @@ export default function ToolToolbar({
           display: "flex",
           alignItems: "center",
           gap: 2,
-          px: 1.5,
+          px: theme.space.tool.px,
           py: 0.5,
           minHeight: 44,
           flexWrap: "wrap",

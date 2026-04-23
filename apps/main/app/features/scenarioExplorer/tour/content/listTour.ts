@@ -66,7 +66,7 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.step3.row",
     anchorId: "list.select.row",
     eyebrow: "STEP 3 - GATHER A SHORTLIST",
-    title: "Select the scenarios you want to focus on",
+    title: "Select the scenarios that you want to focus on",
     body: "Use the checkboxes to gather a working set without losing the rest of the library.",
     placement: "right",
   },

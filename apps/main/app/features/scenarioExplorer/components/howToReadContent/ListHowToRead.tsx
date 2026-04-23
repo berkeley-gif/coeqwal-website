@@ -127,7 +127,7 @@ export function ListHowToRead() {
         callouts={[
           {
             number: "01",
-            title: "Select the scenarios you want to keep",
+            title: "Select the scenarios that you want to keep",
             body: "Use the row check controls to gather a working set without losing the rest of the library.",
             top: 8,
             left: 3,
