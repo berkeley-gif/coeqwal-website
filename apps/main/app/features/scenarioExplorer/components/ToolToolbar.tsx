@@ -101,6 +101,32 @@ export default function ToolToolbar({
     }
   }, [exploreMode, seenHowToRead, markHowToReadSeen])
 
+  // Dev-only keystroke: press "?" to force-open the "How to read this
+  // chart?" modal for the active tool, even while HOW_TO_READ_ENABLED is
+  // false. Lets content authors review the legacy copy without flipping
+  // the flag or exposing the chip to end users. Ignored when typing in
+  // inputs or when any modifier key is held.
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (
+        t &&
+        (t.tagName === "INPUT" ||
+          t.tagName === "TEXTAREA" ||
+          t.isContentEditable)
+      ) {
+        return
+      }
+      if (e.altKey || e.ctrlKey || e.metaKey) return
+      if (e.key === "?") {
+        e.preventDefault()
+        setHowToReadOpen((v) => !v)
+      }
+    }
+    document.addEventListener("keydown", handleKey)
+    return () => document.removeEventListener("keydown", handleKey)
+  }, [])
+
   const handleHowToReadClick = () => {
     if (isToolIntroMode(exploreMode)) {
       bumpReopenToolIntro(exploreMode)

@@ -17,6 +17,14 @@ import {
   LAYER_IDS,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../config/outcomeLayerRegistry"
+// Diagnostic helpers live in the storyboard engine module. OPL
+// imports them so all `[DIAG S4/S5]` logs share one STORYBOARD_DEBUG
+// flag. Phase 3 of the hardening plan removes OPL's demand-units
+// writes entirely; at that point these imports go away with them.
+import {
+  debugLog,
+  logDuState,
+} from "../../../scenarioExplorer/getStarted/engine"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,58 +152,9 @@ const FADE_IN_DURATION = 350
 /** Duration (ms) for the color crossfade when data changes while already visible */
 const COLOR_TRANSITION_DURATION = 400
 
-/* ── DIAG S4/S5 ───────────────────────────────────────────────────────────
- * Temporary diagnostic helper for the Step 4 / Step 5 AG layer bug.
- * Only snapshots state for `demand-units`, since that is the layer the
- * storyboard drives during Beat 5. Remove once root-cause is known. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logDuState(label: string, map: any): void {
-  try {
-    if (!map?.getLayer) {
-      // eslint-disable-next-line no-console
-      console.log(`[DIAG S4/S5] ${label} <no map>`)
-      return
-    }
-    const short = (v: unknown) => {
-      try {
-        const s = JSON.stringify(v)
-        return s && s.length > 80 ? s.slice(0, 80) + "..." : s
-      } catch {
-        return String(v)
-      }
-    }
-    const fill = map.getLayer("demand-units")
-      ? {
-          opacity: short(map.getPaintProperty("demand-units", "fill-opacity")),
-          opTrans: short(
-            map.getPaintProperty("demand-units", "fill-opacity-transition"),
-          ),
-          vis: map.getLayoutProperty("demand-units", "visibility"),
-          filter: short(map.getFilter("demand-units")),
-        }
-      : "<no demand-units>"
-    const outline = map.getLayer("demand-units-outline")
-      ? {
-          opacity: short(
-            map.getPaintProperty("demand-units-outline", "line-opacity"),
-          ),
-          opTrans: short(
-            map.getPaintProperty(
-              "demand-units-outline",
-              "line-opacity-transition",
-            ),
-          ),
-          vis: map.getLayoutProperty("demand-units-outline", "visibility"),
-          filter: short(map.getFilter("demand-units-outline")),
-        }
-      : "<no demand-units-outline>"
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label}`, { fill, outline })
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(`[DIAG S4/S5] ${label} <error>`, e)
-  }
-}
+// `logDuState` and `debugLog` are imported from the storyboard engine
+// at the top of the file. Single source of truth for the storyboard
+// debug flag and layer-state snapshotting.
 
 // ============================================================================
 // COMPONENT
@@ -312,11 +271,9 @@ export function OutcomePolygonLayer({
       return
     }
 
-    // [DIAG S4/S5]
     if (fillId === "demand-units") {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[DIAG S4/S5] OPL main-effect START fillId=${fillId} visible=${visible} hasTierData=${hasTierData} outlineOnly=${outlineOnly} wasShowing=${wasShowingDataRef.current}`,
+      debugLog(
+        `OPL main-effect START fillId=${fillId} visible=${visible} hasTierData=${hasTierData} outlineOnly=${outlineOnly} wasShowing=${wasShowingDataRef.current}`,
       )
       logDuState("OPL main-effect PRE", map)
     }
@@ -498,7 +455,6 @@ export function OutcomePolygonLayer({
       }
     }
 
-    // [DIAG S4/S5]
     if (fillId === "demand-units") {
       logDuState("OPL main-effect POST-sync (pre-rAF)", map)
     }
@@ -565,11 +521,9 @@ export function OutcomePolygonLayer({
       if (!currentMapRef) return
       const map = currentMapRef.getMap()
 
-      // [DIAG S4/S5]
       if (fillId === "demand-units") {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[DIAG S4/S5] OPL unmount-cleanup START fillId=${fillId} outlineCreated=${outlineCreatedRef.current}`,
+        debugLog(
+          `OPL unmount-cleanup START fillId=${fillId} outlineCreated=${outlineCreatedRef.current}`,
         )
         logDuState("OPL unmount-cleanup PRE", map)
       }
@@ -593,7 +547,6 @@ export function OutcomePolygonLayer({
         }
       }
 
-      // [DIAG S4/S5]
       if (fillId === "demand-units") {
         logDuState("OPL unmount-cleanup POST", map)
       }

@@ -32,6 +32,7 @@ import {
   type ShareItem,
 } from "../store"
 import { useTabs } from "../../../context/Tabs"
+import { useTabNavigation } from "../../../hooks/useTabNavigation"
 
 const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   {
@@ -46,37 +47,59 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   },
 ]
 
-const TOOL_TABS: {
-  mode: ExploreMode
+/**
+ * Flow map steps. Mirrors the WelcomeStrip's depiction of the curation
+ * loop (List -> Radar -> Distribution -> Resilience -> Share) so that
+ * the sub-nav reads as the same journey, not a disconnected tab bar.
+ *
+ * `mode: null` means the final Share step, which switches top-level tab.
+ * `research: true` means hidden unless the user toggles research tools.
+ */
+type FlowStep = {
+  mode: ExploreMode | null
   icon: React.ReactNode
   label: string
+  purpose: string
   research?: boolean
-}[] = [
+}
+
+const FLOW: FlowStep[] = [
   {
     mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
+    icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
     label: "List",
+    purpose: "Shortlist scenarios",
   },
   {
     mode: "radar",
-    icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Radar chart",
+    icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Radar",
+    purpose: "Compare shapes",
   },
   {
     mode: "comparison",
-    icon: <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Scenario comparison",
+    icon: <CompareArrowsIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Comparison",
+    purpose: "Side by side",
     research: true,
   },
   {
     mode: "equity",
-    icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Distribution comparison",
+    icon: <AppsIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Distribution",
+    purpose: "See who benefits",
   },
   {
     mode: "resilience",
-    icon: <GridOnIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Resilience heatmap",
+    icon: <GridOnIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Resilience",
+    purpose: "Stress-test",
+  },
+  {
+    mode: null,
+    icon: <icons.IosShare sx={{ fontSize: "1.1rem" }} />,
+    label: "Share",
+    purpose: "Save charts + notes",
   },
 ]
 
@@ -101,6 +124,7 @@ export default function ExploreSubNav() {
   const theme = useTheme()
   const { state, subNavRef } = useTabs()
   const { activeTab } = state
+  const { navigateToTab } = useTabNavigation()
 
   const {
     mainView,
@@ -243,25 +267,143 @@ export default function ExploreSubNav() {
               mx: 0.5,
             }}
           />
-          <Typography
-            component="span"
-            sx={{
-              fontFamily: theme.typography.tabLabelDocked.fontFamily,
-              fontSize: "0.9375rem",
-              fontWeight: 500,
-              lineHeight: 1,
-              whiteSpace: "nowrap",
-              color: theme.palette.text.secondary,
-              letterSpacing: "0.01em",
-              px: 0.5,
-            }}
-          >
-            Select scenarios using key outcomes:
-          </Typography>
 
-          {/* Take-a-tour button. Opens the guided walkthrough of all
-              four tools. Small, secondary affordance so it does not
-              compete with tool selection. */}
+          {/* Flow map. Same curation journey as the WelcomeStrip, adapted
+              to the dark sub-nav background: pills carry label + purpose,
+              separated by chevrons. Clicking Share jumps to the top-level
+              Share tab; all others switch exploreMode. */}
+          {FLOW.filter((step) => !step.research || showResearchTools).map(
+            (step, i, visibleFlow) => {
+              const isShare = step.mode === null
+              const active =
+                step.mode !== null && exploreMode === step.mode
+              const hasCaptures =
+                step.mode !== null && toolsWithCaptures.has(step.mode)
+              const handleClick = () => {
+                if (isShare) {
+                  navigateToTab("share")
+                } else if (step.mode) {
+                  setExploreMode(step.mode)
+                }
+              }
+              return (
+                <React.Fragment key={step.label}>
+                  <Box
+                    component="button"
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={handleClick}
+                    title={
+                      hasCaptures
+                        ? `${step.label}: ${step.purpose} (you have saved items from this tool)`
+                        : `${step.label}: ${step.purpose}`
+                    }
+                    aria-label={`${step.label}: ${step.purpose}`}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.6,
+                      px: 0.9,
+                      py: 0.4,
+                      border: `1px solid ${alpha(
+                        theme.palette.common.white,
+                        active ? 0.7 : 0.3,
+                      )}`,
+                      borderRadius: "12px",
+                      cursor: "pointer",
+                      background: active
+                        ? alpha(theme.palette.common.white, 0.18)
+                        : "transparent",
+                      color: theme.palette.common.white,
+                      transition: "all 120ms ease",
+                      position: "relative",
+                      lineHeight: 1.1,
+                      "&:hover": {
+                        background: alpha(theme.palette.common.white, 0.12),
+                        borderColor: alpha(theme.palette.common.white, 0.6),
+                      },
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        color: theme.palette.common.white,
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: "0.8125rem",
+                          fontWeight: active ? 700 : 600,
+                          color: theme.palette.common.white,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {step.label}
+                      </Box>
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: "0.6875rem",
+                          fontWeight: 400,
+                          color: alpha(theme.palette.common.white, 0.8),
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {step.purpose}
+                      </Box>
+                    </Box>
+                    {hasCaptures && (
+                      <Box
+                        aria-hidden
+                        sx={{
+                          position: "absolute",
+                          top: 3,
+                          right: 3,
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          backgroundColor: theme.palette.common.white,
+                          boxShadow: `0 0 0 1px ${alpha(
+                            theme.palette.blue.bright,
+                            0.7,
+                          )}`,
+                        }}
+                      />
+                    )}
+                  </Box>
+                  {i < visibleFlow.length - 1 && (
+                    <icons.ChevronRight
+                      aria-hidden
+                      sx={{
+                        fontSize: "1rem",
+                        color: alpha(theme.palette.common.white, 0.5),
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              )
+            },
+          )}
+
+          {/* Tour chip. Kept to the right of the flow, matching the
+              WelcomeStrip layout: the flow depicts the journey, and the
+              Tour button offers a guided version of it. */}
           <Box
             component="button"
             type="button"
@@ -272,8 +414,9 @@ export default function ExploreSubNav() {
               display: "inline-flex",
               alignItems: "center",
               gap: 0.5,
-              px: 0.75,
+              px: 0.9,
               py: 0.5,
+              ml: 0.5,
               border: `1px solid ${alpha(theme.palette.common.white, 0.35)}`,
               borderRadius: "12px",
               cursor: "pointer",
@@ -293,86 +436,12 @@ export default function ExploreSubNav() {
                 fontWeight: 500,
                 lineHeight: 1,
                 whiteSpace: "nowrap",
-                color: theme.palette.text.secondary,
+                color: theme.palette.common.white,
               }}
             >
               Tour
             </Typography>
           </Box>
-
-          {TOOL_TABS.filter((tab) => !tab.research || showResearchTools).map(
-            ({ mode, icon, label }) => {
-              const active = exploreMode === mode
-              const hasCaptures = toolsWithCaptures.has(mode)
-              return (
-                <React.Fragment key={mode}>
-                  <Box
-                    component="button"
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setExploreMode(mode)}
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      px: 1.25,
-                      py: 0.5,
-                      border: "none",
-                      borderRadius: theme.borderRadius.sm ?? "4px",
-                      cursor: "pointer",
-                      background: active
-                        ? alpha(theme.palette.common.white, 0.2)
-                        : "transparent",
-                      color: theme.palette.common.white,
-                      transition: "background-color 0.15s",
-                      position: "relative",
-                      "&:hover": {
-                        background: alpha(theme.palette.common.white, 0.15),
-                      },
-                    }}
-                    title={
-                      hasCaptures
-                        ? `${label} (you have saved items from this tool)`
-                        : label
-                    }
-                  >
-                    {icon}
-                    <Typography
-                      component="span"
-                      variant="dashboard"
-                      sx={{
-                        fontWeight: active ? 600 : 500,
-                        lineHeight: 1,
-                        whiteSpace: "nowrap",
-                        color: theme.palette.text.secondary,
-                      }}
-                    >
-                      {label}
-                    </Typography>
-                    {hasCaptures && (
-                      <Box
-                        aria-hidden
-                        sx={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: theme.palette.common.white,
-                          boxShadow: `0 0 0 1px ${alpha(
-                            theme.palette.blue.bright,
-                            0.7,
-                          )}`,
-                        }}
-                      />
-                    )}
-                  </Box>
-                </React.Fragment>
-              )
-            },
-          )}
         </Box>
       </Box>
     </Box>
