@@ -983,18 +983,25 @@ export default function OutcomeMorphOverlay({
 
     // Beat 6+ morph chain driven by progress, applied once all outcomes
     // have settled as squares (post-Beat 2 morphEnd):
-    //   [0.62, 0.72] squareTarget -> barTarget     (barBlend)
+    //   [0.62, 0.68] squareTarget -> barTarget     (barBlend, easeOutCubic)
+    //   [0.68, 0.72] bars hold at final pose       (settled plateau)
     //   [0.72, 0.75] barTarget    -> dotTarget     (avgBlend)
     //   [0.75, 0.82] dotTarget    -> radarTarget   (radarBlend)
     //   [0.82, 0.87] radar chrome fades in         (radarChromeIn)
     //   [0.87, 0.90] radar chrome fades out        (radarChromeOut)
     //   [0.87, 0.95] radarTarget  -> heatmapTarget (heatmapBlend)
     //   [0.95, 1.00] heatmap chrome fades in       (heatmapChromeBlend)
+    // The bar morph uses a tightened window and a front-loaded easeOutCubic
+    // so it feels snappy under both auto-play and scroll, recovering the
+    // perceived tempo of the legacy switcher-driven 500ms RAF morph while
+    // preserving v-deterministic scrubbing. The remaining blends keep the
+    // shared easeInOut for continuity with the rest of the chain.
     // Runs regardless of the `encodingMode` prop (which defaults to
     // "distribution" during non-interactive playback), so the storyboard
     // can drive the transforms independently of the post-settle user
     // toggle that still animates via the 500ms encoding-mode RAF above.
     const BEAT6_START = 0.62
+    const BEAT6_BAR_END = 0.68
     const BEAT6_END = 0.72
     const BEAT7_AVG_END = 0.75
     const BEAT7_RADAR_END = 0.82
@@ -1006,10 +1013,13 @@ export default function OutcomeMorphOverlay({
     const computeBlends = (v: number) => {
       const clampRange = (lo: number, hi: number) =>
         v <= lo ? 0 : v >= hi ? 1 : easeInOut((v - lo) / (hi - lo))
+      const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
+      const clampRangeEaseOut = (lo: number, hi: number) =>
+        v <= lo ? 0 : v >= hi ? 1 : easeOutCubic((v - lo) / (hi - lo))
       const radarChromeIn = clampRange(BEAT7_RADAR_END, BEAT7_CHROME_END)
       const radarChromeOut = clampRange(BEAT7_CHROME_END, BEAT8_CHROME_OUT_END)
       return {
-        barBlend: clampRange(BEAT6_START, BEAT6_END),
+        barBlend: clampRangeEaseOut(BEAT6_START, BEAT6_BAR_END),
         avgBlend: clampRange(BEAT6_END, BEAT7_AVG_END),
         radarBlend: clampRange(BEAT7_AVG_END, BEAT7_RADAR_END),
         radarChromeBlend: radarChromeIn * (1 - radarChromeOut),

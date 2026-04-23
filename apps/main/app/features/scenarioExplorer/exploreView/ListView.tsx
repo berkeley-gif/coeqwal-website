@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Box, Typography, Snackbar, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Snackbar, useTheme, alpha } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
@@ -274,13 +274,21 @@ export default function ListView({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Fixed header area */}
+      {/* Fixed header: stays above the scroll region; soft bottom
+          shadow (wider blur than sm) so content reads as scrolling
+          underneath with a more diffuse edge. */}
       <Box
         sx={{
           flexShrink: 0,
+          position: "relative",
+          zIndex: 1,
           px: theme.space.tool.px,
           pt: 1.25,
           backgroundColor: theme.palette.grey[100],
+          boxShadow: [
+            `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}`,
+            `0 5px 18px -2px ${alpha(theme.palette.common.black, 0.1)}`,
+          ].join(", "),
         }}
       >
         <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
@@ -297,7 +305,6 @@ export default function ListView({
           px: theme.space.tool.px,
           pt: "10px",
           pb: theme.space.section.xl,
-          borderTop: theme.border.medium,
         }}
       >
         {showNoResultsMessage && (

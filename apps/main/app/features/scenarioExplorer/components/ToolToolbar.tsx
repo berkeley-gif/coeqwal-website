@@ -354,13 +354,10 @@ export default function ToolToolbar({
         <Box
           sx={{
             gridColumn: "1 / -1",
-            borderLeft: "none",
             pl: 0,
             ...(!hideTitle && {
               [`@container strategy-grid (min-width: ${FULL}px)`]: {
                 gridColumn: "4",
-                borderLeft: `1px solid rgba(0,0,0,0.2)`,
-                pl: theme.scenarios.grid.divider.gap,
               },
             }),
             display: "flex",

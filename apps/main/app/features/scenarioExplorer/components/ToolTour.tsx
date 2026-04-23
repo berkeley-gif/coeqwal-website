@@ -88,7 +88,7 @@ export default function ToolTour() {
   // unmount.
   useEffect(() => {
     if (!anchorEl) return
-    anchorEl.scrollIntoView({ behavior: "smooth", block: "center" })
+    anchorEl.scrollIntoView({ behavior: "smooth", block: "nearest" })
     const prevOutline = anchorEl.style.outline
     const prevOutlineOffset = anchorEl.style.outlineOffset
     const prevBoxShadow = anchorEl.style.boxShadow
@@ -305,8 +305,7 @@ export default function ToolTour() {
             fontStyle: "italic",
           }}
         >
-          This control is currently hidden in the demo, but the behavior is
-          described below.
+          Todo.
         </Typography>
       )}
 

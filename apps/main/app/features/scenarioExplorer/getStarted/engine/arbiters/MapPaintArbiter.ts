@@ -82,6 +82,13 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       case "beat2-hide-schedule":
         this.applyBeat2HideScheduleEnter(map, ctx)
         return
+      case "beat6-restore":
+        this.applyBeat6RestoreEnter(map, ctx)
+        return
+      case "beat-line-fades":
+        // No one-shot enter work. The first `onUpdate` tick writes
+        // line opacities for every entry in the schedule based on `v`.
+        return
       case "beat5-enter":
         this.applyBeat5Enter(map, ctx)
         return
@@ -131,6 +138,13 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       this.applyBeat2HideScheduleUpdate(map, p, v, ctx)
       return
     }
+    if (p.kind === "beat-line-fades") {
+      this.applyLineFadesUpdate(map, v, ctx)
+      return
+    }
+    // `beat6-restore` is a one-shot baseline assertion in `onEnter`.
+    // Per-tick work would re-write a scalar zero that is already on
+    // the layer, so `onUpdate` is a no-op.
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
 
@@ -554,6 +568,84 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     }
   }
 
+  private applyBeat6RestoreEnter(
+    map: StyledMap,
+    ctx: BeatEngineContext,
+  ): void {
+    // One-shot full-state baseline for the post-Beat 5 tail. Restores
+    // the full DU class filter and the blended AG tier expression
+    // (taking ownership back from the Beat 5 cluster's AG-only
+    // filter), pins the outline line-width at the default 0.5 (the
+    // gold-ring cleanup ran in `beat5-exit.applyBeat5Exit`), and
+    // pins both fill-opacity and line-opacity at scalar 0.
+    //
+    // Mirrors the legacy listener's Beat 6+ branch at
+    // TierAnimationSection.tsx lines 2425 to 2456, which combined
+    // the closure-local `enterBeat2Phase()` (filter + colors +
+    // line-width) with `paintDuHideSchedule()` (per-tick case
+    // expression). At this point in the timeline every tracked DU is
+    // past its `morphStart` and the AG-class fallback is past
+    // `agFadeOutEnd`, so the case expression evaluates to scalar 0
+    // for every feature. We collapse it to a single scalar write
+    // here, behaviorally equivalent and cheaper.
+    //
+    // Reverse scrubs back into Beat 5 are handled by the Beat 5
+    // cluster's own `onEnter`, which performs its own
+    // full-state baseline assertion.
+    const blendedTier = ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
+      | readonly unknown[]
+      | null
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: blendedTier,
+      fillOpacity: { kind: "scalar", value: 0 },
+      lineOpacity: { kind: "scalar", value: 0 },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+  }
+
+  private applyLineFadesUpdate(
+    map: StyledMap,
+    v: number,
+    ctx: BeatEngineContext,
+  ): void {
+    // Per-line-layer fade for the line-geometry outcomes in the hide
+    // schedule. Mirrors the legacy listener's trailing line-fade loop
+    // at TierAnimationSection.tsx lines 2458 to 2481.
+    //
+    // The pre-window guard matters. Without it the tight 0.005 fade
+    // span amplifies any negative `v - fadeStart` into a huge
+    // negative `t`, and `1 - t` overflows Mapbox's clamped
+    // line-opacity range.
+    //
+    // No resource conflict with the polygon arbiters. Line layers
+    // (`cwf-flowline`, `delta-detaw-line`, etc.) are disjoint from
+    // `demand-units` and `demand-units-outline`. The writers audit
+    // does not constrain line layers and the schedule keeps line
+    // and polygon entries on different `geometryType` keys.
+    const schedule = ctx.getHideSchedule()
+    for (const entry of schedule) {
+      if (entry.geometryType !== "line" || !entry.mapboxLayerId) continue
+      let opacity: number
+      if (v < entry.fadeStart) {
+        opacity = 1
+      } else {
+        const fadeDuration = entry.morphStart - entry.fadeStart
+        const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+        opacity = 1 - t
+      }
+      try {
+        if (map.getLayer(entry.mapboxLayerId)) {
+          map.setPaintProperty(entry.mapboxLayerId, "line-opacity", opacity)
+        }
+      } catch {
+        /* ok */
+      }
+    }
+  }
+
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {
     logDuState("MapPaintArbiter.applyBeat5Enter PRE", map)
     // The arbiter is the sole authority on the Mapbox state of
@@ -636,14 +728,18 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     p: Extract<MapPaintPayload, { kind: "beat5-exit" }>,
     ctx: BeatEngineContext,
   ): void {
-    // Mirror the main-choreography listener's `phase === "beat5"`
-    // branch at TierAnimationSection.tsx lines 2384 to 2401. If the
-    // gold ring is still on, clear it. The main listener's
-    // `enterBeat2Phase` then runs on the same tick to restore the full
-    // DU filter and the blended tier expression. We do not run
-    // `enterBeat2Phase` here. Ownership of that hand-off stays with the
-    // main listener, which sees `phase !== "beat2"` on the next tick
-    // and runs it itself.
+    // One-shot ring clear at the trailing edge of Beat 5. If the
+    // gold polygon ring is still on (step 4 was active when the
+    // window closed), restore the blended tier expression and
+    // default outline line-width on `demand-units-outline`.
+    //
+    // The full DU filter restore (and blended tier expression on
+    // both `demand-units` and `demand-units-outline`) lives in the
+    // sibling `beat6:mapPaint:restore.onEnter` (Phase 1.g), which
+    // fires on the first tick after `BEAT5_TAIL_END`. The two writes
+    // are sequenced by the engine's per-tick dispatch order
+    // (onExit -> onEnter -> onUpdate), so the ring clear here always
+    // precedes the restore baseline.
     if (p.clearRing && this.beat5PolyRingOn) {
       this.applyBeat5PolyRingOff(map, ctx)
     }
