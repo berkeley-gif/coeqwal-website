@@ -7,7 +7,7 @@
  * using an interactive tier-based grid visualization.
  */
 
-import { useMemo, useState, useCallback, useEffect, use } from "react"
+import { useMemo, useState, useCallback, useEffect } from "react"
 import {
   Box,
   useTheme,
@@ -330,7 +330,10 @@ export default function EquityPanel() {
         const baselineData = baselineTierDataByCode[outcome.shortCode]
         if (baselineData) {
           baselineData.locations.forEach((location) => {
-            baselineTierMap.set(location.location_id, location.tier_level)
+            baselineTierMap.set(
+              `${outcome.shortCode},${location.location_id}`,
+              location.tier_level,
+            )
           })
         }
       })
@@ -349,7 +352,9 @@ export default function EquityPanel() {
       currentData.locations.forEach((location) => {
         const currentTierLevel = location.tier_level
         const baselineTierLevel = showEquityComparison
-          ? (baselineTierMap.get(location.location_id) ?? currentTierLevel)
+          ? (baselineTierMap.get(
+              `${outcome.shortCode},${location.location_id}`,
+            ) ?? currentTierLevel)
           : currentTierLevel
 
         result.push({
