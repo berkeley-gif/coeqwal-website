@@ -386,21 +386,10 @@ export function BaseHeader({
   const shouldAnimate = shrinkOnScroll && !prefersReducedMotion
 
   /* ========================================
-   * NAV LINK TYPOGRAPHY
-   * Matches hero scroll hint: overline, wide tracking, semibold caps
-   * ======================================== */
-  const navLinkTypography = {
-    ...theme.typography.overline,
-    fontWeight: 600,
-    letterSpacing: "0.2em",
-    lineHeight: 1.2,
-  } as const
-
-  /* ========================================
-   * BUTTON STYLING
+   * BUTTON STYLING (theme.typography.nav)
    * ======================================== */
   const buttonStyle = {
-    ...navLinkTypography,
+    ...theme.typography.nav,
     color: resolvedTextColor,
     padding: "0 10px",
     height: "100%",
@@ -696,7 +685,7 @@ export function BaseHeader({
           <Box
             component="h2"
             sx={{
-              ...navLinkTypography,
+              ...theme.typography.nav,
               color: theme.palette.text.primary,
               margin: 0,
             }}
@@ -743,7 +732,7 @@ export function BaseHeader({
                 id="water-stories-label"
                 component="span"
                 sx={{
-                  ...navLinkTypography,
+                  ...theme.typography.nav,
                   display: "block",
                   px: 2,
                   py: 1,
@@ -897,7 +886,7 @@ export function BaseHeader({
                     id="water-themes-label"
                     component="span"
                     sx={{
-                      ...navLinkTypography,
+                      ...theme.typography.nav,
                       display: "block",
                       px: 2,
                       py: 1,
@@ -965,7 +954,7 @@ export function BaseHeader({
                 <ListItemText
                   primary={t.buttons.getData}
                   slotProps={{
-                    primary: { sx: { ...navLinkTypography } },
+                    primary: { sx: { ...theme.typography.nav } },
                   }}
                 />
               </ListItemButton>
@@ -990,7 +979,7 @@ export function BaseHeader({
                 <ListItemText
                   primary={t.buttons.about}
                   slotProps={{
-                    primary: { sx: { ...navLinkTypography } },
+                    primary: { sx: { ...theme.typography.nav } },
                   }}
                 />
               </ListItemButton>

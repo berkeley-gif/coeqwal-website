@@ -229,15 +229,13 @@ export default function ToolTour() {
 
   const useCentered =
     !step.anchorId || fallbackToCentered || anchorEl === null
-  const showHiddenControlNote = Boolean(
-    step.anchorId && fallbackToCentered,
-  )
 
-  // Shared size and radius so text (Skip/Back) and fill (Next) read as one control row
+  // Shared size. Row wraps instead of shrinking labels; min width keeps tap targets.
   const tourActionShape = {
     textTransform: "none" as const,
     fontSize: "0.8125rem",
     minWidth: 88,
+    flexShrink: 0,
     borderRadius: 1.5,
   }
 
@@ -251,6 +249,9 @@ export default function ToolTour() {
       elevation={8}
       sx={{
         width: "min(440px, calc(100vw - 32px))",
+        maxWidth: "100%",
+        minWidth: 0,
+        boxSizing: "border-box",
         p: 2.25,
         borderRadius: 2,
         border: `1px solid ${theme.palette.divider}`,
@@ -304,30 +305,33 @@ export default function ToolTour() {
         </Box>
       </Box>
 
-      {showHiddenControlNote && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: theme.palette.grey[700],
-            fontSize: "0.6875rem",
-            fontStyle: "italic",
-          }}
-        >
-          Todo.
-        </Typography>
-      )}
-
-      <Typography
+      <Box
         id={titleId}
+        component="h2"
         sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          m: 0,
           fontWeight: 600,
           fontSize: "1rem",
           color: theme.palette.text.primary,
           lineHeight: 1.3,
         }}
       >
-        {step.title}
-      </Typography>
+        {step.titleIcon === "pin" && (
+          <icons.PushPin
+            sx={{
+              fontSize: "1.2rem",
+              color: theme.palette.grey[600],
+              flexShrink: 0,
+              transform: "rotate(45deg)",
+            }}
+            aria-hidden
+          />
+        )}
+        <span>{step.title}</span>
+      </Box>
       <Typography
         id={bodyId}
         sx={{
@@ -343,20 +347,37 @@ export default function ToolTour() {
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
-          gap: 0.75,
+          flexDirection: "column",
+          gap: 1,
           mt: 0.5,
+          width: "100%",
+          minWidth: 0,
         }}
       >
-        <Box sx={{ display: "flex", gap: 0.5 }}>
+        <Box
+          component="ol"
+          aria-hidden
+          sx={{
+            m: 0,
+            p: 0,
+            listStyle: "none",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 0.5,
+            minWidth: 0,
+            rowGap: 0.5,
+          }}
+        >
           {steps.map((s, i) => (
             <Box
               key={s.id}
-              aria-hidden
+              component="li"
               sx={{
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
+                flexShrink: 0,
                 backgroundColor:
                   i === tourStep
                     ? theme.palette.blue.bright
@@ -365,31 +386,23 @@ export default function ToolTour() {
             />
           ))}
         </Box>
-        <Box sx={{ flex: 1 }} />
-        <Button
-          size="small"
-          type="button"
-          variant="outlined"
-          onClick={endTour}
+        <Box
           sx={{
-            ...tourActionShape,
-            color: theme.palette.grey[700],
-            borderColor: theme.palette.divider,
-            backgroundColor: theme.palette.background.paper,
-            "&:hover": {
-              borderColor: theme.palette.grey[400],
-              backgroundColor: theme.palette.action.hover,
-            },
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: 0.75,
+            rowGap: 0.75,
+            width: "100%",
+            minWidth: 0,
           }}
         >
-          Skip
-        </Button>
-        {!isFirst && (
           <Button
             size="small"
             type="button"
             variant="outlined"
-            onClick={handleBack}
+            onClick={endTour}
             sx={{
               ...tourActionShape,
               color: theme.palette.grey[700],
@@ -401,19 +414,39 @@ export default function ToolTour() {
               },
             }}
           >
-            Back
+            Skip
           </Button>
-        )}
-        <Button
-          ref={nextBtnRef}
-          size="small"
-          type="button"
-          variant="contained"
-          onClick={handleNext}
-          sx={tourActionShape}
-        >
-          {isLast ? "Finish" : "Next"}
-        </Button>
+          {!isFirst && (
+            <Button
+              size="small"
+              type="button"
+              variant="outlined"
+              onClick={handleBack}
+              sx={{
+                ...tourActionShape,
+                color: theme.palette.grey[700],
+                borderColor: theme.palette.divider,
+                backgroundColor: theme.palette.background.paper,
+                "&:hover": {
+                  borderColor: theme.palette.grey[400],
+                  backgroundColor: theme.palette.action.hover,
+                },
+              }}
+            >
+              Back
+            </Button>
+          )}
+          <Button
+            ref={nextBtnRef}
+            size="small"
+            type="button"
+            variant="contained"
+            onClick={handleNext}
+            sx={tourActionShape}
+          >
+            {isLast ? "Finish" : "Next"}
+          </Button>
+        </Box>
       </Box>
     </Paper>
   )

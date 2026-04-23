@@ -32,11 +32,12 @@ export const LIST_TOUR: TourStep[] = [
   },
   {
     id: "list.step1.pin",
-    anchorId: "list.toolbar.pinShare",
+    anchorId: "list.row.pin",
     eyebrow: "ARRANGE THE LIST",
     title: "Pin",
+    titleIcon: "pin",
     body: "Pin a scenario to float it to the top of the list while you compare. Use share on the same control when you want to stage the current card to the Share drawer and Share tab.",
-    placement: "right-start",
+    placement: "left-start",
   },
   {
     id: "list.step2.info",

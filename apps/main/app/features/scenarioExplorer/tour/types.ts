@@ -24,6 +24,8 @@ export interface TourStep {
   /** Preferred Popper placement relative to the anchor. Popper will
    *  flip automatically if it does not fit. */
   placement?: TourPlacement
+  /** Optional icon shown before the title in the popper. */
+  titleIcon?: "pin"
 }
 
 export interface TourState {

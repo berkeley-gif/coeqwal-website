@@ -42,6 +42,12 @@ export interface StrategyGridRowProps {
   scenario: ScenarioForDisplay
   /** Whether this is the first row (adds top margin) */
   isFirst: boolean
+  /**
+   * First visible scenario row in the list: only this row registers the List tour
+   * pin control anchor (`list.row.pin`). Differs from `isFirst` when group-by-theme
+   * is on or when pinned rows precede this block.
+   */
+  tourListFirstItem?: boolean
   /** Whether this row is highlighted (search result match) */
   isHighlighted: boolean
   /** Whether this scenario is selected/chosen */
@@ -106,6 +112,7 @@ export interface StrategyGridRowProps {
 export const StrategyGridRow = React.memo(function StrategyGridRow({
   scenario,
   isFirst,
+  tourListFirstItem = false,
   isHighlighted,
   isChosen,
   compact,
@@ -152,7 +159,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   // Tour anchors. Only the first row registers, so the tour highlights
   // a single exemplar row instead of bulk-registering all of them.
   const rowSelectAnchorRef = useTourAnchor("list.select.row")
-  const pinShareAnchorRef = useTourAnchor("list.toolbar.pinShare")
+  const listRowPinTourRef = useTourAnchor("list.row.pin")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
 
   // Bridge the outcome column ref into the tour registry as well. We
@@ -423,7 +430,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               handleShare={handleShare}
               togglePinnedScenario={togglePinnedScenario}
               outcomeColRef={outcomeColRef}
-              pinShareTourRef={isFirst ? pinShareAnchorRef : undefined}
+              pinRowTourRef={
+                tourListFirstItem && isListMode ? listRowPinTourRef : undefined
+              }
             />
           )}
         </>
@@ -447,6 +456,7 @@ export function InlineRowActions({
   hidePinning,
   shareIconNudgeTop,
   dense,
+  pinTourRef,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -460,6 +470,11 @@ export function InlineRowActions({
   shareIconNudgeTop?: string
   /** Tighter padding and gaps (e.g. radar axis detail foreignObject row) */
   dense?: boolean
+  /**
+   * List tour: the pin step anchors to this wrapper so the popper and highlight
+   * target the pin control, not the whole row.
+   */
+  pinTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const shareItems = useScenarioExplorerStore((s) => s.shareItems)
@@ -530,46 +545,52 @@ export function InlineRowActions({
       }}
     >
       {!hidePinning && (
-        <Tooltip
-          title={pinTooltip}
-          arrow
-          placement="top-start"
-          slotProps={{
-            popper: {
-              modifiers: [
-                { name: "flip", enabled: true },
-                {
-                  name: "preventOverflow",
-                  enabled: true,
-                  options: { boundary: "viewport", padding: 8 },
-                },
-              ],
-            },
-          }}
+        <Box
+          component="span"
+          ref={pinTourRef}
+          sx={{ display: "inline-flex", alignItems: "center" }}
         >
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation()
-              togglePinnedScenario(scenarioId)
-            }}
-            sx={{
-              p: iconPad,
-              ...iconButtonTight,
-              color: isPinned ? accentColor : theme.palette.grey[500],
-              "&:hover": {
-                color: isPinned ? accentColor : theme.palette.grey[700],
+          <Tooltip
+            title={pinTooltip}
+            arrow
+            placement="top-start"
+            slotProps={{
+              popper: {
+                modifiers: [
+                  { name: "flip", enabled: true },
+                  {
+                    name: "preventOverflow",
+                    enabled: true,
+                    options: { boundary: "viewport", padding: 8 },
+                  },
+                ],
               },
             }}
           >
-            <icons.PushPin
-              sx={{
-                fontSize: iconSize,
-                transform: isPinned ? "none" : "rotate(45deg)",
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation()
+                togglePinnedScenario(scenarioId)
               }}
-            />
-          </IconButton>
-        </Tooltip>
+              sx={{
+                p: iconPad,
+                ...iconButtonTight,
+                color: isPinned ? accentColor : theme.palette.grey[500],
+                "&:hover": {
+                  color: isPinned ? accentColor : theme.palette.grey[700],
+                },
+              }}
+            >
+              <icons.PushPin
+                sx={{
+                  fontSize: iconSize,
+                  transform: isPinned ? "none" : "rotate(45deg)",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        </Box>
       )}
       <Tooltip
         title={shareTooltip}
@@ -786,16 +807,14 @@ function NonCompactRowContent({
   handleShare,
   togglePinnedScenario,
   outcomeColRef,
-  pinShareTourRef,
+  pinRowTourRef,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
   accentColor?: string
   handleShare?: () => void
   togglePinnedScenario?: (id: string) => void
   outcomeColRef?: React.RefObject<HTMLDivElement | null>
-  /** When provided, the inline pin/share actions block registers itself
-   *  as the `list.toolbar.pinShare` tour anchor via this ref callback. */
-  pinShareTourRef?: (el: HTMLElement | null) => void
+  pinRowTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
@@ -809,10 +828,7 @@ function NonCompactRowContent({
 
   const inlineActionsNode =
     isListMode && handleShare && togglePinnedScenario && accentColor ? (
-      <Box
-        ref={pinShareTourRef}
-        sx={{ display: "inline-flex", alignItems: "center" }}
-      >
+      <Box sx={{ display: "inline-flex", alignItems: "center" }}>
         <InlineRowActions
           scenarioId={scenario.scenarioId}
           scenarioLabel={scenario.label}
@@ -821,6 +837,7 @@ function NonCompactRowContent({
           accentColor={accentColor}
           onShare={handleShare}
           togglePinnedScenario={togglePinnedScenario}
+          pinTourRef={pinRowTourRef}
         />
       </Box>
     ) : undefined

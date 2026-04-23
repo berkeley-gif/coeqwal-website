@@ -246,11 +246,12 @@
       }
 
       .sample-nav {
-        font-family: var(--font-display);
-        font-size: 1.2rem;
+        font-family: var(--font-text);
+        font-size: 0.875rem;
         font-weight: 600;
-        letter-spacing: 0.01em;
-        text-transform: none;
+        line-height: 1.2;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
       }
 
       .sample-tabs-expanded {
@@ -868,19 +869,23 @@
           </div>
         </div>
 
-        <!-- Display Font - Navigation -->
+        <!-- Text font - primary navigation; display font - tab titles -->
         <div class="type-card">
-          <h3>Display Font - Navigation</h3>
+          <h3>Navigation and tabs</h3>
           <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
-            <strong>neue-haas-grotesk-display</strong><br />
-            Used for navigation and tabs
+            <strong>Primary nav</strong> uses
+            <strong>neue-haas-grotesk-text</strong> (tracked uppercase caps).<br />
+            <strong>Tab titles</strong> (Learn / Explore / Share) use
+            <strong>neue-haas-grotesk-display</strong> via
+            <code style="font-size: 0.8rem">tabLabel</code> /
+            <code style="font-size: 0.8rem">tabLabelDocked</code>.
           </p>
 
           <div class="type-sample">
             <div class="type-label">
-              <span class="type-name">Header Nav</span>
+              <span class="type-name">Primary navigation</span>
               <span class="type-specs"
-                >1.2rem (19.2px) / 600 / 1.4 / 0.01em</span
+                >0.875rem (14px) / 600 / 1.2 / 0.2em / uppercase</span
               >
             </div>
             <div class="sample-nav">About COEQWAL</div>
@@ -894,7 +899,10 @@
               "
               >theme.typography.nav</code
             >
-            <div class="type-usage">Header navigation links</div>
+            <div class="type-usage">
+              Header links, mobile drawer top-level links, Explore sub-nav (Get
+              started / Go to tools)
+            </div>
           </div>
 
           <div class="type-sample">

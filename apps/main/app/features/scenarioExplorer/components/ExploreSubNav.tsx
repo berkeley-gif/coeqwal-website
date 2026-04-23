@@ -187,12 +187,12 @@ export default function ExploreSubNav() {
             {icon}
             <Typography
               component="span"
-              variant="dashboard"
+              variant="nav"
               sx={{
                 fontWeight: active ? 600 : 500,
                 lineHeight: 1,
                 whiteSpace: "nowrap",
-                color: theme.palette.text.secondary,
+                color: "inherit",
               }}
             >
               {label}

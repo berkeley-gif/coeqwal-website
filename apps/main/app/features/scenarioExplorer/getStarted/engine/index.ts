@@ -8,6 +8,8 @@ export { NarrationArbiter } from "./arbiters/NarrationArbiter"
 export { OverlayMorphArbiter } from "./arbiters/OverlayMorphArbiter"
 export { CameraArbiter } from "./arbiters/CameraArbiter"
 export type { CameraHome, FlyHomeOpts } from "./arbiters/CameraArbiter"
+export { InteractivePaintArbiter } from "./arbiters/InteractivePaintArbiter"
+export type { InteractivePaintTransition } from "./arbiters/InteractivePaintArbiter"
 export { STORYBOARD_DEBUG, debugLog, logDuState } from "./debug"
 export {
   DU_CLASS_FILTER,
@@ -31,6 +33,7 @@ export type {
   Arbiter,
   BeatEngineContext,
   BeatTableEntry,
+  EngineMode,
   HideScheduleEntry,
   MapPaintActor,
   MapPaintPayload,

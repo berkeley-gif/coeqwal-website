@@ -264,6 +264,12 @@ export function StrategyGridContent({
       isFirstGroup: boolean
       /** Pinned block always had row theme badges; keep when subheaders are partial/empty */
       showThemeBadgeInPinnedSection?: boolean
+      /**
+       * True for the block that contains the first visible list row (pinned head
+       * or unpinned list). Used so the `list.row.pin` tour anchor attaches to the
+       * first row that has pin controls, even with group-by-theme or mixed pinned sections.
+       */
+      registerTourFirstListItem: boolean
     },
   ) =>
     list.flatMap((scenario, index, arr) => {
@@ -323,6 +329,9 @@ export function StrategyGridContent({
           key={scenario.scenarioId}
           scenario={scenario}
           isFirst={!themeSubheaderMode && opts.isFirstGroup && index === 0}
+          tourListFirstItem={
+            opts.registerTourFirstListItem && index === 0
+          }
           isHighlighted={isHighlighted}
           isChosen={selectedScenarios.includes(scenario.scenarioId)}
           compact={compact}
@@ -452,6 +461,7 @@ export function StrategyGridContent({
             themeIds: pinnedThemeScenarioIds,
             isFirstGroup: true,
             showThemeBadgeInPinnedSection: true,
+            registerTourFirstListItem: hasPinned,
           })}
         </Box>
       )}
@@ -460,6 +470,8 @@ export function StrategyGridContent({
       {renderScenarioRows(unpinnedScenarios, {
         themeIds: themeScenarioIds,
         isFirstGroup: !hasPinned,
+        registerTourFirstListItem:
+          !hasPinned && unpinnedScenarios.length > 0,
       })}
     </>
   )

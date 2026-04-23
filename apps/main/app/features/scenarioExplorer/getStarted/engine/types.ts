@@ -77,6 +77,30 @@ export interface HideScheduleEntry {
   locationIds: string[]
 }
 
+/**
+ * Engine-level mode signal (Phase 3).
+ *
+ * Tracks which "regime" the storyboard is currently in, so each map
+ * resource (most importantly `demand-units`) can be owned by exactly
+ * one arbiter at a time without ad-hoc effect-based ownership checks.
+ *
+ * - `"idle"`: pre-play gate (before Play button) or post-Restart. No
+ *   arbiter is actively writing `demand-units`; the layer is at its
+ *   baseline (invisible / Beat 0 state).
+ * - `"playback"`: storyboard beats 0..N are tweening. `MapPaintArbiter`
+ *   owns `demand-units` and drives it via progress-keyed actors.
+ * - `"interactive"`: storyboard has settled (reached the final beat's
+ *   finished state) and the user can click squares. In Phase 3b,
+ *   `InteractivePaintArbiter` takes ownership of `demand-units` in
+ *   this mode; for Phase 3a the mode is signal-only and no arbiter
+ *   keys on it yet.
+ *
+ * Phase 3a ships the signal (getMode/setMode on `BeatEngineApi`) with
+ * no arbiter wiring, so it is observationally a no-op. Phase 3b/3c
+ * then route the interactive-paint logic through it.
+ */
+export type EngineMode = "idle" | "playback" | "interactive"
+
 // Actor discriminants
 
 export type ActorKind =
@@ -495,6 +519,17 @@ export interface BeatEngineContext {
    * `narrationTickRef`.
    */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
+  /**
+   * Read the current engine mode. Arbiters that want to scope their
+   * work to a particular mode (e.g. `InteractivePaintArbiter` only
+   * writing `demand-units` while mode === "interactive") call this
+   * from their lifecycle hooks. Lives on the context rather than as a
+   * separate arg so all arbiters receive it uniformly.
+   *
+   * Phase 3a: unused by all current arbiters. Added here so Phase 3b
+   * can consume it without another context shape change.
+   */
+  getMode: () => EngineMode
 }
 
 // Arbiter interface

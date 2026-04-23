@@ -37,7 +37,9 @@ import type {
   Arbiter,
   BeatEngineContext,
   BeatTableEntry,
+  EngineMode,
 } from "./types"
+import { debugLog } from "./debug"
 
 export interface BeatEngineApi {
   /** Force cleanup. Call `onExit` on every active actor, then
@@ -45,6 +47,16 @@ export interface BeatEngineApi {
    *  (`handleNext`, `handleBack`, `handleRestart` via the existing
    *  `clearInteractiveState`). Idempotent. */
   teardown: () => void
+
+  /** Read the current engine mode. See `EngineMode` for semantics.
+   *  Phase 3a: signal only, no arbiter keys on it yet. */
+  getMode: () => EngineMode
+
+  /** Set the engine mode. Callers: nav handlers (`handlePlay` ->
+   *  "playback", `settleToFinishedState` -> "interactive",
+   *  `handleRestart` -> "idle") and the square-click handler.
+   *  Idempotent - setting the current mode again is a no-op. */
+  setMode: (mode: EngineMode) => void
 }
 
 export interface UseBeatEngineArgs {
@@ -123,6 +135,13 @@ export function useBeatEngine({
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
 
+  // Engine mode signal (Phase 3a). Held in a ref so reads/writes from
+  // nav handlers don't trigger re-renders. Phase 3a ships this as a
+  // pure signal - no arbiter keys on it yet - so a mis-set mode is
+  // observationally a no-op. Phase 3b/3c then route interactive-paint
+  // ownership through `modeRef.current === "interactive"`.
+  const modeRef = useRef<EngineMode>("idle")
+
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
       if (!enabledRef.current) return
@@ -197,7 +216,8 @@ export function useBeatEngine({
     }
   }, [progress])
 
-  // Stable api for callers (nav handlers call `api.teardown()`).
+  // Stable api for callers (nav handlers call `api.teardown()`,
+  // navigation/selection sites call `api.setMode()`).
   const api = useMemo<BeatEngineApi>(() => {
     return {
       teardown: () => {
@@ -215,6 +235,12 @@ export function useBeatEngine({
         for (const arbiter of byKind.values()) {
           arbiter.teardown?.(ctx)
         }
+      },
+      getMode: () => modeRef.current,
+      setMode: (mode) => {
+        if (modeRef.current === mode) return
+        debugLog(`engine.setMode ${modeRef.current} -> ${mode}`)
+        modeRef.current = mode
       },
     }
   }, [progress])

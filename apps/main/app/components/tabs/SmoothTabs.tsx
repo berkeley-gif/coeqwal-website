@@ -279,14 +279,12 @@ export default function SmoothTabs() {
               )}
               <Typography
                 component="span"
+                variant="nav"
                 sx={{
-                  ...theme.typography.overline,
                   fontWeight: isInTabsArea ? 600 : 500,
-                  letterSpacing: "0.2em",
-                  lineHeight: 1.2,
                   color: "inherit",
                   fontSize: isInTabsArea
-                    ? theme.typography.overline.fontSize
+                    ? undefined
                     : "clamp(1.15rem, 0.95rem + 1vw, 1.5rem)",
                   transition: "font-size 0.4s ease, color 0.4s ease",
                 }}

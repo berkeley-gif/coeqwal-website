@@ -64,6 +64,7 @@ import {
   NarrationArbiter,
   OverlayMorphArbiter,
   CameraArbiter,
+  InteractivePaintArbiter,
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
@@ -383,6 +384,10 @@ export default function TierAnimationSection() {
    *  the reduced-motion fast-forward path below. */
   const settleToFinishedState = useCallback(() => {
     setPlayState("finished")
+    // Phase 3a: signal to the engine that the storyboard has settled
+    // and the user can now click squares. Signal only - no arbiter
+    // keys on this mode yet (Phase 3b wires InteractivePaintArbiter).
+    engineApiRef.current?.setMode("interactive")
     mapActions.clearOutcomeVisualization()
     mapActions.clearLocationHighlights()
 
@@ -439,6 +444,14 @@ export default function TierAnimationSection() {
       const clamped = Math.max(0, Math.min(FINAL_BEAT_INDEX, targetIndex))
       const fromIndex = beatIndexRef.current
       if (controlsRef.current) controlsRef.current.stop()
+
+      // Phase 3a: mode signal. Any goTo (forward or backward) puts the
+      // storyboard into playback mode. If the user was in interactive
+      // (post-settle) and pressed Back, this correctly restores
+      // playback so the staggered reveals read as scripted again.
+      // settleToFinishedState below flips to "interactive" on the
+      // final-beat finalize path.
+      engineApiRef.current?.setMode("playback")
 
       const target = BEATS[clamped]!
       const source = BEATS[fromIndex]!
@@ -594,6 +607,10 @@ export default function TierAnimationSection() {
     backOutOpacity.set(1)
     setHasPlayed(true)
     hasPlayedRef.current = true
+    // Phase 3a: mode signal - storyboard is now in playback. Set
+    // before `playArrival()` so any downstream effect observing the
+    // mode sees the transition before the first progress tick lands.
+    engineApiRef.current?.setMode("playback")
     computePolygonDataRef.current()
     playArrival()
   }, [playArrival, backOutOpacity])
@@ -654,6 +671,8 @@ export default function TierAnimationSection() {
       setHasPlayed(false)
       hasPlayedRef.current = false
       setPlayState("idle")
+      // Phase 3a: storyboard is back in the pre-play gate.
+      engineApiRef.current?.setMode("idle")
     }
     const duration = prefersReducedMotion ? 0 : 0.6
     if (duration === 0) {
@@ -755,6 +774,9 @@ export default function TierAnimationSection() {
     setHasPlayed(false)
     hasPlayedRef.current = false
     setPlayState("idle")
+    // Phase 3a: mode signal. Restart returns the engine to the same
+    // pre-play regime it was in at first mount.
+    engineApiRef.current?.setMode("idle")
     computePolygonDataRef.current()
   }, [progress, backOutOpacity, mapAPI.mapRef])
 
@@ -1120,24 +1142,37 @@ export default function TierAnimationSection() {
         // the user can see the polygon that just became active.
         // Same-outcome swaps keep the camera still (both polygons are
         // already in view); de-select clicks skip this branch too.
+        //
+        // Routed through `mapAPI.withMap` + `mapRef.fitBounds` /
+        // `mapRef.getMap().easeTo` to mirror the canonical pattern in
+        // `useOutcomeVisualization.ts` (the learn/explore outcome-click
+        // camera handler). Previously this block used a mix of
+        // `mapAPI.mapRef?.current?.fitBounds(...)` and raw
+        // `map.easeTo(...)`, and silently dropped `action.padding` on
+        // the `easeTo` branch - so outcomes resolved via
+        // `cameraPreset` centered without the 24px top/bottom padding
+        // the `fitBounds` branch got from `resolveOutcomeCamera`.
+        // Unifying through `withMap` + passing padding on both
+        // branches removes that drift between the get-started and
+        // explore/learn camera paths.
         if (isNewOutcomeSelection) {
-          const map = mapAPI.mapRef?.current?.getMap?.()
-          if (map) {
-            const action = resolveOutcomeCamera(info.code, "get-started")
+          const action = resolveOutcomeCamera(info.code, "get-started")
+          mapAPI.withMap((mapRef) => {
             if (action.type === "fitBounds") {
-              mapAPI.mapRef?.current?.fitBounds(action.bounds, {
+              mapRef.fitBounds(action.bounds, {
                 padding: action.padding,
                 maxZoom: action.maxZoom,
                 duration: action.duration,
               })
             } else {
-              map.easeTo({
+              mapRef.getMap().easeTo({
                 center: action.center,
                 zoom: action.zoom,
+                padding: action.padding,
                 duration: action.duration,
               })
             }
-          }
+          })
         }
       },
     }),
@@ -2010,6 +2045,26 @@ export default function TierAnimationSection() {
     ]
   }
 
+  /* ── InteractivePaintArbiter (Phase 3b: lifecycle tracker only) ──
+   *
+   * Event-driven arbiter (same shape as `CameraArbiter`, not in the
+   * progress-dispatch `arbitersRef` list). Will eventually be the
+   * sole writer for `demand-units` / `demand-units-outline` during
+   * interactive mode. In Phase 3b its `onEnter` / `onExit` /
+   * `onChangeSelection` hooks are logging stubs; legacy writers
+   * (`applyPaintChanges` effect + `OutcomePolygonLayer` + the
+   * `selectedOutcomeCode` transition effect) still drive actual
+   * paint. The React effect below calls `sync` on every
+   * (mode, selection) change so we can verify lifecycle correctness
+   * via console before Phase 3c flips on the writes and deletes the
+   * legacy paths. */
+  const interactivePaintArbiterRef = useRef<InteractivePaintArbiter | null>(
+    null,
+  )
+  if (interactivePaintArbiterRef.current === null) {
+    interactivePaintArbiterRef.current = new InteractivePaintArbiter()
+  }
+
   // Bridge refs for the `*Arbiter` actors that delegate to
   // component-owned callbacks. Each child component writes its
   // `applyXxxFrame(v)` callback into `.current` on mount and clears
@@ -2056,6 +2111,11 @@ export default function TierAnimationSection() {
       getHideSchedule: () => hideScheduleRef.current,
       narrationTickRef,
       overlayMorphTickRef,
+      // Route through `engineApiRef` (same pattern as teardown). Safe
+      // because arbiters only call `getMode()` during dispatch, which
+      // happens after `useBeatEngine` has populated the ref. Before
+      // first mount the ref is null and we default to "idle".
+      getMode: () => engineApiRef.current?.getMode() ?? "idle",
     }),
     // `buildBlendedTierExpr` is a non-stable inner function. It closes
     // over `tierColorLookupRef` (a ref) so its identity doesn't
@@ -2073,6 +2133,30 @@ export default function TierAnimationSection() {
     enabled: !isLoading,
   })
   engineApiRef.current = engineApi
+
+  /* ── InteractivePaintArbiter sync ──
+   *
+   * Reconcile the arbiter's ownership claim whenever the engine mode
+   * or the active selection changes. Mode isn't reactive (it lives on
+   * a ref inside `BeatEngine`), so we depend on `playState` as a
+   * proxy: every `setMode(...)` call in this file happens alongside a
+   * `setPlayState(...)` call, so the effect fires on the same tick
+   * the mode transitioned.
+   *
+   * Phase 3b invariant: this call is side-effect-free aside from
+   * `debugLog` output. The arbiter tracks ownership but does not
+   * write paint. Watch the console for `InteractivePaintArbiter
+   * ENTER/EXIT/CHANGE` lines to verify correctness:
+   *
+   * - ENTER on the first square-click after the storyboard settles
+   *   (mode=interactive, selection=null->AG_REV).
+   * - CHANGE when clicking a square from a different outcome while
+   *   still settled (mode=interactive, selection swap).
+   * - EXIT on Restart / Back-to-pre-play / Next->playback
+   *   (mode flips away from interactive). */
+  useEffect(() => {
+    interactivePaintArbiterRef.current?.sync(engineContext, selectedOutcomeCode)
+  }, [engineContext, selectedOutcomeCode, playState])
 
   /* ── Storyboard map-layer unmount cleanup ──
    *

@@ -19,7 +19,7 @@ import { createTheme, Theme, alpha } from "@mui/material/styles"
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
  *                       Typography variants: h1, h2–h6, body1, body2,
- *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
+ *                       nav (tracked uppercase text), tabLabel, tabLabelDocked, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline,
  *                       compactTitle–micro, axisLabel, scenarioTitle, …
  *
@@ -1051,13 +1051,15 @@ const theme = createTheme({
       letterSpacing: "normal",
       textTransform: "uppercase",
     },
+    // Primary navigation labels: header links, Explore Get started / Go to tools, etc.
+    // Tracked uppercase caps (same recipe as hero scroll hint); text face, not display.
     nav: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.2rem",
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.875rem", // 14px, matches overline
       fontWeight: 600,
-      lineHeight: 1.4,
-      letterSpacing: "0.01em",
-      textTransform: "none" as const,
+      lineHeight: 1.2,
+      letterSpacing: "0.2em",
+      textTransform: "uppercase" as const,
     },
     // Tab labels - expanded state (prominent, before docking)
     tabLabel: {
@@ -1069,7 +1071,6 @@ const theme = createTheme({
       textTransform: "capitalize" as const,
     },
     // Tab labels - docked state (with header)
-    // Also used for explorer sub-navigation tabs (T2: display font at 1rem)
     tabLabelDocked: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: "1rem",

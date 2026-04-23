@@ -1,24 +1,8 @@
-/* Storyboard debug flag and diagnostic helpers.
- *
- * One flag, one helper, one home. All storyboard diagnostic logging
- * in the feature routes through `debugLog` and `logDuState` here so
- * turning noise on or off is a single-line change.
- *
- * `STORYBOARD_DEBUG` defaults to `false`. Flip it manually at the top
- * of this file when investigating a regression (or later, wire it to
- * `process.env.NEXT_PUBLIC_STORYBOARD_DEBUG` if we want it toggleable
- * without a code edit).
- *
- * Why not strip the diagnostic call sites entirely. The Step 4 to
- * Step 5 saga needed the instrumentation more than once. Keeping the
- * call sites intact, compiled out to no-ops by the flag, means the
- * next time the same class of bug surfaces we flip the flag and the
- * logs light up again with no code archaeology.
- */
+/* Storyboard debug flag and diagnostic helpers. */
 
 /** Single point of control for all `[DIAG S4/S5]` and equivalent
  *  storyboard-layer diagnostic logs. */
-export const STORYBOARD_DEBUG = false
+export const STORYBOARD_DEBUG = true
 
 /** Log a formatted storyboard diagnostic. No-op when the debug flag
  *  is off. Centralized so call sites do not need a flag check. */
