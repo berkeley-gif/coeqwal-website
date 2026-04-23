@@ -2199,109 +2199,28 @@ export default function TierAnimationSection() {
       }
 
       if (v < BEAT1B_START) {
-        // Beat 1: blues cycling, then frozen
-        const beat1T = v / FREEZE_AT
-
-        const fadeIn = Math.min(1, beat1T / 0.33)
-        const base = 0.65 * fadeIn
-        const breath = fadeIn >= 1 ? 0.05 * Math.sin(beat1T * Math.PI * 4) : 0
-        const opacity = base + breath
-
+        // Beat 1 paint writes (cycling sub-branch `v < FREEZE_AT` and
+        // frozen sub-branch `FREEZE_AT <= v < BEAT1B_START`) moved to
+        // `MapPaintArbiter.applyBeat1Cycle*` and
+        // `MapPaintArbiter.applyBeat1Hold*`, fired by the
+        // `beat0:mapPaint:cycle` and `beat0:mapPaint:hold` actors.
+        // This block retains the listener-local `frozenColorPhase`
+        // bookkeeping (read by the not-yet-ported Beat 1C blend branch
+        // at line 2330 via `beat1FillExpr(frozenColorPhase, ...)`)
+        // and the `phase = "beat1"` assignment that downstream
+        // branches still key off. Phase 1.d removes the remaining
+        // `frozenColorPhase` references. See Storyboard Engine
+        // Hardening Plan v2, Phase 1.c.
         if (v < FREEZE_AT) {
-          // Actively cycling
-          const colorPhase = beat1T * BEAT1_CYCLE
-          frozenColorPhase = colorPhase
-          try {
-            const expr = beat1FillExpr(colorPhase)
-            if (map.getLayer("demand-units")) {
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                expr as never,
-              )
-              map.setPaintProperty("demand-units", "fill-opacity", opacity)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                expr as never,
-              )
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-opacity",
-                opacity,
-              )
-            }
-          } catch {
-            /* ok */
-          }
-        } else {
-          // Frozen: keep the last color pattern, maintain opacity at 0.65
-          try {
-            const expr = beat1FillExpr(frozenColorPhase)
-            if (map.getLayer("demand-units")) {
-              if (phase !== "beat1") {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              if (phase !== "beat1") {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-            }
-          } catch {
-            /* ok */
-          }
+          const beat1T = v / FREEZE_AT
+          frozenColorPhase = beat1T * BEAT1_CYCLE
         }
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
-        // Beat 1B: hold. Keep the frozen 3-blue palette and the full
-        // DU class filter, pin opacity at 0.65. If we're scrubbing
-        // backwards from beat1c, restore the filter and 3-blue fill
-        // expression so the blues come back cleanly.
-        if (phase !== "beat1") {
-          try {
-            const expr = beat1FillExpr(frozenColorPhase)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              map.setPaintProperty("demand-units", "fill-color", expr as never)
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                expr as never,
-              )
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                expr as never,
-              )
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-            }
-          } catch {
-            /* ok */
-          }
-        }
+        // Beat 1B paint writes moved to
+        // `MapPaintArbiter.applyBeat1Hold*`. This block retains only
+        // the `phase = "beat1"` bookkeeping so downstream branches
+        // still re-fire their transitions. See Phase 1.c.
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_END) {
         // Beat 1C: smooth two-stage color morph from the cycling 3-blue

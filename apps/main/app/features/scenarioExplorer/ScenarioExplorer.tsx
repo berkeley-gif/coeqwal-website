@@ -84,6 +84,20 @@ function SimpleButton({
 }
 
 import { InlineToggleChip } from "./components/InlineToggleChip"
+import type { ExploreMode } from "./store"
+
+// Human-readable name for each explore mode. Surfaces in the
+// "Scenario library: {viewName}" header so users always know which
+// of the four tools they are looking at without having to read the
+// chart itself.
+const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
+  list: "List view",
+  radar: "Radar chart",
+  equity: "Distribution",
+  resilience: "Resilience heatmap",
+  comparison: "Comparison",
+  data: "Data explorer",
+}
 
 export default function ScenarioExplorer() {
   return (
@@ -564,6 +578,7 @@ function ScenarioExplorerInner() {
                       onRowHover={handleSidebarRowHover}
                       singleSelect={exploreMode === "equity"}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
+                      viewName={EXPLORE_MODE_VIEW_NAME[exploreMode]}
                     />
                   )
                 }
@@ -571,6 +586,7 @@ function ScenarioExplorerInner() {
                   <ToolToolbar
                     gridAligned={isListMode}
                     hideTitle={!isListMode}
+                    viewName={EXPLORE_MODE_VIEW_NAME[exploreMode]}
                   />
                 }
                 chartControls={isListMode ? undefined : chartControls}

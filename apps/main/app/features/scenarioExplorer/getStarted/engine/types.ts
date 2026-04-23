@@ -72,6 +72,46 @@ export type MapPaintPayload =
       kind: "reset"
     }
   | {
+      /**
+       * Beat 1 blue-cycle. Window `[RESET_END, FREEZE_AT)`. Per-tick
+       * opacity ramp and rotating `beat1FillExpr(colorPhase)`. The
+       * arbiter tracks `frozenColorPhase` on itself so the subsequent
+       * `beat1-hold` actor can resume at the same color pattern the
+       * cycle settled on.
+       *
+       * `cycleStart` and `cycleEnd` bound the window. `colorPhase =
+       * ((v - cycleStart) / (cycleEnd - cycleStart)) * cycleRotations`
+       * so that a single `cycleRotations` value controls how many
+       * palette turns the blues make across the window.
+       *
+       * `peakOpacity` is what the ramp lands on (`0.65`). `fadeInFrac`
+       * is the fraction of the window spent ramping in from 0.
+       * `breathAmplitude` rides on top once the fade-in completes
+       * (`0.05` in the legacy listener).
+       */
+      kind: "beat1-cycle"
+      cycleStart: number
+      cycleEnd: number
+      cycleRotations: number
+      peakOpacity: number
+      fadeInFrac: number
+      breathAmplitude: number
+    }
+  | {
+      /**
+       * Beat 1 hold. Window `[FREEZE_AT, BEAT1C_BLEND_START)`. Covers
+       * both the "frozen" tail of the old `v < BEAT1B_START` branch
+       * and the `BEAT1B_START <= v < BEAT1C_BLEND_START` hold, which
+       * are visually identical (frozen palette, full filter, opacity
+       * pinned at `peakOpacity`). The arbiter re-asserts the full
+       * baseline on enter (using its stored `frozenColorPhase`) and
+       * re-asserts opacity on each update tick so stray writers that
+       * land on the layer during this window are self-healing.
+       */
+      kind: "beat1-hold"
+      peakOpacity: number
+    }
+  | {
       kind: "beat5-enter"
       /** LOI demand-unit id to gold-stroke during step 4 (`BEAT5_LOI_ID`). */
       loiDuId: string

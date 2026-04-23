@@ -42,6 +42,14 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
    *  main-choreography listener. */
   private beat5PolyRingOn = false
 
+  /** Last `colorPhase` the Beat 1 cycle landed on. Written by
+   *  `beat1-cycle.onUpdate` every tick. Read by `beat1-hold.onEnter`
+   *  to seed the frozen palette. Matches the `frozenColorPhase`
+   *  closure variable in the old main-choreography listener. Starts
+   *  at 0 so a fresh playback hold (before any cycle has run) uses
+   *  the reset palette. */
+  private frozenColorPhase = 0
+
   /** [DIAG S4/S5] Which beat5-layer-fade boundaries we've already
    *  logged for the current pass. Reset on `applyBeat5Enter`. */
   private diagBoundariesLogged = new Set<string>()
@@ -58,6 +66,12 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     switch (p.kind) {
       case "reset":
         this.applyReset(map)
+        return
+      case "beat1-cycle":
+        this.applyBeat1CycleEnter(map)
+        return
+      case "beat1-hold":
+        this.applyBeat1HoldEnter(map, p)
         return
       case "beat5-enter":
         this.applyBeat5Enter(map, ctx)
@@ -89,6 +103,14 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     if (!map) return
 
     const p = actor.payload
+    if (p.kind === "beat1-cycle") {
+      this.applyBeat1CycleUpdate(map, p, v)
+      return
+    }
+    if (p.kind === "beat1-hold") {
+      this.applyBeat1HoldUpdate(map, p)
+      return
+    }
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
 
@@ -202,7 +224,113 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // cleared by `clearInteractiveState` -> `teardown()`. Clearing it
     // here a second time is idempotent and keeps the invariant local.
     this.beat5PolyRingOn = false
+    this.frozenColorPhase = 0
     this.diagBoundariesLogged.clear()
+  }
+
+  private applyBeat1CycleEnter(map: StyledMap): void {
+    // Full-state baseline at cycle start. In the common forward-play
+    // case the reset actor just fired, so the layers are already in
+    // this exact state. We re-assert anyway so scrubbing forward
+    // from anywhere past Beat 1 and landing in the cycle window does
+    // not inherit a stale filter or color expression from a later
+    // beat. `fillExpr` is seeded at phase 0 so the very first update
+    // tick has a sensible baseline. `onUpdate` overwrites it on the
+    // same tick with the real cycling phase.
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: beat1FillExpr(0),
+      fillOpacity: { kind: "scalar", value: 0 },
+      lineOpacity: { kind: "scalar", value: 0 },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+  }
+
+  private applyBeat1CycleUpdate(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1-cycle" }>,
+    v: number,
+  ): void {
+    // Compute cycle position. `beat1T` ramps 0 to 1 across the
+    // `[cycleStart, cycleEnd)` window. `colorPhase` rotates through
+    // the palette, stored on the arbiter so `beat1-hold` can resume
+    // from wherever the cycle settled on its final tick.
+    const span = p.cycleEnd - p.cycleStart
+    const beat1T = span > 0 ? (v - p.cycleStart) / span : 0
+    const colorPhase = beat1T * p.cycleRotations
+    this.frozenColorPhase = colorPhase
+
+    // Opacity ramp: linear fade-in across the first `fadeInFrac` of
+    // the window, then peak with a `breathAmplitude` sine
+    // oscillation for the rest.
+    const fadeIn = Math.min(1, beat1T / p.fadeInFrac)
+    const base = p.peakOpacity * fadeIn
+    const breath =
+      fadeIn >= 1 ? p.breathAmplitude * Math.sin(beat1T * Math.PI * 4) : 0
+    const opacity = base + breath
+
+    try {
+      const expr = beat1FillExpr(colorPhase)
+      if (map.getLayer("demand-units")) {
+        map.setPaintProperty("demand-units", "fill-color", expr)
+        map.setPaintProperty("demand-units", "fill-outline-color", expr)
+        map.setPaintProperty("demand-units", "fill-opacity", opacity)
+      }
+      if (map.getLayer("demand-units-outline")) {
+        map.setPaintProperty("demand-units-outline", "line-color", expr)
+        map.setPaintProperty("demand-units-outline", "line-opacity", opacity)
+      }
+    } catch {
+      /* ok */
+    }
+  }
+
+  private applyBeat1HoldEnter(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1-hold" }>,
+  ): void {
+    // Full-state baseline seeded with the arbiter's stored
+    // `frozenColorPhase`. Covers both entry from the cycle (forward
+    // play) and entry from a later beat via scrub-back. In both cases
+    // we want full DU filter, the frozen 3-blue palette, and opacity
+    // pinned at `peakOpacity`.
+    writeDemandUnitsBaseline(map, {
+      filter: DU_CLASS_FILTER,
+      fillExpr: beat1FillExpr(this.frozenColorPhase),
+      fillOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineOpacity: { kind: "scalar", value: p.peakOpacity },
+      lineWidth: 0.5,
+      lineOffset: -0.25,
+      visibility: "visible",
+    })
+  }
+
+  private applyBeat1HoldUpdate(
+    map: StyledMap,
+    p: Extract<MapPaintPayload, { kind: "beat1-hold" }>,
+  ): void {
+    // Re-assert opacity every tick so any stray writer that lands on
+    // the layer during the hold is self-healing. The legacy listener
+    // did the same (lines 2257 and 2267 wrote 0.65 every tick inside
+    // the frozen and Beat 1B sub-branches). Color expression is not
+    // rewritten every tick, which matches the legacy listener's
+    // `phase !== "beat1"` guard.
+    try {
+      if (map.getLayer("demand-units")) {
+        map.setPaintProperty("demand-units", "fill-opacity", p.peakOpacity)
+      }
+      if (map.getLayer("demand-units-outline")) {
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity",
+          p.peakOpacity,
+        )
+      }
+    } catch {
+      /* ok */
+    }
   }
 
   private applyBeat5Enter(map: StyledMap, ctx: BeatEngineContext): void {

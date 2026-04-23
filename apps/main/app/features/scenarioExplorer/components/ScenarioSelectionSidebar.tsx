@@ -43,6 +43,11 @@ interface ScenarioSelectionSidebarProps {
     color: string
     chartData: Record<string, unknown>
   } | null>
+  /** Name of the panel currently being driven by this sidebar (e.g.
+   *  "Radar chart"). When present, the sidebar header reads
+   *  "Scenario library: {viewName}" so users can locate themselves
+   *  inside the explorer. */
+  viewName?: string
 }
 
 export default function ScenarioSelectionSidebar({
@@ -51,6 +56,7 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
   singleSelect = false,
   onCaptureRadarScenario,
+  viewName,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -165,6 +171,15 @@ export default function ScenarioSelectionSidebar({
           }}
         >
           Scenario library
+          {viewName ? (
+            <Box
+              component="span"
+              sx={{ fontWeight: 400, color: theme.palette.grey[700] }}
+            >
+              {": "}
+              {viewName}
+            </Box>
+          ) : null}
         </Typography>
       </Box>
 

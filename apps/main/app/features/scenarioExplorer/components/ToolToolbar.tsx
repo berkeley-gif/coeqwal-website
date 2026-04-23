@@ -55,11 +55,16 @@ const HOW_TO_READ_ENABLED = false
 interface ToolToolbarProps {
   gridAligned?: boolean
   hideTitle?: boolean
+  /** Name of the active tool view (e.g. "List view"). When present
+   *  the gridAligned title row reads "Scenario library: {viewName}"
+   *  so users can locate themselves inside the explorer. */
+  viewName?: string
 }
 
 export default function ToolToolbar({
   gridAligned,
   hideTitle,
+  viewName,
 }: ToolToolbarProps) {
   const theme = useTheme()
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -78,6 +83,8 @@ export default function ToolToolbar({
     markHowToReadSeen,
     bumpReopenToolIntro,
     startToolTour,
+    reopenWelcome,
+    setExploreMode,
   } = useScenarioExplorerStore()
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
@@ -160,6 +167,46 @@ export default function ToolToolbar({
           display: "contents",
         }}
       >
+        {isTourTool(exploreMode) && (
+          <Box
+            component="button"
+            type="button"
+            onClick={() => {
+              if (exploreMode !== "list") setExploreMode("list")
+              reopenWelcome()
+            }}
+            aria-label="Show overview of the scenario explorer"
+            title="Show overview of the scenario explorer"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 0.75,
+              py: 0.25,
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              background: "transparent",
+              color: theme.palette.blue.bright,
+              transition: "background-color 120ms",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+              },
+            }}
+          >
+            <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                color: "inherit",
+              }}
+            >
+              Show overview
+            </Typography>
+          </Box>
+        )}
         {isTourTool(exploreMode) && (
           <Box
             component="button"
@@ -393,6 +440,15 @@ export default function ToolToolbar({
               }}
             >
               Scenario library
+              {viewName ? (
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 400, color: theme.palette.grey[700] }}
+                >
+                  {": "}
+                  {viewName}
+                </Box>
+              ) : null}
             </Typography>
           </Box>
         )}
