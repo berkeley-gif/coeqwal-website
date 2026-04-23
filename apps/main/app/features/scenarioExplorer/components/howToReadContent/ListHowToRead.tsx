@@ -91,7 +91,7 @@ export function ListHowToRead() {
         callouts={[
           {
             number: "01",
-            title: "Info brings back the outcome summary",
+            title: "Outcome summary",
             body: "Click the i when you need a reminder of what the outcome measures and why it matters.",
             top: 2,
             left: 1,
@@ -99,7 +99,7 @@ export function ListHowToRead() {
           },
           {
             number: "02",
-            title: "Sort ranks rows by average",
+            title: "Sorting ranks rows by average",
             body: "Use the sort button to rank scenarios by average outcome, then reverse the order to inspect the other end of the library.",
             top: 4,
             right: 1,

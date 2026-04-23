@@ -25,7 +25,7 @@ export interface TourStep {
    *  flip automatically if it does not fit. */
   placement?: TourPlacement
   /** Optional icon shown before the title in the popper. */
-  titleIcon?: "pin"
+  titleIcon?: "pin" | "share"
 }
 
 export interface TourState {

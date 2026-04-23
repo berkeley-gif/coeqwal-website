@@ -267,7 +267,7 @@ export function StrategyGridContent({
       /**
        * True for the block that contains the first visible list row (pinned head
        * or unpinned list). Used so the `list.row.pin` tour anchor attaches to the
-       * first row that has pin controls, even with group-by-theme or mixed pinned sections.
+       * first row that has pin and share controls, even with group-by-theme or mixed pinned sections.
        */
       registerTourFirstListItem: boolean
     },

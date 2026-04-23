@@ -330,6 +330,16 @@ export default function ToolTour() {
             aria-hidden
           />
         )}
+        {step.titleIcon === "share" && (
+          <icons.IosShare
+            sx={{
+              fontSize: "1.2rem",
+              color: theme.palette.grey[600],
+              flexShrink: 0,
+            }}
+            aria-hidden
+          />
+        )}
         <span>{step.title}</span>
       </Box>
       <Typography

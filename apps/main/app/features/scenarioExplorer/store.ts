@@ -541,6 +541,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
 
     setExploreMode: (mode) =>
       set((state) => {
+        if (state.exploreMode !== mode) {
+          state.tour = { tool: null, step: 0 }
+        }
         state.exploreMode = mode
       }),
 

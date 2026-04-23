@@ -160,6 +160,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   // a single exemplar row instead of bulk-registering all of them.
   const rowSelectAnchorRef = useTourAnchor("list.select.row")
   const listRowPinTourRef = useTourAnchor("list.row.pin")
+  const listRowShareTourRef = useTourAnchor("list.row.share")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
 
   // Bridge the outcome column ref into the tour registry as well. We
@@ -433,6 +434,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               pinRowTourRef={
                 tourListFirstItem && isListMode ? listRowPinTourRef : undefined
               }
+              shareRowTourRef={
+                tourListFirstItem && isListMode
+                  ? listRowShareTourRef
+                  : undefined
+              }
             />
           )}
         </>
@@ -457,6 +463,7 @@ export function InlineRowActions({
   shareIconNudgeTop,
   dense,
   pinTourRef,
+  shareTourRef,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -475,6 +482,7 @@ export function InlineRowActions({
    * target the pin control, not the whole row.
    */
   pinTourRef?: React.RefCallback<HTMLElement | null>
+  shareTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const shareItems = useScenarioExplorerStore((s) => s.shareItems)
@@ -592,50 +600,56 @@ export function InlineRowActions({
           </Tooltip>
         </Box>
       )}
-      <Tooltip
-        title={shareTooltip}
-        arrow
-        placement="top-start"
-        slotProps={{
-          popper: {
-            modifiers: [
-              { name: "flip", enabled: true },
-              {
-                name: "preventOverflow",
-                enabled: true,
-                options: { boundary: "viewport", padding: 8 },
-              },
-            ],
-          },
-        }}
+      <Box
+        component="span"
+        ref={shareTourRef}
+        sx={{ display: "inline-flex", alignItems: "center" }}
       >
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            onShare()
-            setJustShared(true)
-          }}
-          sx={{
-            p: iconPad,
-            ...iconButtonTight,
-            ...(shareIconNudgeTop != null && {
-              position: "relative",
-              top: shareIconNudgeTop,
-            }),
-            color: isShared
-              ? theme.palette.blue.bright
-              : theme.palette.grey[500],
-            "&:hover": {
-              color: isShared
-                ? theme.palette.blue.bright
-                : theme.palette.grey[700],
+        <Tooltip
+          title={shareTooltip}
+          arrow
+          placement="top-start"
+          slotProps={{
+            popper: {
+              modifiers: [
+                { name: "flip", enabled: true },
+                {
+                  name: "preventOverflow",
+                  enabled: true,
+                  options: { boundary: "viewport", padding: 8 },
+                },
+              ],
             },
           }}
         >
-          <icons.IosShare sx={{ fontSize: iconSize }} />
-        </IconButton>
-      </Tooltip>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              onShare()
+              setJustShared(true)
+            }}
+            sx={{
+              p: iconPad,
+              ...iconButtonTight,
+              ...(shareIconNudgeTop != null && {
+                position: "relative",
+                top: shareIconNudgeTop,
+              }),
+              color: isShared
+                ? theme.palette.blue.bright
+                : theme.palette.grey[500],
+              "&:hover": {
+                color: isShared
+                  ? theme.palette.blue.bright
+                  : theme.palette.grey[700],
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: iconSize }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </Box>
   )
 }
@@ -808,6 +822,7 @@ function NonCompactRowContent({
   togglePinnedScenario,
   outcomeColRef,
   pinRowTourRef,
+  shareRowTourRef,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
   accentColor?: string
@@ -815,6 +830,7 @@ function NonCompactRowContent({
   togglePinnedScenario?: (id: string) => void
   outcomeColRef?: React.RefObject<HTMLDivElement | null>
   pinRowTourRef?: React.RefCallback<HTMLElement | null>
+  shareRowTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
@@ -838,6 +854,7 @@ function NonCompactRowContent({
           onShare={handleShare}
           togglePinnedScenario={togglePinnedScenario}
           pinTourRef={pinRowTourRef}
+          shareTourRef={shareRowTourRef}
         />
       </Box>
     ) : undefined

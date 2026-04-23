@@ -964,11 +964,19 @@ export default function TierAnimationSection() {
     // Extracted so we can invoke it either synchronously (style loaded)
     // or deferred via `map.once("idle", ...)` (style busy).
     //
-    // `fillOpacity` / `lineOpacity` are `preserve`, not a scalar: the
-    // main choreography listener's next tick re-writes opacity for
-    // whatever phase we are in (beat1 cycle, beat2 hide-schedule, or
-    // the interactive baseline), and we do not want to land a
-    // transient scalar on the layer between this write and that one.
+    // `fillOpacity` / `lineOpacity` are `scalar 0`, not `preserve`:
+    // this effect only fires on the truthy-to-null transition, i.e.
+    // after the storyboard has already settled into interactive
+    // mode. There is no choreography tick about to re-write opacity
+    // here, so "preserve" would leave whatever OPL last wrote
+    // (typically a zoom-aware interpolate expression) on the layer.
+    // The post-deselect interactive baseline is "invisible", so we
+    // explicitly zero opacity instead of relying on the sibling
+    // `applyPaintChanges` reset branch, which silently drops when
+    // `isStyleLoaded()` returns false (which happens right after
+    // OPL's unmount cleanup calls `removeLayer("demand-units-
+    // outline")`, causing the map to toggle between the CWS view
+    // and the full "all demand-units" baseline on every click).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const runTeardownWrites = (m: any) => {
       try {
@@ -977,8 +985,8 @@ export default function TierAnimationSection() {
           fillExpr: buildBlendedTierExpr(BEAT1_MID, 1) as
             | readonly unknown[]
             | null,
-          fillOpacity: { kind: "preserve" },
-          lineOpacity: { kind: "preserve" },
+          fillOpacity: { kind: "scalar", value: 0 },
+          lineOpacity: { kind: "scalar", value: 0 },
           lineWidth: 0.5,
           lineOffset: -0.25,
           visibility: "visible",
