@@ -112,6 +112,46 @@ export type MapPaintPayload =
       peakOpacity: number
     }
   | {
+      /**
+       * Beat 1C blend. Window `[blendStart, blendEnd)`. Two-stage
+       * color morph from the frozen 3-blue palette to AG tier colors.
+       *
+       * `[blendStart, convergeEnd)` shrinks the 3-blue palette toward
+       * `BEAT1_MID` (convergence ramps 0 to 1). Driven by
+       * `beat1FillExpr(this.frozenColorPhase, convergence)` using the
+       * arbiter's stored phase from Beat 1.
+       *
+       * `[convergeEnd, blendEnd)` morphs `BEAT1_MID` into each AG
+       * DU's tier color. Driven by
+       * `ctx.buildBlendedTierExpr(BEAT1_MID, t)` with `t` ramping 0
+       * to 1.
+       *
+       * The DU class filter stays full across the whole window so
+       * Urban and Refuge stay painted during the blend. The
+       * subsequent `beat1c-tail` actor flips to AG-only.
+       *
+       * `peakOpacity` is the constant opacity held across the blend
+       * (typically 0.65, matching the Beat 1 hold).
+       */
+      kind: "beat1c-blend"
+      blendStart: number
+      convergeEnd: number
+      blendEnd: number
+      peakOpacity: number
+    }
+  | {
+      /**
+       * Beat 1C tail. Window `[blendEnd, beat2Start)`. Static hold
+       * on AG-only with fully blended tier colors. The arbiter
+       * performs a full-state baseline assertion on `onEnter`
+       * (`DU_AG_ONLY_FILTER`, `buildBlendedTierExpr(BEAT1_MID, 1)`,
+       * `peakOpacity`) and no per-tick writes. Matches the legacy
+       * listener's `phase !== "beat1c"` guard behavior.
+       */
+      kind: "beat1c-tail"
+      peakOpacity: number
+    }
+  | {
       kind: "beat5-enter"
       /** LOI demand-unit id to gold-stroke during step 4 (`BEAT5_LOI_ID`). */
       loiDuId: string

@@ -9,20 +9,20 @@
  * Each step is clickable and navigates to that tool (or opens the
  * Share tab for the final step), so the strip doubles as a shortcut.
  *
- * Dismissal is two-state: clicking "Got it" hides it for the session
- * only; clicking "Got it" with the "Don't show again" checkbox ticked
- * persists the dismissal across sessions.
+ * Clicking "Got it" hides the strip for the current session only.
+ * The strip can also be toggled from the toolbar via the
+ * "Show overview" / "Hide overview" chip in [ToolToolbar.tsx], which
+ * uses the same session-only dismissal path.
  *
- * Mounted inside UnifiedToolLayout so it appears wherever the user
- * first lands, not just on the List.
+ * Mounted inside UnifiedToolLayout, only on the List view, since
+ * Radar and Resilience get their own ToolIntroStrip.
  */
 
-import React, { useState } from "react"
+import React from "react"
 import {
   Box,
   Typography,
   Button,
-  Checkbox,
   useTheme,
   alpha,
   icons,
@@ -92,8 +92,6 @@ export default function WelcomeStrip() {
   const setExploreMode = useScenarioExplorerStore((s) => s.setExploreMode)
   const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
 
-  const [dontShowAgain, setDontShowAgain] = useState(false)
-
   if (welcomeDismissedPermanently || welcomeDismissedThisSession) return null
 
   const handleStepClick = (step: FlowStep) => {
@@ -105,7 +103,7 @@ export default function WelcomeStrip() {
   }
 
   const handleDismiss = () => {
-    dismissWelcome(dontShowAgain)
+    dismissWelcome(false)
   }
 
   return (
@@ -150,19 +148,24 @@ export default function WelcomeStrip() {
               lineHeight: 1.45,
             }}
           >
-            Each row is a scenario, a plan for managing California Central Valley
-            water. Pick a few that look interesting and keep reading,
+            Each row is a scenario, a plan for managing California Central
+            Valley water. Pick a few that look interesting and keep reading,
             comparing, and curating. Check the boxes next to the scenarios
             you want to collect into a group that fits your goals.
           </Typography>
         </Box>
 
+        {/* Flow pills, horizontally centered inside the middle column
+            so the "List -> Radar -> Distribution -> Resilience ->
+            Share" journey lines up with the same group in the dark
+            secondary nav above. */}
         <Box
           sx={{
             flex: 1,
             minWidth: 0,
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: 0.5,
             flexWrap: "wrap",
           }}
@@ -269,36 +272,11 @@ export default function WelcomeStrip() {
             display: "flex",
             alignItems: "center",
             gap: 1,
-            flexWrap: "wrap",
-            justifyContent: { xs: "space-between", lg: "flex-end" },
+            flexShrink: 0,
+            justifyContent: { xs: "flex-end", lg: "flex-end" },
+            pt: { xs: 0, lg: 0.25 },
           }}
         >
-          <Box
-            component="label"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.25,
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-          >
-            <Checkbox
-              size="small"
-              checked={dontShowAgain}
-              onChange={(_, checked) => setDontShowAgain(checked)}
-              sx={{ p: 0.25 }}
-            />
-            <Typography
-              variant="caption"
-              sx={{
-                color: theme.palette.grey[700],
-                fontSize: "0.75rem",
-              }}
-            >
-              Don&rsquo;t show again
-            </Typography>
-          </Box>
           <Button
             size="small"
             variant="contained"

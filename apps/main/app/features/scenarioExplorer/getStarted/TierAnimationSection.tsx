@@ -2157,8 +2157,6 @@ export default function TierAnimationSection() {
     // DU filter restore + hide-schedule over in time for AG_REV's morph.
     const BEAT2_START = 0.38
 
-    let frozenColorPhase = 0
-
     const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
@@ -2173,7 +2171,6 @@ export default function TierAnimationSection() {
         // Phase 1.b.
         if (phase !== "idle") {
           phase = "idle"
-          frozenColorPhase = 0
         }
         return
       }
@@ -2204,17 +2201,11 @@ export default function TierAnimationSection() {
         // `MapPaintArbiter.applyBeat1Cycle*` and
         // `MapPaintArbiter.applyBeat1Hold*`, fired by the
         // `beat0:mapPaint:cycle` and `beat0:mapPaint:hold` actors.
-        // This block retains the listener-local `frozenColorPhase`
-        // bookkeeping (read by the not-yet-ported Beat 1C blend branch
-        // at line 2330 via `beat1FillExpr(frozenColorPhase, ...)`)
-        // and the `phase = "beat1"` assignment that downstream
-        // branches still key off. Phase 1.d removes the remaining
-        // `frozenColorPhase` references. See Storyboard Engine
-        // Hardening Plan v2, Phase 1.c.
-        if (v < FREEZE_AT) {
-          const beat1T = v / FREEZE_AT
-          frozenColorPhase = beat1T * BEAT1_CYCLE
-        }
+        // This block retains only the `phase = "beat1"` assignment
+        // that downstream branches still key off. The arbiter tracks
+        // its own `frozenColorPhase` across the cycle and blend
+        // actors, so no listener-local bookkeeping is needed here.
+        // See Storyboard Engine Hardening Plan v2, Phases 1.c and 1.d.
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
         // Beat 1B paint writes moved to
@@ -2223,103 +2214,26 @@ export default function TierAnimationSection() {
         // still re-fire their transitions. See Phase 1.c.
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_END) {
-        // Beat 1C: smooth two-stage color morph from the cycling 3-blue
-        // palette to the AG tier palette.
-        //   [0.26, 0.27] converge the 3 blues to a single BEAT1_MID so
-        //     every feature is the same color before the tier-color
-        //     transition starts. Driven by `beat1FillExpr(phase,
-        //     convergence)` where `convergence` ramps 0 -> 1 across the
-        //     first half of the window.
-        //   [0.27, 0.28] morph BEAT1_MID into each AG DU's tier color.
-        //     Driven by `buildBlendedTierExpr(BEAT1_MID, t)` where `t`
-        //     ramps 0 -> 1 across the second half. DUs not listed in
-        //     the tier lookup (Urban, Refuge, untracked AG) keep the
-        //     BEAT1_MID fallback, so those features stay the shared
-        //     mid-blue while AG features morph into tier colors.
-        // The DU class filter stays full across the whole window so
-        // Urban and Refuge stay painted during the blend. At v >=
-        // BEAT1C_BLEND_END we flip the filter to AG-only, dropping
-        // them cleanly.
-        const CONVERGE_END = 0.27
-        try {
-          let expr: unknown[] | null
-          if (v < CONVERGE_END) {
-            const convergence =
-              (v - BEAT1C_BLEND_START) / (CONVERGE_END - BEAT1C_BLEND_START)
-            expr = beat1FillExpr(frozenColorPhase, convergence)
-          } else {
-            const t =
-              (v - CONVERGE_END) / (BEAT1C_BLEND_END - CONVERGE_END)
-            expr = buildBlendedTierExpr(BEAT1_MID, t)
-          }
-          if (expr && map.getLayer("demand-units")) {
-            if (phase !== "beat1c-blend") {
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-            }
-            map.setPaintProperty("demand-units", "fill-color", expr as never)
-            map.setPaintProperty(
-              "demand-units",
-              "fill-outline-color",
-              expr as never,
-            )
-            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-          }
-          if (expr && map.getLayer("demand-units-outline")) {
-            if (phase !== "beat1c-blend") {
-              map.setFilter(
-                "demand-units-outline",
-                DU_CLASS_FILTER as never,
-              )
-            }
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-color",
-              expr as never,
-            )
-            map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-          }
-        } catch {
-          /* ok */
-        }
+        // Beat 1C blend paint writes (two-stage convergence plus
+        // tier-color morph) moved to
+        // `MapPaintArbiter.applyBeat1cBlendEnter` and
+        // `MapPaintArbiter.applyBeat1cBlendUpdate`, fired by the
+        // `beat1:mapPaint:blend` actor. The arbiter reads its own
+        // `frozenColorPhase` (set during the cycle actor) so no
+        // listener-local bookkeeping is needed. This block retains
+        // only the `phase = "beat1c-blend"` assignment to match the
+        // legacy transition shape. See Storyboard Engine Hardening
+        // Plan v2, Phase 1.d.
         phase = "beat1c-blend"
       } else if (v < BEAT2_START) {
-        // Beat 1C tail: tier colors are fully blended. Hold steady on
-        // AG-only while the example text and popups play.
-        if (phase !== "beat1c") {
-          try {
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
-            }
-          } catch {
-            /* ok */
-          }
-          phase = "beat1c"
-        }
+        // Beat 1C tail (static AG-only hold on fully blended tier
+        // colors) moved to `MapPaintArbiter.applyBeat1cTailEnter`,
+        // fired by the `beat1:mapPaint:tail` actor. This block
+        // retains only the `phase = "beat1c"` assignment. The arbiter
+        // performs a full-state baseline assertion on `onEnter`, so
+        // scrub-back into the tail from a later beat is self-healing.
+        // See Storyboard Engine Hardening Plan v2, Phase 1.d.
+        phase = "beat1c"
       } else {
         // Beat 2+: this branch owns all `demand-units` / `demand-units-outline`
         // paint + filter writes from here on, including the Beat 5 window.

@@ -27,6 +27,7 @@ import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
+import TakeTheTourButton from "./TakeTheTourButton"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 
 interface ScenarioSelectionSidebarProps {
@@ -181,6 +182,7 @@ export default function ScenarioSelectionSidebar({
             </Box>
           ) : null}
         </Typography>
+        <TakeTheTourButton />
       </Box>
 
       {/* Search + visibility chips */}

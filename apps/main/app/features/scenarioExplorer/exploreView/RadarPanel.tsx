@@ -51,7 +51,6 @@ import {
 } from "../dataExplorer/utils/exportUtils"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
-import ToolEmptyState from "../components/ToolEmptyState"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
@@ -651,21 +650,6 @@ export default function RadarPanel({
           Loading radar data...
         </Typography>
       </Box>
-    )
-  }
-
-  // Show instructive empty state when there's nothing to render: no
-  // selected scenarios and the user hasn't opted into "show all".
-  // Hover-highlighted rows alone (from the sidebar) don't count because
-  // they disappear on mouseleave; we want stable, selected scenarios.
-  if (selectedScenarios.length === 0 && !radarShowAll) {
-    return (
-      <ToolEmptyState
-        mode="radar"
-        title="Pick scenarios to compare as portfolios"
-        body="The radar chart reads each scenario as a shape across the outcomes that matter to you. Select two or more scenarios to see their shapes overlap."
-        detail="Tip: turn on 'show all scenarios' in the controls above to sweep the whole library at once."
-      />
     )
   }
 
