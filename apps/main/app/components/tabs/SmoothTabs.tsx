@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
-import { Typography, useTheme, alpha } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { TwoColumnInterstitial } from "@repo/ui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
@@ -52,7 +52,7 @@ function TabDescription({
       return (
         <TwoColumnInterstitial
           headline="What if we managed water differently?"
-          body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California's water future."
+          body="Explore how water allocations change under different scenarios and hydroclimates — and discover new possibilities for California's water future."
           linkListLabel=""
           links={[]}
         />
@@ -218,20 +218,17 @@ export default function SmoothTabs() {
         {TABS.map(({ key, label, panelColor }) => {
           const selected = key === activeTab
           return (
-            <button
+            <Box
               key={key}
+              component="button"
+              type="button"
               role="tab"
               aria-selected={selected}
               aria-controls={`panel-${key}`}
               id={`tab-${key}`}
               onClick={() => onSelect(key)}
-              type="button"
               tabIndex={selected ? 0 : -1}
-              style={{
-                // Each tab sits inside a 1/3-wide grid cell. When
-                // expanded, the tab is 85% of its cell and centered
-                // via justifySelf. When docked, width = 100% makes
-                // tabs stretch edge-to-edge.
+              sx={{
                 justifySelf: "center",
                 width: isInTabsArea ? "100%" : "85%",
                 position: "relative",
@@ -259,6 +256,10 @@ export default function SmoothTabs() {
                   : undefined,
                 borderTop: "none",
                 borderBottom: "none",
+                "&:focus-visible": {
+                  outline: `2px solid ${theme.palette.common.white}`,
+                  outlineOffset: 2,
+                },
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -278,14 +279,21 @@ export default function SmoothTabs() {
               )}
               <Typography
                 component="span"
-                variant={isInTabsArea ? "nav" : "h5"}
                 sx={{
+                  ...theme.typography.overline,
+                  fontWeight: isInTabsArea ? 600 : 500,
+                  letterSpacing: "0.2em",
+                  lineHeight: 1.2,
+                  color: "inherit",
+                  fontSize: isInTabsArea
+                    ? theme.typography.overline.fontSize
+                    : "clamp(1.15rem, 0.95rem + 1vw, 1.5rem)",
                   transition: "font-size 0.4s ease, color 0.4s ease",
                 }}
               >
-                {label.charAt(0).toUpperCase() + label.slice(1)}
+                {label}
               </Typography>
-            </button>
+            </Box>
           )
         })}
       </div>

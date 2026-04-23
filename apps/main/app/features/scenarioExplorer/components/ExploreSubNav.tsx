@@ -73,7 +73,7 @@ const FLOW: FlowStep[] = [
     mode: "radar",
     icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Radar",
-    purpose: "Compare shapes",
+    purpose: "Compare tradeoffs",
   },
   {
     mode: "comparison",

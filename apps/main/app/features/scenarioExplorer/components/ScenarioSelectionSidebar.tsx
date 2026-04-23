@@ -13,7 +13,7 @@
  * with the same shared ordering used by ListView.
  */
 
-import React, { useMemo, useEffect, useRef } from "react"
+import React, { useEffect, useMemo, useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import { useScenarioExplorerStore } from "../store"
@@ -108,13 +108,22 @@ export default function ScenarioSelectionSidebar({
     return () => clearTimeout(timer)
   }, [activeScenarioId])
 
-  const { orderedScenarios, matchingScenarioIds, isLoading } =
+  const { orderedScenarios, matchingScenarioIds, isLoading, scenariosInContiguousThemeOrder } =
     useOrderedScenarios()
+
+  const hasThemedScenarios = useMemo(
+    () => orderedScenarios.some((s) => Boolean(s.theme)),
+    [orderedScenarios],
+  )
+  const themeSubheaderMode =
+    groupByTheme && scenariosInContiguousThemeOrder && hasThemedScenarios
+  const showThemeBadgeOnRow = !themeSubheaderMode
 
   const isSearchActive = searchQuery.trim().length > 0
 
-  // Build theme → scenarioIds map for ThemeGroupHeader
+  // Build theme → scenarioIds for ThemeGroupHeader (only when subheaders are in use)
   const themeScenarioIds = useMemo(() => {
+    if (!themeSubheaderMode) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
     for (const s of orderedScenarios) {
       if (s.theme) {
@@ -124,7 +133,7 @@ export default function ScenarioSelectionSidebar({
       }
     }
     return map
-  }, [orderedScenarios])
+  }, [orderedScenarios, themeSubheaderMode])
 
   // The sidebar is a tour anchor for the resilience tour ("sidebar
   // drives the small multiples"). The radar and equity tours do not
@@ -225,7 +234,7 @@ export default function ScenarioSelectionSidebar({
           const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
           const isSearchMatch =
             isSearchActive && matchingScenarioIds.has(scenario.scenarioId)
-          const isSearchDimmed = isSearchActive && !isSearchMatch
+          // Match StrategyGridRow: search hit = white + blue ring; other rows = #faf8f5 (no opacity dim)
           const color = scenarioColors?.[scenario.scenarioId]
           const accentColor = color || theme.palette.blue.bright
           const isActive =
@@ -236,7 +245,7 @@ export default function ScenarioSelectionSidebar({
           const prevScenario =
             index > 0 ? orderedScenarios[index - 1] : undefined
           const isNewThemeGroup =
-            groupByTheme &&
+            themeSubheaderMode &&
             (index === 0 || scenario.theme !== prevScenario?.theme)
 
           const items: React.ReactNode[] = []
@@ -269,7 +278,7 @@ export default function ScenarioSelectionSidebar({
               sx={{
                 position: "relative",
                 display: "flex",
-                alignItems: "flex-start",
+                alignItems: "center",
                 gap: 0.75,
                 px: 1.5,
                 py: 0.5,
@@ -277,19 +286,39 @@ export default function ScenarioSelectionSidebar({
                 overflow: "hidden",
                 borderRadius: theme.borderRadius.sm,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
-                "--row-bg": isActive
-                  ? theme.palette.background.paper
-                  : hasActiveScenario
-                    ? "#f0eeeb"
-                    : "#faf8f5",
-                backgroundColor: "var(--row-bg)",
-                opacity: isSearchDimmed ? 0.4 : 1,
+                ...(isSearchActive
+                  ? {
+                      "--row-bg": isActive
+                        ? `${accentColor}1A`
+                        : isSearchMatch
+                          ? theme.palette.common.white
+                          : "#faf8f5",
+                      backgroundColor: "var(--row-bg)",
+                      outline: isSearchMatch
+                        ? `1px solid ${theme.palette.blue.bright}`
+                        : "none",
+                    }
+                  : {
+                      "--row-bg": isActive
+                        ? theme.palette.background.paper
+                        : hasActiveScenario
+                          ? "#f0eeeb"
+                          : "#faf8f5",
+                      backgroundColor: "var(--row-bg)",
+                    }),
                 transition:
-                  "background-color 0.2s ease, border-color 0.2s ease, opacity 200ms ease",
-                "&:hover": {
-                  "--row-bg": theme.palette.background.paper,
-                  backgroundColor: "var(--row-bg)",
-                },
+                  "background-color 0.2s ease, border-color 0.2s ease, border-left-color 0.2s ease",
+                "&:hover": isSearchActive
+                  ? {
+                      "--row-bg": isActive
+                        ? `${accentColor}26`
+                        : theme.palette.background.paper,
+                      backgroundColor: "var(--row-bg)",
+                    }
+                  : {
+                      "--row-bg": theme.palette.background.paper,
+                      backgroundColor: "var(--row-bg)",
+                    },
               }}
             >
               {singleSelect ? (
@@ -324,9 +353,6 @@ export default function ScenarioSelectionSidebar({
                   sx={{
                     ...theme.scenarios.checkbox.sm,
                     flexShrink: 0,
-                    alignSelf: "flex-start",
-                    // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
-                    mt: "1px",
                   }}
                 />
               )}
@@ -349,7 +375,7 @@ export default function ScenarioSelectionSidebar({
                     showDefinitions && scenario.scenarioId === hoveredScenarioId
                   }
                   descriptionMaxWidth="none"
-                  showThemeBadge={!groupByTheme}
+                  showThemeBadge={showThemeBadgeOnRow}
                   titleStartAdornment={
                     color ? (
                       <Box
@@ -372,6 +398,7 @@ export default function ScenarioSelectionSidebar({
                       displayMode={outcomeDisplayMode}
                       isPinned={isPinned}
                       accentColor={accentColor}
+                      dense
                       shareIconNudgeTop="-2px"
                       onShare={async () => {
                         if (exploreMode === "radar") {

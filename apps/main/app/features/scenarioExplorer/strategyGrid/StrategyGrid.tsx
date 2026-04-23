@@ -60,6 +60,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   outcomesOnly = false,
   hideColumnTitles = false,
   groupByTheme = false,
+  scenariosInContiguousThemeOrder = true,
   sortBy,
   sortDirection = "asc",
   onSortChange,
@@ -253,6 +254,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             showThemeDivider={showThemeDivider}
             showAllThemeDividers={showAllThemeDividers}
             groupByTheme={groupByTheme}
+            scenariosInContiguousThemeOrder={scenariosInContiguousThemeOrder}
             iconMatchingScenarioIds={iconMatchingScenarioIds}
             showIconDivider={showIconDivider}
             selectedScenarios={selectedScenarios}

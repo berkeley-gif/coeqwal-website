@@ -37,6 +37,7 @@ export default function ListView({
 
   const {
     orderedScenarios,
+    scenariosInContiguousThemeOrder,
     matchingScenarioIds,
     hasSearchResults,
     themeMatchingScenarioIds,
@@ -251,6 +252,7 @@ export default function ListView({
     showOperations: showKeyOperations,
     hideColumnTitles: true,
     groupByTheme,
+    scenariosInContiguousThemeOrder,
     compact: false,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,

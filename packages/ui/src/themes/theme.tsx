@@ -1216,6 +1216,11 @@ const theme = createTheme({
           -moz-osx-font-smoothing: grayscale;
           font-family: ${themeValues.fontFamily.text};
         }
+        /* Pointer-activated focus: hide default browser ring (often blue).
+           Keyboard :focus-visible is unchanged so focus indicators stay for Tab users (WCAG 2.4.7). */
+        :focus:not(:focus-visible) {
+          outline: none;
+        }
       `,
     },
     MuiAppBar: {
@@ -1353,6 +1358,15 @@ const theme = createTheme({
       },
       defaultProps: {
         variant: "standard",
+      },
+    },
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          "&:focus:not(:focus-visible)": {
+            outline: "none",
+          },
+        },
       },
     },
     MuiDivider: {
@@ -1635,8 +1649,8 @@ const theme = createTheme({
             padding: 0,
             cursor: "pointer",
           },
-          // WCAG 2.4.7: Focus visible styles for keyboard users
-          "&:focus-within": {
+          // WCAG 2.4.7: Ring only when the input shows keyboard focus-visible (not mouse click)
+          "&:has(input:focus-visible)": {
             outline: `2px solid ${themeValues.palette.blue.bright}`,
             outlineOffset: "2px",
           },

@@ -333,6 +333,23 @@ export default function VideoHero({
         }}
       >
         <ScrollToButton
+          label={
+            <Typography
+              component="span"
+              variant="overline"
+              aria-hidden
+              sx={{
+                color: `${theme.palette.text.secondary}E6`,
+                textShadow: theme.textShadow.nav,
+                letterSpacing: "0.2em",
+                fontWeight: 600,
+                lineHeight: 1,
+                userSelect: "none",
+              }}
+            >
+              {t("homePanel.scrollHint")}
+            </Typography>
+          }
           color={`${theme.palette.text.secondary}D9`}
           size={52}
           scrollToId="about-coeqwal"

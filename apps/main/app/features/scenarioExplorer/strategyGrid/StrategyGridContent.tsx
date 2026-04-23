@@ -42,6 +42,11 @@ export interface StrategyGridContentProps {
   showAllThemeDividers?: boolean
   /** When true, shows ThemeGroupHeader subheaders above each theme group */
   groupByTheme?: boolean
+  /**
+   * When false with groupByTheme, order interleaves themes: hide subheaders, show per-row theme badges
+   * @default true
+   */
+  scenariosInContiguousThemeOrder?: boolean
   /** Set of scenario IDs matching the active icon filter */
   iconMatchingScenarioIds?: Set<string>
   /** Whether to show a divider after the icon-matching group */
@@ -120,6 +125,7 @@ export function StrategyGridContent({
   showThemeDivider = false,
   showAllThemeDividers = false,
   groupByTheme = false,
+  scenariosInContiguousThemeOrder = true,
   iconMatchingScenarioIds,
   showIconDivider = false,
   selectedScenarios,
@@ -170,6 +176,15 @@ export function StrategyGridContent({
     return scenarios
   })()
 
+  const hasThemedScenarios = useMemo(
+    () => displayScenarios.some((s) => Boolean(s.theme)),
+    [displayScenarios],
+  )
+  // Subheaders only when theme order allows and at least one row is themed; else row badges
+  const themeSubheaderMode =
+    groupByTheme && scenariosInContiguousThemeOrder && hasThemedScenarios
+  const showThemeBadgeUnpinned = !themeSubheaderMode
+
   const pinnedSet = useMemo(
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
@@ -187,7 +202,7 @@ export function StrategyGridContent({
 
   // Pre-compute scenario IDs per theme for ThemeGroupHeader (full display set)
   const themeScenarioIds = useMemo(() => {
-    if (!groupByTheme) return new Map<string, string[]>()
+    if (!themeSubheaderMode) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
     for (const s of displayScenarios) {
       if (s.theme) {
@@ -197,12 +212,12 @@ export function StrategyGridContent({
       }
     }
     return map
-  }, [groupByTheme, displayScenarios])
+  }, [themeSubheaderMode, displayScenarios])
 
   // For pinned section: only show theme header when ALL scenarios
   // in that theme (from the display set) are pinned together.
   const pinnedThemeScenarioIds = useMemo(() => {
-    if (!groupByTheme || pinnedScenarios.length === 0)
+    if (!themeSubheaderMode || pinnedScenarios.length === 0)
       return new Map<string, string[]>()
     const map = new Map<string, string[]>()
     for (const s of pinnedScenarios) {
@@ -220,7 +235,7 @@ export function StrategyGridContent({
       }
     }
     return map
-  }, [groupByTheme, pinnedScenarios, themeScenarioIds])
+  }, [themeSubheaderMode, pinnedScenarios, themeScenarioIds])
 
   // Create context-aware tooltip handler for a specific scenario
   const createTooltipHandler = useCallback(
@@ -246,8 +261,9 @@ export function StrategyGridContent({
     list: ScenarioForDisplay[],
     opts: {
       themeIds: Map<string, string[]>
-      showThemeBadge: boolean
       isFirstGroup: boolean
+      /** Pinned block always had row theme badges; keep when subheaders are partial/empty */
+      showThemeBadgeInPinnedSection?: boolean
     },
   ) =>
     list.flatMap((scenario, index, arr) => {
@@ -277,14 +293,14 @@ export function StrategyGridContent({
         showIconDivider && isIconMatch && !isNextIconMatch
 
       const shouldShowThemeGroupDivider =
-        !groupByTheme &&
+        !themeSubheaderMode &&
         showAllThemeDividers &&
         nextScenario !== undefined &&
         scenario.theme !== nextScenario.theme
 
       const rows: React.ReactNode[] = []
 
-      if (groupByTheme && scenario.theme) {
+      if (themeSubheaderMode && scenario.theme) {
         const prevScenario = index > 0 ? arr[index - 1] : undefined
         const isNewGroup = index === 0 || scenario.theme !== prevScenario?.theme
         if (isNewGroup) {
@@ -292,7 +308,7 @@ export function StrategyGridContent({
           if (ids.length > 0) {
             rows.push(
               <ThemeGroupHeader
-                key={`theme-header-${scenario.theme}`}
+                key={`theme-header-${scenario.scenarioId}`}
                 themeKey={scenario.theme as ScenarioTheme}
                 scenarioIds={ids}
                 isFirst={opts.isFirstGroup && index === 0}
@@ -306,7 +322,7 @@ export function StrategyGridContent({
         <StrategyGridRow
           key={scenario.scenarioId}
           scenario={scenario}
-          isFirst={!groupByTheme && opts.isFirstGroup && index === 0}
+          isFirst={!themeSubheaderMode && opts.isFirstGroup && index === 0}
           isHighlighted={isHighlighted}
           isChosen={selectedScenarios.includes(scenario.scenarioId)}
           compact={compact}
@@ -327,7 +343,9 @@ export function StrategyGridContent({
           onTooltipToggle={createTooltipHandler(scenario)}
           onInfoTooltipToggle={onTooltipToggle}
           onSortChange={onSortChange}
-          showThemeBadge={opts.showThemeBadge}
+          showThemeBadge={opts.showThemeBadgeInPinnedSection === true
+            ? true
+            : showThemeBadgeUnpinned}
           onThemeBadgeClick={onThemeBadgeClick}
           onIconClick={onIconClick}
           scenarioColor={scenarioColors?.[scenario.scenarioId]}
@@ -432,8 +450,8 @@ export function StrategyGridContent({
         >
           {renderScenarioRows(pinnedScenarios, {
             themeIds: pinnedThemeScenarioIds,
-            showThemeBadge: true,
             isFirstGroup: true,
+            showThemeBadgeInPinnedSection: true,
           })}
         </Box>
       )}
@@ -441,7 +459,6 @@ export function StrategyGridContent({
       {/* Unpinned rows - scroll normally */}
       {renderScenarioRows(unpinnedScenarios, {
         themeIds: themeScenarioIds,
-        showThemeBadge: !groupByTheme,
         isFirstGroup: !hasPinned,
       })}
     </>

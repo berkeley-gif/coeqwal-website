@@ -123,9 +123,10 @@ function RadarAxisDetailScenarioControlsInner({
         <InlineRowActions
           scenarioId={scenarioId}
           scenarioLabel={scenarioLabel}
-        displayMode={outcomeDisplayMode}
+          displayMode={outcomeDisplayMode}
           isPinned={isPinned}
           accentColor={accentColor}
+          dense
           hidePinning
           shareIconNudgeTop="-2px"
           onShare={async () => {

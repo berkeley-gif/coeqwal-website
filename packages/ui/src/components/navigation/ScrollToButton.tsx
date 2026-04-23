@@ -28,6 +28,8 @@ interface ScrollToButtonProps {
   axis?: MotionAxis
   /** Accessible label for screen readers (WCAG 4.1.2) */
   ariaLabel?: string
+  /** Optional label above the arrow (static; same hit target as the button) */
+  label?: React.ReactNode
   /**
    * Offset (in px) subtracted from the target's top when scrolling.
    * Use this to account for a fixed header so the scrolled-to
@@ -49,6 +51,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   axis,
   ariaLabel = "Scroll down",
   scrollOffset,
+  label,
 }) => {
   const theme = useTheme()
   const buttonColor =
@@ -71,6 +74,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       delay={delay}
       motionAxis={axis}
       ariaLabel={isInteractive ? ariaLabel : undefined}
+      label={label}
       style={{
         ...style,
         // if no action, keep animation but disable interaction

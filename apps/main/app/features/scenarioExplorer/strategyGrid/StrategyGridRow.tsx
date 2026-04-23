@@ -391,7 +391,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               sx={{
                 ...theme.scenarios.checkbox.sm,
                 cursor: "pointer",
-                ...(isListMode && { mt: "1px" }),
               }}
             />
           </Box>
@@ -515,8 +514,11 @@ export function InlineRowActions({
     </span>
   )
 
-  const iconPad = dense ? 0.25 : 0.375
-  const iconSize = dense ? "0.875rem" : "1rem"
+  const iconPad = dense ? 0.125 : 0.375
+  const iconSize = dense ? "0.8125rem" : "1rem"
+  const iconButtonTight = dense
+    ? { width: 24, height: 24, minWidth: 24, p: 0.125 }
+    : undefined
 
   return (
     <Box
@@ -553,6 +555,7 @@ export function InlineRowActions({
             }}
             sx={{
               p: iconPad,
+              ...iconButtonTight,
               color: isPinned ? accentColor : theme.palette.grey[500],
               "&:hover": {
                 color: isPinned ? accentColor : theme.palette.grey[700],
@@ -594,6 +597,7 @@ export function InlineRowActions({
           }}
           sx={{
             p: iconPad,
+            ...iconButtonTight,
             ...(shareIconNudgeTop != null && {
               position: "relative",
               top: shareIconNudgeTop,

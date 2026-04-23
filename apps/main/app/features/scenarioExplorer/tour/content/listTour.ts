@@ -1,8 +1,8 @@
 /**
  * List tour. Full port of ListHowToRead.tsx callouts, each becoming an
  * ordered, anchored step. Hero and journey-strip bookends render as
- * centered cards (no `anchorId`). Copy is lifted verbatim so the tour
- * reads the same as the modal.
+ * centered cards (no `anchorId`). List how-to copy may diverge from
+ * the modal for clarity; anchored steps can stay aligned.
  */
 
 import type { TourStep } from "../types"
@@ -11,31 +11,31 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.hero",
     eyebrow: "START HERE",
-    title: "This table is your scenario library.",
-    body: "Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry forward.",
+    title: "The List view lets you browse scenarios and compare outcomes.",
+    body: "Start with the scenario list on the left, then read across each row to compare the key outcomes on the right. This is where you can arrange the view, sort by what matters, and build a shortlist to carry forward.",
   },
   {
     id: "list.step1.search",
     anchorId: "list.toolbar.search",
-    eyebrow: "STEP 1 - TUNE THE LIST",
-    title: "Search and chips tune the library",
-    body: "Search, definitions, baselines, key operations, selected only, and group by theme all change what you see first.",
+    eyebrow: "ARRANGE THE LIST",
+    title: "Search",
+    body: "Type here to optionally filter scenarios. Use the x to clear the field and bring the full set back.",
     placement: "bottom-start",
   },
   {
-    id: "list.step1.themeGroup",
-    anchorId: "list.toolbar.themeGroup",
-    eyebrow: "STEP 1 - TUNE THE LIST",
-    title: "Theme organization helps you scan families",
-    body: "Grouping by theme keeps similar interventions together so you can compare like with like before sorting.",
-    placement: "bottom",
+    id: "list.step1.chips",
+    anchorId: "list.toolbar.chips",
+    eyebrow: "ARRANGE THE LIST",
+    title: "Chips",
+    body: "Use these toggles to show definitions, baselines, key operations, selected rows only, and group by theme. Each one changes what appears in the list.",
+    placement: "bottom-start",
   },
   {
-    id: "list.step1.pinShare",
+    id: "list.step1.pin",
     anchorId: "list.toolbar.pinShare",
-    eyebrow: "STEP 1 - TUNE THE LIST",
-    title: "Pin and share are collection tools",
-    body: "Pinning floats a scenario to the top of the library for comparison with the rest of the library. Sharing stages the current scenario card into the Share drawer and Share tab.",
+    eyebrow: "ARRANGE THE LIST",
+    title: "Pin",
+    body: "Pin a scenario to float it to the top of the list while you compare. Use share on the same control when you want to stage the current card to the Share drawer and Share tab.",
     placement: "right-start",
   },
   {

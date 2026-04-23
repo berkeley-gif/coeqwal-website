@@ -44,9 +44,12 @@ const APPROVED_WRITERS = new Set([
   // The baseline helper that other approved writers delegate to for
   // full-state assertion.
   "app/features/scenarioExplorer/getStarted/engine/demandUnitsBaseline.ts",
-  // The main choreography listener (beat table) and the interactive
-  // teardown effect live here. Phase 1 will slim this down further
-  // as beats move into the engine.
+  // Phase 1 of the Storyboard Engine Hardening Plan v2 deleted the
+  // main per-frame paint listener; the remaining writes here are the
+  // interactive teardown effect (`clearInteractiveState`) and the
+  // post-finish settle-to-finished reset. Phase 3 moves the
+  // interactive paint into a dedicated arbiter at which point this
+  // file's count drops to zero.
   "app/features/scenarioExplorer/getStarted/TierAnimationSection.tsx",
   // Interactive paint writer. Phase 3 moves this into a dedicated
   // InteractivePaintArbiter, at which point OutcomePolygonLayer will

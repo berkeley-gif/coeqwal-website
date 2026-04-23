@@ -1,6 +1,13 @@
 "use client"
 
-import { useRef, useLayoutEffect, useMemo, useCallback } from "react"
+import {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+  type RefObject,
+} from "react"
 import { useTheme, alpha } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import {
@@ -49,6 +56,12 @@ interface OutcomeMorphOverlayProps {
   panelWidth: number
   panelHeight: number
   progress: MotionValue<number>
+  /** Bridge into `OverlayMorphArbiter`. The component writes its
+   *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
+   *  and clears it on unmount; the arbiter reads through the ref on
+   *  every tick. See
+   *  `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/OverlayMorphArbiter.ts`. */
+  overlayMorphTickRef: RefObject<((v: number) => void) | null>
   squaresPerRow: number
   distributionPositionMap: Record<
     string,
@@ -276,16 +289,26 @@ function computeOutcomeLayout(
     // the way `BarOnly` in `MorphableDistributionGlyph` does it (each bar
     // is a fraction of `sum(values)`, not the raw normalized value). This
     // is what makes the storyboard and list view draw identical tier
-    // distributions for a given (scenario, outcome). Falls back to the
-    // on-screen square count ratio when `chartPoints` is missing,
-    // preserving graceful render on API failure. The 2px minimum is only
-    // applied when the value is positive, again matching `BarOnly`, so a
-    // truly empty tier renders an empty bar rather than a sliver.
+    // distributions for a given (scenario, outcome). The 2px minimum is
+    // only applied when the value is positive, again matching `BarOnly`,
+    // so a truly empty tier renders an empty bar rather than a sliver.
+    //
+    // For multi-value outcomes the count of on-screen squares is NOT
+    // interchangeable with the API's normalized value: the aggregate
+    // endpoint (`/tiers/scenarios/:id/tiers`) and the per-location
+    // endpoint (`/tier-map/:id/locations`) can disagree on totals
+    // (e.g. CWS_DEL on s0020 is 75 vs 124 locations across the two
+    // endpoints), so the count-ratio fallback would render a width that
+    // does not match the list view. We therefore only fall back to the
+    // count ratio for single-value outcomes (which have no
+    // `chartPoints`-derived bar to begin with). For multi-value
+    // outcomes, if `chartPoints` is missing we render an empty bar; the
+    // memo re-runs the moment `tierChartData` arrives.
     const apiVal = chartPoints?.[tier - 1]?.value
     const apiNorm =
       apiVal != null && apiValueSum > 0 ? apiVal / apiValueSum : null
     const countRatio = totalPolygons > 0 ? group.length / totalPolygons : 0
-    const normVal = apiNorm ?? countRatio
+    const normVal = apiNorm ?? (isSingleValue ? countRatio : 0)
     const barW = normVal > 0 ? Math.max(2, normVal * maxBarWidth) : 0
 
     let barPts: [number, number][]
@@ -411,6 +434,7 @@ export default function OutcomeMorphOverlay({
   panelWidth,
   panelHeight,
   progress,
+  overlayMorphTickRef,
   squaresPerRow,
   distributionPositionMap,
   onOutcomeClick,
@@ -1010,7 +1034,26 @@ export default function OutcomeMorphOverlay({
     }
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
-  useLayoutEffect(() => {
+  /* ── Overlay-morph frame applier (beat-engine bridge) ──
+   *
+   * Replaces the previous `progress.on("change")` subscriber with a
+   * latest-callback ref invoked by the engine's `OverlayMorphArbiter`
+   * every tick. See `engine/arbiters/OverlayMorphArbiter.ts` for the
+   * bridge rationale. Per StorybookEngineHardeningPlanV2 invariant 4,
+   * the engine is the only `progress.on("change")` subscriber in
+   * the storyboard.
+   *
+   * `latestMorphFrameRef` is updated on every render via the
+   * assignment below so closures over `outcomeShapes`, `encodingMode`,
+   * `getTargetForMode`, etc. always reflect the latest render. The
+   * bridge-register effect further down writes a stable dispatcher
+   * into `overlayMorphTickRef.current`. A separate dep-driven
+   * re-sync effect preserves the legacy `useLayoutEffect`'s eager
+   * `handler(progress.get())` on each data change (needed so shape
+   * and encoding-mode updates between progress ticks visually
+   * apply immediately). */
+  const latestMorphFrameRef = useRef<(v: number) => void>(() => {})
+  latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
 
@@ -1061,200 +1104,234 @@ export default function OutcomeMorphOverlay({
       }
     }
 
-    const handler = (v: number) => {
-      if (encodingRafRef.current != null) return
-      if (tierChangeRafRef.current != null) return
+    if (encodingRafRef.current != null) return
+    if (tierChangeRafRef.current != null) return
 
-      const {
-        barBlend,
-        avgBlend,
-        radarBlend,
-        radarChromeBlend,
-        heatmapBlend,
-        heatmapChromeBlend,
-      } = computeBlends(v)
+    const {
+      barBlend,
+      avgBlend,
+      radarBlend,
+      radarChromeBlend,
+      heatmapBlend,
+      heatmapChromeBlend,
+    } = computeBlends(v)
 
-      // Update radar chrome opacity once per tick. (Rises in Beat 7,
-      // falls at the start of Beat 8.)
-      const radarChromeEl = radarChromeRef.current
-      if (radarChromeEl) {
-        radarChromeEl.style.opacity = String(radarChromeBlend)
-      }
+    // Update radar chrome opacity once per tick. (Rises in Beat 7,
+    // falls at the start of Beat 8.)
+    const radarChromeEl = radarChromeRef.current
+    if (radarChromeEl) {
+      radarChromeEl.style.opacity = String(radarChromeBlend)
+    }
 
-      // Update heatmap chrome opacity (outcome-label column, etc.).
-      const heatmapChromeEl = heatmapChromeRef.current
-      if (heatmapChromeEl) {
-        heatmapChromeEl.style.opacity = String(heatmapChromeBlend)
-      }
+    // Update heatmap chrome opacity (outcome-label column, etc.).
+    const heatmapChromeEl = heatmapChromeRef.current
+    if (heatmapChromeEl) {
+      heatmapChromeEl.style.opacity = String(heatmapChromeBlend)
+    }
 
-      for (const group of outcomeShapes) {
-        const refs = pathRefsMap.current.get(group.code)
-        if (!refs) continue
+    for (const group of outcomeShapes) {
+      const refs = pathRefsMap.current.get(group.code)
+      if (!refs) continue
 
-        const [morphStart, morphEnd] = group.progressRange
-        const fadeStart = morphStart - 0.015
+      const [morphStart, morphEnd] = group.progressRange
+      const fadeStart = morphStart - 0.015
 
-        const chromeEl = chromeRefsMap.current.get(group.code)
+      const chromeEl = chromeRefsMap.current.get(group.code)
 
-        for (let i = 0; i < group.shapes.length; i++) {
-          const el = refs[i]
-          if (!el) continue
-          const shape = group.shapes[i]!
+      for (let i = 0; i < group.shapes.length; i++) {
+        const el = refs[i]
+        if (!el) continue
+        const shape = group.shapes[i]!
 
-          const baseOpacity =
-            v < fadeStart
-              ? 0
-              : v < morphStart
-                ? Math.min(1, (v - fadeStart) / (morphStart - fadeStart))
-                : 1
+        const baseOpacity =
+          v < fadeStart
+            ? 0
+            : v < morphStart
+              ? Math.min(1, (v - fadeStart) / (morphStart - fadeStart))
+              : 1
 
-          if (v < morphStart) {
-            el.setAttribute("d", shape.rawD)
-            el.setAttribute("fill", shape.color)
-            el.style.opacity = String(baseOpacity)
-            el.setAttribute("stroke-opacity", "0.4")
-            if (chromeEl && !isBar) chromeEl.style.opacity = "0"
-            continue
+        if (v < morphStart) {
+          el.setAttribute("d", shape.rawD)
+          el.setAttribute("fill", shape.color)
+          el.style.opacity = String(baseOpacity)
+          el.setAttribute("stroke-opacity", "0.4")
+          if (chromeEl && !isBar) chromeEl.style.opacity = "0"
+          continue
+        }
+
+        const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
+        const easedT = easeInOut(morphT)
+
+        const target = getTargetForMode(shape, encodingMode)
+        const pts = shape.resampled.map((a, pi) =>
+          lerp(a, target[pi]!, easedT),
+        )
+        el.setAttribute("d", pointsToD(pts))
+
+        const targetColor = getColorForMode(shape, encodingMode)
+        if (targetColor !== shape.color) {
+          el.setAttribute("fill", lerpColor(shape.color, targetColor, easedT))
+        } else {
+          el.setAttribute("fill", shape.color)
+        }
+
+        if (isBarOrAvg && !shape.isRepresentative) {
+          el.style.opacity = String(baseOpacity * (1 - easedT))
+        } else {
+          el.style.opacity = String(baseOpacity)
+        }
+
+        if (isBar && shape.isRepresentative) {
+          el.setAttribute("fill-opacity", String(0.9 + (0.8 - 0.9) * easedT))
+        }
+
+        if (isBarOrAvg) {
+          el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
+        }
+
+        // Beats 6/7: once this outcome has settled as squares, drive the
+        // chained morph (square -> bar -> dot -> radar vertex) directly
+        // from progress. Overrides the post-morph resting state above
+        // when any of the beat blends are non-zero. Skipped when the
+        // parent has already toggled `encodingMode` to bar/avg (the
+        // existing isBarOrAvg branches already handle that case).
+        const chainActive =
+          v >= morphEnd &&
+          encodingMode === "distribution" &&
+          (barBlend > 0 ||
+            avgBlend > 0 ||
+            radarBlend > 0 ||
+            heatmapBlend > 0)
+        if (chainActive) {
+          const radarTarget =
+            radarTargetsByCode.get(group.code) ?? shape.dotTarget
+          const heatmapTarget =
+            heatmapTargetsByCode.get(group.code) ?? radarTarget
+
+          // Compose the blended target: lerp through square -> bar ->
+          // dot -> radar -> heatmap cell in sequence. Each blend is
+          // clamped to its own window so the chain progresses smoothly
+          // without abrupt handoffs.
+          let pts = shape.squareTarget
+          if (barBlend > 0) {
+            pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
           }
-
-          const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
-          const easedT = easeInOut(morphT)
-
-          const target = getTargetForMode(shape, encodingMode)
-          const pts = shape.resampled.map((a, pi) =>
-            lerp(a, target[pi]!, easedT),
-          )
+          if (avgBlend > 0) {
+            // From settled bar position -> dot (grid-center).
+            pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
+          }
+          if (radarBlend > 0) {
+            // From dot position -> radar vertex (per-outcome polar).
+            pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
+          }
+          if (heatmapBlend > 0) {
+            // From radar vertex -> heatmap cell rectangle.
+            pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
+          }
           el.setAttribute("d", pointsToD(pts))
 
-          const targetColor = getColorForMode(shape, encodingMode)
-          if (targetColor !== shape.color) {
-            el.setAttribute("fill", lerpColor(shape.color, targetColor, easedT))
-          } else {
-            el.setAttribute("fill", shape.color)
-          }
-
-          if (isBarOrAvg && !shape.isRepresentative) {
-            el.style.opacity = String(baseOpacity * (1 - easedT))
+          // Non-representative shapes fade to 0 once we leave pure-bar
+          // territory (same as average-mode behavior).
+          if (!shape.isRepresentative) {
+            const repFade = Math.max(barBlend, avgBlend, radarBlend)
+            el.style.opacity = String(baseOpacity * (1 - repFade))
           } else {
             el.style.opacity = String(baseOpacity)
-          }
+            // In pure bar, use bar-mode fill-opacity. Once we start
+            // collapsing into dot/radar, flip back to full opacity
+            // (matches average-mode styling).
+            const barOnlyFraction = barBlend * (1 - Math.max(avgBlend, radarBlend))
+            el.setAttribute(
+              "fill-opacity",
+              String(0.9 + (0.8 - 0.9) * barOnlyFraction),
+            )
 
-          if (isBar && shape.isRepresentative) {
-            el.setAttribute("fill-opacity", String(0.9 + (0.8 - 0.9) * easedT))
-          }
-
-          if (isBarOrAvg) {
-            el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
-          }
-
-          // Beats 6/7: once this outcome has settled as squares, drive the
-          // chained morph (square -> bar -> dot -> radar vertex) directly
-          // from progress. Overrides the post-morph resting state above
-          // when any of the beat blends are non-zero. Skipped when the
-          // parent has already toggled `encodingMode` to bar/avg (the
-          // existing isBarOrAvg branches already handle that case).
-          const chainActive =
-            v >= morphEnd &&
-            encodingMode === "distribution" &&
-            (barBlend > 0 ||
-              avgBlend > 0 ||
-              radarBlend > 0 ||
-              heatmapBlend > 0)
-          if (chainActive) {
-            const radarTarget =
-              radarTargetsByCode.get(group.code) ?? shape.dotTarget
-            const heatmapTarget =
-              heatmapTargetsByCode.get(group.code) ?? radarTarget
-
-            // Compose the blended target: lerp through square -> bar ->
-            // dot -> radar -> heatmap cell in sequence. Each blend is
-            // clamped to its own window so the chain progresses smoothly
-            // without abrupt handoffs.
-            let pts = shape.squareTarget
-            if (barBlend > 0) {
-              pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
-            }
-            if (avgBlend > 0) {
-              // From settled bar position -> dot (grid-center).
-              pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
-            }
-            if (radarBlend > 0) {
-              // From dot position -> radar vertex (per-outcome polar).
-              pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
-            }
-            if (heatmapBlend > 0) {
-              // From radar vertex -> heatmap cell rectangle.
-              pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
-            }
-            el.setAttribute("d", pointsToD(pts))
-
-            // Non-representative shapes fade to 0 once we leave pure-bar
-            // territory (same as average-mode behavior).
-            if (!shape.isRepresentative) {
-              const repFade = Math.max(barBlend, avgBlend, radarBlend)
-              el.style.opacity = String(baseOpacity * (1 - repFade))
-            } else {
-              el.style.opacity = String(baseOpacity)
-              // In pure bar, use bar-mode fill-opacity. Once we start
-              // collapsing into dot/radar, flip back to full opacity
-              // (matches average-mode styling).
-              const barOnlyFraction = barBlend * (1 - Math.max(avgBlend, radarBlend))
+            // Swap representative fill color to averageColor as we
+            // cross into dot/radar/heatmap territory. All of
+            // avgBlend/radarBlend/heatmapBlend imply "show average
+            // color", so use max of them.
+            const avgMix = Math.max(avgBlend, radarBlend, heatmapBlend)
+            if (avgMix > 0 && shape.averageColor) {
               el.setAttribute(
-                "fill-opacity",
-                String(0.9 + (0.8 - 0.9) * barOnlyFraction),
+                "fill",
+                lerpColor(shape.color, shape.averageColor, avgMix),
               )
-
-              // Swap representative fill color to averageColor as we
-              // cross into dot/radar/heatmap territory. All of
-              // avgBlend/radarBlend/heatmapBlend imply "show average
-              // color", so use max of them.
-              const avgMix = Math.max(avgBlend, radarBlend, heatmapBlend)
-              if (avgMix > 0 && shape.averageColor) {
-                el.setAttribute(
-                  "fill",
-                  lerpColor(shape.color, shape.averageColor, avgMix),
-                )
-              }
             }
-            el.setAttribute("stroke-opacity", String(0.4 * (1 - barBlend)))
           }
+          el.setAttribute("stroke-opacity", String(0.4 * (1 - barBlend)))
         }
+      }
 
-        if (chromeEl) {
-          if (isBar) {
-            if (v < morphStart) {
-              chromeEl.style.opacity = "0"
-            } else if (v >= morphEnd) {
-              chromeEl.style.opacity = "1"
-            } else {
-              const morphT = Math.min(
-                1,
-                (v - morphStart) / (morphEnd - morphStart),
-              )
-              chromeEl.style.opacity = String(easeInOut(morphT))
-            }
-          } else if (encodingMode === "distribution" && v >= morphEnd) {
-            // Beat 6 chrome fade-in rides barBlend once the outcome has
-            // settled. Before morphEnd the chrome stays hidden (the
-            // squares are still morphing into place). Once `avgBlend`
-            // starts the bar-track chrome fades back out so the dot/
-            // radar view isn't cluttered by bar tracks.
-            const chromeOpacity = barBlend * (1 - avgBlend)
-            chromeEl.style.opacity = String(chromeOpacity)
-          } else {
+      if (chromeEl) {
+        if (isBar) {
+          if (v < morphStart) {
             chromeEl.style.opacity = "0"
+          } else if (v >= morphEnd) {
+            chromeEl.style.opacity = "1"
+          } else {
+            const morphT = Math.min(
+              1,
+              (v - morphStart) / (morphEnd - morphStart),
+            )
+            chromeEl.style.opacity = String(easeInOut(morphT))
           }
+        } else if (encodingMode === "distribution" && v >= morphEnd) {
+          // Beat 6 chrome fade-in rides barBlend once the outcome has
+          // settled. Before morphEnd the chrome stays hidden (the
+          // squares are still morphing into place). Once `avgBlend`
+          // starts the bar-track chrome fades back out so the dot/
+          // radar view isn't cluttered by bar tracks.
+          const chromeOpacity = barBlend * (1 - avgBlend)
+          chromeEl.style.opacity = String(chromeOpacity)
+        } else {
+          chromeEl.style.opacity = "0"
         }
       }
     }
-    const unsub = progress.on("change", handler)
-    // Only run initial sync if no tier-change animation is active.
-    // The tier-change effect runs before this one (declaration order),
-    // so tierChangeRafRef will already be set if a transition started.
+  }
+
+  /* ── Bridge registration ──
+   *
+   * Writes a stable dispatcher into `overlayMorphTickRef.current` so
+   * the engine's `OverlayMorphArbiter` invokes the latest morph
+   * frame every tick. Runs once per mount. The eager sync on mount
+   * matches the legacy `useLayoutEffect`'s initial
+   * `handler(progress.get())` call. Gated on
+   * `tierChangeRafRef.current == null` because the tier-change RAF
+   * (declared earlier) takes exclusive control of the SVG transforms
+   * while running and the latest frame's own internal guards
+   * (`if (tierChangeRafRef.current != null) return`) already handle
+   * the overlap, but we still want to avoid triggering a visual
+   * snap on mount. */
+  useEffect(() => {
+    const dispatch = (v: number) => latestMorphFrameRef.current(v)
+    overlayMorphTickRef.current = dispatch
     if (tierChangeRafRef.current == null) {
-      handler(progress.get())
+      dispatch(progress.get())
     }
-    return unsub
+    return () => {
+      if (overlayMorphTickRef.current === dispatch) {
+        overlayMorphTickRef.current = null
+      }
+    }
+  }, [overlayMorphTickRef, progress])
+
+  /* ── Dep-driven re-sync ──
+   *
+   * The legacy `useLayoutEffect` re-ran its entire body (closure
+   * rebuild + `progress.on("change")` resubscribe + eager
+   * `handler(progress.get())`) whenever any of its deps changed.
+   * The bridge-register effect above only eager-syncs once on mount,
+   * so we need a companion `useLayoutEffect` to re-sync the DOM when
+   * `outcomeShapes`, `encodingMode`, `interactive`, etc. change
+   * between progress ticks (e.g. user toggles encoding mode while
+   * progress is paused at v=1). The latest-ref closure is already
+   * current at this point because it was reassigned during the same
+   * render that invalidated these deps. */
+  useLayoutEffect(() => {
+    if (tierChangeRafRef.current == null) {
+      latestMorphFrameRef.current(progress.get())
+    }
   }, [
     progress,
     outcomeShapes,

@@ -33,6 +33,9 @@ export function ScenarioBadge({
     <Box
       component="span"
       sx={{
+        display: "inline-block",
+        maxWidth: "100%",
+        minWidth: 0,
         fontSize: "0.6875rem",
         fontWeight: 600,
         letterSpacing: "0.06em",
@@ -42,10 +45,14 @@ export function ScenarioBadge({
         px: "5px",
         py: "1.5px",
         borderRadius: "2px",
-        lineHeight: 1.2,
-        flexShrink: 0,
+        lineHeight: 1.3,
+        whiteSpace: "normal",
+        overflowWrap: "break-word",
+        wordBreak: "break-word",
         boxDecorationBreak: "clone",
         WebkitBoxDecorationBreak: "clone",
+        boxSizing: "border-box",
+        verticalAlign: "top",
         ...sx,
       }}
     >

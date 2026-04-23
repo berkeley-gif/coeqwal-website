@@ -53,6 +53,8 @@ interface ScrollIndicatorProps {
   motionAxis?: MotionAxis
   /** Accessible label for screen readers (WCAG 4.1.2) */
   ariaLabel?: string
+  /** Optional label above the icon (e.g. “Scroll”); not animated with the bounce */
+  label?: React.ReactNode
 }
 
 /**
@@ -75,6 +77,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   className,
   motionAxis = "vertical",
   ariaLabel,
+  label,
 }) => {
   const controls = useAnimation()
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
@@ -223,10 +226,8 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   initial[axisKey] = 20
 
   return (
-    <motion.div
-      initial={initial}
-      animate={controls}
-      onClick={handleScrollClick}
+    <div
+      onClick={isInteractive ? handleScrollClick : undefined}
       onKeyDown={isInteractive ? handleKeyDown : undefined}
       className={className}
       /*
@@ -240,16 +241,30 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
       aria-label={isInteractive ? ariaLabel : undefined}
       style={{
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: label ? 10 : undefined,
         cursor: isInteractive ? "pointer" : "default",
-        color,
-        fontSize: size,
         outline: "none",
         ...style,
       }}
     >
-      {children}
-    </motion.div>
+      {label}
+      <motion.div
+        initial={initial}
+        animate={controls}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color,
+          fontSize: size,
+          outline: "none",
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
   )
 }

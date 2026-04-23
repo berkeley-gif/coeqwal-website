@@ -677,7 +677,7 @@ export default function RadarPanel({
             body: "Same tier idea as the list: tier 1 hugs the center, tier 4 sits near the edge.",
           },
           {
-            label: "Compare shapes, not just numbers.",
+            label: "Compare tradeoffs, not just numbers.",
             body: "Where one scenario bulges another may pinch. That is the trade-off.",
           },
           {

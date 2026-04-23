@@ -233,6 +233,14 @@ export default function ToolTour() {
     step.anchorId && fallbackToCentered,
   )
 
+  // Shared size and radius so text (Skip/Back) and fill (Next) read as one control row
+  const tourActionShape = {
+    textTransform: "none" as const,
+    fontSize: "0.8125rem",
+    minWidth: 88,
+    borderRadius: 1.5,
+  }
+
   const card = (
     <Paper
       ref={cardRef}
@@ -326,6 +334,7 @@ export default function ToolTour() {
           fontSize: "0.875rem",
           color: theme.palette.text.primary,
           lineHeight: 1.5,
+          whiteSpace: "pre-line",
         }}
       >
         {step.body}
@@ -359,11 +368,18 @@ export default function ToolTour() {
         <Box sx={{ flex: 1 }} />
         <Button
           size="small"
+          type="button"
+          variant="outlined"
           onClick={endTour}
           sx={{
-            textTransform: "none",
+            ...tourActionShape,
             color: theme.palette.grey[700],
-            fontSize: "0.8125rem",
+            borderColor: theme.palette.divider,
+            backgroundColor: theme.palette.background.paper,
+            "&:hover": {
+              borderColor: theme.palette.grey[400],
+              backgroundColor: theme.palette.action.hover,
+            },
           }}
         >
           Skip
@@ -371,8 +387,19 @@ export default function ToolTour() {
         {!isFirst && (
           <Button
             size="small"
+            type="button"
+            variant="outlined"
             onClick={handleBack}
-            sx={{ textTransform: "none", fontSize: "0.8125rem" }}
+            sx={{
+              ...tourActionShape,
+              color: theme.palette.grey[700],
+              borderColor: theme.palette.divider,
+              backgroundColor: theme.palette.background.paper,
+              "&:hover": {
+                borderColor: theme.palette.grey[400],
+                backgroundColor: theme.palette.action.hover,
+              },
+            }}
           >
             Back
           </Button>
@@ -380,9 +407,10 @@ export default function ToolTour() {
         <Button
           ref={nextBtnRef}
           size="small"
+          type="button"
           variant="contained"
           onClick={handleNext}
-          sx={{ textTransform: "none", fontSize: "0.8125rem" }}
+          sx={tourActionShape}
         >
           {isLast ? "Finish" : "Next"}
         </Button>

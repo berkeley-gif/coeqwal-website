@@ -22,7 +22,7 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   list: {
     mode: "list",
     purpose:
-      "Browse the full library and narrow it down to a shortlist of scenarios that you want to study more closely.",
+      "Browse the full library and narrow down a shortlist of scenarios that you want to study more closely.",
     nextMode: "radar",
     nextLabel: "Compare chosen scenarios on Radar chart",
     nextRationale: "See your shortlist scenarios side by side.",

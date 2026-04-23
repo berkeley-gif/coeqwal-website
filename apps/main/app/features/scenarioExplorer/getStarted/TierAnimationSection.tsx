@@ -25,7 +25,6 @@ import {
   useMapStore,
 } from "../../map/store"
 import {
-  BASEMAP_DIM_OPACITY,
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
@@ -62,6 +61,8 @@ import {
   MapPaintArbiter,
   MapPopupArbiter,
   OverlayPopupArbiter,
+  NarrationArbiter,
+  OverlayMorphArbiter,
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
@@ -71,18 +72,6 @@ import {
   type Arbiter,
   type HideScheduleEntry,
 } from "./engine"
-
-/** Phase 0 refactor spike flag. When true, the declarative beat engine
- *  owns Beat 4 (loi-highlight) end to end. That covers the Mapbox
- *  paint sequence (filter swap, layer fade, gold polygon ring), the
- *  overlay square ring, the square popup (via `demoLocation` and
- *  `demoHoveredLocation`), and the map-side polygon
- *  `LocationHighlight` popup. When false, the legacy per-effect code
- *  paths in this file own Beat 4 and the engine subscription is inert.
- *  Used to ship the spike mergeably while visual QA runs. Phase 1
- *  expands the engine's responsibilities to the rest of the beats and
- *  deletes the else branches. */
-const ENGINE_OWNS_BEAT4 = true
 
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
@@ -238,37 +227,17 @@ const ACTIVE_OUTCOMES = new Set([
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 
-/* ── Beat 5 (loi-highlight) shared timing & identity ──
+/* ── Beat 5 (loi-highlight) identity ──
  *
- * Beat 5 choreographs a single AG_REV LOI through five sub-steps. These
- * constants drive the Beat 5 driver effect (which owns React state and
- * the locationHighlights store) and the popup driver. Mapbox paint writes
- * for demand-units / demand-units-outline (AG-only filter swap, layer
- * fade-in and fade-out, step-4 gold polygon ring) moved to the
- * declarative beat engine's `MapPaintArbiter` via the `beat4:mapPaint:*`
- * actor cluster in `engine/beats.ts`. The corresponding paint thresholds
- * (`BEAT5_S1_LAYER_IN_START`, `BEAT5_S1_LAYER_IN_END`,
- * `BEAT5_S4_POLYGON_RING_AT`, `BEAT5_LAYER_OPACITY`) live alongside
- * those actors and are no longer mirrored here.
- *
- *   [BEAT5_ENTER, BEAT5_S2_SQUARE_RING_AT)   AG layer fades in then holds
- *   [BEAT5_S2_SQUARE_RING_AT,    settle)  step 2: gold ring on the square
- *   [BEAT5_S3_SQUARE_POPUP_AT,   settle)  step 3: popup near the square
- *   [BEAT5_S5_POLYGON_POPUP_AT,  settle)  step 5: popup near the polygon
- *   [BEAT5_SETTLE, BEAT5_TAIL_END)  tail: fade layer back out, clear state
- *
- * AG polygons enter Beat 4 at opacity 0 because the engine's
- * `MapPaintArbiter` fades them out at the tail of Beat 2 (see
- * `applyBeat2HideScheduleUpdate`, AG-class fallback). The Beat 5 entry
- * actor ramps them back up.
- */
-const BEAT5_ENTER = 0.5
-const BEAT5_S2_SQUARE_RING_AT = 0.58
-const BEAT5_S3_SQUARE_POPUP_AT = 0.59
-const BEAT5_S5_POLYGON_POPUP_AT = 0.605
-const BEAT5_SETTLE = 0.62
-const BEAT5_TAIL_END = 0.63
-/** DU_ID of the LOI spotlighted during Beat 5 (Glenn Colusa I.D.). */
+ * Beat 5 choreographs a single AG_REV LOI (Glenn Colusa I.D., DU_ID
+ * `08N_SA2`). All Beat 5 timing thresholds and the choreography that
+ * uses them now live in the declarative beat engine
+ * (`engine/beats.ts`, `engine/arbiters/MapPaintArbiter.ts`,
+ * `engine/arbiters/OverlayPopupArbiter.ts`,
+ * `engine/arbiters/MapPopupArbiter.ts`). The only Beat 5 fact still
+ * referenced from this file is the LOI's DU_ID, used by the overlay
+ * "must-include" pin set so the LOI's distribution square renders
+ * deterministically across the morph. */
 const BEAT5_LOI_ID = "08N_SA2"
 
 const BASE_FILL_OPACITY = 0.75
@@ -2048,8 +2017,21 @@ export default function TierAnimationSection() {
       new MapPaintArbiter(),
       new MapPopupArbiter(),
       new OverlayPopupArbiter(),
+      new NarrationArbiter(),
+      new OverlayMorphArbiter(),
     ]
   }
+
+  // Bridge refs for the `*Arbiter` actors that delegate to
+  // component-owned callbacks. Each child component writes its
+  // `applyXxxFrame(v)` callback into `.current` on mount and clears
+  // it on unmount; the arbiter reads through the ref on each
+  // `onUpdate`, which is how we satisfy invariant 4 ("one
+  // `progress.on('change')` subscriber") without lifting the
+  // components' large per-frame DOM-mutation bodies into declarative
+  // actor payloads.
+  const narrationTickRef = useRef<((v: number) => void) | null>(null)
+  const overlayMorphTickRef = useRef<((v: number) => void) | null>(null)
 
   // Engine context. Rebuilt every render, but the engine reads via a
   // ref so no re-subscription happens. Every actor thunk (e.g.
@@ -2084,6 +2066,8 @@ export default function TierAnimationSection() {
         duId,
       resolveTierLabel: getTierLabel,
       getHideSchedule: () => hideScheduleRef.current,
+      narrationTickRef,
+      overlayMorphTickRef,
     }),
     // `buildBlendedTierExpr` is a non-stable inner function. It closes
     // over `tierColorLookupRef` (a ref) so its identity doesn't
@@ -2098,209 +2082,51 @@ export default function TierAnimationSection() {
     beatTable: BEAT_TABLE,
     context: engineContext,
     arbiters: arbitersRef.current,
-    enabled: ENGINE_OWNS_BEAT4 && !isLoading,
+    enabled: !isLoading,
   })
   engineApiRef.current = engineApi
 
-  /* ── Beat-1 map effects + Beat-2 tier color transition ── */
+  /* ── Storyboard map-layer unmount cleanup ──
+   *
+   * Phase 1 (Storyboard Engine Hardening Plan v2) deleted the main
+   * per-frame paint listener. All `demand-units` and
+   * `demand-units-outline` paint writes during playback now flow
+   * through `MapPaintArbiter` (see `engine/arbiters/MapPaintArbiter.ts`
+   * and `engine/beats.ts`), and the `basemap-dim-overlay` ramp moved
+   * with them.
+   *
+   * The legacy listener also did one job that the engine teardown
+   * does not cover: when the storyboard component unmounts (the user
+   * navigates away from the scenarioExplorer page or switches tabs),
+   * reset the animated polygon and line layers to their neutral
+   * resting state so the storyboard does not leak its paint into
+   * other scenarioExplorer views. The arbiter's `teardown` only
+   * clears arbiter-owned state (the gold LOI ring), not the broader
+   * fill / line opacities for `ANIM_POLYGON_LAYERS` and
+   * `ANIM_LINE_LAYERS`. We keep that work here as a tiny dedicated
+   * unmount effect. */
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
-
-    let phase:
-      | "idle"
-      | "beat1"
-      | "beat1c-blend"
-      | "beat1c"
-      | "beat2"
-      | "beat5"
-      | "beat6" = "idle"
-    // (Beat 5 polygon-ring state previously tracked via the
-    // `beat5PolyRingOn` closure here. Now owned by `MapPaintArbiter`
-    // and removed in Phase 1.g together with the Beat 6+ branch that
-    // was its only remaining reader.)
-
-    // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
-    //          still on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.245 -> 0.26): hold. The 3-blue palette stays painted
-    //          at fill-opacity 0.65 with the full DU class filter.
-    //          Earlier versions cross-faded the layer out across this
-    //          window, but that read as a distracting blink between the
-    //          intro legend and the AG tier-color reveal. The blues now
-    //          stay visible right up to the swap at BEAT1C_BLEND_START.
-    // Beat 1C (0.26 -> 0.39): at v = 0.26 we swap the filter to
-    //          Agriculture-only and set fill-color to the AG_REV tier
-    //          expression. The swap is instant and happens while the
-    //          layer is still painted at 0.65, so the user sees a hard
-    //          cut from 3-blue to AG tier colors without an opacity
-    //          dip. (0.28 -> 0.39) tier colors are locked while the
-    //          Beat 1C text and popups play.
-    // Beat 2  (0.39 -> 0.50): DU filter restored, tier colors locked. SVG
-    //          morphs take over and features fade out on their slice.
-    const FREEZE_AT = 0.09
-    const BEAT1B_START = 0.245
-    // BEAT1C_BLEND_START is the filter + color swap boundary. Opacity
-    // stays at 0.65 across this boundary; only the filter and fill
-    // expression flip.
-    const BEAT1C_BLEND_START = 0.26
-    // Kept so downstream branches and comments that still reference the
-    // end of the old cross-fade window compile. The 0.26 -> 0.28 span
-    // is now just a hold at the AG tier colors.
-    const BEAT1C_BLEND_END = 0.28
-    // AG_REV now morphs solo starting at 0.38 (see getOutcomeProgressRange
-    // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
-    // DU filter restore + hide-schedule over in time for AG_REV's morph.
-    const BEAT2_START = 0.38
-
-    const unsub = progress.on("change", (v) => {
+    return () => {
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
-
-      if (v < 0.01) {
-        // Paint writes for the reset window moved to
-        // `MapPaintArbiter.applyReset`, fired by the `beat0:mapPaint:reset`
-        // actor on its `onEnter` hook. This block retains only the
-        // listener-local phase bookkeeping so downstream branches that
-        // gate on `phase !== "idle"` still re-fire on their next
-        // transition. See the Storyboard Engine Hardening Plan v2,
-        // Phase 1.b.
-        if (phase !== "idle") {
-          phase = "idle"
-        }
-        return
-      }
-
-      // Drive the shared basemap-dim-overlay so visualization layers pop
-      // against the satellite basemap. Fades in in lockstep with the
-      // initial blue-polygon reveal (v = 0 -> FREEZE_AT * 0.33 ≈ 0.06)
-      // and then holds steady through the blue cycle, cross-fade, AG_REV
-      // tier colors, and all subsequent morphs. Only the v < 0.01 reset
-      // branch above clears it.
       try {
-        if (map.getLayer("basemap-dim-overlay")) {
-          const dimFadeT = Math.min(1, v / (FREEZE_AT * 0.33))
-          const dimOpacity = BASEMAP_DIM_OPACITY * dimFadeT
-          map.setPaintProperty(
-            "basemap-dim-overlay",
-            "fill-opacity",
-            dimOpacity,
-          )
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill))
+            map.setPaintProperty(fill, "fill-opacity", 0)
+          if (map.getLayer(outline))
+            map.setPaintProperty(outline, "line-opacity", 0)
+        }
+        for (const lineLayer of ANIM_LINE_LAYERS) {
+          if (map.getLayer(lineLayer))
+            map.setPaintProperty(lineLayer, "line-opacity", 1)
         }
       } catch {
         /* ok */
       }
-
-      if (v < BEAT1B_START) {
-        // Beat 1 paint writes (cycling sub-branch `v < FREEZE_AT` and
-        // frozen sub-branch `FREEZE_AT <= v < BEAT1B_START`) moved to
-        // `MapPaintArbiter.applyBeat1Cycle*` and
-        // `MapPaintArbiter.applyBeat1Hold*`, fired by the
-        // `beat0:mapPaint:cycle` and `beat0:mapPaint:hold` actors.
-        // This block retains only the `phase = "beat1"` assignment
-        // that downstream branches still key off. The arbiter tracks
-        // its own `frozenColorPhase` across the cycle and blend
-        // actors, so no listener-local bookkeeping is needed here.
-        // See Storyboard Engine Hardening Plan v2, Phases 1.c and 1.d.
-        phase = "beat1"
-      } else if (v < BEAT1C_BLEND_START) {
-        // Beat 1B paint writes moved to
-        // `MapPaintArbiter.applyBeat1Hold*`. This block retains only
-        // the `phase = "beat1"` bookkeeping so downstream branches
-        // still re-fire their transitions. See Phase 1.c.
-        phase = "beat1"
-      } else if (v < BEAT1C_BLEND_END) {
-        // Beat 1C blend paint writes (two-stage convergence plus
-        // tier-color morph) moved to
-        // `MapPaintArbiter.applyBeat1cBlendEnter` and
-        // `MapPaintArbiter.applyBeat1cBlendUpdate`, fired by the
-        // `beat1:mapPaint:blend` actor. The arbiter reads its own
-        // `frozenColorPhase` (set during the cycle actor) so no
-        // listener-local bookkeeping is needed. This block retains
-        // only the `phase = "beat1c-blend"` assignment to match the
-        // legacy transition shape. See Storyboard Engine Hardening
-        // Plan v2, Phase 1.d.
-        phase = "beat1c-blend"
-      } else if (v < BEAT2_START) {
-        // Beat 1C tail (static AG-only hold on fully blended tier
-        // colors) moved to `MapPaintArbiter.applyBeat1cTailEnter`,
-        // fired by the `beat1:mapPaint:tail` actor. This block
-        // retains only the `phase = "beat1c"` assignment. The arbiter
-        // performs a full-state baseline assertion on `onEnter`, so
-        // scrub-back into the tail from a later beat is self-healing.
-        // See Storyboard Engine Hardening Plan v2, Phase 1.d.
-        phase = "beat1c"
-      } else {
-        // Beat 2+: phase bookkeeping only. All `demand-units` /
-        // `demand-units-outline` paint and filter writes for this
-        // window are owned by the engine's `MapPaintArbiter`:
-        //
-        //   [BEAT2_START, BEAT5_ENTER)     `beat2:mapPaint:hideSchedule`
-        //                                   per-DU fade-out case expr
-        //                                   (see Phase 1.e).
-        //   [BEAT5_ENTER, BEAT5_TAIL_END)  `beat4:mapPaint:*` cluster
-        //                                   AG-only filter, layer fade
-        //                                   ramps, gold polygon ring
-        //                                   (see Phase 0 spike, 1.f).
-        //   [BEAT5_TAIL_END, 1]            `beat6:mapPaint:restore`
-        //                                   full filter restore, blended
-        //                                   tier expr, scalar 0 opacity
-        //                                   pin (see Phase 1.g).
-        //
-        // The line-geometry fade-out (`cwf-flowline`,
-        // `delta-detaw-line`, etc.) is owned by
-        // `beat2:mapPaint:lineFades` across `[BEAT2_START, 1]` (see
-        // Phase 1.g). Line layers are disjoint from demand-units, so
-        // the schedule splits cleanly.
-
-        if (v < BEAT5_ENTER) {
-          // Beat 2 through Beat 4 paint writes are owned by the
-          // engine's `MapPaintArbiter` via the
-          // `beat2:mapPaint:hideSchedule` actor (see Phase 1.e). The
-          // arbiter reads the live hide schedule via
-          // `ctx.getHideSchedule()`. This block is `phase`
-          // bookkeeping only. Phase 1.h removes the `phase` variable
-          // once the listener has no remaining gates.
-          phase = "beat2"
-        } else if (v < BEAT5_TAIL_END) {
-          // Beat 5 paint writes are owned by the engine's
-          // `MapPaintArbiter` via the `beat4:mapPaint:*` actor cluster
-          // (Phase 1.f). This block is `phase` bookkeeping only.
-          phase = "beat5"
-        } else {
-          // Beat 6+ paint writes (DU class filter restore, blended
-          // tier expression, scalar 0 opacity pin, plus the per-line
-          // hide-schedule fade-out) are owned by the engine's
-          // `MapPaintArbiter` via `beat6:mapPaint:restore` and
-          // `beat2:mapPaint:lineFades` in `engine/beats.ts`. This
-          // block is `phase` bookkeeping only. Phase 1.h removes the
-          // `phase` variable entirely once the listener has no
-          // remaining gates.
-          phase = "beat6"
-        }
-      }
-    })
-
-    return () => {
-      unsub()
-      const map = mapRef.getMap?.()
-      if (map?.isStyleLoaded?.()) {
-        try {
-          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (map.getLayer(fill))
-              map.setPaintProperty(fill, "fill-opacity", 0)
-            if (map.getLayer(outline))
-              map.setPaintProperty(outline, "line-opacity", 0)
-          }
-          for (const lineLayer of ANIM_LINE_LAYERS) {
-            if (map.getLayer(lineLayer))
-              map.setPaintProperty(lineLayer, "line-opacity", 1)
-          }
-        } catch {
-          /* ok */
-        }
-      }
     }
-  }, [progress, mapAPI.mapRef, isLoading])
+  }, [mapAPI.mapRef, isLoading])
 
   /* Beat 1C demo popups removed. The five curated AG district popups
    * (Glenn Colusa, Turlock, Westlands, Madera, Modesto) read as noise
@@ -2311,146 +2137,14 @@ export default function TierAnimationSection() {
    * in the overlay so their distribution squares render deterministically
    * in the morph. */
 
-  /* ── Beat 5 demo-LOI driver ──
-   *
-   * Beat 5 spans [BEAT5_ENTER, BEAT5_TAIL_END] in the compressed progress
-   * domain. It choreographs a single AG_REV LOI (Glenn Colusa I.D.)
-   * through five sub-steps, each tied to the "Locations of interest can
-   * be selected on the map or from the chart" sentence:
-   *
-   *   [S1_LAYER_IN_START, S1_LAYER_IN_END]  Step 1: AG layer fades in
-   *   [S2_SQUARE_RING_AT, SETTLE)           Step 2: gold ring on square
-   *   [S3_SQUARE_POPUP_AT, SETTLE)          Step 3: popup near square
-   *   [S4_POLYGON_RING_AT, SETTLE)          Step 4: gold stroke on polygon
-   *   [S5_POLYGON_POPUP_AT, SETTLE)         Step 5: popup near polygon
-   *   [SETTLE, TAIL_END]                    Tail: AG layer fades out
-   *
-   * This effect is React + Zustand only: it drives `demoLocation`
-   * (square ring, via OutcomeMorphOverlay's `demoHighlightedLocationKey`),
-   * `demoHoveredLocation` (square popup, via the overlay's hoverTooltip),
-   * and `mapActions.setLocationHighlights` (polygon popup).
-   *
-   * All Mapbox paint + filter writes for `demand-units` /
-   * `demand-units-outline` during Beat 5 - including step 1's
-   * fill-opacity ramp, step 4's gold line-color case expression, and
-   * the tail fade-out - are owned by the main choreography effect
-   * above. Keeping exactly one writer per Mapbox layer eliminates the
-   * cross-effect races that used to produce flicker during the beat. */
-  useEffect(() => {
-    // Phase 0 refactor spike. When the declarative engine owns Beat
-    // 4, the Beat 5 driver effect is inert. The engine's
-    // `OverlayPopupArbiter` drives `demoLocation` and
-    // `demoHoveredLocation`, and its `MapPopupArbiter` drives
-    // `mapActions.setLocationHighlights`.
-    if (ENGINE_OWNS_BEAT4) return
-    if (isLoading) return
-    const agData = outcomeLocations["AG_REV"]
-    if (!agData || agData.ids.size === 0) return
-
-    const tier = agData.tierMap[BEAT5_LOI_ID]
-    if (tier == null) return
-
-    const info: LocationInfo = {
-      code: "AG_REV",
-      sourceId: BEAT5_LOI_ID,
-      tier,
-    }
-    const coord = centroidLookupRef.current.get(BEAT5_LOI_ID)
-    const tierColor = agData.colorMap[BEAT5_LOI_ID] ?? "#888888"
-    const name =
-      agData.nameMap[BEAT5_LOI_ID] ??
-      getDemandUnitDisplayName(BEAT5_LOI_ID) ??
-      BEAT5_LOI_ID
-    const highlight = coord
-      ? ({
-          key: `beat5:${info.code}:${info.sourceId}`,
-          longitude: coord.lng,
-          latitude: coord.lat,
-          name,
-          tierLevel: info.tier,
-          tierLabel: getTierLabel(info.tier),
-          tierColor,
-          // `pinned: true` satisfies the get-started-mode filter in
-          // VisualizationLayers, which now renders only pinned highlights
-          // so that user-hover never produces a map-side popup. The Beat 5
-          // demo popup is effectively a "pseudo-pin" driven by the
-          // storyboard progress; teardown() clears it when the Beat 5
-          // window closes, so it never leaks into Beat 6.
-          pinned: true,
-        } satisfies import("../../map/store").LocationHighlight)
-      : null
-
-    let ringActive = false
-    let hoverActive = false
-    let popupActive = false
-
-    const teardown = () => {
-      if (ringActive) {
-        setDemoLocation(null)
-        ringActive = false
-      }
-      if (hoverActive) {
-        setDemoHoveredLocation(null)
-        hoverActive = false
-      }
-      if (popupActive) {
-        mapActions.clearLocationHighlights()
-        popupActive = false
-      }
-    }
-
-    const unsub = progress.on("change", (v) => {
-      if (v < BEAT5_ENTER || v >= BEAT5_TAIL_END) {
-        teardown()
-        return
-      }
-
-      // Step 2: gold ring on the distribution square.
-      const wantRing =
-        v >= BEAT5_S2_SQUARE_RING_AT && v < BEAT5_SETTLE
-      if (wantRing && !ringActive) {
-        setDemoLocation(info)
-        ringActive = true
-      } else if (!wantRing && ringActive) {
-        setDemoLocation(null)
-        ringActive = false
-      }
-
-      // Step 3: popup near the square (drives the overlay's
-      // foreignObject hoverTooltip via demoHoveredLocation).
-      const wantHover =
-        v >= BEAT5_S3_SQUARE_POPUP_AT && v < BEAT5_SETTLE
-      if (wantHover && !hoverActive) {
-        setDemoHoveredLocation(info)
-        hoverActive = true
-      } else if (!wantHover && hoverActive) {
-        setDemoHoveredLocation(null)
-        hoverActive = false
-      }
-
-      // Step 5: location-highlight Popup near the polygon. The window runs
-      // from the step onset through the end of the Beat 5 tail (not just the
-      // BEAT5_SETTLE settle point) so the popup remains readable during the
-      // ~0.01-wide tail before Beat 6 clears it. The popup is set to
-      // `pinned: false` in VisualizationLayers' get-started filter, so it
-      // won't survive into Beat 6 on its own -- the teardown() in the
-      // Beat-5 driver's cleanup clears it when the window closes.
-      const wantPopup =
-        v >= BEAT5_S5_POLYGON_POPUP_AT && v < BEAT5_TAIL_END
-      if (wantPopup && !popupActive && highlight) {
-        mapActions.setLocationHighlights([highlight])
-        popupActive = true
-      } else if (!wantPopup && popupActive) {
-        mapActions.clearLocationHighlights()
-        popupActive = false
-      }
-    })
-
-    return () => {
-      unsub()
-      teardown()
-    }
-  }, [progress, outcomeLocations, isLoading])
+  /* Beat 5 demo-LOI driver removed in Phase 1.h. The engine's
+   * `OverlayPopupArbiter` and `MapPopupArbiter` (see
+   * `engine/arbiters/`) now drive `demoLocation`,
+   * `demoHoveredLocation`, and `mapActions.setLocationHighlights` for
+   * the Glenn Colusa I.D. (`AG_REV` / `08N_SA2`) LOI sequence. The
+   * legacy effect was already inert behind the `ENGINE_OWNS_BEAT4`
+   * flag; this commit deletes both. See Storyboard Engine Hardening
+   * Plan v2, Phase 1.h. */
 
   /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {
@@ -3271,6 +2965,7 @@ export default function TierAnimationSection() {
                 panelWidth={panelSize.width}
                 panelHeight={panelSize.height}
                 progress={progress}
+                overlayMorphTickRef={overlayMorphTickRef}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
                 distributionPositionMap={distributionPositionMap}
                 // Click-to-show-outcome-layer is intentionally disabled: the
@@ -3327,6 +3022,7 @@ export default function TierAnimationSection() {
 
           <BeatTextOverlay
             progress={progress}
+            narrationTickRef={narrationTickRef}
             headingOpacity={headingOpacity}
             backOutOpacity={backOutOpacity}
             playState={playState}

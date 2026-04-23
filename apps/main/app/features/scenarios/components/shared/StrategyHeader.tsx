@@ -428,6 +428,43 @@ export function StrategyHeader({
   if (compact) {
     /** Matches title line box height for first-line-only legend dot alignment */
     const compactTitleLineHeight = 1.3
+    const themeBadgeButtonSx = onThemeBadgeClick
+      ? {
+          background: "none" as const,
+          border: "none",
+          padding: 0,
+          cursor: "pointer" as const,
+          textAlign: "left" as const,
+          minWidth: 0,
+          display: "inline-flex" as const,
+          alignItems: "center" as const,
+          flex: 1,
+          flexBasis: 0,
+          overflow: "hidden",
+          flexShrink: 1,
+          "&:hover > span": { opacity: 0.8 },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.blue.bright}`,
+            outlineOffset: "2px",
+            borderRadius: "2px",
+          },
+        }
+      : {
+          minWidth: 0,
+          display: "inline-flex" as const,
+          alignItems: "center" as const,
+          flex: 1,
+          flexBasis: 0,
+          overflow: "hidden",
+          flexShrink: 1,
+        }
+    const themeBadgeTextSx = {
+      whiteSpace: "nowrap" as const,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      minWidth: 0,
+      flexShrink: 0,
+    }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
@@ -438,6 +475,7 @@ export function StrategyHeader({
             gap: "4px",
             mb: "1px",
             minHeight: "16px",
+            minWidth: 0,
           }}
         >
           <Typography
@@ -448,11 +486,47 @@ export function StrategyHeader({
               textTransform: "uppercase",
               fontSize: "0.6875rem",
               lineHeight: 1,
+              flexShrink: 0,
             }}
           >
             {strategy.scenarioId.toUpperCase()}
           </Typography>
-          {inlineActions}
+          {showAllThemeBadges && themeLabel && themeColors ? (
+            <Box
+              component={onThemeBadgeClick ? "button" : "span"}
+              type={onThemeBadgeClick ? "button" : undefined}
+              onClick={
+                onThemeBadgeClick && strategy.theme
+                  ? (e: React.MouseEvent) => {
+                      e.stopPropagation()
+                      onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                    }
+                  : undefined
+              }
+              sx={themeBadgeButtonSx}
+            >
+              <ScenarioBadge
+                label={themeLabel}
+                backgroundColor={themeColors.background}
+                color={themeColors.text}
+                sx={themeBadgeTextSx}
+              />
+            </Box>
+          ) : (
+            strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
+          )}
+          {inlineActions ? (
+            <Box
+              sx={{
+                flexShrink: 0,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              {inlineActions}
+            </Box>
+          ) : null}
         </Box>
         <Box
           component="span"
@@ -505,6 +579,7 @@ export function StrategyHeader({
           gap: "6px",
           mb: "4px",
           minHeight: "18px",
+          minWidth: 0,
         }}
       >
         <Typography
@@ -516,6 +591,7 @@ export function StrategyHeader({
             textTransform: "uppercase",
             fontSize: "0.6875rem",
             lineHeight: 1,
+            flexShrink: 0,
           }}
         >
           {strategy.scenarioId.toUpperCase()}
@@ -540,7 +616,14 @@ export function StrategyHeader({
                     border: "none",
                     padding: 0,
                     cursor: "pointer",
+                    textAlign: "left",
+                    minWidth: 0,
                     display: "inline-flex",
+                    alignItems: "center",
+                    flex: 1,
+                    flexBasis: 0,
+                    overflow: "hidden",
+                    flexShrink: 1,
                     "&:hover > span": { opacity: 0.8 },
                     "&:focus-visible": {
                       outline: `2px solid ${theme.palette.blue.bright}`,
@@ -548,20 +631,46 @@ export function StrategyHeader({
                       borderRadius: "2px",
                     },
                   }
-                : { display: "inline-flex" }
+                : {
+                    minWidth: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    flex: 1,
+                    flexBasis: 0,
+                    overflow: "hidden",
+                    flexShrink: 1,
+                  }
             }
           >
             <ScenarioBadge
               label={themeLabel}
               backgroundColor={themeColors.background}
               color={themeColors.text}
+              sx={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+                flexShrink: 0,
+              }}
             />
           </Box>
         ) : (
           strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
         )}
 
-        {inlineActions}
+        {inlineActions ? (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+            }}
+          >
+            {inlineActions}
+          </Box>
+        ) : null}
       </Box>
       <Typography
         variant="scenarioTitle"

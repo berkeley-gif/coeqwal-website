@@ -51,6 +51,11 @@ export interface StrategyGridProps {
   hideColumnTitles?: boolean
   /** When true, shows ThemeGroupHeader subheaders above each theme group instead of divider lines */
   groupByTheme?: boolean
+  /**
+   * When false, theme subheaders are hidden and per-row theme badges are shown, even if groupByTheme
+   * is on (e.g. search or sort has interleaved themes). From useOrderedScenarios.
+   */
+  scenariosInContiguousThemeOrder?: boolean
 
   // Sorting (optional)
   sortBy?: string | null

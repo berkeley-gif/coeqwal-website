@@ -356,19 +356,49 @@ export interface OverlayPopupActor extends ActorBase {
   buildInfo: (ctx: BeatEngineContext) => LocationInfo | null
 }
 
-// Placeholder actor kinds (filled in by Phases 1 and 2)
+// narration actors
 
+/**
+ * A narration actor bridges the beat engine to a progress-driven
+ * DOM-mutation callback owned by a React component (in practice:
+ * `BeatTextOverlay`). The actor carries no payload. On each `onUpdate`
+ * the `NarrationArbiter` reads the latest callback from
+ * `ctx.narrationTickRef` and calls it with the current `v`.
+ *
+ * Rationale. The component's narration logic is ~320 lines of
+ * per-beat opacity curves over component-local refs (`beat1Ref`,
+ * `beat2IntroRef`, ...). Mechanically lifting that into the
+ * declarative actor format is a large, risky rewrite with no
+ * observable benefit beyond satisfying invariant 4 (only one
+ * `progress.on("change")` subscriber). The bridge pattern gives us
+ * invariant 4 while letting the component retain ownership of its
+ * refs, timing constants, and closures.
+ */
 export interface NarrationActor extends ActorBase {
   kind: "narration"
-  /** Phases 2+. Stubbed shape so the `Actor` union is complete. */
-  placeholder?: unknown
 }
 
+// overlayMorph actors
+
+/**
+ * An overlay-morph actor bridges the beat engine to the per-frame
+ * SVG transform pipeline owned by `OutcomeMorphOverlay`. Carries no
+ * payload. On each `onUpdate` the `OverlayMorphArbiter` reads the
+ * latest callback from `ctx.overlayMorphTickRef` and calls it with
+ * the current `v`.
+ *
+ * Rationale. Same as `NarrationActor`: the component owns ~200
+ * lines of path/transform/opacity writes over nested ref maps and
+ * precomputed shape caches. Lifting that into a declarative actor
+ * payload is a large rewrite with no observable benefit beyond
+ * invariant 4. The bridge pattern gives us invariant 4 while letting
+ * the component keep its refs, constants, and RAF coordination.
+ */
 export interface OverlayMorphActor extends ActorBase {
   kind: "overlayMorph"
-  /** Phases 2+. Stubbed shape so the `Actor` union is complete. */
-  placeholder?: unknown
 }
+
+// Placeholder actor kinds (filled in by later phases)
 
 export interface CameraActor extends ActorBase {
   kind: "camera"
@@ -449,6 +479,22 @@ export interface BeatEngineContext {
    * ticks and must not mutate the array.
    */
   getHideSchedule: () => readonly HideScheduleEntry[]
+  /**
+   * Bridge slot for `NarrationArbiter`. `BeatTextOverlay` writes its
+   * per-frame DOM-mutation callback into `.current` on mount and
+   * clears it on unmount. The arbiter reads through the ref on every
+   * `onUpdate` so the component can rebuild its closure on each
+   * render without forcing re-subscription. `null` means no narration
+   * component is mounted; the arbiter silently no-ops in that case.
+   */
+  narrationTickRef: RefObject<((v: number) => void) | null>
+  /**
+   * Bridge slot for `OverlayMorphArbiter`. `OutcomeMorphOverlay`
+   * writes its per-frame SVG-transform callback into `.current` on
+   * mount and clears it on unmount. Same semantics as
+   * `narrationTickRef`.
+   */
+  overlayMorphTickRef: RefObject<((v: number) => void) | null>
 }
 
 // Arbiter interface

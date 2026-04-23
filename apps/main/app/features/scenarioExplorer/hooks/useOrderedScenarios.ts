@@ -23,6 +23,7 @@ import {
   PRIMARY_SCENARIO_BASELINE_ID,
   compareScenarioIdsForThemeSubgroupOrder,
 } from "../utils/scenarioIdSort"
+import { areThemeGroupsContiguous } from "../utils/scenarioThemeOrder"
 
 const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 
@@ -45,6 +46,8 @@ export interface OrderedScenariosResult {
   iconMatchingScenarioIds: Set<string>
   showIconDivider: boolean
   themeBoundaryIndices: number[]
+  /** False when theme blocks are interleaved (e.g. after search or sort); hide subheaders and use row badges */
+  scenariosInContiguousThemeOrder: boolean
   allScoreData: Record<string, Record<string, OutcomeScoreData>> | undefined
   allChartData: Record<string, Record<string, unknown>>
   outcomeNames: OutcomeName[]
@@ -215,6 +218,7 @@ export function useOrderedScenarios(): OrderedScenariosResult {
       iconMatchingScenarioIds: iconIds,
       showIconDivider: selectedIconId !== null,
       themeBoundaryIndices: boundaries,
+      scenariosInContiguousThemeOrder: areThemeGroupsContiguous(finalList),
     }
   }, [
     siblingGroups,

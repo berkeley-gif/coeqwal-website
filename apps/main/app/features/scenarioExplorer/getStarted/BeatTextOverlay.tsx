@@ -1,6 +1,13 @@
 "use client"
 
-import { useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react"
+import {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+  type RefObject,
+} from "react"
 import {
   Box,
   Typography,
@@ -89,6 +96,12 @@ export interface GlyphRect {
 
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
+  /** Bridge into `NarrationArbiter`. The component writes its
+   *  `applyNarrationFrame(v)` dispatcher into `.current` on mount
+   *  and clears it on unmount; the arbiter reads through the ref
+   *  every tick. See
+   *  `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/NarrationArbiter.ts`. */
+  narrationTickRef: RefObject<((v: number) => void) | null>
   headingOpacity: MotionValue<number>
   /** Multiplicative opacity applied on top of the progress-driven fade
    *  for the left-panel text block (`beat1Ref`). Defaults to a constant
@@ -144,6 +157,7 @@ function clamp01(v: number) {
 
 export default function BeatTextOverlay({
   progress,
+  narrationTickRef,
   headingOpacity,
   backOutOpacity,
   playState,
@@ -349,356 +363,389 @@ export default function BeatTextOverlay({
   const outcomeMorphWindowsRef = useRef(outcomeMorphWindows)
   outcomeMorphWindowsRef.current = outcomeMorphWindows
 
-  /* ── `beat1Ref` opacity: progress-driven fade-in × back-out fade-out ──
+  /* ── Narration frame applier (beat-engine bridge) ──
    *
-   * We multiply the progress-derived fade-in (0.02 -> 0.06 window) by
-   * `backOutOpacity` (default 1, animated to 0 on Back-from-first-beat) so the
-   * entire text block (intro paragraphs, tier legend, beat 1C reveals,
-   * bottom controls) fades out together during back-out instead of the
-   * progress listener unwinding each reveal. Both `progress` and
-   * `backOutOpacity` can change independently, so we listen to both and
-   * recompute on either change. */
-  useEffect(() => {
-    const applyBeat1Opacity = () => {
+   * Combines the two legacy `progress.on("change")` subscribers
+   * (first-panel fade multiplied by `backOutOpacity`, plus the big
+   * per-beat narration tick over every DOM ref in this component)
+   * into one callback the beat engine invokes via the
+   * `NarrationArbiter`. See
+   * `engine/arbiters/NarrationArbiter.ts` for the bridge rationale.
+   * Per StorybookEngineHardeningPlanV2 invariant 4, the engine is
+   * the only `progress.on("change")` subscriber in the storyboard.
+   *
+   * `latestNarrationFrameRef` is updated on every render so the
+   * closures over component state and refs always reflect the most
+   * recent render. The bridge-register effect further down writes a
+   * stable dispatcher into `narrationTickRef.current`; that
+   * dispatcher reads `latestNarrationFrameRef.current` on each call.
+   *
+   * `backOutOpacity` is a separate MotionValue (not `progress`), so
+   * its own `on("change")` subscription remains below. When it
+   * changes we re-run the narration frame at `progress.get()` so
+   * `beat1Ref`'s fade-out multiplier stays in sync. */
+  const latestNarrationFrameRef = useRef<(v: number) => void>(() => {})
+  latestNarrationFrameRef.current = (v: number) => {
+    // Beat 1 (first-panel) opacity: progress-driven fade-in (0.01 ->
+    // 0.01 + B0_PARA) multiplied by `backOutOpacity` (default 1,
+    // animated to 0 on Back-from-first-beat so the whole text block
+    // fades out together without reversing each reveal).
+    if (beat1Ref.current) {
       const el = beat1Ref.current
-      if (!el) return
-      const v = progress.get()
-      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.01) / B0_PARA)
+      const fadeIn = textHiddenRef.current
+        ? 0
+        : clamp01((v - 0.01) / B0_PARA)
       const mult = backOutOpacity ? backOutOpacity.get() : 1
       el.style.opacity = String(fadeIn * mult)
     }
-    applyBeat1Opacity()
-    const uProgress = progress.on("change", applyBeat1Opacity)
-    const uBackOut = backOutOpacity
-      ? backOutOpacity.on("change", applyBeat1Opacity)
-      : null
-    return () => {
-      uProgress()
-      uBackOut?.()
+
+    if (beat2IntroRef.current) {
+      const fadeIn = clamp01((v - 0.1) / B0_PARA)
+      beat2IntroRef.current.style.opacity = String(fadeIn)
     }
-  }, [progress, backOutOpacity, textHidden])
 
-  useEffect(() => {
-    const unsub = progress.on("change", (v) => {
-      // NOTE: `beat1Ref.opacity` is handled in the combined effect above
-      // (it multiplies progress-driven fade-in by `backOutOpacity`).
+    // Intro collapse group: after the Critical row lands (~0.45), fade
+    // out the intro paragraphs + subtitle immediately so the user sees
+    // a response to clicking Next, then collapse their height so the
+    // tier legend slides up into the vacated space via document flow.
+    // The subtitle ("How are scenario results measured?") collapses on
+    // the same schedule as the intro paragraphs so only the page title
+    // sits above the legend at rest. Running the two sequentially (fade
+    // then slide) reads more cleanly than overlapping them. Windows are
+    // kept tight (0.015 each, ~0.7s in the merged beat-2/5 tween) so
+    // the whole transition feels snappy and completes before Beat 1B's
+    // map convergence (starting at 0.50) takes over attention.
+    //
+    // Collapse is driven via `grid-template-rows: 1fr -> 0fr` on the
+    // outer wrapper. The browser interpolates each row's height from
+    // the inner overflow-hidden child's natural `min-content` height
+    // down to zero, so no JS measurement is needed (same pattern as
+    // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
+    // below).
+    const introFadeOut = clamp01((v - 0.23) / B1_EXIT)
+    const introCollapse = clamp01((v - 0.2375) / B1_EXIT)
+    const rowsFrac = 1 - introCollapse
+    if (introCollapseRef.current) {
+      const el = introCollapseRef.current
+      el.style.opacity = String(1 - introFadeOut)
+      el.style.gridTemplateRows = `${rowsFrac}fr`
+    }
+    if (subtitleCollapseRef.current) {
+      const el = subtitleCollapseRef.current
+      el.style.opacity = String(1 - introFadeOut)
+      el.style.gridTemplateRows = `${rowsFrac}fr`
+    }
 
-      if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.1) / B0_PARA)
-        beat2IntroRef.current.style.opacity = String(fadeIn)
-      }
+    if (beat2PanelRef.current) {
+      // Beat 2 panel backdrop now serves purely as a reading surface for
+      // outcome titles + location captions, since the narrative text
+      // lives on the left panel. It fades in with AG_REV's solo morph
+      // so the backdrop arrives together with the first graphics.
+      // The fade completes by 0.39 (beat 3's settle point) so the
+      // backdrop is fully present when the AG_REV morph lands.
+      const fadeIn = clamp01((v - 0.3775) / 0.01)
+      beat2PanelRef.current.style.opacity = String(fadeIn)
+    }
 
-      // Intro collapse group: after the Critical row lands (~0.45), fade
-      // out the intro paragraphs + subtitle immediately so the user sees
-      // a response to clicking Next, then collapse their height so the
-      // tier legend slides up into the vacated space via document flow.
-      // The subtitle ("How are scenario results measured?") collapses on
-      // the same schedule as the intro paragraphs so only the page title
-      // sits above the legend at rest. Running the two sequentially (fade
-      // then slide) reads more cleanly than overlapping them. Windows are
-      // kept tight (0.015 each, ~0.7s in the merged beat-2/5 tween) so
-      // the whole transition feels snappy and completes before Beat 1B's
-      // map convergence (starting at 0.50) takes over attention.
-      //
-      // Collapse is driven via `grid-template-rows: 1fr -> 0fr` on the
-      // outer wrapper. The browser interpolates each row's height from
-      // the inner overflow-hidden child's natural `min-content` height
-      // down to zero, so no JS measurement is needed (same pattern as
-      // `beat1cExampleRef` / `beat1cDeliveryRef` / `allOtherOutcomesRef`
-      // below).
-      const introFadeOut = clamp01((v - 0.23) / B1_EXIT)
-      const introCollapse = clamp01((v - 0.2375) / B1_EXIT)
-      const rowsFrac = 1 - introCollapse
-      if (introCollapseRef.current) {
-        const el = introCollapseRef.current
-        el.style.opacity = String(1 - introFadeOut)
-        el.style.gridTemplateRows = `${rowsFrac}fr`
-      }
-      if (subtitleCollapseRef.current) {
-        const el = subtitleCollapseRef.current
-        el.style.opacity = String(1 - introFadeOut)
-        el.style.gridTemplateRows = `${rowsFrac}fr`
-      }
+    // Outcome titles fade in per-slice, synced to each outcome's own morph.
+    // Each title appears just before its polygons begin morphing so the
+    // viewer can read the title while watching that slice animate.
+    // Captions fade in across the *last portion* of each morph window so
+    // they're fully visible the moment the polygons settle as squares.
+    // (Earlier we had captions starting at morphEnd, which left AG_REV's
+    // caption only partially faded in when beat 3 ends at AG_REV's
+    // morphEnd of 0.78.)
+    const windows = outcomeMorphWindowsRef.current
+    const TITLE_LEAD = 0.004
+    const TITLE_FADE = 0.009
+    // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
+    // exactly at morphEnd, so the "x locations" text is fully opaque
+    // the instant the squares lock in.
+    const CAPTION_FADE = 0.006
+    const CAPTION_LEAD = CAPTION_FADE
+    // Late morph slices (when activeOutcomeGroups is short) can push the
+    // caption's natural fadeEnd past the end of beat 4 (0.5), leaving
+    // the caption partially opaque at rest. Cap fadeEnd so every
+    // caption settles at opacity 1 before beat 4 ends.
+    const CAPTION_FADE_END_CEILING = 0.495
+    const layoutItems = beat2LayoutRef.current?.items
+    if (layoutItems) {
+      for (const item of layoutItems) {
+        const win = windows?.[item.code]
+        const titleEl = titleRefsMap.current.get(item.code)
+        const captionEl = captionRefsMap.current.get(item.code)
 
-      if (beat2PanelRef.current) {
-        // Beat 2 panel backdrop now serves purely as a reading surface for
-        // outcome titles + location captions, since the narrative text
-        // lives on the left panel. It fades in with AG_REV's solo morph
-        // so the backdrop arrives together with the first graphics.
-        // The fade completes by 0.39 (beat 3's settle point) so the
-        // backdrop is fully present when the AG_REV morph lands.
-        const fadeIn = clamp01((v - 0.3775) / 0.01)
-        beat2PanelRef.current.style.opacity = String(fadeIn)
-      }
+        if (!win) {
+          // No morph window yet (outcome's polygons haven't populated
+          // `activeOutcomeGroups`, or it's not in ACTIVE_OUTCOMES).
+          // Keep the title + caption fully hidden so stale slots don't
+          // leak into earlier beats (e.g., "Winter-run salmon" showing
+          // at the end of beat 3 before its real morph slice arrives).
+          if (titleEl) titleEl.style.opacity = "0"
+          if (captionEl) captionEl.style.opacity = "0"
+          continue
+        }
 
-      // Outcome titles fade in per-slice, synced to each outcome's own morph.
-      // Each title appears just before its polygons begin morphing so the
-      // viewer can read the title while watching that slice animate.
-      // Captions fade in across the *last portion* of each morph window so
-      // they're fully visible the moment the polygons settle as squares.
-      // (Earlier we had captions starting at morphEnd, which left AG_REV's
-      // caption only partially faded in when beat 3 ends at AG_REV's
-      // morphEnd of 0.78.)
-      const windows = outcomeMorphWindowsRef.current
-      const TITLE_LEAD = 0.004
-      const TITLE_FADE = 0.009
-      // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
-      // exactly at morphEnd, so the "x locations" text is fully opaque
-      // the instant the squares lock in.
-      const CAPTION_FADE = 0.006
-      const CAPTION_LEAD = CAPTION_FADE
-      // Late morph slices (when activeOutcomeGroups is short) can push the
-      // caption's natural fadeEnd past the end of beat 4 (0.5), leaving
-      // the caption partially opaque at rest. Cap fadeEnd so every
-      // caption settles at opacity 1 before beat 4 ends.
-      const CAPTION_FADE_END_CEILING = 0.495
-      const layoutItems = beat2LayoutRef.current?.items
-      if (layoutItems) {
-        for (const item of layoutItems) {
-          const win = windows?.[item.code]
-          const titleEl = titleRefsMap.current.get(item.code)
-          const captionEl = captionRefsMap.current.get(item.code)
+        const morphStart = win.start
+        const morphEnd = win.end
 
-          if (!win) {
-            // No morph window yet (outcome's polygons haven't populated
-            // `activeOutcomeGroups`, or it's not in ACTIVE_OUTCOMES).
-            // Keep the title + caption fully hidden so stale slots don't
-            // leak into earlier beats (e.g., "Winter-run salmon" showing
-            // at the end of beat 3 before its real morph slice arrives).
-            if (titleEl) titleEl.style.opacity = "0"
-            if (captionEl) captionEl.style.opacity = "0"
-            continue
-          }
+        if (titleEl) {
+          const titleFadeStart = morphStart - TITLE_LEAD
+          titleEl.style.opacity = String(
+            clamp01((v - titleFadeStart) / TITLE_FADE),
+          )
+        }
 
-          const morphStart = win.start
-          const morphEnd = win.end
-
-          if (titleEl) {
-            const titleFadeStart = morphStart - TITLE_LEAD
-            titleEl.style.opacity = String(
-              clamp01((v - titleFadeStart) / TITLE_FADE),
-            )
-          }
-
-          if (captionEl) {
-            const rawFadeEnd = morphEnd + (CAPTION_FADE - CAPTION_LEAD)
-            const captionFadeEnd = Math.min(
-              rawFadeEnd,
-              CAPTION_FADE_END_CEILING,
-            )
-            const captionFadeStart = captionFadeEnd - CAPTION_FADE
-            captionEl.style.opacity = String(
-              clamp01((v - captionFadeStart) / CAPTION_FADE),
-            )
-          }
+        if (captionEl) {
+          const rawFadeEnd = morphEnd + (CAPTION_FADE - CAPTION_LEAD)
+          const captionFadeEnd = Math.min(
+            rawFadeEnd,
+            CAPTION_FADE_END_CEILING,
+          )
+          const captionFadeStart = captionFadeEnd - CAPTION_FADE
+          captionEl.style.opacity = String(
+            clamp01((v - captionFadeStart) / CAPTION_FADE),
+          )
         }
       }
+    }
 
-      const eyebrows = eyebrowDataRef.current
-      if (eyebrows) {
-        for (let i = 0; i < eyebrows.length; i++) {
-          const el = eyebrowRefs.current[i]
-          if (!el) continue
-          // 0.01 fade width matches the right-panel backdrop so both
-          // land together just before beat 3 settles at 0.39.
-          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.01)
-          // Hand off to the view-mode header at Beat 5 start: mirror the
-          // "For each scenario..." paragraph exit (0.50 -> 0.51) so the
-          // two column eyebrows vacate the slot just as the
-          // "Distribution view" header fades in.
-          const fadeOut = clamp01((v - 0.5) / B4_EXIT)
-          el.style.opacity = String(fadeIn * (1 - fadeOut))
-        }
-      }
-
-      // Tier legend staggers in row by row (Optimal -> Acceptable -> At risk
-      // -> Critical) so the gap between "To compare results..." (0.10–0.12)
-      // and the map's Beat 1B collapse (0.245) fills with a meaningful
-      // level-by-level reveal instead of a single wide dead zone.
-      // Per-row fade uses `ITEM_FADE_SEC` (~0.55s) - half the paragraph
-      // pace - so the list reads staccato against the slower paragraph
-      // reveals. The row-to-row cadence is `ITEM_STAGGER_SEC` (~1.3s).
-      const TIER_LEGEND_FIRST_START = 0.13
-      const TIER_LEGEND_ROW_STEP = B0_STEP
-      const TIER_LEGEND_ROW_FADE = B0_ITEM
-      const legendRows = tierLegendRowRefs.current
-      for (let i = 0; i < legendRows.length; i++) {
-        const el = legendRows[i]
+    const eyebrows = eyebrowDataRef.current
+    if (eyebrows) {
+      for (let i = 0; i < eyebrows.length; i++) {
+        const el = eyebrowRefs.current[i]
         if (!el) continue
-        const start = TIER_LEGEND_FIRST_START + i * TIER_LEGEND_ROW_STEP
-        el.style.opacity = String(clamp01((v - start) / TIER_LEGEND_ROW_FADE))
-      }
-
-      // Beat 1C + follow-on narrative paragraphs.
-      //
-      // Each paragraph fades in as a complete block via opacity only.
-      // The outer grid-row still collapses from `1fr` to `0fr` to keep
-      // the slot out of the document flow before the paragraph is due
-      // (so the bottom control row hugs the last visible text at rest),
-      // but the row-size change is a near-instant threshold rather than
-      // a synchronized ramp: the slot pops open a hair before the
-      // opacity fade begins, then the text fades in as one whole
-      // paragraph instead of vertically "unfolding" line by line.
-      //
-      // Each slot opens during a tween (`playState === "playing"`), when
-      // the bottom controls are invisible anyway, so the layout push on
-      // the control row isn't perceived.
-      // Beat 1C paragraphs fade in during beat 2 (0.245 / 0.325) and
-      // then fade out at the start of beat 3 (0.365 -> 0.3675), freeing
-      // the left-panel slot below the tier legend for the Beat 3
-      // narration. Their grid rows collapse once fully faded out so the
-      // new paragraph slides cleanly into their former document-flow
-      // slot.
-      if (beat1cExampleRef.current) {
-        const el = beat1cExampleRef.current
-        const fadeIn = clamp01((v - 0.245) / B1_PARA)
-        const fadeOut = clamp01((v - 0.365) / B2_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.2425 && v < 0.3675 ? "1fr" : "0fr"
-      }
-
-      if (beat1cDeliveryRef.current) {
-        const el = beat1cDeliveryRef.current
-        const fadeIn = clamp01((v - 0.325) / B1_PARA)
-        const fadeOut = clamp01((v - 0.365) / B2_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.3225 && v < 0.3675 ? "1fr" : "0fr"
-      }
-
-      // Step 3 narration splits into two slots sharing the document-flow
-      // slot freed by the Beat 1C paragraphs. The "before" paragraph
-      // fades in (0.3675 -> 0.3725) before the AG_REV morph fires at
-      // [0.38, 0.39], then fades out (0.39 -> 0.3925) once the morph
-      // completes so the "after" paragraph can slide into the same slot
-      // (fade in 0.3925 -> 0.3975) and land with Beat 3's settle at 0.40.
-      if (beat3BeforeRef.current) {
-        const el = beat3BeforeRef.current
-        const fadeIn = clamp01((v - 0.3675) / B2_PARA)
-        const fadeOut = clamp01((v - 0.39) / B2_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.3675 && v < 0.3925 ? "1fr" : "0fr"
-      }
-
-      if (beat3AfterRef.current) {
-        const el = beat3AfterRef.current
-        const fadeIn = clamp01((v - 0.3925) / B2_PARA)
-        // beat3After's fade-out cross-fades with `allOtherOutcomesRef`'s
-        // fade-in (both width 0.01 in Beat 3 time), so it intentionally
-        // runs slower than BLOCK_EXIT to keep the two paragraphs visually
-        // tethered across the swap. Left as a bespoke width for now.
-        const fadeOut = clamp01((v - 0.4) / 0.01)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.3925 && v < 0.41 ? "1fr" : "0fr"
-      }
-
-      // "For each scenario, outcome levels..." fades in during beat 4,
-      // right after the Beat 3 "after" paragraph finishes fading out
-      // (0.40 -> 0.41). The remaining 8 outcome morphs then play
-      // alongside this sentence over [0.42, 0.50]. Once beat 4 settles
-      // it fades out (0.50 -> 0.51, B4_EXIT) so the Beat 5 narration can
-      // slide into the same document-flow slot.
-      if (allOtherOutcomesRef.current) {
-        const el = allOtherOutcomesRef.current
-        const fadeIn = clamp01((v - 0.41) / B3_PARA)
+        // 0.01 fade width matches the right-panel backdrop so both
+        // land together just before beat 3 settles at 0.39.
+        const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.01)
+        // Hand off to the view-mode header at Beat 5 start: mirror the
+        // "For each scenario..." paragraph exit (0.50 -> 0.51) so the
+        // two column eyebrows vacate the slot just as the
+        // "Distribution view" header fades in.
         const fadeOut = clamp01((v - 0.5) / B4_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.41 && v < 0.51 ? "1fr" : "0fr"
       }
+    }
 
-      // Beat 5 narration splits into two sentences so the five-step LOI
-      // choreography (starting at 0.555 in TierAnimationSection) can lead
-      // with the matching second sentence.
-      //  S1 "Outcomes can be displayed... / distribution view..."
-      //     fades in 0.51 -> 0.53 and holds through the beat.
-      //  S2 "Locations of interest can be selected..." fades in
-      //     0.545 -> 0.560 just before step 1 kicks in.
-      // Both share the beat-exit window 0.62 -> 0.63 so the Beat 6
-      // paragraph can slide into the same slot.
-      if (beat5LoiS1Ref.current) {
-        const el = beat5LoiS1Ref.current
-        const fadeIn = clamp01((v - 0.51) / B4_PARA)
-        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.51 && v < 0.63 ? "1fr" : "0fr"
-      }
-      if (beat5LoiS2Ref.current) {
-        const el = beat5LoiS2Ref.current
-        const fadeIn = clamp01((v - 0.545) / B4_PARA)
-        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.545 && v < 0.63 ? "1fr" : "0fr"
-      }
+    // Tier legend staggers in row by row (Optimal -> Acceptable -> At risk
+    // -> Critical) so the gap between "To compare results..." (0.10–0.12)
+    // and the map's Beat 1B collapse (0.245) fills with a meaningful
+    // level-by-level reveal instead of a single wide dead zone.
+    // Per-row fade uses `ITEM_FADE_SEC` (~0.55s) - half the paragraph
+    // pace - so the list reads staccato against the slower paragraph
+    // reveals. The row-to-row cadence is `ITEM_STAGGER_SEC` (~1.3s).
+    const TIER_LEGEND_FIRST_START = 0.13
+    const TIER_LEGEND_ROW_STEP = B0_STEP
+    const TIER_LEGEND_ROW_FADE = B0_ITEM
+    const legendRows = tierLegendRowRefs.current
+    for (let i = 0; i < legendRows.length; i++) {
+      const el = legendRows[i]
+      if (!el) continue
+      const start = TIER_LEGEND_FIRST_START + i * TIER_LEGEND_ROW_STEP
+      el.style.opacity = String(clamp01((v - start) / TIER_LEGEND_ROW_FADE))
+    }
 
-      // Beat 6 narration ("The list view summarizes key outcomes as bar
-      // charts.") fades in 0.63 -> 0.65 into the freed document-flow
-      // slot, landing just before the bar morph completes at 0.72. It
-      // fades back out 0.72 -> 0.73 to make room for Beat 7.
-      if (beat6ListRef.current) {
-        const el = beat6ListRef.current
-        const fadeIn = clamp01((v - 0.63) / B5_PARA)
-        const fadeOut = clamp01((v - 0.72) / B6_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.63 && v < 0.73 ? "1fr" : "0fr"
-      }
+    // Beat 1C + follow-on narrative paragraphs.
+    //
+    // Each paragraph fades in as a complete block via opacity only.
+    // The outer grid-row still collapses from `1fr` to `0fr` to keep
+    // the slot out of the document flow before the paragraph is due
+    // (so the bottom control row hugs the last visible text at rest),
+    // but the row-size change is a near-instant threshold rather than
+    // a synchronized ramp: the slot pops open a hair before the
+    // opacity fade begins, then the text fades in as one whole
+    // paragraph instead of vertically "unfolding" line by line.
+    //
+    // Each slot opens during a tween (`playState === "playing"`), when
+    // the bottom controls are invisible anyway, so the layout push on
+    // the control row isn't perceived.
+    // Beat 1C paragraphs fade in during beat 2 (0.245 / 0.325) and
+    // then fade out at the start of beat 3 (0.365 -> 0.3675), freeing
+    // the left-panel slot below the tier legend for the Beat 3
+    // narration. Their grid rows collapse once fully faded out so the
+    // new paragraph slides cleanly into their former document-flow
+    // slot.
+    if (beat1cExampleRef.current) {
+      const el = beat1cExampleRef.current
+      const fadeIn = clamp01((v - 0.245) / B1_PARA)
+      const fadeOut = clamp01((v - 0.365) / B2_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.2425 && v < 0.3675 ? "1fr" : "0fr"
+    }
 
-      // Beat 7 narration ("The radar chart displays the average values
-      // of key outcomes...") fades in 0.73 -> 0.75 into the freed slot
-      // while the bars collapse into dots (0.72 -> 0.75) and migrate to
-      // their polar vertices (0.75 -> 0.82). It fades back out
-      // 0.87 -> 0.88 to make room for Beat 8.
-      if (beat7RadarRef.current) {
-        const el = beat7RadarRef.current
-        const fadeIn = clamp01((v - 0.73) / B6_PARA)
-        const fadeOut = clamp01((v - 0.87) / B6_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-        el.style.gridTemplateRows = v >= 0.73 && v < 0.88 ? "1fr" : "0fr"
-      }
+    if (beat1cDeliveryRef.current) {
+      const el = beat1cDeliveryRef.current
+      const fadeIn = clamp01((v - 0.325) / B1_PARA)
+      const fadeOut = clamp01((v - 0.365) / B2_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.3225 && v < 0.3675 ? "1fr" : "0fr"
+    }
 
-      // Beat 8 narration ("The heat map displays how key outcomes change
-      // under different hydroclimate futures.") fades in 0.88 -> 0.90
-      // into the freed slot, while the radar chrome fades out and the
-      // radar vertices morph into a column of tier-colored cells.
-      if (beat8HeatmapRef.current) {
-        const el = beat8HeatmapRef.current
-        el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
-        el.style.gridTemplateRows = v >= 0.88 ? "1fr" : "0fr"
-      }
+    // Step 3 narration splits into two slots sharing the document-flow
+    // slot freed by the Beat 1C paragraphs. The "before" paragraph
+    // fades in (0.3675 -> 0.3725) before the AG_REV morph fires at
+    // [0.38, 0.39], then fades out (0.39 -> 0.3925) once the morph
+    // completes so the "after" paragraph can slide into the same slot
+    // (fade in 0.3925 -> 0.3975) and land with Beat 3's settle at 0.40.
+    if (beat3BeforeRef.current) {
+      const el = beat3BeforeRef.current
+      const fadeIn = clamp01((v - 0.3675) / B2_PARA)
+      const fadeOut = clamp01((v - 0.39) / B2_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.3675 && v < 0.3925 ? "1fr" : "0fr"
+    }
 
-      // View-mode headers: a single centered label at the top of the
-      // right panel, occupying the slot vacated by the two column
-      // eyebrows ("Consumptive / Non-consumptive uses"). Each header
-      // rides the same fade window as its matching narration paragraph
-      // so label + paragraph arrive and depart together.
-      if (distributionHeaderRef.current) {
-        const el = distributionHeaderRef.current
-        const fadeIn = clamp01((v - 0.51) / B4_PARA)
-        const fadeOut = clamp01((v - 0.62) / B5_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-      }
-      if (listHeaderRef.current) {
-        const el = listHeaderRef.current
-        const fadeIn = clamp01((v - 0.63) / B5_PARA)
-        const fadeOut = clamp01((v - 0.72) / B6_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-      }
-      if (radarHeaderRef.current) {
-        const el = radarHeaderRef.current
-        const fadeIn = clamp01((v - 0.73) / B6_PARA)
-        const fadeOut = clamp01((v - 0.87) / B6_EXIT)
-        el.style.opacity = String(fadeIn * (1 - fadeOut))
-      }
-      if (heatmapHeaderRef.current) {
-        const el = heatmapHeaderRef.current
-        el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
-      }
+    if (beat3AfterRef.current) {
+      const el = beat3AfterRef.current
+      const fadeIn = clamp01((v - 0.3925) / B2_PARA)
+      // beat3After's fade-out cross-fades with `allOtherOutcomesRef`'s
+      // fade-in (both width 0.01 in Beat 3 time), so it intentionally
+      // runs slower than BLOCK_EXIT to keep the two paragraphs visually
+      // tethered across the swap. Left as a bespoke width for now.
+      const fadeOut = clamp01((v - 0.4) / 0.01)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.3925 && v < 0.41 ? "1fr" : "0fr"
+    }
 
-      // NOTE: bottom control row opacity is driven by `playState`
-      // (see the dedicated effect earlier in the file), not by
-      // `progress`. The row is only visible at the reading pauses
-      // between beats, so it doesn't need a progress-driven fade.
+    // "For each scenario, outcome levels..." fades in during beat 4,
+    // right after the Beat 3 "after" paragraph finishes fading out
+    // (0.40 -> 0.41). The remaining 8 outcome morphs then play
+    // alongside this sentence over [0.42, 0.50]. Once beat 4 settles
+    // it fades out (0.50 -> 0.51, B4_EXIT) so the Beat 5 narration can
+    // slide into the same document-flow slot.
+    if (allOtherOutcomesRef.current) {
+      const el = allOtherOutcomesRef.current
+      const fadeIn = clamp01((v - 0.41) / B3_PARA)
+      const fadeOut = clamp01((v - 0.5) / B4_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.41 && v < 0.51 ? "1fr" : "0fr"
+    }
+
+    // Beat 5 narration splits into two sentences so the five-step LOI
+    // choreography (starting at 0.555 in TierAnimationSection) can lead
+    // with the matching second sentence.
+    //  S1 "Outcomes can be displayed... / distribution view..."
+    //     fades in 0.51 -> 0.53 and holds through the beat.
+    //  S2 "Locations of interest can be selected..." fades in
+    //     0.545 -> 0.560 just before step 1 kicks in.
+    // Both share the beat-exit window 0.62 -> 0.63 so the Beat 6
+    // paragraph can slide into the same slot.
+    if (beat5LoiS1Ref.current) {
+      const el = beat5LoiS1Ref.current
+      const fadeIn = clamp01((v - 0.51) / B4_PARA)
+      const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.51 && v < 0.63 ? "1fr" : "0fr"
+    }
+    if (beat5LoiS2Ref.current) {
+      const el = beat5LoiS2Ref.current
+      const fadeIn = clamp01((v - 0.545) / B4_PARA)
+      const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.545 && v < 0.63 ? "1fr" : "0fr"
+    }
+
+    // Beat 6 narration ("The list view summarizes key outcomes as bar
+    // charts.") fades in 0.63 -> 0.65 into the freed document-flow
+    // slot, landing just before the bar morph completes at 0.72. It
+    // fades back out 0.72 -> 0.73 to make room for Beat 7.
+    if (beat6ListRef.current) {
+      const el = beat6ListRef.current
+      const fadeIn = clamp01((v - 0.63) / B5_PARA)
+      const fadeOut = clamp01((v - 0.72) / B6_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.63 && v < 0.73 ? "1fr" : "0fr"
+    }
+
+    // Beat 7 narration ("The radar chart displays the average values
+    // of key outcomes...") fades in 0.73 -> 0.75 into the freed slot
+    // while the bars collapse into dots (0.72 -> 0.75) and migrate to
+    // their polar vertices (0.75 -> 0.82). It fades back out
+    // 0.87 -> 0.88 to make room for Beat 8.
+    if (beat7RadarRef.current) {
+      const el = beat7RadarRef.current
+      const fadeIn = clamp01((v - 0.73) / B6_PARA)
+      const fadeOut = clamp01((v - 0.87) / B6_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+      el.style.gridTemplateRows = v >= 0.73 && v < 0.88 ? "1fr" : "0fr"
+    }
+
+    // Beat 8 narration ("The heat map displays how key outcomes change
+    // under different hydroclimate futures.") fades in 0.88 -> 0.90
+    // into the freed slot, while the radar chrome fades out and the
+    // radar vertices morph into a column of tier-colored cells.
+    if (beat8HeatmapRef.current) {
+      const el = beat8HeatmapRef.current
+      el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
+      el.style.gridTemplateRows = v >= 0.88 ? "1fr" : "0fr"
+    }
+
+    // View-mode headers: a single centered label at the top of the
+    // right panel, occupying the slot vacated by the two column
+    // eyebrows ("Consumptive / Non-consumptive uses"). Each header
+    // rides the same fade window as its matching narration paragraph
+    // so label + paragraph arrive and depart together.
+    if (distributionHeaderRef.current) {
+      const el = distributionHeaderRef.current
+      const fadeIn = clamp01((v - 0.51) / B4_PARA)
+      const fadeOut = clamp01((v - 0.62) / B5_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+    }
+    if (listHeaderRef.current) {
+      const el = listHeaderRef.current
+      const fadeIn = clamp01((v - 0.63) / B5_PARA)
+      const fadeOut = clamp01((v - 0.72) / B6_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+    }
+    if (radarHeaderRef.current) {
+      const el = radarHeaderRef.current
+      const fadeIn = clamp01((v - 0.73) / B6_PARA)
+      const fadeOut = clamp01((v - 0.87) / B6_EXIT)
+      el.style.opacity = String(fadeIn * (1 - fadeOut))
+    }
+    if (heatmapHeaderRef.current) {
+      const el = heatmapHeaderRef.current
+      el.style.opacity = String(clamp01((v - 0.88) / B7_PARA))
+    }
+
+    // NOTE: bottom control row opacity is driven by `playState`
+    // (see the dedicated effect earlier in the file), not by
+    // `progress`. The row is only visible at the reading pauses
+    // between beats, so it doesn't need a progress-driven fade.
+  }
+
+  /* ── Bridge registration ──
+   *
+   * Writes a stable dispatcher into `narrationTickRef.current` so
+   * the engine's `NarrationArbiter` invokes the latest narration
+   * frame every tick. Runs once per mount (dep set is stable). The
+   * dispatcher reads through `latestNarrationFrameRef` so closures
+   * stay fresh without re-subscription. An eager call on mount
+   * matches the legacy listener's immediate-sync behavior for
+   * `beat1Ref` opacity. */
+  useEffect(() => {
+    const dispatch = (v: number) => latestNarrationFrameRef.current(v)
+    narrationTickRef.current = dispatch
+    dispatch(progress.get())
+    return () => {
+      if (narrationTickRef.current === dispatch) {
+        narrationTickRef.current = null
+      }
+    }
+  }, [narrationTickRef, progress])
+
+  /* ── `backOutOpacity` driver ──
+   *
+   * `backOutOpacity` is a separate MotionValue, not `progress`, so
+   * the engine's single-subscriber invariant does not apply. When it
+   * changes we re-run the narration frame at the current progress so
+   * `beat1Ref`'s fade-out multiplier follows the back-out animation. */
+  useEffect(() => {
+    if (!backOutOpacity) return
+    return backOutOpacity.on("change", () => {
+      latestNarrationFrameRef.current(progress.get())
     })
-    return unsub
-  }, [progress])
+  }, [backOutOpacity, progress])
 
   /* ── Report glyph placeholder rects up to the parent ──
    *

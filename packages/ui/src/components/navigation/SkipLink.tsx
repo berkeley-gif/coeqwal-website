@@ -10,11 +10,12 @@
  * Usage:
  * - Place as the first element in your page/layout, before any other content
  * - Ensure your main content has id="main-content" and tabIndex={-1}
- * - The link is visually hidden until focused (appears top-left on focus)
+ * - The link is visually hidden until keyboard focus-visible (appears top-left)
  *
- * Note: The skip link only appears when you Tab into the page from the browser
- * address bar (or when the page first loads). If you click anywhere on the page
- * first, Tab will start from that element - this is standard browser behavior.
+ * Note: Visible styles use :focus-visible so programmatic focus (e.g. Next.js
+ * App Router after client navigation) does not flash the link. Keyboard users
+ * still see it when tabbing from the address bar. If you click the page first,
+ * Tab starts from that element - standard browser behavior.
  *
  * @example
  * // In your page.tsx or layout.tsx:
@@ -105,8 +106,8 @@ export function SkipLink({
         height: "1px",
         overflow: "hidden",
         zIndex,
-        // Visible when focused
-        "&:focus": {
+        // Visible for keyboard focus only (not programmatic :focus alone)
+        "&:focus-visible": {
           position: "fixed",
           top: 8,
           left: 8,

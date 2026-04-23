@@ -21,7 +21,7 @@ interface ThemeGroupHeaderProps {
   layout?: "grid" | "flex"
   /** Sidebar / grid: highlight linked charts when hovering this header (all theme scenario ids). */
   onRowHover?: (scenarioIds: string[] | null) => void
-  /** if single-select disable theme selection */
+  /** when true, hide the select-all-in-theme header checkbox (e.g. equity) */
   singleSelect?: boolean
 }
 
@@ -115,7 +115,7 @@ export default function ThemeGroupHeader({
         },
       }}
     >
-      {singleSelect && (
+      {!singleSelect && (
         <Box
           sx={{
             display: "flex",

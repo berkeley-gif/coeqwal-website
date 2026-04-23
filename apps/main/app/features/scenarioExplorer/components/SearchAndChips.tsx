@@ -54,6 +54,7 @@ export default function SearchAndChips({
   } = useScenarioExplorerStore()
 
   const searchAnchorRef = useTourAnchor("list.toolbar.search")
+  const chipsRowAnchorRef = useTourAnchor("list.toolbar.chips")
   const themeGroupAnchorRef = useTourAnchor("list.toolbar.themeGroup")
   const showOnlyChosenAnchorRef = useTourAnchor("list.select.showOnlyChosen")
   const showBaselinesAnchorRef = useTourAnchor("list.select.showBaselines")
@@ -144,6 +145,7 @@ export default function SearchAndChips({
           </Typography>
         )}
         <Box
+          ref={chipsRowAnchorRef}
           sx={{
             display: "flex",
             alignItems: "center",

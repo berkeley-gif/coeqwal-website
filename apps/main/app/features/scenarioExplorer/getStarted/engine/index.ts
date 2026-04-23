@@ -4,6 +4,8 @@ export { BEAT_TABLE } from "./beats"
 export { MapPaintArbiter } from "./arbiters/MapPaintArbiter"
 export { MapPopupArbiter } from "./arbiters/MapPopupArbiter"
 export { OverlayPopupArbiter } from "./arbiters/OverlayPopupArbiter"
+export { NarrationArbiter } from "./arbiters/NarrationArbiter"
+export { OverlayMorphArbiter } from "./arbiters/OverlayMorphArbiter"
 export { STORYBOARD_DEBUG, debugLog, logDuState } from "./debug"
 export {
   DU_CLASS_FILTER,

@@ -52,8 +52,14 @@ function AboutCtaLink({
         }}
       >
         <Typography
-          variant="displayBody"
-          sx={{ fontWeight: "fontWeightSemiBold" }}
+          component="span"
+          sx={(theme) => ({
+            ...theme.typography.overline,
+            fontWeight: 600,
+            letterSpacing: "0.2em",
+            lineHeight: 1.2,
+            color: "inherit",
+          })}
         >
           {children}
         </Typography>

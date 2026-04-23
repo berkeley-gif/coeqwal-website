@@ -236,6 +236,29 @@ const BEAT1_BREATH_AMPLITUDE = 0.05
 const BEAT0_ENTRY: BeatTableEntry = {
   id: "legend",
   actors: [
+    // Narration bridge. Fires every tick across the full progress
+    // range. The arbiter delegates to the callback that
+    // `BeatTextOverlay` registers via `ctx.narrationTickRef`. Hosted
+    // under the first beat because actor windows are independent of
+    // beat checkpoints and narration has no natural "owner" beat.
+    // Half-open `[0, 1)` matches engine convention; the final tick
+    // at v=1 is harmless because narration opacity curves have
+    // already latched to their final values well before v approaches 1.
+    {
+      kind: "narration",
+      id: "beat0:narration:tick",
+      window: [0, 1],
+    },
+    // Overlay-morph bridge. Same shape and rationale as the
+    // narration bridge above. `OutcomeMorphOverlay` registers its
+    // per-frame SVG-transform callback via
+    // `ctx.overlayMorphTickRef`. See
+    // `engine/arbiters/OverlayMorphArbiter.ts`.
+    {
+      kind: "overlayMorph",
+      id: "beat0:overlayMorph:tick",
+      window: [0, 1],
+    },
     {
       kind: "mapPaint",
       id: "beat0:mapPaint:reset",
