@@ -1090,8 +1090,13 @@ export default function TierAnimationSection() {
           | LocationInfo
           | undefined
         const prevOutcomeCode = prevEntry?.code ?? null
-        const isCrossOutcome =
-          !wasSelected && prevOutcomeCode != null && prevOutcomeCode !== info.code
+        // Fly the camera whenever the selection enters a new outcome:
+        //   - first click (prevOutcomeCode null -> info.code): fly
+        //   - swap to a different outcome (A -> B): fly
+        //   - swap within the same outcome (A square 1 -> A square 2): no fly
+        //   - de-select (wasSelected): no fly (handled below)
+        const isNewOutcomeSelection =
+          !wasSelected && prevOutcomeCode !== info.code
 
         if (wasSelected) {
           setPinnedLocations(new Map())
@@ -1110,10 +1115,12 @@ export default function TierAnimationSection() {
           mapActions.setOutcomeVisualization(info.code, resolvedScenarioId)
         }
 
-        // Fly the camera to the new outcome on cross-outcome switches so
-        // the user can see the polygon that just became active. Same-outcome
-        // swaps keep the camera still (both polygons are already in view).
-        if (isCrossOutcome) {
+        // Fly the camera to the new outcome whenever the selection
+        // enters a new outcome (first click or cross-outcome swap) so
+        // the user can see the polygon that just became active.
+        // Same-outcome swaps keep the camera still (both polygons are
+        // already in view); de-select clicks skip this branch too.
+        if (isNewOutcomeSelection) {
           const map = mapAPI.mapRef?.current?.getMap?.()
           if (map) {
             const action = resolveOutcomeCamera(info.code, "get-started")
