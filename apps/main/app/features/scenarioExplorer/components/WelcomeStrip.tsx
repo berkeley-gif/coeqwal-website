@@ -42,36 +42,39 @@ interface FlowStep {
   icon: React.ReactNode
 }
 
+// Mirrors the visible (non-research) steps in ExploreSubNav so the
+// strip reads as the same journey the user sees in the dark sub-nav
+// above. Keep label + purpose copy in lockstep with that file.
 const FLOW: FlowStep[] = [
   {
     mode: "list",
     label: "List",
     purpose: "Shortlist scenarios",
-    icon: <ViewListIcon sx={{ fontSize: "1.15rem" }} />,
+    icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
   },
   {
     mode: "radar",
     label: "Radar",
     purpose: "Compare shapes",
-    icon: <AdjustIcon sx={{ fontSize: "1.15rem" }} />,
+    icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
   },
   {
     mode: "equity",
     label: "Distribution",
     purpose: "See who benefits",
-    icon: <AppsIcon sx={{ fontSize: "1.15rem" }} />,
+    icon: <AppsIcon sx={{ fontSize: "1.1rem" }} />,
   },
   {
     mode: "resilience",
     label: "Resilience",
     purpose: "Stress-test",
-    icon: <GridOnIcon sx={{ fontSize: "1.15rem" }} />,
+    icon: <GridOnIcon sx={{ fontSize: "1.1rem" }} />,
   },
   {
     mode: null,
-    label: "Go to Share",
+    label: "Share",
     purpose: "Save charts + notes",
-    icon: <icons.IosShare sx={{ fontSize: "1.15rem" }} />,
+    icon: <icons.IosShare sx={{ fontSize: "1.1rem" }} />,
   },
 ]
 
@@ -128,7 +131,7 @@ export default function WelcomeStrip() {
           gap: { xs: 1.5, lg: 2.5 },
         }}
       >
-        <Box sx={{ minWidth: 0, maxWidth: 360 }}>
+        <Box sx={{ minWidth: 0, maxWidth: 420 }}>
           <Typography
             sx={{
               fontSize: "0.9375rem",
@@ -144,11 +147,13 @@ export default function WelcomeStrip() {
             sx={{
               fontSize: "0.8125rem",
               color: theme.palette.text.primary,
-              lineHeight: 1.4,
+              lineHeight: 1.45,
             }}
           >
-            Each scenario is a preset plan. Use these four tools to shortlist a
-            few, compare them, stress-test them, and share what you find.
+            Each row is a scenario, a plan for managing California Central Valley
+            water. Pick a few that look interesting and keep reading,
+            comparing, and curating. Check the boxes next to the scenarios
+            you want to collect into a group that fits your goals.
           </Typography>
         </Box>
 
@@ -174,9 +179,9 @@ export default function WelcomeStrip() {
                   sx={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 0.5,
-                    px: 1,
-                    py: 0.5,
+                    gap: 0.6,
+                    px: 0.9,
+                    py: 0.4,
                     border: `1px solid ${
                       isActive
                         ? theme.palette.blue.bright
@@ -191,10 +196,7 @@ export default function WelcomeStrip() {
                       : theme.palette.text.primary,
                     cursor: "pointer",
                     transition: "all 120ms ease",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    whiteSpace: "nowrap",
-                    lineHeight: 1.2,
+                    lineHeight: 1.1,
                     "&:hover": {
                       borderColor: theme.palette.blue.bright,
                       background: alpha(theme.palette.blue.bright, 0.08),
@@ -224,7 +226,11 @@ export default function WelcomeStrip() {
                   >
                     <Box
                       component="span"
-                      sx={{ fontSize: "0.8125rem", fontWeight: 600 }}
+                      sx={{
+                        fontSize: "0.8125rem",
+                        fontWeight: isActive ? 700 : 600,
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       {step.label}
                     </Box>
@@ -233,6 +239,7 @@ export default function WelcomeStrip() {
                       sx={{
                         fontSize: "0.6875rem",
                         fontWeight: 400,
+                        whiteSpace: "nowrap",
                         color: isActive
                           ? theme.palette.blue.bright
                           : theme.palette.grey[700],

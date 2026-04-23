@@ -436,6 +436,10 @@ interface ScenarioExplorerActions {
   // Beginner journey
   markHowToReadSeen: (mode: ExploreMode) => void
   dismissWelcome: (permanent: boolean) => void
+  /** Re-open the WelcomeStrip after it has been dismissed. Clears
+   *  both the session and persisted dismissal flags so the strip
+   *  renders again on the List view. */
+  reopenWelcome: () => void
   /** Idempotently pre-pin the baseline scenario on first visit. */
   ensureBaselinePrePin: () => void
   setSeenBaselinePinHint: (seen: boolean) => void
@@ -909,6 +913,12 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.welcomeDismissedThisSession = true
         if (permanent) state.welcomeDismissedPermanently = true
+      }),
+
+    reopenWelcome: () =>
+      set((state) => {
+        state.welcomeDismissedThisSession = false
+        state.welcomeDismissedPermanently = false
       }),
 
     ensureBaselinePrePin: () =>

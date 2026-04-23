@@ -184,7 +184,7 @@ const BEAT4_ENTRY: BeatTableEntry = {
   ],
 }
 
-// Beat 0 (legend) actors
+// Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
 
 // Reset window. Half-open `[0, RESET_END)`. Mirrors the
 // main-choreography listener's `v < 0.01` branch at
@@ -196,6 +196,24 @@ const BEAT4_ENTRY: BeatTableEntry = {
 // a grouping key for the table.
 const RESET_END = 0.01
 
+// Beat 1 thresholds. Mirror the inline `FREEZE_AT`, `BEAT1B_START`,
+// and `BEAT1C_BLEND_START` declarations at
+// TierAnimationSection.tsx lines 2145 to 2150. Must stay in sync.
+const FREEZE_AT = 0.09
+const BEAT1C_BLEND_START = 0.26
+// Reference point for `cycleRotations`. The legacy cycling expression
+// was `beat1T * BEAT1_CYCLE` where `beat1T = v / FREEZE_AT`, so the
+// full cycle window runs one rotation of `BEAT1_CYCLE = 90` phase
+// units across `[0, FREEZE_AT)`. We pass that rotation count to the
+// arbiter as a payload number rather than importing `BEAT1_CYCLE`
+// so the beat table stays free of palette internals.
+const BEAT1_CYCLE_ROTATIONS = 90
+// `beat1T / 0.33` is the legacy fade-in ramp, i.e. the first third
+// of the cycle window is fade-in, the rest is hold with breath.
+const BEAT1_FADE_IN_FRAC = 0.33
+const BEAT1_PEAK_OPACITY = 0.65
+const BEAT1_BREATH_AMPLITUDE = 0.05
+
 const BEAT0_ENTRY: BeatTableEntry = {
   id: "legend",
   actors: [
@@ -204,6 +222,29 @@ const BEAT0_ENTRY: BeatTableEntry = {
       id: "beat0:mapPaint:reset",
       window: [0, RESET_END],
       payload: { kind: "reset" },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:cycle",
+      window: [RESET_END, FREEZE_AT],
+      payload: {
+        kind: "beat1-cycle",
+        cycleStart: 0,
+        cycleEnd: FREEZE_AT,
+        cycleRotations: BEAT1_CYCLE_ROTATIONS,
+        peakOpacity: BEAT1_PEAK_OPACITY,
+        fadeInFrac: BEAT1_FADE_IN_FRAC,
+        breathAmplitude: BEAT1_BREATH_AMPLITUDE,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "beat0:mapPaint:hold",
+      window: [FREEZE_AT, BEAT1C_BLEND_START],
+      payload: {
+        kind: "beat1-hold",
+        peakOpacity: BEAT1_PEAK_OPACITY,
+      },
     },
   ],
 }
