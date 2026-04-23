@@ -76,9 +76,11 @@ export function CenterImageText({
         boxSizing: "border-box",
         height: "100vh",
         maxHeight: "100vh",
-        gap: "55px",
+        gap: { xs: theme.spacing(4), md: theme.spacing(7) },
+        paddingTop: { xs: theme.spacing((paddingTop / 8) + 4), md: `${paddingTop}px` },
+        paddingBottom: { xs: theme.spacing(6), md: "0px" },
+        paddingX: { xs: theme.space.page.x.xs, sm: theme.space.page.x.sm, md: "0px" },
         backgroundColor: backgroundColor,
-        paddingTop: `${paddingTop}px`,
       }}
     >
       {/* Image.centered on mobile and desktop */}
@@ -87,7 +89,7 @@ export function CenterImageText({
         src={imgSrc}
         alt={imgAlt}
         sx={{
-          width: { lg: "300px", xl: "600px" },
+          width: { xs: "200px", sm: "500px", md: "280px", lg: "300px", xl: "600px" },
           height: "auto",
           objectFit: "contain",
         }}
@@ -102,9 +104,10 @@ export function CenterImageText({
           display: "flex",
           flexDirection: "column",
           gap: { xs: 4, md: 4 },
-          textAlign: "left",
-          paddingLeft: "55px",
-          maxWidth: { sm: "55%", xl: "40%" },
+          textAlign: {xs: "center", md: "left"},
+          width: "100%",
+          maxWidth: { xs: "100%", sm: "85%", md: "55%", xl: "40%" },
+          paddingLeft: { xs: "0px", md: "55px" },
         }}
       >
         {/* Body */}

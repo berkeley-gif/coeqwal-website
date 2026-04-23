@@ -54,6 +54,7 @@ export function CenteredTextSection({
         alignItems: "center",
         justifyContent: "center",
         color: textColor ? textColor : theme.palette.blue.darkest,
+        paddingX: { xs: "24px", sm: "40px", md: "0" },
       }}
     >
       {/* Title */}

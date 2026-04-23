@@ -53,7 +53,8 @@ export function ScrollImageTextBlocks({
       aria-label={ariaLabel}
       sx={{
         pointerEvents: "auto",
-        backgroundImage: `url(${backgroundSrc}.jpg)`,
+        backgroundImage: { xs: "none", md: `url(${backgroundSrc}.jpg)` },
+        backgroundColor: { xs: theme.palette.common.white, md: "transparent" },
         backgroundSize: "100% auto", // Full width, height stretches with content
         backgroundRepeat: "repeat",
         backgroundPosition: "top center",
@@ -67,13 +68,15 @@ export function ScrollImageTextBlocks({
         initial="hidden"
         whileInView="show"
         sx={{
-          width: "50%",
+          width: { xs: "100%", md: "50%" },
           paddingTop: `${theme.layout.headerHeight + 25}px`,
           paddingBottom: `70px`,
-          paddingLeft: "25%",
+          paddingLeft: { xs: "24px", md: "25%" },
+          paddingRight: { xs: "24px", md: "0" },
+          position: { xs: "static", md: "sticky" },
           color: theme.palette.blue.darkest,
-          position: "sticky",
           top: 0,
+          boxSizing: "border-box",
           zIndex: 0,
         }}
         variants={fadeIn}
@@ -107,7 +110,9 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
         display: "flex",
         width: "100%",
         flexDirection: "column",
-        gap: "175px",
+        gap: { xs: "64px", md: "175px" },
+        paddingX: { xs: "24px", md: "0" },
+        paddingBottom: { xs: "48px", md: "0" },
       }}
     >
       {rawBlocks?.map((block, index) => (
@@ -119,10 +124,11 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
             width: "100%",
             alignItems: "center",
             justifyContent: "center",
-            gap: `${GAP}px`,
             zIndex: 1,
-            position: "relative",
-            minHeight: "400px", // Give space for absolute positioning
+            minHeight: { xs: "auto", md: "400px" }, // Give space for absolute positioning
+            flexDirection: { xs: "column", md: "row" },
+            position: { xs: "static", md: "relative" },
+            gap: { xs: "24px", md: `${GAP}px` },
           }}
         >
           {/* Image on LEFT */}
@@ -137,11 +143,11 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
                 src={block.imgSrc}
                 alt={block.imgAlt}
                 sx={{
-                  width: `${IMAGE_WIDTH}px`,
+                  width: { xs: "100%", md: `${IMAGE_WIDTH}px` },
+                  position: { xs: "static", md: "absolute" },
+                  right: { md: `calc(50% - ${OFFSET}px)` },
                   height: "auto",
                   objectFit: "contain",
-                  position: "absolute",
-                  right: `calc(50% - ${OFFSET}px)`, // Right edge at 15px left of center
                 }}
               />
               <Box
@@ -151,9 +157,9 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
                 viewport={{ once: false, amount: 0.3 }}
                 variants={fadeInRight}
                 sx={{
-                  width: `${TEXT_WIDTH}px`,
-                  position: "absolute",
-                  left: `calc(50% + ${GAP - OFFSET}px)`, // Starts GAP away from image
+                  width: { xs: "100%", md: `${TEXT_WIDTH}px` },
+                  position: { xs: "static", md: "absolute" },
+                  left: { md: `calc(50% + ${GAP - OFFSET}px)` },
                 }}
               >
                 <Typography
@@ -180,16 +186,16 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
                 viewport={{ once: false, amount: 0.3 }}
                 variants={fadeInRight}
                 sx={{
-                  width: `${TEXT_WIDTH}px`,
-                  position: "absolute",
-                  right: `calc(50% + ${GAP - OFFSET}px)`, // Ends GAP away from image
+                  width: { xs: "100%", md: `${TEXT_WIDTH}px` },
+                  position: { xs: "static", md: "absolute" },
+                  right: { md: `calc(50% + ${GAP - OFFSET}px)` },
                 }}
               >
                 <Typography
                   variant="body1"
                   sx={{
                     textAlign: "left",
-                    background: theme.palette.common.white,
+                    background: { xs: theme.palette.common.white, md: "white" },
                     paddingTop: "25px",
                     paddingLeft: `${OFFSET}px`,
                     paddingRight: `${OFFSET}px`,
@@ -207,11 +213,11 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
                 src={block.imgSrc}
                 alt={block.imgAlt}
                 sx={{
-                  width: `${IMAGE_WIDTH}px`,
+                  width: { xs: "100%", md: `${TEXT_WIDTH}px` },
+                  position: { xs: "static", md: "absolute" },
+                  left: { md: `calc(50% - ${GAP - OFFSET}px)` },// Left edge at 15px left of center
                   height: "auto",
                   objectFit: "contain",
-                  position: "absolute",
-                  left: `calc(50% - ${OFFSET}px)`, // Left edge at 15px left of center
                 }}
               />
             </>
