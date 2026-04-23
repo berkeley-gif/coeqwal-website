@@ -114,6 +114,6 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.journey",
     eyebrow: "TAKE YOUR SHORTLIST FORWARD",
     title: "What to do after the List view",
-    body: "Radar compares the shortlisted scenarios as full portfolios instead of isolated cells. Resilience tests the same scenarios across climate futures and operational leverage. Distribution inspects the spread across locations more directly.",
+    body: "Radar compares the shortlisted scenarios across every chosen outcome at once instead of isolated cells. Resilience tests the same scenarios across climate futures and operational leverage. Distribution inspects the spread across locations more directly.",
   },
 ]

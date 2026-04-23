@@ -670,7 +670,7 @@ export default function RadarPanel({
       <ToolIntroStrip
         mode="radar"
         title="Compare scenarios as shapes, not rows"
-        summary="Each polygon is one scenario. Axes are the outcomes you care about. Look at the overall shape: a balanced portfolio reads round, a lopsided one shows spikes and pinches."
+        summary="Each polygon is one scenario. Axes are the outcomes you care about. Look at the overall shape: a balanced read looks round, a lopsided one shows spikes and pinches."
         bullets={[
           {
             label: "Closer to the center is better.",
