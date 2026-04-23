@@ -17,6 +17,8 @@ import { HydroclimateBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
+import ToolJourneyStrip from "./ToolJourneyStrip"
+import WelcomeStrip from "./WelcomeStrip"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320
 const SIDEBAR_WIDTH_EXPANDED = 480
@@ -115,6 +117,12 @@ export default function UnifiedToolLayout({
           pointerEvents: "auto",
         }}
       >
+        {/* First-visit welcome strip. Only rendered on the List view
+            because that is the canonical landing tool; Radar and
+            Resilience get their own ToolIntroStrip per chart. Equity
+            intentionally has no intro (owned by another developer). */}
+        {exploreMode === "list" && <WelcomeStrip />}
+
         {/* Shared toolbar */}
         <Box
           sx={{
@@ -125,6 +133,15 @@ export default function UnifiedToolLayout({
         >
           {toolbar}
         </Box>
+
+        {/* Beginner journey strip: plain-language purpose + "Now try" nudge.
+            Hidden in research-only modes (comparison, data) where the
+            journey metadata is intentionally sparse. */}
+        {exploreMode !== "comparison" && exploreMode !== "data" && (
+          <Box sx={{ flexShrink: 0 }}>
+            <ToolJourneyStrip mode={exploreMode} />
+          </Box>
+        )}
 
         {/* Per-panel chart controls (optional) */}
         {chartControls && <Box sx={{ flexShrink: 0 }}>{chartControls}</Box>}

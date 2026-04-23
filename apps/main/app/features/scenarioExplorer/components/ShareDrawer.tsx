@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useCallback, useMemo } from "react"
 import {
   Box,
   Drawer,
@@ -16,29 +16,42 @@ import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 import ShareRadarCard from "./ShareRadarCard"
+import ShareSnapshotCard from "./ShareSnapshotCard"
 import type { ChartDataPoint } from "../../scenarios/components/shared/types"
+import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
 
+function outcomeCodesToLabels(codes: string[]): string[] {
+  return codes.map(
+    (code) => OUTCOME_NAMES[code as OutcomeCode] ?? code,
+  )
+}
+
 function ShareItemCard({
   item,
   onRemove,
+  onNoteChange,
   outcomeNames,
   scenarioLookup,
   allChartData,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
+  onNoteChange: (id: string, note: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<
     string,
-    { name: string; description: string; definition: string }
+    {
+      name: string
+      description: string
+      definition: string
+      shortLabel: string
+    }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
 }) {
-  const theme = useTheme()
-
   if (item.type === "barChart") {
     const info = scenarioLookup.get(item.scenarioId)
     const viewLabel =
@@ -67,27 +80,95 @@ function ShareItemCard({
     )
   }
 
-  const radarScenarioNames = item.scenarioIds.map(
-    (id) =>
-      scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
-  )
-  const radarScenarioDefinitions = item.scenarioIds.map(
-    (id) => scenarioLookup.get(id)?.definition ?? "",
-  )
+  if (item.type === "radar") {
+    const radarScenarioNames = item.scenarioIds.map(
+      (id) =>
+        scenarioLookup.get(id)?.description ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+    const radarScenarioDefinitions = item.scenarioIds.map(
+      (id) => scenarioLookup.get(id)?.definition ?? "",
+    )
 
-  return (
-    <ShareRadarCard
-      scenarioNames={radarScenarioNames}
-      scenarioDefinitions={radarScenarioDefinitions}
-      scenarioColors={item.scenarioColors}
-      hydroclimate={item.hydroclimate}
-      showRange={item.showRange}
-      highlightBaseline={item.highlightBaseline}
-      showDotsOnly={item.showDotsOnly}
-      cachedImageDataUrl={item.cachedImageDataUrl}
-      onRemove={() => onRemove(item.id)}
-    />
-  )
+    return (
+      <ShareRadarCard
+        scenarioNames={radarScenarioNames}
+        scenarioDefinitions={radarScenarioDefinitions}
+        scenarioColors={item.scenarioColors}
+        hydroclimate={item.hydroclimate}
+        showRange={item.showRange}
+        highlightBaseline={item.highlightBaseline}
+        showDotsOnly={item.showDotsOnly}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+        onRemove={() => onRemove(item.id)}
+      />
+    )
+  }
+
+  if (item.type === "equity") {
+    const info = scenarioLookup.get(item.scenarioId)
+    const outcomeChips = outcomeCodesToLabels(item.outcomeCodes)
+    return (
+      <ShareSnapshotCard
+        id={item.id}
+        toolLabel="Distribution"
+        title={info?.description ?? info?.name ?? item.scenarioId}
+        subtitle={
+          item.compareToBaseline
+            ? "Compared to today's operations"
+            : "Single scenario view"
+        }
+        chips={outcomeChips}
+        hydroclimate={item.hydroclimate}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+        note={item.note}
+        onNoteChange={(note) => onNoteChange(item.id, note)}
+        onRemove={onRemove}
+      />
+    )
+  }
+
+  if (item.type === "resilience") {
+    const outcomeChips = outcomeCodesToLabels(item.outcomeCodes)
+    const scenarioChips = item.scenarioIds.map(
+      (id) =>
+        scenarioLookup.get(id)?.shortLabel ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+    const viewLabel =
+      item.view === "aggregate"
+        ? "Aggregate across library"
+        : item.view === "scenario"
+          ? "By scenario"
+          : item.view === "outcome"
+            ? "By outcome"
+            : item.view
+    const encodingLabel = item.cellEncoding
+      .replace(/_/g, " ")
+      .replace(/^./, (c) => c.toUpperCase())
+    return (
+      <ShareSnapshotCard
+        id={item.id}
+        toolLabel="Resilience"
+        title={`${viewLabel}: ${encodingLabel}`}
+        subtitle={
+          item.scenarioIds.length
+            ? `${item.scenarioIds.length} scenario${item.scenarioIds.length === 1 ? "" : "s"} in scope`
+            : "Full library"
+        }
+        chips={[...scenarioChips.slice(0, 4), ...outcomeChips]}
+        hydroclimate={item.hydroclimates[0]}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+        note={item.note}
+        onNoteChange={(note) => onNoteChange(item.id, note)}
+        onRemove={onRemove}
+      />
+    )
+  }
+
+  return null
 }
 
 function ShareTab({
@@ -190,6 +271,7 @@ export default function ShareDrawer() {
     setShowShareDrawer,
     removeShareItem,
     clearShareItems,
+    updateShareItem,
   } = useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
@@ -198,17 +280,30 @@ export default function ShareDrawer() {
   const scenarioLookup = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; description: string; definition: string }
+      {
+        name: string
+        description: string
+        definition: string
+        shortLabel: string
+      }
     >()
     siblingGroups.forEach((s) => {
       map.set(s.scenarioId, {
         name: s.shortLabel,
         description: s.label,
         definition: s.description,
+        shortLabel: s.shortLabel,
       })
     })
     return map
   }, [siblingGroups])
+
+  const handleNoteChange = useCallback(
+    (id: string, note: string) => {
+      updateShareItem(id, { note })
+    },
+    [updateShareItem],
+  )
 
   const handleGoToShare = () => {
     setShowShareDrawer(false)
@@ -347,6 +442,7 @@ export default function ShareDrawer() {
                 key={item.id}
                 item={item}
                 onRemove={removeShareItem}
+                onNoteChange={handleNoteChange}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
                 allChartData={

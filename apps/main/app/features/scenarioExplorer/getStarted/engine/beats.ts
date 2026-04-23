@@ -10,8 +10,8 @@
  * Beat 4 comment map (progress domain, compressed).
  *
  *   BEAT5_ENTER               0.500  main-choreography filter swap
- *   BEAT5_S1_LAYER_IN_START   0.555  AG layer begins fading in
- *   BEAT5_S1_LAYER_IN_END     0.575  AG layer at full opacity
+ *   BEAT5_S1_LAYER_IN_START   0.500  AG layer begins fading in
+ *   BEAT5_S1_LAYER_IN_END     0.520  AG layer at full opacity
  *   BEAT5_S2_SQUARE_RING_AT   0.580  gold ring on distribution square
  *   BEAT5_S3_SQUARE_POPUP_AT  0.590  overlay popup near square
  *   BEAT5_S4_POLYGON_RING_AT  0.600  gold stroke on map polygon
@@ -32,8 +32,8 @@ import { getTierLabel } from "../../../../content/tiers"
 // dependency on the component. Must stay in sync with those
 // declarations (there is a check in the spec doc's H3).
 const BEAT5_ENTER = 0.5
-const BEAT5_S1_LAYER_IN_START = 0.555
-const BEAT5_S1_LAYER_IN_END = 0.575
+const BEAT5_S1_LAYER_IN_START = 0.5
+const BEAT5_S1_LAYER_IN_END = 0.52
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
 const BEAT5_S4_POLYGON_RING_AT = 0.6
