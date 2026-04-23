@@ -29,7 +29,6 @@ import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
-import ToolIntroStrip from "../components/ToolIntroStrip"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -667,26 +666,6 @@ export default function RadarPanel({
         position: "relative",
       }}
     >
-      <ToolIntroStrip
-        mode="radar"
-        title="Compare scenarios as shapes, not rows"
-        summary="Each polygon is one scenario. Axes are the outcomes you care about. Look at the overall shape: a balanced read looks round, a lopsided one shows spikes and pinches."
-        bullets={[
-          {
-            label: "Closer to the center is better.",
-            body: "Same tier idea as the list: tier 1 hugs the center, tier 4 sits near the edge.",
-          },
-          {
-            label: "Compare tradeoffs, not just numbers.",
-            body: "Where one scenario bulges another may pinch. That is the trade-off.",
-          },
-          {
-            label: "Use the climate toggle.",
-            body: "The same scenarios can read very differently under wet, dry, or warm futures.",
-          },
-        ]}
-        tourStep={1}
-      />
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
           <Box

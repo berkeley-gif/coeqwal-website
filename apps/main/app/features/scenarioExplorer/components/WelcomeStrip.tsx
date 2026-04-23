@@ -8,8 +8,7 @@
  *
  * Clicking "Got it" hides the strip for the current session only.
  *
- * Mounted inside UnifiedToolLayout, only on the List view, since
- * Radar and Resilience get their own ToolIntroStrip.
+ * Mounted inside UnifiedToolLayout, only on the List view.
  */
 
 import React from "react"

@@ -72,7 +72,6 @@ import {
 import { hydroclimateOptions } from "../../../content/scenarios"
 import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
-import ToolIntroStrip from "../components/ToolIntroStrip"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 // ResilienceChartTuner is intentionally not imported: the "TUNE
 // CHART" entry point is hidden for now while the controls settle.
@@ -2449,27 +2448,6 @@ export default function ResiliencePanel({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      <ToolIntroStrip
-        mode="resilience"
-        title="Stress-test scenarios across climate futures"
-        summary="Each cell is how a scenario performs on one outcome under one climate future. The colors flag where a plan struggles, even if its averages look fine."
-        bullets={[
-          {
-            label: "Read down a column.",
-            body: "That is one scenario across many futures: how robust is it?",
-          },
-          {
-            label: "Read across a row.",
-            body: "That is one outcome across all scenarios: who handles this risk best?",
-          },
-          {
-            label: "Hot spots",
-            body: "Red cells show issues.",
-          },
-        ]}
-        tourStep={3}
-      />
-
       {/* Chart title + subject row removed: the sentence-header
           control bar above the chart (see `ResilienceControls`) already
           describes what the chart is showing, so rendering a second

@@ -159,11 +159,6 @@ function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
   }
 }
 
-/** Tools that get a per-chart `ToolIntroStrip`. Equity is excluded
- *  because it is owned by another developer; List uses the global
- *  `WelcomeStrip` instead. */
-export type ToolIntroMode = "radar" | "resilience"
-
 type JourneyPersist = {
   seenHowToRead: Record<ExploreMode, boolean>
   /** True once the welcome strip has been dismissed with "Don't show again". */
@@ -172,8 +167,6 @@ type JourneyPersist = {
   baselinePrePinned: boolean
   /** True once the user has dismissed the baseline pre-pin hint on the list. */
   seenBaselinePinHint: boolean
-  /** Per-tool flag: has the user dismissed the ToolIntroStrip for this tool? */
-  seenToolIntro: Record<ToolIntroMode, boolean>
 }
 
 function defaultJourney(): JourneyPersist {
@@ -189,7 +182,6 @@ function defaultJourney(): JourneyPersist {
     welcomeDismissedPermanently: false,
     baselinePrePinned: false,
     seenBaselinePinHint: false,
-    seenToolIntro: { radar: false, resilience: false },
   }
 }
 
@@ -208,10 +200,6 @@ function loadJourneyState(): JourneyPersist {
       welcomeDismissedPermanently: Boolean(parsed.welcomeDismissedPermanently),
       baselinePrePinned: Boolean(parsed.baselinePrePinned),
       seenBaselinePinHint: Boolean(parsed.seenBaselinePinHint),
-      seenToolIntro: {
-        ...base.seenToolIntro,
-        ...(parsed.seenToolIntro ?? {}),
-      },
     }
   } catch {
     return defaultJourney()
@@ -324,11 +312,6 @@ interface ScenarioExplorerState {
   baselinePrePinned: boolean
   /** Whether the user has dismissed the baseline pre-pin hint on the list. */
   seenBaselinePinHint: boolean
-  /** Per-tool flag: has the user dismissed the ToolIntroStrip for this tool? */
-  seenToolIntro: Record<ToolIntroMode, boolean>
-  /** Per-tool monotonically-increasing counter; bumped to request a re-open
-   *  of the ToolIntroStrip from outside (e.g., the toolbar info chip). */
-  reopenToolIntroPulse: Record<ToolIntroMode, number>
   /** Which per-tool tour (if any) is active and which step is current.
    *  `tool` is null when no tour is running. Tours are always opt-in
    *  and session-scoped (not persisted). */
@@ -443,10 +426,6 @@ interface ScenarioExplorerActions {
   /** Idempotently pre-pin the baseline scenario on first visit. */
   ensureBaselinePrePin: () => void
   setSeenBaselinePinHint: (seen: boolean) => void
-  /** Mark a tool's intro strip as seen so it stops auto-expanding. */
-  markToolIntroSeen: (mode: ToolIntroMode) => void
-  /** Request the tool's intro strip to re-open (used by the toolbar chip). */
-  bumpReopenToolIntro: (mode: ToolIntroMode) => void
   /** Start the tour for a specific tool and auto-switch `exploreMode`
    *  to that tool so anchors are mounted when the runner looks them
    *  up. */
@@ -520,8 +499,6 @@ const initialState: ScenarioExplorerState = {
   welcomeDismissedThisSession: false,
   baselinePrePinned: persistedJourney.baselinePrePinned,
   seenBaselinePinHint: persistedJourney.seenBaselinePinHint,
-  seenToolIntro: persistedJourney.seenToolIntro,
-  reopenToolIntroPulse: { radar: 0, resilience: 0 },
   tour: { tool: null, step: 0 },
 }
 
@@ -940,17 +917,6 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.seenBaselinePinHint = seen
       }),
 
-    markToolIntroSeen: (mode) =>
-      set((state) => {
-        state.seenToolIntro[mode] = true
-      }),
-
-    bumpReopenToolIntro: (mode) =>
-      set((state) => {
-        state.reopenToolIntroPulse[mode] =
-          (state.reopenToolIntroPulse[mode] ?? 0) + 1
-      }),
-
     startToolTour: (tool) =>
       set((state) => {
         state.tour = { tool, step: 0 }
@@ -1018,15 +984,13 @@ useScenarioExplorerStore.subscribe((state) => {
     state.welcomeDismissedPermanently !==
       prevJourneyRef.welcomeDismissedPermanently ||
     state.baselinePrePinned !== prevJourneyRef.baselinePrePinned ||
-    state.seenBaselinePinHint !== prevJourneyRef.seenBaselinePinHint ||
-    state.seenToolIntro !== prevJourneyRef.seenToolIntro
+    state.seenBaselinePinHint !== prevJourneyRef.seenBaselinePinHint
   ) {
     prevJourneyRef = {
       seenHowToRead: state.seenHowToRead,
       welcomeDismissedPermanently: state.welcomeDismissedPermanently,
       baselinePrePinned: state.baselinePrePinned,
       seenBaselinePinHint: state.seenBaselinePinHint,
-      seenToolIntro: state.seenToolIntro,
     }
     saveJourneyState(prevJourneyRef)
   }

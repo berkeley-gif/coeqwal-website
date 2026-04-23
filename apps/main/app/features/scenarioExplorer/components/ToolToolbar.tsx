@@ -22,21 +22,9 @@ import {
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
-import {
-  useScenarioExplorerStore,
-  type OutcomeDisplayMode,
-  type ToolIntroMode,
-} from "../store"
+import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
 import { HowToReadChartModal } from "./HowToReadChartModal"
 import { useTourAnchor } from "../tour/TourAnchorContext"
-
-/** Modes that own a `ToolIntroStrip`. The "How to read this chart?"
- *  chip re-opens that strip for these modes instead of opening the
- *  HowToRead modal. */
-const TOOL_INTRO_MODES = new Set<ToolIntroMode>(["radar", "resilience"])
-function isToolIntroMode(mode: string): mode is ToolIntroMode {
-  return TOOL_INTRO_MODES.has(mode as ToolIntroMode)
-}
 
 /** Temporarily hide the "How to read this chart?" entry point across
  *  all tools. The modal content is not ready for external viewing yet;
@@ -68,7 +56,6 @@ export default function ToolToolbar({
     exploreMode,
     seenHowToRead,
     markHowToReadSeen,
-    bumpReopenToolIntro,
   } = useScenarioExplorerStore()
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
@@ -76,14 +63,10 @@ export default function ToolToolbar({
   // "How to read this chart?" modal. Each tool has its own content
   // keyed by exploreMode (see HowToReadChartModal + howToReadContent/).
   //
-  // Auto-open: only for modes that DON'T own a ToolIntroStrip. For
-  // those (radar, resilience), the inline strip is the first-visit
-  // surface. List no longer auto-opens a welcome strip. Equity is
+  // List no longer auto-opens a welcome strip. Equity is
   // owned by another developer and gets the legacy modal flow.
   //
-  // Click behavior of the toolbar chip:
-  //   - radar / resilience: re-expands the inline ToolIntroStrip
-  //   - everything else with content: opens the modal
+  // When HOW_TO_READ_ENABLED is true, the chip opens the modal.
   const [howToReadOpen, setHowToReadOpen] = useState(false)
 
   useEffect(() => {
@@ -92,7 +75,6 @@ export default function ToolToolbar({
       exploreMode !== "comparison" &&
       exploreMode !== "data" &&
       exploreMode !== "list" &&
-      !isToolIntroMode(exploreMode) &&
       !seenHowToRead[exploreMode]
     ) {
       setHowToReadOpen(true)
@@ -127,11 +109,7 @@ export default function ToolToolbar({
   }, [])
 
   const handleHowToReadClick = () => {
-    if (isToolIntroMode(exploreMode)) {
-      bumpReopenToolIntro(exploreMode)
-    } else {
-      setHowToReadOpen(true)
-    }
+    setHowToReadOpen(true)
   }
 
   // Register the climate-chip group as a tour anchor for the radar
