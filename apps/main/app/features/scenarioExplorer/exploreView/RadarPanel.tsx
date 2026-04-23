@@ -29,6 +29,7 @@ import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
+import ToolIntroStrip from "../components/ToolIntroStrip"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -50,6 +51,7 @@ import {
 } from "../dataExplorer/utils/exportUtils"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
+import ToolEmptyState from "../components/ToolEmptyState"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -629,6 +631,21 @@ export default function RadarPanel({
     )
   }
 
+  // Show instructive empty state when there's nothing to render: no
+  // selected scenarios and the user hasn't opted into "show all".
+  // Hover-highlighted rows alone (from the sidebar) don't count because
+  // they disappear on mouseleave; we want stable, selected scenarios.
+  if (selectedScenarios.length === 0 && !radarShowAll) {
+    return (
+      <ToolEmptyState
+        mode="radar"
+        title="Pick scenarios to compare as portfolios"
+        body="The radar chart reads each scenario as a shape across the outcomes that matter to you. Select two or more scenarios to see their shapes overlap."
+        detail="Tip: turn on 'show all scenarios' in the controls above to sweep the whole library at once."
+      />
+    )
+  }
+
   const hasRadarTraceData = filteredData.length > 0
 
   return (
@@ -643,6 +660,26 @@ export default function RadarPanel({
         position: "relative",
       }}
     >
+      <ToolIntroStrip
+        mode="radar"
+        title="Compare scenarios as shapes, not rows"
+        summary="Each polygon is one scenario. Axes are the outcomes you care about. Look at the overall shape: a balanced portfolio reads round, a lopsided one shows spikes and pinches."
+        bullets={[
+          {
+            label: "Closer to the center is better.",
+            body: "Same tier idea as the list: tier 1 hugs the center, tier 4 sits near the edge.",
+          },
+          {
+            label: "Compare shapes, not just numbers.",
+            body: "Where one scenario bulges another may pinch. That is the trade-off.",
+          },
+          {
+            label: "Use the climate toggle.",
+            body: "The same scenarios can read very differently under wet, dry, or warm futures.",
+          },
+        ]}
+        tourStep={1}
+      />
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
           <Box

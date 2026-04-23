@@ -192,6 +192,73 @@ const ANIM_POLYGON_LAYERS = [
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
 
+/** Index of the LOI-highlight beat in BEATS (the "loi-highlight"
+ *  entry, progress target 0.62). `MapPaintArbiter` owns
+ *  `demand-units` paint/filter/visibility while this beat is active,
+ *  so other writers (notably the post-interactive teardown effect)
+ *  must refuse to write during this window. */
+const LOI_BEAT_INDEX = 4
+
+/* ── DIAG S4/S5 ───────────────────────────────────────────────────────────
+ * Temporary diagnostic helper for the Step 4 / Step 5 AG layer bug.
+ * Emits a single compact line describing the current Mapbox state of
+ * `demand-units` and `demand-units-outline`. Remove all [DIAG S4/S5]
+ * references once the root cause is identified and the fix is in. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function logDuState(label: string, map: any): void {
+  try {
+    if (!map?.getLayer) {
+      // eslint-disable-next-line no-console
+      console.log(`[DIAG S4/S5] ${label} <no map>`)
+      return
+    }
+    const short = (v: unknown) => {
+      try {
+        const s = JSON.stringify(v)
+        return s && s.length > 80 ? s.slice(0, 80) + "..." : s
+      } catch {
+        return String(v)
+      }
+    }
+    const fill = map.getLayer("demand-units")
+      ? {
+          opacity: short(map.getPaintProperty("demand-units", "fill-opacity")),
+          opTrans: short(
+            map.getPaintProperty("demand-units", "fill-opacity-transition"),
+          ),
+          colorTrans: short(
+            map.getPaintProperty("demand-units", "fill-color-transition"),
+          ),
+          vis: map.getLayoutProperty("demand-units", "visibility"),
+          filter: short(map.getFilter("demand-units")),
+        }
+      : "<no demand-units>"
+    const outline = map.getLayer("demand-units-outline")
+      ? {
+          opacity: short(
+            map.getPaintProperty("demand-units-outline", "line-opacity"),
+          ),
+          opTrans: short(
+            map.getPaintProperty(
+              "demand-units-outline",
+              "line-opacity-transition",
+            ),
+          ),
+          width: short(
+            map.getPaintProperty("demand-units-outline", "line-width"),
+          ),
+          vis: map.getLayoutProperty("demand-units-outline", "visibility"),
+          filter: short(map.getFilter("demand-units-outline")),
+        }
+      : "<no demand-units-outline>"
+    // eslint-disable-next-line no-console
+    console.log(`[DIAG S4/S5] ${label}`, { fill, outline })
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(`[DIAG S4/S5] ${label} <error>`, e)
+  }
+}
+
 /** Filter demand-units to only classes that correspond to tracked outcomes.
  *  Excludes "N/A" and other untracked classes that would otherwise show
  *  as spurious polygons during the beat-1 cycling animation. */
@@ -244,17 +311,26 @@ const HIGHLIGHT_GOLD = "#ffd87e"
  * store). Hoisted to module scope so exactly one source of truth defines
  * each threshold.
  *
- *   [0.500, BEAT5_S1_LAYER_IN_START)  pre-roll (narration settles)
- *   [BEAT5_S1_LAYER_IN_START, BEAT5_S1_LAYER_IN_END)  step 1: AG layer fades in
+ *   [BEAT5_S1_LAYER_IN_START, BEAT5_S1_LAYER_IN_END)  AG layer fades in
+ *   [BEAT5_S1_LAYER_IN_END, BEAT5_S2_SQUARE_RING_AT)   hold at full opacity
  *   [BEAT5_S2_SQUARE_RING_AT,    settle)  step 2: gold ring on the square
  *   [BEAT5_S3_SQUARE_POPUP_AT,   settle)  step 3: popup near the square
  *   [BEAT5_S4_POLYGON_RING_AT,   settle)  step 4: gold stroke on the polygon
  *   [BEAT5_S5_POLYGON_POPUP_AT,  settle)  step 5: popup near the polygon
  *   [BEAT5_SETTLE, BEAT5_TAIL_END)  tail: fade layer back out, clear state
+ *
+ * AG polygons enter Beat 4 at opacity 0 because the main choreography
+ * effect fades them out at the tail of Beat 2 (see `paintDuHideSchedule`,
+ * AG-class fallback). The fade-in window above ramps them back up.
  */
 const BEAT5_ENTER = 0.5
-const BEAT5_S1_LAYER_IN_START = 0.555
-const BEAT5_S1_LAYER_IN_END = 0.575
+// AG polygons fade back in at the start of Beat 4 (Step 5 in the UI
+// numbering). The fade-in window is ~1.5s at Beat 4's per-progress
+// velocity. Chosen to land well before the step 2 square ring at
+// BEAT5_S2_SQUARE_RING_AT = 0.58 so the layer is at full opacity by
+// the time the LOI sequence begins.
+const BEAT5_S1_LAYER_IN_START = 0.5
+const BEAT5_S1_LAYER_IN_END = 0.52
 const BEAT5_S2_SQUARE_RING_AT = 0.58
 const BEAT5_S3_SQUARE_POPUP_AT = 0.59
 const BEAT5_S4_POLYGON_RING_AT = 0.6
@@ -468,7 +544,23 @@ export default function TierAnimationSection() {
         setBeatIndex(clamped)
         beatIndexRef.current = clamped
 
+        // [DIAG S4/S5]
+        // eslint-disable-next-line no-console
+        console.log(
+          `[DIAG S4/S5] runTween START fromV=${progress.get().toFixed(4)} targetV=${target.progress} duration=${duration}`,
+        )
+        logDuState("runTween START", mapAPI.mapRef?.current?.getMap?.())
+
         const finalize = () => {
+          // [DIAG S4/S5]
+          // eslint-disable-next-line no-console
+          console.log(
+            `[DIAG S4/S5] runTween FINALIZE clamped=${clamped} v=${progress.get().toFixed(4)}`,
+          )
+          logDuState(
+            "runTween FINALIZE",
+            mapAPI.mapRef?.current?.getMap?.(),
+          )
           if (clamped === FINAL_BEAT_INDEX) {
             settleToFinishedState()
           } else if (clamped === 0) {
@@ -540,19 +632,38 @@ export default function TierAnimationSection() {
   const engineApiRef = useRef<BeatEngineApi | null>(null)
 
   const clearInteractiveState = useCallback(() => {
+    // [DIAG S4/S5]
+    const _diagMap = mapAPI.mapRef?.current?.getMap?.()
+    logDuState("clearInteractiveState START", _diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
+    logDuState("clearInteractiveState after store clears", _diagMap)
     // Force the engine to clear any actors still in-window so a mid-beat
     // nav away from Beat 4 doesn't strand the gold polygon ring, the
     // square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
-  }, [])
+    logDuState("clearInteractiveState after engine teardown", _diagMap)
+
+    // Visibility restore runs separately in the selectedOutcomeCode
+    // transition effect below. That effect fires after React commits
+    // the `OutcomePolygonLayer` unmount triggered by
+    // `clearOutcomeVisualization`, guaranteeing the restore wins the
+    // race against the unmount's `visibility: "none"` write.
+  }, [mapAPI])
 
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
+    // [DIAG S4/S5]
+    // eslint-disable-next-line no-console
+    console.log(
+      `[DIAG S4/S5] handleNext START beatIndex=${beatIndexRef.current}`,
+    )
     clearInteractiveState()
+    // [DIAG S4/S5]
+    // eslint-disable-next-line no-console
+    console.log(`[DIAG S4/S5] handleNext goTo called`)
     // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
     // (a no-op when already home) before running the beat tween, so a
     // square-click zoom doesn't persist into the next beat.
@@ -874,6 +985,216 @@ export default function TierAnimationSection() {
     setSpotlightedTier(null)
   }, [selectedOutcomeCode])
 
+  /* ── Post-interactive teardown on outcome deselect.
+   *
+   * When the user clicks a distribution square during any interactive
+   * `paused` / `finished` state, `OutcomePolygonLayer` mounts and
+   * writes a set of paint properties onto the shared `demand-units`
+   * and `demand-units-outline` layers: non-zero opacity and color
+   * transitions (350ms), a feature-id match filter, a match-based
+   * fill-color / line-color, and a non-default line-width / offset.
+   *
+   * Its unmount cleanup only hides the layers (`visibility: "none"`)
+   * and sets a match-nothing filter on the fill. It does not reset
+   * the transitions, filter on outline, or colors. Those stale writes
+   * linger on the layer and break the rest of the storyboard. Most
+   * visibly: a 350ms `fill-opacity-transition` causes every per-tick
+   * opacity write by the beat engine or choreography to lag behind
+   * its target, so Beat 4's AG fade-in (0 to 0.65 over ~1.5s) never
+   * actually renders.
+   *
+   * This effect fires only on the truthy to null transition of
+   * `selectedOutcomeCode` (i.e. the user exits interactive mode),
+   * which happens after React has committed `OutcomePolygonLayer`'s
+   * unmount cleanup (child unmount effects run before parent
+   * effects in the same commit). So the writes here are the last
+   * ones applied. We fully reset `demand-units` and
+   * `demand-units-outline` back to the clean choreography-ready
+   * state: instant transitions, class filter, blended tier color,
+   * default outline width/offset, visibility visible. For every
+   * other animation polygon layer we only need to restore
+   * visibility.
+   *
+   * Truthy to different-truthy transitions (cross-outcome swap
+   * during interactive play) are OPL's job to handle. Running this
+   * teardown for those would create a second writer that races OPL
+   * on `demand-units`, which regressed Beat 5 by stomping the
+   * arbiter's Agriculture-only filter.
+   *
+   * If the map style is not loaded at the moment the effect fires
+   * (camera ease mid-flight, source update, layer swap just
+   * committed), the restore is deferred to the next `idle` event
+   * instead of silently dropped. An earlier version of this effect
+   * bailed in that case, which was the root cause of the Step 4 to
+   * Step 5 AG layer being invisible after a distribution-square
+   * click. Before the deferred restore actually runs, it
+   * re-validates that `selectedOutcomeCode` is still null and that
+   * we have not navigated into the Beat 5 window
+   * (`beatIndexRef.current < LOI_BEAT_INDEX`). Otherwise it bails
+   * and yields ownership to whoever claimed the layer in the
+   * meantime. The final line of defense is
+   * `MapPaintArbiter.applyBeat5Enter` which reasserts the Beat 5
+   * preconditions regardless. */
+  const prevSelectedOutcomeCodeRef = useRef<string | null>(null)
+  // Live ref used by the idle-deferred callback below so we can bail
+  // out if `selectedOutcomeCode` changed (user clicked another square,
+  // or the beat engine entered a window that owns `demand-units`)
+  // while we were waiting for `idle`.
+  const selectedOutcomeCodeLiveRef = useRef<string | null>(selectedOutcomeCode)
+  useEffect(() => {
+    selectedOutcomeCodeLiveRef.current = selectedOutcomeCode
+  }, [selectedOutcomeCode])
+  useEffect(() => {
+    const prev = prevSelectedOutcomeCodeRef.current
+    prevSelectedOutcomeCodeRef.current = selectedOutcomeCode
+    // Only fire on the truthy to null transition, i.e. when the user
+    // *exits* interactive mode. A truthy to truthy transition (swap
+    // between outcomes during interactive play) is OPL's job to
+    // handle; running the teardown in that case creates a second
+    // writer for `demand-units` that races OPL and (via the deferred
+    // idle path) can also clobber the beat engine's Beat 5 setup if
+    // the user clicks Next before the idle fires.
+    if (!(prev !== null && selectedOutcomeCode === null)) return
+    // [DIAG S4/S5]
+    // eslint-disable-next-line no-console
+    console.log(
+      `[DIAG S4/S5] selectedOutcomeCode-transition START prev=${prev} now=${selectedOutcomeCode}`,
+    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map: any = mapAPI.mapRef?.current?.getMap?.()
+    logDuState("selectedOutcomeCode-transition PRE-write", map)
+
+    // Extracted so we can invoke it either synchronously (style loaded)
+    // or deferred via `map.once("idle", ...)` (style busy).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const runTeardownWrites = (m: any) => {
+      try {
+        const tierExpr = buildBlendedTierExpr(BEAT1_MID, 1)
+
+        if (m.getLayer("demand-units")) {
+          m.setPaintProperty("demand-units", "fill-opacity-transition", {
+            duration: 0,
+            delay: 0,
+          })
+          m.setPaintProperty("demand-units", "fill-color-transition", {
+            duration: 0,
+            delay: 0,
+          })
+          m.setFilter("demand-units", DU_CLASS_FILTER as never)
+          if (tierExpr) {
+            m.setPaintProperty("demand-units", "fill-color", tierExpr as never)
+            m.setPaintProperty(
+              "demand-units",
+              "fill-outline-color",
+              tierExpr as never,
+            )
+          }
+          m.setLayoutProperty("demand-units", "visibility", "visible")
+        }
+
+        if (m.getLayer("demand-units-outline")) {
+          m.setPaintProperty(
+            "demand-units-outline",
+            "line-opacity-transition",
+            { duration: 0, delay: 0 },
+          )
+          m.setPaintProperty(
+            "demand-units-outline",
+            "line-color-transition",
+            { duration: 0, delay: 0 },
+          )
+          m.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
+          if (tierExpr) {
+            m.setPaintProperty(
+              "demand-units-outline",
+              "line-color",
+              tierExpr as never,
+            )
+          }
+          m.setPaintProperty("demand-units-outline", "line-width", 0.5)
+          m.setPaintProperty("demand-units-outline", "line-offset", -0.25)
+          m.setLayoutProperty(
+            "demand-units-outline",
+            "visibility",
+            "visible",
+          )
+        }
+
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (fill === "demand-units") continue
+          if (m.getLayer(fill))
+            m.setLayoutProperty(fill, "visibility", "visible")
+          if (m.getLayer(outline))
+            m.setLayoutProperty(outline, "visibility", "visible")
+        }
+        logDuState("selectedOutcomeCode-transition POST-write", m)
+      } catch (e) {
+        // [DIAG S4/S5]
+        // eslint-disable-next-line no-console
+        console.log(`[DIAG S4/S5] selectedOutcomeCode-transition ERROR`, e)
+      }
+    }
+
+    if (!map) return
+    if (map.isStyleLoaded?.()) {
+      runTeardownWrites(map)
+      return
+    }
+
+    // Style is busy (camera ease mid-flight, layer swap, source
+    // update, etc). Defer to the next `idle` event instead of
+    // silently dropping the restore. Track the listener so we can
+    // detach it if another transition supersedes us first.
+    //
+    // Before actually running the restore on the `idle` callback, we
+    // re-validate preconditions. If the user has clicked another
+    // square in the meantime, or navigated into the Beat 5 window
+    // where `MapPaintArbiter` owns `demand-units`, we bail. Running
+    // an out-of-date restore would either stomp OPL's live interactive
+    // paint or overwrite the arbiter's Agriculture-only filter with
+    // the full class filter, which was the cause of the "AG layer
+    // bleeds across all demand-unit classes in Beat 5" regression.
+    // [DIAG S4/S5]
+    // eslint-disable-next-line no-console
+    console.log(
+      `[DIAG S4/S5] selectedOutcomeCode-transition deferred to idle`,
+    )
+    let ran = false
+    const onIdle = () => {
+      if (ran) return
+      ran = true
+      const liveOutcome = selectedOutcomeCodeLiveRef.current
+      const liveBeat = beatIndexRef.current
+      if (liveOutcome !== null || liveBeat >= LOI_BEAT_INDEX) {
+        // [DIAG S4/S5]
+        // eslint-disable-next-line no-console
+        console.log(
+          `[DIAG S4/S5] selectedOutcomeCode-transition idle-bail liveOutcome=${liveOutcome} liveBeat=${liveBeat}`,
+        )
+        return
+      }
+      // [DIAG S4/S5]
+      // eslint-disable-next-line no-console
+      console.log(
+        `[DIAG S4/S5] selectedOutcomeCode-transition running after idle`,
+      )
+      runTeardownWrites(map)
+    }
+    try {
+      map.once("idle", onIdle)
+    } catch {
+      /* ok */
+    }
+    return () => {
+      if (ran) return
+      try {
+        map.off?.("idle", onIdle)
+      } catch {
+        /* ok */
+      }
+    }
+  }, [selectedOutcomeCode, mapAPI.mapRef])
+
   /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
   const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(
     null,
@@ -914,6 +1235,16 @@ export default function TierAnimationSection() {
         const key = locKey(info)
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
+
+        // [DIAG S4/S5]
+        // eslint-disable-next-line no-console
+        console.log(
+          `[DIAG S4/S5] square click outcome=${info.code} sourceId=${info.sourceId} wasSelected=${wasSelected}`,
+        )
+        logDuState(
+          "square click (pre-state-change)",
+          mapAPI.mapRef?.current?.getMap?.(),
+        )
 
         // -- Commented out: previous multi-pin toggle behavior. Re-enable
         //    if we ever want several pinned locations with tethered
@@ -1087,8 +1418,17 @@ export default function TierAnimationSection() {
       : null
 
     if (!config) {
+      // The null-config reset slams `demand-units` to opacity 0 and
+      // restores the full class filter, intended for the interactive
+      // idle state after the storyboard ends. `playState` briefly
+      // flips to `paused` at every beat settle mid-run, which also
+      // makes `isInteractive` true. Without this extra guard the
+      // reset fires at every step boundary and wipes the map layer
+      // the choreography listener just painted (blues at end of step
+      // 1, AG tier colors at end of step 2, and so on). Only run the
+      // reset once the storyboard has truly finished.
+      if (playState !== "finished") return
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
-      // Reset demand-units when no outcome is selected
       const resetMap = mapAPI.mapRef?.current?.getMap?.()
       if (resetMap?.isStyleLoaded?.()) {
         try {
@@ -1311,6 +1651,7 @@ export default function TierAnimationSection() {
     }
   }, [
     isInteractive,
+    playState,
     activeLocationSet,
     hoveredLocation,
     pinnedLocations,
@@ -1895,7 +2236,13 @@ export default function TierAnimationSection() {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let phase: "idle" | "beat1" | "beat1c" | "beat2" | "beat5" = "idle"
+    let phase:
+      | "idle"
+      | "beat1"
+      | "beat1c-blend"
+      | "beat1c"
+      | "beat2"
+      | "beat5" = "idle"
     // Beat 5 polygon-ring state (step 4). When true, the
     // `demand-units-outline` layer is currently carrying a case
     // expression that strokes BEAT5_LOI_ID in HIGHLIGHT_GOLD. We
@@ -1906,28 +2253,30 @@ export default function TierAnimationSection() {
 
     // Beat 1  (0.00 -> 0.245): blues cycle until FREEZE_AT, then hold
     //          still on all 3 DU classes (Agriculture, Urban, Refuge).
-    // Beat 1B (0.245 -> 0.26): cross-fade OUT - the demand-units layer
-    //          fades from 0.65 -> 0 with the frozen 3-blue palette
-    //          intact. Begins the instant the intro text collapse
-    //          finishes (at 0.245) so there's no dead air after the
-    //          legend settles at the top.
-    // Beat 1C (0.26 -> 0.39): at v = 0.26, while the layer is invisible,
-    //          we swap the filter to Agriculture-only and set the
-    //          fill-color directly to the AG_REV tier expression.
-    //          (0.26 -> 0.28) the layer fades back IN from 0 -> 0.65
-    //          already wearing its AG_REV tier colors - a clean
-    //          cross-fade with no blue interstitial. (0.28 -> 0.39)
-    //          tier colors are locked while the Beat 1C text + example
-    //          popups play.
+    // Beat 1B (0.245 -> 0.26): hold. The 3-blue palette stays painted
+    //          at fill-opacity 0.65 with the full DU class filter.
+    //          Earlier versions cross-faded the layer out across this
+    //          window, but that read as a distracting blink between the
+    //          intro legend and the AG tier-color reveal. The blues now
+    //          stay visible right up to the swap at BEAT1C_BLEND_START.
+    // Beat 1C (0.26 -> 0.39): at v = 0.26 we swap the filter to
+    //          Agriculture-only and set fill-color to the AG_REV tier
+    //          expression. The swap is instant and happens while the
+    //          layer is still painted at 0.65, so the user sees a hard
+    //          cut from 3-blue to AG tier colors without an opacity
+    //          dip. (0.28 -> 0.39) tier colors are locked while the
+    //          Beat 1C text and popups play.
     // Beat 2  (0.39 -> 0.50): DU filter restored, tier colors locked. SVG
     //          morphs take over and features fade out on their slice.
     const FREEZE_AT = 0.09
     const BEAT1B_START = 0.245
-    // Cross-fade windows (renamed in spirit, kept for diff readability):
-    // BEAT1C_BLEND_START is the fade-out -> fade-in pivot (filter swap
-    // happens here, while the layer is at opacity 0). BEAT1C_BLEND_END
-    // is when the AG_REV tier colors are fully visible at 0.65 opacity.
+    // BEAT1C_BLEND_START is the filter + color swap boundary. Opacity
+    // stays at 0.65 across this boundary; only the filter and fill
+    // expression flip.
     const BEAT1C_BLEND_START = 0.26
+    // Kept so downstream branches and comments that still reference the
+    // end of the old cross-fade window compile. The 0.26 -> 0.28 span
+    // is now just a hold at the AG tier colors.
     const BEAT1C_BLEND_END = 0.28
     // AG_REV now morphs solo starting at 0.38 (see getOutcomeProgressRange
     // in OutcomeMorphOverlay). Shifting BEAT2_START earlier kicks the full
@@ -2080,13 +2429,10 @@ export default function TierAnimationSection() {
         }
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_START) {
-        // Beat 1B: cross-fade OUT. Keep the frozen 3-blue colors and
-        // fade the layer's opacity from 0.65 -> 0. No converge-to-mid
-        // -blue interstitial - the polygons simply dissolve away,
-        // freeing the eye to receive the AG_REV tier-colored polygons
-        // that fade in next. If we're scrubbing backwards from beat1c,
-        // first restore the full DU class filter and the frozen 3-blue
-        // expression so the cross-fade reverses cleanly.
+        // Beat 1B: hold. Keep the frozen 3-blue palette and the full
+        // DU class filter, pin opacity at 0.65. If we're scrubbing
+        // backwards from beat1c, restore the filter and 3-blue fill
+        // expression so the blues come back cleanly.
         if (phase !== "beat1") {
           try {
             const expr = beat1FillExpr(frozenColorPhase)
@@ -2098,6 +2444,7 @@ export default function TierAnimationSection() {
                 "fill-outline-color",
                 expr as never,
               )
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
             }
             if (map.getLayer("demand-units-outline")) {
               map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
@@ -2106,92 +2453,73 @@ export default function TierAnimationSection() {
                 "line-color",
                 expr as never,
               )
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
             }
           } catch {
             /* ok */
           }
-        }
-
-        const fadeOutT =
-          (v - BEAT1B_START) / (BEAT1C_BLEND_START - BEAT1B_START)
-        const easedFadeOut = 1 - Math.pow(1 - fadeOutT, 2) // ease-out
-        const fadeOutOpacity = 0.65 * (1 - easedFadeOut)
-
-        try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity", fadeOutOpacity)
-          }
-          if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-opacity",
-              fadeOutOpacity,
-            )
-          }
-        } catch {
-          /* ok */
         }
         phase = "beat1"
       } else if (v < BEAT1C_BLEND_END) {
-        // Beat 1C: cross-fade IN. While the layer is at opacity 0 we
-        // swap the filter to Agriculture-only and set fill-color to the
-        // pure AG_REV tier expression (no blue blend). Then the layer
-        // fades from 0 -> 0.65 already wearing its tier colors, so the
-        // user sees a clean fade from "blank water" to the colorful
-        // visualization - no solid-blue intermediate.
-        if (phase !== "beat1c") {
-          try {
-            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
-            if (map.getLayer("demand-units")) {
-              map.setFilter("demand-units", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-color",
-                  expr as never,
-                )
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-outline-color",
-                  expr as never,
-                )
-              }
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_AG_ONLY_FILTER as never)
-              if (expr) {
-                map.setPaintProperty(
-                  "demand-units-outline",
-                  "line-color",
-                  expr as never,
-                )
-              }
-            }
-          } catch {
-            /* ok */
-          }
-        }
-
-        const fadeInT =
-          (v - BEAT1C_BLEND_START) / (BEAT1C_BLEND_END - BEAT1C_BLEND_START)
-        const easedFadeIn = 1 - Math.pow(1 - fadeInT, 2) // ease-out
-        const fadeInOpacity = 0.65 * easedFadeIn
-
+        // Beat 1C: smooth two-stage color morph from the cycling 3-blue
+        // palette to the AG tier palette.
+        //   [0.26, 0.27] converge the 3 blues to a single BEAT1_MID so
+        //     every feature is the same color before the tier-color
+        //     transition starts. Driven by `beat1FillExpr(phase,
+        //     convergence)` where `convergence` ramps 0 -> 1 across the
+        //     first half of the window.
+        //   [0.27, 0.28] morph BEAT1_MID into each AG DU's tier color.
+        //     Driven by `buildBlendedTierExpr(BEAT1_MID, t)` where `t`
+        //     ramps 0 -> 1 across the second half. DUs not listed in
+        //     the tier lookup (Urban, Refuge, untracked AG) keep the
+        //     BEAT1_MID fallback, so those features stay the shared
+        //     mid-blue while AG features morph into tier colors.
+        // The DU class filter stays full across the whole window so
+        // Urban and Refuge stay painted during the blend. At v >=
+        // BEAT1C_BLEND_END we flip the filter to AG-only, dropping
+        // them cleanly.
+        const CONVERGE_END = 0.27
         try {
-          if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity", fadeInOpacity)
+          let expr: unknown[] | null
+          if (v < CONVERGE_END) {
+            const convergence =
+              (v - BEAT1C_BLEND_START) / (CONVERGE_END - BEAT1C_BLEND_START)
+            expr = beat1FillExpr(frozenColorPhase, convergence)
+          } else {
+            const t =
+              (v - CONVERGE_END) / (BEAT1C_BLEND_END - CONVERGE_END)
+            expr = buildBlendedTierExpr(BEAT1_MID, t)
           }
-          if (map.getLayer("demand-units-outline")) {
+          if (expr && map.getLayer("demand-units")) {
+            if (phase !== "beat1c-blend") {
+              map.setFilter("demand-units", DU_CLASS_FILTER as never)
+            }
+            map.setPaintProperty("demand-units", "fill-color", expr as never)
+            map.setPaintProperty(
+              "demand-units",
+              "fill-outline-color",
+              expr as never,
+            )
+            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+          }
+          if (expr && map.getLayer("demand-units-outline")) {
+            if (phase !== "beat1c-blend") {
+              map.setFilter(
+                "demand-units-outline",
+                DU_CLASS_FILTER as never,
+              )
+            }
             map.setPaintProperty(
               "demand-units-outline",
-              "line-opacity",
-              fadeInOpacity,
+              "line-color",
+              expr as never,
             )
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0.65)
           }
         } catch {
           /* ok */
         }
-        phase = "beat1c"
+        phase = "beat1c-blend"
       } else if (v < BEAT2_START) {
         // Beat 1C tail: tier colors are fully blended. Hold steady on
         // AG-only while the example text and popups play.
@@ -2309,11 +2637,35 @@ export default function TierAnimationSection() {
           }
         }
 
+        // AG_REV fade-out window. AG_REV is excluded from the per-DU
+        // hide schedule (see the hide-schedule build at line ~3256)
+        // because its distribution-square morph lands on top of the
+        // map polygons. The SVG overlay snapshots the map polygon
+        // shapes at the morph start (v = 0.38) and then animates them
+        // into distribution squares across [0.38, 0.39]. We want the
+        // map layer to hand off to the SVG at the morph start: at
+        // v = 0.38 the SVG polygon is visually identical to the map
+        // polygon (same shape, color, position), so fading the map
+        // layer out in a short window straddling 0.38 reads as a
+        // clean hand-off. If the fade runs late, the map polygons
+        // linger under the morphing SVG and leave a ghost behind.
+        // Window straddles 0.38 so the fade completes just as the
+        // SVG shapes start to deform.
+        const BEAT2_AG_FADE_OUT_START = 0.378
+        const BEAT2_AG_FADE_OUT_END = 0.383
+
         const paintDuHideSchedule = () => {
           // Build demand-units opacity expression:
           // - Fading entries: interpolated opacity (0.65 -> 0)
           // - Not-yet-fading entries: 0.65 (still visible)
-          // - Untracked DUs: 0 (hidden - prevents ghost mid-blue polygons)
+          // - Agriculture class, not listed in any entry: piecewise
+          //   ramp. 0.65 before BEAT2_AG_FADE_OUT_START, interpolated
+          //   0.65 -> 0 across the window, 0 after.
+          //   AG_REV is excluded from the schedule entirely in the
+          //   hide-schedule build, so its DUs are never matched by an
+          //   `in` clause; this Agriculture-class fallback is what
+          //   animates them out.
+          // - Everything else (Urban, Refuge, untracked): 0 (hidden)
           if (duEntries.length === 0 || !map.getLayer("demand-units")) return
           const caseExpr: unknown[] = ["case"]
           for (const entry of duEntries) {
@@ -2332,6 +2684,21 @@ export default function TierAnimationSection() {
               )
             }
           }
+          let agOpacity: number
+          if (v < BEAT2_AG_FADE_OUT_START) {
+            agOpacity = 0.65
+          } else if (v < BEAT2_AG_FADE_OUT_END) {
+            const t =
+              (v - BEAT2_AG_FADE_OUT_START) /
+              (BEAT2_AG_FADE_OUT_END - BEAT2_AG_FADE_OUT_START)
+            agOpacity = 0.65 * (1 - t)
+          } else {
+            agOpacity = 0
+          }
+          caseExpr.push(
+            ["==", ["get", "Class"], "Agriculture"],
+            agOpacity,
+          )
           caseExpr.push(0)
           try {
             map.setPaintProperty(
@@ -3239,6 +3606,13 @@ export default function TierAnimationSection() {
     const schedule: HideScheduleEntry[] = []
     const activeCodes = activeOutcomeGroups.map((g) => g.code)
     for (const group of activeOutcomeGroups) {
+      // AG_REV is excluded from the map-side hide schedule. The overlay
+      // morph in OutcomeMorphOverlay still fades its SVG polygons into
+      // distribution squares on its own 0.01-wide slice, but the map's
+      // `demand-units` polygons stay painted at 0.65 through Beat 2 and
+      // Beat 3 so the user keeps visual anchoring to the AG districts
+      // while the other outcomes morph in.
+      if (group.code === "AG_REV") continue
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
