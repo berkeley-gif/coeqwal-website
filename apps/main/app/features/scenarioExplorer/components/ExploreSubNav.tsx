@@ -10,7 +10,7 @@
  * container, so it stays pinned without its own sticky positioning.
  */
 
-import React, { useMemo, useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -29,7 +29,6 @@ import {
   useScenarioExplorerStore,
   type MainView,
   type ExploreMode,
-  type ShareItem,
 } from "../store"
 import { useTabs } from "../../../context/Tabs"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
@@ -103,48 +102,14 @@ const FLOW: FlowStep[] = [
   },
 ]
 
-/** Map ShareItem types to the ExploreMode they were captured from,
- *  so the sub-nav can show a faint "you have items from here" dot. */
-function modeForShareItem(item: ShareItem): ExploreMode | null {
-  switch (item.type) {
-    case "barChart":
-      return "list"
-    case "radar":
-      return "radar"
-    case "equity":
-      return "equity"
-    case "resilience":
-      return "resilience"
-    default:
-      return null
-  }
-}
-
 export default function ExploreSubNav() {
   const theme = useTheme()
   const { state, subNavRef } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
 
-  const {
-    mainView,
-    setMainView,
-    exploreMode,
-    setExploreMode,
-    shareItems,
-  } = useScenarioExplorerStore()
-
-  // Which tool tabs have at least one captured Share item from that
-  // tool? Drives a small indicator so progress is visible without
-  // forcing any particular order.
-  const toolsWithCaptures = useMemo(() => {
-    const set = new Set<ExploreMode>()
-    for (const item of shareItems) {
-      const mode = modeForShareItem(item)
-      if (mode) set.add(mode)
-    }
-    return set
-  }, [shareItems])
+  const { mainView, setMainView, exploreMode, setExploreMode } =
+    useScenarioExplorerStore()
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
@@ -276,8 +241,6 @@ export default function ExploreSubNav() {
               const isShare = step.mode === null
               const active =
                 step.mode !== null && exploreMode === step.mode
-              const hasCaptures =
-                step.mode !== null && toolsWithCaptures.has(step.mode)
               const handleClick = () => {
                 if (isShare) {
                   navigateToTab("share")
@@ -293,11 +256,7 @@ export default function ExploreSubNav() {
                     role="tab"
                     aria-selected={active}
                     onClick={handleClick}
-                    title={
-                      hasCaptures
-                        ? `${step.label}: ${step.purpose} (you have saved items from this tool)`
-                        : `${step.label}: ${step.purpose}`
-                    }
+                    title={`${step.label}: ${step.purpose}`}
                     aria-label={`${step.label}: ${step.purpose}`}
                     sx={{
                       display: "inline-flex",
@@ -316,7 +275,6 @@ export default function ExploreSubNav() {
                         : "transparent",
                       color: theme.palette.common.white,
                       transition: "all 120ms ease",
-                      position: "relative",
                       lineHeight: 1.1,
                       "&:hover": {
                         background: alpha(theme.palette.common.white, 0.12),
@@ -366,24 +324,6 @@ export default function ExploreSubNav() {
                         {step.purpose}
                       </Box>
                     </Box>
-                    {hasCaptures && (
-                      <Box
-                        aria-hidden
-                        sx={{
-                          position: "absolute",
-                          top: 3,
-                          right: 3,
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: theme.palette.common.white,
-                          boxShadow: `0 0 0 1px ${alpha(
-                            theme.palette.blue.bright,
-                            0.7,
-                          )}`,
-                        }}
-                      />
-                    )}
                   </Box>
                   {i < visibleFlow.length - 1 && (
                     <icons.ChevronRight
