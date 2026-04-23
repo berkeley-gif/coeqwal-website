@@ -5,15 +5,14 @@ import {
   max,
   scaleTime,
   curveLinear,
-  bisector,
   timeFormat,
   type ScaleTime,
 } from "@repo/viz"
-import { csv, autoType } from "@repo/viz"
 import { OffWhiteColor } from "../helpers/colorPalette"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import { useTheme } from "@repo/ui/mui"
+import { useFetchData } from "../../hooks/useFetchData"
 
 export type ContainerSize = { width: number; height: number }
 
@@ -21,6 +20,11 @@ export type GroundwaterRow = {
   msmt_date: string
   gse_gwe: number
   date?: Date // assumed parsed upstream
+}
+
+type GroundwaterJsonRow = {
+  Year: number
+  "GW Change": number
 }
 
 type Margin = { top: number; right: number; bottom: number; left: number }
@@ -35,7 +39,6 @@ const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
   { start: new Date("1983-01-01"), end: new Date("1992-06-01"), opacity: 0.22 },
   { start: new Date("1999-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
 ]
-const RECHARGE_LABELS = ["1st recharge", "2nd recharge"] as const
 
 type Props = {
   scrollProgress: MotionValue<number>
@@ -47,23 +50,18 @@ export default function GroundwaterLine({
   debug = false,
 }: Props) {
   const revealClipId = useId().replace(/:/g, "")
-  const theme = useTheme()
   const [data, setData] = useState<GroundwaterRow[]>([])
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
 
-  useEffect(() => {
-    let cancelled = false
-
-    csv("./data/combined_groundwater.csv", autoType).then((raw) => {
-      if (cancelled) return
-
+  useFetchData(
+    "/data/combined_groundwater.json",
+    (raw: GroundwaterJsonRow[]) => {
       const processed: GroundwaterRow[] = raw
         .map((d) => {
-          const row = d as Record<string, unknown>
-          const year = Number(row["Year"])
-          const gwRaw = Number(row["GW Change"])
+          const year = Number(d.Year)
+          const gwRaw = Number(d["GW Change"])
           const gwDepth = Number.isFinite(gwRaw) && gwRaw < 0 ? -gwRaw : gwRaw
 
           return {
@@ -85,12 +83,8 @@ export default function GroundwaterLine({
       const maxVal = max(values) ?? 0
       const pad = maxVal * 0.05 || 1
       setYExtents([minVal, maxVal + pad])
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    },
+  )
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -210,51 +204,6 @@ export default function GroundwaterLine({
     [0, 0.9],
   )
 
-  // setting the charge labels below the water curve
-  const rechargeGaps = useMemo(() => {
-    if (DROUGHT_BANDS.length < 2 || data.length === 0) return []
-
-    const bisectDate = bisector<GroundwaterRow, Date>((d) => d.date!).center
-
-    return DROUGHT_BANDS.slice(0, -1)
-      .map((b, i) => {
-        const next = DROUGHT_BANDS[i + 1]
-        if (!next) return null
-
-        // 1) midpoint time between drought bands
-        const midTime = new Date((b.end.getTime() + next.start.getTime()) / 2)
-        // 2) x position
-        const x = xScale(midTime)
-        // 3) find closest index (may be out of bounds)
-        let idx = bisectDate(data, midTime)
-        // clamp index safely
-        idx = Math.max(0, Math.min(data.length - 1, idx))
-        const closestDatum = data[idx]
-        if (!closestDatum) return null // extra safety
-        // 4) y position below the curve
-        const yOnCurve = yScale(closestDatum.gse_gwe)
-        const y = Math.min(
-          margin.top + plotHeight - 10, // keep inside plot
-          yOnCurve + 28, // below curve
-        )
-        const [line1, line2] = (
-          RECHARGE_LABELS[i] ?? `Recharge ${i + 1}`
-        ).split(" ")
-        return {
-          x,
-          y,
-          line1,
-          line2,
-        }
-      })
-      .filter(Boolean) as Array<{
-      x: number
-      y: number
-      line1: string
-      line2: string
-    }>
-  }, [xScale, yScale, data, plotHeight])
-
   return (
     <svg ref={svgRef} width="100%" height="100%">
       <defs>
@@ -319,29 +268,6 @@ export default function GroundwaterLine({
             />
           )
         })}
-      </g>
-      {/* Recharge labels placed below curve */}
-      <g clipPath={`url(#${revealClipId})`} pointerEvents="none">
-        {rechargeGaps.map((g, i) => (
-          <text
-            key={i}
-            x={g.x}
-            y={g.y}
-            textAnchor="middle"
-            style={{
-              fill: OffWhiteColor,
-              fontSize: theme.typography.caption.fontSize,
-              opacity: 0.9,
-            }}
-          >
-            <tspan x={g.x} dy="0em">
-              {g.line1}
-            </tspan>
-            <tspan x={g.x} dy="1.2em">
-              {g.line2}
-            </tspan>
-          </text>
-        ))}
       </g>
     </svg>
   )

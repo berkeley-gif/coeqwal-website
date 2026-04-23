@@ -37,7 +37,7 @@ function Opener() {
       <SVGLineContainer viewBox="0 0 1728 1095" preserveAspectRatio="none">
         <motion.path
           d="M0 537 L1728 807"
-          className="svg-line"
+          className="svg-line glow-effect"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{
             pathLength: lineShouldGrow ? 1 : 0,

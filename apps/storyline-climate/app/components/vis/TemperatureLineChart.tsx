@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { scaleLinear, type ScaleLinear, ticks, extent, mean } from "@repo/viz"
-import { format, csvParse, line, curveMonotoneX } from "@repo/viz"
+import { format, line, curveMonotoneX } from "@repo/viz"
 import { OffWhiteColor } from "../helpers/colorPalette"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
+import { useFetchData } from "../../hooks/useFetchData"
 
-type Row = { Date: string; Value: string }
+type Row = { Date: number; Value: number; Anomaly?: number }
 type Point = { year: number; value: number }
 
 type Margin = { top: number; right: number; bottom: number; left: number }
@@ -245,35 +246,24 @@ export default function TemperatureLineChart({
   const START_YEAR = 1960
   const END_YEAR = 2025
 
-  useEffect(() => {
-    ;(async () => {
-      const txt = await (
-        await fetch("/data/CA_historical_state_temperature.csv")
-      ).text()
-      const cleaned = txt
-        .split(/\r?\n/)
-        .filter((line) => line.trim() && !line.startsWith("#"))
-        .join("\n")
-      const rows = csvParse(cleaned) as Row[]
+  useFetchData("/data/CA_historical_state_temperature.json", (rows: Row[]) => {
+    const all: Point[] = rows
+      .map((r) => {
+        const year = Math.floor(Number(r.Date) / 100)
+        const value = Number(r.Value)
+        return Number.isFinite(year) && Number.isFinite(value)
+          ? { year, value }
+          : null
+      })
+      .filter((d): d is Point => !!d)
+      .sort((a, b) => a.year - b.year)
 
-      const all: Point[] = rows
-        .map((r) => {
-          const year = Math.floor(Number(r.Date) / 100)
-          const value = Number(r.Value)
-          return Number.isFinite(year) && Number.isFinite(value)
-            ? { year, value }
-            : null
-        })
-        .filter((d): d is Point => !!d)
-        .sort((a, b) => a.year - b.year)
-
-      // keep only 1960–2025
-      const filtered = all.filter(
-        (d) => d.year >= START_YEAR && d.year <= END_YEAR,
-      )
-      setPoints(filtered)
-    })()
-  }, [])
+    // keep only 1960–2025
+    const filtered = all.filter(
+      (d) => d.year >= START_YEAR && d.year <= END_YEAR,
+    )
+    setPoints(filtered)
+  })
 
   const avg = useMemo(() => {
     const filtered = points.filter((d) => d.year >= 1960 && d.year <= 2025)

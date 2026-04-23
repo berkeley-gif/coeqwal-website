@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "units": "inches",
+    "month_order": [
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep"
+    ]
+  },
+  "records": [
+    {
+      "water_year": 2015,
+      "month": "Oct",
+      "month_num": 10,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Nov",
+      "month_num": 11,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Dec",
+      "month_num": 12,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Jan",
+      "month_num": 1,
+      "value": 11.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Feb",
+      "month_num": 2,
+      "value": 7.9595794392523365
+    },
+    {
+      "water_year": 2015,
+      "month": "Mar",
+      "month_num": 3,
+      "value": 8.055324074074074
+    },
+    {
+      "water_year": 2015,
+      "month": "Apr",
+      "month_num": 4,
+      "value": 3.2643700787401575
+    },
+    {
+      "water_year": 2015,
+      "month": "May",
+      "month_num": 5,
+      "value": 1.1573529411764707
+    },
+    {
+      "water_year": 2015,
+      "month": "Jun",
+      "month_num": 6,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Jul",
+      "month_num": 7,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Aug",
+      "month_num": 8,
+      "value": 0.0
+    },
+    {
+      "water_year": 2015,
+      "month": "Sep",
+      "month_num": 9,
+      "value": 0.0
+    },
+    {
+      "water_year": 2023,
+      "month": "Oct",
+      "month_num": 10,
+      "value": 0.0
+    },
+    {
+      "water_year": 2023,
+      "month": "Nov",
+      "month_num": 11,
+      "value": 0.0
+    },
+    {
+      "water_year": 2023,
+      "month": "Dec",
+      "month_num": 12,
+      "value": 11.0
+    },
+    {
+      "water_year": 2023,
+      "month": "Jan",
+      "month_num": 1,
+      "value": 33.42857142857143
+    },
+    {
+      "water_year": 2023,
+      "month": "Feb",
+      "month_num": 2,
+      "value": 64.11301369863014
+    },
+    {
+      "water_year": 2023,
+      "month": "Mar",
+      "month_num": 3,
+      "value": 81.24906367041199
+    },
+    {
+      "water_year": 2023,
+      "month": "Apr",
+      "month_num": 4,
+      "value": 100.23790849673202
+    },
+    {
+      "water_year": 2023,
+      "month": "May",
+      "month_num": 5,
+      "value": 79.21538461538462
+    },
+    {
+      "water_year": 2023,
+      "month": "Jun",
+      "month_num": 6,
+      "value": 40.68181818181818
+    },
+    {
+      "water_year": 2023,
+      "month": "Jul",
+      "month_num": 7,
+      "value": 9.222222222222221
+    },
+    {
+      "water_year": 2023,
+      "month": "Aug",
+      "month_num": 8,
+      "value": 0.0
+    },
+    {
+      "water_year": 2023,
+      "month": "Sep",
+      "month_num": 9,
+      "value": 0.0
+    }
+  ]
+}

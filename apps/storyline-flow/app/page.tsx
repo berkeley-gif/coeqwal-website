@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Box, CircularProgress, Typography } from "@repo/ui/mui"
 import "./main.css"
 
@@ -58,6 +58,12 @@ import {
   SCROLLAMA_CONFIG,
   useScrollamaSection,
 } from "./hooks/useScrollamaSection"
+import {
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "./components/helpers/header"
 
 const MotionBox = motion.create(Box)
 
@@ -70,6 +76,7 @@ const MotionBox = motion.create(Box)
 export default function StoryContainer() {
   const isMapReady = useMapReady()
   const tooltipContent = useTooltip()
+  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
 
   useEffect(() => {
     appActions.fetchStoryline()
@@ -84,7 +91,13 @@ export default function StoryContainer() {
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
-      <BaseHeader />
+      <BaseHeader
+        backgroundColor="overlay.waterDark"
+        onLogoClick={goToMainHome}
+        onAboutClick={goToMainAbout}
+        onGetDataClick={goToMainData}
+        waterThemesOptions={waterThemesOptions}
+      />
       <SectionIndicator />
       {tooltipContent && (
         <>
