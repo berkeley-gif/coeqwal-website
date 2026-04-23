@@ -25,7 +25,7 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
       "Browse the full library and narrow it down to a shortlist of scenarios you want to study more closely.",
     nextMode: "radar",
     nextLabel: "Compare on Radar",
-    nextRationale: "See your shortlist side by side.",
+    nextRationale: "See your shortlist scenarios side by side.",
   },
   radar: {
     mode: "radar",
@@ -51,19 +51,19 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
       "Stress-test scenarios across climate futures and read which risks hide behind the averages.",
     nextMode: null,
     nextLabel: "Open Share",
-    nextRationale: "Review everything you've saved and turn it into a story.",
+    nextRationale: "Review everything you've saved and build your water story.",
   },
   comparison: {
     mode: "comparison",
     purpose:
-      "Side-by-side research view for comparing a small set of scenarios in detail.",
+      "Side-by-side view for comparing a small set of scenarios in detail.",
     nextMode: null,
     nextLabel: "",
     nextRationale: "",
   },
   data: {
     mode: "data",
-    purpose: "Dig into the underlying data tables for the selected scenarios.",
+    purpose: "Dig into the underlying data for the selected scenarios.",
     nextMode: null,
     nextLabel: "",
     nextRationale: "",

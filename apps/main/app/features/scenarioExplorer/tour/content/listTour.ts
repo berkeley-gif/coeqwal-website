@@ -12,12 +12,12 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.hero",
     eyebrow: "START HERE",
     title: "This table is your scenario library.",
-    body: "Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry into Radar and Resilience.",
+    body: "Start on the left with the scenarios themselves, then read the outcomes on the right. The List view is where you tune the library, sort by what matters, and gather a shortlist to carry forward.",
   },
   {
     id: "list.step1.search",
     anchorId: "list.toolbar.search",
-    eyebrow: "STEP 1 - TUNE THE LIBRARY",
+    eyebrow: "STEP 1 - TUNE THE LIST",
     title: "Search and chips tune the library",
     body: "Search, definitions, baselines, key operations, selected only, and group by theme all change what you see first.",
     placement: "bottom-start",
@@ -25,7 +25,7 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.step1.themeGroup",
     anchorId: "list.toolbar.themeGroup",
-    eyebrow: "STEP 1 - TUNE THE LIBRARY",
+    eyebrow: "STEP 1 - TUNE THE LIST",
     title: "Theme organization helps you scan families",
     body: "Grouping by theme keeps similar interventions together so you can compare like with like before sorting.",
     placement: "bottom",
@@ -33,9 +33,9 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.step1.pinShare",
     anchorId: "list.toolbar.pinShare",
-    eyebrow: "STEP 1 - TUNE THE LIBRARY",
+    eyebrow: "STEP 1 - TUNE THE LIST",
     title: "Pin and share are collection tools",
-    body: "Pinning floats a scenario to the top of the library. Sharing stages the current scenario card into the Share drawer and Share tab.",
+    body: "Pinning floats a scenario to the top of the library for comparison with the rest of the library. Sharing stages the current scenario card into the Share drawer and Share tab.",
     placement: "right-start",
   },
   {
@@ -43,7 +43,7 @@ export const LIST_TOUR: TourStep[] = [
     anchorId: "list.outcome.infoButton",
     eyebrow: "STEP 2 - READ THE OUTCOMES",
     title: "Info brings back the outcome summary",
-    body: "Click the i when you need a reminder of what the outcome measures and why it matters.",
+    body: "Click the i when you need a reminder of what the outcome measures.",
     placement: "bottom",
   },
   {
@@ -59,15 +59,15 @@ export const LIST_TOUR: TourStep[] = [
     anchorId: "list.outcome.column",
     eyebrow: "STEP 2 - READ THE OUTCOMES",
     title: "Read down one column for the answer",
-    body: "Leaders, laggards, and trade-offs appear faster when you compare one question down the column instead of many across the row.",
+    body: "You can compare down the column instead of many across the row.",
     placement: "left",
   },
   {
     id: "list.step3.row",
     anchorId: "list.select.row",
     eyebrow: "STEP 3 - GATHER A SHORTLIST",
-    title: "Select the scenarios you want to keep",
-    body: "Use the row check controls to gather a working set without losing the rest of the library.",
+    title: "Select the scenarios you want to focus on",
+    body: "Use the checkboxes to gather a working set without losing the rest of the library.",
     placement: "right",
   },
   {
@@ -114,6 +114,6 @@ export const LIST_TOUR: TourStep[] = [
     id: "list.journey",
     eyebrow: "TAKE YOUR SHORTLIST FORWARD",
     title: "What to do after the List view",
-    body: "Radar compares the shortlisted scenarios across every chosen outcome at once instead of isolated cells. Resilience tests the same scenarios across climate futures and operational leverage. Distribution inspects the spread across locations more directly.",
+    body: "Radar compares the shortlisted scenarios across every chosen outcome at once instead of isolated cells. Distribution inspects the spread across locations more directly.  Resilience tests the same scenarios across climate futures and operational leverage.",
   },
 ]
