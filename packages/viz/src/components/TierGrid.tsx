@@ -376,18 +376,18 @@ const getFillColor = (
 ): string => {
   if (colorMode === "tier") {
     // In comparison mode, use comparison colors (blue/red based on change)
-    if (showComparison) {
-      const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
-      const baselineTierNum = parseInt(obj.baselineTier.replace("Tier ", ""))
+    // if (showComparison) {
+    //   const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
+    //   const baselineTierNum = parseInt(obj.baselineTier.replace("Tier ", ""))
 
-      if (currentTierNum === baselineTierNum) {
-        return "#90caf9" // Light blue - no change
-      } else if (currentTierNum < baselineTierNum) {
-        return "#2196f3" // Default blue - improved
-      } else {
-        return "#f44336" // Red - worsened
-      }
-    }
+    //   if (currentTierNum === baselineTierNum) {
+    //     return "#90caf9" // Light blue - no change
+    //   } else if (currentTierNum < baselineTierNum) {
+    //     return "#2196f3" // Default blue - improved
+    //   } else {
+    //     return "#f44336" // Red - worsened
+    //   }
+    // }
 
     // In normal mode, use tier colors
     return tierColorMap[obj.tier] || "#999"
@@ -514,6 +514,7 @@ const drawCategoryLabels = (
   height: number,
   categoryLayouts: CategoryLayout[],
   onCategoryClick?: (category: string) => void,
+  showMapView: boolean = false,
 ) => {
   svg.selectAll(".category-labels").remove()
   const labelLayer = svg.append("g").attr("class", "category-labels")
@@ -541,7 +542,38 @@ const drawCategoryLabels = (
     })
     if (currentLine) lines.push(currentLine)
 
-    const textElement = labelLayer
+    // Create a group for the label (background + text)
+    const labelGroup = labelLayer
+      .append("g")
+      .attr("class", "category-label-group")
+
+    // Add background rectangle if clickable
+    let backgroundRect: d3.Selection<
+      SVGRectElement,
+      unknown,
+      null,
+      undefined
+    > | null = null
+    if (onCategoryClick && showMapView) {
+      const padding = 4
+      const lineHeight = 11 * 1.2
+      const rectHeight = lines.length * lineHeight + padding * 2
+      const rectWidth = layout.width * 0.9
+
+      backgroundRect = labelGroup
+        .append("rect")
+        .attr("x", x - rectWidth / 2)
+        .attr("y", y - padding)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("rx", 4)
+        .attr("fill", "#f5f5f5")
+        .attr("stroke", "#ddd")
+        .attr("stroke-width", 1)
+        .style("cursor", "pointer")
+    }
+
+    const textElement = labelGroup
       .append("text")
       .attr("x", x)
       .attr("y", y)
@@ -550,6 +582,7 @@ const drawCategoryLabels = (
       .style("font-size", "11px")
       .style("fill", "#333")
       .style("cursor", onCategoryClick ? "pointer" : "default")
+      .style("pointer-events", "none")
 
     // Add each line as a tspan
     lines.forEach((line, i) => {
@@ -560,8 +593,16 @@ const drawCategoryLabels = (
         .text(line)
     })
 
-    if (onCategoryClick) {
-      textElement.on("click", () => onCategoryClick(layout.category))
+    if (onCategoryClick && backgroundRect && showMapView) {
+      // Add hover effects to background
+      backgroundRect
+        .on("click", () => onCategoryClick(layout.category))
+        .on("mouseover", function () {
+          d3.select(this).attr("fill", "#e3f2fd").attr("stroke", "#1976d2")
+        })
+        .on("mouseout", function () {
+          d3.select(this).attr("fill", "#f5f5f5").attr("stroke", "#ddd")
+        })
     }
   })
 }
@@ -661,7 +702,7 @@ export default function TierGrid({
         onTierCategoryClick,
         showMapView,
       )
-      drawCategoryLabels(svg, h, categoryLayouts, onCategoryClick)
+      drawCategoryLabels(svg, h, categoryLayouts, onCategoryClick, showMapView)
     },
     [
       getSvgSelection,
@@ -759,11 +800,14 @@ export default function TierGrid({
             showComparison,
           ),
         )
+        .attr("fill-opacity", (d) =>
+          showComparison && d.obj.baselineTier == d.obj.tier ? 0.2 : 1,
+        )
         .attr("stroke", (d) =>
           selectedOutcomeLocationCodes.has(String(d.id)) ? "#333" : "#fff",
         )
         .attr("stroke-width", (d) =>
-          selectedOutcomeLocationCodes.has(String(d.id)) ? 3 : 1,
+          selectedOutcomeLocationCodes.has(String(d.id)) ? 2 : 0,
         )
         .attr("opacity", 1)
 
@@ -905,36 +949,39 @@ export default function TierGrid({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <div
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundColor: "#2196f3",
-                borderRadius: "2px",
-              }}
-            />
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <polygon
+                points="8,1 1,15 15,15"
+                fill="#bbbbbb"
+                stroke="#fff"
+                strokeWidth="1"
+              />
+            </svg>
             <span style={{ color: "#4a5568" }}>Improved from baseline</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <div
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundColor: "#90caf9",
-                borderRadius: "2px",
-              }}
-            />
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <rect
+                x="1"
+                y="1"
+                width="14"
+                height="14"
+                fill="#bbbbbb"
+                stroke="#fff"
+                strokeWidth="1"
+              />
+            </svg>
             <span style={{ color: "#4a5568" }}>No change</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <div
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundColor: "#f44336",
-                borderRadius: "2px",
-              }}
-            />
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <polygon
+                points="8,15 1,1 15,1"
+                fill="#bbbbbb"
+                stroke="#fff"
+                strokeWidth="1"
+              />
+            </svg>
             <span style={{ color: "#4a5568" }}>Worsened from baseline</span>
           </div>
         </div>
