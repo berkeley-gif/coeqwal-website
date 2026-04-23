@@ -28,8 +28,8 @@ interface ToolIntroStripProps {
   title: string
   summary: string
   bullets?: ToolIntroBullet[]
-  /** Tour step to jump to when "Take a tour" is clicked. If omitted,
-   *  the tour starts from the beginning. */
+  /** Deprecated. The per-tool tour always starts from step 0 now;
+   *  this prop is accepted for source compatibility but ignored. */
   tourStep?: number
 }
 
@@ -38,7 +38,6 @@ export default function ToolIntroStrip({
   title,
   summary,
   bullets,
-  tourStep,
 }: ToolIntroStripProps) {
   const theme = useTheme()
 
@@ -49,8 +48,7 @@ export default function ToolIntroStrip({
   const markToolIntroSeen = useScenarioExplorerStore(
     (s) => s.markToolIntroSeen,
   )
-  const startTour = useScenarioExplorerStore((s) => s.startTour)
-  const setTourStep = useScenarioExplorerStore((s) => s.setTourStep)
+  const startToolTour = useScenarioExplorerStore((s) => s.startToolTour)
 
   // Track local expansion. Initialize to "expanded" if the user has
   // never seen this tool's intro. Subsequent re-opens come from the
@@ -77,8 +75,7 @@ export default function ToolIntroStrip({
   const handleTour = () => {
     setExpanded(false)
     markToolIntroSeen(mode)
-    if (typeof tourStep === "number") setTourStep(tourStep)
-    startTour()
+    startToolTour(mode)
   }
 
   const mutedColor = theme.palette.grey[700]

@@ -14,6 +14,12 @@ export type {
   BaselineMap,
   DemandUnitsBaselineSpec,
 } from "./demandUnitsBaseline"
+export {
+  BEAT1_COLORS,
+  BEAT1_CYCLE,
+  BEAT1_MID,
+  beat1FillExpr,
+} from "./beat1Palette"
 export type {
   Actor,
   ActorKind,

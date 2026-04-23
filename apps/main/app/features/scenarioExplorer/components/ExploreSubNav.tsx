@@ -132,7 +132,6 @@ export default function ExploreSubNav() {
     exploreMode,
     setExploreMode,
     shareItems,
-    startTour,
   } = useScenarioExplorerStore()
 
   // Which tool tabs have at least one captured Share item from that
@@ -401,47 +400,6 @@ export default function ExploreSubNav() {
             },
           )}
 
-          {/* Tour chip. Kept to the right of the flow, matching the
-              WelcomeStrip layout: the flow depicts the journey, and the
-              Tour button offers a guided version of it. */}
-          <Box
-            component="button"
-            type="button"
-            onClick={startTour}
-            title="Take a guided tour of the tools"
-            aria-label="Take a tour"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 0.9,
-              py: 0.5,
-              ml: 0.5,
-              border: `1px solid ${alpha(theme.palette.common.white, 0.35)}`,
-              borderRadius: "12px",
-              cursor: "pointer",
-              background: "transparent",
-              color: theme.palette.common.white,
-              transition: "background-color 0.15s",
-              "&:hover": {
-                background: alpha(theme.palette.common.white, 0.15),
-              },
-            }}
-          >
-            <icons.HelpOutline sx={{ fontSize: "0.95rem" }} />
-            <Typography
-              component="span"
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-                color: theme.palette.common.white,
-              }}
-            >
-              Tour
-            </Typography>
-          </Box>
         </Box>
       </Box>
     </Box>

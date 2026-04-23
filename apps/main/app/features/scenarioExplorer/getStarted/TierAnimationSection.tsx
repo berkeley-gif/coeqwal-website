@@ -2164,45 +2164,14 @@ export default function TierAnimationSection() {
       if (!map?.isStyleLoaded?.()) return
 
       if (v < 0.01) {
+        // Paint writes for the reset window moved to
+        // `MapPaintArbiter.applyReset`, fired by the `beat0:mapPaint:reset`
+        // actor on its `onEnter` hook. This block retains only the
+        // listener-local phase bookkeeping so downstream branches that
+        // gate on `phase !== "idle"` still re-fire on their next
+        // transition. See the Storyboard Engine Hardening Plan v2,
+        // Phase 1.b.
         if (phase !== "idle") {
-          try {
-            if (map.getLayer("demand-units")) {
-              // Restore the full DU_CLASS_FILTER on reset so the cycling
-              // blues show across all 3 classes again from the top.
-              map.setFilter("demand-units", DU_CLASS_FILTER as never)
-              map.setPaintProperty("demand-units", "fill-opacity", 0)
-              map.setPaintProperty("demand-units", "fill-color-transition", {
-                duration: 0,
-                delay: 0,
-              })
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                beat1FillExpr(0) as never,
-              )
-              map.setPaintProperty(
-                "demand-units",
-                "fill-outline-color",
-                beat1FillExpr(0) as never,
-              )
-            }
-            if (map.getLayer("demand-units-outline")) {
-              map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-              map.setPaintProperty(
-                "demand-units-outline",
-                "line-color",
-                beat1FillExpr(0) as never,
-              )
-              map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-            }
-            // Snap the basemap dim overlay back to 0 so a full reset
-            // shows the bright basemap again.
-            if (map.getLayer("basemap-dim-overlay")) {
-              map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
-            }
-          } catch {
-            /* ok */
-          }
           phase = "idle"
           frozenColorPhase = 0
         }

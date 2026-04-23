@@ -10,6 +10,8 @@ import { create, immer } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 import { BASELINE_SCENARIO_ID } from "./constants"
+import type { TourTool } from "./tour/types"
+export type { TourTool } from "./tour/types"
 
 // ============================================================================
 // Types
@@ -327,8 +329,10 @@ interface ScenarioExplorerState {
   /** Per-tool monotonically-increasing counter; bumped to request a re-open
    *  of the ToolIntroStrip from outside (e.g., the toolbar info chip). */
   reopenToolIntroPulse: Record<ToolIntroMode, number>
-  /** Whether the guided tour is active, and which step is current. */
-  tour: { active: boolean; step: number }
+  /** Which per-tool tour (if any) is active and which step is current.
+   *  `tool` is null when no tour is running. Tours are always opt-in
+   *  and session-scoped (not persisted). */
+  tour: { tool: TourTool | null; step: number }
 }
 
 // ============================================================================
@@ -439,7 +443,10 @@ interface ScenarioExplorerActions {
   markToolIntroSeen: (mode: ToolIntroMode) => void
   /** Request the tool's intro strip to re-open (used by the toolbar chip). */
   bumpReopenToolIntro: (mode: ToolIntroMode) => void
-  startTour: () => void
+  /** Start the tour for a specific tool and auto-switch `exploreMode`
+   *  to that tool so anchors are mounted when the runner looks them
+   *  up. */
+  startToolTour: (tool: TourTool) => void
   endTour: () => void
   setTourStep: (step: number) => void
 
@@ -511,7 +518,7 @@ const initialState: ScenarioExplorerState = {
   seenBaselinePinHint: persistedJourney.seenBaselinePinHint,
   seenToolIntro: persistedJourney.seenToolIntro,
   reopenToolIntroPulse: { radar: 0, resilience: 0 },
-  tour: { active: false, step: 0 },
+  tour: { tool: null, step: 0 },
 }
 
 // ============================================================================
@@ -931,14 +938,17 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
           (state.reopenToolIntroPulse[mode] ?? 0) + 1
       }),
 
-    startTour: () =>
+    startToolTour: (tool) =>
       set((state) => {
-        state.tour = { active: true, step: 0 }
+        state.tour = { tool, step: 0 }
+        // Align the active tool so anchors for this tour are mounted
+        // when the runner resolves them.
+        state.exploreMode = tool
       }),
 
     endTour: () =>
       set((state) => {
-        state.tour = { active: false, step: 0 }
+        state.tour = { tool: null, step: 0 }
       }),
 
     setTourStep: (step) =>

@@ -19,6 +19,7 @@ import {
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import ToggleChip from "./ToggleChip"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 
 interface SearchAndChipsProps {
   /** Show a vertical divider between search and chips (toolbar layout) */
@@ -52,9 +53,15 @@ export default function SearchAndChips({
     setGroupByTheme,
   } = useScenarioExplorerStore()
 
+  const searchAnchorRef = useTourAnchor("list.toolbar.search")
+  const themeGroupAnchorRef = useTourAnchor("list.toolbar.themeGroup")
+  const showOnlyChosenAnchorRef = useTourAnchor("list.select.showOnlyChosen")
+  const showBaselinesAnchorRef = useTourAnchor("list.select.showBaselines")
+
   return (
     <>
       <Box
+        ref={searchAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -149,28 +156,34 @@ export default function SearchAndChips({
             active={showDefinitions}
             onClick={() => setShowDefinitions(!showDefinitions)}
           />
-          <ToggleChip
-            label="baselines"
-            active={showAlternativeBaselines}
-            onClick={() =>
-              setShowAlternativeBaselines(!showAlternativeBaselines)
-            }
-          />
+          <Box ref={showBaselinesAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="baselines"
+              active={showAlternativeBaselines}
+              onClick={() =>
+                setShowAlternativeBaselines(!showAlternativeBaselines)
+              }
+            />
+          </Box>
           <ToggleChip
             label="key operations"
             active={showKeyOperations}
             onClick={() => setShowKeyOperations(!showKeyOperations)}
           />
-          <ToggleChip
-            label="selected only"
-            active={showOnlyChosen}
-            onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-          />
-          <ToggleChip
-            label="group by theme"
-            active={groupByTheme}
-            onClick={() => setGroupByTheme(!groupByTheme)}
-          />
+          <Box ref={showOnlyChosenAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="selected only"
+              active={showOnlyChosen}
+              onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+            />
+          </Box>
+          <Box ref={themeGroupAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="group by theme"
+              active={groupByTheme}
+              onClick={() => setGroupByTheme(!groupByTheme)}
+            />
+          </Box>
         </Box>
       </Box>
     </>

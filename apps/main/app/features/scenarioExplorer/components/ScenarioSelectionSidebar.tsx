@@ -27,6 +27,7 @@ import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -125,8 +126,14 @@ export default function ScenarioSelectionSidebar({
     return map
   }, [orderedScenarios])
 
+  // The sidebar is a tour anchor for the resilience tour ("sidebar
+  // drives the small multiples"). The radar and equity tours do not
+  // step through it, so a single shared id is fine here.
+  const sidebarAnchorRef = useTourAnchor("resilience.sidebar")
+
   return (
     <Box
+      ref={sidebarAnchorRef}
       sx={{
         display: "flex",
         flexDirection: "column",
