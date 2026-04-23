@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Box, Slider, Stack, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import SnowpackLine from "./vis/SnowpackLine"
@@ -119,6 +120,18 @@ export default function SierraNevada() {
                   "Snow builds up in the winter and melts in the late spring to feed rivers and top off reservoirs downstream before the long dry season."
                 }
               </Typography>
+              <Typography variant="body1">
+                {"But "}
+                <span className="highlight-text">{"warmer temperatures"}</span>
+                {" mean more precipitation falls as rain instead of snow."}
+              </Typography>
+              <Typography variant="body1">
+                {"And "}
+                <span className="highlight-text">
+                  {"the snowpack we do receive melts earlier"}
+                </span>
+                {" in the year."}
+              </Typography>
             </Box>
           </motion.div>
           <motion.div style={{ opacity: secondParagraphOpacity }}>
@@ -128,7 +141,7 @@ export default function SierraNevada() {
               </Typography>
               <Typography variant="body1">
                 {
-                  "Use the slider below to compare a record-breaking wet year (2023) with a severe dry year (2015) to see how much our snowpack can vary from year to year."
+                  "Use the slider below to compare a record-breaking wet year (2023) with a severe dry year (2015) to see what snowpack may look like in a warmer future."
                 }
               </Typography>
             </Box>
@@ -234,15 +247,9 @@ export function Snowmelt() {
     [0.5, 0.65],
     [0, 1],
   )
-  const titleOpacity = useTransform(scrollYProgress, [0.18, 0.35], [0, 1])
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
     [0.28, 0.46],
-    [0, 1],
-  )
-  const secondParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.4, 0.58],
     [0, 1],
   )
   const chartHeadingOpacity = useTransform(
@@ -315,42 +322,17 @@ export function Snowmelt() {
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ opacity: titleOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="h3">{"Declining Snow"}</Typography>
-          </Box>
-        </motion.div>
         <motion.div style={{ opacity: firstParagraphOpacity }}>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
-                "Beyond year-to-year variability, California is also facing a long-term decline in snowpack."
+                "Predictions of climate change effects indicate that snowpack will continue to decline over the long-term."
               }
             </Typography>
             <Typography variant="body1">
-              <span className="highlight-text">{"Warmer temperatures"}</span>
-              {" mean more precipitation falls as rain instead of snow."}
-            </Typography>
-            <Typography variant="body1">
-              {"And "}
-              <span className="highlight-text">
-                {"the snowpack we do receive melts earlier"}
-              </span>
-              {" in the year."}
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Higher temperatures also cause water to evaporate faster from soils and plants."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: secondParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"The impact is that "}
+              {"Less snowpack means there will be "}
               <span style={{ fontWeight: "bold" }}>
-                {"less water is available"}
+                {"less water available"}
               </span>
               {
                 " in rivers and reservoirs during the dry summer when we \u2014 humans and ecosystems \u2014 "
@@ -408,15 +390,14 @@ export function Snowmelt() {
             opacity: labelOpacity,
           }}
         >
-          <Box
-            component="img"
+          <Image
             src="/icons/snowflake_icon.svg"
             alt="Snowflake icon"
-            sx={{
+            width={48}
+            height={48}
+            style={{
               display: "block",
-              marginRight: 1,
-              width: 48,
-              height: 48,
+              marginRight: 8,
               filter: "invert(1) brightness(100%)",
             }}
           />

@@ -36,22 +36,23 @@ export function Hydroclimate() {
     >
       <Box
         width="100%"
-        height="100%"
+        height="100vh"
         sx={{
           display: "flex",
           flexDirection: "column",
+          justifyContent: "flex-start",
         }}
       >
         <Box
           className="text-section"
           width="100%"
-          height="35%"
           sx={{
             position: "relative",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            paddingTop: "5rem",
+            paddingTop: { xs: "2rem", md: "4rem" },
+            paddingBottom: { xs: 0, md: 0 },
             pointerEvents: "auto",
           }}
         >
@@ -64,11 +65,7 @@ export function Hydroclimate() {
           </motion.div>
           <motion.div style={{ opacity: paragraphOneOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography
-                variant="body1"
-                style={{ fontWeight: "bold" }}
-                gutterBottom
-              >
+              <Typography variant="body1" style={{ fontWeight: "bold" }}>
                 {"This is where COEQWAL comes in."}
               </Typography>
               <Typography variant="body1">
@@ -81,9 +78,11 @@ export function Hydroclimate() {
           <motion.div style={{ opacity: paragraphTwoOpacity }}>
             <Box className="paragraph" component="article">
               <Typography variant="body1">
-                {"COEQWAL studies three plausible future "}
+                {"COEQWAL studies the effects of different plausible future "}
                 <span style={{ fontWeight: "bold" }}>{"hydroclimates"}</span>
-                {" \u2014 specific changes in streamflow."}
+                {
+                  " \u2014 specific changes in temperature, precipitation, and streamflow."
+                }
               </Typography>
               <Typography variant="body1">
                 {
@@ -102,7 +101,7 @@ export function Hydroclimate() {
         <Box
           className="text-section"
           width="100%"
-          height="65%"
+          height="100%"
           sx={{
             position: "relative",
             display: "flex",
@@ -111,7 +110,12 @@ export function Hydroclimate() {
             pointerEvents: "auto",
           }}
         >
-          <motion.div style={{ opacity: chartHeadingOpacity }}>
+          <motion.div
+            style={{
+              opacity: chartHeadingOpacity,
+              marginBottom: "1rem",
+            }}
+          >
             <Box component="article">
               <Typography variant="h5">
                 {"Streamflow Changes under Different Hydroclimates"}
@@ -215,7 +219,9 @@ export function HydroclimateTransition() {
           </motion.div>
           <motion.div style={{ opacity: paragraphOpacity }}>
             <Typography variant="h3">
-              COEQWAL also explores different strategies for managing water
+              {"COEQWAL also explores strategies for addressing "}
+              <span style={{ fontWeight: "bold" }}> water issues </span>
+              {" in California"}
             </Typography>
             <Typography variant="h3">
               and how these might help limit the impacts of climate change.

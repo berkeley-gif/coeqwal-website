@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Box, UnfoldMoreIcon, useTheme } from "@repo/ui/mui"
 
@@ -97,11 +98,11 @@ export function HorizontalImageSlider({
       }}
     >
       {/* Right image*/}
-      <Box
-        component="img"
+      <Image
         src={rightSrc}
         alt={altRight}
-        sx={{
+        fill
+        style={{
           position: "absolute",
           inset: 0,
           width: "100%",
@@ -112,11 +113,11 @@ export function HorizontalImageSlider({
       />
 
       {/* Left image*/}
-      <Box
-        component="img"
+      <Image
         src={leftSrc}
         alt={altLeft}
-        sx={{
+        fill
+        style={{
           position: "absolute",
           inset: 0,
           width: "100%",
@@ -412,11 +413,11 @@ export function VerticalImageSlider({
       onPointerDown={handlePointerDown}
     >
       {/* Bottom image*/}
-      <Box
-        component="img"
+      <Image
         src={bottomSrc}
         alt={altBottom}
-        sx={{
+        fill
+        style={{
           position: "absolute",
           inset: 0,
           width: "100%",
@@ -427,11 +428,11 @@ export function VerticalImageSlider({
       />
 
       {/* Top image */}
-      <Box
-        component="img"
+      <Image
         src={topSrc}
         alt={altTop}
-        sx={{
+        fill
+        style={{
           position: "absolute",
           inset: 0,
           width: "100%",

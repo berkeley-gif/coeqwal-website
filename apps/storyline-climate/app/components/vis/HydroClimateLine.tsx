@@ -23,7 +23,7 @@ export type FlowEntry = {
   Qthree: number
 }
 
-const margin = { top: 20, right: 40, bottom: 40, left: 180 }
+const margin = { top: 20, right: 40, bottom: 60, left: 180 }
 const yTicks = [65, 40, 20, 0, -20, -40, -65]
 
 function FlowLine({

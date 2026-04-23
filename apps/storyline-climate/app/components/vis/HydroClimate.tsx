@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useState } from "react"
 import { useFetchData } from "../../hooks/useFetchData"
 import FlowLine, { FlowEntry } from "./HydroClimateLine"
-import { scaleLinear, type ScaleLinear } from "@repo/viz"
-import { Box, Button, Stack, Typography } from "@repo/ui/mui"
-import { useBreakpoint } from "@repo/ui/hooks"
+import { Box, Button, Stack, Typography, useTheme } from "@repo/ui/mui"
 
 export type ContainerSize = {
   width: number
@@ -19,7 +17,7 @@ type Model = {
 
 const models: Model[] = [
   {
-    model: "Moderate-dry climate risk",
+    model: "Moderate climate risk",
     background: "#c28433",
     hover: "rgb(160, 101, 25)",
     text: "#fcfbfa",
@@ -31,17 +29,17 @@ const models: Model[] = [
     text: "#fcfbfa",
   },
   {
-    model: "Warmer & Wetter",
-    background: "#6c8ba0ff",
-    hover: "#4e6d80ff",
+    model: "Extreme climate risk",
+    background: "#5c0b0b",
+    hover: "#460909",
     text: "#fcfbfa",
   },
 ]
 
 const modelQueryMap: Record<string, string> = {
-  "Moderate-dry climate risk": "Warmer & Drier I",
+  "Moderate climate risk": "Warmer & Drier I",
   "High climate risk": "Warmer & Drier II",
-  "Warmer & Wetter": "Warmer & Wetter",
+  "Extreme climate risk": "Warmer & Drier III",
 }
 
 export default function HydroClimateContainer() {
@@ -79,15 +77,16 @@ export default function HydroClimateContainer() {
       >
         <div
           style={{
-            height: "20%",
+            height: "10%",
             width: "100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
+            marginBottom: "1rem",
           }}
         >
           <Typography
-            variant="body1"
+            variant="body2"
             sx={{ mr: 2, whiteSpace: "nowrap", fontWeight: 700 }}
           >
             {"Choose a hydroclimate:"}
@@ -110,7 +109,7 @@ export default function HydroClimateContainer() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              height: "80%",
+              height: "50%",
             }}
           >
             <Typography variant="body1">
@@ -131,6 +130,8 @@ function ClimateModelSelector({
   onSelect: (model: string) => void
   selectedModel: string
 }) {
+  const theme = useTheme()
+
   return (
     <Box
       width="100%"
@@ -157,12 +158,17 @@ function ClimateModelSelector({
           <Button
             key={idx}
             variant="contained"
+            size="small"
             onClick={() => onSelect(model.model)}
             sx={{
               borderRadius: "999px",
-              px: 2,
-              py: 0.9,
-              minHeight: "40px",
+              px: { xs: 1, md: 2 },
+              py: { xs: 0.5, md: 0.9 },
+              minHeight: { xs: "16px", md: "20px" },
+              fontSize: {
+                xs: theme.typography.body2.fontSize,
+                md: theme.typography.caption.fontSize,
+              },
               textTransform: "none",
               fontWeight: 700,
               letterSpacing: "0.01em",
@@ -189,290 +195,5 @@ function ClimateModelSelector({
         ))}
       </Stack>
     </Box>
-  )
-}
-
-/* Below are archived */
-
-const dummyData = [
-  { model: "Warmer & Drier I", temperature: 1.5, precipitation: -3 },
-  { model: "Warmer & Drier II", temperature: 1.8, precipitation: -9 },
-  { model: "Warmer & Drier III", temperature: 1.9, precipitation: -7 },
-  { model: "Warmer & Drier IV", temperature: 1.4, precipitation: -12 },
-  { model: "Warmer & Wetter", temperature: 1.2, precipitation: 4 },
-]
-const yExtents = [-15, 15]
-const yTicks = [-15, 0, 15]
-const xExtents = [0, 2]
-const xTicks = [1, 2]
-const margin = { top: 20, right: 75, bottom: 40, left: 120 }
-
-function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
-  const svgRef = useRef<SVGSVGElement | null>(null)
-  const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
-
-  useEffect(() => {
-    if (svgRef.current) {
-      const { width, height } = svgRef.current.getBoundingClientRect()
-      setSize({ width, height })
-    }
-  }, [])
-
-  const xScale = useMemo(() => {
-    return scaleLinear()
-      .domain(xExtents)
-      .range([margin.left, size.width - margin.right])
-      .nice()
-  }, [size.width])
-
-  const yScale = useMemo(() => {
-    return scaleLinear()
-      .domain(yExtents)
-      .range([size.height - margin.bottom, margin.top])
-      .nice()
-  }, [size.height])
-
-  return (
-    <svg ref={svgRef} width="100%" height="100%">
-      <text
-        id="hydroclimate-scatter-title"
-        x={size.width / 2}
-        y={margin.top}
-        dx={"0.75em"}
-        dy={"2em"}
-        style={{ textAnchor: "middle" }}
-      >
-        Below uses dummy data; right side uses real data
-      </text>
-      <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
-      <Rules size={size} xScale={xScale} yScale={yScale} />
-      <ClimatePoint
-        data={dummyData}
-        xScale={xScale}
-        yScale={yScale}
-        onSelect={onSelect}
-      />
-      <YAxis yScale={yScale} />
-    </svg>
-  )
-}
-
-const _archivedClimateScatter = ClimateScatter
-
-function ClimatePoint({
-  data,
-  xScale,
-  yScale,
-  onSelect,
-}: {
-  data: { model: string; temperature: number; precipitation: number }[]
-  xScale: ScaleLinear<number, number>
-  yScale: ScaleLinear<number, number>
-  onSelect: (model: string) => void
-}) {
-  const breakpoint = useBreakpoint()
-
-  return (
-    <>
-      {data.map((entry, idx) => (
-        <g
-          key={idx}
-          onClick={() => onSelect(entry.model)}
-          style={{ cursor: "pointer" }}
-        >
-          <circle
-            r={
-              breakpoint === "xs" || breakpoint === "sm" || breakpoint == "lg"
-                ? 4
-                : 6
-            }
-            fill="#F1B143"
-            cx={xScale(entry.temperature)}
-            cy={yScale(entry.precipitation)}
-          ></circle>
-          <line
-            stroke="#F1B143"
-            strokeWidth={1}
-            x1={xScale(0)}
-            x2={xScale(entry.temperature)}
-            y1={yScale(0)}
-            y2={yScale(entry.precipitation)}
-          ></line>
-          <text
-            className="climate-points"
-            x={xScale(entry.temperature)}
-            y={yScale(entry.precipitation)}
-            dx="0.5em"
-            dy={
-              [
-                "Warmer & Drier I",
-                "Warmer & Drier III",
-                "Warmer & Wetter",
-              ].includes(entry.model)
-                ? "-1em"
-                : "1em"
-            }
-          >
-            {entry.model}
-          </text>
-        </g>
-      ))}
-    </>
-  )
-}
-
-function Rules({
-  xScale,
-  yScale,
-  size,
-}: {
-  size: ContainerSize
-  xScale: ScaleLinear<number, number>
-  yScale: ScaleLinear<number, number>
-}) {
-  const xValues = [10, 5, -5, -10]
-  const yValues = [1, 2]
-
-  return (
-    <>
-      <g className="x-axis-rules" transform={`translate(${margin.left}, 0)`}>
-        {xValues.map((val, idx) => (
-          <path
-            key={idx}
-            d={`M0,${yScale(val)} L${size.width - margin.right - margin.left},${yScale(val)}`}
-            stroke="#fcfbfa"
-            strokeOpacity={0.3}
-            strokeWidth={0.5}
-          ></path>
-        ))}
-      </g>
-      <g className="y-axis-rules" transform={`translate(0, 0)`}>
-        {yValues.map((val, idx) => (
-          <path
-            key={idx}
-            d={`M${xScale(val)},${yScale(-15.5)} L${xScale(val)},${yScale(15.5)}`}
-            stroke="#fcfbfa"
-            strokeOpacity={0.3}
-            strokeWidth={0.5}
-          ></path>
-        ))}
-      </g>
-    </>
-  )
-}
-
-function YAxis({ yScale }: { yScale: ScaleLinear<number, number> }) {
-  return (
-    <>
-      <g className="y-axis" transform={`translate(${margin.left},0)`}>
-        {yTicks.map((tick, idx) => (
-          <YTick key={idx} value={tick} yPos={yScale(tick)} idx={idx} />
-        ))}
-      </g>
-      <g className="y-axis" transform={`translate(${margin.left * 0.5},0)`}>
-        <text id="y-axis-label" x={0} y={yScale(0)}>
-          <tspan x={0} dy="-0.6em" dx="-1em">
-            Changes in
-          </tspan>
-          <tspan x={0} dy="1.2em" dx="-1em">
-            precipitation
-          </tspan>
-          <tspan x={0} dy="1.2em" dx="-1em">
-            &#8594;
-          </tspan>
-        </text>
-      </g>
-    </>
-  )
-}
-
-function XAxis({
-  size,
-  yOffset,
-  xScale,
-}: {
-  size: ContainerSize
-  yOffset: number
-  xScale: ScaleLinear<number, number>
-}) {
-  return (
-    <>
-      <g className="x-axis" transform={`translate(${margin.left}, 0)`}>
-        <path
-          d={`M0,${yOffset} L${size.width - margin.right - margin.left},${yOffset}`}
-          stroke="#fcfbfa"
-          strokeWidth={1}
-        ></path>
-      </g>
-      <g>
-        {xTicks.map((tick, idx) => (
-          <XTick
-            key={idx}
-            idx={idx}
-            yPos={yOffset}
-            value={tick.toString()}
-            xPos={xScale(tick) ?? 0}
-          />
-        ))}
-      </g>
-      <g className="x-axis">
-        <text
-          id="x-axis-label"
-          x={size.width / 2}
-          y={size.height - margin.bottom}
-          dy="2.5em"
-        >
-          Changes in temperature
-          <tspan> &#8593;</tspan>
-        </text>
-      </g>
-    </>
-  )
-}
-
-function XTick({
-  value,
-  xPos,
-  yPos = 0,
-  idx,
-}: {
-  value: string
-  xPos: number
-  yPos?: number
-  idx: number
-}) {
-  return (
-    <g key={idx} className="x-axis-ticks">
-      <text x={xPos} y={yPos} dy="1em">
-        {value}
-        <tspan dx="0.2em">&#176;C</tspan>
-      </text>
-    </g>
-  )
-}
-
-function YTick({
-  value,
-  yPos,
-  idx,
-}: {
-  value: number
-  yPos: number
-  idx: number
-}) {
-  return (
-    <g key={idx} className="y-axis-ticks">
-      <line
-        x1={-6}
-        x2={0}
-        y1={yPos}
-        y2={yPos}
-        stroke="#fcfbfa"
-        strokeWidth={1}
-      ></line>
-      <text x={0} dx="-0.75em" y={yPos}>
-        {value <= 0 ? `${value}%` : `+${value}%`}
-      </text>
-    </g>
   )
 }
