@@ -14,6 +14,7 @@ import {
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
 import TierAnimationSection from "./TierAnimationSection"
+import { getStartedViewportCardHeightCss } from "./getStartedViewport"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* Rounded-panel shell for get-started sections.                               */
@@ -36,14 +37,6 @@ const GET_STARTED_INSET_Y = tunerInsetY()
  *  wrapper and the top of the post-map wrapper. The wash colour/opacity
  *  itself comes from `theme.background.modalBackdrop(Opacity)`. */
 const DARK_WASH_FADE_PX = 160
-
-/** Extra vertical breathing room subtracted from each panel's inner
- *  min-height (on top of the sticky-header-stack subtraction). This
- *  shrinks the rounded card so there's visible air between its top/
- *  bottom edges and the header stack / next panel, without changing
- *  the inset-based gap between consecutive panels. Increase for more
- *  breathing room, decrease to let the card fill more of the viewport. */
-const PANEL_BREATHING_PX = 80
 
 /** Extra top margin applied ONLY to the Welcome panel (the first
  *  get-started panel). Provides clearance between the Explore tab's
@@ -72,19 +65,9 @@ function GetStartedPanelShell({
   minHeight,
 }: GetStartedPanelShellProps) {
   const theme = useTheme()
-  // Shrink each panel by the combined height of the persistent
-  // header stack that sits above get-started views:
-  //   collapsed main header + Learn/Explore/Share tabs row +
-  //   Explore sub-nav (get-started / go-to-tools).
-  // Add a further `PANEL_BREATHING_PX` so the rounded card doesn't
-  // consume the full remaining viewport — leaves a little air above
-  // and below the card before the next panel begins. (The *gap*
-  // between consecutive panels is still controlled by
-  // `GET_STARTED_INSET_Y` and is unchanged.)
-  const stickyStackPx =
-    theme.layout.collapsedHeaderHeight + 2 * theme.layout.collapsedTabHeight
-  const resolvedMinHeight =
-    minHeight ?? `calc(100vh - ${stickyStackPx + PANEL_BREATHING_PX}px)`
+  // Default min-height: see `getStartedViewport.ts` (sticky stack +
+  // shared breathing margin). Override per panel via `minHeight`.
+  const resolvedMinHeight = minHeight ?? getStartedViewportCardHeightCss(theme)
   return (
     <Box
       sx={{

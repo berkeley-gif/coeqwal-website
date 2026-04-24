@@ -16,7 +16,7 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.hero",
     eyebrow: "start here",
-    title: "The List view lets you browse scenarios and compare outcomes.",
+    title: "The List view lets you browse scenarios and compare outcomes",
     body: "Start with the scenario list on the left, then read across each row to compare the key outcomes on the right. This is where you can arrange the view, sort by outcomes, and build a shortlist to carry forward.",
   },
 
@@ -26,7 +26,7 @@ export const LIST_TOUR: TourStep[] = [
     anchorId: "list.scenarioArea",
     eyebrow: "get oriented",
     title: "These controls tune the scenario list below",
-    body: "Everything in this band filters or rearranges the rows below.",
+    body: "Everything in this band filters or rearranges the scenario sidebar rows below.",
     placement: "bottom-start",
   },
   {
@@ -46,20 +46,20 @@ export const LIST_TOUR: TourStep[] = [
     placement: "bottom-start",
   },
   {
+    id: "list.step3.showOnlyChosen",
+    anchorId: "list.select.showOnlyChosen",
+    eyebrow: "arrange the list",
+    title: "Selected only turns a long list into a working table",
+    body: "Once selected scenario listings are checked, you can hide the rest so the shortlist becomes easier to compare.",
+    placement: "bottom",
+  },
+  {
     id: "list.step1.operations",
     anchorId: "list.toolbar.keyOperationsChip",
     eyebrow: "arrange the list",
     title: "Key operations",
     body: "Toggle key operations to add a column of icons that summarize the key operations of each scenario.",
     placement: "bottom-start",
-  },
-  {
-    id: "list.step3.showOnlyChosen",
-    anchorId: "list.select.showOnlyChosen",
-    eyebrow: "arrange the list",
-    title: "Selected only turns a long list into a working table",
-    body: "Once the strongest candidates are checked, hide the rest so the shortlist becomes easier to compare.",
-    placement: "bottom",
   },
   {
     id: "list.step1.pin",
@@ -95,7 +95,7 @@ export const LIST_TOUR: TourStep[] = [
     eyebrow: "open the map",
     title: "",
     illustration: "listMapLegend",
-    body: "Turn on Show map to open the map panel beside the list. Click on an outcome to see it on the map. Use this to see where conditions are strongest or weakest, compare scenarios in place, and view changes by hydroclimate. Pan and zoom as you would in any web map.",
+    body: "Turn on Show map to open the map panel beside the list. Try clicking on an outcome chart to see it on the map. Use this to see where outcomes are strongest or weakest, compare scenarios in place, and view changes by hydroclimate. Pan and zoom as you would in any web map.",
     placement: "bottom-start",
   },
   {

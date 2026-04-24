@@ -132,6 +132,12 @@ export const BEATS: readonly BeatDef[] = [
 
 export const FINAL_BEAT_INDEX = BEATS.length - 1
 
+/** Pixels the storyboard's radar, heatmap, and HTML axis labels are
+ *  shifted up so the right-column visualization and Beat 3+ narration
+ *  read as a single block. Kept in sync across `OutcomeMorphOverlay` and
+ *  `BeatTextOverlay` measurement. */
+export const STORYBOARD_VISUAL_LIFT_PX = 80
+
 /* ── Reveal pace primitives (seconds) ──
  *
  * Reference point: step 1 (Beat 0), where the intro paragraph and subtitle

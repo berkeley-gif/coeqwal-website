@@ -37,6 +37,7 @@ import {
   ITEM_STAGGER_SEC,
   BLOCK_EXIT_SEC,
   secondsToProgress,
+  STORYBOARD_VISUAL_LIFT_PX,
 } from "./animationTiming"
 import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 
@@ -358,6 +359,12 @@ export default function BeatTextOverlay({
    *  Step 7 so the runtime wrap matches the geometry the delta was
    *  computed from. */
   const radarLabelMaxWidthRef = useRef<number>(110)
+  /** Per-outcome `maxWidth` (px) for heatmap y-axis label wrapping. Filled
+   *  in `measure()`; applied when `v >= 0.95` in the progress tick. */
+  const heatmapLabelMaxWRef = useRef<Map<string, number>>(new Map())
+  /** When true, `axisLabel` titles use right-aligned, wrapped text for
+   *  the Beat 8 heatmap column. Mutually exclusive with radar-axis wrap. */
+  const heatmapTextActiveRef = useRef(false)
   /** Tracks whether the per-frame tick has currently applied Step 7's
    *  wrap styles to the title blocks. Used to toggle wrap inline styles
    *  once per transition instead of rewriting them every frame. */
@@ -507,11 +514,11 @@ export default function BeatTextOverlay({
     // which reads as a visible "pop" in the label's text layout. To
     // mask it we dip each title's opacity through 0 right at the flip
     // and raise it back, so the re-flow happens while the label is
-    // invisible. Symmetric dips on the outgoing flip (0.76, mid-slide
-    // to axis vertex) and the incoming flip-back (0.90, arrival home
-    // at end of slide-return) keep every transition hidden.
+    // invisible. A second dip (0.95) masks the switch to the heatmap
+    // y-axis label layout. The flip at 0.76 is scheduled at the dip
+    // floor so the re-flow runs while the label is invisible.
     //
-    // The flip itself is scheduled at the dip floor (`wantWrap`
+    // The 0.76 flip is also aligned with the dip floor (`wantWrap`
     // threshold == dip peak) so the label's DOM state changes at the
     // exact moment its visible opacity is 0. Dip widths (~0.01 on
     // each side) trade off masking strength against total dim time;
@@ -520,8 +527,9 @@ export default function BeatTextOverlay({
     // absent mid-slide.
     const WRAP_DIP_OUT_CENTER = 0.76
     const WRAP_DIP_OUT_HALF = 0.01
-    const WRAP_DIP_IN_CENTER = 0.9
-    const WRAP_DIP_IN_HALF = 0.01
+    /** Masks the discrete switch to heatmap y-axis label layout at v=0.95. */
+    const HEATMAP_WRAP_DIP_CENTER = 0.95
+    const HEATMAP_WRAP_DIP_HALF = 0.01
     let wrapDip = 1
     if (
       v >= WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF &&
@@ -532,14 +540,26 @@ export default function BeatTextOverlay({
           ? 1 - (v - (WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF)) / WRAP_DIP_OUT_HALF
           : (v - WRAP_DIP_OUT_CENTER) / WRAP_DIP_OUT_HALF
     } else if (
-      v >= WRAP_DIP_IN_CENTER - WRAP_DIP_IN_HALF &&
-      v <= WRAP_DIP_IN_CENTER + WRAP_DIP_IN_HALF
+      v >= HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF &&
+      v <= HEATMAP_WRAP_DIP_CENTER + HEATMAP_WRAP_DIP_HALF
     ) {
       wrapDip =
-        v < WRAP_DIP_IN_CENTER
-          ? 1 - (v - (WRAP_DIP_IN_CENTER - WRAP_DIP_IN_HALF)) / WRAP_DIP_IN_HALF
-          : (v - WRAP_DIP_IN_CENTER) / WRAP_DIP_IN_HALF
+        v < HEATMAP_WRAP_DIP_CENTER
+          ? 1 - (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
+              HEATMAP_WRAP_DIP_HALF
+          : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
+    /** Fades labels out in place on the radar ring [0.86,0.9], holds
+     *  them invisible [0.9,0.95] while the morph runs, then fades them
+     *  in at the heatmap y-axis [0.95,0.99] with no position tween. */
+    const pathOpacity =
+      v < 0.86
+        ? 1
+        : v < 0.9
+          ? 1 - (v - 0.86) / 0.04
+          : v < 0.95
+            ? 0
+            : Math.min(1, (v - 0.95) / 0.04)
     // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
     // exactly at morphEnd, so the "x locations" text is fully opaque
     // the instant the squares lock in.
@@ -578,7 +598,9 @@ export default function BeatTextOverlay({
           // windows, so Beats 0-5 and the steady middle of Beat 6 are
           // unaffected.
           titleEl.style.opacity = String(
-            clamp01((v - titleFadeStart) / TITLE_FADE) * wrapDip,
+            clamp01((v - titleFadeStart) / TITLE_FADE) *
+              wrapDip *
+              pathOpacity,
           )
         }
 
@@ -608,49 +630,61 @@ export default function BeatTextOverlay({
       }
     }
 
-    // Beat 6 radar-label wrap + slide.
-    //
-    // Steps 1-6 render titles single-line (`noWrap`, left-aligned,
-    // clipped by the outer block's `overflow: hidden`, defined in the
-    // component's static `sx` below). Step 7 wraps them at `maxLabelW`
-    // and centers each line so they ring the radar the way axis labels
-    // do. The wrap flip happens mid-slide, not at the beat boundary:
-    // on at `WRAP_DIP_OUT_CENTER` (= 0.76, while the labels are already
-    // circling out toward their axis points), off at
-    // `WRAP_DIP_IN_CENTER` (= 0.90, the moment they arrive back home).
-    // Both toggle points sit at the trough of the opacity dip driven
-    // above, so the text layout change lands while the label is at
-    // zero opacity and the re-flow never hits a user-visible frame.
-    //
-    // Inside that window, each wrapped title block is center-anchored
-    // to its polar axis point (`(cx + labelR*cos(angle),
-    // cy + labelR*sin(angle))`, same family
-    // `OutcomeMorphOverlay.radarGeometry` uses) during the `[0.75,
-    // 0.82]` window where `radarBlend` glides the averaged dots to
-    // their vertices, so labels + dots arrive together. Labels ride
-    // back home across `[0.87, 0.90]` as the radar chrome fades out,
-    // yielding the right third for Beat 7's heatmap cells. Delta is
-    // pre-measured in the layout effect against the *wrapped* center,
-    // so the translate lines the wrapped block up with its vertex;
-    // here we only multiply by `blend` and write a translate.
-    const wantWrap = v >= WRAP_DIP_OUT_CENTER && v < WRAP_DIP_IN_CENTER
-    if (wantWrap !== radarWrapActiveRef.current) {
-      radarWrapActiveRef.current = wantWrap
+    // Beats 6-8: Step 7 wraps + centers for the radar; Step 8 wraps +
+    // right-aligns for the heatmap. The two are mutually exclusive.
+    const wantHeatmapText = v >= 0.95
+    const wantRadarAxisWrap = v >= 0.76 && v < 0.9 && !wantHeatmapText
+    if (wantHeatmapText && !heatmapTextActiveRef.current) {
+      heatmapTextActiveRef.current = true
+      radarWrapActiveRef.current = false
+      const maxWMap = heatmapLabelMaxWRef.current
+      titleRefsMap.current.forEach((el, code) => {
+        if (!el) return
+        const textEl = el.firstElementChild as HTMLElement | null
+        if (!textEl) return
+        textEl.style.whiteSpace = ""
+        textEl.style.textAlign = ""
+        textEl.style.maxWidth = ""
+        textEl.style.overflowWrap = ""
+        textEl.style.color = ""
+        el.style.justifyContent = ""
+        el.style.overflow = ""
+        const mw = maxWMap.get(code) ?? 120
+        textEl.style.whiteSpace = "normal"
+        textEl.style.textAlign = "right"
+        textEl.style.maxWidth = `${mw}px`
+        textEl.style.overflowWrap = "break-word"
+        textEl.style.color = theme.palette.text.primary
+        el.style.justifyContent = "flex-end"
+        el.style.overflow = "visible"
+      })
+    } else if (!wantHeatmapText && heatmapTextActiveRef.current) {
+      heatmapTextActiveRef.current = false
+      titleRefsMap.current.forEach((el) => {
+        if (!el) return
+        const textEl = el.firstElementChild as HTMLElement | null
+        if (!textEl) return
+        textEl.style.whiteSpace = ""
+        textEl.style.textAlign = ""
+        textEl.style.maxWidth = ""
+        textEl.style.overflowWrap = ""
+        textEl.style.color = ""
+        el.style.justifyContent = ""
+        el.style.overflow = ""
+      })
+    }
+    if (!wantHeatmapText && wantRadarAxisWrap !== radarWrapActiveRef.current) {
+      radarWrapActiveRef.current = wantRadarAxisWrap
       const maxW = radarLabelMaxWidthRef.current
       titleRefsMap.current.forEach((el) => {
         if (!el) return
         const textEl = el.firstElementChild as HTMLElement | null
         if (!textEl) return
-        if (wantWrap) {
+        if (wantRadarAxisWrap) {
           textEl.style.whiteSpace = "normal"
           textEl.style.textAlign = "center"
           textEl.style.maxWidth = `${maxW}px`
           textEl.style.overflowWrap = "break-word"
-          // Match RadarPlot's `axisTitleFill` (see
-          // `RadarPanel.radarAxisLabelDetailStyle`) so Step 7 axis
-          // titles read as the same navy color the user sees in the
-          // real radar. Flips at the dip trough so the recolor lands
-          // while the label is at zero opacity.
           textEl.style.color = "#193D6B"
           el.style.justifyContent = "center"
           el.style.overflow = "visible"
@@ -665,38 +699,26 @@ export default function BeatTextOverlay({
         }
       })
     }
-    // Label positions in Beats 6-8.
-    //
-    // During Beats 0-5 labels sit at their Beat 2 home positions
-    // (single-line titles above each distribution glyph). Two
-    // successive slides follow:
-    //
-    //   [0.75, 0.82]          home      -> radar rim       (radarBlend)
-    //   [0.82, 0.87]          (rest at radar rim)
-    //   [0.87, 0.90]          radar rim -> home             (radarBlend)
-    //   [0.90, 0.95]          home      -> heatmap y-axis   (heatmapBlend)
-    //   [0.95, 1.00]          (rest at heatmap y-axis)
-    //
-    // Because radarBlend collapses to 0 at 0.90 (the moment
-    // heatmapBlend leaves 0), the two deltas can be summed; only one
-    // is non-zero at any single moment except the instantaneous
-    // handoff at 0.90 where both are 0. Home position is the origin
-    // (0,0 translate) so no explicit home-blend term is needed.
+    // Position: home -> radar [0.75,0.82], hold on the ring until
+    // 0.9+pathOpacity, then the heatmap axis at 0.95+ with no slide
+    // between radar and heatmap.
     const radarDeltas = radarLabelDeltaRef.current
     const heatmapDeltas = heatmapLabelDeltaRef.current
     if (radarDeltas.size > 0 || heatmapDeltas.size > 0) {
       const radarIn = clamp01((v - 0.75) / 0.07)
-      const radarOut = clamp01((v - 0.87) / 0.03)
-      const radarBlend = radarIn * (1 - radarOut)
-      const heatmapBlend = clamp01((v - 0.9) / 0.05)
+      const radarPosBlend =
+        v < 0.75 ? 0 : v < 0.82 ? radarIn : v < 0.9 ? 1 : 0
+      const heatmapPosBlend = v < 0.95 ? 0 : 1
       titleRefsMap.current.forEach((el, code) => {
         if (!el) return
         const rd = radarDeltas.get(code)
         const hd = heatmapDeltas.get(code)
         const dx =
-          (rd ? rd.dx * radarBlend : 0) + (hd ? hd.dx * heatmapBlend : 0)
+          (rd ? rd.dx * radarPosBlend : 0) +
+          (hd ? hd.dx * heatmapPosBlend : 0)
         const dy =
-          (rd ? rd.dy * radarBlend : 0) + (hd ? hd.dy * heatmapBlend : 0)
+          (rd ? rd.dy * radarPosBlend : 0) +
+          (hd ? hd.dy * heatmapPosBlend : 0)
         if (dx !== 0 || dy !== 0) {
           el.style.transform = `translate(${dx}px, ${dy}px)`
         } else if (el.style.transform) {
@@ -1000,7 +1022,7 @@ export default function BeatTextOverlay({
       // chart sits higher, leaving room for Beat 7's narration / Beat
       // 8 heatmap below. Label positions share this cy so HTML axis
       // labels ring the same center as the SVG vertices.
-      const cy = panelH * 0.42
+      const cy = panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX
       const rMax = Math.min(rightW / 2, panelH / 2) * 0.6
       // Push labels past the axis tip by a small pad so they sit in
       // the chart's margin instead of overlapping the outer ring /
@@ -1192,7 +1214,8 @@ export default function BeatTextOverlay({
       const heatAvailableH = panelH * 0.8
       const heatCellH = Math.min(44, heatAvailableH / Math.max(Nr, 1))
       const heatTotalH = Nr * heatCellH
-      const heatColumnTop = panelH / 2 - heatTotalH / 2
+      const heatColumnTop =
+        panelH / 2 - heatTotalH / 2 - STORYBOARD_VISUAL_LIFT_PX
       // Primary column (index 0) cx is the leftmost of the centered
       // column group.
       const heatStride = heatCellW + heatColumnGap
@@ -1200,19 +1223,59 @@ export default function BeatTextOverlay({
       const heatCellLeft = heatCol0Cx - heatCellW / 2
       const HEAT_LABEL_GAP = 12
       const heatmap = heatmapLabelDeltaRef.current
+      const heatmapMaxW = heatmapLabelMaxWRef.current
       heatmap.clear()
+      heatmapMaxW.clear()
       if (Nr > 0) {
+        wrapStateByCode.forEach(({ boxEl }) => {
+          boxEl.style.transform = ""
+        })
         for (let i = 0; i < Nr; i++) {
           const code = radarOrderCodes[i]!
-          const rest = atRestGeom.get(code)
-          if (!rest) continue
           const targetRightX = heatCellLeft - HEAT_LABEL_GAP
           const targetCenterY = heatColumnTop + (i + 0.5) * heatCellH
+          const state = wrapStateByCode.get(code)
+          if (!state) continue
+          const { textEl, boxEl } = state
+          // Heatmap y-axis: right-aligned, wrapped, measured in the
+          // final DOM state. `dx` / `dy` position the *wrapped* text
+          // block so its right edge and vertical center land on
+          // `targetRightX` and `targetCenterY` (labels fade in place
+          // here, no slide from the radar).
+          const prevJ = boxEl.style.justifyContent
+          const prevWhite = textEl.style.whiteSpace
+          const prevAlign = textEl.style.textAlign
+          const prevMax = textEl.style.maxWidth
+          const prevOW = textEl.style.overflowWrap
+          const prevColor = textEl.style.color
+          const boxLeft = boxEl.getBoundingClientRect().left - panelRect.left
+          const maxW = Math.max(
+            40,
+            Math.min(200, targetRightX - HEAT_LABEL_GAP - boxLeft),
+          )
+          heatmapMaxW.set(code, maxW)
+          boxEl.style.justifyContent = "flex-end"
+          textEl.style.whiteSpace = "normal"
+          textEl.style.textAlign = "right"
+          textEl.style.maxWidth = `${maxW}px`
+          textEl.style.overflowWrap = "break-word"
+          textEl.style.color = theme.palette.text.primary
+          const rH = textEl.getBoundingClientRect()
+          const cye = (rH.top + rH.bottom) / 2 - panelRect.top
           heatmap.set(code, {
-            dx: targetRightX - rest.textRightX,
-            dy: targetCenterY - rest.textCenterY,
+            dx: targetRightX - (rH.right - panelRect.left),
+            dy: targetCenterY - cye,
           })
+          boxEl.style.justifyContent = prevJ
+          textEl.style.whiteSpace = prevWhite
+          textEl.style.textAlign = prevAlign
+          textEl.style.maxWidth = prevMax
+          textEl.style.overflowWrap = prevOW
+          textEl.style.color = prevColor
         }
+        wrapStateByCode.forEach(({ boxEl, prevBoxTransform }) => {
+          boxEl.style.transform = prevBoxTransform
+        })
       }
     }
 
@@ -1230,7 +1293,7 @@ export default function BeatTextOverlay({
     measure()
 
     return () => ro.disconnect()
-  }, [onGlyphLayoutChange, beat2Layout, heatmapExtraColumnCount])
+  }, [onGlyphLayoutChange, beat2Layout, heatmapExtraColumnCount, theme])
 
   // Kept live (unused while scenarioHeader JSX is disabled behind
   // `{false && ...}`). Restore usage in the JSX to re-enable.
@@ -1568,6 +1631,10 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
+                These are the outcomes for the{" "}
+                {scenarioName ? `${scenarioName} scenario` : "Current operations scenario"}.
+              </Typography>
+              <Typography variant="body2" component="p" sx={{ mt: 1.5 }}>
                 Each location can be symbolized as a square colored with the
                 outcome level.
               </Typography>
@@ -1842,12 +1909,33 @@ export default function BeatTextOverlay({
           zIndex: 5,
           display: "flex",
           flexDirection: "column",
+          pt: 2.5,
           pb: 2,
           "& .MuiTypography-root": {
             color: theme.palette.text.primary,
           },
         }}
       >
+        <Box
+          sx={{
+            px: 3,
+            pb: 1.5,
+            flexShrink: 0,
+            minHeight: 40,
+            pointerEvents: "none",
+          }}
+        >
+          <Typography
+            variant="overline"
+            component="h3"
+            color="text.secondary"
+            sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
+          >
+            {scenarioName
+              ? `${scenarioName} scenario`
+              : "Current operations scenario"}
+          </Typography>
+        </Box>
         {/* Scenario header + encoding toggle.
          *  Disabled per design direction - kept in-source (wrapped in
          *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}

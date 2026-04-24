@@ -24,6 +24,7 @@ import {
   RADAR_TIER_LABELS,
 } from "@repo/viz"
 import { getTierLabel } from "../../../content/tiers"
+import { STORYBOARD_VISUAL_LIFT_PX } from "./animationTiming"
 import {
   ENV_FLOWS_NAMES,
   STATION_NAMES,
@@ -722,7 +723,8 @@ export default function OutcomeMorphOverlay({
     const availableH = panelHeight * 0.8
     const cellH = Math.min(44, availableH / Math.max(N, 1))
     const totalH = N * cellH
-    const columnTop = panelHeight / 2 - totalH / 2
+    const columnTop =
+      panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
     // `ResilienceHeatmap` uses d3's `scaleBand().padding(0.08)`, which
     // reserves ~8% of bandwidth between cells. Mirror that by shrinking
     // each cell target by an inset on both width and height so rows
