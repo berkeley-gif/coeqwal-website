@@ -11,10 +11,16 @@
  * the user can go try without the tour moving the UI for them.
  *
  * Anchor ids resolve into ResiliencePanel (cell + corner controls),
- * ResilienceControls (the one-sentence pivot / outcomes / encoding
- * phrase buttons, preset rows, and row options), the shared
- * ToolToolbar map strip (resilience.viewArea; no global hydroclimate
- * chooser), and ScenarioExplorer (the chart toolbar wrapper + save snapshot).
+ * ResilienceControls (the one-sentence phrase buttons, the Presets
+ * row, and the Rows row), the shared ToolToolbar map strip
+ * (resilience.viewArea; no global hydroclimate chooser), and
+ * ScenarioExplorer (the chart toolbar wrapper + save snapshot).
+ *
+ * Within the chart controls region, steps progress in the same
+ * visual order a user's eye reads the controls: the sentence top
+ * to bottom and left to right (axes, pivot, outcomes, encoding),
+ * then the Presets row, then the Rows row, and finally Save
+ * snapshot at the top-right corner of the toolbar.
  */
 
 import type { TourStep } from "../types"
@@ -24,7 +30,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     id: "resilience.hero",
     eyebrow: "start here",
     title: "Revealing climate stress",
-    body: "Each selected scenario is viewed as a grid of colored cells, one cell for each outcome and hydroclimate pairing, shaded by how that pairing performs. You can choose any pairwise combination of scenarios, outcomes, and hydroclimates to lay out the chart, with the third dimension splitting the view into small multiples. If no scenarios are selected, the chart falls back to an aggregate overview of the whole library, so the view is never blank.",
+    body: "Each cell shows how one scenario performs for one outcome under one hydroclimate, colored by its tier. Pivot the chart around scenarios, outcomes, or hydroclimates to ask different questions. If nothing is selected, you see an aggregate across the whole library.",
   },
 
   // Orientation + details for the sidebar (scenario library).
@@ -53,7 +59,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.viewArea",
     eyebrow: "get oriented",
     title: "These controls set the data view",
-    body: "Show map matches the other tools: turn it on to send an outcome to the map when you click a cell. Which hydroclimate columns appear on the heatmap is chosen in the chart controls, not in this row.",
+    body: "Show map works like in other tools: turn it on, then click a cell to send that outcome to the map. The hydroclimates shown on the heatmap are picked in the chart controls just below.",
     placement: "bottom-end",
   },
 
@@ -63,26 +69,28 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.chartToolbar",
     eyebrow: "get oriented",
     title: "These controls configure the chart",
-    body: "The row above the chart is resilience-specific. The sentence reshapes the chart one phrase at a time. Presets jump to common layouts. Save snapshot stages what you see in the Share drawer. The next steps walk through each one.",
+    body: "The bar above the chart is resilience-specific. The sentence reshapes the chart one phrase at a time. Presets jump to common layouts. The Rows row tunes how scenarios line up. Save snapshot stages what you see in the Share drawer. The next steps walk through these options.",
     placement: "bottom-start",
   },
 
-  // Arrange the chart: the three phrase buttons in the sentence, then
-  // the preset menu and snapshot.
-  {
-    id: "resilience.step1.pivot",
-    anchorId: "resilience.pivot",
-    eyebrow: "arrange the chart",
-    title: "Pick which dimension the chart is built around",
-    body: "This third phrase picks the dimension the chart is arranged around, and whether the chart shows it as small multiples (one tile per scenario, outcome, or hydroclimate) or a single averaged chart (the dimension is meaned away). This is the biggest lever on what question the chart answers.",
-    placement: "bottom-start",
-  },
+  // Arrange the chart. Steps here follow the chart controls left to
+  // right and top to bottom: the sentence reads axes -> pivot ->
+  // outcomes -> encoding, then the Presets row, then the Rows row,
+  // and finally Save snapshot at the top-right of the bar.
   {
     id: "resilience.step1.axes",
     anchorId: "resilience.axes",
     eyebrow: "arrange the chart",
     title: "Pick what is inside each chart",
-    body: "Whichever two dimensions you didn't pick for the third phrase become the rows and columns inside each chart. Click across or down to rotate which dimension reads along that axis. Use Switch rows and columns in the Rows row of the chart controls when you want the axes flipped.",
+    body: "The first two phrases in the sentence set the rows and columns of each chart. Click across or down to rotate which dimension reads along that axis.",
+    placement: "bottom-start",
+  },
+  {
+    id: "resilience.step1.pivot",
+    anchorId: "resilience.pivot",
+    eyebrow: "arrange the chart",
+    title: "Pick which dimension the chart is built around",
+    body: "This phrase picks the third dimension: whether the chart shows small multiples (one tile per scenario, outcome, or hydroclimate) or a single averaged chart. It is the biggest lever on what question the chart answers.",
     placement: "bottom-start",
   },
   {
@@ -99,6 +107,22 @@ export const RESILIENCE_TOUR: TourStep[] = [
     eyebrow: "arrange the chart",
     title: "Choose what color means",
     body: "Click this phrase to change how each cell is colored. Tier paints the performance category. Delta compares against a baseline with a diverging palette. Glyph splits each cell into a grid, one sub-tile per scenario.",
+    placement: "bottom-start",
+  },
+  {
+    id: "resilience.step1.presets",
+    anchorId: "resilience.presets",
+    eyebrow: "arrange the chart",
+    title: "Jump to a ready-made layout",
+    body: "Presets apply a set of sentence choices in one click. Good starting points when you are not sure how to arrange the chart for a given question.",
+    placement: "bottom-start",
+  },
+  {
+    id: "resilience.step1.rows",
+    anchorId: "resilience.rows",
+    eyebrow: "arrange the chart",
+    title: "Tune how the rows read",
+    body: "Group similar rows clusters scenarios that behave alike so patterns pop. Switch rows and columns flips which dimension runs down versus across.",
     placement: "bottom-start",
   },
   {
@@ -134,7 +158,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.cornerControls",
     eyebrow: "read the chart",
     title: "Fine-tune what the cells show",
-    body: "The top-right toolbar on the chart toggles numeric cell values. In the chart controls, the Rows row clusters similar scenarios and has Switch rows and columns.",
+    body: "The top-right toolbar on the chart toggles numeric cell values, and holds reset and copy actions for the chart.",
     placement: "bottom-end",
   },
 

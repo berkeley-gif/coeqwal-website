@@ -48,7 +48,7 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   resilience: {
     mode: "resilience",
     purpose:
-      "Stress-test scenarios across climate futures and read which risks hide behind the averages.",
+      "Stress-test scenarios across climate futures",
     nextMode: null,
     nextLabel: "Open Share",
     nextRationale: "Review everything you've saved and build your water story.",

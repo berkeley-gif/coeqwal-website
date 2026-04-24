@@ -538,6 +538,10 @@ export default function ResilienceControls({
   const axesAnchorRef = useTourAnchor("resilience.axes")
   const outcomesAnchorRef = useTourAnchor("resilience.outcomes")
   const encodingAnchorRef = useTourAnchor("resilience.encoding")
+  // The preset row and the row-options row each get their own tour
+  // anchor so the walkthrough can point to them after the sentence.
+  const presetsAnchorRef = useTourAnchor("resilience.presets")
+  const rowsAnchorRef = useTourAnchor("resilience.rows")
 
   useEffect(() => {
     const enc = cellEncoding as string
@@ -1038,6 +1042,7 @@ export default function ResilienceControls({
       </Box>
 
       <Box
+        ref={presetsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -1095,6 +1100,7 @@ export default function ResilienceControls({
       </Box>
 
       <Box
+        ref={rowsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",

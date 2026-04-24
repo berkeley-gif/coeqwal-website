@@ -67,11 +67,11 @@ interface ColumnEyebrow {
 }
 
 interface Beat2LayoutItem {
-  code: string
-  label: string
-  column: 0 | 1
-  columnWidth: number
-  isActive: boolean
+    code: string
+    label: string
+    column: 0 | 1
+    columnWidth: number
+    isActive: boolean
   locationCount: number
   /** Pixel height the glyph placeholder should reserve in document flow. */
   targetHeight: number
@@ -345,17 +345,17 @@ export default function BeatTextOverlay({
     // 0.01 + B0_PARA) multiplied by `backOutOpacity` (default 1,
     // animated to 0 on Back-from-first-beat so the whole text block
     // fades out together without reversing each reveal).
-    if (beat1Ref.current) {
+      if (beat1Ref.current) {
       const el = beat1Ref.current
       const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.01) / B0_PARA)
       const mult = backOutOpacity ? backOutOpacity.get() : 1
       el.style.opacity = String(fadeIn * mult)
-    }
+      }
 
-    if (beat2IntroRef.current) {
+      if (beat2IntroRef.current) {
       const fadeIn = clamp01((v - 0.1) / B0_PARA)
-      beat2IntroRef.current.style.opacity = String(fadeIn)
-    }
+        beat2IntroRef.current.style.opacity = String(fadeIn)
+      }
 
     // Intro collapse group: after the Critical row lands (~0.45), fade
     // out the intro paragraphs + subtitle immediately so the user sees
@@ -389,7 +389,7 @@ export default function BeatTextOverlay({
       el.style.gridTemplateRows = `${rowsFrac}fr`
     }
 
-    if (beat2PanelRef.current) {
+      if (beat2PanelRef.current) {
       // Beat 2 panel backdrop now serves purely as a reading surface for
       // outcome titles + location captions, since the narrative text
       // lives on the left panel. It fades in with AG_REV's solo morph
@@ -397,8 +397,8 @@ export default function BeatTextOverlay({
       // The fade completes by 0.39 (beat 3's settle point) so the
       // backdrop is fully present when the AG_REV morph lands.
       const fadeIn = clamp01((v - 0.3775) / 0.01)
-      beat2PanelRef.current.style.opacity = String(fadeIn)
-    }
+        beat2PanelRef.current.style.opacity = String(fadeIn)
+      }
 
     if (scenarioOverlayHeaderRef.current) {
       // Scenario-name overline header appears with the Step 3 "before"
@@ -485,8 +485,8 @@ export default function BeatTextOverlay({
     // the caption partially opaque at rest. Cap fadeEnd so every
     // caption settles at opacity 1 before beat 4 ends.
     const CAPTION_FADE_END_CEILING = 0.495
-    const layoutItems = beat2LayoutRef.current?.items
-    if (layoutItems) {
+      const layoutItems = beat2LayoutRef.current?.items
+      if (layoutItems) {
       for (const item of layoutItems) {
         const win = windows?.[item.code]
         const titleEl = titleRefsMap.current.get(item.code)
@@ -640,13 +640,13 @@ export default function BeatTextOverlay({
           el.style.transform = ""
         }
       })
-    }
+      }
 
-    const eyebrows = eyebrowDataRef.current
-    if (eyebrows) {
-      for (let i = 0; i < eyebrows.length; i++) {
-        const el = eyebrowRefs.current[i]
-        if (!el) continue
+      const eyebrows = eyebrowDataRef.current
+      if (eyebrows) {
+        for (let i = 0; i < eyebrows.length; i++) {
+          const el = eyebrowRefs.current[i]
+          if (!el) continue
         // 0.01 fade width matches the right-panel backdrop so both
         // land together just before beat 3 settles at 0.39.
         const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.01)
@@ -1283,13 +1283,13 @@ export default function BeatTextOverlay({
              * user has clicked Play. See below. In pre-play we show only
              * the Play button here so the title + subtitle read as an
              * invitation rather than an in-progress UI. */
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                pointerEvents: "auto",
-              }}
-            >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "auto",
+            }}
+          >
               <IconButton
                 onClick={onPlay}
                 size="small"
@@ -1369,13 +1369,13 @@ export default function BeatTextOverlay({
               <Typography variant="body2" component="p">
                 Different scenarios change how water is allocated among
                 different users and the environment.
-              </Typography>
-              <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+          </Typography>
+          <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
                 <Typography variant="body2" component="p">
                   To compare results on a common scale, we group key outcomes
                   into levels:
-                </Typography>
-              </Box>
+            </Typography>
+          </Box>
             </Box>
           </Box>
           <Box
@@ -1468,7 +1468,7 @@ export default function BeatTextOverlay({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {label}
+                  {label}
                   </Typography>
                 </Box>
                 <Typography variant="body2" component="span">
@@ -1505,7 +1505,7 @@ export default function BeatTextOverlay({
            *  the content when the row is `0fr`. */}
           <Box
             ref={beat1cExampleRef}
-            sx={{
+              sx={{
               display: "grid",
               gridTemplateRows: "0fr",
               opacity: 0,
@@ -1516,8 +1516,8 @@ export default function BeatTextOverlay({
                 For example, each colored location on the map represents an
                 agricultural water district in the Central Valley receiving
                 surface water deliveries.
-              </Typography>
-            </Box>
+            </Typography>
+          </Box>
           </Box>
           <Box
             ref={beat1cDeliveryRef}
@@ -1533,18 +1533,18 @@ export default function BeatTextOverlay({
                 that affect{" "}
                 <Box component="strong" sx={{ fontWeight: 600 }}>
                   agricultural revenue
-                </Box>
+          </Box>
                 , ranging from optimal levels (blue) to critical levels (red).
               </Typography>
-            </Box>
-          </Box>
-          <Box
+        </Box>
+      </Box>
+      <Box
             ref={beat3BeforeRef}
-            sx={{
+        sx={{
               display: "grid",
               gridTemplateRows: "0fr",
-              opacity: 0,
-            }}
+          opacity: 0,
+        }}
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
@@ -1561,7 +1561,7 @@ export default function BeatTextOverlay({
           </Box>
           <Box
             ref={beat3AfterRef}
-            sx={{
+        sx={{
               display: "grid",
               gridTemplateRows: "0fr",
               opacity: 0,
@@ -1577,10 +1577,10 @@ export default function BeatTextOverlay({
           </Box>
           <Box
             ref={allOtherOutcomesRef}
-            sx={{
+          sx={{
               display: "grid",
               gridTemplateRows: "0fr",
-              opacity: 0,
+            opacity: 0,
             }}
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
@@ -1608,7 +1608,7 @@ export default function BeatTextOverlay({
           </Box>
           <Box
             ref={beat5LoiS2Ref}
-            sx={{
+                sx={{
               display: "grid",
               gridTemplateRows: "0fr",
               opacity: 0,
@@ -1623,7 +1623,7 @@ export default function BeatTextOverlay({
           </Box>
           <Box
             ref={beat6ListRef}
-            sx={{
+                  sx={{
               display: "grid",
               gridTemplateRows: "0fr",
               opacity: 0,
@@ -1633,7 +1633,7 @@ export default function BeatTextOverlay({
               <Typography variant="body2" component="p">
                 The <strong>list view</strong> summarizes key outcomes as bar
                 charts.
-              </Typography>
+                </Typography>
             </Box>
           </Box>
           <Box
@@ -1654,7 +1654,7 @@ export default function BeatTextOverlay({
           </Box>
           <Box
             ref={beat8HeatmapRef}
-            sx={{
+                      sx={{
               display: "grid",
               gridTemplateRows: "0fr",
               opacity: 0,
@@ -1665,8 +1665,8 @@ export default function BeatTextOverlay({
                 The <strong>heat map</strong> displays how key outcomes change
                 under different hydroclimate futures.
               </Typography>
-            </Box>
-          </Box>
+                    </Box>
+              </Box>
         </Box>
 
         {/* Bottom control row: Back / N-of-T / Next, plus Restart once
@@ -1729,10 +1729,10 @@ export default function BeatTextOverlay({
                   >
                     <ChevronLeftIcon sx={{ fontSize: 24 }} />
                   </IconButton>
-                  <Typography
+              <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{
+                sx={{
                       minWidth: 32,
                       textAlign: "center",
                       fontVariantNumeric: "tabular-nums",
@@ -1741,10 +1741,10 @@ export default function BeatTextOverlay({
                     }}
                   >
                     {beatIndex + 1} / {totalBeats}
-                  </Typography>
+              </Typography>
                   <IconButton
                     onClick={onNext}
-                    size="small"
+                size="small"
                     aria-label="Next beat (→)"
                     disabled={atEnd || isPlaying}
                     sx={controlSx}
@@ -1757,7 +1757,7 @@ export default function BeatTextOverlay({
                       size="small"
                       aria-label="Restart storyboard (Home)"
                       disabled={isPlaying}
-                      sx={{
+                sx={{
                         ...controlSx,
                         width: 36,
                         height: 36,
@@ -1792,7 +1792,7 @@ export default function BeatTextOverlay({
        * white would wash out the polygon colors during their morph. */}
       <Box
         ref={beat2PanelRef}
-        sx={{
+                sx={{
           position: "absolute",
           top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
           right: 0,
@@ -1823,7 +1823,7 @@ export default function BeatTextOverlay({
           right: 0,
           width: "33.33%",
           zIndex: 5,
-          display: "flex",
+                  display: "flex",
           flexDirection: "column",
           pt: 2.5,
           pb: 2,
@@ -1834,7 +1834,7 @@ export default function BeatTextOverlay({
       >
         <Box
           ref={scenarioOverlayHeaderRef}
-          sx={{
+                  sx={{
             px: 3,
             pb: 0.75,
             flexShrink: 0,
@@ -1850,8 +1850,8 @@ export default function BeatTextOverlay({
             sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
           >
             {displayScenarioLabel}
-          </Typography>
-        </Box>
+                </Typography>
+              </Box>
         {/* Beat 1C narrative lives in the left panel below the tier
          *  legend. See `beat1Ref` above. The overlay panel is dedicated to
          *  graphics (outcome titles, glyph morphs, location captions). */}
@@ -1924,90 +1924,90 @@ export default function BeatTextOverlay({
                 </Box>
               ))}
             </Box>
-            <Box
-              sx={{
-                display: "flex",
-                gap: "12px",
-                px: 3,
-                pt: 1.5,
+          <Box
+            sx={{
+              display: "flex",
+              gap: "12px",
+              px: 3,
+              pt: 1.5,
               }}
             >
               {[0, 1].map((col) => (
                 <Box
                   key={col}
                   sx={{
-                    flex: 1,
+              flex: 1,
                     minWidth: 0,
                     display: "flex",
                     flexDirection: "column",
                     rowGap: 1.5,
-                  }}
-                >
+            }}
+          >
                   {beat2Layout.eyebrows[col] && (
-                    <Box
-                      ref={(el: HTMLDivElement | null) => {
+                <Box
+                  ref={(el: HTMLDivElement | null) => {
                         eyebrowRefs.current[col] = el
-                      }}
+                  }}
                       sx={{ opacity: 0 }}
-                    >
-                      <Typography variant="smallSectionLabel" component="p">
+                >
+                  <Typography variant="smallSectionLabel" component="p">
                         {beat2Layout.eyebrows[col]!.label}
-                      </Typography>
-                    </Box>
-                  )}
-                  {beat2Layout.items
+                  </Typography>
+                </Box>
+              )}
+              {beat2Layout.items
                     .filter((item) => item.column === col)
                     .map((item) => {
-                      const isSelected = selectedOutcomeCode === item.code
+                  const isSelected = selectedOutcomeCode === item.code
                       const hasGlyph = item.isActive && item.targetHeight > 0
-                      return (
-                        <Box
-                          key={item.code}
+                  return (
+                    <Box
+                      key={item.code}
                           sx={{
                             display: "flex",
                             flexDirection: "column",
                           }}
                         >
                           <Box
-                            ref={(el: HTMLDivElement | null) => {
+                      ref={(el: HTMLDivElement | null) => {
                               titleRefsMap.current.set(item.code, el)
-                            }}
-                            onClick={
-                              interactive
-                                ? () => onOutcomeClick?.(item.code, true)
-                                : undefined
-                            }
-                            sx={{
-                              opacity: 0,
-                              pointerEvents: interactive ? "auto" : "none",
-                              cursor: interactive ? "pointer" : "default",
-                              borderRadius: 1,
-                              px: 0.5,
-                              mx: -0.5,
-                              display: "flex",
-                              alignItems: "center",
-                              boxSizing: "border-box",
-                              overflow: "hidden",
-                              transition: "color 0.15s",
-                              ...(interactive && {
-                                "&:hover .MuiTypography-root": {
-                                  color: theme.palette.blue.bright,
-                                },
-                              }),
-                            }}
-                          >
-                            <Typography
+                      }}
+                      onClick={
+                        interactive
+                          ? () => onOutcomeClick?.(item.code, true)
+                          : undefined
+                      }
+                      sx={{
+                        opacity: 0,
+                        pointerEvents: interactive ? "auto" : "none",
+                        cursor: interactive ? "pointer" : "default",
+                        borderRadius: 1,
+                        px: 0.5,
+                        mx: -0.5,
+                        display: "flex",
+                        alignItems: "center",
+                        boxSizing: "border-box",
+                        overflow: "hidden",
+                        transition: "color 0.15s",
+                        ...(interactive && {
+                          "&:hover .MuiTypography-root": {
+                            color: theme.palette.blue.bright,
+                          },
+                        }),
+                      }}
+                    >
+                      <Typography
                               variant="axisLabel"
-                              noWrap
-                              sx={{
-                                fontWeight: isSelected ? 700 : 500,
-                                transition: "color 0.15s",
-                                color: theme.palette.grey[900],
-                                lineHeight: 1.2,
-                              }}
-                            >
-                              {item.label}
-                            </Typography>
+                        noWrap
+                        sx={{
+                          fontWeight: isSelected ? 700 : 500,
+                          transition: "color 0.15s",
+                          color: theme.palette.grey[900],
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
                           </Box>
                         {hasGlyph && (
                           <>
@@ -2046,60 +2046,60 @@ export default function BeatTextOverlay({
                             </Box>
                           </>
                         )}
-                        </Box>
-                      )
-                    })}
+                    </Box>
+                  )
+                })}
                   {/* eslint-disable-next-line no-constant-binary-expression */}
                   {col === 0 && false && (
                     /* "Add a location to track" CTA - disabled per design
                      *  direction, kept in-source for future reuse. */
-                    <Box
-                      ref={addLocationCtaRef}
-                      sx={{
-                        opacity: 0,
-                        transition: "opacity 0.6s ease",
-                        pointerEvents: interactive ? "auto" : "none",
+              <Box
+                ref={addLocationCtaRef}
+                sx={{
+                  opacity: 0,
+                  transition: "opacity 0.6s ease",
+                  pointerEvents: interactive ? "auto" : "none",
                         mt: "auto",
                         pt: 3,
-                      }}
-                    >
-                      <Box
-                        component="button"
-                        type="button"
-                        onClick={onAddLocation}
-                        sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          color: theme.palette.grey[600],
-                          border: `1px solid ${theme.palette.grey[300]}`,
-                          borderRadius: "4px",
-                          background: "transparent",
-                          textTransform: "none",
-                          fontWeight: 500,
-                          fontSize: "0.75rem",
-                          letterSpacing: "0.02em",
-                          fontFamily: "inherit",
-                          px: 1.25,
-                          py: 0.125,
-                          cursor: "pointer",
-                          transition: "background 0.15s, border-color 0.15s",
-                          "&:hover": {
-                            backgroundColor: theme.palette.grey[100],
-                            borderColor: theme.palette.grey[400],
-                          },
-                          "&:focus-visible": {
-                            outline: `2px solid ${theme.palette.blue.bright}`,
-                            outlineOffset: "2px",
-                          },
-                        }}
-                      >
-                        Add a location to track
-                        <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
-                      </Box>
-                    </Box>
-                  )}
+                }}
+              >
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={onAddLocation}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    color: theme.palette.grey[600],
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    borderRadius: "4px",
+                    background: "transparent",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                    fontFamily: "inherit",
+                    px: 1.25,
+                    py: 0.125,
+                    cursor: "pointer",
+                    transition: "background 0.15s, border-color 0.15s",
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[100],
+                      borderColor: theme.palette.grey[400],
+                    },
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "2px",
+                    },
+                  }}
+                >
+                  Add a location to track
+                  <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
                 </Box>
+                </Box>
+              )}
+                    </Box>
               ))}
             </Box>
           </Box>
