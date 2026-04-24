@@ -182,13 +182,17 @@ export default function EquityPanel() {
   const { outcomeNames, idMapping } = useResolvedScenarioTiers()
 
   // Resolve scenario ID to the right hydro-climate. Fall back to the
-  // baseline until the user explicitly picks a radio.
+  // baseline until the user explicitly picks a radio. Both branches
+  // go through idMapping so the tier queries re-fetch when the
+  // hydroclimate chooser changes (without this, the no-radio state
+  // would always render historical because "s0020" is only the
+  // baseline's short_code under historical).
+  const baselineScenario = idMapping["s0020"] || "s0020"
+
   const firstSelected = equityFocusScenario
   const currentScenario = firstSelected
     ? idMapping[firstSelected] || firstSelected
-    : "s0020"
-
-  const baselineScenario = idMapping["s0020"] || "s0020"
+    : baselineScenario
 
   // Call useTierLocationAssignments for each outcome (not in a loop - follows Rules of Hooks)
   const cwsDel = useTierLocationAssignments(currentScenario, "CWS_DEL")
