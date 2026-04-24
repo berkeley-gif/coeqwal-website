@@ -37,6 +37,8 @@ export interface ResilienceSmallMultiplesTile {
   title: string
   /** Optional subtitle (e.g. short description). */
   subtitle?: string
+  /** Longer text for the native `title` tooltip on the title line. */
+  titleTooltip?: string
   /** Cells for this tile. rowKey / colKey must match the shared axes. */
   cells: ResilienceHeatmapCell[]
 }
@@ -94,6 +96,8 @@ export interface ResilienceHeatmapSmallMultiplesProps {
    * `undefined` so the ref isn't overwritten.
    */
   firstCellRef?: (el: SVGRectElement | null) => void
+  /** Passed through to each tile heatmap; see `ResilienceHeatmap`. */
+  columnLabelRotation?: number
 }
 
 /**
@@ -221,6 +225,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       onSquareClick,
       onTileExpand,
       firstCellRef,
+      columnLabelRotation = 0,
     }) => {
       const tileHeight = useMemo(() => {
         if (tileAspect === "tall") {
@@ -314,7 +319,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                         flex: 1,
                         minWidth: 0,
                       }}
-                      title={tile.title}
+                      title={tile.titleTooltip ?? tile.title}
                     >
                       {tile.title}
                     </span>
@@ -368,6 +373,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       cellRender={cellRender}
                       showCellNumbers={showCellNumbers}
                       hideLegend
+                      columnLabelRotation={columnLabelRotation}
                       onCellHover={onCellHover}
                       onCellClick={onCellClick}
                       formatRowTick={formatRowTick}

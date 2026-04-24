@@ -209,6 +209,12 @@ export interface ResilienceHeatmapProps {
    * available, so consumers should treat it like any callback ref.
    */
   firstCellRef?: (el: SVGRectElement | null) => void
+  /**
+   * When set (e.g. -90), column tick labels are rotated around the tick
+   * anchor so dense scenario codes do not overlap. Use with hydroclimate
+   * small-multiples (scenarios on X).
+   */
+  columnLabelRotation?: number
 }
 
 export interface ResilienceColumnGroup {
@@ -239,6 +245,8 @@ const COLUMN_GROUP_BAND = 24
 // label. Must cover `tickY` (18 within the x-axis group) plus enough
 // ascender space for text at font-size 11 without clipping.
 const X_AXIS_LABEL_RESERVE = 32
+/** Extra top band when column tick labels are rotated (e.g. scenario codes). */
+const X_AXIS_LABEL_RESERVE_ROTATED = 58
 const HATCH_ID = "resilience-unavailable-hatch"
 
 /**
@@ -369,6 +377,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     hideLegend = false,
     columnGroups,
     firstCellRef,
+    columnLabelRotation = 0,
   }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -720,8 +729,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         // legend (when !hideLegend) plus a small base pad.
         const hasColumnGroups = !!columnGroups && columnGroups.length > 0
         const groupBand = hasColumnGroups ? COLUMN_GROUP_BAND : 0
-        const effectiveMarginTop =
-          MARGIN.top + X_AXIS_LABEL_RESERVE + groupBand
+        const xAxisLabelReserve =
+          columnLabelRotation !== 0
+            ? X_AXIS_LABEL_RESERVE_ROTATED
+            : X_AXIS_LABEL_RESERVE
+        const effectiveMarginTop = MARGIN.top + xAxisLabelReserve + groupBand
         const effectiveMarginBottom =
           MARGIN.bottom + (hideLegend ? 0 : LEGEND_HEIGHT)
 
@@ -1221,7 +1233,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         // grouped-header band, when present) above the plot top, so
         // existing relative y offsets (tickY=18, group text y=14, rule
         // y=30) land naturally above the plot with enough padding.
-        const xAxisY = -(X_AXIS_LABEL_RESERVE + groupBand)
+        const xAxisY = -(xAxisLabelReserve + groupBand)
         const xAxis = g
           .append("g")
           .attr("class", "resilience-x-axis")
@@ -1237,7 +1249,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("x", cx)
             .attr("y", tickY)
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "hanging")
+            .attr(
+              "dominant-baseline",
+              columnLabelRotation !== 0 ? "middle" : "hanging",
+            )
             .attr("font-size", 11)
             .attr("font-weight", 600)
             .attr("fill", paletteText)
@@ -1248,6 +1263,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 : null,
             )
             .text(col.label)
+
+          if (columnLabelRotation !== 0) {
+            node.attr(
+              "transform",
+              `rotate(${columnLabelRotation}, ${cx}, ${tickY})`,
+            )
+          }
 
           if (col.fullLabel && col.fullLabel !== col.label) {
             node.append("title").text(col.fullLabel)
@@ -1607,6 +1629,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         marginalCol,
         hideLegend,
         columnGroups,
+        columnLabelRotation,
       ],
     )
 

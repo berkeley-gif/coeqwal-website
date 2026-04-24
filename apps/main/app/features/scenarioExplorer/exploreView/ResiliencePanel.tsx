@@ -1569,8 +1569,7 @@ export default function ResiliencePanel({
     for (const hc of hydroclimates) {
       if (!selectedHydroclimates.has(hc)) continue
       const longHydroLabel = HYDROCLIMATE_LABELS[hc] ?? hc
-      const tileTitle =
-        HYDROCLIMATE_SHORT_LABELS[hc] ?? longHydroLabel
+      const desc = HYDROCLIMATE_DESCRIPTIONS[hc]
       const tileCells: ResilienceHeatmapCell[] = []
       for (const rk of outcomeRowCodes) {
         const rl = getOutcomeName(rk)
@@ -1588,8 +1587,10 @@ export default function ResiliencePanel({
       }
       tiles.push({
         id: hc,
-        title: tileTitle,
-        subtitle: HYDROCLIMATE_DESCRIPTIONS[hc],
+        title: longHydroLabel,
+        titleTooltip: desc
+          ? `${longHydroLabel}\n${desc}`
+          : longHydroLabel,
         cells: tileCells,
       })
     }
@@ -2195,6 +2196,9 @@ export default function ResiliencePanel({
     )
   }
 
+  const scenarioColumnLabelRotation =
+    effectiveView === "hydroclimate" && !transposed ? -90 : 0
+
   return (
     <Box
       sx={{
@@ -2372,6 +2376,7 @@ export default function ResiliencePanel({
                 showCellNumbers={showCellNumbers}
                 formatRowTick={formatRowTick}
                 distributionMode={distributionMode}
+                columnLabelRotation={scenarioColumnLabelRotation}
                 onCellHover={handleCellHover}
                 onCellClick={isMapVisible ? handleCellClick : undefined}
                 onSquareHover={(info) =>
@@ -2464,6 +2469,7 @@ export default function ResiliencePanel({
                   cellRender={effectiveCellRender}
                   showCellNumbers={showCellNumbers}
                   tileAspect={transposed ? "tall" : "wide"}
+                  columnLabelRotation={scenarioColumnLabelRotation}
                   onCellHover={handleCellHover}
                   onCellClick={isMapVisible ? handleCellClick : undefined}
                   formatRowTick={formatRowTick}
@@ -2766,6 +2772,7 @@ function ExpandedTileView({
   showCellNumbers,
   formatRowTick,
   distributionMode,
+  columnLabelRotation = 0,
   onCellHover,
   onCellClick,
   onSquareHover,
@@ -2783,6 +2790,7 @@ function ExpandedTileView({
   showCellNumbers: boolean
   formatRowTick: (row: ResilienceAxisItem) => string
   distributionMode: "scenario" | "location"
+  columnLabelRotation?: number
   onCellHover: (cell: ResilienceHeatmapCell | null) => void
   onCellClick?: (cell: ResilienceHeatmapCell) => void
   onSquareHover: (
@@ -2844,7 +2852,11 @@ function ExpandedTileView({
         >
           {`\u2190 ${backLabel}`}
         </Box>
-        <Typography variant="dashboard" sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="dashboard"
+          sx={{ fontWeight: 600 }}
+          title={tile.titleTooltip ?? tile.title}
+        >
           {tile.title}
         </Typography>
         {tile.subtitle && (
@@ -2871,6 +2883,7 @@ function ExpandedTileView({
           palette={palette}
           cellRender={cellRender}
           showCellNumbers={showCellNumbers}
+          columnLabelRotation={columnLabelRotation}
           onCellHover={onCellHover}
           onCellClick={onCellClick}
           formatRowTick={formatRowTick}
