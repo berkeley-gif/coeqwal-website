@@ -17,6 +17,13 @@ interface ShareRadarCardProps {
   highlightBaseline: boolean
   showDotsOnly: boolean
   cachedImageDataUrl?: string
+  /**
+   * Live-rendered radar used when no cached PNG is available (e.g.
+   * share items restored from a URL that cannot embed large images).
+   * The parent decides whether to mount this fallback so we only pay
+   * the hook / render cost when it is actually needed.
+   */
+  liveChart?: React.ReactNode
   onRemove?: () => void
 }
 
@@ -29,6 +36,7 @@ export default function ShareRadarCard({
   highlightBaseline,
   showDotsOnly,
   cachedImageDataUrl,
+  liveChart,
   onRemove,
 }: ShareRadarCardProps) {
   const theme = useTheme()
@@ -220,7 +228,7 @@ export default function ShareRadarCard({
         </Typography>
       </Box>
 
-      {/* Radar chart image */}
+      {/* Radar chart: cached PNG > live fallback > placeholder. */}
       {cachedImageDataUrl ? (
         <Box
           component="img"
@@ -235,6 +243,8 @@ export default function ShareRadarCard({
             mt: 1,
           }}
         />
+      ) : liveChart ? (
+        liveChart
       ) : (
         <Box
           sx={{

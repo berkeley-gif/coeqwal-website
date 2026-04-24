@@ -13,18 +13,39 @@ import {
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+import { useComparisonData } from "../hooks/useComparisonData"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 import ShareRadarCard from "./ShareRadarCard"
 import ShareSnapshotCard from "./ShareSnapshotCard"
+import ShareRadarLiveChart from "./ShareRadarLiveChart"
+import ShareResilienceLiveChart from "./ShareResilienceLiveChart"
 import type { ChartDataPoint } from "../../scenarios/components/shared/types"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
+import type { VerticalParallelLineData } from "@repo/viz"
+import {
+  OUTCOME_NAMES,
+  getOutcomeName,
+  type OutcomeCode,
+} from "../../../content/outcomes"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
 
 function outcomeCodesToLabels(codes: string[]): string[] {
   return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
+}
+
+/**
+ * Bag of live-chart fallback data sourced once per drawer render and
+ * shared across every rendered card. The radar fields come from
+ * `useComparisonData` and are used to re-render a radar thumbnail
+ * when a share item has no cached PNG.
+ */
+interface ShareDrawerLiveData {
+  radarPlotData: VerticalParallelLineData[]
+  radarBaseline: VerticalParallelLineData | null
+  radarAxisRange: Record<string, { min: number; max: number }>
+  radarLineColorByScenario: Map<string, string>
 }
 
 function ShareItemCard({
@@ -34,6 +55,7 @@ function ShareItemCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
+  liveData,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -49,6 +71,7 @@ function ShareItemCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
+  liveData: ShareDrawerLiveData
 }) {
   if (item.type === "barChart") {
     const info = scenarioLookup.get(item.scenarioId)
@@ -89,6 +112,10 @@ function ShareItemCard({
       (id) => scenarioLookup.get(id)?.definition ?? "",
     )
 
+    const liveChart = item.cachedImageDataUrl
+      ? undefined
+      : renderRadarLiveChart(item, liveData)
+
     return (
       <ShareRadarCard
         scenarioNames={radarScenarioNames}
@@ -99,6 +126,7 @@ function ShareItemCard({
         highlightBaseline={item.highlightBaseline}
         showDotsOnly={item.showDotsOnly}
         cachedImageDataUrl={item.cachedImageDataUrl}
+        liveChart={liveChart}
         onRemove={() => onRemove(item.id)}
       />
     )
@@ -171,6 +199,14 @@ function ShareItemCard({
       : item.scenarioIds.length
         ? `${item.scenarioIds.length} scenario${item.scenarioIds.length === 1 ? "" : "s"} in scope`
         : "Full library"
+    const liveChart =
+      !item.cachedImageDataUrl && item.view !== "quadrant" ? (
+        <ShareResilienceLiveChart
+          scenarioIds={item.scenarioIds}
+          outcomeCodes={item.outcomeCodes}
+          hydroclimates={item.hydroclimates}
+        />
+      ) : undefined
     return (
       <ShareSnapshotCard
         id={item.id}
@@ -180,6 +216,7 @@ function ShareItemCard({
         chips={[...scenarioChips.slice(0, 4), ...outcomeChips]}
         hydroclimate={item.hydroclimates[0]}
         cachedImageDataUrl={item.cachedImageDataUrl}
+        liveChart={liveChart}
         note={item.note}
         onNoteChange={(note) => onNoteChange(item.id, note)}
         onRemove={onRemove}
@@ -188,6 +225,48 @@ function ShareItemCard({
   }
 
   return null
+}
+
+/**
+ * Build the live-radar fallback node for a share item in the drawer.
+ * Filters the shared parallel-plot data down to the item's scenarios,
+ * converts outcome codes back to display names, and selects line
+ * colors from the item's captured palette (preferred) or the current
+ * theme assignment.
+ */
+function renderRadarLiveChart(
+  item: Extract<ShareItem, { type: "radar" }>,
+  liveData: ShareDrawerLiveData,
+): React.ReactNode {
+  const idSet = new Set(item.scenarioIds)
+  const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
+  if (filtered.length === 0) return null
+
+  const orderedFiltered = item.scenarioIds
+    .map((id) => filtered.find((d) => d.id === id))
+    .filter((d): d is VerticalParallelLineData => !!d)
+
+  const axesDisplay = item.axes.map((code) => getOutcomeName(code))
+
+  const lineColors = orderedFiltered.map((d, i) => {
+    const captured = item.scenarioColors?.[i]
+    if (captured) return captured
+    return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
+  })
+
+  return (
+    <ShareRadarLiveChart
+      data={orderedFiltered}
+      axes={axesDisplay}
+      lineColors={lineColors}
+      baselineData={liveData.radarBaseline}
+      axisRange={liveData.radarAxisRange}
+      showRange={item.showRange}
+      highlightBaseline={item.highlightBaseline}
+      showDotsOnly={item.showDotsOnly}
+      size={280}
+    />
+  )
 }
 
 function ShareTab({
@@ -295,6 +374,28 @@ export default function ShareDrawer() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
+
+  // Live radar data shared across drawer cards so items restored
+  // without a cached PNG still get a real thumbnail. Same SWR-cached
+  // fetch the Explore radar panel uses.
+  const comparisonData = useComparisonData()
+  const liveData = useMemo<ShareDrawerLiveData>(() => {
+    const lineColorByScenario = new Map<string, string>()
+    comparisonData.scenarios.forEach((s) => {
+      lineColorByScenario.set(s.id, s.color)
+    })
+    return {
+      radarPlotData: comparisonData.data,
+      radarBaseline: comparisonData.baselineScenario,
+      radarAxisRange: comparisonData.axisRange,
+      radarLineColorByScenario: lineColorByScenario,
+    }
+  }, [
+    comparisonData.data,
+    comparisonData.baselineScenario,
+    comparisonData.axisRange,
+    comparisonData.scenarios,
+  ])
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<
@@ -470,6 +571,7 @@ export default function ShareDrawer() {
                     Record<string, unknown> | undefined
                   >
                 }
+                liveData={liveData}
               />
             ))
           )}

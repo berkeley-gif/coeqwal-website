@@ -38,6 +38,13 @@ interface ShareSnapshotCardProps {
   /** Primary climate the snapshot was taken at, if any. */
   hydroclimate?: string
   cachedImageDataUrl?: string
+  /**
+   * Live-rendered chart to show when no cached PNG is available (e.g.
+   * items restored from a URL that cannot embed large images). The
+   * parent decides whether to mount this fallback so we only pay the
+   * hook / render cost when it is actually needed.
+   */
+  liveChart?: React.ReactNode
   note?: string
   onNoteChange?: (note: string) => void
   onRemove?: (id: string) => void
@@ -51,6 +58,7 @@ export default function ShareSnapshotCard({
   chips = [],
   hydroclimate,
   cachedImageDataUrl,
+  liveChart,
   note,
   onNoteChange,
   onRemove,
@@ -129,7 +137,7 @@ export default function ShareSnapshotCard({
         </Typography>
       )}
 
-      {cachedImageDataUrl && (
+      {cachedImageDataUrl ? (
         <Box
           sx={{
             mt: 1,
@@ -149,6 +157,8 @@ export default function ShareSnapshotCard({
             }}
           />
         </Box>
+      ) : (
+        liveChart ?? null
       )}
 
       {(chips.length > 0 || climateOption) && (

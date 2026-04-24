@@ -34,7 +34,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     id: "resilience.hero",
     eyebrow: "start here",
     title: "Revealing climate stress",
-    body: "Each cell shows how one scenario performs for one outcome under one hydroclimate, colored by its tier. Pivot the chart around scenarios, outcomes, or hydroclimates to ask different questions. If nothing is selected, you see an aggregate across the whole library.",
+    body: "Each cell shows how one scenario performs for one outcome under one hydroclimate, colored by its tier. Pivot the chart around scenarios, outcomes, or hydroclimates to ask different questions. If nothing is selected, you'll see an aggregate across the whole library.",
   },
 
   // Orientation + details for the sidebar (scenario library).
@@ -128,7 +128,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     eyebrow: "arrange the chart",
     title: "Save snapshot",
     titleIcon: "share",
-    body: "Save snapshot sits at the right edge of the Rows row. It stages the chart you see, plus the cells behind it, in the Share drawer, the same way capture view does in Radar. In small-multiples layouts, each tile has its own share icon in the tile header, so you can snapshot just one scenario, outcome, or hydroclimate. The Leverage quadrant has a single snapshot button of its own. Find the results in the Share tab when you are ready to export.",
+    body: "Save snapshot stages the chart you see in the Share drawer. In small-multiples layouts, each tile has its own share icon in the tile header, so you can snapshot just one scenario, outcome, or hydroclimate.",
     placement: "bottom-end",
   },
 
@@ -138,7 +138,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.cell",
     eyebrow: "read the chart",
     title: "Each cell is one pairing",
-    body: "A cell is a scenario under one hydroclimate. Its color is the performance tier; the number inside, when shown, is the continuous tier value behind that color. The X axis is always climate. The Y axis depends on the layout you chose above.",
+    body: "A cell is a scenario under one hydroclimate. Its color is the performance tier. The number inside, when shown, is the continuous tier value.",
     placement: "right-start",
     illustration: "resilienceTierLegend",
   },
@@ -154,6 +154,6 @@ export const RESILIENCE_TOUR: TourStep[] = [
     id: "resilience.journey",
     eyebrow: "take your shortlist forward",
     title: "What to do after this chart",
-    body: "Your shortlist stays with you across the other views. For high-stakes outcomes, the Leverage view under More analysis swaps the heatmap for a scatter that asks what is climate-driven versus operations-driven. When you are done here, circle back to the shortlist and keep refining.",
+    body: "Your shortlist stays with you across the other views. When you are done here, you can circle back to the other tools and keep refining or go to the share section to use the charts you collected to tell your water story.",
   },
 ]

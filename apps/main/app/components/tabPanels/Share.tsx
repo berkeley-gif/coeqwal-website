@@ -29,12 +29,20 @@ import {
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
+import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
 import ShareSnapshotCard from "../../features/scenarioExplorer/components/ShareSnapshotCard"
+import ShareRadarLiveChart from "../../features/scenarioExplorer/components/ShareRadarLiveChart"
+import ShareResilienceLiveChart from "../../features/scenarioExplorer/components/ShareResilienceLiveChart"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../content/outcomes"
+import type { VerticalParallelLineData } from "@repo/viz"
+import {
+  OUTCOME_NAMES,
+  getOutcomeName,
+  type OutcomeCode,
+} from "../../content/outcomes"
 import { toPng } from "html-to-image"
 import {
   downloadFromDataUrl,
@@ -299,10 +307,25 @@ function outcomeCodesToLabels(codes: string[]): string[] {
 }
 
 /**
+ * Bag of live-chart fallback data sourced once per panel/drawer render
+ * and shared across every rendered card. The radar fields come from
+ * `useComparisonData` and are used to re-render a radar thumbnail when
+ * a share item has no cached PNG (e.g. items restored from a URL).
+ */
+export interface ShareRenderLiveData {
+  radarPlotData: VerticalParallelLineData[]
+  radarBaseline: VerticalParallelLineData | null
+  radarAxisRange: Record<string, { min: number; max: number }>
+  radarLineColorByScenario: Map<string, string>
+}
+
+/**
  * Render a ShareItem using the appropriate card component. Used by
  * both the tray and the story canvas. Equity and resilience items
  * render via the lightweight text-forward `ShareSnapshotCard` until
- * full image capture is wired for those panels.
+ * full image capture is wired for those panels. `liveData` supplies
+ * the on-the-fly radar / resilience re-renders used when a share item
+ * arrived without a cached PNG (URL load, different browser, etc.).
  */
 function renderShareItemBody(
   item: ShareItem,
@@ -317,6 +340,7 @@ function renderShareItemBody(
     }
   >,
   allChartData: Record<string, Record<string, unknown> | undefined>,
+  liveData: ShareRenderLiveData,
   onNoteChange?: (id: string, note: string) => void,
 ): React.ReactNode {
   if (item.type === "barChart") {
@@ -355,6 +379,9 @@ function renderShareItemBody(
     const definitions = item.scenarioIds.map(
       (id) => scenarioLookup.get(id)?.definition ?? "",
     )
+    const liveChart = item.cachedImageDataUrl
+      ? undefined
+      : renderRadarLiveChart(item, liveData)
     return (
       <ShareRadarCard
         scenarioNames={names}
@@ -365,6 +392,7 @@ function renderShareItemBody(
         highlightBaseline={item.highlightBaseline}
         showDotsOnly={item.showDotsOnly}
         cachedImageDataUrl={item.cachedImageDataUrl}
+        liveChart={liveChart}
       />
     )
   }
@@ -440,6 +468,13 @@ function renderShareItemBody(
             item.scenarioIds.length === 1 ? "" : "s"
           } in scope`
         : "Full library"
+    // Live heatmap fallback. Quadrant captures use a scatter viz that
+    // isn't reconstructable from the URL-encoded scope alone, so we
+    // keep the text-only placeholder for that view.
+    const liveChart =
+      !item.cachedImageDataUrl && item.view !== "quadrant"
+        ? renderResilienceLiveChart(item)
+        : undefined
     return (
       <ShareSnapshotCard
         id={item.id}
@@ -452,6 +487,7 @@ function renderShareItemBody(
         ]}
         hydroclimate={item.hydroclimates[0]}
         cachedImageDataUrl={item.cachedImageDataUrl}
+        liveChart={liveChart}
         note={item.note}
         onNoteChange={
           onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
@@ -460,6 +496,64 @@ function renderShareItemBody(
     )
   }
   return null
+}
+
+/**
+ * Build the live-radar fallback node for a share item. Filters the
+ * shared parallel-plot data down to the item's scenarios, converts
+ * outcome codes back to display names, and selects line colors from
+ * the item's captured palette (preferred) or the current theme.
+ */
+function renderRadarLiveChart(
+  item: Extract<ShareItem, { type: "radar" }>,
+  liveData: ShareRenderLiveData,
+): React.ReactNode {
+  const idSet = new Set(item.scenarioIds)
+  const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
+  if (filtered.length === 0) return null
+
+  const orderedFiltered = item.scenarioIds
+    .map((id) => filtered.find((d) => d.id === id))
+    .filter((d): d is VerticalParallelLineData => !!d)
+
+  const axesDisplay = item.axes.map((code) => getOutcomeName(code))
+
+  const lineColors = orderedFiltered.map((d, i) => {
+    const captured = item.scenarioColors?.[i]
+    if (captured) return captured
+    return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
+  })
+
+  return (
+    <ShareRadarLiveChart
+      data={orderedFiltered}
+      axes={axesDisplay}
+      lineColors={lineColors}
+      baselineData={liveData.radarBaseline}
+      axisRange={liveData.radarAxisRange}
+      showRange={item.showRange}
+      highlightBaseline={item.highlightBaseline}
+      showDotsOnly={item.showDotsOnly}
+    />
+  )
+}
+
+/**
+ * Build the live-resilience fallback node for a share item. Uses the
+ * always-aggregate thumbnail strategy described on
+ * `ShareResilienceLiveChart` so every non-quadrant view gets a live
+ * viz even when the original view was a small-multiples tile.
+ */
+function renderResilienceLiveChart(
+  item: Extract<ShareItem, { type: "resilience" }>,
+): React.ReactNode {
+  return (
+    <ShareResilienceLiveChart
+      scenarioIds={item.scenarioIds}
+      outcomeCodes={item.outcomeCodes}
+      hydroclimates={item.hydroclimates}
+    />
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -487,6 +581,7 @@ function TrayCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
+  liveData,
 }: {
   item: ShareItem
   isInStory: boolean
@@ -502,11 +597,18 @@ function TrayCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
+  liveData: ShareRenderLiveData
 }) {
   const theme = useTheme()
 
   const renderContent = () =>
-    renderShareItemBody(item, outcomeNames, scenarioLookup, allChartData)
+    renderShareItemBody(
+      item,
+      outcomeNames,
+      scenarioLookup,
+      allChartData,
+      liveData,
+    )
 
   return (
     <Box
@@ -572,6 +674,7 @@ function StoryCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
+  liveData,
 }: {
   item: ShareItem
   onRemoveFromStory: (id: string) => void
@@ -590,6 +693,7 @@ function StoryCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
+  liveData: ShareRenderLiveData
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -646,6 +750,7 @@ function StoryCard({
         outcomeNames,
         scenarioLookup,
         allChartData,
+        liveData,
         onNoteChange,
       )}
     </Box>
@@ -797,6 +902,28 @@ export default function SharePanel() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
+
+  // Live radar data sourced from the same SWR-cached tier fetch as the
+  // Explore radar panel. Used to rehydrate radar thumbnails for share
+  // items that arrived without a cached PNG (URL loads, new browsers).
+  const comparisonData = useComparisonData()
+  const radarLiveData = useMemo<ShareRenderLiveData>(() => {
+    const lineColorByScenario = new Map<string, string>()
+    comparisonData.scenarios.forEach((s) => {
+      lineColorByScenario.set(s.id, s.color)
+    })
+    return {
+      radarPlotData: comparisonData.data,
+      radarBaseline: comparisonData.baselineScenario,
+      radarAxisRange: comparisonData.axisRange,
+      radarLineColorByScenario: lineColorByScenario,
+    }
+  }, [
+    comparisonData.data,
+    comparisonData.baselineScenario,
+    comparisonData.axisRange,
+    comparisonData.scenarios,
+  ])
 
   // Rehydrate cachedChartData for bar chart items restored from localStorage
   useEffect(() => {
@@ -1056,6 +1183,7 @@ export default function SharePanel() {
                 Record<string, unknown> | undefined
               >
             }
+            liveData={radarLiveData}
           />
         ))}
       </Box>
@@ -1123,6 +1251,7 @@ export default function SharePanel() {
                           Record<string, unknown> | undefined
                         >
                       }
+                      liveData={radarLiveData}
                     />
                   ))}
                 </Box>
