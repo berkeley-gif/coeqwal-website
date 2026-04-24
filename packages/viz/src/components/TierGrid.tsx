@@ -870,7 +870,7 @@ export default function TierGrid({
         })
         .on("mouseout", function (this: SVGPathElement, _event, d) {
           if (!selectedOutcomeLocationCodes.has(String(d.id))) {
-            d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1)
+            d3.select(this).attr("stroke-width", 0)
           }
 
           // Hide tooltip
