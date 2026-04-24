@@ -272,6 +272,8 @@ interface OutcomeLayoutItem {
    *  BeatTextOverlay renders a transparent Box of this height to reserve
    *  space in document flow. The SVG morph lands inside that rect. */
   targetHeight: number
+  /** Caption text rendered in DOM below the glyph (e.g. "12 locations"). */
+  locationDescription: string
 }
 
 interface GlyphRect {
@@ -2788,6 +2790,28 @@ export default function TierAnimationSection() {
    * morph overlay uses those measured rects as landing coordinates. */
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
+  const describeLocations = useCallback(
+    (code: string, count: number): string => {
+      switch (code) {
+        case "ENV_FLOWS":
+          return `${count} river & tributary reaches`
+        case "RES_STOR":
+          return `${count} major California reservoirs`
+        case "DELTA_ECO":
+          return "Sacramento-San Joaquin Delta"
+        case "FW_EXP":
+          return "Banks & Jones Pumping Plants"
+        case "FW_DELTA_USES":
+          return "Emmaton & Jersey Point"
+        case "WRC_SALMON_AB":
+          return "population health along the Sacramento"
+        default:
+          return `${count} locations`
+      }
+    },
+    [],
+  )
+
   const outcomeLayout = useMemo(() => {
     if (!panelSize) return null
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
@@ -2874,11 +2898,17 @@ export default function TierAnimationSection() {
         isActive,
         locationCount,
         targetHeight,
+        locationDescription: describeLocations(code, locationCount),
       })
     }
 
     return { items, eyebrows }
-  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
+  }, [
+    panelSize,
+    outcomeGroups,
+    theme.scenarios.tierGrid.squaresPerRow,
+    describeLocations,
+  ])
 
   /** DOM-measured glyph placeholder rects (relative to the right-column root
    *  in BeatTextOverlay, which is absolutely positioned at `right: 0` with

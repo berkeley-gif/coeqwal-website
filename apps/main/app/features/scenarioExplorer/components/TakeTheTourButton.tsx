@@ -16,7 +16,12 @@ import { Box, Typography, useTheme, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import type { TourTool } from "../tour/types"
 
-const TOUR_TOOLS = new Set<TourTool>(["list", "radar", "resilience"])
+// Demo gate: only the List tour has polished popper copy right now, so
+// we temporarily hide the entry point on Radar and Resilience. The
+// underlying tours (content, anchors, runner) are intact. Re-add
+// "radar" and "resilience" to this set once their popper content is
+// filled out.
+const TOUR_TOOLS = new Set<TourTool>(["list"])
 function isTourTool(mode: string): mode is TourTool {
   return TOUR_TOOLS.has(mode as TourTool)
 }
