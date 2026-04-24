@@ -15,10 +15,13 @@ export {
   DU_CLASS_FILTER,
   DU_AG_ONLY_FILTER,
   writeDemandUnitsBaseline,
+  ensureDemandUnitsOutlineLayer,
 } from "./demandUnitsBaseline"
 export type {
   BaselineMap,
+  SessionInitMap,
   DemandUnitsBaselineSpec,
+  DemandUnitsOutlineInitSpec,
 } from "./demandUnitsBaseline"
 export {
   BEAT1_COLORS,

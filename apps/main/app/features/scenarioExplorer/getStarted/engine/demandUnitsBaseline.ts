@@ -50,6 +50,14 @@ export type BaselineMap = {
   setLayoutProperty: (id: string, prop: string, value: unknown) => void
 }
 
+/** Extended map surface for the session-init helper, which also
+ *  creates the `demand-units-outline` layer. `addLayer` takes a
+ *  `LayerSpecification`-shaped object in `@repo/map`; we keep the
+ *  structural type permissive. */
+export type SessionInitMap = BaselineMap & {
+  addLayer: (spec: unknown) => void
+}
+
 /** Complete specification of the demand-units baseline state.
  *
  *  Every field is required. If you find yourself wanting to make
@@ -185,5 +193,59 @@ export function writeDemandUnitsBaseline(
   } catch {
     /* Mapbox can throw transiently during style reloads. The caller
      *  re-asserts on the next valid tick, so swallowing here is safe. */
+  }
+}
+
+/** Specification for the outline-layer creation helper. All fields
+ *  describe the layer's initial Mapbox paint. Visibility is always
+ *  "visible" at creation; callers that want it hidden should flip it
+ *  via `setLayoutProperty` immediately after. */
+export interface DemandUnitsOutlineInitSpec {
+  filter: readonly unknown[]
+  lineColor: readonly unknown[] | string
+  lineWidth: number
+  lineOpacity: number
+  lineOffset: number
+}
+
+/** Ensure the `demand-units-outline` line layer exists. In regular
+ *  map modes `OutcomePolygonLayer` creates it on demand, but in
+ *  get-started mode OPL is skipped for demand-units and the storyboard
+ *  owns the session lifecycle. This helper is idempotent: if the
+ *  layer already exists it returns without writes, so callers can
+ *  call it on every mount cycle without worrying about double-adds.
+ *
+ *  The outline layer inherits `source` and `source-layer` from the
+ *  `demand-units` fill layer; if the fill doesn't exist yet the
+ *  helper bails silently (caller should retry when the style is
+ *  loaded). */
+export function ensureDemandUnitsOutlineLayer(
+  map: SessionInitMap,
+  spec: DemandUnitsOutlineInitSpec,
+): void {
+  try {
+    if (!map.getLayer("demand-units")) return
+    if (map.getLayer("demand-units-outline")) return
+    const fillLayer = map.getLayer("demand-units") as unknown as {
+      source: string
+      "source-layer": string
+    }
+    map.addLayer({
+      id: "demand-units-outline",
+      type: "line",
+      source: fillLayer.source,
+      "source-layer": fillLayer["source-layer"],
+      filter: spec.filter,
+      paint: {
+        "line-color": spec.lineColor,
+        "line-width": spec.lineWidth,
+        "line-opacity": spec.lineOpacity,
+        "line-offset": spec.lineOffset,
+      },
+      layout: { visibility: "visible" },
+    })
+  } catch {
+    /* layer may already exist from another map mode, or style not
+     *  loaded yet. Swallow: the next mount cycle retries. */
   }
 }

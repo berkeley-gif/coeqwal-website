@@ -47,11 +47,11 @@ const APPROVED_WRITERS = new Set([
   // The baseline helper that other approved writers delegate to for
   // full-state assertion.
   "app/features/scenarioExplorer/getStarted/engine/demandUnitsBaseline.ts",
-  // Session-init + engine-unmount teardown writes only. Phase 3c
-  // step 2 moved the interactive-paint + deselect-teardown writes
-  // into `InteractivePaintArbiter`, so this file's literal-id write
-  // count is now restricted to the session-lifecycle blocks.
-  "app/features/scenarioExplorer/getStarted/TierAnimationSection.tsx",
+  // Phase 3d: TierAnimationSection's direct writes were consolidated
+  // into the baseline helper (session-init) and the interactive
+  // arbiter (playback + interactive). The file is deliberately no
+  // longer in the allowlist so any regression that adds a literal
+  // "demand-units" write here trips the audit.
   // Learn / explore modes still route demand-units through OPL; only
   // the get-started interactive flow was moved to
   // `InteractivePaintArbiter`. All of OPL's writes use dynamic

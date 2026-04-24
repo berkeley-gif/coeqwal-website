@@ -68,6 +68,10 @@ import {
   debugLog,
   logDuState,
   DU_CLASS_FILTER,
+  writeDemandUnitsBaseline,
+  ensureDemandUnitsOutlineLayer,
+  type BaselineMap,
+  type SessionInitMap,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
@@ -537,11 +541,29 @@ export default function TierAnimationSection() {
    *  after `useBeatEngine` runs later in this component body. */
   const engineApiRef = useRef<BeatEngineApi | null>(null)
 
+  /** Ref mirror of the memoized `engineContext`. Populated right after
+   *  `useMemo(engineContext, ...)` runs later in this component body.
+   *  Exists so pre-declared nav handlers (`clearInteractiveState`,
+   *  `handleRestart`) and the unmount effect can pass a live context
+   *  to `InteractivePaintArbiter.release()` without depending on the
+   *  memoized object's identity. */
+  const engineContextRef = useRef<BeatEngineContext | null>(null)
+
   const clearInteractiveState = useCallback(() => {
     const diagMap = mapAPI.mapRef?.current?.getMap?.()
     logDuState("clearInteractiveState START", diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
+    // Phase 3d: release interactive paint ownership synchronously,
+    // BEFORE clearing the selection store. The `sync` effect driven by
+    // `selectedOutcomeCode -> null` still fires on React commit, but
+    // by the time it runs the arbiter has already shed ownership and
+    // `sync` no-ops. Explicit release here guarantees the exit write
+    // lands while the selection is still valid, independent of
+    // commit-scheduling interleaving with `goTo`'s mode flip to
+    // "playback". Idempotent: release is a no-op when not owning.
+    const ctx = engineContextRef.current
+    if (ctx) interactivePaintArbiterRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
     logDuState("clearInteractiveState after store clears", diagMap)
@@ -691,6 +713,14 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     setHoveredLocation(null)
     setPinnedLocations(new Map())
+    // Phase 3d: release the interactive arbiter before clearing the
+    // store so the DU teardown runs while the selection (and its
+    // spec) is still valid. See `clearInteractiveState` for the
+    // ordering rationale; the DU baseline written a few lines below
+    // is the final resting state either way, but the explicit release
+    // cancels any pending deferred-idle teardown from a prior exit.
+    const ctx = engineContextRef.current
+    if (ctx) interactivePaintArbiterRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
     mapActions.clearMapTooltips()
@@ -720,19 +750,24 @@ export default function TierAnimationSection() {
             map.setPaintProperty(lineLayer, "line-opacity", 0)
           }
         }
-        if (map.getLayer("demand-units")) {
-          map.setFilter("demand-units", DU_CLASS_FILTER as never)
-          map.setPaintProperty(
-            "demand-units",
-            "fill-color",
-            beat1FillExpr(0) as never,
-          )
-          map.setPaintProperty(
-            "demand-units",
-            "fill-outline-color",
-            "transparent",
-          )
-        }
+        // Phase 3d: consolidated DU reset. `ANIM_POLYGON_LAYERS` loop
+        // above already zeroed fill/line opacity via dynamic ids; the
+        // baseline helper re-asserts the full state (filter, color
+        // expressions, transitions, visibility) so we return to the
+        // pre-play beat-1 palette consistently. Idempotent with the
+        // loop's opacity writes above. Cast via `unknown` because
+        // Mapbox's method signatures are stricter than the helper's
+        // intentionally permissive structural type (same cast pattern
+        // as `getStyledMap` in `MapPaintArbiter`).
+        writeDemandUnitsBaseline(map as unknown as BaselineMap, {
+          filter: DU_CLASS_FILTER,
+          fillExpr: beat1FillExpr(0) as readonly unknown[],
+          fillOpacity: { kind: "scalar", value: 0 },
+          lineOpacity: { kind: "scalar", value: 0 },
+          lineWidth: 0.5,
+          lineOffset: -0.25,
+          visibility: "visible",
+        })
         // Reset shared `basemap-dim-overlay` to 0 here too, mirroring the
         // styled-layer setup path. See the comment at the demand-units
         // setup block below for why we override the transition.
@@ -1761,83 +1796,31 @@ export default function TierAnimationSection() {
               map.setLayoutProperty(outline, "visibility", "visible")
           }
 
-          // Set up demand-units for the beat-1 color cycling
-          if (map.getLayer("demand-units")) {
-            map.setFilter("demand-units", DU_CLASS_FILTER as never)
-            map.setPaintProperty("demand-units", "fill-opacity", 0)
-            map.setPaintProperty(
-              "demand-units",
-              "fill-color",
-              beat1FillExpr(0) as never,
-            )
-            // Leave `fill-outline-color` unset so Mapbox defaults it to
-            // the current `fill-color` expression - this prevents the
-            // previous "transparent" override that produced visible
-            // subpixel slivers between adjacent demand-unit polygons.
-            map.setPaintProperty(
-              "demand-units",
-              "fill-outline-color",
-              beat1FillExpr(0) as never,
-            )
-          }
-
-          // Ensure the companion outline layer exists. In regular map
-          // modes it's created by `OutcomePolygonLayer`, but that
-          // component doesn't mount during the get-started animation -
-          // so without this block we'd have no stroke, and adjacent
-          // demand-unit polygons would render with ratty/gappy edges
-          // at low zooms. Create it once and mirror its color/opacity
-          // with the fill inside the progress handler below.
-          if (
-            map.getLayer("demand-units") &&
-            !map.getLayer("demand-units-outline")
-          ) {
-            try {
-              const fillLayer = map.getLayer("demand-units") as unknown as {
-                source: string
-                "source-layer": string
-              }
-              map.addLayer({
-                id: "demand-units-outline",
-                type: "line",
-                source: fillLayer.source,
-                "source-layer": fillLayer["source-layer"],
-                filter: DU_CLASS_FILTER as never,
-                paint: {
-                  "line-color": beat1FillExpr(0) as never,
-                  "line-width": 0.5,
-                  "line-opacity": 0,
-                  "line-offset": -0.25,
-                },
-                layout: { visibility: "visible" },
-              })
-            } catch {
-              /* layer may already exist from another map mode */
-            }
-          }
-
-          // Pin outline transitions to 0 so per-frame updates from the
-          // progress handler don't smear, and seed its initial state
-          // to match the fill (same color expression, opacity 0).
-          if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-opacity-transition",
-              { duration: 0, delay: 0 },
-            )
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-color-transition",
-              { duration: 0, delay: 0 },
-            )
-            map.setFilter("demand-units-outline", DU_CLASS_FILTER as never)
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-color",
-              beat1FillExpr(0) as never,
-            )
-            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-          }
+          // Phase 3d: consolidated session-init. `ensureDemandUnitsOutlineLayer`
+          // creates the `demand-units-outline` line layer once per session
+          // (idempotent - no-op if it already exists from another map mode).
+          // `writeDemandUnitsBaseline` then asserts the full beat-1 palette
+          // state on both fill and outline layers, including zeroed
+          // transitions so the per-frame color cycling in the progress
+          // handler below writes cleanly without smear. Casts via
+          // `unknown` because Mapbox's method signatures are stricter
+          // than the helpers' permissive structural types.
+          ensureDemandUnitsOutlineLayer(map as unknown as SessionInitMap, {
+            filter: DU_CLASS_FILTER,
+            lineColor: beat1FillExpr(0) as readonly unknown[],
+            lineWidth: 0.5,
+            lineOpacity: 0,
+            lineOffset: -0.25,
+          })
+          writeDemandUnitsBaseline(map as unknown as BaselineMap, {
+            filter: DU_CLASS_FILTER,
+            fillExpr: beat1FillExpr(0) as readonly unknown[],
+            fillOpacity: { kind: "scalar", value: 0 },
+            lineOpacity: { kind: "scalar", value: 0 },
+            lineWidth: 0.5,
+            lineOffset: -0.25,
+            visibility: "visible",
+          })
           // Suppress all other polygon layers until their beat-2 turn
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
             if (fill === "demand-units") continue // already handled above
@@ -2018,6 +2001,7 @@ export default function TierAnimationSection() {
     // dep set here does not drive re-subscription.
     [mapAPI.mapRef, outcomeLocations, engineCentroidLookup],
   )
+  engineContextRef.current = engineContext
 
   const engineApi = useBeatEngine({
     progress,
@@ -2209,6 +2193,22 @@ export default function TierAnimationSection() {
       }
     }
   }, [mapAPI.mapRef, isLoading])
+
+  /* ── InteractivePaintArbiter unmount release ──
+   *
+   * Phase 3d: if the storyboard unmounts while the arbiter is
+   * mid-selection (user closed the page with a DU outcome pinned),
+   * explicitly release ownership so the deferred-idle listener on
+   * `map.once("idle", ...)` is cleaned up and no stale write lands on
+   * a disposed map. `release` invokes `onExit` which writes the
+   * scalar-0 baseline - a safe resting state for any future
+   * scenarioExplorer view. Idempotent when not owning. */
+  useEffect(() => {
+    return () => {
+      const ctx = engineContextRef.current
+      if (ctx) interactivePaintArbiterRef.current?.release(ctx)
+    }
+  }, [])
 
   /* Beat 1C demo popups removed. The five curated AG district popups
    * (Glenn Colusa, Turlock, Westlands, Madera, Modesto) read as noise

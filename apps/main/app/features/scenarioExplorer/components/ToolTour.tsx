@@ -31,6 +31,9 @@ import { TOUR_STEPS } from "../tour/content"
 import ListTourBarIllustration from "../tour/ListTourBarIllustration"
 import ListTourMapLegend from "../tour/ListTourMapLegend"
 import { useTourAnchorResolver } from "../tour/TourAnchorContext"
+import { mapActions, useMapStore } from "../../map/store"
+import type { OutcomeVisualization } from "../../map/store"
+import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 
 const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
 
@@ -175,24 +178,85 @@ export default function ToolTour() {
     }
   }, [anchorEl, theme.palette.blue.bright])
 
-  // Map-reveal side effect: the list-tour map step teaches the map
-  // toggle, so pop the map open while that step is active and close it
-  // again on exit, but only if the user had it closed when we arrived.
-  // Uses `getState` to snapshot the prior value without re-subscribing,
-  // so toggling `showMap` here does not retrigger this effect.
+  // Map-reveal + honest-click side effects for the list-tour map step.
+  //
+  // 1. Snapshot the map visibility + the currently active map outcome on
+  //    entry so we can return both to whatever the user had on exit.
+  // 2. Slide the map open if it was closed.
+  // 3. Once the map is actually visible (the map-action hook recomputes
+  //    `isMapVisible` after the store updates), fire the exact same
+  //    showOutcomeOnMap call that the live bar cell would fire. The
+  //    (scenarioId, outcomeCode) pair is stashed on the anchored cell
+  //    via data attributes by StrategyGridRow's layout effect.
+  //
+  // Uses a shared ref so the enter and the cleanup cooperate across
+  // the two effects below without re-subscribing to store slices that
+  // we change ourselves (which would re-trigger these effects).
+  const mapDemoRef = useRef<{
+    prevShowMap: boolean
+    prevActive: OutcomeVisualization | null
+    demoFired: boolean
+  } | null>(null)
+
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
+  const { buildIdMapping } = useScenarioList()
+
   useEffect(() => {
     if (!step) return
     if (step.id !== "list.step4.map") return
-    const prev = useScenarioExplorerStore.getState().showMap
-    if (!prev) {
+
+    const prevShowMap = useScenarioExplorerStore.getState().showMap
+    const prevActive = useMapStore.getState().activeOutcomeVisualization
+    mapDemoRef.current = {
+      prevShowMap,
+      prevActive,
+      demoFired: false,
+    }
+    if (!prevShowMap) {
       setShowMap(true)
     }
+
     return () => {
-      if (!prev) {
+      const snap = mapDemoRef.current
+      mapDemoRef.current = null
+      if (!snap) return
+      if (snap.demoFired) {
+        if (snap.prevActive) {
+          mapActions.setOutcomeVisualization(
+            snap.prevActive.outcomeCode,
+            snap.prevActive.scenarioId,
+            snap.prevActive.siblingGroupId,
+          )
+        } else {
+          mapActions.clearOutcomeVisualization()
+        }
+      }
+      if (!snap.prevShowMap) {
         setShowMap(false)
       }
     }
   }, [step, setShowMap])
+
+  // Fire the honest click directly on the map store. We do not gate on
+  // `isMapVisible`: the store update is cheap, and the layer renderer
+  // subscribes to `activeOutcomeVisualization`, so the layer paints as
+  // soon as the map pane mounts (which the showMap effect above opens).
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "list.step4.map") return
+    if (mapDemoRef.current?.demoFired) return
+    const el = resolve("list.outcome.barChart")
+    if (!el) return
+    const scenarioId = el.dataset.tourScenarioId
+    const outcomeCode = el.dataset.tourOutcomeCode
+    if (!scenarioId || !outcomeCode) return
+    const mapping = buildIdMapping(hydroclimate)
+    const resolvedId = mapping[scenarioId] ?? scenarioId
+    mapActions.setOutcomeVisualization(outcomeCode, resolvedId, scenarioId)
+    if (mapDemoRef.current) {
+      mapDemoRef.current.demoFired = true
+    }
+  }, [step, resolve, version, buildIdMapping, hydroclimate])
 
   const isFirst = tourStep === 0
   const isLast = steps.length > 0 && tourStep === steps.length - 1

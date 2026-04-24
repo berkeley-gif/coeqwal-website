@@ -296,11 +296,28 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isSorted = sortBy === shortCode
     const glyphRefFor = glyphBoxRefByShortCode.get(shortCode)
 
+    // The list tour's map step replays a real click on this cell. When
+    // this render is that anchored cell, tag the wrapper with data-*
+    // attributes so ToolTour can read (scenarioId, outcomeCode) straight
+    // off the anchor element without coupling to the tour system here.
+    const isTourAnchorCell =
+      tourListFirstItem &&
+      isListMode &&
+      outcomeDisplayMode === "bar" &&
+      firstListOutcomeShort === shortCode
+    const tourCellDataAttrs = isTourAnchorCell
+      ? {
+          "data-tour-scenario-id": scenario.scenarioId,
+          "data-tour-outcome-code": shortCode,
+        }
+      : undefined
+
     if (outcomeDisplayMode === "average") {
       return (
         <Box
           key={shortCode}
           ref={glyphRefFor}
+          {...tourCellDataAttrs}
         >
           <TierSummaryCell
             chartData={chartData}
@@ -323,7 +340,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const showControlsBelowGlyph = !isAlignedGrid
 
     return (
-      <Box key={shortCode} ref={glyphRefFor}>
+      <Box key={shortCode} ref={glyphRefFor} {...tourCellDataAttrs}>
         <OutcomeGlyphItem
           displayName={displayName}
           name={displayName}
