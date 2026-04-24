@@ -193,28 +193,31 @@ function ScenarioExplorerInner() {
     showAxisSelector,
     setShowAxisSelector,
     selectedScenarios,
+    equityFocusScenario,
     hydroclimate,
     resilienceVisibleOutcomes,
     addShareItem,
   } = useScenarioExplorerStore()
 
   // Build a share item for the current Equity panel state and stage
-  // it into the Share drawer. Image capture is a future enhancement;
-  // for now we persist the metadata needed to reconstruct the view.
+  // it into the Share drawer. The scenario id reflects the
+  // Distribution tool's own focus field so the snapshot matches what
+  // was actually on screen. Falls back to the baseline to mirror
+  // EquityPanel's rendering contract.
   const handleEquitySnapshot = useCallback(() => {
-    const firstSelected = selectedScenarios[0]
-    if (!firstSelected) return
+    const focused = equityFocusScenario ?? "s0020"
+    if (!focused) return
     const item: ShareItem = {
-      id: `equity-${firstSelected}-${Date.now()}`,
+      id: `equity-${focused}-${Date.now()}`,
       type: "equity",
-      scenarioId: firstSelected,
+      scenarioId: focused,
       outcomeCodes: resilienceVisibleOutcomes,
       compareToBaseline: showEquityComparison,
       hydroclimate,
     }
     addShareItem(item)
   }, [
-    selectedScenarios,
+    equityFocusScenario,
     resilienceVisibleOutcomes,
     showEquityComparison,
     hydroclimate,
@@ -324,6 +327,11 @@ function ScenarioExplorerInner() {
   // stable across renders (comes from useTourAnchor), so the useMemo
   // below does not need to depend on it.
   const radarChartToolbarRef = useTourAnchor("radar.chartToolbar")
+  // Same pattern for the resilience tour: the whole chart-controls
+  // row (sentence + ChartTuner + save snapshot) is introduced as a
+  // single orientation step before the sentence pieces.
+  const resilienceChartToolbarRef = useTourAnchor("resilience.chartToolbar")
+  const resilienceSnapshotRef = useTourAnchor("resilience.snapshot")
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
@@ -348,11 +356,13 @@ function ScenarioExplorerInner() {
             active={showDotsOnly}
             onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
-          <InlineToggleChip
-            label="highlight current operations"
-            active={highlightBaseline}
-            onClick={() => setHighlightBaseline(!highlightBaseline)}
-          />
+          <RadarTourAnchor anchorId="radar.highlightBaseline">
+            <InlineToggleChip
+              label="highlight current operations"
+              active={highlightBaseline}
+              onClick={() => setHighlightBaseline(!highlightBaseline)}
+            />
+          </RadarTourAnchor>
           <RadarTourAnchor anchorId="radar.libraryRange">
             <InlineToggleChip
               label="show range"
@@ -361,60 +371,49 @@ function ScenarioExplorerInner() {
             />
           </RadarTourAnchor>
           <RadarTourAnchor anchorId="radar.capture">
-          <Box
-            component="button"
-            type="button"
-            disabled={selectedScenarios.length === 0 && !radarShowAll}
-            onClick={() => radarCaptureRef.current?.()}
-            aria-label="capture view"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              px: 1.25,
-              py: 0.5,
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              lineHeight: 1.3,
-              whiteSpace: "nowrap",
-              color: theme.palette.grey[800],
-              background: theme.palette.grey[200],
-              transition: "all 150ms ease",
-              cursor:
-                selectedScenarios.length === 0 && !radarShowAll
-                  ? "default"
-                  : "pointer",
-              opacity:
-                selectedScenarios.length === 0 && !radarShowAll ? 0.4 : 1,
-              "&:hover": {
-                background:
-                  selectedScenarios.length === 0 && !radarShowAll
-                    ? undefined
-                    : theme.palette.interaction.selectedBackground,
-                color:
-                  selectedScenarios.length === 0 && !radarShowAll
-                    ? undefined
-                    : theme.palette.blue.bright,
-              },
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-            capture view
-          </Box>
+            <Box
+              component="button"
+              type="button"
+              onClick={() => radarCaptureRef.current?.()}
+              aria-label="capture view"
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                px: 1.25,
+                py: 0.5,
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+                color: theme.palette.grey[800],
+                background: theme.palette.grey[200],
+                transition: "all 150ms ease",
+                cursor: "pointer",
+                "&:hover": {
+                  background: theme.palette.interaction.selectedBackground,
+                  color: theme.palette.blue.bright,
+                },
+              }}
+            >
+              <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+              capture view
+            </Box>
           </RadarTourAnchor>
         </ChartControlsBar>
       )
     }
     if (exploreMode === "resilience") {
       return (
-        <ChartControlsBar>
+        <ChartControlsBar ref={resilienceChartToolbarRef}>
           <ResilienceControls
             controls={resilienceControls}
             onChange={handleResilienceControlsChange}
           />
           <Box
+            ref={resilienceSnapshotRef}
             component="button"
             type="button"
             onClick={handleResilienceSnapshot}
@@ -448,7 +447,7 @@ function ScenarioExplorerInner() {
       )
     }
     if (exploreMode === "equity") {
-      const canSnapshot = selectedScenarios.length > 0
+      const canSnapshot = equityFocusScenario !== null
       return (
         <ChartControlsBar>
           <InlineToggleChip
@@ -512,12 +511,15 @@ function ScenarioExplorerInner() {
     setRadarShowAll,
     showEquityComparison,
     setShowEquityComparison,
-    selectedScenarios,
+    equityFocusScenario,
     theme,
     resilienceControls,
     handleResilienceControlsChange,
     handleEquitySnapshot,
     handleResilienceSnapshot,
+    radarChartToolbarRef,
+    resilienceChartToolbarRef,
+    resilienceSnapshotRef,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"

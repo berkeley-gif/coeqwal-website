@@ -173,14 +173,17 @@ export default function EquityPanel() {
   const { mapRef, setMotionChildren } = useMap()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
-  // Get currently selected scenarios and comparison mode from the store
-  const { selectedScenarios, showEquityComparison, showMap } =
+  // The Distribution (equity) tool uses its own focus field rather
+  // than the shared multi-select, so entering/leaving Distribution
+  // does not disturb List/Radar/Resilience/Comparison selections.
+  const { equityFocusScenario, showEquityComparison, showMap } =
     useScenarioExplorerStore()
 
   const { outcomeNames, idMapping } = useResolvedScenarioTiers()
 
-  // Resolve scenario ID to the right hydro-climate
-  const firstSelected = selectedScenarios[0]
+  // Resolve scenario ID to the right hydro-climate. Fall back to the
+  // baseline until the user explicitly picks a radio.
+  const firstSelected = equityFocusScenario
   const currentScenario = firstSelected
     ? idMapping[firstSelected] || firstSelected
     : "s0020"

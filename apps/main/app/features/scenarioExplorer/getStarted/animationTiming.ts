@@ -136,7 +136,7 @@ export const FINAL_BEAT_INDEX = BEATS.length - 1
  *  shifted up so the right-column visualization and Beat 3+ narration
  *  read as a single block. Kept in sync across `OutcomeMorphOverlay` and
  *  `BeatTextOverlay` measurement. */
-export const STORYBOARD_VISUAL_LIFT_PX = 80
+export const STORYBOARD_VISUAL_LIFT_PX = 110
 
 /* ── Reveal pace primitives (seconds) ──
  *

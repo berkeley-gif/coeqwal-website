@@ -201,6 +201,14 @@ export interface ResilienceHeatmapProps {
    * fit a second header line with a subtle rule underneath each group.
    */
   columnGroups?: ResilienceColumnGroup[]
+  /**
+   * Callback ref invoked with the first rendered cell's DOM node so a
+   * consumer can anchor a tour popper (or any other overlay) on an
+   * actual tile rather than the entire chart wrapper. Fires with
+   * `null` when the chart re-renders and before the new first cell is
+   * available, so consumers should treat it like any callback ref.
+   */
+  firstCellRef?: (el: SVGRectElement | null) => void
 }
 
 export interface ResilienceColumnGroup {
@@ -320,6 +328,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     showMarginals = false,
     hideLegend = false,
     columnGroups,
+    firstCellRef,
   }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
@@ -336,6 +345,15 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       onCellHoverRef.current = onCellHover
     }, [onCellHover])
+
+    // Stash the firstCellRef callback in a ref so `updateChart` can
+    // invoke it after it re-renders the cells without having to list
+    // the callback in its dep array (which would thrash the draw on
+    // every parent render that produced a new ref function).
+    const firstCellRefCb = useRef(firstCellRef)
+    useEffect(() => {
+      firstCellRefCb.current = firstCellRef
+    }, [firstCellRef])
 
     const onCellClickRef = useRef(onCellClick)
     useEffect(() => {
@@ -730,6 +748,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         }
 
         // Cells
+        let firstCellEl: SVGRectElement | null = null
         rows.forEach((row) => {
           const y = yScale(row.key) ?? 0
           const opacity = rowOpacity(row.key)
@@ -754,6 +773,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .attr("stroke", "transparent")
               .attr("stroke-width", 2)
               .attr("cursor", onCellClick ? "pointer" : "default")
+
+            if (!firstCellEl) {
+              firstCellEl = rect.node() as SVGRectElement | null
+            }
 
             if (cell.available && resolved.fill) {
               rect.attr("fill", resolved.fill).attr("fill-opacity", opacity)
@@ -962,6 +985,14 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             }
           })
         })
+
+        // Expose the first rendered cell to the consumer (used by the
+        // resilience tour to anchor its "what is a cell" popper on an
+        // actual tile). Fires with `null` first to let the consumer
+        // drop references to the previous draw's cell before the new
+        // one is attached.
+        firstCellRefCb.current?.(null)
+        firstCellRefCb.current?.(firstCellEl)
 
         // Marginal strips (row-summary on the right, col-summary below).
         if (showMarginalRowStrip && marginalRow) {

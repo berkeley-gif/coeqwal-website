@@ -86,6 +86,13 @@ export interface ResilienceHeatmapSmallMultiplesProps {
    * used to swap the entire grid for a single full-size heatmap.
    */
   onTileExpand?: (tileId: string) => void
+  /**
+   * Callback ref forwarded to the first tile's heatmap so a consumer
+   * can anchor a tour popper (or other overlay) on an actual cell.
+   * Only the first tile wires this up; subsequent tiles receive
+   * `undefined` so the ref isn't overwritten.
+   */
+  firstCellRef?: (el: SVGRectElement | null) => void
 }
 
 /**
@@ -212,6 +219,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       onSquareHover,
       onSquareClick,
       onTileExpand,
+      firstCellRef,
     }) => {
       const tileHeight = useMemo(() => {
         if (tileAspect === "tall") {
@@ -270,7 +278,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
               alignContent: "start",
             }}
           >
-            {tiles.map((tile) => {
+            {tiles.map((tile, tileIdx) => {
               const hasActions = !!onTileExpand
               return (
                 <div
@@ -361,6 +369,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       onCellClick={onCellClick}
                       formatRowTick={formatRowTick}
                       distributionMode={distributionMode}
+                      firstCellRef={tileIdx === 0 ? firstCellRef : undefined}
                       onSquareHover={
                         onSquareHover
                           ? (info) =>

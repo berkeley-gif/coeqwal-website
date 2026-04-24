@@ -58,7 +58,8 @@ export default function ScenarioSelectionSidebar({
   const {
     selectedScenarios,
     toggleScenario,
-    selectScenarios,
+    equityFocusScenario,
+    setEquityFocusScenario,
     highlightedScenario,
     pinnedScenarioIds,
     togglePinnedScenario,
@@ -77,26 +78,22 @@ export default function ScenarioSelectionSidebar({
     showDotsOnly,
   } = useScenarioExplorerStore()
 
+  // In single-select mode (Distribution / equity) a click sets the
+  // orthogonal `equityFocusScenario` field so the shared multi-select
+  // used by other tools is untouched. In multi-select mode we keep the
+  // familiar toggle-into-selectedScenarios behavior.
   const handleScenarioSelect = (scenarioId: string) => {
-    return singleSelect
-      ? selectScenarios([scenarioId])
-      : toggleScenario(scenarioId)
+    if (singleSelect) {
+      setEquityFocusScenario(scenarioId)
+    } else {
+      toggleScenario(scenarioId)
+    }
   }
 
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = hoveredScenarioId ?? highlightedScenario ?? null
   const hasActiveScenario = activeScenarioId !== null
-
-  // When switching to single-select mode, keep only the first selected scenario
-  useEffect(() => {
-    if (singleSelect && selectedScenarios.length > 1) {
-      const firstScenario = selectedScenarios[0]
-      if (firstScenario) {
-        selectScenarios([firstScenario])
-      }
-    }
-  }, [singleSelect, selectedScenarios, selectScenarios])
 
   useEffect(() => {
     if (!activeScenarioId) return
@@ -251,7 +248,9 @@ export default function ScenarioSelectionSidebar({
         )}
 
         {orderedScenarios.flatMap((scenario, index) => {
-          const isChosen = selectedScenarios.includes(scenario.scenarioId)
+          const isChosen = singleSelect
+            ? scenario.scenarioId === equityFocusScenario
+            : selectedScenarios.includes(scenario.scenarioId)
           const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
           const isSearchMatch =
             isSearchActive && matchingScenarioIds.has(scenario.scenarioId)

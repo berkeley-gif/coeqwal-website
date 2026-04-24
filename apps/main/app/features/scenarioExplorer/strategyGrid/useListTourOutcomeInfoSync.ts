@@ -33,7 +33,12 @@ export function useListTourOutcomeInfoSync(
     wasOnListInfoStepRef.current = isListInfoStep
     if (!isListInfoStep) return
     const first = outcomeNames[0]
-    const el = resolve("list.outcome.infoButton")
+    // `resolve` is typed as `Element` (the anchor registry accepts
+    // SVG elements for the resilience tour), but this anchor is always
+    // registered on an HTMLElement wrapper in StrategyGridHeader. A
+    // narrow cast here is safe and keeps the querySelector fallback
+    // working without losing HTMLElement-only APIs downstream.
+    const el = resolve("list.outcome.infoButton") as HTMLElement | null
     if (!first || !el) return
     if (activeTooltip === first.shortCode) return
     const anchor = el.querySelector<HTMLElement>("button") ?? el

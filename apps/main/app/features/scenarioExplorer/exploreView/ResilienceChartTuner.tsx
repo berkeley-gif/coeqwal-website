@@ -35,6 +35,12 @@ interface ResilienceChartTunerProps {
    */
   open?: boolean
   onOpenChange?: (next: boolean) => void
+  /**
+   * Optional callback ref forwarded onto the tuner's inline trigger
+   * button. The resilience tour uses this to anchor its "More options"
+   * popper directly on the trigger without wrapping it in extra DOM.
+   */
+  triggerRef?: (el: HTMLButtonElement | null) => void
 }
 
 // Baseline "safe defaults" mirrored from ScenarioExplorer's initial
@@ -67,6 +73,7 @@ export default function ResilienceChartTuner({
   onChange,
   open,
   onOpenChange,
+  triggerRef,
 }: ResilienceChartTunerProps) {
   // Preset menu, grouped by stage of the Browse → Curate → Read path.
   // Each preset is a one-click mutation of the controls state; none of
@@ -299,6 +306,7 @@ export default function ResilienceChartTuner({
       getSnapshot={getSnapshot}
       open={open}
       onOpenChange={onOpenChange}
+      triggerRef={triggerRef}
     />
   )
 }

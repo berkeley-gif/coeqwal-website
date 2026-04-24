@@ -27,6 +27,21 @@ export interface TourStep {
   /** Preferred Popper placement relative to the anchor. Popper will
    *  flip automatically if it does not fit. */
   placement?: TourPlacement
+  /** When true, disable Popper's automatic flip modifier so the step
+   *  stays on the preferred side even if space is tight. Useful for
+   *  steps that programmatically reveal chart content the popper
+   *  must not cover (e.g. a chip above the chart whose popper must
+   *  not fall back onto the chart below). */
+  disableFlip?: boolean
+  /** Cross-axis skid expressed as a multiple of the anchor's size
+   *  along that axis. For bottom/top placements this is a multiple
+   *  of the anchor's width; for left/right placements a multiple of
+   *  its height. Useful to push the popper past the anchor on the
+   *  cross axis. Example: with placement "bottom-end" and
+   *  `anchorSkidMultiplier: -1`, the popper's right edge aligns
+   *  with the anchor's left edge (popper sits below and to the
+   *  left of the anchor). */
+  anchorSkidMultiplier?: number
   /** Optional icon shown before the title in the popper. */
   titleIcon?: "pin" | "share"
   /**

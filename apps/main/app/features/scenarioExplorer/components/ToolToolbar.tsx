@@ -118,10 +118,16 @@ export default function ToolToolbar({
   const listClimateTourRef = useTourAnchor("list.toolbar.climate")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
-  // the toolbar. Registered only in list mode. Radar has its own
-  // `radar.viewArea` on the non-list toolbar row.
+  // the toolbar. Registered only in list mode so it does not collide
+  // with the equivalent radar orientation (which uses ChartControlsBar).
   const listViewAreaTourRef = useTourAnchor("list.viewArea")
+  // Same strip of view controls, but in radar mode the toolbar is
+  // rendered as a plain row (not the list grid), so we anchor the
+  // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
+  // And the resilience tour uses the same non-list row to orient the
+  // user on the shared toolbar (hydroclimate + map).
+  const resilienceViewAreaTourRef = useTourAnchor("resilience.viewArea")
   // One DOM node serves both the Radar climate-chip tour and the new
   // List hydroclimate tour step. Merge callback refs so both registries
   // resolve to the same element without re-wrapping the chooser.
@@ -194,7 +200,7 @@ export default function ToolToolbar({
             />
           </>
         ) : null}
-        {exploreMode === "list" && <VerticalDivider />}
+        <VerticalDivider />
       </Box>
 
       <Box
@@ -374,10 +380,16 @@ export default function ToolToolbar({
   }
 
   // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
+  const nonListViewAreaRef =
+    exploreMode === "radar"
+      ? radarViewAreaTourRef
+      : exploreMode === "resilience"
+        ? resilienceViewAreaTourRef
+        : undefined
   return (
     <>
       <Box
-        ref={exploreMode === "radar" ? radarViewAreaTourRef : undefined}
+        ref={nonListViewAreaRef}
         sx={{
           display: "flex",
           alignItems: "center",

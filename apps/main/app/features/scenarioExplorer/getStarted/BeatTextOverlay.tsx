@@ -1,18 +1,9 @@
 "use client"
 
-import {
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useCallback,
-  type RefObject,
-} from "react"
+import { useRef, useEffect, useLayoutEffect, type RefObject } from "react"
 import {
   Box,
   Typography,
-  ToggleButton,
-  ToggleButtonGroup,
   useTheme,
   alpha,
   ArrowForwardIcon,
@@ -25,12 +16,6 @@ import {
 import { motion } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-import { HybridTooltip } from "@repo/ui"
-import {
-  getScenarioIconDefs,
-  renderIconDef,
-} from "../../scenarios/components/shared/opsIcons"
-import { useDrawerStore } from "@repo/state/drawer"
 import {
   PARAGRAPH_FADE_SEC,
   ITEM_FADE_SEC,
@@ -62,6 +47,16 @@ const B5_EXIT = secondsToProgress(5, BLOCK_EXIT_SEC)
 const B6_PARA = secondsToProgress(6, PARAGRAPH_FADE_SEC)
 const B6_EXIT = secondsToProgress(6, BLOCK_EXIT_SEC)
 const B7_PARA = secondsToProgress(7, PARAGRAPH_FADE_SEC)
+
+/** Pixels the right-column overlay (white backdrop + content column
+ *  with scenario header, outcome titles/captions, and the HTML axis
+ *  labels that dock to the radar) is lifted above the panel's standard
+ *  top padding. Pairs with `STORYBOARD_VISUAL_LIFT_PX` (which lifts the
+ *  SVG radar/heatmap + their label landing coordinates by the same
+ *  amount relative to the panel's vertical centerline) so the whole
+ *  right-column block reads as a single unit parked near the top of
+ *  the visible area. */
+const OVERLAY_TOP_LIFT_PX = 30
 
 interface ColumnEyebrow {
   label: string
@@ -182,11 +177,7 @@ export default function BeatTextOverlay({
   selectedOutcomeCode,
   interactive,
   textHidden = false,
-  scenarioId,
   scenarioName,
-  scenarioDescription,
-  encodingMode,
-  onEncodingChange,
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
@@ -194,105 +185,15 @@ export default function BeatTextOverlay({
   heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
 
-  // NOTE: GLOSSARY_TERMS / handleGlossaryClick / glossaryLinkStyles /
-  // descriptionWithLinks are kept live. They're only consumed by the
-  // commented-out scenario-header JSX below (wrapped in `{false && ...}`),
-  // which we preserve for later reuse.
-  const GLOSSARY_TERMS = useMemo(
-    () => [
-      {
-        pattern: /\bTUCPs?\b/g,
-        glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
-      },
-      {
-        pattern: /\bSGMA\b/g,
-        glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
-      },
-      {
-        pattern: /\bDelta Conveyance Project\b/g,
-        glossaryTerm: "Delta Conveyance Project",
-      },
-    ],
-    [],
-  )
-
-  const handleGlossaryClick = useCallback(
-    (term: string) => (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setDrawerContent({ selectedTerm: term })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  const glossaryLinkStyles = useMemo(
-    () => ({
-      color: theme.palette.blue.bright,
-      borderBottom: `2px solid ${theme.palette.blue.bright}`,
-      cursor: "pointer",
-      background: "none",
-      border: "none",
-      borderBottomStyle: "solid" as const,
-      borderBottomWidth: "2px",
-      borderBottomColor: theme.palette.blue.bright,
-      padding: 0,
-      font: "inherit",
-      "&:hover": { borderBottomWidth: "3px" },
-      "&:focus-visible": {
-        outline: `2px solid ${theme.palette.blue.bright}`,
-        outlineOffset: "2px",
-        borderRadius: "2px",
-      },
-    }),
-    [theme.palette.blue.bright],
-  )
-
-  const descriptionWithLinks = useMemo(() => {
-    if (!scenarioDescription) return null
-    const combined = new RegExp(
-      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
-      "g",
-    )
-    const result: React.ReactNode[] = []
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-    while ((match = combined.exec(scenarioDescription)) !== null) {
-      if (match.index > lastIndex)
-        result.push(scenarioDescription.slice(lastIndex, match.index))
-      const word = match[1] ?? ""
-      const punct = match[2] ?? ""
-      const term = GLOSSARY_TERMS.find((t) =>
-        new RegExp(`^${t.pattern.source}$`).test(word),
-      )
-      if (term) {
-        result.push(
-          <Box
-            component="button"
-            type="button"
-            key={`gl-${match.index}`}
-            onClick={handleGlossaryClick(term.glossaryTerm)}
-            tabIndex={0}
-            aria-label={`Open glossary for ${term.glossaryTerm}`}
-            sx={glossaryLinkStyles}
-          >
-            {word}
-          </Box>,
-        )
-        if (punct) result.push(punct)
-      }
-      lastIndex = match.index + match[0].length
-    }
-    if (lastIndex < scenarioDescription.length)
-      result.push(scenarioDescription.slice(lastIndex))
-    return result
-  }, [
-    scenarioDescription,
-    GLOSSARY_TERMS,
-    handleGlossaryClick,
-    glossaryLinkStyles,
-  ])
+  /** Single source of truth for the "<name> scenario" label rendered in
+   *  both the right-column overlay header and the Beat 3 intro sentence.
+   *  Falls back to "Current operations scenario" when no scenarioName is
+   *  passed (e.g. before the scenarios query resolves), so both call
+   *  sites stay in lockstep. */
+  const displayScenarioLabel = scenarioName
+    ? `${scenarioName} scenario`
+    : "Current operations scenario"
 
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
@@ -374,11 +275,14 @@ export default function BeatTextOverlay({
   eyebrowDataRef.current = beat2Layout?.eyebrows
   const beat2LayoutRef = useRef<Beat2Layout | null | undefined>(undefined)
   beat2LayoutRef.current = beat2Layout
-  // NOTE: scenarioHeaderRef + addLocationCtaRef are kept live because their
-  // JSX (current operations text, key-op icons, description, encoding toggle,
-  // climate chooser, "Add a location" CTA) is preserved behind
-  // `{false && ...}` guards below for future reuse. They're not rendered.
-  const scenarioHeaderRef = useRef<HTMLDivElement>(null)
+  /** Scenario-name overline header at the top of the right-column
+   *  overlay ("Current operations scenario"). Opacity-driven by the
+   *  progress tick so the header fades in with Step 3's Beat 3 reveal
+   *  and stays through Step 8, rather than persisting from page load. */
+  const scenarioOverlayHeaderRef = useRef<HTMLDivElement>(null)
+  // NOTE: addLocationCtaRef is kept live because its JSX (the
+  // "Add a location to track" CTA) is preserved behind a
+  // `{false && ...}` guard below for future reuse.
   /** The three reveal blocks below the tier legend collapse their
    *  vertical space while hidden so the bottom control row (which sits
    *  in document flow below them) hugs whatever text is actually
@@ -494,6 +398,17 @@ export default function BeatTextOverlay({
       // backdrop is fully present when the AG_REV morph lands.
       const fadeIn = clamp01((v - 0.3775) / 0.01)
       beat2PanelRef.current.style.opacity = String(fadeIn)
+    }
+
+    if (scenarioOverlayHeaderRef.current) {
+      // Scenario-name overline header appears with the Step 3 "before"
+      // paragraph ("These are the outcomes for the <name> scenario.")
+      // so the header and the sentence land together as a single
+      // introduction of the scenario context. Held visible for the
+      // rest of the storyboard; opacity falls back to 0 automatically
+      // if the user navigates back to Steps 1-2 (v < 0.3675).
+      const fadeIn = clamp01((v - 0.3675) / B2_PARA)
+      scenarioOverlayHeaderRef.current.style.opacity = String(fadeIn)
     }
 
     // Outcome titles fade in per-slice, synced to each outcome's own morph.
@@ -1201,27 +1116,35 @@ export default function BeatTextOverlay({
       // row. Geometry constants MUST stay in sync with
       // `OutcomeMorphOverlay.heatmapGeometry` or labels will drift
       // when the extra columns fade in.
-      const heatNumExtras = heatmapExtraColumnCount
-      const heatNumColumns = 1 + heatNumExtras
-      const heatColumnGapFraction = 0.18
-      const heatAvailableW = rightW * 0.85
-      const heatCellW = Math.min(
-        72,
-        heatAvailableW /
-          (heatNumColumns + (heatNumColumns - 1) * heatColumnGapFraction),
-      )
-      const heatColumnGap = heatCellW * heatColumnGapFraction
+      // Geometry constants MUST stay in sync with
+      // `OutcomeMorphOverlay.heatmapGeometry`. See that block for a
+      // layout diagram; in short: the right third is
+      //   [sidePad] [labelColW] [labelGap] [heatmap columns] [sidePad]
+      // so label text wraps within a fixed `HEAT_LABEL_COL_W` and
+      // heatmap cells left-align immediately to its right. Only the
+      // leftmost column's left edge is needed for label right-alignment
+      // here; cell widths / inter-column gaps / extra-column positions
+      // are irrelevant to labels and therefore omitted.
+      const HEAT_SIDE_PAD = 24
+      const HEAT_LABEL_COL_W = 110
+      const HEAT_LABEL_GAP = 12
+      // See `OutcomeMorphOverlay.heatmapGeometry` — same shift applied
+      // here so labels translate with the heatmap block as one unit.
+      const HEAT_BLOCK_SHIFT_X = -10
+
+      const heatRightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
+      const heatmapLeftX =
+        heatRightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
       const heatAvailableH = panelH * 0.8
       const heatCellH = Math.min(44, heatAvailableH / Math.max(Nr, 1))
       const heatTotalH = Nr * heatCellH
       const heatColumnTop =
         panelH / 2 - heatTotalH / 2 - STORYBOARD_VISUAL_LIFT_PX
-      // Primary column (index 0) cx is the leftmost of the centered
-      // column group.
-      const heatStride = heatCellW + heatColumnGap
-      const heatCol0Cx = cx - ((heatNumColumns - 1) / 2) * heatStride
-      const heatCellLeft = heatCol0Cx - heatCellW / 2
-      const HEAT_LABEL_GAP = 12
+      // Fixed `targetRightX` for every label: labels are right-aligned
+      // to the same x, so the right edges of every wrapped block line
+      // up as a column just to the left of the primary heatmap
+      // column's left edge.
+      const targetRightX = heatmapLeftX - HEAT_LABEL_GAP
       const heatmap = heatmapLabelDeltaRef.current
       const heatmapMaxW = heatmapLabelMaxWRef.current
       heatmap.clear()
@@ -1232,7 +1155,6 @@ export default function BeatTextOverlay({
         })
         for (let i = 0; i < Nr; i++) {
           const code = radarOrderCodes[i]!
-          const targetRightX = heatCellLeft - HEAT_LABEL_GAP
           const targetCenterY = heatColumnTop + (i + 0.5) * heatCellH
           const state = wrapStateByCode.get(code)
           if (!state) continue
@@ -1248,11 +1170,13 @@ export default function BeatTextOverlay({
           const prevMax = textEl.style.maxWidth
           const prevOW = textEl.style.overflowWrap
           const prevColor = textEl.style.color
-          const boxLeft = boxEl.getBoundingClientRect().left - panelRect.left
-          const maxW = Math.max(
-            40,
-            Math.min(200, targetRightX - HEAT_LABEL_GAP - boxLeft),
-          )
+          // Uniform max-width for every heatmap y-axis label: the
+          // reserved label column on the left. Unlike the earlier
+          // per-label `targetRightX - boxLeft` calc, this does not
+          // depend on which two-column flex cell the label's origin
+          // Box sits in, so labels wrap consistently regardless of
+          // origin column.
+          const maxW = HEAT_LABEL_COL_W
           heatmapMaxW.set(code, maxW)
           boxEl.style.justifyContent = "flex-end"
           textEl.style.whiteSpace = "normal"
@@ -1294,13 +1218,6 @@ export default function BeatTextOverlay({
 
     return () => ro.disconnect()
   }, [onGlyphLayoutChange, beat2Layout, heatmapExtraColumnCount, theme])
-
-  // Kept live (unused while scenarioHeader JSX is disabled behind
-  // `{false && ...}`). Restore usage in the JSX to re-enable.
-  const opsIconDefs = useMemo(
-    () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
-    [scenarioId],
-  )
 
   const padding = theme.space.panel.padding
   const textColor = theme.palette.undertone.warm
@@ -1631,8 +1548,7 @@ export default function BeatTextOverlay({
           >
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
-                These are the outcomes for the{" "}
-                {scenarioName ? `${scenarioName} scenario` : "Current operations scenario"}.
+                These are the outcomes for the {displayScenarioLabel}.
               </Typography>
               <Typography variant="body2" component="p" sx={{ mt: 1.5 }}>
                 Each location can be symbolized as a square colored with the
@@ -1878,7 +1794,7 @@ export default function BeatTextOverlay({
         ref={beat2PanelRef}
         sx={{
           position: "absolute",
-          top: padding,
+          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
           right: 0,
           width: "33.33%",
           height: 0,
@@ -1903,7 +1819,7 @@ export default function BeatTextOverlay({
         ref={rightColumnRootRef}
         sx={{
           position: "absolute",
-          top: padding,
+          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
           right: 0,
           width: "33.33%",
           zIndex: 5,
@@ -1917,12 +1833,14 @@ export default function BeatTextOverlay({
         }}
       >
         <Box
+          ref={scenarioOverlayHeaderRef}
           sx={{
             px: 3,
-            pb: 1.5,
+            pb: 0.75,
             flexShrink: 0,
-            minHeight: 40,
+            minHeight: 20,
             pointerEvents: "none",
+            opacity: 0,
           }}
         >
           <Typography
@@ -1931,177 +1849,9 @@ export default function BeatTextOverlay({
             color="text.secondary"
             sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
           >
-            {scenarioName
-              ? `${scenarioName} scenario`
-              : "Current operations scenario"}
+            {displayScenarioLabel}
           </Typography>
         </Box>
-        {/* Scenario header + encoding toggle.
-         *  Disabled per design direction - kept in-source (wrapped in
-         *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
-        {/* eslint-disable-next-line no-constant-binary-expression */}
-        {false && (
-          <Box
-            ref={scenarioHeaderRef}
-            sx={{
-              px: 3,
-              pt: 2,
-              pb: 1.5,
-              flexShrink: 0,
-              pointerEvents: interactive ? "auto" : "none",
-              opacity: 0,
-              transition: "opacity 0.6s ease",
-              borderBottom: interactive
-                ? `1px solid ${theme.palette.grey[200]}`
-                : "none",
-            }}
-          >
-            {/* Two-column grid: title/toggle left, ops/climate right */}
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                rowGap: scenarioDescription ? 0.5 : 1.5,
-                columnGap: 1.5,
-                alignItems: "center",
-              }}
-            >
-              {/* Top-left: title */}
-              {scenarioName && (
-                <Typography
-                  variant="subtitle1"
-                  component="h3"
-                  sx={{ fontWeight: 600, gridColumn: 1 }}
-                >
-                  {scenarioName}
-                </Typography>
-              )}
-
-              {/* Top-right: key operations */}
-              {opsIconDefs.length > 0 && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    gridColumn: 2,
-                    justifySelf: "end",
-                  }}
-                >
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.02em",
-                      color: theme.palette.grey[600],
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Key operations
-                  </Typography>
-                  {opsIconDefs.map((def) => (
-                    <HybridTooltip
-                      key={def.id}
-                      content={
-                        <>
-                          <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
-                            {def.label}
-                          </Typography>
-                          {def.description}
-                        </>
-                      }
-                    >
-                      <Box
-                        tabIndex={0}
-                        aria-label={def.label}
-                        sx={{
-                          width: 26,
-                          height: 26,
-                          flexShrink: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "50%",
-                          cursor: "default",
-                          "&:focus-visible": {
-                            outline: `2px solid ${theme.palette.blue.bright}`,
-                            outlineOffset: "2px",
-                          },
-                        }}
-                      >
-                        {renderIconDef(def)}
-                      </Box>
-                    </HybridTooltip>
-                  ))}
-                </Box>
-              )}
-
-              {/* Description spanning both columns */}
-              {scenarioDescription && (
-                <Typography
-                  variant="compactSubtitle"
-                  component="p"
-                  sx={{
-                    color: theme.palette.grey[500],
-                    gridColumn: "1 / -1",
-                  }}
-                >
-                  {descriptionWithLinks}
-                </Typography>
-              )}
-
-              {/* Bottom-left: encoding toggle */}
-              {encodingMode && onEncodingChange && (
-                <ToggleButtonGroup
-                  value={encodingMode}
-                  exclusive
-                  onChange={(_, val) => {
-                    if (val) onEncodingChange?.(val as EncodingMode)
-                  }}
-                  size="small"
-                  sx={{
-                    gridColumn: 1,
-                    "& .MuiToggleButton-root": {
-                      color: theme.palette.grey[600],
-                      border: `1px solid ${theme.palette.grey[300]}`,
-                      textTransform: "none",
-                      fontWeight: 500,
-                      fontSize: "0.75rem",
-                      letterSpacing: "0.02em",
-                      px: 1.25,
-                      py: 0.125,
-                      "&.Mui-selected": {
-                        backgroundColor: theme.palette.blue.bright,
-                        color: theme.palette.common.white,
-                        borderColor: theme.palette.blue.bright,
-                        "&:hover": {
-                          backgroundColor: theme.palette.blue.dark,
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: theme.palette.grey[100],
-                      },
-                    },
-                  }}
-                >
-                  <ToggleButton value="distribution">Distribution</ToggleButton>
-                  <ToggleButton value="bar">Bar</ToggleButton>
-                  <ToggleButton value="average">Average</ToggleButton>
-                </ToggleButtonGroup>
-              )}
-              {/* The Get Started storyboard is permanently pinned to the
-               *  s0020 baseline under the historical hydroclimate, so no
-               *  in-storyboard hydroclimate chooser is rendered here. The
-               *  Beat 8 heatmap is a single-column placeholder for future
-               *  multi-hydroclimate columns. To restore an inline chooser,
-               *  re-add `hydroclimate` / `onHydroclimateChange` props plus
-               *  the `HydroclimateChooser` import and the wiring removed
-               *  from `TierAnimationSection`. */}
-            </Box>
-          </Box>
-        )}
-
         {/* Beat 1C narrative lives in the left panel below the tier
          *  legend. See `beat1Ref` above. The overlay panel is dedicated to
          *  graphics (outcome titles, glyph morphs, location captions). */}
@@ -2133,12 +1883,28 @@ export default function BeatTextOverlay({
             >
               {(
                 [
-                  { ref: distributionHeaderRef, label: "Distribution view" },
-                  { ref: listHeaderRef, label: "List view" },
-                  { ref: radarHeaderRef, label: "Radar chart" },
-                  { ref: heatmapHeaderRef, label: "Heat map" },
+                  {
+                    ref: distributionHeaderRef,
+                    label: "Distribution view",
+                    align: "left" as const,
+                  },
+                  {
+                    ref: listHeaderRef,
+                    label: "List view",
+                    align: "left" as const,
+                  },
+                  {
+                    ref: radarHeaderRef,
+                    label: "Radar chart",
+                    align: "left" as const,
+                  },
+                  {
+                    ref: heatmapHeaderRef,
+                    label: "Heat map",
+                    align: "left" as const,
+                  },
                 ] as const
-              ).map(({ ref, label }) => (
+              ).map(({ ref, label, align }) => (
                 <Box
                   key={label}
                   ref={ref}
@@ -2147,7 +1913,9 @@ export default function BeatTextOverlay({
                     top: (t) => t.spacing(1.5),
                     left: 0,
                     right: 0,
+                    px: 3,
                     opacity: 0,
+                    textAlign: align,
                   }}
                 >
                   <Typography variant="overline" component="p">

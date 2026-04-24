@@ -639,10 +639,12 @@ export default function OutcomeMorphOverlay({
     const cx = panelLeft + rightWidth / 2
     // Pushed slightly above center (0.42 rather than 0.50) so the radar
     // reads higher on the panel, leaving room beneath it for Beat 7's
-    // narration + eventual heatmap slot. `BeatTextOverlay` uses the
-    // same fraction when computing label positions so chrome and text
-    // stay in lockstep.
-    const cy = panelHeight * 0.42
+    // narration + eventual heatmap slot. The extra
+    // `STORYBOARD_VISUAL_LIFT_PX` pull matches the label anchor in
+    // `BeatTextOverlay` (also `panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX`)
+    // so the SVG chrome and the HTML axis labels stay in lockstep
+    // around the same center.
+    const cy = panelHeight * 0.42 - STORYBOARD_VISUAL_LIFT_PX
     const rMax = Math.min(rightWidth / 2, panelHeight / 2) * 0.6
     const tierR = (tier: number) => (rMax * (4.5 - tier)) / 4
 
@@ -709,17 +711,45 @@ export default function OutcomeMorphOverlay({
     const numColumns = 1 + numExtras
     const panelLeft = panelWidth * (2 / 3)
     const rightWidth = panelWidth - panelLeft
-    const heatCx = panelLeft + rightWidth / 2
-    // Shrink `cellW` so all columns + inter-column gaps fit inside ~85%
-    // of the right column. Cap at 72px per column so individual cells
-    // don't become oversized wide swatches when the panel is very wide.
-    const columnGapFraction = 0.18
-    const availableW = rightWidth * 0.85
+    // Layout inside the right third:
+    //   [sidePad] [labelColW] [labelGap] [heatmap columns ...] [sidePad]
+    // `HEAT_SIDE_PAD` matches the `px: 3` horizontal padding on the
+    // scenario header / view-mode headers / two-column flex in
+    // `BeatTextOverlay`, so the label column's left edge lines up
+    // with those headers. `HEAT_LABEL_COL_W` is the reserved width
+    // for wrapped y-axis labels on the left. The heatmap columns
+    // occupy the remaining width, left-aligned immediately to the
+    // right of the label column.
+    //
+    // Geometry constants MUST stay in sync with
+    // `BeatTextOverlay.measure()` heatmap branch.
+    const HEAT_SIDE_PAD = 24
+    const HEAT_LABEL_COL_W = 110
+    const HEAT_LABEL_GAP = 12
+    const HEAT_COL_GAP_FRACTION = 0.18
+    // Cap set high enough that on typical panels (~1200–2000px wide)
+    // cells grow to consume the full heatmap region, so the
+    // labels+heatmap block visually fills — and therefore centers
+    // inside — the overlay's right third (minus `HEAT_SIDE_PAD` on
+    // each edge). Ultra-wide panels still clamp here to avoid
+    // oversized swatches.
+    const HEAT_MAX_CELL_W = 150
+    // Horizontal nudge applied to the entire labels+heatmap block.
+    // Shifts both edges equally so the block translates without
+    // changing width or cell sizes.
+    const HEAT_BLOCK_SHIFT_X = -10
+
+    const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
+    const rightColRight =
+      panelLeft + rightWidth - HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
+    const heatmapLeft = rightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
+    const heatmapAvailW = Math.max(1, rightColRight - heatmapLeft)
     const cellW = Math.min(
-      72,
-      availableW / (numColumns + (numColumns - 1) * columnGapFraction),
+      HEAT_MAX_CELL_W,
+      heatmapAvailW /
+        (numColumns + (numColumns - 1) * HEAT_COL_GAP_FRACTION),
     )
-    const columnGap = cellW * columnGapFraction
+    const columnGap = cellW * HEAT_COL_GAP_FRACTION
     const availableH = panelHeight * 0.8
     const cellH = Math.min(44, availableH / Math.max(N, 1))
     const totalH = N * cellH
@@ -735,14 +765,21 @@ export default function OutcomeMorphOverlay({
     const innerW = Math.max(1, cellW - cellInsetX * 2)
     const innerH = Math.max(1, cellH - cellInsetY * 2)
 
-    // Horizontally center the column group on `heatCx`. Column stride
-    // is `cellW + columnGap`; leftmost column (index 0 = historical /
-    // primary) is offset by `-(numColumns - 1) / 2 * stride`.
+    // Left-align columns inside the heatmap region: leftmost column's
+    // `cx` sits at `heatmapLeft + cellW / 2`; subsequent columns step
+    // by `stride = cellW + columnGap`.
     const stride = cellW + columnGap
     const columnCx: number[] = []
     for (let c = 0; c < numColumns; c++) {
-      columnCx.push(heatCx + (c - (numColumns - 1) / 2) * stride)
+      columnCx.push(heatmapLeft + cellW / 2 + c * stride)
     }
+    const groupW =
+      numColumns * cellW + (numColumns - 1) * columnGap
+    // Kept for consumers that want a "center of the heatmap column
+    // group" coordinate. No longer equals `panelLeft + rightWidth/2`
+    // now that the heatmap is left-aligned rather than centered in the
+    // right third.
+    const heatCx = heatmapLeft + groupW / 2
 
     // `cells` (primary column only) is the legacy single-column cell list
     // and remains the morph target for each outcome's representative
@@ -1638,7 +1675,7 @@ export default function OutcomeMorphOverlay({
             textAnchor="middle"
             dominantBaseline="central"
           >
-            Current hydroclimate
+            Historical hydroclimate
           </text>
         )}
       </g>

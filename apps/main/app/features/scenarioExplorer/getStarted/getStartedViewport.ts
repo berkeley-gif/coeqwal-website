@@ -20,9 +20,24 @@ function stickyStackOffsetPx(theme: LayoutSlice) {
 /**
  * Returns a CSS `height` or `min-height` value, e.g.
  * `calc(100vh - 200px)`.
+ *
+ * `contentOverflowPx` adds pixels *beyond* the viewport-fits baseline,
+ * so the panel deliberately extends below the fold. Used by the tier
+ * storyboard (`TierAnimationSection`) whose left text column + right
+ * overlay composition is taller than one viewport by design: the user
+ * scrolls so the title + Play button park at the top of the visible
+ * area, and the extra pixels hold the remaining reveals without
+ * crowding. Defaults to 0 (strict viewport fit) for the standard
+ * `GetStartedPanelShell` behavior.
  */
-export function getStartedViewportCardHeightCss(theme: LayoutSlice) {
+export function getStartedViewportCardHeightCss(
+  theme: LayoutSlice,
+  options: { contentOverflowPx?: number } = {},
+) {
+  const { contentOverflowPx = 0 } = options
   return `calc(100vh - ${
-    stickyStackOffsetPx(theme) + GET_STARTED_PANEL_BREATHING_PX
+    stickyStackOffsetPx(theme) +
+    GET_STARTED_PANEL_BREATHING_PX -
+    contentOverflowPx
   }px)`
 }

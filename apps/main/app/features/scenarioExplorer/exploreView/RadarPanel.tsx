@@ -51,6 +51,7 @@ import {
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import { useTourAnchor } from "../tour/TourAnchorContext"
+import { TOUR_STEPS } from "../tour/content"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -114,22 +115,12 @@ export default function RadarPanel({
     showRadarRange,
     showDotsOnly,
     radarShowAll,
-    setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
     hydroclimate,
   } = useScenarioExplorerStore()
 
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
-
-  // With no sidebar checkboxes selected, the chart would otherwise be empty
-  // (filteredData is []). Default to showing the full library, matching the
-  // "show all scenarios" control.
-  useEffect(() => {
-    if (selectedScenarios.length === 0) {
-      setRadarShowAll(true)
-    }
-  }, [selectedScenarios.length, setRadarShowAll])
 
   const { getThemeForScenario, getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
@@ -246,6 +237,31 @@ export default function RadarPanel({
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
 
+  // Tour sync: when the radar tour reaches the "Outcome summary" step,
+  // open the first axis's info popover so the user sees what the
+  // popper is referring to. Close it when the step ends or the tour
+  // is dismissed, mirroring the list tour's outcome-info pattern.
+  const radarTourStepId = useScenarioExplorerStore((s) => {
+    if (s.tour.tool !== "radar") return null
+    return TOUR_STEPS.radar[s.tour.step]?.id ?? null
+  })
+  const openedByTourRef = useRef(false)
+  useEffect(() => {
+    const isInfoStep = radarTourStepId === "radar.step2.infoIcon"
+    if (isInfoStep) {
+      const firstAxis = axisPositions[0]?.axis
+      if (firstAxis && openInfoAxis !== firstAxis) {
+        setOpenInfoAxis(firstAxis)
+        openedByTourRef.current = true
+      }
+      return
+    }
+    if (openedByTourRef.current) {
+      openedByTourRef.current = false
+      setOpenInfoAxis(null)
+    }
+  }, [radarTourStepId, axisPositions, openInfoAxis])
+
   // Map an axis display name back to its outcome code, handling both the
   // aggregate outcomes (OUTCOME_NAMES) and the regional NOD/SOD codes
   // (NOD_SOD_NAMES). Returns the code string or undefined.
@@ -310,6 +326,11 @@ export default function RadarPanel({
   // first paint, when axisPositions is populated.
   const axisLabelAnchorRef = useTourAnchor("radar.axisLabel")
   const infoIconAnchorRef = useTourAnchor("radar.infoIcon")
+  // Anchor for the opened axis-chooser panel. The tour step that
+  // opens the panel points at this ref so the popper can sit to the
+  // right of the panel (placement: right-start) instead of covering
+  // it from the chip above.
+  const axisChooserPanelAnchorRef = useTourAnchor("radar.axisChooserPanel")
   // Bridge chartWrapperRef into both polygon + rings anchors. They
   // share the same target element because the rings live inside the
   // same SVG; the tour copy distinguishes them by step.
@@ -349,8 +370,11 @@ export default function RadarPanel({
 
   const filteredData = useMemo(() => {
     let base: typeof comparisonData
+    // With nothing selected, fall back to showing the full library
+    // instead of an empty chart. The radar is most useful as a quick
+    // overview on first landing, and a blank canvas reads as broken.
     if (radarShowAll) base = comparisonData
-    else if (selectedScenarios.length === 0) base = []
+    else if (selectedScenarios.length === 0) base = comparisonData
     else base = comparisonData.filter((d) => selectedSet.has(d.id))
 
     if (highlightedIds == null || highlightedIds.size === 0) return base
@@ -678,6 +702,7 @@ export default function RadarPanel({
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
           <Box
+            ref={axisChooserPanelAnchorRef}
             sx={{
               position: "absolute",
               top: 0,

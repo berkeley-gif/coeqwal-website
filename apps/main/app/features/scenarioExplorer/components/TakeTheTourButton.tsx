@@ -16,10 +16,7 @@ import { Box, Typography, useTheme, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import type { TourTool } from "../tour/types"
 
-// Demo gate: Resilience popper copy is still being filled out, so its
-// entry point stays hidden. The underlying tour (content, anchors,
-// runner) is intact. Re-add "resilience" once its content is ready.
-const TOUR_TOOLS = new Set<TourTool>(["list", "radar"])
+const TOUR_TOOLS = new Set<TourTool>(["list", "radar", "resilience"])
 function isTourTool(mode: string): mode is TourTool {
   return TOUR_TOOLS.has(mode as TourTool)
 }

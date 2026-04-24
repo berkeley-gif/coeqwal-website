@@ -84,6 +84,18 @@ import {
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
 
+/** Pixels the tier storyboard's root panel extends below the fold
+ *  beyond the strict viewport-fit baseline. The left text column and
+ *  right overlay composition are taller than one viewport by design:
+ *  the user scrolls so the title + Play button park at the top of
+ *  the visible area, and this overflow holds the remaining intro
+ *  paragraphs, tier legend, Beat 1C reveals, Beat 3+ narration, and
+ *  the radar/heatmap composition without crowding. Morph landing
+ *  coordinates in `BeatTextOverlay` are measured from the DOM via
+ *  ResizeObserver so the right-column geometry adapts automatically
+ *  to the taller panel. */
+const STORYBOARD_CONTENT_OVERFLOW_PX = 320
+
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
@@ -918,13 +930,26 @@ export default function TierAnimationSection() {
   }, [scenarios, s0020SiblingGroup])
   const { chartData: cc50ChartData } = useScenarioTiers(cc50VariantId)
   const { chartData: cc95ChartData } = useScenarioTiers(cc95VariantId)
-  const heatmapExtraColumns = useMemo(
-    () => [
-      { label: "Moderate risk", tierChartData: cc50ChartData },
-      { label: "High risk", tierChartData: cc95ChartData },
-    ],
-    [cc50ChartData, cc95ChartData],
-  )
+  /* Only include extra hydroclimate columns whose sibling scenario
+   * actually resolved. If the API doesn't expose the cc50 or cc95
+   * sibling for this strategy, the column is dropped entirely rather
+   * than rendering an empty-chrome header + blank cells. The downstream
+   * geometry in `OutcomeMorphOverlay.heatmapGeometry` and `BeatTextOverlay`
+   * keys off array length, so the layout collapses cleanly to fewer
+   * columns. */
+  const heatmapExtraColumns = useMemo(() => {
+    const cols: Array<{
+      label: string
+      tierChartData?: typeof cc50ChartData
+    }> = []
+    if (cc50VariantId) {
+      cols.push({ label: "Moderate risk", tierChartData: cc50ChartData })
+    }
+    if (cc95VariantId) {
+      cols.push({ label: "High risk", tierChartData: cc95ChartData })
+    }
+    return cols
+  }, [cc50VariantId, cc95VariantId, cc50ChartData, cc95ChartData])
 
   useEffect(() => {
     if (encodingMode !== "bar") setSpotlightedTier(null)
@@ -3019,7 +3044,9 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: getStartedViewportCardHeightCss(theme),
+        height: getStartedViewportCardHeightCss(theme, {
+          contentOverflowPx: STORYBOARD_CONTENT_OVERFLOW_PX,
+        }),
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",

@@ -41,6 +41,7 @@ import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import ResilienceChartTuner from "./ResilienceChartTuner"
 import { useScenarioExplorerStore } from "../store"
+import { useTourAnchor } from "../tour/TourAnchorContext"
 import type {
   AggregateOver,
   CellEncoding,
@@ -208,6 +209,10 @@ interface PhraseButtonProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
   active?: boolean
   ariaLabel?: string
+  /** Optional callback ref to forward onto the rendered button element.
+   *  Used by the resilience tour system to anchor poppers on specific
+   *  clickable phrases in the configuration sentence. */
+  tourAnchorRef?: (el: HTMLElement | null) => void
 }
 
 function phraseButtonSx(theme: Theme, active: boolean) {
@@ -245,10 +250,12 @@ function PhraseButton({
   onClick,
   active = false,
   ariaLabel,
+  tourAnchorRef,
 }: PhraseButtonProps) {
   const theme = useTheme()
   return (
     <Box
+      ref={tourAnchorRef}
       component="button"
       type="button"
       onClick={onClick}
@@ -356,6 +363,15 @@ export default function ResilienceControls({
   } = controls
 
   const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
+
+  // Tour anchors for the sentence phrases. Each anchor attaches
+  // directly to the phrase's <button>, so the tour highlight lands on
+  // the clickable word rather than a wrapper. ChartTuner's trigger is
+  // threaded separately via its `triggerRef` prop.
+  const pivotAnchorRef = useTourAnchor("resilience.pivot")
+  const outcomesAnchorRef = useTourAnchor("resilience.outcomes")
+  const encodingAnchorRef = useTourAnchor("resilience.encoding")
+  const moreOptionsAnchorRef = useTourAnchor("resilience.moreOptions")
   const showResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.showResilienceOutcomeSelector,
   )
@@ -712,6 +728,7 @@ export default function ResilienceControls({
           active={Boolean(pivotAnchor)}
           onClick={(e) => setPivotAnchor(e.currentTarget)}
           ariaLabel={`Chart layout: ${pivotLabel}. Click to change.`}
+          tourAnchorRef={pivotAnchorRef}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
           , covering
@@ -730,6 +747,7 @@ export default function ResilienceControls({
           active={Boolean(outcomesAnchor)}
           onClick={(e) => setOutcomesAnchor(e.currentTarget)}
           ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
+          tourAnchorRef={outcomesAnchorRef}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
           , and
@@ -748,6 +766,7 @@ export default function ResilienceControls({
           active={Boolean(encodingAnchor)}
           onClick={(e) => setEncodingAnchor(e.currentTarget)}
           ariaLabel={`Cell colors show: ${encodingLabel}. Click to change.`}
+          tourAnchorRef={encodingAnchorRef}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700] }}>
           .
@@ -771,7 +790,11 @@ export default function ResilienceControls({
           },
         }}
       >
-        <ResilienceChartTuner controls={controls} onChange={onChange} />
+        <ResilienceChartTuner
+          controls={controls}
+          onChange={onChange}
+          triggerRef={moreOptionsAnchorRef}
+        />
       </Box>
 
       {/* Popover: Encoding (Read as) */}

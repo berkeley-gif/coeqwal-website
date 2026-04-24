@@ -55,6 +55,72 @@ const CONTROL_ILLUSTRATION_VARIANT: Record<string, ListTourControlVariant> = {
   listHydroclimate: "hydroclimate",
 }
 
+/**
+ * Floating highlight ring painted over the anchor's bounding rect.
+ *
+ * Rendered in a Portal and positioned with `position: fixed` so it
+ * can never be clipped by an ancestor's `overflow: hidden` (a common
+ * issue for anchors inside the radar chart's sidebar, the axis
+ * chooser panel, and the chart toolbar band).
+ *
+ * Tracks the anchor on every animation frame while active. That is
+ * cheap for the tour's lifespan and robust to arbitrary reflows
+ * (panel slides, chip toggles, sidebar scrolls, etc.) without having
+ * to wire up observers against every ancestor.
+ */
+function HighlightRing({ anchorEl }: { anchorEl: Element | null }) {
+  const theme = useTheme()
+  const [rect, setRect] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+  } | null>(null)
+
+  useEffect(() => {
+    if (!anchorEl) {
+      setRect(null)
+      return
+    }
+    let raf = 0
+    let prevKey = ""
+    const tick = () => {
+      const r = anchorEl.getBoundingClientRect()
+      const key = `${r.top}|${r.left}|${r.width}|${r.height}`
+      if (key !== prevKey) {
+        prevKey = key
+        setRect({ top: r.top, left: r.left, width: r.width, height: r.height })
+      }
+      raf = window.requestAnimationFrame(tick)
+    }
+    raf = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(raf)
+  }, [anchorEl])
+
+  if (!rect) return null
+  const pad = 4
+  return (
+    <Portal>
+      <Box
+        aria-hidden
+        sx={{
+          position: "fixed",
+          top: rect.top - pad,
+          left: rect.left - pad,
+          width: rect.width + pad * 2,
+          height: rect.height + pad * 2,
+          border: `2px solid ${theme.palette.blue.bright}`,
+          borderRadius: 1.5,
+          boxShadow: `0 0 0 4px ${alpha(theme.palette.blue.bright, 0.18)}`,
+          pointerEvents: "none",
+          zIndex: theme.zIndex.modal - 1,
+          transition: "top 120ms ease, left 120ms ease, width 120ms ease, height 120ms ease",
+        }}
+      />
+    </Portal>
+  )
+}
+
 function TourBodyContent({
   body,
   infoIconColor,
@@ -121,6 +187,12 @@ export default function ToolTour() {
   const setShowAxisSelector = useScenarioExplorerStore(
     (s) => s.setShowAxisSelector,
   )
+  const setHighlightBaseline = useScenarioExplorerStore(
+    (s) => s.setHighlightBaseline,
+  )
+  const setShowRadarRange = useScenarioExplorerStore(
+    (s) => s.setShowRadarRange,
+  )
 
   const { resolve, version } = useTourAnchorResolver()
 
@@ -135,7 +207,7 @@ export default function ToolTour() {
   // Re-resolve the current anchor whenever the registry changes or the
   // step moves. We keep this in state so the Popper re-positions when
   // an anchor mounts late.
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   // Give late-mounting anchors a short grace period before falling
   // back to a centered dialog. Without this the runner would briefly
   // render as "hidden control" every time the step changes.
@@ -170,46 +242,18 @@ export default function ToolTour() {
     return () => window.clearTimeout(timer)
   }, [step, resolve, version])
 
-  // Scroll the anchor into view + apply highlight ring while this step
-  // is active. Cleanup restores inline styles on step change and on
-  // unmount.
+  // Scroll the anchor into view + tag it for downstream CSS hooks.
+  // The actual highlight ring is painted by <HighlightRing> in a
+  // portal, keyed to the anchor's bounding rect, so it can't be
+  // clipped by an ancestor's `overflow: hidden`.
   useEffect(() => {
     if (!anchorEl) return
     anchorEl.scrollIntoView({ behavior: "smooth", block: "nearest" })
-    const prevOutline = anchorEl.style.outline
-    const prevOutlineOffset = anchorEl.style.outlineOffset
-    const prevBoxShadow = anchorEl.style.boxShadow
-    const prevBorderRadius = anchorEl.style.borderRadius
-    const prevTransition = anchorEl.style.transition
-    const prevPosition = anchorEl.style.position
-    const prevZIndex = anchorEl.style.zIndex
-    if (!anchorEl.style.position) {
-      anchorEl.style.position = "relative"
-    }
-    // Outlines extend past the box; the chart row below is painted
-    // after this node and was covering the bottom/side rings. Keep the
-    // highlight above the next sibling while the step is active.
-    anchorEl.style.zIndex = "3"
-    anchorEl.style.transition =
-      "outline-color 160ms ease, box-shadow 160ms ease"
-    anchorEl.style.outline = `2px solid ${theme.palette.blue.bright}`
-    anchorEl.style.outlineOffset = "2px"
-    anchorEl.style.boxShadow = `0 0 0 6px ${alpha(
-      theme.palette.blue.bright,
-      0.18,
-    )}`
     anchorEl.setAttribute(HIGHLIGHT_DATA_ATTR, "true")
     return () => {
-      anchorEl.style.outline = prevOutline
-      anchorEl.style.outlineOffset = prevOutlineOffset
-      anchorEl.style.boxShadow = prevBoxShadow
-      anchorEl.style.borderRadius = prevBorderRadius
-      anchorEl.style.transition = prevTransition
-      anchorEl.style.position = prevPosition
-      anchorEl.style.zIndex = prevZIndex
       anchorEl.removeAttribute(HIGHLIGHT_DATA_ATTR)
     }
-  }, [anchorEl, theme.palette.blue.bright])
+  }, [anchorEl])
 
   // Map-reveal + honest-click side effects for the list-tour map step.
   //
@@ -288,6 +332,57 @@ export default function ToolTour() {
     }
   }, [step, setShowAxisSelector])
 
+  // Demo the "highlight current operations" chip. Flip the baseline
+  // overlay on while the step is active so the popper copy lines up
+  // with what the chart is doing, then restore the user's previous
+  // setting on exit.
+  const highlightBaselineDemoRef = useRef<{
+    prevHighlightBaseline: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "radar.step1.highlightBaseline") return
+    const prevHighlightBaseline =
+      useScenarioExplorerStore.getState().highlightBaseline
+    highlightBaselineDemoRef.current = { prevHighlightBaseline }
+    if (!prevHighlightBaseline) {
+      setHighlightBaseline(true)
+    }
+    return () => {
+      const snap = highlightBaselineDemoRef.current
+      highlightBaselineDemoRef.current = null
+      if (!snap) return
+      if (!snap.prevHighlightBaseline) {
+        setHighlightBaseline(false)
+      }
+    }
+  }, [step, setHighlightBaseline])
+
+  // Demo the "show range" chip. Same snapshot/restore pattern.
+  const radarRangeDemoRef = useRef<{
+    prevShowRadarRange: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "radar.step1.libraryRange") return
+    const prevShowRadarRange =
+      useScenarioExplorerStore.getState().showRadarRange
+    radarRangeDemoRef.current = { prevShowRadarRange }
+    if (!prevShowRadarRange) {
+      setShowRadarRange(true)
+    }
+    return () => {
+      const snap = radarRangeDemoRef.current
+      radarRangeDemoRef.current = null
+      if (!snap) return
+      if (!snap.prevShowRadarRange) {
+        setShowRadarRange(false)
+      }
+    }
+  }, [step, setShowRadarRange])
+
   useEffect(() => {
     if (!step) return
     if (step.id !== "list.step4.map") return
@@ -348,7 +443,10 @@ export default function ToolTour() {
 
     const raf = window.requestAnimationFrame(() => {
       if (mapDemoRef.current?.demoFired) return
-      const el = resolve("list.outcome.barChart")
+      // `resolve` is widened to `Element`; this particular anchor is
+      // always an HTMLElement (a DOM button in the bar chart), so a
+      // narrow cast here is safe and keeps the dataset access typed.
+      const el = resolve("list.outcome.barChart") as HTMLElement | null
       if (!el) return
       const scenarioId = el.dataset.tourScenarioId
       const outcomeCode = el.dataset.tourOutcomeCode
@@ -422,6 +520,20 @@ export default function ToolTour() {
       triggerElRef.current?.focus?.()
     }
   }, [tourTool])
+
+  // Safety net: if this runner unmounts for any reason (parent stops
+  // rendering us when the user leaves the explorer, a route change,
+  // etc.), clear the tour state so it doesn't silently resume the
+  // next time the runner mounts. Uses getState so we don't anchor
+  // the effect to a changing slice.
+  useEffect(() => {
+    return () => {
+      const state = useScenarioExplorerStore.getState()
+      if (state.tour.tool) {
+        state.endTour()
+      }
+    }
+  }, [])
 
   const nextBtnRef = useRef<HTMLButtonElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
@@ -761,6 +873,7 @@ export default function ToolTour() {
           zIndex: theme.zIndex.modal - 1,
         }}
       />
+      {!useCentered ? <HighlightRing anchorEl={anchorEl} /> : null}
       {useCentered ? (
         <Box
           sx={{
@@ -779,12 +892,36 @@ export default function ToolTour() {
           anchorEl={anchorEl}
           placement={step.placement ?? "bottom"}
           modifiers={[
-            { name: "offset", options: { offset: [0, 12] } },
+            {
+              name: "offset",
+              options: {
+                // Function form so we can push the popper past the
+                // anchor on the cross axis using a multiple of the
+                // anchor's own size (see `anchorSkidMultiplier`).
+                offset: ({
+                  placement: p,
+                  reference,
+                }: {
+                  placement: string
+                  reference: { width: number; height: number }
+                }) => {
+                  const mult = step.anchorSkidMultiplier ?? 0
+                  const isVertical =
+                    p.startsWith("top") || p.startsWith("bottom")
+                  const skid = isVertical
+                    ? reference.width * mult
+                    : reference.height * mult
+                  return [skid, 12]
+                },
+              },
+            },
             {
               name: "preventOverflow",
               options: { padding: 12, altAxis: true, tether: false },
             },
-            { name: "flip", options: { padding: 12 } },
+            step.disableFlip
+              ? { name: "flip", enabled: false }
+              : { name: "flip", options: { padding: 12 } },
           ]}
           sx={{ zIndex: theme.zIndex.modal }}
         >

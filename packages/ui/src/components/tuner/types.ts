@@ -90,4 +90,12 @@ export interface ChartTunerProps {
    * the controlled `open` prop; ignored when uncontrolled.
    */
   onOpenChange?: (next: boolean) => void
+  /**
+   * Optional callback ref forwarded onto the tuner's inline trigger
+   * button. Lets callers anchor tour poppers, overlays, etc. directly
+   * on the same element that owns the click/focus affordance, without
+   * wrapping it in an extra DOM node that would displace the button
+   * from its parent flex row.
+   */
+  triggerRef?: (el: HTMLButtonElement | null) => void
 }

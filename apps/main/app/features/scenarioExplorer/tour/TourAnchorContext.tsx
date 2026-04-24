@@ -27,11 +27,16 @@ import React, {
   useState,
 } from "react"
 
-type AnchorMap = Map<string, HTMLElement>
+// Anchors can be any DOM element; tour consumers only need
+// `getBoundingClientRect` (for the HighlightRing) and a Popper
+// anchorEl target, both of which accept `Element`. Widened from
+// `HTMLElement` so SVG primitives (heatmap cells, chart geometry)
+// can also register as anchors.
+type AnchorMap = Map<string, Element>
 
 interface TourAnchorContextValue {
-  register: (id: string, el: HTMLElement | null) => void
-  resolve: (id: string) => HTMLElement | null
+  register: (id: string, el: Element | null) => void
+  resolve: (id: string) => Element | null
   /** Monotonically increasing counter that the runner can subscribe to
    *  to re-render when any anchor changes. Exposed through a subscribe
    *  callback so readers can opt in without causing unrelated
@@ -54,7 +59,7 @@ export function TourAnchorProvider({ children }: TourAnchorProviderProps) {
   }, [])
 
   const register = useCallback(
-    (id: string, el: HTMLElement | null) => {
+    (id: string, el: Element | null) => {
       const map = mapRef.current
       const existing = map.get(id)
       if (el == null) {
@@ -104,7 +109,7 @@ export function TourAnchorProvider({ children }: TourAnchorProviderProps) {
 export function useTourAnchor(id: string) {
   const ctx = useContext(TourAnchorContext)
   return useCallback(
-    (el: HTMLElement | null) => {
+    (el: Element | null) => {
       if (!ctx) return
       ctx.register(id, el)
     },

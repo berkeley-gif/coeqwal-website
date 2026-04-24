@@ -231,6 +231,14 @@ interface ScenarioExplorerState {
   // Scenario selection (shared across all views)
   selectedScenarios: string[]
   highlightedScenario: string | null
+  /**
+   * Single scenario focused by the Distribution (equity) tool. Kept
+   * orthogonal to `selectedScenarios` so entering/leaving Distribution
+   * does not stomp the shared multi-select used by List, Radar,
+   * Resilience, and Comparison. Null until the user explicitly picks a
+   * radio; EquityPanel falls back to the baseline in that case.
+   */
+  equityFocusScenario: string | null
   pinnedScenarioIds: string[]
   maxPinnedScenarios: number
   pinCapReached: boolean
@@ -335,6 +343,7 @@ interface ScenarioExplorerActions {
   toggleScenario: (scenarioId: string) => void
   selectScenarios: (scenarioIds: string[]) => void
   clearScenarios: () => void
+  setEquityFocusScenario: (scenarioId: string | null) => void
   setHighlightedScenario: (scenarioId: string | null) => void
   togglePinnedScenario: (scenarioId: string) => void
   clearPinnedScenarios: () => void
@@ -457,6 +466,7 @@ const initialState: ScenarioExplorerState = {
   exploreMode: "list",
   selectedScenarios: [],
   highlightedScenario: null,
+  equityFocusScenario: null,
   pinnedScenarioIds: [],
   maxPinnedScenarios: 5,
   pinCapReached: false,
@@ -517,6 +527,14 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     // Navigation
     setMainView: (view) =>
       set((state) => {
+        // If the user leaves the explorer while a tool tour is running,
+        // reset the tour so it doesn't pop back up when they return.
+        // The tour is always anchored to a specific tool (list / radar
+        // / etc.), and coming back to a stale, dangling popper is
+        // disorienting.
+        if (state.mainView !== view) {
+          state.tour = { tool: null, step: 0 }
+        }
         state.mainView = view
       }),
 
@@ -547,6 +565,11 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     clearScenarios: () =>
       set((state) => {
         state.selectedScenarios = []
+      }),
+
+    setEquityFocusScenario: (scenarioId) =>
+      set((state) => {
+        state.equityFocusScenario = scenarioId
       }),
 
     setHighlightedScenario: (scenarioId) =>

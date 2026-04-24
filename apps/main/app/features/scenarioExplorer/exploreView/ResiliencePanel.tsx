@@ -2377,14 +2377,14 @@ export default function ResiliencePanel({
     ? { opacity: 1, y: 0 }
     : { opacity: 0, y: -8 }
 
-  // Tour anchors. The mode rail and matrix row both highlight the
-  // chart wrapper because the underlying SVG cells are not addressable
-  // individually in this component; the tour copy is precise enough to
-  // describe what to look at.
-  const matrixRowAnchorRef = useTourAnchor("resilience.matrix.row")
-  const modeRailAnchorRef = useTourAnchor("resilience.modeRail")
-  const moreAnalysisAnchorRef = useTourAnchor("resilience.moreAnalysis")
-  const leverageAnchorRef = useTourAnchor("resilience.leverage")
+  // Tour anchors. The `resilience.cell` anchor attaches to the first
+  // rendered heatmap cell via a callback ref threaded into the viz
+  // (see `ResilienceHeatmap`'s `firstCellRef` prop), so the tour can
+  // point at an actual tile rather than the surrounding chart wrapper.
+  // The `resilience.cornerControls` anchor sits on the floating
+  // transpose + display-options toolbar rendered below.
+  const cellAnchorRef = useTourAnchor("resilience.cell")
+  const cornerControlsAnchorRef = useTourAnchor("resilience.cornerControls")
 
   // Render states
 
@@ -2448,12 +2448,6 @@ export default function ResiliencePanel({
           title here just doubled the wording the user had to read. */}
 
       <Box
-        ref={(el: HTMLDivElement | null) => {
-          matrixRowAnchorRef(el)
-          modeRailAnchorRef(el)
-          moreAnalysisAnchorRef(el)
-          leverageAnchorRef(el)
-        }}
         sx={{
           flex: 1,
           minHeight: 0,
@@ -2470,6 +2464,7 @@ export default function ResiliencePanel({
             go. */}
         {onControlsChange && view !== "quadrant" && (
           <Box
+            ref={cornerControlsAnchorRef}
             sx={{
               position: "absolute",
               top: 4,
@@ -2687,6 +2682,7 @@ export default function ResiliencePanel({
                     onCellClick={isMapVisible ? handleCellClick : undefined}
                     formatRowTick={formatRowTick}
                     distributionMode={distributionMode}
+                    firstCellRef={cellAnchorRef}
                     onSquareHover={(info) =>
                       handleSquareHover(
                         info ? { cell: info.cell, entry: info.entry } : null,
@@ -2698,6 +2694,7 @@ export default function ResiliencePanel({
                   />
                 ) : (
                   <ResilienceHeatmapSmallMultiples
+                    firstCellRef={cellAnchorRef}
                     rows={displayByScenarioRows}
                     columns={displayByScenarioColumns}
                     tiles={displayByScenarioTiles}
@@ -2746,6 +2743,7 @@ export default function ResiliencePanel({
                     onCellClick={isMapVisible ? handleCellClick : undefined}
                     formatRowTick={formatRowTick}
                     distributionMode={distributionMode}
+                    firstCellRef={cellAnchorRef}
                     onSquareHover={(info) =>
                       handleSquareHover(
                         info ? { cell: info.cell, entry: info.entry } : null,
@@ -2757,6 +2755,7 @@ export default function ResiliencePanel({
                   />
                 ) : (
                   <ResilienceHeatmapSmallMultiples
+                    firstCellRef={cellAnchorRef}
                     rows={displayByOutcomeRows}
                     columns={displayByOutcomeColumns}
                     tiles={displayByOutcomeTiles}
@@ -2805,6 +2804,7 @@ export default function ResiliencePanel({
                     onCellClick={isMapVisible ? handleCellClick : undefined}
                     formatRowTick={formatRowTick}
                     distributionMode={distributionMode}
+                    firstCellRef={cellAnchorRef}
                     onSquareHover={(info) =>
                       handleSquareHover(
                         info ? { cell: info.cell, entry: info.entry } : null,
@@ -2816,6 +2816,7 @@ export default function ResiliencePanel({
                   />
                 ) : (
                   <ResilienceHeatmapSmallMultiples
+                    firstCellRef={cellAnchorRef}
                     rows={displayByHydroclimateRows}
                     columns={displayByHydroclimateColumns}
                     tiles={displayByHydroclimateTiles}
@@ -2863,6 +2864,7 @@ export default function ResiliencePanel({
                   marginals={displayMarginals}
                   showMarginals={showMarginals}
                   distributionMode={distributionMode}
+                  firstCellRef={cellAnchorRef}
                   onSquareHover={handleSquareHover}
                   onSquareClick={handleSquareClick}
                 />

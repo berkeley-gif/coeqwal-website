@@ -50,6 +50,7 @@ export default function ChartTuner({
   defaultOpen = false,
   open: controlledOpen,
   onOpenChange,
+  triggerRef: externalTriggerRef,
 }: ChartTunerProps) {
   const hostTheme = useTheme()
   const isControlled = controlledOpen !== undefined
@@ -186,7 +187,10 @@ export default function ChartTuner({
       <Box
         component="button"
         type="button"
-        ref={triggerRef}
+        ref={(el: HTMLButtonElement | null) => {
+          triggerRef.current = el
+          externalTriggerRef?.(el)
+        }}
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((p) => !p)}
