@@ -90,6 +90,13 @@ export interface ResilienceHeatmapSmallMultiplesProps {
    */
   onTileExpand?: (tileId: string) => void
   /**
+   * Optional renderer for extra per-tile header actions (e.g. a share
+   * icon). Rendered inside the same actions slot as the expand button,
+   * to the left of it. The consumer is responsible for stopping event
+   * propagation if the surrounding tile has its own click handler.
+   */
+  renderTileActions?: (tile: ResilienceSmallMultiplesTile) => React.ReactNode
+  /**
    * Callback ref forwarded to the first tile's heatmap so a consumer
    * can anchor a tour popper (or other overlay) on an actual cell.
    * Only the first tile wires this up; subsequent tiles receive
@@ -224,6 +231,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       onSquareHover,
       onSquareClick,
       onTileExpand,
+      renderTileActions,
       firstCellRef,
       columnLabelRotation = 0,
     }) => {
@@ -287,11 +295,13 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             }}
           >
             {tiles.map((tile, tileIdx) => {
-              const hasActions = !!onTileExpand
+              const extraActions = renderTileActions?.(tile)
+              const hasActions = !!onTileExpand || extraActions != null
               return (
                 <div
                   key={tile.id}
                   className="resilience-smt-tile"
+                  data-tile-id={tile.id}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -339,6 +349,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                     {hasActions && (
                       <div
                         className="resilience-tile-actions"
+                        data-capture-exclude="true"
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -346,6 +357,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                           flexShrink: 0,
                         }}
                       >
+                        {extraActions}
                         {onTileExpand && (
                           <TileActionButton
                             palette={palette}
@@ -362,7 +374,10 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       </div>
                     )}
                   </div>
-                  <div style={{ flex: 1, minHeight: tileHeight - 24 }}>
+                  <div
+                    data-resilience-tile-body="true"
+                    style={{ flex: 1, minHeight: tileHeight - 24 }}
+                  >
                     <ResilienceHeatmap
                       rows={rows}
                       columns={columns}

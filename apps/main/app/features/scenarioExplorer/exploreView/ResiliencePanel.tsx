@@ -29,6 +29,7 @@ import {
   CircularProgress,
   Snackbar,
   Typography,
+  icons,
   useTheme,
 } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
@@ -70,6 +71,10 @@ import {
 import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import { useTourAnchor } from "../tour/TourAnchorContext"
+import {
+  captureElementToBlob,
+  captureSvgToBlob,
+} from "../dataExplorer/utils/exportUtils"
 
 export type ResilienceView =
   | "scenario"
@@ -116,6 +121,46 @@ export type CellEncoding =
   | "glyph"
   | "distribution"
   | "leverage"
+
+/**
+ * Flat, CSV-friendly row shape for a single captured heatmap cell.
+ * Mirrors the fields we can reasonably derive from `ResilienceHeatmapCell`
+ * without reaching back into the source matrix.
+ */
+export interface ResilienceChartDataRow {
+  rowKey: string
+  rowLabel: string
+  colKey: string
+  colLabel: string
+  tier?: number
+  value?: number
+  delta?: number
+  count?: number
+}
+
+/**
+ * Payload handed off to the Share drawer when the resilience heatmap
+ * is snapshotted. Consumers should treat it as opaque data; the CSV
+ * export is the only reader that inspects the row shape today.
+ */
+export interface ResilienceHeatmapChartData {
+  kind: "resilience"
+  view: ResilienceView
+  cellEncoding: CellEncoding
+  tileScope: "panel" | "scenario" | "outcome" | "hydroclimate"
+  tileLabel?: string
+  rows: ResilienceChartDataRow[]
+}
+
+export interface ResilienceCaptureResult {
+  dataUrl: string
+  chartData: ResilienceHeatmapChartData
+}
+
+export type ResilienceCaptureFn = () => Promise<ResilienceCaptureResult | null>
+export type ResilienceTileCaptureFn = (
+  tileId: string,
+) => Promise<ResilienceCaptureResult | null>
 
 /**
  * Delta baseline selector. When `none`, no delta is computed.
@@ -206,6 +251,27 @@ interface ResiliencePanelProps {
    * previews).
    */
   onControlsChange?: (next: Partial<ResilienceControlsState>) => void
+  /**
+   * Invoked once after mount with a function that captures the full
+   * chart area as a PNG + flat cell data. Mirrors the pattern
+   * `RadarPanel` uses via `onCaptureReady`, letting `ScenarioExplorer`
+   * stash the capture fn in a ref and call it from the "save
+   * snapshot" toolbar button.
+   */
+  onCaptureReady?: (capture: ResilienceCaptureFn) => void
+  /**
+   * Invoked once after mount with a function that captures a single
+   * small-multiples tile (by its tile id) as a PNG + flat cell data.
+   * Null result means the tile id was not visible (e.g. it was in a
+   * view mode the panel is no longer rendering).
+   */
+  onCaptureTileReady?: (capture: ResilienceTileCaptureFn) => void
+  /**
+   * Invoked when the user clicks a per-tile share icon inside the
+   * small-multiples grid. Consumers typically call the function
+   * produced by `onCaptureTileReady` and then add a ShareItem.
+   */
+  onTileShare?: (tileId: string) => void
 }
 
 const HYDROCLIMATE_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
@@ -347,6 +413,9 @@ export default function ResiliencePanel({
   highlightedIds = null,
   onScenarioHover,
   onControlsChange,
+  onCaptureReady,
+  onCaptureTileReady,
+  onTileShare,
 }: ResiliencePanelProps) {
   const theme = useTheme()
   const {
@@ -2264,6 +2333,210 @@ export default function ResiliencePanel({
   // point at an actual tile rather than the surrounding chart wrapper.
   const cellAnchorRef = useTourAnchor("resilience.cell")
 
+  // Snapshot capture plumbing. The chart body wrapper is the common
+  // ancestor of every rendered heatmap SVG (single heatmap,
+  // small-multiples grid, expanded tile), so a DOM-level capture here
+  // works regardless of which `effectiveView` is active. Per-tile
+  // capture locates the tile's root SVG via the `data-tile-id`
+  // attribute that `ResilienceHeatmapSmallMultiples` stamps on each
+  // tile wrapper.
+  const chartWrapperRef = useRef<HTMLDivElement | null>(null)
+
+  const effectiveViewRef = useRef(effectiveView)
+  useEffect(() => {
+    effectiveViewRef.current = effectiveView
+  }, [effectiveView])
+
+  const cellEncodingRef = useRef(cellEncoding)
+  useEffect(() => {
+    cellEncodingRef.current = cellEncoding
+  }, [cellEncoding])
+
+  const byScenarioTilesRef = useRef(displayByScenarioTiles)
+  useEffect(() => {
+    byScenarioTilesRef.current = displayByScenarioTiles
+  }, [displayByScenarioTiles])
+
+  const byOutcomeTilesRef = useRef(displayByOutcomeTiles)
+  useEffect(() => {
+    byOutcomeTilesRef.current = displayByOutcomeTiles
+  }, [displayByOutcomeTiles])
+
+  const byHydroclimateTilesRef = useRef(displayByHydroclimateTiles)
+  useEffect(() => {
+    byHydroclimateTilesRef.current = displayByHydroclimateTiles
+  }, [displayByHydroclimateTiles])
+
+  const displayCellsRef = useRef(displayCells)
+  useEffect(() => {
+    displayCellsRef.current = displayCells
+  }, [displayCells])
+
+  const cellsToRows = useCallback(
+    (cellsIn: ResilienceHeatmapCell[]): ResilienceChartDataRow[] =>
+      cellsIn.map((cell) => ({
+        rowKey: cell.rowKey,
+        rowLabel: cell.rowLabel,
+        colKey: cell.colKey,
+        colLabel: cell.colLabel,
+        tier: cell.tierLevel ?? undefined,
+        value: cell.continuousValue ?? undefined,
+        delta: cell.divergingValue ?? undefined,
+        count: cell.distribution?.length,
+      })),
+    [],
+  )
+
+  const captureResilience = useCallback<ResilienceCaptureFn>(async () => {
+    const el = chartWrapperRef.current
+    if (!el) return null
+    try {
+      const { dataUrl } = await captureElementToBlob(el)
+      const view = effectiveViewRef.current
+      let rowsOut: ResilienceChartDataRow[]
+      let tileScope:
+        | "panel"
+        | "scenario"
+        | "outcome"
+        | "hydroclimate" = "panel"
+      if (view === "scenario") {
+        rowsOut = byScenarioTilesRef.current.flatMap((t) =>
+          cellsToRows(t.cells).map((r) => ({
+            ...r,
+            rowLabel: `${t.title} / ${r.rowLabel}`,
+          })),
+        )
+        tileScope = "panel"
+      } else if (view === "outcome") {
+        rowsOut = byOutcomeTilesRef.current.flatMap((t) =>
+          cellsToRows(t.cells).map((r) => ({
+            ...r,
+            rowLabel: `${t.title} / ${r.rowLabel}`,
+          })),
+        )
+      } else if (view === "hydroclimate") {
+        rowsOut = byHydroclimateTilesRef.current.flatMap((t) =>
+          cellsToRows(t.cells).map((r) => ({
+            ...r,
+            rowLabel: `${t.title} / ${r.rowLabel}`,
+          })),
+        )
+      } else {
+        rowsOut = cellsToRows(displayCellsRef.current)
+      }
+      return {
+        dataUrl,
+        chartData: {
+          kind: "resilience",
+          view,
+          cellEncoding: cellEncodingRef.current,
+          tileScope,
+          rows: rowsOut,
+        },
+      }
+    } catch (err) {
+      console.error("[ResiliencePanel] captureResilience failed:", err)
+      return null
+    }
+  }, [cellsToRows])
+
+  const captureResilienceTile = useCallback<ResilienceTileCaptureFn>(
+    async (tileId) => {
+      const wrapper = chartWrapperRef.current
+      if (!wrapper) return null
+      const tileEl = wrapper.querySelector<HTMLElement>(
+        `[data-tile-id="${CSS.escape(tileId)}"]`,
+      )
+      if (!tileEl) return null
+      // Scope the SVG lookup to the tile body wrapper. The tile header
+      // contains action buttons whose MUI icons render as <svg>, so a
+      // bare `tileEl.querySelector("svg")` would grab the share icon
+      // rather than the heatmap.
+      const body = tileEl.querySelector<HTMLElement>(
+        "[data-resilience-tile-body]",
+      )
+      const svg = body?.querySelector("svg") ?? null
+      if (!(svg instanceof SVGSVGElement)) return null
+      try {
+        const { dataUrl } = await captureSvgToBlob(svg)
+        const view = effectiveViewRef.current
+        let tileScope: "scenario" | "outcome" | "hydroclimate" = "scenario"
+        let tileSource = byScenarioTilesRef.current
+        if (view === "outcome") {
+          tileScope = "outcome"
+          tileSource = byOutcomeTilesRef.current
+        } else if (view === "hydroclimate") {
+          tileScope = "hydroclimate"
+          tileSource = byHydroclimateTilesRef.current
+        }
+        const tile = tileSource.find((t) => t.id === tileId)
+        if (!tile) return null
+        return {
+          dataUrl,
+          chartData: {
+            kind: "resilience",
+            view,
+            cellEncoding: cellEncodingRef.current,
+            tileScope,
+            tileLabel: tile.title,
+            rows: cellsToRows(tile.cells),
+          },
+        }
+      } catch (err) {
+        console.error("[ResiliencePanel] captureResilienceTile failed:", err)
+        return null
+      }
+    },
+    [cellsToRows],
+  )
+
+  useEffect(() => {
+    onCaptureReady?.(captureResilience)
+  }, [captureResilience, onCaptureReady])
+
+  useEffect(() => {
+    onCaptureTileReady?.(captureResilienceTile)
+  }, [captureResilienceTile, onCaptureTileReady])
+
+  // Per-tile share icon rendered inside the tile header next to the
+  // expand button. The button does not participate in tile hover /
+  // expand gestures - it only fires the external `onTileShare`, which
+  // resolves to `handleResilienceTileSnapshot` in `ScenarioExplorer`.
+  const renderTileShareAction = useMemo(() => {
+    if (!onTileShare) return undefined
+    return (tile: ResilienceSmallMultiplesTile) => (
+      <Box
+        component="button"
+        type="button"
+        aria-label={`Save snapshot of ${tile.title}`}
+        title="Save snapshot of this tile"
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          e.stopPropagation()
+          onTileShare(tile.id)
+        }}
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 22,
+          height: 22,
+          padding: 0,
+          borderRadius: "4px",
+          border: "none",
+          background: "transparent",
+          color: theme.palette.grey[600],
+          cursor: "pointer",
+          "&:hover": {
+            color: theme.palette.blue.bright,
+            backgroundColor: theme.palette.interaction.selectedBackground,
+          },
+        }}
+      >
+        <icons.IosShare sx={{ fontSize: "0.875rem" }} />
+      </Box>
+    )
+  }, [onTileShare, theme])
+
   // Render states
 
   if (error) {
@@ -2354,6 +2627,7 @@ export default function ResiliencePanel({
       )}
 
       <Box
+        ref={chartWrapperRef}
         sx={{
           flex: 1,
           minHeight: 0,
@@ -2496,6 +2770,7 @@ export default function ResiliencePanel({
                   onTileExpand={
                     onControlsChange ? handleTileExpand : undefined
                   }
+                  renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
             ) : effectiveView === "outcome" ? (
@@ -2526,6 +2801,7 @@ export default function ResiliencePanel({
                   onTileExpand={
                     onControlsChange ? handleTileExpand : undefined
                   }
+                  renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
             ) : effectiveView === "hydroclimate" ? (
@@ -2557,6 +2833,7 @@ export default function ResiliencePanel({
                   onTileExpand={
                     onControlsChange ? handleTileExpand : undefined
                   }
+                  renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
             ) : (

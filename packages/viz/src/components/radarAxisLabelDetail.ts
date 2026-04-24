@@ -80,6 +80,13 @@ export function radarAxisDetailBottomModeForIndex(
 ): RadarAxisDetailBottomMode {
   const n = numAxes
   if (n < 2 || i < 0 || i >= n) return "default"
+
+  // Top axis (12 o'clock): its label sits directly above the spoke's
+  // dots, so the default below-label detail panel occludes them. Reuse
+  // the same side-placement layout used for the bottom axis so the panel
+  // sits to the right of the label instead.
+  if (i === 0) return "single-right"
+
   const expanded = n >= RADAR_DETAIL_EXPANDED_BOTTOM_MIN_AXES
 
   if (n % 2 === 0) {

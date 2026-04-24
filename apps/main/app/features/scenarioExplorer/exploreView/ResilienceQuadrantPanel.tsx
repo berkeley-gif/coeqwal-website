@@ -46,6 +46,40 @@ import {
 import { hydroclimateOptions } from "../../../content/scenarios"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import type { ResilienceControlsState } from "./ResiliencePanel"
+import { captureElementToBlob } from "../dataExplorer/utils/exportUtils"
+
+/**
+ * Flat, CSV-friendly payload produced when the Leverage quadrant is
+ * snapshotted into the Share drawer. One row per dot (outcome or LOI)
+ * with the raw x/y coordinates used by `ResilienceQuadrant`. Share
+ * consumers treat it as opaque data; the CSV exporter is the only
+ * reader that walks the row shape today.
+ */
+export interface ResilienceQuadrantChartData {
+  kind: "resilience"
+  view: "quadrant"
+  cellEncoding: "quadrant"
+  tileScope: "quadrant"
+  tileLabel?: string
+  xLabel: string
+  yLabel: string
+  rows: Array<{
+    id: string
+    label: string
+    x: number | null
+    y: number | null
+    tierAtRefHc: number | null
+    secondary?: string
+  }>
+}
+
+export interface ResilienceQuadrantCaptureResult {
+  dataUrl: string
+  chartData: ResilienceQuadrantChartData
+}
+
+export type ResilienceQuadrantCaptureFn =
+  () => Promise<ResilienceQuadrantCaptureResult | null>
 
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
 const CLIMATE_REF_HC: ResilienceHydroclimate = "cc95"
@@ -61,6 +95,13 @@ interface ResilienceQuadrantPanelProps {
   onControlsChange: (next: Partial<ResilienceControlsState>) => void
   highlightedIds?: Set<string> | null
   onScenarioHover?: (scenarioId: string | null) => void
+  /**
+   * Invoked once after mount with a function that captures the
+   * quadrant chart as PNG + flat dot data. Follows the same
+   * `onCaptureReady` pattern as RadarPanel / ResiliencePanel so the
+   * parent can trigger snapshots from a shared toolbar button.
+   */
+  onCaptureReady?: (capture: ResilienceQuadrantCaptureFn) => void
 }
 
 export default function ResilienceQuadrantPanel({
@@ -68,6 +109,7 @@ export default function ResilienceQuadrantPanel({
   onControlsChange,
   highlightedIds: _highlightedIds,
   onScenarioHover,
+  onCaptureReady,
 }: ResilienceQuadrantPanelProps) {
   const theme = useTheme()
   const { quadrantUnit, quadrantOutcome, aggregateScope } = controls
@@ -302,6 +344,85 @@ export default function ResilienceQuadrantPanel({
       ? "Climate sensitivity vs operational leverage (by location)"
       : "Climate sensitivity vs operational leverage (by outcome)"
 
+  // Snapshot capture for the Share drawer. Same pattern as
+  // ResiliencePanel: capture the scatter chart container, then build a
+  // flat row table derived from the dots currently on screen. The
+  // chart data shape is distinct from the heatmap's cell shape but
+  // rides on the same `resilience` ShareItem variant via `tileScope:
+  // "quadrant"`.
+  const chartWrapperRef = useRef<HTMLDivElement | null>(null)
+
+  const quadrantUnitRef = useRef(quadrantUnit)
+  useEffect(() => {
+    quadrantUnitRef.current = quadrantUnit
+  }, [quadrantUnit])
+
+  const outcomeDataRef = useRef(outcomeData)
+  useEffect(() => {
+    outcomeDataRef.current = outcomeData
+  }, [outcomeData])
+
+  const loiDataRef = useRef(loiData)
+  useEffect(() => {
+    loiDataRef.current = loiData
+  }, [loiData])
+
+  const loiOutcomeCodeRef = useRef(loiOutcomeCode)
+  useEffect(() => {
+    loiOutcomeCodeRef.current = loiOutcomeCode
+  }, [loiOutcomeCode])
+
+  const climateRefLabelRef = useRef(climateRefLabel)
+  useEffect(() => {
+    climateRefLabelRef.current = climateRefLabel
+  }, [climateRefLabel])
+
+  const captureQuadrant = useCallback<ResilienceQuadrantCaptureFn>(async () => {
+    const el = chartWrapperRef.current
+    if (!el) return null
+    try {
+      const { dataUrl } = await captureElementToBlob(el)
+      const unit = quadrantUnitRef.current
+      const source =
+        unit === "loi" ? loiDataRef.current : outcomeDataRef.current
+      const yLabel = `Operational leverage (range at ${climateRefLabelRef.current})`
+      const xLabel = `Climate sensitivity (${climateRefLabelRef.current} - historical)`
+      const loiCode = loiOutcomeCodeRef.current
+      const tileLabel =
+        unit === "loi" && loiCode
+          ? `By location - ${getOutcomeName(loiCode as OutcomeCode)}`
+          : "By outcome"
+      return {
+        dataUrl,
+        chartData: {
+          kind: "resilience",
+          view: "quadrant",
+          cellEncoding: "quadrant",
+          tileScope: "quadrant",
+          tileLabel,
+          xLabel,
+          yLabel,
+          rows: source.map((d) => ({
+            id: d.id,
+            label: d.label,
+            x: d.x,
+            y: d.y,
+            tierAtRefHc: d.tierAtRefHc,
+            secondary:
+              typeof d.secondary === "string" ? d.secondary : undefined,
+          })),
+        },
+      }
+    } catch (err) {
+      console.error("[ResilienceQuadrantPanel] captureQuadrant failed:", err)
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    onCaptureReady?.(captureQuadrant)
+  }, [captureQuadrant, onCaptureReady])
+
   const subjectLabel = useMemo(() => {
     const n = scopeScenarioIds.length
     const all = scenarioIds.length
@@ -395,6 +516,7 @@ export default function ResilienceQuadrantPanel({
       </Box>
 
       <Box
+        ref={chartWrapperRef}
         sx={{
           flex: 1,
           minHeight: 0,

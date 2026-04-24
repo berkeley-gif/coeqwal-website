@@ -253,6 +253,119 @@ function radarDataToCSV(
 }
 
 /**
+ * Resilience heatmap row shape, mirroring `ResilienceChartDataRow` in
+ * `ResiliencePanel.tsx`. Duplicated here as a plain type to avoid a
+ * runtime import cycle between exportUtils and the explore view.
+ */
+type ResilienceHeatmapRow = {
+  rowKey: string
+  rowLabel: string
+  colKey: string
+  colLabel: string
+  tier?: number
+  value?: number
+  delta?: number
+  count?: number
+}
+
+type ResilienceHeatmapChartDataShape = {
+  view?: string
+  cellEncoding?: string
+  tileScope?: string
+  tileLabel?: string
+  rows: ResilienceHeatmapRow[]
+}
+
+type ResilienceQuadrantChartDataShape = {
+  view?: "quadrant"
+  tileScope?: "quadrant"
+  tileLabel?: string
+  xLabel?: string
+  yLabel?: string
+  rows: Array<{
+    id: string
+    label: string
+    x: number | null
+    y: number | null
+    tierAtRefHc?: number | null
+    secondary?: string
+  }>
+}
+
+/**
+ * Convert a flat resilience heatmap payload into a CSV table.
+ * Layout: one row per (row, column) cell, with tier / value / delta
+ * columns that map back to the heatmap's cell encoding.
+ */
+function resilienceHeatmapDataToCSV(
+  data: ResilienceHeatmapChartDataShape,
+): string | null {
+  if (!Array.isArray(data.rows) || data.rows.length === 0) return null
+  const header = [
+    "Row",
+    "Column",
+    "Tier",
+    "Value",
+    "Delta",
+    "Count",
+  ]
+  const lines: string[] = []
+  if (data.tileLabel) {
+    lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)
+  }
+  if (data.view) lines.push(`View,${csvEscape(String(data.view))}`)
+  if (data.cellEncoding) {
+    lines.push(`Encoding,${csvEscape(String(data.cellEncoding))}`)
+  }
+  if (lines.length > 0) lines.push("")
+  lines.push(header.join(","))
+  for (const row of data.rows) {
+    lines.push(
+      [
+        csvEscape(row.rowLabel),
+        csvEscape(row.colLabel),
+        row.tier != null ? String(row.tier) : "",
+        row.value != null ? String(row.value) : "",
+        row.delta != null ? String(row.delta) : "",
+        row.count != null ? String(row.count) : "",
+      ].join(","),
+    )
+  }
+  return lines.join("\n")
+}
+
+/**
+ * Convert a quadrant scatter payload into a CSV table. Uses the
+ * payload's xLabel / yLabel as the X and Y column headers so the
+ * captured axis metadata rides through the export.
+ */
+function resilienceQuadrantDataToCSV(
+  data: ResilienceQuadrantChartDataShape,
+): string | null {
+  if (!Array.isArray(data.rows) || data.rows.length === 0) return null
+  const xLabel = data.xLabel ?? "X"
+  const yLabel = data.yLabel ?? "Y"
+  const header = ["Item", csvEscape(xLabel), csvEscape(yLabel), "Tier"]
+  const lines: string[] = []
+  if (data.tileLabel) {
+    lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)
+    lines.push("")
+  }
+  lines.push(header.join(","))
+  for (const row of data.rows) {
+    lines.push(
+      [
+        csvEscape(row.label),
+        row.x != null ? String(row.x) : "",
+        row.y != null ? String(row.y) : "",
+        row.tierAtRefHc != null ? String(row.tierAtRefHc) : "",
+      ].join(","),
+    )
+  }
+  return lines.join("\n")
+}
+
+/**
  * Export a single share-item's chart data as CSV.
  *
  * Bar chart items produce a readable matrix - one row per outcome,
@@ -260,6 +373,10 @@ function radarDataToCSV(
  *
  * Radar items produce a scenario × outcome matrix:
  *   Scenario, Outcome1, Outcome2, …
+ *
+ * Resilience heatmap items produce a row-per-cell table. Resilience
+ * quadrant items (discriminated by `cachedChartData.view === "quadrant"`)
+ * produce a row-per-dot table with axis-labeled X and Y columns.
  */
 export function exportShareItemAsCSV(
   item: {
@@ -291,6 +408,20 @@ export function exportShareItemAsCSV(
       item.scenarioIds,
       scenarioNameLookup,
     )
+    if (csv) downloadCSV(csv, filename)
+    return
+  }
+
+  if (item.type === "resilience") {
+    const data = item.cachedChartData as Record<string, unknown>
+    const csv =
+      data.view === "quadrant"
+        ? resilienceQuadrantDataToCSV(
+            data as unknown as ResilienceQuadrantChartDataShape,
+          )
+        : resilienceHeatmapDataToCSV(
+            data as unknown as ResilienceHeatmapChartDataShape,
+          )
     if (csv) downloadCSV(csv, filename)
     return
   }
@@ -329,6 +460,22 @@ export function exportAllShareItemsAsCSV(
         item.scenarioIds,
         scenarioNameLookup,
       )
+      if (csv) {
+        sections.push(csv)
+        sections.push("")
+      }
+    }
+
+    if (item.type === "resilience") {
+      const data = item.cachedChartData as Record<string, unknown>
+      const csv =
+        data.view === "quadrant"
+          ? resilienceQuadrantDataToCSV(
+              data as unknown as ResilienceQuadrantChartDataShape,
+            )
+          : resilienceHeatmapDataToCSV(
+              data as unknown as ResilienceHeatmapChartDataShape,
+            )
       if (csv) {
         sections.push(csv)
         sections.push("")
@@ -638,10 +785,16 @@ export async function captureElementToBlob(
   ctx.fillStyle = backgroundColor
   ctx.fillRect(0, 0, canvasW, canvasH)
 
-  const svgs = element.querySelectorAll("svg")
+  // Skip any SVG nested inside an element explicitly marked to be excluded
+  // from composite captures (e.g. share / expand action icons rendered on top
+  // of the chart). This lets chart authors keep interactive glyphs out of
+  // snapshot thumbnails without the utility needing to know about them.
+  const svgs = Array.from(element.querySelectorAll("svg")).filter(
+    (svg) => !svg.closest("[data-capture-exclude]"),
+  )
   const serializer = new XMLSerializer()
 
-  const drawPromises = Array.from(svgs).map((svg) => {
+  const drawPromises = svgs.map((svg) => {
     const clone = svg.cloneNode(true) as SVGSVGElement
     inlineStyles(clone, svg)
     const svgW = svg.clientWidth || svg.getBoundingClientRect().width

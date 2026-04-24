@@ -25,4 +25,14 @@ export type {
   DeltaMode,
   AggregateScope,
   QuadrantUnit,
+  ResilienceChartDataRow,
+  ResilienceHeatmapChartData,
+  ResilienceCaptureResult,
+  ResilienceCaptureFn,
+  ResilienceTileCaptureFn,
 } from "./ResiliencePanel"
+export type {
+  ResilienceQuadrantChartData,
+  ResilienceQuadrantCaptureResult,
+  ResilienceQuadrantCaptureFn,
+} from "./ResilienceQuadrantPanel"

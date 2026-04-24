@@ -142,20 +142,41 @@ function ShareItemCard({
           ? "By scenario"
           : item.view === "outcome"
             ? "By outcome"
-            : item.view
+            : item.view === "hydroclimate"
+              ? "By hydroclimate"
+              : item.view === "quadrant"
+                ? "Leverage quadrant"
+                : item.view
     const encodingLabel = item.cellEncoding
       .replace(/_/g, " ")
       .replace(/^./, (c) => c.toUpperCase())
+    const title =
+      item.view === "quadrant"
+        ? viewLabel
+        : `${viewLabel}: ${encodingLabel}`
+    const tileKindLabel =
+      item.tileScope === "scenario"
+        ? "Scenario"
+        : item.tileScope === "outcome"
+          ? "Outcome"
+          : item.tileScope === "hydroclimate"
+            ? "Hydroclimate"
+            : item.tileScope === "quadrant"
+              ? "Quadrant"
+              : null
+    const subtitle = item.tileLabel
+      ? tileKindLabel
+        ? `${tileKindLabel}: ${item.tileLabel}`
+        : item.tileLabel
+      : item.scenarioIds.length
+        ? `${item.scenarioIds.length} scenario${item.scenarioIds.length === 1 ? "" : "s"} in scope`
+        : "Full library"
     return (
       <ShareSnapshotCard
         id={item.id}
         toolLabel="Resilience"
-        title={`${viewLabel}: ${encodingLabel}`}
-        subtitle={
-          item.scenarioIds.length
-            ? `${item.scenarioIds.length} scenario${item.scenarioIds.length === 1 ? "" : "s"} in scope`
-            : "Full library"
-        }
+        title={title}
+        subtitle={subtitle}
         chips={[...scenarioChips.slice(0, 4), ...outcomeChips]}
         hydroclimate={item.hydroclimates[0]}
         cachedImageDataUrl={item.cachedImageDataUrl}

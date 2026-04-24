@@ -89,6 +89,11 @@ function encodeShareItems(
       const ids = item.scenarioIds.join("~")
       const climates = item.hydroclimates.join("~")
       const outcomes = item.outcomeCodes.join("~")
+      // Scope: "minimum for display". tileScope / tileId / tileLabel
+      // and cachedChartData / cachedImageDataUrl are intentionally
+      // not encoded in the URL - round-tripped resilience items
+      // rehydrate as panel-level snapshots (same degradation as the
+      // in-memory-only images/data for all captures).
       return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}`
     }
     return ""
@@ -399,22 +404,48 @@ function renderShareItemBody(
           ? "By scenario"
           : item.view === "outcome"
             ? "By outcome"
-            : item.view
+            : item.view === "hydroclimate"
+              ? "By hydroclimate"
+              : item.view === "quadrant"
+                ? "Leverage quadrant"
+                : item.view
     const encodingLabel = item.cellEncoding
       .replace(/_/g, " ")
       .replace(/^./, (c) => c.toUpperCase())
+    const title =
+      item.view === "quadrant"
+        ? viewLabel
+        : `${viewLabel}: ${encodingLabel}`
+    // The subtitle names the specific tile when this item was
+    // captured from a small-multiples tile (scenario / outcome /
+    // hydroclimate) or the Leverage scatter. Panel captures fall
+    // back to the in-scope count so the card still communicates
+    // what the snapshot represents.
+    const tileKindLabel =
+      item.tileScope === "scenario"
+        ? "Scenario"
+        : item.tileScope === "outcome"
+          ? "Outcome"
+          : item.tileScope === "hydroclimate"
+            ? "Hydroclimate"
+            : item.tileScope === "quadrant"
+              ? "Quadrant"
+              : null
+    const subtitle = item.tileLabel
+      ? tileKindLabel
+        ? `${tileKindLabel}: ${item.tileLabel}`
+        : item.tileLabel
+      : item.scenarioIds.length
+        ? `${item.scenarioIds.length} scenario${
+            item.scenarioIds.length === 1 ? "" : "s"
+          } in scope`
+        : "Full library"
     return (
       <ShareSnapshotCard
         id={item.id}
         toolLabel="Resilience"
-        title={`${viewLabel}: ${encodingLabel}`}
-        subtitle={
-          item.scenarioIds.length
-            ? `${item.scenarioIds.length} scenario${
-                item.scenarioIds.length === 1 ? "" : "s"
-              } in scope`
-            : "Full library"
-        }
+        title={title}
+        subtitle={subtitle}
         chips={[
           ...scenarioChips.slice(0, 4),
           ...outcomeCodesToLabels(item.outcomeCodes),

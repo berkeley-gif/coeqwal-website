@@ -128,7 +128,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     eyebrow: "arrange the chart",
     title: "Save snapshot",
     titleIcon: "share",
-    body: "Save snapshot sits at the right edge of the Rows row. It stages the chart and its underlying data in the Share drawer, the same way capture view does in Radar. Find it in the Share tab when you are ready to export.",
+    body: "Save snapshot sits at the right edge of the Rows row. It stages the chart you see, plus the cells behind it, in the Share drawer, the same way capture view does in Radar. In small-multiples layouts, each tile has its own share icon in the tile header, so you can snapshot just one scenario, outcome, or hydroclimate. The Leverage quadrant has a single snapshot button of its own. Find the results in the Share tab when you are ready to export.",
     placement: "bottom-end",
   },
 

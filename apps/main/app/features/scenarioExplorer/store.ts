@@ -93,6 +93,22 @@ export type ShareItem =
       hydroclimates: string[]
       /** Outcome codes that were visible at capture time. */
       outcomeCodes: string[]
+      /**
+       * Which capture surface produced this item. "panel" captures the
+       * whole chart body, the small-multiples kinds capture a single
+       * tile, and "quadrant" captures the Leverage scatter. Absent
+       * values rehydrate to "panel" for backwards-compatible URL round
+       * trips.
+       */
+      tileScope?: "panel" | "scenario" | "outcome" | "hydroclimate" | "quadrant"
+      /**
+       * Identifier of the captured tile when `tileScope` is one of the
+       * small-multiples kinds (scenarioId, outcome code, or
+       * hydroclimate value). Omitted for panel and quadrant captures.
+       */
+      tileId?: string
+      /** Human-facing label shown in the Share drawer/tab card subtitle. */
+      tileLabel?: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
       note?: string

@@ -33,6 +33,9 @@ import {
 import type {
   SingleScenarioCaptureFn,
   ResilienceControlsState,
+  ResilienceCaptureFn,
+  ResilienceTileCaptureFn,
+  ResilienceQuadrantCaptureFn,
 } from "./exploreView"
 import ResilienceControls from "./exploreView/ResilienceControls"
 import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
@@ -248,6 +251,38 @@ function ScenarioExplorerInner() {
     return radarSingleCaptureRef.current?.(scenarioId) ?? null
   }, [])
 
+  // Resilience capture plumbing. Three separate refs so the toolbar
+  // "save snapshot" button can dispatch to whichever panel is
+  // currently mounted (heatmap vs. quadrant vs. per-tile). Each ref
+  // is populated by the corresponding panel's onCaptureReady
+  // callback on mount, and cleared implicitly on unmount since the
+  // panel instance goes away.
+  const resilienceCaptureRef = useRef<ResilienceCaptureFn | null>(null)
+  const resilienceTileCaptureRef = useRef<ResilienceTileCaptureFn | null>(null)
+  const resilienceQuadrantCaptureRef =
+    useRef<ResilienceQuadrantCaptureFn | null>(null)
+
+  const handleResilienceCaptureReady = useCallback(
+    (capture: ResilienceCaptureFn) => {
+      resilienceCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleResilienceTileCaptureReady = useCallback(
+    (capture: ResilienceTileCaptureFn) => {
+      resilienceTileCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleResilienceQuadrantCaptureReady = useCallback(
+    (capture: ResilienceQuadrantCaptureFn) => {
+      resilienceQuadrantCaptureRef.current = capture
+    },
+    [],
+  )
+
   // Resilience heatmap controls (panel-local state, lifted here so the
   // toolbar and panel share one source of truth without store changes).
   // Default view is Aggregate because the sidebar starts empty; the
@@ -284,15 +319,58 @@ function ScenarioExplorerInner() {
     [],
   )
 
-  const handleResilienceSnapshot = useCallback(() => {
-    const item: ShareItem = {
+  const handleResilienceSnapshot = useCallback(async () => {
+    const base = {
       id: `resilience-${Date.now()}`,
-      type: "resilience",
+      type: "resilience" as const,
       view: resilienceControls.view,
-      cellEncoding: resilienceControls.cellEncoding,
+      cellEncoding:
+        resilienceControls.view === "quadrant"
+          ? "quadrant"
+          : resilienceControls.cellEncoding,
       scenarioIds: [...selectedScenarios],
       hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
       outcomeCodes: resilienceVisibleOutcomes,
+    }
+
+    let capture: {
+      dataUrl?: string
+      chartData?: Record<string, unknown>
+      tileLabel?: string
+      tileScope?: "panel" | "quadrant"
+    } = {}
+
+    if (resilienceControls.view === "quadrant") {
+      const result = await resilienceQuadrantCaptureRef.current?.()
+      if (result) {
+        capture = {
+          dataUrl: result.dataUrl,
+          chartData: result.chartData as unknown as Record<string, unknown>,
+          tileLabel: result.chartData.tileLabel,
+          tileScope: "quadrant",
+        }
+      } else {
+        capture = { tileScope: "quadrant" }
+      }
+    } else {
+      const result = await resilienceCaptureRef.current?.()
+      if (result) {
+        capture = {
+          dataUrl: result.dataUrl,
+          chartData: result.chartData as unknown as Record<string, unknown>,
+          tileScope: "panel",
+        }
+      } else {
+        capture = { tileScope: "panel" }
+      }
+    }
+
+    const item: ShareItem = {
+      ...base,
+      tileScope: capture.tileScope,
+      tileLabel: capture.tileLabel,
+      cachedImageDataUrl: capture.dataUrl,
+      cachedChartData: capture.chartData,
     }
     addShareItem(item)
   }, [
@@ -301,6 +379,34 @@ function ScenarioExplorerInner() {
     resilienceVisibleOutcomes,
     addShareItem,
   ])
+
+  const handleResilienceTileSnapshot = useCallback(
+    async (tileId: string) => {
+      const result = await resilienceTileCaptureRef.current?.(tileId)
+      if (!result) return
+      const item: ShareItem = {
+        id: `resilience-${Date.now()}-${tileId}`,
+        type: "resilience",
+        view: result.chartData.view,
+        cellEncoding: result.chartData.cellEncoding,
+        scenarioIds: [...selectedScenarios],
+        hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
+        outcomeCodes: resilienceVisibleOutcomes,
+        tileScope: result.chartData.tileScope,
+        tileId,
+        tileLabel: result.chartData.tileLabel,
+        cachedImageDataUrl: result.dataUrl,
+        cachedChartData: result.chartData as unknown as Record<string, unknown>,
+      }
+      addShareItem(item)
+    },
+    [
+      selectedScenarios,
+      resilienceControls,
+      resilienceVisibleOutcomes,
+      addShareItem,
+    ],
+  )
 
   // Keep the Resilience "View:" rail in sync with the sidebar
   // selection. Empty selection anchors the rail on "View aggregate";
@@ -583,6 +689,7 @@ function ScenarioExplorerInner() {
                       onControlsChange={handleResilienceControlsChange}
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
+                      onCaptureReady={handleResilienceQuadrantCaptureReady}
                     />
                   ) : (
                     <ResiliencePanel
@@ -590,6 +697,9 @@ function ScenarioExplorerInner() {
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
                       onControlsChange={handleResilienceControlsChange}
+                      onCaptureReady={handleResilienceCaptureReady}
+                      onCaptureTileReady={handleResilienceTileCaptureReady}
+                      onTileShare={handleResilienceTileSnapshot}
                     />
                   ))}
                 {exploreMode === "data" && <DataExplorerView />}
