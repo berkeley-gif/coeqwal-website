@@ -10,15 +10,17 @@
  * programmatic demos (per the plan), so every popper describes what
  * the user can go try without the tour moving the UI for them.
  *
- * Anchor ids resolve into ResiliencePanel (cell + corner controls),
+ * Anchor ids resolve into ResiliencePanel (the first heatmap cell),
  * ResilienceControls (the one-sentence phrase buttons, the Presets
  * row, and the Rows row), the shared ToolToolbar map strip
  * (resilience.viewArea; no global hydroclimate chooser), and
  * ScenarioExplorer (the chart toolbar wrapper + save snapshot).
+ * Show cell values and transpose both live in the Rows row now, so
+ * there is no floating chart-corner toolbar to anchor onto.
  *
  * Within the chart controls region, steps progress in the same
  * visual order a user's eye reads the controls: the sentence top
- * to bottom and left to right (axes, pivot, outcomes, encoding),
+ * to bottom and left to right (pivot, axes, outcomes, encoding),
  * then the Presets row, then the Rows row, and finally Save
  * snapshot at the top-right corner of the toolbar.
  */
@@ -75,8 +77,8 @@ export const RESILIENCE_TOUR: TourStep[] = [
 
   // Arrange the chart. Steps here follow the chart controls left to
   // right and top to bottom: the sentence reads pivot -> axes ->
-  // outcomes -> encoding, then the Presets row, then the Rows row,
-  // and finally Save snapshot at the top-right of the bar.
+  // outcomes -> encoding, then the Presets row, then the Rows row
+  // (which also hosts Save snapshot at its right edge).
   {
     id: "resilience.step1.pivot",
     anchorId: "resilience.pivot",
@@ -90,7 +92,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.axes",
     eyebrow: "arrange the chart",
     title: "Pick what is inside each chart",
-    body: "The next two phrases set the rows and columns inside each chart. Click across or down to rotate which dimension reads along that axis.",
+    body: "The next two phrases set the rows and columns inside each chart. Each phrase opens a chooser. Click one to swap which dimension runs across or down.",
     placement: "bottom-start",
   },
   {
@@ -122,7 +124,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.rows",
     eyebrow: "arrange the chart",
     title: "Tune how the rows read",
-    body: "Group similar rows clusters scenarios that behave alike so patterns pop. Switch rows and columns flips which dimension runs down versus across.",
+    body: "Group similar rows clusters scenarios that behave alike so patterns pop. Show cell values prints each tier number inside the cell; numbers drop out when tiles get too tight. Switch rows and columns flips which dimension runs down versus across.",
     placement: "bottom-start",
   },
   {
@@ -131,7 +133,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     eyebrow: "arrange the chart",
     title: "Save snapshot",
     titleIcon: "share",
-    body: "Save snapshot stages the chart and its underlying data in the Share drawer, the same way capture view does in Radar. Find it in the Share tab when you are ready to export.",
+    body: "Save snapshot sits at the right edge of the Rows row. It stages the chart and its underlying data in the Share drawer, the same way capture view does in Radar. Find it in the Share tab when you are ready to export.",
     placement: "bottom-end",
   },
 
@@ -153,15 +155,6 @@ export const RESILIENCE_TOUR: TourStep[] = [
     body: "Hovering a cell highlights the matching row in the sidebar so you can trace it back to a scenario. Clicking a cell sends that outcome to the map when the map is open, so you can see where the tier is driven from geographically.",
     placement: "right-start",
   },
-  {
-    id: "resilience.step2.cornerControls",
-    anchorId: "resilience.cornerControls",
-    eyebrow: "read the chart",
-    title: "Fine-tune what the cells show",
-    body: "The top-right toolbar on the chart toggles numeric cell values, and holds reset and copy actions for the chart.",
-    placement: "bottom-end",
-  },
-
   {
     id: "resilience.journey",
     eyebrow: "take your shortlist forward",

@@ -267,7 +267,7 @@ function ScenarioExplorerInner() {
       showAllScenarios: false,
       expandedTileId: null,
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
-      showCellNumbers: true,
+      showCellNumbers: false,
       quadrantUnit: "outcome",
       quadrantOutcome: "CWS_DEL",
       primaryOutcomeCode: null,
@@ -327,10 +327,11 @@ function ScenarioExplorerInner() {
   // below does not need to depend on it.
   const radarChartToolbarRef = useTourAnchor("radar.chartToolbar")
   // Same pattern for the resilience tour: the whole chart-controls
-  // row (sentence, presets, display, + save snapshot) is introduced as a
-  // single orientation step before the sentence pieces.
+  // row (sentence, presets, Rows row with Save snapshot) is
+  // introduced as a single orientation step before the sentence
+  // pieces. The resilience.snapshot anchor lives inside
+  // ResilienceControls now, so we don't register it here.
   const resilienceChartToolbarRef = useTourAnchor("resilience.chartToolbar")
-  const resilienceSnapshotRef = useTourAnchor("resilience.snapshot")
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
@@ -410,38 +411,8 @@ function ScenarioExplorerInner() {
           <ResilienceControls
             controls={resilienceControls}
             onChange={handleResilienceControlsChange}
+            onSaveSnapshot={handleResilienceSnapshot}
           />
-          <Box
-            ref={resilienceSnapshotRef}
-            component="button"
-            type="button"
-            onClick={handleResilienceSnapshot}
-            aria-label="save snapshot"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              px: 1.25,
-              py: 0.5,
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              lineHeight: 1.3,
-              whiteSpace: "nowrap",
-              color: theme.palette.grey[800],
-              background: theme.palette.grey[200],
-              cursor: "pointer",
-              transition: "all 150ms ease",
-              "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-                color: theme.palette.blue.bright,
-              },
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-            save snapshot
-          </Box>
         </ChartControlsBar>
       )
     }
@@ -518,7 +489,6 @@ function ScenarioExplorerInner() {
     handleResilienceSnapshot,
     radarChartToolbarRef,
     resilienceChartToolbarRef,
-    resilienceSnapshotRef,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"

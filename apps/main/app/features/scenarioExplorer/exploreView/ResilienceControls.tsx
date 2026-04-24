@@ -77,6 +77,11 @@ import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 interface ResilienceControlsProps {
   controls: ResilienceControlsState
   onChange: (next: Partial<ResilienceControlsState>) => void
+  /** Called when the user clicks the Save snapshot button in the
+   *  Rows row. When omitted the button is not rendered, which is
+   *  useful for test or preview contexts that don't wire up the
+   *  Share drawer. */
+  onSaveSnapshot?: () => void
 }
 
 // Labels for the quadrant toolbar's tab row, which still lets the
@@ -510,6 +515,7 @@ function RadioRow({ active, disabled = false, label, onClick }: RadioRowProps) {
 export default function ResilienceControls({
   controls,
   onChange,
+  onSaveSnapshot,
 }: ResilienceControlsProps) {
   const theme = useTheme()
   const { siblingGroups } = useScenarioList()
@@ -527,6 +533,7 @@ export default function ResilienceControls({
     aggregateOver,
     transposed,
     reorderBySimilarity,
+    showCellNumbers,
   } = controls
 
   const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
@@ -542,6 +549,10 @@ export default function ResilienceControls({
   // anchor so the walkthrough can point to them after the sentence.
   const presetsAnchorRef = useTourAnchor("resilience.presets")
   const rowsAnchorRef = useTourAnchor("resilience.rows")
+  // Save snapshot used to live at the top-right of the shared
+  // ChartControlsBar. It has moved into the Rows row, so this
+  // component owns the tour anchor now.
+  const saveSnapshotAnchorRef = useTourAnchor("resilience.snapshot")
 
   useEffect(() => {
     const enc = cellEncoding as string
@@ -1136,6 +1147,16 @@ export default function ResilienceControls({
               : "Row order: default. Click to group similar scenarios together."
           }
         />
+        <InlineToggleChip
+          label="Show cell values"
+          active={showCellNumbers}
+          onClick={() => onChange({ showCellNumbers: !showCellNumbers })}
+          ariaLabel={
+            showCellNumbers
+              ? "Cell values: shown. Click to hide the tier numbers inside cells."
+              : "Cell values: hidden. Click to show the tier number inside each cell."
+          }
+        />
         <Button
           type="button"
           size="small"
@@ -1179,6 +1200,40 @@ export default function ResilienceControls({
         >
           Switch rows and columns
         </Button>
+        {onSaveSnapshot && (
+          <Box
+            ref={saveSnapshotAnchorRef}
+            component="button"
+            type="button"
+            onClick={onSaveSnapshot}
+            aria-label="save snapshot"
+            sx={{
+              ml: 2,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              cursor: "pointer",
+              transition: "all 150ms ease",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+                color: theme.palette.blue.bright,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            save snapshot
+          </Box>
+        )}
       </Box>
 
       {/* Popover: Encoding (Read as) */}

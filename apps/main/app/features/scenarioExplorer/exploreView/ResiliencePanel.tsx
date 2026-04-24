@@ -27,11 +27,7 @@ import {
   Box,
   Checkbox,
   CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
   Typography,
-  icons,
   useTheme,
 } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
@@ -2055,22 +2051,9 @@ export default function ResiliencePanel({
     return () => document.removeEventListener("keydown", onKey)
   }, [expandedTile, handleBackToGrid])
 
-  // Floating chart-corner toolbar: overflow menu with show cell values.
-  // Transpose lives in chart controls (Rows row).
-  const [displayMenuAnchor, setDisplayMenuAnchor] =
-    useState<HTMLElement | null>(null)
-  const handleOpenDisplayMenu = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      setDisplayMenuAnchor(e.currentTarget)
-    },
-    [],
-  )
-  const handleCloseDisplayMenu = useCallback(() => {
-    setDisplayMenuAnchor(null)
-  }, [])
-  const handleToggleShowCellNumbers = useCallback(() => {
-    onControlsChange?.({ showCellNumbers: !showCellNumbers })
-  }, [onControlsChange, showCellNumbers])
+  // Show cell values and transpose both live in the chart controls
+  // (Rows row), so this panel no longer renders a floating display
+  // menu. Nothing else remains for a chart-corner toolbar to hold.
   // const handleOpenWalkthrough = useCallback(() => {
   //   setWalkthroughOpen(true)
   // }, [])
@@ -2146,10 +2129,7 @@ export default function ResiliencePanel({
   // rendered heatmap cell via a callback ref threaded into the viz
   // (see `ResilienceHeatmap`'s `firstCellRef` prop), so the tour can
   // point at an actual tile rather than the surrounding chart wrapper.
-  // The `resilience.cornerControls` anchor sits on the floating
-  // display-options toolbar rendered below.
   const cellAnchorRef = useTourAnchor("resilience.cell")
-  const cornerControlsAnchorRef = useTourAnchor("resilience.cornerControls")
 
   // Render states
 
@@ -2234,62 +2214,6 @@ export default function ResiliencePanel({
           position: "relative",
         }}
       >
-        {/* Floating chart-corner toolbar. Lives above the chart so the
-            two most-reached-for view refinements (transpose + display
-            menu) are one click away without stealing space from the
-            sentence header. Hidden on the leverage quadrant view - its
-            axes are fixed and its labels are already as tight as they
-            go. */}
-        {onControlsChange && view !== "quadrant" && (
-          <Box
-            ref={cornerControlsAnchorRef}
-            sx={{
-              position: "absolute",
-              top: 4,
-              right: theme.space.component.lg,
-              display: "flex",
-              gap: 0.25,
-              zIndex: 2,
-              background: theme.palette.background.paper,
-              borderRadius: "8px",
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: theme.shadows[1],
-            }}
-          >
-            <IconButton
-              size="small"
-              onClick={handleOpenDisplayMenu}
-              aria-label="Display options"
-              aria-haspopup="menu"
-              aria-expanded={Boolean(displayMenuAnchor)}
-              title="Display options"
-              sx={{ color: theme.palette.grey[700] }}
-            >
-              <icons.Tune fontSize="small" />
-            </IconButton>
-            <Menu
-              anchorEl={displayMenuAnchor}
-              open={Boolean(displayMenuAnchor)}
-              onClose={handleCloseDisplayMenu}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <MenuItem
-                onClick={() => {
-                  handleToggleShowCellNumbers()
-                }}
-                sx={{ fontSize: "0.8125rem", gap: 1 }}
-              >
-                <Checkbox
-                  size="small"
-                  checked={showCellNumbers}
-                  sx={{ p: 0 }}
-                />
-                Show cell values
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
         {showResilienceOutcomeSelector && (
           <ResilienceOutcomeSelector
             visible={resilienceVisibleOutcomes}

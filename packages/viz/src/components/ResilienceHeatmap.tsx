@@ -1002,21 +1002,31 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             // Print inner value when enabled + the cell has enough room.
             // Glyph and distribution modes suppress the inner number
             // (the sub-tiles / stacked bars carry the information).
+            // The size floor keeps small tiles (dense layouts) labeled
+            // too, with an 8px font-size floor so the text stays
+            // legible when the cell would otherwise drive the font
+            // below readability.
             if (
               showCellNumbers &&
               cellRender !== "glyph" &&
               cellRender !== "distribution" &&
               cell.available &&
               resolved.text != null &&
-              bandW > 28 &&
-              bandH > 18
+              bandW > 22 &&
+              bandH > 14
             ) {
               g.append("text")
                 .attr("x", x + bandW / 2)
                 .attr("y", y + bandH / 2)
                 .attr("text-anchor", "middle")
                 .attr("dominant-baseline", "central")
-                .attr("font-size", Math.min(Math.min(bandW, bandH) * 0.36, 14))
+                .attr(
+                  "font-size",
+                  Math.max(
+                    8,
+                    Math.min(Math.min(bandW, bandH) * 0.36, 14),
+                  ),
+                )
                 .attr("font-weight", 600)
                 .attr("fill", resolved.textColor)
                 .attr("fill-opacity", opacity)
