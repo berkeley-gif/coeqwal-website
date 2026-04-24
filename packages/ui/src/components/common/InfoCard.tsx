@@ -27,6 +27,8 @@ export interface InfoCardProps {
   titleColor?: string
   /** Description color override. Same defaults as titleColor. */
   descriptionColor?: string
+  /** Optional accessible name when the card is a button (e.g. open details). */
+  ariaLabel?: string
   sx?: SxProps<Theme>
   children?: React.ReactNode
 }
@@ -42,6 +44,7 @@ export function InfoCard({
   dimmed = false,
   titleColor,
   descriptionColor,
+  ariaLabel,
   sx,
   children,
 }: InfoCardProps) {
@@ -72,7 +75,9 @@ export function InfoCard({
   return (
     <Box
       component={interactive ? "button" : "div"}
+      type={interactive ? "button" : undefined}
       onClick={interactive ? onClick : undefined}
+      aria-label={ariaLabel}
       sx={{
         background: bg,
         border,

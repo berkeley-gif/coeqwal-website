@@ -1,12 +1,13 @@
 "use client"
 
-import { useRef, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
 import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import {
   LinedList,
   InfoCard,
   BarredColumns,
   WaterDroplet,
+  MobileModal,
   tunerRadius,
   tunerInsetX,
   tunerInsetY,
@@ -15,6 +16,8 @@ import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
 import TierAnimationSection from "./TierAnimationSection"
 import { getStartedViewportCardHeightCss } from "./getStartedViewport"
+import TierTooltipContent from "../../tooltips/TierTooltipContent"
+import { getOutcomeName, type OutcomeCode } from "../../../content/outcomes"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* Rounded-panel shell for get-started sections.                               */
@@ -157,50 +160,63 @@ const HYDROCLIMATES = [
   },
 ] as const
 
-const KEY_OUTCOMES = [
+const KEY_OUTCOMES: ReadonlyArray<{
+  outcomeCode: OutcomeCode
+  title: string
+  description: string
+}> = [
   {
+    outcomeCode: "CWS_DEL",
     title: "Community water deliveries",
     description:
       "Reliability of water supplies to communities to satisfy essential drinking water needs",
   },
   {
+    outcomeCode: "AG_REV",
     title: "Agricultural revenue",
     description:
       "Economic productivity of agricultural crops based on water availability",
   },
   {
+    outcomeCode: "ENV_FLOWS",
     title: "Environmental flows",
     description:
       "Seasonal patterns of river flows needed to support healthy ecosystems",
   },
   {
+    outcomeCode: "DELTA_ECO",
     title: "Delta estuary ecology",
     description:
       "Seasonal patterns of flows needed to support the health of the Bay Delta estuary",
   },
   {
+    outcomeCode: "WRC_SALMON_AB",
     title: "Winter-run salmon",
     description:
       "Population status of Sacramento River winter-run Chinook salmon",
   },
   {
+    outcomeCode: "FW_DELTA_USES",
     title: "Freshwater for in-Delta uses",
     description:
       "Availability of freshwater in the Delta to support local communities and farms",
   },
   {
+    outcomeCode: "FW_EXP",
     title: "Freshwater for Delta exports",
     description: "Availability of freshwater for export to other regions",
   },
   {
+    outcomeCode: "RES_STOR",
     title: "Reservoir storage",
     description: "Levels of water stored in major reservoirs",
   },
   {
+    outcomeCode: "GW_STOR",
     title: "Groundwater storage",
     description: "Amount and trends of water stored in groundwater basins",
   },
-] as const
+]
 
 const VIZ_TOOLS: ReadonlyArray<{
   title: string
@@ -247,6 +263,8 @@ const CAVEATS = [
 export default function GetStartedView() {
   const theme = useTheme()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [outcomeDefinitionModal, setOutcomeDefinitionModal] =
+    useState<OutcomeCode | null>(null)
   const mapMode = useMapMode()
   const mapActive = mapMode === "get-started"
   const { openThemePanel } = usePanelRoute()
@@ -659,12 +677,14 @@ export default function GetStartedView() {
                 rowGap: theme.space.section.sm,
               }}
             >
-              {KEY_OUTCOMES.map(({ title, description }) => (
+              {KEY_OUTCOMES.map(({ outcomeCode, title, description }) => (
                 <InfoCard
-                  key={title}
+                  key={outcomeCode}
                   title={title}
                   description={description}
                   variant="onDark"
+                  onClick={() => setOutcomeDefinitionModal(outcomeCode)}
+                  ariaLabel={`${title}: open full definition and outcome levels`}
                 />
               ))}
             </Box>
@@ -948,6 +968,27 @@ export default function GetStartedView() {
           </>
         </GetStartedPanelShell>
       </Box>
+
+      <MobileModal
+        open={outcomeDefinitionModal != null}
+        onClose={() => setOutcomeDefinitionModal(null)}
+        title={
+          outcomeDefinitionModal
+            ? getOutcomeName(outcomeDefinitionModal)
+            : undefined
+        }
+        denseTitle
+        maxWidth={560}
+        maxHeight="85vh"
+        contentAriaLabel="Outcome definition and levels"
+      >
+        {outcomeDefinitionModal && (
+          <TierTooltipContent
+            outcomeCode={outcomeDefinitionModal}
+            showTitle={false}
+          />
+        )}
+      </MobileModal>
     </Box>
   )
 }

@@ -200,11 +200,15 @@ export function MobileModal({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: title ? "space-between" : "flex-end",
-                px: theme.space.section.sm,
+                // denseTitle: slimmer than section.sm, using nearest theme tokens
+                // (lg ~16px ≈ previous horizontal midpoint; md ~12px for vertical)
+                px: denseTitle
+                  ? theme.space.component.lg
+                  : theme.space.section.sm,
                 py: !title
                   ? theme.space.component.xs
                   : denseTitle
-                    ? theme.space.component.xs
+                    ? theme.space.component.md
                     : theme.space.section.sm,
                 borderBottom: title
                   ? `1px solid ${theme.palette.divider}`

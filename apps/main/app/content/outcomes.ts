@@ -353,9 +353,9 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   GW_STOR: {
     tier1:
-      "The groundwater trend in a WBA is **stable or increasing** from 1960-2021 and **average total storage is greater than in the reference scenario**",
+      "The groundwater trend in a WBA is stable or increasing from 1960-2021 and the trend is greater than that in the reference scenario",
     tier2:
-      "The groundwater trend in a WBA is **stable or increasing** but **total storage is less than in the reference**",
+      "The groundwater trend in a WBA is stable or increasing but the trend is less than that in the reference scenario",
     tier3:
       "The groundwater trend is **declining** (not stable or increasing as in Tiers 1 or 2) but at a **moderate rate** (fitted linear trend is less negative than -0.015 ft/yr)",
     tier4:
@@ -392,9 +392,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
       "Maximum of EM and JP is below the low threshold less than **55%** of all months and/or max of EM and JP is above the highest threshold more than **20%** of all months",
   },
   WRC_SALMON_AB: {
-    tier1: "TBD",
-    tier2: "TBD",
-    tier3: "TBD",
-    tier4: "TBD",
+    tier1:
+      "Tier 1 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 3-year average.",
+    tier2:
+      "Tier 2 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 3-year average.",
+    tier3:
+      "Tier 3 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 3-year average.",
+    tier4:
+      "Tier 4 is assigned if the change in population size does not satisfy Tier 1, 2, or 3.",
   },
 }

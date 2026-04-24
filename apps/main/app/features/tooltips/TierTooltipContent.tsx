@@ -33,14 +33,17 @@ interface TierTooltipContentProps {
 }
 
 // Format description text with bold markdown (**text**)
-const formatDescription = (text: string, fontWeightMedium: number = 500) => {
+const formatDescription = (
+  text: string,
+  emphasisWeight: number = 700,
+) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       const content = part.slice(2, -2)
       return (
-        <span key={index} style={{ fontWeight: fontWeightMedium }}>
+        <span key={index} style={{ fontWeight: emphasisWeight }}>
           {content}
         </span>
       )
@@ -50,14 +53,14 @@ const formatDescription = (text: string, fontWeightMedium: number = 500) => {
 }
 
 // Format tier text with emphasized keywords, numbers, and markdown
-const formatTierText = (text: string, fontWeightMedium: number = 500) => {
+const formatTierText = (text: string, emphasisWeight: number = 700) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       const content = part.slice(2, -2)
       return (
-        <span key={index} style={{ fontWeight: fontWeightMedium }}>
+        <span key={index} style={{ fontWeight: emphasisWeight }}>
           {content}
         </span>
       )
@@ -76,14 +79,14 @@ const formatTierText = (text: string, fontWeightMedium: number = 500) => {
         )
       ) {
         return (
-          <span key={key} style={{ fontWeight: fontWeightMedium }}>
+          <span key={key} style={{ fontWeight: emphasisWeight }}>
             {subPart}
           </span>
         )
       }
       if (subPart.match(/^\d+%$/)) {
         return (
-          <span key={key} style={{ fontWeight: fontWeightMedium }}>
+          <span key={key} style={{ fontWeight: emphasisWeight }}>
             {subPart}
           </span>
         )
@@ -135,6 +138,8 @@ export default function TierTooltipContent({
   const theme = useTheme()
   const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
 
+  const emphasisWeight = theme.typography.fontWeightBold as number
+
   // Derive display name from code
   const displayName = getOutcomeName(outcomeCode)
 
@@ -158,7 +163,7 @@ export default function TierTooltipContent({
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcomeCode] ||
             "Definition not available",
-          theme.typography.fontWeightMedium as number,
+          emphasisWeight,
         )}
       </Typography>
 
@@ -332,7 +337,7 @@ export default function TierTooltipContent({
                   ] ||
                     ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
                     "",
-                  theme.typography.fontWeightMedium as number,
+                  emphasisWeight,
                 )}
               </Typography>
             </Box>
