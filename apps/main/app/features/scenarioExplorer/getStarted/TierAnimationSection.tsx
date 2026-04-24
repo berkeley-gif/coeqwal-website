@@ -71,6 +71,8 @@ import {
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
+  type DemandUnitsOverlayState,
+  type DemandUnitsPaintSpec,
   type HideScheduleEntry,
 } from "./engine"
 
@@ -1184,33 +1186,23 @@ export default function TierAnimationSection() {
       : null
 
     if (!config) {
-      // The null-config reset slams `demand-units` to opacity 0 and
-      // restores the full class filter, intended for the interactive
-      // idle state after the storyboard ends. `playState` briefly
-      // flips to `paused` at every beat settle mid-run, which also
-      // makes `isInteractive` true. Without this extra guard the
-      // reset fires at every step boundary and wipes the map layer
-      // the choreography listener just painted (blues at end of step
-      // 1, AG tier colors at end of step 2, and so on). Only run the
-      // reset once the storyboard has truly finished.
+      // No outcome selected. Only `clearLocationHighlights` remains
+      // here: `demand-units` teardown is now owned by
+      // `InteractivePaintArbiter.onExit` (driven by the sync effect
+      // below). `playState !== "finished"` is still the guard,
+      // because `playState` briefly flips to `"paused"` at every beat
+      // settle mid-run and we don't want to clobber highlights during
+      // intermediate beats.
       if (playState !== "finished") return
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
-      const resetMap = mapAPI.mapRef?.current?.getMap?.()
-      if (resetMap?.isStyleLoaded?.()) {
-        try {
-          if (resetMap.getLayer("demand-units")) {
-            resetMap.setPaintProperty("demand-units", "fill-opacity", 0)
-            resetMap.setFilter("demand-units", DU_CLASS_FILTER as never)
-          }
-          if (resetMap.getLayer("demand-units-outline")) {
-            resetMap.setPaintProperty("demand-units-outline", "line-opacity", 0)
-          }
-        } catch {
-          /* ok */
-        }
-      }
       return
     }
+
+    // Demand-units interactive paint (both the base fill/outline AND
+    // the gold-outline / spotlight / pinned overrides) moved to
+    // `InteractivePaintArbiter` in Phase 3c step 2. The highlights
+    // computation below runs for every outcome; the inner
+    // `applyPaintChanges` function no-ops for DU layers.
 
     // ── Polygon-specific Mapbox paint changes ──
     // OutcomePolygonLayer handles filter, fill-color, and base opacity.
@@ -1222,6 +1214,11 @@ export default function TierAnimationSection() {
 
     const applyPaintChanges = () => {
       if (!map || config.geometryType !== "polygon") return
+      // Demand-units paint is owned exclusively by
+      // `InteractivePaintArbiter` (Phase 3c step 2). Bail so we don't
+      // double-write. Non-DU polygon outcomes (WBA, delta, reservoir)
+      // still flow through this path.
+      if (config.layerType === "demand-units") return
       const fillId = config.mapboxLayerId
       const outlineId = `${config.mapboxLayerId}-outline`
       const idProp = config.idProperty ?? "DU_ID"
@@ -2033,27 +2030,143 @@ export default function TierAnimationSection() {
 
   /* ── InteractivePaintArbiter sync ──
    *
-   * Reconcile the arbiter's ownership claim whenever the engine mode
-   * or the active selection changes. Mode isn't reactive (it lives on
-   * a ref inside `BeatEngine`), so we depend on `playState` as a
-   * proxy: every `setMode(...)` call in this file happens alongside a
-   * `setPlayState(...)` call, so the effect fires on the same tick
-   * the mode transitioned.
+   * Reconcile the arbiter's ownership of `demand-units` /
+   * `demand-units-outline` whenever selection, engine mode, or
+   * `playState` changes. The arbiter owns (and paints) iff all of:
    *
-   * Phase 3b invariant: this call is side-effect-free aside from
-   * `debugLog` output. The arbiter tracks ownership but does not
-   * write paint. Watch the console for `InteractivePaintArbiter
-   * ENTER/EXIT/CHANGE` lines to verify correctness:
+   *   1. A DU outcome (`layerType === "demand-units"`) is selected.
+   *   2. Engine mode is not `"idle"` (we're in or past the storyboard).
+   *   3. `playState !== "playing"` (no active tween --
+   *      `MapPaintArbiter` owns during tweens).
+   *   4. Tier data for that outcome has hydrated
+   *      (`outcomeLocationsRef` has the colorMap).
    *
-   * - ENTER on the first square-click after the storyboard settles
-   *   (mode=interactive, selection=null->AG_REV).
-   * - CHANGE when clicking a square from a different outcome while
-   *   still settled (mode=interactive, selection swap).
-   * - EXIT on Restart / Back-to-pre-play / Next->playback
-   *   (mode flips away from interactive). */
+   * When all four hold, we build a `DemandUnitsPaintSpec` and pass it
+   * to `sync`. When any fail, we pass `null` and the arbiter tears
+   * down. Condition (3) is the "broadened" gate promised by Phase 3c
+   * step 2: the arbiter now also owns during paused-between-beats
+   * state, so a mid-storyboard square click's gold outline is
+   * guaranteed to be cleaned up on deselect.
+   *
+   * Mode isn't reactive (it lives on a ref inside `BeatEngine`), so
+   * we depend on `playState` as a proxy: every `setMode(...)` call in
+   * this file happens alongside a `setPlayState(...)` call, so the
+   * effect fires on the same tick the mode transitioned. */
   useEffect(() => {
-    interactivePaintArbiterRef.current?.sync(engineContext, selectedOutcomeCode)
-  }, [engineContext, selectedOutcomeCode, playState])
+    const arbiter = interactivePaintArbiterRef.current
+    if (!arbiter) return
+
+    const mode = engineApiRef.current?.getMode?.() ?? "idle"
+    const canOwn =
+      selectedOutcomeCode !== null &&
+      mode !== "idle" &&
+      playState !== "playing"
+
+    let spec: DemandUnitsPaintSpec | null = null
+    if (canOwn) {
+      const config = getOutcomeConfig(selectedOutcomeCode!)
+      if (
+        config?.layerType === "demand-units" &&
+        config.classFilter &&
+        config.mapboxLayerId === "demand-units"
+      ) {
+        const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
+        const colorMap = locData?.colorMap
+        if (colorMap && Object.keys(colorMap).length > 0) {
+          const idProperty = config.idProperty ?? "DU_ID"
+          // Build the tier-colored match expression: keyed on idProperty,
+          // one pair per feature id, `theme.palette.grey[500]` fallback.
+          const colorPairs: (string | number)[] = []
+          for (const [featureId, color] of Object.entries(colorMap)) {
+            colorPairs.push(featureId)
+            colorPairs.push(color)
+          }
+          const colorExpression =
+            colorPairs.length > 0
+              ? ["match", ["get", idProperty], ...colorPairs, theme.palette.grey[500]]
+              : theme.palette.grey[500]
+          spec = {
+            outcomeCode: selectedOutcomeCode!,
+            classFilter: config.classFilter,
+            idProperty,
+            featureIds: Array.from(locData!.ids),
+            colorExpression,
+          }
+        }
+      }
+    }
+
+    arbiter.sync(engineContext, spec)
+    // `theme` dep covers the grey fallback; `outcomeLocations` fires
+    // the re-sync when tier data hydrates for the current outcome.
+  }, [engineContext, selectedOutcomeCode, playState, theme, outcomeLocations])
+
+  /* ── InteractivePaintArbiter overlay ──
+   *
+   * Apply the per-selection overlay (gold outline + zoom-aware
+   * fill-opacity with optional spotlight / pinned overrides) whenever
+   * active locations, pinned locations, or Beat 5's spotlighted tier
+   * change. Separated from `sync` because overlay state changes much
+   * more frequently (hover, pin toggle, tier step) and can be written
+   * as a pure overlay pass without re-running the full enter /
+   * crossfade sequence.
+   *
+   * No-op when the arbiter doesn't own; cheap guard inside the
+   * arbiter, so we don't duplicate the ownership check here. */
+  useEffect(() => {
+    const arbiter = interactivePaintArbiterRef.current
+    if (!arbiter || !arbiter.owns() || !selectedOutcomeCode) return
+
+    // Translate active + pinned keys into feature ids matching the
+    // demand-units `idProperty`. DU outcomes don't use the reservoir
+    // name-translation map, so `sourceId` is already the feature id.
+    const activeFeatureIds: string[] = []
+    const pinnedFeatureIds: string[] = []
+    for (const [key, info] of activeLocationSet) {
+      if (info.code !== selectedOutcomeCode) continue
+      activeFeatureIds.push(info.sourceId)
+      if (pinnedLocations.has(key)) pinnedFeatureIds.push(info.sourceId)
+    }
+
+    // Beat 5 spotlight: only meaningful for AG_REV + matching tier.
+    const locData = outcomeLocationsRef.current[selectedOutcomeCode]
+    const spotlightFeatureIds: string[] = []
+    if (spotlightedTier != null && locData) {
+      for (const [locId, tier] of Object.entries(locData.tierMap)) {
+        if (tier === spotlightedTier) spotlightFeatureIds.push(locId)
+      }
+    }
+
+    const overlay: DemandUnitsOverlayState = {
+      outcomeCode: selectedOutcomeCode,
+      activeFeatureIds,
+      pinnedFeatureIds,
+      spotlightFeatureIds,
+      hasSpotlight: spotlightedTier != null,
+    }
+    arbiter.applyOverlay(engineContext, overlay)
+  }, [
+    engineContext,
+    selectedOutcomeCode,
+    activeLocationSet,
+    pinnedLocations,
+    spotlightedTier,
+    outcomeLocations,
+  ])
+
+  /* ── InteractivePaintArbiter teardown cancellation ──
+   *
+   * When `playState` flips to `"playing"` the storyboard is tweening
+   * and `MapPaintArbiter`'s beat actors are writing `demand-units`
+   * every frame. If the arbiter has a deferred-idle teardown pending
+   * from a just-prior deselect, it would land after the tween settles
+   * and stomp whatever beat paint `MapPaintArbiter` left on the
+   * layer. Cancel it here so the pending listener detaches cleanly.
+   * Safe to call when no teardown is pending (idempotent). */
+  useEffect(() => {
+    if (playState !== "playing") return
+    interactivePaintArbiterRef.current?.cancelPendingTeardown()
+  }, [playState])
 
   /* ── Storyboard map-layer unmount cleanup ──
    *

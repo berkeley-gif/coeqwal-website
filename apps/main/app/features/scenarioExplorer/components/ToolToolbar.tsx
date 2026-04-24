@@ -116,6 +116,7 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
+  const listMapTourRef = useTourAnchor("list.toolbar.map")
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
@@ -180,7 +181,10 @@ export default function ToolToolbar({
         <VerticalDivider />
       </Box>
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Box
+        ref={exploreMode === "list" ? listMapTourRef : undefined}
+        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+      >
         <Typography
           variant="dashboard"
           sx={{

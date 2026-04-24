@@ -33,6 +33,8 @@ export type {
   Arbiter,
   BeatEngineContext,
   BeatTableEntry,
+  DemandUnitsOverlayState,
+  DemandUnitsPaintSpec,
   EngineMode,
   HideScheduleEntry,
   MapPaintActor,

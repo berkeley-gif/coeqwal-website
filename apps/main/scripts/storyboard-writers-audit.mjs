@@ -41,19 +41,22 @@ const REPO_MAIN_REL = "apps/main"
 const APPROVED_WRITERS = new Set([
   // The playback arbiter. Single writer during Beat 4.
   "app/features/scenarioExplorer/getStarted/engine/arbiters/MapPaintArbiter.ts",
+  // The interactive paint arbiter. Single writer during get-started
+  // paused-between-beats and interactive exploration (Phase 3c).
+  "app/features/scenarioExplorer/getStarted/engine/arbiters/InteractivePaintArbiter.ts",
   // The baseline helper that other approved writers delegate to for
   // full-state assertion.
   "app/features/scenarioExplorer/getStarted/engine/demandUnitsBaseline.ts",
-  // Phase 1 of the Storyboard Engine Hardening Plan v2 deleted the
-  // main per-frame paint listener; the remaining writes here are the
-  // interactive teardown effect (`clearInteractiveState`) and the
-  // post-finish settle-to-finished reset. Phase 3 moves the
-  // interactive paint into a dedicated arbiter at which point this
-  // file's count drops to zero.
+  // Session-init + engine-unmount teardown writes only. Phase 3c
+  // step 2 moved the interactive-paint + deselect-teardown writes
+  // into `InteractivePaintArbiter`, so this file's literal-id write
+  // count is now restricted to the session-lifecycle blocks.
   "app/features/scenarioExplorer/getStarted/TierAnimationSection.tsx",
-  // Interactive paint writer. Phase 3 moves this into a dedicated
-  // InteractivePaintArbiter, at which point OutcomePolygonLayer will
-  // stop writing to demand-units and can be removed from this list.
+  // Learn / explore modes still route demand-units through OPL; only
+  // the get-started interactive flow was moved to
+  // `InteractivePaintArbiter`. All of OPL's writes use dynamic
+  // `fillId` / `outlineId` variables, so the literal-id audit reports
+  // 0 hits; listed here for documentation only.
   "app/features/map/visualizationLayers/components/OutcomePolygonLayer.tsx",
 ])
 

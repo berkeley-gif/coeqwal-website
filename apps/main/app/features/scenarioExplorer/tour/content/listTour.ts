@@ -87,36 +87,29 @@ export const LIST_TOUR: TourStep[] = [
     body: "Once the strongest candidates are checked, hide the rest so the shortlist becomes easier to compare.",
     placement: "bottom",
   },
-  /*
-   * Outcome view toggles (Average / Bar / Distribution). Omitted from the
-   * active tour for now; were steps 11-13/14. Uncomment the block below to
-   * restore. ToolTour renumbers n/N from LIST_TOUR.length automatically.
-   *
-  {
-    id: "list.step4.average",
-    anchorId: "list.viewControl.average",
-    eyebrow: "STEP 4 - SWITCH THE OUTCOME VIEW",
-    title: "Average is for quick scans and first sorting passes",
-    body: "Use it when you need a clean read across many rows and want the sort order to stay legible.",
-    placement: "bottom",
-  },
   {
     id: "list.step4.bar",
-    anchorId: "list.viewControl.bar",
-    eyebrow: "STEP 4 - SWITCH THE OUTCOME VIEW",
-    title: "Bar shows the relative tier mix",
-    body: "Use it when you want to see whether an outcome is concentrated in stronger or weaker tiers without opening the full distribution.",
-    placement: "bottom",
+    anchorId: "list.outcome.barChart",
+    eyebrow: "READ THE OUTCOMES",
+    title: "",
+    illustration: "listBarTiers",
+    body: "Each bar shows what percentage of the locations fall into each tier. Longer bars mean a larger share of the locations is in that tier. Read across a row to compare one scenario across outcomes, or down a column to compare scenarios on the same outcome.",
+    placement: "left",
   },
   {
-    id: "list.step4.distribution",
-    anchorId: "list.viewControl.distribution",
-    eyebrow: "STEP 4 - SWITCH THE OUTCOME VIEW",
-    title: "Distribution works with map, locations, climate, and change",
-    body: "Use it when you need to inspect which locations are driving the result, compare climates, or connect the cell back to spatial detail.",
-    placement: "bottom",
+    id: "list.step4.map",
+    anchorId: "list.toolbar.map",
+    eyebrow: "Open the map",
+    title: "",
+    illustration: "listMapLegend",
+    body: "Turn on Show map to open the map panel beside the list. Click on an outcome to see it on the map. Use this to see where conditions are strongest or weakest, compare scenarios in place, and view changes by hydroclimate. Pan and zoom as you would in any web map.",
+    placement: "bottom-start",
   },
-  */
+  /*
+   * Outcome view toolbar toggles (Average / Bar / Distribution) are not
+   * mounted in the list toolbar while the toggle is feature-flagged off.
+   * The bar tour step anchors to a live `list.outcome.barChart` cell instead.
+   */
   {
     id: "list.journey",
     eyebrow: "TAKE YOUR SHORTLIST FORWARD",

@@ -9,7 +9,14 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useRef, useState, useEffect, useCallback } from "react"
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+} from "react"
 import {
   Box,
   Typography,
@@ -155,11 +162,14 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   const accentColor = scenarioColor || theme.palette.blue.bright
   const outcomeColRef = useRef<HTMLDivElement>(null)
+  const listBarChartTourCellRef = useRef<HTMLDivElement | null>(null)
+  const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   // Tour anchors. Only the first list exemplar row registers (see
   // `tourListFirstItem`), so the tour highlights one checkbox / pin / share
   // instead of bulk-registering all rows.
   const listSelectCheckboxTourRef = useTourAnchor("list.select.checkbox")
+  const listOutcomeBarChartTourRef = useTourAnchor("list.outcome.barChart")
   const listRowPinTourRef = useTourAnchor("list.row.pin")
   const listRowShareTourRef = useTourAnchor("list.row.share")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
@@ -173,6 +183,51 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     outcomeColAnchorRef(outcomeColRef.current)
     return () => outcomeColAnchorRef(null)
   }, [isFirst, outcomeColAnchorRef])
+
+  const firstListOutcomeShort = outcomeNames[0]?.shortCode
+  const glyphBoxRefByShortCode = useMemo(() => {
+    const m = new Map<string, (el: HTMLDivElement | null) => void>()
+    for (const { shortCode } of outcomeNames) {
+      m.set(shortCode, (el) => {
+        glyphRefs.current[shortCode] = el
+        if (
+          tourListFirstItem &&
+          isListMode &&
+          firstListOutcomeShort === shortCode
+        ) {
+          listBarChartTourCellRef.current =
+            outcomeDisplayMode === "bar" ? el : null
+        }
+      })
+    }
+    return m
+  }, [
+    outcomeNames,
+    tourListFirstItem,
+    isListMode,
+    firstListOutcomeShort,
+    outcomeDisplayMode,
+  ])
+
+  // Tour anchor for the bar-chart step: useLayoutEffect + stable glyph refs
+  // so we never register in an inline ref callback. Inline callbacks get a
+  // new identity every parent render; React detaches/reattaches, toggling
+  // the anchor and triggering TourAnchorContext notify loops.
+  useLayoutEffect(() => {
+    if (!tourListFirstItem || !isListMode || outcomeDisplayMode !== "bar") {
+      listOutcomeBarChartTourRef(null)
+      return
+    }
+    listOutcomeBarChartTourRef(listBarChartTourCellRef.current)
+    return () => {
+      listOutcomeBarChartTourRef(null)
+    }
+  }, [
+    tourListFirstItem,
+    isListMode,
+    outcomeDisplayMode,
+    listOutcomeBarChartTourRef,
+  ])
 
   // Map visualization hook
   const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
@@ -212,9 +267,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   ])
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
-  // Refs to store glyph container elements for tooltip anchoring
-  const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
-
   const handleOutcomeClick = (shortCode: string) => {
     const anchor = glyphRefs.current[shortCode]
     if (anchor) {
@@ -242,14 +294,13 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isActive = chartData !== undefined && chartData.length > 0
     const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === shortCode
+    const glyphRefFor = glyphBoxRefByShortCode.get(shortCode)
 
     if (outcomeDisplayMode === "average") {
       return (
         <Box
           key={shortCode}
-          ref={(el: HTMLDivElement | null) => {
-            glyphRefs.current[shortCode] = el
-          }}
+          ref={glyphRefFor}
         >
           <TierSummaryCell
             chartData={chartData}
@@ -272,12 +323,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const showControlsBelowGlyph = !isAlignedGrid
 
     return (
-      <Box
-        key={shortCode}
-        ref={(el: HTMLDivElement | null) => {
-          glyphRefs.current[shortCode] = el
-        }}
-      >
+      <Box key={shortCode} ref={glyphRefFor}>
         <OutcomeGlyphItem
           displayName={displayName}
           name={displayName}

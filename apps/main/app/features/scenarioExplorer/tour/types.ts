@@ -29,6 +29,12 @@ export interface TourStep {
   placement?: TourPlacement
   /** Optional icon shown before the title in the popper. */
   titleIcon?: "pin" | "share"
+  /**
+   * Optional in-popper figure (data-driven SVG). Keeps the tour free of
+   * raw binary assets where possible; extend the switch in ToolTour when
+   * adding new keys.
+   */
+  illustration?: "listBarTiers" | "listMapLegend"
 }
 
 export interface TourState {

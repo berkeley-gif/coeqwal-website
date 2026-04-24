@@ -28,6 +28,8 @@ import {
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import { TOUR_STEPS } from "../tour/content"
+import ListTourBarIllustration from "../tour/ListTourBarIllustration"
+import ListTourMapLegend from "../tour/ListTourMapLegend"
 import { useTourAnchorResolver } from "../tour/TourAnchorContext"
 
 const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
@@ -85,6 +87,7 @@ export default function ToolTour() {
   const tourStep = useScenarioExplorerStore((s) => s.tour.step)
   const endTour = useScenarioExplorerStore((s) => s.endTour)
   const setTourStep = useScenarioExplorerStore((s) => s.setTourStep)
+  const setShowMap = useScenarioExplorerStore((s) => s.setShowMap)
 
   const { resolve, version } = useTourAnchorResolver()
 
@@ -93,6 +96,10 @@ export default function ToolTour() {
 
   const hasTourBody = Boolean(
     step && (step.body?.trim() ?? "").length > 0,
+  )
+  const hasTourMainBlock = Boolean(
+    step &&
+      (hasTourBody || Boolean(step.illustration)),
   )
 
   // Re-resolve the current anchor whenever the registry changes or the
@@ -167,6 +174,25 @@ export default function ToolTour() {
       anchorEl.removeAttribute(HIGHLIGHT_DATA_ATTR)
     }
   }, [anchorEl, theme.palette.blue.bright])
+
+  // Map-reveal side effect: the list-tour map step teaches the map
+  // toggle, so pop the map open while that step is active and close it
+  // again on exit, but only if the user had it closed when we arrived.
+  // Uses `getState` to snapshot the prior value without re-subscribing,
+  // so toggling `showMap` here does not retrigger this effect.
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "list.step4.map") return
+    const prev = useScenarioExplorerStore.getState().showMap
+    if (!prev) {
+      setShowMap(true)
+    }
+    return () => {
+      if (!prev) {
+        setShowMap(false)
+      }
+    }
+  }, [step, setShowMap])
 
   const isFirst = tourStep === 0
   const isLast = steps.length > 0 && tourStep === steps.length - 1
@@ -270,10 +296,14 @@ export default function ToolTour() {
     () => (step ? `tour-title-${step.id}` : undefined),
     [step],
   )
+  const eyebrowId = useMemo(
+    () => (step ? `tour-eyebrow-${step.id}` : undefined),
+    [step],
+  )
   const bodyId = useMemo(
     () =>
-      step && hasTourBody ? `tour-body-${step.id}` : undefined,
-    [step, hasTourBody],
+      step && hasTourMainBlock ? `tour-body-${step.id}` : undefined,
+    [step, hasTourMainBlock],
   )
 
   if (!tourTool || !step) return null
@@ -295,11 +325,15 @@ export default function ToolTour() {
       ref={cardRef}
       role="dialog"
       aria-modal="true"
-      aria-labelledby={titleId}
-      aria-describedby={hasTourBody ? bodyId : undefined}
+      aria-labelledby={
+        step.title.trim() ? titleId : eyebrowId
+      }
+      aria-describedby={hasTourMainBlock ? bodyId : undefined}
       elevation={8}
       sx={{
-        width: "min(440px, calc(100vw - 32px))",
+        width: step.illustration
+          ? "min(520px, calc(100vw - 32px))"
+          : "min(440px, calc(100vw - 32px))",
         maxWidth: "100%",
         minWidth: 0,
         boxSizing: "border-box",
@@ -314,6 +348,7 @@ export default function ToolTour() {
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Typography
+          id={step.title.trim() ? undefined : eyebrowId}
           variant="caption"
           sx={{
             color: theme.palette.text.primary,
@@ -356,59 +391,74 @@ export default function ToolTour() {
         </Box>
       </Box>
 
-      <Box
-        id={titleId}
-        component="h2"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          m: 0,
-          fontWeight: 600,
-          fontSize: "1rem",
-          color: theme.palette.text.primary,
-          lineHeight: 1.3,
-        }}
-      >
-        {step.titleIcon === "pin" && (
-          <icons.PushPin
-            sx={{
-              fontSize: "1.2rem",
-              color: theme.palette.grey[600],
-              flexShrink: 0,
-              transform: "rotate(45deg)",
-            }}
-            aria-hidden
-          />
-        )}
-        {step.titleIcon === "share" && (
-          <icons.IosShare
-            sx={{
-              fontSize: "1.2rem",
-              color: theme.palette.grey[600],
-              flexShrink: 0,
-            }}
-            aria-hidden
-          />
-        )}
-        <span>{step.title}</span>
-      </Box>
-      {hasTourBody ? (
-        <Typography
+      {step.title.trim() ? (
+        <Box
+          id={titleId}
+          component="h2"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            m: 0,
+            fontWeight: 600,
+            fontSize: "1rem",
+            color: theme.palette.text.primary,
+            lineHeight: 1.3,
+          }}
+        >
+          {step.titleIcon === "pin" && (
+            <icons.PushPin
+              sx={{
+                fontSize: "1.2rem",
+                color: theme.palette.grey[600],
+                flexShrink: 0,
+                transform: "rotate(45deg)",
+              }}
+              aria-hidden
+            />
+          )}
+          {step.titleIcon === "share" && (
+            <icons.IosShare
+              sx={{
+                fontSize: "1.2rem",
+                color: theme.palette.grey[600],
+                flexShrink: 0,
+              }}
+              aria-hidden
+            />
+          )}
+          <span>{step.title}</span>
+        </Box>
+      ) : null}
+      {hasTourMainBlock ? (
+        <Box
           id={bodyId}
           sx={{
-            fontSize: "0.875rem",
-            color: theme.palette.text.primary,
-            lineHeight: 1.5,
-            whiteSpace: "pre-line",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.25,
+            minWidth: 0,
           }}
-          component="div"
         >
-          <TourBodyContent
-            body={step.body ?? ""}
-            infoIconColor={theme.palette.grey[700]}
-          />
-        </Typography>
+          {step.illustration === "listMapLegend" ? <ListTourMapLegend /> : null}
+          {step.illustration === "listBarTiers" ? <ListTourBarIllustration /> : null}
+          {hasTourBody ? (
+            <Typography
+              sx={{
+                fontSize: "0.875rem",
+                color: theme.palette.text.primary,
+                lineHeight: 1.55,
+                whiteSpace: "pre-line",
+              }}
+              component="div"
+            >
+              <TourBodyContent
+                body={step.body ?? ""}
+                infoIconColor={theme.palette.grey[700]}
+              />
+            </Typography>
+          ) : null}
+        </Box>
       ) : null}
 
       <Box
@@ -416,7 +466,7 @@ export default function ToolTour() {
           display: "flex",
           flexDirection: "column",
           gap: 1,
-          mt: hasTourBody ? 0.5 : 0,
+          mt: hasTourMainBlock ? 0.5 : 0,
           width: "100%",
           minWidth: 0,
         }}

@@ -11,11 +11,10 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "@repo/motion"
 import { useTheme } from "@repo/ui/mui"
 
-import { useTabs } from "../../context/Tabs"
-import { TABS, TabKey } from "../../types/tabs"
+import { useTabs, setActiveTab } from "../../context/Tabs"
+import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import TabPanel from "../../components/tabs/TabPanel"
 import { AutoHeight } from "@repo/ui"
-import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
 import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
 
@@ -31,16 +30,27 @@ const panelVariants = {
   exit: { opacity: 0, x: -30 },
 }
 
+function isTabKey(value: string | null): value is TabKey {
+  return value !== null && TAB_ORDER.includes(value as TabKey)
+}
+
 export default function TabPanels() {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { state, panelRef, isInTabsArea } = useTabs()
+  const { state, panelRef, tabsRef, isInTabsArea, dispatch } = useTabs()
   const { activeTab } = state
-  const { navigateToTab } = useTabNavigation()
 
   // Const to track if we've already auto-scrolled from a URL Tab
   const didScrollFromUrlRef = useRef(false)
+  /** After user has reached the sticky tabs at least once, stripping ?tab= on scroll-up is OK. */
+  const hasBeenInTabsAreaRef = useRef(false)
+  /** Tab requested by ?tab= on first load; scroll once the matching panel is mounted. */
+  const pendingUrlTabScrollRef = useRef<TabKey | null>(null)
+
+  useEffect(() => {
+    if (isInTabsArea) hasBeenInTabsAreaRef.current = true
+  }, [isInTabsArea])
 
   const collapsedHeaderHeight = theme.layout.collapsedHeaderHeight
 
@@ -66,8 +76,10 @@ export default function TabPanels() {
         const query = params.toString()
         router.replace(query ? `?${query}` : "?", { scroll: false })
       }
-    } else if (!isInTabsArea && urlTab) {
-      // We are outside the tabs area  to  remove ?tab if it exists
+    } else if (!isInTabsArea && urlTab && hasBeenInTabsAreaRef.current) {
+      // Remove ?tab= only after the user has been in the tabs region before.
+      // On first paint we are "above" the tabs but may be honoring ?tab= deep links;
+      // stripping here used to clear the param before the deep-link effect ran.
       params.delete("tab")
       const query = params.toString()
       router.replace(query ? `?${query}` : "?", { scroll: false })
@@ -78,10 +90,12 @@ export default function TabPanels() {
   // Also rehydrate ?scenarios= and ?climate= into the scenario explorer store.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const urlTab = params.get("tab") as TabKey | null
+    const rawTab = params.get("tab")
+    const urlTab = isTabKey(rawTab) ? rawTab : null
 
-    if (urlTab && urlTab !== activeTab) {
-      navigateToTab(urlTab)
+    if (urlTab) {
+      pendingUrlTabScrollRef.current = urlTab
+      dispatch(setActiveTab(urlTab))
     }
 
     const climateParam = params.get("climate")
@@ -130,18 +144,54 @@ export default function TabPanels() {
       }
     }
 
-    if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {
-      didScrollFromUrlRef.current = true
-
-      const rect = panelRef.current.getBoundingClientRect()
-      const absoluteTop = window.scrollY + rect.top
-
-      const targetY = absoluteTop - collapsedHeaderHeight
-
-      window.scrollTo({ top: targetY, behavior: "smooth" })
-    }
+    // Scroll runs in a separate effect so AnimatePresence can mount the
+    // correct TabPanel first (mode="wait" delays the entering panel).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [dispatch])
+
+  useEffect(() => {
+    const target = pendingUrlTabScrollRef.current
+    if (!target || didScrollFromUrlRef.current) return
+    if (activeTab !== target) return
+
+    const headerOffset = collapsedHeaderHeight
+    const expectedPanelId = `panel-${target}`
+    const MAX_FRAMES = 120
+    let frame = 0
+    let rafId = 0
+
+    const scrollToStickyTabs = () => {
+      const tabsEl = tabsRef.current
+      if (!tabsEl) return
+      const tabsRect = tabsEl.getBoundingClientRect()
+      const absoluteTop = window.scrollY + tabsRect.top
+      const targetY = Math.max(0, absoluteTop - headerOffset)
+      window.scrollTo({ top: targetY, behavior: "auto" })
+    }
+
+    const tick = () => {
+      frame += 1
+      const tabsEl = tabsRef.current
+      if (!tabsEl) {
+        if (frame < MAX_FRAMES) rafId = requestAnimationFrame(tick)
+        return
+      }
+
+      const panelEl = panelRef.current
+      const panelReady = panelEl?.id === expectedPanelId
+      if (!panelReady && frame < MAX_FRAMES) {
+        rafId = requestAnimationFrame(tick)
+        return
+      }
+
+      scrollToStickyTabs()
+      didScrollFromUrlRef.current = true
+      pendingUrlTabScrollRef.current = null
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [activeTab, collapsedHeaderHeight, panelRef, tabsRef])
 
   // Background color tied to active tab
   // Learn and Explore tabs use transparent - they manage their own backgrounds

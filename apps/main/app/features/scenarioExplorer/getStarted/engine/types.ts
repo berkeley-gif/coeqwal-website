@@ -101,6 +101,70 @@ export interface HideScheduleEntry {
  */
 export type EngineMode = "idle" | "playback" | "interactive"
 
+/**
+ * Snapshot of everything `InteractivePaintArbiter` needs to paint a
+ * single demand-units outcome. Non-null iff TAS wants the arbiter to
+ * own `demand-units` / `demand-units-outline` right now; null iff the
+ * arbiter should exit (release paint back to the scalar-0 baseline).
+ *
+ * TAS computes the spec from the selected outcome's registry config +
+ * the hydrated `outcomeLocations` tier data. The arbiter itself does
+ * no React-side lookups -- it only touches Mapbox given the spec.
+ *
+ * `outcomeCode` is the identity used for crossfade detection: a
+ * `sync(ctx, spec)` call with the same `outcomeCode` as `currentSpec`
+ * is a no-op; a different `outcomeCode` triggers the crossfade path.
+ *
+ * `classFilter` scopes the demand-units layer to the outcome's DU
+ * class (AG / Urban / Refuge). Combined with the `featureIds`-based
+ * `in` filter so only the outcome's actual LOIs render.
+ *
+ * `colorExpression` is a Mapbox `match` expression keyed on `DU_ID`
+ * (or the outcome's `idProperty`). Arbiter writes it to both fill and
+ * outline so they stay color-aligned.
+ */
+export interface DemandUnitsPaintSpec {
+  /** Outcome code (`"AG_REV"`, `"CWS_DEL"`). Identity for crossfade. */
+  outcomeCode: string
+  /** DU `Class` column filter value. Mirrors `OutcomeLayerConfig.classFilter`. */
+  classFilter: "Agriculture" | "Urban" | "Refuge" | "N/A"
+  /** Feature-id property column (`"DU_ID"` for all current DU outcomes). */
+  idProperty: string
+  /** Feature ids to include in the `["in", idProperty, ...]` filter. */
+  featureIds: readonly string[]
+  /** Mapbox `match` expression (or hex string fallback) for fill/line color. */
+  colorExpression: unknown
+}
+
+/**
+ * Snapshot of per-selection overlay state driving the gold outline +
+ * spotlight / pinned fill-opacity overrides. Sent to
+ * `InteractivePaintArbiter.applyOverlay` whenever the selection's
+ * active / pinned / spotlight state changes.
+ *
+ * Held separately from `DemandUnitsPaintSpec` because it changes much
+ * more frequently (hover, pin toggle, Beat 5 tier step) and can be
+ * written as a pure overlay pass on top of the current base paint
+ * without re-running the full enter / crossfade sequence.
+ *
+ * `hasSpotlight` is explicit because `spotlightFeatureIds` can legally
+ * be empty (e.g. `spotlightedTier` set but no matching DUs for this
+ * outcome). We still want the arbiter to treat that as a spotlight
+ * mode (all DUs dimmed) rather than pinned/active mode.
+ */
+export interface DemandUnitsOverlayState {
+  /** Sanity-check: which outcome this overlay is for. */
+  outcomeCode: string
+  /** Active (hovered or pinned) feature ids; gold outline + opacity 1. */
+  activeFeatureIds: readonly string[]
+  /** Pinned subset of actives; drives zoom-aware fill emphasis. */
+  pinnedFeatureIds: readonly string[]
+  /** Features matching the currently-spotlighted tier (Beat 5 demo). */
+  spotlightFeatureIds: readonly string[]
+  /** True iff spotlight mode is active; `spotlightFeatureIds` may be empty. */
+  hasSpotlight: boolean
+}
+
 // Actor discriminants
 
 export type ActorKind =

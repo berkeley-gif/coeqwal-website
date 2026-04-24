@@ -264,20 +264,29 @@ export default function VisualizationLayers({
 
           {/* Polygon layer (demand-units, WBA, delta, reservoir)
               In get-started mode this only renders after the user clicks a category
-              (activeOutcomeVisualization is null during the animation). */}
-          {isVisualizationActive && geometryType === "polygon" && config && (
-            <OutcomePolygonLayer
-              tierColorMap={tierColorMap}
-              layerType={layerType!}
-              idProperty={config.idProperty}
-              featureIds={featureIds}
-              classFilter={config.classFilter}
-              visible={true}
-              mapboxLayerId={config.mapboxLayerId}
-              featureIdMap={config.featureIdMap}
-              outlineOnly={config.outlineOnly}
-            />
-          )}
+              (activeOutcomeVisualization is null during the animation).
+              Demand-units in get-started mode is owned by
+              `InteractivePaintArbiter` (see
+              `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/InteractivePaintArbiter.ts`)
+              to enforce the storyboard's single-writer-per-resource
+              invariant. Skip the OPL mount in that case so both
+              writers don't race for the layer. */}
+          {isVisualizationActive &&
+            geometryType === "polygon" &&
+            config &&
+            !(isGetStartedMode && layerType === "demand-units") && (
+              <OutcomePolygonLayer
+                tierColorMap={tierColorMap}
+                layerType={layerType!}
+                idProperty={config.idProperty}
+                featureIds={featureIds}
+                classFilter={config.classFilter}
+                visible={true}
+                mapboxLayerId={config.mapboxLayerId}
+                featureIdMap={config.featureIdMap}
+                outlineOnly={config.outlineOnly}
+              />
+            )}
 
           {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
           {tierLocations.length > 0 &&
