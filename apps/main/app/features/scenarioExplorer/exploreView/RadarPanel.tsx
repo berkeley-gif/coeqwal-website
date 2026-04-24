@@ -787,106 +787,138 @@ export default function RadarPanel({
               bottom: 0,
               width: 220,
               zIndex: 2,
-              overflowY: "scroll",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              overflow: "hidden",
               borderRight: `1px solid ${theme.palette.divider}`,
               bgcolor: theme.palette.background.paper,
               py: 1.5,
               px: 1,
             }}
           >
-            <TooltipCloseButton
-              onClick={() => setShowAxisSelector(false)}
-              ariaLabel="Close choose outcome axes panel"
-            />
-            <Typography
-              variant="caption"
+            <Box sx={{ position: "relative", flexShrink: 0 }}>
+              <TooltipCloseButton
+                onClick={() => setShowAxisSelector(false)}
+                ariaLabel="Close choose outcome axes panel"
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.04em",
+                  color: "text.primary",
+                  mb: 1,
+                  display: "block",
+                  pl: 0.5,
+                  pr: 5,
+                }}
+              >
+                Choose outcome axes
+              </Typography>
+            </Box>
+            <Box
               sx={{
-                fontWeight: 700,
-                fontSize: "0.7rem",
-                letterSpacing: "0.04em",
-                color: "text.primary",
-                mb: 1,
-                display: "block",
-                pl: 0.5,
-                pr: 5,
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                overflowX: "hidden",
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "thin",
+                scrollbarColor: (t) =>
+                  `${t.palette.grey[400]} ${t.palette.grey[100]}`,
+                "&::-webkit-scrollbar": { width: 8 },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: (t) => t.palette.grey[100],
+                  borderRadius: 4,
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: (t) => t.palette.grey[400],
+                  borderRadius: 4,
+                  border: "2px solid transparent",
+                  backgroundClip: "padding-box",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  backgroundColor: (t) => t.palette.grey[500],
+                },
               }}
             >
-              Choose outcome axes
-            </Typography>
-            <AxisRow
-              label="All key outcomes"
-              checked={allKeySelected}
-              indeterminate={someKeySelected}
-              bold
-              onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
-              sx={checkboxSx}
-            />
-            <AxisRow
-              label="All regional outcomes"
-              checked={allRegionalSelected}
-              indeterminate={someRegionalSelected}
-              bold
-              onClick={() =>
-                toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
-              }
-              sx={checkboxSx}
-            />
-
-            <Box
-              sx={{
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                my: 1,
-              }}
-            />
-
-            {/* Outcomes with regional variants */}
-            {withRegional.map((code) => {
-              const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
-              return (
-                <Box key={code} sx={{ mb: 0.75 }}>
-                  <AxisRow
-                    label={getOutcomeName(code)}
-                    checked={axesSet.has(code)}
-                    bold
-                    onClick={() => toggleRadarAxis(code)}
-                    sx={checkboxSx}
-                  />
-                  {variants.map((vCode) => (
-                    <AxisRow
-                      key={vCode}
-                      label={
-                        vCode.startsWith("NOD")
-                          ? "North of Delta"
-                          : "South of Delta"
-                      }
-                      checked={axesSet.has(vCode)}
-                      indent
-                      onClick={() => toggleRadarAxis(vCode)}
-                      sx={checkboxSx}
-                    />
-                  ))}
-                </Box>
-              )
-            })}
-
-            <Box
-              sx={{
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                my: 1,
-              }}
-            />
-
-            {/* Outcomes without regional variants */}
-            {withoutRegional.map((code) => (
               <AxisRow
-                key={code}
-                label={getOutcomeName(code)}
-                checked={axesSet.has(code)}
+                label="All key outcomes"
+                checked={allKeySelected}
+                indeterminate={someKeySelected}
                 bold
-                onClick={() => toggleRadarAxis(code)}
+                onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
                 sx={checkboxSx}
               />
-            ))}
+              <AxisRow
+                label="All regional outcomes"
+                checked={allRegionalSelected}
+                indeterminate={someRegionalSelected}
+                bold
+                onClick={() =>
+                  toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
+                }
+                sx={checkboxSx}
+              />
+
+              <Box
+                sx={{
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  my: 1,
+                }}
+              />
+
+              {/* Outcomes with regional variants */}
+              {withRegional.map((code) => {
+                const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
+                return (
+                  <Box key={code} sx={{ mb: 0.75 }}>
+                    <AxisRow
+                      label={getOutcomeName(code)}
+                      checked={axesSet.has(code)}
+                      bold
+                      onClick={() => toggleRadarAxis(code)}
+                      sx={checkboxSx}
+                    />
+                    {variants.map((vCode) => (
+                      <AxisRow
+                        key={vCode}
+                        label={
+                          vCode.startsWith("NOD")
+                            ? "North of Delta"
+                            : "South of Delta"
+                        }
+                        checked={axesSet.has(vCode)}
+                        indent
+                        onClick={() => toggleRadarAxis(vCode)}
+                        sx={checkboxSx}
+                      />
+                    ))}
+                  </Box>
+                )
+              })}
+
+              <Box
+                sx={{
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  my: 1,
+                }}
+              />
+
+              {/* Outcomes without regional variants */}
+              {withoutRegional.map((code) => (
+                <AxisRow
+                  key={code}
+                  label={getOutcomeName(code)}
+                  checked={axesSet.has(code)}
+                  bold
+                  onClick={() => toggleRadarAxis(code)}
+                  sx={checkboxSx}
+                />
+              ))}
+            </Box>
           </Box>
         )}
 

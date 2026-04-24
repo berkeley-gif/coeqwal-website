@@ -16,7 +16,7 @@ import {
   Typography,
   useTheme,
   alpha,
-  PlayArrowIcon,
+  LocationOnIcon,
   ViewListIcon,
   ExploreIcon,
   AdjustIcon,
@@ -36,7 +36,7 @@ import { useTabNavigation } from "../../../hooks/useTabNavigation"
 const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   {
     view: "get-started",
-    icon: <PlayArrowIcon sx={{ fontSize: "1.25rem" }} />,
+    icon: <LocationOnIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Get started",
   },
   {

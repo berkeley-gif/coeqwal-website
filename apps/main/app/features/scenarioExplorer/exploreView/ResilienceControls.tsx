@@ -63,6 +63,7 @@ import {
   RESILIENCE_HYDROCLIMATES,
 } from "../hooks/useResilienceMatrix"
 import {
+  ALL_RADAR_AXES_ORDER,
   OUTCOME_CODE_ORDER,
   OUTCOME_REGIONAL_VARIANTS,
   getOutcomeName,
@@ -732,7 +733,7 @@ export default function ResilienceControls({
         ? "1 scenario"
         : `${scenarioCount} of ${scenarioTotal} scenarios`
   const outcomeCount = resilienceVisibleOutcomes.length
-  const outcomeTotal = OUTCOME_CODE_ORDER.length
+  const outcomeTotal = ALL_RADAR_AXES_ORDER.length
   const outcomesLabel =
     outcomeCount === outcomeTotal
       ? `all ${outcomeTotal} outcomes`
@@ -1116,7 +1117,7 @@ export default function ResilienceControls({
               },
             }}
           >
-            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            <icons.IosShare sx={{ fontSize: "1.25rem", flexShrink: 0 }} />
             save snapshot
           </Box>
         )}

@@ -105,12 +105,13 @@ function encodeShareItems(
       const ids = item.scenarioIds.join("~")
       const climates = item.hydroclimates.join("~")
       const outcomes = item.outcomeCodes.join("~")
-      // Scope: "minimum for display". tileScope / tileId / tileLabel
-      // and cachedChartData / cachedImageDataUrl are intentionally
-      // not encoded in the URL - round-tripped resilience items
-      // rehydrate as panel-level snapshots (same degradation as the
-      // in-memory-only images/data for all captures).
-      return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}`
+      // Optional 7th segment "n" when numeric cell values were on at save.
+      // Scope: tileScope / tileId / tileLabel and cachedChartData /
+      // cachedImageDataUrl are not encoded. Round-tripped items rehydrate
+      // with partial context (same as other tools without full capture).
+      const num =
+        item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
+      return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}${num}`
     }
     return ""
   })
@@ -281,6 +282,7 @@ export function parseShareItemsParam(
         }
       }
       if (parts[0] === "q" && parts.length >= 3) {
+        const showCellNumbers = parts[6] === "n"
         return {
           id: crypto.randomUUID(),
           type: "resilience",
@@ -289,6 +291,7 @@ export function parseShareItemsParam(
           scenarioIds: (parts[3] ?? "").split("~").filter(Boolean),
           hydroclimates: (parts[4] ?? "").split("~").filter(Boolean),
           outcomeCodes: (parts[5] ?? "").split("~").filter(Boolean),
+          ...(showCellNumbers ? { showCellNumbers: true } : {}),
         }
       }
       return null

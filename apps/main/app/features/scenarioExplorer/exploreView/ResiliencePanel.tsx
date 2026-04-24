@@ -2452,8 +2452,8 @@ export default function ResiliencePanel({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 22,
-            height: 22,
+            width: 32,
+            height: 32,
             padding: 0,
             borderRadius: "4px",
             border: "none",
@@ -2464,9 +2464,13 @@ export default function ResiliencePanel({
               color: theme.palette.blue.bright,
               backgroundColor: theme.palette.interaction.selectedBackground,
             },
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 1,
+            },
           }}
         >
-          <icons.IosShare sx={{ fontSize: "0.875rem" }} />
+          <icons.IosShare sx={{ fontSize: "1.25rem" }} />
         </Box>
       )
     }
@@ -2916,91 +2920,131 @@ function ResilienceOutcomeSelector({
         bottom: theme.space.component.md,
         width: 220,
         zIndex: 2,
-        overflowY: "auto",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0,
+        overflow: "hidden",
         borderRight: `1px solid ${theme.palette.divider}`,
         bgcolor: theme.palette.background.paper,
         py: 1.5,
         px: 1,
       }}
     >
-      <TooltipCloseButton
-        onClick={onClose}
-        ariaLabel="Close choose outcome rows panel"
-      />
-      <Typography
-        variant="caption"
+      <Box sx={{ position: "relative", flexShrink: 0 }}>
+        <TooltipCloseButton
+          onClick={onClose}
+          ariaLabel="Close choose outcome rows panel"
+        />
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.7rem",
+            letterSpacing: "0.04em",
+            color: "text.primary",
+            mb: 1,
+            display: "block",
+            pl: 0.5,
+            pr: 5,
+          }}
+        >
+          Choose outcome rows
+        </Typography>
+      </Box>
+
+      <Box
         sx={{
-          fontWeight: 700,
-          fontSize: "0.7rem",
-          letterSpacing: "0.04em",
-          color: "text.primary",
-          mb: 1,
-          display: "block",
-          pl: 0.5,
-          pr: 5,
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "thin",
+          scrollbarColor: (t) =>
+            `${t.palette.grey[400]} ${t.palette.grey[100]}`,
+          "&::-webkit-scrollbar": { width: 8 },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: (t) => t.palette.grey[100],
+            borderRadius: 4,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: (t) => t.palette.grey[400],
+            borderRadius: 4,
+            border: "2px solid transparent",
+            backgroundClip: "padding-box",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: (t) => t.palette.grey[500],
+          },
         }}
       >
-        Choose outcome rows
-      </Typography>
-
-      <OutcomeRow
-        label="All key outcomes"
-        checked={allKeySelected}
-        indeterminate={someKeySelected}
-        bold
-        onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
-        sx={checkboxSx}
-      />
-      <OutcomeRow
-        label="All regional outcomes"
-        checked={allRegionalSelected}
-        indeterminate={someRegionalSelected}
-        bold
-        onClick={() => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)}
-        sx={checkboxSx}
-      />
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }} />
-
-      {withRegional.map((code) => {
-        const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
-        return (
-          <Box key={code} sx={{ mb: 0.75 }}>
-            <OutcomeRow
-              label={getOutcomeName(code)}
-              checked={visibleSet.has(code)}
-              bold
-              onClick={() => onToggle(code)}
-              sx={checkboxSx}
-            />
-            {variants.map((vCode) => (
-              <OutcomeRow
-                key={vCode}
-                label={
-                  vCode.startsWith("NOD") ? "North of Delta" : "South of Delta"
-                }
-                checked={visibleSet.has(vCode)}
-                indent
-                onClick={() => onToggle(vCode)}
-                sx={checkboxSx}
-              />
-            ))}
-          </Box>
-        )
-      })}
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }} />
-
-      {withoutRegional.map((code) => (
         <OutcomeRow
-          key={code}
-          label={getOutcomeName(code)}
-          checked={visibleSet.has(code)}
+          label="All key outcomes"
+          checked={allKeySelected}
+          indeterminate={someKeySelected}
           bold
-          onClick={() => onToggle(code)}
+          onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
           sx={checkboxSx}
         />
-      ))}
+        <OutcomeRow
+          label="All regional outcomes"
+          checked={allRegionalSelected}
+          indeterminate={someRegionalSelected}
+          bold
+          onClick={() =>
+            toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
+          }
+          sx={checkboxSx}
+        />
+
+        <Box
+          sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
+        />
+
+        {withRegional.map((code) => {
+          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
+          return (
+            <Box key={code} sx={{ mb: 0.75 }}>
+              <OutcomeRow
+                label={getOutcomeName(code)}
+                checked={visibleSet.has(code)}
+                bold
+                onClick={() => onToggle(code)}
+                sx={checkboxSx}
+              />
+              {variants.map((vCode) => (
+                <OutcomeRow
+                  key={vCode}
+                  label={
+                    vCode.startsWith("NOD")
+                      ? "North of Delta"
+                      : "South of Delta"
+                  }
+                  checked={visibleSet.has(vCode)}
+                  indent
+                  onClick={() => onToggle(vCode)}
+                  sx={checkboxSx}
+                />
+              ))}
+            </Box>
+          )
+        })}
+
+        <Box
+          sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
+        />
+
+        {withoutRegional.map((code) => (
+          <OutcomeRow
+            key={code}
+            label={getOutcomeName(code)}
+            checked={visibleSet.has(code)}
+            bold
+            onClick={() => onToggle(code)}
+            sx={checkboxSx}
+          />
+        ))}
+      </Box>
     </Box>
   )
 }

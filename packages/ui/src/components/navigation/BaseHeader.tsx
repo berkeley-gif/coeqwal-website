@@ -98,6 +98,11 @@ type HeaderTranslations = {
     getData: string
     about: string
   }
+  /** Intro copy shown above each dropdown’s link list (desktop and mobile). */
+  dropdownIntros: {
+    guides: string
+    waterThemes: string
+  }
   waterStories: {
     flow: string
     climate: string
@@ -192,6 +197,12 @@ const translations: TranslationsMap = {
       getData: "Get data",
       about: "About COEQWAL",
     },
+    dropdownIntros: {
+      guides:
+        "Topical guides about California water in a scrolling story format.",
+      waterThemes:
+        "Reference guides about California water issues and dynamics.",
+    },
     waterStories: {
       flow: "How water flows through California",
       climate: "How climate affects California water",
@@ -205,6 +216,12 @@ const translations: TranslationsMap = {
       waterThemes: "Temas del agua",
       getData: "Descargar datos",
       about: "Sobre COEQWAL",
+    },
+    dropdownIntros: {
+      guides:
+        "Guías temáticas sobre el agua en California en formato de relato con desplazamiento.",
+      waterThemes:
+        "Guías de referencia sobre cuestiones y dinámicas del agua en California.",
     },
     waterStories: {
       flow: "Cómo fluye el agua a través de California",
@@ -544,6 +561,7 @@ export function BaseHeader({
                 {/* 1. Water stories dropdown */}
                 <NavDropdown
                   label={t.buttons.waterStories}
+                  menuDescription={t.dropdownIntros.guides}
                   disableRipple
                   options={[
                     {
@@ -579,6 +597,7 @@ export function BaseHeader({
                 {waterThemesOptions && waterThemesOptions.length > 0 && (
                   <NavDropdown
                     label={t.buttons.waterThemes}
+                    menuDescription={t.dropdownIntros.waterThemes}
                     disableRipple
                     options={waterThemesOptions}
                     variant="text"
@@ -742,6 +761,20 @@ export function BaseHeader({
                 {t.buttons.waterStories}
               </Box>
 
+              <Box
+                component="p"
+                sx={{
+                  ...theme.typography.dashboard,
+                  color: theme.palette.grey[700],
+                  m: 0,
+                  px: 2,
+                  pt: 0,
+                  pb: 1,
+                }}
+              >
+                {t.dropdownIntros.guides}
+              </Box>
+
               {/* Water story sub-items */}
               <List disablePadding>
                 <ListItem disablePadding>
@@ -894,6 +927,19 @@ export function BaseHeader({
                     }}
                   >
                     {t.buttons.waterThemes}
+                  </Box>
+                  <Box
+                    component="p"
+                    sx={{
+                      ...theme.typography.dashboard,
+                      color: theme.palette.grey[700],
+                      m: 0,
+                      px: 2,
+                      pt: 0,
+                      pb: 1,
+                    }}
+                  >
+                    {t.dropdownIntros.waterThemes}
                   </Box>
                   <List disablePadding>
                     {waterThemesOptions.map((option) => (

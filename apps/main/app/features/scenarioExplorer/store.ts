@@ -111,6 +111,12 @@ export type ShareItem =
       tileId?: string
       /** Human-facing label shown in the Share drawer/tab card subtitle. */
       tileLabel?: string
+      /**
+       * Whether numeric cell values were visible in the heatmap at capture
+       * time. Used to match share thumbnails and list context (not used for
+       * quadrant captures).
+       */
+      showCellNumbers?: boolean
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
       note?: string

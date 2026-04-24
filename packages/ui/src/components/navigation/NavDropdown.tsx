@@ -16,7 +16,7 @@
  */
 
 import React, { useState, useId, useRef } from "react"
-import { Button, Menu, MenuItem } from "@mui/material"
+import { Box, Button, Menu, MenuItem, Typography } from "@mui/material"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 
 export interface NavDropdownOption {
@@ -32,6 +32,11 @@ export interface NavDropdownOption {
 export interface NavDropdownProps {
   label: string
   options: NavDropdownOption[]
+  /**
+   * Short explanatory text shown above the menu options (e.g. what kind of
+   * links the list contains). Uses the theme `dashboard` variant.
+   */
+  menuDescription?: string
   variant?: "text" | "standard"
   disableRipple?: boolean
   sx?: React.ComponentProps<typeof Button>["sx"]
@@ -40,6 +45,7 @@ export interface NavDropdownProps {
 export function NavDropdown({
   label,
   options,
+  menuDescription,
   variant = "standard",
   disableRipple = false,
   sx,
@@ -106,6 +112,31 @@ export function NavDropdown({
           },
         }}
       >
+        {menuDescription && (
+          <Box
+            role="presentation"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.preventDefault()}
+            sx={(theme) => ({
+              px: theme.space.component.lg,
+              pt: theme.space.component.md,
+              pb: theme.space.component.sm,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            })}
+          >
+            <Typography
+              variant="dashboard"
+              component="p"
+              sx={(theme) => ({
+                m: 0,
+                color: theme.palette.grey[700],
+                maxWidth: 280,
+              })}
+            >
+              {menuDescription}
+            </Typography>
+          </Box>
+        )}
         {options.map((option) => (
           <MenuItem
             key={option.key}

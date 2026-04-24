@@ -145,6 +145,9 @@ export function getResilienceShareCardContent(
   const scenarioChip = buildScenarioChip(item.scenarioIds, lookups.scenarioLabel)
   const outcomeChip = buildOutcomeChip(item.outcomeCodes, lookups.outcomeLabel)
   const chips = [hydroChip, scenarioChip, outcomeChip]
+  if (item.view !== "quadrant" && item.showCellNumbers) {
+    chips.push("Cell values on")
+  }
 
   if (item.view === "quadrant") {
     const headline =

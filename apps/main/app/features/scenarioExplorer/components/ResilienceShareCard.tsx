@@ -70,6 +70,7 @@ export default function ResilienceShareCard({
           scenarioIds={item.scenarioIds}
           outcomeCodes={item.outcomeCodes}
           hydroclimates={item.hydroclimates}
+          showCellNumbers={item.showCellNumbers === true}
         />
         {model.showThumbnailDisclaimer && model.thumbnailDisclaimer ? (
           <Typography

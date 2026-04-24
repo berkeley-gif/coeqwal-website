@@ -21,6 +21,9 @@
  * encodings (delta, density_opp, leverage, distribution) require
  * additional controller state (baselines, modes, distribution mode)
  * that aren't round-tripped through the share URL today.
+ *
+ * `showCellNumbers` is passed from the share item so numeric cell
+ * labels match the explore heatmap when the user had values turned on.
  */
 
 import React, { useMemo } from "react"
@@ -49,6 +52,11 @@ export interface ShareResilienceLiveChartProps {
   scenarioIds: string[]
   outcomeCodes: string[]
   hydroclimates: string[]
+  /**
+   * Match the explore heatmap when the snapshot used numeric cell labels.
+   * Default false for older share items without the flag.
+   */
+  showCellNumbers?: boolean
   /** Optional fixed height; width follows the container. */
   height?: number
 }
@@ -93,6 +101,7 @@ export default function ShareResilienceLiveChart({
   scenarioIds,
   outcomeCodes,
   hydroclimates,
+  showCellNumbers = false,
   height = DEFAULT_HEIGHT,
 }: ShareResilienceLiveChartProps) {
   const theme = useTheme()
@@ -224,7 +233,7 @@ export default function ShareResilienceLiveChart({
           tierLabels={tierLabels}
           palette={palette}
           cellRender="tier"
-          showCellNumbers={false}
+          showCellNumbers={showCellNumbers}
           responsive
           hideLegend
         />

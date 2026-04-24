@@ -331,6 +331,9 @@ function ScenarioExplorerInner() {
       scenarioIds: [...selectedScenarios],
       hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
       outcomeCodes: resilienceVisibleOutcomes,
+      ...(resilienceControls.view !== "quadrant"
+        ? { showCellNumbers: resilienceControls.showCellNumbers }
+        : {}),
     }
 
     let capture: {
@@ -392,6 +395,7 @@ function ScenarioExplorerInner() {
         scenarioIds: [...selectedScenarios],
         hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
         outcomeCodes: resilienceVisibleOutcomes,
+        showCellNumbers: resilienceControls.showCellNumbers,
         tileScope: result.chartData.tileScope,
         tileId,
         tileLabel: result.chartData.tileLabel,

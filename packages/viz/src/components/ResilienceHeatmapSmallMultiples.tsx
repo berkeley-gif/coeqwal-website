@@ -107,6 +107,10 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   columnLabelRotation?: number
 }
 
+/** Per-tile header controls: size matches Explore tool icons (1.25rem glyph in a ~32px target). */
+const TILE_ACTION_PX = 32
+const TILE_ACTION_GLYPH_PX = 20
+
 /**
  * Tiny button used for per-tile actions. Muted at rest so the header
  * stays quiet while browsing, full-opacity when the tile is hovered or
@@ -140,15 +144,15 @@ function TileActionButton({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 22,
-        height: 22,
+        width: TILE_ACTION_PX,
+        height: TILE_ACTION_PX,
         padding: 0,
         borderRadius: 4,
         border: "none",
         background: "transparent",
         color: active ? palette.text : palette.textMuted,
         cursor: "pointer",
-        fontSize: 13,
+        fontSize: TILE_ACTION_GLYPH_PX,
         lineHeight: 1,
         transition: "opacity .15s ease, background-color .15s ease",
       }}
@@ -353,7 +357,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 2,
+                          gap: 6,
                           flexShrink: 0,
                         }}
                       >
