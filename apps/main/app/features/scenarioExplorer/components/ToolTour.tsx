@@ -182,9 +182,14 @@ export default function ToolTour() {
     const prevBorderRadius = anchorEl.style.borderRadius
     const prevTransition = anchorEl.style.transition
     const prevPosition = anchorEl.style.position
+    const prevZIndex = anchorEl.style.zIndex
     if (!anchorEl.style.position) {
       anchorEl.style.position = "relative"
     }
+    // Outlines extend past the box; the chart row below is painted
+    // after this node and was covering the bottom/side rings. Keep the
+    // highlight above the next sibling while the step is active.
+    anchorEl.style.zIndex = "3"
     anchorEl.style.transition =
       "outline-color 160ms ease, box-shadow 160ms ease"
     anchorEl.style.outline = `2px solid ${theme.palette.blue.bright}`
@@ -201,6 +206,7 @@ export default function ToolTour() {
       anchorEl.style.borderRadius = prevBorderRadius
       anchorEl.style.transition = prevTransition
       anchorEl.style.position = prevPosition
+      anchorEl.style.zIndex = prevZIndex
       anchorEl.removeAttribute(HIGHLIGHT_DATA_ATTR)
     }
   }, [anchorEl, theme.palette.blue.bright])

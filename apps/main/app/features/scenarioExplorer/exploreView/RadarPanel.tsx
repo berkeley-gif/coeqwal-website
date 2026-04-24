@@ -122,6 +122,15 @@ export default function RadarPanel({
 
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
 
+  // With no sidebar checkboxes selected, the chart would otherwise be empty
+  // (filteredData is []). Default to showing the full library, matching the
+  // "show all scenarios" control.
+  useEffect(() => {
+    if (selectedScenarios.length === 0) {
+      setRadarShowAll(true)
+    }
+  }, [selectedScenarios.length, setRadarShowAll])
+
   const { getThemeForScenario, getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
 
@@ -951,32 +960,6 @@ export default function RadarPanel({
             </Box>
           )}
         </Box>
-
-        {!hasRadarTraceData && !isLoading && (
-          <ChartToast maxWidth={480}>
-            <Box
-              sx={{
-                pointerEvents: "auto",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-              }}
-            >
-              <Box component="span">
-                Select scenarios on the left to see them on the chart, or use
-              </Box>
-              <InlineToggleChip
-                label="show all scenarios"
-                active={radarShowAll}
-                onClick={() => setRadarShowAll(!radarShowAll)}
-                onDarkBackground
-              />
-              <Box component="span">in the chart controls above.</Box>
-            </Box>
-          </ChartToast>
-        )}
 
         {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
           <ChartToast maxWidth={440}>

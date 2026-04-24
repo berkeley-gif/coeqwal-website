@@ -5,12 +5,11 @@
  * a "read the chart" section anchored to the plot, and a closing
  * journey card.
  *
- * Order follows a spatial "like with like" grouping. Each "get
- * oriented" popper introduces a region, and the detail poppers for
- * that region follow immediately after.
+ * After the sidebar, the shared top toolbar is introduced in one
+ * step, then the radar-only chart controls row, then the plot.
  *
- * Anchor ids resolve into RadarPanel (chart + axes) and into the
- * shared ToolToolbar + radar-only ChartControlsBar (chips + capture).
+ * Anchor ids: ToolToolbar (`radar.viewArea`), ChartControlsBar
+ * (`radar.chartToolbar` and chips), RadarPanel (plot).
  */
 
 import type { TourStep } from "../types"
@@ -19,8 +18,8 @@ export const RADAR_TOUR: TourStep[] = [
   {
     id: "radar.hero",
     eyebrow: "start here",
-    title: "The Radar view reads your shortlist as shapes.",
-    body: "Each selected scenario is viewed as polygon across the outcome axes you choose, so trade-offs appear as shape. Arrange the chart, read the polygons, and switch hydroclimates to see the shape of the data change.",
+    title: "The Radar view shows the shape of the data",
+    body: "Each selected scenario is viewed as a polygon across the outcome axes you choose, so trade-offs appear as shape. Arrange the chart, read the polygons, and switch hydroclimates to see the shape of the data change.",
   },
 
   // Orientation + details for the sidebar (scenario library).
@@ -29,7 +28,7 @@ export const RADAR_TOUR: TourStep[] = [
     anchorId: "radar.sidebar",
     eyebrow: "get oriented",
     title: "Your scenario list lives in the sidebar",
-    body: "The left column is the same scenario library as the list view. Select scenarios here to add polygons to the chart, and hover a row to highlight its shape. The chart on the right only draws what the sidebar selects.",
+    body: "The left column is the same scenario library as the list view. Select scenarios here to add polygons to the chart, and hover over any row to highlight its shape.",
     placement: "right",
   },
   {
@@ -37,31 +36,40 @@ export const RADAR_TOUR: TourStep[] = [
     anchorId: "radar.sidebarControls",
     eyebrow: "tune the sidebar",
     title: "Tune the scenario list from these controls",
-    body: "Search narrows the list by name. The chips below toggle definitions, baselines, selected-only, group-by-theme, and key operations. These are the same controls the list view covers one by one; they filter and label the rows, not the chart.",
+    body: "Search narrows the list by name. The chips below toggle definitions, baselines, selected-only, group-by-theme, and key operations. These are the same controls as in the list view, and are covered in depth in the list view tour. They filter and label the scenario list.",
     placement: "right",
   },
 
-  // Orientation + details for the chart-side toolbars (radar chips
-  // and the view-level hydroclimate chips above them).
+  // Shared top toolbar (parallel to list: view area → map → then climate; locations sit between map and climate on this layout).
+  {
+    id: "radar.step0.viewArea",
+    anchorId: "radar.viewArea",
+    eyebrow: "get oriented",
+    title: "These controls set the data view",
+    body: "This is the same toolbar as in the list tour: you can open the map and switch the hydroclimate. This toolbar is shared across all the Explore tools.",
+    placement: "bottom-end",
+  },
+
+  // Chart-specific toolbar (row under the top strip).
   {
     id: "radar.step0.chartToolbar",
     anchorId: "radar.chartToolbar",
     eyebrow: "get oriented",
-    title: "These controls configure the chart",
-    body: "The toolbar above the chart is radar-specific. The chips here choose which outcomes become axes, overlay the library range, show all scenarios at once, and capture the current view. A second strip above it switches the hydroclimate the polygons are read under. The next steps walk through each one.",
+    title: "These controls are specific to this radar chart",
+    body: "The next steps walk through each control in this toolbar.",
     placement: "bottom-start",
   },
   {
     id: "radar.step1.axisChooser",
     anchorId: "radar.axisChooser",
-    eyebrow: "arrange the radar",
+    eyebrow: "configure the radar chart",
     title: "Choose outcome axes",
     body: "Open the axis picker to decide which outcomes are visible on the radar.",
   },
   {
     id: "radar.step1.showAll",
     anchorId: "radar.showAll",
-    eyebrow: "arrange the radar",
+    eyebrow: "configure the radar chart",
     title: "Show all scenarios",
     body: "Turn this on to compare your shortlist against the full library at once. Turn it off to focus only on the scenarios you selected in the list view.",
     placement: "bottom-start",
@@ -69,7 +77,7 @@ export const RADAR_TOUR: TourStep[] = [
   {
     id: "radar.step1.libraryRange",
     anchorId: "radar.libraryRange",
-    eyebrow: "arrange the radar",
+    eyebrow: "configure the radar chart",
     title: "Show range",
     body: "Toggle the library range to draw a context band behind the polygons. If a shape pushes outside that band on any axis, it is doing something the broader library rarely does.",
     placement: "bottom-start",
@@ -77,19 +85,10 @@ export const RADAR_TOUR: TourStep[] = [
   {
     id: "radar.step1.capture",
     anchorId: "radar.capture",
-    eyebrow: "arrange the radar",
+    eyebrow: "configure the radar chart",
     title: "Capture view",
     titleIcon: "share",
     body: "Use capture view to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
-    placement: "bottom-end",
-  },
-  {
-    id: "radar.step3.climate",
-    anchorId: "radar.climateChips",
-    eyebrow: "switch the hydroclimate",
-    title: "",
-    illustration: "listHydroclimate",
-    body: "Switch hydroclimates to see how the same shortlist performs under different conditions. Every polygon updates to reflect that climate, so you can test a shape against historical, cc50, and cc95 futures without leaving the chart.",
     placement: "bottom-end",
   },
 

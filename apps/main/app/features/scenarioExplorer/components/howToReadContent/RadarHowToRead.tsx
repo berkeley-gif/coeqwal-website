@@ -16,7 +16,7 @@ export function RadarHowToRead() {
       <StoryHero
         eyebrow="THE RADAR VIEW"
         title="Read a shortlist as shapes, not isolated cells."
-        deck="Radar is where the shortlist stops behaving like a spreadsheet. Each selected scenario becomes a polygon across the outcomes you chose, so trade-offs appear as shape, balance, and deformation instead of as row-by-row arithmetic."
+        deck="Radar is where the shortlist stops behaving like a spreadsheet. Each selected scenario becomes a polygon across the outcomes you chose, so trade-offs appear in the shape., balance, and deformation instead of as row-by-row arithmetic."
         points={[
           {
             label: "Closer to the center is better.",
