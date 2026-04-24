@@ -42,7 +42,7 @@ import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareS
 import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
 import ShareSnapshotCard from "../../features/scenarioExplorer/components/ShareSnapshotCard"
 import ShareRadarLiveChart from "../../features/scenarioExplorer/components/ShareRadarLiveChart"
-import ShareResilienceLiveChart from "../../features/scenarioExplorer/components/ShareResilienceLiveChart"
+import ResilienceShareCard from "../../features/scenarioExplorer/components/ResilienceShareCard"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
 import type { VerticalParallelLineData } from "@repo/viz"
 import {
@@ -324,11 +324,11 @@ export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/utils/s
 
 /**
  * Render a ShareItem using the appropriate card component. Used by
- * both the tray and the story canvas. Equity and resilience items
- * render via the lightweight text-forward `ShareSnapshotCard` until
- * full image capture is wired for those panels. `liveData` supplies
- * the on-the-fly radar / resilience re-renders used when a share item
- * arrived without a cached PNG (URL load, different browser, etc.).
+ * both the tray and the story canvas. Equity items render via the
+ * lightweight text-forward `ShareSnapshotCard`. Resilience uses
+ * `ResilienceShareCard`. `liveData` supplies the on-the-fly radar
+ * re-renders when a radar share item arrived without a cached PNG (URL
+ * load, different browser, etc.).
  */
 function renderShareItemBody(
   item: ShareItem,
@@ -426,76 +426,10 @@ function renderShareItemBody(
     )
   }
   if (item.type === "resilience") {
-    const scenarioChips = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.shortLabel ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const viewLabel =
-      item.view === "aggregate"
-        ? "Aggregate across library"
-        : item.view === "scenario"
-          ? "By scenario"
-          : item.view === "outcome"
-            ? "By outcome"
-            : item.view === "hydroclimate"
-              ? "By hydroclimate"
-              : item.view === "quadrant"
-                ? "Leverage quadrant"
-                : item.view
-    const encodingLabel = item.cellEncoding
-      .replace(/_/g, " ")
-      .replace(/^./, (c) => c.toUpperCase())
-    const title =
-      item.view === "quadrant"
-        ? viewLabel
-        : `${viewLabel}: ${encodingLabel}`
-    // The subtitle names the specific tile when this item was
-    // captured from a small-multiples tile (scenario / outcome /
-    // hydroclimate) or the Leverage scatter. Panel captures fall
-    // back to the in-scope count so the card still communicates
-    // what the snapshot represents.
-    const tileKindLabel =
-      item.tileScope === "scenario"
-        ? "Scenario"
-        : item.tileScope === "outcome"
-          ? "Outcome"
-          : item.tileScope === "hydroclimate"
-            ? "Hydroclimate"
-            : item.tileScope === "quadrant"
-              ? "Quadrant"
-              : null
-    const subtitle = item.tileLabel
-      ? tileKindLabel
-        ? `${tileKindLabel}: ${item.tileLabel}`
-        : item.tileLabel
-      : item.scenarioIds.length
-        ? `${item.scenarioIds.length} scenario${
-            item.scenarioIds.length === 1 ? "" : "s"
-          } in scope`
-        : "Full library"
-    // Live heatmap fallback. Quadrant captures use a scatter viz that
-    // isn't reconstructable from the URL-encoded scope alone, so we
-    // keep the text-only placeholder for that view.
-    const liveChart =
-      !item.cachedImageDataUrl && item.view !== "quadrant"
-        ? renderResilienceLiveChart(item)
-        : undefined
     return (
-      <ShareSnapshotCard
-        id={item.id}
-        toolLabel="Resilience"
-        title={title}
-        subtitle={subtitle}
-        chips={[
-          ...scenarioChips.slice(0, 4),
-          ...outcomeCodesToLabels(item.outcomeCodes),
-        ]}
-        hydroclimate={item.hydroclimates[0]}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        liveChart={liveChart}
-        note={item.note}
+      <ResilienceShareCard
+        item={item}
+        scenarioLookup={scenarioLookup}
         onNoteChange={
           onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
         }
@@ -550,24 +484,6 @@ function renderRadarLiveChart(
       highlightBaseline={item.highlightBaseline}
       showDotsOnly={item.showDotsOnly}
       morphGeneration={liveData.morphGeneration}
-    />
-  )
-}
-
-/**
- * Build the live-resilience fallback node for a share item. Uses the
- * always-aggregate thumbnail strategy described on
- * `ShareResilienceLiveChart` so every non-quadrant view gets a live
- * viz even when the original view was a small-multiples tile.
- */
-function renderResilienceLiveChart(
-  item: Extract<ShareItem, { type: "resilience" }>,
-): React.ReactNode {
-  return (
-    <ShareResilienceLiveChart
-      scenarioIds={item.scenarioIds}
-      outcomeCodes={item.outcomeCodes}
-      hydroclimates={item.hydroclimates}
     />
   )
 }

@@ -26,7 +26,7 @@ import ShareScenarioCard from "./ShareScenarioCard"
 import ShareRadarCard from "./ShareRadarCard"
 import ShareSnapshotCard from "./ShareSnapshotCard"
 import ShareRadarLiveChart from "./ShareRadarLiveChart"
-import ShareResilienceLiveChart from "./ShareResilienceLiveChart"
+import ResilienceShareCard from "./ResilienceShareCard"
 import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 import type { VerticalParallelLineData } from "@repo/viz"
 import {
@@ -155,68 +155,10 @@ function ShareItemCard({
   }
 
   if (item.type === "resilience") {
-    const outcomeChips = outcomeCodesToLabels(item.outcomeCodes)
-    const scenarioChips = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.shortLabel ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const viewLabel =
-      item.view === "aggregate"
-        ? "Aggregate across library"
-        : item.view === "scenario"
-          ? "By scenario"
-          : item.view === "outcome"
-            ? "By outcome"
-            : item.view === "hydroclimate"
-              ? "By hydroclimate"
-              : item.view === "quadrant"
-                ? "Leverage quadrant"
-                : item.view
-    const encodingLabel = item.cellEncoding
-      .replace(/_/g, " ")
-      .replace(/^./, (c) => c.toUpperCase())
-    const title =
-      item.view === "quadrant"
-        ? viewLabel
-        : `${viewLabel}: ${encodingLabel}`
-    const tileKindLabel =
-      item.tileScope === "scenario"
-        ? "Scenario"
-        : item.tileScope === "outcome"
-          ? "Outcome"
-          : item.tileScope === "hydroclimate"
-            ? "Hydroclimate"
-            : item.tileScope === "quadrant"
-              ? "Quadrant"
-              : null
-    const subtitle = item.tileLabel
-      ? tileKindLabel
-        ? `${tileKindLabel}: ${item.tileLabel}`
-        : item.tileLabel
-      : item.scenarioIds.length
-        ? `${item.scenarioIds.length} scenario${item.scenarioIds.length === 1 ? "" : "s"} in scope`
-        : "Full library"
-    const liveChart =
-      !item.cachedImageDataUrl && item.view !== "quadrant" ? (
-        <ShareResilienceLiveChart
-          scenarioIds={item.scenarioIds}
-          outcomeCodes={item.outcomeCodes}
-          hydroclimates={item.hydroclimates}
-        />
-      ) : undefined
     return (
-      <ShareSnapshotCard
-        id={item.id}
-        toolLabel="Resilience"
-        title={title}
-        subtitle={subtitle}
-        chips={[...scenarioChips.slice(0, 4), ...outcomeChips]}
-        hydroclimate={item.hydroclimates[0]}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        liveChart={liveChart}
-        note={item.note}
+      <ResilienceShareCard
+        item={item}
+        scenarioLookup={scenarioLookup}
         onNoteChange={(note) => onNoteChange(item.id, note)}
         onRemove={onRemove}
       />
