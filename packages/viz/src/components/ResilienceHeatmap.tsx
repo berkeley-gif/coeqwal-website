@@ -1687,8 +1687,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             lineHeight: 1.5,
             zIndex: 20,
             boxShadow: palette.tooltipShadow,
-            whiteSpace: "nowrap",
             maxWidth: 320,
+            boxSizing: "border-box",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
           }}
         />
         <div
@@ -1706,6 +1708,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             zIndex: 20,
             boxShadow: palette.tooltipShadow,
             maxWidth: 280,
+            boxSizing: "border-box",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
           }}
         />
       </div>
