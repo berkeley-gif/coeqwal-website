@@ -8,7 +8,16 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from "react"
-import { Box, useTheme, Tooltip } from "@repo/ui/mui"
+import {
+  Box,
+  useTheme,
+  Tooltip,
+  Snackbar,
+  Alert,
+  Menu,
+  MenuItem,
+  Divider,
+} from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
@@ -84,15 +93,12 @@ function calculateMultiPolygonCentroid(
   return calculatePolygonCentroid(largestPolygon)
 }
 
-/**
- * Get the centroid for a polygon feature from Mapbox
- */
-function getPolygonCentroidFromMapbox(
+function getPolygonCentroidNameFromMapbox(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   map: any,
   outcomeCode: string,
   locationId: string,
-): [number, number] | null {
+): { coords: [number, number]; name: string } | null {
   const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
 
   // Only works for polygon layers
@@ -133,12 +139,23 @@ function getPolygonCentroidFromMapbox(
     const feature = features[0]
     const geometry = feature.geometry
 
+    const resolvedName =
+      feature.properties?.Mod_Name ||
+      feature.properties?.Urb_Name ||
+      feature.properties?.Sub_Name
+
     if (geometry.type === "Polygon" && geometry.coordinates) {
-      return calculatePolygonCentroid(geometry.coordinates as number[][][])
+      return {
+        coords: calculatePolygonCentroid(geometry.coordinates as number[][][]),
+        name: resolvedName,
+      }
     } else if (geometry.type === "MultiPolygon" && geometry.coordinates) {
-      return calculateMultiPolygonCentroid(
-        geometry.coordinates as number[][][][],
-      )
+      return {
+        coords: calculateMultiPolygonCentroid(
+          geometry.coordinates as number[][][][],
+        ),
+        name: resolvedName,
+      }
     }
 
     return null
@@ -285,6 +302,14 @@ export default function EquityPanel() {
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
   >([])
+  const [hasShownMapHint, setHasShownMapHint] = useState(false)
+  const [showMapHintSnackbar, setShowMapHintSnackbar] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{
+    mouseX: number
+    mouseY: number
+    category: string
+    tier: string
+  } | null>(null)
 
   // Watch for map location highlights being cleared to deselect all objectives
   const locationHighlights = useMapStore((state) => state.locationHighlights)
@@ -313,7 +338,10 @@ export default function EquityPanel() {
         const baselineData = baselineTierDataByCode[outcome.shortCode]
         if (baselineData) {
           baselineData.locations.forEach((location) => {
-            baselineTierMap.set(location.location_id, location.tier_level)
+            baselineTierMap.set(
+              `${outcome.shortCode},${location.location_id}`,
+              location.tier_level,
+            )
           })
         }
       })
@@ -332,7 +360,9 @@ export default function EquityPanel() {
       currentData.locations.forEach((location) => {
         const currentTierLevel = location.tier_level
         const baselineTierLevel = showEquityComparison
-          ? (baselineTierMap.get(location.location_id) ?? currentTierLevel)
+          ? (baselineTierMap.get(
+              `${outcome.shortCode},${location.location_id}`,
+            ) ?? currentTierLevel)
           : currentTierLevel
 
         result.push({
@@ -387,6 +417,59 @@ export default function EquityPanel() {
     setSelectedObjectives(categoryObjectives)
   }
 
+  const handleTierCategoryClick = (
+    categoryName: string,
+    tier: string,
+    event: MouseEvent,
+  ) => {
+    event.preventDefault()
+    if (showEquityComparison) {
+      // Show context menu for filtering
+      setContextMenu({
+        mouseX: event.clientX,
+        mouseY: event.clientY,
+        category: categoryName,
+        tier: tier,
+      })
+    } else {
+      // Direct selection in non-comparison mode
+      const tierCategoryObjectives = objectives.filter(
+        (obj) => obj.category === categoryName && obj.tier === tier,
+      )
+      setSelectedObjectives(tierCategoryObjectives)
+    }
+  }
+
+  const handleContextMenuSelect = (
+    filter: "all" | "improved" | "nochange" | "worsened",
+  ) => {
+    if (!contextMenu) return
+
+    const { category, tier } = contextMenu
+    let filtered = objectives.filter(
+      (obj) => obj.category === category && obj.tier === tier,
+    )
+
+    if (filter === "improved") {
+      filtered = filtered.filter((obj) => {
+        const currentTier = parseInt(obj.tier.replace("Tier ", ""))
+        const baselineTier = parseInt(obj.baselineTier.replace("Tier ", ""))
+        return currentTier < baselineTier
+      })
+    } else if (filter === "nochange") {
+      filtered = filtered.filter((obj) => obj.tier === obj.baselineTier)
+    } else if (filter === "worsened") {
+      filtered = filtered.filter((obj) => {
+        const currentTier = parseInt(obj.tier.replace("Tier ", ""))
+        const baselineTier = parseInt(obj.baselineTier.replace("Tier ", ""))
+        return currentTier > baselineTier
+      })
+    }
+
+    setSelectedObjectives(filtered)
+    setContextMenu(null)
+  }
+
   const handleShowOnMap = useCallback(
     (outcomeLocationCodes: string[]) => {
       // Get the Mapbox map instance
@@ -406,7 +489,6 @@ export default function EquityPanel() {
       // Create marker elements for each location
       const markerElements = objectivesToShow.map((obj) => {
         // Get tier color and shape based on comparison mode
-        let markerColor: string
         let isTriangle = false
         let triangleDirection: "up" | "down" = "up"
 
@@ -416,32 +498,38 @@ export default function EquityPanel() {
             obj.baselineTier.replace("Tier ", ""),
           )
           if (currentTierNum === baselineTierNum) {
-            markerColor = "#64b5f6" // Light blue - no change
+            // markerColor = "#64b5f6" // Light blue - no change
             isTriangle = false // Circle for no change
           } else if (currentTierNum < baselineTierNum) {
-            markerColor = "#1976d2" // Blue - improved
+            // markerColor = "#1976d2" // Blue - improved
             isTriangle = true
             triangleDirection = "up" // Triangle pointing up for improvement
           } else {
-            markerColor = "#d32f2f" // Red - worsened
+            // markerColor = "#d32f2f" // Red - worsened
             isTriangle = true
             triangleDirection = "down" // Triangle pointing down for worse
           }
         } else {
           // Use tier color when not in comparison mode
-          markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
+          // markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
           isTriangle = false
         }
+        const markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
+        let name: string | null = null
         if (obj.tierCode && map) {
           // Try to get centroid from polygon layer
-          coords = getPolygonCentroidFromMapbox(
+          const result = getPolygonCentroidNameFromMapbox(
             map,
             obj.tierCode,
             obj.locationId,
           )
+          if (result) {
+            coords = result.coords
+            name = result.name
+          }
         }
 
         // Fallback to hardcoded coordinates if polygon centroid not available
@@ -468,8 +556,20 @@ export default function EquityPanel() {
                 fontSize: "15.5px",
               }}
             >
-              {obj.locationName}
+              {name || obj.locationName}
             </Box>
+            {name && (
+              <Box
+                sx={{
+                  fontWeight: 400,
+                  mb: 0.5,
+                  color: "#718096",
+                  fontSize: "11px",
+                }}
+              >
+                {obj.locationName}
+              </Box>
+            )}
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
               {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
                 obj.tierCode}
@@ -530,8 +630,20 @@ export default function EquityPanel() {
                 fontSize: "15.5px",
               }}
             >
-              {obj.locationName}
+              {name || obj.locationName}
             </Box>
+            {name && (
+              <Box
+                sx={{
+                  fontWeight: 400,
+                  mb: 0.5,
+                  color: "#718096",
+                  fontSize: "11px",
+                }}
+              >
+                {obj.locationName}
+              </Box>
+            )}
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
               {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
                 obj.tierCode}
@@ -599,7 +711,7 @@ export default function EquityPanel() {
                   gap: 0.5,
                 }}
               >
-                <Box
+                {/* <Box
                   sx={{
                     px: 1,
                     py: 0.5,
@@ -613,13 +725,13 @@ export default function EquityPanel() {
                   }}
                 >
                   {obj.locationName}
-                </Box>
+                </Box> */}
                 {isTriangle ? (
                   <Box
                     component="svg"
                     sx={{
-                      width: 14,
-                      height: 14,
+                      width: 16,
+                      height: 16,
                       filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
                     }}
                     viewBox="0 0 14 14"
@@ -629,26 +741,27 @@ export default function EquityPanel() {
                         points="7,2 2,12 12,12"
                         fill={markerColor}
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="1"
                       />
                     ) : (
                       <polygon
                         points="7,12 2,2 12,2"
                         fill={markerColor}
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="1"
                       />
                     )}
                   </Box>
                 ) : (
                   <Box
                     sx={{
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       borderRadius: "50%",
                       backgroundColor: markerColor,
-                      border: "2px solid white",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                      border: "1px solid white",
+                      // boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                      // opacity: showEquityComparison ? 0.5 : 1,
                     }}
                   />
                 )}
@@ -698,6 +811,14 @@ export default function EquityPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedObjectives, showMap])
 
+  useEffect(() => {
+    if (showMap && !hasShownMapHint) {
+      setHasShownMapHint(true)
+      setShowMapHintSnackbar(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showMap])
+
   // Cleanup markers on unmount
   useEffect(() => {
     return () => {
@@ -739,10 +860,69 @@ export default function EquityPanel() {
           selectedObjectives={selectedObjectives}
           onObjectiveClick={handleObjectiveClick}
           onCategoryClick={handleCategoryClick}
+          onTierCategoryClick={handleTierCategoryClick}
           onShowOnMap={handleShowOnMap}
           showMapView={showMap}
         />
       </Box>
+
+      {/* Context menu for filtering tier-category cells */}
+      <Menu
+        open={contextMenu !== null}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem
+          onClick={() => handleContextMenuSelect("all")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          All in this cell
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => handleContextMenuSelect("improved")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          Improved only
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleContextMenuSelect("nochange")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          No change only
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleContextMenuSelect("worsened")}
+          sx={{ fontSize: "0.75rem", py: 0.2, px: 1.5 }}
+        >
+          Worsened only
+        </MenuItem>
+      </Menu>
+
+      <Snackbar
+        open={showMapHintSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          top: "50% !important",
+        }}
+      >
+        <Alert
+          onClose={() => setShowMapHintSnackbar(false)}
+          severity="info"
+          sx={{
+            width: "100%",
+            border: 2,
+            alignItems: "center",
+          }}
+        >
+          Click on squares in the grid to view their locations on the map
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
