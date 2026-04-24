@@ -189,6 +189,7 @@ export default function ToolToolbar({
             </Typography>
           </Box>
         )}
+        {HOW_TO_READ_ENABLED && <VerticalDivider />}
         {/* Outcome view toggle (Average / Bar / Distribution) hidden
             . The list view reverts to its bar-chart
             default; the glyph click-through to map layers is
@@ -201,9 +202,9 @@ export default function ToolToolbar({
               value={outcomeDisplayMode}
               onChange={setOutcomeDisplayMode}
             />
+            <VerticalDivider />
           </>
         ) : null}
-        <VerticalDivider />
       </Box>
 
       <Box

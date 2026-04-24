@@ -25,6 +25,7 @@ import {
   useShowBasins,
   useShowRivers,
   useShowArrows,
+  useActiveOutcomeVisualization,
 } from "./store"
 
 export default function LayerOrchestrator() {
@@ -34,6 +35,7 @@ export default function LayerOrchestrator() {
   const showBasins = useShowBasins()
   const showRivers = useShowRivers()
   const showArrows = useShowArrows()
+  const activeOutcomeVisualization = useActiveOutcomeVisualization()
 
   const isLearnMode = mapMode === "learn"
 
@@ -41,8 +43,14 @@ export default function LayerOrchestrator() {
 
   // Rivers visibility:
   // - Learn mode: controlled by scroll position
-  // - Get-started / Explore mode: hidden (clean map)
-  const riversVisible = isLearnMode ? showRivers : false
+  // - Explore: only when Winter-run salmon is the active map outcome, so
+  //   the Sacramento main stem can be stroked with the tier color (RiversLayer).
+  // - Get-started: hidden here; tier animation uses its own map paint path.
+  const showSalmonRiversInExplore =
+    mapMode === "explore" &&
+    activeOutcomeVisualization?.outcomeCode === "WRC_SALMON_AB"
+  const riversVisible =
+    (isLearnMode && showRivers) || showSalmonRiversInExplore
 
   // Rivers progress:
   // - Learn mode: animated via scroll (0 -> 1)
@@ -58,6 +66,7 @@ export default function LayerOrchestrator() {
         mapMode={mapMode}
         riversVisible={riversVisible}
         riversProgress={riversProgressValue}
+        riversSacramentoOnly={showSalmonRiversInExplore}
         basinsVisible={isLearnMode && showBasins}
         riverBasinLabelsOpacity={riverBasinLabelsOpacity}
         arrowsVisible={isLearnMode && showArrows}

@@ -13,6 +13,8 @@ interface BaseLayersProps {
   mapMode: MapMode
   riversVisible: boolean
   riversProgress: number
+  /** When true, rivers layer draws only the Sacramento mainstem. */
+  riversSacramentoOnly?: boolean
   basinsVisible: boolean
   riverBasinLabelsOpacity: number
   arrowsVisible: boolean
@@ -22,6 +24,7 @@ interface BaseLayersProps {
 export default function BaseLayers({
   riversVisible,
   riversProgress,
+  riversSacramentoOnly = false,
   basinsVisible,
   riverBasinLabelsOpacity,
   arrowsVisible,
@@ -36,7 +39,11 @@ export default function BaseLayers({
 
       <BasinInflowArrows visible={arrowsVisible} opacity={arrowsOpacity} />
 
-      <RiversLayer visible={riversVisible} progress={riversProgress} />
+      <RiversLayer
+        visible={riversVisible}
+        progress={riversProgress}
+        sacramentoOnly={riversSacramentoOnly}
+      />
     </>
   )
 }
