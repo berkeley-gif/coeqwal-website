@@ -199,6 +199,21 @@ export default function ToolTour() {
 
   const steps = tourTool ? TOUR_STEPS[tourTool] : []
   const step = steps[tourStep] ?? null
+  const stepId = step?.id
+  const anchorId = step?.anchorId
+  // Single key for the anchor `useEffect` deps so the dependency array
+  // always has the same length (3). React warns if the effect's deps
+  // array changes size between renders, which can happen when Fast
+  // Refresh replaces a 3-tuple with a 4-tuple or vice versa. Encoding
+  // step and anchor in one string keeps behavior equivalent to
+  // [stepId, anchorId, ...] without a variable-length list.
+  const tourStepAnchorKey = useMemo(
+    () =>
+      [tourTool ?? "", String(tourStep), stepId ?? "", anchorId ?? ""].join(
+        "\u0000",
+      ),
+    [tourTool, tourStep, stepId, anchorId],
+  )
 
   const hasTourBody = Boolean(step && (step.body?.trim() ?? "").length > 0)
   const hasTourMainBlock = Boolean(
@@ -214,34 +229,42 @@ export default function ToolTour() {
   // render as "hidden control" every time the step changes.
   const [fallbackToCentered, setFallbackToCentered] = useState(false)
 
+  // Keep a fixed-length deps array ([tourStepAnchorKey, version, resolve])
+  // so React never complains when Fast Refresh swaps a 3-tuple for a
+  // 4-tuple. stepId and anchorId are encoded in tourStepAnchorKey.
   useEffect(() => {
-    if (!step) {
-      setAnchorEl(null)
-      setFallbackToCentered(false)
+    if (!stepId) {
+      setAnchorEl((prev) => (prev == null ? prev : null))
+      setFallbackToCentered((prev) => (prev === false ? prev : false))
       return
     }
-    if (!step.anchorId) {
-      setAnchorEl(null)
-      setFallbackToCentered(false)
+    if (!anchorId) {
+      setAnchorEl((prev) => (prev == null ? prev : null))
+      setFallbackToCentered((prev) => (prev === false ? prev : false))
       return
     }
-    const el = resolve(step.anchorId)
-    setAnchorEl(el)
+    const el = resolve(anchorId)
+    setAnchorEl((prev) => (prev === el ? prev : el))
     if (el) {
-      setFallbackToCentered(false)
+      setFallbackToCentered((prev) => (prev === false ? prev : false))
       return
     }
-    setFallbackToCentered(false)
+    setFallbackToCentered((prev) => (prev === false ? prev : false))
     const timer = window.setTimeout(() => {
-      const retry = resolve(step.anchorId!)
+      const retry = resolve(anchorId)
       if (retry) {
-        setAnchorEl(retry)
+        setAnchorEl((prev) => (prev === retry ? prev : retry))
       } else {
-        setFallbackToCentered(true)
+        setFallbackToCentered((prev) => (prev === true ? prev : true))
       }
     }, 250)
     return () => window.clearTimeout(timer)
-  }, [step, resolve, version])
+    // stepId and anchorId are read inside the effect but their changes
+    // are already captured by tourStepAnchorKey; listing them would
+    // grow the deps array to 5 and trip "changed size between renders"
+    // during Fast Refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStepAnchorKey, version, resolve])
 
   // Scroll the anchor into view + tag it for downstream CSS hooks.
   // The actual highlight ring is painted by <HighlightRing> in a

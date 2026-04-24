@@ -20,9 +20,11 @@
  *
  * Within the chart controls region, steps progress in the same
  * visual order a user's eye reads the controls: the sentence top
- * to bottom and left to right (pivot, axes, outcomes, encoding),
- * then the Presets row, then the Rows row, and finally Save
- * snapshot at the top-right corner of the toolbar.
+ * to bottom and left to right (pivot, axes, outcomes), then the
+ * Presets row, then the Rows row (which also hosts Save snapshot
+ * at its right edge). The sentence ends with a static "as average
+ * tier" clause (no chooser) because the tool is focused on the
+ * tier story.
  */
 
 import type { TourStep } from "../types"
@@ -77,8 +79,9 @@ export const RESILIENCE_TOUR: TourStep[] = [
 
   // Arrange the chart. Steps here follow the chart controls left to
   // right and top to bottom: the sentence reads pivot -> axes ->
-  // outcomes -> encoding, then the Presets row, then the Rows row
-  // (which also hosts Save snapshot at its right edge).
+  // outcomes (and ends in a static "as average tier" clause), then
+  // the Presets row, then the Rows row (which also hosts Save
+  // snapshot at its right edge).
   {
     id: "resilience.step1.pivot",
     anchorId: "resilience.pivot",
@@ -101,14 +104,6 @@ export const RESILIENCE_TOUR: TourStep[] = [
     eyebrow: "arrange the chart",
     title: "Pick which outcomes to show",
     body: "Click this phrase to open the outcome picker. Narrow to a handful of outcomes to keep the chart legible, or expand a parent outcome to see its regional rows. In the per-outcome layout, this is also where you set the primary outcome and pick outcomes to compare against it.",
-    placement: "bottom-start",
-  },
-  {
-    id: "resilience.step1.encoding",
-    anchorId: "resilience.encoding",
-    eyebrow: "arrange the chart",
-    title: "Choose what color means",
-    body: "Click this phrase to change how each cell is colored. Tier paints the performance category. Delta compares against a baseline with a diverging palette. Glyph splits each cell into a grid, one sub-tile per scenario.",
     placement: "bottom-start",
   },
   {

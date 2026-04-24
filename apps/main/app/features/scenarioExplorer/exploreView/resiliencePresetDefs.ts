@@ -115,22 +115,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         expandedTileId: null,
       }),
     },
-    {
-      id: "analyze-scenario-distribution",
-      group: "Analyze",
-      label: "Scenario distribution",
-      description:
-        "Scenarios as small multiples, cells show the spread of results.",
-      salient: true,
-      getPatch: () => ({
-        view: "scenario",
-        cellEncoding: "distribution",
-        deltaMode: "none",
-        showAllScenarios: true,
-        showCellNumbers: false,
-        expandedTileId: null,
-      }),
-    },
   ]
 
 export const RESILIENCE_SALIENT_PRESETS: readonly ResiliencePresetDefinition[] =

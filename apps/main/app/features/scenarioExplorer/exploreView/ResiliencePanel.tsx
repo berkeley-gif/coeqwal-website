@@ -27,6 +27,7 @@ import {
   Box,
   Checkbox,
   CircularProgress,
+  Snackbar,
   Typography,
   useTheme,
 } from "@repo/ui/mui"
@@ -311,6 +312,36 @@ function resolveCellRender(
   return deltaMode !== "none" ? "delta" : "tier"
 }
 
+/**
+ * Compose the Snackbar copy shown when a heatmap cell click cannot
+ * drive the map. Each branch explains the specific gating reason so
+ * the message never sounds like a global "maps aren't ready" failure.
+ * The derived-encoding branch is mostly defensive: the Read-as chooser
+ * has been removed and `ResilienceControls` coerces the encoding back
+ * to tier, but a stale preset or URL can still deliver a derived value
+ * transiently before the coercion effect runs.
+ */
+function getMapLinkBlockedMessage(
+  effectiveView: ResilienceView,
+  cellEncoding: CellEncoding,
+  hasOutcome: boolean,
+): string {
+  if (!hasOutcome) {
+    return "This cell isn't tied to a mappable outcome."
+  }
+  if (effectiveView === "aggregate") {
+    return "Overview cells aggregate many scenarios or outcomes, so they don't open a single slice on the map. Switch to Scenarios, Outcomes, or Hydroclimates to link cells to the map."
+  }
+  if (
+    cellEncoding === "delta" ||
+    cellEncoding === "density_opp" ||
+    cellEncoding === "leverage"
+  ) {
+    return "This cell shows a derived metric, not a single scenario tier, so it doesn't drive the map."
+  }
+  return "This cell can't be linked to the map from the current view."
+}
+
 export default function ResiliencePanel({
   controls,
   highlightedIds = null,
@@ -359,6 +390,11 @@ export default function ResiliencePanel({
   const distributionMode = useScenarioExplorerStore(
     (s) => s.resilienceDistributionMode,
   )
+  // Map hydroclimate lives on the scenario explorer store. The toolbar
+  // `HydroclimateChooser` writes to the same setter; we call it when the
+  // user clicks a heatmap cell so the map repaints for that cell's
+  // hydroclimate via the existing sibling-group resolution path.
+  const setHydroclimate = useScenarioExplorerStore((s) => s.setHydroclimate)
 
   // Legacy walkthrough-open state (unused; guide lives in ResilienceControls).
   // const [walkthroughOpen, setWalkthroughOpen] = useState(false)
@@ -1156,6 +1192,13 @@ export default function ResiliencePanel({
       }
     })
 
+    // When aggregating across hydroclimates, the column axis becomes
+    // scenarios, so col.key is a scenarioId and the cell is not pinned
+    // to any one HC. Every other main-heatmap layout has HC columns.
+    const columnsAreHydroclimate = !(
+      effectiveView === "aggregate" && aggregateOver === "hydroclimates"
+    )
+
     for (const rk of orderedRowKeys) {
       for (const col of columns) {
         const v = valueGrid[rk]?.[col.key]
@@ -1177,6 +1220,7 @@ export default function ResiliencePanel({
                 ? rk
                 : undefined,
           outcomeCode: rk,
+          hydroclimate: columnsAreHydroclimate ? col.key : undefined,
           type: v.type,
           divergingValue: v.divergingValue,
           densityValue: v.densityValue,
@@ -1196,6 +1240,7 @@ export default function ResiliencePanel({
     effectiveView,
     effectiveFocusScenarioId,
     scenarios,
+    aggregateOver,
   ])
 
   // Per-scenario cell computation for the by-scenario small-multiples
@@ -1251,6 +1296,7 @@ export default function ResiliencePanel({
         subjectLabel: subject,
         scenarioId,
         outcomeCode: rowKey,
+        hydroclimate: hc,
         type: cell.type,
         distribution,
       }
@@ -1406,6 +1452,7 @@ export default function ResiliencePanel({
         subjectLabel: subject,
         scenarioId,
         outcomeCode,
+        hydroclimate: hc,
         type: cell.type,
         distribution,
       }
@@ -1523,6 +1570,7 @@ export default function ResiliencePanel({
         subjectLabel: subject,
         scenarioId,
         outcomeCode,
+        hydroclimate: hc,
         type: cell.type,
         distribution,
       }
@@ -1751,14 +1799,76 @@ export default function ResiliencePanel({
     ],
   )
 
+  // Whether clicking this cell can drive the map today. The Overview
+  // (aggregate) view and the derived encodings (climate shift, density,
+  // leverage) do not map cleanly onto the per-LOI tier paint that the
+  // map pipeline serves, so we explain that in a Snackbar instead of
+  // painting an approximation.
+  const cellMapsCleanly = useCallback(
+    (cell: ResilienceHeatmapCell): boolean => {
+      if (!cell.outcomeCode) return false
+      if (effectiveView === "aggregate") return false
+      if (
+        cellEncoding === "delta" ||
+        cellEncoding === "density_opp" ||
+        cellEncoding === "leverage"
+      ) {
+        return false
+      }
+      return true
+    },
+    [effectiveView, cellEncoding],
+  )
+
+  // Snackbar message for clicks that can't drive the map. We store the
+  // reason as a string so each click shows copy that matches its own
+  // gating condition (overview vs. derived encoding vs. missing outcome)
+  // rather than the generic "coming soon" line. `null` means closed.
+  const [mapBlockedMessage, setMapBlockedMessage] = useState<string | null>(
+    null,
+  )
+  const openMapBlockedMessage = useCallback(
+    (message: string) => setMapBlockedMessage(message),
+    [],
+  )
+  const closeMapBlockedMessage = useCallback(
+    () => setMapBlockedMessage(null),
+    [],
+  )
+
   const handleCellClick = useCallback(
     (cell: ResilienceHeatmapCell) => {
       if (!isMapVisible) return
-      const outcomeCode = cell.outcomeCode
-      if (!outcomeCode) return
-      triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
+      if (!cell.outcomeCode) {
+        openMapBlockedMessage(
+          getMapLinkBlockedMessage(effectiveView, cellEncoding, false),
+        )
+        return
+      }
+      if (!cellMapsCleanly(cell)) {
+        openMapBlockedMessage(
+          getMapLinkBlockedMessage(effectiveView, cellEncoding, true),
+        )
+        return
+      }
+      // Align the toolbar HC with the clicked column so the sibling-
+      // group resolution in useMapVisualizationAction paints the right
+      // climate variant on the map. Safe to call even if the value
+      // matches current state - setHydroclimate is idempotent.
+      if (cell.hydroclimate) {
+        setHydroclimate(cell.hydroclimate)
+      }
+      triggerMapForOutcome(cell.outcomeCode, cell.scenarioId ?? null)
     },
-    [isMapVisible, triggerMapForOutcome],
+    [
+      isMapVisible,
+      cellMapsCleanly,
+      openMapBlockedMessage,
+      effectiveView,
+      cellEncoding,
+      setHydroclimate,
+      triggerMapForOutcome,
+    ],
   )
 
   // Build a LocationHighlight payload from a distribution square in
@@ -1878,13 +1988,31 @@ export default function ResiliencePanel({
 
   // Per-square click. Opens the outcome's map layer and (location mode)
   // toggles a persistent pin for the clicked LOI. No-op when the map
-  // is hidden, same guard as handleCellClick above.
+  // is hidden, same guard as handleCellClick above. Overview / derived
+  // cells short-circuit to the reason-specific Snackbar - even the LOI
+  // pin is gated, since the pin's tier color would disagree with the
+  // cell's reduced scalar.
   const handleSquareClick = useCallback(
     (info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry }) => {
       const { cell, entry } = info
       const outcomeCode = cell.outcomeCode
       if (!isMapVisible) return
-      if (!outcomeCode) return
+      if (!outcomeCode) {
+        openMapBlockedMessage(
+          getMapLinkBlockedMessage(effectiveView, cellEncoding, false),
+        )
+        return
+      }
+      if (!cellMapsCleanly(cell)) {
+        openMapBlockedMessage(
+          getMapLinkBlockedMessage(effectiveView, cellEncoding, true),
+        )
+        return
+      }
+
+      if (cell.hydroclimate) {
+        setHydroclimate(cell.hydroclimate)
+      }
 
       if (distributionMode === "location") {
         // Location mode encodes LOIs. Entries carry no scenarioId, so we
@@ -1914,6 +2042,11 @@ export default function ResiliencePanel({
     },
     [
       isMapVisible,
+      cellMapsCleanly,
+      openMapBlockedMessage,
+      effectiveView,
+      cellEncoding,
+      setHydroclimate,
       distributionMode,
       triggerMapForOutcome,
       buildLocationHighlight,
@@ -2205,6 +2338,21 @@ export default function ResiliencePanel({
         climateCount={selectedHydroclimates.size}
       />
 
+      {isMapVisible && effectiveView === "aggregate" && (
+        <Typography
+          variant="caption"
+          sx={{
+            px: theme.space.component.lg,
+            pb: theme.space.component.xs,
+            color: theme.palette.grey[700],
+            lineHeight: 1.3,
+          }}
+        >
+          Overview cells aggregate across scenarios. Switch to Scenarios,
+          Outcomes, or Hydroclimates to link cells to the map.
+        </Typography>
+      )}
+
       <Box
         sx={{
           flex: 1,
@@ -2453,6 +2601,30 @@ export default function ResiliencePanel({
           }}
         />
       )}
+
+      <Snackbar
+        open={mapBlockedMessage !== null}
+        autoHideDuration={4500}
+        onClose={closeMapBlockedMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        message={mapBlockedMessage ?? undefined}
+        ContentProps={{
+          sx: {
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            borderRadius: theme.borderRadius.sm,
+            justifyContent: "center",
+            maxWidth: 320,
+            px: 2,
+            py: 1.5,
+            "& .MuiSnackbarContent-message": {
+              textAlign: "center",
+              whiteSpace: "normal",
+              lineHeight: 1.4,
+            },
+          },
+        }}
+      />
     </Box>
   )
 }

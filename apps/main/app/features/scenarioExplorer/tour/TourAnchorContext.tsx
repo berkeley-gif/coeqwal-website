@@ -124,14 +124,22 @@ export function useTourAnchor(id: string) {
  */
 export function useTourAnchorResolver() {
   const ctx = useContext(TourAnchorContext)
+  const ctxRef = useRef(ctx)
+  ctxRef.current = ctx
   const [version, setVersion] = useState(0)
   useEffect(() => {
     if (!ctx) return
     return ctx.subscribe(() => setVersion((v) => v + 1))
   }, [ctx])
-  const resolve = useCallback(
-    (id: string) => (ctx ? ctx.resolve(id) : null),
-    [ctx],
-  )
+  // Keep `resolve` referentially stable. ToolTour and other consumers put
+  // it in `useEffect` dependency arrays. A callback that closed over
+  // `ctx` and listed `[ctx]` re-ran that effect on every render whenever
+  // the provider's value object identity wobbled, which can exceed max
+  // update depth. Reading `ctx` from a ref keeps the callback stable while
+  // still resolving the latest registry.
+  const resolve = useCallback((id: string) => {
+    const c = ctxRef.current
+    return c ? c.resolve(id) : null
+  }, [])
   return { resolve, version }
 }

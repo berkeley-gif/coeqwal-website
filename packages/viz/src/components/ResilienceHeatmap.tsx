@@ -77,6 +77,14 @@ export interface ResilienceHeatmapCell {
   /** Opaque passthrough for onClick handlers (e.g. scenarioId / outcomeCode). */
   scenarioId?: string
   outcomeCode?: string
+  /**
+   * Hydroclimate slice this cell represents, when the cell is pinned to a
+   * single hydroclimate. Populated by the parent so click handlers can
+   * route the map to the matching climate variant without re-deriving it
+   * from `rowKey` / `colKey`. Left undefined when the axis the cell sits
+   * on is not a hydroclimate (e.g. aggregateOver === "hydroclimates").
+   */
+  hydroclimate?: string
   /** Distinguishes aggregate outcome cells from single-value / NOD-SOD cells. */
   type?: "single_value" | "multi_value" | "nod_sod"
   /** Signed delta value (tier units); used when cellRender === "delta". */

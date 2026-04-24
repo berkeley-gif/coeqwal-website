@@ -424,6 +424,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onAxisPositionsRef.current = onAxisPositions
     }, [onAxisPositions])
+    const activeMapDotRef = useRef(activeMapDot)
+    useEffect(() => {
+      activeMapDotRef.current = activeMapDot
+    }, [activeMapDot])
     // Last axis positions reported to the parent via onAxisPositions.
     // Guarding against equal repeats breaks the ResizeObserver → updateChart
     // → setState → re-render feedback loop that can trip React's
@@ -1169,6 +1173,88 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 })
             })
           })
+
+          {
+            const active = activeMapDotRef.current
+            if (active) {
+              const overlay = g.select("g.highlight-overlay")
+              const dotSel = dotsLayer
+                .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+                .filter(function () {
+                  return (
+                    this.getAttribute("data-scenario-id") ===
+                      active.scenarioId &&
+                    this.getAttribute("data-axis") === active.axis
+                  )
+                })
+              const node = dotSel.node()
+              if (node) {
+                const cell = select(node)
+                const finalCx = parseFloat(
+                  cell.attr("data-final-cx") ?? cell.attr("cx") ?? "0",
+                )
+                const finalCy = parseFloat(
+                  cell.attr("data-final-cy") ?? cell.attr("cy") ?? "0",
+                )
+                const fill = cell.attr("fill") ?? colors.default
+                const oldPos = morphSnapshot?.dots.get(
+                  `${active.axis}:${active.scenarioId}`,
+                )
+                const sx = oldPos != null ? oldPos.cx : finalCx
+                const sy = oldPos != null ? oldPos.cy : finalCy
+                const baseR = 4
+                const glow = overlay
+                  .append("circle")
+                  .attr("class", "active-map-glow")
+                  .attr("cx", sx)
+                  .attr("cy", sy)
+                  .attr("r", baseR + 8)
+                  .attr("fill", fill)
+                  .attr("fill-opacity", 0.12)
+                  .attr("pointer-events", "none")
+                const ring = overlay
+                  .append("circle")
+                  .attr("class", "active-map-ring")
+                  .attr("cx", sx)
+                  .attr("cy", sy)
+                  .attr("r", baseR + 6)
+                  .attr("fill", "none")
+                  .attr("stroke", fill)
+                  .attr("stroke-width", 2.5)
+                  .attr("stroke-opacity", 0.7)
+                  .attr("pointer-events", "none")
+                const copy = overlay
+                  .append("circle")
+                  .attr("class", "active-map-dot-copy")
+                  .attr("cx", sx)
+                  .attr("cy", sy)
+                  .attr("r", baseR + 2)
+                  .attr("fill", fill)
+                  .attr("fill-opacity", 1)
+                  .attr("stroke", "#fff")
+                  .attr("stroke-width", 1)
+                  .attr("stroke-opacity", 1)
+                  .attr("pointer-events", "none")
+                if (oldPos != null) {
+                  glow
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("cx", finalCx)
+                    .attr("cy", finalCy)
+                  ring
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("cx", finalCx)
+                    .attr("cy", finalCy)
+                  copy
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("cx", finalCx)
+                    .attr("cy", finalCy)
+                }
+              }
+            }
+          }
 
           // Range band: arcs along polar circles at each spoke to cover dodge
           if (axisRange && Object.keys(axisRange).length > 0) {

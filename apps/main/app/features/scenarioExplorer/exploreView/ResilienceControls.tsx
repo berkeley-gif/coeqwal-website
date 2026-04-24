@@ -5,15 +5,17 @@
  *
  * The control surface is a single one-line sentence:
  *
- *   "Comparing {axes}, {pivot}, covering {scenarios}, {outcomes}, and
- *    {climates} as {encoding}."   [Options]
+ *   "{Pivot}, comparing {axes}, covering {scenarios}, {outcomes}, and
+ *    {climates}, as average tier."   [Options]
  *
- * The phrases run from broad (what the chart pivots on) to narrow
- * (what cell colors mean), so a new user reads the sentence in the
- * same order they would make decisions. Wording avoids data jargon
- * (no "aggregate", "mean", "read as", "x" / cross-product); terms of
- * art that the project already defines in its glossary (scenario,
- * outcome, hydroclimate, tier) are kept as-is.
+ * The leading phrase is the pivot (biggest lever on chart shape); the
+ * following phrases narrow down the axes and scope. Cells are always
+ * colored by average tier; that trailing clause is static text rather
+ * than a chooser, which keeps the sentence short and the tool focused
+ * on the tier story. Wording avoids data jargon (no "aggregate", "mean",
+ * "read as", "x" / cross-product); terms of art that the project
+ * already defines in its glossary (scenario, outcome, hydroclimate,
+ * tier) are kept as-is.
  *
  * Layout is not a user choice: non-aggregate pivots always render as
  * small multiples, and the aggregate pivot is always a single
@@ -52,8 +54,6 @@ import { useScenarioExplorerStore } from "../store"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 import type {
   AggregateOver,
-  CellEncoding,
-  DeltaMode,
   QuadrantUnit,
   ResilienceControlsState,
   ResilienceView,
@@ -103,85 +103,15 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
   "aggregate",
 ]
 
-/**
- * Virtual "Read as" enum. Combines cellEncoding + deltaMode into a
- * single user-facing read mode.
- */
-type ReadAs =
-  | "mean_tier"
-  | "climate_shift"
-  | "distribution"
-  | "operational_leverage"
-
-const READ_AS_LABEL: Record<ReadAs, string> = {
-  mean_tier: "average tier",
-  climate_shift: "change vs. historical",
-  distribution: "spread of results",
-  operational_leverage: "sensitivity to climate",
-}
-
-function deriveReadAs(
-  view: ResilienceView,
-  enc: CellEncoding,
-  delta: DeltaMode,
-): ReadAs {
-  if (view === "quadrant") return "mean_tier"
-  if (delta !== "none") return "climate_shift"
-  if (enc === "density_opp") return "mean_tier"
-  if (enc === "distribution") return "distribution"
-  if (enc === "leverage") return "operational_leverage"
-  return "mean_tier"
-}
-
-function applyReadAs(
-  next: ReadAs,
-  prev: ResilienceControlsState,
-): Partial<ResilienceControlsState> {
-  switch (next) {
-    case "mean_tier":
-      return { cellEncoding: "tier", deltaMode: "none" }
-    case "climate_shift":
-      return {
-        cellEncoding: "tier",
-        deltaMode: prev.deltaMode !== "none" ? prev.deltaMode : "vs_historical",
-      }
-    case "distribution":
-      return { cellEncoding: "distribution", deltaMode: "none" }
-    case "operational_leverage":
-      return { cellEncoding: "leverage", deltaMode: "none" }
-  }
-}
-
-const READ_AS_OPTIONS: readonly ReadAs[] = [
-  "mean_tier",
-  "climate_shift",
-  "distribution",
-  "operational_leverage",
-]
-
-/**
- * Gate options that don't compose with the current pivot /
- * aggregation. Leverage needs the underlying scenario by hydroclimate
- * cube; it is only coherent in aggregate. Climate shift
- * needs a historical HC column, so it's disabled when aggregating over
- * hydroclimates.
- */
-function isReadAsOptionDisabled(
-  opt: ReadAs,
-  view: ResilienceView,
-  aggregateOver: AggregateOver,
-): boolean {
-  if (opt === "operational_leverage" && view !== "aggregate") {
-    return true
-  }
-  if (opt === "operational_leverage" && aggregateOver !== "scenarios") {
-    return true
-  }
-  if (opt === "climate_shift" && aggregateOver === "hydroclimates") {
-    return true
-  }
-  return false
-}
+// The sentence used to end with a "read as" phrase button that let the
+// user swap between average tier, climate shift, spread of results,
+// and leverage encodings. That chooser was removed in favor of a
+// single, static "average tier" clause; the tool is now focused on
+// the tier story end-to-end. The CellEncoding / DeltaMode fields
+// remain in state (see `ResiliencePanel`) so presets and the viz
+// layer keep working, but there is no longer any UI that sets them
+// to anything other than `tier` / `none`. A migration effect below
+// coerces legacy or imported state back to those defaults.
 
 // ------------------------------------------------------------------
 // Z-role adapter
@@ -524,7 +454,6 @@ export default function ResilienceControls({
     view,
     cellEncoding,
     deltaMode,
-    deltaBaselineScenarioId,
     selectedHydroclimates,
     quadrantUnit,
     quadrantOutcome,
@@ -544,7 +473,6 @@ export default function ResilienceControls({
   const pivotAnchorRef = useTourAnchor("resilience.pivot")
   const axesAnchorRef = useTourAnchor("resilience.axes")
   const outcomesAnchorRef = useTourAnchor("resilience.outcomes")
-  const encodingAnchorRef = useTourAnchor("resilience.encoding")
   // The preset row and the row-options row each get their own tour
   // anchor so the walkthrough can point to them after the sentence.
   const presetsAnchorRef = useTourAnchor("resilience.presets")
@@ -554,12 +482,18 @@ export default function ResilienceControls({
   // component owns the tour anchor now.
   const saveSnapshotAnchorRef = useTourAnchor("resilience.snapshot")
 
+  // Pin the sentence to "average tier" end-to-end: any non-tier
+  // encoding (legacy density modes, distribution, leverage, glyph)
+  // or any non-none delta mode is coerced back to the default. This
+  // replaces the old chooser migrations and covers URL / preset /
+  // import paths that predate the simplification.
   useEffect(() => {
     const enc = cellEncoding as string
-    if (enc === "density_opp" || enc === "density_risk") {
+    const needsReset = enc !== "tier" || deltaMode !== "none"
+    if (needsReset) {
       onChange({ cellEncoding: "tier", deltaMode: "none" })
     }
-  }, [cellEncoding, onChange])
+  }, [cellEncoding, deltaMode, onChange])
 
   const showResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.showResilienceOutcomeSelector,
@@ -569,12 +503,6 @@ export default function ResilienceControls({
   )
   const resilienceVisibleOutcomes = useScenarioExplorerStore(
     (s) => s.resilienceVisibleOutcomes,
-  )
-  const distributionMode = useScenarioExplorerStore(
-    (s) => s.resilienceDistributionMode,
-  )
-  const setDistributionMode = useScenarioExplorerStore(
-    (s) => s.setResilienceDistributionMode,
   )
 
   const outcomeItems = useMemo(() => {
@@ -623,16 +551,9 @@ export default function ResilienceControls({
   const handleViewChange = useCallback(
     (next: ResilienceView) => {
       if (view === next) return
-      const patch: Partial<ResilienceControlsState> = { view: next }
-      if (
-        next !== "aggregate" &&
-        (cellEncoding === "glyph" || cellEncoding === "leverage")
-      ) {
-        patch.cellEncoding = "tier"
-      }
-      onChange(patch)
+      onChange({ view: next })
     },
-    [view, cellEncoding, onChange],
+    [view, onChange],
   )
 
   // Derive the current (xDim, yDim, zDim, zMode) from stored state.
@@ -749,28 +670,6 @@ export default function ResilienceControls({
   const allHcsSelected =
     selectedHydroclimates.size === RESILIENCE_HYDROCLIMATES.length
 
-  const handleReadAsChange = useCallback(
-    (next: ReadAs) => {
-      if (isReadAsOptionDisabled(next, view, aggregateOver)) return
-      onChange(applyReadAs(next, controls))
-    },
-    [controls, onChange, view, aggregateOver],
-  )
-
-  const handleDeltaModeChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onChange({ deltaMode: e.target.value as DeltaMode })
-    },
-    [onChange],
-  )
-
-  const handleDeltaBaselineChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onChange({ deltaBaselineScenarioId: e.target.value })
-    },
-    [onChange],
-  )
-
   const handlePrimaryOutcomeChange = useCallback(
     (e: SelectChangeEvent<string>) => {
       const next = e.target.value || null
@@ -809,7 +708,6 @@ export default function ResilienceControls({
   // Popover anchors
   // --------------------------------------------------------------
 
-  const [encodingAnchor, setEncodingAnchor] = useState<HTMLElement | null>(null)
   const [scenariosAnchor, setScenariosAnchor] = useState<HTMLElement | null>(
     null,
   )
@@ -820,13 +718,11 @@ export default function ResilienceControls({
   const [zAnchor, setZAnchor] = useState<HTMLElement | null>(null)
 
   const isQuadrant = view === "quadrant"
-  const readAs = deriveReadAs(view, cellEncoding, deltaMode)
 
   // --------------------------------------------------------------
   // Sentence phrase labels
   // --------------------------------------------------------------
 
-  const encodingLabel = READ_AS_LABEL[readAs]
   const scenarioCount = selectedScenarios.length
   const scenarioTotal = scenarioItems.length
   const scenariosLabel =
@@ -1040,18 +936,8 @@ export default function ResilienceControls({
           onClick={(e) => setClimatesAnchor(e.currentTarget)}
           ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
         />
-        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          , as{" "}
-        </Box>
-        <PhraseButton
-          label={encodingLabel}
-          active={Boolean(encodingAnchor)}
-          onClick={(e) => setEncodingAnchor(e.currentTarget)}
-          ariaLabel={`Cell colors show: ${encodingLabel}. Click to change.`}
-          tourAnchorRef={encodingAnchorRef}
-        />
         <Box component="span" sx={{ color: theme.palette.grey[700] }}>
-          .
+          , as average tier.
         </Box>
       </Typography>
       </Box>
@@ -1235,149 +1121,6 @@ export default function ResilienceControls({
           </Box>
         )}
       </Box>
-
-      {/* Popover: Encoding (Read as) */}
-      <Popover
-        open={Boolean(encodingAnchor)}
-        anchorEl={encodingAnchor}
-        onClose={() => setEncodingAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-      >
-        <PopoverShell
-          title="What cell colors show"
-          subtitle="Pick what each cell's color tells you."
-          width={320}
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-            {READ_AS_OPTIONS.map((opt) => {
-              const disabled = isReadAsOptionDisabled(opt, view, aggregateOver)
-              const active = readAs === opt
-              return (
-                <Box
-                  key={opt}
-                  component="button"
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => handleReadAsChange(opt)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    px: 0.75,
-                    py: 0.5,
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: disabled ? "default" : "pointer",
-                    textAlign: "left",
-                    background: active
-                      ? theme.palette.interaction.selectedBackground
-                      : "transparent",
-                    color: disabled
-                      ? theme.palette.grey[400]
-                      : active
-                        ? theme.palette.blue.bright
-                        : theme.palette.text.primary,
-                    fontSize: "0.8125rem",
-                    opacity: disabled ? 0.6 : 1,
-                    "&:hover:not(:disabled)": {
-                      background: theme.palette.action.hover,
-                    },
-                  }}
-                >
-                  {active ? (
-                    <icons.RadioButtonChecked
-                      sx={{
-                        fontSize: "1rem",
-                        color: theme.palette.blue.bright,
-                      }}
-                    />
-                  ) : (
-                    <icons.RadioButtonUnchecked
-                      sx={{
-                        fontSize: "1rem",
-                        color: theme.palette.grey[400],
-                      }}
-                    />
-                  )}
-                  {READ_AS_LABEL[opt]}
-                </Box>
-              )
-            })}
-          </Box>
-          {readAs === "climate_shift" && (
-            <>
-              <Divider sx={{ borderColor: theme.palette.divider }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.7rem",
-                  color: theme.palette.grey[700],
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Compared to
-              </Typography>
-              <Select
-                size="small"
-                value={deltaMode}
-                onChange={handleDeltaModeChange}
-                sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
-              >
-                <MenuItem value="vs_historical" sx={cellSize}>
-                  historical climate
-                </MenuItem>
-                <MenuItem value="vs_baseline" sx={cellSize}>
-                  a baseline scenario
-                </MenuItem>
-              </Select>
-              {deltaMode === "vs_baseline" && (
-                <Select
-                  size="small"
-                  value={deltaBaselineScenarioId}
-                  onChange={handleDeltaBaselineChange}
-                  sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
-                >
-                  {scenarioItems.map((s) => (
-                    <MenuItem key={s.id} value={s.id} sx={cellSize}>
-                      {s.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            </>
-          )}
-          {readAs === "distribution" && (
-            <>
-              <Divider sx={{ borderColor: theme.palette.divider }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.7rem",
-                  color: theme.palette.grey[700],
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Group dots by
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                <InlineToggleChip
-                  label="by scenario"
-                  active={distributionMode === "scenario"}
-                  onClick={() => setDistributionMode("scenario")}
-                />
-                <InlineToggleChip
-                  label="by location"
-                  active={distributionMode === "location"}
-                  onClick={() => setDistributionMode("location")}
-                />
-              </Box>
-            </>
-          )}
-        </PopoverShell>
-      </Popover>
 
       {/* Popover: Scenarios (read-only summary; sidebar is the source) */}
       <Popover
