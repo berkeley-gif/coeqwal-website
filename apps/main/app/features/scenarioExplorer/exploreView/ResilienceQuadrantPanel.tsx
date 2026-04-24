@@ -313,12 +313,9 @@ export default function ResilienceQuadrantPanel({
   )
 
   const handleOutcomeClick = useCallback(
-    (d: ResilienceQuadrantDatum) => {
-      // Outcome-mode click: jump to the by-outcome heatmap and expand
-      // this outcome's tile to full size. `expandedTileId` overrides
-      // the grid render path (see ResiliencePanel) so the user lands
-      // directly in the focused view.
-      onControlsChange({ view: "outcome", expandedTileId: d.id })
+    (_d: ResilienceQuadrantDatum) => {
+      // Outcome-mode click: jump to the by-outcome heatmap for this outcome.
+      onControlsChange({ view: "outcome" })
     },
     [onControlsChange],
   )

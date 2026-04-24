@@ -40,7 +40,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         deltaMode: "none",
         aggregateScope: "all",
         showCellNumbers: true,
-        expandedTileId: null,
       }),
     },
     {
@@ -54,7 +53,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         cellEncoding: "tier",
         deltaMode: "none",
         showAllScenarios: true,
-        expandedTileId: null,
       }),
     },
     {
@@ -67,7 +65,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         view: "outcome",
         cellEncoding: "tier",
         deltaMode: "none",
-        expandedTileId: null,
       }),
     },
     {
@@ -81,7 +78,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         view: "hydroclimate",
         cellEncoding: "tier",
         deltaMode: "none",
-        expandedTileId: null,
       }),
     },
     {
@@ -96,7 +92,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         aggregateOver: "outcomes",
         cellEncoding: "tier",
         deltaMode: "none",
-        expandedTileId: null,
       }),
     },
     {
@@ -111,7 +106,6 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
         aggregateOver: "hydroclimates",
         cellEncoding: "tier",
         deltaMode: "none",
-        expandedTileId: null,
       }),
     },
   ]

@@ -43,6 +43,7 @@ interface ScenarioSelectionSidebarProps {
     color: string
     chartData: Record<string, unknown>
   } | null>
+  onResilienceScenarioShare?: (scenarioId: string) => void | Promise<void>
 }
 
 export default function ScenarioSelectionSidebar({
@@ -51,6 +52,7 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
   singleSelect = false,
   onCaptureRadarScenario,
+  onResilienceScenarioShare,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -447,6 +449,8 @@ export default function ScenarioSelectionSidebar({
                             cachedImageDataUrl: result?.dataUrl,
                             cachedChartData: result?.chartData,
                           })
+                        } else if (onResilienceScenarioShare) {
+                          await onResilienceScenarioShare(scenario.scenarioId)
                         } else {
                           addShareItem({
                             id: crypto.randomUUID(),
@@ -458,7 +462,7 @@ export default function ScenarioSelectionSidebar({
                         }
                       }}
                       togglePinnedScenario={togglePinnedScenario}
-                      hidePinning={exploreMode === "radar"}
+                      hidePinning
                     />
                   }
                 />

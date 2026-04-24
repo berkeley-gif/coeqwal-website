@@ -23,6 +23,8 @@ import React, {
   useState,
   startTransition,
 } from "react"
+import { flushSync } from "react-dom"
+import { createRoot, type Root } from "react-dom/client"
 import {
   Box,
   Checkbox,
@@ -195,16 +197,6 @@ export interface ResilienceControlsState {
    * pattern in RadarPanel.
    */
   showAllScenarios: boolean
-  /**
-   * When non-null, the heatmap swaps its small-multiples grid for a
-   * single full-size tile matching this id. Used by the "click-to-expand"
-   * gesture on each tile's expand icon (and by drill-through actions
-   * like the quadrant view). The id is a scenario id in the by-scenario
-   * view, or an outcome code in the by-outcome view. The expanded view
-   * is dismissed with a Back button or the Esc key, which clears this
-   * back to null.
-   */
-  expandedTileId: string | null
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   showCellNumbers: boolean
   quadrantUnit: QuadrantUnit
@@ -272,7 +264,7 @@ interface ResiliencePanelProps {
    * small-multiples grid. Consumers typically call the function
    * produced by `onCaptureTileReady` and then add a ShareItem.
    */
-  onTileShare?: (tileId: string) => void
+  onTileShare?: (tileId: string) => void | Promise<boolean> | boolean
 }
 
 const HYDROCLIMATE_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
@@ -428,7 +420,6 @@ export default function ResiliencePanel({
     reorderBySimilarity,
     showMarginals,
     showAllScenarios,
-    expandedTileId,
     selectedHydroclimates,
     showCellNumbers,
     primaryOutcomeCode,
@@ -1491,11 +1482,9 @@ export default function ResiliencePanel({
     ],
   )
 
-  // By-hydroclimate small multiples - one tile per hydroclimate, Y =
-  // outcomes, X = scenarios. Mirrors the by-scenario / by-outcome
-  // gallery pattern: by default the user sees all three HCs as a 3-tile
-  // gallery, and any tile can be clicked-to-expand into a full-size
-  // heatmap (same pin/expand pattern as the other views).
+  // By-hydroclimate small multiples: one tile per hydroclimate, Y =
+  // outcomes, X = scenarios. Mirrors the by-scenario / by-outcome gallery
+  // pattern (multi-tile grid, shared legend).
   const byHydroclimateScenarioColIds = useMemo<readonly string[]>(() => {
     if (showAllScenarios) return scenarioRowIdsAll
     if (selectedScenarios.length === 0) return scenarioRowIdsAll
@@ -2130,61 +2119,6 @@ export default function ResiliencePanel({
   const noOutcomesSelected =
     !anyEmpty && view === "aggregate" && outcomeRowCodes.length === 0
 
-  // Expand wiring for the small-multiples tile headers. Expand swaps
-  // the grid for a single full-size heatmap via the `expandedTileId`
-  // control state. The per-tile pin/check affordance was removed so
-  // the sidebar is the single source of truth for scenario selection;
-  // outcome visibility is driven by the "choose outcomes" chip in the
-  // chart controls.
-  const handleTileExpand = useCallback(
-    (tileId: string) => {
-      onControlsChange?.({ expandedTileId: tileId })
-    },
-    [onControlsChange],
-  )
-  const handleBackToGrid = useCallback(() => {
-    onControlsChange?.({ expandedTileId: null })
-  }, [onControlsChange])
-
-  // Resolve the expanded tile (if any) from the current per-view tile
-  // set. Guarded by effectiveView so an `expandedTileId` left over from
-  // a previous view doesn't accidentally render into the wrong grid.
-  const expandedTile = useMemo<ResilienceSmallMultiplesTile | null>(() => {
-    if (!expandedTileId) return null
-    if (view === "scenario") {
-      return byScenarioTiles.find((t) => t.id === expandedTileId) ?? null
-    }
-    if (view === "outcome") {
-      return byOutcomeTiles.find((t) => t.id === expandedTileId) ?? null
-    }
-    if (view === "hydroclimate") {
-      return byHydroclimateTiles.find((t) => t.id === expandedTileId) ?? null
-    }
-    return null
-  }, [
-    expandedTileId,
-    view,
-    byScenarioTiles,
-    byOutcomeTiles,
-    byHydroclimateTiles,
-  ])
-
-  // Esc dismisses the expanded view when it's open, mirroring the
-  // keyboard affordance on modals / tuner overlays elsewhere. The
-  // listener is only installed while an expanded tile is active so it
-  // doesn't fight the walkthrough panel's own Esc handler.
-  useEffect(() => {
-    if (!expandedTile) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation()
-        handleBackToGrid()
-      }
-    }
-    document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [expandedTile, handleBackToGrid])
-
   // Show cell values and transpose both live in the chart controls
   // (Rows row), so this panel no longer renders a floating display
   // menu. Nothing else remains for a chart-corner toolbar to hold.
@@ -2246,6 +2180,48 @@ export default function ResiliencePanel({
     [transposed, byHydroclimateTiles],
   )
 
+  /**
+   * One by-scenario small-multiples tile for any valid scenario id, even
+   * when the panel is in aggregate/outcome/HC view or the scenario is
+   * not in the on-screen small-multiples scope. Used for share/capture
+   * without duplicating the full grid in the DOM.
+   */
+  const makeScenarioSoloMultiplesTile = useCallback(
+    (sid: string): ResilienceSmallMultiplesTile | null => {
+      if (!scenarioRowIdsAll.includes(sid)) return null
+      const title = getDisplayName(sid)
+      const tileCells: ResilienceHeatmapCell[] = []
+      for (const rk of outcomeRowCodes) {
+        const rl = getOutcomeName(rk)
+        for (const col of hydroclimateColumns) {
+          const c = computeScenarioTileCell(
+            sid,
+            rk,
+            col.key as ResilienceHydroclimate,
+            rl,
+            title,
+            col.label,
+          )
+          if (c) tileCells.push(c)
+        }
+      }
+      const base: ResilienceSmallMultiplesTile = {
+        id: sid,
+        title,
+        cells: tileCells,
+      }
+      return transposed ? transposeTile(base) : base
+    },
+    [
+      scenarioRowIdsAll,
+      getDisplayName,
+      outcomeRowCodes,
+      hydroclimateColumns,
+      computeScenarioTileCell,
+      transposed,
+    ],
+  )
+
   // Cross-fade + translate-y pivot animation. Respects the user's
   // reduced-motion preference (WCAG 2.3.3).
   const prefersReducedMotion = useReducedMotion()
@@ -2266,9 +2242,9 @@ export default function ResiliencePanel({
   const cellAnchorRef = useTourAnchor("resilience.cell")
 
   // Snapshot capture plumbing. The chart body wrapper is the common
-  // ancestor of every rendered heatmap SVG (single heatmap,
-  // small-multiples grid, expanded tile), so a DOM-level capture here
-  // works regardless of which `effectiveView` is active. Per-tile
+  // ancestor of every rendered heatmap SVG (single heatmap or
+  // small-multiples grid), so a DOM-level capture here works regardless
+  // of which `effectiveView` is active. Per-tile
   // capture locates the tile's root SVG via the `data-tile-id`
   // attribute that `ResilienceHeatmapSmallMultiples` stamps on each
   // tile wrapper.
@@ -2317,6 +2293,84 @@ export default function ResiliencePanel({
         count: cell.distribution?.length,
       })),
     [],
+  )
+
+  const renderSoloScenarioForShare = useCallback(
+    async (scenarioId: string) => {
+      const SOLO_W = 800
+      const SOLO_H = 520
+      const tile = makeScenarioSoloMultiplesTile(scenarioId)
+      if (!tile) return null
+      const host = document.createElement("div")
+      host.style.cssText = `box-sizing:border-box;position:fixed;left:-10000px;top:0;width:${SOLO_W}px;height:${SOLO_H}px;opacity:0;pointer-events:none;z-index:-1;overflow:hidden`
+      document.body.appendChild(host)
+      const root: Root = createRoot(host)
+      const encoding = cellEncodingRef.current
+      try {
+        // ResilienceHeatmap draws in useEffect. flushSync only commits; we
+        // still need a short delay so D3 can run after paint.
+        flushSync(() => {
+          root.render(
+            <ResilienceHeatmap
+              width={SOLO_W}
+              height={SOLO_H}
+              responsive={false}
+              rows={displayByScenarioRows}
+              columns={displayByScenarioColumns}
+              cells={tile.cells}
+              tierColors={tierColors}
+              tierLabels={tierLabels}
+              palette={heatmapPalette}
+              cellRender={effectiveCellRender}
+              showCellNumbers={showCellNumbers}
+              hideLegend
+              distributionMode={distributionMode}
+              formatRowTick={formatRowTick}
+            />,
+          )
+        })
+        await new Promise<void>((r) => {
+          setTimeout(r, 200)
+        })
+        const { dataUrl } = await captureElementToBlob(host, {
+          backgroundColor: theme.palette.common.white,
+        })
+        return {
+          dataUrl,
+          chartData: {
+            kind: "resilience" as const,
+            view: "scenario" as const,
+            cellEncoding: encoding,
+            tileScope: "scenario" as const,
+            tileLabel: tile.title,
+            rows: cellsToRows(tile.cells),
+          },
+        }
+      } catch (err) {
+        console.error(
+          "[ResiliencePanel] renderSoloScenarioForShare failed:",
+          err,
+        )
+        return null
+      } finally {
+        root.unmount()
+        host.remove()
+      }
+    },
+    [
+      makeScenarioSoloMultiplesTile,
+      displayByScenarioRows,
+      displayByScenarioColumns,
+      tierColors,
+      tierLabels,
+      heatmapPalette,
+      effectiveCellRender,
+      showCellNumbers,
+      distributionMode,
+      formatRowTick,
+      cellsToRows,
+      theme,
+    ],
   )
 
   const captureResilience = useCallback<ResilienceCaptureFn>(async () => {
@@ -2375,47 +2429,52 @@ export default function ResiliencePanel({
       const tileEl = wrapper.querySelector<HTMLElement>(
         `[data-tile-id="${CSS.escape(tileId)}"]`,
       )
-      if (!tileEl) return null
-      // Scope the SVG lookup to the tile body wrapper. The tile header
-      // contains action buttons whose MUI icons render as <svg>, so a
-      // bare `tileEl.querySelector("svg")` would grab the share icon
-      // rather than the heatmap.
-      const body = tileEl.querySelector<HTMLElement>(
-        "[data-resilience-tile-body]",
-      )
-      const svg = body?.querySelector("svg") ?? null
-      if (!(svg instanceof SVGSVGElement)) return null
-      try {
-        const { dataUrl } = await captureSvgToBlob(svg)
-        const view = effectiveViewRef.current
-        let tileScope: "scenario" | "outcome" | "hydroclimate" = "scenario"
-        let tileSource = byScenarioTilesRef.current
-        if (view === "outcome") {
-          tileScope = "outcome"
-          tileSource = byOutcomeTilesRef.current
-        } else if (view === "hydroclimate") {
-          tileScope = "hydroclimate"
-          tileSource = byHydroclimateTilesRef.current
+      if (tileEl) {
+        // Scope the SVG lookup to the tile body wrapper. The tile header
+        // contains action buttons whose MUI icons render as <svg>, so a
+        // bare `tileEl.querySelector("svg")` would grab the share icon
+        // rather than the heatmap.
+        const body = tileEl.querySelector<HTMLElement>(
+          "[data-resilience-tile-body]",
+        )
+        const svg = body?.querySelector("svg") ?? null
+        if (!(svg instanceof SVGSVGElement)) return null
+        try {
+          const { dataUrl } = await captureSvgToBlob(svg)
+          const view = effectiveViewRef.current
+          let tileScope: "scenario" | "outcome" | "hydroclimate" = "scenario"
+          let tileSource = byScenarioTilesRef.current
+          if (view === "outcome") {
+            tileScope = "outcome"
+            tileSource = byOutcomeTilesRef.current
+          } else if (view === "hydroclimate") {
+            tileScope = "hydroclimate"
+            tileSource = byHydroclimateTilesRef.current
+          }
+          const tile = tileSource.find((t) => t.id === tileId)
+          if (!tile) return null
+          return {
+            dataUrl,
+            chartData: {
+              kind: "resilience",
+              view,
+              cellEncoding: cellEncodingRef.current,
+              tileScope,
+              tileLabel: tile.title,
+              rows: cellsToRows(tile.cells),
+            },
+          }
+        } catch (err) {
+          console.error("[ResiliencePanel] captureResilienceTile failed:", err)
+          return null
         }
-        const tile = tileSource.find((t) => t.id === tileId)
-        if (!tile) return null
-        return {
-          dataUrl,
-          chartData: {
-            kind: "resilience",
-            view,
-            cellEncoding: cellEncodingRef.current,
-            tileScope,
-            tileLabel: tile.title,
-            rows: cellsToRows(tile.cells),
-          },
-        }
-      } catch (err) {
-        console.error("[ResiliencePanel] captureResilienceTile failed:", err)
-        return null
       }
+      if (scenarioRowIdsAll.includes(tileId)) {
+        return await renderSoloScenarioForShare(tileId)
+      }
+      return null
     },
-    [cellsToRows],
+    [cellsToRows, renderSoloScenarioForShare, scenarioRowIdsAll],
   )
 
   useEffect(() => {
@@ -2426,10 +2485,9 @@ export default function ResiliencePanel({
     onCaptureTileReady?.(captureResilienceTile)
   }, [captureResilienceTile, onCaptureTileReady])
 
-  // Per-tile share icon rendered inside the tile header next to the
-  // expand button. The button does not participate in tile hover /
-  // expand gestures - it only fires the external `onTileShare`, which
-  // resolves to `handleResilienceTileSnapshot` in `ScenarioExplorer`.
+  // Per-tile share icon in the tile header. The button does not
+  // participate in tile hover; it only fires the external `onTileShare`,
+  // which resolves to `handleResilienceTileSnapshot` in `ScenarioExplorer`.
   const renderTileShareAction = useMemo(() => {
     if (!onTileShare) return undefined
     const handleTileShare = onTileShare
@@ -2438,6 +2496,7 @@ export default function ResiliencePanel({
         <Box
           component="button"
           type="button"
+          className="resilience-tile-action"
           aria-label={`Save snapshot of ${tile.title}`}
           title="Save snapshot of this tile"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -2448,13 +2507,13 @@ export default function ResiliencePanel({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 32,
-            height: 32,
+            width: 36,
+            height: 36,
             padding: 0,
             borderRadius: "4px",
             border: "none",
             background: "transparent",
-            color: theme.palette.grey[600],
+            color: theme.palette.text.primary,
             cursor: "pointer",
             "&:hover": {
               color: theme.palette.blue.bright,
@@ -2466,7 +2525,9 @@ export default function ResiliencePanel({
             },
           }}
         >
-          <icons.IosShare sx={{ fontSize: "1.25rem" }} />
+          <icons.IosShare
+            sx={{ fontSize: "1.375rem", color: "inherit" }}
+          />
         </Box>
       )
     }
@@ -2635,50 +2696,6 @@ export default function ResiliencePanel({
                 title="No outcomes to show"
                 body="Open the outcome picker (or the Outcomes phrase in the sentence above) and pick at least one outcome to see its tile."
               />
-            ) : expandedTile ? (
-              <ExpandedTileView
-                tile={transposed ? transposeTile(expandedTile) : expandedTile}
-                rows={
-                  view === "scenario"
-                    ? displayByScenarioRows
-                    : view === "outcome"
-                      ? displayByOutcomeRows
-                      : displayByHydroclimateRows
-                }
-                columns={
-                  view === "scenario"
-                    ? displayByScenarioColumns
-                    : view === "outcome"
-                      ? displayByOutcomeColumns
-                      : displayByHydroclimateColumns
-                }
-                tierColors={tierColors}
-                tierLabels={tierLabels}
-                palette={heatmapPalette}
-                cellRender={effectiveCellRender}
-                showCellNumbers={showCellNumbers}
-                formatRowTick={formatRowTick}
-                distributionMode={distributionMode}
-                columnLabelRotation={scenarioColumnLabelRotation}
-                onCellHover={handleCellHover}
-                onCellClick={isMapVisible ? handleCellClick : undefined}
-                onSquareHover={(info) =>
-                  handleSquareHover(
-                    info ? { cell: info.cell, entry: info.entry } : null,
-                  )
-                }
-                onSquareClick={(info) =>
-                  handleSquareClick({ cell: info.cell, entry: info.entry })
-                }
-                onBack={handleBackToGrid}
-                backLabel={
-                  view === "scenario"
-                    ? "Back to all scenarios"
-                    : view === "outcome"
-                      ? "Back to all outcomes"
-                      : "Back to all hydroclimates"
-                }
-              />
             ) : effectiveView === "scenario" ? (
               <BrowseShell>
                 <ResilienceHeatmapSmallMultiples
@@ -2704,7 +2721,6 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
@@ -2733,7 +2749,6 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
@@ -2763,7 +2778,6 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
@@ -3098,156 +3112,6 @@ function OutcomeRow({
   )
 }
 
-/**
- * Expanded single-tile view. Shows one scenario or outcome at full
- * size with a "← Back" button that dismisses via `onBack`. Framer
- * Motion's `layoutId` lets the browser interpolate between the grid
- * tile and the full-size heatmap when the user reduced-motion pref is
- * off; with reduced motion the transition degrades to a static swap.
- */
-function ExpandedTileView({
-  tile,
-  rows,
-  columns,
-  tierColors,
-  tierLabels,
-  palette,
-  cellRender,
-  showCellNumbers,
-  formatRowTick,
-  distributionMode,
-  columnLabelRotation = 0,
-  onCellHover,
-  onCellClick,
-  onSquareHover,
-  onSquareClick,
-  onBack,
-  backLabel,
-}: {
-  tile: ResilienceSmallMultiplesTile
-  rows: ResilienceAxisItem[]
-  columns: ResilienceAxisItem[]
-  tierColors: readonly [string, string, string, string]
-  tierLabels: readonly [string, string, string, string]
-  palette: ResilienceHeatmapPalette
-  cellRender: ResilienceCellRender
-  showCellNumbers: boolean
-  formatRowTick: (row: ResilienceAxisItem) => string
-  distributionMode: "scenario" | "location"
-  columnLabelRotation?: number
-  onCellHover: (cell: ResilienceHeatmapCell | null) => void
-  onCellClick?: (cell: ResilienceHeatmapCell) => void
-  onSquareHover: (
-    info: {
-      tileId: string
-      cell: ResilienceHeatmapCell
-      entry: ResilienceGlyphEntry
-    } | null,
-  ) => void
-  onSquareClick: (info: {
-    tileId: string
-    cell: ResilienceHeatmapCell
-    entry: ResilienceGlyphEntry
-  }) => void
-  onBack: () => void
-  backLabel: string
-}) {
-  const theme = useTheme()
-  const prefersReducedMotion = useReducedMotion()
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        minHeight: 0,
-        gap: 1,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          px: 0.5,
-        }}
-      >
-        <Box
-          component="button"
-          type="button"
-          onClick={onBack}
-          sx={{
-            appearance: "none",
-            border: `1px solid ${theme.palette.divider}`,
-            background: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            borderRadius: 999,
-            px: 1.25,
-            py: 0.4,
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            cursor: "pointer",
-            "&:hover": { backgroundColor: theme.palette.action.hover },
-            "&:focus-visible": {
-              outline: `2px solid ${theme.palette.primary.main}`,
-              outlineOffset: 2,
-            },
-          }}
-        >
-          {`\u2190 ${backLabel}`}
-        </Box>
-        <Typography
-          variant="dashboard"
-          sx={{ fontWeight: 600 }}
-          title={tile.titleTooltip ?? tile.title}
-        >
-          {tile.title}
-        </Typography>
-        {tile.subtitle && (
-          <Typography variant="caption" color="text.secondary">
-            {tile.subtitle}
-          </Typography>
-        )}
-        <Box sx={{ flex: 1 }} />
-        <Typography variant="caption" color="text.secondary">
-          Press Esc to return
-        </Typography>
-      </Box>
-      <motion.div
-        layoutId={`resilience-tile-${tile.id}`}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25 }}
-        style={{ flex: 1, minHeight: 0 }}
-      >
-        <ResilienceHeatmap
-          rows={rows}
-          columns={columns}
-          cells={tile.cells}
-          tierColors={tierColors}
-          tierLabels={tierLabels}
-          palette={palette}
-          cellRender={cellRender}
-          showCellNumbers={showCellNumbers}
-          columnLabelRotation={columnLabelRotation}
-          onCellHover={onCellHover}
-          onCellClick={onCellClick}
-          formatRowTick={formatRowTick}
-          distributionMode={distributionMode}
-          onSquareHover={(info) =>
-            onSquareHover(info ? { tileId: tile.id, ...info } : null)
-          }
-          onSquareClick={(info) => onSquareClick({ tileId: tile.id, ...info })}
-        />
-      </motion.div>
-    </Box>
-  )
-}
-
-/**
- * Wraps a small-multiples grid with an optional curation chip above.
- * The chip tells the user "Comparing N of M · focus on my selection"
- * when they've pinned items while in show-all mode, and clicking it
- * fires the supplied `onClick` (typically flipping show-all off).
- */
 /**
  * ResiliencePanelTitle - two-line header rendered at the top of the
  * chart area.

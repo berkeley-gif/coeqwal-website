@@ -300,7 +300,6 @@ function ScenarioExplorerInner() {
       reorderBySimilarity: false,
       showMarginals: false,
       showAllScenarios: false,
-      expandedTileId: null,
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
       showCellNumbers: false,
       quadrantUnit: "outcome",
@@ -384,15 +383,18 @@ function ScenarioExplorerInner() {
   ])
 
   const handleResilienceTileSnapshot = useCallback(
-    async (tileId: string) => {
+    async (
+      tileId: string,
+      options?: { scenarioIdsForShare?: string[] },
+    ): Promise<boolean> => {
       const result = await resilienceTileCaptureRef.current?.(tileId)
-      if (!result) return
+      if (!result) return false
       const item: ShareItem = {
         id: `resilience-${Date.now()}-${tileId}`,
         type: "resilience",
         view: result.chartData.view,
         cellEncoding: result.chartData.cellEncoding,
-        scenarioIds: [...selectedScenarios],
+        scenarioIds: options?.scenarioIdsForShare ?? [...selectedScenarios],
         hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
         outcomeCodes: resilienceVisibleOutcomes,
         showCellNumbers: resilienceControls.showCellNumbers,
@@ -403,6 +405,7 @@ function ScenarioExplorerInner() {
         cachedChartData: result.chartData as unknown as Record<string, unknown>,
       }
       addShareItem(item)
+      return true
     },
     [
       selectedScenarios,
@@ -410,6 +413,18 @@ function ScenarioExplorerInner() {
       resilienceVisibleOutcomes,
       addShareItem,
     ],
+  )
+
+  const handleResilienceSidebarScenarioShare = useCallback(
+    async (scenarioId: string) => {
+      const added = await handleResilienceTileSnapshot(scenarioId, {
+        scenarioIdsForShare: [scenarioId],
+      })
+      if (!added) {
+        await handleResilienceSnapshot()
+      }
+    },
+    [handleResilienceTileSnapshot, handleResilienceSnapshot],
   )
 
   // Keep the Resilience "View:" rail in sync with the sidebar
@@ -653,6 +668,11 @@ function ScenarioExplorerInner() {
                       onRowHover={handleSidebarRowHover}
                       singleSelect={exploreMode === "equity"}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
+                      onResilienceScenarioShare={
+                        exploreMode === "resilience"
+                          ? handleResilienceSidebarScenarioShare
+                          : undefined
+                      }
                     />
                   )
                 }

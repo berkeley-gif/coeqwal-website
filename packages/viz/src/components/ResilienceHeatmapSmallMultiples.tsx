@@ -84,16 +84,9 @@ export interface ResilienceHeatmapSmallMultiplesProps {
     entry: ResilienceGlyphEntry
   }) => void
   /**
-   * Optional per-tile expand button. When provided, each tile header
-   * shows an expand icon that fires `onTileExpand(tileId)`, typically
-   * used to swap the entire grid for a single full-size heatmap.
-   */
-  onTileExpand?: (tileId: string) => void
-  /**
-   * Optional renderer for extra per-tile header actions (e.g. a share
-   * icon). Rendered inside the same actions slot as the expand button,
-   * to the left of it. The consumer is responsible for stopping event
-   * propagation if the surrounding tile has its own click handler.
+   * Optional renderer for per-tile header actions (e.g. a share icon).
+   * The consumer is responsible for stopping event propagation if the
+   * surrounding tile has its own click handler.
    */
   renderTileActions?: (tile: ResilienceSmallMultiplesTile) => React.ReactNode
   /**
@@ -107,60 +100,8 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   columnLabelRotation?: number
 }
 
-/** Per-tile header controls: size matches Explore tool icons (1.25rem glyph in a ~32px target). */
-const TILE_ACTION_PX = 32
-const TILE_ACTION_GLYPH_PX = 20
-
-/**
- * Tiny button used for per-tile actions. Muted at rest so the header
- * stays quiet while browsing, full-opacity when the tile is hovered or
- * the button itself is focused.
- */
-function TileActionButton({
-  onClick,
-  ariaLabel,
-  title,
-  children,
-  active = false,
-  palette,
-}: {
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-  ariaLabel: string
-  title: string
-  children: React.ReactNode
-  active?: boolean
-  palette: ResilienceHeatmapPalette
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      title={title}
-      onClick={onClick}
-      className={
-        active ? "resilience-tile-action is-active" : "resilience-tile-action"
-      }
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: TILE_ACTION_PX,
-        height: TILE_ACTION_PX,
-        padding: 0,
-        borderRadius: 4,
-        border: "none",
-        background: "transparent",
-        color: active ? palette.text : palette.textMuted,
-        cursor: "pointer",
-        fontSize: TILE_ACTION_GLYPH_PX,
-        lineHeight: 1,
-        transition: "opacity .15s ease, background-color .15s ease",
-      }}
-    >
-      {children}
-    </button>
-  )
-}
+/** Vertical space for React tile title row (padding + one line + actions). */
+const TILE_HEADER_RESERVE = 48
 
 /**
  * A compact, inline SVG replica of the tier legend used by
@@ -234,7 +175,6 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       distributionMode,
       onSquareHover,
       onSquareClick,
-      onTileExpand,
       renderTileActions,
       firstCellRef,
       columnLabelRotation = 0,
@@ -277,7 +217,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
           }}
         >
           <style>{`
-          .resilience-tile-action { opacity: 0.35; }
+          .resilience-tile-action { opacity: 0.8; }
           .resilience-tile-action.is-active { opacity: 1; }
           .resilience-smt-tile:hover .resilience-tile-action,
           .resilience-smt-tile:focus-within .resilience-tile-action { opacity: 1; }
@@ -300,7 +240,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
           >
             {tiles.map((tile, tileIdx) => {
               const extraActions = renderTileActions?.(tile)
-              const hasActions = !!onTileExpand || extraActions != null
+              const hasActions = extraActions != null
               return (
                 <div
                   key={tile.id}
@@ -319,7 +259,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       alignItems: "center",
                       gap: 8,
                       padding: "0 4px 4px",
-                      minHeight: 24,
+                      minHeight: 40,
                     }}
                   >
                     <span
@@ -362,25 +302,12 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                         }}
                       >
                         {extraActions}
-                        {onTileExpand && (
-                          <TileActionButton
-                            palette={palette}
-                            ariaLabel={`Expand ${tile.title}`}
-                            title="Expand to full size"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onTileExpand(tile.id)
-                            }}
-                          >
-                            {"\u2922"}
-                          </TileActionButton>
-                        )}
                       </div>
                     )}
                   </div>
                   <div
                     data-resilience-tile-body="true"
-                    style={{ flex: 1, minHeight: tileHeight - 24 }}
+                    style={{ flex: 1, minHeight: tileHeight - TILE_HEADER_RESERVE }}
                   >
                     <ResilienceHeatmap
                       rows={rows}
