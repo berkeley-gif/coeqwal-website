@@ -21,6 +21,7 @@ import {
   ScrollToButton,
   resolveRadius,
   resolveInset,
+  tunerInsetY,
   tunerInsetYPx,
   type RadiusValue,
   type PanelInset,
@@ -389,41 +390,92 @@ function WaterThemesPanelContent({
           justifyContent: "center",
           height: "100%",
           boxSizing: "border-box",
+          // Short-viewport layout: anchor content to the top so the
+          // paragraph sits at the same vertical level as the morphing
+          // headline instead of being vertically centered. The top
+          // padding is reduced by headerHeight + insetY so the content
+          // starts at the same viewport Y as the MorphingHeadline
+          // overlay (which is fixed at `top: panel.topOffset`). The
+          // sticky panel is pinned at `headerHeight` from the viewport
+          // top, and the rounded card is inset by `insetY`, so those
+          // two offsets must be subtracted for the content's top edge
+          // to land on the same viewport row as the headline.
+          "@media (max-height: 859px)": {
+            justifyContent: "flex-start",
+            pt: `calc(${theme.space.panel.topOffset} - ${theme.layout.headerHeight}px - ${tunerInsetY()})`,
+          },
         }}
       >
         {/* Headline + intro - fades in with crossfade */}
         <motion.div style={{ opacity: contentOpacity }}>
-          {/* Responsive headline - visible on xs–md only */}
-          <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
-            <Typography
-              variant="h2Main"
-              component="span"
-              sx={{ display: "block", color: "text.primary" }}
-            >
-              What water issues
-            </Typography>
-            <Typography
-              variant="h1"
-              component="span"
-              sx={{ display: "block", color: "text.primary" }}
-            >
-              matter to you?
-            </Typography>
-          </Box>
-
-          <Typography
-            variant="body1"
+          {/* Short-viewport split: responsive headline in the left
+              column, paragraph in the right column (mirrors the About
+              panel's split layout). Only kicks in at md+ widths so the
+              paragraph does not get cramped on narrow landscape phones.
+              On lg+ the responsive headline is hidden and the
+              MorphingHeadline overlay occupies the left half, so the
+              paragraph still reads as sitting beside it. */}
+          <Box
             sx={{
-              color: "text.primary",
-              maxWidth: "66%",
-              mb: theme.space.section.md,
+              "@media (max-height: 859px)": {
+                display: { xs: "block", md: "grid" },
+                gridTemplateColumns: { md: "1fr 1fr" },
+                columnGap: { md: theme.space.section.lg },
+                alignItems: "start",
+              },
             }}
           >
-            Water is important to all of us — from farmers in the Central Valley
-            to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions
-            affect the issues people care about.
-          </Typography>
+            {/* Responsive headline - visible on xs–md only */}
+            <Box
+              sx={{
+                display: { xs: "block", lg: "none" },
+                mb: 2,
+                "@media (max-height: 859px)": { mb: { xs: 2, md: 0 } },
+              }}
+            >
+              <Typography
+                variant="h2Main"
+                component="span"
+                sx={{ display: "block", color: "text.primary" }}
+              >
+                What water issues
+              </Typography>
+              <Typography
+                variant="h1"
+                component="span"
+                sx={{ display: "block", color: "text.primary" }}
+              >
+                matter to you?
+              </Typography>
+            </Box>
+
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.primary",
+                maxWidth: "66%",
+                mb: theme.space.section.md,
+                "@media (max-height: 859px)": {
+                  maxWidth: { xs: "66%", md: "none" },
+                  mb: { xs: theme.space.section.md, md: 0 },
+                  gridColumn: { md: "2" },
+                  // Lift the paragraph by its own half-leading so the
+                  // first character's cap-top aligns with the morphing
+                  // headline's top instead of sitting below it by the
+                  // body1 line-height gap. body1 has lineHeight 1.75
+                  // at fontSize 1.25rem, so (1.75 - 1) / 2 = 0.375em
+                  // of invisible space sits above the glyphs; negating
+                  // that margin brings the visual top flush.
+                  mt: { md: "-0.375em" },
+                },
+              }}
+            >
+              Water is important to all of us — from farmers in the Central
+              Valley to communities in the Delta, from salmon in the
+              Sacramento River to urban water users in Los Angeles. We can
+              consider how decisions affect the issues people care about.
+            </Typography>
+          </Box>
         </motion.div>
 
         {/* Five theme cards - horizontal grid */}
@@ -434,6 +486,14 @@ function WaterThemesPanelContent({
             alignItems: "stretch",
             columnGap: theme.space.section.sm,
             rowGap: theme.space.component.lg,
+            // Short-viewport layout: the text block above is anchored
+            // to the headline's top instead of being vertically
+            // centered, which removes the natural breathing room
+            // between the paragraph and the cards. Restore it with an
+            // explicit top padding.
+            "@media (max-height: 859px)": {
+              pt: "60px",
+            },
           }}
         >
           {CIRCLE_CONFIG.map((c) => {

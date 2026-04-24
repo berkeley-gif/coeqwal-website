@@ -74,23 +74,23 @@ export const RESILIENCE_TOUR: TourStep[] = [
   },
 
   // Arrange the chart. Steps here follow the chart controls left to
-  // right and top to bottom: the sentence reads axes -> pivot ->
+  // right and top to bottom: the sentence reads pivot -> axes ->
   // outcomes -> encoding, then the Presets row, then the Rows row,
   // and finally Save snapshot at the top-right of the bar.
-  {
-    id: "resilience.step1.axes",
-    anchorId: "resilience.axes",
-    eyebrow: "arrange the chart",
-    title: "Pick what is inside each chart",
-    body: "The first two phrases in the sentence set the rows and columns of each chart. Click across or down to rotate which dimension reads along that axis.",
-    placement: "bottom-start",
-  },
   {
     id: "resilience.step1.pivot",
     anchorId: "resilience.pivot",
     eyebrow: "arrange the chart",
     title: "Pick which dimension the chart is built around",
-    body: "This phrase picks the third dimension: whether the chart shows small multiples (one tile per scenario, outcome, or hydroclimate) or a single averaged chart. It is the biggest lever on what question the chart answers.",
+    body: "The leading phrase picks the dimension the chart is built around, and whether the chart shows it as small multiples (one tile per scenario, outcome, or hydroclimate) or a single averaged chart. This is the biggest lever on what question the chart answers.",
+    placement: "bottom-start",
+  },
+  {
+    id: "resilience.step1.axes",
+    anchorId: "resilience.axes",
+    eyebrow: "arrange the chart",
+    title: "Pick what is inside each chart",
+    body: "The next two phrases set the rows and columns inside each chart. Click across or down to rotate which dimension reads along that axis.",
     placement: "bottom-start",
   },
   {

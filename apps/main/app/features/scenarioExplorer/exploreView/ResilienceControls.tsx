@@ -852,6 +852,13 @@ export default function ResilienceControls({
     zDisplayMode === "facet"
       ? `for each ${DIM_LABEL_SINGULAR[zDim]}`
       : `averaged over ${DIM_LABEL_PLURAL[zDim]}`
+  // The pivot phrase leads the sentence now, so render it with a
+  // capitalized first letter. Keep `zPhraseLabel` itself lowercase
+  // because aria-labels, tooltips, and tour copy use it mid-sentence.
+  const zPhraseLabelLeading =
+    zPhraseLabel.length > 0
+      ? zPhraseLabel.charAt(0).toUpperCase() + zPhraseLabel.slice(1)
+      : zPhraseLabel
 
   const cellSize = { fontSize: "0.8125rem" } as const
 
@@ -968,8 +975,15 @@ export default function ResilienceControls({
           flex: 1,
         }}
       >
-        <Box component="span" sx={{ color: theme.palette.grey[700], mr: 0.25 }}>
-          Comparing
+        <PhraseButton
+          label={zPhraseLabelLeading}
+          active={Boolean(zAnchor)}
+          onClick={(e) => setZAnchor(e.currentTarget)}
+          ariaLabel={`Chart pivot: ${zPhraseLabel}. This is the biggest lever on the chart. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
+          tourAnchorRef={pivotAnchorRef}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
+          , comparing
         </Box>
         <PhraseButton
           label={xDimLabel}
@@ -986,16 +1000,6 @@ export default function ResilienceControls({
           active={Boolean(yAnchor)}
           onClick={(e) => setYAnchor(e.currentTarget)}
           ariaLabel={`Down axis: ${yDimLabel}. Click to change which dimension reads down each chart.`}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
-          ,
-        </Box>
-        <PhraseButton
-          label={zPhraseLabel}
-          active={Boolean(zAnchor)}
-          onClick={(e) => setZAnchor(e.currentTarget)}
-          ariaLabel={`Chart pivot: ${zPhraseLabel}. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
-          tourAnchorRef={pivotAnchorRef}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
           , covering
