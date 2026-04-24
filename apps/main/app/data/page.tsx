@@ -20,6 +20,7 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Alert,
+  alpha,
   useTheme,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
@@ -401,7 +402,7 @@ export default function DataPage() {
             <Grid
               container
               columnSpacing={12}
-              rowSpacing={4}
+              rowSpacing={8}
               sx={{
                 mt: (theme) => theme.space.section.xs,
                 pointerEvents: "auto",
@@ -551,6 +552,86 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
+              {/* API access section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    API access
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: (theme) => theme.space.component.lg,
+                    }}
+                  >
+                    REST API endpoints for programmatic access to scenario data,
+                    model outputs, and COEQWAL resources.
+                  </Typography>
+                  <Typography
+                    component="a"
+                    href="https://api.coeqwal.org/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="body2"
+                    sx={{
+                      display: "inline-block",
+                      // Match the trailing mb on row 1's ScenarioSelect
+                      // FormControl so the row 2 -> row 3 gap equals
+                      // the row 1 -> row 2 gap (grid rowSpacing is
+                      // uniform, so row-1's extra breathing room is
+                      // contributed entirely by that section.sm).
+                      mb: (theme) => theme.space.section.sm,
+                      color: "common.white",
+                      textDecoration: "underline",
+                      textDecorationColor: (theme) =>
+                        alpha(theme.palette.common.white, 0.4),
+                      textUnderlineOffset: "3px",
+                      "&:hover": {
+                        textDecorationColor: (theme) =>
+                          alpha(theme.palette.common.white, 0.8),
+                      },
+                    }}
+                  >
+                    API documentation
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Companion sites section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <Box>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
+                    Companion sites
+                  </Typography>
+                  <Typography
+                    component="a"
+                    href="https://huggingface.co/spaces/COEQWAL/water-data-dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="body2"
+                    sx={{
+                      color: "common.white",
+                      textDecoration: "underline",
+                      textDecorationColor: (theme) =>
+                        alpha(theme.palette.common.white, 0.4),
+                      textUnderlineOffset: "3px",
+                      "&:hover": {
+                        textDecorationColor: (theme) =>
+                          alpha(theme.palette.common.white, 0.8),
+                      },
+                    }}
+                  >
+                    COEQWAL modeling team data dashboard
+                  </Typography>
+                </Box>
+              </Grid>
+
               {/* Model documentation section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
@@ -599,36 +680,6 @@ export default function DataPage() {
                   >
                     Peer-reviewed publications and research papers related to
                     the COEQWAL project and CalSim3 modeling efforts.
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[300],
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* API access section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    API access
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.component.lg,
-                    }}
-                  >
-                    REST API endpoints for programmatic access to scenario data,
-                    model outputs, and COEQWAL resources.
                   </Typography>
                   <Typography
                     variant="body2"

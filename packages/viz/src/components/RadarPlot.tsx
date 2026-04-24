@@ -281,6 +281,35 @@ function computeSpokeDodge(
   return result
 }
 
+type AxisPosition = {
+  axis: string
+  x: number
+  y: number
+  anchor: "start" | "end" | "middle"
+}
+
+function axisPositionsEqual(
+  a: AxisPosition[] | null,
+  b: AxisPosition[] | null,
+): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i]!
+    const y = b[i]!
+    if (
+      x.axis !== y.axis ||
+      x.x !== y.x ||
+      x.y !== y.y ||
+      x.anchor !== y.anchor
+    ) {
+      return false
+    }
+  }
+  return true
+}
+
 const RadarPlot: React.FC<RadarPlotProps> = React.memo(
   ({
     data,
@@ -395,6 +424,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onAxisPositionsRef.current = onAxisPositions
     }, [onAxisPositions])
+    // Last axis positions reported to the parent via onAxisPositions.
+    // Guarding against equal repeats breaks the ResizeObserver → updateChart
+    // → setState → re-render feedback loop that can trip React's
+    // update-depth guard during the 700ms map-column width transition.
+    const lastReportedAxisPositionsRef = useRef<AxisPosition[] | null>(null)
 
     const axisLabelDetailChromeRef = useRef(axisLabelDetailChrome)
     useEffect(() => {
@@ -1547,7 +1581,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             })
           })
 
-          onAxisPositionsRef.current?.(axisPositions)
+          if (
+            !axisPositionsEqual(
+              lastReportedAxisPositionsRef.current,
+              axisPositions,
+            )
+          ) {
+            lastReportedAxisPositionsRef.current = axisPositions
+            onAxisPositionsRef.current?.(axisPositions)
+          }
 
           const reopen = lastOpenAxisDetailRef.current
           if (reopen) {

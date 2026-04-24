@@ -53,6 +53,65 @@ import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioCo
 import { useTourAnchor } from "../tour/TourAnchorContext"
 import { TOUR_STEPS } from "../tour/content"
 
+type AxisPosition = {
+  axis: string
+  x: number
+  y: number
+  anchor: "start" | "end" | "middle"
+}
+
+type AxisLabelRect = { x: number; y: number; width: number; height: number }
+
+function axisPositionsEqual(
+  a: AxisPosition[] | null,
+  b: AxisPosition[] | null,
+): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i]!
+    const y = b[i]!
+    if (
+      x.axis !== y.axis ||
+      x.x !== y.x ||
+      x.y !== y.y ||
+      x.anchor !== y.anchor
+    ) {
+      return false
+    }
+  }
+  return true
+}
+
+// Stable identity for the "no rects yet" state. Using a single shared
+// object avoids a fresh setState every render when axisPositions is empty.
+const EMPTY_RECTS: Record<string, AxisLabelRect> = {}
+
+function rectsShallowEqual(
+  a: Record<string, AxisLabelRect>,
+  b: Record<string, AxisLabelRect>,
+): boolean {
+  if (a === b) return true
+  const aKeys = Object.keys(a)
+  const bKeys = Object.keys(b)
+  if (aKeys.length !== bKeys.length) return false
+  for (const key of aKeys) {
+    const av = a[key]
+    const bv = b[key]
+    if (!bv) return false
+    if (
+      av!.x !== bv.x ||
+      av!.y !== bv.y ||
+      av!.width !== bv.width ||
+      av!.height !== bv.height
+    ) {
+      return false
+    }
+  }
+  return true
+}
+
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
   color: string
@@ -167,42 +226,58 @@ export default function RadarPanel({
     [onOutcomeHover],
   )
 
-  const [axisPositions, setAxisPositions] = useState<
-    { axis: string; x: number; y: number; anchor: "start" | "end" | "middle" }[]
-  >([])
+  const [axisPositions, setAxisPositions] = useState<AxisPosition[]>([])
 
-  const handleAxisPositions = useCallback(
-    (
-      positions: {
-        axis: string
-        x: number
-        y: number
-        anchor: "start" | "end" | "middle"
-      }[],
-    ) => {
-      setAxisPositions(positions)
-    },
-    [],
+  // Axis positions arrive from RadarPlot on every D3 rebuild. During the
+  // 700ms map-column width transition the ResizeObserver fires every
+  // frame, and each tick produces genuinely different pixel positions
+  // (different widths), so we'd commit a setState per frame, each
+  // triggering an axisLabelRects commit, and the cumulative depth would
+  // trip React's #185 guard. Throttle to at most one commit per 50ms so
+  // the info-icon overlay still moves smoothly during the transition
+  // (~14 commits over 700ms) without overwhelming React.
+  const pendingAxisPositionsRef = useRef<AxisPosition[] | null>(null)
+  const axisPositionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
   )
+
+  const handleAxisPositions = useCallback((positions: AxisPosition[]) => {
+    pendingAxisPositionsRef.current = positions
+    if (axisPositionsTimerRef.current != null) return
+    axisPositionsTimerRef.current = setTimeout(() => {
+      const next = pendingAxisPositionsRef.current
+      pendingAxisPositionsRef.current = null
+      axisPositionsTimerRef.current = null
+      if (!next) return
+      setAxisPositions((prev) =>
+        axisPositionsEqual(prev, next) ? prev : next,
+      )
+    }, 50)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (axisPositionsTimerRef.current != null) {
+        clearTimeout(axisPositionsTimerRef.current)
+        axisPositionsTimerRef.current = null
+      }
+    }
+  }, [])
 
   // Measured bounding boxes of each axis label group in the SVG, keyed by
   // axis display name. Used to place the info icon flush against the
   // rendered text rather than guessing from the anchor point. Re-measured
   // whenever the chart re-renders (new axisPositions array).
-  const [axisLabelRects, setAxisLabelRects] = useState<
-    Record<string, { x: number; y: number; width: number; height: number }>
-  >({})
+  const [axisLabelRects, setAxisLabelRects] =
+    useState<Record<string, AxisLabelRect>>(EMPTY_RECTS)
 
   useEffect(() => {
     const svg = radarSvgRef.current
     if (!svg || axisPositions.length === 0) {
-      setAxisLabelRects({})
+      setAxisLabelRects((prev) => (prev === EMPTY_RECTS ? prev : EMPTY_RECTS))
       return
     }
-    const rects: Record<
-      string,
-      { x: number; y: number; width: number; height: number }
-    > = {}
+    const rects: Record<string, AxisLabelRect> = {}
     svg.querySelectorAll<SVGGElement>("g.axis-label").forEach((g) => {
       const axis = g.getAttribute("data-axis")
       if (!axis) return
@@ -229,7 +304,7 @@ export default function RadarPanel({
         // getBBox can throw on detached nodes; ignore and skip.
       }
     })
-    setAxisLabelRects(rects)
+    setAxisLabelRects((prev) => (rectsShallowEqual(prev, rects) ? prev : rects))
   }, [axisPositions])
 
   // Which axis label's info popover is currently open (by display name).

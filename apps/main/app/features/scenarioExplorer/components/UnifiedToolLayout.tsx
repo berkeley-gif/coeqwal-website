@@ -48,6 +48,13 @@ export default function UnifiedToolLayout({
     ? SIDEBAR_WIDTH_EXPANDED
     : SIDEBAR_WIDTH_COLLAPSED
 
+  // Keep map mode + panel width in sync with showMap. Previously this
+  // effect's cleanup function ran on every showMap change (firing
+  // hidden/clear/50 before the body then set the real values), which
+  // produced 5-6 synchronous mapStore writes per toggle and amplified
+  // the render cascade that trips React #185. Splitting into a
+  // dependency-driven effect plus an unmount-only cleanup drops the
+  // toggle cost to 2-3 writes.
   useEffect(() => {
     if (showMap) {
       mapActions.setMapMode("explore")
@@ -55,13 +62,17 @@ export default function UnifiedToolLayout({
     } else {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setExplorePanelWidth(50)
     }
+  }, [showMap])
+
+  useEffect(() => {
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
       mapActions.setExplorePanelWidth(50)
     }
-  }, [showMap])
+  }, [])
 
   // Clear map visualization when switching between tools so stale
   // outcome highlights from a previous tool don't persist.
