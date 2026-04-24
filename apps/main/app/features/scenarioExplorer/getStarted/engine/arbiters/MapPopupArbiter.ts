@@ -14,11 +14,7 @@
 
 import { mapActions } from "../../../../map/store"
 import type { LocationHighlight } from "../../../../map/store"
-import type {
-  Arbiter,
-  BeatEngineContext,
-  MapPopupActor,
-} from "../types"
+import type { Arbiter, BeatEngineContext, MapPopupActor } from "../types"
 
 export class MapPopupArbiter implements Arbiter<MapPopupActor> {
   readonly kind = "mapPopup" as const
@@ -35,20 +31,12 @@ export class MapPopupArbiter implements Arbiter<MapPopupActor> {
    *  frame. */
   private lastSig = ""
 
-  onEnter(
-    actor: MapPopupActor,
-    _v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onEnter(actor: MapPopupActor, _v: number, ctx: BeatEngineContext): void {
     const hi = actor.buildHighlight(ctx)
     if (hi) this.buffer.set(actor.id, hi)
   }
 
-  onUpdate(
-    actor: MapPopupActor,
-    _v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onUpdate(actor: MapPopupActor, _v: number, ctx: BeatEngineContext): void {
     // Re-evaluate each tick so late-arriving centroid or tier data
     // lands without needing a dedicated "data ready" signal. If
     // `buildHighlight` returns null (data not ready yet), drop the

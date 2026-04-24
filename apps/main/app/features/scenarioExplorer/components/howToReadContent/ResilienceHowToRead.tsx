@@ -31,15 +31,18 @@ export function ResilienceHowToRead() {
         points={[
           {
             label: "Scenarios is sidebar-driven, like Radar.",
-            description: "Select scenarios in the sidebar and they appear as small multiples. Select none and the chart shows the Overview aggregate across the full field instead of an empty panel.",
+            description:
+              "Select scenarios in the sidebar and they appear as small multiples. Select none and the chart shows the Overview aggregate across the full field instead of an empty panel.",
           },
           {
             label: "Outcome mirrors that rule on the Y axis.",
-            description: "Pick a primary outcome and the matrix becomes scenarios down the Y axis. Sidebar selection filters which scenarios show as rows; with nothing selected, all scenarios appear.",
+            description:
+              "Pick a primary outcome and the matrix becomes scenarios down the Y axis. Sidebar selection filters which scenarios show as rows; with nothing selected, all scenarios appear.",
           },
           {
             label: "Regional detail is one click away.",
-            description: "Any outcome with North-of-Delta and South-of-Delta variants can be unfolded row-by-row, just like axis expand in Radar. Hydroclimate columns sit above the matrix so you can read the climate shift without leaving the chart.",
+            description:
+              "Any outcome with North-of-Delta and South-of-Delta variants can be unfolded row-by-row, just like axis expand in Radar. Hydroclimate columns sit above the matrix so you can read the climate shift without leaving the chart.",
           },
         ]}
         visual={<ResilienceHeroGraphic showAllScenarios={demoShowAll} />}

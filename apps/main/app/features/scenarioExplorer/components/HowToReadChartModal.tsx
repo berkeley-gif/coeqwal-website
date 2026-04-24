@@ -70,7 +70,8 @@ function getModeMeta(mode: ExploreMode, theme: Theme) {
     case "equity":
       return {
         eyebrow: "COMING SOON",
-        summary: "A distribution-first view of consistency across locations of interest.",
+        summary:
+          "A distribution-first view of consistency across locations of interest.",
         chapters: ["Overview"],
         accent: theme.palette.blue.bright,
       }
@@ -151,7 +152,10 @@ export function HowToReadChartModal({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.15fr) minmax(320px, 0.85fr)" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "minmax(0, 1.15fr) minmax(320px, 0.85fr)",
+              },
               gap: theme.space.section.sm,
               alignItems: "start",
             }}

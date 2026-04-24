@@ -50,9 +50,10 @@ export function useTierLocationAssignmentsBatch(
     isLoading,
     isValidating,
   } = useSWR<TierLocationAssignmentsBatchResponse>(
-    enabled ? CACHE_KEYS.tierLocationsBatch(scenarioId as string, tierCodes) : null,
-    () =>
-      fetchTierLocationAssignmentsBatch(scenarioId as string, tierCodes),
+    enabled
+      ? CACHE_KEYS.tierLocationsBatch(scenarioId as string, tierCodes)
+      : null,
+    () => fetchTierLocationAssignmentsBatch(scenarioId as string, tierCodes),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -66,11 +67,9 @@ export function useTierLocationAssignmentsBatch(
   useEffect(() => {
     if (!data || !scenarioId) return
     for (const [code, perCode] of Object.entries(data.results)) {
-      globalMutate(
-        CACHE_KEYS.tierLocations(scenarioId, code),
-        perCode,
-        { revalidate: false },
-      )
+      globalMutate(CACHE_KEYS.tierLocations(scenarioId, code), perCode, {
+        revalidate: false,
+      })
     }
   }, [data, scenarioId])
 

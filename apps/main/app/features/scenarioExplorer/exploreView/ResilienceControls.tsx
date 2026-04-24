@@ -148,8 +148,7 @@ function applyReadAs(
     case "climate_shift":
       return {
         cellEncoding: "tier",
-        deltaMode:
-          prev.deltaMode !== "none" ? prev.deltaMode : "vs_historical",
+        deltaMode: prev.deltaMode !== "none" ? prev.deltaMode : "vs_historical",
       }
     case "risk_density":
       return { cellEncoding: "density_risk", deltaMode: "none" }
@@ -324,9 +323,7 @@ function PopoverShell({
         )}
       </Box>
       <Divider sx={{ borderColor: theme.palette.divider }} />
-      <Box
-        sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}
-      >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
         {children}
       </Box>
     </Box>
@@ -358,9 +355,7 @@ export default function ResilienceControls({
     aggregateOver,
   } = controls
 
-  const selectedScenarios = useScenarioExplorerStore(
-    (s) => s.selectedScenarios,
-  )
+  const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
   const showResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.showResilienceOutcomeSelector,
   )
@@ -546,14 +541,12 @@ export default function ResilienceControls({
   // Popover anchors
   // --------------------------------------------------------------
 
-  const [encodingAnchor, setEncodingAnchor] =
-    useState<HTMLElement | null>(null)
-  const [scenariosAnchor, setScenariosAnchor] =
-    useState<HTMLElement | null>(null)
-  const [outcomesAnchor, setOutcomesAnchor] =
-    useState<HTMLElement | null>(null)
-  const [climatesAnchor, setClimatesAnchor] =
-    useState<HTMLElement | null>(null)
+  const [encodingAnchor, setEncodingAnchor] = useState<HTMLElement | null>(null)
+  const [scenariosAnchor, setScenariosAnchor] = useState<HTMLElement | null>(
+    null,
+  )
+  const [outcomesAnchor, setOutcomesAnchor] = useState<HTMLElement | null>(null)
+  const [climatesAnchor, setClimatesAnchor] = useState<HTMLElement | null>(null)
   const [pivotAnchor, setPivotAnchor] = useState<HTMLElement | null>(null)
 
   const isQuadrant = view === "quadrant"
@@ -778,10 +771,7 @@ export default function ResilienceControls({
           },
         }}
       >
-        <ResilienceChartTuner
-          controls={controls}
-          onChange={onChange}
-        />
+        <ResilienceChartTuner controls={controls} onChange={onChange} />
       </Box>
 
       {/* Popover: Encoding (Read as) */}
@@ -945,7 +935,7 @@ export default function ResilienceControls({
           width={300}
         >
           <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
-            Tick or untick scenarios in the sidebar to change what's on the
+            Tick or untick scenarios in the sidebar to change what&apos;s on the
             chart. Leave none picked to see them all.
           </Typography>
           {scenarioCount > 0 && (
@@ -991,9 +981,7 @@ export default function ResilienceControls({
         >
           <InlineToggleChip
             label={
-              showResilienceOutcomeSelector
-                ? "hide picker"
-                : "pick outcomes…"
+              showResilienceOutcomeSelector ? "hide picker" : "pick outcomes…"
             }
             active={showResilienceOutcomeSelector}
             onClick={() =>

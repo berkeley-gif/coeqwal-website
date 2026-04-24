@@ -308,179 +308,198 @@ export default function GetStartedView() {
             area (padding doesn't margin-collapse out of the parent,
             unlike `mt`). See WELCOME_TOP_MARGIN_PX. */}
         <Box sx={{ pt: `${WELCOME_TOP_MARGIN_PX}px` }}>
-        <GetStartedPanelShell background={theme.palette.tabPanels.exploreDeep}>
-          <>
-            {/* Heading */}
-            <Typography
-              variant="h3"
-              component="h2"
-              color="text.secondary"
-              sx={{ maxWidth: 850 }}
-            >
-              What is the COEQWAL scenario library and how should I use it?
-            </Typography>
+          <GetStartedPanelShell
+            background={theme.palette.tabPanels.exploreDeep}
+          >
+            <>
+              {/* Heading */}
+              <Typography
+                variant="h3"
+                component="h2"
+                color="text.secondary"
+                sx={{ maxWidth: 850 }}
+              >
+                What is the COEQWAL scenario library and how should I use it?
+              </Typography>
 
-            {/* Three-column grid */}
-            <Box
-              sx={{
-                mt: theme.space.section.xl,
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                columnGap: theme.space.section.lg,
-                rowGap: sp.lg,
-              }}
-            >
-              {/* Column 1 - The model */}
-              <Box>
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
-                >
-                  The model
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  COEQWAL uses the{" "}
-                  <Typography component="span" variant="body2" fontWeight={600}>
-                    CalSim3
-                  </Typography>{" "}
-                  water planning model to evaluate how different{" "}
-                  <Typography component="span" variant="body2" fontWeight={600}>
-                    scenarios
-                  </Typography>{" "}
-                  affect outcomes for communities, farms, and the environment.
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.md }}
-                >
-                  Each scenario pairs a{" "}
-                  <Typography component="span" variant="body2" fontWeight={600}>
-                    water management strategy
-                  </Typography>{" "}
-                  (the operating rules, policies, and infrastructure decisions
-                  that determine how water is allocated) with a{" "}
-                  <Typography component="span" variant="body2" fontWeight={600}>
-                    hydroclimate
-                  </Typography>{" "}
-                  (the temperature and precipitation patterns that determine how
-                  much water is available).
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.md }}
-                >
-                  The management strategy represents what we can control and the
-                  hydroclimate represents what we can&rsquo;t control and must
-                  prepare for.
-                </Typography>
-              </Box>
-
-              {/* Column 2 - The library */}
-              <Box>
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
-                >
-                  The library
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  COEQWAL has compiled a library of over 100 scenarios.
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.md }}
-                >
-                  Each scenario is associated with dozens of outcome variables
-                  that describe how water is allocated to different locations
-                  and users.
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.md }}
-                >
-                  Visualization tools can be used to compare scenarios, examine
-                  outcomes, and interpret results across different perspectives.
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.md }}
-                >
-                  A summary of all scenarios can be accessed{" "}
+              {/* Three-column grid */}
+              <Box
+                sx={{
+                  mt: theme.space.section.xl,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  columnGap: theme.space.section.lg,
+                  rowGap: sp.lg,
+                }}
+              >
+                {/* Column 1 - The model */}
+                <Box>
                   <Typography
-                    component="button"
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                  >
+                    The model
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    COEQWAL uses the{" "}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={600}
+                    >
+                      CalSim3
+                    </Typography>{" "}
+                    water planning model to evaluate how different{" "}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={600}
+                    >
+                      scenarios
+                    </Typography>{" "}
+                    affect outcomes for communities, farms, and the environment.
+                  </Typography>
+                  <Typography
                     variant="body2"
-                    sx={{
-                      background: "none",
-                      border: "none",
-                      p: 0,
-                      color: "text.secondary",
-                      textDecoration: "underline",
-                      textDecorationColor: alpha(
-                        theme.palette.common.white,
-                        0.4,
-                      ),
-                      textUnderlineOffset: "3px",
-                      cursor: "pointer",
-                      font: "inherit",
-                      "&:hover": {
+                    color="text.secondary"
+                    sx={{ mt: sp.md }}
+                  >
+                    Each scenario pairs a{" "}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={600}
+                    >
+                      water management strategy
+                    </Typography>{" "}
+                    (the operating rules, policies, and infrastructure decisions
+                    that determine how water is allocated) with a{" "}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={600}
+                    >
+                      hydroclimate
+                    </Typography>{" "}
+                    (the temperature and precipitation patterns that determine
+                    how much water is available).
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: sp.md }}
+                  >
+                    The management strategy represents what we can control and
+                    the hydroclimate represents what we can&rsquo;t control and
+                    must prepare for.
+                  </Typography>
+                </Box>
+
+                {/* Column 2 - The library */}
+                <Box>
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                  >
+                    The library
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    COEQWAL has compiled a library of over 100 scenarios.
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: sp.md }}
+                  >
+                    Each scenario is associated with dozens of outcome variables
+                    that describe how water is allocated to different locations
+                    and users.
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: sp.md }}
+                  >
+                    Visualization tools can be used to compare scenarios,
+                    examine outcomes, and interpret results across different
+                    perspectives.
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: sp.md }}
+                  >
+                    A summary of all scenarios can be accessed{" "}
+                    <Typography
+                      component="button"
+                      variant="body2"
+                      sx={{
+                        background: "none",
+                        border: "none",
+                        p: 0,
+                        color: "text.secondary",
+                        textDecoration: "underline",
                         textDecorationColor: alpha(
                           theme.palette.common.white,
-                          0.8,
+                          0.4,
                         ),
-                      },
-                    }}
-                  >
-                    here
+                        textUnderlineOffset: "3px",
+                        cursor: "pointer",
+                        font: "inherit",
+                        "&:hover": {
+                          textDecorationColor: alpha(
+                            theme.palette.common.white,
+                            0.8,
+                          ),
+                        },
+                      }}
+                    >
+                      here
+                    </Typography>
+                    .
                   </Typography>
-                  .
-                </Typography>
-              </Box>
+                </Box>
 
-              {/* Column 3 - What you'll learn */}
-              <Box>
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
-                >
-                  What you&rsquo;ll learn
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  By exploring the scenario library, you will gain understanding
-                  of how:
-                </Typography>
-                <LinedList
-                  items={[
-                    {
-                      label:
-                        "Management strategies affect trade-offs and synergies among outcomes",
-                    },
-                    {
-                      label:
-                        "Benefits and impacts are distributed among water users and locations",
-                    },
-                    {
-                      label:
-                        "Different strategies perform under varying levels of climate stress",
-                    },
-                  ]}
-                  color={theme.palette.common.white}
-                  arrows={false}
-                  icon={dropletIcon}
-                  labelVariant="body2"
-                  sx={{ mt: sp.sm }}
-                />
+                {/* Column 3 - What you'll learn */}
+                <Box>
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+                  >
+                    What you&rsquo;ll learn
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    By exploring the scenario library, you will gain
+                    understanding of how:
+                  </Typography>
+                  <LinedList
+                    items={[
+                      {
+                        label:
+                          "Management strategies affect trade-offs and synergies among outcomes",
+                      },
+                      {
+                        label:
+                          "Benefits and impacts are distributed among water users and locations",
+                      },
+                      {
+                        label:
+                          "Different strategies perform under varying levels of climate stress",
+                      },
+                    ]}
+                    color={theme.palette.common.white}
+                    arrows={false}
+                    icon={dropletIcon}
+                    labelVariant="body2"
+                    sx={{ mt: sp.sm }}
+                  />
+                </Box>
               </Box>
-            </Box>
-          </>
-        </GetStartedPanelShell>
+            </>
+          </GetStartedPanelShell>
         </Box>
 
         {/* Water Issues - custom layout for five-column grid */}

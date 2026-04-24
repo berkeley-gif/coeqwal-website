@@ -42,7 +42,7 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   {
     view: "explorer",
     icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
-    label:"Tools",
+    label: "Tools",
   },
 ]
 
@@ -239,8 +239,7 @@ export default function ExploreSubNav() {
           {FLOW.filter((step) => !step.research || showResearchTools).map(
             (step, i, visibleFlow) => {
               const isShare = step.mode === null
-              const active =
-                step.mode !== null && exploreMode === step.mode
+              const active = step.mode !== null && exploreMode === step.mode
               const handleClick = () => {
                 if (isShare) {
                   navigateToTab("share")
@@ -339,7 +338,6 @@ export default function ExploreSubNav() {
               )
             },
           )}
-
         </Box>
       </Box>
     </Box>

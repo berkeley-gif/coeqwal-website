@@ -372,7 +372,7 @@ const getFillColor = (
   colorMode: string,
   tierColorMap: Record<string, string>,
   categoryColorScale: d3.ScaleOrdinal<string, string, never>,
-  showComparison: boolean = false,
+  _showComparison: boolean = false,
 ): string => {
   if (colorMode === "tier") {
     // In comparison mode, use comparison colors (blue/red based on change)

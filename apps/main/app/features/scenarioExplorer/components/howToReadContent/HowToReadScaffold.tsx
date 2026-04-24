@@ -68,7 +68,10 @@ export function StoryHero({
         sx={{
           position: "relative",
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.1fr) minmax(320px, 0.9fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "minmax(0, 1.1fr) minmax(320px, 0.9fr)",
+          },
           gap: theme.space.section.md,
           px: { xs: theme.space.section.sm, md: theme.space.section.md },
           py: { xs: theme.space.section.sm, md: theme.space.section.md },
@@ -277,7 +280,9 @@ export function AnnotatedStage({
           variant="h5"
           sx={{
             maxWidth: 560,
-            color: dark ? theme.palette.common.white : theme.palette.text.primary,
+            color: dark
+              ? theme.palette.common.white
+              : theme.palette.text.primary,
           }}
         >
           {title}
@@ -339,7 +344,10 @@ export function AnnotatedStage({
                 : usesStackedCallouts
                   ? "grid"
                   : { xs: "grid", xl: "contents" },
-              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+              },
               gap: theme.space.component.sm,
             }}
           >
@@ -363,7 +371,7 @@ export function AnnotatedStage({
                       ? "100%"
                       : { xs: "100%", xl: "auto" },
                   maxWidth: usesOverlayCallouts
-                    ? callout.maxWidth ?? "240px"
+                    ? (callout.maxWidth ?? "240px")
                     : usesStackedCallouts
                       ? "none"
                       : { xs: "none", xl: callout.maxWidth ?? "240px" },
@@ -465,10 +473,16 @@ export function JourneyStrip({
               >
                 {step.number}
               </Typography>
-              <Typography variant="subtitle1" sx={{ mb: theme.space.component.xs }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: theme.space.component.xs }}
+              >
                 {step.label}
               </Typography>
-              <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+              <Typography
+                variant="body2"
+                sx={{ color: theme.palette.text.primary }}
+              >
                 {step.description}
               </Typography>
             </Box>

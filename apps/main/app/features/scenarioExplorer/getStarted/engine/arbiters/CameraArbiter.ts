@@ -76,12 +76,7 @@ export class CameraArbiter {
    *  `onStart` fires, an easeTo is dispatched, and `onArrive` is wired
    *  to the next `moveend`. */
   flyHome(map: CameraMap | null | undefined, opts: FlyHomeOpts = {}): void {
-    const {
-      duration = 800,
-      resetOrientation = false,
-      onStart,
-      onArrive,
-    } = opts
+    const { duration = 800, resetOrientation = false, onStart, onArrive } = opts
 
     if (!map || this.isHome(map)) {
       onArrive?.()

@@ -78,8 +78,6 @@ interface Beat2LayoutItem {
   locationCount: number
   /** Pixel height the glyph placeholder should reserve in document flow. */
   targetHeight: number
-  /** Caption rendered under the glyph (e.g. "12 locations"). */
-  locationDescription: string
 }
 
 interface Beat2Layout {
@@ -316,8 +314,28 @@ export default function BeatTextOverlay({
   const placeholderRefsMap = useRef<Map<string, HTMLDivElement | null>>(
     new Map(),
   )
-  /** Caption Typographies under each glyph. */
-  const captionRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  /** Panel-relative home geometry for each outcome title block, measured
+   *  alongside the placeholder ResizeObserver. `text*` fields capture the
+   *  intrinsic (un-clipped) width/height of the inner Typography so Beat 6
+   *  can anchor the text at radar axis positions without relying on the
+   *  outer block's column-clipped bounding rect. */
+  const titleGeomRef = useRef<
+    Map<
+      string,
+      {
+        textLeft: number
+        textCenterY: number
+        textWidth: number
+        textHeight: number
+      }
+    >
+  >(new Map())
+  /** Precomputed per-outcome delta for the Beat 6 radar-label slide.
+   *  Populated by the same measure pass that fills `titleGeomRef`; the
+   *  per-frame tick just multiplies by `blend` and writes a translate. */
+  const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
+    new Map(),
+  )
   const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
   const eyebrowDataRef = useRef<ColumnEyebrow[] | undefined>(undefined)
   eyebrowDataRef.current = beat2Layout?.eyebrows
@@ -392,9 +410,7 @@ export default function BeatTextOverlay({
     // fades out together without reversing each reveal).
     if (beat1Ref.current) {
       const el = beat1Ref.current
-      const fadeIn = textHiddenRef.current
-        ? 0
-        : clamp01((v - 0.01) / B0_PARA)
+      const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.01) / B0_PARA)
       const mult = backOutOpacity ? backOutOpacity.get() : 1
       el.style.opacity = String(fadeIn * mult)
     }
@@ -450,44 +466,26 @@ export default function BeatTextOverlay({
     // Outcome titles fade in per-slice, synced to each outcome's own morph.
     // Each title appears just before its polygons begin morphing so the
     // viewer can read the title while watching that slice animate.
-    // Captions fade in across the *last portion* of each morph window so
-    // they're fully visible the moment the polygons settle as squares.
-    // (Earlier we had captions starting at morphEnd, which left AG_REV's
-    // caption only partially faded in when beat 3 ends at AG_REV's
-    // morphEnd of 0.78.)
     const windows = outcomeMorphWindowsRef.current
     const TITLE_LEAD = 0.004
     const TITLE_FADE = 0.009
-    // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
-    // exactly at morphEnd, so the "x locations" text is fully opaque
-    // the instant the squares lock in.
-    const CAPTION_FADE = 0.006
-    const CAPTION_LEAD = CAPTION_FADE
-    // Late morph slices (when activeOutcomeGroups is short) can push the
-    // caption's natural fadeEnd past the end of beat 4 (0.5), leaving
-    // the caption partially opaque at rest. Cap fadeEnd so every
-    // caption settles at opacity 1 before beat 4 ends.
-    const CAPTION_FADE_END_CEILING = 0.495
     const layoutItems = beat2LayoutRef.current?.items
     if (layoutItems) {
       for (const item of layoutItems) {
         const win = windows?.[item.code]
         const titleEl = titleRefsMap.current.get(item.code)
-        const captionEl = captionRefsMap.current.get(item.code)
 
         if (!win) {
           // No morph window yet (outcome's polygons haven't populated
           // `activeOutcomeGroups`, or it's not in ACTIVE_OUTCOMES).
-          // Keep the title + caption fully hidden so stale slots don't
-          // leak into earlier beats (e.g., "Winter-run salmon" showing
-          // at the end of beat 3 before its real morph slice arrives).
+          // Keep the title fully hidden so stale slots don't leak into
+          // earlier beats (e.g., "Winter-run salmon" showing at the end
+          // of beat 3 before its real morph slice arrives).
           if (titleEl) titleEl.style.opacity = "0"
-          if (captionEl) captionEl.style.opacity = "0"
           continue
         }
 
         const morphStart = win.start
-        const morphEnd = win.end
 
         if (titleEl) {
           const titleFadeStart = morphStart - TITLE_LEAD
@@ -495,19 +493,39 @@ export default function BeatTextOverlay({
             clamp01((v - titleFadeStart) / TITLE_FADE),
           )
         }
-
-        if (captionEl) {
-          const rawFadeEnd = morphEnd + (CAPTION_FADE - CAPTION_LEAD)
-          const captionFadeEnd = Math.min(
-            rawFadeEnd,
-            CAPTION_FADE_END_CEILING,
-          )
-          const captionFadeStart = captionFadeEnd - CAPTION_FADE
-          captionEl.style.opacity = String(
-            clamp01((v - captionFadeStart) / CAPTION_FADE),
-          )
-        }
       }
+    }
+
+    // Beat 6 radar-label slide.
+    //
+    // Each title's text is anchored at its polar axis position (matching
+    // `RadarPlot.axis-label` geometry: `labelR = rMax + 24`, anchor
+    // derived from angle) during the same [0.75, 0.82] window where
+    // `OutcomeMorphOverlay.radarBlend` glides the averaged dots to their
+    // vertices, so labels + dots arrive together. The labels ride back
+    // home across [0.87, 0.90] as the radar chrome fades out, yielding
+    // the right third for Beat 7's heatmap cells.
+    //
+    // Delta is pre-measured in the layout effect (`radarLabelDeltaRef`);
+    // here we only multiply by `blend` and write a translate + relax the
+    // block's `overflow: hidden` so text past the column edge stays
+    // visible at the axis.
+    const radarDeltas = radarLabelDeltaRef.current
+    if (radarDeltas.size > 0) {
+      const blendIn = clamp01((v - 0.75) / 0.07)
+      const blendOut = clamp01((v - 0.87) / 0.03)
+      const blend = blendIn * (1 - blendOut)
+      radarDeltas.forEach(({ dx, dy }, code) => {
+        const el = titleRefsMap.current.get(code)
+        if (!el) return
+        if (blend > 0) {
+          el.style.transform = `translate(${dx * blend}px, ${dy * blend}px)`
+          el.style.overflow = "visible"
+        } else if (el.style.transform || el.style.overflow) {
+          el.style.transform = ""
+          el.style.overflow = ""
+        }
+      })
     }
 
     const eyebrows = eyebrowDataRef.current
@@ -791,6 +809,73 @@ export default function BeatTextOverlay({
       if (backdrop) {
         backdrop.style.height = `${rootRect.height}px`
       }
+
+      // Title home geometry + per-outcome radar-axis label delta.
+      //
+      // Text extents come from the inner Typography's intrinsic size
+      // (`scrollWidth` / `offsetHeight`), which survives the outer block's
+      // `overflow: hidden` column clip. The block's measured rect gives
+      // the text's *visible* left edge (block left + padding collapsed by
+      // the sx `px/mx` pair), which lines up with where we want to
+      // translate FROM so the title slides out of the column cleanly.
+      const titleGeom = titleGeomRef.current
+      titleGeom.clear()
+      titleRefsMap.current.forEach((el, code) => {
+        if (!el) return
+        const textEl = el.firstElementChild as HTMLElement | null
+        if (!textEl) return
+        const rText = textEl.getBoundingClientRect()
+        titleGeom.set(code, {
+          textLeft: rText.left - panelRect.left,
+          textCenterY: (rText.top + rText.bottom) / 2 - panelRect.top,
+          textWidth: textEl.scrollWidth,
+          textHeight: textEl.offsetHeight,
+        })
+      })
+
+      // Radar axis label positions: same polar layout the real RadarPlot
+      // uses (center in the right third, `labelR = rMax + 24`, anchor
+      // derived from the angle), sampled over the *active* outcomes in
+      // display order so the per-code delta maps 1:1 to the dot that
+      // lands at the matching vertex in `OutcomeMorphOverlay`.
+      const delta = radarLabelDeltaRef.current
+      delta.clear()
+      const activeItems = beat2LayoutRef.current?.items.filter(
+        (it) => it.isActive && it.targetHeight > 0,
+      )
+      if (activeItems && activeItems.length > 0) {
+        const panelW = panelRect.width
+        const panelH = panelRect.height
+        const panelLeft = panelW * (2 / 3)
+        const rightW = panelW - panelLeft
+        const cx = panelLeft + rightW / 2
+        const cy = panelH / 2
+        const rMax = Math.min(rightW / 2, panelH / 2) * 0.6
+        const labelR = rMax + 24
+        const N = activeItems.length
+        for (let i = 0; i < N; i++) {
+          const item = activeItems[i]!
+          const home = titleGeom.get(item.code)
+          if (!home) continue
+          const angle = (2 * Math.PI * i) / N - Math.PI / 2
+          const lx = cx + labelR * Math.cos(angle)
+          const ly = cy + labelR * Math.sin(angle)
+          const angleDeg = (angle * 180) / Math.PI
+          const isLeft = angleDeg > 90 || angleDeg < -90
+          const anchor: "start" | "middle" | "end" =
+            Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
+          const targetTextLeft =
+            anchor === "start"
+              ? lx
+              : anchor === "middle"
+                ? lx - home.textWidth / 2
+                : lx - home.textWidth
+          delta.set(item.code, {
+            dx: targetTextLeft - home.textLeft,
+            dy: ly - home.textCenterY,
+          })
+        }
+      }
     }
 
     const ro = new ResizeObserver(() => {
@@ -799,6 +884,9 @@ export default function BeatTextOverlay({
     ro.observe(root)
     ro.observe(panel)
     placeholderRefsMap.current.forEach((el) => {
+      if (el) ro.observe(el)
+    })
+    titleRefsMap.current.forEach((el) => {
       if (el) ro.observe(el)
     })
     measure()
@@ -1108,7 +1196,8 @@ export default function BeatTextOverlay({
             <Box sx={{ overflow: "hidden", pt: 2.5 }}>
               <Typography variant="body2" component="p">
                 For example, each colored location on the map represents an
-                agricultural water district in the Central Valley receiving surface water deliveries.
+                agricultural water district in the Central Valley receiving
+                surface water deliveries.
               </Typography>
             </Box>
           </Box>
@@ -1160,7 +1249,8 @@ export default function BeatTextOverlay({
             <Box sx={{ overflow: "hidden", pt: 2 }}>
               <Typography variant="body2" component="p">
                 The distribution shows how agricultural revenue plays out in
-                this scenario across the Central Valley agricultural districts in CalSim at a glance.
+                this scenario across the Central Valley agricultural districts
+                in CalSim at a glance.
               </Typography>
             </Box>
           </Box>
@@ -1256,7 +1346,6 @@ export default function BeatTextOverlay({
               </Typography>
             </Box>
           </Box>
-
         </Box>
 
         {/* Bottom control row: Back / N-of-T / Next, plus Restart once
@@ -1424,6 +1513,7 @@ export default function BeatTextOverlay({
         {/* Scenario header + encoding toggle.
          *  Disabled per design direction - kept in-source (wrapped in
          *  `{false && ...}`) so it can be re-enabled by flipping the guard. */}
+        {/* eslint-disable-next-line no-constant-binary-expression */}
         {false && (
           <Box
             ref={scenarioHeaderRef}
@@ -1640,98 +1730,97 @@ export default function BeatTextOverlay({
                 </Box>
               ))}
             </Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: "12px",
-              px: 3,
-              pt: 1.5,
-            }}
-          >
-            {[0, 1].map((col) => (
-              <Box
-                key={col}
-                sx={{
-                  flex: 1,
-                  minWidth: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  rowGap: 1.5,
-                }}
-              >
-                {beat2Layout.eyebrows[col] && (
-                  <Box
-                    ref={(el: HTMLDivElement | null) => {
-                      eyebrowRefs.current[col] = el
-                    }}
-                    sx={{ opacity: 0 }}
-                  >
-                    <Typography variant="smallSectionLabel" component="p">
-                      {beat2Layout.eyebrows[col]!.label}
-                    </Typography>
-                  </Box>
-                )}
-                {beat2Layout.items
-                  .filter((item) => item.column === col)
-                  .map((item) => {
-                    const isSelected = selectedOutcomeCode === item.code
-                    const hasGlyph = item.isActive && item.targetHeight > 0
-                    return (
-                      <Box
-                        key={item.code}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
+            <Box
+              sx={{
+                display: "flex",
+                gap: "12px",
+                px: 3,
+                pt: 1.5,
+              }}
+            >
+              {[0, 1].map((col) => (
+                <Box
+                  key={col}
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 1.5,
+                  }}
+                >
+                  {beat2Layout.eyebrows[col] && (
+                    <Box
+                      ref={(el: HTMLDivElement | null) => {
+                        eyebrowRefs.current[col] = el
+                      }}
+                      sx={{ opacity: 0 }}
+                    >
+                      <Typography variant="smallSectionLabel" component="p">
+                        {beat2Layout.eyebrows[col]!.label}
+                      </Typography>
+                    </Box>
+                  )}
+                  {beat2Layout.items
+                    .filter((item) => item.column === col)
+                    .map((item) => {
+                      const isSelected = selectedOutcomeCode === item.code
+                      const hasGlyph = item.isActive && item.targetHeight > 0
+                      return (
                         <Box
-                          ref={(el: HTMLDivElement | null) => {
-                            titleRefsMap.current.set(item.code, el)
-                          }}
-                          onClick={
-                            interactive
-                              ? () => onOutcomeClick?.(item.code, true)
-                              : undefined
-                          }
+                          key={item.code}
                           sx={{
-                            opacity: 0,
-                            pointerEvents: interactive ? "auto" : "none",
-                            cursor: interactive ? "pointer" : "default",
-                            borderRadius: 1,
-                            px: 0.5,
-                            mx: -0.5,
                             display: "flex",
-                            alignItems: "center",
-                            boxSizing: "border-box",
-                            overflow: "hidden",
-                            transition: "color 0.15s",
-                            ...(interactive && {
-                              "&:hover .MuiTypography-root": {
-                                color: theme.palette.blue.bright,
-                              },
-                            }),
+                            flexDirection: "column",
                           }}
                         >
-                          <Typography
-                            variant="overline"
-                            noWrap
+                          <Box
+                            ref={(el: HTMLDivElement | null) => {
+                              titleRefsMap.current.set(item.code, el)
+                            }}
+                            onClick={
+                              interactive
+                                ? () => onOutcomeClick?.(item.code, true)
+                                : undefined
+                            }
                             sx={{
-                              fontWeight: isSelected ? 700 : 500,
-                              textTransform: "none",
+                              opacity: 0,
+                              pointerEvents: interactive ? "auto" : "none",
+                              cursor: interactive ? "pointer" : "default",
+                              borderRadius: 1,
+                              px: 0.5,
+                              mx: -0.5,
+                              display: "flex",
+                              alignItems: "center",
+                              boxSizing: "border-box",
+                              overflow: "hidden",
                               transition: "color 0.15s",
-                              color: theme.palette.grey[900],
-                              lineHeight: 1.2,
+                              ...(interactive && {
+                                "&:hover .MuiTypography-root": {
+                                  color: theme.palette.blue.bright,
+                                },
+                              }),
                             }}
                           >
-                            {item.label}
-                          </Typography>
-                        </Box>
-                        {hasGlyph && (
-                          <>
-                            {/* Transparent placeholder reserving space for
+                            <Typography
+                              variant="overline"
+                              noWrap
+                              sx={{
+                                fontWeight: isSelected ? 700 : 500,
+                                textTransform: "none",
+                                transition: "color 0.15s",
+                                color: theme.palette.grey[900],
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {item.label}
+                            </Typography>
+                          </Box>
+                          {hasGlyph && (
+                            /* Transparent placeholder reserving space for
                              *  the SVG morph landing rect. The parent
                              *  ResizeObserver reads its bounding rect and
-                             *  forwards panel-relative coords to the SVG. */}
+                             *  forwards panel-relative coords to the SVG. */
                             <Box
                               ref={(el: HTMLDivElement | null) => {
                                 placeholderRefsMap.current.set(item.code, el)
@@ -1744,80 +1833,63 @@ export default function BeatTextOverlay({
                                 pointerEvents: "none",
                               }}
                             />
-                            <Box
-                              ref={(el: HTMLDivElement | null) => {
-                                captionRefsMap.current.set(item.code, el)
-                              }}
-                              sx={{ opacity: 0, mt: "4px" }}
-                            >
-                              <Typography
-                                component="span"
-                                sx={{
-                                  fontSize: 11,
-                                  lineHeight: 1.3,
-                                  color: theme.palette.grey[700],
-                                }}
-                              >
-                                {item.locationDescription}
-                              </Typography>
-                            </Box>
-                          </>
-                        )}
-                      </Box>
-                    )
-                  })}
-                {col === 0 && false && (
-                  /* "Add a location to track" CTA - disabled per design
-                   *  direction, kept in-source for future reuse. */
-                  <Box
-                    ref={addLocationCtaRef}
-                    sx={{
-                      opacity: 0,
-                      transition: "opacity 0.6s ease",
-                      pointerEvents: interactive ? "auto" : "none",
-                      mt: "auto",
-                      pt: 3,
-                    }}
-                  >
+                          )}
+                        </Box>
+                      )
+                    })}
+                  {/* eslint-disable-next-line no-constant-binary-expression */}
+                  {col === 0 && false && (
+                    /* "Add a location to track" CTA - disabled per design
+                     *  direction, kept in-source for future reuse. */
                     <Box
-                      component="button"
-                      type="button"
-                      onClick={onAddLocation}
+                      ref={addLocationCtaRef}
                       sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        color: theme.palette.grey[600],
-                        border: `1px solid ${theme.palette.grey[300]}`,
-                        borderRadius: "4px",
-                        background: "transparent",
-                        textTransform: "none",
-                        fontWeight: 500,
-                        fontSize: "0.75rem",
-                        letterSpacing: "0.02em",
-                        fontFamily: "inherit",
-                        px: 1.25,
-                        py: 0.125,
-                        cursor: "pointer",
-                        transition: "background 0.15s, border-color 0.15s",
-                        "&:hover": {
-                          backgroundColor: theme.palette.grey[100],
-                          borderColor: theme.palette.grey[400],
-                        },
-                        "&:focus-visible": {
-                          outline: `2px solid ${theme.palette.blue.bright}`,
-                          outlineOffset: "2px",
-                        },
+                        opacity: 0,
+                        transition: "opacity 0.6s ease",
+                        pointerEvents: interactive ? "auto" : "none",
+                        mt: "auto",
+                        pt: 3,
                       }}
                     >
-                      Add a location to track
-                      <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
+                      <Box
+                        component="button"
+                        type="button"
+                        onClick={onAddLocation}
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          color: theme.palette.grey[600],
+                          border: `1px solid ${theme.palette.grey[300]}`,
+                          borderRadius: "4px",
+                          background: "transparent",
+                          textTransform: "none",
+                          fontWeight: 500,
+                          fontSize: "0.75rem",
+                          letterSpacing: "0.02em",
+                          fontFamily: "inherit",
+                          px: 1.25,
+                          py: 0.125,
+                          cursor: "pointer",
+                          transition: "background 0.15s, border-color 0.15s",
+                          "&:hover": {
+                            backgroundColor: theme.palette.grey[100],
+                            borderColor: theme.palette.grey[400],
+                          },
+                          "&:focus-visible": {
+                            outline: `2px solid ${theme.palette.blue.bright}`,
+                            outlineOffset: "2px",
+                          },
+                        }}
+                      >
+                        Add a location to track
+                        <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
+                      </Box>
                     </Box>
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
+                  )}
+                </Box>
+              ))}
+            </Box>
           </Box>
         )}
       </Box>

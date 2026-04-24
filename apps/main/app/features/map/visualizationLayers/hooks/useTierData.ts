@@ -200,8 +200,19 @@ export function useTierData(
       return convertScenarioTierToLocations(scenarioTiersData, outcomeCode)
     }
     if (!assignments || !config) return null
-    return adaptAssignmentsToLegacyShape(assignments, scenarioId, config.tierCode)
-  }, [isSingleValue, scenarioTiersData, outcomeCode, assignments, config, scenarioId])
+    return adaptAssignmentsToLegacyShape(
+      assignments,
+      scenarioId,
+      config.tierCode,
+    )
+  }, [
+    isSingleValue,
+    scenarioTiersData,
+    outcomeCode,
+    assignments,
+    config,
+    scenarioId,
+  ])
 
   const derived = useMemo(() => {
     if (!response) {

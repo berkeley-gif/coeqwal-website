@@ -91,18 +91,18 @@ export default function ToolTour() {
   const endTour = useScenarioExplorerStore((s) => s.endTour)
   const setTourStep = useScenarioExplorerStore((s) => s.setTourStep)
   const setShowMap = useScenarioExplorerStore((s) => s.setShowMap)
+  const setShowKeyOperations = useScenarioExplorerStore(
+    (s) => s.setShowKeyOperations,
+  )
 
   const { resolve, version } = useTourAnchorResolver()
 
   const steps = tourTool ? TOUR_STEPS[tourTool] : []
   const step = steps[tourStep] ?? null
 
-  const hasTourBody = Boolean(
-    step && (step.body?.trim() ?? "").length > 0,
-  )
+  const hasTourBody = Boolean(step && (step.body?.trim() ?? "").length > 0)
   const hasTourMainBlock = Boolean(
-    step &&
-      (hasTourBody || Boolean(step.illustration)),
+    step && (hasTourBody || Boolean(step.illustration)),
   )
 
   // Re-resolve the current anchor whenever the registry changes or the
@@ -200,6 +200,33 @@ export default function ToolTour() {
 
   const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
   const { buildIdMapping } = useScenarioList()
+
+  // Temporarily reveal the Key operations column while the operations
+  // tour step is active, then restore the user's previous chip state
+  // on exit. Snapshot lives in a ref so the snapshot effect doesn't
+  // re-subscribe to `showKeyOperations` (which we are about to change).
+  const opsDemoRef = useRef<{
+    prevShowKeyOperations: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "list.step1.operations") return
+    const prevShowKeyOperations =
+      useScenarioExplorerStore.getState().showKeyOperations
+    opsDemoRef.current = { prevShowKeyOperations }
+    if (!prevShowKeyOperations) {
+      setShowKeyOperations(true)
+    }
+    return () => {
+      const snap = opsDemoRef.current
+      opsDemoRef.current = null
+      if (!snap) return
+      if (!snap.prevShowKeyOperations) {
+        setShowKeyOperations(false)
+      }
+    }
+  }, [step, setShowKeyOperations])
 
   useEffect(() => {
     if (!step) return
@@ -365,15 +392,13 @@ export default function ToolTour() {
     [step],
   )
   const bodyId = useMemo(
-    () =>
-      step && hasTourMainBlock ? `tour-body-${step.id}` : undefined,
+    () => (step && hasTourMainBlock ? `tour-body-${step.id}` : undefined),
     [step, hasTourMainBlock],
   )
 
   if (!tourTool || !step) return null
 
-  const useCentered =
-    !step.anchorId || fallbackToCentered || anchorEl === null
+  const useCentered = !step.anchorId || fallbackToCentered || anchorEl === null
 
   // Shared size. Row wraps instead of shrinking labels; min width keeps tap targets.
   const tourActionShape = {
@@ -389,9 +414,7 @@ export default function ToolTour() {
       ref={cardRef}
       role="dialog"
       aria-modal="true"
-      aria-labelledby={
-        step.title.trim() ? titleId : eyebrowId
-      }
+      aria-labelledby={step.title.trim() ? titleId : eyebrowId}
       aria-describedby={hasTourMainBlock ? bodyId : undefined}
       elevation={8}
       sx={{
@@ -505,7 +528,9 @@ export default function ToolTour() {
           }}
         >
           {step.illustration === "listMapLegend" ? <ListTourMapLegend /> : null}
-          {step.illustration === "listBarTiers" ? <ListTourBarIllustration /> : null}
+          {step.illustration === "listBarTiers" ? (
+            <ListTourBarIllustration />
+          ) : null}
           {hasTourBody ? (
             <Typography
               sx={{

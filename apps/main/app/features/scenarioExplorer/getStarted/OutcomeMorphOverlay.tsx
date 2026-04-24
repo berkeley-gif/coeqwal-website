@@ -605,7 +605,8 @@ export default function OutcomeMorphOverlay({
     }> = []
     for (let i = 0; i < N; i++) {
       const group = outcomeShapes[i]!
-      const rep = group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
+      const rep =
+        group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
       const tier = rep?.tier ?? 2
       const normAvg = Math.max(0.2, tier / 4)
       const angle = (2 * Math.PI * i) / Math.max(N, 1) - Math.PI / 2
@@ -627,10 +628,7 @@ export default function OutcomeMorphOverlay({
   const radarTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
     for (const v of radarGeometry.vertices) {
-      map.set(
-        v.code,
-        circlePoints(v.cx, v.cy, DOT_RADIUS, POINTS_PER_SHAPE),
-      )
+      map.set(v.code, circlePoints(v.cx, v.cy, DOT_RADIUS, POINTS_PER_SHAPE))
     }
     return map
   }, [radarGeometry])
@@ -1163,9 +1161,7 @@ export default function OutcomeMorphOverlay({
         const easedT = easeInOut(morphT)
 
         const target = getTargetForMode(shape, encodingMode)
-        const pts = shape.resampled.map((a, pi) =>
-          lerp(a, target[pi]!, easedT),
-        )
+        const pts = shape.resampled.map((a, pi) => lerp(a, target[pi]!, easedT))
         el.setAttribute("d", pointsToD(pts))
 
         const targetColor = getColorForMode(shape, encodingMode)
@@ -1198,10 +1194,7 @@ export default function OutcomeMorphOverlay({
         const chainActive =
           v >= morphEnd &&
           encodingMode === "distribution" &&
-          (barBlend > 0 ||
-            avgBlend > 0 ||
-            radarBlend > 0 ||
-            heatmapBlend > 0)
+          (barBlend > 0 || avgBlend > 0 || radarBlend > 0 || heatmapBlend > 0)
         if (chainActive) {
           const radarTarget =
             radarTargetsByCode.get(group.code) ?? shape.dotTarget
@@ -1240,7 +1233,8 @@ export default function OutcomeMorphOverlay({
             // In pure bar, use bar-mode fill-opacity. Once we start
             // collapsing into dot/radar, flip back to full opacity
             // (matches average-mode styling).
-            const barOnlyFraction = barBlend * (1 - Math.max(avgBlend, radarBlend))
+            const barOnlyFraction =
+              barBlend * (1 - Math.max(avgBlend, radarBlend))
             el.setAttribute(
               "fill-opacity",
               String(0.9 + (0.8 - 0.9) * barOnlyFraction),

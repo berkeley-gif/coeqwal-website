@@ -8,7 +8,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useTheme } from "@repo/ui/mui"
 import { Figure } from "./Figure"
 
 export { TierLegend } from "./TierLegend"

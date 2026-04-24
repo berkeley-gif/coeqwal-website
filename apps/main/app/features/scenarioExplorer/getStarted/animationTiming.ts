@@ -164,9 +164,6 @@ function beatRate(i: number): number {
  *  the velocity of the beat that contains the fade. Use this whenever you
  *  author a fade window (`(v - start) / width`) so the wall-clock duration
  *  stays consistent as beat durations are retuned. */
-export function secondsToProgress(
-  beatIndex: number,
-  seconds: number,
-): number {
+export function secondsToProgress(beatIndex: number, seconds: number): number {
   return beatRate(beatIndex) * seconds
 }

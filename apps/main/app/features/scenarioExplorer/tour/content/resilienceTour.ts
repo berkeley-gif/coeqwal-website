@@ -10,7 +10,8 @@ export const RESILIENCE_TOUR: TourStep[] = [
   {
     id: "resilience.hero",
     eyebrow: "THE CLIMATE STRESS TEST",
-    title: "This is where a shortlist meets climate and starts to reveal its breaking points.",
+    title:
+      "This is where a shortlist meets climate and starts to reveal its breaking points.",
     body: "Resilience turns the same scenarios you shortlisted in List and shaped in Radar into a matrix of outcomes by hydroclimate. It is less about choosing a winner at a glance and more about seeing where performance bends, where it breaks, and where operations still matter.",
   },
   {

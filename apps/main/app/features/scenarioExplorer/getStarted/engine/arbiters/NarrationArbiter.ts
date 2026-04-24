@@ -24,11 +24,7 @@ import type { Arbiter, BeatEngineContext, NarrationActor } from "../types"
 export class NarrationArbiter implements Arbiter<NarrationActor> {
   readonly kind = "narration" as const
 
-  onUpdate(
-    _actor: NarrationActor,
-    v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onUpdate(_actor: NarrationActor, v: number, ctx: BeatEngineContext): void {
     ctx.narrationTickRef.current?.(v)
   }
 

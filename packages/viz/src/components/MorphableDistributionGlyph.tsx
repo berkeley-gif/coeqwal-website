@@ -61,13 +61,7 @@ function distributeSquares(values: number[], targetTotal: number): number[] {
 // ── Bar geometry constants ──────────────────────────────────────────────────
 
 const NUM_TIERS = 4
-const BAR_HEIGHT = (GLYPH_SIZE * 0.8) / NUM_TIERS
-const BAR_SPACING = (GLYPH_SIZE * 0.2) / (NUM_TIERS + 1)
-const MAX_BAR_WIDTH = GLYPH_SIZE * 0.7
-const BAR_CORNER_RADIUS = BAR_HEIGHT / 4
 const GRID_WIDTH = COLS * CELL
-const BAR_LEFT_X = (GRID_WIDTH - GLYPH_SIZE) / 2 + GLYPH_SIZE * 0.15
-const BAR_VISUAL_HEIGHT = NUM_TIERS * BAR_HEIGHT + (NUM_TIERS + 1) * BAR_SPACING
 
 // ── Lightweight bar-only renderer (4 <rect> pairs) ──────────────────────────
 
@@ -101,8 +95,7 @@ const BarOnly: React.FC<BarOnlyProps> = React.memo(
     const barLeftX = compact
       ? glyphSize * 0.15
       : (GRID_WIDTH - GLYPH_SIZE) / 2 + GLYPH_SIZE * 0.15
-    const barVisualHeight =
-      NUM_TIERS * barHeight + (NUM_TIERS + 1) * barSpacing
+    const barVisualHeight = NUM_TIERS * barHeight + (NUM_TIERS + 1) * barSpacing
 
     return (
       <div

@@ -53,8 +53,7 @@ export function Section({
   figurePosition = "after",
 }: SectionProps) {
   const theme = useTheme()
-  const resolvedLayout =
-    layout ?? (number || eyebrow ? "split" : "single")
+  const resolvedLayout = layout ?? (number || eyebrow ? "split" : "single")
 
   const bodyTextStyles = {
     color: theme.palette.text.primary,

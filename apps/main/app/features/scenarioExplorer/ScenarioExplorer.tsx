@@ -97,11 +97,8 @@ function ScenarioExplorerInner() {
   const theme = useTheme()
   const {
     mainView,
-    setMainView,
     exploreMode,
-    setExploreMode,
     showMap,
-    setShowMap,
     showEquityComparison,
     setShowEquityComparison,
     ensureBaselinePrePin,

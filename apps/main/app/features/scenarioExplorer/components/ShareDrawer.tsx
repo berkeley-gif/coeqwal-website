@@ -24,9 +24,7 @@ const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
 
 function outcomeCodesToLabels(codes: string[]): string[] {
-  return codes.map(
-    (code) => OUTCOME_NAMES[code as OutcomeCode] ?? code,
-  )
+  return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
 }
 
 function ShareItemCard({

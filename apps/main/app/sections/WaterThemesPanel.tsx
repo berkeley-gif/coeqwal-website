@@ -39,9 +39,9 @@ import { usePanelRoute } from "../hooks/usePanelRoute"
 /* IMAGE & CIRCLE CONFIG                                                       */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-/** Native dimensions of the Delta Aerials image */
-const IMG_W = 2784
-const IMG_H = 1066
+/** Native dimensions of the Delta Aerials image (kept for reference). */
+const _IMG_W = 2784
+const _IMG_H = 1066
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
@@ -192,6 +192,7 @@ function ThemeCirclePhoto({
 }
 
 /** Label card positioned at 9:00.owns its staggered opacity hook */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ThemeCircleLabel({
   circle,
   index,

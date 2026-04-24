@@ -117,9 +117,7 @@ function main() {
   const sorted = [...hitsByFile.entries()].sort((a, b) => b[1] - a[1])
   console.log("Storyboard writers audit")
   console.log(`  scan root: ${REPO_MAIN_REL}/app`)
-  console.log(
-    `  layers: demand-units, demand-units-outline (literal ids only)`,
-  )
+  console.log(`  layers: demand-units, demand-units-outline (literal ids only)`)
   console.log("")
   console.log("Write sites found:")
   for (const [file, hits] of sorted) {

@@ -266,8 +266,7 @@ export function useResilienceAggregate(
           const entry: AggregateDistributionEntry = {
             memberId: reduceKey,
             memberKind: axes.reduceKind,
-            scenarioId:
-              axes.reduceKind === "scenario" ? reduceKey : undefined,
+            scenarioId: axes.reduceKind === "scenario" ? reduceKey : undefined,
             tierLevel: cell?.tierLevel ?? null,
             continuousValue: cell?.continuousValue ?? null,
             available: Boolean(cell?.available),

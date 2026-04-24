@@ -71,7 +71,7 @@ export default function BasinsLayer({
         ["==", ["get", "name"], "San Joaquin River Basin"],
         [0, 0],
         [0, 1],
-      ] as [string, ...any[]],
+      ] as [string, ...unknown[]],
     }),
     [visibility],
   )
@@ -88,7 +88,7 @@ export default function BasinsLayer({
         ["==", ["get", "name"], "San Joaquin River Basin"],
         labelsOpacity,
         isOutcomeActive ? 0 : 1,
-      ] as [string, ...any[]],
+      ] as [string, ...unknown[]],
     }),
     [labelsOpacity, isOutcomeActive],
   )

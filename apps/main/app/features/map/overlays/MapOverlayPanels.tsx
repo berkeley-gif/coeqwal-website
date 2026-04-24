@@ -197,7 +197,7 @@ export default function MapOverlayPanels() {
   const [closedTooltips, setClosedTooltips] = useState<Set<string>>(
     () => new Set(),
   )
-  const closeTooltip = useCallback(
+  const _closeTooltip = useCallback(
     (key: string) =>
       setClosedTooltips((prev) => {
         if (prev.has(key)) return prev
@@ -889,7 +889,9 @@ export default function MapOverlayPanels() {
                     <KeyOperationsPanel
                       scenarioId={LEARN_SCENARIO_ID}
                       onTitleClick={() => reopenTooltip("keyOps")}
-                      hydroclimateRef={panelRefs.keyOperations.hydroclimateTarget}
+                      hydroclimateRef={
+                        panelRefs.keyOperations.hydroclimateTarget
+                      }
                     />
                   </RightPanelSlot>
 
@@ -944,7 +946,7 @@ export default function MapOverlayPanels() {
                                 }}
                               />{" "}
                               icons to learn more about each outcome. Click on
-                              the chart to see the outcome on a map. 
+                              the chart to see the outcome on a map.
                             </Box>
                             <Box
                               component="span"
@@ -953,7 +955,8 @@ export default function MapOverlayPanels() {
                                 mt: theme.space.component.sm,
                               }}
                             >
-                              When outcomes are visible on the map, you can hover over them to get more information.
+                              When outcomes are visible on the map, you can
+                              hover over them to get more information.
                             </Box>
                           </>
                         }

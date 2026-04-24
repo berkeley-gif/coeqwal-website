@@ -250,10 +250,7 @@ export class InteractivePaintArbiter {
    * If it isn't, the writes silently no-op and the next overlay tick
    * (or a hover/pin toggle) retries.
    */
-  applyOverlay(
-    ctx: BeatEngineContext,
-    overlay: DemandUnitsOverlayState,
-  ): void {
+  applyOverlay(ctx: BeatEngineContext, overlay: DemandUnitsOverlayState): void {
     if (!this.currentlyOwns || !this.currentSpec) return
     if (overlay.outcomeCode !== this.currentSpec.outcomeCode) return
 
@@ -301,7 +298,11 @@ export class InteractivePaintArbiter {
             "line-width",
             OUTLINE_LINE_WIDTH as never,
           )
-          map.setPaintProperty("demand-units-outline", "line-opacity", 1 as never)
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-opacity",
+            1 as never,
+          )
         }
       }
 
@@ -440,10 +441,14 @@ export class InteractivePaintArbiter {
           "line-color",
           spec.colorExpression as never,
         )
-        map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
-          duration: FADE_IN_DURATION,
-          delay: 0,
-        } as never)
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity-transition",
+          {
+            duration: FADE_IN_DURATION,
+            delay: 0,
+          } as never,
+        )
         map.setPaintProperty("demand-units-outline", "line-opacity", 0 as never)
         map.setPaintProperty(
           "demand-units-outline",
@@ -481,7 +486,11 @@ export class InteractivePaintArbiter {
           FADE_IN_FILL_OPACITY as never,
         )
         if (map.getLayer("demand-units-outline")) {
-          map.setPaintProperty("demand-units-outline", "line-opacity", 1 as never)
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-opacity",
+            1 as never,
+          )
           map.setLayoutProperty("demand-units-outline", "visibility", "visible")
         }
         logDuState("InteractivePaintArbiter.onEnter POST-RAF", map)

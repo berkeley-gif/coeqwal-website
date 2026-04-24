@@ -139,13 +139,17 @@ function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
         item.type === "equity" ||
         item.type === "resilience"
       ) {
-        const { cachedImageDataUrl, cachedChartData, ...rest } = item as {
+        const {
+          cachedImageDataUrl: _cachedImageDataUrl,
+          cachedChartData: _cachedChartData,
+          ...rest
+        } = item as {
           cachedImageDataUrl?: string
           cachedChartData?: Record<string, unknown>
         } & ShareItem
         return rest
       }
-      const { cachedChartData, ...rest } = item as {
+      const { cachedChartData: _cachedChartData, ...rest } = item as {
         cachedChartData?: Record<string, unknown>
       } & ShareItem
       return rest

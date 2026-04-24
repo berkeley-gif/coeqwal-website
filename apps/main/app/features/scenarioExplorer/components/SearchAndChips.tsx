@@ -58,6 +58,9 @@ export default function SearchAndChips({
   const themeGroupAnchorRef = useTourAnchor("list.toolbar.themeGroup")
   const showOnlyChosenAnchorRef = useTourAnchor("list.select.showOnlyChosen")
   const showBaselinesAnchorRef = useTourAnchor("list.select.showBaselines")
+  const keyOperationsChipAnchorRef = useTourAnchor(
+    "list.toolbar.keyOperationsChip",
+  )
 
   return (
     <>
@@ -167,11 +170,13 @@ export default function SearchAndChips({
               }
             />
           </Box>
-          <ToggleChip
-            label="key operations"
-            active={showKeyOperations}
-            onClick={() => setShowKeyOperations(!showKeyOperations)}
-          />
+          <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="key operations"
+              active={showKeyOperations}
+              onClick={() => setShowKeyOperations(!showKeyOperations)}
+            />
+          </Box>
           <Box ref={showOnlyChosenAnchorRef} sx={{ display: "inline-flex" }}>
             <ToggleChip
               label="selected only"

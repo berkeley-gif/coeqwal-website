@@ -329,9 +329,7 @@ export function StrategyGridContent({
           key={scenario.scenarioId}
           scenario={scenario}
           isFirst={!themeSubheaderMode && opts.isFirstGroup && index === 0}
-          tourListFirstItem={
-            opts.registerTourFirstListItem && index === 0
-          }
+          tourListFirstItem={opts.registerTourFirstListItem && index === 0}
           isHighlighted={isHighlighted}
           isChosen={selectedScenarios.includes(scenario.scenarioId)}
           compact={compact}
@@ -352,9 +350,11 @@ export function StrategyGridContent({
           onTooltipToggle={createTooltipHandler(scenario)}
           onInfoTooltipToggle={onTooltipToggle}
           onSortChange={onSortChange}
-          showThemeBadge={opts.showThemeBadgeInPinnedSection === true
-            ? true
-            : showThemeBadgeUnpinned}
+          showThemeBadge={
+            opts.showThemeBadgeInPinnedSection === true
+              ? true
+              : showThemeBadgeUnpinned
+          }
           onThemeBadgeClick={onThemeBadgeClick}
           onIconClick={onIconClick}
           scenarioColor={scenarioColors?.[scenario.scenarioId]}
@@ -470,8 +470,7 @@ export function StrategyGridContent({
       {renderScenarioRows(unpinnedScenarios, {
         themeIds: themeScenarioIds,
         isFirstGroup: !hasPinned,
-        registerTourFirstListItem:
-          !hasPinned && unpinnedScenarios.length > 0,
+        registerTourFirstListItem: !hasPinned && unpinnedScenarios.length > 0,
       })}
     </>
   )

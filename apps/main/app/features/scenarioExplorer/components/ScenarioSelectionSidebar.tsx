@@ -108,8 +108,12 @@ export default function ScenarioSelectionSidebar({
     return () => clearTimeout(timer)
   }, [activeScenarioId])
 
-  const { orderedScenarios, matchingScenarioIds, isLoading, scenariosInContiguousThemeOrder } =
-    useOrderedScenarios()
+  const {
+    orderedScenarios,
+    matchingScenarioIds,
+    isLoading,
+    scenariosInContiguousThemeOrder,
+  } = useOrderedScenarios()
 
   const hasThemedScenarios = useMemo(
     () => orderedScenarios.some((s) => Boolean(s.theme)),

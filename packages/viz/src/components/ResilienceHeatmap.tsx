@@ -1205,7 +1205,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               continue
             }
             const firstCol = columns[cursor]
-            const lastCol = columns[Math.min(cursor + span - 1, columns.length - 1)]
+            const lastCol =
+              columns[Math.min(cursor + span - 1, columns.length - 1)]
             if (!firstCol || !lastCol) {
               cursor += span
               continue
@@ -1542,7 +1543,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         marginalRow,
         marginalCol,
         hideLegend,
-        distributionMode,
         columnGroups,
       ],
     )

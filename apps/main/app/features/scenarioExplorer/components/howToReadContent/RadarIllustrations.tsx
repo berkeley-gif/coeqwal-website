@@ -69,11 +69,7 @@ function Chip({
   )
 }
 
-function RadarCore({
-  showLibraryRange,
-}: {
-  showLibraryRange: boolean
-}) {
+function RadarCore({ showLibraryRange }: { showLibraryRange: boolean }) {
   const theme = useTheme()
   const tiers = theme.palette.tiers
   const ringColors = [tiers.tier1, tiers.tier2, tiers.tier3, tiers.tier4]
@@ -239,7 +235,13 @@ export function RadarHeroGraphic({
       <Chip x={74} y={18} width={102} label="historical" active />
       <Chip x={184} y={18} width={80} label="cc50" />
       <Chip x={272} y={18} width={80} label="cc95" />
-      <Chip x={360} y={18} width={126} label="show library range" active={showLibraryRange} />
+      <Chip
+        x={360}
+        y={18}
+        width={126}
+        label="show library range"
+        active={showLibraryRange}
+      />
 
       <RadarCore showLibraryRange={showLibraryRange} />
 
@@ -346,12 +348,7 @@ export function RadarAxisSliceGraphic() {
       >
         ENVIRONMENTAL OUTFLOWS
       </text>
-      <text
-        x={348}
-        y={126}
-        fontSize={11}
-        fill={theme.palette.grey[700]}
-      >
+      <text x={348} y={126} fontSize={11} fill={theme.palette.grey[700]}>
         scenario slice
       </text>
 

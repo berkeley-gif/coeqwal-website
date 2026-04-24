@@ -16,11 +16,7 @@ import type { Arbiter, BeatEngineContext, OverlayMorphActor } from "../types"
 export class OverlayMorphArbiter implements Arbiter<OverlayMorphActor> {
   readonly kind = "overlayMorph" as const
 
-  onUpdate(
-    _actor: OverlayMorphActor,
-    v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onUpdate(_actor: OverlayMorphActor, v: number, ctx: BeatEngineContext): void {
     ctx.overlayMorphTickRef.current?.(v)
   }
 

@@ -99,7 +99,7 @@ export default function ChartTuner({
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [open])
+  }, [open, setOpen])
 
   // Click-outside to close.
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function ChartTuner({
     }
     document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
-  }, [open])
+  }, [open, setOpen])
 
   const applyStep = useCallback(
     (idx: number) => {

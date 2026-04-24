@@ -73,8 +73,7 @@ export function useMapVisualizationAction() {
       for (const id of ids) {
         preload(
           CACHE_KEYS.tierLocationsBatch(id, PREFETCHABLE_TIER_CODES),
-          () =>
-            fetchTierLocationAssignmentsBatch(id, PREFETCHABLE_TIER_CODES),
+          () => fetchTierLocationAssignmentsBatch(id, PREFETCHABLE_TIER_CODES),
         ).catch(() => {})
       }
     },

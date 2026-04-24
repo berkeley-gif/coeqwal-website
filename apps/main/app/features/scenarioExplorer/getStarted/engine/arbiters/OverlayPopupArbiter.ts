@@ -13,11 +13,7 @@
  * There is no commit batching to do.
  */
 
-import type {
-  Arbiter,
-  BeatEngineContext,
-  OverlayPopupActor,
-} from "../types"
+import type { Arbiter, BeatEngineContext, OverlayPopupActor } from "../types"
 
 export class OverlayPopupArbiter implements Arbiter<OverlayPopupActor> {
   readonly kind = "overlayPopup" as const
@@ -27,11 +23,7 @@ export class OverlayPopupArbiter implements Arbiter<OverlayPopupActor> {
   private writtenRing = false
   private writtenHover = false
 
-  onEnter(
-    actor: OverlayPopupActor,
-    _v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onEnter(actor: OverlayPopupActor, _v: number, ctx: BeatEngineContext): void {
     const info = actor.buildInfo(ctx)
     if (!info) return
     if (actor.target === "ring") {
@@ -43,11 +35,7 @@ export class OverlayPopupArbiter implements Arbiter<OverlayPopupActor> {
     }
   }
 
-  onExit(
-    actor: OverlayPopupActor,
-    _v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onExit(actor: OverlayPopupActor, _v: number, ctx: BeatEngineContext): void {
     if (actor.target === "ring") {
       ctx.setDemoLocation(null)
       this.writtenRing = false

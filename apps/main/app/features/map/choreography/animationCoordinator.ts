@@ -105,9 +105,7 @@ class AnimationCoordinator {
    * Get a fresh, valid map instance or null.
    * Safely handles cases where map is unmounted or invalid.
    */
-  getValidMap(
-    mapRef: RefObject<MapRef | null> | null,
-  ): MapboxGLMap | null {
+  getValidMap(mapRef: RefObject<MapRef | null> | null): MapboxGLMap | null {
     try {
       const instance = mapRef?.current?.getMap?.()
       if (instance && typeof instance.getLayer === "function") {
@@ -122,10 +120,7 @@ class AnimationCoordinator {
   /**
    * Safely check if a layer exists on the map
    */
-  hasLayer(
-    mapRef: RefObject<MapRef | null> | null,
-    layerId: string,
-  ): boolean {
+  hasLayer(mapRef: RefObject<MapRef | null> | null, layerId: string): boolean {
     const map = this.getValidMap(mapRef)
     if (!map) return false
     try {

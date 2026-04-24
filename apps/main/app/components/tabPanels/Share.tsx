@@ -155,9 +155,7 @@ const RESILIENCE_VIEW_TOKEN: Record<
   quadrant: "q",
 }
 
-export function encodeResilienceControls(
-  shape: ResilienceShareShape,
-): string {
+export function encodeResilienceControls(shape: ResilienceShareShape): string {
   const parts: string[] = []
   if (shape.view && shape.view !== "scenario") {
     parts.push(`v:${RESILIENCE_VIEW_TOKEN[shape.view]}`)
@@ -964,7 +962,8 @@ export default function SharePanel() {
           }}
         >
           No scenarios staged for sharing yet. Go to the Explore tab, find
-          scenarios that you want to share, and click the share icon on each one.
+          scenarios that you want to share, and click the share icon on each
+          one.
         </Typography>
         <Button
           variant="outlined"

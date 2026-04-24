@@ -138,7 +138,9 @@ function HeatmapTile({
             y={y + 42 + rowIndex * 16}
             size={22}
             fill={fill}
-            label={rowIndex === 0 ? ["2.1", "2.4", "2.8"][columnIndex] : undefined}
+            label={
+              rowIndex === 0 ? ["2.1", "2.4", "2.8"][columnIndex] : undefined
+            }
           />
         )),
       )}
@@ -190,10 +192,29 @@ export function ResilienceHeroGraphic({
       />
       <Chip x={34} y={22} width={80} label="Overview" active />
       <Chip x={122} y={22} width={84} label="Mean tier" active />
-      <Chip x={400} y={22} width={108} label="all scenarios" active={showAllScenarios} />
+      <Chip
+        x={400}
+        y={22}
+        width={108}
+        label="all scenarios"
+        active={showAllScenarios}
+      />
 
-      <rect x={30} y={72} width={112} height={212} rx={14} fill={theme.palette.grey[50]} />
-      <text x={46} y={92} fontSize={10} fontWeight={700} fill={theme.palette.grey[700]}>
+      <rect
+        x={30}
+        y={72}
+        width={112}
+        height={212}
+        rx={14}
+        fill={theme.palette.grey[50]}
+      />
+      <text
+        x={46}
+        y={92}
+        fontSize={10}
+        fontWeight={700}
+        fill={theme.palette.grey[700]}
+      >
         SCENARIOS
       </text>
       {[
@@ -219,7 +240,9 @@ export function ResilienceHeroGraphic({
             cx={54}
             cy={item.y + 12}
             r={5}
-            fill={item.active ? theme.palette.blue.bright : theme.palette.grey[300]}
+            fill={
+              item.active ? theme.palette.blue.bright : theme.palette.grey[300]
+            }
           />
           <text
             x={64}
@@ -234,9 +257,24 @@ export function ResilienceHeroGraphic({
       ))}
 
       <HeatmapTile x={166} y={78} title="Current ops" emphasis={1} />
-      <HeatmapTile x={318} y={78} title="Delta pulse" emphasis={showAllScenarios ? 1 : 0.22} />
-      <HeatmapTile x={166} y={202} title="Flow carveout" emphasis={showAllScenarios ? 1 : 0.22} />
-      <HeatmapTile x={318} y={202} title="Storage swap" emphasis={showAllScenarios ? 1 : 0.22} />
+      <HeatmapTile
+        x={318}
+        y={78}
+        title="Delta pulse"
+        emphasis={showAllScenarios ? 1 : 0.22}
+      />
+      <HeatmapTile
+        x={166}
+        y={202}
+        title="Flow carveout"
+        emphasis={showAllScenarios ? 1 : 0.22}
+      />
+      <HeatmapTile
+        x={318}
+        y={202}
+        title="Storage swap"
+        emphasis={showAllScenarios ? 1 : 0.22}
+      />
     </svg>
   )
 }
@@ -278,9 +316,24 @@ export function EncodingModesGraphic() {
 
       {[
         { x: 34, title: "Summary", subtitle: "mean tier", draw: "summary" },
-        { x: 166, title: "Climate shift", subtitle: "vs reference", draw: "delta" },
-        { x: 298, title: "Risk / opportunity", subtitle: "density", draw: "density" },
-        { x: 430, title: "Distribution", subtitle: "by scenario / location", draw: "distribution" },
+        {
+          x: 166,
+          title: "Climate shift",
+          subtitle: "vs reference",
+          draw: "delta",
+        },
+        {
+          x: 298,
+          title: "Risk / opportunity",
+          subtitle: "density",
+          draw: "density",
+        },
+        {
+          x: 430,
+          title: "Distribution",
+          subtitle: "by scenario / location",
+          draw: "distribution",
+        },
       ].map((card) => (
         <g key={card.title}>
           <rect
@@ -312,22 +365,30 @@ export function EncodingModesGraphic() {
           </text>
 
           {card.draw === "summary" ? (
-            <HeatCell x={card.x + 24} y={136} size={52} fill={tiers.tier2} label="2.3" />
+            <HeatCell
+              x={card.x + 24}
+              y={136}
+              size={52}
+              fill={tiers.tier2}
+              label="2.3"
+            />
           ) : null}
 
           {card.draw === "delta" ? (
             <>
-              {[d.negStrong, d.negWeak, d.zero, d.posWeak, d.posStrong].map((fill, index) => (
-                <rect
-                  key={index}
-                  x={card.x + 12 + index * 15}
-                  y={150}
-                  width={13}
-                  height={32}
-                  rx={4}
-                  fill={fill}
-                />
-              ))}
+              {[d.negStrong, d.negWeak, d.zero, d.posWeak, d.posStrong].map(
+                (fill, index) => (
+                  <rect
+                    key={index}
+                    x={card.x + 12 + index * 15}
+                    y={150}
+                    width={13}
+                    height={32}
+                    rx={4}
+                    fill={fill}
+                  />
+                ),
+              )}
               <text
                 x={card.x + 50}
                 y={202}
@@ -486,16 +547,40 @@ export function QuadrantStageGraphic() {
         />
       ))}
 
-      <text x={181} y={108} fontSize={11} fontWeight={600} fill={theme.palette.text.primary}>
+      <text
+        x={181}
+        y={108}
+        fontSize={11}
+        fontWeight={600}
+        fill={theme.palette.text.primary}
+      >
         Robust
       </text>
-      <text x={340} y={108} fontSize={11} fontWeight={600} fill={theme.palette.text.primary}>
+      <text
+        x={340}
+        y={108}
+        fontSize={11}
+        fontWeight={600}
+        fill={theme.palette.text.primary}
+      >
         Climate-limited
       </text>
-      <text x={150} y={218} fontSize={11} fontWeight={600} fill={theme.palette.text.primary}>
+      <text
+        x={150}
+        y={218}
+        fontSize={11}
+        fontWeight={600}
+        fill={theme.palette.text.primary}
+      >
         Operationally tractable
       </text>
-      <text x={338} y={218} fontSize={11} fontWeight={600} fill={theme.palette.text.primary}>
+      <text
+        x={338}
+        y={218}
+        fontSize={11}
+        fontWeight={600}
+        fill={theme.palette.text.primary}
+      >
         High-stakes
       </text>
 

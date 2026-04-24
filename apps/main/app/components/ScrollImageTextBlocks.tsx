@@ -215,7 +215,7 @@ function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
                 sx={{
                   width: { xs: "100%", md: `${TEXT_WIDTH}px` },
                   position: { xs: "static", md: "absolute" },
-                  left: { md: `calc(50% - ${GAP - OFFSET}px)` },// Left edge at 15px left of center
+                  left: { md: `calc(50% - ${GAP - OFFSET}px)` }, // Left edge at 15px left of center
                   height: "auto",
                   objectFit: "contain",
                 }}

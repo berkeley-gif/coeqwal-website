@@ -179,7 +179,8 @@ export function ListHowToRead() {
           },
           {
             number: "03",
-            title: "Distribution works with map, locations, climate, and change",
+            title:
+              "Distribution works with map, locations, climate, and change",
             body: "Use it when you need to inspect which locations are driving the result, compare climates, or connect the cell back to spatial detail.",
             bottom: 2,
             right: 4,
@@ -206,7 +207,8 @@ export function ListHowToRead() {
           onClick={() => setDemoOnlyChosen((v) => !v)}
         />
         <Typography variant="storyBody" component="span">
-          once you have selected a few scenarios and want to focus only on the shortlist you are carrying forward.
+          once you have selected a few scenarios and want to focus only on the
+          shortlist you are carrying forward.
         </Typography>
       </Box>
 
@@ -217,25 +219,29 @@ export function ListHowToRead() {
           {
             number: "01",
             label: "List",
-            description: "Use the master table to narrow the field and choose a shortlist.",
+            description:
+              "Use the master table to narrow the field and choose a shortlist.",
             state: "current",
           },
           {
             number: "02",
             label: "Radar",
-            description: "Compare the shortlisted scenarios across every chosen outcome at once instead of isolated cells.",
+            description:
+              "Compare the shortlisted scenarios across every chosen outcome at once instead of isolated cells.",
             state: "next",
           },
           {
             number: "03",
             label: "Distribution",
-            description: "Coming soon: inspect the spread across locations more directly.",
+            description:
+              "Coming soon: inspect the spread across locations more directly.",
             state: "comingSoon",
           },
           {
             number: "04",
             label: "Resilience",
-            description: "Test the same scenarios across climate futures and operational leverage.",
+            description:
+              "Test the same scenarios across climate futures and operational leverage.",
             state: "next",
           },
         ]}

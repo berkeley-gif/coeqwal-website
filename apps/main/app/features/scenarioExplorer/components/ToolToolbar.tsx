@@ -10,7 +10,7 @@
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
  */
 
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   Box,
   Typography,
@@ -50,8 +50,6 @@ export default function ToolToolbar({
     setShowMap,
     outcomeDisplayMode,
     setOutcomeDisplayMode,
-    showLocationPicker,
-    setShowLocationPicker,
     showKeyOperations,
     exploreMode,
     seenHowToRead,
@@ -117,6 +115,17 @@ export default function ToolToolbar({
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
   const listMapTourRef = useTourAnchor("list.toolbar.map")
+  const listClimateTourRef = useTourAnchor("list.toolbar.climate")
+  // One DOM node serves both the Radar climate-chip tour and the new
+  // List hydroclimate tour step. Merge callback refs so both registries
+  // resolve to the same element without re-wrapping the chooser.
+  const climateMergedRef = useCallback(
+    (el: HTMLElement | null) => {
+      climateChipsAnchorRef(el)
+      if (exploreMode === "list") listClimateTourRef(el)
+    },
+    [climateChipsAnchorRef, listClimateTourRef, exploreMode],
+  )
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
@@ -169,6 +178,7 @@ export default function ToolToolbar({
             . The list view reverts to its bar-chart
             default; the glyph click-through to map layers is
             unaffected. */}
+        {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
         {false && exploreMode === "list" ? (
           <>
             <VerticalDivider />
@@ -232,7 +242,7 @@ export default function ToolToolbar({
       <VerticalDivider />
 
       <Box
-        ref={climateChipsAnchorRef}
+        ref={climateMergedRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -284,74 +294,74 @@ export default function ToolToolbar({
 
     return (
       <>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: theme.scenarios.grid.columns.xs,
-          [`@container strategy-grid (min-width: ${SM}px)`]: {
-            gridTemplateColumns: showKeyOperations
-              ? "32px minmax(0, 600px) 140px 1fr"
-              : "32px minmax(0, 600px) 0px 1fr",
-          },
-          [`@container strategy-grid (min-width: ${FULL}px)`]: {
-            gridTemplateColumns: showKeyOperations
-              ? theme.scenarios.grid.columns.full
-              : "32px 0.382fr 0px 1fr",
-          },
-          transition: "grid-template-columns 300ms ease",
-          columnGap: theme.scenarios.grid.gap.default,
-          px: theme.space.tool.px,
-          py: 0.5,
-          minHeight: 44,
-          alignItems: "center",
-        }}
-      >
-        {!hideTitle && (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: theme.scenarios.grid.columns.xs,
+            [`@container strategy-grid (min-width: ${SM}px)`]: {
+              gridTemplateColumns: showKeyOperations
+                ? "32px minmax(0, 600px) 140px 1fr"
+                : "32px minmax(0, 600px) 0px 1fr",
+            },
+            [`@container strategy-grid (min-width: ${FULL}px)`]: {
+              gridTemplateColumns: showKeyOperations
+                ? theme.scenarios.grid.columns.full
+                : "32px 0.382fr 0px 1fr",
+            },
+            transition: "grid-template-columns 300ms ease",
+            columnGap: theme.scenarios.grid.gap.default,
+            px: theme.space.tool.px,
+            py: 0.5,
+            minHeight: 44,
+            alignItems: "center",
+          }}
+        >
+          {!hideTitle && (
+            <Box
+              sx={{
+                gridColumn: "1 / -1",
+                [`@container strategy-grid (min-width: ${SM}px)`]: {
+                  gridColumn: "1 / 4",
+                },
+                display: "none",
+                [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                  display: "flex",
+                },
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  lineHeight: 1.3,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                Scenario library
+              </Typography>
+            </Box>
+          )}
+
           <Box
             sx={{
               gridColumn: "1 / -1",
-              [`@container strategy-grid (min-width: ${SM}px)`]: {
-                gridColumn: "1 / 4",
-              },
-              display: "none",
-              [`@container strategy-grid (min-width: ${FULL}px)`]: {
-                display: "flex",
-              },
+              pl: 0,
+              ...(!hideTitle && {
+                [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                  gridColumn: "4",
+                },
+              }),
+              display: "flex",
               alignItems: "center",
+              alignSelf: "stretch",
+              gap: 2,
             }}
           >
-            <Typography
-              sx={{
-                fontSize: "0.9375rem",
-                fontWeight: 600,
-                lineHeight: 1.3,
-                color: theme.palette.text.primary,
-              }}
-            >
-              Scenario library
-            </Typography>
+            {viewControls}
           </Box>
-        )}
-
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            pl: 0,
-            ...(!hideTitle && {
-              [`@container strategy-grid (min-width: ${FULL}px)`]: {
-                gridColumn: "4",
-              },
-            }),
-            display: "flex",
-            alignItems: "center",
-            alignSelf: "stretch",
-            gap: 2,
-          }}
-        >
-          {viewControls}
         </Box>
-      </Box>
-      {howToReadModal}
+        {howToReadModal}
       </>
     )
   }

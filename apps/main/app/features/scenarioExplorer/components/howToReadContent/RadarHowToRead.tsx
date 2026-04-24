@@ -5,10 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { HowToReadBody } from "./Section"
 import { StoryHero, AnnotatedStage, JourneyStrip } from "./HowToReadScaffold"
 import { InlineToggleChip } from "../InlineToggleChip"
-import {
-  RadarAxisSliceGraphic,
-  RadarHeroGraphic,
-} from "./RadarIllustrations"
+import { RadarAxisSliceGraphic, RadarHeroGraphic } from "./RadarIllustrations"
 
 export function RadarHowToRead() {
   const theme = useTheme()
@@ -23,15 +20,19 @@ export function RadarHowToRead() {
         points={[
           {
             label: "Closer to the center is better.",
-            description: "The rings still use the same tier logic as the list: tier 1 near the center, tier 4 farther out.",
+            description:
+              "The rings still use the same tier logic as the list: tier 1 near the center, tier 4 farther out.",
           },
           {
-            label: "The shape tells you where a scenario wins and gives up ground.",
-            description: "A broad, even polygon reads as balanced; spikes and pinches reveal trade-offs.",
+            label:
+              "The shape tells you where a scenario wins and gives up ground.",
+            description:
+              "A broad, even polygon reads as balanced; spikes and pinches reveal trade-offs.",
           },
           {
             label: "Context matters as much as geometry.",
-            description: "Use the library envelope and climate chips to see whether a shape is merely tidy or actually distinctive.",
+            description:
+              "Use the library envelope and climate chips to see whether a shape is merely tidy or actually distinctive.",
           },
         ]}
         visual={<RadarHeroGraphic showLibraryRange={demoShowLibrary} />}
@@ -137,7 +138,8 @@ export function RadarHowToRead() {
           },
           {
             number: "04",
-            title: "Climate chips let you compare the same shape across futures",
+            title:
+              "Climate chips let you compare the same shape across futures",
             body: "Historical, cc50, and cc95 are not separate charts. They are separate conditions for the same shortlist.",
             top: 5,
             right: 3,
@@ -153,19 +155,22 @@ export function RadarHowToRead() {
           {
             number: "02",
             label: "Radar",
-            description: "See balance across outcomes and trade-offs at a glance.",
+            description:
+              "See balance across outcomes and trade-offs at a glance.",
             state: "current",
           },
           {
             number: "03",
             label: "Distribution",
-            description: "Coming soon: inspect the spread across locations hidden inside each vertex mean.",
+            description:
+              "Coming soon: inspect the spread across locations hidden inside each vertex mean.",
             state: "comingSoon",
           },
           {
             number: "04",
             label: "Resilience",
-            description: "Take the same shortlist into a climate-by-outcome matrix and test what holds.",
+            description:
+              "Take the same shortlist into a climate-by-outcome matrix and test what holds.",
             state: "next",
           },
         ]}

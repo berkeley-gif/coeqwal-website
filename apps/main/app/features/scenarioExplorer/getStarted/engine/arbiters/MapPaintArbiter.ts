@@ -67,11 +67,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
    *  logged for the current pass. Reset on `applyBeat5Enter`. */
   private diagBoundariesLogged = new Set<string>()
 
-  onEnter(
-    actor: MapPaintActor,
-    v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onEnter(actor: MapPaintActor, v: number, ctx: BeatEngineContext): void {
     const map = getStyledMap(ctx)
     if (!map) return
 
@@ -123,11 +119,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     }
   }
 
-  onUpdate(
-    actor: MapPaintActor,
-    v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onUpdate(actor: MapPaintActor, v: number, ctx: BeatEngineContext): void {
     const map = getStyledMap(ctx)
     if (!map) return
 
@@ -185,11 +177,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
 
       try {
         if (map.getLayer("demand-units")) {
-          map.setPaintProperty(
-            "demand-units",
-            "fill-opacity",
-            targetOpacity,
-          )
+          map.setPaintProperty("demand-units", "fill-opacity", targetOpacity)
         }
         if (map.getLayer("demand-units-outline")) {
           map.setPaintProperty(
@@ -207,11 +195,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // Nothing to do per tick.
   }
 
-  onExit(
-    actor: MapPaintActor,
-    _v: number,
-    ctx: BeatEngineContext,
-  ): void {
+  onExit(actor: MapPaintActor, _v: number, ctx: BeatEngineContext): void {
     const map = getStyledMap(ctx)
     if (!map) return
 
@@ -438,8 +422,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // `ctx.buildBlendedTierExpr(BEAT1_MID, t)`.
     let expr: readonly unknown[] | null
     if (v < p.convergeEnd) {
-      const convergence =
-        (v - p.blendStart) / (p.convergeEnd - p.blendStart)
+      const convergence = (v - p.blendStart) / (p.convergeEnd - p.blendStart)
       expr = beat1FillExpr(this.frozenColorPhase, convergence)
     } else {
       const t = (v - p.convergeEnd) / (p.blendEnd - p.convergeEnd)
@@ -553,7 +536,11 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     if (!map.getLayer("demand-units")) return
 
     const schedule = ctx.getHideSchedule()
-    const duEntries: { fadeStart: number; morphStart: number; locationIds: readonly string[] }[] = []
+    const duEntries: {
+      fadeStart: number
+      morphStart: number
+      locationIds: readonly string[]
+    }[] = []
     for (const entry of schedule) {
       if (
         entry.geometryType === "polygon" &&
@@ -587,8 +574,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     if (v < p.agFadeOutStart) {
       agOpacity = p.peakOpacity
     } else if (v < p.agFadeOutEnd) {
-      const t =
-        (v - p.agFadeOutStart) / (p.agFadeOutEnd - p.agFadeOutStart)
+      const t = (v - p.agFadeOutStart) / (p.agFadeOutEnd - p.agFadeOutStart)
       agOpacity = p.peakOpacity * (1 - t)
     } else {
       agOpacity = 0
@@ -599,11 +585,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     try {
       map.setPaintProperty("demand-units", "fill-opacity", caseExpr)
       if (map.getLayer("demand-units-outline")) {
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-opacity",
-          caseExpr,
-        )
+        map.setPaintProperty("demand-units-outline", "line-opacity", caseExpr)
       }
     } catch {
       /* ok */
@@ -733,16 +715,18 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       const baseExpr = ctx.buildBlendedTierExpr(BEAT1_MID, 1)
       if (map.getLayer("demand-units-outline") && baseExpr) {
         const match = ["==", ["get", "DU_ID"], p.loiDuId]
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-color",
-          ["case", match, p.goldHex, baseExpr] as never,
-        )
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-width",
-          ["case", match, 2, 0.5] as never,
-        )
+        map.setPaintProperty("demand-units-outline", "line-color", [
+          "case",
+          match,
+          p.goldHex,
+          baseExpr,
+        ] as never)
+        map.setPaintProperty("demand-units-outline", "line-width", [
+          "case",
+          match,
+          2,
+          0.5,
+        ] as never)
       }
     } catch {
       /* ok */
@@ -750,10 +734,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     this.beat5PolyRingOn = true
   }
 
-  private applyBeat5PolyRingOff(
-    map: StyledMap,
-    ctx: BeatEngineContext,
-  ): void {
+  private applyBeat5PolyRingOff(map: StyledMap, ctx: BeatEngineContext): void {
     try {
       const baseExpr = ctx.buildBlendedTierExpr(BEAT1_MID, 1)
       if (map.getLayer("demand-units-outline") && baseExpr) {

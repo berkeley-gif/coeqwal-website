@@ -34,7 +34,6 @@ import {
   Typography,
   icons,
   useTheme,
-  type Theme,
 } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
 import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
@@ -259,7 +258,7 @@ function transposeCell(cell: ResilienceHeatmapCell): ResilienceHeatmapCell {
  * Transpose an entire (rows, columns, cells) triple. Pure and order-
  * preserving: row i of the input becomes column i of the output.
  */
-function transposeHeatmap(
+function _transposeHeatmap(
   rows: ResilienceAxisItem[],
   columns: ResilienceAxisItem[],
   cells: ResilienceHeatmapCell[],
@@ -388,7 +387,7 @@ export default function ResiliencePanel({
   // when on, fall back to all 24. Phase 1 renders a single heatmap; the
   // by-scenario branch picks the first item as its focus and later
   // phases will fan this out into small multiples.
-  const effectiveScenarioScope = useMemo<readonly string[]>(() => {
+  const _effectiveScenarioScope = useMemo<readonly string[]>(() => {
     if (showAllScenarios) return [] // sentinel: "all" resolved from matrix
     return selectedScenarios
   }, [showAllScenarios, selectedScenarios])
@@ -455,9 +454,8 @@ export default function ResiliencePanel({
   // (groupBy=hydroclimates). All other views still use the legacy axis
   // (groupBy=scenarios) because their rows / cols are concrete
   // (matrix-backed) rather than aggregated.
-  const aggregateGroupBy = effectiveView === "aggregate"
-    ? aggregateOver
-    : "scenarios"
+  const aggregateGroupBy =
+    effectiveView === "aggregate" ? aggregateOver : "scenarios"
 
   const aggregate = useResilienceAggregate({
     scenarioIds: aggregateScenarioIds,
@@ -667,12 +665,7 @@ export default function ResiliencePanel({
     for (const code of compareOutcomeCodes) push(code)
     for (const code of resilienceVisibleOutcomes) push(code)
     return out
-  }, [
-    view,
-    primaryOutcomeCode,
-    compareOutcomeCodes,
-    resilienceVisibleOutcomes,
-  ])
+  }, [view, primaryOutcomeCode, compareOutcomeCodes, resilienceVisibleOutcomes])
 
   // Per-LOI distribution fetch (only when the "By location" sub-mode is
   // active for the distribution cell encoding). Scoped to the current
@@ -965,18 +958,18 @@ export default function ResiliencePanel({
     // (for vs_baseline) the row axis is outcomes (so the per-outcome
     // matrix lookup makes sense). Otherwise we treat the chart as
     // non-delta and fall back to the tier encoding downstream.
-    const effectiveDeltaMode: DeltaMode =
-      !colAxisIsHydroclimate
+    const effectiveDeltaMode: DeltaMode = !colAxisIsHydroclimate
+      ? "none"
+      : deltaMode === "vs_baseline" && rowKind !== "outcome"
         ? "none"
-        : deltaMode === "vs_baseline" && rowKind !== "outcome"
-          ? "none"
-          : deltaMode
+        : deltaMode
 
     // For distribution / glyph encodings: label + scenarioId on each
     // entry depend on the reduced-axis member kind.
-    const labelForMember = (
-      entry: { memberId: string; memberKind: "scenario" | "outcome" | "hydroclimate" },
-    ): string => {
+    const labelForMember = (entry: {
+      memberId: string
+      memberKind: "scenario" | "outcome" | "hydroclimate"
+    }): string => {
       if (entry.memberKind === "scenario") return getDisplayName(entry.memberId)
       if (entry.memberKind === "outcome") return getOutcomeName(entry.memberId)
       return HYDROCLIMATE_LABELS[entry.memberId] ?? entry.memberId
@@ -1688,19 +1681,18 @@ export default function ResiliencePanel({
     scenarios,
   ])
 
-  const hydroclimateCombinedColumnGroups = useMemo<ResilienceColumnGroup[]>(
-    () => {
-      if (view !== "hydroclimate" || hydroclimateCombinedHcs.length === 0)
-        return []
-      const span = byHydroclimateScenarioColIds.length
-      return hydroclimateCombinedHcs.map((hc) => ({
-        key: hc,
-        label: HYDROCLIMATE_LABELS[hc] ?? hc,
-        span,
-      }))
-    },
-    [view, hydroclimateCombinedHcs, byHydroclimateScenarioColIds],
-  )
+  const hydroclimateCombinedColumnGroups = useMemo<
+    ResilienceColumnGroup[]
+  >(() => {
+    if (view !== "hydroclimate" || hydroclimateCombinedHcs.length === 0)
+      return []
+    const span = byHydroclimateScenarioColIds.length
+    return hydroclimateCombinedHcs.map((hc) => ({
+      key: hc,
+      label: HYDROCLIMATE_LABELS[hc] ?? hc,
+      span,
+    }))
+  }, [view, hydroclimateCombinedHcs, byHydroclimateScenarioColIds])
 
   const hydroclimateCombinedCells = useMemo<ResilienceHeatmapCell[]>(() => {
     if (view !== "hydroclimate" || hydroclimateCombinedHcs.length === 0)
@@ -1781,8 +1773,7 @@ export default function ResiliencePanel({
   const outcomeCombinedCodes = useMemo<readonly string[]>(
     () =>
       outcomeSmallMultiplesCodes.filter(
-        (code) =>
-          !(NOD_SOD_OUTCOME_CODES as readonly string[]).includes(code),
+        (code) => !(NOD_SOD_OUTCOME_CODES as readonly string[]).includes(code),
       ),
     [outcomeSmallMultiplesCodes],
   )
@@ -2317,6 +2308,84 @@ export default function ResiliencePanel({
   //   setWalkthroughOpen(true)
   // }, [])
 
+  // View-level transpose transform. Applied just before render so the
+  // underlying buildValueFn / tile compute pipeline stays unchanged.
+  // Marginals swap row/col arrays; combined-layout column groups are
+  // intentionally left unchanged (the group spans are along the
+  // horizontal axis and don't have a natural row analog).
+  //
+  // These hooks must sit above the early returns below so React
+  // always sees the same hook-call order on every render (the
+  // `error` / `isLoading && !hasData` branches bail out before the
+  // main tree renders).
+  const displayRows = transposed ? columns : rows
+  const displayColumns = transposed ? rows : columns
+  const displayCells = useMemo(
+    () => (transposed ? cells.map(transposeCell) : cells),
+    [transposed, cells],
+  )
+  const displayMarginals = useMemo<ResilienceHeatmapMarginals | undefined>(
+    () =>
+      marginalsData && transposed
+        ? { row: marginalsData.col, col: marginalsData.row }
+        : marginalsData,
+    [transposed, marginalsData],
+  )
+
+  const displayByScenarioRows = transposed
+    ? hydroclimateColumns
+    : byScenarioRows
+  const displayByScenarioColumns = transposed
+    ? byScenarioRows
+    : hydroclimateColumns
+  const displayByScenarioTiles = useMemo(
+    () => (transposed ? byScenarioTiles.map(transposeTile) : byScenarioTiles),
+    [transposed, byScenarioTiles],
+  )
+
+  const displayByOutcomeRows = transposed ? hydroclimateColumns : byOutcomeRows
+  const displayByOutcomeColumns = transposed
+    ? byOutcomeRows
+    : hydroclimateColumns
+  const displayByOutcomeTiles = useMemo(
+    () => (transposed ? byOutcomeTiles.map(transposeTile) : byOutcomeTiles),
+    [transposed, byOutcomeTiles],
+  )
+
+  const displayByHydroclimateRows = transposed
+    ? byHydroclimateColumnItems
+    : byHydroclimateRows
+  const displayByHydroclimateColumns = transposed
+    ? byHydroclimateRows
+    : byHydroclimateColumnItems
+  const displayByHydroclimateTiles = useMemo(
+    () =>
+      transposed ? byHydroclimateTiles.map(transposeTile) : byHydroclimateTiles,
+    [transposed, byHydroclimateTiles],
+  )
+
+  // Cross-fade + translate-y pivot animation. Respects the user's
+  // reduced-motion preference (WCAG 2.3.3).
+  const prefersReducedMotion = useReducedMotion()
+  const motionTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.25, ease: "easeOut" as const }
+  const motionInitial = prefersReducedMotion
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: 8 }
+  const motionExit = prefersReducedMotion
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: -8 }
+
+  // Tour anchors. The mode rail and matrix row both highlight the
+  // chart wrapper because the underlying SVG cells are not addressable
+  // individually in this component; the tour copy is precise enough to
+  // describe what to look at.
+  const matrixRowAnchorRef = useTourAnchor("resilience.matrix.row")
+  const modeRailAnchorRef = useTourAnchor("resilience.modeRail")
+  const moreAnalysisAnchorRef = useTourAnchor("resilience.moreAnalysis")
+  const leverageAnchorRef = useTourAnchor("resilience.leverage")
+
   // Render states
 
   if (error) {
@@ -2357,85 +2426,10 @@ export default function ResiliencePanel({
         }}
       >
         <CircularProgress size={32} />
-        <Typography variant="body2">
-          Loading resilience data...
-        </Typography>
+        <Typography variant="body2">Loading resilience data...</Typography>
       </Box>
     )
   }
-
-  // View-level transpose transform. Applied just before render so the
-  // underlying buildValueFn / tile compute pipeline stays unchanged.
-  // Marginals swap row/col arrays; combined-layout column groups are
-  // intentionally left unchanged (the group spans are along the
-  // horizontal axis and don't have a natural row analog).
-  const displayRows = transposed ? columns : rows
-  const displayColumns = transposed ? rows : columns
-  const displayCells = useMemo(
-    () => (transposed ? cells.map(transposeCell) : cells),
-    [transposed, cells],
-  )
-  const displayMarginals = useMemo<ResilienceHeatmapMarginals | undefined>(
-    () =>
-      marginalsData && transposed
-        ? { row: marginalsData.col, col: marginalsData.row }
-        : marginalsData,
-    [transposed, marginalsData],
-  )
-
-  const displayByScenarioRows = transposed ? hydroclimateColumns : byScenarioRows
-  const displayByScenarioColumns = transposed
-    ? byScenarioRows
-    : hydroclimateColumns
-  const displayByScenarioTiles = useMemo(
-    () => (transposed ? byScenarioTiles.map(transposeTile) : byScenarioTiles),
-    [transposed, byScenarioTiles],
-  )
-
-  const displayByOutcomeRows = transposed ? hydroclimateColumns : byOutcomeRows
-  const displayByOutcomeColumns = transposed
-    ? byOutcomeRows
-    : hydroclimateColumns
-  const displayByOutcomeTiles = useMemo(
-    () => (transposed ? byOutcomeTiles.map(transposeTile) : byOutcomeTiles),
-    [transposed, byOutcomeTiles],
-  )
-
-  const displayByHydroclimateRows = transposed
-    ? byHydroclimateColumnItems
-    : byHydroclimateRows
-  const displayByHydroclimateColumns = transposed
-    ? byHydroclimateRows
-    : byHydroclimateColumnItems
-  const displayByHydroclimateTiles = useMemo(
-    () =>
-      transposed
-        ? byHydroclimateTiles.map(transposeTile)
-        : byHydroclimateTiles,
-    [transposed, byHydroclimateTiles],
-  )
-
-  // Cross-fade + translate-y pivot animation. Respects the user's
-  // reduced-motion preference (WCAG 2.3.3).
-  const prefersReducedMotion = useReducedMotion()
-  const motionTransition = prefersReducedMotion
-    ? { duration: 0 }
-    : { duration: 0.25, ease: "easeOut" as const }
-  const motionInitial = prefersReducedMotion
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: 8 }
-  const motionExit = prefersReducedMotion
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: -8 }
-
-  // Tour anchors. The mode rail and matrix row both highlight the
-  // chart wrapper because the underlying SVG cells are not addressable
-  // individually in this component; the tour copy is precise enough to
-  // describe what to look at.
-  const matrixRowAnchorRef = useTourAnchor("resilience.matrix.row")
-  const modeRailAnchorRef = useTourAnchor("resilience.modeRail")
-  const moreAnalysisAnchorRef = useTourAnchor("resilience.moreAnalysis")
-  const leverageAnchorRef = useTourAnchor("resilience.leverage")
 
   return (
     <Box
@@ -2493,7 +2487,9 @@ export default function ResiliencePanel({
               size="small"
               onClick={handleToggleTranspose}
               aria-label={
-                transposed ? "Swap rows and columns (active)" : "Swap rows and columns"
+                transposed
+                  ? "Swap rows and columns (active)"
+                  : "Swap rows and columns"
               }
               title="Swap rows and columns"
               sx={{

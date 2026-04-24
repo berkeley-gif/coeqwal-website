@@ -68,7 +68,14 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
         >
           {viewName}
         </Typography>
-        <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.25, minWidth: 0 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "baseline",
+            gap: 0.25,
+            minWidth: 0,
+          }}
+        >
           <Typography
             variant="dashboard"
             sx={{

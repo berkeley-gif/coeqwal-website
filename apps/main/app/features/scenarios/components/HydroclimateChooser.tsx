@@ -183,16 +183,16 @@ export function HydroclimateChooser({
                       backgroundColor: isDisabled
                         ? theme.palette.grey[400]
                         : config?.bgColor || theme.palette.blue.bright,
-                    border: isSelected
-                      ? `3px solid ${theme.palette.common.white}`
-                      : "3px solid transparent",
-                    outline: isSelected
-                      ? `2px solid ${config?.bgColor || theme.palette.blue.bright}`
-                      : "2px solid transparent",
-                    outlineOffset: "0px",
-                    boxShadow: isSelected
-                      ? theme.shadow.sm
-                      : theme.shadow.none,
+                      border: isSelected
+                        ? `3px solid ${theme.palette.common.white}`
+                        : "3px solid transparent",
+                      outline: isSelected
+                        ? `2px solid ${config?.bgColor || theme.palette.blue.bright}`
+                        : "2px solid transparent",
+                      outlineOffset: "0px",
+                      boxShadow: isSelected
+                        ? theme.shadow.sm
+                        : theme.shadow.none,
                       transition: theme.transition.default,
                       "&:hover": !isDisabled
                         ? {

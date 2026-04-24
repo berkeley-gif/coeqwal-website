@@ -169,7 +169,11 @@ export function writeDemandUnitsBaseline(
       })
       map.setFilter("demand-units-outline", spec.filter)
       if (spec.fillExpr) {
-        map.setPaintProperty("demand-units-outline", "line-color", spec.fillExpr)
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-color",
+          spec.fillExpr,
+        )
       }
       if (spec.lineOpacity.kind === "scalar") {
         map.setPaintProperty(

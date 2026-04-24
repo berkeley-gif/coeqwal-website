@@ -76,8 +76,8 @@ export default function WelcomeStrip() {
           >
             Each row is a scenario, a plan for managing California Central
             Valley water. Pick a few that look interesting and keep reading,
-            comparing, and curating. Check the boxes next to the scenarios
-            you want to collect into a group that fits your goals.
+            comparing, and curating. Check the boxes next to the scenarios you
+            want to collect into a group that fits your goals.
           </Typography>
         </Box>
 

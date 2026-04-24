@@ -146,7 +146,6 @@ export default function TabPanels() {
 
     // Scroll runs in a separate effect so AnimatePresence can mount the
     // correct TabPanel first (mode="wait" delays the entering panel).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch])
 
   useEffect(() => {

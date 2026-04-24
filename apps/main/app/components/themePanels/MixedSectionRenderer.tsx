@@ -1,6 +1,5 @@
 // apps/main/components/theme-panel/MixedSectionRenderer.tsx
 
-import { Fragment } from "react"
 import {
   Typography,
   List,

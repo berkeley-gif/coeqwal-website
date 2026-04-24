@@ -49,6 +49,22 @@ export const LIST_TOUR: TourStep[] = [
     placement: "left-start",
   },
   {
+    id: "list.step1.operations",
+    anchorId: "list.toolbar.keyOperationsChip",
+    eyebrow: "KNOW EACH SCENARIO",
+    title: "Key operations",
+    body: "Toggle Key operations to add a column of icons that summarize the key operations of each scenario.",
+    placement: "bottom-start",
+  },
+  {
+    id: "list.step2.outcomes",
+    anchorId: "list.outcome.column",
+    eyebrow: "STEP 2 - READ THE OUTCOMES",
+    title: "The columns are the key outcomes",
+    body: "Each column is one key outcome. Read down one column to compare scenarios on the same outcome, or read across a row to see one scenario's full profile.",
+    placement: "left",
+  },
+  {
     id: "list.step2.info",
     anchorId: "list.outcome.infoButton",
     eyebrow: "STEP 2 - READ THE OUTCOMES",
@@ -63,13 +79,6 @@ export const LIST_TOUR: TourStep[] = [
     title: "Sorting ranks rows by average",
     body: "Use the sort button to rank scenarios by average outcome, then reverse the order to inspect the other end of the library.",
     placement: "bottom",
-  },
-  {
-    id: "list.step2.column",
-    anchorId: "list.outcome.column",
-    eyebrow: "STEP 2 - READ THE OUTCOMES",
-    title: "Read down the column to compare",
-    placement: "left",
   },
   {
     id: "list.step3.row",
@@ -95,6 +104,14 @@ export const LIST_TOUR: TourStep[] = [
     illustration: "listBarTiers",
     body: "Each bar shows what percentage of the locations fall into each tier. Longer bars mean a larger share of the locations is in that tier. Read across a row to compare one scenario across outcomes, or down a column to compare scenarios on the same outcome.",
     placement: "left",
+  },
+  {
+    id: "list.step4.climate",
+    anchorId: "list.toolbar.climate",
+    eyebrow: "Switch the hydroclimate contex",
+    title: "",
+    body: "Switch hydroclimates to see how the same scenarios perform under different conditions. The outcomes across every row update to reflect that climate, as does the map, so you can test a shortlist against different futures.",
+    placement: "bottom-end",
   },
   {
     id: "list.step4.map",

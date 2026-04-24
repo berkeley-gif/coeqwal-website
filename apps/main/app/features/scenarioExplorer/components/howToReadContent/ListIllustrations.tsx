@@ -156,7 +156,9 @@ function OpsDots({ x, y }: { x: number; y: number }) {
           cx={x + index * 12}
           cy={y}
           r={4}
-          fill={index === 1 ? theme.palette.blue.bright : theme.palette.grey[300]}
+          fill={
+            index === 1 ? theme.palette.blue.bright : theme.palette.grey[300]
+          }
         />
       ))}
     </>
@@ -177,7 +179,15 @@ function PinIcon({ x, y, active }: { x: number; y: number; active?: boolean }) {
   )
 }
 
-function ShareIcon({ x, y, active }: { x: number; y: number; active?: boolean }) {
+function ShareIcon({
+  x,
+  y,
+  active,
+}: {
+  x: number
+  y: number
+  active?: boolean
+}) {
   const theme = useTheme()
   const color = active ? theme.palette.blue.bright : theme.palette.grey[400]
   return (
@@ -199,7 +209,12 @@ function InfoDot({ x, y }: { x: number; y: number }) {
   const theme = useTheme()
   return (
     <g transform={`translate(${x}, ${y})`}>
-      <circle cx={6} cy={6} r={5.5} fill={alpha(theme.palette.blue.bright, 0.12)} />
+      <circle
+        cx={6}
+        cy={6}
+        r={5.5}
+        fill={alpha(theme.palette.blue.bright, 0.12)}
+      />
       <text
         x={6}
         y={8}
@@ -228,9 +243,7 @@ function SortGlyph({
   const theme = useTheme()
   const color = active ? theme.palette.blue.bright : theme.palette.grey[400]
   const path =
-    direction === "desc"
-      ? "M 2 4 L 6 9 L 10 4"
-      : "M 2 8 L 6 3 L 10 8"
+    direction === "desc" ? "M 2 4 L 6 9 L 10 4" : "M 2 8 L 6 3 L 10 8"
 
   return (
     <g transform={`translate(${x}, ${y})`}>
@@ -368,7 +381,14 @@ export function ListHeroGraphic() {
         <Chip x={354} y={24} width={58} label="Bar" />
         <Chip x={418} y={24} width={96} label="Distribution" />
 
-        <rect x={34} y={66} width={116} height={176} rx={12} fill={theme.palette.grey[50]} />
+        <rect
+          x={34}
+          y={66}
+          width={116}
+          height={176}
+          rx={12}
+          fill={theme.palette.grey[50]}
+        />
         <SvgLabel x={48} y={86} size={10} weight={700} muted>
           SCENARIO LIBRARY
         </SvgLabel>
@@ -400,9 +420,17 @@ export function ListHeroGraphic() {
               fill={theme.palette.common.white}
               stroke={theme.palette.divider}
             />
-            <CheckDot cx={174} cy={y + rowHeight / 2} active={rowIndex === 1 || rowIndex === 2} />
+            <CheckDot
+              cx={174}
+              cy={y + rowHeight / 2}
+              active={rowIndex === 1 || rowIndex === 2}
+            />
             <SvgLabel x={190} y={y + 18} size={11} weight={600}>
-              {["Current ops", "Delta pulse", "Flow carveout", "Storage swap"][rowIndex]}
+              {
+                ["Current ops", "Delta pulse", "Flow carveout", "Storage swap"][
+                  rowIndex
+                ]
+              }
             </SvgLabel>
             <PinIcon x={292} y={y + 6} active={rowIndex === 1} />
             <ShareIcon x={312} y={y + 6} active={rowIndex === 2} />
@@ -453,7 +481,14 @@ export function ListToolbarGraphic() {
         <Chip x={36} y={112} width={92} label="selected only" />
         <Chip x={134} y={112} width={108} label="group by theme" active />
 
-        <rect x={36} y={146} width={492} height={86} rx={14} fill={theme.palette.grey[50]} />
+        <rect
+          x={36}
+          y={146}
+          width={492}
+          height={86}
+          rx={14}
+          fill={theme.palette.grey[50]}
+        />
         <SvgLabel x={52} y={166} size={10} weight={700} muted>
           BASELINE
         </SvgLabel>
@@ -464,9 +499,21 @@ export function ListToolbarGraphic() {
           STORAGE
         </SvgLabel>
         {[
-          { y: 154, label: "Current ops", pin: true, share: false, tint: false },
+          {
+            y: 154,
+            label: "Current ops",
+            pin: true,
+            share: false,
+            tint: false,
+          },
           { y: 186, label: "Delta pulse", pin: true, share: true, tint: true },
-          { y: 218, label: "Storage swap", pin: false, share: false, tint: false },
+          {
+            y: 218,
+            label: "Storage swap",
+            pin: false,
+            share: false,
+            tint: false,
+          },
         ].map((row) => (
           <g key={row.label}>
             <rect
@@ -475,9 +522,18 @@ export function ListToolbarGraphic() {
               width={408}
               height={24}
               rx={12}
-              fill={row.tint ? alpha(theme.palette.blue.bright, 0.08) : theme.palette.common.white}
+              fill={
+                row.tint
+                  ? alpha(theme.palette.blue.bright, 0.08)
+                  : theme.palette.common.white
+              }
             />
-            <SvgLabel x={140} y={row.y + 16} size={11} weight={row.tint ? 600 : 500}>
+            <SvgLabel
+              x={140}
+              y={row.y + 16}
+              size={11}
+              weight={row.tint ? 600 : 500}
+            >
               {row.label}
             </SvgLabel>
             <PinIcon x={422} y={row.y + 4} active={row.pin} />
@@ -683,7 +739,13 @@ export function ShortlistFocusGraphic({
       aria-label="Selected scenarios with show only chosen filtering"
     >
       <Frame title="BUILD A SHORTLIST">
-        <Chip x={394} y={24} width={132} label="show only chosen" active={showOnlyChosen} />
+        <Chip
+          x={394}
+          y={24}
+          width={132}
+          label="show only chosen"
+          active={showOnlyChosen}
+        />
         <Chip x={286} y={24} width={100} label="baselines" />
         {rows.map((row) => {
           const hidden = showOnlyChosen && !row.chosen
@@ -695,11 +757,24 @@ export function ShortlistFocusGraphic({
                 width={492}
                 height={26}
                 rx={8}
-                fill={row.chosen ? alpha(theme.palette.blue.bright, 0.08) : theme.palette.common.white}
-                stroke={row.chosen ? alpha(theme.palette.blue.bright, 0.18) : theme.palette.divider}
+                fill={
+                  row.chosen
+                    ? alpha(theme.palette.blue.bright, 0.08)
+                    : theme.palette.common.white
+                }
+                stroke={
+                  row.chosen
+                    ? alpha(theme.palette.blue.bright, 0.18)
+                    : theme.palette.divider
+                }
               />
               <CheckDot cx={52} cy={row.y + 13} active={row.chosen} />
-              <SvgLabel x={68} y={row.y + 17} size={11} weight={row.chosen ? 600 : 500}>
+              <SvgLabel
+                x={68}
+                y={row.y + 17}
+                size={11}
+                weight={row.chosen ? 600 : 500}
+              >
                 {row.name}
               </SvgLabel>
               <Cell
@@ -779,7 +854,11 @@ export function BaselineComparisonGraphic({
                 width={492}
                 height={38}
                 rx={10}
-                fill={index === 0 ? alpha(theme.palette.blue.bright, 0.06) : theme.palette.grey[50]}
+                fill={
+                  index === 0
+                    ? alpha(theme.palette.blue.bright, 0.06)
+                    : theme.palette.grey[50]
+                }
               />
               <SvgLabel x={52} y={y + 17} size={12} weight={600}>
                 {row.label}
@@ -856,7 +935,14 @@ export function OutcomeViewsGraphic() {
           </g>
         ))}
 
-        <Cell x={84} y={122} width={48} height={48} fill={tiers.tier2} label="2.3" />
+        <Cell
+          x={84}
+          y={122}
+          width={48}
+          height={48}
+          fill={tiers.tier2}
+          label="2.3"
+        />
         <SvgLabel x={108} y={180} size={10} muted anchor="middle">
           average tier
         </SvgLabel>
@@ -871,7 +957,14 @@ export function OutcomeViewsGraphic() {
           tier shares
         </SvgLabel>
 
-        <rect x={430} y={122} width={56} height={56} rx={8} fill={theme.palette.common.white} />
+        <rect
+          x={430}
+          y={122}
+          width={56}
+          height={56}
+          rx={8}
+          fill={theme.palette.common.white}
+        />
         <DistributionGrid x={440} y={132} fills={distB} />
         <SvgLabel x={458} y={180} size={10} muted anchor="middle">
           vulnerable locations

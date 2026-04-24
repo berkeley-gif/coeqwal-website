@@ -172,6 +172,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const listOutcomeBarChartTourRef = useTourAnchor("list.outcome.barChart")
   const listRowPinTourRef = useTourAnchor("list.row.pin")
   const listRowShareTourRef = useTourAnchor("list.row.share")
+  const listRowOperationsTourRef = useTourAnchor("list.row.operations")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
 
   // Bridge the outcome column ref into the tour registry as well. We
@@ -314,11 +315,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
     if (outcomeDisplayMode === "average") {
       return (
-        <Box
-          key={shortCode}
-          ref={glyphRefFor}
-          {...tourCellDataAttrs}
-        >
+        <Box key={shortCode} ref={glyphRefFor} {...tourCellDataAttrs}>
           <TierSummaryCell
             chartData={chartData}
             isActive={isActive}
@@ -505,6 +502,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               shareRowTourRef={
                 tourListFirstItem && isListMode
                   ? listRowShareTourRef
+                  : undefined
+              }
+              operationsRowTourRef={
+                tourListFirstItem && isListMode
+                  ? listRowOperationsTourRef
                   : undefined
               }
             />
@@ -891,6 +893,7 @@ function NonCompactRowContent({
   outcomeColRef,
   pinRowTourRef,
   shareRowTourRef,
+  operationsRowTourRef,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
   accentColor?: string
@@ -899,6 +902,7 @@ function NonCompactRowContent({
   outcomeColRef?: React.RefObject<HTMLDivElement | null>
   pinRowTourRef?: React.RefCallback<HTMLElement | null>
   shareRowTourRef?: React.RefCallback<HTMLElement | null>
+  operationsRowTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
@@ -963,6 +967,7 @@ function NonCompactRowContent({
 
           {/* Column 3: Key operations */}
           <Box
+            ref={operationsRowTourRef}
             sx={{
               gridColumn: "3",
               borderLeft: `1px solid ${theme.palette.grey[300]}`,

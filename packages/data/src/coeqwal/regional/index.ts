@@ -41,7 +41,9 @@ export type RegionalOutcomeCode =
 
 export type RegionalTierMeans = Record<
   string,
-  Partial<Record<RegionalHydroclimate, Partial<Record<RegionalOutcomeCode, number>>>>
+  Partial<
+    Record<RegionalHydroclimate, Partial<Record<RegionalOutcomeCode, number>>>
+  >
 >
 
 const data = raw as RegionalTierMeans
