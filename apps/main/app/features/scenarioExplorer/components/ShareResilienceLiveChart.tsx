@@ -53,7 +53,8 @@ export interface ShareResilienceLiveChartProps {
   height?: number
 }
 
-const DEFAULT_HEIGHT = 260
+/** Aligned with share radar thumbnail: full card width and ~square visual weight. */
+const DEFAULT_HEIGHT = 312
 
 function hydroclimateLabel(hc: string): string {
   return HYDROCLIMATE_SHORT_LABELS[hc] ?? hc

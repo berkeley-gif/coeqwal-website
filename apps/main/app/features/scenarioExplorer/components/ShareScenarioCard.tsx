@@ -264,7 +264,7 @@ export default function ShareScenarioCard({
                   <Box sx={{ textAlign: "center" }}>
                     <Typography
                       sx={{
-                        fontSize: "0.5625rem",
+                        fontSize: "0.625rem",
                         lineHeight: 1.2,
                         color: theme.palette.grey[700],
                       }}
@@ -273,7 +273,7 @@ export default function ShareScenarioCard({
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: "0.5rem",
+                        fontSize: "0.5625rem",
                         lineHeight: 1.3,
                         color: theme.palette.grey[500],
                       }}
@@ -302,7 +302,7 @@ export default function ShareScenarioCard({
                     sx={{
                       display: "flex",
                       flexWrap: "wrap",
-                      gap: 1.5,
+                      gap: 2,
                       justifyContent: "center",
                       alignItems: "start",
                     }}
@@ -319,10 +319,10 @@ export default function ShareScenarioCard({
                     sx={{
                       display: "flex",
                       flexWrap: "wrap",
-                      gap: 1.5,
+                      gap: 2,
                       justifyContent: "center",
                       alignItems: "start",
-                      mt: row1.length > 0 ? 1.5 : 0,
+                      mt: row1.length > 0 ? 2 : 0,
                     }}
                   >
                     {row2.map(({ shortCode, displayName }) =>
@@ -337,9 +337,9 @@ export default function ShareScenarioCard({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(86px, 1fr))",
-              rowGap: 1,
-              columnGap: 0.75,
+              gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+              rowGap: 1.25,
+              columnGap: 1,
               mt: 1,
               alignItems: "start",
             }}
@@ -363,7 +363,7 @@ export default function ShareScenarioCard({
                   />
                   <Typography
                     sx={{
-                      fontSize: "0.5625rem",
+                      fontSize: "0.625rem",
                       lineHeight: 1.2,
                       color: theme.palette.grey[700],
                       textAlign: "center",
@@ -379,9 +379,9 @@ export default function ShareScenarioCard({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))",
-              rowGap: 1,
-              columnGap: 0.5,
+              gridTemplateColumns: "repeat(auto-fill, minmax(92px, 1fr))",
+              rowGap: 1.25,
+              columnGap: 0.75,
               mt: 1,
               justifyItems: "center",
               alignItems: "start",
@@ -396,7 +396,7 @@ export default function ShareScenarioCard({
                   name={shortCode}
                   chartData={data}
                   isActive={!!data && data.length > 0}
-                  size={36}
+                  size={48}
                   showLabel
                   showInfoButton={false}
                   showSortButton={false}
