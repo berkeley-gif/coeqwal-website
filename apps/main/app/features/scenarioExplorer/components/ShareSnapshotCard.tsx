@@ -12,18 +12,11 @@
  * gracefully degrades to text-only when it's absent.
  */
 
-import React, { useState } from "react"
-import {
-  Box,
-  Typography,
-  IconButton,
-  TextField,
-  useTheme,
-  icons,
-  alpha,
-} from "@repo/ui/mui"
+import React from "react"
+import { Box, Typography, IconButton, useTheme, icons, alpha } from "@repo/ui/mui"
 import type { HydroclimateOption } from "../../../content/scenarios"
 import { hydroclimateOptions } from "../../../content/scenarios"
+import ShareItemNoteBlock from "./ShareItemNoteBlock"
 
 interface ShareSnapshotCardProps {
   id: string
@@ -64,7 +57,6 @@ export default function ShareSnapshotCard({
   onRemove,
 }: ShareSnapshotCardProps) {
   const theme = useTheme()
-  const [editing, setEditing] = useState(false)
 
   const climateOption: HydroclimateOption | undefined = hydroclimate
     ? hydroclimateOptions.find((o) => o.value === hydroclimate)
@@ -210,77 +202,7 @@ export default function ShareSnapshotCard({
         </Box>
       )}
 
-      {/* Inline note editor. When a note exists it renders as a muted
-          caption; clicking enters edit mode. The beginner flow is
-          intentionally light here: no required fields, just an
-          optional "why I saved this". */}
-      <Box sx={{ mt: 1 }}>
-        {editing ? (
-          <TextField
-            autoFocus
-            multiline
-            size="small"
-            fullWidth
-            minRows={2}
-            maxRows={4}
-            placeholder="Why did you save this? Your notes will show up on the Share page."
-            value={note ?? ""}
-            onChange={(e) => onNoteChange?.(e.target.value)}
-            onBlur={() => setEditing(false)}
-            sx={{ fontSize: "0.8125rem" }}
-          />
-        ) : note ? (
-          <Box
-            component="button"
-            type="button"
-            onClick={() => setEditing(true)}
-            sx={{
-              width: "100%",
-              textAlign: "left",
-              border: "none",
-              background: "transparent",
-              cursor: "text",
-              p: 0,
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                color: theme.palette.text.secondary,
-                fontStyle: "italic",
-                display: "block",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.4,
-              }}
-            >
-              {note}
-            </Typography>
-          </Box>
-        ) : (
-          onNoteChange && (
-            <Box
-              component="button"
-              type="button"
-              onClick={() => setEditing(true)}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.25,
-                fontSize: "0.75rem",
-                border: "none",
-                background: "transparent",
-                color: theme.palette.blue.bright,
-                cursor: "pointer",
-                p: 0,
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              <icons.EditNote sx={{ fontSize: "0.875rem" }} />
-              Add a note
-            </Box>
-          )
-        )}
-      </Box>
+      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
     </Box>
   )
 }

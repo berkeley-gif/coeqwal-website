@@ -16,6 +16,7 @@ import {
   type HydroclimateOption,
 } from "../../../content/scenarios"
 import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
+import ShareItemNoteBlock from "./ShareItemNoteBlock"
 
 interface ShareScenarioCardProps {
   scenarioId: string
@@ -27,6 +28,8 @@ interface ShareScenarioCardProps {
   outcomeNames: { shortCode: string; displayName: string }[]
   onRemove?: (id: string) => void
   viewMode?: OutcomeDisplayMode
+  note?: string
+  onNoteChange?: (note: string) => void
 }
 
 export default function ShareScenarioCard({
@@ -39,6 +42,8 @@ export default function ShareScenarioCard({
   outcomeNames,
   onRemove,
   viewMode,
+  note,
+  onNoteChange,
 }: ShareScenarioCardProps) {
   const theme = useTheme()
 
@@ -405,6 +410,8 @@ export default function ShareScenarioCard({
             })}
           </Box>
         ))}
+
+      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
     </Box>
   )
 }

@@ -93,6 +93,8 @@ function ShareItemCard({
         outcomeNames={outcomeNames}
         onRemove={() => onRemove(item.id)}
         viewMode={item.viewMode}
+        note={item.note}
+        onNoteChange={(note) => onNoteChange(item.id, note)}
       />
     )
   }
@@ -127,6 +129,8 @@ function ShareItemCard({
         cachedImageDataUrl={item.cachedImageDataUrl}
         liveChart={liveChart}
         onRemove={() => onRemove(item.id)}
+        note={item.note}
+        onNoteChange={(note) => onNoteChange(item.id, note)}
       />
     )
   }

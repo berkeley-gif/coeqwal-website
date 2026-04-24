@@ -372,6 +372,10 @@ function renderShareItemBody(
         chartData={chartData}
         outcomeNames={outcomeNames}
         viewMode={item.viewMode}
+        note={item.note}
+        onNoteChange={
+          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
+        }
       />
     )
   }
@@ -402,6 +406,10 @@ function renderShareItemBody(
         showDotsOnly={item.showDotsOnly}
         cachedImageDataUrl={item.cachedImageDataUrl}
         liveChart={liveChart}
+        note={item.note}
+        onNoteChange={
+          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
+        }
       />
     )
   }
@@ -512,6 +520,7 @@ function TrayCard({
   item,
   isInStory,
   onToggle,
+  onNoteChange,
   outcomeNames,
   scenarioLookup,
   allChartData,
@@ -521,6 +530,7 @@ function TrayCard({
   item: ShareItem
   isInStory: boolean
   onToggle: () => void
+  onNoteChange: (id: string, note: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<
     string,
@@ -545,11 +555,17 @@ function TrayCard({
       allChartData,
       radarLiveByHydro,
       getThemeForScenario,
+      onNoteChange,
     )
 
   return (
     <Box
-      onClick={onToggle}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("[data-share-note]")) {
+          return
+        }
+        onToggle()
+      }}
       sx={{
         position: "relative",
         width: TRAY_CARD_WIDTH,
@@ -567,9 +583,7 @@ function TrayCard({
         },
       }}
     >
-      <Box sx={{ px: 0.5, pb: 0.5, pointerEvents: "none" }}>
-        {renderContent()}
-      </Box>
+      <Box sx={{ px: 0.5, pb: 0.5 }}>{renderContent()}</Box>
 
       {/* In-story badge */}
       {isInStory && (
@@ -1132,6 +1146,7 @@ export default function SharePanel() {
               item={item}
               isInStory={storyItemIdSet.has(item.id)}
               onToggle={() => handleToggleStory(item.id)}
+              onNoteChange={handleNoteChange}
               outcomeNames={outcomeNames}
               scenarioLookup={scenarioLookup}
               allChartData={
@@ -1258,10 +1273,11 @@ export default function SharePanel() {
                   variant="outlined"
                   size="small"
                   onClick={async () => {
+                    const st = useScenarioExplorerStore.getState()
                     const url = encodeShareItems(
-                      shareItems,
-                      hydroclimate,
-                      storyItemIds,
+                      st.shareItems,
+                      st.hydroclimate,
+                      st.storyItemIds,
                     )
                     try {
                       await navigator.clipboard.writeText(url)

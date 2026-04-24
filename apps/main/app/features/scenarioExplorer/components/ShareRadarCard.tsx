@@ -7,6 +7,7 @@ import {
   type HydroclimateOption,
 } from "../../../content/scenarios"
 import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
+import ShareItemNoteBlock from "./ShareItemNoteBlock"
 
 interface ShareRadarCardProps {
   scenarioNames: string[]
@@ -26,6 +27,8 @@ interface ShareRadarCardProps {
    */
   liveChart?: React.ReactNode
   onRemove?: () => void
+  note?: string
+  onNoteChange?: (note: string) => void
 }
 
 export default function ShareRadarCard({
@@ -40,6 +43,8 @@ export default function ShareRadarCard({
   cachedImageDataUrl,
   liveChart,
   onRemove,
+  note,
+  onNoteChange,
 }: ShareRadarCardProps) {
   const theme = useTheme()
 
@@ -265,6 +270,8 @@ export default function ShareRadarCard({
           Radar image not available
         </Box>
       )}
+
+      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
     </Box>
   )
 }
