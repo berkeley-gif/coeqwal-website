@@ -96,27 +96,33 @@ export default function ShareRadarLiveChart({
     )
   }
 
+  // Match `ShareRadarCard` cached image layout: `width: 100%`, natural height
+  // from a square raster. `RadarPlot` defaults to `containerMinHeight: 400` for
+  // the main panel; in a card that forces overflow/clipping, so we pass 0 and
+  // give the component a real square from `aspectRatio` (same as explore SVG).
   return (
     <Box
       sx={{
         mt: 1,
+        width: "100%",
+        position: "relative",
+        aspectRatio: "1 / 1",
         borderRadius: "4px",
         backgroundColor: theme.palette.common.white,
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
         overflow: "hidden",
-        transform: "translateY(-6px)",
       }}
     >
       <Box
         sx={{
-          width: "100%",
-          maxWidth: "100%",
-          height: 280,
-          minHeight: 220,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           pointerEvents: "none",
-          position: "relative",
         }}
       >
         <RadarPlot
@@ -124,6 +130,7 @@ export default function ShareRadarLiveChart({
           axes={axes}
           baselineData={baselineData ?? undefined}
           responsive
+          containerMinHeight={0}
           lineColors={lineColors}
           scenarioThemes={scenarioThemes}
           morphGeneration={morphGeneration}

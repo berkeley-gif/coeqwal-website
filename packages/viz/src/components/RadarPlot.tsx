@@ -83,6 +83,14 @@ export interface RadarPlotProps {
   /** External ref to access the rendered SVG element (e.g. for capture/export) */
   svgRefCallback?: (svg: SVGSVGElement | null) => void
   /**
+   * Min-height (px) on the chart root when `responsive` is true. The main
+   * explorer panel uses 400 so the plot does not collapse while the column
+   * is still measuring. Tight embeds (share card thumbnails) should pass 0
+   * so the root respects the parent height; otherwise 400 can clip or
+   * scale incorrectly inside a small, overflow-hidden box.
+   */
+  containerMinHeight?: number
+  /**
    * Typography and panel chrome for the axis-label hover detail.
    * Pass values from theme
    */
@@ -347,6 +355,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     svgRefCallback,
     axisLabelDetailStyle: axisLabelDetailStyleProp,
     axisLabelDetailChrome,
+    containerMinHeight = 400,
   }) => {
     const axisLabelDetailStyle = useMemo(
       () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
@@ -1864,7 +1873,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         style={{
           width: responsive ? "100%" : width,
           height: responsive ? "100%" : height,
-          minHeight: 400,
+          minHeight: containerMinHeight,
           position: "relative",
         }}
       >
