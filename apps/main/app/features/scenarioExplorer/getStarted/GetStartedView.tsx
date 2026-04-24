@@ -616,35 +616,6 @@ export default function GetStartedView() {
                 />
               ))}
             </Box>
-
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: sp.lg }}
-            >
-              A summary of each hydroclimate future can be accessed{" "}
-              <Typography
-                component="button"
-                variant="body2"
-                sx={{
-                  background: "none",
-                  border: "none",
-                  p: 0,
-                  color: "text.secondary",
-                  textDecoration: "underline",
-                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
-                  textUnderlineOffset: "3px",
-                  cursor: "pointer",
-                  font: "inherit",
-                  "&:hover": {
-                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
-                  },
-                }}
-              >
-                here
-              </Typography>
-              .
-            </Typography>
           </>
         </GetStartedPanelShell>
 
@@ -697,35 +668,6 @@ export default function GetStartedView() {
                 />
               ))}
             </Box>
-
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: sp.lg }}
-            >
-              A summary of all key outcomes can be accessed{" "}
-              <Typography
-                component="button"
-                variant="body2"
-                sx={{
-                  background: "none",
-                  border: "none",
-                  p: 0,
-                  color: "text.secondary",
-                  textDecoration: "underline",
-                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
-                  textUnderlineOffset: "3px",
-                  cursor: "pointer",
-                  font: "inherit",
-                  "&:hover": {
-                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
-                  },
-                }}
-              >
-                here
-              </Typography>
-              .
-            </Typography>
           </>
         </GetStartedPanelShell>
       </Box>
