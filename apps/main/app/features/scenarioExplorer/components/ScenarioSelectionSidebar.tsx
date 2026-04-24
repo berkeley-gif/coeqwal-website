@@ -74,6 +74,7 @@ export default function ScenarioSelectionSidebar({
     hydroclimate,
     radarVisibleAxes,
     showRadarRange,
+    showTierZones,
     highlightBaseline,
     showDotsOnly,
   } = useScenarioExplorerStore()
@@ -439,6 +440,7 @@ export default function ScenarioSelectionSidebar({
                                 : undefined,
                             axes: [...radarVisibleAxes],
                             showRange: showRadarRange,
+                            showTierZones,
                             highlightBaseline,
                             showDotsOnly,
                             hydroclimate,

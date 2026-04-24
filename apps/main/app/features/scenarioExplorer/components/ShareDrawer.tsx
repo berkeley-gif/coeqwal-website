@@ -14,6 +14,13 @@ import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../hooks/useComparisonData"
+import { useScenarioList } from "../../scenarios/hooks"
+import {
+  normalizeShareRadarHydro,
+  buildShareRadarLiveDataFields,
+  type ShareRadarHydroKey,
+  type ShareRadarLiveDataFields,
+} from "../utils/shareRadarLiveData"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 import ShareRadarCard from "./ShareRadarCard"
@@ -35,19 +42,6 @@ function outcomeCodesToLabels(codes: string[]): string[] {
   return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
 }
 
-/**
- * Bag of live-chart fallback data sourced once per drawer render and
- * shared across every rendered card. The radar fields come from
- * `useComparisonData` and are used to re-render a radar thumbnail
- * when a share item has no cached PNG.
- */
-interface ShareDrawerLiveData {
-  radarPlotData: VerticalParallelLineData[]
-  radarBaseline: VerticalParallelLineData | null
-  radarAxisRange: Record<string, { min: number; max: number }>
-  radarLineColorByScenario: Map<string, string>
-}
-
 function ShareItemCard({
   item,
   onRemove,
@@ -55,7 +49,8 @@ function ShareItemCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
-  liveData,
+  radarLiveByHydro,
+  getThemeForScenario,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -71,7 +66,8 @@ function ShareItemCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
-  liveData: ShareDrawerLiveData
+  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
+  getThemeForScenario: (id: string) => string
 }) {
   if (item.type === "barChart") {
     const info = scenarioLookup.get(item.scenarioId)
@@ -112,9 +108,11 @@ function ShareItemCard({
       (id) => scenarioLookup.get(id)?.definition ?? "",
     )
 
+    const radarLive =
+      radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
     const liveChart = item.cachedImageDataUrl
       ? undefined
-      : renderRadarLiveChart(item, liveData)
+      : renderRadarLiveChart(item, radarLive, getThemeForScenario)
 
     return (
       <ShareRadarCard
@@ -123,6 +121,7 @@ function ShareItemCard({
         scenarioColors={item.scenarioColors}
         hydroclimate={item.hydroclimate}
         showRange={item.showRange}
+        showTierZones={item.showTierZones !== false}
         highlightBaseline={item.highlightBaseline}
         showDotsOnly={item.showDotsOnly}
         cachedImageDataUrl={item.cachedImageDataUrl}
@@ -236,7 +235,8 @@ function ShareItemCard({
  */
 function renderRadarLiveChart(
   item: Extract<ShareItem, { type: "radar" }>,
-  liveData: ShareDrawerLiveData,
+  liveData: ShareRadarLiveDataFields,
+  getThemeForScenario: (id: string) => string,
 ): React.ReactNode {
   const idSet = new Set(item.scenarioIds)
   const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
@@ -254,17 +254,24 @@ function renderRadarLiveChart(
     return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
   })
 
+  const scenarioThemes: Record<string, string> = {}
+  for (const id of item.scenarioIds) {
+    scenarioThemes[id] = getThemeForScenario(id) ?? "unthemed"
+  }
+
   return (
     <ShareRadarLiveChart
       data={orderedFiltered}
       axes={axesDisplay}
       lineColors={lineColors}
+      scenarioThemes={scenarioThemes}
       baselineData={liveData.radarBaseline}
       axisRange={liveData.radarAxisRange}
-      showRange={item.showRange}
+      showRadarRange={item.showRange}
+      showTierZones={item.showTierZones !== false}
       highlightBaseline={item.highlightBaseline}
       showDotsOnly={item.showDotsOnly}
-      size={280}
+      morphGeneration={liveData.morphGeneration}
     />
   )
 }
@@ -374,28 +381,21 @@ export default function ShareDrawer() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
+  const { getThemeForScenario } = useScenarioList()
 
-  // Live radar data shared across drawer cards so items restored
-  // without a cached PNG still get a real thumbnail. Same SWR-cached
-  // fetch the Explore radar panel uses.
-  const comparisonData = useComparisonData()
-  const liveData = useMemo<ShareDrawerLiveData>(() => {
-    const lineColorByScenario = new Map<string, string>()
-    comparisonData.scenarios.forEach((s) => {
-      lineColorByScenario.set(s.id, s.color)
-    })
-    return {
-      radarPlotData: comparisonData.data,
-      radarBaseline: comparisonData.baselineScenario,
-      radarAxisRange: comparisonData.axisRange,
-      radarLineColorByScenario: lineColorByScenario,
-    }
-  }, [
-    comparisonData.data,
-    comparisonData.baselineScenario,
-    comparisonData.axisRange,
-    comparisonData.scenarios,
-  ])
+  const compHistorical = useComparisonData("historical", true)
+  const compCc50 = useComparisonData("cc50", true)
+  const compCc95 = useComparisonData("cc95", true)
+
+  const radarLiveByHydro = useMemo(
+    () =>
+      ({
+        historical: buildShareRadarLiveDataFields(compHistorical),
+        cc50: buildShareRadarLiveDataFields(compCc50),
+        cc95: buildShareRadarLiveDataFields(compCc95),
+      }) satisfies Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
+    [compHistorical, compCc50, compCc95],
+  )
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<
@@ -571,7 +571,8 @@ export default function ShareDrawer() {
                     Record<string, unknown> | undefined
                   >
                 }
-                liveData={liveData}
+                radarLiveByHydro={radarLiveByHydro}
+                getThemeForScenario={getThemeForScenario}
               />
             ))
           )}

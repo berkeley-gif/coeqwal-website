@@ -47,6 +47,7 @@ function RadarAxisDetailScenarioControlsInner({
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
   const radarVisibleAxes = useScenarioExplorerStore((s) => s.radarVisibleAxes)
   const showRadarRange = useScenarioExplorerStore((s) => s.showRadarRange)
+  const showTierZones = useScenarioExplorerStore((s) => s.showTierZones)
   const highlightBaseline = useScenarioExplorerStore((s) => s.highlightBaseline)
   const showDotsOnly = useScenarioExplorerStore((s) => s.showDotsOnly)
   const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
@@ -138,6 +139,7 @@ function RadarAxisDetailScenarioControlsInner({
               scenarioColors: result ? [result.color] : [lineColor],
               axes: [...radarVisibleAxes],
               showRange: showRadarRange,
+              showTierZones,
               highlightBaseline,
               showDotsOnly,
               hydroclimate,

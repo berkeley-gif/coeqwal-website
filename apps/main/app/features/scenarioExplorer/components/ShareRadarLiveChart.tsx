@@ -4,21 +4,19 @@
  * ShareRadarLiveChart
  *
  * Small radar thumbnail rendered from live tier data when the share
- * item has no cached PNG. This is the cross-browser replacement for
- * the cached `cachedImageDataUrl` path: URLs can't carry a rasterized
- * radar, so the card re-renders it from the fetched tier data the
- * same way the list-view cards re-render their bar charts.
- *
- * The component is intentionally dumb: parents (SharePanel,
- * ShareDrawer) call `useComparisonData` once, filter the resulting
- * VerticalParallelLineData array by the share item's scenarioIds, and
- * hand the filtered data in as props. That avoids recomputing the
- * 24-scenario parallel-plot array for every card.
+ * item has no cached PNG. Props mirror explore `RadarPanel` + `RadarPlot`
+ * semantics: `showRadarRange` controls axis min/max shading; `showTierZones`
+ * controls the tier band background (stored on the share item or URL).
  */
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
-import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
+import {
+  RadarPlot,
+  type VerticalParallelLineData,
+  mergeRadarAxisLabelDetailStyle,
+  type RadarPlotAxisLabelDetailStyle,
+} from "@repo/viz"
 
 export interface ShareRadarLiveChartProps {
   /** Filtered radar data matching the share item's scenarioIds. */
@@ -27,32 +25,56 @@ export interface ShareRadarLiveChartProps {
   axes: string[]
   /** Line colors in the same order as `data`. */
   lineColors?: string[]
+  /** Per-scenario theme keys for `RadarPlot` (matches explore). */
+  scenarioThemes: Record<string, string>
   /** Baseline scenario from useComparisonData. */
   baselineData?: VerticalParallelLineData | null
   /** Per-axis min/max across all scenarios in the hydroclimate. */
   axisRange?: Record<string, { min: number; max: number }>
+  /** When true, show min/max range shading (explore `showRadarRange`). */
+  showRadarRange: boolean
+  /** When true, show tier band background (explore `showTierZones`). */
+  showTierZones: boolean
   /** Radar-toggle captures from the share item. */
-  showRange: boolean
   highlightBaseline: boolean
   showDotsOnly: boolean
-  /** Optional fixed size; defaults to a card-friendly square. */
-  size?: number
+  morphGeneration: number
 }
-
-const DEFAULT_SIZE = 240
 
 export default function ShareRadarLiveChart({
   data,
   axes,
   lineColors,
+  scenarioThemes,
   baselineData,
   axisRange,
-  showRange,
+  showRadarRange,
+  showTierZones,
   highlightBaseline,
   showDotsOnly,
-  size = DEFAULT_SIZE,
+  morphGeneration,
 }: ShareRadarLiveChartProps) {
   const theme = useTheme()
+
+  const axisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
+    const axisTypo = theme.typography.axisLabel
+
+    return mergeRadarAxisLabelDetailStyle({
+      fontFamily: axisTypo.fontFamily as string,
+      scenarioFontSize: axisTypo.fontSize as string,
+      scenarioFontWeight: Number(axisTypo.fontWeight),
+      scenarioLetterSpacing: axisTypo.letterSpacing as string,
+      tierFontSize: theme.typography.compactCaption.fontSize as string,
+      tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
+      panelFill: theme.palette.common.white,
+      panelStroke: "none",
+      scenarioFill: "#193D6B",
+      tierFill: "#193D6B",
+      axisTitleFill: "#193D6B",
+      scenarioControlsRowHeightPx: 26,
+      scenarioControlsRowGapPx: 4,
+    })
+  }, [theme])
 
   if (data.length === 0 || axes.length === 0) {
     return (
@@ -84,25 +106,39 @@ export default function ShareRadarLiveChart({
         display: "flex",
         justifyContent: "center",
         overflow: "hidden",
+        transform: "translateY(-6px)",
       }}
     >
-      <Box sx={{ width: size, height: size, pointerEvents: "none" }}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: "100%",
+          height: 280,
+          minHeight: 220,
+          pointerEvents: "none",
+          position: "relative",
+        }}
+      >
         <RadarPlot
           data={data}
           axes={axes}
           baselineData={baselineData ?? undefined}
           responsive
-          width={size}
-          height={size}
           lineColors={lineColors}
+          scenarioThemes={scenarioThemes}
+          morphGeneration={morphGeneration}
           chosenIds={new Set(data.map((d) => d.id))}
           highlightBaseline={highlightBaseline && !!baselineData}
+          showAllPaths
           showScenarioPath
-          showAllPaths={false}
-          showTierZones={showRange}
+          showTierZones={showTierZones}
           showDotsOnly={showDotsOnly}
-          axisRange={axisRange}
+          axisRange={showRadarRange ? axisRange : undefined}
+          dimUnselected={false}
+          dimUnpinned={false}
+          tooltipLeftOffset={0}
           enableTooltip={false}
+          axisLabelDetailStyle={axisLabelDetailStyle}
         />
       </Box>
     </Box>

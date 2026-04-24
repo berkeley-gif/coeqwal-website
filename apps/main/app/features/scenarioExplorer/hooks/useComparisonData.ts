@@ -46,17 +46,27 @@ function tierMeanToRadarValue(tierMean: number): number {
  * useMultipleScenarioTiers so only 24 scenarios are fetched per hydroclimate.
  * All returned data is keyed by sibling group IDs, making downstream code
  * hydroclimate-agnostic.
+ *
+ * @param hydroclimateOverride When set (e.g. for share live radar), use this
+ *   period for tier mapping and NOD/SOD handling instead of the store value.
+ * @param includeAllScenariosInParallelPlot When true, do not filter by
+ *   showOnlyChosen so every scenario row is available (share tray / URL).
  */
-export function useComparisonData() {
+export function useComparisonData(
+  hydroclimateOverride?: string,
+  includeAllScenariosInParallelPlot = false,
+) {
   const { buildIdMapping, getDisplayName, getThemeForScenario } =
     useScenarioList()
 
   const {
-    hydroclimate,
+    hydroclimate: storeHydroclimate,
     showAlternativeBaselines,
     showOnlyChosen,
     selectedScenarios,
   } = useScenarioExplorerStore()
+
+  const hydroclimate = hydroclimateOverride ?? storeHydroclimate
 
   const idMapping = useMemo(
     () => buildIdMapping(hydroclimate),
@@ -93,7 +103,11 @@ export function useComparisonData() {
             getThemeForScenario(id) !== "baseline" ||
             id === PRIMARY_BASELINE_ID,
         )
-    if (showOnlyChosen && selectedScenarios.length > 0) {
+    if (
+      !includeAllScenariosInParallelPlot &&
+      showOnlyChosen &&
+      selectedScenarios.length > 0
+    ) {
       const chosen = new Set(selectedScenarios)
       filtered = filtered.filter((id) => chosen.has(id))
     }
@@ -105,6 +119,7 @@ export function useComparisonData() {
   }, [
     allScenarioIds,
     showAlternativeBaselines,
+    includeAllScenariosInParallelPlot,
     showOnlyChosen,
     selectedScenarios,
     getThemeForScenario,

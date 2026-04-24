@@ -62,6 +62,8 @@ export type ShareItem =
       scenarioColors?: string[]
       axes: string[]
       showRange: boolean
+      /** When false, tier band background is off (matches explore `showTierZones`). */
+      showTierZones?: boolean
       highlightBaseline: boolean
       showDotsOnly: boolean
       hydroclimate: string

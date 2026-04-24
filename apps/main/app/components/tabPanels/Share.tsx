@@ -30,6 +30,13 @@ import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
+import { useScenarioList } from "../../features/scenarios/hooks"
+import {
+  normalizeShareRadarHydro,
+  buildShareRadarLiveDataFields,
+  type ShareRadarHydroKey,
+  type ShareRadarLiveDataFields,
+} from "../../features/scenarioExplorer/utils/shareRadarLiveData"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
@@ -81,6 +88,7 @@ function encodeShareItems(
       if (item.showRange) flags += "r"
       if (item.highlightBaseline) flags += "b"
       if (item.showDotsOnly) flags += "d"
+      if (item.showTierZones === false) flags += "n"
       return `r.${ids}.${axes}.${flags}.${hc}`
     }
     if (item.type === "equity") {
@@ -255,6 +263,7 @@ export function parseShareItemsParam(
           scenarioIds,
           axes,
           showRange: flags.includes("r"),
+          showTierZones: !flags.includes("n"),
           highlightBaseline: flags.includes("b"),
           showDotsOnly: flags.includes("d"),
           hydroclimate: parts[4] || "historical",
@@ -307,17 +316,11 @@ function outcomeCodesToLabels(codes: string[]): string[] {
 }
 
 /**
- * Bag of live-chart fallback data sourced once per panel/drawer render
- * and shared across every rendered card. The radar fields come from
- * `useComparisonData` and are used to re-render a radar thumbnail when
- * a share item has no cached PNG (e.g. items restored from a URL).
+ * Per-hydro live radar fields for share. See `buildShareRadarLiveDataFields`
+ * and `useComparisonData(period, true)` in the share panel and drawer.
  */
-export interface ShareRenderLiveData {
-  radarPlotData: VerticalParallelLineData[]
-  radarBaseline: VerticalParallelLineData | null
-  radarAxisRange: Record<string, { min: number; max: number }>
-  radarLineColorByScenario: Map<string, string>
-}
+export type ShareRenderLiveData = ShareRadarLiveDataFields
+export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/utils/shareRadarLiveData"
 
 /**
  * Render a ShareItem using the appropriate card component. Used by
@@ -340,7 +343,8 @@ function renderShareItemBody(
     }
   >,
   allChartData: Record<string, Record<string, unknown> | undefined>,
-  liveData: ShareRenderLiveData,
+  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
+  getThemeForScenario: (id: string) => string,
   onNoteChange?: (id: string, note: string) => void,
 ): React.ReactNode {
   if (item.type === "barChart") {
@@ -379,9 +383,11 @@ function renderShareItemBody(
     const definitions = item.scenarioIds.map(
       (id) => scenarioLookup.get(id)?.definition ?? "",
     )
+    const radarLive =
+      radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
     const liveChart = item.cachedImageDataUrl
       ? undefined
-      : renderRadarLiveChart(item, liveData)
+      : renderRadarLiveChart(item, radarLive, getThemeForScenario)
     return (
       <ShareRadarCard
         scenarioNames={names}
@@ -389,6 +395,7 @@ function renderShareItemBody(
         scenarioColors={item.scenarioColors}
         hydroclimate={item.hydroclimate}
         showRange={item.showRange}
+        showTierZones={item.showTierZones !== false}
         highlightBaseline={item.highlightBaseline}
         showDotsOnly={item.showDotsOnly}
         cachedImageDataUrl={item.cachedImageDataUrl}
@@ -506,7 +513,8 @@ function renderShareItemBody(
  */
 function renderRadarLiveChart(
   item: Extract<ShareItem, { type: "radar" }>,
-  liveData: ShareRenderLiveData,
+  liveData: ShareRadarLiveDataFields,
+  getThemeForScenario: (id: string) => string,
 ): React.ReactNode {
   const idSet = new Set(item.scenarioIds)
   const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
@@ -524,16 +532,24 @@ function renderRadarLiveChart(
     return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
   })
 
+  const scenarioThemes: Record<string, string> = {}
+  for (const id of item.scenarioIds) {
+    scenarioThemes[id] = getThemeForScenario(id) ?? "unthemed"
+  }
+
   return (
     <ShareRadarLiveChart
       data={orderedFiltered}
       axes={axesDisplay}
       lineColors={lineColors}
+      scenarioThemes={scenarioThemes}
       baselineData={liveData.radarBaseline}
       axisRange={liveData.radarAxisRange}
-      showRange={item.showRange}
+      showRadarRange={item.showRange}
+      showTierZones={item.showTierZones !== false}
       highlightBaseline={item.highlightBaseline}
       showDotsOnly={item.showDotsOnly}
+      morphGeneration={liveData.morphGeneration}
     />
   )
 }
@@ -581,7 +597,8 @@ function TrayCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
-  liveData,
+  radarLiveByHydro,
+  getThemeForScenario,
 }: {
   item: ShareItem
   isInStory: boolean
@@ -597,7 +614,8 @@ function TrayCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
-  liveData: ShareRenderLiveData
+  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
+  getThemeForScenario: (id: string) => string
 }) {
   const theme = useTheme()
 
@@ -607,7 +625,8 @@ function TrayCard({
       outcomeNames,
       scenarioLookup,
       allChartData,
-      liveData,
+      radarLiveByHydro,
+      getThemeForScenario,
     )
 
   return (
@@ -674,7 +693,8 @@ function StoryCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
-  liveData,
+  radarLiveByHydro,
+  getThemeForScenario,
 }: {
   item: ShareItem
   onRemoveFromStory: (id: string) => void
@@ -693,7 +713,8 @@ function StoryCard({
     }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
-  liveData: ShareRenderLiveData
+  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
+  getThemeForScenario: (id: string) => string
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -750,7 +771,8 @@ function StoryCard({
         outcomeNames,
         scenarioLookup,
         allChartData,
-        liveData,
+        radarLiveByHydro,
+        getThemeForScenario,
         onNoteChange,
       )}
     </Box>
@@ -902,28 +924,24 @@ export default function SharePanel() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
+  const { getThemeForScenario } = useScenarioList()
 
-  // Live radar data sourced from the same SWR-cached tier fetch as the
-  // Explore radar panel. Used to rehydrate radar thumbnails for share
-  // items that arrived without a cached PNG (URL loads, new browsers).
-  const comparisonData = useComparisonData()
-  const radarLiveData = useMemo<ShareRenderLiveData>(() => {
-    const lineColorByScenario = new Map<string, string>()
-    comparisonData.scenarios.forEach((s) => {
-      lineColorByScenario.set(s.id, s.color)
-    })
-    return {
-      radarPlotData: comparisonData.data,
-      radarBaseline: comparisonData.baselineScenario,
-      radarAxisRange: comparisonData.axisRange,
-      radarLineColorByScenario: lineColorByScenario,
-    }
-  }, [
-    comparisonData.data,
-    comparisonData.baselineScenario,
-    comparisonData.axisRange,
-    comparisonData.scenarios,
-  ])
+  // One `useComparisonData(period, true)` per explore hydro so share
+  // items use `item.hydroclimate`, with full parallel rows (not
+  // showOnlyChosen-filtered) for URL / mixed-tray rehydration.
+  const compHistorical = useComparisonData("historical", true)
+  const compCc50 = useComparisonData("cc50", true)
+  const compCc95 = useComparisonData("cc95", true)
+
+  const radarLiveByHydro = useMemo(
+    () =>
+      ({
+        historical: buildShareRadarLiveDataFields(compHistorical),
+        cc50: buildShareRadarLiveDataFields(compCc50),
+        cc95: buildShareRadarLiveDataFields(compCc95),
+      }) satisfies Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
+    [compHistorical, compCc50, compCc95],
+  )
 
   // Rehydrate cachedChartData for bar chart items restored from localStorage
   useEffect(() => {
@@ -1183,7 +1201,8 @@ export default function SharePanel() {
                 Record<string, unknown> | undefined
               >
             }
-            liveData={radarLiveData}
+            radarLiveByHydro={radarLiveByHydro}
+            getThemeForScenario={getThemeForScenario}
           />
         ))}
       </Box>
@@ -1251,7 +1270,8 @@ export default function SharePanel() {
                           Record<string, unknown> | undefined
                         >
                       }
-                      liveData={radarLiveData}
+                      radarLiveByHydro={radarLiveByHydro}
+                      getThemeForScenario={getThemeForScenario}
                     />
                   ))}
                 </Box>
@@ -1370,11 +1390,25 @@ export default function SharePanel() {
               variant="outlined"
               size="small"
               disabled
-              startIcon={<icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />}
+              startIcon={
+                <icons.PictureAsPdf
+                  sx={{
+                    fontSize: "0.875rem",
+                    color: theme.palette.action.disabled,
+                  }}
+                />
+              }
               sx={{
                 textTransform: "none",
-                color: theme.palette.text.secondary,
-                borderColor: theme.palette.divider,
+                opacity: 0.45,
+                color: theme.palette.action.disabled,
+                borderColor: theme.palette.action.disabled,
+                pointerEvents: "none",
+                "&.Mui-disabled": {
+                  opacity: 0.45,
+                  color: theme.palette.action.disabled,
+                  borderColor: theme.palette.action.disabled,
+                },
               }}
             >
               Download PDF

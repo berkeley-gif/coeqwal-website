@@ -14,6 +14,7 @@ interface ShareRadarCardProps {
   scenarioColors?: string[]
   hydroclimate?: string
   showRange: boolean
+  showTierZones?: boolean
   highlightBaseline: boolean
   showDotsOnly: boolean
   cachedImageDataUrl?: string
@@ -33,6 +34,7 @@ export default function ShareRadarCard({
   scenarioColors,
   hydroclimate,
   showRange,
+  showTierZones = true,
   highlightBaseline,
   showDotsOnly,
   cachedImageDataUrl,
@@ -52,6 +54,7 @@ export default function ShareRadarCard({
 
   const toggleLabels: string[] = []
   if (showRange) toggleLabels.push("Range shown")
+  if (showTierZones === false) toggleLabels.push("Tier bands off")
   if (highlightBaseline) toggleLabels.push("Baseline highlighted")
   if (showDotsOnly) toggleLabels.push("Dots only")
 

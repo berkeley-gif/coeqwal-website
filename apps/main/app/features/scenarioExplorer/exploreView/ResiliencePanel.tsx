@@ -2436,37 +2436,41 @@ export default function ResiliencePanel({
   // resolves to `handleResilienceTileSnapshot` in `ScenarioExplorer`.
   const renderTileShareAction = useMemo(() => {
     if (!onTileShare) return undefined
-    return (tile: ResilienceSmallMultiplesTile) => (
-      <Box
-        component="button"
-        type="button"
-        aria-label={`Save snapshot of ${tile.title}`}
-        title="Save snapshot of this tile"
-        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-          e.stopPropagation()
-          onTileShare(tile.id)
-        }}
-        sx={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 22,
-          height: 22,
-          padding: 0,
-          borderRadius: "4px",
-          border: "none",
-          background: "transparent",
-          color: theme.palette.grey[600],
-          cursor: "pointer",
-          "&:hover": {
-            color: theme.palette.blue.bright,
-            backgroundColor: theme.palette.interaction.selectedBackground,
-          },
-        }}
-      >
-        <icons.IosShare sx={{ fontSize: "0.875rem" }} />
-      </Box>
-    )
+    function ResilienceTileShareButton(tile: ResilienceSmallMultiplesTile) {
+      return (
+        <Box
+          component="button"
+          type="button"
+          aria-label={`Save snapshot of ${tile.title}`}
+          title="Save snapshot of this tile"
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation()
+            onTileShare(tile.id)
+          }}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 22,
+            height: 22,
+            padding: 0,
+            borderRadius: "4px",
+            border: "none",
+            background: "transparent",
+            color: theme.palette.grey[600],
+            cursor: "pointer",
+            "&:hover": {
+              color: theme.palette.blue.bright,
+              backgroundColor: theme.palette.interaction.selectedBackground,
+            },
+          }}
+        >
+          <icons.IosShare sx={{ fontSize: "0.875rem" }} />
+        </Box>
+      )
+    }
+    ResilienceTileShareButton.displayName = "ResilienceTileShareButton"
+    return ResilienceTileShareButton
   }, [onTileShare, theme])
 
   // Render states
