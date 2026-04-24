@@ -93,15 +93,12 @@ function calculateMultiPolygonCentroid(
   return calculatePolygonCentroid(largestPolygon)
 }
 
-/**
- * Get the centroid for a polygon feature from Mapbox
- */
-function getPolygonCentroidFromMapbox(
+function getPolygonCentroidNameFromMapbox(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   map: any,
   outcomeCode: string,
   locationId: string,
-): [number, number] | null {
+): { coords: [number, number]; name: string } | null {
   const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
 
   // Only works for polygon layers
@@ -142,12 +139,23 @@ function getPolygonCentroidFromMapbox(
     const feature = features[0]
     const geometry = feature.geometry
 
+    const resolvedName =
+      feature.properties?.Mod_Name ||
+      feature.properties?.Urb_Name ||
+      feature.properties?.Sub_Name
+
     if (geometry.type === "Polygon" && geometry.coordinates) {
-      return calculatePolygonCentroid(geometry.coordinates as number[][][])
+      return {
+        coords: calculatePolygonCentroid(geometry.coordinates as number[][][]),
+        name: resolvedName,
+      }
     } else if (geometry.type === "MultiPolygon" && geometry.coordinates) {
-      return calculateMultiPolygonCentroid(
-        geometry.coordinates as number[][][][],
-      )
+      return {
+        coords: calculateMultiPolygonCentroid(
+          geometry.coordinates as number[][][][],
+        ),
+        name: resolvedName,
+      }
     }
 
     return null
@@ -481,7 +489,6 @@ export default function EquityPanel() {
       // Create marker elements for each location
       const markerElements = objectivesToShow.map((obj) => {
         // Get tier color and shape based on comparison mode
-        let markerColor: string
         let isTriangle = false
         let triangleDirection: "up" | "down" = "up"
 
@@ -507,17 +514,22 @@ export default function EquityPanel() {
           // markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4] || "#999"
           isTriangle = false
         }
-        markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
+        const markerColor = tierColors[obj.tierLevel as 1 | 2 | 3 | 4]
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
+        let name: string | null = null
         if (obj.tierCode && map) {
           // Try to get centroid from polygon layer
-          coords = getPolygonCentroidFromMapbox(
+          const result = getPolygonCentroidNameFromMapbox(
             map,
             obj.tierCode,
             obj.locationId,
           )
+          if (result) {
+            coords = result.coords
+            name = result.name
+          }
         }
 
         // Fallback to hardcoded coordinates if polygon centroid not available
@@ -544,8 +556,20 @@ export default function EquityPanel() {
                 fontSize: "15.5px",
               }}
             >
-              {obj.locationName}
+              {name || obj.locationName}
             </Box>
+            {name && (
+              <Box
+                sx={{
+                  fontWeight: 400,
+                  mb: 0.5,
+                  color: "#718096",
+                  fontSize: "11px",
+                }}
+              >
+                {obj.locationName}
+              </Box>
+            )}
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
               {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
                 obj.tierCode}
@@ -606,8 +630,20 @@ export default function EquityPanel() {
                 fontSize: "15.5px",
               }}
             >
-              {obj.locationName}
+              {name || obj.locationName}
             </Box>
+            {name && (
+              <Box
+                sx={{
+                  fontWeight: 400,
+                  mb: 0.5,
+                  color: "#718096",
+                  fontSize: "11px",
+                }}
+              >
+                {obj.locationName}
+              </Box>
+            )}
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
               {(obj.tierCode && OUTCOME_NAMES[obj.tierCode as OutcomeCode]) ||
                 obj.tierCode}
