@@ -25,7 +25,7 @@
  * because its mental model differs from the 3-axis cube.
  */
 
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Box,
   Divider,
@@ -71,15 +71,15 @@ interface ResilienceControlsProps {
   onChange: (next: Partial<ResilienceControlsState>) => void
 }
 
-// User-facing labels used inside the pivot popover's option list.
-// These describe the layout in a single plain-English phrase; the
-// sentence header builds richer phrases on top of them (see
-// `pivotLabel` below).
+// User-facing labels for the dimension chooser (second phrase in the
+// sentence header). Pairs with `LAYOUT_LABEL` below; together they say
+// e.g. "Showing small multiples, per scenario" or "Showing one
+// combined chart, as an aggregate".
 const PIVOT_LABEL: Record<ResilienceView, string> = {
-  scenario: "one chart per scenario",
-  outcome: "one chart per outcome",
-  hydroclimate: "one chart per climate future",
-  aggregate: "everything combined",
+  scenario: "per scenario",
+  outcome: "per outcome",
+  hydroclimate: "per climate future",
+  aggregate: "as an aggregate",
   quadrant: "leverage",
 }
 
@@ -89,6 +89,19 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
   "hydroclimate",
   "aggregate",
 ]
+
+// First-phrase chooser. Defines whether the chart renders as a grid of
+// small tiles or as a single merged chart; the "aggregate" dimension
+// inherently implies combined and co-moves when the user picks small
+// multiples from an aggregate state (see `handleLayoutChange`).
+type LayoutMode = "small_multiples" | "combined"
+
+const LAYOUT_LABEL: Record<LayoutMode, string> = {
+  small_multiples: "small multiples",
+  combined: "one combined chart",
+}
+
+const LAYOUT_ORDER: readonly LayoutMode[] = ["small_multiples", "combined"]
 
 // Labels for the "averaged across X" chip row inside the pivot
 // popover, and for the sentence header when in aggregate mode.
@@ -449,6 +462,28 @@ export default function ResilienceControls({
     [view, cellEncoding, onChange],
   )
 
+  // The "effective" layout the first-phrase chooser reflects is
+  // derived further down (after count declarations) because the
+  // combined option is conditionally hidden for degenerate pivot
+  // selections. Aggregate always resolves to combined; see
+  // `effectiveLayout` below.
+  const handleLayoutChange = useCallback(
+    (next: LayoutMode) => {
+      const currentLayout: LayoutMode =
+        view === "aggregate" ? "combined" : scenarioLayout
+      if (next === currentLayout) return
+      // Picking small multiples while the dimension is aggregate is
+      // incoherent (aggregate has no per-unit tile). Switch to the
+      // per-scenario pivot, which is the default non-aggregate shape.
+      if (next === "small_multiples" && view === "aggregate") {
+        onChange({ view: "scenario", scenarioLayout: "small_multiples" })
+        return
+      }
+      onChange({ scenarioLayout: next })
+    },
+    [view, scenarioLayout, onChange],
+  )
+
   const handleAggregateOverChange = useCallback(
     (next: AggregateOver) => {
       if (aggregateOver === next) return
@@ -563,6 +598,7 @@ export default function ResilienceControls({
   )
   const [outcomesAnchor, setOutcomesAnchor] = useState<HTMLElement | null>(null)
   const [climatesAnchor, setClimatesAnchor] = useState<HTMLElement | null>(null)
+  const [layoutAnchor, setLayoutAnchor] = useState<HTMLElement | null>(null)
   const [pivotAnchor, setPivotAnchor] = useState<HTMLElement | null>(null)
 
   const isQuadrant = view === "quadrant"
@@ -593,27 +629,58 @@ export default function ResilienceControls({
     : selectedHydroclimates.size === 1
       ? "1 climate future"
       : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climate futures`
-  const pivotLabel = (() => {
-    if (isAggregate) {
-      return `one combined chart, ${AGGREGATE_OVER_LABEL[aggregateOver]}`
+
+  // Combined is only visually meaningful when the pivot dimension
+  // (grouped column headers) has 3+ items AND the secondary axis
+  // (sub-columns inside each group) has 2+ items. At 1-2 pivot items
+  // the grouped chart is indistinguishable from small multiples
+  // placed side-by-side, and at 1 secondary item the grouped header
+  // is overhead over a single column. When combined is unavailable
+  // the layout chooser hides it and any stored `scenarioLayout:
+  // "combined"` is normalized to `small_multiples` (effect below).
+  // Aggregate view is exempt: it is always a single combined chart
+  // by construction.
+  const effectiveScenarioCount =
+    scenarioCount > 0 ? scenarioCount : scenarioTotal
+  const combinedPivotCount: number = isAggregate
+    ? Number.POSITIVE_INFINITY
+    : view === "scenario"
+      ? effectiveScenarioCount
+      : view === "outcome"
+        ? outcomeCount
+        : view === "hydroclimate"
+          ? selectedHydroclimates.size
+          : Number.POSITIVE_INFINITY
+  const combinedSecondaryCount: number = isAggregate
+    ? Number.POSITIVE_INFINITY
+    : view === "scenario" || view === "outcome"
+      ? selectedHydroclimates.size
+      : view === "hydroclimate"
+        ? effectiveScenarioCount
+        : Number.POSITIVE_INFINITY
+  const combinedAvailable =
+    combinedPivotCount >= 3 && combinedSecondaryCount >= 2
+
+  const effectiveLayout: LayoutMode = isAggregate
+    ? "combined"
+    : combinedAvailable && scenarioLayout === "combined"
+      ? "combined"
+      : "small_multiples"
+
+  // Normalize the stored layout when combined becomes unavailable
+  // (e.g. the user unpicks scenarios down to 2). Skips the write when
+  // already small_multiples to avoid redundant store churn.
+  useEffect(() => {
+    if (isAggregate) return
+    if (!combinedAvailable && scenarioLayout === "combined") {
+      onChange({ scenarioLayout: "small_multiples" })
     }
-    if (view === "scenario") {
-      return scenarioLayout === "combined"
-        ? "all scenarios in one merged chart"
-        : "one chart per scenario"
-    }
-    if (view === "outcome") {
-      return scenarioLayout === "combined"
-        ? "all outcomes in one merged chart"
-        : "one chart per outcome"
-    }
-    if (view === "hydroclimate") {
-      return scenarioLayout === "combined"
-        ? "all climate futures in one merged chart"
-        : "one chart per climate future"
-    }
-    return PIVOT_LABEL[view]
-  })()
+  }, [isAggregate, combinedAvailable, scenarioLayout, onChange])
+
+  const layoutLabel = LAYOUT_LABEL[effectiveLayout]
+  const pivotLabel = isAggregate
+    ? AGGREGATE_OVER_LABEL[aggregateOver]
+    : PIVOT_LABEL[view]
 
   const cellSize = { fontSize: "0.8125rem" } as const
 
@@ -724,11 +791,20 @@ export default function ResilienceControls({
           Showing
         </Box>
         <PhraseButton
+          label={layoutLabel}
+          active={Boolean(layoutAnchor)}
+          onClick={(e) => setLayoutAnchor(e.currentTarget)}
+          ariaLabel={`Chart layout: ${layoutLabel}. Click to switch between small multiples and one combined chart.`}
+          tourAnchorRef={pivotAnchorRef}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
+          ,
+        </Box>
+        <PhraseButton
           label={pivotLabel}
           active={Boolean(pivotAnchor)}
           onClick={(e) => setPivotAnchor(e.currentTarget)}
-          ariaLabel={`Chart layout: ${pivotLabel}. Click to change.`}
-          tourAnchorRef={pivotAnchorRef}
+          ariaLabel={`Pivot dimension: ${pivotLabel}. Click to change what the chart is organized by.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
           , covering
@@ -1162,9 +1238,9 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="How to lay out the chart"
-          subtitle="Show one small chart per scenario, per outcome, or per climate future — or pull everything together into a single combined chart."
-          width={340}
+          title="What the chart is organized by"
+          subtitle="Pick the dimension each chart (or each row-group when combined) represents. Aggregate collapses that dimension entirely."
+          width={320}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
             {PIVOT_ORDER.map((mode) => {
@@ -1243,35 +1319,102 @@ export default function ResilienceControls({
               </Box>
             </>
           )}
-          {!isAggregate && (
-            <>
-              <Divider sx={{ borderColor: theme.palette.divider }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.7rem",
-                  color: theme.palette.grey[700],
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Show tiles as
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                <InlineToggleChip
-                  label="side-by-side tiles"
-                  active={scenarioLayout === "small_multiples"}
-                  onClick={() =>
-                    onChange({ scenarioLayout: "small_multiples" })
-                  }
-                />
-                <InlineToggleChip
-                  label="merged into one"
-                  active={scenarioLayout === "combined"}
-                  onClick={() => onChange({ scenarioLayout: "combined" })}
-                />
-              </Box>
-            </>
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Layout (small multiples vs. one combined chart). */}
+      <Popover
+        open={Boolean(layoutAnchor)}
+        anchorEl={layoutAnchor}
+        onClose={() => setLayoutAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="How the chart is laid out"
+          subtitle="Show a grid of side-by-side tiles, or merge everything into a single chart."
+          width={300}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            {LAYOUT_ORDER.map((mode) => {
+              const active = effectiveLayout === mode
+              const disabled =
+                (mode === "small_multiples" && isAggregate) ||
+                (mode === "combined" && !isAggregate && !combinedAvailable)
+              return (
+                <Box
+                  key={mode}
+                  component="button"
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => handleLayoutChange(mode)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    px: 0.75,
+                    py: 0.5,
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: disabled ? "default" : "pointer",
+                    textAlign: "left",
+                    background: active
+                      ? theme.palette.interaction.selectedBackground
+                      : "transparent",
+                    color: disabled
+                      ? theme.palette.grey[400]
+                      : active
+                        ? theme.palette.blue.bright
+                        : theme.palette.text.primary,
+                    fontSize: "0.8125rem",
+                    opacity: disabled ? 0.6 : 1,
+                    "&:hover:not(:disabled)": {
+                      background: theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  {active ? (
+                    <icons.RadioButtonChecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.blue.bright,
+                      }}
+                    />
+                  ) : (
+                    <icons.RadioButtonUnchecked
+                      sx={{
+                        fontSize: "1rem",
+                        color: theme.palette.grey[400],
+                      }}
+                    />
+                  )}
+                  {LAYOUT_LABEL[mode]}
+                </Box>
+              )
+            })}
+          </Box>
+          {!isAggregate && !combinedAvailable && (
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                fontSize: "0.72rem",
+                color: theme.palette.grey[600],
+                lineHeight: 1.35,
+                mt: 0.25,
+              }}
+            >
+              Combining into one chart only changes the picture with 3 or
+              more {view === "scenario"
+                ? "scenarios"
+                : view === "outcome"
+                  ? "outcomes"
+                  : "climate futures"}{" "}
+              and at least 2{" "}
+              {view === "hydroclimate" ? "scenarios" : "climate futures"}.
+              With fewer, it is visually identical to small multiples laid
+              side-by-side, so this option is hidden.
+            </Typography>
           )}
         </PopoverShell>
       </Popover>

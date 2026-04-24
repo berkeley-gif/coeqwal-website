@@ -20,6 +20,7 @@
 
 import React, { useMemo } from "react"
 import ResilienceHeatmap, {
+  RESILIENCE_HEATMAP_LEFT_GUTTER,
   type ResilienceAxisItem,
   type ResilienceCellRender,
   type ResilienceGlyphEntry,
@@ -223,15 +224,17 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
     }) => {
       const tileHeight = useMemo(() => {
         if (tileAspect === "tall") {
-          // Tall tiles: scenarios on Y (up to 24 rows). Scale with row count
-          // so 24-row tiles still breathe, but cap it so 6-row tiles aren't
-          // absurdly stubby.
+          // Tall tiles: scenarios on Y (up to 24 rows). Scale with row
+          // count so 24-row tiles still breathe, but cap it so 6-row
+          // tiles aren't absurdly stubby. The chrome accounts for the
+          // React tile header plus the inner chart margins (top pad +
+          // hydroclimate label band above the plot + bottom pad).
           const perRow = 16
-          const chrome = 96 // top margin + x-axis labels
-          return Math.max(320, chrome + rows.length * perRow)
+          const chrome = 88
+          return Math.max(300, chrome + rows.length * perRow)
         }
         // Wide tiles: outcomes on Y (19 rows). More uniform height.
-        return 360
+        return 340
       }, [tileAspect, rows.length])
 
       // Compute a display column count the CSS grid can respect. We let
@@ -391,12 +394,15 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             })}
           </div>
 
-          {/* One shared legend at the bottom of the trellis. */}
+          {/* One shared legend at the bottom of the trellis. Left-padded
+              by the tile's row-tick gutter so the legend's left edge
+              lines up with the leftmost heatmap column across all
+              tiles, rather than with the outer tile padding. */}
           <div
             style={{
               display: "flex",
               justifyContent: "flex-start",
-              padding: "4px 4px 0",
+              padding: `4px 4px 0 ${RESILIENCE_HEATMAP_LEFT_GUTTER}px`,
             }}
           >
             <SharedTierLegend

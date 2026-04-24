@@ -217,11 +217,28 @@ export interface ResilienceColumnGroup {
   span: number
 }
 
-const MARGIN = { top: 16, right: 24, bottom: 72, left: 200 }
+// Hydroclimate (column) labels render ABOVE the plot, so the top
+// margin owns the x-axis label band plus an optional column-group
+// header; the bottom margin is just a small pad plus (when present)
+// the shared tier legend. Left margin is sized for outcome row ticks;
+// right margin is a small pad unless a row marginal strip needs room
+// (extraRight is added dynamically).
+const MARGIN = { top: 16, right: 16, bottom: 16, left: 168 }
+/**
+ * Horizontal gutter between the tile's left edge and the first column
+ * of cells. Exported so the small-multiples wrapper can align its
+ * shared legend (and any other tile-level chrome) to the leftmost
+ * column across all tiles without re-deriving the band geometry.
+ */
+export const RESILIENCE_HEATMAP_LEFT_GUTTER = MARGIN.left
 const MARGINAL_BAND = 22
 const MARGINAL_GAP = 6
 const LEGEND_HEIGHT = 48
 const COLUMN_GROUP_BAND = 24
+// Reserve between the plot top and the nearest hydroclimate tick
+// label. Must cover `tickY` (18 within the x-axis group) plus enough
+// ascender space for text at font-size 11 without clipping.
+const X_AXIS_LABEL_RESERVE = 32
 const HATCH_ID = "resilience-unavailable-hatch"
 
 function clampTier(value: number): 1 | 2 | 3 | 4 {
@@ -683,23 +700,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           ? MARGINAL_BAND + MARGINAL_GAP
           : 0
 
-        // Reclaim legend space when the tile is embedded in small-multiples
-        // (the wrapper renders one shared legend outside), but keep enough
-        // room below the plot for the x-axis (hydroclimate) labels. The
-        // tick text is placed with dominant-baseline "hanging" at y = 18
-        // (or + group band) at font-size 11, so labels extend to ~30px
-        // past the plot. A 40px reserve covers that plus a small safety
-        // pad so labels aren't clipped in small-multiples tiles. Reserve
-        // extra room for a grouped-column header band when columnGroups
-        // is set.
+        // Hydroclimate labels live above the plot, so the top margin
+        // grows by X_AXIS_LABEL_RESERVE (plus the grouped-column header
+        // band, when columnGroups is set). The bottom margin holds the
+        // legend (when !hideLegend) plus a small base pad.
         const hasColumnGroups = !!columnGroups && columnGroups.length > 0
         const groupBand = hasColumnGroups ? COLUMN_GROUP_BAND : 0
-        const X_AXIS_LABEL_RESERVE = 40
+        const effectiveMarginTop =
+          MARGIN.top + X_AXIS_LABEL_RESERVE + groupBand
         const effectiveMarginBottom =
-          (hideLegend ? X_AXIS_LABEL_RESERVE : MARGIN.bottom) + groupBand
+          MARGIN.bottom + (hideLegend ? 0 : LEGEND_HEIGHT)
 
         const innerW = w - MARGIN.left - MARGIN.right - extraRight
-        const innerH = h - MARGIN.top - effectiveMarginBottom - extraBottom
+        const innerH =
+          h - effectiveMarginTop - effectiveMarginBottom - extraBottom
         if (innerW <= 0 || innerH <= 0) return
 
         // Diagonal-hatch pattern for unavailable cells.
@@ -727,7 +741,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
         const g = svg
           .append("g")
-          .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`)
+          .attr("transform", `translate(${MARGIN.left},${effectiveMarginTop})`)
 
         const xScale = scaleBand<string>()
           .domain(columns.map((c) => c.key))
@@ -1181,15 +1195,19 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
         })
 
-        // X axis (hydroclimates) — shifted down when the col marginal is shown.
-        const xAxisY =
-          innerH + (showMarginalColStrip ? MARGINAL_BAND + MARGINAL_GAP : 0)
+        // X axis (hydroclimates) — rendered ABOVE the plot. The xAxis
+        // group's local origin sits X_AXIS_LABEL_RESERVE (plus the
+        // grouped-header band, when present) above the plot top, so
+        // existing relative y offsets (tickY=18, group text y=14, rule
+        // y=30) land naturally above the plot with enough padding.
+        const xAxisY = -(X_AXIS_LABEL_RESERVE + groupBand)
         const xAxis = g
           .append("g")
           .attr("class", "resilience-x-axis")
           .attr("transform", `translate(0,${xAxisY})`)
         // Per-column tick labels (hydroclimate names). When column
-        // groups are present the ticks move down below the group band.
+        // groups are present the ticks sit below the group band so the
+        // reading order top-down is group → rule → tick → plot.
         const tickY = hasColumnGroups ? 18 + COLUMN_GROUP_BAND : 18
         columns.forEach((col) => {
           const cx = (xScale(col.key) ?? 0) + bandW / 2
@@ -1271,12 +1289,16 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         // small-multiples wrapper renders one shared legend outside).
         if (hideLegend) return
 
-        // Legend — varies by cellRender mode.
+        // Legend — varies by cellRender mode. Horizontal origin is the
+        // left edge of the first column cell (MARGIN.left + the band's
+        // outer-padding offset) so the legend visually lines up with the
+        // leftmost heatmap column, not with the row-tick gutter.
+        const firstColOffset = xScale(columns[0]?.key ?? "") ?? 0
         const legendG = svg
           .append("g")
           .attr(
             "transform",
-            `translate(${MARGIN.left}, ${MARGIN.top + innerH + extraBottom + LEGEND_HEIGHT - 4})`,
+            `translate(${MARGIN.left + firstColOffset}, ${effectiveMarginTop + innerH + extraBottom + LEGEND_HEIGHT - 4})`,
           )
 
         if (

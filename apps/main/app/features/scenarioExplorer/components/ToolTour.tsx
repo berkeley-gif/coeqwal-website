@@ -30,6 +30,7 @@ import { useScenarioExplorerStore } from "../store"
 import { TOUR_STEPS } from "../tour/content"
 import ListTourBarIllustration from "../tour/ListTourBarIllustration"
 import ListTourMapLegend from "../tour/ListTourMapLegend"
+import TourTierLegend from "../tour/TourTierLegend"
 import ListTourControlIllustration, {
   type ListTourControlVariant,
 } from "../tour/ListTourControlIllustration"
@@ -725,6 +726,9 @@ export default function ToolTour() {
           {step.illustration === "listMapLegend" ? <ListTourMapLegend /> : null}
           {step.illustration === "listBarTiers" ? (
             <ListTourBarIllustration />
+          ) : null}
+          {step.illustration === "resilienceTierLegend" ? (
+            <TourTierLegend title="Cell color legend" />
           ) : null}
           {step.illustration &&
           CONTROL_ILLUSTRATION_VARIANT[step.illustration] ? (

@@ -23,9 +23,8 @@ export const RESILIENCE_TOUR: TourStep[] = [
   {
     id: "resilience.hero",
     eyebrow: "start here",
-    title:
-      "The Resilience heatmap is a climate stress test of your shortlist",
-    body: "Your shortlist meets climate here. Each cell is a scenario read under one hydroclimate, colored by how that pairing performs. Arrange the chart, read the cells, and look for where performance bends, where it breaks, and where operations still matter.",
+    title: "Revealing climate stress",
+    body: "Each selected scenario is viewed as a grid of colored cells, one cell for each outcome and hydroclimate pairing, shaded by how that pairing performs. You can choose any pairwise combination of scenarios, outcomes, and hydroclimates to lay out the chart, with the third dimension splitting the view into small multiples. If no scenarios are selected, the chart falls back to an aggregate overview of the whole library, so the view is never blank.",
   },
 
   // Orientation + details for the sidebar (scenario library).
@@ -121,6 +120,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     title: "Each cell is one pairing",
     body: "A cell is a scenario under one hydroclimate. Its color is the performance tier; the number inside, when shown, is the continuous tier value behind that color. The X axis is always climate. The Y axis depends on the layout you chose above.",
     placement: "right-start",
+    illustration: "resilienceTierLegend",
   },
   {
     id: "resilience.step2.hoverClick",

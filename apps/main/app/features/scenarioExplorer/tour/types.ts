@@ -57,6 +57,7 @@ export interface TourStep {
     | "listSortButton"
     | "listCheckbox"
     | "listHydroclimate"
+    | "resilienceTierLegend"
 }
 
 export interface TourState {

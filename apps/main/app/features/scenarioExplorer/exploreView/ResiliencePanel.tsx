@@ -2442,10 +2442,21 @@ export default function ResiliencePanel({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Chart title + subject row removed: the sentence-header
-          control bar above the chart (see `ResilienceControls`) already
-          describes what the chart is showing, so rendering a second
-          title here just doubled the wording the user had to read. */}
+      {/* Panel-level title. Names the pivot (what the chart is) and
+          spells out the specific subject it exhibits (which scenarios /
+          outcomes / climates, or the aggregate framing). Kept
+          intentionally different in shape from the one-line sentence
+          header so the two don't read as duplicates: the sentence
+          describes how the user is currently configuring the chart;
+          the title describes what the chart IS. */}
+      <ResiliencePanelTitle
+        view={view}
+        scenarioLayout={scenarioLayout}
+        aggregateOver={aggregateOver}
+        scenarioCount={selectedScenarios.length}
+        outcomeCount={resilienceVisibleOutcomes.length}
+        climateCount={selectedHydroclimates.size}
+      />
 
       <Box
         sx={{
@@ -2648,21 +2659,7 @@ export default function ResiliencePanel({
                 }
               />
             ) : effectiveView === "scenario" ? (
-              <BrowseShell
-                chip={
-                  selectedScenarios.length > 0
-                    ? {
-                        label: `${selectedScenarios.length} scenario${
-                          selectedScenarios.length === 1 ? "" : "s"
-                        } picked, shown ${
-                          scenarioLayout === "combined"
-                            ? "together in one chart"
-                            : "side by side"
-                        }`,
-                      }
-                    : null
-                }
-              >
+              <BrowseShell>
                 {scenarioLayout === "combined" ? (
                   // Combined-layout keeps its own column groups (scenario
                   // header spanning HC sub-cols), so transpose is
@@ -3254,6 +3251,114 @@ function ExpandedTileView({
  * when they've pinned items while in show-all mode, and clicking it
  * fires the supplied `onClick` (typically flipping show-all off).
  */
+/**
+ * ResiliencePanelTitle - two-line header rendered at the top of the
+ * chart area.
+ *
+ * Line 1 (title) names the pivot in a short noun phrase, calling out
+ * the layout (side-by-side vs. combined) or the aggregate framing.
+ * Line 2 (subtitle) spells out the scope of the subject the chart
+ * exhibits (how many scenarios / outcomes / climate futures, or the
+ * aggregation axis). This is orthogonal to the sentence-header
+ * control bar above the chart, which narrates the current
+ * configuration: title = what the chart IS, sentence = how you are
+ * currently looking at it.
+ */
+function ResiliencePanelTitle({
+  view,
+  scenarioLayout,
+  aggregateOver,
+  scenarioCount,
+  outcomeCount,
+  climateCount,
+}: {
+  view: ResilienceView
+  scenarioLayout: "small_multiples" | "combined"
+  aggregateOver: AggregateOver
+  scenarioCount: number
+  outcomeCount: number
+  climateCount: number
+}) {
+  const theme = useTheme()
+
+  const layoutSuffix =
+    scenarioLayout === "combined" ? "combined in one chart" : "side by side"
+
+  let title: string
+  let subtitle: string
+
+  if (view === "quadrant") {
+    title = "Leverage"
+    subtitle = "Climate sensitivity against operational range"
+  } else if (view === "aggregate") {
+    const aggregateNoun: Record<AggregateOver, string> = {
+      scenarios: "scenarios",
+      outcomes: "outcomes",
+      hydroclimates: "climate futures",
+    }
+    title = "Aggregate across the library"
+    subtitle = `Averaged across ${aggregateNoun[aggregateOver]}`
+  } else {
+    const pivotNoun: Record<Exclude<ResilienceView, "aggregate" | "quadrant">, string> = {
+      scenario: "scenarios",
+      outcome: "outcomes",
+      hydroclimate: "climate futures",
+    }
+    title = `${capitalize(pivotNoun[view])} ${layoutSuffix}`
+    const scopeBits: string[] = []
+    if (scenarioCount > 0) {
+      scopeBits.push(
+        `${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`,
+      )
+    } else {
+      scopeBits.push("entire scenario library")
+    }
+    scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
+    scopeBits.push(
+      `${climateCount} climate future${climateCount === 1 ? "" : "s"}`,
+    )
+    subtitle = scopeBits.join(" · ")
+  }
+
+  return (
+    <Box
+      sx={{
+        px: theme.space.component.lg,
+        pt: theme.space.component.sm,
+        pb: theme.space.component.xs,
+      }}
+    >
+      <Typography
+        component="h2"
+        sx={{
+          m: 0,
+          fontSize: "1.0625rem",
+          fontWeight: 600,
+          lineHeight: 1.3,
+          color: theme.palette.text.primary,
+        }}
+      >
+        {title}
+      </Typography>
+      <Typography
+        component="div"
+        sx={{
+          mt: 0.25,
+          fontSize: "0.8125rem",
+          lineHeight: 1.4,
+          color: theme.palette.grey[700],
+        }}
+      >
+        {subtitle}
+      </Typography>
+    </Box>
+  )
+}
+
+function capitalize(s: string): string {
+  return s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : s
+}
+
 /**
  * Layout shell for the chart area. Stacks an optional curation chip
  * above the children so every view path (by-scenario gallery,
