@@ -902,6 +902,44 @@ export default function TierAnimationSection() {
     [scenarios],
   )
 
+  /* ── Beat 8 extra-hydroclimate columns ──
+   *
+   * The Beat 8 heatmap shows three columns: the primary (historical)
+   * `s0020` run plus the cc50 and cc95 climate-variant siblings. Resolve
+   * the variant short_codes by matching on `sibling_group` (same
+   * strategy, different climate) and fetch tier data for each so the
+   * columns can fade in with accurate per-outcome colors. Falls back
+   * gracefully (`null` scenarioId -> `useScenarioTiers` returns empty
+   * chartData) while the scenarios list is still loading. */
+  const s0020SiblingGroup = s0020Scenario?.sibling_group
+  const { cc50VariantId, cc95VariantId } = useMemo(() => {
+    if (!scenarios || !s0020SiblingGroup) {
+      return { cc50VariantId: null, cc95VariantId: null }
+    }
+    const siblings = scenarios.filter(
+      (s) => s.sibling_group === s0020SiblingGroup,
+    )
+    // Hydroclimate IDs from `HYDROCLIMATE_ID_MAP`: cc50=3, cc95=4. Use
+    // numeric `hydroclimate_id` (stable across deployments) rather than
+    // the newer `hydroclimate_short_code`, which may be null/absent on
+    // older API deployments.
+    return {
+      cc50VariantId:
+        siblings.find((s) => s.hydroclimate_id === 3)?.short_code ?? null,
+      cc95VariantId:
+        siblings.find((s) => s.hydroclimate_id === 4)?.short_code ?? null,
+    }
+  }, [scenarios, s0020SiblingGroup])
+  const { chartData: cc50ChartData } = useScenarioTiers(cc50VariantId)
+  const { chartData: cc95ChartData } = useScenarioTiers(cc95VariantId)
+  const heatmapExtraColumns = useMemo(
+    () => [
+      { label: "Moderate risk", tierChartData: cc50ChartData },
+      { label: "High risk", tierChartData: cc95ChartData },
+    ],
+    [cc50ChartData, cc95ChartData],
+  )
+
   useEffect(() => {
     if (encodingMode !== "bar") setSpotlightedTier(null)
   }, [encodingMode])
@@ -3077,6 +3115,7 @@ export default function TierAnimationSection() {
                 locationNameMap={locationNameMap}
                 encodingMode={isInteractive ? encodingMode : "distribution"}
                 tierChartData={tierChartData}
+                extraHydroclimateColumns={heatmapExtraColumns}
                 spotlightedTier={spotlightedTier}
                 onBarClick={
                   isInteractive
@@ -3129,6 +3168,7 @@ export default function TierAnimationSection() {
             outcomeMorphWindows={outcomeMorphWindows}
             onGlyphLayoutChange={handleGlyphLayoutChange}
             hideControls={prefersReducedMotion}
+            heatmapExtraColumnCount={heatmapExtraColumns.length}
           />
 
           {/* Retired: right-side pinned-location cards with dashed leader

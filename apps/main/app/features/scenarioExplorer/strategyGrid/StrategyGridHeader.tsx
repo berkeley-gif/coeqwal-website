@@ -205,6 +205,12 @@ function ColumnHeaders({
   // In full mode, column 4 is visible; in wrapped mode, it's not
   const isFullMode = layoutMode === "full"
 
+  // High-level orientation anchor for the list tour. Highlights the
+  // entire search + chips region so the user understands "everything
+  // in this band tunes the scenario list" before drilling into the
+  // individual chips.
+  const scenarioAreaAnchorRef = useTourAnchor("list.scenarioArea")
+
   return (
     <>
       {/* Columns 1-3: Search + visibility chips.
@@ -212,6 +218,7 @@ function ColumnHeaders({
           Wrapped mode: spans all columns, adds "Scenario library" title inline,
           with bottom padding to visually center against the parent's top padding. */}
       <Box
+        ref={scenarioAreaAnchorRef}
         sx={{
           gridColumn: isFullMode ? "1 / 4" : "1 / -1",
           gridRow: isFullMode ? "1 / 3" : undefined,

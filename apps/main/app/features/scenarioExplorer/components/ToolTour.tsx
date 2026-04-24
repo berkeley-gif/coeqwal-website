@@ -30,6 +30,9 @@ import { useScenarioExplorerStore } from "../store"
 import { TOUR_STEPS } from "../tour/content"
 import ListTourBarIllustration from "../tour/ListTourBarIllustration"
 import ListTourMapLegend from "../tour/ListTourMapLegend"
+import ListTourControlIllustration, {
+  type ListTourControlVariant,
+} from "../tour/ListTourControlIllustration"
 import { useTourAnchorResolver } from "../tour/TourAnchorContext"
 import { mapActions, useMapStore } from "../../map/store"
 import type { OutcomeVisualization } from "../../map/store"
@@ -38,6 +41,19 @@ import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
 
 const INFO_ICON_PLACEHOLDER = "{{infoIcon}}"
+
+// Map from `TourStep.illustration` keys that render a specific
+// control sample to the `ListTourControlIllustration` variant.
+// Kept as a string-indexed map so the check site can safely look up
+// any illustration string (including the non-control keys) without
+// branching per variant.
+const CONTROL_ILLUSTRATION_VARIANT: Record<string, ListTourControlVariant> = {
+  listSearch: "search",
+  listChips: "chips",
+  listSortButton: "sortButton",
+  listCheckbox: "checkbox",
+  listHydroclimate: "hydroclimate",
+}
 
 function TourBodyContent({
   body,
@@ -91,8 +107,19 @@ export default function ToolTour() {
   const endTour = useScenarioExplorerStore((s) => s.endTour)
   const setTourStep = useScenarioExplorerStore((s) => s.setTourStep)
   const setShowMap = useScenarioExplorerStore((s) => s.setShowMap)
+  // Subscribe to showMap so the honest-click effect can wait until
+  // the map is actually visible. Critical: UnifiedToolLayout has a
+  // useEffect([showMap]) whose cleanup calls
+  // mapActions.clearOutcomeVisualization(). When showMap flips
+  // false to true, that cleanup wipes any visualization we set
+  // before the transition. Gating our set on showMap === true
+  // ensures we run AFTER UnifiedToolLayout has settled.
+  const showMap = useScenarioExplorerStore((s) => s.showMap)
   const setShowKeyOperations = useScenarioExplorerStore(
     (s) => s.setShowKeyOperations,
+  )
+  const setShowAxisSelector = useScenarioExplorerStore(
+    (s) => s.setShowAxisSelector,
   )
 
   const { resolve, version } = useTourAnchorResolver()
@@ -228,6 +255,33 @@ export default function ToolTour() {
     }
   }, [step, setShowKeyOperations])
 
+  // Temporarily slide the axis chooser panel open while the radar
+  // axis-chooser tour step is active, then restore the user's
+  // previous state on exit. Same ref pattern as opsDemoRef so the
+  // snapshot effect does not re-subscribe to the slice it mutates.
+  const axisSelectorDemoRef = useRef<{
+    prevShowAxisSelector: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    if (!step) return
+    if (step.id !== "radar.step1.axisChooser") return
+    const prevShowAxisSelector =
+      useScenarioExplorerStore.getState().showAxisSelector
+    axisSelectorDemoRef.current = { prevShowAxisSelector }
+    if (!prevShowAxisSelector) {
+      setShowAxisSelector(true)
+    }
+    return () => {
+      const snap = axisSelectorDemoRef.current
+      axisSelectorDemoRef.current = null
+      if (!snap) return
+      if (!snap.prevShowAxisSelector) {
+        setShowAxisSelector(false)
+      }
+    }
+  }, [step, setShowAxisSelector])
+
   useEffect(() => {
     if (!step) return
     if (step.id !== "list.step4.map") return
@@ -264,26 +318,49 @@ export default function ToolTour() {
     }
   }, [step, setShowMap])
 
-  // Fire the honest click directly on the map store. We do not gate on
-  // `isMapVisible`: the store update is cheap, and the layer renderer
-  // subscribes to `activeOutcomeVisualization`, so the layer paints as
-  // soon as the map pane mounts (which the showMap effect above opens).
+  // Fire the honest click directly on the map store, mirroring what a
+  // real glyph click does (clear tooltips when the outcome changes,
+  // then set the active visualization).
+  //
+  // Two things make this tricky:
+  //   1. UnifiedToolLayout has `useEffect(..., [showMap])` whose
+  //      cleanup calls `clearOutcomeVisualization()`. When the tour
+  //      flips showMap from false to true, that cleanup wipes any
+  //      visualization we set BEFORE the transition completes. We
+  //      dodge it by gating on `showMap === true` so the effect only
+  //      runs after the transition has settled.
+  //   2. Sibling-component effect ordering on an update is not
+  //      something we want to hinge correctness on, so we defer the
+  //      actual set by one animation frame. That guarantees we run
+  //      after UnifiedToolLayout's cleanup+effect pair for this
+  //      render, no matter the tree order.
   useEffect(() => {
     if (!step) return
     if (step.id !== "list.step4.map") return
+    if (!showMap) return
     if (mapDemoRef.current?.demoFired) return
-    const el = resolve("list.outcome.barChart")
-    if (!el) return
-    const scenarioId = el.dataset.tourScenarioId
-    const outcomeCode = el.dataset.tourOutcomeCode
-    if (!scenarioId || !outcomeCode) return
-    const mapping = buildIdMapping(hydroclimate)
-    const resolvedId = mapping[scenarioId] ?? scenarioId
-    mapActions.setOutcomeVisualization(outcomeCode, resolvedId, scenarioId)
-    if (mapDemoRef.current) {
-      mapDemoRef.current.demoFired = true
-    }
-  }, [step, resolve, version, buildIdMapping, hydroclimate])
+
+    const raf = window.requestAnimationFrame(() => {
+      if (mapDemoRef.current?.demoFired) return
+      const el = resolve("list.outcome.barChart")
+      if (!el) return
+      const scenarioId = el.dataset.tourScenarioId
+      const outcomeCode = el.dataset.tourOutcomeCode
+      if (!scenarioId || !outcomeCode) return
+      const mapping = buildIdMapping(hydroclimate)
+      const resolvedId = mapping[scenarioId] ?? scenarioId
+      const current = useMapStore.getState().activeOutcomeVisualization
+      if (!current || current.outcomeCode !== outcomeCode) {
+        mapActions.clearMapTooltips()
+      }
+      mapActions.setOutcomeVisualization(outcomeCode, resolvedId, scenarioId)
+      if (mapDemoRef.current) {
+        mapDemoRef.current.demoFired = true
+      }
+    })
+
+    return () => window.cancelAnimationFrame(raf)
+  }, [step, showMap, resolve, version, buildIdMapping, hydroclimate])
 
   const isFirst = tourStep === 0
   const isLast = steps.length > 0 && tourStep === steps.length - 1
@@ -530,6 +607,12 @@ export default function ToolTour() {
           {step.illustration === "listMapLegend" ? <ListTourMapLegend /> : null}
           {step.illustration === "listBarTiers" ? (
             <ListTourBarIllustration />
+          ) : null}
+          {step.illustration &&
+          CONTROL_ILLUSTRATION_VARIANT[step.illustration] ? (
+            <ListTourControlIllustration
+              variant={CONTROL_ILLUSTRATION_VARIANT[step.illustration]!}
+            />
           ) : null}
           {hasTourBody ? (
             <Typography

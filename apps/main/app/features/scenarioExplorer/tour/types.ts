@@ -34,7 +34,14 @@ export interface TourStep {
    * raw binary assets where possible; extend the switch in ToolTour when
    * adding new keys.
    */
-  illustration?: "listBarTiers" | "listMapLegend"
+  illustration?:
+    | "listBarTiers"
+    | "listMapLegend"
+    | "listSearch"
+    | "listChips"
+    | "listSortButton"
+    | "listCheckbox"
+    | "listHydroclimate"
 }
 
 export interface TourState {

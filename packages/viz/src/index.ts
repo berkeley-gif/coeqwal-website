@@ -107,6 +107,8 @@ export {
   mergeRadarAxisLabelDetailStyle,
   DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE,
   radarAxisDetailBottomModeForIndex,
+  RADAR_TIER_LABELS,
+  RADAR_TIER_SWATCH_COLORS,
 } from "./components/radarAxisLabelDetail"
 
 export { default as TierHeatmap } from "./components/TierHeatmap"

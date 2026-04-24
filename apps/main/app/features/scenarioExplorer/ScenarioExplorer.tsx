@@ -318,10 +318,17 @@ function ScenarioExplorerInner() {
     })
   }, [hasSelectedScenarios])
 
+  // High-level orientation anchor for the radar tour: the entire
+  // chart-controls row, so the user sees "these are the chart's
+  // controls" before we step through each chip. The callback ref is
+  // stable across renders (comes from useTourAnchor), so the useMemo
+  // below does not need to depend on it.
+  const radarChartToolbarRef = useTourAnchor("radar.chartToolbar")
+
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
-        <ChartControlsBar>
+        <ChartControlsBar ref={radarChartToolbarRef}>
           <RadarTourAnchor anchorId="radar.axisChooser">
             <InlineToggleChip
               label="choose outcome axes"
@@ -329,11 +336,13 @@ function ScenarioExplorerInner() {
               onClick={() => setShowAxisSelector(!showAxisSelector)}
             />
           </RadarTourAnchor>
-          <InlineToggleChip
-            label="show all scenarios"
-            active={radarShowAll}
-            onClick={() => setRadarShowAll(!radarShowAll)}
-          />
+          <RadarTourAnchor anchorId="radar.showAll">
+            <InlineToggleChip
+              label="show all scenarios"
+              active={radarShowAll}
+              onClick={() => setRadarShowAll(!radarShowAll)}
+            />
+          </RadarTourAnchor>
           <InlineToggleChip
             label="dots only"
             active={showDotsOnly}
@@ -351,6 +360,7 @@ function ScenarioExplorerInner() {
               onClick={() => setShowRadarRange(!showRadarRange)}
             />
           </RadarTourAnchor>
+          <RadarTourAnchor anchorId="radar.capture">
           <Box
             component="button"
             type="button"
@@ -393,6 +403,7 @@ function ScenarioExplorerInner() {
             <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
             capture view
           </Box>
+          </RadarTourAnchor>
         </ChartControlsBar>
       )
     }

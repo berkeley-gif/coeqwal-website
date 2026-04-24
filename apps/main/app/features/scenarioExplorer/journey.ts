@@ -30,7 +30,7 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   radar: {
     mode: "radar",
     purpose:
-      "Compare the scenarios you selected across all the outcomes that matter to you in one view.",
+      "Compare the scenarios you selected across all the outcome in one view.",
     nextMode: "equity",
     nextLabel: "Inspect by location",
     nextRationale:

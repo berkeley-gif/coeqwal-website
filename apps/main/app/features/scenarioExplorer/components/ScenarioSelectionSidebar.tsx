@@ -13,7 +13,7 @@
  * with the same shared ordering used by ListView.
  */
 
-import React, { useEffect, useMemo, useRef } from "react"
+import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import { useScenarioExplorerStore } from "../store"
@@ -140,9 +140,25 @@ export default function ScenarioSelectionSidebar({
   }, [orderedScenarios, themeSubheaderMode])
 
   // The sidebar is a tour anchor for the resilience tour ("sidebar
-  // drives the small multiples"). The radar and equity tours do not
-  // step through it, so a single shared id is fine here.
-  const sidebarAnchorRef = useTourAnchor("resilience.sidebar")
+  // drives the small multiples"). The radar tour also highlights the
+  // sidebar as a high-level orientation step; merge both ids onto the
+  // same DOM node so either registry resolves to the same outer Box.
+  // Equity does not step through it.
+  const resilienceSidebarAnchorRef = useTourAnchor("resilience.sidebar")
+  const radarSidebarAnchorRef = useTourAnchor("radar.sidebar")
+  const sidebarAnchorRef = useCallback(
+    (el: HTMLElement | null) => {
+      resilienceSidebarAnchorRef(el)
+      if (exploreMode === "radar") radarSidebarAnchorRef(el)
+    },
+    [resilienceSidebarAnchorRef, radarSidebarAnchorRef, exploreMode],
+  )
+
+  // Separate anchor for the "search + visibility chips" strip inside
+  // the sidebar. The radar tour uses it for a single brief review of
+  // the scenario-list controls (the list view tour covers each chip
+  // individually).
+  const sidebarControlsAnchorRef = useTourAnchor("radar.sidebarControls")
 
   return (
     <Box
@@ -183,6 +199,7 @@ export default function ScenarioSelectionSidebar({
 
       {/* Search + visibility chips */}
       <Box
+        ref={sidebarControlsAnchorRef}
         sx={{
           flexShrink: 0,
           display: "flex",

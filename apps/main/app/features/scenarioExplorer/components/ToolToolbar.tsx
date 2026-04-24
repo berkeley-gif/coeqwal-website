@@ -116,6 +116,11 @@ export default function ToolToolbar({
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
   const listMapTourRef = useTourAnchor("list.toolbar.map")
   const listClimateTourRef = useTourAnchor("list.toolbar.climate")
+  // High-level orientation anchor for the list tour: the whole strip
+  // of view controls (hydroclimate, map, etc.) on the right side of
+  // the toolbar. Registered only in list mode so it does not collide
+  // with the equivalent radar orientation (which uses ChartControlsBar).
+  const listViewAreaTourRef = useTourAnchor("list.viewArea")
   // One DOM node serves both the Radar climate-chip tour and the new
   // List hydroclimate tour step. Merge callback refs so both registries
   // resolve to the same element without re-wrapping the chooser.
@@ -344,6 +349,7 @@ export default function ToolToolbar({
           )}
 
           <Box
+            ref={listViewAreaTourRef}
             sx={{
               gridColumn: "1 / -1",
               pl: 0,

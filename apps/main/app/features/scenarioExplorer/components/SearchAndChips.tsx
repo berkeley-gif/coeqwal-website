@@ -170,13 +170,6 @@ export default function SearchAndChips({
               }
             />
           </Box>
-          <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
-            <ToggleChip
-              label="key operations"
-              active={showKeyOperations}
-              onClick={() => setShowKeyOperations(!showKeyOperations)}
-            />
-          </Box>
           <Box ref={showOnlyChosenAnchorRef} sx={{ display: "inline-flex" }}>
             <ToggleChip
               label="selected only"
@@ -189,6 +182,13 @@ export default function SearchAndChips({
               label="group by theme"
               active={groupByTheme}
               onClick={() => setGroupByTheme(!groupByTheme)}
+            />
+          </Box>
+          <Box ref={keyOperationsChipAnchorRef} sx={{ display: "inline-flex" }}>
+            <ToggleChip
+              label="key operations"
+              active={showKeyOperations}
+              onClick={() => setShowKeyOperations(!showKeyOperations)}
             />
           </Box>
         </Box>

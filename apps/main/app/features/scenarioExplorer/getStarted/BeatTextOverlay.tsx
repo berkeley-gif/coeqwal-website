@@ -38,6 +38,7 @@ import {
   BLOCK_EXIT_SEC,
   secondsToProgress,
 } from "./animationTiming"
+import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 
 /* ── Per-beat progress-fraction widths, derived from the seconds-based
  *    primitives in `animationTiming.ts`. ──
@@ -149,6 +150,13 @@ interface BeatTextOverlayProps {
    *  coordinates for the SVG morph overlay. Coordinates are relative to
    *  the right-column root Box (its left edge == panelWidth * 2/3). */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
+  /** Number of extra hydroclimate columns beyond the primary column in
+   *  the Beat 8 heatmap (i.e. the length of `extraHydroclimateColumns`
+   *  passed to `OutcomeMorphOverlay`). Used here to compute the
+   *  same multi-column geometry so row labels anchor to the left edge
+   *  of the leftmost column rather than drifting as extras fade in.
+   *  Defaults to 0 (legacy single-column heatmap). */
+  heatmapExtraColumnCount?: number
 }
 
 function clamp01(v: number) {
@@ -182,6 +190,7 @@ export default function BeatTextOverlay({
   outcomeMorphWindows,
   onGlyphLayoutChange,
   hideControls = false,
+  heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -318,28 +327,41 @@ export default function BeatTextOverlay({
   )
   /** Caption Typographies under each glyph. */
   const captionRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
-  /** Panel-relative home geometry for each outcome title block, measured
-   *  alongside the placeholder ResizeObserver. `text*` fields capture the
-   *  intrinsic (un-clipped) width/height of the inner Typography so Beat 6
-   *  can anchor the text at radar axis positions without relying on the
-   *  outer block's column-clipped bounding rect. */
-  const titleGeomRef = useRef<
-    Map<
-      string,
-      {
-        textLeft: number
-        textCenterY: number
-        textWidth: number
-        textHeight: number
-      }
-    >
+  /** Panel-relative center of each outcome title block as it would
+   *  appear in Step 7's *wrapped* layout (`whiteSpace: normal`,
+   *  `textAlign: center`, `max-width` sized from the radar arc). Steps
+   *  1-6 render titles single-line, so the wrapped centers differ from
+   *  the at-rest bounding rect; the measure pass computes them by
+   *  temporarily applying wrap styles to every title at once inside
+   *  `useLayoutEffect`, reading `getBoundingClientRect`, and reverting
+   *  before the browser paints. */
+  const wrappedTitleGeomRef = useRef<
+    Map<string, { textCenterX: number; textCenterY: number }>
   >(new Map())
   /** Precomputed per-outcome delta for the Beat 6 radar-label slide.
-   *  Populated by the same measure pass that fills `titleGeomRef`; the
-   *  per-frame tick just multiplies by `blend` and writes a translate. */
+   *  Populated by the same measure pass that fills `wrappedTitleGeomRef`;
+   *  the per-frame tick just multiplies by `blend` and writes a translate. */
   const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
     new Map(),
   )
+  /** Precomputed per-outcome delta for the Beat 8 heatmap-label slide.
+   *  Targets align the title text's right edge with the heatmap cell's
+   *  left edge minus a small gutter and the text's vertical center with
+   *  the cell's center, so labels read like the y-axis on the resilience
+   *  heatmap. Measured against the at-rest (unwrapped, noWrap) text
+   *  bounding rect. */
+  const heatmapLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
+    new Map(),
+  )
+  /** Latest `max-width` (px) the wrap-measure pass applied to titles.
+   *  Re-applied by the per-frame tick when it toggles wrap styles on at
+   *  Step 7 so the runtime wrap matches the geometry the delta was
+   *  computed from. */
+  const radarLabelMaxWidthRef = useRef<number>(110)
+  /** Tracks whether the per-frame tick has currently applied Step 7's
+   *  wrap styles to the title blocks. Used to toggle wrap inline styles
+   *  once per transition instead of rewriting them every frame. */
+  const radarWrapActiveRef = useRef<boolean>(false)
   const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
   const eyebrowDataRef = useRef<ColumnEyebrow[] | undefined>(undefined)
   eyebrowDataRef.current = beat2Layout?.eyebrows
@@ -478,6 +500,46 @@ export default function BeatTextOverlay({
     const windows = outcomeMorphWindowsRef.current
     const TITLE_LEAD = 0.004
     const TITLE_FADE = 0.009
+    // Wrap-flip opacity dip.
+    //
+    // The Step 7 single-line -> wrapped style flip is necessarily
+    // instantaneous (line breaks are discrete, so wrap cannot tween),
+    // which reads as a visible "pop" in the label's text layout. To
+    // mask it we dip each title's opacity through 0 right at the flip
+    // and raise it back, so the re-flow happens while the label is
+    // invisible. Symmetric dips on the outgoing flip (0.76, mid-slide
+    // to axis vertex) and the incoming flip-back (0.90, arrival home
+    // at end of slide-return) keep every transition hidden.
+    //
+    // The flip itself is scheduled at the dip floor (`wantWrap`
+    // threshold == dip peak) so the label's DOM state changes at the
+    // exact moment its visible opacity is 0. Dip widths (~0.01 on
+    // each side) trade off masking strength against total dim time;
+    // 0.01 of progress ~= a few frames at typical scrub speed, enough
+    // to hide the layout shift without leaving the label conspicuously
+    // absent mid-slide.
+    const WRAP_DIP_OUT_CENTER = 0.76
+    const WRAP_DIP_OUT_HALF = 0.01
+    const WRAP_DIP_IN_CENTER = 0.9
+    const WRAP_DIP_IN_HALF = 0.01
+    let wrapDip = 1
+    if (
+      v >= WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF &&
+      v <= WRAP_DIP_OUT_CENTER + WRAP_DIP_OUT_HALF
+    ) {
+      wrapDip =
+        v < WRAP_DIP_OUT_CENTER
+          ? 1 - (v - (WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF)) / WRAP_DIP_OUT_HALF
+          : (v - WRAP_DIP_OUT_CENTER) / WRAP_DIP_OUT_HALF
+    } else if (
+      v >= WRAP_DIP_IN_CENTER - WRAP_DIP_IN_HALF &&
+      v <= WRAP_DIP_IN_CENTER + WRAP_DIP_IN_HALF
+    ) {
+      wrapDip =
+        v < WRAP_DIP_IN_CENTER
+          ? 1 - (v - (WRAP_DIP_IN_CENTER - WRAP_DIP_IN_HALF)) / WRAP_DIP_IN_HALF
+          : (v - WRAP_DIP_IN_CENTER) / WRAP_DIP_IN_HALF
+    }
     // CAPTION_LEAD == CAPTION_FADE means the fade window finishes
     // exactly at morphEnd, so the "x locations" text is fully opaque
     // the instant the squares lock in.
@@ -511,8 +573,12 @@ export default function BeatTextOverlay({
 
         if (titleEl) {
           const titleFadeStart = morphStart - TITLE_LEAD
+          // Multiply in the wrap-flip dip so the re-flow happens while
+          // the label is invisible. `wrapDip` is 1 outside the dip
+          // windows, so Beats 0-5 and the steady middle of Beat 6 are
+          // unaffected.
           titleEl.style.opacity = String(
-            clamp01((v - titleFadeStart) / TITLE_FADE),
+            clamp01((v - titleFadeStart) / TITLE_FADE) * wrapDip,
           )
         }
 
@@ -542,27 +608,97 @@ export default function BeatTextOverlay({
       }
     }
 
-    // Beat 6 radar-label slide.
+    // Beat 6 radar-label wrap + slide.
     //
-    // Each wrapped title block is center-anchored to its polar axis
-    // point (`(cx + labelR*cos(angle), cy + labelR*sin(angle))`, the
-    // same family `OutcomeMorphOverlay.radarGeometry` uses) during the
-    // `[0.75, 0.82]` window where `radarBlend` glides the averaged dots
-    // to their vertices, so labels + dots arrive together. Labels ride
+    // Steps 1-6 render titles single-line (`noWrap`, left-aligned,
+    // clipped by the outer block's `overflow: hidden`, defined in the
+    // component's static `sx` below). Step 7 wraps them at `maxLabelW`
+    // and centers each line so they ring the radar the way axis labels
+    // do. The wrap flip happens mid-slide, not at the beat boundary:
+    // on at `WRAP_DIP_OUT_CENTER` (= 0.76, while the labels are already
+    // circling out toward their axis points), off at
+    // `WRAP_DIP_IN_CENTER` (= 0.90, the moment they arrive back home).
+    // Both toggle points sit at the trough of the opacity dip driven
+    // above, so the text layout change lands while the label is at
+    // zero opacity and the re-flow never hits a user-visible frame.
+    //
+    // Inside that window, each wrapped title block is center-anchored
+    // to its polar axis point (`(cx + labelR*cos(angle),
+    // cy + labelR*sin(angle))`, same family
+    // `OutcomeMorphOverlay.radarGeometry` uses) during the `[0.75,
+    // 0.82]` window where `radarBlend` glides the averaged dots to
+    // their vertices, so labels + dots arrive together. Labels ride
     // back home across `[0.87, 0.90]` as the radar chrome fades out,
     // yielding the right third for Beat 7's heatmap cells. Delta is
-    // pre-measured in the layout effect; here we only multiply by
-    // `blend` and write a translate.
-    const radarDeltas = radarLabelDeltaRef.current
-    if (radarDeltas.size > 0) {
-      const blendIn = clamp01((v - 0.75) / 0.07)
-      const blendOut = clamp01((v - 0.87) / 0.03)
-      const blend = blendIn * (1 - blendOut)
-      radarDeltas.forEach(({ dx, dy }, code) => {
-        const el = titleRefsMap.current.get(code)
+    // pre-measured in the layout effect against the *wrapped* center,
+    // so the translate lines the wrapped block up with its vertex;
+    // here we only multiply by `blend` and write a translate.
+    const wantWrap = v >= WRAP_DIP_OUT_CENTER && v < WRAP_DIP_IN_CENTER
+    if (wantWrap !== radarWrapActiveRef.current) {
+      radarWrapActiveRef.current = wantWrap
+      const maxW = radarLabelMaxWidthRef.current
+      titleRefsMap.current.forEach((el) => {
         if (!el) return
-        if (blend > 0) {
-          el.style.transform = `translate(${dx * blend}px, ${dy * blend}px)`
+        const textEl = el.firstElementChild as HTMLElement | null
+        if (!textEl) return
+        if (wantWrap) {
+          textEl.style.whiteSpace = "normal"
+          textEl.style.textAlign = "center"
+          textEl.style.maxWidth = `${maxW}px`
+          textEl.style.overflowWrap = "break-word"
+          // Match RadarPlot's `axisTitleFill` (see
+          // `RadarPanel.radarAxisLabelDetailStyle`) so Step 7 axis
+          // titles read as the same navy color the user sees in the
+          // real radar. Flips at the dip trough so the recolor lands
+          // while the label is at zero opacity.
+          textEl.style.color = "#193D6B"
+          el.style.justifyContent = "center"
+          el.style.overflow = "visible"
+        } else {
+          textEl.style.whiteSpace = ""
+          textEl.style.textAlign = ""
+          textEl.style.maxWidth = ""
+          textEl.style.overflowWrap = ""
+          textEl.style.color = ""
+          el.style.justifyContent = ""
+          el.style.overflow = ""
+        }
+      })
+    }
+    // Label positions in Beats 6-8.
+    //
+    // During Beats 0-5 labels sit at their Beat 2 home positions
+    // (single-line titles above each distribution glyph). Two
+    // successive slides follow:
+    //
+    //   [0.75, 0.82]          home      -> radar rim       (radarBlend)
+    //   [0.82, 0.87]          (rest at radar rim)
+    //   [0.87, 0.90]          radar rim -> home             (radarBlend)
+    //   [0.90, 0.95]          home      -> heatmap y-axis   (heatmapBlend)
+    //   [0.95, 1.00]          (rest at heatmap y-axis)
+    //
+    // Because radarBlend collapses to 0 at 0.90 (the moment
+    // heatmapBlend leaves 0), the two deltas can be summed; only one
+    // is non-zero at any single moment except the instantaneous
+    // handoff at 0.90 where both are 0. Home position is the origin
+    // (0,0 translate) so no explicit home-blend term is needed.
+    const radarDeltas = radarLabelDeltaRef.current
+    const heatmapDeltas = heatmapLabelDeltaRef.current
+    if (radarDeltas.size > 0 || heatmapDeltas.size > 0) {
+      const radarIn = clamp01((v - 0.75) / 0.07)
+      const radarOut = clamp01((v - 0.87) / 0.03)
+      const radarBlend = radarIn * (1 - radarOut)
+      const heatmapBlend = clamp01((v - 0.9) / 0.05)
+      titleRefsMap.current.forEach((el, code) => {
+        if (!el) return
+        const rd = radarDeltas.get(code)
+        const hd = heatmapDeltas.get(code)
+        const dx =
+          (rd ? rd.dx * radarBlend : 0) + (hd ? hd.dx * heatmapBlend : 0)
+        const dy =
+          (rd ? rd.dy * radarBlend : 0) + (hd ? hd.dy * heatmapBlend : 0)
+        if (dx !== 0 || dy !== 0) {
+          el.style.transform = `translate(${dx}px, ${dy}px)`
         } else if (el.style.transform) {
           el.style.transform = ""
         }
@@ -851,82 +987,230 @@ export default function BeatTextOverlay({
         backdrop.style.height = `${rootRect.height}px`
       }
 
-      // Radar geometry (center in the right third, `labelR = rMax + 24`)
-      // is shared with `OutcomeMorphOverlay.radarGeometry`, so the dot
-      // that lands at each vertex is anchored to the same center as the
-      // title that slides out to the rim. Compute first so we can size
-      // each label's `max-width` from the axis arc length before
-      // measuring; the measured text box then reflects the wrapped width
-      // the animation actually sees.
+      // Radar geometry is shared with `OutcomeMorphOverlay.radarGeometry`,
+      // so each label block's center lands on the same `(cx + rMax*cosθ,
+      // cy + rMax*sinθ)` axis tip the SVG spokes terminate at.
       const panelW = panelRect.width
       const panelH = panelRect.height
       const panelLeft = panelW * (2 / 3)
       const rightW = panelW - panelLeft
       const cx = panelLeft + rightW / 2
-      const cy = panelH / 2
+      // Keep in sync with `OutcomeMorphOverlay.radarGeometry`: the
+      // radar center is pushed slightly above the panel midline so the
+      // chart sits higher, leaving room for Beat 7's narration / Beat
+      // 8 heatmap below. Label positions share this cy so HTML axis
+      // labels ring the same center as the SVG vertices.
+      const cy = panelH * 0.42
       const rMax = Math.min(rightW / 2, panelH / 2) * 0.6
-      const labelR = rMax + 24
+      // Push labels past the axis tip by a small pad so they sit in
+      // the chart's margin instead of overlapping the outer ring /
+      // polygon trace. Keep in sync with any visual crowding tweaks.
+      const LABEL_PAD = 22
+      const labelR = rMax + LABEL_PAD
       const activeItems =
         beat2LayoutRef.current?.items.filter(
           (it) => it.isActive && it.targetHeight > 0,
         ) ?? []
       const N = activeItems.length
-      // Arc length between neighboring axes at `labelR` bounds how wide a
-      // label can get before it bumps its neighbor. 0.9 of that arc
-      // leaves a small breathing gap; clamped so edge cases (very few
-      // active outcomes, very small panels) still produce a sane width.
+      // Arc length between neighboring axes at the label-placement ring
+      // bounds how wide a label can get before it bumps its neighbor.
+      // 0.9 of that arc leaves a small breathing gap; clamped so edge
+      // cases (very few active outcomes, very small panels) still
+      // produce a sane width.
       const arc = N > 0 ? (2 * Math.PI * labelR) / N : 120
       const maxLabelW = Math.max(72, Math.min(160, arc * 0.9))
-      titleRefsMap.current.forEach((el) => {
-        if (!el) return
-        const textEl = el.firstElementChild as HTMLElement | null
-        if (!textEl) return
-        textEl.style.maxWidth = `${maxLabelW}px`
-      })
+      radarLabelMaxWidthRef.current = maxLabelW
 
-      // Title home geometry. Measured *after* `max-width` is applied so
-      // stored dimensions reflect the wrapped text block the animation
-      // translates. `offsetWidth` / `offsetHeight` on the inner
-      // Typography capture the wrapped block's full rectangle;
-      // `getBoundingClientRect` gives its panel-relative visible
-      // position, which lines up with where the text sits at rest.
-      const titleGeom = titleGeomRef.current
-      titleGeom.clear()
+      // Radar-mode wrap geometry.
+      //
+      // Steps 1-6 render each title single-line (`noWrap`, left-aligned,
+      // clipped by the outer block's `overflow: hidden`); Step 7 wraps
+      // them at `maxLabelW` and centers every line. Because the two
+      // modes have different block rectangles (wrap grows the block
+      // vertically, centering shifts the text horizontally), the radar
+      // slide needs the *wrapped* center to land at the axis point.
+      //
+      // We measure wrapped dimensions here via a synchronous
+      // apply-measure-revert across every title at once. Applying all
+      // titles simultaneously matches the runtime state (every column
+      // reflows together as wrap kicks in), so wrapped `top` / `center`
+      // positions reflect the layout the slide will actually start
+      // from. Reverting before returning keeps at-rest Steps 1-6
+      // un-wrapped. Because the whole pass lives inside
+      // `useLayoutEffect`, the browser never paints the transient
+      // wrapped layout.
+      const wrapStateByCode = new Map<
+        string,
+        {
+          textEl: HTMLElement
+          prevWhiteSpace: string
+          prevTextAlign: string
+          prevMaxWidth: string
+          prevOverflowWrap: string
+          boxEl: HTMLDivElement
+          prevBoxJustify: string
+          prevBoxOverflow: string
+          prevBoxTransform: string
+        }
+      >()
       titleRefsMap.current.forEach((el, code) => {
         if (!el) return
         const textEl = el.firstElementChild as HTMLElement | null
         if (!textEl) return
-        const rText = textEl.getBoundingClientRect()
-        titleGeom.set(code, {
-          textLeft: rText.left - panelRect.left,
-          textCenterY: (rText.top + rText.bottom) / 2 - panelRect.top,
-          textWidth: textEl.offsetWidth,
-          textHeight: textEl.offsetHeight,
+        wrapStateByCode.set(code, {
+          textEl,
+          prevWhiteSpace: textEl.style.whiteSpace,
+          prevTextAlign: textEl.style.textAlign,
+          prevMaxWidth: textEl.style.maxWidth,
+          prevOverflowWrap: textEl.style.overflowWrap,
+          boxEl: el,
+          prevBoxJustify: el.style.justifyContent,
+          prevBoxOverflow: el.style.overflow,
+          prevBoxTransform: el.style.transform,
         })
       })
+      // Apply wrap styles to every title simultaneously. Also clear
+      // any runtime translate so the measured rect reflects the
+      // element's at-rest position, not a mid-slide one. Without this,
+      // a ResizeObserver fire in the middle of Beat 6/7 (when
+      // `blend > 0`) would sample the already-translated rect and
+      // feed back into a compounding delta.
+      wrapStateByCode.forEach(({ textEl, boxEl }) => {
+        textEl.style.whiteSpace = "normal"
+        textEl.style.textAlign = "center"
+        textEl.style.maxWidth = `${maxLabelW}px`
+        textEl.style.overflowWrap = "break-word"
+        boxEl.style.justifyContent = "center"
+        boxEl.style.overflow = "visible"
+        boxEl.style.transform = ""
+      })
+      // Measure wrapped centers (panel-relative).
+      const wrapGeom = wrappedTitleGeomRef.current
+      wrapGeom.clear()
+      wrapStateByCode.forEach(({ textEl }, code) => {
+        const rText = textEl.getBoundingClientRect()
+        wrapGeom.set(code, {
+          textCenterX: (rText.left + rText.right) / 2 - panelRect.left,
+          textCenterY: (rText.top + rText.bottom) / 2 - panelRect.top,
+        })
+      })
+      // Revert wrap styles (but leave transforms cleared) so we can
+      // measure each title's at-rest (unwrapped, Beat 2 home) rect.
+      // Those rests feed the Beat 8 heatmap-label migration below: the
+      // label's right edge has to land at the cell's left edge minus
+      // a small gutter, and that target is easier to express against
+      // the unwrapped text's right-edge x than against the wrapped
+      // center.
+      wrapStateByCode.forEach(
+        ({
+          textEl,
+          prevWhiteSpace,
+          prevTextAlign,
+          prevMaxWidth,
+          prevOverflowWrap,
+          boxEl,
+          prevBoxJustify,
+          prevBoxOverflow,
+        }) => {
+          textEl.style.whiteSpace = prevWhiteSpace
+          textEl.style.textAlign = prevTextAlign
+          textEl.style.maxWidth = prevMaxWidth
+          textEl.style.overflowWrap = prevOverflowWrap
+          boxEl.style.justifyContent = prevBoxJustify
+          boxEl.style.overflow = prevBoxOverflow
+        },
+      )
+      const atRestGeom = new Map<
+        string,
+        { textCenterY: number; textRightX: number }
+      >()
+      wrapStateByCode.forEach(({ textEl }, code) => {
+        const r = textEl.getBoundingClientRect()
+        atRestGeom.set(code, {
+          textCenterY: (r.top + r.bottom) / 2 - panelRect.top,
+          textRightX: r.right - panelRect.left,
+        })
+      })
+      // Now restore transforms so the next frame's tick handler can
+      // keep animating from the position it was already at.
+      wrapStateByCode.forEach(({ boxEl, prevBoxTransform }) => {
+        boxEl.style.transform = prevBoxTransform
+      })
 
-      // Radar axis label deltas: every label lands center-anchored on
-      // its axis point (block center at `(lx, ly)`). `textAlign: center`
-      // on the Typography keeps each wrapped line horizontally centered
-      // inside the block, so a single symmetric anchor gives consistent
-      // visual alignment for every axis orientation, no per-side
-      // `anchor=start|end|middle` gymnastics like single-line SVG text.
-      // Same polar family `OutcomeMorphOverlay.radarGeometry` uses, so
-      // each label rings the ring one-to-one with its averaged dot.
+      // Radar axis label positions: each label's center sits on the
+      // `labelR` ring (`rMax + LABEL_PAD`), just outside the axis tip,
+      // so labels don't crowd the outer polygon / tick ring.
+      //
+      // Angle indexing MUST match `OutcomeMorphOverlay.radarGeometry`,
+      // which iterates `outcomes` (= `activeOutcomeGroups`) in
+      // OUTCOME_CODE_ORDER. `beat2Layout.items` (and therefore
+      // `activeItems`) re-orders the left column first (AG_REV,
+      // CWS_DEL), so iterating `activeItems` here would silently put
+      // each label on the wrong axis. We rebuild a radar-order list
+      // (active codes filtered from OUTCOME_CODE_ORDER) so every code
+      // gets the same i, and therefore the same angle, as its axis.
+      const radarOrderCodes = OUTCOME_CODE_ORDER.filter((code) =>
+        activeItems.some((it) => it.code === code),
+      )
+      const Nr = radarOrderCodes.length
       const delta = radarLabelDeltaRef.current
       delta.clear()
-      if (N > 0) {
-        for (let i = 0; i < N; i++) {
-          const item = activeItems[i]!
-          const home = titleGeom.get(item.code)
-          if (!home) continue
-          const angle = (2 * Math.PI * i) / N - Math.PI / 2
+      if (Nr > 0) {
+        for (let i = 0; i < Nr; i++) {
+          const code = radarOrderCodes[i]!
+          const wrapped = wrapGeom.get(code)
+          if (!wrapped) continue
+          const angle = (2 * Math.PI * i) / Nr - Math.PI / 2
           const lx = cx + labelR * Math.cos(angle)
           const ly = cy + labelR * Math.sin(angle)
-          const homeCenterX = home.textLeft + home.textWidth / 2
-          delta.set(item.code, {
-            dx: lx - homeCenterX,
-            dy: ly - home.textCenterY,
+          delta.set(code, {
+            dx: lx - wrapped.textCenterX,
+            dy: ly - wrapped.textCenterY,
+          })
+        }
+      }
+
+      // Heatmap y-axis label positions (Beat 8). Mirrors
+      // `OutcomeMorphOverlay.heatmapGeometry`: a grid of
+      // `1 + extraHydroclimateCount` hydroclimate columns centered
+      // horizontally in the right third of the panel. Labels anchor to
+      // the leftmost (primary) column, right-aligned to that column's
+      // left edge minus `HEAT_LABEL_GAP`, vertically centered on each
+      // row. Geometry constants MUST stay in sync with
+      // `OutcomeMorphOverlay.heatmapGeometry` or labels will drift
+      // when the extra columns fade in.
+      const heatNumExtras = heatmapExtraColumnCount
+      const heatNumColumns = 1 + heatNumExtras
+      const heatColumnGapFraction = 0.18
+      const heatAvailableW = rightW * 0.85
+      const heatCellW = Math.min(
+        72,
+        heatAvailableW /
+          (heatNumColumns + (heatNumColumns - 1) * heatColumnGapFraction),
+      )
+      const heatColumnGap = heatCellW * heatColumnGapFraction
+      const heatAvailableH = panelH * 0.8
+      const heatCellH = Math.min(44, heatAvailableH / Math.max(Nr, 1))
+      const heatTotalH = Nr * heatCellH
+      const heatColumnTop = panelH / 2 - heatTotalH / 2
+      // Primary column (index 0) cx is the leftmost of the centered
+      // column group.
+      const heatStride = heatCellW + heatColumnGap
+      const heatCol0Cx = cx - ((heatNumColumns - 1) / 2) * heatStride
+      const heatCellLeft = heatCol0Cx - heatCellW / 2
+      const HEAT_LABEL_GAP = 12
+      const heatmap = heatmapLabelDeltaRef.current
+      heatmap.clear()
+      if (Nr > 0) {
+        for (let i = 0; i < Nr; i++) {
+          const code = radarOrderCodes[i]!
+          const rest = atRestGeom.get(code)
+          if (!rest) continue
+          const targetRightX = heatCellLeft - HEAT_LABEL_GAP
+          const targetCenterY = heatColumnTop + (i + 0.5) * heatCellH
+          heatmap.set(code, {
+            dx: targetRightX - rest.textRightX,
+            dy: targetCenterY - rest.textCenterY,
           })
         }
       }
@@ -946,7 +1230,7 @@ export default function BeatTextOverlay({
     measure()
 
     return () => ro.disconnect()
-  }, [onGlyphLayoutChange, beat2Layout])
+  }, [onGlyphLayoutChange, beat2Layout, heatmapExtraColumnCount])
 
   // Kept live (unused while scenarioHeader JSX is disabled behind
   // `{false && ...}`). Restore usage in the JSX to re-enable.
@@ -1778,7 +2062,7 @@ export default function BeatTextOverlay({
                     opacity: 0,
                   }}
                 >
-                  <Typography variant="smallSectionLabel" component="p">
+                  <Typography variant="overline" component="p">
                     {label}
                   </Typography>
                 </Box>
@@ -1846,8 +2130,8 @@ export default function BeatTextOverlay({
                               mx: -0.5,
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "center",
                               boxSizing: "border-box",
+                              overflow: "hidden",
                               transition: "color 0.15s",
                               ...(interactive && {
                                 "&:hover .MuiTypography-root": {
@@ -1857,25 +2141,13 @@ export default function BeatTextOverlay({
                             }}
                           >
                             <Typography
-                              variant="overline"
-                              component="p"
+                              variant="axisLabel"
+                              noWrap
                               sx={{
                                 fontWeight: isSelected ? 700 : 500,
-                                textTransform: "none",
                                 transition: "color 0.15s",
                                 color: theme.palette.grey[900],
                                 lineHeight: 1.2,
-                                textAlign: "center",
-                                whiteSpace: "normal",
-                                wordBreak: "normal",
-                                overflowWrap: "break-word",
-                                margin: 0,
-                                // `maxWidth` is overwritten each measure pass
-                                // with a value derived from the radar rMax so
-                                // labels wrap to a width that fits the axis
-                                // spacing. This static fallback governs only
-                                // the first paint before measure() runs.
-                                maxWidth: "110px",
                               }}
                             >
                               {item.label}
