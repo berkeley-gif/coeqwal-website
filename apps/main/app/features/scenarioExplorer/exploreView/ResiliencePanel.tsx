@@ -2436,6 +2436,7 @@ export default function ResiliencePanel({
   // resolves to `handleResilienceTileSnapshot` in `ScenarioExplorer`.
   const renderTileShareAction = useMemo(() => {
     if (!onTileShare) return undefined
+    const handleTileShare = onTileShare
     function ResilienceTileShareButton(tile: ResilienceSmallMultiplesTile) {
       return (
         <Box
@@ -2445,7 +2446,7 @@ export default function ResiliencePanel({
           title="Save snapshot of this tile"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation()
-            onTileShare(tile.id)
+            handleTileShare(tile.id)
           }}
           sx={{
             display: "inline-flex",
