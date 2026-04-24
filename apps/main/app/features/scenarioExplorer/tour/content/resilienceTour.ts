@@ -74,8 +74,8 @@ export const RESILIENCE_TOUR: TourStep[] = [
     id: "resilience.step1.pivot",
     anchorId: "resilience.pivot",
     eyebrow: "arrange the chart",
-    title: "Choose the layout",
-    body: "Click this phrase to pick how the chart is arranged: one small chart per scenario, one per outcome, one per climate future, or everything combined into a single overview. The layout is the biggest lever on what question the chart answers.",
+    title: "Choose what the chart pivots on",
+    body: "Click this phrase to pick how the chart is arranged: one tile per scenario, per outcome, or per climate future rendered as small multiples, or a single aggregate chart averaged across the library. This is the biggest lever on what question the chart answers.",
     placement: "bottom-start",
   },
   {

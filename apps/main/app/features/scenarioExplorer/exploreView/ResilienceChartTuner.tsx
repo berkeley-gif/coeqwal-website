@@ -63,7 +63,6 @@ const DEFAULT_CONTROLS: ResilienceControlsState = {
   primaryOutcomeCode: null,
   compareOutcomeCodes: [],
   expandedRegionalOutcomes: [],
-  scenarioLayout: "small_multiples",
   transposed: false,
   aggregateOver: "scenarios",
 }

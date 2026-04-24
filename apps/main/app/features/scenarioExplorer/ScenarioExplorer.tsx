@@ -273,7 +273,6 @@ function ScenarioExplorerInner() {
       primaryOutcomeCode: null,
       compareOutcomeCodes: [],
       expandedRegionalOutcomes: [],
-      scenarioLayout: "small_multiples",
       transposed: false,
       aggregateOver: "scenarios",
     })
