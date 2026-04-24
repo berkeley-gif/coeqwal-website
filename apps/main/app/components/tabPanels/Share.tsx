@@ -1041,10 +1041,7 @@ export default function SharePanel() {
           px: 3,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 600, color: theme.palette.text.secondary }}
-        >
+        <Typography variant="h3" component="h2" color="text.secondary">
           Share
         </Typography>
         <Typography
@@ -1077,263 +1074,281 @@ export default function SharePanel() {
     )
   }
 
-  // ── Two-zone layout (left tray | right canvas) ──
+  // ── Section headline (full width) + two-zone body (tray | story) ──
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         height: "100%",
+        minHeight: 0,
+        overflow: "hidden",
       }}
     >
-      {/* ─── Scorecard Tray (left, fixed-width, vertical scroll) ─── */}
       <Box
         sx={{
           flexShrink: 0,
-          width: TRAY_CARD_WIDTH + 32,
-          borderRight: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.grey[50],
-          px: 2,
-          py: 2,
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          overflowY: "auto",
-          "&::-webkit-scrollbar": { width: 6 },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: theme.palette.grey[300],
-            borderRadius: 3,
-          },
+          width: "100%",
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          pb: theme.space.section.md,
         }}
       >
-        {shareItems.map((item) => (
-          <TrayCard
-            key={item.id}
-            item={item}
-            isInStory={storyItemIdSet.has(item.id)}
-            onToggle={() => handleToggleStory(item.id)}
-            outcomeNames={outcomeNames}
-            scenarioLookup={scenarioLookup}
-            allChartData={
-              allChartData as Record<
-                string,
-                Record<string, unknown> | undefined
-              >
-            }
-            radarLiveByHydro={radarLiveByHydro}
-            getThemeForScenario={getThemeForScenario}
-          />
-        ))}
-      </Box>
-
-      {/* ─── Story Canvas (right, scrollable) ─── */}
-      <Box sx={{ flex: 1, minWidth: 0, overflow: "auto", px: 3, py: 3 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 600,
-            mb: 0.5,
-            color: theme.palette.text.secondary,
-          }}
-        >
+        <Typography variant="h3" component="h2" color="text.secondary">
           Tell your water story
         </Typography>
+      </Box>
 
-        {storyItems.length > 0 ? (
-          <>
-            <Typography
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
+        {/* ─── Scorecard Tray (left, fixed-width, vertical scroll) ─── */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            width: TRAY_CARD_WIDTH + 32,
+            borderRight: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.grey[50],
+            px: 2,
+            py: 2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            overflowY: "auto",
+            "&::-webkit-scrollbar": { width: 6 },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: theme.palette.grey[300],
+              borderRadius: 3,
+            },
+          }}
+        >
+          {shareItems.map((item) => (
+            <TrayCard
+              key={item.id}
+              item={item}
+              isInStory={storyItemIdSet.has(item.id)}
+              onToggle={() => handleToggleStory(item.id)}
+              outcomeNames={outcomeNames}
+              scenarioLookup={scenarioLookup}
+              allChartData={
+                allChartData as Record<
+                  string,
+                  Record<string, unknown> | undefined
+                >
+              }
+              radarLiveByHydro={radarLiveByHydro}
+              getThemeForScenario={getThemeForScenario}
+            />
+          ))}
+        </Box>
+
+        {/* ─── Story Canvas (right, scrollable) ─── */}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            overflow: "auto",
+            px: 3,
+            pt: theme.space.section.lg,
+            pb: 3,
+          }}
+        >
+          {storyItems.length > 0 ? (
+            <>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ opacity: 0.85, mb: theme.space.section.md }}
+              >
+                {storyItems.length} card{storyItems.length !== 1 ? "s" : ""} in
+                your story. Drag to rearrange.
+              </Typography>
+
+              <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragEnd={handleStoryDragEnd}
+              >
+                <SortableContext
+                  items={storyItemIds}
+                  strategy={rectSortingStrategy}
+                >
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        md: "1fr 1fr",
+                      },
+                      gap: 2,
+                    }}
+                  >
+                    {storyItems.map((item) => (
+                      <StoryCard
+                        key={item.id}
+                        item={item}
+                        onRemoveFromStory={removeFromStory}
+                        onDelete={removeShareItem}
+                        onDownloadData={handleDownloadData}
+                        onRegisterContentRef={registerCardRef}
+                        onNoteChange={handleNoteChange}
+                        outcomeNames={outcomeNames}
+                        scenarioLookup={scenarioLookup}
+                        allChartData={
+                          allChartData as Record<
+                            string,
+                            Record<string, unknown> | undefined
+                          >
+                        }
+                        radarLiveByHydro={radarLiveByHydro}
+                        getThemeForScenario={getThemeForScenario}
+                      />
+                    ))}
+                  </Box>
+                </SortableContext>
+              </DndContext>
+            </>
+          ) : (
+            <Box
               sx={{
-                fontSize: "0.875rem",
-                color: theme.palette.text.secondary,
-                opacity: 0.8,
-                mb: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                py: 8,
+                gap: 1.5,
+                opacity: 0.6,
               }}
             >
-              {storyItems.length} card{storyItems.length !== 1 ? "s" : ""} in
-              your story. Drag to rearrange.
-            </Typography>
-
-            <DndContext
-              sensors={sensors}
-              collisionDetection={pointerWithin}
-              onDragEnd={handleStoryDragEnd}
-            >
-              <SortableContext
-                items={storyItemIds}
-                strategy={rectSortingStrategy}
+              <icons.ArrowBack
+                sx={{ fontSize: "2rem", color: theme.palette.grey[400] }}
+              />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="center"
+                sx={{ maxWidth: 360 }}
               >
-                <Box
+                Click cards in the tray on the left to add them to your story
+              </Typography>
+            </Box>
+          )}
+
+          {/* ─── Export bar ─── */}
+          {storyItems.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.5,
+                mt: 3,
+                pt: 2,
+                borderTop: `1px solid ${theme.palette.divider}`,
+              }}
+            >
+              <Tooltip
+                title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
+                arrow
+              >
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={async () => {
+                    const url = encodeShareItems(
+                      shareItems,
+                      hydroclimate,
+                      storyItemIds,
+                    )
+                    try {
+                      await navigator.clipboard.writeText(url)
+                    } catch {
+                      const ta = document.createElement("textarea")
+                      ta.value = url
+                      document.body.appendChild(ta)
+                      ta.select()
+                      document.execCommand("copy")
+                      document.body.removeChild(ta)
+                    }
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }}
+                  startIcon={
+                    copied ? (
+                      <icons.Check sx={{ fontSize: "1rem" }} />
+                    ) : (
+                      <icons.ContentCopy sx={{ fontSize: "1rem" }} />
+                    )
+                  }
                   sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      md: "1fr 1fr",
-                    },
-                    gap: 2,
+                    textTransform: "none",
+                    color: theme.palette.text.secondary,
+                    borderColor: theme.palette.divider,
                   }}
                 >
-                  {storyItems.map((item) => (
-                    <StoryCard
-                      key={item.id}
-                      item={item}
-                      onRemoveFromStory={removeFromStory}
-                      onDelete={removeShareItem}
-                      onDownloadData={handleDownloadData}
-                      onRegisterContentRef={registerCardRef}
-                      onNoteChange={handleNoteChange}
-                      outcomeNames={outcomeNames}
-                      scenarioLookup={scenarioLookup}
-                      allChartData={
-                        allChartData as Record<
-                          string,
-                          Record<string, unknown> | undefined
-                        >
-                      }
-                      radarLiveByHydro={radarLiveByHydro}
-                      getThemeForScenario={getThemeForScenario}
-                    />
-                  ))}
-                </Box>
-              </SortableContext>
-            </DndContext>
-          </>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              py: 8,
-              gap: 1.5,
-              opacity: 0.6,
-            }}
-          >
-            <icons.ArrowBack
-              sx={{ fontSize: "2rem", color: theme.palette.grey[400] }}
-            />
-            <Typography
-              sx={{
-                fontSize: "0.9375rem",
-                color: theme.palette.text.secondary,
-                textAlign: "center",
-                maxWidth: 360,
-              }}
-            >
-              Click cards in the tray on the left to add them to your story
-            </Typography>
-          </Box>
-        )}
-
-        {/* ─── Export bar ─── */}
-        {storyItems.length > 0 && (
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1.5,
-              mt: 3,
-              pt: 2,
-              borderTop: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Tooltip
-              title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
-              arrow
-            >
+                  {copied ? "Copied!" : "Copy link"}
+                </Button>
+              </Tooltip>
               <Button
                 variant="outlined"
                 size="small"
-                onClick={async () => {
-                  const url = encodeShareItems(
-                    shareItems,
-                    hydroclimate,
-                    storyItemIds,
-                  )
-                  try {
-                    await navigator.clipboard.writeText(url)
-                  } catch {
-                    const ta = document.createElement("textarea")
-                    ta.value = url
-                    document.body.appendChild(ta)
-                    ta.select()
-                    document.execCommand("copy")
-                    document.body.removeChild(ta)
-                  }
-                  setCopied(true)
-                  setTimeout(() => setCopied(false), 2000)
-                }}
-                startIcon={
-                  copied ? (
-                    <icons.Check sx={{ fontSize: "1rem" }} />
-                  ) : (
-                    <icons.ContentCopy sx={{ fontSize: "1rem" }} />
-                  )
-                }
+                onClick={handleDownloadAllImages}
+                startIcon={<icons.Image sx={{ fontSize: "0.875rem" }} />}
                 sx={{
                   textTransform: "none",
                   color: theme.palette.text.secondary,
                   borderColor: theme.palette.divider,
                 }}
               >
-                {copied ? "Copied!" : "Copy link"}
+                Download all images
               </Button>
-            </Tooltip>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleDownloadAllImages}
-              startIcon={<icons.Image sx={{ fontSize: "0.875rem" }} />}
-              sx={{
-                textTransform: "none",
-                color: theme.palette.text.secondary,
-                borderColor: theme.palette.divider,
-              }}
-            >
-              Download all images
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleDownloadAllData}
-              startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
-              sx={{
-                textTransform: "none",
-                color: theme.palette.text.secondary,
-                borderColor: theme.palette.divider,
-              }}
-            >
-              Download all data
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled
-              startIcon={
-                <icons.PictureAsPdf
-                  sx={{
-                    fontSize: "0.875rem",
-                    color: theme.palette.action.disabled,
-                  }}
-                />
-              }
-              sx={{
-                textTransform: "none",
-                opacity: 0.45,
-                color: theme.palette.action.disabled,
-                borderColor: theme.palette.action.disabled,
-                pointerEvents: "none",
-                "&.Mui-disabled": {
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleDownloadAllData}
+                startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
+                sx={{
+                  textTransform: "none",
+                  color: theme.palette.text.secondary,
+                  borderColor: theme.palette.divider,
+                }}
+              >
+                Download all data
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled
+                startIcon={
+                  <icons.PictureAsPdf
+                    sx={{
+                      fontSize: "0.875rem",
+                      color: theme.palette.action.disabled,
+                    }}
+                  />
+                }
+                sx={{
+                  textTransform: "none",
                   opacity: 0.45,
                   color: theme.palette.action.disabled,
                   borderColor: theme.palette.action.disabled,
-                },
-              }}
-            >
-              Download PDF
-            </Button>
-          </Box>
-        )}
+                  pointerEvents: "none",
+                  "&.Mui-disabled": {
+                    opacity: 0.45,
+                    color: theme.palette.action.disabled,
+                    borderColor: theme.palette.action.disabled,
+                  },
+                }}
+              >
+                Download PDF
+              </Button>
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   )
