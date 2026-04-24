@@ -12,9 +12,9 @@
  *
  * Anchor ids resolve into ResiliencePanel (cell + corner controls),
  * ResilienceControls (the one-sentence pivot / outcomes / encoding
- * phrase buttons and the "More options" tuner trigger), the shared
- * ToolToolbar (resilience.viewArea), and ScenarioExplorer (the chart
- * toolbar wrapper + save snapshot button).
+ * phrase buttons, preset rows, and row options), the shared
+ * ToolToolbar map strip (resilience.viewArea; no global hydroclimate
+ * chooser), and ScenarioExplorer (the chart toolbar wrapper + save snapshot).
  */
 
 import type { TourStep } from "../types"
@@ -47,14 +47,13 @@ export const RESILIENCE_TOUR: TourStep[] = [
     placement: "right",
   },
 
-  // Shared top toolbar (hydroclimate + map). Same strip the list and
-  // radar tours cover; introduced here as a single orientation step.
+  // Shared top toolbar (map; no global hydroclimate switch in this tool).
   {
     id: "resilience.step0.viewArea",
     anchorId: "resilience.viewArea",
     eyebrow: "get oriented",
     title: "These controls set the data view",
-    body: "This is the same toolbar as in the other views. Switch hydroclimates here to ask the chart a different question about the future, and open the map to send an outcome to the map when you click a cell.",
+    body: "Show map matches the other tools: turn it on to send an outcome to the map when you click a cell. Which hydroclimate columns appear on the heatmap is chosen in the chart controls, not in this row.",
     placement: "bottom-end",
   },
 
@@ -64,7 +63,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.chartToolbar",
     eyebrow: "get oriented",
     title: "These controls configure the chart",
-    body: "The row above the chart is resilience-specific. The sentence on the left reshapes the chart one phrase at a time. More options offers named presets. Save snapshot stages what you see in the Share drawer. The next steps walk through each one.",
+    body: "The row above the chart is resilience-specific. The sentence reshapes the chart one phrase at a time. Presets jump to common layouts. Save snapshot stages what you see in the Share drawer. The next steps walk through each one.",
     placement: "bottom-start",
   },
 
@@ -74,8 +73,16 @@ export const RESILIENCE_TOUR: TourStep[] = [
     id: "resilience.step1.pivot",
     anchorId: "resilience.pivot",
     eyebrow: "arrange the chart",
-    title: "Choose what the chart pivots on",
-    body: "Click this phrase to pick how the chart is arranged: one tile per scenario, per outcome, or per climate future rendered as small multiples, or a single aggregate chart averaged across the library. This is the biggest lever on what question the chart answers.",
+    title: "Pick which dimension the chart is built around",
+    body: "This third phrase picks the dimension the chart is arranged around, and whether the chart shows it as small multiples (one tile per scenario, outcome, or hydroclimate) or a single averaged chart (the dimension is meaned away). This is the biggest lever on what question the chart answers.",
+    placement: "bottom-start",
+  },
+  {
+    id: "resilience.step1.axes",
+    anchorId: "resilience.axes",
+    eyebrow: "arrange the chart",
+    title: "Pick what is inside each chart",
+    body: "Whichever two dimensions you didn't pick for the third phrase become the rows and columns inside each chart. Click across or down to rotate which dimension reads along that axis. Use Switch rows and columns in the Rows row of the chart controls when you want the axes flipped.",
     placement: "bottom-start",
   },
   {
@@ -91,16 +98,8 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.encoding",
     eyebrow: "arrange the chart",
     title: "Choose what color means",
-    body: "Click this phrase to change how each cell is colored. Tier paints the performance category. Delta compares against a baseline with a diverging palette. Density shades by how many scenarios are at-risk or above target. Glyph splits each cell into a grid, one sub-tile per scenario.",
+    body: "Click this phrase to change how each cell is colored. Tier paints the performance category. Delta compares against a baseline with a diverging palette. Glyph splits each cell into a grid, one sub-tile per scenario.",
     placement: "bottom-start",
-  },
-  {
-    id: "resilience.step1.moreOptions",
-    anchorId: "resilience.moreOptions",
-    eyebrow: "arrange the chart",
-    title: "Jump to a named preset",
-    body: "More options opens a panel of one-click presets for common configurations: overview, all scenarios, all outcomes, all hydroclimates, flip rows and columns, aggregate over outcomes or hydroclimates, scenario distribution, climate shift, risk density. Useful when you want to try a named view without touching the sentence.",
-    placement: "bottom-end",
   },
   {
     id: "resilience.step1.snapshot",
@@ -135,7 +134,7 @@ export const RESILIENCE_TOUR: TourStep[] = [
     anchorId: "resilience.cornerControls",
     eyebrow: "read the chart",
     title: "Fine-tune what the cells show",
-    body: "The top-right toolbar on the chart swaps rows and columns, toggles numeric cell values, and reorders rows by similarity so scenarios that behave alike sit next to each other.",
+    body: "The top-right toolbar on the chart toggles numeric cell values. In the chart controls, the Rows row clusters similar scenarios and has Switch rows and columns.",
     placement: "bottom-end",
   },
 

@@ -5,15 +5,15 @@
  *
  * The control surface is a single one-line sentence:
  *
- *   "Showing {pivot}, covering {scenarios}, {outcomes}, and
- *    {climates}. Each cell is colored by its {encoding}."   [Options]
+ *   "Comparing {axes}, {pivot}, covering {scenarios}, {outcomes}, and
+ *    {climates} as {encoding}."   [Options]
  *
  * The phrases run from broad (what the chart pivots on) to narrow
  * (what cell colors mean), so a new user reads the sentence in the
  * same order they would make decisions. Wording avoids data jargon
  * (no "aggregate", "mean", "read as", "x" / cross-product); terms of
  * art that the project already defines in its glossary (scenario,
- * outcome, climate future / hydroclimate, tier) are kept as-is.
+ * outcome, hydroclimate, tier) are kept as-is.
  *
  * Layout is not a user choice: non-aggregate pivots always render as
  * small multiples, and the aggregate pivot is always a single
@@ -23,30 +23,31 @@
  * we removed it as a choice.
  *
  * Each bold phrase is a click-target that opens a focused popover for
- * that dimension. Transpose and display-overflow live as a floating
- * toolbar on the chart itself (see `ResiliencePanel`); the Configure
- * button opens the existing `ResilienceChartTuner` overlay for
- * presets, walkthrough, reset, and snapshot.
+ * that dimension. Under the sentence: Presets, then Rows (group similar
+ * and flip axes). The chart corner toolbar only has display options
+ * (see `ResiliencePanel`).
  *
  * Quadrant / Leverage retains its own compact two-card control set
  * because its mental model differs from the 3-axis cube.
  */
 
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Box,
+  Button,
   Divider,
   MenuItem,
   Popover,
   Select,
   type SelectChangeEvent,
+  Tooltip,
   Typography,
   icons,
   useTheme,
 } from "@repo/ui/mui"
 import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../components/InlineToggleChip"
-import ResilienceChartTuner from "./ResilienceChartTuner"
+import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
 import { useScenarioExplorerStore } from "../store"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 import type {
@@ -78,14 +79,14 @@ interface ResilienceControlsProps {
   onChange: (next: Partial<ResilienceControlsState>) => void
 }
 
-// User-facing labels for the pivot (first phrase) in the sentence
-// header. Non-aggregate pivots render as small multiples (one tile
-// per item of the picked dimension); aggregate renders as a single
-// averaged chart (see `AGGREGATE_OVER_LABEL`).
+// Labels for the quadrant toolbar's tab row, which still lets the
+// user switch between the four top-level modes (the three heatmap
+// pivots and the aggregate). The sentence header for the heatmap
+// branch uses the X / Y / Z pills instead.
 const PIVOT_LABEL: Record<ResilienceView, string> = {
   scenario: "one chart per scenario",
   outcome: "one chart per outcome",
-  hydroclimate: "one chart per climate future",
+  hydroclimate: "one chart per hydroclimate",
   aggregate: "a single aggregate chart",
   quadrant: "leverage",
 }
@@ -97,20 +98,6 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
   "aggregate",
 ]
 
-// Labels for the "averaged across X" chip row inside the pivot
-// popover, and for the sentence header when in aggregate mode.
-const AGGREGATE_OVER_LABEL: Record<AggregateOver, string> = {
-  scenarios: "averaged across scenarios",
-  outcomes: "averaged across outcomes",
-  hydroclimates: "averaged across climate futures",
-}
-
-const AGGREGATE_OVER_ORDER: readonly AggregateOver[] = [
-  "scenarios",
-  "outcomes",
-  "hydroclimates",
-]
-
 /**
  * Virtual "Read as" enum. Combines cellEncoding + deltaMode into a
  * single user-facing read mode.
@@ -118,16 +105,12 @@ const AGGREGATE_OVER_ORDER: readonly AggregateOver[] = [
 type ReadAs =
   | "mean_tier"
   | "climate_shift"
-  | "risk_density"
-  | "opportunity_density"
   | "distribution"
   | "operational_leverage"
 
 const READ_AS_LABEL: Record<ReadAs, string> = {
   mean_tier: "average tier",
   climate_shift: "change vs. historical",
-  risk_density: "share that are at-risk",
-  opportunity_density: "share that are optimal",
   distribution: "spread of results",
   operational_leverage: "sensitivity to climate",
 }
@@ -139,8 +122,7 @@ function deriveReadAs(
 ): ReadAs {
   if (view === "quadrant") return "mean_tier"
   if (delta !== "none") return "climate_shift"
-  if (enc === "density_risk") return "risk_density"
-  if (enc === "density_opp") return "opportunity_density"
+  if (enc === "density_opp") return "mean_tier"
   if (enc === "distribution") return "distribution"
   if (enc === "leverage") return "operational_leverage"
   return "mean_tier"
@@ -158,10 +140,6 @@ function applyReadAs(
         cellEncoding: "tier",
         deltaMode: prev.deltaMode !== "none" ? prev.deltaMode : "vs_historical",
       }
-    case "risk_density":
-      return { cellEncoding: "density_risk", deltaMode: "none" }
-    case "opportunity_density":
-      return { cellEncoding: "density_opp", deltaMode: "none" }
     case "distribution":
       return { cellEncoding: "distribution", deltaMode: "none" }
     case "operational_leverage":
@@ -173,15 +151,13 @@ const READ_AS_OPTIONS: readonly ReadAs[] = [
   "mean_tier",
   "climate_shift",
   "distribution",
-  "risk_density",
-  "opportunity_density",
   "operational_leverage",
 ]
 
 /**
  * Gate options that don't compose with the current pivot /
- * aggregation. Densities + leverage need the underlying scenario ×
- * hydroclimate cube; they're only coherent in aggregate. Climate shift
+ * aggregation. Leverage needs the underlying scenario by hydroclimate
+ * cube; it is only coherent in aggregate. Climate shift
  * needs a historical HC column, so it's disabled when aggregating over
  * hydroclimates.
  */
@@ -190,12 +166,7 @@ function isReadAsOptionDisabled(
   view: ResilienceView,
   aggregateOver: AggregateOver,
 ): boolean {
-  if (
-    (opt === "risk_density" ||
-      opt === "opportunity_density" ||
-      opt === "operational_leverage") &&
-    view !== "aggregate"
-  ) {
+  if (opt === "operational_leverage" && view !== "aggregate") {
     return true
   }
   if (opt === "operational_leverage" && aggregateOver !== "scenarios") {
@@ -205,6 +176,136 @@ function isReadAsOptionDisabled(
     return true
   }
   return false
+}
+
+// ------------------------------------------------------------------
+// Z-role adapter
+//
+// The sentence header exposes the chart as a permutation of the
+// three dimensions (scenario, outcome, hydroclimate) across three
+// roles:
+//
+//   - Across (X)  the cell grid's horizontal axis
+//   - Down   (Y)  the cell grid's vertical axis
+//   - Third  (Z)  the dimension that is either faceted out into
+//                 small multiples, or collapsed into a single
+//                 averaged chart
+//
+// Stored state still uses (view, aggregateOver, transposed); the
+// adapter translates between the two framings. X and Y are derived
+// from Z via a canonical table plus the `transposed` flip.
+//
+// The mapping from (view, aggregateOver) to (zDim, zMode) is 1:1
+// across every non-quadrant configuration, and the canonical X/Y
+// assignment below matches today's rendering, so this is purely a
+// relabeling at the control surface - no chart geometry changes.
+// ------------------------------------------------------------------
+
+type ZDim = "scenario" | "outcome" | "hydroclimate"
+type ZMode = "facet" | "aggregate"
+
+const ALL_DIMS: readonly ZDim[] = ["scenario", "outcome", "hydroclimate"]
+
+const DIM_LABEL_SINGULAR: Record<ZDim, string> = {
+  scenario: "scenario",
+  outcome: "outcome",
+  hydroclimate: "hydroclimate",
+}
+const DIM_LABEL_PLURAL: Record<ZDim, string> = {
+  scenario: "scenarios",
+  outcome: "outcomes",
+  hydroclimate: "hydroclimates",
+}
+
+const AGGREGATE_OVER_TO_ZDIM: Record<AggregateOver, ZDim> = {
+  scenarios: "scenario",
+  outcomes: "outcome",
+  hydroclimates: "hydroclimate",
+}
+const ZDIM_TO_AGGREGATE_OVER: Record<ZDim, AggregateOver> = {
+  scenario: "scenarios",
+  outcome: "outcomes",
+  hydroclimate: "hydroclimates",
+}
+
+function deriveZ(
+  view: ResilienceView,
+  aggregateOver: AggregateOver,
+): { zDim: ZDim; zMode: ZMode } {
+  if (view === "aggregate") {
+    return { zDim: AGGREGATE_OVER_TO_ZDIM[aggregateOver], zMode: "aggregate" }
+  }
+  // For heatmap views the view id itself is the Z dim. `quadrant`
+  // is handled separately by the caller and never reaches here.
+  return { zDim: view as ZDim, zMode: "facet" }
+}
+
+function writeZ(zDim: ZDim, zMode: ZMode): Partial<ResilienceControlsState> {
+  if (zMode === "aggregate") {
+    return {
+      view: "aggregate",
+      aggregateOver: ZDIM_TO_AGGREGATE_OVER[zDim],
+    }
+  }
+  return { view: zDim }
+}
+
+// Canonical axis assignment for each choice of Z. Matches today's
+// rendering across both facet and aggregate paths, so switching the
+// sentence-model framing is a pure relabel. `transposed` flips X
+// and Y at render time.
+const CANONICAL_X_FOR_Z: Record<ZDim, ZDim> = {
+  scenario: "hydroclimate",
+  outcome: "hydroclimate",
+  hydroclimate: "scenario",
+}
+const CANONICAL_Y_FOR_Z: Record<ZDim, ZDim> = {
+  scenario: "outcome",
+  outcome: "scenario",
+  hydroclimate: "outcome",
+}
+
+function deriveXY(
+  zDim: ZDim,
+  transposed: boolean,
+): { xDim: ZDim; yDim: ZDim } {
+  const cx = CANONICAL_X_FOR_Z[zDim]
+  const cy = CANONICAL_Y_FOR_Z[zDim]
+  return transposed ? { xDim: cy, yDim: cx } : { xDim: cx, yDim: cy }
+}
+
+/**
+ * Build a patch that sets (zDim, zMode) and applies the same
+ * cross-field guards the pre-refactor `handleViewChange` /
+ * `handleAggregateOverChange` enforced: demote aggregate-only
+ * encodings when leaving aggregate, clear leverage when aggregating
+ * over outcomes, and clear delta when aggregating over
+ * hydroclimates (the historical column disappears).
+ */
+function applyZPatch(
+  zDim: ZDim,
+  zMode: ZMode,
+  current: ResilienceControlsState,
+  extra: Partial<ResilienceControlsState> = {},
+): Partial<ResilienceControlsState> {
+  const patch: Partial<ResilienceControlsState> = {
+    ...writeZ(zDim, zMode),
+    ...extra,
+  }
+  const nextView = patch.view ?? current.view
+  const nextAgg = patch.aggregateOver ?? current.aggregateOver
+  const enc = current.cellEncoding
+
+  if (nextView !== "aggregate" && (enc === "glyph" || enc === "leverage")) {
+    patch.cellEncoding = "tier"
+  }
+  if (nextAgg === "outcomes" && enc === "leverage") {
+    patch.cellEncoding = "tier"
+  }
+  if (nextAgg === "hydroclimates" && current.deltaMode !== "none") {
+    patch.deltaMode = "none"
+  }
+  return patch
 }
 
 // --------------------------------------------------------------------
@@ -345,6 +446,64 @@ function PopoverShell({
 }
 
 // --------------------------------------------------------------------
+// Radio-row option (shared by X / Y / Z popovers)
+// --------------------------------------------------------------------
+
+interface RadioRowProps {
+  active: boolean
+  disabled?: boolean
+  label: React.ReactNode
+  onClick: () => void
+}
+
+function RadioRow({ active, disabled = false, label, onClick }: RadioRowProps) {
+  const theme = useTheme()
+  return (
+    <Box
+      component="button"
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        px: 0.75,
+        py: 0.5,
+        border: "none",
+        borderRadius: "6px",
+        cursor: disabled ? "default" : "pointer",
+        textAlign: "left",
+        background: active
+          ? theme.palette.interaction.selectedBackground
+          : "transparent",
+        color: disabled
+          ? theme.palette.grey[400]
+          : active
+            ? theme.palette.blue.bright
+            : theme.palette.text.primary,
+        fontSize: "0.8125rem",
+        opacity: disabled ? 0.6 : 1,
+        "&:hover:not(:disabled)": {
+          background: theme.palette.action.hover,
+        },
+      }}
+    >
+      {active ? (
+        <icons.RadioButtonChecked
+          sx={{ fontSize: "1rem", color: theme.palette.blue.bright }}
+        />
+      ) : (
+        <icons.RadioButtonUnchecked
+          sx={{ fontSize: "1rem", color: theme.palette.grey[400] }}
+        />
+      )}
+      {label}
+    </Box>
+  )
+}
+
+// --------------------------------------------------------------------
 // ResilienceControls
 // --------------------------------------------------------------------
 
@@ -366,18 +525,27 @@ export default function ResilienceControls({
     primaryOutcomeCode,
     compareOutcomeCodes,
     aggregateOver,
+    transposed,
+    reorderBySimilarity,
   } = controls
 
   const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
 
   // Tour anchors for the sentence phrases. Each anchor attaches
   // directly to the phrase's <button>, so the tour highlight lands on
-  // the clickable word rather than a wrapper. ChartTuner's trigger is
-  // threaded separately via its `triggerRef` prop.
+  // the clickable word rather than a wrapper.
   const pivotAnchorRef = useTourAnchor("resilience.pivot")
+  const axesAnchorRef = useTourAnchor("resilience.axes")
   const outcomesAnchorRef = useTourAnchor("resilience.outcomes")
   const encodingAnchorRef = useTourAnchor("resilience.encoding")
-  const moreOptionsAnchorRef = useTourAnchor("resilience.moreOptions")
+
+  useEffect(() => {
+    const enc = cellEncoding as string
+    if (enc === "density_opp" || enc === "density_risk") {
+      onChange({ cellEncoding: "tier", deltaMode: "none" })
+    }
+  }, [cellEncoding, onChange])
+
   const showResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.showResilienceOutcomeSelector,
   )
@@ -443,10 +611,7 @@ export default function ResilienceControls({
       const patch: Partial<ResilienceControlsState> = { view: next }
       if (
         next !== "aggregate" &&
-        (cellEncoding === "density_risk" ||
-          cellEncoding === "density_opp" ||
-          cellEncoding === "glyph" ||
-          cellEncoding === "leverage")
+        (cellEncoding === "glyph" || cellEncoding === "leverage")
       ) {
         patch.cellEncoding = "tier"
       }
@@ -455,19 +620,85 @@ export default function ResilienceControls({
     [view, cellEncoding, onChange],
   )
 
-  const handleAggregateOverChange = useCallback(
-    (next: AggregateOver) => {
-      if (aggregateOver === next) return
-      const patch: Partial<ResilienceControlsState> = { aggregateOver: next }
-      if (next === "outcomes" && cellEncoding === "leverage") {
-        patch.cellEncoding = "tier"
-      }
-      if (next === "hydroclimates" && deltaMode !== "none") {
-        patch.deltaMode = "none"
-      }
-      onChange(patch)
+  // Derive the current (xDim, yDim, zDim, zMode) from stored state.
+  // Only meaningful for the heatmap views; the quadrant branch
+  // returns early above the sentence header, so it never reads these.
+  const { zDim, zMode } = useMemo(
+    () => deriveZ(view, aggregateOver),
+    [view, aggregateOver],
+  )
+  const { xDim, yDim } = useMemo(
+    () => deriveXY(zDim, transposed),
+    [zDim, transposed],
+  )
+
+  // Z-role handlers. Writes flow back via applyZPatch which keeps
+  // the stored (view, aggregateOver) in sync with the user-facing
+  // (zDim, zMode) model and applies the same cross-field encoding
+  // guards as the pre-refactor view/aggregateOver setters.
+  const handleZPick = useCallback(
+    (nextDim: ZDim, nextMode?: ZMode) => {
+      const mode = nextMode ?? zMode
+      if (nextDim === zDim && mode === zMode) return
+      // Only reset transposed when the Z dim actually changes, because
+      // the canonical X/Y pair changes with it and the user's previous
+      // transpose intent no longer refers to the same axes.
+      const extra: Partial<ResilienceControlsState> =
+        nextDim === zDim ? {} : { transposed: false }
+      onChange(applyZPatch(nextDim, mode, controls, extra))
     },
-    [aggregateOver, cellEncoding, deltaMode, onChange],
+    [controls, onChange, zDim, zMode],
+  )
+
+  const handleZModeChange = useCallback(
+    (nextMode: ZMode) => {
+      if (nextMode === zMode) return
+      onChange(applyZPatch(zDim, nextMode, controls))
+    },
+    [controls, onChange, zDim, zMode],
+  )
+
+  // Clicking a dim in the X pill has three meaningful outcomes:
+  //   - picking the current X: no-op
+  //   - picking the current Y: transpose (swap X and Y)
+  //   - picking the current Z: promote Z into X, demote X into Z,
+  //     preserving Y. `transposed` is set so that canonical(newZ)
+  //     lands the user's picked dim on X and the current Y on Y.
+  const handleXPick = useCallback(
+    (nextDim: ZDim) => {
+      if (nextDim === xDim) return
+      if (nextDim === yDim) {
+        onChange({ transposed: !transposed })
+        return
+      }
+      const newZ = xDim
+      const needsTranspose = CANONICAL_X_FOR_Z[newZ] !== nextDim
+      onChange(
+        applyZPatch(newZ, zMode, controls, { transposed: needsTranspose }),
+      )
+    },
+    [controls, onChange, xDim, yDim, zMode, transposed],
+  )
+
+  // Mirror of handleXPick for the Y pill.
+  const handleYPick = useCallback(
+    (nextDim: ZDim) => {
+      if (nextDim === yDim) return
+      if (nextDim === xDim) {
+        onChange({ transposed: !transposed })
+        return
+      }
+      const newZ = yDim
+      // We want the current X to remain the X after rotation. The
+      // needsTranspose test asks: does the canonical X for the new Z
+      // already match our desired X? If yes, no transpose; if no,
+      // transpose.
+      const needsTranspose = CANONICAL_X_FOR_Z[newZ] !== xDim
+      onChange(
+        applyZPatch(newZ, zMode, controls, { transposed: needsTranspose }),
+      )
+    },
+    [controls, onChange, xDim, yDim, zMode, transposed],
   )
 
   const toggleHydroclimate = useCallback(
@@ -569,10 +800,11 @@ export default function ResilienceControls({
   )
   const [outcomesAnchor, setOutcomesAnchor] = useState<HTMLElement | null>(null)
   const [climatesAnchor, setClimatesAnchor] = useState<HTMLElement | null>(null)
-  const [pivotAnchor, setPivotAnchor] = useState<HTMLElement | null>(null)
+  const [xAnchor, setXAnchor] = useState<HTMLElement | null>(null)
+  const [yAnchor, setYAnchor] = useState<HTMLElement | null>(null)
+  const [zAnchor, setZAnchor] = useState<HTMLElement | null>(null)
 
   const isQuadrant = view === "quadrant"
-  const isAggregate = view === "aggregate"
   const readAs = deriveReadAs(view, cellEncoding, deltaMode)
 
   // --------------------------------------------------------------
@@ -595,14 +827,27 @@ export default function ResilienceControls({
       ? `all ${outcomeTotal} outcomes`
       : `${outcomeCount} of ${outcomeTotal} outcomes`
   const climatesLabel = allHcsSelected
-    ? "all climate futures"
+    ? "all hydroclimates"
     : selectedHydroclimates.size === 1
-      ? "1 climate future"
-      : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climate futures`
+      ? "1 hydroclimate"
+      : `${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} hydroclimates`
 
-  const pivotLabel = isAggregate
-    ? AGGREGATE_OVER_LABEL[aggregateOver]
-    : PIVOT_LABEL[view]
+  // When the user hasn't picked any scenarios and Z is set to facet
+  // over scenarios, the panel silently falls back to an aggregate
+  // across the library (otherwise there are no tiles to render). We
+  // mirror that effective behavior in the sentence label and Z
+  // popover so the user sees the chart they're actually getting
+  // rather than the literal stored (zMode = facet) state.
+  const zEffectivelyAggregate =
+    zMode === "facet" && zDim === "scenario" && scenarioCount === 0
+  const zDisplayMode: ZMode = zEffectivelyAggregate ? "aggregate" : zMode
+
+  const xDimLabel = DIM_LABEL_PLURAL[xDim]
+  const yDimLabel = DIM_LABEL_PLURAL[yDim]
+  const zPhraseLabel =
+    zDisplayMode === "facet"
+      ? `for each ${DIM_LABEL_SINGULAR[zDim]}`
+      : `averaged over ${DIM_LABEL_PLURAL[zDim]}`
 
   const cellSize = { fontSize: "0.8125rem" } as const
 
@@ -687,13 +932,23 @@ export default function ResilienceControls({
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
-        gap: 1,
+        flexDirection: "column",
+        gap: 0.75,
         py: 0.5,
         flex: 1,
         minWidth: 0,
+        alignSelf: "stretch",
       }}
     >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          minWidth: 0,
+          width: "100%",
+        }}
+      >
       <Typography
         variant="compactCaption"
         component="div"
@@ -710,13 +965,32 @@ export default function ResilienceControls({
         }}
       >
         <Box component="span" sx={{ color: theme.palette.grey[700], mr: 0.25 }}>
-          Showing
+          Comparing
         </Box>
         <PhraseButton
-          label={pivotLabel}
-          active={Boolean(pivotAnchor)}
-          onClick={(e) => setPivotAnchor(e.currentTarget)}
-          ariaLabel={`Chart pivot: ${pivotLabel}. Click to change what the chart is organized by.`}
+          label={xDimLabel}
+          active={Boolean(xAnchor)}
+          onClick={(e) => setXAnchor(e.currentTarget)}
+          ariaLabel={`Across axis: ${xDimLabel}. Click to change which dimension reads across each chart.`}
+          tourAnchorRef={axesAnchorRef}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
+          across
+        </Box>
+        <PhraseButton
+          label={yDimLabel}
+          active={Boolean(yAnchor)}
+          onClick={(e) => setYAnchor(e.currentTarget)}
+          ariaLabel={`Down axis: ${yDimLabel}. Click to change which dimension reads down each chart.`}
+        />
+        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
+          ,
+        </Box>
+        <PhraseButton
+          label={zPhraseLabel}
+          active={Boolean(zAnchor)}
+          onClick={(e) => setZAnchor(e.currentTarget)}
+          ariaLabel={`Chart pivot: ${zPhraseLabel}. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
           tourAnchorRef={pivotAnchorRef}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
@@ -745,10 +1019,10 @@ export default function ResilienceControls({
           label={climatesLabel}
           active={Boolean(climatesAnchor)}
           onClick={(e) => setClimatesAnchor(e.currentTarget)}
-          ariaLabel={`Climate futures on the chart: ${climatesLabel}. Click to change.`}
+          ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
         />
         <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          . Each cell is colored by its
+          , as{" "}
         </Box>
         <PhraseButton
           label={encodingLabel}
@@ -761,29 +1035,140 @@ export default function ResilienceControls({
           .
         </Box>
       </Typography>
+      </Box>
 
       <Box
         sx={{
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
-          flexShrink: 0,
-          // Style the ResilienceChartTuner's pill trigger to read as a
-          // "Configure" affordance without inventing a separate widget.
-          // The tuner owns its own open state + overlay positioning.
-          "& button[aria-haspopup='dialog']": {
-            borderRadius: "8px !important",
-            fontSize: "0.8125rem !important",
-            letterSpacing: "0 !important",
-            fontWeight: "500 !important",
-            textTransform: "none !important",
-          },
+          flexWrap: "wrap",
+          gap: 0.75,
+          rowGap: 0.5,
+          pl: 0,
         }}
       >
-        <ResilienceChartTuner
-          controls={controls}
-          onChange={onChange}
-          triggerRef={moreOptionsAnchorRef}
+        <Typography
+          variant="compactCaption"
+          sx={{
+            fontSize: "0.6875rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: theme.palette.grey[600],
+            flexShrink: 0,
+            mr: 0.25,
+          }}
+        >
+          Presets
+        </Typography>
+        {RESILIENCE_SALIENT_PRESETS.map((preset) => (
+          <Tooltip key={preset.id} title={preset.description} placement="top">
+            <Button
+              type="button"
+              size="small"
+              variant="outlined"
+              onClick={() => onChange(preset.getPatch(controls))}
+              aria-label={`${preset.label}. ${preset.description}`}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                lineHeight: 1.2,
+                py: 0.35,
+                px: 1,
+                minHeight: 30,
+                borderColor: theme.palette.grey[300],
+                color: theme.palette.grey[800],
+                backgroundColor: theme.palette.common.white,
+                boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+                "&:hover": {
+                  borderColor: theme.palette.grey[400],
+                  backgroundColor: theme.palette.grey[50],
+                },
+              }}
+            >
+              {preset.label}
+            </Button>
+          </Tooltip>
+        ))}
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 0.75,
+        }}
+      >
+        <Typography
+          variant="compactCaption"
+          sx={{
+            fontSize: "0.6875rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: theme.palette.grey[600],
+            flexShrink: 0,
+            mr: 0.25,
+          }}
+        >
+          Rows
+        </Typography>
+        <InlineToggleChip
+          label="Group similar rows"
+          active={reorderBySimilarity}
+          onClick={() => onChange({ reorderBySimilarity: !reorderBySimilarity })}
+          ariaLabel={
+            reorderBySimilarity
+              ? "Row order: similar scenarios grouped. Click to use default order."
+              : "Row order: default. Click to group similar scenarios together."
+          }
         />
+        <Button
+          type="button"
+          size="small"
+          variant="outlined"
+          onClick={() => onChange({ transposed: !transposed })}
+          aria-pressed={transposed}
+          aria-label={
+            transposed
+              ? "Rows and columns switched. Click to use the default row and column layout."
+              : "Switch which dimension runs down the rows versus across the columns."
+          }
+          sx={{
+            ml: 0.25,
+            borderRadius: "10px",
+            textTransform: "none",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            lineHeight: 1.2,
+            py: 0.35,
+            px: 1,
+            minHeight: 30,
+            borderColor: transposed
+              ? theme.palette.blue.bright
+              : theme.palette.grey[300],
+            color: transposed
+              ? theme.palette.blue.bright
+              : theme.palette.grey[800],
+            backgroundColor: transposed
+              ? theme.palette.interaction.selectedBackground
+              : theme.palette.common.white,
+            boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+            "&:hover": {
+              borderColor: transposed
+                ? theme.palette.blue.dark
+                : theme.palette.grey[400],
+              backgroundColor: transposed
+                ? theme.palette.interaction.selectedBackground
+                : theme.palette.grey[50],
+            },
+          }}
+        >
+          Switch rows and columns
+        </Button>
       </Box>
 
       {/* Popover: Encoding (Read as) */}
@@ -1117,8 +1502,8 @@ export default function ResilienceControls({
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="Which climate futures?"
-          subtitle={`${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} climate futures on the chart.`}
+          title="Which hydroclimates?"
+          subtitle={`${selectedHydroclimates.size} of ${RESILIENCE_HYDROCLIMATES.length} hydroclimates on the chart.`}
           width={280}
         >
           <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
@@ -1142,95 +1527,136 @@ export default function ResilienceControls({
         </PopoverShell>
       </Popover>
 
-      {/* Popover: Pivot (heatmap layout) */}
+      {/* Popover: X dim (Across axis) */}
       <Popover
-        open={Boolean(pivotAnchor)}
-        anchorEl={pivotAnchor}
-        onClose={() => setPivotAnchor(null)}
+        open={Boolean(xAnchor)}
+        anchorEl={xAnchor}
+        onClose={() => setXAnchor(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <PopoverShell
-          title="What the chart is organized by"
-          subtitle="Pick the dimension the chart pivots on. Each non-aggregate pivot renders as small multiples, one tile per item; aggregate collapses the dimension into a mean."
-          width={320}
+          title="Across axis"
+          subtitle="Pick the dimension that reads across each chart. Picking the down-axis dimension swaps the two axes; picking the pivot dimension rotates it into the across role."
+          width={300}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-            {PIVOT_ORDER.map((mode) => {
-              const active = view === mode
-              return (
-                <Box
-                  key={mode}
-                  component="button"
-                  type="button"
-                  onClick={() => handleViewChange(mode)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    px: 0.75,
-                    py: 0.5,
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    background: active
-                      ? theme.palette.interaction.selectedBackground
-                      : "transparent",
-                    color: active
-                      ? theme.palette.blue.bright
-                      : theme.palette.text.primary,
-                    fontSize: "0.8125rem",
-                    "&:hover": {
-                      background: theme.palette.action.hover,
-                    },
-                  }}
-                >
-                  {active ? (
-                    <icons.RadioButtonChecked
-                      sx={{
-                        fontSize: "1rem",
-                        color: theme.palette.blue.bright,
-                      }}
-                    />
-                  ) : (
-                    <icons.RadioButtonUnchecked
-                      sx={{
-                        fontSize: "1rem",
-                        color: theme.palette.grey[400],
-                      }}
-                    />
-                  )}
-                  {PIVOT_LABEL[mode]}
-                </Box>
-              )
-            })}
-          </Box>
-          {isAggregate && (
-            <>
-              <Divider sx={{ borderColor: theme.palette.divider }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.7rem",
-                  color: theme.palette.grey[700],
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
+            {ALL_DIMS.map((dim) => (
+              <RadioRow
+                key={dim}
+                active={xDim === dim}
+                label={DIM_LABEL_PLURAL[dim]}
+                onClick={() => {
+                  handleXPick(dim)
+                  setXAnchor(null)
                 }}
-              >
-                Average across
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                {AGGREGATE_OVER_ORDER.map((axis) => (
-                  <InlineToggleChip
-                    key={axis}
-                    label={AGGREGATE_OVER_LABEL[axis]}
-                    active={aggregateOver === axis}
-                    onClick={() => handleAggregateOverChange(axis)}
-                  />
-                ))}
-              </Box>
-            </>
+              />
+            ))}
+          </Box>
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Y dim (Down axis) */}
+      <Popover
+        open={Boolean(yAnchor)}
+        anchorEl={yAnchor}
+        onClose={() => setYAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="Down axis"
+          subtitle="Pick the dimension that reads down each chart. Picking the across-axis dimension swaps the two axes; picking the pivot dimension rotates it into the down role."
+          width={300}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            {ALL_DIMS.map((dim) => (
+              <RadioRow
+                key={dim}
+                active={yDim === dim}
+                label={DIM_LABEL_PLURAL[dim]}
+                onClick={() => {
+                  handleYPick(dim)
+                  setYAnchor(null)
+                }}
+              />
+            ))}
+          </Box>
+        </PopoverShell>
+      </Popover>
+
+      {/* Popover: Z dim + mode (the "third" role) */}
+      <Popover
+        open={Boolean(zAnchor)}
+        anchorEl={zAnchor}
+        onClose={() => setZAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <PopoverShell
+          title="What the chart is built around"
+          subtitle="Pick the dimension the chart is arranged around, and whether it shows one tile per item or a single averaged chart."
+          width={340}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: "0.7rem",
+              color: theme.palette.grey[700],
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Arrange by
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            {ALL_DIMS.map((dim) => (
+              <RadioRow
+                key={dim}
+                active={zDim === dim}
+                label={DIM_LABEL_PLURAL[dim]}
+                onClick={() => handleZPick(dim)}
+              />
+            ))}
+          </Box>
+          <Divider sx={{ borderColor: theme.palette.divider }} />
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: "0.7rem",
+              color: theme.palette.grey[700],
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Show as
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            <RadioRow
+              active={zDisplayMode === "facet"}
+              label={`small multiples, one chart per ${DIM_LABEL_SINGULAR[zDim]}`}
+              onClick={() => handleZModeChange("facet")}
+            />
+            <RadioRow
+              active={zDisplayMode === "aggregate"}
+              label={`a single chart, averaged across ${DIM_LABEL_PLURAL[zDim]}`}
+              onClick={() => handleZModeChange("aggregate")}
+            />
+          </Box>
+          {zEffectivelyAggregate && (
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: "0.72rem",
+                color: theme.palette.grey[600],
+                lineHeight: 1.35,
+                mt: 0.25,
+              }}
+            >
+              No scenarios are picked in the sidebar, so the chart is showing
+              the aggregate across the whole library. Pick a scenario to see
+              one chart per scenario.
+            </Typography>
           )}
         </PopoverShell>
       </Popover>

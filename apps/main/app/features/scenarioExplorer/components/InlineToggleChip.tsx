@@ -18,12 +18,15 @@ export function InlineToggleChip({
   active,
   onClick,
   onDarkBackground = false,
+  ariaLabel,
 }: {
   label: string
   active: boolean
   onClick: () => void
   /** Opaque light fill so the chip reads on dark toast / panel backgrounds. */
   onDarkBackground?: boolean
+  /** If set, used for `aria-label` instead of `label` (e.g. longer state help). */
+  ariaLabel?: string
 }) {
   const theme = useTheme()
   const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
@@ -41,7 +44,7 @@ export function InlineToggleChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      aria-label={label}
+      aria-label={ariaLabel ?? label}
       sx={{
         display: "inline-flex",
         alignItems: "center",

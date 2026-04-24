@@ -83,7 +83,7 @@ export type ShareItem =
   | {
       id: string
       type: "resilience"
-      /** Which cell encoding was used, e.g. "tier" | "delta" | "density_risk" | ... */
+      /** Which cell encoding was used, e.g. "tier" | "delta" | "distribution" | ... */
       cellEncoding: string
       /** Which top-level view was active, e.g. "scenario" | "outcome" | "aggregate" */
       view: string

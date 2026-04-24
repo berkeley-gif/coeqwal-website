@@ -2,9 +2,10 @@
 
 /**
  * How-to-read body for the resilience heatmap tool. Reframed around
- * the three primary modes in the mode rail (Scenario, Outcome,
- * Overview), with Leverage teed up at the end as a secondary analysis
- * surface reached from More analysis.
+ * the three primary Z-role picks in the sentence header ("scenarios
+ * as small multiples", "outcomes as small multiples", "averaged
+ * across the library"), with Leverage teed up at the end as a
+ * secondary analysis surface reached from More analysis.
  */
 
 import React, { useState } from "react"
@@ -51,8 +52,8 @@ export function ResilienceHowToRead() {
 
       <AnnotatedStage
         eyebrow="STEP 1"
-        title="Scenarios mode: selection in, small multiples out."
-        deck="Pin scenarios in the sidebar and Scenarios mode renders one tile per selection, each with the nine aggregate outcomes down the Y axis and three hydroclimate columns across the X. With nothing selected, the chart falls through to the Overview aggregate across all 24 scenarios. When the mean for an outcome hides important North/South differences, unfold its row from Regional detail."
+        title="Scenarios as small multiples: selection in, tiles out."
+        deck="Pin scenarios in the sidebar and picking scenario as the third dimension renders one tile per selection, each with the nine aggregate outcomes down the Y axis and three hydroclimate columns across the X. With nothing selected, the chart falls through to the library aggregate across all 24 scenarios. When the mean for an outcome hides important North/South differences, unfold its row from Regional detail."
         visual={<ResilienceHeroGraphic showAllScenarios={demoShowAll} />}
         accentColor={theme.palette.blue.bright}
         minHeight={420}
@@ -108,8 +109,8 @@ export function ResilienceHowToRead() {
 
       <AnnotatedStage
         eyebrow="STEP 2"
-        title="Outcome mode: pick one outcome, let the sidebar choose the rows."
-        deck="Pick a primary outcome in the Outcome control and the matrix becomes scenarios down the Y axis. Sidebar selection filters which scenarios appear as rows; with nothing selected, all 24 scenarios show. Compare adds small multiples for additional outcomes so you can track one climate question across the field."
+        title="Outcomes as small multiples: pick one, let the sidebar choose the rows."
+        deck="Pick outcome as the third dimension and the matrix becomes scenarios down the Y axis, one tile per outcome. Sidebar selection filters which scenarios appear as rows; with nothing selected, all 24 scenarios show. Compare adds more outcome tiles so you can track one climate question across the field."
         visual={<EncodingModesGraphic />}
         accentColor={theme.palette.blue.bright}
         minHeight={380}

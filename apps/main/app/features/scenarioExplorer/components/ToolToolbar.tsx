@@ -4,7 +4,8 @@
  * ToolToolbar. Shared toolbar rendered above the active tool content.
  *
  * Always shows: search + visibility toggle chips + view controls (outcome
- * view, map, locations, climate).
+ * view, map, locations, climate). Resilience mode omits the global
+ * hydroclimate chooser; that tool controls hydroclimates in chart controls.
  *
  * When `gridAligned` is true (list mode), uses CSS Grid that aligns
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
@@ -55,6 +56,8 @@ export default function ToolToolbar({
     seenHowToRead,
     markHowToReadSeen,
   } = useScenarioExplorerStore()
+
+  const showToolbarHydroclimateChooser = exploreMode !== "resilience"
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
@@ -126,7 +129,7 @@ export default function ToolToolbar({
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
   // And the resilience tour uses the same non-list row to orient the
-  // user on the shared toolbar (hydroclimate + map).
+  // user on the shared toolbar (map; no global hydroclimate chooser).
   const resilienceViewAreaTourRef = useTourAnchor("resilience.viewArea")
   // One DOM node serves both the Radar climate-chip tour and the new
   // List hydroclimate tour step. Merge callback refs so both registries
@@ -251,44 +254,48 @@ export default function ToolToolbar({
         </Typography>
       </Box>
 
-      <VerticalDivider />
+      {showToolbarHydroclimateChooser && (
+        <>
+          <VerticalDivider />
 
-      <Box
-        ref={climateMergedRef}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          flexWrap: "wrap",
-        }}
-      >
-        <Typography
-          variant="dashboard"
-          sx={{
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            whiteSpace: "nowrap",
-          }}
-        >
-          View by climate
-        </Typography>
-        <HydroclimateChooser
-          layout="horizontal"
-          showTitle={false}
-          showLabels={false}
-          hideDisabled
-          iconSize="28px"
-          iconFontSize="1rem"
-          value={hydroclimate}
-          onChange={setHydroclimate}
-        />
-        {!showMap && hydroBadge && (
-          <HydroclimateBadge
-            title={hydroBadge.title}
-            accentColor={hydroBadge.accentColor}
-          />
-        )}
-      </Box>
+          <Box
+            ref={climateMergedRef}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              flexWrap: "wrap",
+            }}
+          >
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                whiteSpace: "nowrap",
+              }}
+            >
+              View by climate
+            </Typography>
+            <HydroclimateChooser
+              layout="horizontal"
+              showTitle={false}
+              showLabels={false}
+              hideDisabled
+              iconSize="28px"
+              iconFontSize="1rem"
+              value={hydroclimate}
+              onChange={setHydroclimate}
+            />
+            {!showMap && hydroBadge && (
+              <HydroclimateBadge
+                title={hydroBadge.title}
+                accentColor={hydroBadge.accentColor}
+              />
+            )}
+          </Box>
+        </>
+      )}
     </>
   )
 

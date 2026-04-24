@@ -327,7 +327,7 @@ function ScenarioExplorerInner() {
   // below does not need to depend on it.
   const radarChartToolbarRef = useTourAnchor("radar.chartToolbar")
   // Same pattern for the resilience tour: the whole chart-controls
-  // row (sentence + ChartTuner + save snapshot) is introduced as a
+  // row (sentence, presets, display, + save snapshot) is introduced as a
   // single orientation step before the sentence pieces.
   const resilienceChartToolbarRef = useTourAnchor("resilience.chartToolbar")
   const resilienceSnapshotRef = useTourAnchor("resilience.snapshot")

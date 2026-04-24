@@ -8,7 +8,6 @@
  * parent). Supports multiple cell-encoding modes:
  *   - "tier":         categorical tier fill + continuous value label.
  *   - "delta":        diverging fill around 0, signed value label.
- *   - "density_risk": monochrome red ramp over fraction-at-risk (0..1).
  *   - "density_opp":  monochrome green ramp over fraction-acceptable (0..1).
  *   - "glyph":        sub-tile grid (one tile per scenario in distribution).
  *
@@ -30,7 +29,6 @@ import { useResizeObserver } from "../hooks/useResizeObserver"
 export type ResilienceCellRender =
   | "tier"
   | "delta"
-  | "density_risk"
   | "density_opp"
   | "glyph"
   | "distribution"
@@ -39,6 +37,11 @@ export type ResilienceCellRender =
 export interface ResilienceAxisItem {
   key: string
   label: string
+  /**
+   * When `label` is shortened for layout, the native SVG `<title>` on the
+   * tick can still show the full name (X-axis column ticks).
+   */
+  fullLabel?: string
   /** Shown in the axis-label tooltip (if provided). */
   definitionTooltip?: string
 }
@@ -78,7 +81,7 @@ export interface ResilienceHeatmapCell {
   type?: "single_value" | "multi_value" | "nod_sod"
   /** Signed delta value (tier units); used when cellRender === "delta". */
   divergingValue?: number | null
-  /** Fraction 0..1; used when cellRender === "density_risk" / "density_opp". */
+  /** Fraction 0..1; used when cellRender === "density_opp". */
   densityValue?: number | null
   /** Per-scenario tier values; used when cellRender === "glyph". */
   distribution?: ReadonlyArray<ResilienceGlyphEntry>
@@ -126,9 +129,6 @@ export interface ResilienceHeatmapPalette {
   divergingZero: string
   divergingPosWeak: string
   divergingPosStrong: string
-  /** Monochrome ramp anchors for density_risk (0% .. 100%). */
-  densityRiskMin: string
-  densityRiskMax: string
   /** Monochrome ramp anchors for density_opp (0% .. 100%). */
   densityOppMin: string
   densityOppMax: string
@@ -241,6 +241,33 @@ const COLUMN_GROUP_BAND = 24
 const X_AXIS_LABEL_RESERVE = 32
 const HATCH_ID = "resilience-unavailable-hatch"
 
+/**
+ * Truncate end-aligned y-axis tick text so it fits in the left margin.
+ * Preserves a leading space indent (e.g. NOD / SOD rows). Returns
+ * whether the string was shortened so the caller can add a native
+ * `<title>` with the full label.
+ */
+function truncateResilienceYAxisTick(
+  textEl: SVGTextElement,
+  maxWidth: number,
+): boolean {
+  if (textEl.getComputedTextLength() <= maxWidth) return false
+  const full = textEl.textContent ?? ""
+  const m = /^( +)/.exec(full)
+  const prefix = m?.[1] ?? ""
+  let rest = full.slice(prefix.length)
+  for (;;) {
+    textEl.textContent = prefix + rest + "…"
+    if (textEl.getComputedTextLength() <= maxWidth) {
+      return true
+    }
+    if (rest.length === 0) {
+      return true
+    }
+    rest = rest.slice(0, -1)
+  }
+}
+
 function clampTier(value: number): 1 | 2 | 3 | 4 {
   return Math.min(4, Math.max(1, Math.round(value))) as 1 | 2 | 3 | 4
 }
@@ -281,15 +308,11 @@ function divergingColor(
   return interpolateRgb(palette.divergingPosWeak, palette.divergingPosStrong)(t)
 }
 
-function densityColor(
+function densityOppColor(
   fraction: number,
-  mode: "risk" | "opp",
   palette: ResilienceHeatmapPalette,
 ): string {
   const t = clamp(fraction, 0, 1)
-  if (mode === "risk") {
-    return interpolateRgb(palette.densityRiskMin, palette.densityRiskMax)(t)
-  }
   return interpolateRgb(palette.densityOppMin, palette.densityOppMax)(t)
 }
 
@@ -466,17 +489,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           return { fill, text, textColor }
         }
 
-        if (cellRender === "density_risk") {
-          const dv = cell.densityValue ?? 0
-          const fill = densityColor(dv, "risk", palette)
-          const text = formatPercent(dv)
-          const textColor = dv >= 0.6 ? onDarkTier : onLightTier
-          return { fill, text, textColor }
-        }
-
         if (cellRender === "density_opp") {
           const dv = cell.densityValue ?? 0
-          const fill = densityColor(dv, "opp", palette)
+          const fill = densityOppColor(dv, palette)
           const text = formatPercent(dv)
           const textColor = dv >= 0.6 ? onDarkTier : onLightTier
           return { fill, text, textColor }
@@ -553,8 +568,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           valueText = cell.unavailableReason ?? "No data"
         } else if (cellRender === "delta" && cell.divergingValue != null) {
           valueText = `Δ tier ${formatDelta(cell.divergingValue)}`
-        } else if (cellRender === "density_risk" && cell.densityValue != null) {
-          valueText = `${formatPercent(cell.densityValue)} at Tier 3+`
         } else if (cellRender === "density_opp" && cell.densityValue != null) {
           valueText = `${formatPercent(cell.densityValue)} at Tier 2 or better`
         } else if (cellRender === "leverage" && cell.leverageValue != null) {
@@ -660,8 +673,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       (event: MouseEvent, item: ResilienceAxisItem) => {
         const el = axisTooltipRef.current
         if (!el || !item.definitionTooltip) return
+        const headline = item.fullLabel ?? item.label
         el.innerHTML = `
-          <div style="font-weight:600;color:${paletteText};margin-bottom:4px">${escapeHtml(item.label)}</div>
+          <div style="font-weight:600;color:${paletteText};margin-bottom:4px">${escapeHtml(headline)}</div>
           <div style="color:${paletteText}">${escapeHtml(item.definitionTooltip)}</div>
         `
         el.style.display = "block"
@@ -1032,10 +1046,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               let fill: string
               if (cellRender === "delta") {
                 fill = divergingColor(val, palette)
-              } else if (cellRender === "density_risk") {
-                fill = densityColor(val, "risk", palette)
               } else if (cellRender === "density_opp") {
-                fill = densityColor(val, "opp", palette)
+                fill = densityOppColor(val, palette)
               } else if (cellRender === "leverage") {
                 fill = leverageColor(val, palette)
               } else {
@@ -1047,8 +1059,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 const label =
                   cellRender === "delta"
                     ? formatDelta(val)
-                    : cellRender === "density_risk" ||
-                        cellRender === "density_opp"
+                    : cellRender === "density_opp"
                       ? formatPercent(val)
                       : cellRender === "leverage"
                         ? formatLeverage(val)
@@ -1107,10 +1118,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               let fill: string
               if (cellRender === "delta") {
                 fill = divergingColor(val, palette)
-              } else if (cellRender === "density_risk") {
-                fill = densityColor(val, "risk", palette)
               } else if (cellRender === "density_opp") {
-                fill = densityColor(val, "opp", palette)
+                fill = densityOppColor(val, palette)
               } else if (cellRender === "leverage") {
                 fill = leverageColor(val, palette)
               } else {
@@ -1122,8 +1131,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 const label =
                   cellRender === "delta"
                     ? formatDelta(val)
-                    : cellRender === "density_risk" ||
-                        cellRender === "density_opp"
+                    : cellRender === "density_opp"
                       ? formatPercent(val)
                       : cellRender === "leverage"
                         ? formatLeverage(val)
@@ -1162,6 +1170,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
         // Y axis (rows)
         const yAxis = g.append("g").attr("class", "resilience-y-axis")
+        const yAxisTickMaxW = MARGIN.left - 16
         rows.forEach((row) => {
           const y = (yScale(row.key) ?? 0) + bandH / 2
           const label = formatRowTickRef.current(row)
@@ -1182,6 +1191,18 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 : null,
             )
             .text(label)
+
+          const textEl = node.node()
+          if (textEl) {
+            const truncated = truncateResilienceYAxisTick(textEl, yAxisTickMaxW)
+            const wantNativeTitle =
+              truncated ||
+              (row.fullLabel != null &&
+                row.fullLabel.trim() !== label.trim())
+            if (wantNativeTitle) {
+              node.append("title").text(row.fullLabel ?? label)
+            }
+          }
 
           if (row.definitionTooltip) {
             node
@@ -1227,6 +1248,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 : null,
             )
             .text(col.label)
+
+          if (col.fullLabel && col.fullLabel !== col.label) {
+            node.append("title").text(col.fullLabel)
+          }
 
           if (col.definitionTooltip) {
             node
@@ -1424,29 +1449,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
             .text("No data")
-        } else if (
-          cellRender === "density_risk" ||
-          cellRender === "density_opp"
-        ) {
+        } else if (cellRender === "density_opp") {
           const barW = 220
           const barH = 10
-          const gradId =
-            cellRender === "density_risk"
-              ? "resilience-density-risk-gradient"
-              : "resilience-density-opp-gradient"
+          const gradId = "resilience-density-opp-gradient"
           const grad = defs
             .append("linearGradient")
             .attr("id", gradId)
             .attr("x1", "0%")
             .attr("x2", "100%")
-          const minC =
-            cellRender === "density_risk"
-              ? palette.densityRiskMin
-              : palette.densityOppMin
-          const maxC =
-            cellRender === "density_risk"
-              ? palette.densityRiskMax
-              : palette.densityOppMax
+          const minC = palette.densityOppMin
+          const maxC = palette.densityOppMax
           grad.append("stop").attr("offset", "0%").attr("stop-color", minC)
           grad.append("stop").attr("offset", "100%").attr("stop-color", maxC)
 
@@ -1459,10 +1472,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("rx", 2)
             .attr("fill", `url(#${gradId})`)
 
-          const labelText =
-            cellRender === "density_risk"
-              ? "fraction at Tier 3+"
-              : "fraction at Tier 2 or better"
+          const labelText = "fraction at Tier 2 or better"
           const ticks: [number, string][] = [
             [0, "0%"],
             [barW / 2, "50%"],

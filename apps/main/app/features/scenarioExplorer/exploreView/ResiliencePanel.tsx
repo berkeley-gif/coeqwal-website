@@ -8,7 +8,6 @@
  * of several modes:
  *   - tier:    categorical tier fill + continuous mean value.
  *   - delta:   diverging fill around 0 with signed delta vs a baseline.
- *   - density: fraction of scenarios at Tier 3+ (risk) or Tier 2- (opp).
  *   - glyph:   sub-tile grid inside each cell, one tile per scenario.
  *
  * Control state is lifted to ScenarioExplorer.tsx; this panel only
@@ -67,14 +66,13 @@ import {
   getOutcomeDefinition,
   type OutcomeCode,
 } from "../../../content/outcomes"
-import { hydroclimateOptions } from "../../../content/scenarios"
+import {
+  hydroclimateOptions,
+  HYDROCLIMATE_SHORT_LABELS,
+} from "../../../content/scenarios"
 import { TIER_LABELS, getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import { useTourAnchor } from "../tour/TourAnchorContext"
-// ResilienceChartTuner is intentionally not imported: the "TUNE
-// CHART" entry point is hidden for now while the controls settle.
-// Re-import and re-mount below when we want to bring it back.
-// import ResilienceChartTuner from "./ResilienceChartTuner"
 
 export type ResilienceView =
   | "scenario"
@@ -105,7 +103,6 @@ export type AggregateOver = "scenarios" | "outcomes" | "hydroclimates"
  * Cell encoding selects how each cell's fill / value is computed and drawn.
  * - `tier`: categorical tier color + arithmetic mean value (current default).
  * - `delta`: diverging color around 0, fed by `deltaMode`.
- * - `density_risk`: fraction of scenarios in Tier 3+ (red ramp, aggregate view only).
  * - `density_opp`: fraction in Tier 2- (green ramp, aggregate view only).
  * - `glyph`: sub-tile grid inside each cell, one tile per scenario
  *   (aggregate view only, legacy).
@@ -118,7 +115,6 @@ export type AggregateOver = "scenarios" | "outcomes" | "hydroclimates"
 export type CellEncoding =
   | "tier"
   | "delta"
-  | "density_risk"
   | "density_opp"
   | "glyph"
   | "distribution"
@@ -208,9 +204,9 @@ interface ResiliencePanelProps {
   onScenarioHover?: (scenarioId: string | null) => void
   /**
    * Optional callback for mutating the shared control state. When
-   * provided, a "TUNE CHART" entry point renders in the upper-left of
-   * the chart area; when omitted, the button is suppressed (useful for
-   * read-only previews of the panel).
+   * provided, the floating corner toolbar (transpose and display menu)
+   * renders on the chart; when omitted, it is hidden (read-only
+   * previews).
    */
   onControlsChange?: (next: Partial<ResilienceControlsState>) => void
 }
@@ -281,13 +277,14 @@ function transposeTile(
 
 /**
  * Resolve the effective viz-level cell renderer from the logical state.
- * Density / glyph are aggregate-only. Some encodings become incoherent
- * when the aggregate view reduces over outcomes (mixed units across
- * rows) or hydroclimates (no "historical" reference column):
+ * Glyph, distribution, and legacy density_opp are aggregate-only. Some
+ * encodings become incoherent when the aggregate view reduces over
+ * outcomes (mixed units across rows) or hydroclimates (no "historical"
+ * reference column):
  *
  *   - `aggregateOver=outcomes`: disable `leverage` and (implicitly)
- *     `delta` - fall back to tier. Density and distribution still work
- *     because they operate on tier levels which are unit-free.
+ *     `delta` - fall back to tier. Distribution still works because it
+ *     operates on tier levels which are unit-free.
  *   - `aggregateOver=hydroclimates`: `deltaMode` is forced to `none` in
  *     the value fn, so there's no delta to resolve here; all other
  *     encodings are left alone.
@@ -299,7 +296,7 @@ function resolveCellRender(
   aggregateOver: AggregateOver = "scenarios",
 ): ResilienceCellRender {
   if (view === "aggregate") {
-    if (encoding === "density_risk" || encoding === "density_opp") {
+    if (encoding === "density_opp") {
       return encoding
     }
     if (encoding === "glyph") return "glyph"
@@ -367,9 +364,7 @@ export default function ResiliencePanel({
     (s) => s.resilienceDistributionMode,
   )
 
-  // The TUNE CHART entry point (and the walkthrough it opens) is
-  // hidden for now. Leaving the wiring commented-out below so we can
-  // restore it without rebuilding the plumbing.
+  // Legacy walkthrough-open state (unused; guide lives in ResilienceControls).
   // const [walkthroughOpen, setWalkthroughOpen] = useState(false)
 
   // Effective per-view scenario scope. Mirrors the radar-panel pattern:
@@ -421,6 +416,26 @@ export default function ResiliencePanel({
     isLoading,
     error,
   } = useResilienceMatrix()
+
+  /**
+   * Heatmap axis ticks use the API `shortCode` (e.g. s0020) so dense
+   * columns of scenarios stay legible; `fullLabel` and optional
+   * `definitionTooltip` carry the long name and description for hover.
+   */
+  const resolveScenarioAxisItem = useCallback(
+    (sid: string): ResilienceAxisItem => {
+      const s = scenarios.find((x) => x.scenarioId === sid)
+      const full = getDisplayName(sid)
+      return {
+        key: sid,
+        label: s?.shortCode ?? sid,
+        fullLabel: full,
+        definitionTooltip:
+          s?.description && s.description.length > 0 ? s.description : undefined,
+      }
+    },
+    [scenarios, getDisplayName],
+  )
 
   const {
     showOutcomeOnMap,
@@ -482,8 +497,6 @@ export default function ResiliencePanel({
   const divZero = theme.palette.tierDiverging.zero
   const divPosWeak = theme.palette.tierDiverging.posWeak
   const divPosStrong = theme.palette.tierDiverging.posStrong
-  const densRiskMin = theme.palette.tierDensity.riskMin
-  const densRiskMax = theme.palette.tierDensity.riskMax
   const densOppMin = theme.palette.tierDensity.oppMin
   const densOppMax = theme.palette.tierDensity.oppMax
   const leverageMin = theme.palette.tierLeverage.min
@@ -507,8 +520,6 @@ export default function ResiliencePanel({
       divergingZero: divZero,
       divergingPosWeak: divPosWeak,
       divergingPosStrong: divPosStrong,
-      densityRiskMin: densRiskMin,
-      densityRiskMax: densRiskMax,
       densityOppMin: densOppMin,
       densityOppMax: densOppMax,
       leverageMin,
@@ -527,8 +538,6 @@ export default function ResiliencePanel({
       divZero,
       divPosWeak,
       divPosStrong,
-      densRiskMin,
-      densRiskMax,
       densOppMin,
       densOppMax,
       leverageMin,
@@ -544,11 +553,16 @@ export default function ResiliencePanel({
   const hydroclimateColumns: ResilienceAxisItem[] = useMemo(() => {
     return hydroclimates
       .filter((hc) => selectedHydroclimates.has(hc))
-      .map((hc) => ({
-        key: hc,
-        label: HYDROCLIMATE_LABELS[hc] ?? hc,
-        definitionTooltip: HYDROCLIMATE_DESCRIPTIONS[hc],
-      }))
+      .map((hc) => {
+        const long = HYDROCLIMATE_LABELS[hc] ?? hc
+        const short = HYDROCLIMATE_SHORT_LABELS[hc] ?? long
+        return {
+          key: hc,
+          label: short,
+          fullLabel: short !== long ? long : undefined,
+          definitionTooltip: HYDROCLIMATE_DESCRIPTIONS[hc],
+        }
+      })
   }, [hydroclimates, selectedHydroclimates])
 
   // Scenario-as-columns axis. Used by the aggregate view when
@@ -562,20 +576,13 @@ export default function ResiliencePanel({
       selectedScenarios.length > 0
         ? selectedScenarios
         : scenarioIds
-    return ids.map((sid) => ({
-      key: sid,
-      label: getDisplayName(sid),
-      definitionTooltip:
-        scenarios.find((s) => s.scenarioId === sid)?.description ||
-        getDisplayName(sid),
-    }))
+    return ids.map((sid) => resolveScenarioAxisItem(sid))
   }, [
     effectiveView,
     aggregateScope,
     selectedScenarios,
     scenarioIds,
-    scenarios,
-    getDisplayName,
+    resolveScenarioAxisItem,
   ])
 
   // Main column axis used by the single-heatmap render path (the
@@ -986,14 +993,6 @@ export default function ResiliencePanel({
         rowLabel: rowLabels[rowKey] ?? rowKey,
       }
 
-      if (cellEncoding === "density_risk") {
-        return {
-          ...baseCell,
-          densityValue: agg.riskDensity,
-          available: true,
-          signal: agg.riskDensity,
-        }
-      }
       if (cellEncoding === "density_opp") {
         return {
           ...baseCell,
@@ -1359,15 +1358,8 @@ export default function ResiliencePanel({
   }, [showAllScenarios, scenarioRowIdsAll, selectedScenarios])
 
   const byOutcomeRows = useMemo<ResilienceAxisItem[]>(
-    () =>
-      byOutcomeScenarioRowIds.map((sid) => ({
-        key: sid,
-        label: getDisplayName(sid),
-        definitionTooltip:
-          scenarios.find((s) => s.scenarioId === sid)?.description ||
-          getDisplayName(sid),
-      })),
-    [byOutcomeScenarioRowIds, getDisplayName, scenarios],
+    () => byOutcomeScenarioRowIds.map((sid) => resolveScenarioAxisItem(sid)),
+    [byOutcomeScenarioRowIds, resolveScenarioAxisItem],
   )
 
   const computeOutcomeTileCell = useCallback(
@@ -1471,14 +1463,8 @@ export default function ResiliencePanel({
   // way the by-outcome gallery does.
   const byHydroclimateColumnItems = useMemo<ResilienceAxisItem[]>(
     () =>
-      byHydroclimateScenarioColIds.map((sid) => ({
-        key: sid,
-        label: getDisplayName(sid),
-        definitionTooltip:
-          scenarios.find((s) => s.scenarioId === sid)?.description ||
-          getDisplayName(sid),
-      })),
-    [byHydroclimateScenarioColIds, getDisplayName, scenarios],
+      byHydroclimateScenarioColIds.map((sid) => resolveScenarioAxisItem(sid)),
+    [byHydroclimateScenarioColIds, resolveScenarioAxisItem],
   )
 
   const byHydroclimateRows = useMemo<ResilienceAxisItem[]>(
@@ -1582,7 +1568,9 @@ export default function ResiliencePanel({
     const tiles: ResilienceSmallMultiplesTile[] = []
     for (const hc of hydroclimates) {
       if (!selectedHydroclimates.has(hc)) continue
-      const title = HYDROCLIMATE_LABELS[hc] ?? hc
+      const longHydroLabel = HYDROCLIMATE_LABELS[hc] ?? hc
+      const tileTitle =
+        HYDROCLIMATE_SHORT_LABELS[hc] ?? longHydroLabel
       const tileCells: ResilienceHeatmapCell[] = []
       for (const rk of outcomeRowCodes) {
         const rl = getOutcomeName(rk)
@@ -1592,7 +1580,7 @@ export default function ResiliencePanel({
             rk,
             hc,
             rl,
-            title,
+            longHydroLabel,
             getDisplayName(sid),
           )
           if (c) tileCells.push(c)
@@ -1600,7 +1588,7 @@ export default function ResiliencePanel({
       }
       tiles.push({
         id: hc,
-        title,
+        title: tileTitle,
         subtitle: HYDROCLIMATE_DESCRIPTIONS[hc],
         cells: tileCells,
       })
@@ -1990,11 +1978,17 @@ export default function ResiliencePanel({
 
   const formatRowTick = useCallback(
     (row: ResilienceAxisItem) => {
-      if (view === "outcome") return row.label
+      const label =
+        row.key === "FW_EXP"
+          ? "Delta export freshwater"
+          : row.key === "FW_DELTA_USES"
+            ? "In-Delta freshwater"
+            : row.label
+      if (view === "outcome") return label
       if ((NOD_SOD_OUTCOME_CODES as readonly string[]).includes(row.key)) {
-        return `  ${row.label}`
+        return `  ${label}`
       }
-      return row.label
+      return label
     },
     [view],
   )
@@ -2060,14 +2054,8 @@ export default function ResiliencePanel({
     return () => document.removeEventListener("keydown", onKey)
   }, [expandedTile, handleBackToGrid])
 
-  const handleToggleTranspose = useCallback(() => {
-    onControlsChange?.({ transposed: !transposed })
-  }, [onControlsChange, transposed])
-
-  // Floating chart-corner toolbar: overflow menu with display options
-  // (reorder-by-similarity, show cell numbers). The transpose action is
-  // a dedicated IconButton next to it so the most-reached-for action
-  // doesn't hide in a menu.
+  // Floating chart-corner toolbar: overflow menu with show cell values.
+  // Transpose lives in chart controls (Rows row).
   const [displayMenuAnchor, setDisplayMenuAnchor] =
     useState<HTMLElement | null>(null)
   const handleOpenDisplayMenu = useCallback(
@@ -2082,10 +2070,6 @@ export default function ResiliencePanel({
   const handleToggleShowCellNumbers = useCallback(() => {
     onControlsChange?.({ showCellNumbers: !showCellNumbers })
   }, [onControlsChange, showCellNumbers])
-  const handleToggleReorderBySimilarity = useCallback(() => {
-    onControlsChange?.({ reorderBySimilarity: !reorderBySimilarity })
-  }, [onControlsChange, reorderBySimilarity])
-  // Walkthrough handler disabled alongside the TUNE CHART entry point.
   // const handleOpenWalkthrough = useCallback(() => {
   //   setWalkthroughOpen(true)
   // }, [])
@@ -2162,7 +2146,7 @@ export default function ResiliencePanel({
   // (see `ResilienceHeatmap`'s `firstCellRef` prop), so the tour can
   // point at an actual tile rather than the surrounding chart wrapper.
   // The `resilience.cornerControls` anchor sits on the floating
-  // transpose + display-options toolbar rendered below.
+  // display-options toolbar rendered below.
   const cellAnchorRef = useTourAnchor("resilience.cell")
   const cornerControlsAnchorRef = useTourAnchor("resilience.cornerControls")
 
@@ -2270,23 +2254,6 @@ export default function ResiliencePanel({
           >
             <IconButton
               size="small"
-              onClick={handleToggleTranspose}
-              aria-label={
-                transposed
-                  ? "Swap rows and columns (active)"
-                  : "Swap rows and columns"
-              }
-              title="Swap rows and columns"
-              sx={{
-                color: transposed
-                  ? theme.palette.blue.bright
-                  : theme.palette.grey[700],
-              }}
-            >
-              <icons.SwapHoriz fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
               onClick={handleOpenDisplayMenu}
               aria-label="Display options"
               aria-haspopup="menu"
@@ -2315,19 +2282,6 @@ export default function ResiliencePanel({
                   sx={{ p: 0 }}
                 />
                 Show cell values
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  handleToggleReorderBySimilarity()
-                }}
-                sx={{ fontSize: "0.8125rem", gap: 1 }}
-              >
-                <Checkbox
-                  size="small"
-                  checked={reorderBySimilarity}
-                  sx={{ p: 0 }}
-                />
-                Reorder rows by similarity
               </MenuItem>
             </Menu>
           </Box>
@@ -2941,14 +2895,18 @@ function ExpandedTileView({
  * ResiliencePanelTitle - two-line header rendered at the top of the
  * chart area.
  *
- * Line 1 (title) names the chart in a short noun phrase (the pivot
- * dimension as small multiples, the aggregate framing, or the
- * leverage scatter). Line 2 (subtitle) spells out the scope of the
- * subject the chart exhibits (how many scenarios / outcomes / climate
- * futures, or the aggregation axis). This is orthogonal to the
- * sentence-header control bar above the chart, which narrates the
- * current configuration: title = what the chart IS, sentence = how
- * you are currently looking at it.
+ * Line 1 (title) names the chart as a noun phrase anchored on the
+ * Third-role dimension ("Scenarios as small multiples", "Averaged
+ * across outcomes", etc.). Line 2 (subtitle) spells out the scope
+ * of the subject the chart exhibits (how many scenarios / outcomes
+ * / hydroclimates). This is orthogonal to the sentence-header
+ * control bar above the chart, which narrates the current
+ * configuration: title = what the chart IS, sentence = how you are
+ * currently looking at it.
+ *
+ * The title follows the same Z-dim / Z-mode framing that the
+ * sentence header uses (see `ResilienceControls`), so the two
+ * headers stay in lockstep as the user rotates the permutation.
  */
 function ResiliencePanelTitle({
   view,
@@ -2965,30 +2923,53 @@ function ResiliencePanelTitle({
 }) {
   const theme = useTheme()
 
+  // Local copy of the Z-role derivation so the title doesn't have
+  // to import from ResilienceControls. Must stay in sync with the
+  // adapter over there.
+  type ZDim = "scenario" | "outcome" | "hydroclimate"
+  type ZMode = "facet" | "aggregate"
+  const AGGREGATE_OVER_TO_ZDIM: Record<AggregateOver, ZDim> = {
+    scenarios: "scenario",
+    outcomes: "outcome",
+    hydroclimates: "hydroclimate",
+  }
+  const DIM_PLURAL_TITLECASE: Record<ZDim, string> = {
+    scenario: "Scenarios",
+    outcome: "Outcomes",
+    hydroclimate: "Hydroclimates",
+  }
+  const DIM_PLURAL_LOWER: Record<ZDim, string> = {
+    scenario: "scenarios",
+    outcome: "outcomes",
+    hydroclimate: "hydroclimates",
+  }
+
   let title: string
   let subtitle: string
 
   if (view === "quadrant") {
     title = "Leverage"
     subtitle = "Climate sensitivity against operational range"
-  } else if (view === "aggregate") {
-    const aggregateNoun: Record<AggregateOver, string> = {
-      scenarios: "scenarios",
-      outcomes: "outcomes",
-      hydroclimates: "climate futures",
-    }
-    title = "Aggregate across the library"
-    subtitle = `Averaged across ${aggregateNoun[aggregateOver]}`
   } else {
-    const pivotTitle: Record<
-      Exclude<ResilienceView, "aggregate" | "quadrant">,
-      string
-    > = {
-      scenario: "One chart per scenario",
-      outcome: "One chart per outcome",
-      hydroclimate: "One chart per climate future",
-    }
-    title = pivotTitle[view]
+    const zDim: ZDim =
+      view === "aggregate"
+        ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
+        : (view as ZDim)
+    const zMode: ZMode = view === "aggregate" ? "aggregate" : "facet"
+
+    // Mirror the sentence header's empty-selection fallback so the
+    // title reads aggregate when the panel is actually showing the
+    // library aggregate.
+    const effectiveMode: ZMode =
+      zMode === "facet" && zDim === "scenario" && scenarioCount === 0
+        ? "aggregate"
+        : zMode
+
+    title =
+      effectiveMode === "facet"
+        ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
+        : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
+
     const scopeBits: string[] = []
     if (scenarioCount > 0) {
       scopeBits.push(
@@ -2999,7 +2980,7 @@ function ResiliencePanelTitle({
     }
     scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
     scopeBits.push(
-      `${climateCount} climate future${climateCount === 1 ? "" : "s"}`,
+      `${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`,
     )
     subtitle = scopeBits.join(" · ")
   }
