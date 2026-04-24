@@ -1030,10 +1030,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 .attr("dominant-baseline", "central")
                 .attr(
                   "font-size",
-                  Math.max(
-                    8,
-                    Math.min(Math.min(bandW, bandH) * 0.36, 14),
-                  ),
+                  Math.max(8, Math.min(Math.min(bandW, bandH) * 0.36, 14)),
                 )
                 .attr("font-weight", 600)
                 .attr("fill", resolved.textColor)
@@ -1227,8 +1224,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             const truncated = truncateResilienceYAxisTick(textEl, yAxisTickMaxW)
             const wantNativeTitle =
               truncated ||
-              (row.fullLabel != null &&
-                row.fullLabel.trim() !== label.trim())
+              (row.fullLabel != null && row.fullLabel.trim() !== label.trim())
             if (wantNativeTitle) {
               node.append("title").text(row.fullLabel ?? label)
             }

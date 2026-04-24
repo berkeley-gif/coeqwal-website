@@ -746,15 +746,13 @@ export default function OutcomeMorphOverlay({
     const heatmapAvailW = Math.max(1, rightColRight - heatmapLeft)
     const cellW = Math.min(
       HEAT_MAX_CELL_W,
-      heatmapAvailW /
-        (numColumns + (numColumns - 1) * HEAT_COL_GAP_FRACTION),
+      heatmapAvailW / (numColumns + (numColumns - 1) * HEAT_COL_GAP_FRACTION),
     )
     const columnGap = cellW * HEAT_COL_GAP_FRACTION
     const availableH = panelHeight * 0.8
     const cellH = Math.min(44, availableH / Math.max(N, 1))
     const totalH = N * cellH
-    const columnTop =
-      panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
+    const columnTop = panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
     // `ResilienceHeatmap` uses d3's `scaleBand().padding(0.08)`, which
     // reserves ~8% of bandwidth between cells. Mirror that by shrinking
     // each cell target by an inset on both width and height so rows
@@ -773,8 +771,7 @@ export default function OutcomeMorphOverlay({
     for (let c = 0; c < numColumns; c++) {
       columnCx.push(heatmapLeft + cellW / 2 + c * stride)
     }
-    const groupW =
-      numColumns * cellW + (numColumns - 1) * columnGap
+    const groupW = numColumns * cellW + (numColumns - 1) * columnGap
     // Kept for consumers that want a "center of the heatmap column
     // group" coordinate. No longer equals `panelLeft + rightWidth/2`
     // now that the heatmap is left-aligned rather than centered in the
@@ -795,7 +792,13 @@ export default function OutcomeMorphOverlay({
     for (let i = 0; i < N; i++) {
       const group = outcomeShapes[i]!
       const cy = columnTop + (i + 0.5) * cellH
-      cells.push({ code: group.code, cx: columnCx[0]!, cy, w: innerW, h: innerH })
+      cells.push({
+        code: group.code,
+        cx: columnCx[0]!,
+        cy,
+        w: innerW,
+        h: innerH,
+      })
     }
 
     // Per-extra-column cell list, keyed by column index (0 = first
@@ -804,7 +807,14 @@ export default function OutcomeMorphOverlay({
     const extraColumns: Array<{
       label: string
       cx: number
-      cells: Array<{ code: string; cx: number; cy: number; w: number; h: number; fill: string }>
+      cells: Array<{
+        code: string
+        cx: number
+        cy: number
+        w: number
+        h: number
+        fill: string
+      }>
     }> = []
     const tierColors = theme.palette.tiers
     for (let c = 0; c < numExtras; c++) {

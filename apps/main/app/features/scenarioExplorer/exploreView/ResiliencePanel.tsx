@@ -533,7 +533,9 @@ export default function ResiliencePanel({
         label: s?.shortCode ?? sid,
         fullLabel: full,
         definitionTooltip:
-          s?.description && s.description.length > 0 ? s.description : undefined,
+          s?.description && s.description.length > 0
+            ? s.description
+            : undefined,
       }
     },
     [scenarios, getDisplayName],
@@ -1633,9 +1635,7 @@ export default function ResiliencePanel({
       tiles.push({
         id: hc,
         title: longHydroLabel,
-        titleTooltip: desc
-          ? `${longHydroLabel}\n${desc}`
-          : longHydroLabel,
+        titleTooltip: desc ? `${longHydroLabel}\n${desc}` : longHydroLabel,
         cells: tileCells,
       })
     }
@@ -2326,11 +2326,7 @@ export default function ResiliencePanel({
       const { dataUrl } = await captureElementToBlob(el)
       const view = effectiveViewRef.current
       let rowsOut: ResilienceChartDataRow[]
-      let tileScope:
-        | "panel"
-        | "scenario"
-        | "outcome"
-        | "hydroclimate" = "panel"
+      let tileScope: "panel" | "scenario" | "outcome" | "hydroclimate" = "panel"
       if (view === "scenario") {
         rowsOut = byScenarioTilesRef.current.flatMap((t) =>
           cellsToRows(t.cells).map((r) => ({
@@ -2708,9 +2704,7 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={
-                    onControlsChange ? handleTileExpand : undefined
-                  }
+                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
@@ -2739,9 +2733,7 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={
-                    onControlsChange ? handleTileExpand : undefined
-                  }
+                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>
@@ -2771,9 +2763,7 @@ export default function ResiliencePanel({
                   onSquareClick={(info) =>
                     handleSquareClick({ cell: info.cell, entry: info.entry })
                   }
-                  onTileExpand={
-                    onControlsChange ? handleTileExpand : undefined
-                  }
+                  onTileExpand={onControlsChange ? handleTileExpand : undefined}
                   renderTileActions={renderTileShareAction}
                 />
               </BrowseShell>

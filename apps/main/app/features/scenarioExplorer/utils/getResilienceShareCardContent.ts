@@ -40,9 +40,7 @@ const PANEL_VIEW_HEADLINE: Record<string, string> = {
   hydroclimate: "By hydroclimate",
 }
 
-function isQuadrantChartData(
-  d: unknown,
-): d is ResilienceQuadrantChartData {
+function isQuadrantChartData(d: unknown): d is ResilienceQuadrantChartData {
   return (
     typeof d === "object" &&
     d !== null &&
@@ -62,9 +60,7 @@ function isHeatmapChartData(d: unknown): d is ResilienceHeatmapChartData {
 
 function encodingLabel(cellEncoding: string): string {
   if (cellEncoding === "quadrant") return "Quadrant"
-  return cellEncoding
-    .replace(/_/g, " ")
-    .replace(/^./, (c) => c.toUpperCase())
+  return cellEncoding.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())
 }
 
 function isFullHydroSelection(hydroclimates: string[]): boolean {
@@ -142,7 +138,10 @@ export function getResilienceShareCardContent(
     : undefined
 
   const hydroChip = buildHydroChip(item.hydroclimates, lookups.hydroShortLabel)
-  const scenarioChip = buildScenarioChip(item.scenarioIds, lookups.scenarioLabel)
+  const scenarioChip = buildScenarioChip(
+    item.scenarioIds,
+    lookups.scenarioLabel,
+  )
   const outcomeChip = buildOutcomeChip(item.outcomeCodes, lookups.outcomeLabel)
   const chips = [hydroChip, scenarioChip, outcomeChip]
   if (item.view !== "quadrant" && item.showCellNumbers) {
@@ -213,8 +212,7 @@ export function getResilienceShareCardContent(
     headline = kind ? `${kind}: ${label}` : label
   } else {
     const viewSource = heatmapCached?.view ?? item.view
-    const viewKey =
-      viewSource in PANEL_VIEW_HEADLINE ? viewSource : "aggregate"
+    const viewKey = viewSource in PANEL_VIEW_HEADLINE ? viewSource : "aggregate"
     const viewPhrase =
       PANEL_VIEW_HEADLINE[viewKey] ?? PANEL_VIEW_HEADLINE.aggregate
     headline = `Resilience · full panel · ${viewPhrase}`

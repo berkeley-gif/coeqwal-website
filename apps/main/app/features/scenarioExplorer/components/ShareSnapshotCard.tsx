@@ -158,7 +158,7 @@ export default function ShareSnapshotCard({
           />
         </Box>
       ) : (
-        liveChart ?? null
+        (liveChart ?? null)
       )}
 
       {(chips.length > 0 || climateOption) && (

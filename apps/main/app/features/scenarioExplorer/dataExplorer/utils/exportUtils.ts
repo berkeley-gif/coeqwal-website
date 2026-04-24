@@ -301,14 +301,7 @@ function resilienceHeatmapDataToCSV(
   data: ResilienceHeatmapChartDataShape,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
-  const header = [
-    "Row",
-    "Column",
-    "Tier",
-    "Value",
-    "Delta",
-    "Count",
-  ]
+  const header = ["Row", "Column", "Tier", "Value", "Delta", "Count"]
   const lines: string[] = []
   if (data.tileLabel) {
     lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)

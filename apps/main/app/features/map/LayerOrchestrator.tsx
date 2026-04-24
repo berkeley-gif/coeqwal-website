@@ -49,8 +49,7 @@ export default function LayerOrchestrator() {
   const showSalmonRiversInExplore =
     mapMode === "explore" &&
     activeOutcomeVisualization?.outcomeCode === "WRC_SALMON_AB"
-  const riversVisible =
-    (isLearnMode && showRivers) || showSalmonRiversInExplore
+  const riversVisible = (isLearnMode && showRivers) || showSalmonRiversInExplore
 
   // Rivers progress:
   // - Learn mode: animated via scroll (0 -> 1)

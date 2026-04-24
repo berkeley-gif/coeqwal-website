@@ -115,7 +115,8 @@ function HighlightRing({ anchorEl }: { anchorEl: Element | null }) {
           boxShadow: `0 0 0 4px ${alpha(theme.palette.blue.bright, 0.18)}`,
           pointerEvents: "none",
           zIndex: theme.zIndex.modal - 1,
-          transition: "top 120ms ease, left 120ms ease, width 120ms ease, height 120ms ease",
+          transition:
+            "top 120ms ease, left 120ms ease, width 120ms ease, height 120ms ease",
         }}
       />
     </Portal>
@@ -191,9 +192,7 @@ export default function ToolTour() {
   const setHighlightBaseline = useScenarioExplorerStore(
     (s) => s.setHighlightBaseline,
   )
-  const setShowRadarRange = useScenarioExplorerStore(
-    (s) => s.setShowRadarRange,
-  )
+  const setShowRadarRange = useScenarioExplorerStore((s) => s.setShowRadarRange)
 
   const { resolve, version } = useTourAnchorResolver()
 

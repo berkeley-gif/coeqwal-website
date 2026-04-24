@@ -249,9 +249,7 @@ export default function RadarPanel({
       pendingAxisPositionsRef.current = null
       axisPositionsTimerRef.current = null
       if (!next) return
-      setAxisPositions((prev) =>
-        axisPositionsEqual(prev, next) ? prev : next,
-      )
+      setAxisPositions((prev) => (axisPositionsEqual(prev, next) ? prev : next))
     }, 50)
   }, [])
 

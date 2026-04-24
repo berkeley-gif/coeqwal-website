@@ -171,8 +171,7 @@ export default function ShareResilienceLiveChart({
     return out
   }, [rows, columns, cells, scenarioIds.length])
 
-  const showLoading =
-    isLoading && matrix.scenarioIds.length === 0 && !error
+  const showLoading = isLoading && matrix.scenarioIds.length === 0 && !error
 
   if (showLoading) {
     return (

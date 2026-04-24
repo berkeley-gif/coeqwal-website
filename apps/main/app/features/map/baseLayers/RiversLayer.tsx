@@ -109,8 +109,7 @@ export default function RiversLayer({
   const activeOutcomeViz = useActiveOutcomeVisualization()
   const mapMode = useMapMode()
   const isExploreMode = mapMode === "explore"
-  const isSalmonOutcome =
-    activeOutcomeViz?.outcomeCode === "WRC_SALMON_AB"
+  const isSalmonOutcome = activeOutcomeViz?.outcomeCode === "WRC_SALMON_AB"
 
   // Get visualization color for Salmon abundance outcome (no camera side effects)
   const sacramentoColor = useSalmonRiverColor()
@@ -138,9 +137,7 @@ export default function RiversLayer({
   const troughTargetOpacity = hideRiversForOtherOutcomeViz ? 0 : 0.6
   const lineTargetOpacity = hideRiversForOtherOutcomeViz ? 0 : 1
   // Tier body: always alpha 1 when we have a salmon result; outline white is thinned in opacity.
-  const sacBodyLineOpacity = hasSalmonTierColor
-    ? 1
-    : lineTargetOpacity
+  const sacBodyLineOpacity = hasSalmonTierColor ? 1 : lineTargetOpacity
   const sacOutlineLineOpacity = hasSalmonTierColor
     ? SALMON_OUTLINE_WHITE_OPACITY
     : lineTargetOpacity

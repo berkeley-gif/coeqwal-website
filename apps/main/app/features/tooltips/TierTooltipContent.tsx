@@ -33,10 +33,7 @@ interface TierTooltipContentProps {
 }
 
 // Format description text with bold markdown (**text**)
-const formatDescription = (
-  text: string,
-  emphasisWeight: number = 700,
-) => {
+const formatDescription = (text: string, emphasisWeight: number = 700) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {

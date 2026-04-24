@@ -471,9 +471,9 @@ function WaterThemesPanelContent({
               }}
             >
               Water is important to all of us — from farmers in the Central
-              Valley to communities in the Delta, from salmon in the
-              Sacramento River to urban water users in Los Angeles. We can
-              consider how decisions affect the issues people care about.
+              Valley to communities in the Delta, from salmon in the Sacramento
+              River to urban water users in Los Angeles. We can consider how
+              decisions affect the issues people care about.
             </Typography>
           </Box>
         </motion.div>

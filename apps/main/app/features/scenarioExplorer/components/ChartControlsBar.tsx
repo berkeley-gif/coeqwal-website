@@ -16,8 +16,10 @@ interface ChartControlsBarProps {
   children: React.ReactNode
 }
 
-const ChartControlsBar = React.forwardRef<HTMLDivElement, ChartControlsBarProps>(
-  function ChartControlsBar({ children }, ref) {
+const ChartControlsBar = React.forwardRef<
+  HTMLDivElement,
+  ChartControlsBarProps
+>(function ChartControlsBar({ children }, ref) {
   const theme = useTheme()
 
   return (
@@ -68,7 +70,6 @@ const ChartControlsBar = React.forwardRef<HTMLDivElement, ChartControlsBarProps>
       </Box>
     </Box>
   )
-  },
-)
+})
 
 export default ChartControlsBar

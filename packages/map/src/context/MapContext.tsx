@@ -150,8 +150,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
           typeof transitionOptions.easing === "function"
             ? transitionOptions.easing
             : DEFAULT_TRANSITION.easing,
-        essential:
-          transitionOptions.essential ?? DEFAULT_TRANSITION.essential,
+        essential: transitionOptions.essential ?? DEFAULT_TRANSITION.essential,
       })
     } else if (
       args.length >= 3 &&
@@ -386,19 +385,16 @@ export function MapProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const setFilter = useCallback<MapOperationsAPI["setFilter"]>(
-    (id, filter) => {
-      const map = mapRef.current?.getMap()
-      if (!map || !map.getLayer(id)) return
-      try {
-        // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
-        map.setFilter(id, filter)
-      } catch (err) {
-        console.error(`Failed to set filter for layer '${id}':`, err)
-      }
-    },
-    [],
-  )
+  const setFilter = useCallback<MapOperationsAPI["setFilter"]>((id, filter) => {
+    const map = mapRef.current?.getMap()
+    if (!map || !map.getLayer(id)) return
+    try {
+      // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
+      map.setFilter(id, filter)
+    } catch (err) {
+      console.error(`Failed to set filter for layer '${id}':`, err)
+    }
+  }, [])
 
   const project = useCallback<MapOperationsAPI["project"]>((lng, lat) => {
     const map = mapRef.current?.getMap()

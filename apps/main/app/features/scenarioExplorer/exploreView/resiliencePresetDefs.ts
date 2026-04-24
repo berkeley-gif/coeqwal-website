@@ -47,8 +47,7 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
       id: "browse-all-scenarios",
       group: "Browse",
       label: "All scenarios",
-      description:
-        "Scenarios as small multiples · pin a few tiles to compare.",
+      description: "Scenarios as small multiples · pin a few tiles to compare.",
       salient: true,
       getPatch: () => ({
         view: "scenario",

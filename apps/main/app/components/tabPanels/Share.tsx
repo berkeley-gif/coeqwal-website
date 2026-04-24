@@ -109,8 +109,7 @@ function encodeShareItems(
       // Scope: tileScope / tileId / tileLabel and cachedChartData /
       // cachedImageDataUrl are not encoded. Round-tripped items rehydrate
       // with partial context (same as other tools without full capture).
-      const num =
-        item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
+      const num = item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
       return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}${num}`
     }
     return ""

@@ -126,7 +126,11 @@ export default function ListTourControlIllustration({
               }}
             >
               <ToggleChip label="definitions" active onClick={NOOP} />
-              <ToggleChip label="key operations" active={false} onClick={NOOP} />
+              <ToggleChip
+                label="key operations"
+                active={false}
+                onClick={NOOP}
+              />
               <ToggleChip label="selected only" active={false} onClick={NOOP} />
             </Box>
           ),

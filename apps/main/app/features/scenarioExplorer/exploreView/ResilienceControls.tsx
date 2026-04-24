@@ -201,10 +201,7 @@ const CANONICAL_Y_FOR_Z: Record<ZDim, ZDim> = {
   hydroclimate: "outcome",
 }
 
-function deriveXY(
-  zDim: ZDim,
-  transposed: boolean,
-): { xDim: ZDim; yDim: ZDim } {
+function deriveXY(zDim: ZDim, transposed: boolean): { xDim: ZDim; yDim: ZDim } {
   const cx = CANONICAL_X_FOR_Z[zDim]
   const cy = CANONICAL_Y_FOR_Z[zDim]
   return transposed ? { xDim: cy, yDim: cx } : { xDim: cx, yDim: cy }
@@ -868,79 +865,94 @@ export default function ResilienceControls({
           width: "100%",
         }}
       >
-      <Typography
-        variant="compactCaption"
-        component="div"
-        sx={{
-          fontSize: "0.875rem",
-          lineHeight: 1.7,
-          color: theme.palette.grey[800],
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 0.25,
-          minWidth: 0,
-          flex: 1,
-        }}
-      >
-        <PhraseButton
-          label={zPhraseLabelLeading}
-          active={Boolean(zAnchor)}
-          onClick={(e) => setZAnchor(e.currentTarget)}
-          ariaLabel={`Chart pivot: ${zPhraseLabel}. This is the biggest lever on the chart. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
-          tourAnchorRef={pivotAnchorRef}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          , comparing
-        </Box>
-        <PhraseButton
-          label={xDimLabel}
-          active={Boolean(xAnchor)}
-          onClick={(e) => setXAnchor(e.currentTarget)}
-          ariaLabel={`Across axis: ${xDimLabel}. Click to change which dimension reads across each chart.`}
-          tourAnchorRef={axesAnchorRef}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          across
-        </Box>
-        <PhraseButton
-          label={yDimLabel}
-          active={Boolean(yAnchor)}
-          onClick={(e) => setYAnchor(e.currentTarget)}
-          ariaLabel={`Down axis: ${yDimLabel}. Click to change which dimension reads down each chart.`}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          , covering
-        </Box>
-        <PhraseButton
-          label={scenariosLabel}
-          active={Boolean(scenariosAnchor)}
-          onClick={(e) => setScenariosAnchor(e.currentTarget)}
-          ariaLabel={`Scenarios on the chart: ${scenariosLabel}. Click for details.`}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[500], mx: 0.25 }}>
-          ,
-        </Box>
-        <PhraseButton
-          label={outcomesLabel}
-          active={Boolean(outcomesAnchor)}
-          onClick={(e) => setOutcomesAnchor(e.currentTarget)}
-          ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
-          tourAnchorRef={outcomesAnchorRef}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[700], mx: 0.25 }}>
-          , and
-        </Box>
-        <PhraseButton
-          label={climatesLabel}
-          active={Boolean(climatesAnchor)}
-          onClick={(e) => setClimatesAnchor(e.currentTarget)}
-          ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
-        />
-        <Box component="span" sx={{ color: theme.palette.grey[700] }}>
-          , as average tier.
-        </Box>
-      </Typography>
+        <Typography
+          variant="compactCaption"
+          component="div"
+          sx={{
+            fontSize: "0.875rem",
+            lineHeight: 1.7,
+            color: theme.palette.grey[800],
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 0.25,
+            minWidth: 0,
+            flex: 1,
+          }}
+        >
+          <PhraseButton
+            label={zPhraseLabelLeading}
+            active={Boolean(zAnchor)}
+            onClick={(e) => setZAnchor(e.currentTarget)}
+            ariaLabel={`Chart pivot: ${zPhraseLabel}. This is the biggest lever on the chart. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
+            tourAnchorRef={pivotAnchorRef}
+          />
+          <Box
+            component="span"
+            sx={{ color: theme.palette.grey[700], mx: 0.25 }}
+          >
+            , comparing
+          </Box>
+          <PhraseButton
+            label={xDimLabel}
+            active={Boolean(xAnchor)}
+            onClick={(e) => setXAnchor(e.currentTarget)}
+            ariaLabel={`Across axis: ${xDimLabel}. Click to change which dimension reads across each chart.`}
+            tourAnchorRef={axesAnchorRef}
+          />
+          <Box
+            component="span"
+            sx={{ color: theme.palette.grey[700], mx: 0.25 }}
+          >
+            across
+          </Box>
+          <PhraseButton
+            label={yDimLabel}
+            active={Boolean(yAnchor)}
+            onClick={(e) => setYAnchor(e.currentTarget)}
+            ariaLabel={`Down axis: ${yDimLabel}. Click to change which dimension reads down each chart.`}
+          />
+          <Box
+            component="span"
+            sx={{ color: theme.palette.grey[700], mx: 0.25 }}
+          >
+            , covering
+          </Box>
+          <PhraseButton
+            label={scenariosLabel}
+            active={Boolean(scenariosAnchor)}
+            onClick={(e) => setScenariosAnchor(e.currentTarget)}
+            ariaLabel={`Scenarios on the chart: ${scenariosLabel}. Click for details.`}
+          />
+          <Box
+            component="span"
+            sx={{ color: theme.palette.grey[500], mx: 0.25 }}
+          >
+            ,
+          </Box>
+          <PhraseButton
+            label={outcomesLabel}
+            active={Boolean(outcomesAnchor)}
+            onClick={(e) => setOutcomesAnchor(e.currentTarget)}
+            ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
+            tourAnchorRef={outcomesAnchorRef}
+          />
+          <Box
+            component="span"
+            sx={{ color: theme.palette.grey[700], mx: 0.25 }}
+          >
+            , and
+          </Box>
+          <PhraseButton
+            label={climatesLabel}
+            active={Boolean(climatesAnchor)}
+            onClick={(e) => setClimatesAnchor(e.currentTarget)}
+            ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
+          />
+          <Box component="span" sx={{ color: theme.palette.grey[700] }}>
+            , as average tier.
+          </Box>
+        </Typography>
       </Box>
 
       <Box
@@ -1027,7 +1039,9 @@ export default function ResilienceControls({
         <InlineToggleChip
           label="Group similar rows"
           active={reorderBySimilarity}
-          onClick={() => onChange({ reorderBySimilarity: !reorderBySimilarity })}
+          onClick={() =>
+            onChange({ reorderBySimilarity: !reorderBySimilarity })
+          }
           ariaLabel={
             reorderBySimilarity
               ? "Row order: similar scenarios grouped. Click to use default order."
@@ -1463,13 +1477,12 @@ export default function ResilienceControls({
               }}
             >
               No scenarios are picked in the sidebar, so the chart is showing
-              the aggregate across the whole library. Pick a scenario to see
-              one chart per scenario.
+              the aggregate across the whole library. Pick a scenario to see one
+              chart per scenario.
             </Typography>
           )}
         </PopoverShell>
       </Popover>
-
     </Box>
   )
 }
