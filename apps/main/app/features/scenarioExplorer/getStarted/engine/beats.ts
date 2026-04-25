@@ -241,7 +241,7 @@ const BEAT0_ENTRY: BeatTableEntry = {
     // `BeatTextOverlay` registers via `ctx.narrationTickRef`. Hosted
     // under the first beat because actor windows are independent of
     // beat checkpoints and narration has no natural "owner" beat.
-    // Half-open `[0, 1)` matches engine convention; the final tick
+    // Half-open `[0, 1)` matches engine convention. The final tick
     // at v=1 is harmless because narration opacity curves have
     // already latched to their final values well before v approaches 1.
     {

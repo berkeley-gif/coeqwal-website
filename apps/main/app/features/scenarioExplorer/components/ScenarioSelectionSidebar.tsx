@@ -139,19 +139,12 @@ export default function ScenarioSelectionSidebar({
     return map
   }, [orderedScenarios, themeSubheaderMode])
 
-  // The sidebar is a tour anchor for the resilience tour ("sidebar
-  // drives the small multiples"). The radar tour also highlights the
-  // sidebar as a high-level orientation step; merge both ids onto the
-  // same DOM node so either registry resolves to the same outer Box.
-  // Equity does not step through it.
-  const resilienceSidebarAnchorRef = useTourAnchor("resilience.sidebar")
   const radarSidebarAnchorRef = useTourAnchor("radar.sidebar")
   const sidebarAnchorRef = useCallback(
     (el: HTMLElement | null) => {
-      resilienceSidebarAnchorRef(el)
       if (exploreMode === "radar") radarSidebarAnchorRef(el)
     },
-    [resilienceSidebarAnchorRef, radarSidebarAnchorRef, exploreMode],
+    [radarSidebarAnchorRef, exploreMode],
   )
 
   // Separate anchor for the "search + visibility chips" strip inside
@@ -257,7 +250,7 @@ export default function ScenarioSelectionSidebar({
           const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
           const isSearchMatch =
             isSearchActive && matchingScenarioIds.has(scenario.scenarioId)
-          // Match StrategyGridRow: search hit = white + blue ring; other rows = #faf8f5 (no opacity dim)
+          // Match StrategyGridRow: search hit = white + blue ring. Other rows = #faf8f5 (no opacity dim)
           const color = scenarioColors?.[scenario.scenarioId]
           const accentColor = color || theme.palette.blue.bright
           const isActive =

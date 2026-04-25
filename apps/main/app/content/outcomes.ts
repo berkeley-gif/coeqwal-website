@@ -334,9 +334,9 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   ENV_FLOWS: {
     tier1:
-      "**Functional Ecosystem** Functional flows to sustain native freshwater species in 90% of years; Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
+      "**Functional Ecosystem** Functional flows to sustain native freshwater species in 90% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
     tier2:
-      "**Modified Functional Flows** Partial functional flows in wet season and spring; full functional flows in summer in 75% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
+      "**Modified Functional Flows** Partial functional flows in wet season and spring. Full functional flows in summer in 75% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
     tier3:
       "**Existing Flow Requirements** CalSim minimum flow constraints for Baseline Scenario in 50% of years",
     tier4: "**No function** none of the above thresholds met",

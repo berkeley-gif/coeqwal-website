@@ -41,8 +41,8 @@ All tools are rendered inside `UnifiedToolLayout`, which provides a persistent t
 [Sidebar (optional, 320-480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
 ```
 
-- **Sidebar** (optional): `ScenarioSelectionSidebar`. Scenario checkboxes, theme filter, pinning. Shown in non-list modes; omitted in list mode.
-- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips (Definitions, Baselines, Key ops, Chosen only), distribution toggle, show-map toggle, location picker, hydroclimate chooser. In list mode, uses CSS Grid aligned with `StrategyGrid` columns; in other modes, uses inline flex layout.
+- **Sidebar** (optional): `ScenarioSelectionSidebar`. Scenario checkboxes, theme filter, pinning. Shown in non-list modes. Omitted in list mode.
+- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips (Definitions, Baselines, Key ops, Chosen only), distribution toggle, show-map toggle, location picker, hydroclimate chooser. In list mode, uses CSS Grid aligned with `StrategyGrid` columns. In other modes, uses inline flex layout.
 - **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
@@ -263,7 +263,7 @@ For developers porting an external visualization:
 - [ ] **Fetch data via hooks**.use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
 - [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click. For map visualization, use `mapActions.setOutcomeVisualization()` (see "Map integration" below).
 - [ ] **Use MUI `sx` prop** for all styling. Please remember to remove any imports from other css. Import from `@repo/ui/mui`.
-- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>`.standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
+- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>`. Standard React + D3 pattern. The existing `@repo/viz` components do this. Use them as reference.
 - [ ] **Port pure d3 visualizations as-is**. You can place them directly in your component, or if there is a case for reuse, in the `@repo/viz`package.
 - [ ] **Please use the site persistent Mapbox map** See "Map integration" below. We can add an option to change the basemap.
 - [ ] **Render custom dot markers** on the shared map using `setMotionChildren` from `useMap()`. Do not modify the existing marker components (`TierMarkers.tsx`, `TierLocationLabels.tsx`). See "Custom dot markers" under "Map integration" below.
@@ -355,7 +355,7 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 
 ### What your component should do
 
-1. **Toggle the visualization**: call `mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element. This single call handles both set and clear (if the same outcome is already active, it clears it; otherwise it sets the new one).
+1. **Toggle the visualization**: call `mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element. This single call handles both set and clear (if the same outcome is already active, it clears it. Otherwise it sets the new one).
 2. **Clear tooltips**: call `mapActions.clearMapTooltips()` before toggling to dismiss any pinned map tooltips from a previous selection.
 3. **Highlight the active element**: read `useActiveOutcomeVisualization()` and visually indicate which outcome is currently shown on the map (e.g., an element border or highlight color).
 4. **Clear on navigate**: call `mapActions.clearOutcomeVisualization()` when the user navigates away from the view.

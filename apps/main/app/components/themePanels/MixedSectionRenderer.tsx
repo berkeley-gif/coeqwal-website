@@ -23,7 +23,7 @@ function parseBoldText(text: string): React.ReactNode {
   )
 }
 
-// Reusable alongside parseBoldText — splits on \n and inserts a space between lines or paragraphs.
+// Reusable alongside parseBoldText, splits on \n and inserts a space between lines or paragraphs.
 function parseCaptionBlocks(text: string): React.ReactNode {
   return text.split("\n").map((line, i) => (
     <Typography key={i} variant="caption" sx={{ color: "inherit" }}>

@@ -53,7 +53,7 @@ import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 // Phase thresholds for useScrollPhase.stable module-level constants so
 // the hook's internal useEffect dep array never triggers unnecessary re-runs.
-// Phase 1: Panels enter one at a time (0.03–0.55), each sliding up with easing
+// Phase 1: Panels enter one at a time (0.03-0.55), each sliding up with easing
 const STRATEGY_PHASE_THRESHOLDS = {
   enter: [0.03, 0.14] as ProgressRange,
   hold: [0.14, 1.0] as ProgressRange,
@@ -82,7 +82,7 @@ const PANEL_POSITIONS = {
 
 // Sticky top for the right-side panel stack, in pixels. The Learn
 // page's visual top-chrome (site header + any tab/sub-nav rows) is
-// ~90px on production builds; we add a small pad below that so the
+// ~90px on production builds. We add a small pad below that so the
 // panels sit just clear of the header stack. Kept as a single
 // explicit pixel constant (rather than adding theme tokens for every
 // sticky band) so it's trivial to tune for demo.
@@ -98,7 +98,7 @@ const ACCENT_TEXT_SX = {
 const LEARN_SCENARIO_ID = "s0020" // for the Scenario Intro panels
 const RIGHT_PANEL_MAX_WIDTH = "540px"
 
-const SLIDE_DISTANCE = 500 // px, starting Y-offset for the Scenario Intro slide-up animation; used in useTransform so can't be css value
+const SLIDE_DISTANCE = 500 // px, starting Y-offset for the Scenario Intro slide-up animation. Used in useTransform so can't be css value
 
 /** Pairs opacity (0-1) and Y translation (SLIDE_DISTANCE->0) for a panel entrance. */
 function usePanelEntrance(progress: MotionValue<number>, range: ProgressRange) {
@@ -261,7 +261,7 @@ export default function MapOverlayPanels() {
   // useState + useMotionValueEvent chains that previously managed each panel's
   // opacity and pointer events.
   //
-  // ScrollElement handles opacity using the same context progress; useScrollPhase
+  // ScrollElement handles opacity using the same context progress. useScrollPhase
   // gives us a React state value for pointer-events (which can't be a MotionValue).
   const { phase: strategyPhase } = useScrollPhase(
     scenarioIntroProgress,
@@ -318,7 +318,7 @@ export default function MapOverlayPanels() {
 
   // Phase 1: Panel entrance.each slides up from below the viewport
   // and fades in with ease-out cubic (fast start -> gentle settle).
-  // Only one panel animates at a time; each waits for the previous to land.
+  // Only one panel animates at a time. Each waits for the previous to land.
   const strategy = usePanelEntrance(
     scenarioIntroProgress,
     STRATEGY_PHASE_THRESHOLDS.enter,
@@ -337,7 +337,7 @@ export default function MapOverlayPanels() {
   )
 
   // Phase 2: Tooltip opacity.sequenced AFTER all panels are in position.
-  // Panels finish entering at ~0.59, tooltips run 0.62–0.90.
+  // Panels finish entering at ~0.59, tooltips run 0.62-0.90.
   // Each: 0.02 fade in, 0.03 hold, 0.02 fade out = 0.07 per tooltip,
   // with ~0.005 gap between. Longer hold gives readers time to absorb.
   const strategyInfoTooltipOpacity = useTransform(
@@ -873,7 +873,7 @@ export default function MapOverlayPanels() {
                                 Try this:
                               </Typography>
                               <Box component="span" sx={{ display: "block" }}>
-                                Click an icon to update the key outcomes; hover
+                                Click an icon to update the key outcomes. Hover
                                 to learn about each hydroclimate.
                               </Box>
                             </>
@@ -988,7 +988,7 @@ export default function MapOverlayPanels() {
                 </Box>
               </Box>
 
-              {/* Scroll spacer.gives the summary tooltip (progress 0.74–0.84)
+              {/* Scroll spacer.gives the summary tooltip (progress 0.74-0.84)
                 enough runway before the wrapper exits the viewport. */}
               <Box sx={{ height: "100vh" }} aria-hidden="true" />
             </Box>

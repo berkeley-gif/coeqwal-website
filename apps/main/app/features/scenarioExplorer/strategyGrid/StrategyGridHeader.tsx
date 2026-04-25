@@ -31,7 +31,7 @@ import { useTourAnchor } from "../tour/TourAnchorContext"
 /**
  * Layout mode for responsive grid behavior (see theme.scenarios.grid.fullBreakpoint).
  * - "full": All 4 columns inline (container ≥ fullBreakpoint)
- * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px – fullBreakpoint)
+ * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px - fullBreakpoint)
  * - "compact": Mobile layout (below 600px)
  */
 export type LayoutMode = "full" | "wrapped" | "compact"
@@ -202,7 +202,7 @@ function ColumnHeaders({
 }: ColumnHeadersProps) {
   const theme = useTheme()
 
-  // In full mode, column 4 is visible; in wrapped mode, it's not
+  // In full mode, column 4 is visible. In wrapped mode, it's not
   const isFullMode = layoutMode === "full"
 
   // High-level orientation anchor for the list tour. Highlights the

@@ -172,13 +172,13 @@ export interface BaseHeaderProps {
    *
    *  Accepts a number (interpreted as px) or a raw CSS string such as
    *  `"24px"` or `"var(--panel-inset-y, clamp(16px, 3vw, 32px))"`.
-   *  Defaults to `0` — behavior is identical to today for any consumer
+   *  Defaults to `0`, behavior is identical to today for any consumer
    *  that does not pass this prop (e.g. storyline-flow). */
   topOffset?: string | number
 
   /** Optional symmetric inset from the left and right edges of the
    *  viewport. Lets the header pull in to match a rounded-panel side
-   *  frame (typically `tunerInsetX()`). Defaults to `0` — behavior is
+   *  frame (typically `tunerInsetX()`). Defaults to `0`, behavior is
    *  identical to today for any consumer that does not pass this. */
   sideOffset?: string | number
 }

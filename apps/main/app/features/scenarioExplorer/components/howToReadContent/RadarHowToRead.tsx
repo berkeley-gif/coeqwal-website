@@ -27,7 +27,7 @@ export function RadarHowToRead() {
             label:
               "The shape tells you where a scenario wins and gives up ground.",
             description:
-              "A broad, even polygon reads as balanced; spikes and pinches reveal trade-offs.",
+              "A broad, even polygon reads as balanced. Spikes and pinches reveal trade-offs.",
           },
           {
             label: "Context matters as much as geometry.",

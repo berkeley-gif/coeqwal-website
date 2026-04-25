@@ -8,7 +8,7 @@
 import type { ScenarioTheme } from "./scenarios"
 
 // =============================================================================
-// Block types — content blocks for theme sections
+// Block types: content blocks for theme sections
 // =============================================================================
 
 export type ParagraphBlock = {
@@ -37,7 +37,7 @@ export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
 export interface MixedSection {
   type: "mixed"
   blocks: ContentBlock[]
-  /** Optional gap between blocks — defaults to theme spacing if omitted */
+  /** Optional gap between blocks. Defaults to theme spacing if omitted */
   gap?: string | number
 }
 
@@ -76,7 +76,7 @@ export type ThemeSectionId = (typeof THEME_SECTION_IDS)[number]
 export interface Theme {
   /** Stable identifier (e.g. "delta") */
   id: string
-  /** Display label — may contain \n for line-breaks in circle layouts */
+  /** Display label, may contain \n for line-breaks in circle layouts */
   label: string
   /** Short label for compact UI contexts (tabs, chips, dropdowns) */
   shortLabel: string
@@ -132,7 +132,7 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 ]
 
 // =============================================================================
-// WATER_THEMES — content for each theme page
+// WATER_THEMES: content for each theme page
 // =============================================================================
 
 export const WATER_THEMES: Theme[] = [

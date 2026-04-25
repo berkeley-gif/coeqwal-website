@@ -94,7 +94,7 @@ const IntroSection = () => {
   // text crossfade against the *visible* headline position: during
   // the About panel the headline has glided to viewport center, so
   // the seam "visually" crosses the headline when the seam passes
-  // the center line — not when it passes the headline's default
+  // the center line, not when it passes the headline's default
   // top anchor.
   const viewportCenterRef = useRef<HTMLDivElement>(null)
   const videoHeroRef = useRef<HTMLDivElement>(null)
@@ -167,7 +167,7 @@ const IntroSection = () => {
   // the TOP of the headline (gap has fully passed). Because the
   // headline is position:fixed, useMeetingProgress treats its scroll
   // rate as 0, so each window's width equals the headline's own
-  // height — the text visibly changes as the gap swipes past it.
+  // height. The text visibly changes as the gap swipes past it.
   const crossfadeAt1 = useMeetingProgress(
     containerRef,
     videoHeroRef,
@@ -182,7 +182,7 @@ const IntroSection = () => {
   )
 
   // Transition 0 (VideoHero → About): gap enters when hero's bottom
-  // reaches the headline's bottom; leaves when About's top reaches the
+  // reaches the headline's bottom. Leaves when About's top reaches the
   // headline's top.
   const gap1Start = useMeetingProgress(
     containerRef,
@@ -200,9 +200,9 @@ const IntroSection = () => {
   // Transition 1 (About → WaterThemes): measure against the
   // viewport-center marker, which is sized to the headline's own
   // height and centered on the viewport. That way the two meeting
-  // events span the centered headline's vertical extent — gap2Start
+  // events span the centered headline's vertical extent. gap2Start
   // is when the seam reaches the centered headline's BOTTOM, gap2End
-  // is when the seam reaches its TOP — mirroring the gap1 pattern
+  // is when the seam reaches its TOP, mirroring the gap1 pattern
   // that uses the headline ref directly while it sits at its default
   // top anchor.
   const gap2Start = useMeetingProgress(
@@ -222,7 +222,7 @@ const IntroSection = () => {
   // the seam has fully swept past the centered headline. Without
   // this delay the dark-blue panel-3 text fades in while the white
   // inset-frame seam is still crossing the headline, which reads as
-  // dark-blue text over a white band — visually muddy. Shifting the
+  // dark-blue text over a white band, visually muddy. Shifting the
   // crossfade window forward by one gap2Duration (the headline's
   // own height, i.e. the full time it takes the seam to cross the
   // headline) means the text only starts morphing once the seam is
@@ -253,9 +253,9 @@ const IntroSection = () => {
   // glide well past the text crossfade for a slower, smoother feel.
   //
   // Exit: anchored off `gap2End` (seam reaches the top of the
-  // centered headline) — deliberately NOT off `textCrossfadeEnd`.
+  // centered headline), deliberately NOT off `textCrossfadeEnd`.
   // The delay applied to the text crossfade is a cosmetic shift to
-  // avoid dark-blue text over the white seam; the motion pause +
+  // avoid dark-blue text over the white seam. The motion pause +
   // glide back up to the top anchor should still be scheduled
   // relative to the seam itself so the overall return-to-top
   // timing doesn't get pushed later as we tweak the text delay.
@@ -411,7 +411,7 @@ const IntroSection = () => {
             // outer height (minHeight + 2·insetY from its own py
             // padding) exactly equals the StickyScrollSection's
             // stickyHeight (`100vh − headerHeight`). This matches the
-            // WaterThemesPanel geometry — its content wrapper is
+            // WaterThemesPanel geometry. Its content wrapper is
             // `height: 100%` inside the sticky div, with `py: insetY`
             // producing the same rounded-card extent. Without
             // subtracting the second `insetY` the CoeqwalPanel is

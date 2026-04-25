@@ -232,7 +232,7 @@ export default function ListTourControlIllustration({
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                // Illustration only; disable clicks so hovering the
+                // Illustration only. Disable clicks so hovering the
                 // sample never mutates the live chooser's value.
                 pointerEvents: "none",
               }}

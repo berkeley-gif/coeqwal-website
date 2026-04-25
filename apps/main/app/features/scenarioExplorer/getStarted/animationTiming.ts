@@ -33,7 +33,7 @@ export interface BeatDef {
  *  remaining [0.5, 1.0]. Every threshold below (and in BeatTextOverlay,
  *  TierAnimationSection, and OutcomeMorphOverlay.getOutcomeProgressRange)
  *  is half of its pre-compression value. Durations are unchanged, so each
- *  beat's per-second rate doubled; seconds-based fades still feel the same
+ *  beat's per-second rate doubled. Seconds-based fades still feel the same
  *  because they flow through `secondsToProgress`. */
 export const BEATS: readonly BeatDef[] = [
   // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
@@ -54,14 +54,14 @@ export const BEATS: readonly BeatDef[] = [
   //      3. Beat 1C narration paces for reading: "For example, each
   //         colored location..." fades in at 0.245 -> 0.26
   //         (concurrent with the map cross-fade out, so text + tier
-  //         colors arrive together by 0.28); then "The colors
+  //         colors arrive together by 0.28). Then "The colors
   //         correspond to different water delivery outcome
   //         levels..." fades in at 0.325 -> 0.34, leaving a ~1.6s
   //         reading pause before the beat settles at 0.365.
   { id: "collapse-and-colors", progress: 0.365, duration: 9 },
   // B2 (3/4) - Text swap + AG_REV morph + post-morph caption. 10s
   //      over 0.035 progress. Beat 1C paragraphs fade out
-  //      0.365 -> 0.3675 and collapse; the Beat 3 "before" paragraph
+  //      0.365 -> 0.3675 and collapse. The Beat 3 "before" paragraph
   //      fades in 0.3675 -> 0.3725 into the same slot, giving a
   //      reading beat before AG_REV morphs to its distribution
   //      squares over [0.38, 0.39]. Once the morph completes the
@@ -71,7 +71,7 @@ export const BEATS: readonly BeatDef[] = [
   { id: "ag-rev-morph", progress: 0.4, duration: 5 },
   // B3 (4/8) - "Remaining outcomes" beat. 14s over 0.10 progress
   //      (same per-progress velocity as AG_REV's morph). The Beat 3
-  //      "after" paragraph fades out 0.40 -> 0.41; "For each
+  //      "after" paragraph fades out 0.40 -> 0.41. "For each
   //      scenario, outcome levels..." fades in in its place
   //      0.41 -> 0.42, and the remaining 8 outcome morphs play
   //      back-to-back across [0.42, 0.50] (each a 0.01-wide slice,
@@ -90,11 +90,11 @@ export const BEATS: readonly BeatDef[] = [
   //        [0.590, 0.600] popup near the square
   //        [0.600, 0.610] gold stroke on the map polygon
   //        [0.610, 0.620] popup near the polygon
-  //      Beat settles at 0.62; tail [0.62, 0.63] clears all demo
+  //      Beat settles at 0.62. Tail [0.62, 0.63] clears all demo
   //      state so Beat 6 starts clean.
   { id: "loi-highlight", progress: 0.62, duration: 9 },
   // B5 (6/8) - List view. 5s over 0.10 progress. The Beat 5
-  //      narration fades out 0.62 -> 0.63; "The list view
+  //      narration fades out 0.62 -> 0.63. "The list view
   //      summarizes key outcomes as bar charts." fades in
   //      0.63 -> 0.65. Simultaneously, all 9 distribution grids
   //      morph into their per-outcome bar glyphs across
@@ -103,18 +103,18 @@ export const BEATS: readonly BeatDef[] = [
   //      track + guide chrome fades in. Beat settles at 0.72.
   { id: "list-bar", progress: 0.72, duration: 5 },
   // B6 (7/8) - Radar chart. 7s over 0.15 progress. The Beat 6
-  //      narration fades out 0.72 -> 0.73; "The radar chart displays
+  //      narration fades out 0.72 -> 0.73. "The radar chart displays
   //      the average values of key outcomes..." fades in
   //      0.73 -> 0.75. In parallel: the per-outcome bars collapse
   //      into single dots at each grid center across [0.72, 0.75]
-  //      (`avgBlend`); the dots then glide from their grid columns
+  //      (`avgBlend`). The dots then glide from their grid columns
   //      out to their polar-vertex positions across [0.75, 0.82]
-  //      (`radarBlend`); finally the radar chrome (axes, rings,
+  //      (`radarBlend`). Finally the radar chrome (axes, rings,
   //      connecting polygon) fades in across [0.82, 0.87]
   //      (`radarChromeBlend`). Beat settles at 0.87.
   { id: "radar", progress: 0.87, duration: 7 },
   // B7 (8/8) - Heat map. 5s over 0.13 progress. Radar chrome (rings,
-  //      axes, connecting polygon) fades out 0.87 -> 0.90; in the
+  //      axes, connecting polygon) fades out 0.87 -> 0.90. In the
   //      same window the Beat 7 narration fades out and the Beat 8
   //      narration ("The heat map displays how key outcomes change
   //      under different hydroclimate futures.") fades in
@@ -124,7 +124,7 @@ export const BEATS: readonly BeatDef[] = [
   //      chrome (outcome labels on the side) fades in over
   //      [0.95, 1.0] (`heatmapChromeBlend`). Because the demo is
   //      scoped to a single hydroclimate (`s0020`), the heatmap is a
-  //      single column; the layout generalizes trivially to multiple
+  //      single column. The layout generalizes trivially to multiple
   //      columns when additional hydroclimates are added. Beat
   //      settles at 1.0.
   { id: "heatmap", progress: 1.0, duration: 5 },

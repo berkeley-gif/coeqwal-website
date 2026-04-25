@@ -37,7 +37,7 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
         alignItems: "center",
         gap: 2,
         // Match [ToolToolbar.tsx] and other tool rows: list grid uses
-        // theme.space.tool.px; keep this strip on the same horizontal
+        // theme.space.tool.px. Keep this strip on the same horizontal
         // rhythm as the "Scenario library" block.
         px: theme.space.tool.px,
         py: 0.5,

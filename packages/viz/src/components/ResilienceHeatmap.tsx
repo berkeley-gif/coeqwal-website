@@ -72,7 +72,17 @@ export interface ResilienceHeatmapCell {
   unavailableReason?: string
   /** Copy for the cell tooltip. */
   rowLabel: string
+  /**
+   * When `rowLabel` is abbreviated, optional long copy on the line below
+   * the row line (e.g. after transpose with scenarios on the row axis).
+   */
+  rowLabelFull?: string
   colLabel: string
+  /**
+   * When `colLabel` is abbreviated (e.g. short code), optional long copy
+   * shown on the line below in the cell and distribution tooltips.
+   */
+  colLabelFull?: string
   subjectLabel: string
   /** Opaque passthrough for onClick handlers (e.g. scenarioId / outcomeCode). */
   scenarioId?: string
@@ -219,8 +229,9 @@ export interface ResilienceHeatmapProps {
   firstCellRef?: (el: SVGRectElement | null) => void
   /**
    * When set (e.g. -90), column tick labels are rotated around the tick
-   * anchor so dense scenario codes do not overlap. Use with hydroclimate
-   * small-multiples (scenarios on X).
+   * anchor so dense scenario codes do not overlap. Use when the
+   * horizontal axis is scenarios (e.g. aggregate overview comparing
+   * scenarios across hydroclimates, or by-hydroclimate small multiples).
    */
   columnLabelRotation?: number
 }
@@ -621,9 +632,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         }
 
         el.innerHTML = `
-          <div style="font-weight:600;color:${paletteText}">${escapeHtml(cell.subjectLabel)}</div>
-          <div style="color:${paletteText}">${escapeHtml(cell.rowLabel)}</div>
-          <div style="color:${paletteTextMuted}">${escapeHtml(cell.colLabel)}</div>
+          <div style="font-weight:700;color:${paletteText}">${escapeHtml(cell.subjectLabel)}</div>
+          ${resilienceRowTooltipHtml(cell, paletteText, paletteTextMuted)}
+          ${resilienceColTooltipHtml(cell, paletteText, paletteTextMuted)}
           <div style="margin-top:4px;color:${paletteText};font-weight:500">${escapeHtml(valueText)}</div>
         `
         el.style.display = "block"
@@ -666,9 +677,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         }
 
         el.innerHTML = `
-          <div style="font-weight:600;color:${paletteText}">${escapeHtml(subjectLine)}</div>
-          <div style="color:${paletteText}">${escapeHtml(cell.rowLabel)}</div>
-          <div style="color:${paletteTextMuted}">${escapeHtml(cell.colLabel)}</div>
+          <div style="font-weight:700;color:${paletteText}">${escapeHtml(subjectLine)}</div>
+          ${resilienceRowTooltipHtml(cell, paletteText, paletteTextMuted)}
+          ${resilienceColTooltipHtml(cell, paletteText, paletteTextMuted)}
           <div style="margin-top:4px;color:${paletteText};font-weight:500">${escapeHtml(tierText)}</div>
         `
         el.style.display = "block"
@@ -692,7 +703,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         if (!el || !item.definitionTooltip) return
         const headline = item.fullLabel ?? item.label
         el.innerHTML = `
-          <div style="font-weight:600;color:${paletteText};margin-bottom:4px">${escapeHtml(headline)}</div>
+          <div style="font-weight:700;color:${paletteText};margin-bottom:4px">${escapeHtml(headline)}</div>
           <div style="color:${paletteText}">${escapeHtml(item.definitionTooltip)}</div>
         `
         el.style.display = "block"
@@ -1041,9 +1052,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           })
         })
 
-        // Expose the first rendered cell to the consumer (used by the
-        // resilience tour to anchor its "what is a cell" popper on an
-        // actual tile). Fires with `null` first to let the consumer
+        // Expose the first rendered cell to the consumer (e.g. overlays
+        // anchored on an actual tile). Fires with `null` first to let the
+        // consumer
         // drop references to the previous draw's cell before the new
         // one is attached.
         firstCellRefCb.current?.(null)
@@ -1242,7 +1253,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
         })
 
-        // X axis (hydroclimates) — rendered ABOVE the plot. The xAxis
+        // X axis (hydroclimates), rendered ABOVE the plot. The xAxis
         // group's local origin sits X_AXIS_LABEL_RESERVE (plus the
         // grouped-header band, when present) above the plot top, so
         // existing relative y offsets (tickY=18, group text y=14, rule
@@ -1346,11 +1357,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
         }
 
-        // Legend — skipped entirely when the parent opts out (e.g., the
+        // Legend, skipped entirely when the parent opts out (e.g., the
         // small-multiples wrapper renders one shared legend outside).
         if (hideLegend) return
 
-        // Legend — varies by cellRender mode. Horizontal origin is the
+        // Legend, varies by cellRender mode. Horizontal origin is the
         // left edge of the first column cell (MARGIN.left + the band's
         // outer-padding offset) so the legend visually lines up with the
         // leftmost heatmap column, not with the row-tick gutter.
@@ -1723,6 +1734,38 @@ function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;")
+}
+
+function resilienceRowTooltipHtml(
+  cell: Pick<ResilienceHeatmapCell, "rowLabel" | "rowLabelFull">,
+  paletteText: string,
+  paletteTextMuted: string,
+): string {
+  const full = cell.rowLabelFull?.trim()
+  const showFull = Boolean(full && full !== cell.rowLabel.trim())
+  if (showFull && full) {
+    return (
+      `<div style="color:${paletteTextMuted};font-weight:500">${escapeHtml(cell.rowLabel)}</div>` +
+      `<div style="color:${paletteText};font-weight:700;max-width:260px;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;margin-top:2px;line-height:1.35">${escapeHtml(full)}</div>`
+    )
+  }
+  return `<div style="color:${paletteText};font-weight:700">${escapeHtml(cell.rowLabel)}</div>`
+}
+
+function resilienceColTooltipHtml(
+  cell: Pick<ResilienceHeatmapCell, "colLabel" | "colLabelFull">,
+  paletteText: string,
+  paletteTextMuted: string,
+): string {
+  const full = cell.colLabelFull?.trim()
+  const showFull = Boolean(full && full !== cell.colLabel.trim())
+  if (showFull && full) {
+    return (
+      `<div style="color:${paletteTextMuted};font-weight:500">${escapeHtml(cell.colLabel)}</div>` +
+      `<div style="color:${paletteText};font-weight:700;max-width:260px;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;margin-top:2px;line-height:1.35">${escapeHtml(full)}</div>`
+    )
+  }
+  return `<div style="color:${paletteText};font-weight:700">${escapeHtml(cell.colLabel)}</div>`
 }
 
 export default ResilienceHeatmap

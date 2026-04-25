@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * `createTunerDarkTheme` — produces a dark-skinned MUI theme for the
+ * `createTunerDarkTheme` produces a dark-skinned MUI theme for the
  * ChartTuner overlay, preserving every custom extension the host app has
  * added (`blue.*`, `tiers.*`, `tierDiverging.*`, `interaction.*`,
  * `layout`, `space`, `border`, `borderRadius`, `strokeWidth`,
@@ -16,7 +16,7 @@
  * variables are scoped to the document root and bound to the single
  * `light` color scheme the host enables. Inside a nested
  * `<ThemeProvider>`, those var references *still* resolve to the
- * document-root (light) values — so any override like
+ * document-root (light) values, so any override like
  * `palette.background.paper: "#0f1218"` ends up silently routed through
  * `var(--mui-palette-background-paper)` and rendered as the host's light
  * color.

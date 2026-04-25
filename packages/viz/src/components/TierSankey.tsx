@@ -29,7 +29,7 @@ export interface TierSankeyProps {
   onScenarioClick?: (scenarioId: string) => void
   highlightedIds?: Set<string> | null
   chosenIds?: Set<string>
-  /** Monotonically increasing counter — triggers crossfade on data change */
+  /** Monotonically increasing counter, triggers crossfade on data change */
   morphGeneration?: number
 }
 
@@ -288,7 +288,7 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
         }
         const scenarioFillY = leftNodes.map((n) => n.y0)
 
-        // Draw flows — iterate data flows in declared order
+        // Draw flows, iterate data flows in declared order
         data.forEach((scenario, si) => {
           const opacity = getOpacity(scenario.scenarioId)
 

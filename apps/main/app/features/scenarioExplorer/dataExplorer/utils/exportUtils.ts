@@ -123,7 +123,7 @@ export function exportAsJSON(
 
 /**
  * Convert the internal radar coordinate (-1 … +1) back to a weighted
- * tier score on the 1–4 scale used by the tier system:
+ * tier score on the 1-4 scale used by the tier system:
  *   1 = Optimal, 2 = Acceptable, 3 = At-risk, 4 = Critical
  */
 function radarValueToTierScore(v: number): number {

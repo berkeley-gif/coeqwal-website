@@ -13,7 +13,7 @@ export interface VerticalOutcomeGlyphProps {
 }
 
 /**
- * VerticalOutcomeGlyph – small multiple 4-bar vertical chart matching horizontal style.
+ * VerticalOutcomeGlyph: small multiple 4-bar vertical chart matching horizontal style.
  * If no `values` provided falls back to VerticalBarChart's internal dummy values for demo.
  */
 const VerticalOutcomeGlyph: React.FC<VerticalOutcomeGlyphProps> = React.memo(

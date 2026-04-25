@@ -5,7 +5,7 @@
  *
  * Small radar thumbnail rendered from live tier data when the share
  * item has no cached PNG. Props mirror explore `RadarPanel` + `RadarPlot`
- * semantics: `showRadarRange` controls axis min/max shading; `showTierZones`
+ * semantics: `showRadarRange` controls axis min/max shading. `showTierZones`
  * controls the tier band background (stored on the share item or URL).
  */
 
@@ -98,7 +98,7 @@ export default function ShareRadarLiveChart({
 
   // Match `ShareRadarCard` cached image layout: `width: 100%`, natural height
   // from a square raster. `RadarPlot` defaults to `containerMinHeight: 400` for
-  // the main panel; in a card that forces overflow/clipping, so we pass 0 and
+  // the main panel. In a card that forces overflow/clipping, so we pass 0 and
   // give the component a real square from `aspectRatio` (same as explore SVG).
   return (
     <Box

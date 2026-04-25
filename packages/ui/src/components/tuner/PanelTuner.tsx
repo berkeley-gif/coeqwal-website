@@ -1,10 +1,10 @@
 "use client"
 
 /**
- * PanelTuner — floating widget for live tuning of rounded-panel border
+ * PanelTuner, floating widget for live tuning of rounded-panel border
  * radius and inset values across the site.
  *
- * Writes three CSS custom properties on `<html>` — defined in
+ * Writes three CSS custom properties on `<html>`, defined in
  * `./cssVars` and consumed by apps via `tunerRadius()`, `tunerInsetX()`,
  * and `tunerInsetY()`:
  *
@@ -17,7 +17,7 @@
  * in localStorage across reloads so a design team can pick a setting once
  * and review the whole site with it.
  *
- * No production gating — the component renders nothing until the shortcut
+ * No production gating, the component renders nothing until the shortcut
  * is pressed, so it's safe to mount in any build. The shortcut is
  * effectively a secret handshake for the design/review workflow.
  */

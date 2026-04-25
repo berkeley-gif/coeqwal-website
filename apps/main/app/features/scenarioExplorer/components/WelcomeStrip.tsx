@@ -4,7 +4,7 @@
  * WelcomeStrip. Inline first-visit orientation rendered above the
  * active tool. Frames how to read the list view and what to do with
  * it. The List -> Radar -> Distribution -> Resilience -> Share flow
- * is intentionally not duplicated here; it lives in ExploreSubNav.
+ * is intentionally not duplicated here. It lives in ExploreSubNav.
  *
  * Clicking "Got it" hides the strip for the current session only.
  *

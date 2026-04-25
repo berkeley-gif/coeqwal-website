@@ -1,14 +1,14 @@
 /**
  * Shared types for the per-tool anchored tour system. Each tool (List,
- * Radar, Resilience) owns an ordered list of TourStep entries. Steps
+ * Radar) owns an ordered list of TourStep entries. Steps
  * with an `anchorId` resolve to a DOM element registered through
- * TourAnchorContext; steps without an anchor render as centered
+ * TourAnchorContext. Steps without an anchor render as centered
  * "bookend" dialogs (hero intro, journey wrap-up).
  */
 
 import type { PopperProps } from "@repo/ui/mui"
 
-export type TourTool = "list" | "radar" | "resilience"
+export type TourTool = "list" | "radar"
 
 export type TourPlacement = NonNullable<PopperProps["placement"]>
 
@@ -35,7 +35,7 @@ export interface TourStep {
   disableFlip?: boolean
   /** Cross-axis skid expressed as a multiple of the anchor's size
    *  along that axis. For bottom/top placements this is a multiple
-   *  of the anchor's width; for left/right placements a multiple of
+   *  of the anchor's width. For left/right placements a multiple of
    *  its height. Useful to push the popper past the anchor on the
    *  cross axis. Example: with placement "bottom-end" and
    *  `anchorSkidMultiplier: -1`, the popper's right edge aligns
@@ -46,7 +46,7 @@ export interface TourStep {
   titleIcon?: "pin" | "share"
   /**
    * Optional in-popper figure (data-driven SVG). Keeps the tour free of
-   * raw binary assets where possible; extend the switch in ToolTour when
+   * raw binary assets where possible. Extend the switch in ToolTour when
    * adding new keys.
    */
   illustration?:
@@ -57,7 +57,6 @@ export interface TourStep {
     | "listSortButton"
     | "listCheckbox"
     | "listHydroclimate"
-    | "resilienceTierLegend"
 }
 
 export interface TourState {

@@ -8,7 +8,7 @@
  * notes the user adds to explain why they saved it.
  *
  * When a cachedImageDataUrl becomes available in the future, callers
- * can pass it to render a thumbnail above the chip list; the card
+ * can pass it to render a thumbnail above the chip list. The card
  * gracefully degrades to text-only when it's absent.
  */
 

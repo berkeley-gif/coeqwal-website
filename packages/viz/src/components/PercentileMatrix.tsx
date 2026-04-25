@@ -169,7 +169,7 @@ export interface PercentileMatrixProps {
    * Hard ceiling for the Y-axis maximum in volume+absolute mode.
    * When set, the computed domain is capped at this value regardless of how
    * high the data goes.  Data above the cap is clipped by the chart boundary.
-   * Use e.g. 120 for % unimpaired charts so the axis stays at 0–120%
+   * Use e.g. 120 for % unimpaired charts so the axis stays at 0-120%
    * even when a few regulated channels exceed 100%.
    */
   yAxisMax?: number

@@ -5,7 +5,7 @@
  *
  * Always shows: search + visibility toggle chips + view controls (outcome
  * view, map, locations, climate). Resilience mode omits the global
- * hydroclimate chooser; that tool controls hydroclimates in chart controls.
+ * hydroclimate chooser. That tool controls hydroclimates in chart controls.
  *
  * When `gridAligned` is true (list mode), uses CSS Grid that aligns
  * with StrategyGrid columns. Otherwise uses a simple flex layout.
@@ -128,9 +128,6 @@ export default function ToolToolbar({
   // rendered as a plain row (not the list grid), so we anchor the
   // radar orientation popper on that row directly.
   const radarViewAreaTourRef = useTourAnchor("radar.viewArea")
-  // And the resilience tour uses the same non-list row to orient the
-  // user on the shared toolbar (map; no global hydroclimate chooser).
-  const resilienceViewAreaTourRef = useTourAnchor("resilience.viewArea")
   // One DOM node serves both the Radar climate-chip tour and the new
   // List hydroclimate tour step. Merge callback refs so both registries
   // resolve to the same element without re-wrapping the chooser.
@@ -144,7 +141,7 @@ export default function ToolToolbar({
 
   // The list view's "Outcome view" toggle (Average / Bar /
   // Distribution) is intentionally deactivated for the current demo
-  // build; flip the `false &&` guard below to bring it back.
+  // build. Flip the `false &&` guard below to bring it back.
 
   const viewControls = (
     <>
@@ -192,7 +189,7 @@ export default function ToolToolbar({
         {HOW_TO_READ_ENABLED && <VerticalDivider />}
         {/* Outcome view toggle (Average / Bar / Distribution) hidden
             . The list view reverts to its bar-chart
-            default; the glyph click-through to map layers is
+            default. The glyph click-through to map layers is
             unaffected. */}
         {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
         {false && exploreMode === "list" ? (
@@ -389,11 +386,7 @@ export default function ToolToolbar({
 
   // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
   const nonListViewAreaRef =
-    exploreMode === "radar"
-      ? radarViewAreaTourRef
-      : exploreMode === "resilience"
-        ? resilienceViewAreaTourRef
-        : undefined
+    exploreMode === "radar" ? radarViewAreaTourRef : undefined
   return (
     <>
       <Box

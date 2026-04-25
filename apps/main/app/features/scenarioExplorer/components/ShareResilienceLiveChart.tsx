@@ -57,7 +57,7 @@ export interface ShareResilienceLiveChartProps {
    * Default false for older share items without the flag.
    */
   showCellNumbers?: boolean
-  /** Optional fixed height; width follows the container. */
+  /** Optional fixed height. Width follows the container. */
   height?: number
 }
 

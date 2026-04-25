@@ -42,7 +42,7 @@ export const ENDPOINTS = {
     `/tiers/batch?scenarios=${scenarioIds.join(",")}`,
 
   /**
-   * Tier location GeoJSON (includes full polygon geometry — heavy).
+   * Tier location GeoJSON (includes full polygon geometry, heavy).
    * Prefer `tierLocationAssignments` for treemap/table use cases.
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param tierCode - Tier short code (e.g., "AG_REV")

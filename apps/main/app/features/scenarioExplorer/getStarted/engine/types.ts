@@ -85,14 +85,14 @@ export interface HideScheduleEntry {
  * one arbiter at a time without ad-hoc effect-based ownership checks.
  *
  * - `"idle"`: pre-play gate (before Play button) or post-Restart. No
- *   arbiter is actively writing `demand-units`; the layer is at its
+ *   arbiter is actively writing `demand-units`. The layer is at its
  *   baseline (invisible / Beat 0 state).
  * - `"playback"`: storyboard beats 0..N are tweening. `MapPaintArbiter`
  *   owns `demand-units` and drives it via progress-keyed actors.
  * - `"interactive"`: storyboard has settled (reached the final beat's
  *   finished state) and the user can click squares. In Phase 3b,
  *   `InteractivePaintArbiter` takes ownership of `demand-units` in
- *   this mode; for Phase 3a the mode is signal-only and no arbiter
+ *   this mode. For Phase 3a the mode is signal-only and no arbiter
  *   keys on it yet.
  *
  * Phase 3a ships the signal (getMode/setMode on `BeatEngineApi`) with
@@ -104,7 +104,7 @@ export type EngineMode = "idle" | "playback" | "interactive"
 /**
  * Snapshot of everything `InteractivePaintArbiter` needs to paint a
  * single demand-units outcome. Non-null iff TAS wants the arbiter to
- * own `demand-units` / `demand-units-outline` right now; null iff the
+ * own `demand-units` / `demand-units-outline` right now. Null iff the
  * arbiter should exit (release paint back to the scalar-0 baseline).
  *
  * TAS computes the spec from the selected outcome's registry config +
@@ -113,7 +113,7 @@ export type EngineMode = "idle" | "playback" | "interactive"
  *
  * `outcomeCode` is the identity used for crossfade detection: a
  * `sync(ctx, spec)` call with the same `outcomeCode` as `currentSpec`
- * is a no-op; a different `outcomeCode` triggers the crossfade path.
+ * is a no-op. A different `outcomeCode` triggers the crossfade path.
  *
  * `classFilter` scopes the demand-units layer to the outcome's DU
  * class (AG / Urban / Refuge). Combined with the `featureIds`-based
@@ -155,13 +155,13 @@ export interface DemandUnitsPaintSpec {
 export interface DemandUnitsOverlayState {
   /** Sanity-check: which outcome this overlay is for. */
   outcomeCode: string
-  /** Active (hovered or pinned) feature ids; gold outline + opacity 1. */
+  /** Active (hovered or pinned) feature ids. Gold outline + opacity 1. */
   activeFeatureIds: readonly string[]
-  /** Pinned subset of actives; drives zoom-aware fill emphasis. */
+  /** Pinned subset of actives. Drives zoom-aware fill emphasis. */
   pinnedFeatureIds: readonly string[]
   /** Features matching the currently-spotlighted tier (Beat 5 demo). */
   spotlightFeatureIds: readonly string[]
-  /** True iff spotlight mode is active; `spotlightFeatureIds` may be empty. */
+  /** True iff spotlight mode is active. `spotlightFeatureIds` may be empty. */
   hasSpotlight: boolean
 }
 
@@ -573,7 +573,7 @@ export interface BeatEngineContext {
    * clears it on unmount. The arbiter reads through the ref on every
    * `onUpdate` so the component can rebuild its closure on each
    * render without forcing re-subscription. `null` means no narration
-   * component is mounted; the arbiter silently no-ops in that case.
+   * component is mounted. The arbiter silently no-ops in that case.
    */
   narrationTickRef: RefObject<((v: number) => void) | null>
   /**

@@ -45,7 +45,7 @@ export default function TabPanels() {
   const didScrollFromUrlRef = useRef(false)
   /** After user has reached the sticky tabs at least once, stripping ?tab= on scroll-up is OK. */
   const hasBeenInTabsAreaRef = useRef(false)
-  /** Tab requested by ?tab= on first load; scroll once the matching panel is mounted. */
+  /** Tab requested by ?tab= on first load. Scroll once the matching panel is mounted. */
   const pendingUrlTabScrollRef = useRef<TabKey | null>(null)
 
   useEffect(() => {

@@ -7,7 +7,7 @@
  * Handles caching, loading states, and color computation internally.
  *
  * Single-value outcomes (Salmon, Delta) share SWR cache with glyphs via
- * CACHE_KEYS.scenarioTiers; multi-value outcomes share cache with every
+ * CACHE_KEYS.scenarioTiers. Multi-value outcomes share cache with every
  * other consumer of useTierLocationAssignments / useTierLocationAssignmentsBatch
  * via CACHE_KEYS.tierLocations. There is no module-level Map cache or
  * bespoke in-flight dedupe layer: SWR handles both.
@@ -150,7 +150,7 @@ export interface UseTierDataResult {
  * Hook to fetch tier data and compute colors
  *
  * Single-value outcomes share the SWR cache key `scenarioTiers(id)` with
- * the glyph panel; multi-value outcomes share `tierLocations(id, code)`
+ * the glyph panel. Multi-value outcomes share `tierLocations(id, code)`
  * with every other assignments consumer (single hook, batch hook,
  * prefetch). `keepPreviousData` keeps the previous render up while a new
  * scenario / outcome is being loaded so the map never blinks empty.

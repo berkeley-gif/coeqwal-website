@@ -52,7 +52,7 @@ export type BaselineMap = {
 
 /** Extended map surface for the session-init helper, which also
  *  creates the `demand-units-outline` layer. `addLayer` takes a
- *  `LayerSpecification`-shaped object in `@repo/map`; we keep the
+ *  `LayerSpecification`-shaped object in `@repo/map`. We keep the
  *  structural type permissive. */
 export type SessionInitMap = BaselineMap & {
   addLayer: (spec: unknown) => void
@@ -202,7 +202,7 @@ export function writeDemandUnitsBaseline(
 
 /** Specification for the outline-layer creation helper. All fields
  *  describe the layer's initial Mapbox paint. Visibility is always
- *  "visible" at creation; callers that want it hidden should flip it
+ *  "visible" at creation. Callers that want it hidden should flip it
  *  via `setLayoutProperty` immediately after. */
 export interface DemandUnitsOutlineInitSpec {
   filter: readonly unknown[]
@@ -220,7 +220,7 @@ export interface DemandUnitsOutlineInitSpec {
  *  call it on every mount cycle without worrying about double-adds.
  *
  *  The outline layer inherits `source` and `source-layer` from the
- *  `demand-units` fill layer; if the fill doesn't exist yet the
+ *  `demand-units` fill layer. If the fill doesn't exist yet the
  *  helper bails silently (caller should retry when the style is
  *  loaded). */
 export function ensureDemandUnitsOutlineLayer(

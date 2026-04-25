@@ -212,7 +212,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   // Tour anchor for the bar-chart step: useLayoutEffect + stable glyph refs
   // so we never register in an inline ref callback. Inline callbacks get a
-  // new identity every parent render; React detaches/reattaches, toggling
+  // new identity every parent render. React detaches/reattaches, toggling
   // the anchor and triggering TourAnchorContext notify loops.
   useLayoutEffect(() => {
     if (!tourListFirstItem || !isListMode || outcomeDisplayMode !== "bar") {
@@ -858,7 +858,7 @@ function CompactRowContent({
  * Non-compact mode content - grid-based layout with vertical dividers
  *
  * In "full" mode (≥ fullBreakpoint): 4 columns inline
- * In "wrapped" mode (600px – fullBreakpoint): 3 columns with outcomes wrapping below
+ * In "wrapped" mode (600px - fullBreakpoint): 3 columns with outcomes wrapping below
  */
 interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay

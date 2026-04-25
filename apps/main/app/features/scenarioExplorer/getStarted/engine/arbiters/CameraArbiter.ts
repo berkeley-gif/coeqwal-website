@@ -10,14 +10,14 @@
  * Note: despite the "Arbiter" name (from the hardening plan), this
  * module is not a progress-driven `Arbiter<A>`. It has no actors and is
  * never called during engine dispatch. It is an imperative helper held
- * in a ref on the storyboard container; nav handlers call
+ * in a ref on the storyboard container. Nav handlers call
  * `cameraArbiter.flyHome(...)` directly. The name is kept to match the
  * architecture diagram and to signal that all camera-home writes go
  * through this one object.
  */
 
 /** Minimal Mapbox map shape we use here. Mirrors the shape used by
- *  MapPaintArbiter; we avoid importing mapbox-gl types directly to keep
+ *  MapPaintArbiter. We avoid importing mapbox-gl types directly to keep
  *  this module framework-agnostic. */
 type CameraMap = {
   getCenter: () => { lng: number; lat: number }

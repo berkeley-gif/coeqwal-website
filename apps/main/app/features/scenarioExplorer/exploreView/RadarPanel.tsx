@@ -280,7 +280,7 @@ export default function RadarPanel({
       const axis = g.getAttribute("data-axis")
       if (!axis) return
       // For two-line curated labels the group contains two <text> title
-      // elements; the last appended one is the bottom line. We want the
+      // elements. The last appended one is the bottom line. We want the
       // icon to land after the last word of that last line, so we measure
       // the last <text class="axis-label-title"> specifically rather than
       // the whole group's bbox (which would center across both lines and
@@ -299,14 +299,14 @@ export default function RadarPanel({
           }
         }
       } catch {
-        // getBBox can throw on detached nodes; ignore and skip.
+        // getBBox can throw on detached nodes. Ignore and skip.
       }
     })
     setAxisLabelRects((prev) => (rectsShallowEqual(prev, rects) ? prev : rects))
   }, [axisPositions])
 
   // Which axis label's info popover is currently open (by display name).
-  // Only one open at a time; clicking another closes the previous.
+  // Only one open at a time. Clicking another closes the previous.
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
 
@@ -406,7 +406,7 @@ export default function RadarPanel({
   const axisChooserPanelAnchorRef = useTourAnchor("radar.axisChooserPanel")
   // Bridge chartWrapperRef into both polygon + rings anchors. They
   // share the same target element because the rings live inside the
-  // same SVG; the tour copy distinguishes them by step.
+  // same SVG. The tour copy distinguishes them by step.
   useEffect(() => {
     polygonAnchorRef(chartWrapperRef.current)
     ringsAnchorRef(chartWrapperRef.current)

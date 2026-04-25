@@ -18,10 +18,10 @@ import { createTheme, Theme, alpha } from "@mui/material/styles"
  *
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
- *                       Typography variants: h1, h2–h6, body1, body2,
+ *                       Typography variants: h1, h2-h6, body1, body2,
  *                       nav (tracked uppercase text), tabLabel, tabLabelDocked, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline,
- *                       compactTitle–micro, axisLabel, scenarioTitle, …
+ *                       compactTitle-micro, axisLabel, scenarioTitle, …
  *
  * 5. Post-creation    - Attach design tokens to theme object (theme.space, etc.)
  *
@@ -384,14 +384,14 @@ const palette = {
   // Reads as a neutral "how much does policy move this?" signal, so we
   // use a purple ramp to keep it distinct from the risk/opportunity ramps.
   tierLeverage: {
-    min: "#f4f4f2", // Near-white (0 tier range — operations don't move it)
+    min: "#f4f4f2", // Near-white (0 tier range, operations don't move it)
     max: "#5f3b8a", // Deep purple (max 3 tier range)
   },
 
   tabPanels: {
     learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
-    exploreDeep: "#2f6fa8", // Darker explore — welcome panel background
+    exploreDeep: "#2f6fa8", // Darker explore, welcome panel background
     share: "#193D6B", // brand.panelDark
   },
 
@@ -526,7 +526,7 @@ const border = {
 // Background styles
 //
 // `modalBackdropOpacity` is the single source of truth for the opacity
-// used on black backdrops that sit behind modal-like surfaces — modal
+// used on black backdrops that sit behind modal-like surfaces: modal
 // dialogs, scrim curtains, full-screen dimming washes over the map,
 // etc. Compose with `alpha(palette.common.black, modalBackdropOpacity)`
 // at the call site (these backdrops always participate in a gradient,
@@ -544,7 +544,7 @@ const background = {
     85: alpha(palette.common.white, 0.85),
     95: alpha(palette.common.white, 0.95),
   },
-  /** Opacity (0–1) for the black backdrop used behind modal-like
+  /** Opacity (0-1) for the black backdrop used behind modal-like
    *  surfaces and scrim curtains. Compose with `alpha()` at the call
    *  site, e.g. `alpha(theme.palette.common.black, theme.background.modalBackdropOpacity)`. */
   modalBackdropOpacity: 0.4,
@@ -753,7 +753,7 @@ export const themeValues = {
       columns: {
         /** Mobile (<600px): 2 columns (checkbox + content) */
         xs: "32px minmax(0, 1fr)",
-        /** 600px – fullBreakpoint: 4 columns — scenario capped at 600px, operations auto, outcomes wrap below */
+        /** 600px - fullBreakpoint: 4 columns, scenario capped at 600px, operations auto, outcomes wrap below */
         sm: "32px minmax(0, 600px) auto 1fr",
         /** Container ≥ fullBreakpoint: golden-ratio columns with outcomes inline */
         full: "32px 0.382fr 140px 1fr",
@@ -805,14 +805,14 @@ export const themeValues = {
     // Usage: <Checkbox sx={theme.scenarios.checkbox.sm} />
     // md is 1.2× sm (5:6 scale factors) so group/theme headers read slightly larger than scenario rows.
     checkbox: {
-      /** Small checkbox — individual scenario rows (list, grid, sidebar) */
+      /** Small checkbox, individual scenario rows (list, grid, sidebar) */
       sm: {
         padding: 0,
         margin: 0,
         transform: "scale(0.7)",
         transformOrigin: "100% 50%",
       } as const,
-      /** Group header checkbox — theme/section “select all”; visually ~20% larger than sm */
+      /** Group header checkbox, theme/section “select all”; visually ~20% larger than sm */
       md: {
         padding: 0,
         margin: 0,
@@ -1160,7 +1160,7 @@ const theme = createTheme({
     // Scenario/strategy title - headline for scenario cards/rows
     scenarioTitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "0.9375rem", // 15px — primary content anchor (T3b)
+      fontSize: "0.9375rem", // 15px, primary content anchor (T3b)
       fontWeight: 500,
       lineHeight: 1.3,
     },

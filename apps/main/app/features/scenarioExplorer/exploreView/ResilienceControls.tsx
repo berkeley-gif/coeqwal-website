@@ -8,29 +8,10 @@
  *   "{Pivot}, comparing {axes}, covering {scenarios}, {outcomes}, and
  *    {climates}, as average tier."   [Options]
  *
- * The leading phrase is the pivot (biggest lever on chart shape); the
+ * The leading phrase is the pivot (biggest lever on chart shape). The
  * following phrases narrow down the axes and scope. Cells are always
- * colored by average tier; that trailing clause is static text rather
- * than a chooser, which keeps the sentence short and the tool focused
- * on the tier story. Wording avoids data jargon (no "aggregate", "mean",
- * "read as", "x" / cross-product); terms of art that the project
- * already defines in its glossary (scenario, outcome, hydroclimate,
- * tier) are kept as-is.
- *
- * Layout is not a user choice: non-aggregate pivots always render as
- * small multiples, and the aggregate pivot is always a single
- * averaged chart. This was a deliberate simplification - "combine
- * into one chart" was visually indistinguishable from small multiples
- * placed side-by-side once you accounted for the shared row axis, so
- * we removed it as a choice.
- *
- * Each bold phrase is a click-target that opens a focused popover for
- * that dimension. Under the sentence: Presets, then Rows (group similar
- * and flip axes). The chart corner toolbar only has display options
- * (see `ResiliencePanel`).
- *
- * Quadrant / Leverage retains its own compact two-card control set
- * because its mental model differs from the 3-axis cube.
+ * colored by average tier. That trailing clause is static text rather
+ * than a chooser
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react"
@@ -51,7 +32,6 @@ import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
 import { useScenarioExplorerStore } from "../store"
-import { useTourAnchor } from "../tour/TourAnchorContext"
 import type {
   AggregateOver,
   QuadrantUnit,
@@ -79,9 +59,7 @@ interface ResilienceControlsProps {
   controls: ResilienceControlsState
   onChange: (next: Partial<ResilienceControlsState>) => void
   /** Called when the user clicks the Save snapshot button in the
-   *  Rows row. When omitted the button is not rendered, which is
-   *  useful for test or preview contexts that don't wire up the
-   *  Share drawer. */
+   *  Rows row. When omitted the button is not rendered. */
   onSaveSnapshot?: () => void
 }
 
@@ -107,7 +85,7 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
 // The sentence used to end with a "read as" phrase button that let the
 // user swap between average tier, climate shift, spread of results,
 // and leverage encodings. That chooser was removed in favor of a
-// single, static "average tier" clause; the tool is now focused on
+// single, static "average tier" clause. The tool is now focused on
 // the tier story end-to-end. The CellEncoding / DeltaMode fields
 // remain in state (see `ResiliencePanel`) so presets and the viz
 // layer keep working, but there is no longer any UI that sets them
@@ -127,7 +105,7 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
 //                 small multiples, or collapsed into a single
 //                 averaged chart
 //
-// Stored state still uses (view, aggregateOver, transposed); the
+// Stored state still uses (view, aggregateOver, transposed). The
 // adapter translates between the two framings. X and Y are derived
 // from Z via a canonical table plus the `transposed` flip.
 //
@@ -250,10 +228,6 @@ interface PhraseButtonProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
   active?: boolean
   ariaLabel?: string
-  /** Optional callback ref to forward onto the rendered button element.
-   *  Used by the resilience tour system to anchor poppers on specific
-   *  clickable phrases in the configuration sentence. */
-  tourAnchorRef?: (el: HTMLElement | null) => void
 }
 
 function phraseButtonSx(theme: Theme, active: boolean) {
@@ -291,12 +265,10 @@ function PhraseButton({
   onClick,
   active = false,
   ariaLabel,
-  tourAnchorRef,
 }: PhraseButtonProps) {
   const theme = useTheme()
   return (
     <Box
-      ref={tourAnchorRef}
       component="button"
       type="button"
       onClick={onClick}
@@ -465,21 +437,6 @@ export default function ResilienceControls({
 
   const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
 
-  // Tour anchors for the sentence phrases. Each anchor attaches
-  // directly to the phrase's <button>, so the tour highlight lands on
-  // the clickable word rather than a wrapper.
-  const pivotAnchorRef = useTourAnchor("resilience.pivot")
-  const axesAnchorRef = useTourAnchor("resilience.axes")
-  const outcomesAnchorRef = useTourAnchor("resilience.outcomes")
-  // The preset row and the row-options row each get their own tour
-  // anchor so the walkthrough can point to them after the sentence.
-  const presetsAnchorRef = useTourAnchor("resilience.presets")
-  const rowsAnchorRef = useTourAnchor("resilience.rows")
-  // Save snapshot used to live at the top-right of the shared
-  // ChartControlsBar. It has moved into the Rows row, so this
-  // component owns the tour anchor now.
-  const saveSnapshotAnchorRef = useTourAnchor("resilience.snapshot")
-
   // Pin the sentence to "average tier" end-to-end: any non-tier
   // encoding (legacy density modes, distribution, leverage, glyph)
   // or any non-none delta mode is coerced back to the default. This
@@ -555,7 +512,7 @@ export default function ResilienceControls({
   )
 
   // Derive the current (xDim, yDim, zDim, zMode) from stored state.
-  // Only meaningful for the heatmap views; the quadrant branch
+  // Only meaningful for the heatmap views. The quadrant branch
   // returns early above the sentence header, so it never reads these.
   const { zDim, zMode } = useMemo(
     () => deriveZ(view, aggregateOver),
@@ -625,7 +582,7 @@ export default function ResilienceControls({
       const newZ = yDim
       // We want the current X to remain the X after rotation. The
       // needsTranspose test asks: does the canonical X for the new Z
-      // already match our desired X? If yes, no transpose; if no,
+      // already match our desired X? If yes, no transpose. If no,
       // transpose.
       const needsTranspose = CANONICAL_X_FOR_Z[newZ] !== xDim
       onChange(
@@ -885,20 +842,18 @@ export default function ResilienceControls({
             active={Boolean(zAnchor)}
             onClick={(e) => setZAnchor(e.currentTarget)}
             ariaLabel={`Chart pivot: ${zPhraseLabel}. This is the biggest lever on the chart. Click to change the dimension the chart is built around and whether it shows small multiples or a single averaged chart.`}
-            tourAnchorRef={pivotAnchorRef}
           />
           <Box
             component="span"
             sx={{ color: theme.palette.grey[700], mx: 0.25 }}
           >
-            , comparing
+            comparing
           </Box>
           <PhraseButton
             label={xDimLabel}
             active={Boolean(xAnchor)}
             onClick={(e) => setXAnchor(e.currentTarget)}
             ariaLabel={`Across axis: ${xDimLabel}. Click to change which dimension reads across each chart.`}
-            tourAnchorRef={axesAnchorRef}
           />
           <Box
             component="span"
@@ -916,7 +871,7 @@ export default function ResilienceControls({
             component="span"
             sx={{ color: theme.palette.grey[700], mx: 0.25 }}
           >
-            , covering
+            covering
           </Box>
           <PhraseButton
             label={scenariosLabel}
@@ -927,21 +882,18 @@ export default function ResilienceControls({
           <Box
             component="span"
             sx={{ color: theme.palette.grey[500], mx: 0.25 }}
-          >
-            ,
-          </Box>
+          ></Box>
           <PhraseButton
             label={outcomesLabel}
             active={Boolean(outcomesAnchor)}
             onClick={(e) => setOutcomesAnchor(e.currentTarget)}
             ariaLabel={`Outcomes on the chart: ${outcomesLabel}. Click to change.`}
-            tourAnchorRef={outcomesAnchorRef}
           />
           <Box
             component="span"
             sx={{ color: theme.palette.grey[700], mx: 0.25 }}
           >
-            , and
+            and
           </Box>
           <PhraseButton
             label={climatesLabel}
@@ -950,13 +902,12 @@ export default function ResilienceControls({
             ariaLabel={`Hydroclimates on the chart: ${climatesLabel}. Click to change.`}
           />
           <Box component="span" sx={{ color: theme.palette.grey[700] }}>
-            , as average tier.
+            as average tier.
           </Box>
         </Typography>
       </Box>
 
       <Box
-        ref={presetsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -1014,7 +965,6 @@ export default function ResilienceControls({
       </Box>
 
       <Box
-        ref={rowsAnchorRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -1103,7 +1053,6 @@ export default function ResilienceControls({
         </Button>
         {onSaveSnapshot && (
           <Box
-            ref={saveSnapshotAnchorRef}
             component="button"
             type="button"
             onClick={onSaveSnapshot}
@@ -1137,7 +1086,7 @@ export default function ResilienceControls({
         )}
       </Box>
 
-      {/* Popover: Scenarios (read-only summary; sidebar is the source) */}
+      {/* Popover: Scenarios (read-only summary. Sidebar is the source) */}
       <Popover
         open={Boolean(scenariosAnchor)}
         anchorEl={scenariosAnchor}
@@ -1360,7 +1309,7 @@ export default function ResilienceControls({
       >
         <PopoverShell
           title="Across axis"
-          subtitle="Pick the dimension that reads across each chart. Picking the down-axis dimension swaps the two axes; picking the pivot dimension rotates it into the across role."
+          subtitle="Pick the dimension that reads across each chart. Picking the down-axis dimension swaps the two axes. Picking the pivot dimension rotates it into the across role."
           width={300}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
@@ -1389,7 +1338,7 @@ export default function ResilienceControls({
       >
         <PopoverShell
           title="Down axis"
-          subtitle="Pick the dimension that reads down each chart. Picking the across-axis dimension swaps the two axes; picking the pivot dimension rotates it into the down role."
+          subtitle="Pick the dimension that reads down each chart. Picking the across-axis dimension swaps the two axes. Picking the pivot dimension rotates it into the down role."
           width={300}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>

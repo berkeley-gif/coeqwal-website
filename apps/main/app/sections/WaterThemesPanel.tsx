@@ -55,9 +55,9 @@ const WATER_THEME_PHOTOS: Record<string, string | undefined> = {
 
 interface ThemeCircle {
   id: string
-  /** Center X in image-space pixels (0–2784) */
+  /** Center X in image-space pixels (0-2784) */
   cx: number
-  /** Center Y in image-space pixels (0–1066) */
+  /** Center Y in image-space pixels (0-1066) */
   cy: number
   /** Radius in image-space pixels */
   r: number
@@ -325,7 +325,7 @@ function WaterThemesPanelContent({
   const prefersReducedMotion = useReducedMotion()
   const { openThemePanel } = usePanelRoute()
 
-  // Local scroll progress (0–1) within this StickyScrollSection
+  // Local scroll progress (0-1) within this StickyScrollSection
   const progress = useScrollProgress()
 
   // Phase opacities.when reduced motion, show final state
@@ -425,7 +425,7 @@ function WaterThemesPanelContent({
               },
             }}
           >
-            {/* Responsive headline - visible on xs–md only */}
+            {/* Responsive headline - visible on xs-md only */}
             <Box
               sx={{
                 display: { xs: "block", lg: "none" },
@@ -464,7 +464,7 @@ function WaterThemesPanelContent({
                   // headline's top instead of sitting below it by the
                   // body1 line-height gap. body1 has lineHeight 1.75
                   // at fontSize 1.25rem, so (1.75 - 1) / 2 = 0.375em
-                  // of invisible space sits above the glyphs; negating
+                  // of invisible space sits above the glyphs. Negating
                   // that margin brings the visual top flush.
                   mt: { md: "-0.375em" },
                 },
@@ -530,7 +530,7 @@ function WaterThemesPanelContent({
         </Box>
       </Box>
 
-      {/* Scroll-down arrow — matches the VideoHero and About panels.
+      {/* Scroll-down arrow, matches the VideoHero and About panels.
           Absolutely positioned against the rounded card (whose wrapper
           has position:relative), bottom-center, above all other
           layers so it stays visible throughout the sticky pin. */}

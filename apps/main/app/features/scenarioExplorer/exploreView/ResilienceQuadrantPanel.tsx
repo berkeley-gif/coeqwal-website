@@ -13,7 +13,7 @@
  *
  * Aggregate scope can narrow the denominator (all 24 sibling groups vs
  * the user's selected subset). Clicking an outcome dot jumps to the
- * per-outcome heatmap; clicking an LOI dot (or bin) focuses the map on
+ * per-outcome heatmap. Clicking an LOI dot (or bin) focuses the map on
  * the underlying outcome for the currently focused scenario.
  */
 
@@ -52,7 +52,7 @@ import { captureElementToBlob } from "../dataExplorer/utils/exportUtils"
  * Flat, CSV-friendly payload produced when the Leverage quadrant is
  * snapshotted into the Share drawer. One row per dot (outcome or LOI)
  * with the raw x/y coordinates used by `ResilienceQuadrant`. Share
- * consumers treat it as opaque data; the CSV exporter is the only
+ * consumers treat it as opaque data. The CSV exporter is the only
  * reader that walks the row shape today.
  */
 export interface ResilienceQuadrantChartData {
@@ -116,7 +116,7 @@ export default function ResilienceQuadrantPanel({
 
   const { selectedScenarios } = useScenarioExplorerStore()
   // Scenario used for LOI-level map focus. Prefer the user's first
-  // sidebar selection; fall back to the baseline so "show on map" still
+  // sidebar selection. Fall back to the baseline so "show on map" still
   // works when nothing is pinned.
   const loiMapScenarioId = selectedScenarios[0] ?? PRIMARY_SCENARIO_BASELINE_ID
   const setHighlightedScenario = useScenarioExplorerStore(

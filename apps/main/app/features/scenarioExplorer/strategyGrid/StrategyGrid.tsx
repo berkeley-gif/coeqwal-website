@@ -89,7 +89,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   /**
    * Layout mode determines how columns are arranged:
    * - "full": All 4 columns inline (container ≥ fullBreakpoint, currently 1200px)
-   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px – fullBreakpoint)
+   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px - fullBreakpoint)
    * - "compact": Mobile layout (below 600px)
    *
    * Derived from container width so the grid adapts when placed in a

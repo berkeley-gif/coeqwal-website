@@ -235,7 +235,7 @@ export default function ExploreSubNav() {
           {/* Flow map. Same curation journey as the WelcomeStrip, adapted
               to the dark sub-nav background: pills carry label + purpose,
               separated by chevrons. Clicking Share jumps to the top-level
-              Share tab; all others switch exploreMode. */}
+              Share tab. All others switch exploreMode. */}
           {FLOW.filter((step) => !step.research || showResearchTools).map(
             (step, i, visibleFlow) => {
               const isShare = step.mode === null

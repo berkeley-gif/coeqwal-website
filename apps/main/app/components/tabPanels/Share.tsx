@@ -93,7 +93,7 @@ function encodeShareItems(
     }
     if (item.type === "equity") {
       // Note and cached image are intentionally not URL-encoded. Notes
-      // are a private annotation; images are too large to fit a URL.
+      // are a private annotation. Images are too large to fit a URL.
       const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
       const outcomes = item.outcomeCodes.join("~")
       const cmp = item.compareToBaseline ? "c" : ""
@@ -136,7 +136,7 @@ function encodeShareItems(
 //
 // The resilience heatmap panel owns its own state locally in
 // ScenarioExplorer.tsx (see `resilienceControls`). It is not part of
-// ShareItem[] because it isn't a pinned card; it is the active tool
+// ShareItem[] because it isn't a pinned card. It is the active tool
 // configuration. Shared URLs created before this reset never carried
 // resilience state, so existing URLs continue to parse identically and
 // the panel falls through to its initial defaults.

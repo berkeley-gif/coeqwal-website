@@ -92,7 +92,7 @@ function RadarAxisDetailScenarioControlsInner({
           minWidth: 0,
           /**
            * Partial offset for `transformOrigin: "0 50%"` (dead space in the
-           * checkbox flex item); keep less negative than before so there is
+           * checkbox flex item). Keep less negative than before so there is
            * clear space between the glyph and the short code.
            */
           marginLeft: theme.spacing(-1),

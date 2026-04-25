@@ -1,7 +1,7 @@
 /**
  * Tier score calculation and color blending utilities.
  *
- * computeTierScore:    ChartDataPoint[] → weighted mean tier (1.0–4.0)
+ * computeTierScore:    ChartDataPoint[] -> weighted mean tier (1.0-4.0)
  * interpolateTierColor: score + theme tier colors → blended hex string
  * getTierLabelForScore: score → "Optimal" | "Acceptable" | "At-risk" | "Critical"
  */
@@ -47,7 +47,7 @@ export function getTierLabelForScore(score: number): string {
 }
 
 /**
- * Map a tier score to a tier level (1–4) for color lookup.
+ * Map a tier score to a tier level (1-4) for color lookup.
  */
 export function getTierLevelForScore(score: number): 1 | 2 | 3 | 4 {
   if (score < 1.5) return 1

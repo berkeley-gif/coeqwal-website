@@ -27,14 +27,14 @@ dist
 .DS_Store
 *.pem
 
-# Documentation (developer notes)
+# Documentation / developer notes
 docs/
 
-# Archived code (unused files preserved outside version control)
+# Archived code
 **/archive/
 **/_archive/
 
-# Developer scratch files (local-only, never committed)
+# Developer scratch files
 **/*.peak.tsx
 **/*.peak.ts
 **/*.peak.jsx

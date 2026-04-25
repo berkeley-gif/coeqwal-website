@@ -155,7 +155,7 @@ function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
   try {
     if (typeof window === "undefined") return
     // ShareItem variants that cache images are stripped on persist to
-    // keep localStorage small; the in-memory state keeps the images so
+    // keep localStorage small. The in-memory state keeps the images so
     // the current session can still render thumbnails.
     const stripped = shareItems.map((item) => {
       if (
@@ -260,7 +260,7 @@ interface ScenarioExplorerState {
    * orthogonal to `selectedScenarios` so entering/leaving Distribution
    * does not stomp the shared multi-select used by List, Radar,
    * Resilience, and Comparison. Null until the user explicitly picks a
-   * radio; EquityPanel falls back to the baseline in that case.
+   * radio. EquityPanel falls back to the baseline in that case.
    */
   equityFocusScenario: string | null
   pinnedScenarioIds: string[]
@@ -316,7 +316,7 @@ interface ScenarioExplorerState {
   resilienceVisibleOutcomes: string[]
 
   // Resilience heatmap distribution sub-mode (within the "distribution"
-  // cell encoding). "scenario" = one square per scenario; "location" =
+  // cell encoding). "scenario" = one square per scenario. "location" =
   // one square per LOI (mean tier across scope scenarios).
   resilienceDistributionMode: "scenario" | "location"
 
@@ -553,8 +553,8 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         // If the user leaves the explorer while a tool tour is running,
         // reset the tour so it doesn't pop back up when they return.
-        // The tour is always anchored to a specific tool (list / radar
-        // / etc.), and coming back to a stale, dangling popper is
+        // The tour is always anchored to a specific tool (list / radar),
+        // and coming back to a stale, dangling popper is
         // disorienting.
         if (state.mainView !== view) {
           state.tour = { tool: null, step: 0 }

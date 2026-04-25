@@ -5,7 +5,7 @@ import { select, type BaseType, type Selection } from "d3"
 /** Typography, panel chrome, and layout for the SVG axis-label hover detail. */
 export type RadarPlotAxisLabelDetailStyle = {
   /**
-   * Spoke axis titles and scenario name in the hover card — use
+   * Spoke axis titles and scenario name in the hover card. Use
    * `theme.typography.axisLabel`.
    */
   scenarioFontSize: string
@@ -32,7 +32,7 @@ export type RadarPlotAxisLabelDetailStyle = {
   panelStroke: string
   scenarioFill: string
   tierFill: string
-  /** Static axis title (spoke label) fill — use theme `text.primary`. */
+  /** Static axis title (spoke label) fill. Use theme `text.primary`. */
   axisTitleFill: string
   /** Max width of the hover detail panel (SVG user units / px). */
   detailMaxWidthPx: number
@@ -68,10 +68,10 @@ const RADAR_DETAIL_EXPANDED_BOTTOM_MIN_AXES = 16
 
 /**
  * - Even N≤15: `single-right` for `i === N/2` only.
- * - Even N≥16: bottom three — `pair-right` / `single-right` / `pair-left` for
+ * - Even N≥16: bottom three: `pair-right` / `single-right` / `pair-left` for
  *   `N/2-1`, `N/2`, `N/2+1`.
  * - Odd N≤15: `pair-right` / `pair-left` for the two spokes straddling 6 o'clock.
- * - Odd N≥17: bottom four — `floor(N/2)-1` … `floor(N/2)+2`, by angle vs 6 o'clock
+ * - Odd N≥17: bottom four: `floor(N/2)-1` … `floor(N/2)+2`, by angle vs 6 o'clock
  *   (`pair-right` if `i < N/2`, else `pair-left`).
  */
 export function radarAxisDetailBottomModeForIndex(
@@ -152,7 +152,7 @@ export type RadarAxisLabelDetailPayload = {
   tierIndex: number
 }
 
-/** Payload passed to `onScenarioControlsMount` — includes layout for anchor-aware chrome. */
+/** Payload passed to `onScenarioControlsMount`, includes layout for anchor-aware chrome. */
 export type RadarAxisLabelDetailChromeMountPayload =
   RadarAxisLabelDetailPayload & {
     /**

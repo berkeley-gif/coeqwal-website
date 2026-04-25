@@ -13,7 +13,7 @@ interface ShareItemNoteBlockProps {
 
 /**
  * Optional note for any share card. The tray card uses [data-share-note] so
- * clicks here do not toggle the card; we avoid wrapping handlers that could
+ * clicks here do not toggle the card. We avoid wrapping handlers that could
  * interfere with the inner control.
  */
 export default function ShareItemNoteBlock({

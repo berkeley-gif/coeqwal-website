@@ -125,7 +125,7 @@ export default function ScrollTooltip({
 
       // Position relative to target element.
       // For left/right positions, `alignTargetRef` overrides the horizontal
-      // anchor only; for top/bottom it overrides the vertical anchor only.
+      // anchor only. For top/bottom it overrides the vertical anchor only.
       switch (position) {
         case "right":
           top = relativeTop + targetRect.height / 2

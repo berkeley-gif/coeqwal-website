@@ -60,7 +60,7 @@ interface OutcomeMorphOverlayProps {
   progress: MotionValue<number>
   /** Bridge into `OverlayMorphArbiter`. The component writes its
    *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
-   *  and clears it on unmount; the arbiter reads through the ref on
+   *  and clears it on unmount. The arbiter reads through the ref on
    *  every tick. See
    *  `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/OverlayMorphArbiter.ts`. */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
@@ -97,7 +97,7 @@ interface OutcomeMorphOverlayProps {
    *  during non-interactive playback. */
   demoHighlightedLocationKey?: string | null
   /** Source IDs that must survive the per-outcome subsample. Any polygon
-   *  whose `sourceId` is in this set is kept verbatim; the remaining quota
+   *  whose `sourceId` is in this set is kept verbatim. The remaining quota
    *  is filled with a uniform stride over the untouched polygons. Used by
    *  the storyboard to guarantee that beat-specific LOIs (e.g. the Beat 5
    *  Glenn Colusa spotlight, the Beat 1C popup DUs) always have a square
@@ -314,7 +314,7 @@ function computeOutcomeLayout(
     // does not match the list view. We therefore only fall back to the
     // count ratio for single-value outcomes (which have no
     // `chartPoints`-derived bar to begin with). For multi-value
-    // outcomes, if `chartPoints` is missing we render an empty bar; the
+    // outcomes, if `chartPoints` is missing we render an empty bar. The
     // memo re-runs the moment `tierChartData` arrives.
     const apiVal = chartPoints?.[tier - 1]?.value
     const apiNorm =
@@ -415,14 +415,14 @@ function computeOutcomeLayout(
 }
 
 /**
- * Progress ranges for each outcome within Beat 2 (global progress 0.78–1.0).
+ * Progress ranges for each outcome within Beat 2 (global progress 0.78-1.0).
  * Each outcome gets a slice for its polygon morph animation.
  * Morphing begins at 0.78, after the Beat 1C tier-color blend, example
  * text, and map popups have all played.
  */
 /** Beat 2 is split so AG_REV morphs first (solo), then the overlay narrates
  *  "All other key outcomes...", then the remaining outcomes morph in their
- *  existing order. AG_REV gets a dedicated early window; the rest divide the
+ *  existing order. AG_REV gets a dedicated early window. The rest divide the
  *  tail of the progress track equally.
  *
  *  Returns the [start, end] progress window (in `progress` space, 0..1) for
@@ -695,7 +695,7 @@ export default function OutcomeMorphOverlay({
    * A grid of `numColumns` hydroclimate columns (primary column +
    * `extraHydroclimateColumns.length` extras) by `N` outcome rows. The
    * primary column (column index 0) is where each outcome's
-   * representative morph polygon lands via `heatmapTargetsByCode`; the
+   * representative morph polygon lands via `heatmapTargetsByCode`. The
    * extra columns are purely decorative fade-ins (no morph). All
    * columns share the same inter-cell padding so rows read as a single
    * stacked heatmap the way `ResilienceHeatmap` does.
@@ -727,10 +727,10 @@ export default function OutcomeMorphOverlay({
     const HEAT_LABEL_COL_W = 110
     const HEAT_LABEL_GAP = 12
     const HEAT_COL_GAP_FRACTION = 0.18
-    // Cap set high enough that on typical panels (~1200–2000px wide)
+    // Cap set high enough that on typical panels (~1200-2000px wide)
     // cells grow to consume the full heatmap region, so the
-    // labels+heatmap block visually fills — and therefore centers
-    // inside — the overlay's right third (minus `HEAT_SIDE_PAD` on
+    // labels+heatmap block visually fills, and therefore centers
+    // inside, the overlay's right third (minus `HEAT_SIDE_PAD` on
     // each edge). Ultra-wide panels still clamp here to avoid
     // oversized swatches.
     const HEAT_MAX_CELL_W = 150
@@ -764,7 +764,7 @@ export default function OutcomeMorphOverlay({
     const innerH = Math.max(1, cellH - cellInsetY * 2)
 
     // Left-align columns inside the heatmap region: leftmost column's
-    // `cx` sits at `heatmapLeft + cellW / 2`; subsequent columns step
+    // `cx` sits at `heatmapLeft + cellW / 2`. Subsequent columns step
     // by `stride = cellW + columnGap`.
     const stride = cellW + columnGap
     const columnCx: number[] = []
@@ -1649,7 +1649,7 @@ export default function OutcomeMorphOverlay({
           column header. Row labels live in `BeatTextOverlay` as
           migrated HTML `axisLabel` titles, so this group intentionally
           renders no row text. Opacity driven by `heatmapChromeBlend`
-          in the main progress handler; at blend=1 each rect is opaque
+          in the main progress handler. At blend=1 each rect is opaque
           and covers the sharp-cornered morph polygon underneath, so
           the cells resolve to rounded rectangles in the rest frame. */}
       <g
@@ -1692,10 +1692,10 @@ export default function OutcomeMorphOverlay({
       {/* Extra hydroclimate columns (Beat 8): each column is a `<g>`
           with its own opacity ref so it can fade in sequentially after
           the primary column's chrome settles. Same rounded-rect cell
-          style + column header treatment; cell fills come from each
+          style + column header treatment. Cell fills come from each
           column's `tierChartData` resolved against the theme tier
           palette. No morph lands here, so there is no underlying
-          polygon to cover — cells render directly as the final heatmap
+          polygon to cover. Cells render directly as the final heatmap
           appearance. */}
       {heatmapGeometry.extraColumns.map((column, colIdx) => (
         <g
@@ -1827,7 +1827,7 @@ export default function OutcomeMorphOverlay({
               // Squares are clickable whenever the overlay is interactive
               // and we're not in average mode. The `isSelected` gate was
               // dropped because outcome-title clicks no longer precede
-              // square clicks; clicking a square is now the sole entry
+              // square clicks. Clicking a square is now the sole entry
               // point for activating an outcome's map layer.
               const isClickable = interactive && !isAvgMode
               return (

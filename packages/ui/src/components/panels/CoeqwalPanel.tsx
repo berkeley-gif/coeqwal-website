@@ -165,7 +165,7 @@ export function CoeqwalPanel({
             : { maxWidth: "680px" }
         }
       >
-        {/* Responsive headline.visible on xs–md only; lg+ uses MorphingHeadline overlay */}
+        {/* Responsive headline.visible on xs-md only; lg+ uses MorphingHeadline overlay */}
         {responsiveHeadline && (
           <Box
             sx={{

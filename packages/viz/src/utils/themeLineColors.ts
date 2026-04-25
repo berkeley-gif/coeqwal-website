@@ -7,8 +7,8 @@
  * theme share a hue family but vary in lightness and saturation so that up to
  * 7 scenarios from the same theme are distinguishable.
  *
- * getThemeLineColor uses THEME_LINE_PALETTES_LIGHT_TO_DARK`
- * — the same hexes sorted by WCAG relative luminance so that, within a theme,
+ * getThemeLineColor uses `THEME_LINE_PALETTES_LIGHT_TO_DARK`.
+ * The same hexes sorted by WCAG relative luminance so that, within a theme,
  * index 0 is the lightest swatch and higher indices read progressively darker.
  *
  * Theme-to-hue mapping:

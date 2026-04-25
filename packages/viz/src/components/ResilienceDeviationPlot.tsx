@@ -12,23 +12,23 @@ import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 // An evolution of DeviationPlot that makes climate resilience the
 // primary visual signal. Key design differences:
 //
-// 1. ALWAYS-VISIBLE SPREAD — Both climates are shown simultaneously as
+// 1. ALWAYS-VISIBLE SPREAD: Both climates are shown simultaneously as
 //    a vertical range bar per scenario per column. The bar length *is*
 //    the climate sensitivity, and its color encodes severity.
 //
-// 2. INDEPENDENT BASELINE SHIFT — Two bracket marks per column (solid =
+// 2. INDEPENDENT BASELINE SHIFT: Two bracket marks per column (solid =
 //    primary climate, dashed = comparison climate) so the viewer sees
 //    "how much the floor moved" independent of any scenario.
 //
-// 3. BUFFERING INDICATOR — When a scenario's tier-shift is smaller than
+// 3. BUFFERING INDICATOR: When a scenario's tier-shift is smaller than
 //    the baseline's tier-shift in a column, a small shield glyph shows
 //    that the operation is absorbing climate impact.
 //
-// 4. RESILIENCE RANKING SIDEBAR — A sorted horizontal bar chart showing
+// 4. RESILIENCE RANKING SIDEBAR: A sorted horizontal bar chart showing
 //    each scenario's average cross-column climate spread, so the viewer
 //    can immediately rank resilience without mental math.
 //
-// 5. SPREAD-COLORED RANGE BARS — Green = small spread (resilient),
+// 5. SPREAD-COLORED RANGE BARS: Green = small spread (resilient),
 //    amber/red = large spread (vulnerable), applied per column.
 //
 // The component accepts the same data shape as DeviationPlot so it can

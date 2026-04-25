@@ -20,7 +20,7 @@ import {
 // Diagnostic helpers live in the storyboard engine module. OPL
 // imports them so all `[DIAG S4/S5]` logs share one STORYBOARD_DEBUG
 // flag. Phase 3 of the hardening plan removes OPL's demand-units
-// writes entirely; at that point these imports go away with them.
+// writes entirely. At that point these imports go away with them.
 import {
   debugLog,
   logDuState,
@@ -175,7 +175,7 @@ export function OutcomePolygonLayer({
   const { mapRef } = useMap()
   const mapReady = useMapReady()
   const outlineCreatedRef = useRef(false)
-  /** RAF handle for the deferred fade-in; cancelled if the effect re-runs first */
+  /** RAF handle for the deferred fade-in. Cancelled if the effect re-runs first */
   const fadeRafRef = useRef<number | null>(null)
   /** Tracks whether the layer was already showing colored data (for crossfade vs fade-in) */
   const wasShowingDataRef = useRef(false)

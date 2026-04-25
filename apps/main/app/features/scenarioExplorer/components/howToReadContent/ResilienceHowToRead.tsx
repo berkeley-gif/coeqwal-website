@@ -38,7 +38,7 @@ export function ResilienceHowToRead() {
           {
             label: "Outcome mirrors that rule on the Y axis.",
             description:
-              "Pick a primary outcome and the matrix becomes scenarios down the Y axis. Sidebar selection filters which scenarios show as rows; with nothing selected, all scenarios appear.",
+              "Pick a primary outcome and the matrix becomes scenarios down the Y axis. Sidebar selection filters which scenarios show as rows. With nothing selected, all scenarios appear.",
           },
           {
             label: "Regional detail is one click away.",
@@ -110,7 +110,7 @@ export function ResilienceHowToRead() {
       <AnnotatedStage
         eyebrow="STEP 2"
         title="Outcomes as small multiples: pick one, let the sidebar choose the rows."
-        deck="Pick outcome as the third dimension and the matrix becomes scenarios down the Y axis, one tile per outcome. Sidebar selection filters which scenarios appear as rows; with nothing selected, all 24 scenarios show. Compare adds more outcome tiles so you can track one climate question across the field."
+        deck="Pick outcome as the third dimension and the matrix becomes scenarios down the Y axis, one tile per outcome. Sidebar selection filters which scenarios appear as rows. With nothing selected, all 24 scenarios show. Compare adds more outcome tiles so you can track one climate question across the field."
         visual={<EncodingModesGraphic />}
         accentColor={theme.palette.blue.bright}
         minHeight={380}

@@ -27,7 +27,7 @@ interface SearchAndChipsProps {
   /**
    * Optional small-caps subheader rendered above the chip row to
    * categorize it. Used by the sidebar to label the visibility chips
-   * as the scenario-list tuner; omitted in the toolbar variant where
+   * as the scenario-list tuner. Omitted in the toolbar variant where
    * the chips are inline with the rest of the toolbar controls.
    */
   chipsEyebrow?: string

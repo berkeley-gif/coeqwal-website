@@ -14,7 +14,7 @@
  *     of LOI tier levels, matching V3's tiers_df[cols].mean(axis=1).
  *   - NOD/SOD rows read the dashboard-derived regional tier means from
  *     @repo/data/coeqwal. Coverage spans all three website hydroclimates
- *     (historical, cc50, cc95); cells fall back to `available: false`
+ *     (historical, cc50, cc95). Cells fall back to `available: false`
  *     only when the dataset lacks a specific (scenario, outcome, HC).
  *
  * Panels build their scenario-view / outcome-view pivots from this matrix.

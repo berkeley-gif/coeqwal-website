@@ -180,7 +180,7 @@ export function StrategyGridContent({
     () => displayScenarios.some((s) => Boolean(s.theme)),
     [displayScenarios],
   )
-  // Subheaders only when theme order allows and at least one row is themed; else row badges
+  // Subheaders only when theme order allows and at least one row is themed. Else row badges
   const themeSubheaderMode =
     groupByTheme && scenariosInContiguousThemeOrder && hasThemedScenarios
   const showThemeBadgeUnpinned = !themeSubheaderMode
@@ -262,7 +262,7 @@ export function StrategyGridContent({
     opts: {
       themeIds: Map<string, string[]>
       isFirstGroup: boolean
-      /** Pinned block always had row theme badges; keep when subheaders are partial/empty */
+      /** Pinned block always had row theme badges. Keep when subheaders are partial/empty */
       showThemeBadgeInPinnedSection?: boolean
       /**
        * True for the block that contains the first visible list row (pinned head

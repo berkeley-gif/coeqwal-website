@@ -192,7 +192,7 @@ export function useComparisonData(
             // Clip anything over 4 back to 4 (radar value -1) so those
             // scenarios still render at the bottom of the axis instead of
             // clipping off-chart. Not clear why the upstream scores exceed
-            // 4; leaving that for someone else to figure out.
+            // 4. Leaving that for someone else to figure out.
             if (code === "WRC_SALMON_AB" && v < -1) v = -1
             values[displayName] = v
           } else {

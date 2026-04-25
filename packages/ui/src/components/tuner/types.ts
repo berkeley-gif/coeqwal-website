@@ -10,7 +10,7 @@ import type { SxProps, Theme } from "@mui/material"
 export interface WalkthroughStep {
   /** Short heading for this step (e.g. "What is resilience?"). */
   title: string
-  /** Body content — plain text, React nodes, rich JSX, etc. */
+  /** Body content: plain text, React nodes, rich JSX, etc. */
   body: React.ReactNode
   /**
    * Optional hook run when this step is activated, for the chart to update
@@ -21,7 +21,7 @@ export interface WalkthroughStep {
 }
 
 /**
- * A saved preset — a one-click chart configuration. Presets are surfaced
+ * A saved preset, a one-click chart configuration. Presets are surfaced
  * as buttons so users can jump straight to a meaningful view rather than
  * fiddling with individual controls.
  */
@@ -59,7 +59,7 @@ export interface ChartTunerProps {
    */
   presets?: TunerPreset[]
   /**
-   * Existing chart-control UI — rendered as-is in the overlay. This is how
+   * Existing chart-control UI, rendered as-is in the overlay. This is how
    * developers surface the traditional controls (sliders, toggles, …) to
    * power users without building them into the tuner.
    */

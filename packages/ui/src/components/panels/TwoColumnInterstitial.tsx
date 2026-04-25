@@ -22,7 +22,7 @@ export interface InterstitialLink {
   target?: string
   /** Rel attribute, e.g. "noopener noreferrer" for external links */
   rel?: string
-  /** Optional opacity override (0–1) for inactive links */
+  /** Optional opacity override (0-1) for inactive links */
   opacity?: number
 }
 

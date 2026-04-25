@@ -7,7 +7,7 @@
  * - WCAG 1.1.1: Video/image marked as decorative (aria-hidden, empty alt)
  * - WCAG 1.3.1: Uses semantic <section> with aria-label
  * - WCAG 2.2.2: Pause/play control for autoplay video (DO NOT REMOVE)
- * - WCAG 2.3.3: Animations handled via MotionConfig; video playback uses useReducedMotion hook
+ * - WCAG 2.3.3: Animations handled via MotionConfig. Video playback uses useReducedMotion hook
  * - WCAG 2.4.7: Focus-visible styles on interactive elements
  * - WCAG 4.1.2: Proper aria-labels on controls
  */
@@ -125,7 +125,7 @@ export default function VideoHero({
   const radius = resolveRadius(borderRadius, theme.borderRadius)
   const insetCfg = resolveInset(inset)
 
-  // Inset mode uses a wrapping frame Box; inner height must subtract the
+  // Inset mode uses a wrapping frame Box. Inner height must subtract the
   // vertical frame padding so the hero still fits one viewport.
   const heroHeight =
     insetCfg && insetCfg.y !== 0
@@ -299,7 +299,7 @@ export default function VideoHero({
 
       {/* Paragraph.lower-right. Left edge aligns with the first
           header nav item ("Guides") via the `--coeqwal-nav-left`
-          CSS variable published by BaseHeader; right edge aligns
+          CSS variable published by BaseHeader. Right edge aligns
           with the header's right panel padding so the block tracks
           the nav horizontally. Falls back gracefully if the header
           hasn't measured yet (e.g. SSR, mobile nav). */}

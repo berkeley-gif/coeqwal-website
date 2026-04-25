@@ -229,9 +229,9 @@ function rowsToVolumePercentiles(
 }
 
 /**
- * % Unimpaired percentile bands from the q0–q100 / pct_unimpaired columns.
+ * % Unimpaired percentile bands from the q0-q100 / pct_unimpaired columns.
  * NULL where no unimpaired reference exists (Mokelumne, some canals).
- * Values are percentages (0–∞); highly regulated reaches can exceed 100%.
+ * Values are percentages (0-infinity); highly regulated reaches can exceed 100%.
  */
 function rowsToPctUnimpairedPercentiles(
   rows: ChannelMonthlyStats[],

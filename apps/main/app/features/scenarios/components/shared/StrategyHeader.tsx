@@ -426,7 +426,7 @@ export function StrategyHeader({
       ? "Current operations with historical agricultural land use"
       : strategy.label
 
-  /** Long row labels only: wrap inside ScenarioBadge; all other theme chips stay one line + ellipsis. */
+  /** Long row labels only: wrap inside ScenarioBadge. All other theme chips stay one line + ellipsis. */
   const themeBadgeMultiline = Boolean(
     showAllThemeBadges && themeLabel && shouldWrapThemeBadgeLabel(themeLabel),
   )

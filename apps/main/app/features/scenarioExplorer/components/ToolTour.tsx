@@ -30,7 +30,6 @@ import { useScenarioExplorerStore } from "../store"
 import { TOUR_STEPS } from "../tour/content"
 import ListTourBarIllustration from "../tour/ListTourBarIllustration"
 import ListTourMapLegend from "../tour/ListTourMapLegend"
-import TourTierLegend from "../tour/TourTierLegend"
 import ListTourControlIllustration, {
   type ListTourControlVariant,
 } from "../tour/ListTourControlIllustration"
@@ -259,7 +258,7 @@ export default function ToolTour() {
     }, 250)
     return () => window.clearTimeout(timer)
     // stepId and anchorId are read inside the effect but their changes
-    // are already captured by tourStepAnchorKey; listing them would
+    // are already captured by tourStepAnchorKey. Listing them would
     // grow the deps array to 5 and trip "changed size between renders"
     // during Fast Refresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -466,7 +465,7 @@ export default function ToolTour() {
 
     const raf = window.requestAnimationFrame(() => {
       if (mapDemoRef.current?.demoFired) return
-      // `resolve` is widened to `Element`; this particular anchor is
+      // `resolve` is widened to `Element`. This particular anchor is
       // always an HTMLElement (a DOM button in the bar chart), so a
       // narrow cast here is safe and keeps the dataset access typed.
       const el = resolve("list.outcome.barChart") as HTMLElement | null
@@ -569,7 +568,7 @@ export default function ToolTour() {
   }, [tourTool, tourStep])
 
   // Lightweight focus trap. Tab/Shift+Tab cycles among the buttons
-  // inside the tour card; everything outside is dimmed and unreachable
+  // inside the tour card. Everything outside is dimmed and unreachable
   // by keyboard, matching the visual modality.
   useEffect(() => {
     if (!tourTool) return
@@ -618,7 +617,7 @@ export default function ToolTour() {
 
   const useCentered = !step.anchorId || fallbackToCentered || anchorEl === null
 
-  // Shared size. Row wraps instead of shrinking labels; min width keeps tap targets.
+  // Shared size. Row wraps instead of shrinking labels. Min width keeps tap targets.
   const tourActionShape = {
     textTransform: "none" as const,
     fontSize: "0.8125rem",
@@ -748,9 +747,6 @@ export default function ToolTour() {
           {step.illustration === "listMapLegend" ? <ListTourMapLegend /> : null}
           {step.illustration === "listBarTiers" ? (
             <ListTourBarIllustration />
-          ) : null}
-          {step.illustration === "resilienceTierLegend" ? (
-            <TourTierLegend title="Cell color legend" />
           ) : null}
           {step.illustration &&
           CONTROL_ILLUSTRATION_VARIANT[step.illustration] ? (

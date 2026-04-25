@@ -29,7 +29,7 @@ export interface ShapeMorphData {
   centroidScreen: [number, number]
   /** Tier color hex */
   color: string
-  /** Tier level (1–4) */
+  /** Tier level (1-4) */
   tier: number
   /** Feature/location identifier for hide-schedule coordination */
   sourceId: string

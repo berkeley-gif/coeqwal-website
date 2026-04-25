@@ -276,7 +276,7 @@ export default function ListView({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Fixed header: stays above the scroll region; soft bottom
+      {/* Fixed header: stays above the scroll region. Soft bottom
           shadow (wider blur than sm) so content reads as scrolling
           underneath with a more diffuse edge. */}
       <Box

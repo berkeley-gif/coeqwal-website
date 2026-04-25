@@ -9,7 +9,7 @@
  * grid; per-tile legends are suppressed (see `hideLegend` on
  * ResilienceHeatmap).
  *
- * The component is layout-only — all D3 work happens inside each
+ * The component is layout-only. All D3 work happens inside each
  * ResilienceHeatmap tile, so the anti-flicker rules carry through
  * unchanged.
  *

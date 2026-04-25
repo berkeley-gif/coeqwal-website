@@ -16,7 +16,7 @@ import { Box, Typography, useTheme, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import type { TourTool } from "../tour/types"
 
-const TOUR_TOOLS = new Set<TourTool>(["list", "radar", "resilience"])
+const TOUR_TOOLS = new Set<TourTool>(["list", "radar"])
 function isTourTool(mode: string): mode is TourTool {
   return TOUR_TOOLS.has(mode as TourTool)
 }
@@ -56,7 +56,7 @@ export default function TakeTheTourButton() {
     >
       <icons.PlayCircleOutline
         sx={(t) => ({
-          // Match label cap height: dashboard text is 0.875rem; keep
+          // Match label cap height: dashboard text is 0.875rem. Keep
           // the glyph optically aligned with the cap line without
           // baseline hacks on the text span.
           fontSize: t.typography.dashboard.fontSize,

@@ -22,7 +22,7 @@ export function SummaryCellExample() {
   const theme = useTheme()
   const size = 96
   return (
-    <Figure caption="Summary mode: color encodes the categorical tier; the number is the arithmetic mean across LOIs.">
+    <Figure caption="Summary mode: color encodes the categorical tier. The number is the arithmetic mean across LOIs.">
       <svg width={260} height={size + 20} role="img" aria-label="Summary cell">
         <rect
           x={0}

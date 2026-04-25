@@ -258,7 +258,7 @@ export default function TemperatureLineChart({
       .filter((d): d is Point => !!d)
       .sort((a, b) => a.year - b.year)
 
-    // keep only 1960–2025
+    // keep only 1960-2025
     const filtered = all.filter(
       (d) => d.year >= START_YEAR && d.year <= END_YEAR,
     )

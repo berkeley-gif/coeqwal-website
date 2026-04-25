@@ -11,7 +11,7 @@ import {
 export interface InfoCardProps {
   title: string
   description?: string
-  /** Click handler — makes the card interactive. */
+  /** Click handler, makes the card interactive. */
   onClick?: () => void
   /** Visual variant. "onDark" uses translucent white; "onLight" uses a tinted fill. */
   variant?: "onDark" | "onLight"

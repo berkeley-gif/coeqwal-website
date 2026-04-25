@@ -16,7 +16,7 @@ export interface LinedListItem {
   href?: string
   target?: string
   rel?: string
-  /** Dim the row (0–1). Defaults to 1. */
+  /** Dim the row (0-1). Defaults to 1. */
   opacity?: number
 }
 

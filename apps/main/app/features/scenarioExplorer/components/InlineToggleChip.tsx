@@ -4,7 +4,7 @@
  * InlineToggleChip - Compact pill control with check / radio icon states.
  *
  * Used in the radar (and similar) chart controls row and inside ChartToast
- * guidance copy so the same control can be referenced inline; optional
+ * guidance copy so the same control can be referenced inline. Optional
  * `onDarkBackground` uses an opaque light fill for contrast on dark toasts.
  */
 

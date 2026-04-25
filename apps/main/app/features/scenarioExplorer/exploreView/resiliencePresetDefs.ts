@@ -1,6 +1,6 @@
 /**
  * Single source of truth for resilience heatmap preset buttons in
- * `ResilienceControls` (single Presets row; `salient` filters that row).
+ * `ResilienceControls` (single Presets row. `salient` filters that row).
  */
 
 import type { ResilienceControlsState } from "./ResiliencePanel"
@@ -85,7 +85,7 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
       group: "Analyze",
       label: "Averaged across outcomes",
       description:
-        "Single chart with outcomes meaned away; read scenarios directly.",
+        "Single chart with outcomes meaned away. Read scenarios directly.",
       salient: true,
       getPatch: () => ({
         view: "aggregate",
@@ -99,7 +99,7 @@ export const RESILIENCE_PRESET_DEFINITIONS: readonly ResiliencePresetDefinition[
       group: "Analyze",
       label: "Averaged across hydroclimates",
       description:
-        "Single chart with hydroclimates meaned away; climate-agnostic profile.",
+        "Single chart with hydroclimates meaned away. Climate-agnostic profile.",
       salient: true,
       getPatch: () => ({
         view: "aggregate",

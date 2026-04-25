@@ -21,7 +21,7 @@ const HISTORICAL_HC_ID = 2
  * Exposes two views of the data:
  * - `scenarios` - all 72+ individual scenarios (for raw access)
  * - `siblingGroups` - 24 representative Scenario objects (historical variants),
- *   one per unique strategy. The UI renders these; the hydroclimate chooser
+ *   one per unique strategy. The UI renders these. The hydroclimate chooser
  *   determines which variant's tier data is fetched.
  */
 export function useScenarioList() {

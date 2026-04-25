@@ -153,7 +153,7 @@ function ScenarioExplorerInner() {
    * Hover coordination (sidebar ↔ tool panels in non-list modes).
    * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
    * Charts must keep `chosenIds` (selected scenarios) visible when this is set -
-   * it adds emphasis for hovered IDs; it does not replace selection visibility.
+   * it adds emphasis for hovered IDs. It does not replace selection visibility.
    */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
 
@@ -285,7 +285,7 @@ function ScenarioExplorerInner() {
 
   // Resilience heatmap controls (panel-local state, lifted here so the
   // toolbar and panel share one source of truth without store changes).
-  // Default view is Aggregate because the sidebar starts empty; the
+  // Default view is Aggregate because the sidebar starts empty. The
   // sync effect below flips to "scenario" the moment the sidebar has
   // at least one scenario selected, and back to "aggregate" when the
   // selection is cleared. Explicit user choices of "outcome" or
@@ -451,12 +451,6 @@ function ScenarioExplorerInner() {
   // stable across renders (comes from useTourAnchor), so the useMemo
   // below does not need to depend on it.
   const radarChartToolbarRef = useTourAnchor("radar.chartToolbar")
-  // Same pattern for the resilience tour: the whole chart-controls
-  // row (sentence, presets, Rows row with Save snapshot) is
-  // introduced as a single orientation step before the sentence
-  // pieces. The resilience.snapshot anchor lives inside
-  // ResilienceControls now, so we don't register it here.
-  const resilienceChartToolbarRef = useTourAnchor("resilience.chartToolbar")
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
@@ -500,7 +494,7 @@ function ScenarioExplorerInner() {
               component="button"
               type="button"
               onClick={() => radarCaptureRef.current?.()}
-              aria-label="capture view"
+              aria-label="save snapshot"
               sx={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -524,7 +518,7 @@ function ScenarioExplorerInner() {
               }}
             >
               <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-              capture view
+              save snapshot
             </Box>
           </RadarTourAnchor>
         </ChartControlsBar>
@@ -532,7 +526,7 @@ function ScenarioExplorerInner() {
     }
     if (exploreMode === "resilience") {
       return (
-        <ChartControlsBar ref={resilienceChartToolbarRef}>
+        <ChartControlsBar>
           <ResilienceControls
             controls={resilienceControls}
             onChange={handleResilienceControlsChange}
@@ -613,7 +607,6 @@ function ScenarioExplorerInner() {
     handleEquitySnapshot,
     handleResilienceSnapshot,
     radarChartToolbarRef,
-    resilienceChartToolbarRef,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"

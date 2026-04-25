@@ -24,7 +24,7 @@ const PREFETCHABLE_TIER_CODES: string[] = Object.entries(OUTCOME_LAYER_REGISTRY)
  * Provides two entry points:
  *
  * - `showOnMap(outcomeCode, scenarioId)` - fixed-scenario call (Learn section).
- *   Uses the scenarioId as-is; no hydroclimate tracking.
+ *   Uses the scenarioId as-is. No hydroclimate tracking.
  *
  * - `showOnMapForGroup(outcomeCode, siblingGroupId)` - hydroclimate-aware call
  *   (list view / explore tools). Resolves the sibling group ID to the current

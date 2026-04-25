@@ -4,7 +4,7 @@
  * storyboard is in a non-playing state AND a non-null demand-units
  * outcome is selected. Under the hardening plan's invariant 1 (single
  * writer per resource), this is the one arbiter that writes those
- * layers during interactive exploration; `MapPaintArbiter` owns them
+ * layers during interactive exploration. `MapPaintArbiter` owns them
  * during active playback tweens.
  *
  * Phase 3c step 2 (current): all interactive paint is now concentrated
@@ -16,7 +16,7 @@
  * baseline so the layer is reliably invisible on deselect. Combined,
  * OPL's demand-units branch and `applyPaintChanges`'s demand-units
  * writes can be removed (VisualizationLayers skips OPL for DU layers
- * in get-started mode; `applyPaintChanges` early-returns for DU).
+ * in get-started mode. `applyPaintChanges` early-returns for DU).
  *
  * Ownership policy lives in the call site (`TierAnimationSection`):
  * the sync effect passes `spec !== null` iff it wants the arbiter to
@@ -44,7 +44,7 @@ import {
 import { BEAT1_MID } from "../beat1Palette"
 
 /** Transition observed by the most recent `sync` call. Used for tests
- *  and log correlation; no control flow depends on it. */
+ *  and log correlation. No control flow depends on it. */
 export type InteractivePaintTransition =
   | "enter"
   | "exit"
@@ -181,7 +181,7 @@ export class InteractivePaintArbiter {
    * spec when the arbiter SHOULD own.
    *
    * Idempotent: unchanged-spec calls return `"no-op"` and perform no
-   * writes; same-identity calls (same `outcomeCode`) also no-op, even
+   * writes. Same-identity calls (same `outcomeCode`) also no-op, even
    * if the internal expression-building produced a new array (arrays
    * are not reference-stable across React renders).
    */
@@ -232,7 +232,7 @@ export class InteractivePaintArbiter {
 
     // No-op. Either still not owning, or still owning the same outcome.
     // Per-outcome data shape (featureIds, colorExpression) is assumed
-    // stable for the lifetime of a selection; if it isn't, the caller
+    // stable for the lifetime of a selection. If it isn't, the caller
     // releases and re-enters rather than mutating under us.
     return "no-op"
   }

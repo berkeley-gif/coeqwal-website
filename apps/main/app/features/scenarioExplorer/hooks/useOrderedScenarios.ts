@@ -46,7 +46,7 @@ export interface OrderedScenariosResult {
   iconMatchingScenarioIds: Set<string>
   showIconDivider: boolean
   themeBoundaryIndices: number[]
-  /** False when theme blocks are interleaved (e.g. after search or sort); hide subheaders and use row badges */
+  /** False when theme blocks are interleaved (e.g. after search or sort). Hide subheaders and use row badges */
   scenariosInContiguousThemeOrder: boolean
   allScoreData: Record<string, Record<string, OutcomeScoreData>> | undefined
   allChartData: Record<string, Record<string, unknown>>

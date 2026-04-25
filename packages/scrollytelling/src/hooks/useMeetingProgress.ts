@@ -3,7 +3,7 @@
 /**
  * useMeetingProgress - Scroll progress at which two DOM elements' edges meet.
  *
- * Returns a number (0–1) representing the scroll progress within
+ * Returns a number (0-1) representing the scroll progress within
  * `containerRef` at which the specified edge of `refA` will reach the same
  * viewport Y position as the specified edge of `refB` (i.e. they meet).
  *
@@ -99,7 +99,7 @@ export function useMeetingProgress(
     // Observe the container plus refA and refB. Observing the ref
     // elements is important when one of them is a dynamic-size
     // marker (e.g. a viewport-center marker whose height is set
-    // from measured headline height after mount) — without it the
+    // from measured headline height after mount), without it the
     // initial measurement captures the pre-measured size and never
     // updates. It also makes the hook self-healing against font
     // loads, text changes, and reflows in the tracked elements.

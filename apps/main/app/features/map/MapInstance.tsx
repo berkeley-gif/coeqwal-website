@@ -154,7 +154,7 @@ export default function MapInstance({
   }, [map.mapRef])
 
   /** When the style URL changes, cycle mapReady so layer-setup hooks re-run.
-   *  react-map-gl calls map.setStyle() internally; we listen for style.load
+   *  react-map-gl calls map.setStyle() internally. We listen for style.load
    *  to know when the new style is ready. */
   const prevStyleRef = useRef(mapStyle)
   useEffect(() => {

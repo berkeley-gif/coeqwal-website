@@ -41,7 +41,7 @@ function distributeSquares(values: number[]): number[] {
  * DistributionSquaresGlyph. Renders a 10-column grid of colored squares
  * matching the get-started overlay (OutcomeMorphOverlay) layout exactly.
  *
- * Each tier occupies its own row(s) — tiers never share a row.
+ * Each tier occupies its own row(s). Tiers never share a row.
  * Layout mirrors computeOutcomeLayout: tier 1 fills rows 0..ceil(n1/cols)-1,
  * tier 2 starts on the next row, etc.
  */

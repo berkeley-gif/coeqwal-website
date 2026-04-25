@@ -44,7 +44,7 @@ import OutcomeMorphOverlay, {
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 // Retired in favor of the anchored upper-left map popup rendered by
-// `VisualizationLayers`; kept imported (prefixed to silence the unused-var
+// `VisualizationLayers`. Kept imported (prefixed to silence the unused-var
 // lint) so un-commenting the card-list mount below is a one-line change.
 import _PinnedLocationsList from "./PinnedLocationsList"
 // TODO(beat3): restore ResearcherIllustrations import
@@ -422,7 +422,7 @@ export default function TierAnimationSection() {
    * today via `handleRestart`, which masks the reverse tween behind a
    * camera fly) uses `BACK_DURATION_FACTOR` of the source beat's
    * `duration` so the rewind feels snappier than Next. The regular Back
-   * button bypasses `goTo` entirely and snaps instead; see `handleBack`.
+   * button bypasses `goTo` entirely and snaps instead. See `handleBack`.
    * Under `prefers-reduced-motion`, every tween collapses to an
    * instantaneous `progress.set` + settle.
    *
@@ -711,7 +711,7 @@ export default function TierAnimationSection() {
     // Phase 3d: release the interactive arbiter before clearing the
     // store so the DU teardown runs while the selection (and its
     // spec) is still valid. See `clearInteractiveState` for the
-    // ordering rationale; the DU baseline written a few lines below
+    // ordering rationale. The DU baseline written a few lines below
     // is the final resting state either way, but the explicit release
     // cancels any pending deferred-idle teardown from a prior exit.
     const ctx = engineContextRef.current
@@ -746,7 +746,7 @@ export default function TierAnimationSection() {
           }
         }
         // Phase 3d: consolidated DU reset. `ANIM_POLYGON_LAYERS` loop
-        // above already zeroed fill/line opacity via dynamic ids; the
+        // above already zeroed fill/line opacity via dynamic ids. The
         // baseline helper re-asserts the full state (filter, color
         // expressions, transitions, visibility) so we return to the
         // pre-play beat-1 palette consistently. Idempotent with the
@@ -966,14 +966,14 @@ export default function TierAnimationSection() {
    * tier color, default outline width, plus the deferred-to-idle
    * handling for post-`removeLayer` style-busy windows) is owned by
    * `InteractivePaintArbiter.onExit`. That is driven from the sync
-   * effect further below; nothing here has to replicate it.
+   * effect further below. Nothing here has to replicate it.
    *
    * What remains here is the NON-demand-units half of the old
    * teardown: flip visibility back to `"visible"` on the animation
    * polygon layers the storyboard doesn't own (`calsim-wba`,
    * `california-reservoir`, `delta-detaw`, plus their outlines).
    * `OutcomePolygonLayer`'s unmount cleanup set those to `"none"` when
-   * the user deselected a non-DU outcome; leaving them hidden means a
+   * the user deselected a non-DU outcome. Leaving them hidden means a
    * subsequent click on the same layer -- or any other code that
    * assumes the base style's default visibility -- has to discover
    * the layer is hidden and flip it back. Cheap and idempotent to do
@@ -1121,7 +1121,7 @@ export default function TierAnimationSection() {
         // enters a new outcome (first click or cross-outcome swap) so
         // the user can see the polygon that just became active.
         // Same-outcome swaps keep the camera still (both polygons are
-        // already in view); de-select clicks skip this branch too.
+        // already in view). De-select clicks skip this branch too.
         //
         // Routed through `mapAPI.withMap` + `mapRef.fitBounds` /
         // `mapRef.getMap().easeTo` to mirror the canonical pattern in
@@ -1203,7 +1203,7 @@ export default function TierAnimationSection() {
     // Under sticky single-select, clicking a square atomically sets both
     // `pinnedLocations` and `selectedOutcomeCode`. If the pins already
     // belong to the new outcome (common case: user clicked a square in
-    // outcome B while outcome A was pinned), keep them untouched — the
+    // outcome B while outcome A was pinned), keep them untouched. The
     // click handler is the source of truth. Only clear stale pins whose
     // outcome no longer matches (e.g. the storyboard animation switched
     // outcomes out from under a leftover selection).
@@ -1223,14 +1223,14 @@ export default function TierAnimationSection() {
     setHoveredLocation(null)
 
     // The interactive paint effect caches original line-color / line-width
-    // values per layer; invalidate them so the new outcome's layer starts
+    // values per layer. Invalidate them so the new outcome's layer starts
     // from a clean baseline.
     origLineColorRef.current = null
     origLineWidthRef.current = null
 
     // NOTE: pinnedCacheRef (stash/restore per-outcome pins) was used by
     // the older multi-pin + outcome-title-click flow. It is intentionally
-    // not read or written here any more; a cross-outcome click replaces
+    // not read or written here any more. A cross-outcome click replaces
     // the pin outright rather than reviving a cached selection.
   }, [selectedOutcomeCode])
 
@@ -1282,7 +1282,7 @@ export default function TierAnimationSection() {
     // Demand-units interactive paint (both the base fill/outline AND
     // the gold-outline / spotlight / pinned overrides) moved to
     // `InteractivePaintArbiter` in Phase 3c step 2. The highlights
-    // computation below runs for every outcome; the inner
+    // computation below runs for every outcome. The inner
     // `applyPaintChanges` function no-ops for DU layers.
 
     // ── Polygon-specific Mapbox paint changes ──
@@ -1515,7 +1515,7 @@ export default function TierAnimationSection() {
   )
 
   // Prefixed with `_` so the unused-var lint stays silent while the retired
-  // `PinnedLocationsList` mount sits commented out. Still functional; just
+  // `PinnedLocationsList` mount sits commented out. Still functional. Just
   // re-wire (and rename) when restoring the card-list UI.
   const _handlePinnedHoverEnter = useCallback(
     (key: string) => {
@@ -1974,7 +1974,7 @@ export default function TierAnimationSection() {
    * progress-dispatch `arbitersRef` list). Will eventually be the
    * sole writer for `demand-units` / `demand-units-outline` during
    * interactive mode. In Phase 3b its `onEnter` / `onExit` /
-   * `onChangeSelection` hooks are logging stubs; legacy writers
+   * `onChangeSelection` hooks are logging stubs. Legacy writers
    * (`applyPaintChanges` effect + `OutcomePolygonLayer` + the
    * `selectedOutcomeCode` transition effect) still drive actual
    * paint. The React effect below calls `sync` on every
@@ -1991,7 +1991,7 @@ export default function TierAnimationSection() {
   // Bridge refs for the `*Arbiter` actors that delegate to
   // component-owned callbacks. Each child component writes its
   // `applyXxxFrame(v)` callback into `.current` on mount and clears
-  // it on unmount; the arbiter reads through the ref on each
+  // it on unmount. The arbiter reads through the ref on each
   // `onUpdate`, which is how we satisfy invariant 4 ("one
   // `progress.on('change')` subscriber") without lifting the
   // components' large per-frame DOM-mutation bodies into declarative
@@ -2130,7 +2130,7 @@ export default function TierAnimationSection() {
     }
 
     arbiter.sync(engineContext, spec)
-    // `theme` dep covers the grey fallback; `outcomeLocations` fires
+    // `theme` dep covers the grey fallback. `outcomeLocations` fires
     // the re-sync when tier data hydrates for the current outcome.
   }, [engineContext, selectedOutcomeCode, playState, theme, outcomeLocations])
 
@@ -2144,7 +2144,7 @@ export default function TierAnimationSection() {
    * as a pure overlay pass without re-running the full enter /
    * crossfade sequence.
    *
-   * No-op when the arbiter doesn't own; cheap guard inside the
+   * No-op when the arbiter doesn't own. Cheap guard inside the
    * arbiter, so we don't duplicate the ownership check here. */
   useEffect(() => {
     const arbiter = interactivePaintArbiterRef.current
@@ -2273,7 +2273,7 @@ export default function TierAnimationSection() {
    * `demoHoveredLocation`, and `mapActions.setLocationHighlights` for
    * the Glenn Colusa I.D. (`AG_REV` / `08N_SA2`) LOI sequence. The
    * legacy effect was already inert behind the `ENGINE_OWNS_BEAT4`
-   * flag; this commit deletes both. See Storyboard Engine Hardening
+   * flag. This commit deletes both. See Storyboard Engine Hardening
    * Plan v2, Phase 1.h. */
 
   /* ── Measure panel for SVG coordinate mapping ── */
@@ -3155,7 +3155,7 @@ export default function TierAnimationSection() {
             onBack={handleBack}
             onRestart={handleRestart}
             beat2Layout={outcomeLayout}
-            // Outcome-title clicks no longer drive layer visibility; see the
+            // Outcome-title clicks no longer drive layer visibility. See the
             // matching comment above on OutcomeMorphOverlay.
             onOutcomeClick={undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}

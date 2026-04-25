@@ -95,7 +95,7 @@ interface BeatTextOverlayProps {
   progress: MotionValue<number>
   /** Bridge into `NarrationArbiter`. The component writes its
    *  `applyNarrationFrame(v)` dispatcher into `.current` on mount
-   *  and clears it on unmount; the arbiter reads through the ref
+   *  and clears it on unmount. The arbiter reads through the ref
    *  every tick. See
    *  `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/NarrationArbiter.ts`. */
   narrationTickRef: RefObject<((v: number) => void) | null>
@@ -233,7 +233,7 @@ export default function BeatTextOverlay({
    *  appear in Step 7's *wrapped* layout (`whiteSpace: normal`,
    *  `textAlign: center`, `max-width` sized from the radar arc). Steps
    *  1-6 render titles single-line, so the wrapped centers differ from
-   *  the at-rest bounding rect; the measure pass computes them by
+   *  the at-rest bounding rect. The measure pass computes them by
    *  temporarily applying wrap styles to every title at once inside
    *  `useLayoutEffect`, reading `getBoundingClientRect`, and reverting
    *  before the browser paints. */
@@ -241,8 +241,8 @@ export default function BeatTextOverlay({
     Map<string, { textCenterX: number; textCenterY: number }>
   >(new Map())
   /** Precomputed per-outcome delta for the Beat 6 radar-label slide.
-   *  Populated by the same measure pass that fills `wrappedTitleGeomRef`;
-   *  the per-frame tick just multiplies by `blend` and writes a translate. */
+   *  Populated by the same measure pass that fills `wrappedTitleGeomRef`.
+   *  The per-frame tick just multiplies by `blend` and writes a translate. */
   const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
     new Map(),
   )
@@ -261,7 +261,7 @@ export default function BeatTextOverlay({
    *  computed from. */
   const radarLabelMaxWidthRef = useRef<number>(110)
   /** Per-outcome `maxWidth` (px) for heatmap y-axis label wrapping. Filled
-   *  in `measure()`; applied when `v >= 0.95` in the progress tick. */
+   *  in `measure()`. Applied when `v >= 0.95` in the progress tick. */
   const heatmapLabelMaxWRef = useRef<Map<string, number>>(new Map())
   /** When true, `axisLabel` titles use right-aligned, wrapped text for
    *  the Beat 8 heatmap column. Mutually exclusive with radar-axis wrap. */
@@ -306,7 +306,7 @@ export default function BeatTextOverlay({
   const beat7RadarRef = useRef<HTMLDivElement>(null)
   const beat8HeatmapRef = useRef<HTMLDivElement>(null)
   /* View-mode headers layered above the two-column eyebrow row in the
-   * right panel. One ref per Beat 5-8; opacity is driven by the same
+   * right panel. One ref per Beat 5-8. Opacity is driven by the same
    * progress windows as the matching narration paragraph. */
   const distributionHeaderRef = useRef<HTMLDivElement>(null)
   const listHeaderRef = useRef<HTMLDivElement>(null)
@@ -332,7 +332,7 @@ export default function BeatTextOverlay({
    * `latestNarrationFrameRef` is updated on every render so the
    * closures over component state and refs always reflect the most
    * recent render. The bridge-register effect further down writes a
-   * stable dispatcher into `narrationTickRef.current`; that
+   * stable dispatcher into `narrationTickRef.current`. That
    * dispatcher reads `latestNarrationFrameRef.current` on each call.
    *
    * `backOutOpacity` is a separate MotionValue (not `progress`), so
@@ -405,7 +405,7 @@ export default function BeatTextOverlay({
       // paragraph ("These are the outcomes for the <name> scenario.")
       // so the header and the sentence land together as a single
       // introduction of the scenario context. Held visible for the
-      // rest of the storyboard; opacity falls back to 0 automatically
+      // rest of the storyboard. Opacity falls back to 0 automatically
       // if the user navigates back to Steps 1-2 (v < 0.3675).
       const fadeIn = clamp01((v - 0.3675) / B2_PARA)
       scenarioOverlayHeaderRef.current.style.opacity = String(fadeIn)
@@ -538,7 +538,7 @@ export default function BeatTextOverlay({
       }
     }
 
-    // Beats 6-8: Step 7 wraps + centers for the radar; Step 8 wraps +
+    // Beats 6-8: Step 7 wraps + centers for the radar. Step 8 wraps +
     // right-aligns for the heatmap. The two are mutually exclusive.
     const wantHeatmapText = v >= 0.95
     const wantRadarAxisWrap = v >= 0.76 && v < 0.9 && !wantHeatmapText
@@ -650,7 +650,7 @@ export default function BeatTextOverlay({
     }
 
     // Tier legend staggers in row by row (Optimal -> Acceptable -> At risk
-    // -> Critical) so the gap between "To compare results..." (0.10–0.12)
+    // -> Critical) so the gap between "To compare results..." (0.10-0.12)
     // and the map's Beat 1B collapse (0.245) fills with a meaningful
     // level-by-level reveal instead of a single wide dead zone.
     // Per-row fade uses `ITEM_FADE_SEC` (~0.55s) - half the paragraph
@@ -941,7 +941,7 @@ export default function BeatTextOverlay({
       const N = activeItems.length
       // Arc length between neighboring axes at the label-placement ring
       // bounds how wide a label can get before it bumps its neighbor.
-      // 0.9 of that arc leaves a small breathing gap; clamped so edge
+      // 0.9 of that arc leaves a small breathing gap. Clamped so edge
       // cases (very few active outcomes, very small panels) still
       // produce a sane width.
       const arc = N > 0 ? (2 * Math.PI * labelR) / N : 120
@@ -951,7 +951,7 @@ export default function BeatTextOverlay({
       // Radar-mode wrap geometry.
       //
       // Steps 1-6 render each title single-line (`noWrap`, left-aligned,
-      // clipped by the outer block's `overflow: hidden`); Step 7 wraps
+      // clipped by the outer block's `overflow: hidden`). Step 7 wraps
       // them at `maxLabelW` and centers every line. Because the two
       // modes have different block rectangles (wrap grows the block
       // vertically, centering shifts the text horizontally), the radar
@@ -1108,17 +1108,17 @@ export default function BeatTextOverlay({
       // when the extra columns fade in.
       // Geometry constants MUST stay in sync with
       // `OutcomeMorphOverlay.heatmapGeometry`. See that block for a
-      // layout diagram; in short: the right third is
+      // layout diagram. In short: the right third is
       //   [sidePad] [labelColW] [labelGap] [heatmap columns] [sidePad]
       // so label text wraps within a fixed `HEAT_LABEL_COL_W` and
       // heatmap cells left-align immediately to its right. Only the
       // leftmost column's left edge is needed for label right-alignment
-      // here; cell widths / inter-column gaps / extra-column positions
+      // here. Cell widths / inter-column gaps / extra-column positions
       // are irrelevant to labels and therefore omitted.
       const HEAT_SIDE_PAD = 24
       const HEAT_LABEL_COL_W = 110
       const HEAT_LABEL_GAP = 12
-      // See `OutcomeMorphOverlay.heatmapGeometry` — same shift applied
+      // See `OutcomeMorphOverlay.heatmapGeometry`, same shift applied
       // here so labels translate with the heatmap block as one unit.
       const HEAT_BLOCK_SHIFT_X = -10
 
@@ -1854,7 +1854,7 @@ export default function BeatTextOverlay({
              *  over the eyebrow row at the top of the two-column flex,
              *  so it occupies the slot vacated by "Consumptive uses /
              *  Non-consumptive uses" without affecting glyph layout.
-             *  Four labels stack in the same slot; each is driven by
+             *  Four labels stack in the same slot. Each is driven by
              *  its own progress-keyed opacity ref in the main progress
              *  handler, so at most one is visible at a time. */}
             <Box

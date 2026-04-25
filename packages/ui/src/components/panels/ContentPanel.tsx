@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ContentPanel — Full-viewport colored section with heading and
+ * ContentPanel. Full-viewport colored section with heading and
  * reading-width-constrained body content.
  */
 

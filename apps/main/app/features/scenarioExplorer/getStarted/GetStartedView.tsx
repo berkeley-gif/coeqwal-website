@@ -21,7 +21,7 @@ import { getOutcomeName, type OutcomeCode } from "../../../content/outcomes"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* Rounded-panel shell for get-started sections.                               */
-/* Frame (outer) holds the inset; card (inner) holds the rounded corners.      */
+/* Frame (outer) holds the inset. Card (inner) holds the rounded corners.      */
 /* Tune these three constants to adjust all nine sections at once.             */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
@@ -53,7 +53,7 @@ interface GetStartedPanelShellProps {
   children: ReactNode
   /** Card background colour (the rounded surface) */
   background: string
-  /** Optional frame background; defaults to transparent so the frame blends
+  /** Optional frame background. Defaults to transparent so the frame blends
    *  into the scroll container. Pass a colour to cover content behind
    *  (e.g. the persistent map when `mapMode === "get-started"`). */
   frameBackground?: string
@@ -272,7 +272,7 @@ export default function GetStartedView() {
   const exploreBg = theme.palette.tabPanels.explore
   const sp = theme.space.component
 
-  // Dark wash tint used on both sides of the map panel; opacity is
+  // Dark wash tint used on both sides of the map panel. Opacity is
   // the single theme token (`modalBackdropOpacity`) so it can be
   // re-tuned in one place.
   const darkWash = alpha(
@@ -692,8 +692,8 @@ export default function GetStartedView() {
         </GetStartedPanelShell>
       </Box>
 
-      {/* Map panel (TierAnimationSection).thin outer frame + rounded shell;
-          radius applied around (not inside) the pinned map overlay so the
+      {/* Map panel (TierAnimationSection).thin outer frame + rounded shell.
+          Radius applied around (not inside) the pinned map overlay so the
           tier animation's own 100vh geometry is preserved. */}
       <Box
         sx={{

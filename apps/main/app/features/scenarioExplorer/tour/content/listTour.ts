@@ -2,7 +2,7 @@
  * List tour. Full port of ListHowToRead.tsx callouts, each becoming an
  * ordered, anchored step. Hero and journey-strip bookends render as
  * centered cards (no `anchorId`). List how-to copy may diverge from
- * the modal for clarity; anchored steps can stay aligned.
+ * the modal for clarity. Anchored steps can stay aligned.
  *
  * Order follows a spatial "like with like" grouping: each "get
  * oriented" popper introduces a region, and the detail poppers for

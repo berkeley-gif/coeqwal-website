@@ -45,7 +45,7 @@ export default function LayerOrchestrator() {
   // - Learn mode: controlled by scroll position
   // - Explore: only when Winter-run salmon is the active map outcome, so
   //   the Sacramento main stem can be stroked with the tier color (RiversLayer).
-  // - Get-started: hidden here; tier animation uses its own map paint path.
+  // - Get-started: hidden here. Tier animation uses its own map paint path.
   const showSalmonRiversInExplore =
     mapMode === "explore" &&
     activeOutcomeVisualization?.outcomeCode === "WRC_SALMON_AB"
@@ -56,7 +56,7 @@ export default function LayerOrchestrator() {
   // - Explore mode: full line (progress = 1)
   const riversProgressValue = isLearnMode ? riversProgress : 1
 
-  // Basin labels are currently disabled; kept at 0 for potential reintroduction.
+  // Basin labels are currently disabled. Kept at 0 for potential reintroduction.
   const riverBasinLabelsOpacity = 0
 
   return (

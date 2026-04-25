@@ -118,7 +118,7 @@ export function HydroclimateChooser({
           gap: theme.space.gap.xs,
           alignItems: isVertical ? "flex-start" : "center",
           // White border + 2px color outline on the selected icon extend
-          // past the circle; a little padding and visible overflow keep
+          // past the circle. A little padding and visible overflow keep
           // the ring from being clipped by flex ancestors
           // (e.g. explore ToolToolbar under overflow: hidden columns).
           px: 0.5,

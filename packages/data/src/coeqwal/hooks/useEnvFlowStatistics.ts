@@ -175,7 +175,7 @@ export function useChannelsSeasonal(
  *
  * Returns one row per channel reach (59 rows).
  * pearson_r: correlation between monthly simulated and unimpaired flow over the full
- * 1,200-month period (WY 1922–2021). r ≈ +1 = natural timing preserved; r ≈ 0 = altered.
+ * 1,200-month period (WY 1922-2021). r ≈ +1 = natural timing preserved; r ≈ 0 = altered.
  * mif_met_pct: fraction of months where flow >= binding MIF (NULL if has_mif = false).
  *
  * @param scenarioId - Scenario ID (e.g., "s0020") or null to suspend

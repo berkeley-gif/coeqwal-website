@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * HydroclimateBadge — compact read-only pill for the active hydroclimate (title only).
+ * HydroclimateBadge, compact read-only pill for the active hydroclimate (title only).
  * Presentational only: pass label text and accent color from app data.
  */
 
@@ -14,8 +14,8 @@ export interface HydroclimateBadgeProps {
   /** Hex color for border / background tint */
   accentColor: string
   /**
-   * `tinted` — translucent scorecard-style wash (toolbar).
-   * `solid` — fully opaque light pastel from the accent (e.g. over map).
+   * `tinted`, translucent scorecard-style wash (toolbar).
+   * `solid`, fully opaque light pastel from the accent (e.g. over map).
    */
   surface?: "tinted" | "solid"
 }
@@ -58,7 +58,7 @@ export function HydroclimateBadge({
         variant="dashboard"
         sx={{
           fontWeight: 500,
-          // Neutral gray — `text.primary` here is blue-tinted and reads purple on red/orange fills.
+          // Neutral gray, `text.primary` here is blue-tinted and reads purple on red/orange fills.
           color: theme.palette.grey[800],
           whiteSpace: "nowrap",
         }}

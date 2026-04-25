@@ -15,7 +15,7 @@
  * Compute pairwise squared-Euclidean distance between two row vectors,
  * skipping positions where either side is null / NaN.
  *
- * Returns `Infinity` when no overlap is available — the caller should
+ * Returns `Infinity` when no overlap is available. The caller should
  * treat such pairs as "maximally dissimilar" without crashing.
  */
 function pairDistance(
@@ -94,7 +94,7 @@ export function hierarchicalRowOrder(
   }
 
   // Average-linkage distance between two clusters: mean of pairwise row
-  // distances (skipping any +Infinity pairs — they contribute nothing).
+  // distances (skipping any +Infinity pairs, they contribute nothing).
   const avgLinkage = (a: Cluster, b: Cluster): number => {
     let sum = 0
     let count = 0

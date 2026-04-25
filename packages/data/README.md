@@ -201,7 +201,7 @@ const {
 
 #### `useTierLocationAssignments(scenarioId, tierCode)`
 
-Fetches per-location tier assignments for a single scenario+outcome pair. Returns location-level data (no geometry) — suitable for treemaps, tables, or any visualization that needs to know which locations fall into which tier. Pass `null` for either argument to skip fetching.
+Fetches per-location tier assignments for a single scenario+outcome pair. Returns location-level data (no geometry), suitable for treemaps, tables, or any visualization that needs to know which locations fall into which tier. Pass `null` for either argument to skip fetching.
 
 ```tsx
 import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
@@ -210,7 +210,7 @@ const { data, isLoading, error } = useTierLocationAssignments(
   "s0020",
   "CWS_DEL",
 )
-// data.locations: TierLocationAssignment[] — all locations with tier_level, location_name, etc.
+// data.locations: TierLocationAssignment[], all locations with tier_level, location_name, etc.
 // data.tier_code: "CWS_DEL"
 // data.metadata: { total_locations, tier_counts }
 

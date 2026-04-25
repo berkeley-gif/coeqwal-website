@@ -1,14 +1,14 @@
 "use client"
 
 /**
- * ChartTuner — inline trigger button + portaled overlay for tuning charts.
+ * ChartTuner: inline trigger button + portaled overlay for tuning charts.
  *
  * Designed as a user-friendly alternative to traditional chart-control
  * toolbars. It exposes three things, in order of approachability:
  *
- *   1. Walkthrough — a guided tour of the chart, one concept at a time.
- *   2. Presets    — one-click "saved views" (e.g. "Drought year", "Delta").
- *   3. Controls   — the existing chart-control widgets, for power users.
+ *   1. Walkthrough: a guided tour of the chart, one concept at a time.
+ *   2. Presets:    one-click "saved views" (e.g. "Drought year", "Delta").
+ *   3. Controls:   the existing chart-control widgets, for power users.
  *
  * The trigger is a small pill-style button that can be placed anywhere
  * (inline in a toolbar, pinned to a corner, etc.). Opening it portals an
@@ -18,12 +18,12 @@
  * Visual design: the inline trigger inherits the *host* theme (so it
  * blends into wherever it's dropped), but the floating overlay is wrapped
  * in a `<ThemeProvider>` carrying `createTunerDarkTheme(host)`. Every
- * `useTheme()` consumer inside the overlay — including embedded
- * controls like `ResilienceControls` and its chips + Selects — picks up
+ * `useTheme()` consumer inside the overlay, including embedded
+ * controls like `ResilienceControls` and its chips + Selects, picks up
  * the dark palette automatically, so the whole surface reads as one
  * focused dark panel.
  *
- * The ChartTuner is self-contained — each mounted instance manages its
+ * The ChartTuner is self-contained. Each mounted instance manages its
  * own open/close state. It is *not* gated by the global Cmd/Ctrl+K
  * shortcut used by `PanelTuner`; ChartTuners are part of the normal UI
  * and always visible to users.
@@ -280,7 +280,7 @@ interface OverlayBodyProps {
 
 /**
  * Renders the floating panel. Isolated so it consumes the *dark* theme
- * injected by the parent `ThemeProvider` — every `useTheme()` in here
+ * injected by the parent `ThemeProvider`, every `useTheme()` in here
  * (and in every descendant, including embedded chips and Selects) sees
  * the tuner palette.
  */

@@ -30,9 +30,9 @@ export interface DeviationPlotProps {
   comparisonLabel?: string
   climateMode?: "off" | "morph" | "compare"
   morphShowComparison?: boolean
-  /** Map of scenario ID to theme/group string — used to cluster same-theme dots together */
+  /** Map of scenario ID to theme/group string, used to cluster same-theme dots together */
   scenarioThemes?: Record<string, string>
-  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter, triggers morph transitions instead of full rebuild */
   morphGeneration?: number
 }
 
@@ -88,7 +88,7 @@ function computeColumnDodge(
   const isSingleTier = tierSet.size === 1
 
   if (isSingleTier) {
-    // All dots share the same tier — use a clean centered horizontal line
+    // All dots share the same tier. Use a clean centered horizontal line
     // with even spacing, compressing if needed to stay within halfSpread.
     // Sort by theme so same-theme dots cluster together.
     const ordered = themeMap
@@ -109,7 +109,7 @@ function computeColumnDodge(
     return result
   }
 
-  // Multiple tiers — greedy center-first placement with 2D collision.
+  // Multiple tiers, greedy center-first placement with 2D collision.
   // Process largest same-tier groups first so they claim center positions.
   const tierMap = new Map<number, { id: string; y: number }[]>()
   for (const e of entries) {
@@ -184,7 +184,7 @@ function computeColumnDodge(
   return result
 }
 
-/** Imperatively show the tooltip DOM element — no React state updates. */
+/** Imperatively show the tooltip DOM element, no React state updates. */
 function showTooltip(
   el: HTMLDivElement,
   x: number,
@@ -1253,7 +1253,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           height={currentHeight}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
-        {/* Tooltip element — always mounted, toggled via display:none imperatively */}
+        {/* Tooltip element, always mounted, toggled via display:none imperatively */}
         <div
           ref={tooltipRef}
           style={{

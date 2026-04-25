@@ -15,7 +15,7 @@ import TourTierLegend from "./TourTierLegend"
  *
  * Framing matches `ListTourBarIllustration`: warm off-white panel
  * (same as unhighlighted scenario rows), hairline border, small
- * uppercase eyebrows. The switch here is decorative; click handlers
+ * uppercase eyebrows. The switch here is decorative. Click handlers
  * are omitted so the illustration can't mutate app state (the tour
  * runner already drives the real switch when the step is active).
  */

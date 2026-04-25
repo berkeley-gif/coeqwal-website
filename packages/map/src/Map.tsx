@@ -18,7 +18,7 @@ export default function Map(props: MapProps) {
         mapRef.current = instance
         console.log("✅ mapRef assigned to context")
       } else {
-        console.log("🧹 Map unmounted – clearing mapRef")
+        console.log("🧹 Map unmounted - clearing mapRef")
         mapRef.current = null
       }
     },

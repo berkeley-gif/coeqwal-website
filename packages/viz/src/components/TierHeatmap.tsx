@@ -10,8 +10,8 @@ export interface TierHeatmapCell {
   scenarioName: string
   outcomeCode: string
   outcomeName: string
-  tierLevel: number // 1–4
-  normalizedScore: number // 0–1
+  tierLevel: number // 1-4
+  normalizedScore: number // 0-1
 }
 
 export interface TierHeatmapProps {
@@ -27,7 +27,7 @@ export interface TierHeatmapProps {
   onCellClick?: (cell: TierHeatmapCell) => void
   highlightedIds?: Set<string> | null
   chosenIds?: Set<string>
-  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter, triggers morph transitions instead of full rebuild */
   morphGeneration?: number
 }
 

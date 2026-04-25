@@ -11,7 +11,7 @@
  *   return <Box ref={tourRef}>...</Box>
  *
  * The registry keeps an id -> HTMLElement map in a mutable ref. Writes
- * (from registering elements) do not trigger re-renders; only the tour
+ * (from registering elements) do not trigger re-renders. Only the tour
  * runner's own state changes trigger re-renders when it looks up
  * targets. If two components register the same id, the most recently
  * mounted wins.
@@ -27,7 +27,7 @@ import React, {
   useState,
 } from "react"
 
-// Anchors can be any DOM element; tour consumers only need
+// Anchors can be any DOM element. Tour consumers only need
 // `getBoundingClientRect` (for the HighlightRing) and a Popper
 // anchorEl target, both of which accept `Element`. Widened from
 // `HTMLElement` so SVG primitives (heatmap cells, chart geometry)

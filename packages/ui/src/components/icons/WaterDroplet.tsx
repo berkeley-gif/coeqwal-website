@@ -1,5 +1,5 @@
 /**
- * WaterDroplet — Two-tone water droplet icon with thin stroke outline
+ * WaterDroplet, two-tone water droplet icon with thin stroke outline
  * and a partial fill at the bottom (waterline effect).
  */
 
@@ -13,9 +13,9 @@ export interface WaterDropletProps extends SVGProps<SVGSVGElement> {
   color?: string
   /** Outline stroke width. Defaults to theme.strokeWidth.accent. */
   strokeWidth?: number
-  /** Y position (0–24) where the waterline fill begins. Higher = less fill. Defaults to 14. */
+  /** Y position (0-24) where the waterline fill begins. Higher = less fill. Defaults to 14. */
   waterlineY?: number
-  /** Opacity of the waterline fill (0–1). Defaults to 0.3. */
+  /** Opacity of the waterline fill (0-1). Defaults to 0.3. */
   fillOpacity?: number
 }
 

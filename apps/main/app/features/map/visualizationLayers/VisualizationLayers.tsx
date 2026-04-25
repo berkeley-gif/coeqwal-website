@@ -398,7 +398,7 @@ export default function VisualizationLayers({
           {/* Lightweight tooltips from tier animation overlay hover/pin.
            * Only *pinned* highlights render on the map (anchored to the
            * upper-left of the polygon). Hovered-but-unpinned highlights
-           * show up in the overlay only — keeping the map quiet during
+           * show up in the overlay only, keeping the map quiet during
            * hover. Beat 5's storyboard demo participates in this popup
            * by setting `pinned: true` on its pseudo-highlight so the
            * demo renders the map popup alongside the gold polygon stroke;

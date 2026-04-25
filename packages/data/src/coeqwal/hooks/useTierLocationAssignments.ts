@@ -8,7 +8,7 @@ import type { TierLocationAssignmentsResponse } from "../types"
 /**
  * Fetch and cache per-location tier assignments for a single scenario+outcome.
  *
- * Returns location-level tier data (no geometry) — suitable for treemaps,
+ * Returns location-level tier data (no geometry), suitable for treemaps,
  * tables, or any visualization that needs to know which locations fall into
  * which tier.
  *

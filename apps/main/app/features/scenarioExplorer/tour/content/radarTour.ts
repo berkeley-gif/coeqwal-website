@@ -42,7 +42,7 @@ export const RADAR_TOUR: TourStep[] = [
   },
 
   // Shared top toolbar (hydroclimate + map). Same strip the list tour
-  // covers; introduced here as a single orientation step so the radar
+  // covers. Introduced here as a single orientation step so the radar
   // tour does not have to repeat the per-control walkthrough.
   {
     id: "radar.step0.viewArea",
@@ -116,9 +116,9 @@ export const RADAR_TOUR: TourStep[] = [
     id: "radar.step1.capture",
     anchorId: "radar.capture",
     eyebrow: "arrange the radar chart",
-    title: "Capture view",
+    title: "Save snapshot",
     titleIcon: "share",
-    body: "Use capture view to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
+    body: "Use save snapshot to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
     placement: "bottom-end",
   },
   // Reading the radar chart itself.

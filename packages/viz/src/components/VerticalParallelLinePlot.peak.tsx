@@ -73,7 +73,7 @@ export interface VerticalParallelLinePlotProps {
   baselineAbsoluteValues?: Record<string, number | null>
   /** Called when brush/filter drag ends with the IDs of scenarios that are now filtered out. */
   onBrushFilter?: (filteredOutIds: string[]) => void
-  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter, triggers morph transitions instead of full rebuild */
   morphGeneration?: number
 }
 
@@ -133,7 +133,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
 
-  // Effective margin — caller can override, otherwise orientation-specific defaults apply.
+  // Effective margin, caller can override, otherwise orientation-specific defaults apply.
   const margin =
     marginProp ??
     (orientation === "horizontal"
@@ -416,7 +416,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
         selection.attr("transform", `translate(${margin.left},${margin.top})`)
       }
 
-      // Clear hover state before removing elements — the old DOM nodes won't
+      // Clear hover state before removing elements. The old DOM nodes won't
       // fire mouseout once removed, so we must reset manually.
       if (hoveredScenarioRef.current !== null) {
         hoveredScenarioRef.current = null

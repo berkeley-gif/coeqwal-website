@@ -15,7 +15,7 @@
  *    section title. The wide right column holds the body copy and, if
  *    supplied, a figure rendered below the children.
  *
- * A thin hairline divider sits above the section by default; pass
+ * A thin hairline divider sits above the section by default. Pass
  * `divider={false}` on the first section of a modal to suppress it.
  */
 
@@ -29,7 +29,7 @@ interface SectionProps {
   number?: string
   /** Uppercase eyebrow label, e.g. "THE CHART". Enables split layout. */
   eyebrow?: string
-  /** Optional figure/illustration; rendered after children in the body column. */
+  /** Optional figure/illustration. Rendered after children in the body column. */
   figure?: React.ReactNode
   /** Force layout mode. Defaults to "split" when number or eyebrow is set, else "single". */
   layout?: "single" | "split"

@@ -32,7 +32,7 @@ export interface RadarPlotProps {
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
   /**
-   * User-selected scenarios — stay fully visible even when `highlightedIds` is
+   * User-selected scenarios stay fully visible even when `highlightedIds` is
    * set (e.g. sidebar row hover); see `resolveVisuals` external-highlight policy.
    */
   chosenIds?: Set<string>
@@ -619,7 +619,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const DIM_OPACITY = 0.22
           const EMPHASIS_DOT_DELTA = 1.2
           const EMPHASIS_STROKE_WIDTH = 2
-          /** Slightly lighter than selected emphasis — sidebar / crosshair hover trace */
+          /** Slightly lighter than selected emphasis, sidebar / crosshair hover trace */
           const HOVER_HIGHLIGHT_DOT_DELTA = 0.85
           const HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
           const PIN_DOT_DELTA = 1.45
@@ -775,7 +775,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .text(RADAR_TIER_LABELS[i] ?? "")
           })
 
-          // Range band placeholder — drawn after dots so we can use actual positions
+          // Range band placeholder, drawn after dots so we can use actual positions
           const rangeBandLayer = g.append("g").attr("class", "range-band")
 
           // 4. Distribution dots layer
@@ -786,7 +786,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           // 5. Scenario path layer
           const pathLayer = g.append("g").attr("class", "scenario-paths")
 
-          // 6. Baseline gold overlay — sibling after pathLayer so it paints above scenario traces
+          // 6. Baseline gold overlay, sibling after pathLayer so it paints above scenario traces
           const baselineHighlightLayer = g
             .append("g")
             .attr("class", "baseline-highlight")
