@@ -839,7 +839,6 @@ export default function SharePanel() {
   const {
     shareItems,
     storyItemIds,
-    hydroclimate,
     removeShareItem,
     addToStory,
     removeFromStory,

@@ -41,7 +41,6 @@ import {
   ResilienceHeatmapSmallMultiples,
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
-  type ResilienceHeatmapPalette,
   type ResilienceHeatmapMarginals,
   type ResilienceCellRender,
   type ResilienceGlyphEntry,
@@ -405,7 +404,6 @@ export default function ResiliencePanel({
   controls,
   highlightedIds = null,
   onScenarioHover,
-  onControlsChange,
   onCaptureReady,
   onCaptureTileReady,
   onTileShare,
@@ -2525,9 +2523,7 @@ export default function ResiliencePanel({
             },
           }}
         >
-          <icons.IosShare
-            sx={{ fontSize: "1.375rem", color: "inherit" }}
-          />
+          <icons.IosShare sx={{ fontSize: "1.375rem", color: "inherit" }} />
         </Box>
       )
     }

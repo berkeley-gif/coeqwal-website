@@ -307,7 +307,10 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                   </div>
                   <div
                     data-resilience-tile-body="true"
-                    style={{ flex: 1, minHeight: tileHeight - TILE_HEADER_RESERVE }}
+                    style={{
+                      flex: 1,
+                      minHeight: tileHeight - TILE_HEADER_RESERVE,
+                    }}
                   >
                     <ResilienceHeatmap
                       rows={rows}
