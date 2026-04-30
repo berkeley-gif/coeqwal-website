@@ -179,8 +179,10 @@ export interface ResilienceHeatmapProps {
   onCellClick?: (cell: ResilienceHeatmapCell) => void
   /**
    * Sub-mode for cellRender === "distribution". Controls sort + tooltip
-   * copy, and routes per-square hover/click to different callbacks in the
-   * parent (sidebar highlight vs map highlight).
+   * copy. The parent decides what to do with `onSquareHover` /
+   * `onSquareClick` per mode (e.g. scenario mode is typically wired to
+   * a sidebar / scenario-list highlight, location mode to a map-layer
+   * highlight, but neither is required by the viz).
    */
   distributionMode?: "scenario" | "location"
   /** Per-square hover inside a distribution cell. */
@@ -192,7 +194,13 @@ export interface ResilienceHeatmapProps {
     cell: ResilienceHeatmapCell
     entry: ResilienceGlyphEntry
   }) => void
-  /** Sidebar-hover highlighted scenarios; dims non-matching rows/cells. */
+  /**
+   * Row keys to keep at full opacity; rows whose key is not in the set
+   * are dimmed. Pass `null` or an empty set to disable dimming. The viz
+   * is agnostic about where the set comes from; in this app it is
+   * typically driven by sidebar / scenario-list hover, but any caller
+   * can supply it (or omit it) and the chart works unchanged.
+   */
   highlightedRowKeys?: Set<string> | null
   /** Row key label formatter override (e.g. regional indent for NOD/SOD). */
   formatRowTick?: (row: ResilienceAxisItem) => string
@@ -440,6 +448,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       formatRowTickRef.current = formatRowTick
     }, [formatRowTick])
+
+    // Mirrors the `highlightedRowKeys` prop in a ref so updateChart
+    // can read the current value without depending on it. The
+    // visual-only effect below pushes prop changes onto the live SVG
+    // (per-row group opacity) without a full rebuild. In this app the
+    // set typically comes from sidebar / scenario-list hover, but the
+    // viz itself is caller-agnostic.
+    const highlightedRowKeysRef = useRef(highlightedRowKeys)
+    useEffect(() => {
+      highlightedRowKeysRef.current = highlightedRowKeys
+    }, [highlightedRowKeys])
 
     const cellIndex = useMemo(() => {
       const idx = new Map<string, ResilienceHeatmapCell>()
@@ -730,6 +749,43 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       if (el) el.style.display = "none"
     }, [])
 
+    // Tooltip-helper refs.
+    // The 7 tooltip useCallbacks above re-memoize when their deps
+    // (paletteText / cellRender / distributionMode / etc.) change. To
+    // keep them out of `updateChart`'s dep array, we mirror them in
+    // refs and read `xxxRef.current(...)` from inside the cell / square /
+    // axis event handlers. Their internal state (palette, render mode)
+    // stays correct because the useEffect below writes the latest
+    // closure into the ref whenever it re-memoizes.
+    const showCellTooltipRef = useRef(showCellTooltip)
+    useEffect(() => {
+      showCellTooltipRef.current = showCellTooltip
+    }, [showCellTooltip])
+    const hideCellTooltipRef = useRef(hideCellTooltip)
+    useEffect(() => {
+      hideCellTooltipRef.current = hideCellTooltip
+    }, [hideCellTooltip])
+    const positionCellTooltipRef = useRef(positionCellTooltip)
+    useEffect(() => {
+      positionCellTooltipRef.current = positionCellTooltip
+    }, [positionCellTooltip])
+    const showSquareTooltipRef = useRef(showSquareTooltip)
+    useEffect(() => {
+      showSquareTooltipRef.current = showSquareTooltip
+    }, [showSquareTooltip])
+    const showAxisTooltipRef = useRef(showAxisTooltip)
+    useEffect(() => {
+      showAxisTooltipRef.current = showAxisTooltip
+    }, [showAxisTooltip])
+    const hideAxisTooltipRef = useRef(hideAxisTooltip)
+    useEffect(() => {
+      hideAxisTooltipRef.current = hideAxisTooltip
+    }, [hideAxisTooltip])
+    const positionAxisTooltipRef = useRef(positionAxisTooltip)
+    useEffect(() => {
+      positionAxisTooltipRef.current = positionAxisTooltip
+    }, [positionAxisTooltip])
+
     // Marginal strip primitives captured once from palette for deps.
     const marginalRow = marginals?.row
     const marginalCol = marginals?.col
@@ -814,16 +870,34 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const bandW = xScale.bandwidth()
         const bandH = yScale.bandwidth()
 
-        const rowOpacity = (rowKey: string) => {
-          if (!highlightedRowKeys || highlightedRowKeys.size === 0) return 1
-          return highlightedRowKeys.has(rowKey) ? 1 : 0.35
+        // highlightedRowKeys is read from a ref so updateChart does
+        // not have to re-fire when the highlight set changes (the
+        // typical trigger is sidebar / scenario-list hover, but it
+        // could be any caller). The visual-only effect below updates
+        // each row group's `opacity` attribute on prop change without
+        // rebuilding the SVG.
+        const computeRowOpacity = (rowKey: string): number => {
+          const set = highlightedRowKeysRef.current
+          if (!set || set.size === 0) return 1
+          return set.has(rowKey) ? 1 : 0.35
         }
 
         // Cells
         let firstCellEl: SVGRectElement | null = null
         rows.forEach((row) => {
           const y = yScale(row.key) ?? 0
-          const opacity = rowOpacity(row.key)
+          const opacity = computeRowOpacity(row.key)
+
+          // Per-row group: lets the visual-only effect update the row's
+          // dim level by writing one `opacity` attribute on the group,
+          // which compounds with each child's `fill-opacity` so cells,
+          // distribution squares, glyph sub-tiles, and inner labels
+          // all dim together without a full SVG rebuild.
+          const rowGroup = g
+            .append("g")
+            .attr("class", "resilience-row")
+            .attr("data-row", row.key)
+            .attr("opacity", opacity)
 
           columns.forEach((col) => {
             const cell = cellIndex.get(`${row.key}|${col.key}`)
@@ -832,7 +906,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
             const resolved = resolveCellFill(cell)
 
-            const rect = g
+            const rect = rowGroup
               .append("rect")
               .attr("class", "resilience-cell")
               .attr("data-row", row.key)
@@ -844,20 +918,22 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .attr("rx", 2)
               .attr("stroke", "transparent")
               .attr("stroke-width", 2)
-              .attr("cursor", onCellClick ? "pointer" : "default")
+              .attr(
+                "cursor",
+                onCellClickRef.current ? "pointer" : "default",
+              )
 
             if (!firstCellEl) {
               firstCellEl = rect.node() as SVGRectElement | null
             }
 
             if (cell.available && resolved.fill) {
-              rect.attr("fill", resolved.fill).attr("fill-opacity", opacity)
+              rect.attr("fill", resolved.fill)
             } else {
               rect
                 .attr("fill", `url(#${HATCH_ID})`)
                 .attr("stroke", paletteUnavailStroke)
                 .attr("stroke-width", 1)
-                .attr("fill-opacity", opacity)
             }
 
             // Distribution overlay: a grid of rounded squares, one per
@@ -913,7 +989,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                     t != null && t >= 1 && t <= 4
                       ? (tierColors[t - 1] ?? paletteUnavailFill)
                       : paletteUnavailFill
-                  const sq = g
+                  const sq = rowGroup
                     .append("rect")
                     .attr("x", gx + col * stride)
                     .attr("y", gy + rowIdx * stride)
@@ -922,7 +998,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                     .attr("rx", corner)
                     .attr("ry", corner)
                     .attr("fill", fill)
-                    .attr("fill-opacity", opacity * 0.9)
+                    .attr("fill-opacity", 0.9)
                     .attr("stroke", "transparent")
                     .attr("stroke-width", 1)
 
@@ -937,17 +1013,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                         select(this)
                           .attr("stroke", paletteHoverStroke)
                           .attr("stroke-width", 1.5)
-                        showSquareTooltip(event, cell, entry)
+                        showSquareTooltipRef.current(event, cell, entry)
                         onSquareHoverRef.current?.({ cell, entry })
                       })
                       .on("mousemove", function (event: MouseEvent) {
                         event.stopPropagation()
-                        positionCellTooltip(event)
+                        positionCellTooltipRef.current(event)
                       })
                       .on("mouseleave", function (event: MouseEvent) {
                         event.stopPropagation()
                         select(this).attr("stroke", "transparent")
-                        hideCellTooltip()
+                        hideCellTooltipRef.current()
                         onSquareHoverRef.current?.(null)
                       })
                       .on("click", function (event: MouseEvent) {
@@ -990,7 +1066,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                   const rowIdx = Math.floor(i / cols)
                   const sx = x + pad + col * subW
                   const sy = y + pad + rowIdx * subH
-                  g.append("rect")
+                  rowGroup
+                    .append("rect")
                     .attr("x", sx)
                     .attr("y", sy)
                     .attr("width", Math.max(1, subW - 0.5))
@@ -1001,7 +1078,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                         ? colorScale(entry.tierLevel)
                         : paletteUnavailFill,
                     )
-                    .attr("fill-opacity", opacity)
                     .attr("pointer-events", "none")
                 })
               }
@@ -1012,11 +1088,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 select(this)
                   .attr("stroke", paletteHoverStroke)
                   .attr("stroke-width", 2)
-                showCellTooltip(event, cell)
+                showCellTooltipRef.current(event, cell)
                 onCellHoverRef.current?.(cell)
               })
               .on("mousemove", function (event: MouseEvent) {
-                positionCellTooltip(event)
+                positionCellTooltipRef.current(event)
               })
               .on("mouseleave", function () {
                 if (cell.available) {
@@ -1024,7 +1100,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 } else {
                   select(this).attr("stroke", paletteUnavailStroke)
                 }
-                hideCellTooltip()
+                hideCellTooltipRef.current()
                 onCellHoverRef.current?.(null)
               })
               .on("click", () => {
@@ -1047,7 +1123,8 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               bandW > 22 &&
               bandH > 14
             ) {
-              g.append("text")
+              rowGroup
+                .append("text")
                 .attr("x", x + bandW / 2)
                 .attr("y", y + bandH / 2)
                 .attr("text-anchor", "middle")
@@ -1058,7 +1135,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 )
                 .attr("font-weight", 600)
                 .attr("fill", resolved.textColor)
-                .attr("fill-opacity", opacity)
                 .attr("pointer-events", "none")
                 .text(resolved.text)
             }
@@ -1257,12 +1333,12 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           if (row.definitionTooltip) {
             node
               .on("mouseenter", function (event: MouseEvent) {
-                showAxisTooltip(event, row)
+                showAxisTooltipRef.current(event, row)
               })
               .on("mousemove", function (event: MouseEvent) {
-                positionAxisTooltip(event)
+                positionAxisTooltipRef.current(event)
               })
-              .on("mouseleave", hideAxisTooltip)
+              .on("mouseleave", () => hideAxisTooltipRef.current())
           }
         })
 
@@ -1316,12 +1392,12 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           if (col.definitionTooltip) {
             node
               .on("mouseenter", function (event: MouseEvent) {
-                showAxisTooltip(event, col)
+                showAxisTooltipRef.current(event, col)
               })
               .on("mousemove", function (event: MouseEvent) {
-                positionAxisTooltip(event)
+                positionAxisTooltipRef.current(event)
               })
-              .on("mouseleave", hideAxisTooltip)
+              .on("mouseleave", () => hideAxisTooltipRef.current())
           }
         })
 
@@ -1644,23 +1720,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         resolveCellFill,
         cellRender,
         showCellNumbers,
-        highlightedRowKeys,
-        onCellClick,
         palette,
-        paletteText,
-        paletteTextMuted,
-        paletteHoverStroke,
-        paletteUnavailFill,
-        paletteUnavailStroke,
-        paletteUnavailHatch,
-        paletteAxisHint,
-        showCellTooltip,
-        positionCellTooltip,
-        hideCellTooltip,
-        showSquareTooltip,
-        showAxisTooltip,
-        positionAxisTooltip,
-        hideAxisTooltip,
         showMarginalRowStrip,
         showMarginalColStrip,
         marginalRow,
@@ -1730,6 +1790,27 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
       return () => ro.disconnect()
     }, [responsive, width, height])
+
+    // Visual-only effect for the `highlightedRowKeys` prop. When the
+    // set changes (typically driven by sidebar / scenario-list hover,
+    // but the viz is caller-agnostic), walk the per-row groups built
+    // by updateChart and update each group's `opacity` attribute. The
+    // SVG itself is not rebuilt, the cells / squares / labels keep
+    // their listeners, and the dim level compounds with the
+    // per-element fill-opacity values written at draw time.
+    useEffect(() => {
+      const svg = select(svgRef.current)
+      if (svg.empty()) return
+      const set = highlightedRowKeys
+      const dimActive = set != null && set.size > 0
+      svg
+        .selectAll<SVGGElement, unknown>("g.resilience-row")
+        .each(function () {
+          const rowKey = this.getAttribute("data-row") ?? ""
+          const op = !dimActive ? 1 : set!.has(rowKey) ? 1 : 0.35
+          this.setAttribute("opacity", String(op))
+        })
+    }, [highlightedRowKeys])
 
     return (
       <div

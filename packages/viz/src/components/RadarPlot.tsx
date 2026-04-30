@@ -289,9 +289,9 @@ function computeSpokeDodge(
   return result
 }
 
-// ── Visual emphasis constants (shared by updateChart and the visual-only
-// effect that re-applies dot/path visuals when sidebar/highlight props
-// change without rebuilding the SVG) ───────────────────────────────────
+// Visual emphasis constants. Shared by updateChart and the visual-only
+// effect that re-applies dot/path visuals when highlight / dim / chosen
+// props change without rebuilding the SVG.
 const RADAR_DOT_R = 3.5
 const RADAR_DIM_OPACITY = 0.22
 const RADAR_EMPHASIS_DOT_DELTA = 1.2
@@ -574,7 +574,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     // update-depth guard during the 700ms map-column width transition.
     const lastReportedAxisPositionsRef = useRef<AxisPosition[] | null>(null)
 
-    // ── Visual-only prop refs ───────────────────────────────────────
+    // Visual-only prop refs.
     // These props affect dot opacity / radius and path stroke (visual
     // only); they are intentionally NOT in updateChart's dep array.
     // Instead a separate effect reads them from refs and walks the
