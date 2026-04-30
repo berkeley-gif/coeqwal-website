@@ -1558,12 +1558,13 @@ export default function OutcomeMorphOverlay({
           tier labels along the top spoke, and a connecting trace
           through the per-outcome vertices. Visual spec mirrors the
           `@repo/viz` RadarPlot rendering seen in `RadarPanel`:
-            - grid color: `#193D6B` (the brand navy RadarPanel uses for
-              axis-title text via `axisTitleFill`), at low opacity so
-              the rings + spokes read as a quiet scaffold rather than
-              dominant ink. Stronger than RadarPlot's literal
-              `#dce3ea` so the grid actually reads against the
-              storyboard's white backdrop.
+            - grid color: `theme.palette.brand.panelDark` (the brand
+              navy RadarPanel uses for axis-title text via
+              `axisTitleFill`), at low opacity so the rings + spokes
+              read as a quiet scaffold rather than dominant ink.
+              Stronger than RadarPlot's default grid stroke (grey 300)
+              so the grid actually reads against the storyboard's
+              white backdrop.
             - rings: 4 concentric circles at `tierR(1..4)`, solid
               stroke, width 1 (no dash)
             - axes: same stroke / width 1, extending from center to
@@ -1595,7 +1596,7 @@ export default function OutcomeMorphOverlay({
               cy={radarGeometry.cy}
               r={r}
               fill="none"
-              stroke="#193D6B"
+              stroke={theme.palette.brand.panelDark}
               strokeOpacity={0.2}
               strokeWidth={1}
             />
@@ -1608,7 +1609,7 @@ export default function OutcomeMorphOverlay({
             y1={radarGeometry.cy}
             x2={radarGeometry.cx + radarGeometry.rMax * Math.cos(v.angle)}
             y2={radarGeometry.cy + radarGeometry.rMax * Math.sin(v.angle)}
-            stroke="#193D6B"
+            stroke={theme.palette.brand.panelDark}
             strokeOpacity={0.2}
             strokeWidth={1}
           />

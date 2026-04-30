@@ -593,7 +593,7 @@ export default function BeatTextOverlay({
           textEl.style.textAlign = "center"
           textEl.style.maxWidth = `${maxW}px`
           textEl.style.overflowWrap = "break-word"
-          textEl.style.color = "#193D6B"
+          textEl.style.color = theme.palette.text.primary
           el.style.justifyContent = "center"
           el.style.overflow = "visible"
         } else {

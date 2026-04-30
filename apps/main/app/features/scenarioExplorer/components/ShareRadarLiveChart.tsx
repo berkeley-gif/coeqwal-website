@@ -57,6 +57,7 @@ export default function ShareRadarLiveChart({
 
   const axisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
     const axisTypo = theme.typography.axisLabel
+    const brandNavy = theme.palette.brand.panelDark
 
     return mergeRadarAxisLabelDetailStyle({
       fontFamily: axisTypo.fontFamily as string,
@@ -67,9 +68,9 @@ export default function ShareRadarLiveChart({
       tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
       panelFill: theme.palette.common.white,
       panelStroke: "none",
-      scenarioFill: "#193D6B",
-      tierFill: "#193D6B",
-      axisTitleFill: "#193D6B",
+      scenarioFill: brandNavy,
+      tierFill: brandNavy,
+      axisTitleFill: brandNavy,
       scenarioControlsRowHeightPx: 26,
       scenarioControlsRowGapPx: 4,
     })
