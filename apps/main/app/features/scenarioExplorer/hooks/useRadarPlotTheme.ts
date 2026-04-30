@@ -43,6 +43,11 @@ export function useRadarPlotTheme(): RadarPlotPalette {
       // Subtle outline so distribution dots read as discrete locations without
       // adding a heavy black border; leaves theme-dark behaviour to a follow-up.
       distributionDotStroke: "rgba(0,0,0,0.25)",
+      // Slate-blue fallback used only when a row in `lineColors` is empty,
+      // which the explore radar always populates via theme/scenario maps.
+      // Kept as a literal to match the previous viz-internal default
+      // exactly. We can promote to a theme token if a future caller needs it.
+      defaultLineColor: "#546e7a",
     }),
     [gridStroke, tierLabelText, commonWhite, rangeBandFill, rangeBandStroke],
   )

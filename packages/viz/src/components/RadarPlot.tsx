@@ -25,7 +25,6 @@ export interface RadarPlotProps {
   responsive?: boolean
   width?: number
   height?: number
-  colors?: { default: string; highlighted: string; background: string }
   lineColors?: string[]
   /** @deprecated Prefer onDotHover which fires immediately with outcome detail. */
   onLineHover?: (data: VerticalParallelLineData | null) => void
@@ -110,13 +109,11 @@ const TIER_POSITIONS = [1, 2, 3, 4] as const
 
 /**
  * Chart-chrome palette for `RadarPlot`. Every field has a default that
- * matches a hardcoded hex value, so adopting the palette
- * is a no-op visually until callers pass theme-derived overrides.
- *
- * Scenario line emphasis colors live on the separate `colors` prop
- * (`default` / `highlighted` / `background`). This palette covers the
- * grid, range band, baseline accent, dot strokes, and tier-zone fills.
- *
+ * matches a hardcoded hex value, so adopting the palette is a no-op
+ * visually until callers pass theme-derived overrides. Covers the
+ * grid, range band, baseline accent, dot strokes, tier-zone fills, and
+ * the fallback scenario-line color used when `lineColors` is unset for
+ * a row.
  */
 export interface RadarPlotPalette {
   /** Stroke for concentric grid circles and radial spokes. */
@@ -147,6 +144,11 @@ export interface RadarPlotPalette {
   baselineColor: string
   /** Stroke around the small distribution dots in showDistribution mode. */
   distributionDotStroke: string
+  /**
+   * Fallback color for scenario polygon lines, dots, and active-map
+   * highlights when no per-row color is supplied via `lineColors`.
+   */
+  defaultLineColor: string
 }
 
 const DEFAULT_RADAR_PALETTE: RadarPlotPalette = {
@@ -158,13 +160,9 @@ const DEFAULT_RADAR_PALETTE: RadarPlotPalette = {
   rangeBandStroke: "#a0aec0",
   baselineColor: "#cc9a06",
   distributionDotStroke: "rgba(0,0,0,0.25)",
+  defaultLineColor: "#546e7a",
 }
 
-const DEFAULT_COLORS = {
-  default: "#546e7a",
-  highlighted: "#1a3a5c",
-  background: "#ffffff",
-}
 const DEFAULT_LINE_COLORS: string[] = []
 const HOVER_NOTIFY_MS = 80
 /** Delay before hiding axis-label detail after leaving the dot or panel (bridge cancels when entering panel). */
@@ -452,7 +450,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     responsive = true,
     width = 600,
     height = 600,
-    colors = DEFAULT_COLORS,
     lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
@@ -972,8 +969,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             if (!scenario) return
             const si = activeList.indexOf(scenario)
             const color = hasScenarioColors
-              ? lineColors[si] || colors.default
-              : colors.default
+              ? lineColors[si] || palette.defaultLineColor
+              : palette.defaultLineColor
             const pathGen = line<DotPoint>()
               .x((d) => d.x)
               .y((d) => d.y)
@@ -1147,8 +1144,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const dotY =
                 cy + r * Math.sin(angle) + dodgeOff * Math.sin(perpAngle)
               const color = hasScenarioColors
-                ? lineColors[si] || colors.default
-                : colors.default
+                ? lineColors[si] || palette.defaultLineColor
+                : palette.defaultLineColor
 
               dotPositions.get(scenario.id)![axisIdx] = { x: dotX, y: dotY }
 
@@ -1278,7 +1275,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 const finalCy = parseFloat(
                   cell.attr("data-final-cy") ?? cell.attr("cy") ?? "0",
                 )
-                const fill = cell.attr("fill") ?? colors.default
+                const fill = cell.attr("fill") ?? palette.defaultLineColor
                 const oldPos = morphSnapshot?.dots.get(
                   `${active.axis}:${active.scenarioId}`,
                 )
@@ -1590,8 +1587,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const si = data.findIndex((s) => s.id === scenarioId)
               const color =
                 si >= 0 && hasScenarioColors
-                  ? lineColors[si] || colors.default
-                  : colors.default
+                  ? lineColors[si] || palette.defaultLineColor
+                  : palette.defaultLineColor
 
               axes.forEach((axis, axisIdx) => {
                 const buckets = outcomeBuckets[axis]
@@ -1813,7 +1810,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         axes,
         baselineData,
         lineColors,
-        colors,
         highlightBaseline,
         showTierZones,
         pinnedScenarioIds,
@@ -1971,7 +1967,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           ) {
             const dotCx = parseFloat(el.attr("data-final-cx") ?? el.attr("cx"))
             const dotCy = parseFloat(el.attr("data-final-cy") ?? el.attr("cy"))
-            const fill = el.attr("fill") ?? colors.default
+            const fill = el.attr("fill") ?? palette.defaultLineColor
             const baseR = 4
             overlay
               .append("circle")
@@ -2007,7 +2003,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("pointer-events", "none")
           }
         })
-    }, [activeMapDot, colors.default, data.length, palette.dotStroke])
+    }, [
+      activeMapDot,
+      data.length,
+      palette.defaultLineColor,
+      palette.dotStroke,
+    ])
 
     return (
       <div
