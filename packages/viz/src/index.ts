@@ -10,13 +10,9 @@ export type {
 } from "./types"
 
 // Export components
-export { default as BarChart } from "./components/BarChart"
-export type { BarChartProps } from "./components/BarChart"
 export { default as DecileBarChart } from "./components/DecileBarChart"
 export { default as LineChart } from "./components/LineChart"
 export type { LineChartData, MonthlyData } from "./components/LineChart"
-export { default as RoseChart } from "./components/RoseChart"
-export type { RoseChartProps } from "./components/RoseChart"
 export { default as StickChart } from "./components/StickChart"
 export type { StickChartProps } from "./components/StickChart"
 export { default as VerticalParallelLinePlot } from "./components/VerticalParallelLinePlot"
@@ -34,15 +30,11 @@ export { default as VerticalBarChart } from "./components/VerticalBarChart"
 export type { VerticalBarChartProps } from "./components/VerticalBarChart"
 export { default as TierCircles } from "./components/TierCircles"
 export type { TierCirclesProps } from "./components/TierCircles"
-export { default as VerticalOutcomeGlyph } from "./components/VerticalOutcomeGlyph"
-export type { VerticalOutcomeGlyphProps } from "./components/VerticalOutcomeGlyph"
 export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
 export type {
   ScenarioGlyphProps,
   GlyphVariant,
 } from "./components/ScenarioGlyph"
-export { default as DistributionSquaresGlyph } from "./components/DistributionSquaresGlyph"
-export type { DistributionSquaresGlyphProps } from "./components/DistributionSquaresGlyph"
 export { default as MorphableDistributionGlyph } from "./components/MorphableDistributionGlyph"
 export type { MorphableDistributionGlyphProps } from "./components/MorphableDistributionGlyph"
 export { default as PercentileBandChart } from "./components/PercentileBandChart"

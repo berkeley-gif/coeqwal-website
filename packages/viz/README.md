@@ -120,12 +120,12 @@ export default MyChart
 
 All components are wrapped in `React.memo`. For D3 imperative charts this prevents unnecessary
 `useEffect` -> full-redraw cycles when a parent re-renders with identical props. For pure-SVG
-glyphs (BarChart, RoseChart, etc.) it prevents re-diffing the JSX tree.
+glyphs (`OutcomeGlyph`, `OutcomeDotsGlyph`, etc.) it prevents re-diffing the JSX tree.
 
 ### Declarative vs. imperative components
 
-Not every component needs D3 imperative rendering. Small glyphs like `BarChart`, `RoseChart`,
-`StickChart`, and `OutcomeDotsGlyph` render pure JSX/SVG with no `useEffect` or `useCallback`.
+Not every component needs D3 imperative rendering. Small glyphs like `OutcomeGlyph`,
+`OutcomeDotsGlyph`, and `StickChart` render pure JSX/SVG with no `useEffect` or `useCallback`.
 They still follow the same definition/export/props conventions but skip the
 `useResizeObserver` + `useCallback` + `useEffect` pattern since there is no imperative DOM
 manipulation.

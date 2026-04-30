@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef, useEffect } from "react"
 import { SQUARE_SIZE, SQUARE_GAP } from "../utils/shape-morph"
+import BarsLayer from "./BarsLayer"
 
 const COLS = 10
 const TOTAL_SQUARES = 100
@@ -58,12 +59,11 @@ function distributeSquares(values: number[], targetTotal: number): number[] {
   return floored
 }
 
-// ── Bar geometry constants ──────────────────────────────────────────────────
-
-const NUM_TIERS = 4
 const GRID_WIDTH = COLS * CELL
 
-// ── Lightweight bar-only renderer (4 <rect> pairs) ──────────────────────────
+// Bars-mode wrapper around BarsLayer. Keeps the outer clipping div so the
+// bars/distribution mode swap stays a clean drop-in inside the parent
+// MorphableDistributionGlyph.
 
 interface BarOnlyProps {
   values: [number, number, number, number]
@@ -79,87 +79,25 @@ interface BarOnlyProps {
 
 const BarOnly: React.FC<BarOnlyProps> = React.memo(
   ({ values, tierColors, compact = false, size }) => {
-    const valTotal = (values as number[]).reduce((a, b) => a + b, 0)
-
-    // Geometry: in compact view, derive bar dimensions from `size` and drop
-    // the 120px distribution-grid alignment so the glyph fits in tight
-    // layouts (e.g. Learn section panels). Otherwise use the shared
-    // GLYPH_SIZE/GRID_WIDTH constants so this renderer stays pixel-aligned
-    // with the distribution mode it can morph to.
     const glyphSize = compact ? (size ?? GLYPH_SIZE) : GLYPH_SIZE
-    const barHeight = (glyphSize * 0.8) / NUM_TIERS
-    const barSpacing = (glyphSize * 0.2) / (NUM_TIERS + 1)
-    const maxBarWidth = glyphSize * 0.7
-    const barCornerRadius = barHeight / 4
     const containerWidth = compact ? glyphSize : GRID_WIDTH
-    const barLeftX = compact
-      ? glyphSize * 0.15
-      : (GRID_WIDTH - GLYPH_SIZE) / 2 + GLYPH_SIZE * 0.15
-    const barVisualHeight = NUM_TIERS * barHeight + (NUM_TIERS + 1) * barSpacing
 
     return (
       <div
         style={{
           width: containerWidth,
-          height: barVisualHeight,
+          height: glyphSize,
           overflow: "hidden",
           position: "relative",
         }}
       >
-        <svg
-          width={containerWidth}
-          height={barVisualHeight}
-          style={{ position: "absolute", top: 0, left: 0 }}
-        >
-          {Array.from({ length: NUM_TIERS }, (_, ti) => {
-            const y = barSpacing + ti * (barHeight + barSpacing)
-            const normVal = valTotal > 0 ? values[ti]! / valTotal : 0
-            const fraction =
-              normVal > 0 ? Math.max(2 / maxBarWidth, normVal) : 0
-            return (
-              <g key={ti}>
-                <rect
-                  x={barLeftX}
-                  y={y}
-                  width={maxBarWidth}
-                  height={barHeight}
-                  fill="#d8d8d8"
-                  rx={barCornerRadius}
-                />
-                <rect
-                  x={barLeftX}
-                  y={y}
-                  width={maxBarWidth}
-                  height={barHeight}
-                  fill={tierColors[ti]}
-                  opacity={0.8}
-                  rx={barCornerRadius}
-                  style={{
-                    transform: `scaleX(${fraction})`,
-                    transformOrigin: `${barLeftX}px 0`,
-                    transition: "transform 800ms cubic-bezier(0.25,0.1,0.25,1)",
-                  }}
-                />
-              </g>
-            )
-          })}
-          {[0.25, 0.5, 0.75].map((frac, li) => (
-            <line
-              key={li}
-              x1={barLeftX + maxBarWidth * frac}
-              y1={barSpacing}
-              x2={barLeftX + maxBarWidth * frac}
-              y2={
-                barSpacing +
-                (NUM_TIERS - 1) * (barHeight + barSpacing) +
-                barHeight
-              }
-              stroke="#ccc"
-              strokeWidth={0.5}
-              strokeDasharray="1,2"
-            />
-          ))}
-        </svg>
+        <BarsLayer
+          values={values}
+          tierColors={tierColors}
+          size={glyphSize}
+          layout={compact ? "compact" : "gridAligned"}
+          animate
+        />
       </div>
     )
   },
