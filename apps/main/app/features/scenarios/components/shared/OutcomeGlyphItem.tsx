@@ -13,7 +13,7 @@
  * - Sort button (optional, Explore mode only)
  */
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import {
@@ -156,39 +156,76 @@ export function OutcomeGlyphItem({
   const responsiveSize = isMdUp ? 60 : 50
   const actualSize = size ?? responsiveSize
 
-  // Compute glyph values and colors
-  const values: [number, number, number, number] = chartData
-    ? (chartData.map((tier) => tier.value).slice(0, 4) as [
-        number,
-        number,
-        number,
-        number,
-      ])
-    : [0, 0, 0, 0]
+  // Glyph value / color / location-count tuples, memoized on the
+  // primitive fields they read from `chartData` (and the theme tier
+  // fallback colors for the no-data case)
+  const v0 = chartData?.[0]?.value
+  const v1 = chartData?.[1]?.value
+  const v2 = chartData?.[2]?.value
+  const v3 = chartData?.[3]?.value
+  const values = useMemo<[number, number, number, number]>(() => {
+    if (!chartData) return [0, 0, 0, 0]
+    return chartData.map((tier) => tier.value).slice(0, 4) as [
+      number,
+      number,
+      number,
+      number,
+    ]
+    // chartData itself is intentionally not a dep: identity may churn
+    // even when the four primitive values do not.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v0, v1, v2, v3])
 
-  const tierColors: [string, string, string, string] = chartData
-    ? (chartData.map((tier) => tier.color).slice(0, 4) as [
-        string,
-        string,
-        string,
-        string,
-      ])
-    : [
-        theme.palette.tiers.tier1,
-        theme.palette.tiers.tier2,
-        theme.palette.tiers.tier3,
-        theme.palette.tiers.tier4,
-      ]
+  const c0 = chartData?.[0]?.color
+  const c1 = chartData?.[1]?.color
+  const c2 = chartData?.[2]?.color
+  const c3 = chartData?.[3]?.color
+  const fallbackTier1 = theme.palette.tiers.tier1
+  const fallbackTier2 = theme.palette.tiers.tier2
+  const fallbackTier3 = theme.palette.tiers.tier3
+  const fallbackTier4 = theme.palette.tiers.tier4
+  const tierColors = useMemo<[string, string, string, string]>(() => {
+    if (!chartData) {
+      return [fallbackTier1, fallbackTier2, fallbackTier3, fallbackTier4]
+    }
+    return chartData.map((tier) => tier.color).slice(0, 4) as [
+      string,
+      string,
+      string,
+      string,
+    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    c0,
+    c1,
+    c2,
+    c3,
+    fallbackTier1,
+    fallbackTier2,
+    fallbackTier3,
+    fallbackTier4,
+  ])
 
-  const locationCounts: [number, number, number, number] | undefined =
-    chartData?.every((t) => t.rawCount != null)
-      ? (chartData.map((t) => t.rawCount!).slice(0, 4) as [
-          number,
-          number,
-          number,
-          number,
-        ])
-      : undefined
+  const r0 = chartData?.[0]?.rawCount
+  const r1 = chartData?.[1]?.rawCount
+  const r2 = chartData?.[2]?.rawCount
+  const r3 = chartData?.[3]?.rawCount
+  const locationCounts = useMemo<
+    [number, number, number, number] | undefined
+  >(() => {
+    if (
+      r0 == null ||
+      r1 == null ||
+      r2 == null ||
+      r3 == null ||
+      !chartData ||
+      chartData.length < 4
+    ) {
+      return undefined
+    }
+    return [r0, r1, r2, r3]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [r0, r1, r2, r3])
 
   const isSingleValue = isSingleValueTier(chartData)
   const autoVariant = isSingleValue ? "dots" : "bars"
