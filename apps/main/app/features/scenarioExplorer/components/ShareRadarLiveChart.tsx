@@ -17,6 +17,7 @@ import {
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
 } from "@repo/viz"
+import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
 
 export interface ShareRadarLiveChartProps {
   /** Filtered radar data matching the share item's scenarioIds. */
@@ -55,6 +56,7 @@ export default function ShareRadarLiveChart({
   morphGeneration,
 }: ShareRadarLiveChartProps) {
   const theme = useTheme()
+  const radarPalette = useRadarPlotTheme()
 
   const axisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
     const axisTypo = theme.typography.axisLabel
@@ -146,6 +148,7 @@ export default function ShareRadarLiveChart({
           tooltipLeftOffset={0}
           enableTooltip={false}
           axisLabelDetailStyle={axisLabelDetailStyle}
+          palette={radarPalette}
         />
       </Box>
     </Box>

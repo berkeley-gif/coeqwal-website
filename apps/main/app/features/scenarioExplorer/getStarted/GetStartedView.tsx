@@ -19,11 +19,11 @@ import { getStartedViewportCardHeightCss } from "./getStartedViewport"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { getOutcomeName, type OutcomeCode } from "../../../content/outcomes"
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* Rounded-panel shell for get-started sections.                               */
 /* Frame (outer) holds the inset. Card (inner) holds the rounded corners.      */
 /* Tune these three constants to adjust all nine sections at once.             */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 /**
  * Corner radius + inset values are read from CSS custom properties so they

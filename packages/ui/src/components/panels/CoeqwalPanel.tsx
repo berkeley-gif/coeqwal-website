@@ -45,7 +45,7 @@ import {
 
 const MotionBox = motion.create(Box)
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 export interface CoeqwalPanelProps {
   /** HTML id for anchor/scroll targeting */
@@ -110,7 +110,7 @@ export interface CoeqwalPanelProps {
   scrollIndicator?: React.ReactNode
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 export function CoeqwalPanel({
   id,

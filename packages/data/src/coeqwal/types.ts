@@ -1301,7 +1301,7 @@ export interface ChannelMonthlyStats {
   /** 1=October ... 12=September */
   water_month: number
 
-  // ── Flow volume ──────────────────────────────────────────────────────────
+  // ── Flow volume
   /** Mean monthly flow (CFS) across all simulated years */
   flow_avg_cfs: number | null
   flow_cv: number | null

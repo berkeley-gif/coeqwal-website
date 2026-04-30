@@ -100,6 +100,12 @@ export interface RadarPlotProps {
    * (e.g. scenario checkbox + share via foreignObject).
    */
   axisLabelDetailChrome?: RadarAxisLabelDetailChromeOptions
+  /**
+   * Chart-chrome palette overrides (grid stroke, range band fills, etc.).
+   * Any omitted field falls back to its hardcoded default. Pass values
+   * from theme tokens.
+   */
+  palette?: Partial<RadarPlotPalette>
 }
 
 function toTier(v: number): number {
@@ -107,7 +113,58 @@ function toTier(v: number): number {
 }
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
-const TIER_BAND_COLORS = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const
+
+/**
+ * Chart-chrome palette for `RadarPlot`. Every field has a default that
+ * matches a hardcoded hex value, so adopting the palette
+ * is a no-op visually until callers pass theme-derived overrides.
+ *
+ * Scenario line emphasis colors live on the separate `colors` prop
+ * (`default` / `highlighted` / `background`). This palette covers the
+ * grid, range band, baseline accent, dot strokes, and tier-zone fills.
+ *
+ */
+export interface RadarPlotPalette {
+  /** Stroke for concentric grid circles and radial spokes. */
+  gridStroke: string
+  /** Fill for tier-name labels along the top spoke (e.g. "Tier 1"). */
+  tierLabelText: string
+  /**
+   * Stroke applied around scenario dots, the active-map highlight ring,
+   * and the active-map dot copy.
+   */
+  dotStroke: string
+  /**
+   * Per-tier-zone fill, indexed tier1..tier4. Each ring is drawn from
+   * the outermost inward, so each fill covers the inner portion of the
+   * previous tier zone. All defaults are white because tier zones are
+   * normally rendered as transparent overlays on the chart background.
+   */
+  tierZoneFills: readonly [string, string, string, string]
+  /** Range-band shaded fill (per-axis min/max envelope). */
+  rangeBandFill: string
+  /** Range-band stroke (outer + inner edges of the envelope). */
+  rangeBandStroke: string
+  /**
+   * Baseline accent color used for the highlighted-baseline polygon and
+   * its outline. Defaults to `#cc9a06` (the same "current operations"
+   * gold used by `getThemeLineColor` for `s0020`).
+   */
+  baselineColor: string
+  /** Stroke around the small distribution dots in showDistribution mode. */
+  distributionDotStroke: string
+}
+
+const DEFAULT_RADAR_PALETTE: RadarPlotPalette = {
+  gridStroke: "#dce3ea",
+  tierLabelText: "#718096",
+  dotStroke: "#ffffff",
+  tierZoneFills: ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const,
+  rangeBandFill: "#cbd5e0",
+  rangeBandStroke: "#a0aec0",
+  baselineColor: "#cc9a06",
+  distributionDotStroke: "rgba(0,0,0,0.25)",
+}
 
 const DEFAULT_COLORS = {
   default: "#546e7a",
@@ -487,10 +544,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     axisLabelDetailStyle: axisLabelDetailStyleProp,
     axisLabelDetailChrome,
     containerMinHeight = 400,
+    palette: paletteProp,
   }) => {
     const axisLabelDetailStyle = useMemo(
       () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
       [axisLabelDetailStyleProp],
+    )
+    const palette = useMemo<RadarPlotPalette>(
+      () => ({ ...DEFAULT_RADAR_PALETTE, ...paletteProp }),
+      [paletteProp],
     )
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -828,7 +890,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("cx", cx)
                 .attr("cy", cy)
                 .attr("r", r)
-                .attr("fill", TIER_BAND_COLORS[i] ?? "#fff")
+                .attr("fill", palette.tierZoneFills[i] ?? palette.dotStroke)
                 .attr("stroke", "none")
             })
           }
@@ -841,7 +903,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("cy", cy)
               .attr("r", r)
               .attr("fill", "none")
-              .attr("stroke", "#dce3ea")
+              .attr("stroke", palette.gridStroke)
               .attr("stroke-width", 1)
           })
 
@@ -853,7 +915,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("y1", cy)
               .attr("x2", cx + outerR * Math.cos(angle))
               .attr("y2", cy + outerR * Math.sin(angle))
-              .attr("stroke", "#dce3ea")
+              .attr("stroke", palette.gridStroke)
               .attr("stroke-width", 1)
           })
 
@@ -866,7 +928,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("font-size", 9.5)
               .attr("font-family", FONT_FAMILY)
               .attr("font-weight", 500)
-              .attr("fill", "#718096")
+              .attr("fill", palette.tierLabelText)
               .attr("letter-spacing", "0.02em")
               .text(RADAR_TIER_LABELS[i] ?? "")
           })
@@ -1182,7 +1244,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("r", startR)
                 .attr("fill", color)
                 .attr("fill-opacity", startOp)
-                .attr("stroke", "#fff")
+                .attr("stroke", palette.dotStroke)
                 .attr("stroke-width", 1)
                 .attr("stroke-opacity", startOp)
                 .attr("cursor", "pointer")
@@ -1342,7 +1404,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   .attr("r", baseR + 2)
                   .attr("fill", fill)
                   .attr("fill-opacity", 1)
-                  .attr("stroke", "#fff")
+                  .attr("stroke", palette.dotStroke)
                   .attr("stroke-width", 1)
                   .attr("stroke-opacity", 1)
                   .attr("pointer-events", "none")
@@ -1432,9 +1494,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .append("path")
                 .attr("class", "range-shadow")
                 .attr("d", `${outerD} ${innerD}`)
-                .attr("fill", "#cbd5e0")
+                .attr("fill", palette.rangeBandFill)
                 .attr("fill-opacity", 0.35)
-                .attr("stroke", "#a0aec0")
+                .attr("stroke", palette.rangeBandStroke)
                 .attr("stroke-width", 0.8)
                 .attr("stroke-opacity", 0.5)
                 .attr("fill-rule", "evenodd")
@@ -1479,8 +1541,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const blIdx = data.findIndex((s) => s.id === baselineData.id)
               const blStroke =
                 blIdx >= 0 && hasScenarioColors
-                  ? lineColors[blIdx] || "#cc9a06"
-                  : "#cc9a06"
+                  ? lineColors[blIdx] || palette.baselineColor
+                  : palette.baselineColor
               blRuns.forEach((run) => {
                 const axisKeys = run.indices.map((i) => axes[i]!).join(",")
                 if (run.closed) {
@@ -1491,7 +1553,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     .attr("data-axis-keys", axisKeys)
                     .attr("data-closed", "1")
                     .attr("d", pathGen([...run.points, run.points[0]!]) ?? "")
-                    .attr("fill", "#cc9a06")
+                    .attr("fill", palette.baselineColor)
                     .attr("fill-opacity", 0.12)
                     .attr("stroke", blStroke)
                     .attr("stroke-width", 2.5)
@@ -1668,7 +1730,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                       .attr("r", locDotR)
                       .attr("fill", color)
                       .attr("fill-opacity", 0.85)
-                      .attr("stroke", "rgba(0,0,0,0.25)")
+                      .attr("stroke", palette.distributionDotStroke)
                       .attr("stroke-width", 0.5)
                       .attr("pointer-events", "none")
                       .attr("class", "dist-dot")
@@ -1851,6 +1913,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         distributionData,
         getAngle,
         axisLabelDetailStyle,
+        palette,
       ],
     )
 
@@ -2029,13 +2092,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("r", baseR + 2)
               .attr("fill", fill)
               .attr("fill-opacity", 1)
-              .attr("stroke", "#fff")
+              .attr("stroke", palette.dotStroke)
               .attr("stroke-width", 1)
               .attr("stroke-opacity", 1)
               .attr("pointer-events", "none")
           }
         })
-    }, [activeMapDot, colors.default, data.length])
+    }, [activeMapDot, colors.default, data.length, palette.dotStroke])
 
     return (
       <div

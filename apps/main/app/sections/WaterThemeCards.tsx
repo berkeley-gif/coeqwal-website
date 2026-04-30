@@ -19,9 +19,9 @@ const RULE = "1px solid #e5e5df"
 
 const MotionBox = motion.create(Box)
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* CONSTANTS                                                                    */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 const WATER_THEME_IDS = ["cws", "ag_gw", "eco", "delta"] as const
 
@@ -32,9 +32,9 @@ const WATER_THEME_PHOTOS: Partial<Record<string, string>> = {
   delta: "/images/themes/Screenshot 2026-02-25 at 11.21.jpg",
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* THEME CARD                                                                   */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 /** Water-theme card.coloured header, photo, description */
 function ThemeCard({
@@ -125,9 +125,9 @@ function ThemeCard({
   )
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* WATER THEME CARDS GRID                                                       */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 export function WaterThemeCards({
   waterThemePalette,

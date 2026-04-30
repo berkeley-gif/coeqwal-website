@@ -36,9 +36,9 @@ import type { MotionValue } from "@repo/motion"
 import { WATER_THEMES } from "../content/themes"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* IMAGE & CIRCLE CONFIG                                                       */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 /** Native dimensions of the Delta Aerials image (kept for reference). */
 const _IMG_W = 2784
@@ -124,9 +124,9 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
   },
 ]
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* STAGGER TIMING                                                              */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 /** Left-to-right reveal order.sorted by cx position */
 const SORTED_INDICES = CIRCLE_CONFIG.map((c, i) => ({ cx: c.cx, i }))
@@ -148,9 +148,9 @@ function getStaggerStart(index: number, rangeStart: number, rangeEnd: number) {
   )
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* PER-CIRCLE SUB-COMPONENTS (each calls its own hooks.lint-safe)            */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 /** Photo fill clipped to a circle.owns its staggered opacity hook */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -304,9 +304,9 @@ function ThemeCircleLabel({
   )
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* INNER CONTENT (reads scroll progress from StickyScrollSection context)      */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 function WaterThemesPanelContent({
   contentOpacity,
@@ -581,9 +581,9 @@ function WaterThemesPanelContent({
   return content
 }
 
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 /* EXPORTED PANEL                                                               */
-/* ─────────────────────────────────────────────────────────────────────────── */
+/*───────────────── */
 
 export interface WaterThemesPanelProps {
   /** Ref forwarded to the outer wrapper */

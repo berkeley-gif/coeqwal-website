@@ -241,7 +241,7 @@ const OPS_BLUE = "#2d89b7"
 const THEME_COLOR = "#845284"
 
 export const ICON_REGISTRY: Record<string, IconDef> = {
-  // ── Theme icons ──────────────────────────────────────────────────────────
+  // ── Theme icons
 
   theme_baseline: {
     id: "theme_baseline",

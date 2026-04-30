@@ -27,6 +27,7 @@ import {
 } from "@repo/viz"
 import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
+import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
 import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -160,6 +161,8 @@ export default function RadarPanel({
         scenarioControlsRowGapPx: 4,
       })
     }, [theme])
+
+  const radarPalette = useRadarPlotTheme()
 
   const {
     selectedScenarios,
@@ -964,6 +967,7 @@ export default function RadarPanel({
             onAxisPositions={handleAxisPositions}
             axisLabelDetailStyle={radarAxisLabelDetailStyle}
             axisLabelDetailChrome={axisLabelDetailChrome}
+            palette={radarPalette}
           />
 
           {/* Per-axis info icons with click-to-open definition popover.

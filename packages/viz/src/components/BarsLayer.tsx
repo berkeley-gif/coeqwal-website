@@ -7,7 +7,7 @@ import { SQUARE_SIZE, SQUARE_GAP } from "../utils/shape-morph"
  * BarsLayer: shared 4-tier horizontal bar renderer used by both the static
  * `OutcomeGlyph` path and the animated bars-mode of `MorphableDistributionGlyph`.
  *
- * Width semantic: bar widths are sum-normalized — each bar's fraction is
+ * Width semantic: bar widths are sum-normalized. Each bar's fraction is
  * `value / sum(values)`. This matches `DistOnly`'s `distributeSquares`
  * (the 100-square distribution mode) and the storyboard's inline bar
  * math in `OutcomeMorphOverlay`. For production data, where the API
@@ -15,7 +15,7 @@ import { SQUARE_SIZE, SQUARE_GAP } from "../utils/shape-morph"
  * `convertMultiValueToChartData`), this produces pixel-identical output
  * to the previous max-normalize `BarChart`.
  *
- * This component is pure SVG — no refs, no D3 imperative work, no
+ * This component is pure SVG. No refs, no D3, no
  * theme dependency. Callers may override `trackColor` / `gridlineColor`
  * to thread theme tokens through; defaults match the previous hardcoded
  * values so adopting BarsLayer is a no-op visually.

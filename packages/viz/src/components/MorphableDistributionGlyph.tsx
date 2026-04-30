@@ -61,9 +61,11 @@ function distributeSquares(values: number[], targetTotal: number): number[] {
 
 const GRID_WIDTH = COLS * CELL
 
-// Bars-mode wrapper around BarsLayer. Keeps the outer clipping div so the
-// bars/distribution mode swap stays a clean drop-in inside the parent
-// MorphableDistributionGlyph.
+/**
+ * Bars-mode wrapper around BarsLayer. Keeps the outer clipping div so the
+ * bars/distribution mode swap stays a clean drop-in inside the parent
+ * MorphableDistributionGlyph.
+ */
 
 interface BarOnlyProps {
   values: [number, number, number, number]
@@ -104,7 +106,7 @@ const BarOnly: React.FC<BarOnlyProps> = React.memo(
 )
 BarOnly.displayName = "BarOnly"
 
-// ── Lightweight distribution-only renderer (N <rect>) ───────────────────────
+// Lightweight distribution-only renderer (N <rect>)
 
 // Timing for hydroclimate transition (color first, pause, then slide)
 const COLOR_FADE_MS = 600
@@ -241,7 +243,7 @@ const DistOnly: React.FC<DistOnlyProps> = React.memo(
 )
 DistOnly.displayName = "DistOnly"
 
-// ── Main component ──────────────────────────────────────────────────────────
+// Main component
 
 const MorphableDistributionGlyph: React.FC<MorphableDistributionGlyphProps> =
   React.memo(

@@ -5,11 +5,11 @@ import OutcomeGlyph from "./OutcomeGlyph"
 import OutcomeDotsGlyph from "./OutcomeDotsGlyph"
 
 /**
- * `"distribution"` is retained as a sentinel value for callers (e.g.
+ * `"distribution"` is a sentinel value for callers (e.g.
  * `OutcomeGlyphItem`) that branch on the requested mode upstream of the
  * dispatcher (rendering `MorphableDistributionGlyph` or an inline
  * single-value SVG instead of going through `ScenarioGlyph`). In practice
- * `ScenarioGlyph` itself never receives `"distribution"` — if it ever
+ * `ScenarioGlyph` itself never receives `"distribution"`. If it ever
  * does, the default arm renders the bars glyph as a safe fallback.
  */
 export type GlyphVariant = "bars" | "dots" | "distribution"

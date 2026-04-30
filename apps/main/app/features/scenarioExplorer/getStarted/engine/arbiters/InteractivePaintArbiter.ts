@@ -51,12 +51,12 @@ export type InteractivePaintTransition =
   | "change-selection"
   | "no-op"
 
-// ──────────────────────────────────────────────────────────────
+//────
 // Constants (duplicated from TierAnimationSection to avoid React
 // file-level coupling). If any of these diverge here and there the
 // gold-outline overlay will look different from the non-DU outcomes,
 // so keep them in sync.
-// ──────────────────────────────────────────────────────────────
+//────
 
 /** Fade-in duration (ms) for the initial enter transition. */
 const FADE_IN_DURATION = 350
@@ -126,9 +126,9 @@ const OUTLINE_LINE_OFFSET: unknown = [
   -1.5,
 ]
 
-// ──────────────────────────────────────────────────────────────
+//────
 // Helpers
-// ──────────────────────────────────────────────────────────────
+//────
 
 /** Build the compound filter for `demand-units`: class gate AND id
  *  inclusion. Called for both the fill layer and the outline layer.
@@ -383,9 +383,9 @@ export class InteractivePaintArbiter {
     cleanup()
   }
 
-  // ──────────────────────────────────────────────────────────────
+  //────
   // Lifecycle hooks
-  // ──────────────────────────────────────────────────────────────
+  //────
 
   /**
    * Take ownership of `demand-units` / `demand-units-outline`.
