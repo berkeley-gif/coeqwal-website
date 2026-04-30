@@ -568,9 +568,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     // measure the tooltip's actual offsetWidth/offsetHeight after the
     // caller has set its content, then flip to the cursor's left / top
     // when placing on the default side would overflow the viewport.
-    // This prevents the small-multiples right-edge compression that
-    // shrinks the tooltip's available width to ~0 and triggers the
-    // tall-tooltip / scrollbar / ResizeObserver feedback loop.
     const positionCellTooltip = useCallback((event: MouseEvent) => {
       const el = cellTooltipRef.current
       if (!el) return

@@ -289,6 +289,137 @@ function computeSpokeDodge(
   return result
 }
 
+// ── Visual emphasis constants (shared by updateChart and the visual-only
+// effect that re-applies dot/path visuals when sidebar/highlight props
+// change without rebuilding the SVG) ───────────────────────────────────
+const RADAR_DOT_R = 3.5
+const RADAR_DIM_OPACITY = 0.22
+const RADAR_EMPHASIS_DOT_DELTA = 1.2
+const RADAR_EMPHASIS_STROKE_WIDTH = 2
+/** Slightly lighter than selected emphasis, sidebar / crosshair hover trace */
+const RADAR_HOVER_HIGHLIGHT_DOT_DELTA = 0.85
+const RADAR_HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
+const RADAR_PIN_DOT_DELTA = 1.45
+const RADAR_HOVER_DOT_RADIUS_BUMP = 1.45
+
+interface RadarScenarioVisuals {
+  dotR: number
+  opacity: number
+  strokeWidth: number
+  strokeOpacity: number
+}
+
+interface RadarVisualsInputs {
+  chosenIds: Set<string> | null | undefined
+  highlightedIds: Set<string> | null
+  pinnedScenarioIds: Set<string>
+  dimUnselected: boolean
+  dimUnpinned: boolean
+  showDotsOnly: boolean
+  highlightBaseline: boolean
+  baselineId: string | null
+}
+
+/**
+ * Pure resolver for per-scenario radar visuals. Used by both the
+ * imperative `updateChart` rebuild path and the visual-only effect
+ * that re-applies opacity / radius / stroke on existing DOM when only
+ * sidebar highlight or chosen / dim flags change.
+ */
+function resolveScenarioVisuals(
+  scenarioId: string,
+  focusId: string | null | undefined,
+  inp: RadarVisualsInputs,
+): RadarScenarioVisuals {
+  const isFocused = focusId != null && scenarioId === focusId
+  const hasExternalHighlight =
+    inp.highlightedIds != null && inp.highlightedIds.size > 0
+  const isExternallyHighlighted =
+    hasExternalHighlight && inp.highlightedIds!.has(scenarioId)
+  const hasChosenIds = inp.chosenIds != null && inp.chosenIds.size > 0
+  const isSelected = hasChosenIds && inp.chosenIds!.has(scenarioId)
+  const isPinned = inp.pinnedScenarioIds.has(scenarioId)
+  const hasPinned = inp.pinnedScenarioIds.size > 0
+  const isBaseline =
+    inp.highlightBaseline &&
+    inp.baselineId != null &&
+    scenarioId === inp.baselineId
+
+  const selectedOrBaselineVisuals: RadarScenarioVisuals = {
+    dotR: RADAR_DOT_R + RADAR_EMPHASIS_DOT_DELTA,
+    opacity: 1.0,
+    strokeWidth: RADAR_EMPHASIS_STROKE_WIDTH,
+    strokeOpacity: inp.showDotsOnly ? RADAR_DIM_OPACITY : 1.0,
+  }
+  const pinnedVisuals: RadarScenarioVisuals = {
+    dotR: RADAR_DOT_R + RADAR_PIN_DOT_DELTA,
+    opacity: 1.0,
+    strokeWidth: RADAR_EMPHASIS_STROKE_WIDTH,
+    strokeOpacity: inp.showDotsOnly ? RADAR_DIM_OPACITY : 1.0,
+  }
+  const externalDimVisuals: RadarScenarioVisuals = {
+    dotR: RADAR_DOT_R * 0.7,
+    opacity: RADAR_DIM_OPACITY,
+    strokeWidth: 1.2,
+    strokeOpacity: RADAR_DIM_OPACITY,
+  }
+  const hoverEmphasisVisuals: RadarScenarioVisuals = {
+    dotR: RADAR_DOT_R + RADAR_HOVER_HIGHLIGHT_DOT_DELTA,
+    opacity: 1.0,
+    strokeWidth: RADAR_HOVER_HIGHLIGHT_STROKE_WIDTH,
+    strokeOpacity: inp.showDotsOnly ? RADAR_DIM_OPACITY : 1.0,
+  }
+
+  const anyHighlightActive =
+    focusId != null ||
+    inp.dimUnselected ||
+    (inp.dimUnpinned && hasPinned) ||
+    hasExternalHighlight
+
+  if (isFocused || isExternallyHighlighted) {
+    return hoverEmphasisVisuals
+  }
+
+  if (hasExternalHighlight) {
+    if (isSelected || isBaseline) return selectedOrBaselineVisuals
+    if (isPinned) return pinnedVisuals
+    return externalDimVisuals
+  }
+
+  if (isSelected || isBaseline) {
+    return selectedOrBaselineVisuals
+  }
+
+  if (isPinned) {
+    return pinnedVisuals
+  }
+
+  if (anyHighlightActive) {
+    return {
+      dotR: RADAR_DOT_R * 0.7,
+      opacity: RADAR_DIM_OPACITY,
+      strokeWidth: 1.2,
+      strokeOpacity: RADAR_DIM_OPACITY,
+    }
+  }
+
+  if (inp.showDotsOnly) {
+    return {
+      dotR: RADAR_DOT_R,
+      opacity: 1.0,
+      strokeWidth: 1.2,
+      strokeOpacity: RADAR_DIM_OPACITY,
+    }
+  }
+
+  return {
+    dotR: RADAR_DOT_R,
+    opacity: 1.0,
+    strokeWidth: 1.2,
+    strokeOpacity: 0.55,
+  }
+}
+
 type AxisPosition = {
   axis: string
   x: number
@@ -442,6 +573,50 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     // → setState → re-render feedback loop that can trip React's
     // update-depth guard during the 700ms map-column width transition.
     const lastReportedAxisPositionsRef = useRef<AxisPosition[] | null>(null)
+
+    // ── Visual-only prop refs ───────────────────────────────────────
+    // These props affect dot opacity / radius and path stroke (visual
+    // only); they are intentionally NOT in updateChart's dep array.
+    // Instead a separate effect reads them from refs and walks the
+    // existing DOM to apply the visual change without a full SVG
+    // rebuild.
+    const chosenIdsRef = useRef(chosenIds)
+    useEffect(() => {
+      chosenIdsRef.current = chosenIds
+    }, [chosenIds])
+    const highlightedIdsRef = useRef(highlightedIds)
+    useEffect(() => {
+      highlightedIdsRef.current = highlightedIds
+    }, [highlightedIds])
+    const pinnedScenarioIdsRef = useRef(pinnedScenarioIds)
+    useEffect(() => {
+      pinnedScenarioIdsRef.current = pinnedScenarioIds
+    }, [pinnedScenarioIds])
+    const dimUnselectedRef = useRef(dimUnselected)
+    useEffect(() => {
+      dimUnselectedRef.current = dimUnselected
+    }, [dimUnselected])
+    const dimUnpinnedRef = useRef(dimUnpinned)
+    useEffect(() => {
+      dimUnpinnedRef.current = dimUnpinned
+    }, [dimUnpinned])
+    const showDotsOnlyRef = useRef(showDotsOnly)
+    useEffect(() => {
+      showDotsOnlyRef.current = showDotsOnly
+    }, [showDotsOnly])
+    const enableTooltipRef = useRef(enableTooltip)
+    useEffect(() => {
+      enableTooltipRef.current = enableTooltip
+    }, [enableTooltip])
+    const scenarioThemesRef = useRef(scenarioThemes)
+    useEffect(() => {
+      scenarioThemesRef.current = scenarioThemes
+    }, [scenarioThemes])
+    // Currently-hovered scenario id (set in dot mouseenter, cleared in
+    // the axis-detail dismiss timer after resetDotVisuals). The
+    // visual-only effect reads it to preserve focus emphasis when a
+    // sidebar/highlight prop change runs while a dot is hovered.
+    const focusedScenarioIdRef = useRef<string | null>(null)
 
     const axisLabelDetailChromeRef = useRef(axisLabelDetailChrome)
     useEffect(() => {
@@ -613,115 +788,36 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             )
           }
 
-          const hasPinned = pinnedScenarioIds.size > 0
+          // hasPinned is read live from the ref so visual updates run
+          // off the latest pin state (updateChart still re-runs on pin
+          // change because pinnedScenarioIds is a structural dep).
+          const hasPinned = pinnedScenarioIdsRef.current.size > 0
           const hasScenarioColors = lineColors.length > 0
-          const dotR = 3.5
-          const DIM_OPACITY = 0.22
-          const EMPHASIS_DOT_DELTA = 1.2
-          const EMPHASIS_STROKE_WIDTH = 2
-          /** Slightly lighter than selected emphasis, sidebar / crosshair hover trace */
-          const HOVER_HIGHLIGHT_DOT_DELTA = 0.85
-          const HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
-          const PIN_DOT_DELTA = 1.45
-          const HOVER_DOT_RADIUS_BUMP = 1.45
+          // Local aliases for layout maths that also use the resting dot
+          // radius and the on-hover bump (kept here to avoid renaming
+          // every callsite).
+          const dotR = RADAR_DOT_R
+          const HOVER_DOT_RADIUS_BUMP = RADAR_HOVER_DOT_RADIUS_BUMP
 
-          const hasChosenIds = chosenIds && chosenIds.size > 0
-
-          /**
-           * External highlight (`highlightedIds`): emphasize those traces only;
-           * chosen, baseline, and pinned stay at normal resting emphasis (not dimmed).
-           * Chart dot hover (`focusId`) unchanged.
-           */
-          const selectedOrBaselineVisuals = {
-            dotR: dotR + EMPHASIS_DOT_DELTA,
-            opacity: 1.0,
-            strokeWidth: EMPHASIS_STROKE_WIDTH,
-            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-          } as const
-          const pinnedVisuals = {
-            dotR: dotR + PIN_DOT_DELTA,
-            opacity: 1.0,
-            strokeWidth: EMPHASIS_STROKE_WIDTH,
-            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-          } as const
-          const externalDimVisuals = {
-            dotR: dotR * 0.7,
-            opacity: DIM_OPACITY,
-            strokeWidth: 1.2,
-            strokeOpacity: DIM_OPACITY,
-          } as const
-          const hoverEmphasisVisuals = {
-            dotR: dotR + HOVER_HIGHLIGHT_DOT_DELTA,
-            opacity: 1.0,
-            strokeWidth: HOVER_HIGHLIGHT_STROKE_WIDTH,
-            strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-          } as const
-
+          // resolveVisuals reads visual-only props from refs at call
+          // time (instead of closing over the props snapshot). Event
+          // handlers attached to dots/paths stay correct even when
+          // updateChart isn't re-running on those prop changes (see
+          // the visual-only effect below).
           const resolveVisuals = (
             scenarioId: string,
             focusId?: string | null,
-          ) => {
-            const isFocused = focusId != null && scenarioId === focusId
-            const hasExternalHighlight =
-              highlightedIds != null && highlightedIds.size > 0
-            const isExternallyHighlighted =
-              hasExternalHighlight && highlightedIds!.has(scenarioId)
-            const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
-            const isPinned = pinnedScenarioIds.has(scenarioId)
-            const isBaseline =
-              highlightBaseline &&
-              baselineData != null &&
-              scenarioId === baselineData.id
-
-            const anyHighlightActive =
-              focusId != null ||
-              dimUnselected ||
-              (dimUnpinned && hasPinned) ||
-              hasExternalHighlight
-
-            if (isFocused || isExternallyHighlighted) {
-              return hoverEmphasisVisuals
-            }
-
-            if (hasExternalHighlight) {
-              if (isSelected || isBaseline) return selectedOrBaselineVisuals
-              if (isPinned) return pinnedVisuals
-              return externalDimVisuals
-            }
-
-            if (isSelected || isBaseline) {
-              return selectedOrBaselineVisuals
-            }
-
-            if (isPinned) {
-              return pinnedVisuals
-            }
-
-            if (anyHighlightActive) {
-              return {
-                dotR: dotR * 0.7,
-                opacity: DIM_OPACITY,
-                strokeWidth: 1.2,
-                strokeOpacity: DIM_OPACITY,
-              }
-            }
-
-            if (showDotsOnly) {
-              return {
-                dotR,
-                opacity: 1.0,
-                strokeWidth: 1.2,
-                strokeOpacity: DIM_OPACITY,
-              }
-            }
-
-            return {
-              dotR,
-              opacity: 1.0,
-              strokeWidth: 1.2,
-              strokeOpacity: 0.55,
-            }
-          }
+          ): RadarScenarioVisuals =>
+            resolveScenarioVisuals(scenarioId, focusId, {
+              chosenIds: chosenIdsRef.current,
+              highlightedIds: highlightedIdsRef.current,
+              pinnedScenarioIds: pinnedScenarioIdsRef.current,
+              dimUnselected: dimUnselectedRef.current,
+              dimUnpinned: dimUnpinnedRef.current,
+              showDotsOnly: showDotsOnlyRef.current,
+              highlightBaseline,
+              baselineId: baselineData?.id ?? null,
+            })
 
           // 1. Tier zone rings (draw from outermost inward; each filled circle
           //    covers the inner portion of the previous one)
@@ -1032,6 +1128,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             leaveResetTimerRef.current = setTimeout(() => {
               leaveResetTimerRef.current = null
               resetDotVisuals()
+              focusedScenarioIdRef.current = null
               lastNotifiedIdRef.current = null
               onLineHoverRef.current?.(null)
               resetAllAxisLabelTitlesFontWeight()
@@ -1112,6 +1209,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   // reset every spoke first (cross-axis moves otherwise leave stale bold).
                   resetAllAxisLabelTitlesFontWeight()
 
+                  // Track the focused scenario so the visual-only effect
+                  // (sidebar highlight / dim toggle changes) can preserve
+                  // hover emphasis on this dot during a non-rebuild update.
+                  focusedScenarioIdRef.current = scenario.id
+
                   applyFocusVisuals(scenario.id)
                   select(this)
                     .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
@@ -1124,7 +1226,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     hoverNotifyTimerRef.current = null
                   }
 
-                  if (enableTooltip) {
+                  if (enableTooltipRef.current) {
                     const el = tooltipRef.current
                     if (el) {
                       showTooltip(
@@ -1132,7 +1234,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                         scenario.name,
                         axis,
                         sv != null ? toTier(sv) : undefined,
-                        scenarioThemes?.[scenario.id],
+                        scenarioThemesRef.current?.[scenario.id],
                         scenario.id,
                       )
                     }
@@ -1164,7 +1266,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     clearTimeout(hoverNotifyTimerRef.current)
                     hoverNotifyTimerRef.current = null
                   }
-                  if (enableTooltip && tooltipRef.current)
+                  if (enableTooltipRef.current && tooltipRef.current)
                     hideTooltip(tooltipRef.current)
                   onDotHoverRef.current?.(null)
 
@@ -1729,6 +1831,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           continueFullRebuild()
         }
       },
+      // CP2: visual-only props (chosenIds, highlightedIds,
+      // dimUnselected, dimUnpinned, showDotsOnly, enableTooltip,
+      // scenarioThemes) are intentionally OMITTED from this dep list.
+      // They are read via refs at call time inside resolveVisuals and
+      // the dot event handlers; sidebar-hover changes are applied by
+      // the visual-only effect below without rebuilding the SVG.
       [
         data,
         axes,
@@ -1736,20 +1844,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         lineColors,
         colors,
         highlightBaseline,
-        showDotsOnly,
-        dimUnselected,
-        chosenIds,
         showTierZones,
         pinnedScenarioIds,
-        dimUnpinned,
         axisRange,
-        scenarioThemes,
         showDistribution,
         distributionData,
         getAngle,
-        enableTooltip,
         axisLabelDetailStyle,
-        highlightedIds,
       ],
     )
 
@@ -1801,6 +1902,75 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
       return () => ro.disconnect()
     }, [responsive])
+
+    // Visual-only re-render: when sidebar highlight, chosen, or
+    // dim-flag props change, walk the existing dots and scenario
+    // paths and re-apply opacity / radius / stroke without rebuilding
+    // the SVG. Mirrors what `resetDotVisuals` does inside
+    // `updateChart`, but runs against whatever DOM is currently
+    // mounted. Pin/structural changes still go through `updateChart`.
+    useEffect(() => {
+      const svg = select(svgRef.current)
+      if (svg.empty()) return
+      const dotsLayer = svg.select<SVGGElement>("g.dots")
+      const pathLayer = svg.select<SVGGElement>("g.scenario-paths")
+      if (dotsLayer.empty() || pathLayer.empty()) return
+
+      const focusId = focusedScenarioIdRef.current
+      const visualsFor = (scenarioId: string) =>
+        resolveScenarioVisuals(scenarioId, focusId, {
+          chosenIds: chosenIdsRef.current,
+          highlightedIds: highlightedIdsRef.current,
+          pinnedScenarioIds: pinnedScenarioIdsRef.current,
+          dimUnselected: dimUnselectedRef.current,
+          dimUnpinned: dimUnpinnedRef.current,
+          showDotsOnly: showDotsOnlyRef.current,
+          highlightBaseline,
+          baselineId: baselineData?.id ?? null,
+        })
+
+      dotsLayer
+        .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+        .each(function () {
+          const sid = this.getAttribute("data-scenario-id") ?? ""
+          const vis = visualsFor(sid)
+          const node = select(this)
+          node
+            .attr("fill-opacity", vis.opacity)
+            .attr("stroke-opacity", vis.opacity)
+          // The mouseenter handler bumps the focused dot's radius to
+          // dotR + HOVER_DOT_RADIUS_BUMP (larger than any resolved
+          // visual). Don't shrink it back during a non-rebuild update.
+          if (focusId == null || sid !== focusId) {
+            node.attr("r", vis.dotR)
+          }
+        })
+
+      pathLayer
+        .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+        .each(function () {
+          const el = select(this)
+          const sid = el.attr("data-path-id") ?? ""
+          const vis = visualsFor(sid)
+          el.attr("stroke-width", vis.strokeWidth).attr(
+            "stroke-opacity",
+            vis.strokeOpacity,
+          )
+        })
+      // pinnedScenarioIds is intentionally NOT a dep here: a pin
+      // change goes through updateChart's full rebuild (it changes
+      // distribution layer membership). highlightBaseline/baselineData
+      // are deps because the closure reads them; updateChart also
+      // re-runs on those changes (redundant but harmless).
+    }, [
+      chosenIds,
+      highlightedIds,
+      dimUnselected,
+      dimUnpinned,
+      showDotsOnly,
+      highlightBaseline,
+      baselineData,
+    ])
 
     // Imperatively manage the active-map-dot highlight without
     // triggering a full SVG rebuild when the active outcome changes.
