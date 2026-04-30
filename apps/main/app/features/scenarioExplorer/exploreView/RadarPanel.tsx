@@ -184,7 +184,7 @@ export default function RadarPanel({
 
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
 
-  const { getThemeForScenario, getDisplayName } = useScenarioList()
+  const { getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
 
   const radarSvgRef = useRef<SVGSVGElement | null>(null)
@@ -490,14 +490,6 @@ export default function RadarPanel({
   useEffect(() => {
     onScenarioColors?.(scenarioColorMap)
   }, [scenarioColorMap, onScenarioColors])
-
-  const scenarioThemes = useMemo(() => {
-    const map: Record<string, string> = {}
-    filteredData.forEach((d) => {
-      map[d.id] = getThemeForScenario(d.id) ?? "unthemed"
-    })
-    return map
-  }, [filteredData, getThemeForScenario])
 
   const visibleAxisNames = useMemo(() => {
     const nameSet = new Set(radarVisibleAxes.map(getOutcomeName))
@@ -947,7 +939,6 @@ export default function RadarPanel({
             highlightBaseline={highlightBaseline}
             chosenIds={chosenIds}
             highlightedIds={highlightedIds}
-            scenarioThemes={scenarioThemes}
             morphGeneration={morphGeneration}
             pinnedScenarioIds={pinnedSet}
             onDotClick={(scenarioId, axis) =>
@@ -960,8 +951,6 @@ export default function RadarPanel({
             showAllPaths
             showDotsOnly={showDotsOnly}
             dimUnselected={radarShowAll && selectedScenarios.length > 0}
-            tooltipLeftOffset={showAxisSelector ? 220 : 0}
-            enableTooltip={false}
             svgRefCallback={handleSvgRef}
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}

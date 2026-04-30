@@ -9,7 +9,6 @@ import {
   renderRadarAxisLabelDetailInto,
   RADAR_AXIS_DETAIL_SHADOW_FILTER_ID,
   RADAR_TIER_LABELS,
-  RADAR_TIER_SWATCH_COLORS,
   type RadarAxisLabelDetailPayload,
   type RadarAxisLabelDetailChromeOptions,
   type RadarAxisLabelDetailPointerBridge,
@@ -45,7 +44,6 @@ export interface RadarPlotProps {
   showScenarioPath?: boolean
   showAllPaths?: boolean
   showTierZones?: boolean
-  scenarioThemes?: Record<string, string>
   morphGeneration?: number
   pinnedScenarioIds?: Set<string>
   onPinnedToggle?: (scenarioId: string) => void
@@ -63,10 +61,6 @@ export interface RadarPlotProps {
   showDotsOnly?: boolean
   /** When true, dim scenarios not in chosenIds */
   dimUnselected?: boolean
-  /** Extra left offset for the tooltip (e.g. when a sidebar overlaps) */
-  tooltipLeftOffset?: number
-  /** When false, suppress the built-in tooltip on dot hover */
-  enableTooltip?: boolean
   /** Called on dot mouseenter/mouseleave with axis-level hover info */
   onDotHover?: (
     info: { scenarioId: string; axis: string; tierValue: number } | null,
@@ -199,62 +193,6 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "SOD: Reservoir storage": ["SOD:", "Reservoir storage"],
   "NOD: Groundwater storage": ["NOD:", "Groundwater storage"],
   "SOD: Groundwater storage": ["SOD:", "Groundwater storage"],
-}
-
-const THEME_PILL_CONFIG: Record<
-  string,
-  { label: string; bg: string; text: string }
-> = {
-  baseline: { label: "Baselines", bg: "#ffd87e", text: "#7a5200" },
-  ag_gw: { label: "Farms and groundwater", bg: "#d0ebd7", text: "#2d6a4f" },
-  eco: {
-    label: "Rivers, salmon and the Delta ecosystem",
-    bg: "#CDDFF1",
-    text: "#1E4F6E",
-  },
-  delta: {
-    label: "The Delta as a living place",
-    bg: "#DED6F0",
-    text: "#3A2888",
-  },
-  cws: { label: "Community water systems", bg: "#ffe5cc", text: "#7a3000" },
-  unthemed: { label: "Other scenarios", bg: "#e0e0e0", text: "#616161" },
-}
-
-function showTooltip(
-  el: HTMLDivElement,
-  scenarioName: string,
-  outcomeName: string,
-  tierValue?: number,
-  themeKey?: string,
-  scenarioId?: string,
-) {
-  el.style.display = "block"
-  const tier =
-    tierValue != null ? Math.min(4, Math.max(1, Math.round(tierValue))) : null
-  const tierLine =
-    tier != null
-      ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
-        `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${RADAR_TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
-        `${RADAR_TIER_LABELS[tier - 1] ?? `Tier ${tier}`}</div>`
-      : ""
-  const pill = themeKey ? THEME_PILL_CONFIG[themeKey] : undefined
-  const themeLine = pill
-    ? `<div><span style="display:inline-block;font-size:8.5px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:${pill.text};background:${pill.bg};padding:1px 4px;border-radius:2px;line-height:1.3">${pill.label}</span></div>`
-    : ""
-  const idLine = scenarioId
-    ? `<div style="color:#718096;font-size:10px;letter-spacing:0.03em;margin-top:2px">${scenarioId}</div>`
-    : ""
-  el.innerHTML =
-    themeLine +
-    idLine +
-    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em;margin-top:${pill || scenarioId ? "3px" : "0"}">${scenarioName}</div>` +
-    `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>` +
-    tierLine
-}
-
-function hideTooltip(el: HTMLDivElement) {
-  el.style.display = "none"
 }
 
 /** Simple deterministic hash: scenario ID -> stable integer */
@@ -530,14 +468,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onDotClick,
     dimUnpinned = false,
     axisRange,
-    scenarioThemes,
     showDistribution = false,
     distributionData,
     activeMapDot,
     showDotsOnly = false,
     dimUnselected = false,
-    tooltipLeftOffset = 0,
-    enableTooltip = true,
     onDotHover,
     onAxisPositions,
     svgRefCallback,
@@ -564,7 +499,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     )
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
-    const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
 
     const shouldMorphNextRef = useRef(false)
@@ -666,14 +600,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       showDotsOnlyRef.current = showDotsOnly
     }, [showDotsOnly])
-    const enableTooltipRef = useRef(enableTooltip)
-    useEffect(() => {
-      enableTooltipRef.current = enableTooltip
-    }, [enableTooltip])
-    const scenarioThemesRef = useRef(scenarioThemes)
-    useEffect(() => {
-      scenarioThemesRef.current = scenarioThemes
-    }, [scenarioThemes])
     // Currently-hovered scenario id (set in dot mouseenter, cleared in
     // the axis-detail dismiss timer after resetDotVisuals). The
     // visual-only effect reads it to preserve focus emphasis when a
@@ -737,7 +663,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           clearTimeout(leaveResetTimerRef.current)
           leaveResetTimerRef.current = null
         }
-        if (tooltipRef.current) hideTooltip(tooltipRef.current)
 
         const numAxes = axes.length
 
@@ -1288,20 +1213,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     hoverNotifyTimerRef.current = null
                   }
 
-                  if (enableTooltipRef.current) {
-                    const el = tooltipRef.current
-                    if (el) {
-                      showTooltip(
-                        el,
-                        scenario.name,
-                        axis,
-                        sv != null ? toTier(sv) : undefined,
-                        scenarioThemesRef.current?.[scenario.id],
-                        scenario.id,
-                      )
-                    }
-                  }
-
                   onDotHoverRef.current?.({
                     scenarioId: scenario.id,
                     axis,
@@ -1328,8 +1239,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     clearTimeout(hoverNotifyTimerRef.current)
                     hoverNotifyTimerRef.current = null
                   }
-                  if (enableTooltipRef.current && tooltipRef.current)
-                    hideTooltip(tooltipRef.current)
                   onDotHoverRef.current?.(null)
 
                   scheduleAxisDetailDismiss(axis)
@@ -1894,11 +1803,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         }
       },
       // CP2: visual-only props (chosenIds, highlightedIds,
-      // dimUnselected, dimUnpinned, showDotsOnly, enableTooltip,
-      // scenarioThemes) are intentionally OMITTED from this dep list.
-      // They are read via refs at call time inside resolveVisuals and
-      // the dot event handlers; sidebar-hover changes are applied by
-      // the visual-only effect below without rebuilding the SVG.
+      // dimUnselected, dimUnpinned, showDotsOnly) are intentionally
+      // OMITTED from this dep list. They are read via refs at call
+      // time inside resolveVisuals and the dot event handlers;
+      // sidebar-hover changes are applied by the visual-only effect
+      // below without rebuilding the SVG.
       [
         data,
         axes,
@@ -2119,28 +2028,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           width={width}
           height={height}
           style={{ display: "block", width: "100%", height: "100%" }}
-        />
-        <div
-          ref={tooltipRef}
-          style={{
-            display: "none",
-            position: "absolute",
-            top: 12,
-            left: 12 + tooltipLeftOffset,
-            background: "rgba(255,255,255,0.97)",
-            border: "1px solid #eceff1",
-            borderRadius: 8,
-            padding: "8px 12px",
-            fontSize: 11,
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.55,
-            pointerEvents: "none",
-            zIndex: 10,
-            boxShadow:
-              "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
-            whiteSpace: "normal",
-            maxWidth: 280,
-          }}
         />
       </div>
     )

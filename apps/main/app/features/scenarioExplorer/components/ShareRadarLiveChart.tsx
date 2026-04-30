@@ -26,8 +26,6 @@ export interface ShareRadarLiveChartProps {
   axes: string[]
   /** Line colors in the same order as `data`. */
   lineColors?: string[]
-  /** Per-scenario theme keys for `RadarPlot` (matches explore). */
-  scenarioThemes: Record<string, string>
   /** Baseline scenario from useComparisonData. */
   baselineData?: VerticalParallelLineData | null
   /** Per-axis min/max across all scenarios in the hydroclimate. */
@@ -46,7 +44,6 @@ export default function ShareRadarLiveChart({
   data,
   axes,
   lineColors,
-  scenarioThemes,
   baselineData,
   axisRange,
   showRadarRange,
@@ -134,7 +131,6 @@ export default function ShareRadarLiveChart({
           responsive
           containerMinHeight={0}
           lineColors={lineColors}
-          scenarioThemes={scenarioThemes}
           morphGeneration={morphGeneration}
           chosenIds={new Set(data.map((d) => d.id))}
           highlightBaseline={highlightBaseline && !!baselineData}
@@ -145,8 +141,6 @@ export default function ShareRadarLiveChart({
           axisRange={showRadarRange ? axisRange : undefined}
           dimUnselected={false}
           dimUnpinned={false}
-          tooltipLeftOffset={0}
-          enableTooltip={false}
           axisLabelDetailStyle={axisLabelDetailStyle}
           palette={radarPalette}
         />

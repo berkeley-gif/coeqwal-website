@@ -14,7 +14,6 @@ import { useScenarioExplorerStore } from "../store"
 import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../hooks/useComparisonData"
-import { useScenarioList } from "../../scenarios/hooks"
 import {
   normalizeShareRadarHydro,
   buildShareRadarLiveDataFields,
@@ -50,7 +49,6 @@ function ShareItemCard({
   scenarioLookup,
   allChartData,
   radarLiveByHydro,
-  getThemeForScenario,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -67,7 +65,6 @@ function ShareItemCard({
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
-  getThemeForScenario: (id: string) => string
 }) {
   if (item.type === "barChart") {
     const info = scenarioLookup.get(item.scenarioId)
@@ -114,7 +111,7 @@ function ShareItemCard({
       radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
     const liveChart = item.cachedImageDataUrl
       ? undefined
-      : renderRadarLiveChart(item, radarLive, getThemeForScenario)
+      : renderRadarLiveChart(item, radarLive)
 
     return (
       <ShareRadarCard
@@ -182,7 +179,6 @@ function ShareItemCard({
 function renderRadarLiveChart(
   item: Extract<ShareItem, { type: "radar" }>,
   liveData: ShareRadarLiveDataFields,
-  getThemeForScenario: (id: string) => string,
 ): React.ReactNode {
   const idSet = new Set(item.scenarioIds)
   const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
@@ -200,17 +196,11 @@ function renderRadarLiveChart(
     return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
   })
 
-  const scenarioThemes: Record<string, string> = {}
-  for (const id of item.scenarioIds) {
-    scenarioThemes[id] = getThemeForScenario(id) ?? "unthemed"
-  }
-
   return (
     <ShareRadarLiveChart
       data={orderedFiltered}
       axes={axesDisplay}
       lineColors={lineColors}
-      scenarioThemes={scenarioThemes}
       baselineData={liveData.radarBaseline}
       axisRange={liveData.radarAxisRange}
       showRadarRange={item.showRange}
@@ -327,7 +317,6 @@ export default function ShareDrawer() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
-  const { getThemeForScenario } = useScenarioList()
 
   const compHistorical = useComparisonData("historical", true)
   const compCc50 = useComparisonData("cc50", true)
@@ -518,7 +507,6 @@ export default function ShareDrawer() {
                   >
                 }
                 radarLiveByHydro={radarLiveByHydro}
-                getThemeForScenario={getThemeForScenario}
               />
             ))
           )}

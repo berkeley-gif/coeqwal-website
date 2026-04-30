@@ -30,7 +30,6 @@ import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
-import { useScenarioList } from "../../features/scenarios/hooks"
 import {
   normalizeShareRadarHydro,
   buildShareRadarLiveDataFields,
@@ -346,7 +345,6 @@ function renderShareItemBody(
   >,
   allChartData: Record<string, Record<string, unknown> | undefined>,
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
-  getThemeForScenario: (id: string) => string,
   onNoteChange?: (id: string, note: string) => void,
 ): React.ReactNode {
   if (item.type === "barChart") {
@@ -393,7 +391,7 @@ function renderShareItemBody(
       radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
     const liveChart = item.cachedImageDataUrl
       ? undefined
-      : renderRadarLiveChart(item, radarLive, getThemeForScenario)
+      : renderRadarLiveChart(item, radarLive)
     return (
       <ShareRadarCard
         scenarioNames={names}
@@ -458,7 +456,6 @@ function renderShareItemBody(
 function renderRadarLiveChart(
   item: Extract<ShareItem, { type: "radar" }>,
   liveData: ShareRadarLiveDataFields,
-  getThemeForScenario: (id: string) => string,
 ): React.ReactNode {
   const idSet = new Set(item.scenarioIds)
   const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
@@ -476,17 +473,11 @@ function renderRadarLiveChart(
     return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
   })
 
-  const scenarioThemes: Record<string, string> = {}
-  for (const id of item.scenarioIds) {
-    scenarioThemes[id] = getThemeForScenario(id) ?? "unthemed"
-  }
-
   return (
     <ShareRadarLiveChart
       data={orderedFiltered}
       axes={axesDisplay}
       lineColors={lineColors}
-      scenarioThemes={scenarioThemes}
       baselineData={liveData.radarBaseline}
       axisRange={liveData.radarAxisRange}
       showRadarRange={item.showRange}
@@ -525,7 +516,6 @@ function TrayCard({
   scenarioLookup,
   allChartData,
   radarLiveByHydro,
-  getThemeForScenario,
 }: {
   item: ShareItem
   isInStory: boolean
@@ -543,7 +533,6 @@ function TrayCard({
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
-  getThemeForScenario: (id: string) => string
 }) {
   const theme = useTheme()
 
@@ -554,7 +543,6 @@ function TrayCard({
       scenarioLookup,
       allChartData,
       radarLiveByHydro,
-      getThemeForScenario,
       onNoteChange,
     )
 
@@ -626,7 +614,6 @@ function StoryCard({
   scenarioLookup,
   allChartData,
   radarLiveByHydro,
-  getThemeForScenario,
 }: {
   item: ShareItem
   onRemoveFromStory: (id: string) => void
@@ -646,7 +633,6 @@ function StoryCard({
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
-  getThemeForScenario: (id: string) => string
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -704,7 +690,6 @@ function StoryCard({
         scenarioLookup,
         allChartData,
         radarLiveByHydro,
-        getThemeForScenario,
         onNoteChange,
       )}
     </Box>
@@ -855,7 +840,6 @@ export default function SharePanel() {
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
-  const { getThemeForScenario } = useScenarioList()
 
   // One `useComparisonData(period, true)` per explore hydro so share
   // items use `item.hydroclimate`, with full parallel rows (not
@@ -1155,7 +1139,6 @@ export default function SharePanel() {
                 >
               }
               radarLiveByHydro={radarLiveByHydro}
-              getThemeForScenario={getThemeForScenario}
             />
           ))}
         </Box>
@@ -1219,7 +1202,6 @@ export default function SharePanel() {
                           >
                         }
                         radarLiveByHydro={radarLiveByHydro}
-                        getThemeForScenario={getThemeForScenario}
                       />
                     ))}
                   </Box>
