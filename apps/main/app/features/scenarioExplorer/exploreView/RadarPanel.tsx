@@ -229,7 +229,7 @@ export default function RadarPanel({
   const [axisPositions, setAxisPositions] = useState<AxisPosition[]>([])
 
   // Axis positions arrive from RadarPlot on every D3 rebuild. During the
-  // 700ms map-column width transition the ResizeObserver fires every
+  // map-column width transition the ResizeObserver fires every
   // frame, and each tick produces genuinely different pixel positions
   // (different widths), so we'd commit a setState per frame, each
   // triggering an axisLabelRects commit, and the cumulative depth would
@@ -264,7 +264,7 @@ export default function RadarPanel({
 
   // Measured bounding boxes of each axis label group in the SVG, keyed by
   // axis display name. Used to place the info icon flush against the
-  // rendered text rather than guessing from the anchor point. Re-measured
+  // rendered text. Re-measured
   // whenever the chart re-renders (new axisPositions array).
   const [axisLabelRects, setAxisLabelRects] =
     useState<Record<string, AxisLabelRect>>(EMPTY_RECTS)
@@ -279,7 +279,7 @@ export default function RadarPanel({
     svg.querySelectorAll<SVGGElement>("g.axis-label").forEach((g) => {
       const axis = g.getAttribute("data-axis")
       if (!axis) return
-      // For two-line curated labels the group contains two <text> title
+      // For two-line labels the group contains two <text> title
       // elements. The last appended one is the bottom line. We want the
       // icon to land after the last word of that last line, so we measure
       // the last <text class="axis-label-title"> specifically rather than
@@ -352,7 +352,7 @@ export default function RadarPanel({
 
   // Reverse lookup from a NOD/SOD code to its parent aggregate outcome,
   // so regional spokes can fall back to the parent outcome's definition
-  // (we don't carry separate NOD/SOD definition copy on the radar).
+  // (we don't yet have separate NOD/SOD definition copy on the radar).
   const nodSodToParent = useMemo(() => {
     const map = new Map<NodSodCode, OutcomeCode>()
     for (const [parent, variants] of Object.entries(
@@ -432,7 +432,7 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
-  /** Stable palette index aligned with `comparisonData`. */
+  /** Stable palette index */
   const scenarioColorById = useMemo(() => {
     const m = new Map<string, string>()
     comparisonData.forEach((d, i) => {
@@ -445,7 +445,7 @@ export default function RadarPanel({
     let base: typeof comparisonData
     // With nothing selected, fall back to showing the full library
     // instead of an empty chart. The radar is most useful as a quick
-    // overview on first landing, and a blank canvas reads as broken.
+    // overview on first landing, and a blank canvas could read as broken or otherwise be confusing.
     if (radarShowAll) base = comparisonData
     else if (selectedScenarios.length === 0) base = comparisonData
     else base = comparisonData.filter((d) => selectedSet.has(d.id))

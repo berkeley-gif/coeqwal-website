@@ -3,18 +3,14 @@
 /**
  * ResilienceHeatmap
  *
- * D3 heatmap for the Scenario Explorer resilience tool.
- * X axis = hydroclimates, Y axis = outcomes or scenarios (driven by the
- * parent). Supports multiple cell-encoding modes:
+ * D3 heatmap for the Scenario Explorer resilience tool. Supports multiple cell-encoding modes:
  *   - "tier":         categorical tier fill + continuous value label.
  *   - "delta":        diverging fill around 0, signed value label.
  *   - "density_opp":  monochrome green ramp over fraction-acceptable (0..1).
  *   - "glyph":        sub-tile grid (one tile per scenario in distribution).
  *
- * Optional marginal strips summarize row/column means next to the grid.
- *
  * Color tokens and tier labels are injected by the parent so the viz
- * stays theme-agnostic; see ResiliencePanel for the wiring.
+ * stays theme-agnostic. See ResiliencePanel for the wiring.
  *
  * Follows the @repo/viz hover-flicker rules:
  *  - Ref-based tooltip (no useState), two flavors: cell + axis label.
@@ -22,9 +18,9 @@
  *  - updateChart deps are minimal; callbacks live in refs.
  */
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import React, { useRef, useEffect, useCallback, useMemo } from "react"
+import { createPortal } from "react-dom"
 import { scaleBand, interpolateRgb, select } from "d3"
-import { useResizeObserver } from "../hooks/useResizeObserver"
 
 export type ResilienceCellRender =
   | "tier"
@@ -113,7 +109,7 @@ export interface ResilienceHeatmapCell {
 }
 
 /**
- * Neutral / chrome colors consumed by the heatmap. The parent should
+ * Heatmap colors. The parent should
  * derive these from the app theme so the component stays theme-agnostic.
  */
 export interface ResilienceHeatmapPalette {
@@ -403,11 +399,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     const cellTooltipRef = useRef<HTMLDivElement | null>(null)
     const axisTooltipRef = useRef<HTMLDivElement | null>(null)
 
-    const dimensions = useResizeObserver(
-      containerRef as React.RefObject<HTMLElement>,
-    )
-    const [currentWidth, setCurrentWidth] = useState(width)
-    const [currentHeight, setCurrentHeight] = useState(height)
+    // Imperative dim tracking: bypass the React state cascade so resize
+    // ticks call updateChart directly without going through setState ->
+    // re-render -> useEffect. Mirrors the pattern proven in RadarPlot.
+    const lastDimsRef = useRef<{ width: number; height: number }>({
+      width: responsive ? 0 : width,
+      height: responsive ? 0 : height,
+    })
 
     const onCellHoverRef = useRef(onCellHover)
     useEffect(() => {
@@ -442,16 +440,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       formatRowTickRef.current = formatRowTick
     }, [formatRowTick])
-
-    useEffect(() => {
-      if (responsive && dimensions.width > 0 && dimensions.height > 0) {
-        setCurrentWidth(dimensions.width)
-        setCurrentHeight(dimensions.height)
-      } else if (!responsive) {
-        setCurrentWidth(width)
-        setCurrentHeight(height)
-      }
-    }, [dimensions, responsive, width, height])
 
     const cellIndex = useMemo(() => {
       const idx = new Map<string, ResilienceHeatmapCell>()
@@ -575,13 +563,31 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     )
 
     // Imperative tooltip helpers (refs only, no React state).
+    // Tooltip is portaled to document.body with position:fixed, so we
+    // use viewport-relative coordinates (event.clientX/Y) directly. We
+    // measure the tooltip's actual offsetWidth/offsetHeight after the
+    // caller has set its content, then flip to the cursor's left / top
+    // when placing on the default side would overflow the viewport.
+    // This prevents the small-multiples right-edge compression that
+    // shrinks the tooltip's available width to ~0 and triggers the
+    // tall-tooltip / scrollbar / ResizeObserver feedback loop.
     const positionCellTooltip = useCallback((event: MouseEvent) => {
       const el = cellTooltipRef.current
-      const container = containerRef.current
-      if (!el || !container) return
-      const rect = container.getBoundingClientRect()
-      el.style.left = `${event.clientX - rect.left + 12}px`
-      el.style.top = `${event.clientY - rect.top + 12}px`
+      if (!el) return
+      const offset = 12
+      const margin = 4
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      let left = event.clientX + offset
+      let top = event.clientY + offset
+      if (left + w > window.innerWidth - margin) {
+        left = Math.max(margin, event.clientX - w - offset)
+      }
+      if (top + h > window.innerHeight - margin) {
+        top = Math.max(margin, event.clientY - h - offset)
+      }
+      el.style.left = `${left}px`
+      el.style.top = `${top}px`
     }, [])
 
     const showCellTooltip = useCallback(
@@ -690,11 +696,21 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
 
     const positionAxisTooltip = useCallback((event: MouseEvent) => {
       const el = axisTooltipRef.current
-      const container = containerRef.current
-      if (!el || !container) return
-      const rect = container.getBoundingClientRect()
-      el.style.left = `${event.clientX - rect.left + 12}px`
-      el.style.top = `${event.clientY - rect.top + 12}px`
+      if (!el) return
+      const offset = 12
+      const margin = 4
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      let left = event.clientX + offset
+      let top = event.clientY + offset
+      if (left + w > window.innerWidth - margin) {
+        left = Math.max(margin, event.clientX - w - offset)
+      }
+      if (top + h > window.innerHeight - margin) {
+        top = Math.max(margin, event.clientY - h - offset)
+      }
+      el.style.left = `${left}px`
+      el.style.top = `${top}px`
     }, [])
 
     const showAxisTooltip = useCallback(
@@ -1658,68 +1674,142 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       ],
     )
 
+    // Keep a ref to updateChart so the ResizeObserver can call it without
+    // going through React state (which would create a feedback loop).
+    const updateChartRef = useRef(updateChart)
     useEffect(() => {
-      if (currentWidth > 0 && currentHeight > 0) {
-        updateChart(currentWidth, currentHeight)
+      updateChartRef.current = updateChart
+    }, [updateChart])
+
+    // When updateChart identity changes (props/data changed), re-run it
+    // at the last known dimensions.
+    useEffect(() => {
+      const { width: w, height: h } = lastDimsRef.current
+      if (w > 0 && h > 0) {
+        updateChart(w, h)
       }
-    }, [currentWidth, currentHeight, updateChart])
+    }, [updateChart])
+
+    // Observe container size imperatively. Call updateChart directly
+    // without a React state roundtrip to avoid resize -> re-render loops.
+    // When `responsive` is false, fall back to the prop-driven dims and
+    // call updateChart once at mount / when dims change.
+    useEffect(() => {
+      if (!responsive) {
+        if (width > 0 && height > 0) {
+          lastDimsRef.current = { width, height }
+          updateChartRef.current(width, height)
+        }
+        return
+      }
+
+      const el = containerRef.current
+      if (!el) return
+
+      const ro = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        const { width: w, height: h } = entry.contentRect
+        const rw = Math.round(w)
+        const rh = Math.round(h)
+        const prev = lastDimsRef.current
+        if (prev.width === rw && prev.height === rh) return
+        lastDimsRef.current = { width: rw, height: rh }
+        if (rw > 0 && rh > 0) {
+          updateChartRef.current(rw, rh)
+        }
+      })
+
+      ro.observe(el)
+
+      // Synchronous initial measurement (runs once on mount).
+      const rect = el.getBoundingClientRect()
+      const iw = Math.round(rect.width)
+      const ih = Math.round(rect.height)
+      if (iw > 0 && ih > 0) {
+        lastDimsRef.current = { width: iw, height: ih }
+        updateChartRef.current(iw, ih)
+      }
+
+      return () => ro.disconnect()
+    }, [responsive, width, height])
 
     return (
       <div
         ref={containerRef}
         style={{
-          width: responsive ? "100%" : currentWidth,
-          height: responsive ? "100%" : currentHeight,
+          width: responsive ? "100%" : width,
+          height: responsive ? "100%" : height,
           minHeight: 300,
           position: "relative",
         }}
       >
         <svg
           ref={svgRef}
-          width={currentWidth}
-          height={currentHeight}
+          width={width}
+          height={height}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
-        <div
-          ref={cellTooltipRef}
-          style={{
-            position: "absolute",
-            display: "none",
-            pointerEvents: "none",
-            background: palette.tooltipBg,
-            border: `1px solid ${palette.tooltipBorder}`,
-            borderRadius: 6,
-            padding: "6px 10px",
-            fontSize: 11,
-            lineHeight: 1.5,
-            zIndex: 20,
-            boxShadow: palette.tooltipShadow,
-            maxWidth: 320,
-            boxSizing: "border-box",
-            overflowWrap: "break-word",
-            wordBreak: "break-word",
-          }}
-        />
-        <div
-          ref={axisTooltipRef}
-          style={{
-            position: "absolute",
-            display: "none",
-            pointerEvents: "none",
-            background: palette.tooltipBg,
-            border: `1px solid ${palette.tooltipBorder}`,
-            borderRadius: 6,
-            padding: "8px 12px",
-            fontSize: 11,
-            lineHeight: 1.5,
-            zIndex: 20,
-            boxShadow: palette.tooltipShadow,
-            maxWidth: 280,
-            boxSizing: "border-box",
-            overflowWrap: "break-word",
-            wordBreak: "break-word",
-          }}
-        />
+        {/* Tooltips are portaled to document.body and positioned with
+            `position: fixed`. Inline absolute positioning inside this
+            container caused width compression (and a feedback-loop
+            scrollbar jitter) when the cursor was near the right edge of
+            a small-multiples tile, because the absolute element's
+            shrink-to-fit width is bounded by the containing block's
+            available width. position:fixed alone is not enough because
+            the heatmap is rendered inside a framer-motion.div whose
+            transform creates a containing block for fixed descendants;
+            portaling to body escapes that ancestor entirely. */}
+        {typeof document !== "undefined" &&
+          createPortal(
+            <>
+              <div
+                ref={cellTooltipRef}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  display: "none",
+                  pointerEvents: "none",
+                  background: palette.tooltipBg,
+                  border: `1px solid ${palette.tooltipBorder}`,
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                  zIndex: 2000,
+                  boxShadow: palette.tooltipShadow,
+                  maxWidth: 320,
+                  boxSizing: "border-box",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                }}
+              />
+              <div
+                ref={axisTooltipRef}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  display: "none",
+                  pointerEvents: "none",
+                  background: palette.tooltipBg,
+                  border: `1px solid ${palette.tooltipBorder}`,
+                  borderRadius: 6,
+                  padding: "8px 12px",
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                  zIndex: 2000,
+                  boxShadow: palette.tooltipShadow,
+                  maxWidth: 280,
+                  boxSizing: "border-box",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                }}
+              />
+            </>,
+            document.body,
+          )}
       </div>
     )
   },

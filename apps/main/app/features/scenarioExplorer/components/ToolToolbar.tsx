@@ -3,12 +3,8 @@
 /**
  * ToolToolbar. Shared toolbar rendered above the active tool content.
  *
- * Always shows: search + visibility toggle chips + view controls (outcome
- * view, map, locations, climate). Resilience mode omits the global
- * hydroclimate chooser. That tool controls hydroclimates in chart controls.
- *
  * When `gridAligned` is true (list mode), uses CSS Grid that aligns
- * with StrategyGrid columns. Otherwise uses a simple flex layout.
+ * with StrategyGrid columns. Otherwise uses a flex layout.
  */
 
 import React, { useCallback, useEffect, useState } from "react"
