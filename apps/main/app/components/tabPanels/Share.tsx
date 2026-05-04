@@ -38,6 +38,10 @@ import {
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareItemView from "../../features/scenarioExplorer/share/ShareItemView"
 import ShareUrlVersionNotice from "../../features/scenarioExplorer/share/ui/ShareUrlVersionNotice"
+import {
+  CAPTURE_DIMENSIONS,
+  type CaptureSize,
+} from "../../features/scenarioExplorer/share/capture/dimensions"
 import { toPng } from "html-to-image"
 import {
   downloadFromDataUrl,
@@ -101,18 +105,15 @@ function shareItemFilenameLabel(item: ShareItem): string {
 }
 
 /**
- * Per-variant raster output size, in pixels (square or rectangle).
- * Picked to roughly match the live panel's aspect, so PNG outputs
- * look like what the user saw on screen.
+ * Per-variant raster output size, in pixels. Sourced from the
+ * single capture-dimensions module so PNG download size always
+ * matches the SVG capture size for that variant.
  */
-const RASTER_SIZE: Record<
-  ShareItem["type"],
-  { width: number; height: number }
-> = {
-  radar: { width: 600, height: 600 },
-  equity: { width: 900, height: 600 },
-  resilience: { width: 900, height: 600 },
-  barChart: { width: 800, height: 400 },
+const RASTER_SIZE: Record<ShareItem["type"], CaptureSize> = {
+  radar: CAPTURE_DIMENSIONS.radar,
+  equity: CAPTURE_DIMENSIONS.equity,
+  resilience: CAPTURE_DIMENSIONS.resiliencePanel,
+  barChart: CAPTURE_DIMENSIONS.barChartRow,
 }
 
 function hasCachedSvg(item: ShareItem): boolean {

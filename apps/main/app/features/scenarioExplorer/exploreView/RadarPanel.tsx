@@ -30,7 +30,6 @@ import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
 import { useScenarioExplorerStore } from "../store"
-import type { ShareItem } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -46,6 +45,7 @@ import {
   type NodSodCode,
 } from "../../../content/outcomes"
 import { captureRadarOffscreen } from "./OffscreenRadarCapture"
+import { stageShareItem } from "../share/stage"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import { useTourAnchor } from "../tour/TourAnchorContext"
@@ -110,38 +110,14 @@ function rectsShallowEqual(
   return true
 }
 
-export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
-  /** Serialized SVG string with computed styles inlined. Primary cache. */
-  svg: string
-  /**
-   * PNG data URL produced by rasterizing the cloned SVG. Kept for
-   * backward compatibility while the share system migrates from PNG
-   * to SVG primary. P1.3 drops this field at the variant rename.
-   */
-  dataUrl: string
-  color: string
-  chartData: Record<string, unknown>
-} | null>
-
-/**
- * Capture function for an arbitrary set of scenarios overlaid on a
- * single radar chart. Used by the sidebar's theme-header "share all"
- * action so a theme's scenarios collapse to one card with multiple
- * traces, rather than one card per scenario. Only radar uses this
- * shape; equity / resilience can't overlay and stay on the
- * per-scenario `shareScenario` path.
- *
- * Returns `colors` and `scenarioIds` aligned by index (in the order
- * the chart drew them, which is the order of `comparisonData` after
- * filtering for resolvable ids and dedup).
- */
-export type MultiScenarioCaptureFn = (scenarioIds: string[]) => Promise<{
-  svg: string
-  dataUrl: string
-  colors: string[]
-  scenarioIds: string[]
-  chartData: Record<string, unknown>
-} | null>
+export type {
+  SingleScenarioCaptureFn,
+  MultiScenarioCaptureFn,
+} from "../share/capture/types"
+import type {
+  SingleScenarioCaptureFn,
+  MultiScenarioCaptureFn,
+} from "../share/capture/types"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -619,12 +595,9 @@ export default function RadarPanel({
       "captureRadar",
     )
     if (!slice) return
-    try {
-      const { svg, dataUrl } = await renderRadarCapture(
-        slice.data,
-        slice.colors,
-      )
-      const item: ShareItem = {
+    await stageShareItem({
+      capture: () => renderRadarCapture(slice.data, slice.colors),
+      buildItem: (captured) => ({
         id: crypto.randomUUID(),
         type: "radar",
         scenarioIds: slice.scenarioIds,
@@ -635,14 +608,13 @@ export default function RadarPanel({
         highlightBaseline,
         showDotsOnly,
         hydroclimate,
-        cachedSvg: svg,
-        cachedImageDataUrl: dataUrl,
+        cachedSvg: captured?.svg,
+        cachedImageDataUrl: captured?.dataUrl,
         cachedChartData: slice.chartData,
-      }
-      addShareItem(item)
-    } catch (err) {
-      console.error("[RadarPanel] captureRadar failed:", err)
-    }
+      }),
+      addItem: addShareItem,
+      errorLabel: "RadarPanel.captureRadar",
+    })
   }, [
     buildRadarCaptureSlice,
     renderRadarCapture,

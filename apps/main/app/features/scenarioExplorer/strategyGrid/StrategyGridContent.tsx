@@ -26,6 +26,9 @@ import type { LayoutMode } from "./StrategyGridHeader"
 import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import ThemeGroupHeader from "../components/ThemeGroupHeader"
+import { useScenarioExplorerStore } from "../store"
+import { captureBarChartRow } from "./captureBarChartRow"
+import { stageShareItem } from "../share/stage"
 
 export interface StrategyGridContentProps {
   /** Scenarios to display */
@@ -237,6 +240,54 @@ export function StrategyGridContent({
     return map
   }, [themeSubheaderMode, pinnedScenarios, themeScenarioIds])
 
+  const outcomeDisplayMode = useScenarioExplorerStore(
+    (s) => s.outcomeDisplayMode,
+  )
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
+  const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+
+  // ThemeGroupHeader's "share all" loop. Each scenario's outcome row
+  // is captured off-screen at fixed dimensions before its share item
+  // is staged. Sequential await keeps each off-screen mount tidy.
+  const handleShareThemeScenarios = useCallback(
+    async (scenarioIds: string[]) => {
+      for (const sid of scenarioIds) {
+        const scenarioChartData = getChartDataForScenario(sid)
+        await stageShareItem({
+          capture: () =>
+            captureBarChartRow({
+              outcomeNames,
+              chartData: scenarioChartData,
+              viewMode: outcomeDisplayMode,
+              theme,
+              glyphSize,
+            }),
+          buildItem: (captured) => ({
+            id: crypto.randomUUID(),
+            type: "barChart",
+            scenarioId: sid,
+            viewMode: outcomeDisplayMode,
+            hydroclimate,
+            cachedChartData: scenarioChartData as Record<string, unknown>,
+            cachedSvg: captured?.svg,
+            cachedImageDataUrl: captured?.dataUrl,
+          }),
+          addItem: addShareItem,
+          errorLabel: "StrategyGridContent.handleShareThemeScenarios",
+        })
+      }
+    },
+    [
+      outcomeNames,
+      getChartDataForScenario,
+      outcomeDisplayMode,
+      theme,
+      glyphSize,
+      hydroclimate,
+      addShareItem,
+    ],
+  )
+
   // Create context-aware tooltip handler for a specific scenario
   const createTooltipHandler = useCallback(
     (scenario: ScenarioForDisplay) => (name: string, anchor: HTMLElement) => {
@@ -318,6 +369,7 @@ export function StrategyGridContent({
                 themeKey={scenario.theme as ScenarioTheme}
                 scenarioIds={ids}
                 isFirst={opts.isFirstGroup && index === 0}
+                onShareScenarios={handleShareThemeScenarios}
               />,
             )
           }

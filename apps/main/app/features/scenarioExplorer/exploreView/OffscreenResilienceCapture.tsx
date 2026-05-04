@@ -18,9 +18,10 @@ import { ResilienceHeatmapSnapshot } from "@repo/viz"
 import type { ResilienceHeatmapSnapshotProps } from "@repo/viz"
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
+import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 
-export const RESILIENCE_TILE_CAPTURE_WIDTH = 800
-export const RESILIENCE_TILE_CAPTURE_HEIGHT = 520
+export const RESILIENCE_TILE_CAPTURE_WIDTH = CAPTURE_DIMENSIONS.resilienceTile.width
+export const RESILIENCE_TILE_CAPTURE_HEIGHT = CAPTURE_DIMENSIONS.resilienceTile.height
 
 export interface CaptureResilienceOffscreenInput {
   /**

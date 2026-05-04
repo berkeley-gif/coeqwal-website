@@ -16,9 +16,10 @@ import {
 } from "@repo/viz"
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
+import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 
-export const QUADRANT_CAPTURE_WIDTH = 800
-export const QUADRANT_CAPTURE_HEIGHT = 600
+export const QUADRANT_CAPTURE_WIDTH = CAPTURE_DIMENSIONS.quadrant.width
+export const QUADRANT_CAPTURE_HEIGHT = CAPTURE_DIMENSIONS.quadrant.height
 
 export interface CaptureQuadrantOffscreenInput {
   props: Omit<

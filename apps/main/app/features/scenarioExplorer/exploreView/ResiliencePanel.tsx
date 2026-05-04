@@ -35,8 +35,6 @@ import {
 import { TooltipCloseButton } from "@repo/ui"
 import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
 import {
-  ResilienceHeatmap,
-  ResilienceHeatmapSmallMultiples,
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapMarginals,
@@ -69,12 +67,17 @@ import {
 } from "../../../content/scenarios"
 import { getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
-import { composeAndRasterize } from "../dataExplorer/utils/exportUtils"
 import {
   captureResilienceOffscreen,
   RESILIENCE_TILE_CAPTURE_WIDTH,
   RESILIENCE_TILE_CAPTURE_HEIGHT,
 } from "./OffscreenResilienceCapture"
+import { captureResiliencePanelOffscreen } from "./OffscreenResiliencePanelCapture"
+import ResiliencePanelChartView, {
+  type ResiliencePanelChartViewState,
+  type ResiliencePanelChartViewProps,
+  type ResiliencePanelChartViewHandlers,
+} from "./ResiliencePanelChartView"
 import { useResilienceHeatmapTheme } from "../hooks/useResilienceHeatmapTheme"
 
 export type ResilienceView =
@@ -165,10 +168,14 @@ export interface ResilienceCaptureResult {
   chartData: ResilienceHeatmapChartData
 }
 
-export type ResilienceCaptureFn = () => Promise<ResilienceCaptureResult | null>
-export type ResilienceTileCaptureFn = (
-  tileId: string,
-) => Promise<ResilienceCaptureResult | null>
+export type {
+  ResilienceCaptureFn,
+  ResilienceTileCaptureFn,
+} from "../share/capture/types"
+import type {
+  ResilienceCaptureFn,
+  ResilienceTileCaptureFn,
+} from "../share/capture/types"
 
 /**
  * Delta baseline selector. When `none`, no delta is computed.
@@ -500,7 +507,6 @@ export default function ResiliencePanel({
     primaryOutcomeCode == null &&
     compareOutcomeCodes.length === 0 &&
     !hasOutcomeAxisSelection
-  const anyEmpty = outcomeEmpty
   const effectiveView: ResilienceView = scenarioRendersAsOverview
     ? "aggregate"
     : view
@@ -2137,12 +2143,6 @@ export default function ResiliencePanel({
     [view, effectiveView, transposed, aggregateOver],
   )
 
-  // Empty state detection derived from the per-mode flags computed up
-  // top near the store-state destructuring. This section just names a
-  // couple of derived flags the JSX uses below for chip rendering.
-  const noOutcomesSelected =
-    !anyEmpty && view === "aggregate" && outcomeRowCodes.length === 0
-
   // Show cell values and transpose both live in the chart controls
   // (Rows row), so this panel no longer renders a floating display
   // menu. Nothing else remains for a chart-corner toolbar to hold.
@@ -2260,15 +2260,9 @@ export default function ResiliencePanel({
     ? { opacity: 1, y: 0 }
     : { opacity: 0, y: -8 }
 
-  // Snapshot capture plumbing. The chart body wrapper is the common
-  // ancestor of every rendered heatmap SVG (single heatmap or
-  // small-multiples grid), so a DOM-level capture here works regardless
-  // of which `effectiveView` is active. Per-tile
-  // capture locates the tile's root SVG via the `data-tile-id`
-  // attribute that `ResilienceHeatmapSmallMultiples` stamps on each
-  // tile wrapper.
-  const chartWrapperRef = useRef<HTMLDivElement | null>(null)
-
+  // Per-tile capture locates the tile's root SVG via the
+  // `data-tile-id` attribute that `ResilienceHeatmapSmallMultiples`
+  // stamps on each tile wrapper.
   const effectiveViewRef = useRef(effectiveView)
   useEffect(() => {
     effectiveViewRef.current = effectiveView
@@ -2376,14 +2370,11 @@ export default function ResiliencePanel({
   )
 
   const captureResilience = useCallback<ResilienceCaptureFn>(async () => {
-    const el = chartWrapperRef.current
-    if (!el) return null
     try {
-      // Composes every descendant <svg> (single heatmap or grid of
-      // small multiples) into one stand-alone SVG document, then
-      // rasterizes a PNG companion. The SVG is what downstream
-      // download / persistence reads.
-      const { svg, dataUrl } = await composeAndRasterize(el, {
+      const { svg, dataUrl } = await captureResiliencePanelOffscreen({
+        state: chartViewStateRef.current,
+        view: chartViewVisualsRef.current,
+        theme,
         backgroundColor: theme.palette.common.white,
       })
       const view = effectiveViewRef.current
@@ -2578,6 +2569,130 @@ export default function ResiliencePanel({
     return ResilienceTileShareButton
   }, [onTileShare, theme])
 
+  // Snapshot of the chart-area state in the shape ResiliencePanelChartView
+  // expects. Both the live render and captureResilience read this so the
+  // toolbar share produces the same chart at fixed dimensions.
+  const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
+    const labelRotation =
+      !transposed &&
+      (effectiveView === "hydroclimate" ||
+        (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
+        ? -90
+        : 0
+    if (columns.length === 0) return { kind: "noColumns" }
+    if (
+      effectiveView === "aggregate" &&
+      outcomeRowCodes.length === 0 &&
+      !outcomeEmpty
+    ) {
+      return { kind: "noOutcomesSelected" }
+    }
+    if (outcomeEmpty) {
+      return {
+        kind: "outcomeEmpty",
+        eyebrow: "Outcome",
+        title: "No outcomes to show",
+        body: "Open the outcome picker (or the Outcomes phrase in the sentence above) and pick at least one outcome to see its tile.",
+      }
+    }
+    if (effectiveView === "scenario") {
+      return {
+        kind: "smallMultiples",
+        view: "scenario",
+        rows: displayByScenarioRows,
+        columns: displayByScenarioColumns,
+        tiles: displayByScenarioTiles,
+        tileAspect: transposed ? "tall" : "wide",
+      }
+    }
+    if (effectiveView === "outcome") {
+      return {
+        kind: "smallMultiples",
+        view: "outcome",
+        rows: displayByOutcomeRows,
+        columns: displayByOutcomeColumns,
+        tiles: displayByOutcomeTiles,
+        tileAspect: transposed ? "wide" : "tall",
+      }
+    }
+    if (effectiveView === "hydroclimate") {
+      return {
+        kind: "smallMultiples",
+        view: "hydroclimate",
+        rows: displayByHydroclimateRows,
+        columns: displayByHydroclimateColumns,
+        tiles: displayByHydroclimateTiles,
+        tileAspect: transposed ? "tall" : "wide",
+        columnLabelRotation: labelRotation,
+      }
+    }
+    return {
+      kind: "aggregate",
+      rows: displayRows,
+      columns: displayColumns,
+      cells: displayCells,
+      marginals: displayMarginals,
+      showMarginals,
+      highlightedRowKeys: transposed ? undefined : effectiveRowHighlight,
+      columnLabelRotation: labelRotation,
+    }
+  }, [
+    effectiveView,
+    transposed,
+    aggregateOver,
+    columns.length,
+    outcomeRowCodes.length,
+    outcomeEmpty,
+    displayByScenarioRows,
+    displayByScenarioColumns,
+    displayByScenarioTiles,
+    displayByOutcomeRows,
+    displayByOutcomeColumns,
+    displayByOutcomeTiles,
+    displayByHydroclimateRows,
+    displayByHydroclimateColumns,
+    displayByHydroclimateTiles,
+    displayRows,
+    displayColumns,
+    displayCells,
+    displayMarginals,
+    showMarginals,
+    effectiveRowHighlight,
+  ])
+
+  const chartViewVisuals = useMemo<
+    Omit<ResiliencePanelChartViewProps, "state" | "handlers">
+  >(
+    () => ({
+      tierColors,
+      tierLabels,
+      palette: heatmapPalette,
+      cellRender: effectiveCellRender,
+      showCellNumbers,
+      formatRowTick,
+      distributionMode,
+    }),
+    [
+      tierColors,
+      tierLabels,
+      heatmapPalette,
+      effectiveCellRender,
+      showCellNumbers,
+      formatRowTick,
+      distributionMode,
+    ],
+  )
+
+  const chartViewStateRef = useRef(chartViewState)
+  useEffect(() => {
+    chartViewStateRef.current = chartViewState
+  }, [chartViewState])
+
+  const chartViewVisualsRef = useRef(chartViewVisuals)
+  useEffect(() => {
+    chartViewVisualsRef.current = chartViewVisuals
+  }, [chartViewVisuals])
+
   // Render states
 
   if (error) {
@@ -2623,12 +2738,13 @@ export default function ResiliencePanel({
     )
   }
 
-  const scenarioColumnLabelRotation =
-    !transposed &&
-    (effectiveView === "hydroclimate" ||
-      (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
-      ? -90
-      : 0
+  const liveHandlers: ResiliencePanelChartViewHandlers = {
+    onCellHover: handleCellHover,
+    onCellClick: isMapVisible ? handleCellClick : undefined,
+    onSquareHover: handleSquareHover,
+    onSquareClick: handleSquareClick,
+    renderTileActions: renderTileShareAction,
+  }
 
   return (
     <Box
@@ -2672,7 +2788,6 @@ export default function ResiliencePanel({
       )}
 
       <Box
-        ref={chartWrapperRef}
         sx={{
           flex: 1,
           minHeight: 0,
@@ -2705,152 +2820,11 @@ export default function ResiliencePanel({
               minHeight: 0,
             }}
           >
-            {columns.length === 0 ? (
-              <Box
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  Select at least one hydroclimate in the chart controls.
-                </Typography>
-              </Box>
-            ) : noOutcomesSelected ? (
-              <Box
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  px: 3,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{ textAlign: "center", maxWidth: 480 }}
-                >
-                  No outcome rows selected. Open &ldquo;choose outcome
-                  rows&rdquo; in the chart controls above to pick which outcomes
-                  to display.
-                </Typography>
-              </Box>
-            ) : outcomeEmpty ? (
-              <ResilienceEmptyState
-                eyebrow="Outcome"
-                title="No outcomes to show"
-                body="Open the outcome picker (or the Outcomes phrase in the sentence above) and pick at least one outcome to see its tile."
-              />
-            ) : effectiveView === "scenario" ? (
-              <BrowseShell>
-                <ResilienceHeatmapSmallMultiples
-                  rows={displayByScenarioRows}
-                  columns={displayByScenarioColumns}
-                  tiles={displayByScenarioTiles}
-                  tierColors={tierColors}
-                  tierLabels={tierLabels}
-                  palette={heatmapPalette}
-                  cellRender={effectiveCellRender}
-                  showCellNumbers={showCellNumbers}
-                  tileAspect={transposed ? "tall" : "wide"}
-                  onCellHover={handleCellHover}
-                  onCellClick={isMapVisible ? handleCellClick : undefined}
-                  formatRowTick={formatRowTick}
-                  distributionMode={distributionMode}
-                  onSquareHover={(info) =>
-                    handleSquareHover(
-                      info ? { cell: info.cell, entry: info.entry } : null,
-                    )
-                  }
-                  onSquareClick={(info) =>
-                    handleSquareClick({ cell: info.cell, entry: info.entry })
-                  }
-                  renderTileActions={renderTileShareAction}
-                />
-              </BrowseShell>
-            ) : effectiveView === "outcome" ? (
-              <BrowseShell>
-                <ResilienceHeatmapSmallMultiples
-                  rows={displayByOutcomeRows}
-                  columns={displayByOutcomeColumns}
-                  tiles={displayByOutcomeTiles}
-                  tierColors={tierColors}
-                  tierLabels={tierLabels}
-                  palette={heatmapPalette}
-                  cellRender={effectiveCellRender}
-                  showCellNumbers={showCellNumbers}
-                  tileAspect={transposed ? "wide" : "tall"}
-                  onCellHover={handleCellHover}
-                  onCellClick={isMapVisible ? handleCellClick : undefined}
-                  formatRowTick={formatRowTick}
-                  distributionMode={distributionMode}
-                  onSquareHover={(info) =>
-                    handleSquareHover(
-                      info ? { cell: info.cell, entry: info.entry } : null,
-                    )
-                  }
-                  onSquareClick={(info) =>
-                    handleSquareClick({ cell: info.cell, entry: info.entry })
-                  }
-                  renderTileActions={renderTileShareAction}
-                />
-              </BrowseShell>
-            ) : effectiveView === "hydroclimate" ? (
-              <BrowseShell>
-                <ResilienceHeatmapSmallMultiples
-                  rows={displayByHydroclimateRows}
-                  columns={displayByHydroclimateColumns}
-                  tiles={displayByHydroclimateTiles}
-                  tierColors={tierColors}
-                  tierLabels={tierLabels}
-                  palette={heatmapPalette}
-                  cellRender={effectiveCellRender}
-                  showCellNumbers={showCellNumbers}
-                  tileAspect={transposed ? "tall" : "wide"}
-                  columnLabelRotation={scenarioColumnLabelRotation}
-                  onCellHover={handleCellHover}
-                  onCellClick={isMapVisible ? handleCellClick : undefined}
-                  formatRowTick={formatRowTick}
-                  distributionMode={distributionMode}
-                  onSquareHover={(info) =>
-                    handleSquareHover(
-                      info ? { cell: info.cell, entry: info.entry } : null,
-                    )
-                  }
-                  onSquareClick={(info) =>
-                    handleSquareClick({ cell: info.cell, entry: info.entry })
-                  }
-                  renderTileActions={renderTileShareAction}
-                />
-              </BrowseShell>
-            ) : (
-              <BrowseShell>
-                <ResilienceHeatmap
-                  rows={displayRows}
-                  columns={displayColumns}
-                  cells={displayCells}
-                  tierColors={tierColors}
-                  tierLabels={tierLabels}
-                  palette={heatmapPalette}
-                  cellRender={effectiveCellRender}
-                  showCellNumbers={showCellNumbers}
-                  onCellHover={handleCellHover}
-                  onCellClick={isMapVisible ? handleCellClick : undefined}
-                  highlightedRowKeys={
-                    transposed ? undefined : effectiveRowHighlight
-                  }
-                  formatRowTick={formatRowTick}
-                  marginals={displayMarginals}
-                  showMarginals={showMarginals}
-                  distributionMode={distributionMode}
-                  onSquareHover={handleSquareHover}
-                  onSquareClick={handleSquareClick}
-                  columnLabelRotation={scenarioColumnLabelRotation}
-                />
-              </BrowseShell>
-            )}
+            <ResiliencePanelChartView
+              state={chartViewState}
+              {...chartViewVisuals}
+              handlers={liveHandlers}
+            />
           </motion.div>
         </AnimatePresence>
       </Box>
@@ -3285,187 +3259,3 @@ function ResiliencePanelTitle({
   )
 }
 
-/**
- * Layout shell for the chart area. Stacks an optional curation chip
- * above the children so every view path (by-scenario gallery,
- * by-outcome gallery, aggregate) can render consistent header
- * affordances without each branch having to rebuild its own flex
- * column.
- */
-function BrowseShell({
-  chip,
-  children,
-}: {
-  /**
-   * Compact status/hint chip pinned above the chart. When `content` is
-   * set, it fully replaces the default `label` + `actionLabel` layout,
-   * letting call sites embed interactive elements (inline toggles,
-   * multi-sentence copy, etc.) inside the chip surface.
-   */
-  chip?: {
-    label?: string
-    actionLabel?: string
-    onClick?: () => void
-    content?: React.ReactNode
-  } | null
-  children: React.ReactNode
-}) {
-  const theme = useTheme()
-  if (!chip) return <>{children}</>
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        minHeight: 0,
-        gap: 1,
-      }}
-    >
-      {chip && (
-        <Box
-          sx={{
-            display: "inline-flex",
-            alignSelf: "flex-start",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 1,
-            rowGap: 0.5,
-            px: 1.25,
-            py: 0.5,
-            borderRadius: 999,
-            border: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
-          }}
-        >
-          {chip.content ? (
-            chip.content
-          ) : (
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>
-              {chip.label}
-            </Typography>
-          )}
-          {!chip.content && chip.actionLabel && chip.onClick && (
-            <Box
-              component="button"
-              type="button"
-              onClick={chip.onClick}
-              sx={{
-                appearance: "none",
-                border: "none",
-                background: "transparent",
-                color: theme.palette.primary.main,
-                cursor: "pointer",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                textDecoration: "underline",
-                p: 0,
-                "&:hover": { opacity: 0.85 },
-                "&:focus-visible": {
-                  outline: `2px solid ${theme.palette.primary.main}`,
-                  outlineOffset: 2,
-                },
-              }}
-            >
-              {chip.actionLabel}
-            </Box>
-          )}
-        </Box>
-      )}
-      <Box sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
-    </Box>
-  )
-}
-
-/**
- * ResilienceEmptyState - consistent empty-state rendering used by
- * Scenario, Outcome, and Overview modes when the user has not yet
- * picked a primary focus (or, in Overview, when the scope is empty).
- *
- * The visual rhythm intentionally mirrors the populated panel so the
- * user does not get a different chrome for the empty case.
- */
-function ResilienceEmptyState({
-  eyebrow,
-  title,
-  body,
-  actionLabel,
-  onAction,
-}: {
-  eyebrow: string
-  title: string
-  body: string
-  actionLabel?: string
-  onAction?: () => void
-}) {
-  const theme = useTheme()
-  return (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        px: 3,
-      }}
-    >
-      <Box sx={{ maxWidth: 480, textAlign: "center" }}>
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: theme.palette.grey[700],
-            mb: 1,
-          }}
-        >
-          {eyebrow}
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 600,
-            color: theme.palette.text.primary,
-            mb: 1,
-          }}
-        >
-          {title}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: theme.palette.grey[700], mb: actionLabel ? 2 : 0 }}
-        >
-          {body}
-        </Typography>
-        {actionLabel && onAction && (
-          <Box
-            component="button"
-            type="button"
-            onClick={onAction}
-            sx={{
-              appearance: "none",
-              border: `1px solid ${theme.palette.divider}`,
-              background: theme.palette.common.white,
-              color: theme.palette.text.primary,
-              cursor: "pointer",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              lineHeight: 1.3,
-              px: 1.5,
-              py: 0.75,
-              borderRadius: "12px",
-              "&:hover": {
-                backgroundColor: theme.palette.action.hover,
-                color: theme.palette.blue.bright,
-              },
-            }}
-          >
-            {actionLabel}
-          </Box>
-        )}
-      </Box>
-    </Box>
-  )
-}

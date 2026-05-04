@@ -27,6 +27,8 @@ import { ThemeProvider, type Theme } from "@repo/ui/mui"
 import {
   inlineStyles,
   rasterizeSvgClone,
+  composeLiveSvgsToString,
+  rasterizeSvgString,
 } from "../../dataExplorer/utils/exportUtils"
 import { captureDoctor } from "./captureDoctor"
 
@@ -72,6 +74,22 @@ export interface OffscreenCaptureInput {
    * out by setting `false` to skip the canvas paint.
    */
   rasterize?: boolean
+  /**
+   * How to assemble the captured SVG.
+   * - `single` (default): expect exactly one `<svg>` in the host
+   *   and serialize it. Used by single-chart variants (radar,
+   *   equity TierGrid, resilience tile, quadrant).
+   * - `compose`: compose every descendant `<svg>` into one
+   *   stand-alone SVG sized to the host. Used by composed-React
+   *   variants like the resilience panel (small-multiples grid)
+   *   and the bar-chart row (strip of glyphs).
+   */
+  mode?: "single" | "compose"
+  /**
+   * Background fill applied to composed SVGs. Ignored in `single`
+   * mode. Defaults to white.
+   */
+  backgroundColor?: string
 }
 
 export interface OffscreenCaptureResult {
@@ -141,6 +159,23 @@ export async function offscreenCapture(
     // Cheap insurance against a torn paint when the chart fires
     // onReady from a deep render path.
     await new Promise<void>((r) => requestAnimationFrame(() => r()))
+
+    const mode = input.mode ?? "single"
+
+    if (mode === "compose") {
+      const svg = composeLiveSvgsToString(host, {
+        backgroundColor: input.backgroundColor,
+      })
+      let dataUrl = ""
+      if (rasterize) {
+        const result = await rasterizeSvgString(svg, width, height, {
+          backgroundColor: input.backgroundColor,
+        })
+        dataUrl = result.dataUrl
+      }
+      captureDoctor.success(doctor)
+      return { svg, dataUrl }
+    }
 
     const svgEl = host.querySelector("svg") as SVGSVGElement | null
     if (!svgEl) {

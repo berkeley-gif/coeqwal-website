@@ -85,8 +85,8 @@ export interface ResilienceQuadrantCaptureResult {
   chartData: ResilienceQuadrantChartData
 }
 
-export type ResilienceQuadrantCaptureFn =
-  () => Promise<ResilienceQuadrantCaptureResult | null>
+export type { ResilienceQuadrantCaptureFn } from "../share/capture/types"
+import type { ResilienceQuadrantCaptureFn } from "../share/capture/types"
 
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
 const CLIMATE_REF_HC: ResilienceHydroclimate = "cc95"

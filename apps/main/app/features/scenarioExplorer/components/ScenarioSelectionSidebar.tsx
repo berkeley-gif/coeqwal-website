@@ -24,6 +24,7 @@ import {
 import { InlineRowActions } from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
+import { stageShareItem } from "../share/stage"
 import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
@@ -120,25 +121,29 @@ export default function ScenarioSelectionSidebar({
   const shareScenario = useCallback(
     async (scenarioId: string): Promise<void> => {
       if (exploreMode === "radar") {
-        const result = await onCaptureRadarScenario?.(scenarioId)
-        addShareItem({
-          id: crypto.randomUUID(),
-          type: "radar",
-          scenarioIds: [scenarioId],
-          scenarioColors: result
-            ? [result.color]
-            : scenarioColors
-              ? [scenarioColors[scenarioId] ?? "#666666"]
-              : undefined,
-          axes: [...radarVisibleAxes],
-          showRange: showRadarRange,
-          showTierZones,
-          highlightBaseline,
-          showDotsOnly,
-          hydroclimate,
-          cachedSvg: result?.svg,
-          cachedImageDataUrl: result?.dataUrl,
-          cachedChartData: result?.chartData,
+        await stageShareItem({
+          capture: () => onCaptureRadarScenario?.(scenarioId) ?? Promise.resolve(null),
+          buildItem: (captured) => ({
+            id: crypto.randomUUID(),
+            type: "radar",
+            scenarioIds: [scenarioId],
+            scenarioColors: captured
+              ? [captured.color]
+              : scenarioColors
+                ? [scenarioColors[scenarioId] ?? "#666666"]
+                : undefined,
+            axes: [...radarVisibleAxes],
+            showRange: showRadarRange,
+            showTierZones,
+            highlightBaseline,
+            showDotsOnly,
+            hydroclimate,
+            cachedSvg: captured?.svg,
+            cachedImageDataUrl: captured?.dataUrl,
+            cachedChartData: captured?.chartData,
+          }),
+          addItem: addShareItem,
+          errorLabel: "ScenarioSelectionSidebar.shareScenario(radar)",
         })
         return
       }
@@ -193,28 +198,33 @@ export default function ScenarioSelectionSidebar({
       if (scenarioIds.length === 0) return
 
       if (exploreMode === "radar") {
-        const result = await onCaptureRadarScenarios?.(scenarioIds)
         const fallbackColors = scenarioColors
           ? scenarioIds.map((sid) => scenarioColors[sid] ?? "#666666")
           : undefined
-        addShareItem({
-          id: crypto.randomUUID(),
-          type: "radar",
-          // Prefer the resolved order from the capture (it filtered
-          // missing entries and deduped). If capture failed, fall
-          // back to the requested list so the card still renders
-          // live from the store.
-          scenarioIds: result?.scenarioIds ?? [...scenarioIds],
-          scenarioColors: result?.colors ?? fallbackColors,
-          axes: [...radarVisibleAxes],
-          showRange: showRadarRange,
-          showTierZones,
-          highlightBaseline,
-          showDotsOnly,
-          hydroclimate,
-          cachedSvg: result?.svg,
-          cachedImageDataUrl: result?.dataUrl,
-          cachedChartData: result?.chartData,
+        await stageShareItem({
+          capture: () =>
+            onCaptureRadarScenarios?.(scenarioIds) ?? Promise.resolve(null),
+          buildItem: (captured) => ({
+            id: crypto.randomUUID(),
+            type: "radar",
+            // Prefer the resolved order from the capture (it filtered
+            // missing entries and deduped). If capture failed, fall
+            // back to the requested list so the card still renders
+            // live from the store.
+            scenarioIds: captured?.scenarioIds ?? [...scenarioIds],
+            scenarioColors: captured?.colors ?? fallbackColors,
+            axes: [...radarVisibleAxes],
+            showRange: showRadarRange,
+            showTierZones,
+            highlightBaseline,
+            showDotsOnly,
+            hydroclimate,
+            cachedSvg: captured?.svg,
+            cachedImageDataUrl: captured?.dataUrl,
+            cachedChartData: captured?.chartData,
+          }),
+          addItem: addShareItem,
+          errorLabel: "ScenarioSelectionSidebar.shareThemeScenarios(radar)",
         })
         return
       }

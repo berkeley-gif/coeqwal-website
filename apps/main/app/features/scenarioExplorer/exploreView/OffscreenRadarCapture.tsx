@@ -26,8 +26,7 @@ import {
 } from "@repo/viz"
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
-
-const DEFAULT_CAPTURE_SIZE = 600
+import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 
 export interface CaptureRadarOffscreenInput {
   data: VerticalParallelLineData[]
@@ -71,8 +70,8 @@ export interface CaptureRadarOffscreenResult {
 export async function captureRadarOffscreen(
   input: CaptureRadarOffscreenInput,
 ): Promise<CaptureRadarOffscreenResult> {
-  const width = input.width ?? DEFAULT_CAPTURE_SIZE
-  const height = input.height ?? DEFAULT_CAPTURE_SIZE
+  const width = input.width ?? CAPTURE_DIMENSIONS.radar.width
+  const height = input.height ?? CAPTURE_DIMENSIONS.radar.height
 
   return offscreenCapture({
     theme: input.theme,

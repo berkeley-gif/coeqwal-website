@@ -4,7 +4,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import ShareCardShell from "../ShareCardShell"
 import HydroclimateBadge from "./HydroclimateBadge"
-import SvgThumbnail from "./SvgThumbnail"
+import ChartThumbnail from "./ChartThumbnail"
 
 interface ShareRadarCardProps {
   scenarioNames: string[]
@@ -170,42 +170,14 @@ export default function ShareRadarCard({
         </Typography>
       </Box>
 
-      {/* Thumbnail priority: cachedSvg (vector) > cachedImageDataUrl (PNG) > live fallback > placeholder. */}
-      {cachedSvg ? (
-        <SvgThumbnail svg={cachedSvg} ariaLabel={thumbnailLabel} />
-      ) : cachedImageDataUrl ? (
-        <Box
-          component="img"
-          src={cachedImageDataUrl}
-          alt={thumbnailLabel}
-          sx={{
-            width: "100%",
-            height: "auto",
-            objectFit: "contain",
-            borderRadius: theme.borderRadius.sm,
-            backgroundColor: theme.palette.common.white,
-            mt: 1,
-          }}
-        />
-      ) : liveChart ? (
-        liveChart
-      ) : (
-        <Box
-          sx={{
-            mt: 1,
-            minHeight: 80,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: theme.palette.grey[400],
-            fontSize: "0.75rem",
-            border: `1px dashed ${theme.palette.divider}`,
-            borderRadius: theme.borderRadius.sm,
-          }}
-        >
-          Radar image not available
-        </Box>
-      )}
+      <ChartThumbnail
+        cachedSvg={cachedSvg}
+        cachedImageDataUrl={cachedImageDataUrl}
+        liveChart={liveChart}
+        ariaLabel={thumbnailLabel}
+        variant="whiteSurface"
+        placeholderLabel="Radar image not available"
+      />
     </ShareCardShell>
   )
 }

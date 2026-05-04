@@ -16,10 +16,11 @@ import React from "react"
 import { TierGridSnapshot } from "@repo/viz"
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
+import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 import { useEquityObjectives } from "../hooks/useEquityObjectives"
 
-export const EQUITY_CAPTURE_WIDTH = 900
-export const EQUITY_CAPTURE_HEIGHT = 600
+export const EQUITY_CAPTURE_WIDTH = CAPTURE_DIMENSIONS.equity.width
+export const EQUITY_CAPTURE_HEIGHT = CAPTURE_DIMENSIONS.equity.height
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 

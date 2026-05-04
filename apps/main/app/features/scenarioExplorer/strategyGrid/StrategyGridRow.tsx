@@ -36,13 +36,14 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
-import type { OutcomeDisplayMode, ShareItem } from "../store"
+import type { OutcomeDisplayMode } from "../store"
 import { useOutcomeMapAction } from "../../map/hooks"
 import { useTourAnchor } from "../tour/TourAnchorContext"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
-import { composeAndRasterize } from "../dataExplorer/utils/exportUtils"
+import { captureBarChartRow } from "./captureBarChartRow"
+import { stageShareItem } from "../share/stage"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -175,10 +176,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const listRowOperationsTourRef = useTourAnchor("list.row.operations")
   const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
 
-  // Bridge the outcome column ref into the tour registry as well. We
-  // cannot replace `outcomeColRef` with the tour callback ref because
-  // it is also used for the share-image capture above, so we mirror it
-  // through an effect.
+  // Bridge the outcome column ref into the tour registry. Mirroring
+  // through an effect lets `outcomeColRef` stay a stable React ref
+  // while still notifying the tour anchor whenever the first row
+  // remounts.
   useEffect(() => {
     if (!isFirst) return
     outcomeColAnchorRef(outcomeColRef.current)
@@ -237,40 +238,41 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
 
-  const handleShare = useCallback(async () => {
-    const itemId = crypto.randomUUID()
-    const item: ShareItem = {
-      id: itemId,
-      type: "barChart",
-      scenarioId: scenario.scenarioId,
-      viewMode: outcomeDisplayMode,
+  const handleShare = useCallback(
+    () =>
+      stageShareItem({
+        capture: () =>
+          captureBarChartRow({
+            outcomeNames,
+            chartData: scenarioChartData,
+            viewMode: outcomeDisplayMode,
+            theme,
+            glyphSize,
+          }),
+        buildItem: (captured) => ({
+          id: crypto.randomUUID(),
+          type: "barChart",
+          scenarioId: scenario.scenarioId,
+          viewMode: outcomeDisplayMode,
+          hydroclimate,
+          cachedChartData: scenarioChartData as Record<string, unknown>,
+          cachedSvg: captured?.svg,
+          cachedImageDataUrl: captured?.dataUrl,
+        }),
+        addItem: addShareItem,
+        errorLabel: "StrategyGridRow.handleShare",
+      }),
+    [
+      scenario.scenarioId,
+      outcomeDisplayMode,
+      scenarioChartData,
+      addShareItem,
       hydroclimate,
-      cachedChartData: scenarioChartData as Record<string, unknown>,
-    }
-
-    // Bar-chart row is a composed React layout of many small SVGs
-    // (one OutcomeGlyph per outcome). composeAndRasterize stitches
-    // them into one stand-alone SVG document at their on-screen
-    // positions, then rasterizes a PNG companion.
-    const el = outcomeColRef.current
-    if (el) {
-      try {
-        const { svg, dataUrl } = await composeAndRasterize(el)
-        item.cachedSvg = svg
-        item.cachedImageDataUrl = dataUrl
-      } catch {
-        // capture failed - scorecard still renders from live data
-      }
-    }
-
-    addShareItem(item)
-  }, [
-    scenario.scenarioId,
-    outcomeDisplayMode,
-    scenarioChartData,
-    addShareItem,
-    hydroclimate,
-  ])
+      outcomeNames,
+      theme,
+      glyphSize,
+    ],
+  )
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
   const handleOutcomeClick = (shortCode: string) => {
@@ -1051,7 +1053,6 @@ function NonCompactRowContent({
       <Box
         ref={outcomeColRef}
         className="outcome-col"
-        data-outcome-col-scenario-id={scenario.scenarioId}
         sx={{
           gridColumn:
             layoutMode === "compact" ? "2" : isWrappedMode ? "2 / -1" : "4",

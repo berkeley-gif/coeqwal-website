@@ -1,35 +1,28 @@
 /**
- * Locate the live `outcome-col` for a scenario row in the list view
- * and produce a stand-alone SVG (and rasterized PNG) of it via
- * `composeAndRasterize`. Returns `null` when the row is not on
- * screen (e.g. the user is not in list mode), in which case callers
- * should add a no-image bar-chart share item that re-renders live
- * from `cachedChartData`.
+ * Capture a stand-alone SVG (and PNG) of a scenario's outcome-glyph
+ * row at fixed dimensions. The capture happens in an off-screen
+ * mount via `captureBarChartRowOffscreen`, so every entry point
+ * (StrategyGridRow share button, ThemeGroupHeader "share all" loop)
+ * produces identical output regardless of whether the live row
+ * happened to be on-screen at the time.
  */
 
-import { composeAndRasterize } from "../dataExplorer/utils/exportUtils"
+import {
+  captureBarChartRowOffscreen,
+  type CaptureBarChartRowOffscreenInput,
+} from "./OffscreenBarChartRowCapture"
+import type { CapturedVisual } from "../share/capture/types"
 
-export interface CapturedBarChartRow {
-  svg: string
-  dataUrl: string
-}
+export type CapturedBarChartRow = CapturedVisual
 
 export async function captureBarChartRow(
-  scenarioId: string,
+  input: CaptureBarChartRowOffscreenInput,
 ): Promise<CapturedBarChartRow | null> {
   if (typeof document === "undefined") return null
-  const el = document.querySelector<HTMLElement>(
-    `[data-outcome-col-scenario-id="${CSS.escape(scenarioId)}"]`,
-  )
-  if (!el) return null
   try {
-    return await composeAndRasterize(el)
+    return await captureBarChartRowOffscreen(input)
   } catch (err) {
-    console.warn(
-      "[captureBarChartRow] composeAndRasterize failed for",
-      scenarioId,
-      err,
-    )
+    console.warn("[captureBarChartRow] off-screen capture failed:", err)
     return null
   }
 }

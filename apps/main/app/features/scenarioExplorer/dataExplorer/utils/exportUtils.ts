@@ -996,28 +996,6 @@ export function composeLiveSvgsToString(
 }
 
 /**
- * Convenience wrapper around `composeLiveSvgsToString` +
- * `rasterizeSvgString`. Returns both the composite SVG (for
- * `cachedSvg`) and a PNG (for `cachedImageDataUrl`).
- */
-export async function composeAndRasterize(
-  host: HTMLElement,
-  options: { backgroundColor?: string; scale?: number } = {},
-): Promise<{ svg: string; dataUrl: string }> {
-  const svg = composeLiveSvgsToString(host, {
-    backgroundColor: options.backgroundColor,
-  })
-  const hostRect = host.getBoundingClientRect()
-  const width = Math.max(1, Math.round(hostRect.width))
-  const height = Math.max(1, Math.round(hostRect.height))
-  const { dataUrl } = await rasterizeSvgString(svg, width, height, {
-    scale: options.scale,
-    backgroundColor: options.backgroundColor,
-  })
-  return { svg, dataUrl }
-}
-
-/**
  * Rasterize a serialized SVG string to a PNG. Parses into an
  * SVGSVGElement and reuses `rasterizeSvgClone` so the canvas
  * compositing stays in one place. Width and height should match the

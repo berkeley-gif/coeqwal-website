@@ -39,6 +39,7 @@ import type {
   ResilienceQuadrantCaptureFn,
 } from "./exploreView"
 import { captureEquityOffscreen } from "./exploreView/OffscreenEquityCapture"
+import { stageShareItem } from "./share/stage"
 import ResilienceControls from "./exploreView/ResilienceControls"
 import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
@@ -210,28 +211,27 @@ function ScenarioExplorerInner() {
   // a no-cache item; the card then text-renders without a chart but
   // does not block the user.
   const stageEquityShareItem = useCallback(
-    async (scenarioId: string) => {
-      const item: ShareItem = {
-        id: `equity-${scenarioId}-${Date.now()}`,
-        type: "equity",
-        scenarioId,
-        outcomeCodes: resilienceVisibleOutcomes,
-        compareToBaseline: showEquityComparison,
-        hydroclimate,
-      }
-      try {
-        const { svg, dataUrl } = await captureEquityOffscreen({
+    async (scenarioId: string) =>
+      stageShareItem({
+        capture: () =>
+          captureEquityOffscreen({
+            scenarioId,
+            compareToBaseline: showEquityComparison,
+            theme,
+          }),
+        buildItem: (captured) => ({
+          id: `equity-${scenarioId}-${Date.now()}`,
+          type: "equity",
           scenarioId,
+          outcomeCodes: resilienceVisibleOutcomes,
           compareToBaseline: showEquityComparison,
-          theme,
-        })
-        item.cachedSvg = svg
-        item.cachedImageDataUrl = dataUrl
-      } catch (err) {
-        console.error("[ScenarioExplorer] captureEquityOffscreen failed:", err)
-      }
-      addShareItem(item)
-    },
+          hydroclimate,
+          cachedSvg: captured?.svg,
+          cachedImageDataUrl: captured?.dataUrl,
+        }),
+        addItem: addShareItem,
+        errorLabel: "ScenarioExplorer.captureEquityOffscreen",
+      }),
     [
       resilienceVisibleOutcomes,
       showEquityComparison,

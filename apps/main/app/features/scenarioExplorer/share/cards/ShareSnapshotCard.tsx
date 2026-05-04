@@ -11,7 +11,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import ShareCardShell from "../ShareCardShell"
 import HydroclimateBadge from "./HydroclimateBadge"
-import SvgThumbnail from "./SvgThumbnail"
+import ChartThumbnail from "./ChartThumbnail"
 
 interface ShareSnapshotCardProps {
   id: string
@@ -109,31 +109,13 @@ export default function ShareSnapshotCard({
         </Box>
       )}
 
-      {cachedSvg ? (
-        <SvgThumbnail svg={cachedSvg} ariaLabel={title} />
-      ) : cachedImageDataUrl ? (
-        <Box
-          sx={{
-            mt: 1,
-            borderRadius: 1,
-            overflow: "hidden",
-            border: `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Box
-            component="img"
-            src={cachedImageDataUrl}
-            alt={title}
-            sx={{
-              display: "block",
-              width: "100%",
-              height: "auto",
-            }}
-          />
-        </Box>
-      ) : (
-        (liveChart ?? null)
-      )}
+      <ChartThumbnail
+        cachedSvg={cachedSvg}
+        cachedImageDataUrl={cachedImageDataUrl}
+        liveChart={liveChart}
+        ariaLabel={title}
+        variant="bordered"
+      />
 
       {chips.length > 0 && (
         <Box
