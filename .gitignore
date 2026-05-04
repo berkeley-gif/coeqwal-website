@@ -39,3 +39,7 @@ docs/
 **/*.peak.ts
 **/*.peak.jsx
 **/*.peak.js
+
+# Developer scripts
+scripts
+apps/main/scripts

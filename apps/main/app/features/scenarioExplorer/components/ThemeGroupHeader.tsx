@@ -12,6 +12,7 @@ import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
+import { captureBarChartRow } from "../strategyGrid/captureBarChartRow"
 
 interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme
@@ -23,6 +24,15 @@ interface ThemeGroupHeaderProps {
   onRowHover?: (scenarioIds: string[] | null) => void
   /** when true, hide the select-all-in-theme header checkbox (e.g. equity) */
   singleSelect?: boolean
+  /**
+   * Optional override for the "share all in theme" action. When set,
+   * the share icon delegates to this callback so the parent (e.g.
+   * `ScenarioSelectionSidebar`) can dispatch by the active explore
+   * mode (radar capture, equity item, resilience tile, etc.). When
+   * omitted, the default behavior stages one bar-chart share item
+   * per scenario, which matches the StrategyGrid (list) view.
+   */
+  onShareScenarios?: (scenarioIds: string[]) => void | Promise<void>
 }
 
 export default function ThemeGroupHeader({
@@ -31,6 +41,7 @@ export default function ThemeGroupHeader({
   layout = "grid",
   onRowHover,
   singleSelect = false,
+  onShareScenarios,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
@@ -185,19 +196,40 @@ export default function ThemeGroupHeader({
             className="theme-action-icon"
             size="small"
             onClick={() => {
-              scenarioIds.forEach((sid) => {
-                addShareItem({
-                  id: crypto.randomUUID(),
-                  type: "barChart",
-                  scenarioId: sid,
-                  viewMode,
-                  hydroclimate,
-                })
-              })
+              if (onShareScenarios) {
+                void onShareScenarios(scenarioIds)
+                return
+              }
+              // StrategyGrid (list-mode) fallback. The live rows are
+              // mounted, so capture each row's outcome column into
+              // an SVG (and PNG) before staging the share item.
+              // Sequential await keeps DOM measurements stable.
+              void (async () => {
+                for (const sid of scenarioIds) {
+                  const captured = await captureBarChartRow(sid)
+                  addShareItem({
+                    id: crypto.randomUUID(),
+                    type: "barChart",
+                    scenarioId: sid,
+                    viewMode,
+                    hydroclimate,
+                    cachedSvg: captured?.svg,
+                    cachedImageDataUrl: captured?.dataUrl,
+                  })
+                }
+              })()
             }}
             sx={{
               p: 0.25,
-              opacity: allShared ? 1 : 0,
+              // When a parent supplies its own dispatcher (sidebar
+              // mode), `allShared` no longer reflects whether the
+              // theme's scenarios have been shared, since the parent
+              // may be producing equity / radar / resilience cards
+              // instead of bar charts. Always show the icon in that
+              // case so the action remains discoverable. The
+              // StrategyGrid path keeps the original "fade in when
+              // all shared" persistence indicator.
+              opacity: onShareScenarios ? 1 : allShared ? 1 : 0,
               color: theme.palette.text.primary,
               transition: "opacity 200ms ease",
             }}

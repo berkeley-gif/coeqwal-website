@@ -804,13 +804,18 @@ export async function captureElementToBlob(
       "data:image/svg+xml;charset=utf-8," +
       encodeURIComponent(serializer.serializeToString(clone))
 
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       const img = new Image()
       img.onload = () => {
         ctx.drawImage(img, offsetX, offsetY, svgW * scale, svgH * scale)
         resolve()
       }
-      img.onerror = () => resolve()
+      img.onerror = () =>
+        reject(
+          new Error(
+            "Failed to load embedded SVG as image during composite capture",
+          ),
+        )
       img.src = uri
     })
   })
@@ -857,4 +862,184 @@ export async function downloadFromDataUrl(
   const res = await fetch(dataUrl)
   const blob = await res.blob()
   downloadBlob(blob, filename)
+}
+
+/**
+ * Trigger a browser download for an SVG string. Wraps the string in
+ * a Blob with the SVG mime type so the file opens in a viewer or
+ * vector tool rather than as plain text.
+ */
+export function downloadSvgString(svgString: string, filename: string): void {
+  const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" })
+  downloadBlob(blob, filename)
+}
+
+/**
+ * Standalone CSS that downloaded SVGs embed at the top of the
+ * document so renderers that fetch web fonts (Chrome's image
+ * viewer, Figma SVG paste, modern browsers when opened directly)
+ * can resolve our typeface. Native vector tools (Illustrator,
+ * Affinity, PowerPoint) do not honor remote @import in SVG, so
+ * the file still falls back to the system stack listed in
+ * `font-family`. This is best-effort portability, not
+ * binary embedding.
+ *
+ * The Typekit URL is fixed to the production kit. Bumping the
+ * kit ID is a one-line change here. Subsetting the font binary
+ * (the strict definition of "font subset") would require
+ * fontkit + WOFF2 manipulation and is licensing-fraught with
+ * Adobe Fonts, so decided to deliberately stop at the @import.
+ */
+const SHARE_SVG_FONT_CSS = `<style type="text/css"><![CDATA[
+@import url("https://use.typekit.net/rxm7kha.css");
+text { font-family: "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif; }
+]]></style>`
+
+/**
+ * Insert `SHARE_SVG_FONT_CSS` as the first child of the SVG root.
+ * Operates on a serialized string by direct splicing (no DOM
+ * round-trip) so the function stays cheap and does not lose any
+ * vendor-specific attributes a parser might normalize away.
+ *
+ * Returns the original string unchanged when no `<svg ...>` opening
+ * tag is found, so callers can pass arbitrary input without a
+ * pre-check.
+ */
+export function embedFontStylesInSvg(svgString: string): string {
+  const openTagMatch = svgString.match(/<svg\b[^>]*>/i)
+  if (!openTagMatch) return svgString
+  const insertAt = openTagMatch.index! + openTagMatch[0].length
+  return (
+    svgString.slice(0, insertAt) +
+    SHARE_SVG_FONT_CSS +
+    svgString.slice(insertAt)
+  )
+}
+
+/**
+ * Compose every descendant `<svg>` of `host` into one stand-alone
+ * SVG document, preserving each child's pixel position relative to
+ * the host. Used by composed-React share cards (bar-chart row,
+ * resilience small-multiples) where the live DOM is a layout of
+ * many small SVG glyphs rather than a single large SVG.
+ *
+ * Children inside `[data-capture-exclude]` are skipped, matching
+ * `captureElementToBlob`. Each child SVG is cloned, its computed
+ * styles are inlined, and it is wrapped in a `<g transform="translate(...)">`
+ * sized to its own pixel rect.
+ *
+ * Returns the serialized composite. Pair with `rasterizeSvgString`
+ * for PNG output, or persist directly as `cachedSvg`.
+ */
+export function composeLiveSvgsToString(
+  host: HTMLElement,
+  options: { backgroundColor?: string } = {},
+): string {
+  const { backgroundColor = themeValues.palette.common.white } = options
+  const hostRect = host.getBoundingClientRect()
+  const width = Math.max(1, Math.round(hostRect.width))
+  const height = Math.max(1, Math.round(hostRect.height))
+
+  const svgs = Array.from(host.querySelectorAll("svg")).filter(
+    (svg) => !svg.closest("[data-capture-exclude]"),
+  )
+
+  // Build the composite via the DOM API so we get correct attribute
+  // serialization and namespace handling, then serialize at the end.
+  const SVG_NS = "http://www.w3.org/2000/svg"
+  const wrapper = document.createElementNS(SVG_NS, "svg")
+  wrapper.setAttribute("xmlns", SVG_NS)
+  wrapper.setAttribute("width", String(width))
+  wrapper.setAttribute("height", String(height))
+  wrapper.setAttribute("viewBox", `0 0 ${width} ${height}`)
+
+  const bg = document.createElementNS(SVG_NS, "rect")
+  bg.setAttribute("x", "0")
+  bg.setAttribute("y", "0")
+  bg.setAttribute("width", String(width))
+  bg.setAttribute("height", String(height))
+  bg.setAttribute("fill", backgroundColor)
+  wrapper.appendChild(bg)
+
+  for (const svg of svgs) {
+    const childRect = svg.getBoundingClientRect()
+    const childW = Math.max(
+      1,
+      Math.round(childRect.width || svg.clientWidth || 0),
+    )
+    const childH = Math.max(
+      1,
+      Math.round(childRect.height || svg.clientHeight || 0),
+    )
+    if (childW <= 0 || childH <= 0) continue
+
+    const clone = svg.cloneNode(true) as SVGSVGElement
+    inlineStyles(clone, svg)
+    clone.removeAttribute("style")
+    clone.setAttribute("width", String(childW))
+    clone.setAttribute("height", String(childH))
+    if (!clone.getAttribute("viewBox")) {
+      clone.setAttribute("viewBox", `0 0 ${childW} ${childH}`)
+    }
+    clone.setAttribute("xmlns", SVG_NS)
+
+    const offsetX = Math.round(childRect.left - hostRect.left)
+    const offsetY = Math.round(childRect.top - hostRect.top)
+
+    const group = document.createElementNS(SVG_NS, "g")
+    group.setAttribute("transform", `translate(${offsetX}, ${offsetY})`)
+    group.appendChild(clone)
+    wrapper.appendChild(group)
+  }
+
+  return new XMLSerializer().serializeToString(wrapper)
+}
+
+/**
+ * Convenience wrapper around `composeLiveSvgsToString` +
+ * `rasterizeSvgString`. Returns both the composite SVG (for
+ * `cachedSvg`) and a PNG (for `cachedImageDataUrl`).
+ */
+export async function composeAndRasterize(
+  host: HTMLElement,
+  options: { backgroundColor?: string; scale?: number } = {},
+): Promise<{ svg: string; dataUrl: string }> {
+  const svg = composeLiveSvgsToString(host, {
+    backgroundColor: options.backgroundColor,
+  })
+  const hostRect = host.getBoundingClientRect()
+  const width = Math.max(1, Math.round(hostRect.width))
+  const height = Math.max(1, Math.round(hostRect.height))
+  const { dataUrl } = await rasterizeSvgString(svg, width, height, {
+    scale: options.scale,
+    backgroundColor: options.backgroundColor,
+  })
+  return { svg, dataUrl }
+}
+
+/**
+ * Rasterize a serialized SVG string to a PNG. Parses into an
+ * SVGSVGElement and reuses `rasterizeSvgClone` so the canvas
+ * compositing stays in one place. Width and height should match the
+ * intended pixel dimensions of the rendered chart, the helper
+ * normalizes the root attributes before drawing.
+ */
+export async function rasterizeSvgString(
+  svgString: string,
+  width: number,
+  height: number,
+  options: { scale?: number; backgroundColor?: string } = {},
+): Promise<{ blob: Blob; dataUrl: string }> {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(svgString, "image/svg+xml")
+  const root = doc.documentElement
+  if (!root || root.tagName.toLowerCase() !== "svg") {
+    throw new Error("rasterizeSvgString: input is not a valid SVG document")
+  }
+  return rasterizeSvgClone(
+    root as unknown as SVGSVGElement,
+    width,
+    height,
+    options,
+  )
 }

@@ -24,6 +24,7 @@ import {
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
   type RadarAxisLabelDetailChromeOptions,
+  type VerticalParallelLineData,
 } from "@repo/viz"
 import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
@@ -44,11 +45,7 @@ import {
   type OutcomeCode,
   type NodSodCode,
 } from "../../../content/outcomes"
-import {
-  captureSvgToBlob,
-  inlineStyles,
-  rasterizeSvgClone,
-} from "../dataExplorer/utils/exportUtils"
+import { captureRadarOffscreen } from "./OffscreenRadarCapture"
 import { InlineToggleChip } from "../components/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
 import { useTourAnchor } from "../tour/TourAnchorContext"
@@ -114,8 +111,35 @@ function rectsShallowEqual(
 }
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
+  /** Serialized SVG string with computed styles inlined. Primary cache. */
+  svg: string
+  /**
+   * PNG data URL produced by rasterizing the cloned SVG. Kept for
+   * backward compatibility while the share system migrates from PNG
+   * to SVG primary. P1.3 drops this field at the variant rename.
+   */
   dataUrl: string
   color: string
+  chartData: Record<string, unknown>
+} | null>
+
+/**
+ * Capture function for an arbitrary set of scenarios overlaid on a
+ * single radar chart. Used by the sidebar's theme-header "share all"
+ * action so a theme's scenarios collapse to one card with multiple
+ * traces, rather than one card per scenario. Only radar uses this
+ * shape; equity / resilience can't overlay and stay on the
+ * per-scenario `shareScenario` path.
+ *
+ * Returns `colors` and `scenarioIds` aligned by index (in the order
+ * the chart drew them, which is the order of `comparisonData` after
+ * filtering for resolvable ids and dedup).
+ */
+export type MultiScenarioCaptureFn = (scenarioIds: string[]) => Promise<{
+  svg: string
+  dataUrl: string
+  colors: string[]
+  scenarioIds: string[]
   chartData: Record<string, unknown>
 } | null>
 
@@ -130,6 +154,13 @@ interface RadarPanelProps {
   onCaptureReady?: (capture: () => Promise<void>) => void
   /** Exposes a single-scenario capture function for sidebar share */
   onSingleCaptureReady?: (capture: SingleScenarioCaptureFn) => void
+  /**
+   * Exposes a multi-scenario capture function for the sidebar's
+   * theme-header "share all" action. Caller passes an arbitrary
+   * scenario id list (typically the theme's scenarios); RadarPanel
+   * captures one chart with all of them overlaid.
+   */
+  onMultiCaptureReady?: (capture: MultiScenarioCaptureFn) => void
 }
 
 export default function RadarPanel({
@@ -138,6 +169,7 @@ export default function RadarPanel({
   onScenarioColors,
   onCaptureReady,
   onSingleCaptureReady,
+  onMultiCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -167,7 +199,6 @@ export default function RadarPanel({
 
   const {
     selectedScenarios,
-    toggleScenario,
     highlightBaseline,
     showTierZones,
     dimUnpinned,
@@ -497,40 +528,125 @@ export default function RadarPanel({
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
 
-  // Radar capture function - exposed to parent via onCaptureReady
-  const captureRadar = useCallback(async () => {
-    const svg = radarSvgRef.current
-    if (!svg) {
-      console.warn("[RadarPanel] captureRadar: SVG ref is null")
-      return
-    }
-    try {
-      const { dataUrl } = await captureSvgToBlob(svg)
-      const scenarioIds = filteredData.map((d) => d.id)
+  // Resolve a list of scenario ids against comparisonData into the
+  // shape RadarPlot needs (data + colors aligned by index). Drops
+  // unresolvable ids and dedupes while preserving requested order so
+  // every capture path produces a deterministic chart.
+  const buildRadarCaptureSlice = useCallback(
+    (
+      requestedIds: string[],
+      label: string,
+    ): {
+      data: VerticalParallelLineData[]
+      colors: string[]
+      scenarioIds: string[]
+      chartData: Record<string, unknown>
+    } | null => {
+      const seen = new Set<string>()
+      const orderedIds: string[] = []
+      const data: VerticalParallelLineData[] = []
+      const colors: string[] = []
 
+      for (const sid of requestedIds) {
+        if (seen.has(sid)) continue
+        seen.add(sid)
+        const entry = comparisonData.find((d) => d.id === sid)
+        if (!entry) {
+          console.warn(
+            `[RadarPanel] ${label}: scenario "${sid}" not in comparison data, skipping`,
+          )
+          continue
+        }
+        orderedIds.push(sid)
+        data.push(entry)
+        colors.push(scenarioColorById.get(sid) ?? "#666666")
+      }
+
+      if (data.length === 0) {
+        console.warn(`[RadarPanel] ${label}: no resolvable scenarios`)
+        return null
+      }
+
+      return {
+        data,
+        colors,
+        scenarioIds: orderedIds,
+        chartData: Object.fromEntries(data.map((d) => [d.id, d.values])),
+      }
+    },
+    [comparisonData, scenarioColorById],
+  )
+
+  // Single off-screen render path. Every radar capture (toolbar,
+  // sidebar single-scenario, theme-header overlay) goes through here
+  // so the rendered chart is identical in size, palette, axes, and
+  // toggle state. Eliminates the live-SVG clone path that previously
+  // produced a different scale than the off-screen renders.
+  const renderRadarCapture = useCallback(
+    (data: VerticalParallelLineData[], colors: string[]) =>
+      captureRadarOffscreen({
+        theme,
+        data,
+        axes: visibleAxisNames,
+        lineColors: colors,
+        axisRange: showRadarRange ? axisRange : undefined,
+        baselineData: baselineScenario ?? undefined,
+        showTierZones,
+        highlightBaseline,
+        showDotsOnly,
+        axisLabelDetailStyle: radarAxisLabelDetailStyle,
+        palette: radarPalette,
+      }),
+    [
+      theme,
+      visibleAxisNames,
+      axisRange,
+      baselineScenario,
+      showRadarRange,
+      showTierZones,
+      highlightBaseline,
+      showDotsOnly,
+      radarAxisLabelDetailStyle,
+      radarPalette,
+    ],
+  )
+
+  // Toolbar "save snapshot": capture whatever the chart is currently
+  // displaying as a single share item.
+  const captureRadar = useCallback(async () => {
+    const slice = buildRadarCaptureSlice(
+      filteredData.map((d) => d.id),
+      "captureRadar",
+    )
+    if (!slice) return
+    try {
+      const { svg, dataUrl } = await renderRadarCapture(
+        slice.data,
+        slice.colors,
+      )
       const item: ShareItem = {
         id: crypto.randomUUID(),
         type: "radar",
-        scenarioIds,
-        scenarioColors: [...filteredLineColors],
+        scenarioIds: slice.scenarioIds,
+        scenarioColors: slice.colors,
         axes: [...radarVisibleAxes],
         showRange: showRadarRange,
         showTierZones,
         highlightBaseline,
-        showDotsOnly: showDotsOnly,
+        showDotsOnly,
         hydroclimate,
+        cachedSvg: svg,
         cachedImageDataUrl: dataUrl,
-        cachedChartData: Object.fromEntries(
-          filteredData.map((d) => [d.id, d.values]),
-        ),
+        cachedChartData: slice.chartData,
       }
       addShareItem(item)
     } catch (err) {
       console.error("[RadarPanel] captureRadar failed:", err)
     }
   }, [
+    buildRadarCaptureSlice,
+    renderRadarCapture,
     filteredData,
-    filteredLineColors,
     radarVisibleAxes,
     showRadarRange,
     showTierZones,
@@ -544,93 +660,69 @@ export default function RadarPanel({
     onCaptureReady?.(captureRadar)
   }, [captureRadar, onCaptureReady])
 
+  // Sidebar single-scenario share.
   const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
     async (scenarioId) => {
-      if (!radarSvgRef.current) return null
-
-      const alreadyVisible =
-        radarShowAll || selectedScenarios.includes(scenarioId)
-      let didToggle = false
-
-      if (!alreadyVisible) {
-        const wrapper = chartWrapperRef.current
-        if (wrapper) wrapper.style.opacity = "0"
-        toggleScenario(scenarioId)
-        didToggle = true
-        const deadline = Date.now() + 2000
-        await new Promise<void>((resolve) => {
-          const check = () => {
-            const svg = radarSvgRef.current
-            if (
-              svg?.querySelector(`path[data-path-id="${scenarioId}"]`) ||
-              Date.now() > deadline
-            ) {
-              resolve()
-            } else {
-              requestAnimationFrame(check)
-            }
-          }
-          requestAnimationFrame(check)
-        })
-      }
-
+      const slice = buildRadarCaptureSlice(
+        [scenarioId],
+        "captureSingleScenarioRadar",
+      )
+      if (!slice) return null
       try {
-        const svg = radarSvgRef.current
-        if (!svg) return null
-
-        const clone = svg.cloneNode(true) as SVGSVGElement
-        inlineStyles(clone, svg)
-
-        clone
-          .querySelectorAll<SVGPathElement>("path[data-path-id]")
-          .forEach((p) => {
-            if (p.getAttribute("data-path-id") !== scenarioId) p.remove()
-          })
-        clone
-          .querySelectorAll<SVGCircleElement>("circle.radar-dot")
-          .forEach((d) => {
-            if (d.getAttribute("data-scenario-id") !== scenarioId) d.remove()
-          })
-
-        const rect = svg.getBoundingClientRect()
-        const w = rect.width || svg.clientWidth || 600
-        const h = rect.height || svg.clientHeight || 600
-        const { dataUrl } = await rasterizeSvgClone(clone, w, h)
-
-        const allData = comparisonData
-        const allColors = lineColors
-        const idx = allData.findIndex((d) => d.id === scenarioId)
-        const color = idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
-
-        const scenarioEntry = allData.find((d) => d.id === scenarioId)
-        const chartData: Record<string, unknown> = scenarioEntry
-          ? { [scenarioId]: scenarioEntry.values }
-          : {}
-
-        return { dataUrl, color, chartData }
+        const { svg, dataUrl } = await renderRadarCapture(
+          slice.data,
+          slice.colors,
+        )
+        return {
+          svg,
+          dataUrl,
+          color: slice.colors[0] ?? "#666666",
+          chartData: slice.chartData,
+        }
       } catch (err) {
         console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
         return null
-      } finally {
-        if (didToggle) {
-          toggleScenario(scenarioId)
-        }
-        const wrapper = chartWrapperRef.current
-        if (wrapper) wrapper.style.opacity = ""
       }
     },
-    [
-      comparisonData,
-      lineColors,
-      selectedScenarios,
-      radarShowAll,
-      toggleScenario,
-    ],
+    [buildRadarCaptureSlice, renderRadarCapture],
   )
 
   useEffect(() => {
     onSingleCaptureReady?.(captureSingleScenarioRadar)
   }, [captureSingleScenarioRadar, onSingleCaptureReady])
+
+  // Sidebar theme-header overlay: render every requested scenario on
+  // a single off-screen chart so the share item collapses to one card.
+  const captureScenariosRadar: MultiScenarioCaptureFn = useCallback(
+    async (requestedIds) => {
+      const slice = buildRadarCaptureSlice(
+        requestedIds,
+        "captureScenariosRadar",
+      )
+      if (!slice) return null
+      try {
+        const { svg, dataUrl } = await renderRadarCapture(
+          slice.data,
+          slice.colors,
+        )
+        return {
+          svg,
+          dataUrl,
+          colors: slice.colors,
+          scenarioIds: slice.scenarioIds,
+          chartData: slice.chartData,
+        }
+      } catch (err) {
+        console.error("[RadarPanel] captureScenariosRadar failed:", err)
+        return null
+      }
+    },
+    [buildRadarCaptureSlice, renderRadarCapture],
+  )
+
+  useEffect(() => {
+    onMultiCaptureReady?.(captureScenariosRadar)
+  }, [captureScenariosRadar, onMultiCaptureReady])
 
   const axisDetailChromeRootsRef = useRef(new Map<HTMLDivElement, Root>())
 

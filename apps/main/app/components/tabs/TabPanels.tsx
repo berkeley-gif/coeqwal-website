@@ -22,7 +22,7 @@ import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
-import { parseShareItemsParam } from "../tabPanels/Share"
+import { parseShareUrl } from "../../features/scenarioExplorer/share/url"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },
@@ -105,17 +105,20 @@ export default function TabPanels() {
 
     const itemsParam = params.get("items")
     if (itemsParam) {
-      const storyParam = params.get("story") ?? undefined
-      const { items: parsed, storyItemIds } = parseShareItemsParam(
-        itemsParam,
-        storyParam,
-      )
+      const {
+        items: parsed,
+        storyItemIds,
+        versionMismatch,
+      } = parseShareUrl(params)
+      const store = useScenarioExplorerStore.getState()
       if (parsed.length > 0) {
-        const store = useScenarioExplorerStore.getState()
         store.setShareItems(parsed)
         if (storyItemIds.length > 0) {
           store.reorderStory(storyItemIds)
         }
+      }
+      if (versionMismatch) {
+        store.setShareUrlVersionMismatch(true)
       }
     } else {
       const scenariosParam = params.get("scenarios")

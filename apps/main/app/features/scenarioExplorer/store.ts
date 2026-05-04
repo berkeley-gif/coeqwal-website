@@ -11,7 +11,10 @@ import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 import { BASELINE_SCENARIO_ID } from "./constants"
 import type { TourTool } from "./tour/types"
+import type { ShareItem, ShareItemPatch } from "./share/types"
+import { loadShareState, saveShareState } from "./share/persist"
 export type { TourTool } from "./tour/types"
+export type { ShareItem, ShareItemPatch } from "./share/types"
 
 // ============================================================================
 // Types
@@ -37,155 +40,14 @@ export type MainView = "get-started" | "explorer" | "data"
 
 export type OutcomeDisplayMode = "average" | "bar" | "distribution"
 
-/**
- * A single item staged for the Share tab composition grid.
- * The union discriminant `type` determines which rendering path is used.
- *
- * All variants support an optional `note` so users can annotate why
- * they saved an item. Notes are rendered as captions in the Share tab.
- */
-export type ShareItem =
-  | {
-      id: string
-      type: "barChart"
-      scenarioId: string
-      viewMode: OutcomeDisplayMode
-      hydroclimate: string
-      cachedImageDataUrl?: string
-      cachedChartData?: Record<string, unknown>
-      note?: string
-    }
-  | {
-      id: string
-      type: "radar"
-      scenarioIds: string[]
-      scenarioColors?: string[]
-      axes: string[]
-      showRange: boolean
-      /** When false, tier band background is off (matches explore `showTierZones`). */
-      showTierZones?: boolean
-      highlightBaseline: boolean
-      showDotsOnly: boolean
-      hydroclimate: string
-      cachedImageDataUrl?: string
-      cachedChartData?: Record<string, unknown>
-      note?: string
-    }
-  | {
-      id: string
-      type: "equity"
-      scenarioId: string
-      outcomeCodes: string[]
-      compareToBaseline: boolean
-      hydroclimate: string
-      cachedImageDataUrl?: string
-      cachedChartData?: Record<string, unknown>
-      note?: string
-    }
-  | {
-      id: string
-      type: "resilience"
-      /** Which cell encoding was used, e.g. "tier" | "delta" | "distribution" | ... */
-      cellEncoding: string
-      /** Which top-level view was active, e.g. "scenario" | "outcome" | "aggregate" */
-      view: string
-      /** Scenario ids that were in-scope at capture time (may be empty for aggregate). */
-      scenarioIds: string[]
-      /** Hydroclimates that were selected at capture time. */
-      hydroclimates: string[]
-      /** Outcome codes that were visible at capture time. */
-      outcomeCodes: string[]
-      /**
-       * Which capture surface produced this item. "panel" captures the
-       * whole chart body, the small-multiples kinds capture a single
-       * tile, and "quadrant" captures the Leverage scatter. Absent
-       * values rehydrate to "panel" for backwards-compatible URL round
-       * trips.
-       */
-      tileScope?: "panel" | "scenario" | "outcome" | "hydroclimate" | "quadrant"
-      /**
-       * Identifier of the captured tile when `tileScope` is one of the
-       * small-multiples kinds (scenarioId, outcome code, or
-       * hydroclimate value). Omitted for panel and quadrant captures.
-       */
-      tileId?: string
-      /** Human-facing label shown in the Share drawer/tab card subtitle. */
-      tileLabel?: string
-      /**
-       * Whether numeric cell values were visible in the heatmap at capture
-       * time. Used to match share thumbnails and list context (not used for
-       * quadrant captures).
-       */
-      showCellNumbers?: boolean
-      cachedImageDataUrl?: string
-      cachedChartData?: Record<string, unknown>
-      note?: string
-    }
-
 // ============================================================================
-// Manual localStorage persistence for shareItems + storyItemIds
+// Local-storage persistence for journey progress
 // ============================================================================
+// Share-state persistence lives in `share/persist.ts`. Journey state
+// is the only persisted bag still defined here, because it has no
+// other home and changes infrequently.
 
-const SHARE_STORAGE_KEY = "coeqwal-share-v1"
 const JOURNEY_STORAGE_KEY = "coeqwal-journey-v1"
-
-function loadShareState(): {
-  shareItems: ShareItem[]
-  storyItemIds: string[]
-} {
-  try {
-    if (typeof window === "undefined") {
-      return { shareItems: [], storyItemIds: [] }
-    }
-    const raw = localStorage.getItem(SHARE_STORAGE_KEY)
-    if (!raw) return { shareItems: [], storyItemIds: [] }
-    const parsed = JSON.parse(raw)
-    return {
-      shareItems: Array.isArray(parsed.shareItems) ? parsed.shareItems : [],
-      storyItemIds: Array.isArray(parsed.storyItemIds)
-        ? parsed.storyItemIds
-        : [],
-    }
-  } catch {
-    return { shareItems: [], storyItemIds: [] }
-  }
-}
-
-function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
-  try {
-    if (typeof window === "undefined") return
-    // ShareItem variants that cache images are stripped on persist to
-    // keep localStorage small. The in-memory state keeps the images so
-    // the current session can still render thumbnails.
-    const stripped = shareItems.map((item) => {
-      if (
-        item.type === "barChart" ||
-        item.type === "equity" ||
-        item.type === "resilience"
-      ) {
-        const {
-          cachedImageDataUrl: _cachedImageDataUrl,
-          cachedChartData: _cachedChartData,
-          ...rest
-        } = item as {
-          cachedImageDataUrl?: string
-          cachedChartData?: Record<string, unknown>
-        } & ShareItem
-        return rest
-      }
-      const { cachedChartData: _cachedChartData, ...rest } = item as {
-        cachedChartData?: Record<string, unknown>
-      } & ShareItem
-      return rest
-    })
-    localStorage.setItem(
-      SHARE_STORAGE_KEY,
-      JSON.stringify({ shareItems: stripped, storyItemIds }),
-    )
-  } catch {
-    // localStorage full or unavailable - silently ignore
-  }
-}
 
 type JourneyPersist = {
   seenHowToRead: Record<ExploreMode, boolean>
@@ -295,6 +157,14 @@ interface ScenarioExplorerState {
   shareItems: ShareItem[]
   storyItemIds: string[]
   showShareDrawer: boolean
+  /**
+   * Set when a deep-link URL declared a SHARE_URL_VERSION that
+   * does not match the build's current version. The Share tab
+   * surfaces a notice (`ShareUrlVersionNotice`, P2.7) so users
+   * understand why a shared link may render differently than the
+   * sender saw. Reset by `dismissShareUrlVersionMismatch`.
+   */
+  shareUrlVersionMismatch: boolean
 
   // Chart toggles (shared across chart panels)
   relativeToBaseline: boolean
@@ -400,11 +270,21 @@ interface ScenarioExplorerActions {
   // Share staging
   addShareItem: (item: ShareItem) => void
   removeShareItem: (id: string) => void
-  reorderShareItems: (orderedIds: string[]) => void
   clearShareItems: () => void
   setShareItems: (items: ShareItem[]) => void
-  updateShareItem: (id: string, patch: Partial<ShareItem>) => void
+  /**
+   * Patch a share item in place. Only the fields in `ShareItemPatch`
+   * (note, cachedChartData) can be mutated through this action.
+   * Other state is set once at capture time, or goes through
+   * specific actions (`addShareItem`, `removeShareItem`,
+   * `reorderShareItems`).
+   */
+  updateShareItem: (id: string, patch: ShareItemPatch) => void
   setShowShareDrawer: (open: boolean) => void
+  /** Set the version-mismatch flag, typically from a URL hydrator. */
+  setShareUrlVersionMismatch: (mismatch: boolean) => void
+  /** Dismiss the version-mismatch notice. UI-only effect. */
+  dismissShareUrlVersionMismatch: () => void
 
   // Story arrangement
   addToStory: (id: string) => void
@@ -511,6 +391,7 @@ const initialState: ScenarioExplorerState = {
   shareItems: persisted.shareItems,
   storyItemIds: persisted.storyItemIds,
   showShareDrawer: false,
+  shareUrlVersionMismatch: false,
   relativeToBaseline: true,
   highlightBaseline: false,
   overlayTiers: false,
@@ -744,14 +625,6 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         if (storyIdx > -1) state.storyItemIds.splice(storyIdx, 1)
       }),
 
-    reorderShareItems: (orderedIds) =>
-      set((state) => {
-        const byId = new Map(state.shareItems.map((s) => [s.id, s]))
-        state.shareItems = orderedIds
-          .map((id) => byId.get(id))
-          .filter(Boolean) as ShareItem[]
-      }),
-
     clearShareItems: () =>
       set((state) => {
         state.shareItems = []
@@ -772,6 +645,16 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowShareDrawer: (open) =>
       set((state) => {
         state.showShareDrawer = open
+      }),
+
+    setShareUrlVersionMismatch: (mismatch) =>
+      set((state) => {
+        state.shareUrlVersionMismatch = mismatch
+      }),
+
+    dismissShareUrlVersionMismatch: () =>
+      set((state) => {
+        state.shareUrlVersionMismatch = false
       }),
 
     // Story arrangement

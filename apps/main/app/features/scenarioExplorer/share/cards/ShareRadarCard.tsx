@@ -1,13 +1,10 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, IconButton, useTheme, icons } from "@repo/ui/mui"
-import {
-  hydroclimateOptions,
-  type HydroclimateOption,
-} from "../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
-import ShareItemNoteBlock from "./ShareItemNoteBlock"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import ShareCardShell from "../ShareCardShell"
+import HydroclimateBadge from "./HydroclimateBadge"
+import SvgThumbnail from "./SvgThumbnail"
 
 interface ShareRadarCardProps {
   scenarioNames: string[]
@@ -18,12 +15,19 @@ interface ShareRadarCardProps {
   showTierZones?: boolean
   highlightBaseline: boolean
   showDotsOnly: boolean
+  /**
+   * Vector thumbnail captured by the off-screen radar host. Preferred
+   * over `cachedImageDataUrl` because the card stays sharp at any
+   * zoom and the SVG can be downloaded directly without re-rasterizing.
+   */
+  cachedSvg?: string
   cachedImageDataUrl?: string
   /**
-   * Live-rendered radar used when no cached PNG is available (e.g.
-   * share items restored from a URL that cannot embed large images).
-   * The parent decides whether to mount this fallback so we only pay
-   * the hook / render cost when it is actually needed.
+   * Live-rendered radar used when neither cachedSvg nor
+   * cachedImageDataUrl is available (e.g. share items restored from a
+   * URL that cannot embed visual cache). The parent decides whether
+   * to mount this fallback so we only pay the hook and render cost
+   * when it is actually needed.
    */
   liveChart?: React.ReactNode
   onRemove?: () => void
@@ -40,6 +44,7 @@ export default function ShareRadarCard({
   showTierZones = true,
   highlightBaseline,
   showDotsOnly,
+  cachedSvg,
   cachedImageDataUrl,
   liveChart,
   onRemove,
@@ -48,14 +53,10 @@ export default function ShareRadarCard({
 }: ShareRadarCardProps) {
   const theme = useTheme()
 
-  const climateOption: HydroclimateOption | undefined = hydroclimate
-    ? hydroclimateOptions.find((o) => o.value === hydroclimate)
-    : undefined
-  const climateConfig = hydroclimate
-    ? HYDROCLIMATE_CONFIG[hydroclimate]
-    : undefined
-
   const isSingle = scenarioNames.length === 1
+  const thumbnailLabel = isSingle
+    ? (scenarioNames[0] ?? "Radar")
+    : "Radar comparison"
 
   const toggleLabels: string[] = []
   if (showRange) toggleLabels.push("Range shown")
@@ -64,33 +65,12 @@ export default function ShareRadarCard({
   if (showDotsOnly) toggleLabels.push("Dots only")
 
   return (
-    <Box
-      sx={{
-        position: "relative",
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.borderRadius.sm ?? "6px",
-        backgroundColor: theme.palette.background.paper,
-        p: 1.5,
-        mb: 1,
-      }}
+    <ShareCardShell
+      onRemove={onRemove}
+      note={note}
+      onNoteChange={onNoteChange}
+      removeAriaLabel="Remove radar from share tray"
     >
-      {onRemove && (
-        <IconButton
-          size="small"
-          onClick={onRemove}
-          sx={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            p: 0.25,
-            color: theme.palette.grey[400],
-            "&:hover": { color: theme.palette.grey[700] },
-          }}
-        >
-          <icons.Close sx={{ fontSize: "0.875rem" }} />
-        </IconButton>
-      )}
-
       {isSingle ? (
         <>
           {/* Single scenario: name + definition, same style as bar chart scorecard */}
@@ -122,7 +102,7 @@ export default function ShareRadarCard({
         </>
       ) : (
         <>
-          {/* Multi-scenario: "Radar Comparison" title + colored legend */}
+          {/* Multi-scenario: "Radar comparison" title + colored legend */}
           <Typography
             variant="body2"
             sx={{
@@ -132,7 +112,7 @@ export default function ShareRadarCard({
               pr: onRemove ? 2.5 : 0,
             }}
           >
-            Radar Comparison
+            Radar comparison
           </Typography>
 
           <Box
@@ -152,7 +132,7 @@ export default function ShareRadarCard({
                   sx={{
                     width: 8,
                     height: 8,
-                    borderRadius: "50%",
+                    borderRadius: theme.borderRadius.circle,
                     backgroundColor:
                       scenarioColors?.[i] ?? theme.palette.grey[400],
                     flexShrink: 0,
@@ -175,53 +155,7 @@ export default function ShareRadarCard({
 
       {/* Hydroclimate badge + chart type label + toggle states */}
       <Box sx={{ mt: 0.75 }}>
-        {climateOption && climateConfig && (
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "flex-start",
-              gap: 0.5,
-              backgroundColor: `${climateConfig.bgColor}0F`,
-              border: `1px solid ${climateConfig.bgColor}28`,
-              borderRadius: "4px",
-              px: 0.75,
-              py: 0.375,
-              mb: 0.5,
-            }}
-          >
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                backgroundColor: climateConfig.bgColor,
-                flexShrink: 0,
-                mt: "3px",
-              }}
-            />
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: "0.625rem",
-                  lineHeight: 1.3,
-                  fontWeight: 600,
-                  color: theme.palette.grey[800],
-                }}
-              >
-                {climateOption.label} hydroclimate
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "0.5625rem",
-                  lineHeight: 1.3,
-                  color: theme.palette.grey[600],
-                }}
-              >
-                {climateOption.description}
-              </Typography>
-            </Box>
-          </Box>
-        )}
+        <HydroclimateBadge hydroclimate={hydroclimate} />
 
         <Typography
           sx={{
@@ -236,17 +170,19 @@ export default function ShareRadarCard({
         </Typography>
       </Box>
 
-      {/* Radar chart: cached PNG > live fallback > placeholder. */}
-      {cachedImageDataUrl ? (
+      {/* Thumbnail priority: cachedSvg (vector) > cachedImageDataUrl (PNG) > live fallback > placeholder. */}
+      {cachedSvg ? (
+        <SvgThumbnail svg={cachedSvg} ariaLabel={thumbnailLabel} />
+      ) : cachedImageDataUrl ? (
         <Box
           component="img"
           src={cachedImageDataUrl}
-          alt={isSingle ? scenarioNames[0] : "Radar Comparison"}
+          alt={thumbnailLabel}
           sx={{
             width: "100%",
             height: "auto",
             objectFit: "contain",
-            borderRadius: "4px",
+            borderRadius: theme.borderRadius.sm,
             backgroundColor: theme.palette.common.white,
             mt: 1,
           }}
@@ -264,14 +200,12 @@ export default function ShareRadarCard({
             color: theme.palette.grey[400],
             fontSize: "0.75rem",
             border: `1px dashed ${theme.palette.divider}`,
-            borderRadius: "4px",
+            borderRadius: theme.borderRadius.sm,
           }}
         >
           Radar image not available
         </Box>
       )}
-
-      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
-    </Box>
+    </ShareCardShell>
   )
 }

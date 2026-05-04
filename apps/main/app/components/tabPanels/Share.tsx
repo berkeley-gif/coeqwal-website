@@ -31,27 +31,19 @@ import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
 import {
-  normalizeShareRadarHydro,
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
   type ShareRadarLiveDataFields,
-} from "../../features/scenarioExplorer/utils/shareRadarLiveData"
+} from "../../features/scenarioExplorer/share/utils/shareRadarLiveData"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
-import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
-import ShareSnapshotCard from "../../features/scenarioExplorer/components/ShareSnapshotCard"
-import ShareRadarLiveChart from "../../features/scenarioExplorer/components/ShareRadarLiveChart"
-import ResilienceShareCard from "../../features/scenarioExplorer/components/ResilienceShareCard"
-import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
-import type { VerticalParallelLineData } from "@repo/viz"
-import {
-  OUTCOME_NAMES,
-  getOutcomeName,
-  type OutcomeCode,
-} from "../../content/outcomes"
+import ShareItemView from "../../features/scenarioExplorer/share/ShareItemView"
+import ShareUrlVersionNotice from "../../features/scenarioExplorer/share/ui/ShareUrlVersionNotice"
 import { toPng } from "html-to-image"
 import {
   downloadFromDataUrl,
+  downloadSvgString,
+  rasterizeSvgString,
+  embedFontStylesInSvg,
   exportShareItemAsCSV,
   exportAllShareItemsAsCSV,
   getTimestampedFilename,
@@ -60,437 +52,26 @@ import {
 // ---------------------------------------------------------------------------
 // URL helpers
 // ---------------------------------------------------------------------------
+// All encode / decode logic lives in `share/url.ts` and is re-
+// exported from `share/index.ts`. Only the call site below
+// (`encodeShareItems` for the "Copy link" button) imports anything
+// here.
 
-function encodeShareItems(
-  items: ShareItem[],
-  climate: string,
-  storyIds?: string[],
-): string {
-  const parts = [`tab=share`]
-  if (climate !== "historical") parts.push(`climate=${climate}`)
-  const encoded = items.map((item) => {
-    if (item.type === "barChart") {
-      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-      const modeToken =
-        item.viewMode === "average"
-          ? "a"
-          : item.viewMode === "distribution"
-            ? "d"
-            : "b"
-      return `b.${item.scenarioId}.${modeToken}.${hc}`
-    }
-    if (item.type === "radar") {
-      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-      const ids = item.scenarioIds.join("~")
-      const axes = item.axes.join("~")
-      let flags = ""
-      if (item.showRange) flags += "r"
-      if (item.highlightBaseline) flags += "b"
-      if (item.showDotsOnly) flags += "d"
-      if (item.showTierZones === false) flags += "n"
-      return `r.${ids}.${axes}.${flags}.${hc}`
-    }
-    if (item.type === "equity") {
-      // Note and cached image are intentionally not URL-encoded. Notes
-      // are a private annotation. Images are too large to fit a URL.
-      const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-      const outcomes = item.outcomeCodes.join("~")
-      const cmp = item.compareToBaseline ? "c" : ""
-      return `e.${item.scenarioId}.${outcomes}.${cmp}.${hc}`
-    }
-    if (item.type === "resilience") {
-      const view = item.view
-      const encoding = item.cellEncoding
-      const ids = item.scenarioIds.join("~")
-      const climates = item.hydroclimates.join("~")
-      const outcomes = item.outcomeCodes.join("~")
-      // Optional 7th segment "n" when numeric cell values were on at save.
-      // Scope: tileScope / tileId / tileLabel and cachedChartData /
-      // cachedImageDataUrl are not encoded. Round-tripped items rehydrate
-      // with partial context (same as other tools without full capture).
-      const num = item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
-      return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}${num}`
-    }
-    return ""
-  })
-  if (encoded.length > 0) parts.push(`items=${encoded.join(",")}`)
-
-  if (storyIds && storyIds.length > 0) {
-    const idToIndex = new Map(items.map((item, i) => [item.id, i]))
-    const indices = storyIds
-      .map((id) => idToIndex.get(id))
-      .filter((i): i is number => i != null)
-    if (indices.length > 0) parts.push(`story=${indices.join(",")}`)
-  }
-
-  return `${window.location.origin}/?${parts.join("&")}`
-}
-
-// ---------------------------------------------------------------------------
-// Shared URL parsing (exported for use by TabPanels restore logic)
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Resilience controls URL schema (forward-compatible, legacy-safe).
-//
-// The resilience heatmap panel owns its own state locally in
-// ScenarioExplorer.tsx (see `resilienceControls`). It is not part of
-// ShareItem[] because it isn't a pinned card. It is the active tool
-// configuration. Shared URLs created before this reset never carried
-// resilience state, so existing URLs continue to parse identically and
-// the panel falls through to its initial defaults.
-//
-// The token schema below is available for a future "share this chart
-// configuration" surface. It deliberately uses short keys so the URL
-// stays compact, and skips any field at its initial default so
-// round-tripped URLs stay as short as possible.
-//
-// Schema (order-independent, each segment "key:value"):
-//   v:s|o|a|q             view (scenario / outcome / aggregate / quadrant)
-//   po:<outcomeCode>      primaryOutcomeCode
-//   co:<code>~<code>      compareOutcomeCodes
-//   er:<code>~<code>      expandedRegionalOutcomes
-//   sc:s|a                aggregateScope (selected / all)
-//
-// Scenarios mode is sidebar-driven: the ShareItem encoding already
-// carries the scenario selection, so no per-chart scenario tokens
-// are required.
-// ---------------------------------------------------------------------------
-
-export interface ResilienceShareShape {
-  view?: "scenario" | "outcome" | "aggregate" | "quadrant"
-  primaryOutcomeCode?: string | null
-  compareOutcomeCodes?: string[]
-  expandedRegionalOutcomes?: string[]
-  aggregateScope?: "selected" | "all"
-}
-
-const RESILIENCE_VIEW_TOKEN: Record<
-  NonNullable<ResilienceShareShape["view"]>,
-  string
-> = {
-  scenario: "s",
-  outcome: "o",
-  aggregate: "a",
-  quadrant: "q",
-}
-
-export function encodeResilienceControls(shape: ResilienceShareShape): string {
-  const parts: string[] = []
-  if (shape.view && shape.view !== "scenario") {
-    parts.push(`v:${RESILIENCE_VIEW_TOKEN[shape.view]}`)
-  }
-  if (shape.primaryOutcomeCode) parts.push(`po:${shape.primaryOutcomeCode}`)
-  if (shape.compareOutcomeCodes && shape.compareOutcomeCodes.length > 0) {
-    parts.push(`co:${shape.compareOutcomeCodes.join("~")}`)
-  }
-  if (
-    shape.expandedRegionalOutcomes &&
-    shape.expandedRegionalOutcomes.length > 0
-  ) {
-    parts.push(`er:${shape.expandedRegionalOutcomes.join("~")}`)
-  }
-  if (shape.aggregateScope === "selected") parts.push("sc:s")
-  return parts.join(",")
-}
-
-export function parseResilienceControlsParam(
-  param: string | null | undefined,
-): ResilienceShareShape {
-  if (!param) return {}
-  const out: ResilienceShareShape = {}
-  for (const tok of param.split(",")) {
-    const sepIndex = tok.indexOf(":")
-    if (sepIndex <= 0) continue
-    const key = tok.slice(0, sepIndex)
-    const value = tok.slice(sepIndex + 1)
-    switch (key) {
-      case "v":
-        if (value === "s") out.view = "scenario"
-        else if (value === "o") out.view = "outcome"
-        else if (value === "a") out.view = "aggregate"
-        else if (value === "q") out.view = "quadrant"
-        break
-      case "po":
-        out.primaryOutcomeCode = value
-        break
-      case "co":
-        out.compareOutcomeCodes = value.split("~").filter(Boolean)
-        break
-      case "er":
-        out.expandedRegionalOutcomes = value.split("~").filter(Boolean)
-        break
-      case "sc":
-        out.aggregateScope = value === "s" ? "selected" : "all"
-        break
-    }
-  }
-  return out
-}
-
-export function parseShareItemsParam(
-  param: string,
-  storyParam?: string,
-): { items: ShareItem[]; storyItemIds: string[] } {
-  if (!param) return { items: [], storyItemIds: [] }
-  const items = param
-    .split(",")
-    .map((token): ShareItem | null => {
-      const parts = token.split(".")
-      if (parts[0] === "b" && parts.length >= 3) {
-        const modeToken = parts[2]
-        return {
-          id: crypto.randomUUID(),
-          type: "barChart",
-          scenarioId: parts[1]!,
-          viewMode:
-            modeToken === "a"
-              ? "average"
-              : modeToken === "d"
-                ? "distribution"
-                : "bar",
-          hydroclimate: parts[3] || "historical",
-        }
-      }
-      if (parts[0] === "r" && parts.length >= 3) {
-        const scenarioIds = parts[1]!.split("~").filter(Boolean)
-        const axes = parts[2]!.split("~").filter(Boolean)
-        const flags = parts[3] ?? ""
-        return {
-          id: crypto.randomUUID(),
-          type: "radar",
-          scenarioIds,
-          axes,
-          showRange: flags.includes("r"),
-          showTierZones: !flags.includes("n"),
-          highlightBaseline: flags.includes("b"),
-          showDotsOnly: flags.includes("d"),
-          hydroclimate: parts[4] || "historical",
-        }
-      }
-      if (parts[0] === "e" && parts.length >= 3) {
-        const outcomeCodes = (parts[2] ?? "").split("~").filter(Boolean)
-        return {
-          id: crypto.randomUUID(),
-          type: "equity",
-          scenarioId: parts[1] ?? "",
-          outcomeCodes,
-          compareToBaseline: (parts[3] ?? "").includes("c"),
-          hydroclimate: parts[4] || "historical",
-        }
-      }
-      if (parts[0] === "q" && parts.length >= 3) {
-        const showCellNumbers = parts[6] === "n"
-        return {
-          id: crypto.randomUUID(),
-          type: "resilience",
-          view: parts[1] ?? "aggregate",
-          cellEncoding: parts[2] ?? "tier",
-          scenarioIds: (parts[3] ?? "").split("~").filter(Boolean),
-          hydroclimates: (parts[4] ?? "").split("~").filter(Boolean),
-          outcomeCodes: (parts[5] ?? "").split("~").filter(Boolean),
-          ...(showCellNumbers ? { showCellNumbers: true } : {}),
-        }
-      }
-      return null
-    })
-    .filter(Boolean) as ShareItem[]
-
-  let storyItemIds: string[] = []
-  if (storyParam) {
-    storyItemIds = storyParam
-      .split(",")
-      .map((s) => parseInt(s, 10))
-      .filter((i) => !isNaN(i) && i >= 0 && i < items.length)
-      .map((i) => items[i]!.id)
-  }
-
-  return { items, storyItemIds }
-}
-
-// ---------------------------------------------------------------------------
-// Shared rendering helper for share-item cards
-// ---------------------------------------------------------------------------
-
-function outcomeCodesToLabels(codes: string[]): string[] {
-  return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
-}
+import { encodeShareItems } from "../../features/scenarioExplorer/share/url"
 
 /**
- * Per-hydro live radar fields for share. See `buildShareRadarLiveDataFields`
+ * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
  * and `useComparisonData(period, true)` in the share panel and drawer.
  */
 export type ShareRenderLiveData = ShareRadarLiveDataFields
-export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/utils/shareRadarLiveData"
+export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/share/utils/shareRadarLiveData"
 
-/**
- * Render a ShareItem using the appropriate card component. Used by
- * both the tray and the story canvas. Equity items render via the
- * lightweight text-forward `ShareSnapshotCard`. Resilience uses
- * `ResilienceShareCard`. `liveData` supplies the on-the-fly radar
- * re-renders when a radar share item arrived without a cached PNG (URL
- * load, different browser, etc.).
- */
-function renderShareItemBody(
-  item: ShareItem,
-  outcomeNames: { shortCode: string; displayName: string }[],
-  scenarioLookup: Map<
-    string,
-    {
-      name: string
-      description: string
-      definition: string
-      shortLabel: string
-    }
-  >,
-  allChartData: Record<string, Record<string, unknown> | undefined>,
-  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
-  onNoteChange?: (id: string, note: string) => void,
-): React.ReactNode {
-  if (item.type === "barChart") {
-    const info = scenarioLookup.get(item.scenarioId)
-    const viewLabel =
-      item.viewMode === "average"
-        ? "Key outcomes average"
-        : item.viewMode === "distribution"
-          ? "Key outcomes distribution"
-          : "Key outcomes bar chart"
-    const chartData =
-      (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
-      (allChartData[item.scenarioId] as
-        | Record<string, ChartDataPoint[]>
-        | undefined)
-    return (
-      <ShareScenarioCard
-        scenarioId={item.id}
-        name={info?.description ?? info?.name ?? item.scenarioId}
-        scenarioDefinition={info?.definition}
-        description={viewLabel}
-        hydroclimate={item.hydroclimate}
-        chartData={chartData}
-        outcomeNames={outcomeNames}
-        viewMode={item.viewMode}
-        note={item.note}
-        onNoteChange={
-          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
-        }
-      />
-    )
-  }
-  if (item.type === "radar") {
-    const names = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.description ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const definitions = item.scenarioIds.map(
-      (id) => scenarioLookup.get(id)?.definition ?? "",
-    )
-    const radarLive =
-      radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
-    const liveChart = item.cachedImageDataUrl
-      ? undefined
-      : renderRadarLiveChart(item, radarLive)
-    return (
-      <ShareRadarCard
-        scenarioNames={names}
-        scenarioDefinitions={definitions}
-        scenarioColors={item.scenarioColors}
-        hydroclimate={item.hydroclimate}
-        showRange={item.showRange}
-        showTierZones={item.showTierZones !== false}
-        highlightBaseline={item.highlightBaseline}
-        showDotsOnly={item.showDotsOnly}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        liveChart={liveChart}
-        note={item.note}
-        onNoteChange={
-          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
-        }
-      />
-    )
-  }
-  if (item.type === "equity") {
-    const info = scenarioLookup.get(item.scenarioId)
-    return (
-      <ShareSnapshotCard
-        id={item.id}
-        toolLabel="Distribution"
-        title={info?.description ?? info?.name ?? item.scenarioId}
-        subtitle={
-          item.compareToBaseline
-            ? "Compared to today's operations"
-            : "Single scenario view"
-        }
-        chips={outcomeCodesToLabels(item.outcomeCodes)}
-        hydroclimate={item.hydroclimate}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        note={item.note}
-        onNoteChange={
-          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
-        }
-      />
-    )
-  }
-  if (item.type === "resilience") {
-    return (
-      <ResilienceShareCard
-        item={item}
-        scenarioLookup={scenarioLookup}
-        onNoteChange={
-          onNoteChange ? (note) => onNoteChange(item.id, note) : undefined
-        }
-      />
-    )
-  }
-  return null
-}
-
-/**
- * Build the live-radar fallback node for a share item. Filters the
- * shared parallel-plot data down to the item's scenarios, converts
- * outcome codes back to display names, and selects line colors from
- * the item's captured palette (preferred) or the current theme.
- */
-function renderRadarLiveChart(
-  item: Extract<ShareItem, { type: "radar" }>,
-  liveData: ShareRadarLiveDataFields,
-): React.ReactNode {
-  const idSet = new Set(item.scenarioIds)
-  const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
-  if (filtered.length === 0) return null
-
-  const orderedFiltered = item.scenarioIds
-    .map((id) => filtered.find((d) => d.id === id))
-    .filter((d): d is VerticalParallelLineData => !!d)
-
-  const axesDisplay = item.axes.map((code) => getOutcomeName(code))
-
-  const lineColors = orderedFiltered.map((d, i) => {
-    const captured = item.scenarioColors?.[i]
-    if (captured) return captured
-    return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
-  })
-
-  return (
-    <ShareRadarLiveChart
-      data={orderedFiltered}
-      axes={axesDisplay}
-      lineColors={lineColors}
-      baselineData={liveData.radarBaseline}
-      axisRange={liveData.radarAxisRange}
-      showRadarRange={item.showRange}
-      showTierZones={item.showTierZones !== false}
-      highlightBaseline={item.highlightBaseline}
-      showDotsOnly={item.showDotsOnly}
-      morphGeneration={liveData.morphGeneration}
-    />
-  )
-}
+// Render dispatch lives in `share/ShareItemView`. Both the tray card
+// and the story card render through that single component so per-
+// variant rendering logic lives in one place.
 
 // ---------------------------------------------------------------------------
-// Transform helper for dnd-kit (translate only, no scale)
+// Transform helper for dnd-kit (translate)
 // ---------------------------------------------------------------------------
 
 function transformToCSS(
@@ -499,6 +80,111 @@ function transformToCSS(
   if (!transform) return undefined
   const { x, y } = transform
   return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
+}
+
+// ---------------------------------------------------------------------------
+// Download helpers
+// ---------------------------------------------------------------------------
+
+/** Label fragment used by getTimestampedFilename for share downloads. */
+function shareItemFilenameLabel(item: ShareItem): string {
+  switch (item.type) {
+    case "barChart":
+      return `coeqwal-${item.scenarioId}-${item.viewMode}`
+    case "radar":
+      return `coeqwal-radar-${item.scenarioIds.length}scenarios`
+    case "equity":
+      return `coeqwal-distribution-${item.scenarioId}`
+    case "resilience":
+      return `coeqwal-resilience-${item.view}`
+  }
+}
+
+/**
+ * Per-variant raster output size, in pixels (square or rectangle).
+ * Picked to roughly match the live panel's aspect, so PNG outputs
+ * look like what the user saw on screen.
+ */
+const RASTER_SIZE: Record<
+  ShareItem["type"],
+  { width: number; height: number }
+> = {
+  radar: { width: 600, height: 600 },
+  equity: { width: 900, height: 600 },
+  resilience: { width: 900, height: 600 },
+  barChart: { width: 800, height: 400 },
+}
+
+function hasCachedSvg(item: ShareItem): boolean {
+  return typeof item.cachedSvg === "string" && item.cachedSvg.length > 0
+}
+
+/**
+ * PNG download path. Order of preference:
+ *   1. cachedSvg → rasterize on demand. Output matches the captured
+ *      snapshot exactly, regardless of the current live state.
+ *   2. live element via html-to-image. Used for variants whose card
+ *      contains a re-rendered chart but no SVG cache (URL-restored
+ *      items).
+ *   3. cachedImageDataUrl. Direct write of an old PNG fallback.
+ */
+async function downloadShareItemAsPng(
+  item: ShareItem,
+  liveEl: HTMLElement | null,
+  backgroundColor: string,
+): Promise<void> {
+  const filename = getTimestampedFilename(shareItemFilenameLabel(item), "png")
+
+  if (item.cachedSvg) {
+    try {
+      const size = RASTER_SIZE[item.type]
+      const { dataUrl } = await rasterizeSvgString(
+        item.cachedSvg,
+        size.width,
+        size.height,
+        { backgroundColor },
+      )
+      await downloadFromDataUrl(dataUrl, filename)
+      return
+    } catch (err) {
+      console.warn(
+        "[Share] PNG download via cachedSvg failed, falling back to live capture:",
+        err,
+      )
+    }
+  }
+
+  if (liveEl) {
+    try {
+      const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
+      const dataUrl = await toPng(liveEl, {
+        pixelRatio: dpr * 2,
+        backgroundColor,
+      })
+      await downloadFromDataUrl(dataUrl, filename)
+      return
+    } catch (err) {
+      console.warn(
+        "[Share] PNG download via live capture failed, falling back to cached PNG:",
+        err,
+      )
+    }
+  }
+
+  if (item.cachedImageDataUrl) {
+    await downloadFromDataUrl(item.cachedImageDataUrl, filename)
+  }
+}
+
+/**
+ * SVG download path. Embeds an @import for the Neue Haas family so
+ * renderers that honor web fonts match the on-screen typography;
+ * native vector tools fall back to the listed system stack.
+ */
+function downloadShareItemAsSvg(item: ShareItem): void {
+  if (!item.cachedSvg) return
+  const filename = getTimestampedFilename(shareItemFilenameLabel(item), "svg")
+  downloadSvgString(embedFontStylesInSvg(item.cachedSvg), filename)
 }
 
 // ---------------------------------------------------------------------------
@@ -536,15 +222,16 @@ function TrayCard({
 }) {
   const theme = useTheme()
 
-  const renderContent = () =>
-    renderShareItemBody(
-      item,
-      outcomeNames,
-      scenarioLookup,
-      allChartData,
-      radarLiveByHydro,
-      onNoteChange,
-    )
+  const renderContent = () => (
+    <ShareItemView
+      item={item}
+      outcomeNames={outcomeNames}
+      scenarioLookup={scenarioLookup}
+      allChartData={allChartData}
+      radarLiveByHydro={radarLiveByHydro}
+      onNoteChange={onNoteChange}
+    />
+  )
 
   return (
     <Box
@@ -587,7 +274,7 @@ function TrayCard({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+            boxShadow: theme.shadow.sm,
           }}
         >
           <icons.Check
@@ -645,34 +332,19 @@ function StoryCard({
     isDragging,
   } = useSortable({ id: item.id })
 
-  const handleDownloadImage = useCallback(async () => {
-    const el = contentRef.current
-    if (!el) return
-    try {
-      const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
-      const dataUrl = await toPng(el, {
-        pixelRatio: dpr * 2,
-        backgroundColor: theme.palette.common.white,
-        skipFonts: true,
-      })
-      const label =
-        item.type === "barChart"
-          ? `coeqwal-${item.scenarioId}-${item.viewMode}`
-          : item.type === "radar"
-            ? `coeqwal-radar-${item.scenarioIds.length}scenarios`
-            : item.type === "equity"
-              ? `coeqwal-distribution-${item.scenarioId}`
-              : `coeqwal-resilience-${item.view}`
-      await downloadFromDataUrl(dataUrl, getTimestampedFilename(label, "png"))
-    } catch {
-      if (item.cachedImageDataUrl) {
-        await downloadFromDataUrl(
-          item.cachedImageDataUrl,
-          getTimestampedFilename(`coeqwal-${item.type}`, "png"),
-        )
-      }
-    }
+  const handleDownloadPng = useCallback(async () => {
+    await downloadShareItemAsPng(
+      item,
+      contentRef.current,
+      theme.palette.common.white,
+    )
   }, [item, theme.palette.common.white])
+
+  const handleDownloadSvg = useCallback(() => {
+    downloadShareItemAsSvg(item)
+  }, [item])
+
+  const svgAvailable = hasCachedSvg(item)
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
@@ -684,14 +356,14 @@ function StoryCard({
 
   const renderContent = () => (
     <Box sx={{ px: 0.5, pb: 0.5 }}>
-      {renderShareItemBody(
-        item,
-        outcomeNames,
-        scenarioLookup,
-        allChartData,
-        radarLiveByHydro,
-        onNoteChange,
-      )}
+      <ShareItemView
+        item={item}
+        outcomeNames={outcomeNames}
+        scenarioLookup={scenarioLookup}
+        allChartData={allChartData}
+        radarLiveByHydro={radarLiveByHydro}
+        onNoteChange={onNoteChange}
+      />
     </Box>
   )
 
@@ -747,15 +419,26 @@ function StoryCard({
             alignItems: "center",
           }}
         >
-          <Tooltip title="Download image" arrow>
+          <Tooltip title="Download as PNG" arrow>
             <IconButton
               size="small"
-              onClick={handleDownloadImage}
+              onClick={handleDownloadPng}
               sx={{ p: 0.75, color: theme.palette.grey[600] }}
             >
               <icons.Image sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
+          {svgAvailable && (
+            <Tooltip title="Download as SVG" arrow>
+              <IconButton
+                size="small"
+                onClick={handleDownloadSvg}
+                sx={{ p: 0.75, color: theme.palette.grey[600] }}
+              >
+                <icons.Code sx={{ fontSize: "1.25rem" }} />
+              </IconButton>
+            </Tooltip>
+          )}
           {(() => {
             const hasData =
               !!item.cachedChartData &&
@@ -971,42 +654,8 @@ export default function SharePanel() {
   const handleDownloadAllImages = useCallback(async () => {
     const items = storyItems.length > 0 ? storyItems : shareItems
     for (const item of items) {
-      const el = cardContentRefs.current.get(item.id)
-      if (el) {
-        try {
-          const dpr =
-            typeof window !== "undefined" ? window.devicePixelRatio : 1
-          const dataUrl = await toPng(el, {
-            pixelRatio: dpr * 2,
-            backgroundColor: theme.palette.common.white,
-            skipFonts: true,
-          })
-          const label =
-            item.type === "barChart"
-              ? `coeqwal-${item.scenarioId}-${item.viewMode}`
-              : item.type === "radar"
-                ? `coeqwal-radar-${item.scenarioIds.length}scenarios`
-                : item.type === "equity"
-                  ? `coeqwal-distribution-${item.scenarioId}`
-                  : `coeqwal-resilience-${item.view}`
-          await downloadFromDataUrl(
-            dataUrl,
-            getTimestampedFilename(label, "png"),
-          )
-        } catch {
-          if (item.cachedImageDataUrl) {
-            await downloadFromDataUrl(
-              item.cachedImageDataUrl,
-              getTimestampedFilename(`coeqwal-${item.type}`, "png"),
-            )
-          }
-        }
-      } else if (item.cachedImageDataUrl) {
-        await downloadFromDataUrl(
-          item.cachedImageDataUrl,
-          getTimestampedFilename(`coeqwal-${item.type}`, "png"),
-        )
-      }
+      const el = cardContentRefs.current.get(item.id) ?? null
+      await downloadShareItemAsPng(item, el, theme.palette.common.white)
     }
   }, [storyItems, shareItems, theme.palette.common.white])
 
@@ -1092,6 +741,7 @@ export default function SharePanel() {
         <Typography variant="h3" component="h2" color="text.secondary">
           Tell your water story
         </Typography>
+        <ShareUrlVersionNotice />
       </Box>
 
       <Box

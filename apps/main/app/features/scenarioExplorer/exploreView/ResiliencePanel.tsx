@@ -23,8 +23,6 @@ import React, {
   useState,
   startTransition,
 } from "react"
-import { flushSync } from "react-dom"
-import { createRoot, type Root } from "react-dom/client"
 import {
   Box,
   Checkbox,
@@ -71,10 +69,12 @@ import {
 } from "../../../content/scenarios"
 import { getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
+import { composeAndRasterize } from "../dataExplorer/utils/exportUtils"
 import {
-  captureElementToBlob,
-  captureSvgToBlob,
-} from "../dataExplorer/utils/exportUtils"
+  captureResilienceOffscreen,
+  RESILIENCE_TILE_CAPTURE_WIDTH,
+  RESILIENCE_TILE_CAPTURE_HEIGHT,
+} from "./OffscreenResilienceCapture"
 import { useResilienceHeatmapTheme } from "../hooks/useResilienceHeatmapTheme"
 
 export type ResilienceView =
@@ -154,7 +154,14 @@ export interface ResilienceHeatmapChartData {
 }
 
 export interface ResilienceCaptureResult {
+  /** PNG data URL. Always populated. */
   dataUrl: string
+  /**
+   * Serialized SVG with computed styles inlined. Populated by the
+   * off-screen capture path (tile / solo). The panel-wide capture
+   * path leaves this undefined while it is still composed-DOM.
+   */
+  svg?: string
   chartData: ResilienceHeatmapChartData
 }
 
@@ -2308,46 +2315,32 @@ export default function ResiliencePanel({
   )
 
   const renderSoloScenarioForShare = useCallback(
-    async (scenarioId: string) => {
-      const SOLO_W = 800
-      const SOLO_H = 520
+    async (scenarioId: string): Promise<ResilienceCaptureResult | null> => {
       const tile = makeScenarioSoloMultiplesTile(scenarioId)
       if (!tile) return null
-      const host = document.createElement("div")
-      host.style.cssText = `box-sizing:border-box;position:fixed;left:-10000px;top:0;width:${SOLO_W}px;height:${SOLO_H}px;opacity:0;pointer-events:none;z-index:-1;overflow:hidden`
-      document.body.appendChild(host)
-      const root: Root = createRoot(host)
       const encoding = cellEncodingRef.current
       try {
-        // ResilienceHeatmap draws in useEffect. flushSync only commits. We
-        // still need a short delay so D3 can run after paint.
-        flushSync(() => {
-          root.render(
-            <ResilienceHeatmap
-              width={SOLO_W}
-              height={SOLO_H}
-              responsive={false}
-              rows={displayByScenarioRows}
-              columns={displayByScenarioColumns}
-              cells={tile.cells}
-              tierColors={tierColors}
-              tierLabels={tierLabels}
-              palette={heatmapPalette}
-              cellRender={effectiveCellRender}
-              showCellNumbers={showCellNumbers}
-              hideLegend
-              distributionMode={distributionMode}
-              formatRowTick={formatRowTick}
-            />,
-          )
-        })
-        await new Promise<void>((r) => {
-          setTimeout(r, 200)
-        })
-        const { dataUrl } = await captureElementToBlob(host, {
-          backgroundColor: theme.palette.common.white,
+        const { svg, dataUrl } = await captureResilienceOffscreen({
+          theme,
+          width: RESILIENCE_TILE_CAPTURE_WIDTH,
+          height: RESILIENCE_TILE_CAPTURE_HEIGHT,
+          captureKind: "resilience:scenario-solo",
+          props: {
+            rows: displayByScenarioRows,
+            columns: displayByScenarioColumns,
+            cells: tile.cells,
+            tierColors,
+            tierLabels,
+            palette: heatmapPalette,
+            cellRender: effectiveCellRender,
+            showCellNumbers,
+            hideLegend: true,
+            distributionMode,
+            formatRowTick,
+          },
         })
         return {
+          svg,
           dataUrl,
           chartData: {
             kind: "resilience" as const,
@@ -2364,9 +2357,6 @@ export default function ResiliencePanel({
           err,
         )
         return null
-      } finally {
-        root.unmount()
-        host.remove()
       }
     },
     [
@@ -2389,7 +2379,13 @@ export default function ResiliencePanel({
     const el = chartWrapperRef.current
     if (!el) return null
     try {
-      const { dataUrl } = await captureElementToBlob(el)
+      // Composes every descendant <svg> (single heatmap or grid of
+      // small multiples) into one stand-alone SVG document, then
+      // rasterizes a PNG companion. The SVG is what downstream
+      // download / persistence reads.
+      const { svg, dataUrl } = await composeAndRasterize(el, {
+        backgroundColor: theme.palette.common.white,
+      })
       const view = effectiveViewRef.current
       let rowsOut: ResilienceChartDataRow[]
       let tileScope: "panel" | "scenario" | "outcome" | "hydroclimate" = "panel"
@@ -2419,6 +2415,7 @@ export default function ResiliencePanel({
         rowsOut = cellsToRows(displayCellsRef.current)
       }
       return {
+        svg,
         dataUrl,
         chartData: {
           kind: "resilience",
@@ -2432,61 +2429,97 @@ export default function ResiliencePanel({
       console.error("[ResiliencePanel] captureResilience failed:", err)
       return null
     }
-  }, [cellsToRows])
+  }, [cellsToRows, theme])
 
   const captureResilienceTile = useCallback<ResilienceTileCaptureFn>(
     async (tileId) => {
-      const wrapper = chartWrapperRef.current
-      if (!wrapper) return null
-      const tileEl = wrapper.querySelector<HTMLElement>(
-        `[data-tile-id="${CSS.escape(tileId)}"]`,
-      )
-      if (tileEl) {
-        // Scope the SVG lookup to the tile body wrapper. The tile header
-        // contains action buttons whose MUI icons render as <svg>, so a
-        // bare `tileEl.querySelector("svg")` would grab the share icon
-        // rather than the heatmap.
-        const body = tileEl.querySelector<HTMLElement>(
-          "[data-resilience-tile-body]",
-        )
-        const svg = body?.querySelector("svg") ?? null
-        if (!(svg instanceof SVGSVGElement)) return null
-        try {
-          const { dataUrl } = await captureSvgToBlob(svg)
-          const view = effectiveViewRef.current
-          let tileScope: "scenario" | "outcome" | "hydroclimate" = "scenario"
-          let tileSource = byScenarioTilesRef.current
-          if (view === "outcome") {
-            tileScope = "outcome"
-            tileSource = byOutcomeTilesRef.current
-          } else if (view === "hydroclimate") {
-            tileScope = "hydroclimate"
-            tileSource = byHydroclimateTilesRef.current
-          }
-          const tile = tileSource.find((t) => t.id === tileId)
-          if (!tile) return null
-          return {
-            dataUrl,
-            chartData: {
-              kind: "resilience",
-              view,
-              cellEncoding: cellEncodingRef.current,
-              tileScope,
-              tileLabel: tile.title,
-              rows: cellsToRows(tile.cells),
-            },
-          }
-        } catch (err) {
-          console.error("[ResiliencePanel] captureResilienceTile failed:", err)
-          return null
+      const view = effectiveViewRef.current
+      let tileScope: "scenario" | "outcome" | "hydroclimate"
+      let tileSource: ResilienceSmallMultiplesTile[]
+      let rows: ResilienceAxisItem[]
+      let columns: ResilienceAxisItem[]
+      if (view === "outcome") {
+        tileScope = "outcome"
+        tileSource = byOutcomeTilesRef.current
+        rows = displayByOutcomeRows
+        columns = displayByOutcomeColumns
+      } else if (view === "hydroclimate") {
+        tileScope = "hydroclimate"
+        tileSource = byHydroclimateTilesRef.current
+        rows = displayByHydroclimateRows
+        columns = displayByHydroclimateColumns
+      } else {
+        tileScope = "scenario"
+        tileSource = byScenarioTilesRef.current
+        rows = displayByScenarioRows
+        columns = displayByScenarioColumns
+      }
+      const tile = tileSource.find((t) => t.id === tileId)
+      // Scenario view falls back to a synthesized solo tile when the
+      // requested scenario is not on screen (the small-multiples grid
+      // hides scenarios outside the current selection).
+      if (!tile) {
+        if (view === "scenario" && scenarioRowIdsAll.includes(tileId)) {
+          return await renderSoloScenarioForShare(tileId)
         }
+        return null
       }
-      if (scenarioRowIdsAll.includes(tileId)) {
-        return await renderSoloScenarioForShare(tileId)
+      try {
+        const { svg, dataUrl } = await captureResilienceOffscreen({
+          theme,
+          width: RESILIENCE_TILE_CAPTURE_WIDTH,
+          height: RESILIENCE_TILE_CAPTURE_HEIGHT,
+          captureKind: `resilience:tile:${tileScope}`,
+          props: {
+            rows,
+            columns,
+            cells: tile.cells,
+            tierColors,
+            tierLabels,
+            palette: heatmapPalette,
+            cellRender: effectiveCellRender,
+            showCellNumbers,
+            hideLegend: true,
+            distributionMode,
+            formatRowTick,
+          },
+        })
+        return {
+          svg,
+          dataUrl,
+          chartData: {
+            kind: "resilience",
+            view,
+            cellEncoding: cellEncodingRef.current,
+            tileScope,
+            tileLabel: tile.title,
+            rows: cellsToRows(tile.cells),
+          },
+        }
+      } catch (err) {
+        console.error("[ResiliencePanel] captureResilienceTile failed:", err)
+        return null
       }
-      return null
     },
-    [cellsToRows, renderSoloScenarioForShare, scenarioRowIdsAll],
+    [
+      cellsToRows,
+      renderSoloScenarioForShare,
+      scenarioRowIdsAll,
+      theme,
+      tierColors,
+      tierLabels,
+      heatmapPalette,
+      effectiveCellRender,
+      showCellNumbers,
+      distributionMode,
+      formatRowTick,
+      displayByScenarioRows,
+      displayByScenarioColumns,
+      displayByOutcomeRows,
+      displayByOutcomeColumns,
+      displayByHydroclimateRows,
+      displayByHydroclimateColumns,
+    ],
   )
 
   useEffect(() => {

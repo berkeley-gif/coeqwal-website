@@ -99,6 +99,25 @@ export interface RadarPlotProps {
    * from theme tokens.
    */
   palette?: Partial<RadarPlotPalette>
+  /**
+   * When false the chart suppresses event handlers, hovers, and the
+   * axis-label hover detail panel placeholder. Use for off-screen
+   * capture renders where interactivity must not be present in the
+   * cloned SVG.
+   */
+  interactive?: boolean
+  /**
+   * When false d3 transitions run with duration 0 so the chart paints
+   * its final state on first render. Use for off-screen capture so the
+   * SVG can be serialized immediately after the first updateChart.
+   */
+  animate?: boolean
+  /**
+   * Called once after the first full chart build settles. Used by the
+   * off-screen capture host to know when the SVG is ready to clone and
+   * serialize.
+   */
+  onReady?: () => void
 }
 
 function toTier(v: number): number {
@@ -477,6 +496,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     axisLabelDetailChrome,
     containerMinHeight = 400,
     palette: paletteProp,
+    interactive = true,
+    animate = true,
+    onReady,
   }) => {
     const axisLabelDetailStyle = useMemo(
       () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
@@ -557,6 +579,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onAxisPositionsRef.current = onAxisPositions
     }, [onAxisPositions])
+    // onReady is fired once after the first continueFullRebuild settles.
+    // Off-screen capture awaits this signal before serializing the SVG.
+    const onReadyRef = useRef(onReady)
+    useEffect(() => {
+      onReadyRef.current = onReady
+    }, [onReady])
+    const hasFiredOnReadyRef = useRef(false)
     const activeMapDotRef = useRef(activeMapDot)
     useEffect(() => {
       activeMapDotRef.current = activeMapDot
@@ -664,7 +693,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const numAxes = axes.length
 
         // ── Snapshot for morph animation ──
-        const HC_DUR = 600
+        // Capture mode (animate=false) collapses every transition to
+        // duration 0 so the chart paints its final state immediately
+        // and the off-screen host can serialize without waiting.
+        const HC_DUR = animate ? 600 : 0
         let morphSnapshot: {
           dots: Map<string, { cx: number; cy: number }>
           baselineD: string | null
@@ -950,11 +982,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return runs.map((r) => ({ ...r, closed: false }))
           }
 
-          const T_DUR = morphSnapshot
-            ? HC_DUR
-            : hasAnimatedRef.current
-              ? 0
-              : 400
+          const T_DUR = !animate
+            ? 0
+            : morphSnapshot
+              ? HC_DUR
+              : hasAnimatedRef.current
+                ? 0
+                : 400
           hasAnimatedRef.current = true
 
           const drawPolygonForScenario = (
@@ -1184,6 +1218,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("r", vis.dotR)
                 .attr("fill-opacity", vis.opacity)
                 .attr("stroke-opacity", vis.opacity)
+
+              if (!interactive) {
+                dot.attr("cursor", "default").attr("pointer-events", "none")
+                return
+              }
 
               dot
                 .on("mouseenter", function () {
@@ -1733,10 +1772,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .text(axis)
             }
 
-            labelGroup
-              .append("g")
-              .attr("class", "axis-label-detail")
-              .attr("visibility", "hidden")
+            if (interactive) {
+              labelGroup
+                .append("g")
+                .attr("class", "axis-label-detail")
+                .attr("visibility", "hidden")
+            }
 
             axisPositions.push({
               axis,
@@ -1788,6 +1829,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               lastOpenAxisDetailRef.current = null
             }
           }
+
+          // Signal first-paint readiness exactly once. The off-screen
+          // capture host listens for this so it can clone and serialize
+          // the SVG immediately. Wrapped in rAF so the browser has a
+          // chance to commit the DOM before the consumer reads it.
+          if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+            hasFiredOnReadyRef.current = true
+            const cb = onReadyRef.current
+            requestAnimationFrame(() => cb())
+          }
         }
 
         if (axisLabelDetailChromeRef.current?.onBeforeSvgDomClear) {
@@ -1819,6 +1870,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         getAngle,
         axisLabelDetailStyle,
         palette,
+        interactive,
+        animate,
       ],
     )
 

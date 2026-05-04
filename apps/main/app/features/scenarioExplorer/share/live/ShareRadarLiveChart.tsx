@@ -17,7 +17,7 @@ import {
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
 } from "@repo/viz"
-import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
+import { useRadarPlotTheme } from "../../hooks/useRadarPlotTheme"
 
 export interface ShareRadarLiveChartProps {
   /** Filtered radar data matching the share item's scenarioIds. */
@@ -88,7 +88,7 @@ export default function ShareRadarLiveChart({
           color: theme.palette.grey[500],
           fontSize: "0.75rem",
           border: `1px dashed ${theme.palette.divider}`,
-          borderRadius: "4px",
+          borderRadius: theme.borderRadius.sm,
         }}
       >
         Loading radar chart...
@@ -107,7 +107,7 @@ export default function ShareRadarLiveChart({
         width: "100%",
         position: "relative",
         aspectRatio: "1 / 1",
-        borderRadius: "4px",
+        borderRadius: theme.borderRadius.sm,
         backgroundColor: theme.palette.common.white,
         overflow: "hidden",
       }}

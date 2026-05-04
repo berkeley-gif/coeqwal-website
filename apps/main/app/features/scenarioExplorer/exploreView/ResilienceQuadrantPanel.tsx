@@ -46,7 +46,11 @@ import {
 import { hydroclimateOptions } from "../../../content/scenarios"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import type { ResilienceControlsState } from "./ResiliencePanel"
-import { captureElementToBlob } from "../dataExplorer/utils/exportUtils"
+import {
+  captureQuadrantOffscreen,
+  QUADRANT_CAPTURE_WIDTH,
+  QUADRANT_CAPTURE_HEIGHT,
+} from "./OffscreenQuadrantCapture"
 
 /**
  * Flat, CSV-friendly payload produced when the Leverage quadrant is
@@ -74,7 +78,10 @@ export interface ResilienceQuadrantChartData {
 }
 
 export interface ResilienceQuadrantCaptureResult {
+  /** PNG data URL. */
   dataUrl: string
+  /** Serialized SVG with computed styles inlined. */
+  svg?: string
   chartData: ResilienceQuadrantChartData
 }
 
@@ -341,14 +348,11 @@ export default function ResilienceQuadrantPanel({
       ? "Climate sensitivity vs operational leverage (by location)"
       : "Climate sensitivity vs operational leverage (by outcome)"
 
-  // Snapshot capture for the Share drawer. Same pattern as
-  // ResiliencePanel: capture the scatter chart container, then build a
-  // flat row table derived from the dots currently on screen. The
-  // chart data shape is distinct from the heatmap's cell shape but
-  // rides on the same `resilience` ShareItem variant via `tileScope:
-  // "quadrant"`.
-  const chartWrapperRef = useRef<HTMLDivElement | null>(null)
-
+  // Snapshot capture for the Share drawer. The capture path mounts an
+  // off-screen ResilienceQuadrant via `captureQuadrantOffscreen`, so
+  // it does not depend on the live DOM: refs only mirror props the
+  // capture builds chart data from. Rides on the `resilience`
+  // ShareItem variant via `tileScope: "quadrant"`.
   const quadrantUnitRef = useRef(quadrantUnit)
   useEffect(() => {
     quadrantUnitRef.current = quadrantUnit
@@ -375,21 +379,30 @@ export default function ResilienceQuadrantPanel({
   }, [climateRefLabel])
 
   const captureQuadrant = useCallback<ResilienceQuadrantCaptureFn>(async () => {
-    const el = chartWrapperRef.current
-    if (!el) return null
+    const unit = quadrantUnitRef.current
+    const source = unit === "loi" ? loiDataRef.current : outcomeDataRef.current
+    const yLabel = `Operational leverage (range at ${climateRefLabelRef.current})`
+    const xLabel = `Climate sensitivity (${climateRefLabelRef.current} - historical)`
+    const loiCode = loiOutcomeCodeRef.current
+    const tileLabel =
+      unit === "loi" && loiCode
+        ? `By location - ${getOutcomeName(loiCode as OutcomeCode)}`
+        : "By outcome"
     try {
-      const { dataUrl } = await captureElementToBlob(el)
-      const unit = quadrantUnitRef.current
-      const source =
-        unit === "loi" ? loiDataRef.current : outcomeDataRef.current
-      const yLabel = `Operational leverage (range at ${climateRefLabelRef.current})`
-      const xLabel = `Climate sensitivity (${climateRefLabelRef.current} - historical)`
-      const loiCode = loiOutcomeCodeRef.current
-      const tileLabel =
-        unit === "loi" && loiCode
-          ? `By location - ${getOutcomeName(loiCode as OutcomeCode)}`
-          : "By outcome"
+      const { svg, dataUrl } = await captureQuadrantOffscreen({
+        theme,
+        width: QUADRANT_CAPTURE_WIDTH,
+        height: QUADRANT_CAPTURE_HEIGHT,
+        props: {
+          unit,
+          data: source,
+          tierColors,
+          palette: quadrantPalette,
+          climateRefHcLabel: climateRefLabelRef.current,
+        },
+      })
       return {
+        svg,
         dataUrl,
         chartData: {
           kind: "resilience",
@@ -414,7 +427,7 @@ export default function ResilienceQuadrantPanel({
       console.error("[ResilienceQuadrantPanel] captureQuadrant failed:", err)
       return null
     }
-  }, [])
+  }, [theme, tierColors, quadrantPalette])
 
   useEffect(() => {
     onCaptureReady?.(captureQuadrant)
@@ -513,7 +526,6 @@ export default function ResilienceQuadrantPanel({
       </Box>
 
       <Box
-        ref={chartWrapperRef}
         sx={{
           flex: 1,
           minHeight: 0,

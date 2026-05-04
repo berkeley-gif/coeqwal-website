@@ -13,6 +13,7 @@ import { InlineRowActions } from "../strategyGrid"
 import { useScenarioExplorerStore } from "../store"
 
 export type RadarAxisDetailCaptureFn = (scenarioId: string) => Promise<{
+  svg: string
   dataUrl: string
   color: string
   chartData: Record<string, unknown>
@@ -143,6 +144,7 @@ function RadarAxisDetailScenarioControlsInner({
               highlightBaseline,
               showDotsOnly,
               hydroclimate,
+              cachedSvg: result?.svg,
               cachedImageDataUrl: result?.dataUrl,
               cachedChartData: result?.chartData,
             })

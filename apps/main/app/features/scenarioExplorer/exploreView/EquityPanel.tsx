@@ -23,15 +23,13 @@ import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
 import { getTierColorsFromTheme } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
-import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+import { useEquityObjectives } from "../hooks/useEquityObjectives"
 import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
 import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
 import { useMap, Marker } from "@repo/map"
-import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
-import type { TierLocationAssignmentsResponse } from "@repo/data/coeqwal"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 
@@ -179,132 +177,10 @@ export default function EquityPanel() {
   const { equityFocusScenario, showEquityComparison, showMap } =
     useScenarioExplorerStore()
 
-  const { outcomeNames, idMapping } = useResolvedScenarioTiers()
-
-  // Resolve scenario ID to the right hydro-climate. Fall back to the
-  // baseline until the user explicitly picks a radio. Both branches
-  // go through idMapping so the tier queries re-fetch when the
-  // hydroclimate chooser changes (without this, the no-radio state
-  // would always render historical because "s0020" is only the
-  // baseline's short_code under historical).
-  const baselineScenario = idMapping["s0020"] || "s0020"
-
-  const firstSelected = equityFocusScenario
-  const currentScenario = firstSelected
-    ? idMapping[firstSelected] || firstSelected
-    : baselineScenario
-
-  // Call useTierLocationAssignments for each outcome (not in a loop - follows Rules of Hooks)
-  const cwsDel = useTierLocationAssignments(currentScenario, "CWS_DEL")
-  const agRev = useTierLocationAssignments(currentScenario, "AG_REV")
-  const envFlows = useTierLocationAssignments(currentScenario, "ENV_FLOWS")
-  const resStor = useTierLocationAssignments(currentScenario, "RES_STOR")
-  const gwStor = useTierLocationAssignments(currentScenario, "GW_STOR")
-  const deltaEco = useTierLocationAssignments(currentScenario, "DELTA_ECO")
-  const fwExp = useTierLocationAssignments(currentScenario, "FW_EXP")
-  const fwDeltaUses = useTierLocationAssignments(
-    currentScenario,
-    "FW_DELTA_USES",
-  )
-  const wrcSalmonAb = useTierLocationAssignments(
-    currentScenario,
-    "WRC_SALMON_AB",
-  )
-
-  // Baseline data for comparison
-  const baselineCwsDel = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "CWS_DEL",
-  )
-  const baselineAgRev = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "AG_REV",
-  )
-  const baselineEnvFlows = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "ENV_FLOWS",
-  )
-  const baselineResStor = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "RES_STOR",
-  )
-  const baselineGwStor = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "GW_STOR",
-  )
-  const baselineDeltaEco = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "DELTA_ECO",
-  )
-  const baselineFwExp = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "FW_EXP",
-  )
-  const baselineFwDeltaUses = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "FW_DELTA_USES",
-  )
-  const baselineWrcSalmonAb = useTierLocationAssignments(
-    showEquityComparison ? baselineScenario : null,
-    "WRC_SALMON_AB",
-  )
-
-  // Map outcome codes to their data
-  const tierDataByCode: Record<
-    string,
-    TierLocationAssignmentsResponse | undefined
-  > = useMemo(
-    () => ({
-      CWS_DEL: cwsDel.data,
-      AG_REV: agRev.data,
-      ENV_FLOWS: envFlows.data,
-      RES_STOR: resStor.data,
-      GW_STOR: gwStor.data,
-      DELTA_ECO: deltaEco.data,
-      FW_EXP: fwExp.data,
-      FW_DELTA_USES: fwDeltaUses.data,
-      WRC_SALMON_AB: wrcSalmonAb.data,
-    }),
-    [
-      cwsDel.data,
-      agRev.data,
-      envFlows.data,
-      resStor.data,
-      gwStor.data,
-      deltaEco.data,
-      fwExp.data,
-      fwDeltaUses.data,
-      wrcSalmonAb.data,
-    ],
-  )
-
-  const baselineTierDataByCode: Record<
-    string,
-    TierLocationAssignmentsResponse | undefined
-  > = useMemo(
-    () => ({
-      CWS_DEL: baselineCwsDel.data,
-      AG_REV: baselineAgRev.data,
-      ENV_FLOWS: baselineEnvFlows.data,
-      RES_STOR: baselineResStor.data,
-      GW_STOR: baselineGwStor.data,
-      DELTA_ECO: baselineDeltaEco.data,
-      FW_EXP: baselineFwExp.data,
-      FW_DELTA_USES: baselineFwDeltaUses.data,
-      WRC_SALMON_AB: baselineWrcSalmonAb.data,
-    }),
-    [
-      baselineCwsDel.data,
-      baselineAgRev.data,
-      baselineEnvFlows.data,
-      baselineResStor.data,
-      baselineGwStor.data,
-      baselineDeltaEco.data,
-      baselineFwExp.data,
-      baselineFwDeltaUses.data,
-      baselineWrcSalmonAb.data,
-    ],
-  )
+  const { objectives, categories } = useEquityObjectives({
+    scenarioId: equityFocusScenario,
+    compareToBaseline: showEquityComparison,
+  })
 
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
@@ -328,73 +204,6 @@ export default function EquityPanel() {
     }
   }, [locationHighlights])
 
-  // Transform tier location data to tier grid format
-  const { objectives, categories } = useMemo(() => {
-    if (outcomeNames.length === 0) {
-      return { objectives: [], categories: [] }
-    }
-
-    const result: TierGridProps["objectives"] = []
-    const categorySet = new Set<string>()
-    let globalId = 0
-
-    // Build baseline tier map
-    const baselineTierMap = new Map<string, number>()
-    if (showEquityComparison) {
-      outcomeNames.forEach((outcome) => {
-        const baselineData = baselineTierDataByCode[outcome.shortCode]
-        if (baselineData) {
-          baselineData.locations.forEach((location) => {
-            baselineTierMap.set(
-              `${outcome.shortCode},${location.location_id}`,
-              location.tier_level,
-            )
-          })
-        }
-      })
-    }
-
-    // Process each outcome
-    outcomeNames.forEach((outcome) => {
-      const tierCode = outcome.shortCode
-      const currentData = tierDataByCode[tierCode]
-
-      if (!currentData) return
-
-      const categoryName = outcome.displayName
-      categorySet.add(categoryName)
-
-      currentData.locations.forEach((location) => {
-        const currentTierLevel = location.tier_level
-        const baselineTierLevel = showEquityComparison
-          ? (baselineTierMap.get(
-              `${outcome.shortCode},${location.location_id}`,
-            ) ?? currentTierLevel)
-          : currentTierLevel
-
-        result.push({
-          id: globalId++,
-          tier: `Tier ${currentTierLevel}`,
-          baselineTier: `Tier ${baselineTierLevel}`,
-          category: categoryName,
-          locationId: location.location_id,
-          locationName: location.location_name,
-          tierLevel: currentTierLevel,
-          tierCode: tierCode,
-        })
-      })
-    })
-
-    return {
-      objectives: result,
-      categories: Array.from(categorySet),
-    }
-  }, [
-    outcomeNames,
-    tierDataByCode,
-    baselineTierDataByCode,
-    showEquityComparison,
-  ])
 
   const handleObjectiveClick = (objective: TierGridProps["objectives"][0]) => {
     setSelectedObjectives((prev) => {
@@ -801,7 +610,7 @@ export default function EquityPanel() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScenario, showEquityComparison, objectives])
+  }, [equityFocusScenario, showEquityComparison, objectives])
 
   // Update highlights when selected objectives changes
   useEffect(() => {

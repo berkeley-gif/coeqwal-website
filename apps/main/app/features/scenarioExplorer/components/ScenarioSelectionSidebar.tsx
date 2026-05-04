@@ -39,11 +39,26 @@ interface ScenarioSelectionSidebarProps {
   onRowHover?: (scenarioIds: string[] | null) => void
   singleSelect?: boolean
   onCaptureRadarScenario?: (scenarioId: string) => Promise<{
+    svg: string
     dataUrl: string
     color: string
     chartData: Record<string, unknown>
   } | null>
+  /**
+   * Multi-scenario radar capture for the theme-header "share all"
+   * action. Returns one combined chart with all scenarios overlaid
+   * (radar's traces compose on a single canvas, unlike equity or
+   * resilience which need one card per scenario).
+   */
+  onCaptureRadarScenarios?: (scenarioIds: string[]) => Promise<{
+    svg: string
+    dataUrl: string
+    colors: string[]
+    scenarioIds: string[]
+    chartData: Record<string, unknown>
+  } | null>
   onResilienceScenarioShare?: (scenarioId: string) => void | Promise<void>
+  onEquityScenarioShare?: (scenarioId: string) => void | Promise<void>
 }
 
 export default function ScenarioSelectionSidebar({
@@ -52,7 +67,9 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
   singleSelect = false,
   onCaptureRadarScenario,
+  onCaptureRadarScenarios,
   onResilienceScenarioShare,
+  onEquityScenarioShare,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -92,6 +109,134 @@ export default function ScenarioSelectionSidebar({
       toggleScenario(scenarioId)
     }
   }
+
+  // Per-scenario share dispatcher. The sidebar is shown in every
+  // non-list explore mode, so the share icon next to each row (and
+  // the "share all" icon on the theme-group header, which calls
+  // through this same path) must produce a card that matches the
+  // panel currently on screen, not a list-view bar chart. Each
+  // branch returns a promise so callers can await batch operations
+  // (e.g. a theme-group share that iterates scenarios sequentially).
+  const shareScenario = useCallback(
+    async (scenarioId: string): Promise<void> => {
+      if (exploreMode === "radar") {
+        const result = await onCaptureRadarScenario?.(scenarioId)
+        addShareItem({
+          id: crypto.randomUUID(),
+          type: "radar",
+          scenarioIds: [scenarioId],
+          scenarioColors: result
+            ? [result.color]
+            : scenarioColors
+              ? [scenarioColors[scenarioId] ?? "#666666"]
+              : undefined,
+          axes: [...radarVisibleAxes],
+          showRange: showRadarRange,
+          showTierZones,
+          highlightBaseline,
+          showDotsOnly,
+          hydroclimate,
+          cachedSvg: result?.svg,
+          cachedImageDataUrl: result?.dataUrl,
+          cachedChartData: result?.chartData,
+        })
+        return
+      }
+      if (exploreMode === "equity" && onEquityScenarioShare) {
+        await onEquityScenarioShare(scenarioId)
+        return
+      }
+      if (exploreMode === "resilience" && onResilienceScenarioShare) {
+        await onResilienceScenarioShare(scenarioId)
+        return
+      }
+      // comparison and data modes (and any future mode without a
+      // dedicated share variant) fall through to a list-view bar
+      // chart. This matches what the row would have shared from
+      // ListView, so the user gets a usable artifact rather than
+      // nothing.
+      addShareItem({
+        id: crypto.randomUUID(),
+        type: "barChart",
+        scenarioId,
+        viewMode: outcomeDisplayMode,
+        hydroclimate,
+      })
+    },
+    [
+      exploreMode,
+      onCaptureRadarScenario,
+      onEquityScenarioShare,
+      onResilienceScenarioShare,
+      addShareItem,
+      scenarioColors,
+      radarVisibleAxes,
+      showRadarRange,
+      showTierZones,
+      highlightBaseline,
+      showDotsOnly,
+      hydroclimate,
+      outcomeDisplayMode,
+    ],
+  )
+
+  // Theme-header share. Radar overlays multiple traces on a single
+  // chart, so a "share all in theme" action collapses to one radar
+  // card with every scenario in the theme. Equity / resilience can't
+  // overlay (one chart per scenario, by design), so they iterate
+  // `shareScenario` to produce N cards. The list-mode default
+  // (StrategyGrid passing no override) keeps its bar-chart loop.
+  // Sequential await on the per-scenario branch keeps off-screen
+  // captures (resilience tile) from contending for the host.
+  const shareThemeScenarios = useCallback(
+    async (scenarioIds: string[]): Promise<void> => {
+      if (scenarioIds.length === 0) return
+
+      if (exploreMode === "radar") {
+        const result = await onCaptureRadarScenarios?.(scenarioIds)
+        const fallbackColors = scenarioColors
+          ? scenarioIds.map((sid) => scenarioColors[sid] ?? "#666666")
+          : undefined
+        addShareItem({
+          id: crypto.randomUUID(),
+          type: "radar",
+          // Prefer the resolved order from the capture (it filtered
+          // missing entries and deduped). If capture failed, fall
+          // back to the requested list so the card still renders
+          // live from the store.
+          scenarioIds: result?.scenarioIds ?? [...scenarioIds],
+          scenarioColors: result?.colors ?? fallbackColors,
+          axes: [...radarVisibleAxes],
+          showRange: showRadarRange,
+          showTierZones,
+          highlightBaseline,
+          showDotsOnly,
+          hydroclimate,
+          cachedSvg: result?.svg,
+          cachedImageDataUrl: result?.dataUrl,
+          cachedChartData: result?.chartData,
+        })
+        return
+      }
+
+      for (const sid of scenarioIds) {
+        await shareScenario(sid)
+      }
+    },
+    [
+      exploreMode,
+      onCaptureRadarScenarios,
+      addShareItem,
+      scenarioColors,
+      radarVisibleAxes,
+      showRadarRange,
+      showTierZones,
+      highlightBaseline,
+      showDotsOnly,
+      hydroclimate,
+      shareScenario,
+    ],
+  )
 
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -277,6 +422,7 @@ export default function ScenarioSelectionSidebar({
                 layout="flex"
                 onRowHover={onRowHover}
                 singleSelect={singleSelect}
+                onShareScenarios={shareThemeScenarios}
               />,
             )
           }
@@ -416,43 +562,8 @@ export default function ScenarioSelectionSidebar({
                       accentColor={accentColor}
                       dense
                       shareIconNudgeTop="-2px"
-                      onShare={async () => {
-                        if (exploreMode === "radar") {
-                          const result = await onCaptureRadarScenario?.(
-                            scenario.scenarioId,
-                          )
-                          addShareItem({
-                            id: crypto.randomUUID(),
-                            type: "radar",
-                            scenarioIds: [scenario.scenarioId],
-                            scenarioColors: result
-                              ? [result.color]
-                              : scenarioColors
-                                ? [
-                                    scenarioColors[scenario.scenarioId] ??
-                                      "#666666",
-                                  ]
-                                : undefined,
-                            axes: [...radarVisibleAxes],
-                            showRange: showRadarRange,
-                            showTierZones,
-                            highlightBaseline,
-                            showDotsOnly,
-                            hydroclimate,
-                            cachedImageDataUrl: result?.dataUrl,
-                            cachedChartData: result?.chartData,
-                          })
-                        } else if (onResilienceScenarioShare) {
-                          await onResilienceScenarioShare(scenario.scenarioId)
-                        } else {
-                          addShareItem({
-                            id: crypto.randomUUID(),
-                            type: "barChart",
-                            scenarioId: scenario.scenarioId,
-                            viewMode: outcomeDisplayMode,
-                            hydroclimate,
-                          })
-                        }
+                      onShare={() => {
+                        void shareScenario(scenario.scenarioId)
                       }}
                       togglePinnedScenario={togglePinnedScenario}
                       hidePinning

@@ -19,7 +19,7 @@ import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
 import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
-import ShareDrawer from "./components/ShareDrawer"
+import ShareDrawer from "./share/ShareDrawer"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import ToolTour from "./components/ToolTour"
 import { TourAnchorProvider, useTourAnchor } from "./tour/TourAnchorContext"
@@ -32,11 +32,13 @@ import {
 } from "./exploreView"
 import type {
   SingleScenarioCaptureFn,
+  MultiScenarioCaptureFn,
   ResilienceControlsState,
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
   ResilienceQuadrantCaptureFn,
 } from "./exploreView"
+import { captureEquityOffscreen } from "./exploreView/OffscreenEquityCapture"
 import ResilienceControls from "./exploreView/ResilienceControls"
 import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
@@ -202,36 +204,66 @@ function ScenarioExplorerInner() {
     addShareItem,
   } = useScenarioExplorerStore()
 
-  // Build a share item for the current Equity panel state and stage
-  // it into the Share drawer. The scenario id reflects the
-  // Distribution tool's own focus field so the snapshot matches what
-  // was actually on screen. Falls back to the baseline to mirror
-  // EquityPanel's rendering contract.
+  // Stage an equity share item, capturing an off-screen TierGrid SVG
+  // for the requested scenario so the share card has a real
+  // thumbnail and PNG / SVG download both work. Failures fall back to
+  // a no-cache item; the card then text-renders without a chart but
+  // does not block the user.
+  const stageEquityShareItem = useCallback(
+    async (scenarioId: string) => {
+      const item: ShareItem = {
+        id: `equity-${scenarioId}-${Date.now()}`,
+        type: "equity",
+        scenarioId,
+        outcomeCodes: resilienceVisibleOutcomes,
+        compareToBaseline: showEquityComparison,
+        hydroclimate,
+      }
+      try {
+        const { svg, dataUrl } = await captureEquityOffscreen({
+          scenarioId,
+          compareToBaseline: showEquityComparison,
+          theme,
+        })
+        item.cachedSvg = svg
+        item.cachedImageDataUrl = dataUrl
+      } catch (err) {
+        console.error("[ScenarioExplorer] captureEquityOffscreen failed:", err)
+      }
+      addShareItem(item)
+    },
+    [
+      resilienceVisibleOutcomes,
+      showEquityComparison,
+      hydroclimate,
+      addShareItem,
+      theme,
+    ],
+  )
+
+  // Toolbar "save snapshot" button. Defaults to the baseline when no
+  // scenario is in focus to mirror EquityPanel's rendering contract.
   const handleEquitySnapshot = useCallback(() => {
     const focused = equityFocusScenario ?? "s0020"
     if (!focused) return
-    const item: ShareItem = {
-      id: `equity-${focused}-${Date.now()}`,
-      type: "equity",
-      scenarioId: focused,
-      outcomeCodes: resilienceVisibleOutcomes,
-      compareToBaseline: showEquityComparison,
-      hydroclimate,
-    }
-    addShareItem(item)
-  }, [
-    equityFocusScenario,
-    resilienceVisibleOutcomes,
-    showEquityComparison,
-    hydroclimate,
-    addShareItem,
-  ])
+    void stageEquityShareItem(focused)
+  }, [equityFocusScenario, stageEquityShareItem])
+
+  // Sidebar row + theme-header share entry point. Captures the row's
+  // scenario regardless of focus.
+  const handleEquitySidebarScenarioShare = useCallback(
+    (scenarioId: string) => {
+      void stageEquityShareItem(scenarioId)
+    },
+    [stageEquityShareItem],
+  )
 
   // Resilience snapshot builder is defined below (after resilienceControls
   // state is declared) because it closes over that state.
 
   const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
   const radarSingleCaptureRef = useRef<SingleScenarioCaptureFn | null>(null)
+  const radarMultiCaptureRef = useRef<MultiScenarioCaptureFn | null>(null)
 
   const handleRadarCaptureReady = useCallback(
     (capture: () => Promise<void>) => {
@@ -247,9 +279,23 @@ function ScenarioExplorerInner() {
     [],
   )
 
+  const handleRadarMultiCaptureReady = useCallback(
+    (capture: MultiScenarioCaptureFn) => {
+      radarMultiCaptureRef.current = capture
+    },
+    [],
+  )
+
   const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
     return radarSingleCaptureRef.current?.(scenarioId) ?? null
   }, [])
+
+  const handleCaptureRadarScenarios = useCallback(
+    async (scenarioIds: string[]) => {
+      return radarMultiCaptureRef.current?.(scenarioIds) ?? null
+    },
+    [],
+  )
 
   // Resilience capture plumbing. Three separate refs so the toolbar
   // "save snapshot" button can dispatch to whichever panel is
@@ -336,6 +382,7 @@ function ScenarioExplorerInner() {
     }
 
     let capture: {
+      svg?: string
       dataUrl?: string
       chartData?: Record<string, unknown>
       tileLabel?: string
@@ -346,6 +393,7 @@ function ScenarioExplorerInner() {
       const result = await resilienceQuadrantCaptureRef.current?.()
       if (result) {
         capture = {
+          svg: result.svg,
           dataUrl: result.dataUrl,
           chartData: result.chartData as unknown as Record<string, unknown>,
           tileLabel: result.chartData.tileLabel,
@@ -358,6 +406,7 @@ function ScenarioExplorerInner() {
       const result = await resilienceCaptureRef.current?.()
       if (result) {
         capture = {
+          svg: result.svg,
           dataUrl: result.dataUrl,
           chartData: result.chartData as unknown as Record<string, unknown>,
           tileScope: "panel",
@@ -371,6 +420,7 @@ function ScenarioExplorerInner() {
       ...base,
       tileScope: capture.tileScope,
       tileLabel: capture.tileLabel,
+      cachedSvg: capture.svg,
       cachedImageDataUrl: capture.dataUrl,
       cachedChartData: capture.chartData,
     }
@@ -401,6 +451,7 @@ function ScenarioExplorerInner() {
         tileScope: result.chartData.tileScope,
         tileId,
         tileLabel: result.chartData.tileLabel,
+        cachedSvg: result.svg,
         cachedImageDataUrl: result.dataUrl,
         cachedChartData: result.chartData as unknown as Record<string, unknown>,
       }
@@ -661,9 +712,15 @@ function ScenarioExplorerInner() {
                       onRowHover={handleSidebarRowHover}
                       singleSelect={exploreMode === "equity"}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
+                      onCaptureRadarScenarios={handleCaptureRadarScenarios}
                       onResilienceScenarioShare={
                         exploreMode === "resilience"
                           ? handleResilienceSidebarScenarioShare
+                          : undefined
+                      }
+                      onEquityScenarioShare={
+                        exploreMode === "equity"
+                          ? handleEquitySidebarScenarioShare
                           : undefined
                       }
                     />
@@ -690,6 +747,7 @@ function ScenarioExplorerInner() {
                     onScenarioColors={setRadarScenarioColors}
                     onCaptureReady={handleRadarCaptureReady}
                     onSingleCaptureReady={handleRadarSingleCaptureReady}
+                    onMultiCaptureReady={handleRadarMultiCaptureReady}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}

@@ -11,206 +11,18 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
-import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useComparisonData } from "../hooks/useComparisonData"
 import {
-  normalizeShareRadarHydro,
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
   type ShareRadarLiveDataFields,
-} from "../utils/shareRadarLiveData"
+} from "./utils/shareRadarLiveData"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
-import ShareScenarioCard from "./ShareScenarioCard"
-import ShareRadarCard from "./ShareRadarCard"
-import ShareSnapshotCard from "./ShareSnapshotCard"
-import ShareRadarLiveChart from "./ShareRadarLiveChart"
-import ResilienceShareCard from "./ResilienceShareCard"
-import type { ChartDataPoint } from "../../scenarios/components/shared/types"
-import type { VerticalParallelLineData } from "@repo/viz"
-import {
-  OUTCOME_NAMES,
-  getOutcomeName,
-  type OutcomeCode,
-} from "../../../content/outcomes"
+import ShareItemView from "./ShareItemView"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
-
-function outcomeCodesToLabels(codes: string[]): string[] {
-  return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
-}
-
-function ShareItemCard({
-  item,
-  onRemove,
-  onNoteChange,
-  outcomeNames,
-  scenarioLookup,
-  allChartData,
-  radarLiveByHydro,
-}: {
-  item: ShareItem
-  onRemove: (id: string) => void
-  onNoteChange: (id: string, note: string) => void
-  outcomeNames: { shortCode: string; displayName: string }[]
-  scenarioLookup: Map<
-    string,
-    {
-      name: string
-      description: string
-      definition: string
-      shortLabel: string
-    }
-  >
-  allChartData: Record<string, Record<string, unknown> | undefined>
-  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
-}) {
-  if (item.type === "barChart") {
-    const info = scenarioLookup.get(item.scenarioId)
-    const viewLabel =
-      item.viewMode === "average"
-        ? "Key outcomes average"
-        : item.viewMode === "distribution"
-          ? "Key outcomes distribution"
-          : "Key outcomes bar chart"
-    const chartData =
-      (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
-      (allChartData[item.scenarioId] as
-        | Record<string, ChartDataPoint[]>
-        | undefined)
-    return (
-      <ShareScenarioCard
-        scenarioId={item.id}
-        name={info?.description ?? info?.name ?? item.scenarioId}
-        scenarioDefinition={info?.definition}
-        description={viewLabel}
-        hydroclimate={item.hydroclimate}
-        chartData={chartData}
-        outcomeNames={outcomeNames}
-        onRemove={() => onRemove(item.id)}
-        viewMode={item.viewMode}
-        note={item.note}
-        onNoteChange={(note) => onNoteChange(item.id, note)}
-      />
-    )
-  }
-
-  if (item.type === "radar") {
-    const radarScenarioNames = item.scenarioIds.map(
-      (id) =>
-        scenarioLookup.get(id)?.description ??
-        scenarioLookup.get(id)?.name ??
-        id,
-    )
-    const radarScenarioDefinitions = item.scenarioIds.map(
-      (id) => scenarioLookup.get(id)?.definition ?? "",
-    )
-
-    const radarLive =
-      radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
-    const liveChart = item.cachedImageDataUrl
-      ? undefined
-      : renderRadarLiveChart(item, radarLive)
-
-    return (
-      <ShareRadarCard
-        scenarioNames={radarScenarioNames}
-        scenarioDefinitions={radarScenarioDefinitions}
-        scenarioColors={item.scenarioColors}
-        hydroclimate={item.hydroclimate}
-        showRange={item.showRange}
-        showTierZones={item.showTierZones !== false}
-        highlightBaseline={item.highlightBaseline}
-        showDotsOnly={item.showDotsOnly}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        liveChart={liveChart}
-        onRemove={() => onRemove(item.id)}
-        note={item.note}
-        onNoteChange={(note) => onNoteChange(item.id, note)}
-      />
-    )
-  }
-
-  if (item.type === "equity") {
-    const info = scenarioLookup.get(item.scenarioId)
-    const outcomeChips = outcomeCodesToLabels(item.outcomeCodes)
-    return (
-      <ShareSnapshotCard
-        id={item.id}
-        toolLabel="Distribution"
-        title={info?.description ?? info?.name ?? item.scenarioId}
-        subtitle={
-          item.compareToBaseline
-            ? "Compared to today's operations"
-            : "Single scenario view"
-        }
-        chips={outcomeChips}
-        hydroclimate={item.hydroclimate}
-        cachedImageDataUrl={item.cachedImageDataUrl}
-        note={item.note}
-        onNoteChange={(note) => onNoteChange(item.id, note)}
-        onRemove={onRemove}
-      />
-    )
-  }
-
-  if (item.type === "resilience") {
-    return (
-      <ResilienceShareCard
-        item={item}
-        scenarioLookup={scenarioLookup}
-        onNoteChange={(note) => onNoteChange(item.id, note)}
-        onRemove={onRemove}
-      />
-    )
-  }
-
-  return null
-}
-
-/**
- * Build the live-radar fallback node for a share item in the drawer.
- * Filters the shared parallel-plot data down to the item's scenarios,
- * converts outcome codes back to display names, and selects line
- * colors from the item's captured palette (preferred) or the current
- * theme assignment.
- */
-function renderRadarLiveChart(
-  item: Extract<ShareItem, { type: "radar" }>,
-  liveData: ShareRadarLiveDataFields,
-): React.ReactNode {
-  const idSet = new Set(item.scenarioIds)
-  const filtered = liveData.radarPlotData.filter((d) => idSet.has(d.id))
-  if (filtered.length === 0) return null
-
-  const orderedFiltered = item.scenarioIds
-    .map((id) => filtered.find((d) => d.id === id))
-    .filter((d): d is VerticalParallelLineData => !!d)
-
-  const axesDisplay = item.axes.map((code) => getOutcomeName(code))
-
-  const lineColors = orderedFiltered.map((d, i) => {
-    const captured = item.scenarioColors?.[i]
-    if (captured) return captured
-    return liveData.radarLineColorByScenario.get(d.id) ?? "#666666"
-  })
-
-  return (
-    <ShareRadarLiveChart
-      data={orderedFiltered}
-      axes={axesDisplay}
-      lineColors={lineColors}
-      baselineData={liveData.radarBaseline}
-      axisRange={liveData.radarAxisRange}
-      showRadarRange={item.showRange}
-      showTierZones={item.showTierZones !== false}
-      highlightBaseline={item.highlightBaseline}
-      showDotsOnly={item.showDotsOnly}
-      morphGeneration={liveData.morphGeneration}
-    />
-  )
-}
 
 function ShareTab({
   count,
@@ -243,12 +55,12 @@ function ShareTab({
         py: 1.5,
         px: 0.5,
         border: "none",
-        borderRadius: "8px 0 0 8px",
+        borderRadius: `${theme.borderRadius.md} 0 0 ${theme.borderRadius.md}`,
         cursor: "pointer",
         pointerEvents: "auto",
         backgroundColor: theme.palette.blue.bright,
         color: theme.palette.common.white,
-        boxShadow: "-2px 0 8px rgba(0,0,0,0.15)",
+        boxShadow: theme.shadow.md,
         "&:hover": {
           backgroundColor: theme.palette.blue.darkest,
         },
@@ -284,7 +96,7 @@ function ShareTab({
             mt: 0.25,
             minWidth: 18,
             height: 18,
-            borderRadius: "9px",
+            borderRadius: theme.borderRadius.circle,
             backgroundColor: theme.palette.common.white,
             color: theme.palette.blue.bright,
             fontSize: "0.625rem",
@@ -390,7 +202,7 @@ export default function ShareDrawer() {
             flexDirection: "column",
             overflow: "hidden",
             pointerEvents: "auto",
-            boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
+            boxShadow: theme.shadow.lg,
           },
         }}
       >
@@ -447,7 +259,7 @@ export default function ShareDrawer() {
                 px: 1.25,
                 py: 0.5,
                 border: "none",
-                borderRadius: "12px",
+                borderRadius: theme.borderRadius.lg,
                 cursor: "pointer",
                 fontSize: "0.8125rem",
                 fontWeight: 500,
@@ -493,7 +305,7 @@ export default function ShareDrawer() {
             </Typography>
           ) : (
             shareItems.map((item) => (
-              <ShareItemCard
+              <ShareItemView
                 key={item.id}
                 item={item}
                 onRemove={removeShareItem}

@@ -1,29 +1,17 @@
 "use client"
 
 /**
- * ShareSnapshotCard. Text-forward share card for tools whose full
- * image capture isn't wired yet (equity, resilience). Renders the
- * important state (outcomes, scenarios, climate, encoding) as chips
- * so the saved context is readable at a glance, and supports inline
- * notes the user adds to explain why they saved it.
- *
- * When a cachedImageDataUrl becomes available in the future, callers
- * can pass it to render a thumbnail above the chip list. The card
- * gracefully degrades to text-only when it's absent.
+ * Share card used by the equity (Distribution) and resilience tools.
+ * Renders the captured SVG thumbnail when present, falls back to a
+ * raster PNG, and finally to text-only chips so URL-restored items
+ * still convey what was saved.
  */
 
 import React from "react"
-import {
-  Box,
-  Typography,
-  IconButton,
-  useTheme,
-  icons,
-  alpha,
-} from "@repo/ui/mui"
-import type { HydroclimateOption } from "../../../content/scenarios"
-import { hydroclimateOptions } from "../../../content/scenarios"
-import ShareItemNoteBlock from "./ShareItemNoteBlock"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import ShareCardShell from "../ShareCardShell"
+import HydroclimateBadge from "./HydroclimateBadge"
+import SvgThumbnail from "./SvgThumbnail"
 
 interface ShareSnapshotCardProps {
   id: string
@@ -37,12 +25,16 @@ interface ShareSnapshotCardProps {
   chips?: string[]
   /** Primary climate the snapshot was taken at, if any. */
   hydroclimate?: string
+  /** Serialized SVG thumbnail. Preferred over cachedImageDataUrl. */
+  cachedSvg?: string
+  /** PNG fallback (used when no SVG is available). */
   cachedImageDataUrl?: string
   /**
-   * Live-rendered chart to show when no cached PNG is available (e.g.
-   * items restored from a URL that cannot embed large images). The
-   * parent decides whether to mount this fallback so we only pay the
-   * hook / render cost when it is actually needed.
+   * Live-rendered chart to show when no cached SVG or PNG is
+   * available (e.g. items restored from a URL that cannot embed
+   * visual cache). The parent decides whether to mount this fallback
+   * so we only pay the hook and render cost when it is actually
+   * needed.
    */
   liveChart?: React.ReactNode
   note?: string
@@ -57,6 +49,7 @@ export default function ShareSnapshotCard({
   subtitle,
   chips = [],
   hydroclimate,
+  cachedSvg,
   cachedImageDataUrl,
   liveChart,
   note,
@@ -65,39 +58,13 @@ export default function ShareSnapshotCard({
 }: ShareSnapshotCardProps) {
   const theme = useTheme()
 
-  const climateOption: HydroclimateOption | undefined = hydroclimate
-    ? hydroclimateOptions.find((o) => o.value === hydroclimate)
-    : undefined
-
   return (
-    <Box
-      sx={{
-        position: "relative",
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.borderRadius.sm ?? "6px",
-        backgroundColor: theme.palette.background.paper,
-        p: 1.5,
-        mb: 1,
-      }}
+    <ShareCardShell
+      onRemove={onRemove ? () => onRemove(id) : undefined}
+      note={note}
+      onNoteChange={onNoteChange}
+      removeAriaLabel="Remove snapshot"
     >
-      {onRemove && (
-        <IconButton
-          size="small"
-          onClick={() => onRemove(id)}
-          sx={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            p: 0.25,
-            color: theme.palette.grey[400],
-            "&:hover": { color: theme.palette.grey[700] },
-          }}
-          aria-label="Remove snapshot"
-        >
-          <icons.Close sx={{ fontSize: "0.875rem" }} />
-        </IconButton>
-      )}
-
       <Typography
         variant="caption"
         sx={{
@@ -136,7 +103,15 @@ export default function ShareSnapshotCard({
         </Typography>
       )}
 
-      {cachedImageDataUrl ? (
+      {hydroclimate && (
+        <Box sx={{ mt: 0.75 }}>
+          <HydroclimateBadge hydroclimate={hydroclimate} />
+        </Box>
+      )}
+
+      {cachedSvg ? (
+        <SvgThumbnail svg={cachedSvg} ariaLabel={title} />
+      ) : cachedImageDataUrl ? (
         <Box
           sx={{
             mt: 1,
@@ -160,7 +135,7 @@ export default function ShareSnapshotCard({
         (liveChart ?? null)
       )}
 
-      {(chips.length > 0 || climateOption) && (
+      {chips.length > 0 && (
         <Box
           sx={{
             display: "flex",
@@ -169,24 +144,6 @@ export default function ShareSnapshotCard({
             mt: 0.75,
           }}
         >
-          {climateOption && (
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                px: 0.75,
-                py: 0.25,
-                fontSize: "0.6875rem",
-                fontWeight: 500,
-                borderRadius: "10px",
-                backgroundColor: alpha(theme.palette.blue.bright, 0.1),
-                color: theme.palette.blue.dark,
-              }}
-            >
-              {climateOption.label}
-            </Box>
-          )}
           {chips.map((chip) => (
             <Box
               key={chip}
@@ -198,7 +155,7 @@ export default function ShareSnapshotCard({
                 py: 0.25,
                 fontSize: "0.6875rem",
                 fontWeight: 500,
-                borderRadius: "10px",
+                borderRadius: theme.borderRadius.lg,
                 backgroundColor: theme.palette.grey[100],
                 color: theme.palette.text.primary,
               }}
@@ -208,8 +165,6 @@ export default function ShareSnapshotCard({
           ))}
         </Box>
       )}
-
-      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
-    </Box>
+    </ShareCardShell>
   )
 }

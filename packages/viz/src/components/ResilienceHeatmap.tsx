@@ -238,6 +238,24 @@ export interface ResilienceHeatmapProps {
    * scenarios across hydroclimates, or by-hydroclimate small multiples).
    */
   columnLabelRotation?: number
+  /**
+   * Capture-mode props (P2.1). Off-screen capture sets all three:
+   *  - `interactive=false`: skips all hover/click handler attachment
+   *    so the rendered SVG carries no listener residue.
+   *  - `animate=false`: reserved for future transitions; the heatmap
+   *    has none today, so this is currently a no-op flag kept for
+   *    parity with `RadarPlot`.
+   *  - `onReady`: invoked once after the first successful render
+   *    (in a `requestAnimationFrame` so post-paint layout settles
+   *    first). Capture hosts await this before serializing the SVG.
+   *
+   * The defaults (`interactive=true`, `animate=true`, `onReady=undefined`)
+   * preserve the live mount's behavior, so existing call sites do not
+   * need to change.
+   */
+  interactive?: boolean
+  animate?: boolean
+  onReady?: () => void
 }
 
 export interface ResilienceColumnGroup {
@@ -401,7 +419,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     columnGroups,
     firstCellRef,
     columnLabelRotation = 0,
+    interactive = true,
+    animate: _animate = true,
+    onReady,
   }) => {
+    void _animate
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
     const cellTooltipRef = useRef<HTMLDivElement | null>(null)
@@ -448,6 +470,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       formatRowTickRef.current = formatRowTick
     }, [formatRowTick])
+
+    // Capture-mode gates. `interactiveRef` is read inside `updateChart`
+    // so we can flip the prop without rebuilding the callback. The
+    // `onReady` flow fires exactly once, after the chart's first
+    // successful draw, so off-screen capture hosts can await it.
+    const interactiveRef = useRef(interactive)
+    useEffect(() => {
+      interactiveRef.current = interactive
+    }, [interactive])
+    const onReadyRef = useRef(onReady)
+    useEffect(() => {
+      onReadyRef.current = onReady
+    }, [onReady])
+    const hasFiredOnReadyRef = useRef(false)
 
     // Mirrors the `highlightedRowKeys` prop in a ref so updateChart
     // can read the current value without depending on it. The
@@ -979,8 +1015,13 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                 const gridH = rows * stride - gap
                 const gx = x + hPad + (innerGridW - gridW) / 2
                 const gy = y + vPad + (innerGridH - gridH) / 2
-                const interactive =
-                  !!onSquareHoverRef.current || !!onSquareClickRef.current
+                // Combine the prop-level capture-mode gate with the
+                // local "do callbacks exist" gate. Off-screen capture
+                // sets `interactive=false` so listeners are never
+                // attached and the SVG serializes clean.
+                const cellInteractive =
+                  interactiveRef.current &&
+                  (!!onSquareHoverRef.current || !!onSquareClickRef.current)
                 sorted.forEach((entry, i) => {
                   const col = i % cols
                   const rowIdx = Math.floor(i / cols)
@@ -1002,7 +1043,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
                     .attr("stroke", "transparent")
                     .attr("stroke-width", 1)
 
-                  if (interactive) {
+                  if (cellInteractive) {
                     sq.attr(
                       "cursor",
                       onSquareClickRef.current ? "pointer" : "default",
@@ -1083,29 +1124,33 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               }
             }
 
-            rect
-              .on("mouseenter", function (event: MouseEvent) {
-                select(this)
-                  .attr("stroke", paletteHoverStroke)
-                  .attr("stroke-width", 2)
-                showCellTooltipRef.current(event, cell)
-                onCellHoverRef.current?.(cell)
-              })
-              .on("mousemove", function (event: MouseEvent) {
-                positionCellTooltipRef.current(event)
-              })
-              .on("mouseleave", function () {
-                if (cell.available) {
-                  select(this).attr("stroke", "transparent")
-                } else {
-                  select(this).attr("stroke", paletteUnavailStroke)
-                }
-                hideCellTooltipRef.current()
-                onCellHoverRef.current?.(null)
-              })
-              .on("click", () => {
-                if (cell.available) onCellClickRef.current?.(cell)
-              })
+            if (interactiveRef.current) {
+              rect
+                .on("mouseenter", function (event: MouseEvent) {
+                  select(this)
+                    .attr("stroke", paletteHoverStroke)
+                    .attr("stroke-width", 2)
+                  showCellTooltipRef.current(event, cell)
+                  onCellHoverRef.current?.(cell)
+                })
+                .on("mousemove", function (event: MouseEvent) {
+                  positionCellTooltipRef.current(event)
+                })
+                .on("mouseleave", function () {
+                  if (cell.available) {
+                    select(this).attr("stroke", "transparent")
+                  } else {
+                    select(this).attr("stroke", paletteUnavailStroke)
+                  }
+                  hideCellTooltipRef.current()
+                  onCellHoverRef.current?.(null)
+                })
+                .on("click", () => {
+                  if (cell.available) onCellClickRef.current?.(cell)
+                })
+            } else {
+              rect.attr("pointer-events", "none")
+            }
 
             // Print inner value when enabled + the cell has enough room.
             // Glyph and distribution modes suppress the inner number
@@ -1330,7 +1375,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             }
           }
 
-          if (row.definitionTooltip) {
+          if (row.definitionTooltip && interactiveRef.current) {
             node
               .on("mouseenter", function (event: MouseEvent) {
                 showAxisTooltipRef.current(event, row)
@@ -1389,7 +1434,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             node.append("title").text(col.fullLabel)
           }
 
-          if (col.definitionTooltip) {
+          if (col.definitionTooltip && interactiveRef.current) {
             node
               .on("mouseenter", function (event: MouseEvent) {
                 showAxisTooltipRef.current(event, col)
@@ -1707,6 +1752,18 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
             .text("Insufficient coverage")
+        }
+
+        // Fire onReady once after the first successful render. The
+        // requestAnimationFrame insurance lets any post-paint layout
+        // settle before the off-screen capture host serializes the
+        // SVG. The flag prevents subsequent updateChart calls (e.g.
+        // resize, prop change) from firing the callback again.
+        if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+          hasFiredOnReadyRef.current = true
+          requestAnimationFrame(() => {
+            onReadyRef.current?.()
+          })
         }
       },
       [

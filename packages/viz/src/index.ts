@@ -87,6 +87,8 @@ export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps, RadarPlotPalette } from "./components/RadarPlot"
+export { default as RadarPlotSnapshot } from "./components/RadarPlotSnapshot"
+export type { RadarPlotSnapshotProps } from "./components/RadarPlotSnapshot"
 export type {
   RadarPlotAxisLabelDetailStyle,
   RadarAxisDetailBottomMode,
@@ -118,6 +120,8 @@ export type {
   ResilienceGlyphEntry,
   ResilienceColumnGroup,
 } from "./components/ResilienceHeatmap"
+export { default as ResilienceHeatmapSnapshot } from "./components/ResilienceHeatmapSnapshot"
+export type { ResilienceHeatmapSnapshotProps } from "./components/ResilienceHeatmapSnapshot"
 export { default as ResilienceHeatmapSmallMultiples } from "./components/ResilienceHeatmapSmallMultiples"
 export type {
   ResilienceHeatmapSmallMultiplesProps,
@@ -125,6 +129,8 @@ export type {
   ResilienceSmallMultiplesTileAspect,
 } from "./components/ResilienceHeatmapSmallMultiples"
 export { default as ResilienceQuadrant } from "./components/ResilienceQuadrant"
+export { default as ResilienceQuadrantSnapshot } from "./components/ResilienceQuadrantSnapshot"
+export type { ResilienceQuadrantSnapshotProps } from "./components/ResilienceQuadrantSnapshot"
 export type {
   ResilienceQuadrantProps,
   ResilienceQuadrantDatum,
@@ -140,6 +146,8 @@ export type {
 
 export { default as TierGrid } from "./components/TierGrid"
 export type { TierGridProps } from "./components/TierGrid"
+export { default as TierGridSnapshot } from "./components/TierGridSnapshot"
+export type { TierGridSnapshotProps } from "./components/TierGridSnapshot"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"

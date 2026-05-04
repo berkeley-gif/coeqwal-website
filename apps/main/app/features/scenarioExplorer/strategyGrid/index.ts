@@ -20,6 +20,8 @@ export { StrategyGridHeader } from "./StrategyGridHeader"
 export { StrategyGridContent } from "./StrategyGridContent"
 export { StrategyGridRow, InlineRowActions } from "./StrategyGridRow"
 export { GridControls } from "./GridControls"
+export { captureBarChartRow } from "./captureBarChartRow"
+export type { CapturedBarChartRow } from "./captureBarChartRow"
 
 // Types
 export type { StrategyGridProps } from "./types"

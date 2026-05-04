@@ -33,20 +33,20 @@ import {
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
 } from "@repo/viz"
-import { useResilienceAggregate } from "../hooks/useResilienceAggregate"
+import { useResilienceAggregate } from "../../hooks/useResilienceAggregate"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
-} from "../hooks/useResilienceMatrix"
-import { useResilienceHeatmapTheme } from "../hooks/useResilienceHeatmapTheme"
+} from "../../hooks/useResilienceMatrix"
+import { useResilienceHeatmapTheme } from "../../hooks/useResilienceHeatmapTheme"
 import {
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
   getOutcomeName,
   getOutcomeDefinition,
   type OutcomeCode,
-} from "../../../content/outcomes"
-import { HYDROCLIMATE_SHORT_LABELS } from "../../../content/scenarios"
+} from "../../../../content/outcomes"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../content/scenarios"
 
 export interface ShareResilienceLiveChartProps {
   scenarioIds: string[]
@@ -185,7 +185,7 @@ export default function ShareResilienceLiveChart({
           color: theme.palette.grey[500],
           fontSize: "0.75rem",
           border: `1px dashed ${theme.palette.divider}`,
-          borderRadius: "4px",
+          borderRadius: theme.borderRadius.sm,
         }}
       >
         Loading heatmap...
@@ -205,7 +205,7 @@ export default function ShareResilienceLiveChart({
           color: theme.palette.grey[500],
           fontSize: "0.75rem",
           border: `1px dashed ${theme.palette.divider}`,
-          borderRadius: "4px",
+          borderRadius: theme.borderRadius.sm,
         }}
       >
         Heatmap unavailable
@@ -217,7 +217,7 @@ export default function ShareResilienceLiveChart({
     <Box
       sx={{
         mt: 1,
-        borderRadius: "4px",
+        borderRadius: theme.borderRadius.sm,
         backgroundColor: theme.palette.common.white,
         border: `1px solid ${theme.palette.divider}`,
         overflow: "hidden",

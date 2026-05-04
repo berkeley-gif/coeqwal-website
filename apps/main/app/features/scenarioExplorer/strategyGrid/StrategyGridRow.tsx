@@ -42,7 +42,7 @@ import { useTourAnchor } from "../tour/TourAnchorContext"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
-import { captureElementToBlob } from "../dataExplorer/utils/exportUtils"
+import { composeAndRasterize } from "../dataExplorer/utils/exportUtils"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -248,10 +248,15 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       cachedChartData: scenarioChartData as Record<string, unknown>,
     }
 
+    // Bar-chart row is a composed React layout of many small SVGs
+    // (one OutcomeGlyph per outcome). composeAndRasterize stitches
+    // them into one stand-alone SVG document at their on-screen
+    // positions, then rasterizes a PNG companion.
     const el = outcomeColRef.current
     if (el) {
       try {
-        const { dataUrl } = await captureElementToBlob(el)
+        const { svg, dataUrl } = await composeAndRasterize(el)
+        item.cachedSvg = svg
         item.cachedImageDataUrl = dataUrl
       } catch {
         // capture failed - scorecard still renders from live data
@@ -1046,6 +1051,7 @@ function NonCompactRowContent({
       <Box
         ref={outcomeColRef}
         className="outcome-col"
+        data-outcome-col-scenario-id={scenario.scenarioId}
         sx={{
           gridColumn:
             layoutMode === "compact" ? "2" : isWrappedMode ? "2 / -1" : "4",

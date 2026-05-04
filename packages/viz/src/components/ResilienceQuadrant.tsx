@@ -82,6 +82,12 @@ export interface ResilienceQuadrantProps {
   height?: number
   onDotHover?: (datum: ResilienceQuadrantDatum | null) => void
   onDotClick?: (datum: ResilienceQuadrantDatum) => void
+  /** When false, dot listeners are skipped. Used by capture mode. */
+  interactive?: boolean
+  /** Reserved for future transitions. Currently the chart paints synchronously. */
+  animate?: boolean
+  /** Fires once after the first synchronous paint commits. Capture hosts await this. */
+  onReady?: () => void
 }
 
 const MARGIN = { top: 32, right: 28, bottom: 56, left: 64 }
@@ -117,10 +123,18 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
     height = 480,
     onDotHover,
     onDotClick,
+    interactive = true,
+    onReady,
   }) => {
     const svgRef = useRef<SVGSVGElement | null>(null)
     const containerRef = useRef<HTMLDivElement | null>(null)
     const tooltipRef = useRef<HTMLDivElement | null>(null)
+
+    const interactiveRef = useRef(interactive)
+    interactiveRef.current = interactive
+    const onReadyRef = useRef(onReady)
+    onReadyRef.current = onReady
+    const hasFiredOnReadyRef = useRef(false)
 
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
@@ -418,46 +432,48 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
                 .text(d.label)
             }
 
-            node
-              .on("mouseenter", function (event: MouseEvent) {
-                if (!available) return
-                select(this)
-                  .select("circle")
-                  .attr("stroke", paletteHoverStroke)
-                  .attr("stroke-width", 2)
-                showTooltip(
-                  event,
-                  `<div style="font-weight:600;color:${paletteText}">${escapeHtml(
-                    d.label,
-                  )}</div>
-                  <div style="color:${paletteTextMuted}">Climate shift: ${formatSigned(
-                    d.x!,
-                  )} tiers</div>
-                  <div style="color:${paletteTextMuted}">Operational leverage: ${d.y!.toFixed(
-                    1,
-                  )} tiers</div>
-                  ${
-                    d.tierAtRefHc != null
-                      ? `<div style="color:${paletteTextMuted}">Mean tier at ${escapeHtml(
-                          climateRefHcLabel,
-                        )}: ${d.tierAtRefHc.toFixed(2)}</div>`
-                      : ""
-                  }`,
-                )
-                onDotHoverRef.current?.(d)
-              })
-              .on("mousemove", (event: MouseEvent) => positionTooltip(event))
-              .on("mouseleave", function () {
-                select(this)
-                  .select("circle")
-                  .attr("stroke", stroke)
-                  .attr("stroke-width", 1.5)
-                hideTooltip()
-                onDotHoverRef.current?.(null)
-              })
-              .on("click", () => {
-                if (available) onDotClickRef.current?.(d)
-              })
+            if (interactiveRef.current) {
+              node
+                .on("mouseenter", function (event: MouseEvent) {
+                  if (!available) return
+                  select(this)
+                    .select("circle")
+                    .attr("stroke", paletteHoverStroke)
+                    .attr("stroke-width", 2)
+                  showTooltip(
+                    event,
+                    `<div style="font-weight:600;color:${paletteText}">${escapeHtml(
+                      d.label,
+                    )}</div>
+                    <div style="color:${paletteTextMuted}">Climate shift: ${formatSigned(
+                      d.x!,
+                    )} tiers</div>
+                    <div style="color:${paletteTextMuted}">Operational leverage: ${d.y!.toFixed(
+                      1,
+                    )} tiers</div>
+                    ${
+                      d.tierAtRefHc != null
+                        ? `<div style="color:${paletteTextMuted}">Mean tier at ${escapeHtml(
+                            climateRefHcLabel,
+                          )}: ${d.tierAtRefHc.toFixed(2)}</div>`
+                        : ""
+                    }`,
+                  )
+                  onDotHoverRef.current?.(d)
+                })
+                .on("mousemove", (event: MouseEvent) => positionTooltip(event))
+                .on("mouseleave", function () {
+                  select(this)
+                    .select("circle")
+                    .attr("stroke", stroke)
+                    .attr("stroke-width", 1.5)
+                  hideTooltip()
+                  onDotHoverRef.current?.(null)
+                })
+                .on("click", () => {
+                  if (available) onDotClickRef.current?.(d)
+                })
+            }
           })
         } else if (unit === "loi" && loiBinned) {
           // Bin-sized dots; area scales with count.
@@ -508,64 +524,67 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
                 .text(String(bin.items.length))
             }
 
-            node
-              .on("mouseenter", function (event: MouseEvent) {
-                select(this)
-                  .select("circle")
-                  .attr("stroke", paletteHoverStroke)
-                  .attr("stroke-width", 2)
-                const names = bin.items
-                  .slice(0, 5)
-                  .map((it) => escapeHtml(it.label))
-                  .join("<br/>")
-                const more =
-                  bin.items.length > 5
-                    ? `<br/><span style="color:${paletteTextMuted}">+ ${
-                        bin.items.length - 5
-                      } more…</span>`
-                    : ""
-                showTooltip(
-                  event,
-                  `<div style="font-weight:600;color:${paletteText}">${
-                    bin.items.length === 1
-                      ? escapeHtml(bin.items[0]!.label)
-                      : `${bin.items.length} locations`
-                  }</div>
-                  <div style="color:${paletteTextMuted}">Climate shift: ${formatSigned(
-                    bin.bx,
-                  )} tiers</div>
-                  <div style="color:${paletteTextMuted}">Operational leverage: ${bin.by.toFixed(
-                    1,
-                  )} tiers</div>
-                  ${
-                    meanTier != null
-                      ? `<div style="color:${paletteTextMuted}">Mean tier: ${meanTier.toFixed(
-                          2,
-                        )}</div>`
+            if (interactiveRef.current) {
+              node
+                .on("mouseenter", function (event: MouseEvent) {
+                  select(this)
+                    .select("circle")
+                    .attr("stroke", paletteHoverStroke)
+                    .attr("stroke-width", 2)
+                  const names = bin.items
+                    .slice(0, 5)
+                    .map((it) => escapeHtml(it.label))
+                    .join("<br/>")
+                  const more =
+                    bin.items.length > 5
+                      ? `<br/><span style="color:${paletteTextMuted}">+ ${
+                          bin.items.length - 5
+                        } more…</span>`
                       : ""
-                  }
-                  ${
-                    bin.items.length > 1
-                      ? `<div style="margin-top:4px;color:${paletteText}">${names}${more}</div>`
-                      : ""
-                  }`,
-                )
-                // Fire hover with the first item in the bin; panel
-                // decides how to react (e.g. focus the map on it).
-                onDotHoverRef.current?.(bin.items[0] ?? null)
-              })
-              .on("mousemove", (event: MouseEvent) => positionTooltip(event))
-              .on("mouseleave", function () {
-                select(this)
-                  .select("circle")
-                  .attr("stroke", stroke)
-                  .attr("stroke-width", 1.25)
-                hideTooltip()
-                onDotHoverRef.current?.(null)
-              })
-              .on("click", () => {
-                if (bin.items.length > 0) onDotClickRef.current?.(bin.items[0]!)
-              })
+                  showTooltip(
+                    event,
+                    `<div style="font-weight:600;color:${paletteText}">${
+                      bin.items.length === 1
+                        ? escapeHtml(bin.items[0]!.label)
+                        : `${bin.items.length} locations`
+                    }</div>
+                    <div style="color:${paletteTextMuted}">Climate shift: ${formatSigned(
+                      bin.bx,
+                    )} tiers</div>
+                    <div style="color:${paletteTextMuted}">Operational leverage: ${bin.by.toFixed(
+                      1,
+                    )} tiers</div>
+                    ${
+                      meanTier != null
+                        ? `<div style="color:${paletteTextMuted}">Mean tier: ${meanTier.toFixed(
+                            2,
+                          )}</div>`
+                        : ""
+                    }
+                    ${
+                      bin.items.length > 1
+                        ? `<div style="margin-top:4px;color:${paletteText}">${names}${more}</div>`
+                        : ""
+                    }`,
+                  )
+                  // Hover fires with the first item in the bin; panel
+                  // decides how to react (e.g. focus the map on it).
+                  onDotHoverRef.current?.(bin.items[0] ?? null)
+                })
+                .on("mousemove", (event: MouseEvent) => positionTooltip(event))
+                .on("mouseleave", function () {
+                  select(this)
+                    .select("circle")
+                    .attr("stroke", stroke)
+                    .attr("stroke-width", 1.25)
+                  hideTooltip()
+                  onDotHoverRef.current?.(null)
+                })
+                .on("click", () => {
+                  if (bin.items.length > 0)
+                    onDotClickRef.current?.(bin.items[0]!)
+                })
+            }
           })
         }
       },
@@ -598,6 +617,18 @@ const ResilienceQuadrant: React.FC<ResilienceQuadrantProps> = React.memo(
         updateChart(currentWidth, currentHeight)
       }
     }, [currentWidth, currentHeight, updateChart])
+
+    // Capture hosts await this signal before serializing the SVG.
+    useEffect(() => {
+      if (hasFiredOnReadyRef.current) return
+      if (currentWidth <= 0 || currentHeight <= 0) return
+      const id = requestAnimationFrame(() => {
+        if (hasFiredOnReadyRef.current) return
+        hasFiredOnReadyRef.current = true
+        onReadyRef.current?.()
+      })
+      return () => cancelAnimationFrame(id)
+    }, [currentWidth, currentHeight, data])
 
     return (
       <div

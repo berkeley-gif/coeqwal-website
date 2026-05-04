@@ -1,22 +1,18 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, IconButton, useTheme, icons } from "@repo/ui/mui"
-import { OutcomeGlyphItem } from "../../scenarios/components/shared/OutcomeGlyphItem"
-import { TierSummaryCell } from "../../scenarios/components/shared/TierSummaryCell"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { OutcomeGlyphItem } from "../../../scenarios/components/shared/OutcomeGlyphItem"
+import { TierSummaryCell } from "../../../scenarios/components/shared/TierSummaryCell"
 import { MorphableDistributionGlyph, SQUARE_SIZE, SQUARE_GAP } from "@repo/viz"
 import {
   isSingleValueTier,
   type ChartDataPoint,
-} from "../../scenarios/components/shared/types"
-import { getSingleValueLocationCount } from "../../../content/outcomes"
-import type { OutcomeDisplayMode } from "../store"
-import {
-  hydroclimateOptions,
-  type HydroclimateOption,
-} from "../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
-import ShareItemNoteBlock from "./ShareItemNoteBlock"
+} from "../../../scenarios/components/shared/types"
+import { getSingleValueLocationCount } from "../../../../content/outcomes"
+import type { OutcomeDisplayMode } from "../../store"
+import ShareCardShell from "../ShareCardShell"
+import HydroclimateBadge from "./HydroclimateBadge"
 
 interface ShareScenarioCardProps {
   scenarioId: string
@@ -47,42 +43,13 @@ export default function ShareScenarioCard({
 }: ShareScenarioCardProps) {
   const theme = useTheme()
 
-  const climateOption: HydroclimateOption | undefined = hydroclimate
-    ? hydroclimateOptions.find((o) => o.value === hydroclimate)
-    : undefined
-  const climateConfig = hydroclimate
-    ? HYDROCLIMATE_CONFIG[hydroclimate]
-    : undefined
-
   return (
-    <Box
-      sx={{
-        position: "relative",
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.borderRadius.sm ?? "6px",
-        backgroundColor: theme.palette.background.paper,
-        p: 1.5,
-        mb: 1,
-      }}
+    <ShareCardShell
+      onRemove={onRemove ? () => onRemove(scenarioId) : undefined}
+      note={note}
+      onNoteChange={onNoteChange}
+      removeAriaLabel="Remove scenario from share tray"
     >
-      {/* Remove button */}
-      {onRemove && (
-        <IconButton
-          size="small"
-          onClick={() => onRemove(scenarioId)}
-          sx={{
-            position: "absolute",
-            top: 4,
-            right: 4,
-            p: 0.25,
-            color: theme.palette.grey[400],
-            "&:hover": { color: theme.palette.grey[700] },
-          }}
-        >
-          <icons.Close sx={{ fontSize: "0.875rem" }} />
-        </IconButton>
-      )}
-
       {/* Scenario title */}
       <Typography
         variant="body2"
@@ -113,53 +80,7 @@ export default function ShareScenarioCard({
 
       {/* Hydroclimate + chart type metadata */}
       <Box sx={{ mt: 0.75 }}>
-        {climateOption && climateConfig && (
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "flex-start",
-              gap: 0.5,
-              backgroundColor: `${climateConfig.bgColor}0F`,
-              border: `1px solid ${climateConfig.bgColor}28`,
-              borderRadius: "4px",
-              px: 0.75,
-              py: 0.375,
-              mb: 0.5,
-            }}
-          >
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                backgroundColor: climateConfig.bgColor,
-                flexShrink: 0,
-                mt: "3px",
-              }}
-            />
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: "0.625rem",
-                  lineHeight: 1.3,
-                  fontWeight: 600,
-                  color: theme.palette.grey[800],
-                }}
-              >
-                {climateOption.label} hydroclimate
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "0.5625rem",
-                  lineHeight: 1.3,
-                  color: theme.palette.grey[600],
-                }}
-              >
-                {climateOption.description}
-              </Typography>
-            </Box>
-          </Box>
-        )}
+        <HydroclimateBadge hydroclimate={hydroclimate} />
         {description && (
           <Typography
             sx={{
@@ -410,8 +331,6 @@ export default function ShareScenarioCard({
             })}
           </Box>
         ))}
-
-      <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
-    </Box>
+    </ShareCardShell>
   )
 }

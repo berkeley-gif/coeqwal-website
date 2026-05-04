@@ -2,15 +2,15 @@
 
 import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import type { ShareItem } from "../store"
+import type { ShareItem } from "../../store"
 import ShareSnapshotCard from "./ShareSnapshotCard"
-import ShareResilienceLiveChart from "./ShareResilienceLiveChart"
+import ShareResilienceLiveChart from "../live/ShareResilienceLiveChart"
 import {
   getResilienceShareCardContent,
   type ResilienceShareCardLookups,
 } from "../utils/getResilienceShareCardContent"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
-import { HYDROCLIMATE_SHORT_LABELS } from "../../../content/scenarios"
+import { OUTCOME_NAMES, type OutcomeCode } from "../../../../content/outcomes"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../content/scenarios"
 
 type ResilienceItem = Extract<ShareItem, { type: "resilience" }>
 
@@ -85,6 +85,7 @@ export default function ResilienceShareCard({
       title={model.headline}
       subtitle={model.subtitle}
       chips={model.chips}
+      cachedSvg={item.cachedSvg}
       cachedImageDataUrl={item.cachedImageDataUrl}
       liveChart={liveChart}
       note={item.note}

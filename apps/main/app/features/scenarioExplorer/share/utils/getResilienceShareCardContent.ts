@@ -3,10 +3,10 @@
  * and Share drawer aligned without duplicating string logic.
  */
 
-import type { ShareItem } from "../store"
-import { RESILIENCE_HYDROCLIMATES } from "../hooks/useResilienceMatrix"
-import type { ResilienceHeatmapChartData } from "../exploreView/ResiliencePanel"
-import type { ResilienceQuadrantChartData } from "../exploreView/ResilienceQuadrantPanel"
+import type { ShareItem } from "../../store"
+import { RESILIENCE_HYDROCLIMATES } from "../../hooks/useResilienceMatrix"
+import type { ResilienceHeatmapChartData } from "../../exploreView/ResiliencePanel"
+import type { ResilienceQuadrantChartData } from "../../exploreView/ResilienceQuadrantPanel"
 
 export type ResilienceShareItem = Extract<ShareItem, { type: "resilience" }>
 

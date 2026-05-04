@@ -53,6 +53,12 @@ export interface TierGridProps {
   onShowOnMap?: (locationIds: string[]) => void
   tierColorMap?: Record<string, string>
   showMapView?: boolean
+  /** When false, the dots layer skips event listeners; pair with omitted callbacks so the chart is purely visual. Used by capture mode. */
+  interactive?: boolean
+  /** When false, enter/update/exit transitions run with duration 0 so a single frame paints the final state. Used by capture mode. */
+  animate?: boolean
+  /** Invoked once after the first paint has committed. Capture hosts await this before serializing the SVG. */
+  onReady?: () => void
 }
 
 // ============================================================================
@@ -626,6 +632,9 @@ export default function TierGrid({
   onTierCategoryClick,
   tierColorMap = DEFAULT_TIER_COLORS,
   showMapView = false,
+  interactive = true,
+  animate = true,
+  onReady,
 }: TierGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -636,6 +645,17 @@ export default function TierGrid({
     null,
     undefined
   > | null>(null)
+
+  // Refs let the d3 callbacks read the latest values without triggering
+  // a re-bind on every render; matches the pattern in RadarPlot and
+  // ResilienceHeatmap.
+  const interactiveRef = useRef(interactive)
+  interactiveRef.current = interactive
+  const animateRef = useRef(animate)
+  animateRef.current = animate
+  const onReadyRef = useRef(onReady)
+  onReadyRef.current = onReady
+  const hasFiredOnReadyRef = useRef(false)
 
   const dimensions = useResizeObserver(
     containerRef as React.RefObject<HTMLElement>,
@@ -714,10 +734,12 @@ export default function TierGrid({
     ],
   )
 
-  const animate = useCallback(
+  const redrawShapes = useCallback(
     (w: number, h: number) => {
       const svg = getSvgSelection()
       if (!svg || objectives.length === 0) return
+      const enterDuration = animateRef.current ? 1000 : 0
+      const exitDuration = animateRef.current ? 300 : 0
 
       const { positions } = calculateTierPositions(
         objectives,
@@ -788,7 +810,7 @@ export default function TierGrid({
       // Transition
       allShapes
         .transition()
-        .duration(1000)
+        .duration(enterDuration)
         .ease(d3.easeCubicOut)
         .attr("d", getShapePath)
         .attr("fill", (d) =>
@@ -811,8 +833,10 @@ export default function TierGrid({
         )
         .attr("opacity", 1)
 
-      // Add event handlers
-      allShapes
+      // Skip listeners in capture mode so the snapshot SVG carries no
+      // event handlers (also avoids tooltip mounts during off-screen render).
+      if (interactiveRef.current) {
+        allShapes
         .on("click", function (_event, d) {
           if (showMapView && onObjectiveClick) {
             onObjectiveClick(d.obj)
@@ -878,9 +902,10 @@ export default function TierGrid({
             tooltipRef.current.style.opacity = "0"
           }
         })
+      }
 
       // Exit
-      shapes.exit().transition().duration(300).attr("opacity", 0).remove()
+      shapes.exit().transition().duration(exitDuration).attr("opacity", 0).remove()
     },
     [
       getSvgSelection,
@@ -908,9 +933,24 @@ export default function TierGrid({
   // Animate when data changes
   useEffect(() => {
     if (currentWidth > 0 && currentHeight > 0 && objectives.length > 0) {
-      animate(currentWidth, currentHeight)
+      redrawShapes(currentWidth, currentHeight)
     }
-  }, [currentWidth, currentHeight, animate, objectives])
+  }, [currentWidth, currentHeight, redrawShapes, objectives])
+
+  // Fire onReady once the chart has paint-committed at least one frame
+  // with non-zero data and dimensions. Capture hosts await this before
+  // serializing the SVG.
+  useEffect(() => {
+    if (hasFiredOnReadyRef.current) return
+    if (currentWidth <= 0 || currentHeight <= 0) return
+    if (objectives.length === 0 || categories.length === 0) return
+    const id = requestAnimationFrame(() => {
+      if (hasFiredOnReadyRef.current) return
+      hasFiredOnReadyRef.current = true
+      onReadyRef.current?.()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [currentWidth, currentHeight, objectives.length, categories.length])
 
   return (
     <div
