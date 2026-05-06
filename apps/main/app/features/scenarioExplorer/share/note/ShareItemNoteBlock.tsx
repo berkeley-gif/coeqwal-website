@@ -53,6 +53,7 @@ export default function ShareItemNoteBlock({
           value={note ?? ""}
           onChange={(e) => onNoteChange(e.target.value)}
           onBlur={() => setEditing(false)}
+          data-share-export-ignore=""
           sx={inputClassSx}
         />
       ) : note ? (
@@ -87,6 +88,7 @@ export default function ShareItemNoteBlock({
           component="button"
           type="button"
           onClick={() => setEditing(true)}
+          data-share-export-ignore=""
           sx={{
             display: "inline-flex",
             alignItems: "center",

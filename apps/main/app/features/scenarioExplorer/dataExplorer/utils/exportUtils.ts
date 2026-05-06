@@ -1,5 +1,7 @@
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import { themeValues } from "@repo/ui/themes/theme"
+import type { ShareItem } from "../../share/types"
+import { handlerForItem } from "../../share/variants"
 
 /**
  * Export utilities for Data Explorer
@@ -141,7 +143,7 @@ function csvQuote(val: string): string {
   return `"${val.replace(/"/g, '""')}"`
 }
 
-type BarTierEntry = {
+export type BarTierEntry = {
   label?: string
   value?: number
   rawCount?: number
@@ -156,13 +158,20 @@ type BarTierEntry = {
  *
  *   Scenario, <name>
  *   Outcome, Optimal, Acceptable, At-risk, Critical, Total Locations
- *   Delta Exports, 1, 2, 1, 0, 4
- *   Delta Outflow, 0, 1, 0, 0, 1
- *   …
+ *   Community deliveries, 1, 2, 1, 0, 4
+ *   Ag revenue, 0, 1, 0, 0, 1
+ *   ...
+ *
+ * The outcome column carries display names rather than the raw
+ * `OutcomeCode` keys when an `outcomeNameLookup` is supplied; this
+ * keeps the bar chart and radar exports human-readable and aligned
+ * with the resilience export which already ships display labels in
+ * its payload.
  */
-function barChartDataToCSV(
+export function barChartDataToCSV(
   data: Record<string, BarTierEntry[]>,
   scenarioLabel: string,
+  outcomeNameLookup?: (code: string) => string,
 ): string {
   const outcomes = Object.keys(data)
   if (outcomes.length === 0) return ""
@@ -185,7 +194,8 @@ function barChartDataToCSV(
       counts = tiers.map((t) => String(t.rawCount ?? 0))
       total = String(tiers.reduce((sum, t) => sum + (t.rawCount ?? 0), 0))
     }
-    return [csvEscape(outcome), ...counts, total]
+    const outcomeLabel = outcomeNameLookup?.(outcome) ?? outcome
+    return [csvEscape(outcomeLabel), ...counts, total]
   })
 
   return [
@@ -206,10 +216,11 @@ function barChartDataToCSV(
  *   Delta Exports, 2.35, 1.80
  *   Delta Outflow, 1.50, 2.00
  */
-function radarDataToCSV(
+export function radarDataToCSV(
   rawData: Record<string, unknown>,
   scenarioIds?: string[],
   scenarioNameLookup?: (id: string) => string,
+  outcomeNameLookup?: (code: string) => string,
 ): string | null {
   const ids = scenarioIds ?? Object.keys(rawData)
   if (ids.length === 0) return null
@@ -224,7 +235,7 @@ function radarDataToCSV(
   const scenarioEntries = Object.entries(data)
   if (scenarioEntries.length === 0) return null
 
-  const outcomeNames = Array.from(
+  const outcomeCodes = Array.from(
     new Set(scenarioEntries.flatMap(([, v]) => Object.keys(v))),
   )
 
@@ -241,12 +252,13 @@ function radarDataToCSV(
   lines.push("")
   lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
 
-  for (const outcome of outcomeNames) {
+  for (const code of outcomeCodes) {
+    const label = outcomeNameLookup?.(code) ?? code
     const vals = scenarioEntries.map(([, values]) => {
-      const v = values[outcome]
+      const v = values[code]
       return v != null ? String(radarValueToTierScore(v)) : ""
     })
-    lines.push([csvQuote(outcome), ...vals].join(","))
+    lines.push([csvQuote(label), ...vals].join(","))
   }
 
   return lines.join("\n")
@@ -257,7 +269,7 @@ function radarDataToCSV(
  * `ResiliencePanel.tsx`. Duplicated here as a plain type to avoid a
  * runtime import cycle between exportUtils and the explore view.
  */
-type ResilienceHeatmapRow = {
+export type ResilienceHeatmapRow = {
   rowKey: string
   rowLabel: string
   colKey: string
@@ -268,7 +280,7 @@ type ResilienceHeatmapRow = {
   count?: number
 }
 
-type ResilienceHeatmapChartDataShape = {
+export type ResilienceHeatmapChartDataShape = {
   view?: string
   cellEncoding?: string
   tileScope?: string
@@ -276,7 +288,7 @@ type ResilienceHeatmapChartDataShape = {
   rows: ResilienceHeatmapRow[]
 }
 
-type ResilienceQuadrantChartDataShape = {
+export type ResilienceQuadrantChartDataShape = {
   view?: "quadrant"
   tileScope?: "quadrant"
   tileLabel?: string
@@ -293,15 +305,43 @@ type ResilienceQuadrantChartDataShape = {
 }
 
 /**
- * Convert a flat resilience heatmap payload into a CSV table.
- * Layout: one row per (row, column) cell, with tier / value / delta
- * columns that map back to the heatmap's cell encoding.
+ * Distribution-card chart data persisted by `captureEquityOffscreen`.
+ * Mirrors the `EquityChartData` shape from
+ * `OffscreenEquityCapture.tsx`; duplicated as a structural type so the
+ * exporter can stay free of UI-package imports.
  */
-function resilienceHeatmapDataToCSV(
+export type EquityChartDataShape = {
+  kind?: "equity"
+  scenarioId: string
+  compareToBaseline: boolean
+  categories: string[]
+  objectives: Array<{
+    id: number
+    tier: string
+    baselineTier?: string
+    category: string
+    locationId: string
+    locationName: string
+    tierLevel: number
+    tierCode: string
+  }>
+}
+
+/**
+ * Convert a flat resilience heatmap payload into a CSV table.
+ * Layout: one row per (row, column) cell with tier and value columns.
+ *
+ * Tier is the categorical (1-4) bucket the heatmap drew, value is
+ * the underlying continuous score. The earlier delta and count
+ * columns were dropped: delta duplicates the value comparison
+ * already encoded in the chart, and count was an internal
+ * distribution-bucket size that shipped to the export by accident.
+ */
+export function resilienceHeatmapDataToCSV(
   data: ResilienceHeatmapChartDataShape,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
-  const header = ["Row", "Column", "Tier", "Value", "Delta", "Count"]
+  const header = ["Row", "Column", "Tier", "Value"]
   const lines: string[] = []
   if (data.tileLabel) {
     lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)
@@ -319,10 +359,47 @@ function resilienceHeatmapDataToCSV(
         csvEscape(row.colLabel),
         row.tier != null ? String(row.tier) : "",
         row.value != null ? String(row.value) : "",
-        row.delta != null ? String(row.delta) : "",
-        row.count != null ? String(row.count) : "",
       ].join(","),
     )
+  }
+  return lines.join("\n")
+}
+
+/**
+ * Convert a distribution-card payload into a CSV table. Layout: one
+ * row per (location, outcome) tier assignment, with a baseline-tier
+ * column when comparison was on at capture time.
+ */
+export function equityDataToCSV(
+  data: EquityChartDataShape,
+  scenarioLabel: string,
+): string | null {
+  if (!Array.isArray(data.objectives) || data.objectives.length === 0) {
+    return null
+  }
+
+  const lines: string[] = []
+  lines.push(`Scenario,${csvEscape(scenarioLabel)}`)
+  lines.push(
+    `Compared to baseline,${data.compareToBaseline ? "yes" : "no"}`,
+  )
+  lines.push("")
+
+  const header = data.compareToBaseline
+    ? ["Outcome", "Location", "Tier", "Baseline tier"]
+    : ["Outcome", "Location", "Tier"]
+  lines.push(header.join(","))
+
+  for (const obj of data.objectives) {
+    const row = [
+      csvEscape(obj.category),
+      csvEscape(obj.locationName),
+      String(obj.tierLevel),
+    ]
+    if (data.compareToBaseline) {
+      row.push(obj.baselineTier ? csvEscape(obj.baselineTier) : "")
+    }
+    lines.push(row.join(","))
   }
   return lines.join("\n")
 }
@@ -332,7 +409,7 @@ function resilienceHeatmapDataToCSV(
  * payload's xLabel / yLabel as the X and Y column headers so the
  * captured axis metadata rides through the export.
  */
-function resilienceQuadrantDataToCSV(
+export function resilienceQuadrantDataToCSV(
   data: ResilienceQuadrantChartDataShape,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
@@ -359,123 +436,72 @@ function resilienceQuadrantDataToCSV(
 }
 
 /**
- * Export a single share-item's chart data as CSV.
- *
- * Bar chart items produce a readable matrix - one row per outcome,
- * tier scores as columns (Optimal, Acceptable, At-risk, Critical).
- *
- * Radar items produce a scenario × outcome matrix:
- *   Scenario, Outcome1, Outcome2, …
- *
- * Resilience heatmap items produce a row-per-cell table. Resilience
- * quadrant items (discriminated by `cachedChartData.view === "quadrant"`)
- * produce a row-per-dot table with axis-labeled X and Y columns.
+ * Build the lookup pair the share variant registry expects. Treats
+ * the optional callbacks as identity-on-missing so handler code can
+ * stay branchless: a missing scenario name falls back to the id, a
+ * missing outcome label falls back to the code.
  */
-export function exportShareItemAsCSV(
-  item: {
-    type: string
-    scenarioId?: string
-    scenarioIds?: string[]
-    cachedChartData?: Record<string, unknown>
-  },
-  filename: string,
+function buildCsvLookups(
   scenarioNameLookup?: (id: string) => string,
+  outcomeNameLookup?: (code: string) => string,
 ) {
-  if (!item.cachedChartData) return
-
-  if (item.type === "barChart") {
-    const data = item.cachedChartData as Record<
-      string,
-      { label?: string; value?: number; rawCount?: number }[]
-    >
-    const scenarioLabel =
-      scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
-    const lines = barChartDataToCSV(data, scenarioLabel)
-    downloadCSV(lines, filename)
-    return
-  }
-
-  if (item.type === "radar") {
-    const csv = radarDataToCSV(
-      item.cachedChartData as Record<string, unknown>,
-      item.scenarioIds,
-      scenarioNameLookup,
-    )
-    if (csv) downloadCSV(csv, filename)
-    return
-  }
-
-  if (item.type === "resilience") {
-    const data = item.cachedChartData as Record<string, unknown>
-    const csv =
-      data.view === "quadrant"
-        ? resilienceQuadrantDataToCSV(
-            data as unknown as ResilienceQuadrantChartDataShape,
-          )
-        : resilienceHeatmapDataToCSV(
-            data as unknown as ResilienceHeatmapChartDataShape,
-          )
-    if (csv) downloadCSV(csv, filename)
-    return
+  return {
+    scenarioNameLookup: (id: string) => scenarioNameLookup?.(id) ?? id,
+    outcomeNameLookup: (code: string) => outcomeNameLookup?.(code) ?? code,
   }
 }
 
 /**
- * Export all share-items' chart data as a single multi-sheet-style CSV.
- * Each item's data is separated by a header row indicating the item type.
+ * Render one share-item's CSV body via its variant handler. Returns
+ * null when the variant has no exporter or has no cached data, so
+ * the caller can decide whether to skip the section or write
+ * nothing.
  */
-export function exportAllShareItemsAsCSV(
-  items: Array<{
-    type: string
-    scenarioId?: string
-    scenarioIds?: string[]
-    cachedChartData?: Record<string, unknown>
-  }>,
+function renderShareItemCsv(
+  item: ShareItem,
+  lookups: ReturnType<typeof buildCsvLookups>,
+): string | null {
+  const handler = handlerForItem(item)
+  if (!handler.exportCsv) return null
+  return handler.exportCsv(item as never, lookups)
+}
+
+/**
+ * Export a single share-item's chart data as CSV. Routes the item to
+ * its variant handler in the share registry. Variants without an
+ * `exportCsv` hook are silently skipped.
+ */
+export function exportShareItemAsCSV(
+  item: ShareItem,
   filename: string,
   scenarioNameLookup?: (id: string) => string,
+  outcomeNameLookup?: (code: string) => string,
 ) {
+  const lookups = buildCsvLookups(scenarioNameLookup, outcomeNameLookup)
+  const csv = renderShareItemCsv(item, lookups)
+  if (csv) downloadCSV(csv, filename)
+}
+
+/**
+ * Export every share-item's chart data into one multi-section CSV.
+ * Each variant's section is rendered through its registry handler;
+ * empty sections (no cachedChartData, no exporter) are dropped.
+ */
+export function exportAllShareItemsAsCSV(
+  items: ShareItem[],
+  filename: string,
+  scenarioNameLookup?: (id: string) => string,
+  outcomeNameLookup?: (code: string) => string,
+) {
+  const lookups = buildCsvLookups(scenarioNameLookup, outcomeNameLookup)
   const sections: string[] = []
-
   for (const item of items) {
-    if (!item.cachedChartData) continue
-
-    if (item.type === "barChart") {
-      const label =
-        scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
-      const data = item.cachedChartData as Record<string, BarTierEntry[]>
-      sections.push(barChartDataToCSV(data, label))
+    const csv = renderShareItemCsv(item, lookups)
+    if (csv) {
+      sections.push(csv)
       sections.push("")
     }
-
-    if (item.type === "radar") {
-      const csv = radarDataToCSV(
-        item.cachedChartData as Record<string, unknown>,
-        item.scenarioIds,
-        scenarioNameLookup,
-      )
-      if (csv) {
-        sections.push(csv)
-        sections.push("")
-      }
-    }
-
-    if (item.type === "resilience") {
-      const data = item.cachedChartData as Record<string, unknown>
-      const csv =
-        data.view === "quadrant"
-          ? resilienceQuadrantDataToCSV(
-              data as unknown as ResilienceQuadrantChartDataShape,
-            )
-          : resilienceHeatmapDataToCSV(
-              data as unknown as ResilienceHeatmapChartDataShape,
-            )
-      if (csv) {
-        sections.push(csv)
-        sections.push("")
-      }
-    }
   }
-
   if (sections.length === 0) return
   downloadCSV(sections.join("\n"), filename)
 }
@@ -483,7 +509,7 @@ export function exportAllShareItemsAsCSV(
 /**
  * Download CSV helper
  */
-function downloadCSV(csvContent: string, filename: string) {
+export function downloadCSV(csvContent: string, filename: string) {
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
 

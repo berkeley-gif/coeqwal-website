@@ -19,6 +19,14 @@ interface ShareSnapshotCardProps {
   toolLabel: string
   /** Short human description of what was captured. */
   title: string
+  /**
+   * Longer scenario definition shown below the title in the same
+   * style the bar chart and radar cards use for their definition
+   * line. Distribution and resilience scenario-solo cards pass the
+   * scenario's `info.definition` here so every card type carries
+   * the same context block.
+   */
+  scenarioDefinition?: string
   /** Additional context line shown under the title. */
   subtitle?: string
   /** Context chips, each a short phrase. */
@@ -46,6 +54,7 @@ export default function ShareSnapshotCard({
   id,
   toolLabel,
   title,
+  scenarioDefinition,
   subtitle,
   chips = [],
   hydroclimate,
@@ -89,6 +98,20 @@ export default function ShareSnapshotCard({
       >
         {title}
       </Typography>
+
+      {scenarioDefinition && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.4,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: 3,
+          }}
+        >
+          {scenarioDefinition}
+        </Typography>
+      )}
 
       {subtitle && (
         <Typography

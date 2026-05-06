@@ -739,7 +739,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const continueFullRebuild = () => {
           svg.selectAll("*").remove()
           axisDetailInnerHitRef.current = null
-          if (w <= 0 || h <= 0) return
+          if (w <= 0 || h <= 0) {
+            // Off-screen capture awaits onReady before serializing. Fire it
+            // here too so a zero-dim render does not deadlock the host.
+            if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+              hasFiredOnReadyRef.current = true
+              const cb = onReadyRef.current
+              requestAnimationFrame(() => cb())
+            }
+            return
+          }
 
           const sh = axisLabelDetailStyle
           if (sh.panelShadowBlur > 0) {
@@ -763,7 +772,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const MARGIN = 80
           const size = Math.min(w, h)
           const radius = (size - MARGIN * 2) / 2
-          if (radius <= 0) return
+          if (radius <= 0) {
+            // Fire onReady on this bail too so off-screen capture is
+            // not gated on the chart having any drawable area.
+            if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+              hasFiredOnReadyRef.current = true
+              const cb = onReadyRef.current
+              requestAnimationFrame(() => cb())
+            }
+            return
+          }
           const cx = w / 2
           const cy = h / 2
 

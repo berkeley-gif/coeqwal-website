@@ -18,6 +18,8 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   ResilienceHeatmap,
   ResilienceHeatmapSmallMultiples,
+  getResilienceSmallMultiplesTileHeight,
+  RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS,
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapMarginals,
@@ -80,6 +82,48 @@ export interface ResiliencePanelChartViewProps {
   formatRowTick?: (row: ResilienceAxisItem) => string
   distributionMode?: "scenario" | "location"
   handlers?: ResiliencePanelChartViewHandlers
+  /**
+   * When true, render the small-multiples grid for off-screen capture:
+   * a fixed two-column layout, no scroll container, full content
+   * height. Aggregate / single-heatmap views ignore this flag - they
+   * already lay out at the host's fixed dims. Live mounts leave this
+   * undefined so the responsive grid behaves as before.
+   */
+  captureMode?: boolean
+}
+
+/** Inter-tile gap (matches the live grid's `gap: 16`). */
+const CAPTURE_GRID_GAP = 16
+/** Outer padding around the grid in the capture canvas. */
+const CAPTURE_OUTER_PADDING = 24
+
+/**
+ * Total height (in CSS pixels) the small-multiples grid will need in
+ * capture mode for the given tile count, tile aspect, and row count.
+ * The off-screen capture host sizes itself to this so the grid lays
+ * out at full content height (no scroll, no clipping) and the composer
+ * gathers every tile's bounding rect in the rendered output.
+ *
+ * Aggregate / single-heatmap captures do not call this; they keep the
+ * fixed `CAPTURE_DIMENSIONS.resiliencePanel.height`.
+ *
+ * Reads `RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS` from `@repo/viz`
+ * so this height calc and the small-multiples grid layout cannot
+ * drift out of sync.
+ */
+export function computeResiliencePanelSmallMultiplesCaptureHeight(args: {
+  tilesCount: number
+  tileAspect: ResilienceSmallMultiplesTileAspect
+  rowsCount: number
+}): number {
+  const { tilesCount, tileAspect, rowsCount } = args
+  if (tilesCount <= 0) return 0
+  const tileH = getResilienceSmallMultiplesTileHeight(tileAspect, rowsCount)
+  const gridRows = Math.ceil(
+    tilesCount / RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS,
+  )
+  const gridContent = gridRows * tileH + (gridRows - 1) * CAPTURE_GRID_GAP
+  return gridContent + CAPTURE_OUTER_PADDING * 2
 }
 
 function CenteredMessage({ children }: { children: React.ReactNode }) {
@@ -152,6 +196,7 @@ export default function ResiliencePanelChartView({
   formatRowTick,
   distributionMode,
   handlers,
+  captureMode = false,
 }: ResiliencePanelChartViewProps) {
   if (state.kind === "noColumns") {
     return (
@@ -202,6 +247,7 @@ export default function ResiliencePanelChartView({
         showCellNumbers={showCellNumbers}
         tileAspect={state.tileAspect}
         columnLabelRotation={state.columnLabelRotation}
+        captureMode={captureMode}
         onCellHover={handlers?.onCellHover}
         onCellClick={handlers?.onCellClick}
         formatRowTick={formatRowTick}

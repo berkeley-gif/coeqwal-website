@@ -10,10 +10,16 @@
  * Capture size is 900x600 (the live distribution panel's typical
  * aspect). Adjust `EQUITY_CAPTURE_*` if a different output is needed;
  * downstream raster size in Share.tsx is keyed off the same constants.
+ *
+ * Returns the resolved tier objectives alongside the SVG and PNG so
+ * the share item can persist `cachedChartData` for the data-download
+ * button without having to re-resolve the same SWR queries when the
+ * card is rendered.
  */
 
-import React from "react"
+import React, { useEffect } from "react"
 import { TierGridSnapshot } from "@repo/viz"
+import type { TierGridProps } from "@repo/viz"
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
 import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
@@ -32,9 +38,23 @@ export interface CaptureEquityOffscreenInput {
   height?: number
 }
 
+/**
+ * Distribution chart-data shape persisted on the equity ShareItem.
+ * `kind: "equity"` is the discriminator the CSV exporter uses to pick
+ * the equity branch.
+ */
+export interface EquityChartData {
+  kind: "equity"
+  scenarioId: string
+  compareToBaseline: boolean
+  categories: string[]
+  objectives: TierGridProps["objectives"]
+}
+
 export interface CaptureEquityOffscreenResult {
   svg: string
   dataUrl: string
+  chartData?: EquityChartData
 }
 
 interface EquityCaptureMountProps {
@@ -43,6 +63,7 @@ interface EquityCaptureMountProps {
   width: number
   height: number
   onReady: () => void
+  onChartData: (data: EquityChartData) => void
 }
 
 /**
@@ -51,7 +72,8 @@ interface EquityCaptureMountProps {
  * live panel has already loaded the same scenario) and mounts
  * TierGridSnapshot once data is ready. `onReady` is forwarded only
  * after TierGrid's first paint commits so the host serializes a
- * fully drawn SVG.
+ * fully drawn SVG. `onChartData` reports the resolved objectives so
+ * the caller can persist them on the share item.
  */
 function EquityCaptureMount({
   scenarioId,
@@ -59,11 +81,30 @@ function EquityCaptureMount({
   width,
   height,
   onReady,
+  onChartData,
 }: EquityCaptureMountProps) {
   const { objectives, categories, ready } = useEquityObjectives({
     scenarioId,
     compareToBaseline,
   })
+
+  useEffect(() => {
+    if (!ready || objectives.length === 0) return
+    onChartData({
+      kind: "equity",
+      scenarioId,
+      compareToBaseline,
+      categories,
+      objectives,
+    })
+  }, [
+    ready,
+    objectives,
+    categories,
+    scenarioId,
+    compareToBaseline,
+    onChartData,
+  ])
 
   if (!ready || objectives.length === 0) return null
 
@@ -89,7 +130,9 @@ export async function captureEquityOffscreen(
   const width = input.width ?? EQUITY_CAPTURE_WIDTH
   const height = input.height ?? EQUITY_CAPTURE_HEIGHT
 
-  return offscreenCapture({
+  let chartData: EquityChartData | undefined
+
+  const { svg, dataUrl } = await offscreenCapture({
     theme: input.theme,
     width,
     height,
@@ -101,7 +144,12 @@ export async function captureEquityOffscreen(
         width={width}
         height={height}
         onReady={onReady}
+        onChartData={(data) => {
+          chartData = data
+        }}
       />
     ),
   })
+
+  return { svg, dataUrl, chartData }
 }

@@ -28,6 +28,10 @@
  */
 
 import type { ShareItem } from "./types"
+import {
+  getHandlerByUrlPrefix,
+  handlerForItem,
+} from "./variants"
 
 /**
  * Current schema version for share URLs. Bump on any
@@ -69,51 +73,16 @@ export function encodeShareItems(
   return `${window.location.origin}/?${parts.join("&")}`
 }
 
+/**
+ * Encode one share item as a URL token. Delegates to the variant
+ * handler in the share registry so the prefix and body shape live
+ * with the rest of the variant's logic. The registry is exhaustive
+ * over `ShareItem["type"]` (compile-checked in `variants.ts`) so the
+ * lookup always resolves.
+ */
 function encodeOne(item: ShareItem): string {
-  if (item.type === "barChart") {
-    const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-    const modeToken =
-      item.viewMode === "average"
-        ? "a"
-        : item.viewMode === "distribution"
-          ? "d"
-          : "b"
-    return `b.${item.scenarioId}.${modeToken}.${hc}`
-  }
-  if (item.type === "radar") {
-    const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-    const ids = item.scenarioIds.join("~")
-    const axes = item.axes.join("~")
-    let flags = ""
-    if (item.showRange) flags += "r"
-    if (item.highlightBaseline) flags += "b"
-    if (item.showDotsOnly) flags += "d"
-    if (item.showTierZones === false) flags += "n"
-    return `r.${ids}.${axes}.${flags}.${hc}`
-  }
-  if (item.type === "equity") {
-    // Note and cached image are intentionally not URL-encoded.
-    // Notes are a private annotation. Images are too large to
-    // fit a URL.
-    const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
-    const outcomes = item.outcomeCodes.join("~")
-    const cmp = item.compareToBaseline ? "c" : ""
-    return `e.${item.scenarioId}.${outcomes}.${cmp}.${hc}`
-  }
-  if (item.type === "resilience") {
-    const view = item.view
-    const encoding = item.cellEncoding
-    const ids = item.scenarioIds.join("~")
-    const climates = item.hydroclimates.join("~")
-    const outcomes = item.outcomeCodes.join("~")
-    // Optional 7th segment "n" when numeric cell values were on
-    // at save. tileScope / tileId / tileLabel and the visual /
-    // chart caches are not encoded. Round-tripped items
-    // rehydrate with partial context.
-    const num = item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
-    return `q.${view}.${encoding}.${ids}.${climates}.${outcomes}${num}`
-  }
-  return ""
+  const handler = handlerForItem(item)
+  return `${handler.urlPrefix}.${handler.encodeUrlToken(item)}`
 }
 
 // ---------------------------------------------------------------------------
@@ -187,62 +156,16 @@ export function parseShareItemsParam(
   return { items, storyItemIds }
 }
 
+/**
+ * Decode one share item from a URL token. Routes by the leading
+ * one-letter prefix to the matching variant handler in the share
+ * registry. Returns null when the prefix is unknown so the caller
+ * can drop unparseable items rather than failing the whole URL parse.
+ */
 function decodeOne(token: string): ShareItem | null {
   const parts = token.split(".")
-  if (parts[0] === "b" && parts.length >= 3) {
-    const modeToken = parts[2]
-    return {
-      id: crypto.randomUUID(),
-      type: "barChart",
-      scenarioId: parts[1]!,
-      viewMode:
-        modeToken === "a"
-          ? "average"
-          : modeToken === "d"
-            ? "distribution"
-            : "bar",
-      hydroclimate: parts[3] || "historical",
-    }
-  }
-  if (parts[0] === "r" && parts.length >= 3) {
-    const scenarioIds = parts[1]!.split("~").filter(Boolean)
-    const axes = parts[2]!.split("~").filter(Boolean)
-    const flags = parts[3] ?? ""
-    return {
-      id: crypto.randomUUID(),
-      type: "radar",
-      scenarioIds,
-      axes,
-      showRange: flags.includes("r"),
-      showTierZones: !flags.includes("n"),
-      highlightBaseline: flags.includes("b"),
-      showDotsOnly: flags.includes("d"),
-      hydroclimate: parts[4] || "historical",
-    }
-  }
-  if (parts[0] === "e" && parts.length >= 3) {
-    const outcomeCodes = (parts[2] ?? "").split("~").filter(Boolean)
-    return {
-      id: crypto.randomUUID(),
-      type: "equity",
-      scenarioId: parts[1] ?? "",
-      outcomeCodes,
-      compareToBaseline: (parts[3] ?? "").includes("c"),
-      hydroclimate: parts[4] || "historical",
-    }
-  }
-  if (parts[0] === "q" && parts.length >= 3) {
-    const showCellNumbers = parts[6] === "n"
-    return {
-      id: crypto.randomUUID(),
-      type: "resilience",
-      view: parts[1] ?? "aggregate",
-      cellEncoding: parts[2] ?? "tier",
-      scenarioIds: (parts[3] ?? "").split("~").filter(Boolean),
-      hydroclimates: (parts[4] ?? "").split("~").filter(Boolean),
-      outcomeCodes: (parts[5] ?? "").split("~").filter(Boolean),
-      ...(showCellNumbers ? { showCellNumbers: true } : {}),
-    }
-  }
-  return null
+  if (parts.length < 2) return null
+  const handler = getHandlerByUrlPrefix(parts[0]!)
+  if (!handler) return null
+  return handler.decodeUrlToken(parts.slice(1))
 }

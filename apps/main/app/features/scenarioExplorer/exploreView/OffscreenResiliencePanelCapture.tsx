@@ -2,11 +2,19 @@
 
 /**
  * Off-screen panel-wide capture for the resilience heatmap. Mounts
- * `ResiliencePanelChartView` inside `OffscreenCaptureHost` at fixed
- * dimensions and uses `compose` mode so a small-multiples grid (which
- * has many `<svg>` children) ends up as a single composite SVG. The
- * single-aggregate render also routes through the same path, since
- * compose mode handles a one-svg host correctly.
+ * `ResiliencePanelChartView` inside `OffscreenCaptureHost` and uses
+ * `compose` mode so a small-multiples grid (which has many `<svg>`
+ * children) ends up as a single composite SVG. The single-aggregate
+ * render also routes through the same path, since compose mode
+ * handles a one-svg host correctly.
+ *
+ * Sizing:
+ *   - Aggregate / single-heatmap captures use the fixed
+ *     `CAPTURE_DIMENSIONS.resiliencePanel` size.
+ *   - Small-multiples captures pass an explicit `height` computed by
+ *     `computeResiliencePanelSmallMultiplesCaptureHeight` so every
+ *     tile renders into the composite (the live grid uses
+ *     `overflowY: auto`, which would otherwise clip below the host).
  *
  * Callers gather the panel's current chart state into the
  * `ResiliencePanelChartViewState` discriminated union and pass it
@@ -29,8 +37,14 @@ export const RESILIENCE_PANEL_CAPTURE_HEIGHT =
 
 export interface CaptureResiliencePanelOffscreenInput {
   state: ResiliencePanelChartViewState
-  /** Visual props shared across both chart paths. */
-  view: Omit<ResiliencePanelChartViewProps, "state" | "handlers">
+  /**
+   * Visual props shared across both chart paths. `captureMode` is
+   * always set by this host, so callers do not pass it.
+   */
+  view: Omit<
+    ResiliencePanelChartViewProps,
+    "state" | "handlers" | "captureMode"
+  >
   theme: Theme
   width?: number
   height?: number
@@ -43,11 +57,14 @@ export interface CaptureResiliencePanelOffscreenResult {
 }
 
 /**
- * Render the panel chart at fixed dimensions and return the composed
- * SVG plus rasterized PNG. Empty-state captures (no columns / no
- * outcomes) still produce a valid composite (the host bounds with the
- * background fill and any text nodes), which keeps callers from
- * branching on emptiness.
+ * Render the panel chart at the requested dimensions and return the
+ * composed SVG plus rasterized PNG. When `height` is omitted, the
+ * default fixed panel height is used (right for aggregate captures);
+ * small-multiples captures pass an explicit content-aware height.
+ *
+ * Empty-state captures (no columns / no outcomes) still produce a
+ * valid composite (the host bounds with the background fill and any
+ * text nodes), which keeps callers from branching on emptiness.
  */
 export async function captureResiliencePanelOffscreen(
   input: CaptureResiliencePanelOffscreenInput,
@@ -76,7 +93,10 @@ export async function captureResiliencePanelOffscreen(
 
 interface ResiliencePanelHostProps {
   state: ResiliencePanelChartViewState
-  view: Omit<ResiliencePanelChartViewProps, "state" | "handlers">
+  view: Omit<
+    ResiliencePanelChartViewProps,
+    "state" | "handlers" | "captureMode"
+  >
   width: number
   height: number
   onReady: () => void
@@ -111,9 +131,14 @@ function ResiliencePanelHost({
         display: "flex",
         flexDirection: "column",
         minHeight: 0,
+        // Mirrors CAPTURE_OUTER_PADDING in ResiliencePanelChartView so
+        // a small-multiples grid sized via the helper has matching
+        // breathing room on every side of the rasterized output.
+        padding: "24px",
+        boxSizing: "border-box",
       }}
     >
-      <ResiliencePanelChartView state={state} {...view} />
+      <ResiliencePanelChartView state={state} captureMode {...view} />
     </Box>
   )
 }

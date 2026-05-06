@@ -134,9 +134,18 @@ export async function offscreenCapture(
 
   const ready = new Promise<void>((resolve, reject) => {
     const timer = window.setTimeout(() => {
+      // Common causes are an empty-data render path that forgot to fire
+      // onReady, or a snapshot whose own first paint never settled. The
+      // breadcrumbs below help a future developer triage which case it
+      // is without needing to add ad-hoc logging.
+      const svgPresent = host.querySelector("svg") !== null
+      const renderedHtmlLength = host.innerHTML.length
       reject(
         new Error(
-          `offscreenCapture(${input.captureKind ?? "unknown"}): onReady did not fire within timeout`,
+          `offscreenCapture(${input.captureKind ?? "unknown"}): onReady did not fire within ${READY_TIMEOUT_MS}ms ` +
+            `(svgPresent=${svgPresent}, renderedHtmlLength=${renderedHtmlLength}). ` +
+            `Likely causes: snapshot bailed early without firing onReady (empty data, zero dims), ` +
+            `or its first paint never settled. Snapshot wrappers must fire onReady on every render path.`,
         ),
       )
     }, READY_TIMEOUT_MS)

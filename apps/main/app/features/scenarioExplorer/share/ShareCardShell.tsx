@@ -51,6 +51,7 @@ export default function ShareCardShell({
           size="small"
           onClick={onRemove}
           aria-label={removeAriaLabel}
+          data-share-export-ignore=""
           sx={{
             position: "absolute",
             top: 4,

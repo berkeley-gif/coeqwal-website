@@ -38,11 +38,8 @@ import {
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareItemView from "../../features/scenarioExplorer/share/ShareItemView"
 import ShareUrlVersionNotice from "../../features/scenarioExplorer/share/ui/ShareUrlVersionNotice"
-import {
-  CAPTURE_DIMENSIONS,
-  type CaptureSize,
-} from "../../features/scenarioExplorer/share/capture/dimensions"
-import { toPng } from "html-to-image"
+import { CAPTURE_DIMENSIONS } from "../../features/scenarioExplorer/share/capture/dimensions"
+import { handlerForItem } from "../../features/scenarioExplorer/share/variants"
 import {
   downloadFromDataUrl,
   downloadSvgString,
@@ -52,6 +49,10 @@ import {
   exportAllShareItemsAsCSV,
   getTimestampedFilename,
 } from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
+import {
+  downloadCardAsPng,
+  downloadCardAsSvg,
+} from "../../features/scenarioExplorer/share/cardExport"
 
 // ---------------------------------------------------------------------------
 // URL helpers
@@ -90,43 +91,34 @@ function transformToCSS(
 // Download helpers
 // ---------------------------------------------------------------------------
 
-/** Label fragment used by getTimestampedFilename for share downloads. */
-function shareItemFilenameLabel(item: ShareItem): string {
-  switch (item.type) {
-    case "barChart":
-      return `coeqwal-${item.scenarioId}-${item.viewMode}`
-    case "radar":
-      return `coeqwal-radar-${item.scenarioIds.length}scenarios`
-    case "equity":
-      return `coeqwal-distribution-${item.scenarioId}`
-    case "resilience":
-      return `coeqwal-resilience-${item.view}`
-  }
-}
-
 /**
- * Per-variant raster output size, in pixels. Sourced from the
- * single capture-dimensions module so PNG download size always
- * matches the SVG capture size for that variant.
+ * Filename fragment + raster size both come from the share variant
+ * registry so a new variant only has to fill in one row in
+ * `share/variants.ts` to wire its downloads. The registry's
+ * `rasterDimensionsKey` indexes into {@link CAPTURE_DIMENSIONS}; this
+ * is a one-size-per-variant lookup, which is fine for radar / equity
+ * / barChart but currently rounds resilience tile and quadrant
+ * captures up to the panel size at PNG-from-cachedSvg time. See the
+ * README "RASTER_SIZE per tileScope" follow-up note.
  */
-const RASTER_SIZE: Record<ShareItem["type"], CaptureSize> = {
-  radar: CAPTURE_DIMENSIONS.radar,
-  equity: CAPTURE_DIMENSIONS.equity,
-  resilience: CAPTURE_DIMENSIONS.resiliencePanel,
-  barChart: CAPTURE_DIMENSIONS.barChartRow,
+function shareItemFilenameLabel(item: ShareItem): string {
+  return handlerForItem(item).filenameLabel(item)
 }
 
-function hasCachedSvg(item: ShareItem): boolean {
-  return typeof item.cachedSvg === "string" && item.cachedSvg.length > 0
+function shareItemRasterSize(item: ShareItem) {
+  return CAPTURE_DIMENSIONS[handlerForItem(item).rasterDimensionsKey]
 }
 
 /**
  * PNG download path. Order of preference:
- *   1. cachedSvg → rasterize on demand. Output matches the captured
- *      snapshot exactly, regardless of the current live state.
- *   2. live element via html-to-image. Used for variants whose card
- *      contains a re-rendered chart but no SVG cache (URL-restored
- *      items).
+ *   1. live card element via html-to-image. Captures the full card
+ *      (tool label, title, definition, hydroclimate badge, chart,
+ *      chips, user-written note) so the downloaded image matches
+ *      what the user sees in the share tray. This is the dominant
+ *      path for any item rendered in the panel.
+ *   2. cachedSvg → rasterize on demand. Bare-chart fallback when
+ *      the card is not currently mounted (e.g. URL-restored items
+ *      that have not been added to the story canvas).
  *   3. cachedImageDataUrl. Direct write of an old PNG fallback.
  */
 async function downloadShareItemAsPng(
@@ -136,9 +128,14 @@ async function downloadShareItemAsPng(
 ): Promise<void> {
   const filename = getTimestampedFilename(shareItemFilenameLabel(item), "png")
 
+  if (liveEl) {
+    const ok = await downloadCardAsPng(liveEl, filename, { backgroundColor })
+    if (ok) return
+  }
+
   if (item.cachedSvg) {
     try {
-      const size = RASTER_SIZE[item.type]
+      const size = shareItemRasterSize(item)
       const { dataUrl } = await rasterizeSvgString(
         item.cachedSvg,
         size.width,
@@ -149,24 +146,7 @@ async function downloadShareItemAsPng(
       return
     } catch (err) {
       console.warn(
-        "[Share] PNG download via cachedSvg failed, falling back to live capture:",
-        err,
-      )
-    }
-  }
-
-  if (liveEl) {
-    try {
-      const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
-      const dataUrl = await toPng(liveEl, {
-        pixelRatio: dpr * 2,
-        backgroundColor,
-      })
-      await downloadFromDataUrl(dataUrl, filename)
-      return
-    } catch (err) {
-      console.warn(
-        "[Share] PNG download via live capture failed, falling back to cached PNG:",
+        "[Share] PNG download via cachedSvg failed, falling back to cached PNG:",
         err,
       )
     }
@@ -178,14 +158,29 @@ async function downloadShareItemAsPng(
 }
 
 /**
- * SVG download path. Embeds an @import for the Neue Haas family so
- * renderers that honor web fonts match the on-screen typography;
- * native vector tools fall back to the listed system stack.
+ * SVG download path. Order of preference:
+ *   1. live card element via html-to-image's foreignObject SVG.
+ *      Carries the full card chrome at vector resolution, modulo
+ *      the legacy-renderer caveat documented on `downloadCardAsSvg`.
+ *   2. cachedSvg with embedded font @import. Bare-chart fallback
+ *      when the card is not mounted; the file still opens cleanly
+ *      in vector tools.
  */
-function downloadShareItemAsSvg(item: ShareItem): void {
-  if (!item.cachedSvg) return
+async function downloadShareItemAsSvg(
+  item: ShareItem,
+  liveEl: HTMLElement | null,
+  backgroundColor: string,
+): Promise<void> {
   const filename = getTimestampedFilename(shareItemFilenameLabel(item), "svg")
-  downloadSvgString(embedFontStylesInSvg(item.cachedSvg), filename)
+
+  if (liveEl) {
+    const ok = await downloadCardAsSvg(liveEl, filename, { backgroundColor })
+    if (ok) return
+  }
+
+  if (item.cachedSvg) {
+    downloadSvgString(embedFontStylesInSvg(item.cachedSvg), filename)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -199,6 +194,7 @@ function TrayCard({
   isInStory,
   onToggle,
   onNoteChange,
+  onRegisterTrayContentRef,
   outcomeNames,
   scenarioLookup,
   allChartData,
@@ -208,6 +204,7 @@ function TrayCard({
   isInStory: boolean
   onToggle: () => void
   onNoteChange: (id: string, note: string) => void
+  onRegisterTrayContentRef: (id: string, el: HTMLDivElement | null) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<
     string,
@@ -259,7 +256,14 @@ function TrayCard({
         },
       }}
     >
-      <Box sx={{ px: 0.5, pb: 0.5 }}>{renderContent()}</Box>
+      <Box
+        ref={(el: HTMLDivElement | null) => {
+          onRegisterTrayContentRef(item.id, el)
+        }}
+        sx={{ px: 0.5, pb: 0.5 }}
+      >
+        {renderContent()}
+      </Box>
 
       {/* In-story badge */}
       {isInStory && (
@@ -341,11 +345,13 @@ function StoryCard({
     )
   }, [item, theme.palette.common.white])
 
-  const handleDownloadSvg = useCallback(() => {
-    downloadShareItemAsSvg(item)
-  }, [item])
-
-  const svgAvailable = hasCachedSvg(item)
+  const handleDownloadSvg = useCallback(async () => {
+    await downloadShareItemAsSvg(
+      item,
+      contentRef.current,
+      theme.palette.common.white,
+    )
+  }, [item, theme.palette.common.white])
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
@@ -429,17 +435,15 @@ function StoryCard({
               <icons.Image sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
-          {svgAvailable && (
-            <Tooltip title="Download as SVG" arrow>
-              <IconButton
-                size="small"
-                onClick={handleDownloadSvg}
-                sx={{ p: 0.75, color: theme.palette.grey[600] }}
-              >
-                <icons.Code sx={{ fontSize: "1.25rem" }} />
-              </IconButton>
-            </Tooltip>
-          )}
+          <Tooltip title="Download as SVG" arrow>
+            <IconButton
+              size="small"
+              onClick={handleDownloadSvg}
+              sx={{ p: 0.75, color: theme.palette.grey[600] }}
+            >
+              <icons.Code sx={{ fontSize: "1.25rem" }} />
+            </IconButton>
+          </Tooltip>
           {(() => {
             const hasData =
               !!item.cachedChartData &&
@@ -619,6 +623,29 @@ export default function SharePanel() {
     [storyItemIdSet, addToStory, removeFromStory],
   )
 
+  // Single outcome-name lookup for the bar chart and radar CSV
+  // exporters. Falls back to the resolved-tiers display name and
+  // finally the raw OutcomeCode so the exporter never emits a code
+  // when a display name is available.
+  const outcomeNameByCode = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const o of outcomeNames) map.set(o.shortCode, o.displayName)
+    return map
+  }, [outcomeNames])
+
+  const outcomeNameLookup = useCallback(
+    (code: string) => outcomeNameByCode.get(code) ?? code,
+    [outcomeNameByCode],
+  )
+
+  const scenarioNameLookup = useCallback(
+    (id: string) =>
+      scenarioLookup.get(id)?.description ??
+      scenarioLookup.get(id)?.name ??
+      id,
+    [scenarioLookup],
+  )
+
   const handleDownloadData = useCallback(
     (item: ShareItem) => {
       if (
@@ -633,16 +660,18 @@ export default function SharePanel() {
       exportShareItemAsCSV(
         item,
         filename,
-        (id) =>
-          scenarioLookup.get(id)?.description ??
-          scenarioLookup.get(id)?.name ??
-          id,
+        scenarioNameLookup,
+        outcomeNameLookup,
       )
     },
-    [scenarioLookup],
+    [scenarioNameLookup, outcomeNameLookup],
   )
 
+  // Story-canvas card refs are the primary live-element source for
+  // the bulk download path. Tray refs are registered too so tray-only
+  // items (not added to a story) still produce a styled-card export.
   const cardContentRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const trayContentRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   const registerCardRef = useCallback(
     (id: string, el: HTMLDivElement | null) => {
@@ -652,25 +681,39 @@ export default function SharePanel() {
     [],
   )
 
+  const registerTrayCardRef = useCallback(
+    (id: string, el: HTMLDivElement | null) => {
+      if (el) trayContentRefs.current.set(id, el)
+      else trayContentRefs.current.delete(id)
+    },
+    [],
+  )
+
+  const resolveLiveCardEl = useCallback(
+    (id: string): HTMLDivElement | null =>
+      cardContentRefs.current.get(id) ??
+      trayContentRefs.current.get(id) ??
+      null,
+    [],
+  )
+
   const handleDownloadAllImages = useCallback(async () => {
     const items = storyItems.length > 0 ? storyItems : shareItems
     for (const item of items) {
-      const el = cardContentRefs.current.get(item.id) ?? null
+      const el = resolveLiveCardEl(item.id)
       await downloadShareItemAsPng(item, el, theme.palette.common.white)
     }
-  }, [storyItems, shareItems, theme.palette.common.white])
+  }, [storyItems, shareItems, theme.palette.common.white, resolveLiveCardEl])
 
   const handleDownloadAllData = useCallback(() => {
     const items = storyItems.length > 0 ? storyItems : shareItems
     exportAllShareItemsAsCSV(
       items,
       getTimestampedFilename("coeqwal-chart-data", "csv"),
-      (id) =>
-        scenarioLookup.get(id)?.description ??
-        scenarioLookup.get(id)?.name ??
-        id,
+      scenarioNameLookup,
+      outcomeNameLookup,
     )
-  }, [storyItems, shareItems, scenarioLookup])
+  }, [storyItems, shareItems, scenarioNameLookup, outcomeNameLookup])
 
   // ── Empty state: no share items at all ──
   if (shareItems.length === 0) {
@@ -781,6 +824,7 @@ export default function SharePanel() {
               isInStory={storyItemIdSet.has(item.id)}
               onToggle={() => handleToggleStory(item.id)}
               onNoteChange={handleNoteChange}
+              onRegisterTrayContentRef={registerTrayCardRef}
               outcomeNames={outcomeNames}
               scenarioLookup={scenarioLookup}
               allChartData={

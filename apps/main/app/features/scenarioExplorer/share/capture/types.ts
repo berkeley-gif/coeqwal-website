@@ -66,6 +66,17 @@ export type ResilienceTileCaptureFn = (
   tileId: string,
 ) => Promise<ResilienceCaptureResult | null>
 
+/**
+ * Capture a single scenario as a synthesized scenario-solo tile,
+ * regardless of the panel's current view. Used by the scenario
+ * sidebar so clicking the share icon next to a row always produces
+ * a card scoped to that scenario, mirroring how radar (single
+ * trace) and equity (single distribution) sidebar shares behave.
+ */
+export type ResilienceScenarioSoloCaptureFn = (
+  scenarioId: string,
+) => Promise<ResilienceCaptureResult | null>
+
 /** Capture the resilience leverage quadrant. */
 export type ResilienceQuadrantCaptureFn =
   () => Promise<ResilienceQuadrantCaptureResult | null>

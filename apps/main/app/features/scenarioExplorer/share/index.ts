@@ -54,3 +54,13 @@ export {
   type OffscreenCaptureInput,
   type OffscreenCaptureResult,
 } from "./capture/OffscreenCaptureHost"
+
+export {
+  VARIANT_REGISTRY,
+  handlerForItem,
+  getHandlerByUrlPrefix,
+  type VariantHandler,
+  type RenderContext,
+  type CsvLookups,
+  type ShareItemScenarioInfo,
+} from "./variants"

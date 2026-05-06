@@ -123,6 +123,10 @@ export type {
 export { default as ResilienceHeatmapSnapshot } from "./components/ResilienceHeatmapSnapshot"
 export type { ResilienceHeatmapSnapshotProps } from "./components/ResilienceHeatmapSnapshot"
 export { default as ResilienceHeatmapSmallMultiples } from "./components/ResilienceHeatmapSmallMultiples"
+export {
+  getResilienceSmallMultiplesTileHeight,
+  RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS,
+} from "./components/ResilienceHeatmapSmallMultiples"
 export type {
   ResilienceHeatmapSmallMultiplesProps,
   ResilienceSmallMultiplesTile,

@@ -30,6 +30,31 @@ import ResilienceHeatmap, {
 
 export type ResilienceSmallMultiplesTileAspect = "wide" | "tall"
 
+/**
+ * Column count used by the small-multiples grid in capture mode.
+ * Exported so external height-calculation helpers stay in sync with
+ * the layout the component actually renders.
+ */
+export const RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS = 2
+
+/**
+ * Per-tile height (in CSS pixels) used by the small-multiples grid.
+ * Exported so callers laying out the grid in a fixed-size off-screen
+ * host (capture path) can compute a content-aware total height that
+ * matches the live grid's row pitch exactly.
+ */
+export function getResilienceSmallMultiplesTileHeight(
+  tileAspect: ResilienceSmallMultiplesTileAspect,
+  rowsCount: number,
+): number {
+  if (tileAspect === "tall") {
+    const perRow = 16
+    const chrome = 88
+    return Math.max(300, chrome + rowsCount * perRow)
+  }
+  return 340
+}
+
 export interface ResilienceSmallMultiplesTile {
   /** Stable unique id (scenario id, outcome code, etc.). */
   id: string
@@ -61,6 +86,24 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   minTileWidth?: number
   /** Maximum columns in the grid. Defaults to 4. */
   maxColumns?: number
+  /**
+   * Reconfigure the grid for off-screen SVG capture. When true:
+   *  - the column count is pinned to
+   *    `RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS` (2) instead of
+   *    the responsive auto-fit, so the snapshot layout is
+   *    deterministic regardless of the off-screen host width;
+   *  - the scroll container is dropped so every tile lays out at
+   *    full content height (the live grid's overflowY: auto would
+   *    otherwise clip tiles below the host height);
+   *  - each tile's title is rendered as an inline `<svg><text>`
+   *    instead of an HTML `<span>` so the SVG composer (which only
+   *    walks `<svg>` elements) picks the title up.
+   *
+   * Live mounts leave this off so the responsive grid, scroll, CSS
+   * ellipsis on long titles, and the native `title` tooltip
+   * continue to work.
+   */
+  captureMode?: boolean
   /** Emitted when the hovered cell in any tile changes. */
   onCellHover?: (cell: ResilienceHeatmapCell | null) => void
   /** Emitted when a cell is clicked. */
@@ -169,6 +212,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       tileAspect = "wide",
       minTileWidth = 360,
       maxColumns = 4,
+      captureMode = false,
       onCellHover,
       onCellClick,
       formatRowTick,
@@ -179,26 +223,26 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       firstCellRef,
       columnLabelRotation = 0,
     }) => {
-      const tileHeight = useMemo(() => {
-        if (tileAspect === "tall") {
-          // Tall tiles: scenarios on Y (up to 24 rows). Scale with row
-          // count so 24-row tiles still breathe, but cap it so 6-row
-          // tiles aren't absurdly stubby. The chrome accounts for the
-          // React tile header plus the inner chart margins (top pad +
-          // hydroclimate label band above the plot + bottom pad).
-          const perRow = 16
-          const chrome = 88
-          return Math.max(300, chrome + rows.length * perRow)
-        }
-        // Wide tiles: outcomes on Y (19 rows). More uniform height.
-        return 340
-      }, [tileAspect, rows.length])
+      const tileHeight = useMemo(
+        // Tall tiles (scenarios on Y, up to 24 rows): scale with row
+        // count so 24-row tiles still breathe, but cap so 6-row tiles
+        // aren't absurdly stubby. The chrome accounts for the React
+        // tile header plus the inner chart margins (top pad +
+        // hydroclimate label band above the plot + bottom pad).
+        // Wide tiles (outcomes on Y, 19 rows) are uniform height.
+        () => getResilienceSmallMultiplesTileHeight(tileAspect, rows.length),
+        [tileAspect, rows.length],
+      )
 
-      // Compute a display column count the CSS grid can respect. We let
-      // auto-fit handle the actual responsive behavior, but clamp the max.
+      // Live grid: auto-fit responsiveness clamped by maxColumns. Capture
+      // grid: a fixed column count so the snapshot layout is deterministic
+      // and not dependent on the off-screen host's width.
       const gridTemplate = useMemo(
-        () => `repeat(auto-fit, minmax(${minTileWidth}px, 1fr))`,
-        [minTileWidth],
+        () =>
+          captureMode
+            ? `repeat(${RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS}, 1fr)`
+            : `repeat(auto-fit, minmax(${minTileWidth}px, 1fr))`,
+        [minTileWidth, captureMode],
       )
 
       if (tiles.length === 0) {
@@ -211,7 +255,11 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             display: "flex",
             flexDirection: "column",
             width: "100%",
-            height: "100%",
+            // Live mode: grid scrolls inside the panel and claims the
+            // parent's full height. Capture mode: grid lays out at
+            // full content height so every tile lands in the
+            // rasterized output.
+            height: captureMode ? "auto" : "100%",
             minHeight: 0,
             gap: 12,
           }}
@@ -231,10 +279,13 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
               gap: 16,
               flex: 1,
               minHeight: 0,
-              overflowY: "auto",
+              overflowY: captureMode ? "visible" : "auto",
               overflowX: "hidden",
-              // Enforce a soft cap on columns via max-width.
-              maxWidth: `${maxColumns * 560}px`,
+              // Live mode caps via max-width to avoid stretching the
+              // tiles too wide on huge screens. Capture mode leaves the
+              // grid free to fill the off-screen host width that the
+              // caller chose deliberately.
+              maxWidth: captureMode ? "none" : `${maxColumns * 560}px`,
               alignContent: "start",
             }}
           >
@@ -262,33 +313,69 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       minHeight: 40,
                     }}
                   >
-                    <span
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: palette.text,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        flex: 1,
-                        minWidth: 0,
-                      }}
-                      title={tile.titleTooltip ?? tile.title}
-                    >
-                      {tile.title}
-                    </span>
-                    {tile.subtitle && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: palette.textMuted,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
+                    {captureMode ? (
+                      // Inline SVG so the off-screen SVG composer (which only
+                      // collects `<svg>` elements) picks the title up. Live
+                      // mounts use the HTML branch below for ellipsis,
+                      // accessibility, and tooltip behavior.
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="100%"
+                        height={36}
+                        style={{ display: "block", flex: 1, minWidth: 0 }}
+                        aria-hidden
                       >
-                        {tile.subtitle}
-                      </span>
+                        <text
+                          x={0}
+                          y={tile.subtitle ? 14 : 22}
+                          fontSize={13}
+                          fontWeight={600}
+                          fill={palette.text}
+                        >
+                          {tile.title}
+                        </text>
+                        {tile.subtitle && (
+                          <text
+                            x={0}
+                            y={30}
+                            fontSize={11}
+                            fill={palette.textMuted}
+                          >
+                            {tile.subtitle}
+                          </text>
+                        )}
+                      </svg>
+                    ) : (
+                      <>
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: palette.text,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                          title={tile.titleTooltip ?? tile.title}
+                        >
+                          {tile.title}
+                        </span>
+                        {tile.subtitle && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: palette.textMuted,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {tile.subtitle}
+                          </span>
+                        )}
+                      </>
                     )}
                     {hasActions && (
                       <div

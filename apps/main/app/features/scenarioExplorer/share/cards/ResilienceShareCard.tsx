@@ -35,6 +35,7 @@ function buildLookups(
   return {
     scenarioLabel: (id) =>
       scenarioLookup.get(id)?.shortLabel ?? scenarioLookup.get(id)?.name ?? id,
+    scenarioDefinition: (id) => scenarioLookup.get(id)?.definition,
     outcomeLabel: (code) => OUTCOME_NAMES[code as OutcomeCode] ?? code,
     hydroShortLabel: (hc) => HYDROCLIMATE_SHORT_LABELS[hc] ?? hc,
   }
@@ -83,6 +84,7 @@ export default function ResilienceShareCard({
       id={item.id}
       toolLabel="Resilience"
       title={model.headline}
+      scenarioDefinition={model.scenarioDefinition}
       subtitle={model.subtitle}
       chips={model.chips}
       cachedSvg={item.cachedSvg}

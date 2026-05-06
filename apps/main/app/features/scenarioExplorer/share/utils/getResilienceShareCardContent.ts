@@ -13,6 +13,13 @@ export type ResilienceShareItem = Extract<ShareItem, { type: "resilience" }>
 export interface ResilienceShareCardLookups {
   /** Short label for a scenario id (e.g. shortLabel or name). */
   scenarioLabel: (id: string) => string
+  /**
+   * Longer scenario definition for `info.definition`-style copy,
+   * shown under the headline on single-scenario tile cards so the
+   * resilience card carries the same context as bar chart and
+   * radar single-scenario cards.
+   */
+  scenarioDefinition?: (id: string) => string | undefined
   /** Display name for an outcome code. */
   outcomeLabel: (code: string) => string
   /** Short hydroclimate label (e.g. HYDROCLIMATE_SHORT_LABELS). */
@@ -23,6 +30,12 @@ export interface ResilienceShareCardContent {
   headline: string
   /** Primary context line under the headline. */
   subtitle: string
+  /**
+   * Longer scenario definition rendered under the headline on
+   * single-scenario tile cards. Empty string is treated as "no
+   * definition available" by the consumer.
+   */
+  scenarioDefinition?: string
   /** Optional second line when the live thumbnail is an aggregate summary. */
   thumbnailDisclaimer?: string
   /** Prefix-styled chips: Hydro, Scenarios, Outcomes. */
@@ -228,9 +241,27 @@ export function getResilienceShareCardContent(
 
   const subtitle = `${enc} · ${scope}`
 
+  // Resolve the scenario definition for single-scenario tile cards
+  // so the resilience card matches the bar chart and radar cards
+  // (longer context line under the headline). Falls back to an
+  // undefined definition when the lookup or the scenario id is
+  // missing; the consumer treats undefined as "no extra line".
+  let scenarioDefinition: string | undefined
+  if (
+    item.tileScope === "scenario" &&
+    item.tileId &&
+    lookups.scenarioDefinition
+  ) {
+    const def = lookups.scenarioDefinition(item.tileId)
+    if (def && def.length > 0) {
+      scenarioDefinition = def
+    }
+  }
+
   return {
     headline,
     subtitle,
+    scenarioDefinition,
     chips,
     showLiveAggregateFallback,
     showThumbnailDisclaimer: Boolean(thumbnailDisclaimer),

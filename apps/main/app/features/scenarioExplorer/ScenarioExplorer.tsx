@@ -37,6 +37,7 @@ import type {
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
   ResilienceQuadrantCaptureFn,
+  ResilienceScenarioSoloCaptureFn,
 } from "./exploreView"
 import { captureEquityOffscreen } from "./exploreView/OffscreenEquityCapture"
 import { stageShareItem } from "./share/stage"
@@ -228,6 +229,9 @@ function ScenarioExplorerInner() {
           hydroclimate,
           cachedSvg: captured?.svg,
           cachedImageDataUrl: captured?.dataUrl,
+          cachedChartData: captured?.chartData as
+            | Record<string, unknown>
+            | undefined,
         }),
         addItem: addShareItem,
         errorLabel: "ScenarioExplorer.captureEquityOffscreen",
@@ -286,6 +290,15 @@ function ScenarioExplorerInner() {
     [],
   )
 
+  // Mirrors RadarPanel's `filteredData.length > 0`; drives the
+  // toolbar "save snapshot" button's disabled state. Default false
+  // so the button starts dimmed during the brief mount window
+  // before RadarPanel fires the callback with the real value.
+  const [canCaptureRadar, setCanCaptureRadar] = useState(false)
+  const handleRadarCanCaptureChange = useCallback((canCapture: boolean) => {
+    setCanCaptureRadar(canCapture)
+  }, [])
+
   const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
     return radarSingleCaptureRef.current?.(scenarioId) ?? null
   }, [])
@@ -305,6 +318,8 @@ function ScenarioExplorerInner() {
   // panel instance goes away.
   const resilienceCaptureRef = useRef<ResilienceCaptureFn | null>(null)
   const resilienceTileCaptureRef = useRef<ResilienceTileCaptureFn | null>(null)
+  const resilienceScenarioSoloCaptureRef =
+    useRef<ResilienceScenarioSoloCaptureFn | null>(null)
   const resilienceQuadrantCaptureRef =
     useRef<ResilienceQuadrantCaptureFn | null>(null)
 
@@ -318,6 +333,13 @@ function ScenarioExplorerInner() {
   const handleResilienceTileCaptureReady = useCallback(
     (capture: ResilienceTileCaptureFn) => {
       resilienceTileCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleResilienceScenarioSoloCaptureReady = useCallback(
+    (capture: ResilienceScenarioSoloCaptureFn) => {
+      resilienceScenarioSoloCaptureRef.current = capture
     },
     [],
   )
@@ -466,16 +488,44 @@ function ScenarioExplorerInner() {
     ],
   )
 
+  // Sidebar share for resilience always produces a scenario-scoped
+  // tile (this scenario's outcomes x hydroclimates), regardless of
+  // the live panel's current view. The synthesized solo capture
+  // path keeps the sidebar share predictable: clicking the share
+  // icon next to a scenario row gives a card about that scenario,
+  // mirroring how radar (single trace) and equity (single
+  // distribution) sidebar shares behave. The earlier behavior
+  // delegated to the panel-wide capture in non-byScenario views,
+  // which threw away the row click signal.
   const handleResilienceSidebarScenarioShare = useCallback(
-    async (scenarioId: string) => {
-      const added = await handleResilienceTileSnapshot(scenarioId, {
-        scenarioIdsForShare: [scenarioId],
-      })
-      if (!added) {
-        await handleResilienceSnapshot()
+    async (scenarioId: string): Promise<void> => {
+      const result = await resilienceScenarioSoloCaptureRef.current?.(
+        scenarioId,
+      )
+      if (!result) return
+      const item: ShareItem = {
+        id: `resilience-${Date.now()}-${scenarioId}`,
+        type: "resilience",
+        view: result.chartData.view,
+        cellEncoding: result.chartData.cellEncoding,
+        scenarioIds: [scenarioId],
+        hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
+        outcomeCodes: resilienceVisibleOutcomes,
+        showCellNumbers: resilienceControls.showCellNumbers,
+        tileScope: result.chartData.tileScope,
+        tileId: scenarioId,
+        tileLabel: result.chartData.tileLabel,
+        cachedSvg: result.svg,
+        cachedImageDataUrl: result.dataUrl,
+        cachedChartData: result.chartData as unknown as Record<string, unknown>,
       }
+      addShareItem(item)
     },
-    [handleResilienceTileSnapshot, handleResilienceSnapshot],
+    [
+      resilienceControls,
+      resilienceVisibleOutcomes,
+      addShareItem,
+    ],
   )
 
   // Keep the Resilience "View:" rail in sync with the sidebar
@@ -544,6 +594,7 @@ function ScenarioExplorerInner() {
             <Box
               component="button"
               type="button"
+              disabled={!canCaptureRadar}
               onClick={() => radarCaptureRef.current?.()}
               aria-label="save snapshot"
               sx={{
@@ -560,11 +611,14 @@ function ScenarioExplorerInner() {
                 whiteSpace: "nowrap",
                 color: theme.palette.grey[800],
                 background: theme.palette.grey[200],
+                cursor: canCaptureRadar ? "pointer" : "default",
+                opacity: canCaptureRadar ? 1 : 0.4,
                 transition: "all 150ms ease",
-                cursor: "pointer",
                 "&:hover": {
-                  background: theme.palette.interaction.selectedBackground,
-                  color: theme.palette.blue.bright,
+                  background: canCaptureRadar
+                    ? theme.palette.interaction.selectedBackground
+                    : undefined,
+                  color: canCaptureRadar ? theme.palette.blue.bright : undefined,
                 },
               }}
             >
@@ -658,6 +712,7 @@ function ScenarioExplorerInner() {
     handleEquitySnapshot,
     handleResilienceSnapshot,
     radarChartToolbarRef,
+    canCaptureRadar,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -748,6 +803,7 @@ function ScenarioExplorerInner() {
                     onCaptureReady={handleRadarCaptureReady}
                     onSingleCaptureReady={handleRadarSingleCaptureReady}
                     onMultiCaptureReady={handleRadarMultiCaptureReady}
+                    onCanCaptureChange={handleRadarCanCaptureChange}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}
@@ -774,6 +830,9 @@ function ScenarioExplorerInner() {
                       onControlsChange={handleResilienceControlsChange}
                       onCaptureReady={handleResilienceCaptureReady}
                       onCaptureTileReady={handleResilienceTileCaptureReady}
+                      onCaptureScenarioSoloReady={
+                        handleResilienceScenarioSoloCaptureReady
+                      }
                       onTileShare={handleResilienceTileSnapshot}
                     />
                   ))}

@@ -836,6 +836,14 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (rows.length === 0 || columns.length === 0 || w <= 0 || h <= 0) {
+          // Off-screen capture awaits onReady before serializing. Fire it
+          // here too so an empty-data render does not deadlock the host.
+          if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+            hasFiredOnReadyRef.current = true
+            requestAnimationFrame(() => {
+              onReadyRef.current?.()
+            })
+          }
           return
         }
 
@@ -1491,6 +1499,18 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
         }
 
+        // The main chart content (rows, columns, cells, marginal strips)
+        // is drawn at this point. Fire onReady before the optional legend
+        // section so off-screen capture is not gated on decorative
+        // chrome, and so a future `if (someChromeOpt) return` cannot
+        // strand the readiness signal.
+        if (!hasFiredOnReadyRef.current && onReadyRef.current) {
+          hasFiredOnReadyRef.current = true
+          requestAnimationFrame(() => {
+            onReadyRef.current?.()
+          })
+        }
+
         // Legend, skipped entirely when the parent opts out (e.g., the
         // small-multiples wrapper renders one shared legend outside).
         if (hideLegend) return
@@ -1752,18 +1772,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .attr("font-size", 10)
             .attr("fill", paletteTextMuted)
             .text("Insufficient coverage")
-        }
-
-        // Fire onReady once after the first successful render. The
-        // requestAnimationFrame insurance lets any post-paint layout
-        // settle before the off-screen capture host serializes the
-        // SVG. The flag prevents subsequent updateChart calls (e.g.
-        // resize, prop change) from firing the callback again.
-        if (!hasFiredOnReadyRef.current && onReadyRef.current) {
-          hasFiredOnReadyRef.current = true
-          requestAnimationFrame(() => {
-            onReadyRef.current?.()
-          })
         }
       },
       [

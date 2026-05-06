@@ -15,6 +15,15 @@
  * `OffscreenCaptureHost`: the host renders the snapshot
  * inside a hidden div, awaits `onReady`, then serializes the SVG.
  *
+ * onReady contract:
+ *   The underlying chart MUST fire `onReady` exactly once after
+ *   its first render attempt, on every code path - including the
+ *   empty-data and zero-dimension bail-outs. The capture host
+ *   waits on this signal before serializing; a missed fire shows
+ *   up as `onReady did not fire within timeout`. Empty data is
+ *   the caller's responsibility to filter out earlier; the chart
+ *   must still complete its render-attempt handshake.
+ *
  * Tooltip refs are still installed by `ResilienceHeatmap` (the
  * cell tooltip / axis tooltip portal nodes mount unconditionally),
  * but they never fire because no listeners are attached when

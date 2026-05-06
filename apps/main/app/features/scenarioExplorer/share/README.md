@@ -2,26 +2,36 @@
 
 This directory owns everything user-facing for the share feature: the
 drawer, the cards rendered in the tray and story canvas, the off-screen
-capture pipeline, the localStorage envelope, and the URL grammar. The
-goal is that adding a new visualization to the share system means
-implementing one capture adapter and one card; everything else is
-generic.
+capture pipeline, the localStorage envelope, the URL grammar, and the
+per-variant registry that ties them together. Adding a new
+visualization to the share system means writing four implementation
+files and adding one row to the registry; the dispatchers (card render,
+URL encode/decode, filename, raster size, CSV) all read from the
+registry, so a missing arm is a compile error in `variants.ts` rather
+than a silent `return null` somewhere downstream.
 
 ```
 share/
   index.ts                        Barrel; the only stable public surface.
   types.ts                        ShareItem, ShareItemPatch, PersistedShareItem.
+  variants.ts                     Per-variant registry + RenderContext / CsvLookups types.
+  variants/
+    barChart.ts                   barChart variant handler.
+    radar.ts                      radar variant handler (with live-fallback builder).
+    equity.ts                     equity / Distribution variant handler.
+    resilience.ts                 resilience variant handler.
   persist.ts                      loadShareState / saveShareState + storage key.
   url.ts                          encodeShareItems / parseShareUrl + SHARE_URL_VERSION.
+                                  Dispatches per-item to the registry by URL prefix.
   stage.ts                        stageShareItem: build -> capture -> add.
-  ShareItemView.tsx               Variant -> card dispatcher.
+  ShareItemView.tsx               Variant -> card dispatcher (registry lookup).
   ShareCardShell.tsx              Common card chrome (border, remove button, note).
   ShareDrawer.tsx                 The right-edge tray.
   capture/
     OffscreenCaptureHost.tsx      Mounts a snapshot in a hidden div, returns SVG + PNG.
     dimensions.ts                 CAPTURE_DIMENSIONS: per-variant fixed size.
     types.ts                      CapturedVisual + capture function signatures.
-    captureRegistry.ts            Documentation-only cross-reference.
+    captureRegistry.ts            Re-export barrel for capture primitives.
   cards/
     ShareScenarioCard.tsx         barChart variant (header + chips only).
     ShareRadarCard.tsx            radar variant.
@@ -70,24 +80,48 @@ strips `cachedChartData` (live data, rebuilt at render time) and keeps
 both `cachedSvg` and `cachedImageDataUrl` so reload restores the same
 thumbnail and downloads keep working without a fresh capture.
 
+## The variant registry
+
+`variants.ts` exports one `VariantHandler<T>` per `ShareItem["type"]`,
+keyed in `VARIANT_REGISTRY` by that literal type. The registry is
+typed with `satisfies Record<ShareItem["type"], …>`, so adding a new
+arm to the `ShareItem` union without registering its handler is a
+compile error in this file.
+
+Each handler owns:
+
+| Field | Purpose | Used by |
+|---|---|---|
+| `type` | Discriminator value. | Self-documenting; matches the registry key. |
+| `urlPrefix` | One-letter token segment (e.g. `b`, `r`, `e`, `q`). | `url.ts` encode/decode. |
+| `rasterDimensionsKey` | Key into `CAPTURE_DIMENSIONS`. | `Share.tsx` PNG fallback when rasterizing `cachedSvg`. |
+| `renderCard(item, ctx)` | Returns the card React node. | `ShareItemView.tsx`. |
+| `encodeUrlToken(item)` | Body of the URL token (no prefix, no leading dot). | `url.ts#encodeOne`. |
+| `decodeUrlToken(parts)` | Inverse; receives parts after the prefix is stripped. | `url.ts#decodeOne`. |
+| `filenameLabel(item)` | Fragment fed to `getTimestampedFilename`. | `Share.tsx` PNG/SVG/CSV downloads. |
+| `exportCsv(item, lookups)` | Returns a CSV body string or `null`. Optional. | `exportUtils.ts` single + bulk CSV export. |
+
+Dispatchers do not branch on `item.type`. They look up the handler
+once and delegate, so a new variant only has to fill in the registry
+row to wire all four download paths and the URL grammar.
+
 ## Adding share to a new visualization
 
-There are four things to wire up. Use the existing variants as
-references; the radar pipeline is the cleanest end-to-end example.
+There are five files to write and one registry row to add. Use the
+existing variants as references; the radar pipeline is the cleanest
+end-to-end example.
 
-### 1. Add a variant to `ShareItem`
+### 1. Add a variant arm to `share/types.ts`
 
-In `share/types.ts`, extend the discriminated union with the metadata
-your new card needs. Be conservative: only fields the card or download
-path will read. Anything reconstructable from the live data should not
-land here.
+Extend the discriminated union with the metadata the card or download
+path needs. Be conservative: only fields a downstream reader will
+read. Anything reconstructable from the live data should not land in
+`ShareItem`.
 
 ```typescript
 export type ShareItem =
   | (ShareItemBaseFields & { type: "barChart"; /* ... */ })
-  | (ShareItemBaseFields & { type: "radar";    /* ... */ })
-  | (ShareItemBaseFields & { type: "equity";   /* ... */ })
-  | (ShareItemBaseFields & { type: "resilience"; /* ... */ })
+  // ...
   | (ShareItemBaseFields & {
       type: "myNewChart"
       scenarioIds: string[]
@@ -95,12 +129,27 @@ export type ShareItem =
     })
 ```
 
-`PersistedShareItem` is defined as `Omit<ShareItem, "cachedChartData">`,
-so a new variant is automatically covered.
+`PersistedShareItem` is `Omit<ShareItem, "cachedChartData">`, so a new
+variant is automatically covered.
 
-### 2. Build a snapshot wrapper
+### 2. Add a `CAPTURE_DIMENSIONS` entry
 
-The snapshot is a thin React component that renders your chart with
+```typescript
+// share/capture/dimensions.ts
+export const CAPTURE_DIMENSIONS = {
+  // ...
+  myNewChart: { width: 600, height: 400 },
+} as const satisfies Record<string, CaptureSize>
+```
+
+This is the only place dimensions are declared. The off-screen
+adapter, the PNG download fallback, and any compose-mode backdrop all
+read from here so the captured SVG and the downloaded PNG cannot
+drift.
+
+### 3. Build a snapshot wrapper (with the `onReady` contract)
+
+The snapshot is a thin React component that renders the chart with
 capture-mode props pre-bound. It must accept three props:
 
 - `interactive?: boolean` (default `true`). When `false`, the chart
@@ -110,10 +159,31 @@ capture-mode props pre-bound. It must accept three props:
 - `animate?: boolean` (default `true`). When `false`, transitions
   should run with duration 0 so the chart settles in one frame and
   the capture is not racing the animation.
-- `onReady?: () => void`. Called once after the chart has rendered to
-  the DOM and any post-frame layout has settled. Schedule the call
-  in a `requestAnimationFrame` from the end of your last build pass
-  and guard against double fires.
+- `onReady?: () => void`. **Contract:** must fire on **every**
+  render path, including empty-data and zero-dimension bail-outs.
+  The capture host waits on this signal before serializing; a missed
+  fire surfaces as `onReady did not fire within timeout` after a 4 s
+  deadlock. Empty data is the caller's job to filter (bail before
+  invoking the capture adapter); the chart's job is just to honor
+  the render-attempt handshake. See `ResilienceHeatmap.tsx` and
+  `RadarPlot.tsx` for the canonical pattern: every early return
+  fires `onReady` first.
+
+#### Capture-mode visual tweaks: bundle them under one `captureMode` prop
+
+A handful of charts need small layout differences during capture
+(don't clip an `overflowY: auto` container, force a fixed column
+count instead of responsive auto-fit, render an HTML title as inline
+SVG `<text>` so it survives the SVG composer). Bundle every such
+tweak under one `captureMode?: boolean` prop on the chart component
+and have the snapshot wrapper / capture host opt in via
+`captureMode={true}`.
+
+`ResilienceHeatmapSmallMultiples` is the canonical example: it
+collapses what used to be three separate flags (`forceColumns`,
+`noScroll`, `titleAsSvg`) into one `captureMode` prop. New charts
+should follow the same pattern; new flags accumulating one per quirk
+will rot fast.
 
 Snapshot wrappers for the visualizations shipped from `@repo/viz`
 live in `packages/viz/src/components/` (`RadarPlotSnapshot`,
@@ -125,30 +195,13 @@ the snapshot inside the feature folder
 snapshot's only job is to render at fixed dimensions without any
 live-mount side effects.
 
-### 3. Add fixed dimensions
-
-Open `share/capture/dimensions.ts` and add an entry to
-`CAPTURE_DIMENSIONS`:
-
-```typescript
-export const CAPTURE_DIMENSIONS = {
-  // ...
-  myNewChart: { width: 600, height: 400 },
-} as const satisfies Record<string, CaptureSize>
-```
-
-This is the only place dimensions are declared. The off-screen
-adapter, the PNG download path in `Share.tsx`, and any compose-mode
-backdrop all read from here so the captured SVG and the downloaded
-PNG cannot drift.
-
-### 4. Add a capture adapter
+### 4. Build an `Offscreen<Variant>Capture` adapter
 
 The adapter mounts the snapshot in `OffscreenCaptureHost` at the
 declared dimensions and returns `CapturedVisual` (`{ svg, dataUrl }`)
 plus any per-variant extras. It MUST NOT read from the live, on-screen
-chart, even as a fallback; that is where dot-loss and scaling bugs come
-from.
+chart, even as a fallback; that is where dot-loss and scaling bugs
+come from.
 
 ```typescript
 "use client"
@@ -161,7 +214,7 @@ import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 import type { CapturedVisual } from "../share/capture/types"
 
 export interface CaptureMyChartOffscreenInput {
-  // ...the data your chart needs
+  // ...the data the chart needs
   theme: Theme
 }
 
@@ -169,7 +222,6 @@ export async function captureMyChartOffscreen(
   input: CaptureMyChartOffscreenInput,
 ): Promise<CapturedVisual> {
   const { width, height } = CAPTURE_DIMENSIONS.myNewChart
-
   return offscreenCapture({
     theme: input.theme,
     width,
@@ -177,7 +229,7 @@ export async function captureMyChartOffscreen(
     captureKind: "myChart:offscreen",
     render: (onReady) => (
       <MyChartSnapshot
-        // ...your chart props...
+        // ...chart props...
         width={width}
         height={height}
         onReady={onReady}
@@ -195,33 +247,7 @@ one composite at the same fixed dimensions. See
 `OffscreenResiliencePanelCapture.tsx` for reference compose-mode
 adapters.
 
-### 5. Call the adapter via `stageShareItem`
-
-Every call site funnels through `share/stage.ts#stageShareItem`, which
-runs the capture inside a try/catch, hands the result (or `null`) to
-your `buildItem` function, and always calls `addItem` so the share
-card still renders if capture fails (the card falls back to the live
-chart).
-
-```typescript
-import { stageShareItem } from "../share/stage"
-
-await stageShareItem({
-  capture: () => captureMyChartOffscreen({ theme, /* ... */ }),
-  buildItem: (captured) => ({
-    type: "myNewChart",
-    id: makeId(),
-    scenarioIds: [scenarioId],
-    cachedSvg: captured?.svg,
-    cachedImageDataUrl: captured?.dataUrl,
-    cachedChartData: liveChartData,
-  }),
-  addItem: addShareItem,
-  errorLabel: "myNewChart:share",
-})
-```
-
-### 6. Add a card
+### 5. Build a `Share<Variant>Card` component
 
 Add `cards/ShareMyChartCard.tsx`. Wrap content in `<ShareCardShell>`
 and render the thumbnail via `<ChartThumbnail>`; the shell handles
@@ -279,43 +305,120 @@ export default function ShareMyChartCard({
 }
 ```
 
-Then route the new variant in `ShareItemView.tsx`:
+### 6. Register the variant in `share/variants.ts`
+
+Create `share/variants/myNewChart.ts` and register it in the table:
 
 ```typescript
-if (item.type === "myNewChart") {
-  return (
-    <ShareMyChartCard
-      id={item.id}
-      title={/* ... */}
-      cachedSvg={item.cachedSvg}
-      cachedImageDataUrl={item.cachedImageDataUrl}
-      liveChart={/* optional fallback */}
-      note={item.note}
-      onNoteChange={noteHandler}
-      onRemove={onRemove}
-    />
-  )
+// share/variants/myNewChart.ts
+import React from "react"
+import ShareMyChartCard from "../cards/ShareMyChartCard"
+import type { ShareItemOfType } from "../types"
+import type { VariantHandler } from "../variants"
+
+type MyChartItem = ShareItemOfType<"myNewChart">
+
+const myNewChartHandler: VariantHandler<MyChartItem> = {
+  type: "myNewChart",
+  urlPrefix: "m",                  // pick an unused letter
+  rasterDimensionsKey: "myNewChart",
+
+  renderCard(item, ctx) {
+    return React.createElement(ShareMyChartCard, {
+      id: item.id,
+      title: ctx.scenarioLookup.get(item.scenarioIds[0]!)?.name ?? "Chart",
+      cachedSvg: item.cachedSvg,
+      cachedImageDataUrl: item.cachedImageDataUrl,
+      note: item.note,
+      onNoteChange: ctx.onNoteChange,
+      onRemove: ctx.onRemove,
+    })
+  },
+
+  encodeUrlToken(item) {
+    const ids = item.scenarioIds.join("~")
+    const flag = item.myFeatureFlag ? "1" : ""
+    return `${ids}.${flag}`
+  },
+
+  decodeUrlToken(parts) {
+    if (parts.length < 1) return null
+    return {
+      id: crypto.randomUUID(),
+      type: "myNewChart",
+      scenarioIds: (parts[0] ?? "").split("~").filter(Boolean),
+      myFeatureFlag: (parts[1] ?? "") === "1",
+    }
+  },
+
+  filenameLabel(item) {
+    return `coeqwal-mychart-${item.scenarioIds.length}scenarios`
+  },
+
+  // Optional. Implement if cachedChartData carries a meaningful payload
+  // and downstream tools should be able to download it as a table.
+  exportCsv(item, lookups) {
+    if (!item.cachedChartData) return null
+    return /* build CSV string from item.cachedChartData */
+  },
 }
+
+export default myNewChartHandler
 ```
 
-### 7. Update the URL grammar
+```typescript
+// share/variants.ts
+import myNewChartHandler from "./variants/myNewChart"
 
-Pick a one-letter prefix for your variant in `share/url.ts` and add
-`encodeOne` / `decodeOne` cases. Keep the encoding compact: skip
-fields that equal the variant's default, use `~` for inner lists,
-omit trailing empty segments. Bump `SHARE_URL_VERSION` if the change
-is backwards-incompatible (adding a brand-new prefix is not, removing
-or repurposing one is).
+export const VARIANT_REGISTRY = {
+  barChart: barChartHandler,
+  radar: radarHandler,
+  equity: equityHandler,
+  resilience: resilienceHandler,
+  myNewChart: myNewChartHandler, // <- new
+} as const satisfies ShareVariantRegistry
+```
 
-### 8. Update the download path
+The `satisfies` clause turns a missing handler into a compile error
+right here. Once the row is added, `ShareItemView`, `url.ts`, the
+PNG/SVG/CSV download paths in `Share.tsx`, and `exportUtils.ts` all
+pick up the new variant automatically.
 
-Add a row to `RASTER_SIZE` in
-`apps/main/app/components/tabPanels/Share.tsx` so the PNG download
-path picks up the same dimensions, and add a label fragment to
-`shareItemFilenameLabel`. The bulk-download path uses the same
-helpers.
+### 7. Wire the capture site via `stageShareItem`
 
-## Download paths
+Every call site funnels through `share/stage.ts#stageShareItem`, which
+runs the capture inside a try/catch, hands the result (or `null`) to
+the `buildItem` function, and always calls `addItem` so the share
+card still renders if capture fails (the card falls back to the live
+chart).
+
+```typescript
+import { stageShareItem } from "../share/stage"
+
+await stageShareItem({
+  capture: () => captureMyChartOffscreen({ theme, /* ... */ }),
+  buildItem: (captured) => ({
+    type: "myNewChart",
+    id: makeId(),
+    scenarioIds: [scenarioId],
+    cachedSvg: captured?.svg,
+    cachedImageDataUrl: captured?.dataUrl,
+    cachedChartData: liveChartData,
+  }),
+  addItem: addShareItem,
+  errorLabel: "myNewChart:share",
+})
+```
+
+### 8. (Optional) Re-export the new card from `share/index.ts`
+
+If something outside the `share/` folder will mount the card directly
+(rare; usually `ShareItemView` is the only entry point), add it to
+the barrel export. Most variants don't need this step — `ShareItemView`
+is the public render entry point and reaches the card through the
+registry.
+
+## Bulk download paths
 
 `apps/main/app/components/tabPanels/Share.tsx` exposes
 `downloadShareItemAsPng` and `downloadShareItemAsSvg`. The PNG path
@@ -325,6 +428,37 @@ capture of the rendered card body, and finally to the legacy PNG.
 The SVG button is shown whenever `cachedSvg` is present and embeds
 an `@import` for the Neue Haas font family so renderers that honor
 web fonts match the on-screen typography.
+
+CSV export for the whole tray flows through
+`exportAllShareItemsAsCSV` (in `dataExplorer/utils/exportUtils.ts`),
+which iterates the items and asks each handler's `exportCsv` for its
+section. Per-variant CSV body builders (`barChartDataToCSV`,
+`radarDataToCSV`, `equityDataToCSV`,
+`resilienceHeatmapDataToCSV`, `resilienceQuadrantDataToCSV`) live in
+the same file and are imported by the handlers; they are pure
+string-builders so the same code drives single-item and bulk export.
+
+### Known limitation: one raster size per variant type
+
+`shareItemRasterSize` (in `Share.tsx`) currently maps each
+`ShareItem["type"]` to one entry in `CAPTURE_DIMENSIONS` via the
+handler's `rasterDimensionsKey`. That's fine for `barChart`, `radar`,
+and `equity`, which capture at one fixed size. It rounds resilience
+panel / single-tile / quadrant captures down to one shared size
+(`resiliencePanel`) when PNG fallback rasterization happens — a
+URL-restored resilience tile rasterizes against the panel size, not
+its own size.
+
+Live behavior is unaffected today because `cachedSvg` carries the
+correct viewBox and the live card path uses `html-to-image` against
+the rendered card. The only path that hits the wrong size is
+PNG-from-cachedSvg with no live element mounted (a tray-only
+URL-restored resilience tile, which is rare). When that becomes a
+real problem, replace `rasterDimensionsKey` with an item-level
+resolver: `rasterDimensions: (item) => CaptureSize`. The handler
+can then look at `item.tileScope` (panel / scenario / outcome /
+hydroclimate / quadrant) and pick the correct
+`CAPTURE_DIMENSIONS` entry. **Out of scope for now.**
 
 ## Persistence
 

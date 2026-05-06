@@ -33,6 +33,7 @@ export type {
   ResilienceCaptureResult,
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
+  ResilienceScenarioSoloCaptureFn,
 } from "./ResiliencePanel"
 export type {
   ResilienceQuadrantChartData,

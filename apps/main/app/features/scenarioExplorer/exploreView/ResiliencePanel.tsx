@@ -74,6 +74,7 @@ import {
 } from "./OffscreenResilienceCapture"
 import { captureResiliencePanelOffscreen } from "./OffscreenResiliencePanelCapture"
 import ResiliencePanelChartView, {
+  computeResiliencePanelSmallMultiplesCaptureHeight,
   type ResiliencePanelChartViewState,
   type ResiliencePanelChartViewProps,
   type ResiliencePanelChartViewHandlers,
@@ -171,10 +172,12 @@ export interface ResilienceCaptureResult {
 export type {
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
+  ResilienceScenarioSoloCaptureFn,
 } from "../share/capture/types"
 import type {
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
+  ResilienceScenarioSoloCaptureFn,
 } from "../share/capture/types"
 
 /**
@@ -271,6 +274,18 @@ interface ResiliencePanelProps {
    * view mode the panel is no longer rendering).
    */
   onCaptureTileReady?: (capture: ResilienceTileCaptureFn) => void
+  /**
+   * Invoked once after mount with a function that captures one
+   * scenario as a synthesized scenario-solo tile, independent of
+   * the panel's current view. The scenario sidebar uses this so
+   * clicking a row's share icon always produces a card scoped to
+   * that scenario (matching radar / equity sidebar semantics)
+   * even when the live panel is in `aggregate`, `outcome`, or
+   * `hydroclimate` view.
+   */
+  onCaptureScenarioSoloReady?: (
+    capture: ResilienceScenarioSoloCaptureFn,
+  ) => void
   /**
    * Invoked when the user clicks a per-tile share icon inside the
    * small-multiples grid. Consumers typically call the function
@@ -421,6 +436,7 @@ export default function ResiliencePanel({
   onScenarioHover,
   onCaptureReady,
   onCaptureTileReady,
+  onCaptureScenarioSoloReady,
   onTileShare,
 }: ResiliencePanelProps) {
   const theme = useTheme()
@@ -2312,6 +2328,17 @@ export default function ResiliencePanel({
     async (scenarioId: string): Promise<ResilienceCaptureResult | null> => {
       const tile = makeScenarioSoloMultiplesTile(scenarioId)
       if (!tile) return null
+      // Refuse to capture an empty card. Happens when the user has cleared
+      // all hydroclimate chips or all outcome rows; the heatmap would
+      // render a blank thumbnail and the share card would be unhelpful.
+      if (tile.cells.length === 0) {
+        console.warn(
+          "[ResiliencePanel] renderSoloScenarioForShare: nothing to draw for",
+          scenarioId,
+          "(no outcomes or hydroclimates selected); skipping share.",
+        )
+        return null
+      }
       const encoding = cellEncodingRef.current
       try {
         const { svg, dataUrl } = await captureResilienceOffscreen({
@@ -2371,11 +2398,27 @@ export default function ResiliencePanel({
 
   const captureResilience = useCallback<ResilienceCaptureFn>(async () => {
     try {
+      // Small-multiples views can have up to 24 tiles. A fixed-size
+      // canvas would either squish them or clip everything below the
+      // fold via the live grid's `overflowY: auto`. Compute a
+      // content-aware height so every tile renders into the composed
+      // SVG at the same row pitch the live grid uses. Aggregate /
+      // single-heatmap captures keep the default fixed height.
+      const captureState = chartViewStateRef.current
+      const dynamicHeight =
+        captureState.kind === "smallMultiples"
+          ? computeResiliencePanelSmallMultiplesCaptureHeight({
+              tilesCount: captureState.tiles.length,
+              tileAspect: captureState.tileAspect,
+              rowsCount: captureState.rows.length,
+            })
+          : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
-        state: chartViewStateRef.current,
+        state: captureState,
         view: chartViewVisualsRef.current,
         theme,
         backgroundColor: theme.palette.common.white,
+        ...(dynamicHeight ? { height: dynamicHeight } : {}),
       })
       const view = effectiveViewRef.current
       let rowsOut: ResilienceChartDataRow[]
@@ -2520,6 +2563,10 @@ export default function ResiliencePanel({
   useEffect(() => {
     onCaptureTileReady?.(captureResilienceTile)
   }, [captureResilienceTile, onCaptureTileReady])
+
+  useEffect(() => {
+    onCaptureScenarioSoloReady?.(renderSoloScenarioForShare)
+  }, [renderSoloScenarioForShare, onCaptureScenarioSoloReady])
 
   // Per-tile share icon in the tile header. The button does not
   // participate in tile hover. It only fires the external `onTileShare`,

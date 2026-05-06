@@ -137,6 +137,15 @@ interface RadarPanelProps {
    * captures one chart with all of them overlaid.
    */
   onMultiCaptureReady?: (capture: MultiScenarioCaptureFn) => void
+  /**
+   * Notifies the parent toolbar whether the chart currently has
+   * traces to capture. Lets the "save snapshot" button dim to
+   * inactive when nothing is on the chart. Tracks `filteredData.length`,
+   * which is the same array fed to RadarPlot, so it accounts for
+   * `radarShowAll`, sidebar-hover highlights, and the
+   * empty-selection fallback that shows the full library.
+   */
+  onCanCaptureChange?: (canCapture: boolean) => void
 }
 
 export default function RadarPanel({
@@ -146,6 +155,7 @@ export default function RadarPanel({
   onCaptureReady,
   onSingleCaptureReady,
   onMultiCaptureReady,
+  onCanCaptureChange,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -632,6 +642,19 @@ export default function RadarPanel({
     onCaptureReady?.(captureRadar)
   }, [captureRadar, onCaptureReady])
 
+  // True whenever the trace dataset is non-empty. Drives the
+  // in-chart "two axes is too few" toast: that toast wants to
+  // surface even when the user has zero axes selected, so it cares
+  // about data only.
+  const hasRadarTraceData = filteredData.length > 0
+  // The toolbar "save snapshot" button needs both data AND at
+  // least one axis to draw. Zero axes means a blank wireframe with
+  // no spokes. Capturing that would produce a useless share card.
+  const canCaptureRadar = hasRadarTraceData && visibleAxisNames.length > 0
+  useEffect(() => {
+    onCanCaptureChange?.(canCaptureRadar)
+  }, [canCaptureRadar, onCanCaptureChange])
+
   // Sidebar single-scenario share.
   const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
     async (scenarioId) => {
@@ -819,8 +842,6 @@ export default function RadarPanel({
       </Box>
     )
   }
-
-  const hasRadarTraceData = filteredData.length > 0
 
   return (
     <Box
