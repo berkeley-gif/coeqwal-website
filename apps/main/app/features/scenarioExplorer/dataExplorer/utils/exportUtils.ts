@@ -1,7 +1,12 @@
+import JSZip from "jszip"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import { themeValues } from "@repo/ui/themes/theme"
 import type { ShareItem } from "../../share/types"
-import { handlerForItem } from "../../share/variants"
+import {
+  handlerForItem,
+  type CsvLookups,
+} from "../../share/variants"
+import { withExt } from "../../share/utils/filename"
 
 /**
  * Export utilities for Data Explorer
@@ -581,94 +586,99 @@ export function exportShareItemAsCSV(
 }
 
 /**
- * Strip CSV quoting (matching outer double quotes, escaped `""`)
- * from a single cell value. Used by the bulk-export banner builder
- * to recover the human label from an already-CSV-encoded line.
+ * Resolve the per-item filename a variant uses for both its PNG/SVG
+ * download and its CSV. The bulk exporter uses the CSV form (with the
+ * `-data` suffix already attached at the call site below) so users get
+ * the same basename whether they download an item one at a time or as
+ * part of the ZIP.
  */
-function unquoteCsvCell(cell: string): string {
-  if (cell.length >= 2 && cell.startsWith('"') && cell.endsWith('"')) {
-    return cell.slice(1, -1).replace(/""/g, '"')
-  }
-  return cell
+function shareItemFilenameLabel(
+  item: ShareItem,
+  lookups: CsvLookups,
+): string {
+  return handlerForItem(item).filenameLabel(item as never, lookups)
 }
 
 /**
- * Pull the variant title and the scenario(s) cell out of the first
- * few rows of an already-rendered section CSV (which always opens
- * with a `Coeqwal export,<title>` row and a `Scenario(s),<labels>`
- * row courtesy of `buildCsvHeaderBlock`). Used to render the
- * single-cell banner row that delimits sections in the bulk export.
+ * Disambiguate per-item CSV filenames inside the ZIP. Two share
+ * items with identical capture metadata (e.g. two distribution
+ * captures of the same scenario at the same hydroclimate) would
+ * otherwise produce the same `<label>-data.csv` name and overwrite
+ * each other. This appends `-2`, `-3`, ... to subsequent collisions
+ * so every entry survives.
  */
-function bannerRowFromSection(csv: string): string {
-  const lines = csv.split("\n")
-  let variantTitle = "Section"
-  let scenarioLabel = ""
-  // The header block is short (<= ~8 rows). Limit the scan so a
-  // big data table can't drag this into O(n) work per section.
-  for (const line of lines.slice(0, 12)) {
-    if (line.startsWith("Coeqwal export,")) {
-      variantTitle = unquoteCsvCell(line.slice("Coeqwal export,".length))
-    } else if (line.startsWith("Scenarios,")) {
-      scenarioLabel = unquoteCsvCell(line.slice("Scenarios,".length))
-      break
-    } else if (line.startsWith("Scenario,")) {
-      scenarioLabel = unquoteCsvCell(line.slice("Scenario,".length))
-      break
-    }
+function makeUniqueFilename(
+  base: string,
+  used: Set<string>,
+): string {
+  if (!used.has(base)) {
+    used.add(base)
+    return base
   }
-  const tail = scenarioLabel ? ` - ${scenarioLabel}` : ""
-  // The whole banner is a single CSV cell so it lands in column A
-  // of any spreadsheet without column drift. csvEscape adds quoting
-  // only if the label contains a comma / quote / newline.
-  return csvEscape(`########  ${variantTitle}${tail}`)
+  let n = 2
+  while (used.has(`${base.replace(/\.csv$/, "")}-${n}.csv`)) n++
+  const out = `${base.replace(/\.csv$/, "")}-${n}.csv`
+  used.add(out)
+  return out
 }
 
 /**
- * Export every share-item's chart data into one multi-section CSV.
- * Each variant's section is rendered through its registry handler
- * and prefixed with a single-cell banner row so section boundaries
- * are easy to spot when the file is opened in a spreadsheet. Empty
- * sections (no cachedChartData, no exporter) are dropped.
+ * Bundle every share-item's chart data into a ZIP containing one CSV
+ * per item. Each variant's per-item filename matches
+ * `handler.filenameLabel(item, lookups) + "-data.csv"` so the names
+ * line up with the per-card CSV download (and with PNG/SVG downloads
+ * when the user mixes those into the same folder).
+ *
+ * Items whose variant has no `exportCsv`, or whose `exportCsv` returns
+ * null because `cachedChartData` is missing, are silently skipped.
+ * The caller is expected to call `useShareDataReady` first to wait
+ * for variants with rehydrators (radar / equity / barChart /
+ * resilience heatmap) to fill in `cachedChartData`. Items genuinely
+ * without a resolver (today: resilience quadrant) just don't appear
+ * in the bundle.
  */
-export function exportAllShareItemsAsCSV(
+export async function exportAllShareItemsAsZip(
   items: ShareItem[],
   filename: string,
   scenarioNameLookup?: (id: string) => string,
   outcomeNameLookup?: (code: string) => string,
   scenarioShortLabelLookup?: (id: string) => string,
-) {
+): Promise<void> {
   const lookups = buildCsvLookups(
     scenarioNameLookup,
     outcomeNameLookup,
     scenarioShortLabelLookup,
   )
-  const sections: string[] = []
+  const zip = new JSZip()
+  const usedNames = new Set<string>()
+  let included = 0
+
   for (const item of items) {
+    const baseLabel = shareItemFilenameLabel(item, lookups)
+    const desired = withExt(`${baseLabel}-data`, "csv")
     const csv = renderShareItemCsv(item, lookups)
-    if (csv) {
-      sections.push(bannerRowFromSection(csv))
-      sections.push(csv)
-      sections.push("")
-    }
+    if (!csv) continue
+    const finalName = makeUniqueFilename(desired, usedNames)
+    zip.file(finalName, csv)
+    included += 1
   }
-  if (sections.length === 0) return
-  downloadCSV(sections.join("\n"), filename)
+
+  // Don't trigger a download if every item was skipped — the user
+  // would just get an empty ZIP with no signal as to why.
+  if (included === 0) return
+
+  const blob = await zip.generateAsync({ type: "blob" })
+  downloadBlob(blob, filename)
 }
 
 /**
- * Download CSV helper
+ * Download CSV helper. Wraps the shared `downloadBlob` defined below
+ * so the CSV / ZIP / image download paths all share one anchor-click
+ * implementation.
  */
 export function downloadCSV(csvContent: string, filename: string) {
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-  const url = URL.createObjectURL(blob)
-
-  const link = document.createElement("a")
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  downloadBlob(blob, filename)
 }
 
 /**

@@ -1942,6 +1942,19 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       return () => ro.disconnect()
     }, [responsive])
 
+    // Non-responsive path: drive layout from the explicit `width` /
+    // `height` props. Without this, `lastDimsRef` stays at {0, 0} and
+    // `updateChart` never builds the SVG (the responsive branch above
+    // is the only other writer of `lastDimsRef`). Mirrors TierGrid,
+    // which seeds `currentWidth` / `currentHeight` from props in the
+    // non-responsive branch.
+    useEffect(() => {
+      if (responsive) return
+      if (width <= 0 || height <= 0) return
+      lastDimsRef.current = { width, height }
+      updateChartRef.current(width, height)
+    }, [responsive, width, height])
+
     // Visual-only re-render: when sidebar highlight, chosen, or
     // dim-flag props change, walk the existing dots and scenario
     // paths and re-apply opacity / radius / stroke without rebuilding

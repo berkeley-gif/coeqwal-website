@@ -105,7 +105,8 @@ Each handler owns:
 | `encodeUrlToken(item)` | Body of the URL token (no prefix, no leading dot). | `url.ts#encodeOne`. |
 | `decodeUrlToken(parts)` | Inverse; receives parts after the prefix is stripped. | `url.ts#decodeOne`. |
 | `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`. | `Share.tsx` PNG/SVG/CSV downloads. |
-| `exportCsv(item, lookups)` | Returns a CSV body string or `null`. Optional. | `exportUtils.ts` single + bulk CSV export. |
+| `exportCsv(item, lookups)` | Returns a CSV body string or `null`. Optional. | `exportUtils.ts` single + bulk ZIP export. |
+| `DataRehydrator` | React component mounted by `ShareDataRehydrationHost`. Backfills `cachedChartData` for URL-restored items so the bulk ZIP can include them. Optional; items whose variant ships no rehydrator are silently dropped from the bundle when they have no cached data. | `ShareDataRehydrationHost.tsx`, `useShareDataReady` (gates "Download all data"). |
 
 Dispatchers do not branch on `item.type`. They look up the handler
 once and delegate, so a new variant only has to fill in the registry
@@ -393,6 +394,20 @@ const myNewChartHandler: VariantHandler<MyChartItem> = {
     const rows = /* build data rows from item.cachedChartData */
     return [...header, "", ...rows].join("\n")
   },
+
+  // Optional but strongly recommended. Mounted by
+  // `ShareDataRehydrationHost` while the share tab is open so a
+  // URL-restored item (no `cachedSvg` / `cachedImageDataUrl` /
+  // `cachedChartData`) ends up with `cachedChartData` populated
+  // before the user clicks "Download all data". Items without a
+  // rehydrator are silently skipped from the bulk ZIP when they
+  // have no cached data.
+  //
+  // Pattern: define one inner component per item that calls the same
+  // hooks the live capture / fallback uses, then write through
+  // `context.updateShareItem(item.id, { cachedChartData })` when the
+  // hooks are ready. See `equity.ts` for an SWR-backed example.
+  DataRehydrator: ({ items, context }) => null, // implement me
 }
 
 export default myNewChartHandler
@@ -462,13 +477,50 @@ an `@import` for the Neue Haas font family so renderers that honor
 web fonts match the on-screen typography.
 
 CSV export for the whole tray flows through
-`exportAllShareItemsAsCSV` (in `dataExplorer/utils/exportUtils.ts`),
+`exportAllShareItemsAsZip` (in `dataExplorer/utils/exportUtils.ts`),
 which iterates the items and asks each handler's `exportCsv` for its
-section. Per-variant CSV body builders (`barChartDataToCSV`,
+body. Per-variant CSV body builders (`barChartDataToCSV`,
 `radarDataToCSV`, `equityDataToCSV`,
 `resilienceHeatmapDataToCSV`, `resilienceQuadrantDataToCSV`) live in
 the same file and are imported by the handlers; they are pure
 string-builders so the same code drives single-item and bulk export.
+
+The bulk export emits a ZIP (`coeqwal-share-export.zip`) shaped like:
+
+```
+coeqwal-share-export.zip
+├── coeqwal-bar-chart-current-ops-bars-hist-data.csv
+├── coeqwal-radar-current-ops-vs-managed-flows-hist-data.csv
+├── coeqwal-distribution-current-ops-vs-baseline-cc50-data.csv
+└── ...
+```
+
+Each per-item CSV uses `handler.filenameLabel(item, lookups) + "-data.csv"`
+so the names line up with the per-card CSV download. Items whose
+variant has no `exportCsv`, or whose `exportCsv` returns null because
+`cachedChartData` is missing, are silently skipped. The exporter
+produces no download at all when every item is skipped, rather than
+handing the user an empty ZIP. Two share items with identical capture
+metadata (and therefore the same filename) are disambiguated with a
+`-2`, `-3`, ... suffix.
+
+### `ShareDataRehydrationHost`
+
+URL-restored items don't carry visual or chart-data caches (URLs
+can't fit them). So that radar / equity / resilience heatmap items
+loaded from a URL still appear in the bulk export, every variant
+declares a `DataRehydrator` React component on its handler.
+`ShareDataRehydrationHost` mounts each variant's rehydrator once
+with the items of that type plus a shared `DataRehydrationContext`
+(the same `allChartData` and `radarLiveByHydro` the live cards
+consume). Each rehydrator writes back through
+`context.updateShareItem` once its hooks resolve.
+
+`useShareDataReady(items)` is the gate the share panel uses on the
+"Download all data" button: it returns `false` while any item with a
+registered `DataRehydrator` still lacks `cachedChartData`. Items
+without a rehydrator (resilience quadrant today) count as ready
+without blocking the user; they're silently skipped from the ZIP.
 
 ### CSV pipeline conventions
 
@@ -507,14 +559,6 @@ must use the same representation. The equity payload now carries
 `useEquityObjectives`); use those rather than the legacy formatted
 `"Tier N"` strings.
 
-#### Bulk export section banners
-
-`exportAllShareItemsAsCSV` prefixes each section with a single-cell
-banner row of the form `########  <variant title> - <scenario(s)>`,
-extracted from the section's own header block. The banner makes
-section boundaries trivial to find when the file is opened in a
-spreadsheet without breaking column alignment.
-
 #### Filename convention
 
 PNG, SVG, and CSV downloads all derive their filename from
@@ -529,8 +573,11 @@ coeqwal-distribution-current-ops-hist.svg
 coeqwal-distribution-current-ops-hist-data.csv
 ```
 
-The bulk CSV is `coeqwal-tray-export.csv` — fixed name, no scenario
-metadata, since it concatenates every share item.
+The bulk-data download is a ZIP at `coeqwal-share-export.zip` —
+fixed name, no scenario metadata, since it bundles every share item.
+Per-item CSVs inside the ZIP keep the same per-variant basename plus
+`-data.csv` so they extract next to a sibling `.png` / `.svg` when
+the user re-zips them.
 
 ##### Building the basename
 

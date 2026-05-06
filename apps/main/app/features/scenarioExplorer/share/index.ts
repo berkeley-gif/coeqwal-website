@@ -62,5 +62,12 @@ export {
   type VariantHandler,
   type RenderContext,
   type CsvLookups,
+  type DataRehydrationContext,
   type ShareItemScenarioInfo,
 } from "./variants"
+
+export {
+  default as ShareDataRehydrationHost,
+  useShareDataReady,
+  type ShareDataRehydrationHostProps,
+} from "./ShareDataRehydrationHost"

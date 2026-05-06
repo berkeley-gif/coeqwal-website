@@ -12,22 +12,177 @@
  * "RASTER_SIZE per tileScope" note for the planned fix.
  */
 
-import React from "react"
+import React, { useEffect, useMemo } from "react"
+import {
+  getOutcomeName,
+  OUTCOME_CODE_ORDER,
+  NOD_SOD_OUTCOME_CODES,
+} from "../../../../content/outcomes"
+import { HYDROCLIMATE_SHORT_LABELS } from "../../../../content/scenarios"
 import {
   resilienceHeatmapDataToCSV,
   resilienceQuadrantDataToCSV,
   type ResilienceHeatmapChartDataShape,
   type ResilienceQuadrantChartDataShape,
 } from "../../dataExplorer/utils/exportUtils"
+import { useResilienceAggregate } from "../../hooks/useResilienceAggregate"
+import {
+  RESILIENCE_HYDROCLIMATES,
+  type ResilienceHydroclimate,
+} from "../../hooks/useResilienceMatrix"
 import ResilienceShareCard from "../cards/ResilienceShareCard"
 import {
   hydroclimateSlug,
   slugifyForFilename,
 } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
-import type { VariantHandler } from "../variants"
+import type {
+  DataRehydrationContext,
+  VariantHandler,
+} from "../variants"
 
 type ResilienceItem = ShareItemOfType<"resilience">
+
+/**
+ * Restrict the captured outcomes to the canonical display order so
+ * the rehydrated table reads the same way as the explore heatmap
+ * regardless of the order the URL token serialized them in.
+ * Mirrors `orderOutcomes` in `ShareResilienceLiveChart`.
+ */
+function orderOutcomes(codes: string[]): string[] {
+  const known = new Set(codes)
+  const ordered: string[] = []
+  for (const code of OUTCOME_CODE_ORDER) {
+    if (known.has(code)) ordered.push(code)
+  }
+  for (const code of NOD_SOD_OUTCOME_CODES) {
+    if (known.has(code)) ordered.push(code)
+  }
+  for (const code of codes) {
+    if (!ordered.includes(code)) ordered.push(code)
+  }
+  return ordered
+}
+
+function orderHydroclimates(hcs: string[]): ResilienceHydroclimate[] {
+  const known = new Set(hcs)
+  const ordered: ResilienceHydroclimate[] = []
+  for (const hc of RESILIENCE_HYDROCLIMATES) {
+    if (known.has(hc)) ordered.push(hc)
+  }
+  return ordered
+}
+
+function hydroclimateLabel(hc: string): string {
+  return HYDROCLIMATE_SHORT_LABELS[hc] ?? hc
+}
+
+/**
+ * Per-item resilience rehydrator. Quadrant captures have no live
+ * resolver today; the parent registry filters those out before
+ * mounting this component, and they're silently skipped from the
+ * bulk ZIP when their `cachedChartData` is missing.
+ *
+ * The aggregate is taken across the item's scenario scope (groupBy
+ * = "scenarios"), matching the visual summary `ShareResilienceLiveChart`
+ * already shows for URL-restored items. The CSV exporter reads
+ * `rowLabel`, `colLabel`, `tier`, `value` only, so the resulting
+ * 2D table is a faithful representation of what the live thumbnail
+ * draws even when the original capture used a small-multiples view.
+ */
+const ResilienceItemRehydrator: React.FC<{
+  item: ResilienceItem
+  context: DataRehydrationContext
+}> = ({ item, context }) => {
+  const orderedOutcomes = useMemo(
+    () => orderOutcomes(item.outcomeCodes),
+    [item.outcomeCodes],
+  )
+  const orderedHydroclimates = useMemo(
+    () => orderHydroclimates(item.hydroclimates),
+    [item.hydroclimates],
+  )
+
+  const { cells, isLoading, error, matrix } = useResilienceAggregate({
+    groupBy: "scenarios",
+    scenarioIds: item.scenarioIds,
+    outcomeCodes: orderedOutcomes,
+    hydroclimates: orderedHydroclimates,
+  })
+
+  useEffect(() => {
+    if (item.cachedChartData) return
+    if (isLoading || error) return
+    if (matrix.scenarioIds.length === 0) return
+    if (orderedOutcomes.length === 0 || orderedHydroclimates.length === 0) {
+      return
+    }
+    const rows: ResilienceHeatmapChartDataShape["rows"] = []
+    for (const code of orderedOutcomes) {
+      for (const hc of orderedHydroclimates) {
+        const cell = cells[code]?.[hc]
+        const available = !!cell && cell.availableCount > 0
+        const tierLevel =
+          available && cell!.mean != null
+            ? Math.min(4, Math.max(1, Math.round(cell!.mean)))
+            : undefined
+        rows.push({
+          rowKey: code,
+          rowLabel: getOutcomeName(code),
+          colKey: hc,
+          colLabel: hydroclimateLabel(hc),
+          tier: tierLevel,
+          value: available ? (cell!.mean ?? undefined) : undefined,
+        })
+      }
+    }
+    if (rows.length === 0) return
+    context.updateShareItem(item.id, {
+      cachedChartData: {
+        kind: "resilience",
+        view: item.view,
+        cellEncoding: item.cellEncoding,
+        tileScope: item.tileScope ?? "panel",
+        tileLabel: item.tileLabel,
+        rows,
+      },
+    })
+  }, [
+    item.id,
+    item.view,
+    item.cellEncoding,
+    item.tileScope,
+    item.tileLabel,
+    item.cachedChartData,
+    cells,
+    isLoading,
+    error,
+    matrix.scenarioIds.length,
+    orderedOutcomes,
+    orderedHydroclimates,
+    context,
+  ])
+
+  return null
+}
+
+const ResilienceRehydrator: React.FC<{
+  items: ResilienceItem[]
+  context: DataRehydrationContext
+}> = ({ items, context }) =>
+  React.createElement(
+    React.Fragment,
+    null,
+    items
+      .filter((item) => item.view !== "quadrant" && !item.cachedChartData)
+      .map((item) =>
+        React.createElement(ResilienceItemRehydrator, {
+          key: item.id,
+          item,
+          context,
+        }),
+      ),
+  )
 
 const resilienceHandler: VariantHandler<ResilienceItem> = {
   type: "resilience",
@@ -148,6 +303,14 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
           header,
         )
   },
+
+  // Quadrant captures have no live resolver today: their CSV shape
+  // (paired x/y leverage scores per scenario) isn't reproducible from
+  // the URL's scenario / outcome / hydroclimate tuple alone. The
+  // bulk exporter silently skips items whose `exportCsv` returns
+  // null. Heatmap items get an inner mount that runs
+  // `useResilienceAggregate` for the captured scope.
+  DataRehydrator: ResilienceRehydrator,
 }
 
 export default resilienceHandler

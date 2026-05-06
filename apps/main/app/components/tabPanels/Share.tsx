@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
+import React, { useMemo, useState, useCallback, useRef } from "react"
 import {
   Box,
   Typography,
@@ -49,13 +49,16 @@ import {
   rasterizeSvgString,
   embedFontStylesInSvg,
   exportShareItemAsCSV,
-  exportAllShareItemsAsCSV,
+  exportAllShareItemsAsZip,
 } from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
 import { withExt } from "../../features/scenarioExplorer/share/utils/filename"
 import {
   downloadCardAsPng,
   downloadCardAsSvg,
 } from "../../features/scenarioExplorer/share/cardExport"
+import ShareDataRehydrationHost, {
+  useShareDataReady,
+} from "../../features/scenarioExplorer/share/ShareDataRehydrationHost"
 
 // ---------------------------------------------------------------------------
 // URL helpers
@@ -562,24 +565,13 @@ export default function SharePanel() {
     [compHistorical, compCc50, compCc95],
   )
 
-  // Rehydrate cachedChartData for bar chart items restored from localStorage
-  useEffect(() => {
-    if (!allChartData) return
-    for (const item of shareItems) {
-      if (
-        item.type === "barChart" &&
-        !item.cachedChartData &&
-        allChartData[item.scenarioId]
-      ) {
-        updateShareItem(item.id, {
-          cachedChartData: allChartData[item.scenarioId] as Record<
-            string,
-            unknown
-          >,
-        })
-      }
-    }
-  }, [shareItems, allChartData, updateShareItem])
+  // Per-variant rehydration is mounted once via
+  // `ShareDataRehydrationHost` (see render below). The previous inline
+  // useEffect that backfilled bar-chart data lives in
+  // `barChart.DataRehydrator` now; the host keeps the same behavior
+  // for bar charts and adds it for radar / equity / resilience
+  // heatmap items so URL-restored cards have data ready when the
+  // user clicks "Download all data".
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<
@@ -758,11 +750,11 @@ export default function SharePanel() {
     csvLookups,
   ])
 
-  const handleDownloadAllData = useCallback(() => {
+  const handleDownloadAllData = useCallback(async () => {
     const items = storyItems.length > 0 ? storyItems : shareItems
-    exportAllShareItemsAsCSV(
+    await exportAllShareItemsAsZip(
       items,
-      withExt("coeqwal-tray-export", "csv"),
+      withExt("coeqwal-share-export", "zip"),
       scenarioNameLookup,
       outcomeNameLookup,
       scenarioShortLabelLookup,
@@ -774,6 +766,33 @@ export default function SharePanel() {
     outcomeNameLookup,
     scenarioShortLabelLookup,
   ])
+
+  // Gate the bulk-data button until every variant's rehydrator has
+  // either populated `cachedChartData` or been classified as
+  // unresolvable (today: resilience quadrant). Without this gate the
+  // ZIP would silently drop items whose async resolver is still
+  // loading on first share-tab open after a URL load.
+  const bulkItems = useMemo(
+    () => (storyItems.length > 0 ? storyItems : shareItems),
+    [storyItems, shareItems],
+  )
+  const dataReady = useShareDataReady(bulkItems)
+
+  // The host has to live inside the share panel so the rehydrators
+  // can read SWR caches the panel already populated (resolved tier
+  // data, comparison data). Build the context once per render with
+  // the same fields the cards already use.
+  const rehydrationContext = useMemo(
+    () => ({
+      allChartData: allChartData as Record<
+        string,
+        Record<string, unknown> | undefined
+      >,
+      radarLiveByHydro,
+      updateShareItem,
+    }),
+    [allChartData, radarLiveByHydro, updateShareItem],
+  )
 
   // ── Empty state: no share items at all ──
   if (shareItems.length === 0) {
@@ -834,6 +853,10 @@ export default function SharePanel() {
         overflow: "hidden",
       }}
     >
+      <ShareDataRehydrationHost
+        items={shareItems}
+        context={rehydrationContext}
+      />
       <Box
         sx={{
           flexShrink: 0,
@@ -1058,19 +1081,33 @@ export default function SharePanel() {
               >
                 Download all images
               </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleDownloadAllData}
-                startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
-                sx={{
-                  textTransform: "none",
-                  color: theme.palette.text.secondary,
-                  borderColor: theme.palette.divider,
-                }}
+              <Tooltip
+                title={
+                  dataReady
+                    ? "Download a ZIP with one CSV per card"
+                    : "Preparing data..."
+                }
+                arrow
               >
-                Download all data
-              </Button>
+                <span>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleDownloadAllData}
+                    disabled={!dataReady}
+                    startIcon={
+                      <icons.DataObject sx={{ fontSize: "0.875rem" }} />
+                    }
+                    sx={{
+                      textTransform: "none",
+                      color: theme.palette.text.secondary,
+                      borderColor: theme.palette.divider,
+                    }}
+                  >
+                    Download all data
+                  </Button>
+                </span>
+              </Tooltip>
               <Button
                 variant="outlined"
                 size="small"

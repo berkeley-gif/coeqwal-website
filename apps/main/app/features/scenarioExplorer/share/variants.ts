@@ -22,7 +22,7 @@
 
 import type React from "react"
 import type { Theme } from "@repo/ui/mui"
-import type { ShareItem, ShareItemOfType } from "./types"
+import type { ShareItem, ShareItemOfType, ShareItemPatch } from "./types"
 import type { CaptureDimensionKey } from "./capture/dimensions"
 import type {
   ShareRadarHydroKey,
@@ -84,6 +84,35 @@ export interface CsvLookups {
 }
 
 /**
+ * Shared bag of resources every {@link VariantHandler.DataRehydrator}
+ * receives. The host computes these once on the share panel and
+ * forwards them to each variant's rehydrator. Mirrors the live render
+ * context (`RenderContext`) so a rehydrator can use the same data the
+ * card's live fallback already consumes.
+ */
+export interface DataRehydrationContext {
+  /**
+   * Per-scenario resolved bar-chart data keyed by scenarioId. Same
+   * structure the bar-chart card consumes; sourced from
+   * `useResolvedScenarioTiers().allChartData`.
+   */
+  allChartData: Record<string, Record<string, unknown> | undefined>
+  /**
+   * Per-hydroclimate radar live fields. Each entry already carries
+   * the scenario-keyed plot data the radar exporter needs. Sourced
+   * from `useComparisonData(hc, true)`.
+   */
+  radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
+  /**
+   * Update one share item in the explorer store. Rehydrators write
+   * back through this so resolved data lives next to the rest of
+   * the share-item state and survives the next render / reload.
+   */
+  updateShareItem: (id: string, patch: ShareItemPatch) => void
+}
+
+
+/**
  * Single source of truth for everything specific to a share variant.
  * Generic over the variant's narrowed `ShareItem` arm so renderCard,
  * encodeUrlToken, etc. all see the right field set without casts at
@@ -125,12 +154,29 @@ export interface VariantHandler<T extends ShareItem> {
    * Optional CSV builder. Returns a CSV body string for the item, or
    * null when there is nothing to export (no cached data, empty
    * rows). The caller decides what to do with the string: the
-   * single-item path writes one file, the bulk path concatenates
-   * sections into one multi-section file. Returning a string instead
-   * of writing directly keeps both paths going through one
-   * implementation per variant.
+   * single-item path writes one file, the bulk path bundles per-item
+   * CSVs into a ZIP. Returning a string instead of writing directly
+   * keeps both paths going through one implementation per variant.
    */
   exportCsv?: (item: T, lookups: CsvLookups) => string | null
+  /**
+   * Optional rehydration component. Mounted once per variant inside
+   * `ShareDataRehydrationHost` with every share item of this variant
+   * that is currently missing `cachedChartData`. Expected to backfill
+   * `cachedChartData` via `context.updateShareItem` once the resolver
+   * has data. Items whose data cannot be resolved (e.g. resilience
+   * quadrant captures with no live equivalent) are left as-is and
+   * silently skipped from the bulk ZIP.
+   *
+   * Component-shaped (rather than hook-shaped) so each variant can
+   * mount one inner component per item without violating the rules of
+   * hooks: an inner component can call hooks scoped to that item's
+   * id alone.
+   */
+  DataRehydrator?: React.FC<{
+    items: T[]
+    context: DataRehydrationContext
+  }>
 }
 
 type ShareVariantRegistry = {

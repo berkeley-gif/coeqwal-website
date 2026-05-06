@@ -4,7 +4,7 @@
  * tool's hydroclimate badge.
  */
 
-import React from "react"
+import React, { useEffect } from "react"
 import {
   OUTCOME_NAMES,
   type OutcomeCode,
@@ -13,6 +13,7 @@ import {
   equityDataToCSV,
   type EquityChartDataShape,
 } from "../../dataExplorer/utils/exportUtils"
+import { useEquityObjectives } from "../../hooks/useEquityObjectives"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
 import ShareEquityLiveChart from "../live/ShareEquityLiveChart"
 import {
@@ -20,13 +21,78 @@ import {
   slugifyForFilename,
 } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
-import type { VariantHandler } from "../variants"
+import type {
+  DataRehydrationContext,
+  VariantHandler,
+} from "../variants"
 
 type EquityItem = ShareItemOfType<"equity">
 
 function outcomeCodesToLabels(codes: string[]): string[] {
   return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
 }
+
+/**
+ * Per-item rehydration mount. Each missing equity item gets its own
+ * inner component so `useEquityObjectives` can be called once per
+ * scenario / baseline pair without violating the rules of hooks.
+ *
+ * Persists `cachedChartData` in the same shape `OffscreenEquityCapture`
+ * writes at capture time so the CSV exporter sees identical input
+ * whether the item was captured live or rehydrated from a URL.
+ */
+const EquityItemRehydrator: React.FC<{
+  item: EquityItem
+  context: DataRehydrationContext
+}> = ({ item, context }) => {
+  const { objectives, categories, ready } = useEquityObjectives({
+    scenarioId: item.scenarioId,
+    compareToBaseline: item.compareToBaseline,
+  })
+
+  useEffect(() => {
+    if (!ready || objectives.length === 0) return
+    if (item.cachedChartData) return
+    context.updateShareItem(item.id, {
+      cachedChartData: {
+        kind: "equity",
+        scenarioId: item.scenarioId,
+        compareToBaseline: item.compareToBaseline,
+        categories,
+        objectives,
+      },
+    })
+  }, [
+    ready,
+    objectives,
+    categories,
+    item.id,
+    item.scenarioId,
+    item.compareToBaseline,
+    item.cachedChartData,
+    context,
+  ])
+
+  return null
+}
+
+const EquityRehydrator: React.FC<{
+  items: EquityItem[]
+  context: DataRehydrationContext
+}> = ({ items, context }) =>
+  React.createElement(
+    React.Fragment,
+    null,
+    items
+      .filter((item) => !item.cachedChartData)
+      .map((item) =>
+        React.createElement(EquityItemRehydrator, {
+          key: item.id,
+          item,
+          context,
+        }),
+      ),
+  )
 
 const equityHandler: VariantHandler<EquityItem> = {
   type: "equity",
@@ -113,6 +179,12 @@ const equityHandler: VariantHandler<EquityItem> = {
       includeTierScale: true,
     })
   },
+
+  // Mount one inner component per missing item so `useEquityObjectives`
+  // is called per (scenarioId, compareToBaseline) pair. SWR shares
+  // the underlying tier queries with the live panel, so the typical
+  // case is a warm-cache hit with no extra network.
+  DataRehydrator: EquityRehydrator,
 }
 
 export default equityHandler

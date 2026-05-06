@@ -9,7 +9,7 @@
  * lazily.
  */
 
-import React from "react"
+import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../content/outcomes"
 import { radarDataToCSV } from "../../dataExplorer/utils/exportUtils"
@@ -162,6 +162,33 @@ const radarHandler: VariantHandler<RadarItem> = {
       lookups.scenarioNameLookup,
       lookups.outcomeNameLookup,
     )
+  },
+
+  // Radar's bulk-rehydration source is `context.radarLiveByHydro`,
+  // the per-hydroclimate live data the share panel already builds
+  // for live fallback rendering. The shape RadarPanel persists at
+  // capture time is `{ [scenarioId]: values }` (see
+  // `buildRadarCaptureSlice`), so reproduce that here from the
+  // already-resolved `VerticalParallelLineData[]` for the item's
+  // hydroclimate. No async work required.
+  DataRehydrator({ items, context }) {
+    useEffect(() => {
+      for (const item of items) {
+        if (item.cachedChartData) continue
+        const live =
+          context.radarLiveByHydro[normalizeShareRadarHydro(item.hydroclimate)]
+        if (!live || live.radarPlotData.length === 0) continue
+        const idSet = new Set(item.scenarioIds)
+        const filtered = live.radarPlotData.filter(
+          (d: VerticalParallelLineData) => idSet.has(d.id),
+        )
+        if (filtered.length === 0) continue
+        const chartData: Record<string, unknown> = {}
+        for (const d of filtered) chartData[d.id] = d.values
+        context.updateShareItem(item.id, { cachedChartData: chartData })
+      }
+    }, [items, context])
+    return null
   },
 }
 

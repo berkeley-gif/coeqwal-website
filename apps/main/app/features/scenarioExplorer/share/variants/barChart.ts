@@ -4,7 +4,7 @@
  * sidebar. URL prefix `b`.
  */
 
-import React from "react"
+import React, { useEffect } from "react"
 import type { ChartDataPoint } from "../../../scenarios/components/shared/types"
 import { barChartDataToCSV } from "../../dataExplorer/utils/exportUtils"
 import ShareScenarioCard from "../cards/ShareScenarioCard"
@@ -120,6 +120,28 @@ const barChartHandler: VariantHandler<BarChartItem> = {
       lookups.outcomeNameLookup,
     )
     return csv || null
+  },
+
+  // Bar-chart rehydration is trivial: the scenario's resolved
+  // outcome rows live in `context.allChartData[scenarioId]` because
+  // the share panel already mounts `useResolvedScenarioTiers` for
+  // the rest of the panel. Nothing async to await — write through
+  // synchronously when the data is present and the item is missing
+  // it. Replaces the inline `useEffect` that used to live in
+  // Share.tsx.
+  DataRehydrator({ items, context }) {
+    useEffect(() => {
+      if (!context.allChartData) return
+      for (const item of items) {
+        if (item.cachedChartData) continue
+        const resolved = context.allChartData[item.scenarioId]
+        if (!resolved) continue
+        context.updateShareItem(item.id, {
+          cachedChartData: resolved as Record<string, unknown>,
+        })
+      }
+    }, [items, context])
+    return null
   },
 }
 
