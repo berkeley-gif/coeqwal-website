@@ -26,11 +26,7 @@ const ScenarioGlyph: React.FC<ScenarioGlyphProps> = React.memo(
   ({ variant, values, size = 60, tierColors }) => {
     if (variant === "dots") {
       return (
-        <OutcomeDotsGlyph
-          values={values}
-          size={size}
-          tierColors={tierColors}
-        />
+        <OutcomeDotsGlyph values={values} size={size} tierColors={tierColors} />
       )
     }
 

@@ -10,10 +10,7 @@ import { barChartDataToCSV } from "../../dataExplorer/utils/exportUtils"
 import ShareScenarioCard from "../cards/ShareScenarioCard"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
-import {
-  hydroclimateSlug,
-  slugifyForFilename,
-} from "../utils/filename"
+import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 
 type BarChartItem = ShareItemOfType<"barChart">
 

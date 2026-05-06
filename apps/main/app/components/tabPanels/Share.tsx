@@ -111,10 +111,7 @@ function transformToCSS(
  * use the same scenario short labels users see in the share UI
  * (e.g. `current-ops`) instead of internal ids (`s0042`).
  */
-function shareItemFilenameLabel(
-  item: ShareItem,
-  lookups: CsvLookups,
-): string {
+function shareItemFilenameLabel(item: ShareItem, lookups: CsvLookups): string {
   return handlerForItem(item).filenameLabel(item as never, lookups)
 }
 
@@ -648,9 +645,7 @@ export default function SharePanel() {
 
   const scenarioNameLookup = useCallback(
     (id: string) =>
-      scenarioLookup.get(id)?.description ??
-      scenarioLookup.get(id)?.name ??
-      id,
+      scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
     [scenarioLookup],
   )
 

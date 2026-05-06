@@ -28,10 +28,7 @@
  */
 
 import type { ShareItem } from "./types"
-import {
-  getHandlerByUrlPrefix,
-  handlerForItem,
-} from "./variants"
+import { getHandlerByUrlPrefix, handlerForItem } from "./variants"
 
 /**
  * Current schema version for share URLs. Bump on any

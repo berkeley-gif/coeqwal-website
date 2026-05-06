@@ -111,7 +111,6 @@ export interface DataRehydrationContext {
   updateShareItem: (id: string, patch: ShareItemPatch) => void
 }
 
-
 /**
  * Single source of truth for everything specific to a share variant.
  * Generic over the variant's narrowed `ShareItem` arm so renderCard,

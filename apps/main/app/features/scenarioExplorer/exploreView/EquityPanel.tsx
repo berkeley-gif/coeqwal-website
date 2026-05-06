@@ -204,7 +204,6 @@ export default function EquityPanel() {
     }
   }, [locationHighlights])
 
-
   const handleObjectiveClick = (objective: TierGridProps["objectives"][0]) => {
     setSelectedObjectives((prev) => {
       const isSelected = prev.some(

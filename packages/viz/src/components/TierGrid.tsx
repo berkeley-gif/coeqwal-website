@@ -839,26 +839,29 @@ export default function TierGrid({
       // event handlers (also avoids tooltip mounts during off-screen render).
       if (interactiveRef.current) {
         allShapes
-        .on("click", function (_event, d) {
-          if (showMapView && onObjectiveClick) {
-            onObjectiveClick(d.obj)
-          }
-        })
-        .on("mouseover", function (this: SVGPathElement, event, d) {
-          if (showMapView && !selectedOutcomeLocationCodes.has(String(d.id))) {
-            d3.select(this).attr("stroke", "#333").attr("stroke-width", 2)
-          }
+          .on("click", function (_event, d) {
+            if (showMapView && onObjectiveClick) {
+              onObjectiveClick(d.obj)
+            }
+          })
+          .on("mouseover", function (this: SVGPathElement, event, d) {
+            if (
+              showMapView &&
+              !selectedOutcomeLocationCodes.has(String(d.id))
+            ) {
+              d3.select(this).attr("stroke", "#333").attr("stroke-width", 2)
+            }
 
-          // Show tooltip
-          if (tooltipRef.current && containerRef.current) {
-            const obj = d.obj
-            const baselineTierRow = showComparison
-              ? `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
+            // Show tooltip
+            if (tooltipRef.current && containerRef.current) {
+              const obj = d.obj
+              const baselineTierRow = showComparison
+                ? `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
                   <span style="color: #718096;">Baseline Tier:</span>
                   <span style="font-weight: 600; color: #2d3748;">${obj.baselineTier}</span>
                 </div>`
-              : ""
-            const tooltipHTML = `
+                : ""
+              const tooltipHTML = `
               <div style="font-weight: 600; margin-bottom: 4px; color: #1a202c; font-size: 15.5px;">${obj.locationName}</div>
               <div style="color: #718096; font-size: 12px; margin-bottom: 6px;">${obj.category}</div>
               <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 6px;">
@@ -873,41 +876,46 @@ export default function TierGrid({
                 </div>
               </div>
             `
-            tooltipRef.current.innerHTML = tooltipHTML
-            tooltipRef.current.style.opacity = "1"
+              tooltipRef.current.innerHTML = tooltipHTML
+              tooltipRef.current.style.opacity = "1"
 
-            // Position relative to container
-            const containerRect = containerRef.current.getBoundingClientRect()
-            const x = event.clientX - containerRect.left + 10
-            const y = event.clientY - containerRect.top + 10
-            tooltipRef.current.style.left = `${x}px`
-            tooltipRef.current.style.top = `${y}px`
-          }
-        })
-        .on("mousemove", function (event) {
-          if (tooltipRef.current && containerRef.current) {
-            // Update position relative to container
-            const containerRect = containerRef.current.getBoundingClientRect()
-            const x = event.clientX - containerRect.left + 10
-            const y = event.clientY - containerRect.top + 10
-            tooltipRef.current.style.left = `${x}px`
-            tooltipRef.current.style.top = `${y}px`
-          }
-        })
-        .on("mouseout", function (this: SVGPathElement, _event, d) {
-          if (!selectedOutcomeLocationCodes.has(String(d.id))) {
-            d3.select(this).attr("stroke-width", 0)
-          }
+              // Position relative to container
+              const containerRect = containerRef.current.getBoundingClientRect()
+              const x = event.clientX - containerRect.left + 10
+              const y = event.clientY - containerRect.top + 10
+              tooltipRef.current.style.left = `${x}px`
+              tooltipRef.current.style.top = `${y}px`
+            }
+          })
+          .on("mousemove", function (event) {
+            if (tooltipRef.current && containerRef.current) {
+              // Update position relative to container
+              const containerRect = containerRef.current.getBoundingClientRect()
+              const x = event.clientX - containerRect.left + 10
+              const y = event.clientY - containerRect.top + 10
+              tooltipRef.current.style.left = `${x}px`
+              tooltipRef.current.style.top = `${y}px`
+            }
+          })
+          .on("mouseout", function (this: SVGPathElement, _event, d) {
+            if (!selectedOutcomeLocationCodes.has(String(d.id))) {
+              d3.select(this).attr("stroke-width", 0)
+            }
 
-          // Hide tooltip
-          if (tooltipRef.current) {
-            tooltipRef.current.style.opacity = "0"
-          }
-        })
+            // Hide tooltip
+            if (tooltipRef.current) {
+              tooltipRef.current.style.opacity = "0"
+            }
+          })
       }
 
       // Exit
-      shapes.exit().transition().duration(exitDuration).attr("opacity", 0).remove()
+      shapes
+        .exit()
+        .transition()
+        .duration(exitDuration)
+        .attr("opacity", 0)
+        .remove()
     },
     [
       getSvgSelection,

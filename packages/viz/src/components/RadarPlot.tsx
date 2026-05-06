@@ -2087,12 +2087,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("pointer-events", "none")
           }
         })
-    }, [
-      activeMapDot,
-      data.length,
-      palette.defaultLineColor,
-      palette.dotStroke,
-    ])
+    }, [activeMapDot, data.length, palette.defaultLineColor, palette.dotStroke])
 
     return (
       <div

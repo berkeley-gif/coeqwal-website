@@ -211,10 +211,7 @@ export default function ResiliencePanelChartView({
   if (state.kind === "noOutcomesSelected") {
     return (
       <CenteredMessage>
-        <Typography
-          variant="body2"
-          sx={{ textAlign: "center", maxWidth: 480 }}
-        >
+        <Typography variant="body2" sx={{ textAlign: "center", maxWidth: 480 }}>
           No outcome rows selected. Open &ldquo;choose outcome rows&rdquo; in
           the chart controls above to pick which outcomes to display.
         </Typography>

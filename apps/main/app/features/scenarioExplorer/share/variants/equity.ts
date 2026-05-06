@@ -5,10 +5,7 @@
  */
 
 import React, { useEffect } from "react"
-import {
-  OUTCOME_NAMES,
-  type OutcomeCode,
-} from "../../../../content/outcomes"
+import { OUTCOME_NAMES, type OutcomeCode } from "../../../../content/outcomes"
 import {
   equityDataToCSV,
   type EquityChartDataShape,
@@ -16,15 +13,9 @@ import {
 import { useEquityObjectives } from "../../hooks/useEquityObjectives"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
 import ShareEquityLiveChart from "../live/ShareEquityLiveChart"
-import {
-  hydroclimateSlug,
-  slugifyForFilename,
-} from "../utils/filename"
+import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
-import type {
-  DataRehydrationContext,
-  VariantHandler,
-} from "../variants"
+import type { DataRehydrationContext, VariantHandler } from "../variants"
 
 type EquityItem = ShareItemOfType<"equity">
 

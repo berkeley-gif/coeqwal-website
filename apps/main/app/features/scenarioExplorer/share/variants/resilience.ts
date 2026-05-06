@@ -31,15 +31,9 @@ import {
   type ResilienceHydroclimate,
 } from "../../hooks/useResilienceMatrix"
 import ResilienceShareCard from "../cards/ResilienceShareCard"
-import {
-  hydroclimateSlug,
-  slugifyForFilename,
-} from "../utils/filename"
+import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
-import type {
-  DataRehydrationContext,
-  VariantHandler,
-} from "../variants"
+import type { DataRehydrationContext, VariantHandler } from "../variants"
 
 type ResilienceItem = ShareItemOfType<"resilience">
 

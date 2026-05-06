@@ -96,17 +96,17 @@ compile error in this file.
 
 Each handler owns:
 
-| Field | Purpose | Used by |
-|---|---|---|
-| `type` | Discriminator value. | Self-documenting; matches the registry key. |
-| `urlPrefix` | One-letter token segment (e.g. `b`, `r`, `e`, `q`). | `url.ts` encode/decode. |
-| `rasterDimensionsKey` | Key into `CAPTURE_DIMENSIONS`. | `Share.tsx` PNG fallback when rasterizing `cachedSvg`. |
-| `renderCard(item, ctx)` | Returns the card React node. | `ShareItemView.tsx`. |
-| `encodeUrlToken(item)` | Body of the URL token (no prefix, no leading dot). | `url.ts#encodeOne`. |
-| `decodeUrlToken(parts)` | Inverse; receives parts after the prefix is stripped. | `url.ts#decodeOne`. |
-| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`. | `Share.tsx` PNG/SVG/CSV downloads. |
-| `exportCsv(item, lookups)` | Returns a CSV body string or `null`. Optional. | `exportUtils.ts` single + bulk ZIP export. |
-| `DataRehydrator` | React component mounted by `ShareDataRehydrationHost`. Backfills `cachedChartData` for URL-restored items so the bulk ZIP can include them. Optional; items whose variant ships no rehydrator are silently dropped from the bundle when they have no cached data. | `ShareDataRehydrationHost.tsx`, `useShareDataReady` (gates "Download all data"). |
+| Field                          | Purpose                                                                                                                                                                                                                                                           | Used by                                                                          |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `type`                         | Discriminator value.                                                                                                                                                                                                                                              | Self-documenting; matches the registry key.                                      |
+| `urlPrefix`                    | One-letter token segment (e.g. `b`, `r`, `e`, `q`).                                                                                                                                                                                                               | `url.ts` encode/decode.                                                          |
+| `rasterDimensionsKey`          | Key into `CAPTURE_DIMENSIONS`.                                                                                                                                                                                                                                    | `Share.tsx` PNG fallback when rasterizing `cachedSvg`.                           |
+| `renderCard(item, ctx)`        | Returns the card React node.                                                                                                                                                                                                                                      | `ShareItemView.tsx`.                                                             |
+| `encodeUrlToken(item)`         | Body of the URL token (no prefix, no leading dot).                                                                                                                                                                                                                | `url.ts#encodeOne`.                                                              |
+| `decodeUrlToken(parts)`        | Inverse; receives parts after the prefix is stripped.                                                                                                                                                                                                             | `url.ts#decodeOne`.                                                              |
+| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`.                                                                                                                                                                 | `Share.tsx` PNG/SVG/CSV downloads.                                               |
+| `exportCsv(item, lookups)`     | Returns a CSV body string or `null`. Optional.                                                                                                                                                                                                                    | `exportUtils.ts` single + bulk ZIP export.                                       |
+| `DataRehydrator`               | React component mounted by `ShareDataRehydrationHost`. Backfills `cachedChartData` for URL-restored items so the bulk ZIP can include them. Optional; items whose variant ships no rehydrator are silently dropped from the bundle when they have no cached data. | `ShareDataRehydrationHost.tsx`, `useShareDataReady` (gates "Download all data"). |
 
 Dispatchers do not branch on `item.type`. They look up the handler
 once and delegate, so a new variant only has to fill in the registry
@@ -127,7 +127,7 @@ read. Anything reconstructable from the live data should not land in
 
 ```typescript
 export type ShareItem =
-  | (ShareItemBaseFields & { type: "barChart"; /* ... */ })
+  | (ShareItemBaseFields & { type: "barChart" /* ... */ })
   // ...
   | (ShareItemBaseFields & {
       type: "myNewChart"
@@ -443,7 +443,7 @@ chart).
 import { stageShareItem } from "../share/stage"
 
 await stageShareItem({
-  capture: () => captureMyChartOffscreen({ theme, /* ... */ }),
+  capture: () => captureMyChartOffscreen({ theme /* ... */ }),
   buildItem: (captured) => ({
     type: "myNewChart",
     id: makeId(),
@@ -605,11 +605,11 @@ the captured content. Otherwise two captures of the "same" card at
 different settings collide and the OS quietly suffixes `(1)`. For the
 existing variants:
 
-| Variant | Encoded segments |
-|---|---|
-| `barChart` | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
-| `radar` | every scenario short label joined by `-vs-`, hydroclimate. |
-| `equity` | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate. |
+| Variant      | Encoded segments                                                                                                                                                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename.         |
+| `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                                    |
+| `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                           |
 | `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate` / `quadrant`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it). |
 
 When in doubt: include scenario identity, the chosen hydroclimate,

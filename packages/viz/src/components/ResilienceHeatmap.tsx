@@ -962,10 +962,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .attr("rx", 2)
               .attr("stroke", "transparent")
               .attr("stroke-width", 2)
-              .attr(
-                "cursor",
-                onCellClickRef.current ? "pointer" : "default",
-              )
+              .attr("cursor", onCellClickRef.current ? "pointer" : "default")
 
             if (!firstCellEl) {
               firstCellEl = rect.node() as SVGRectElement | null
@@ -1785,7 +1782,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         resolveCellFill,
         cellRender,
         showCellNumbers,
+        // `palette` itself is read for its diverging / density /
+        // leverage gradient stops; the seven primitives below are
+        // destructured from `palette` at the top of the component
+        // and used as bare identifiers inside `updateChart`, so
+        // ESLint can't see they're derived. Listing them explicitly
+        // satisfies exhaustive-deps without changing behavior.
         palette,
+        paletteAxisHint,
+        paletteHoverStroke,
+        paletteText,
+        paletteTextMuted,
+        paletteUnavailFill,
+        paletteUnavailHatch,
+        paletteUnavailStroke,
         showMarginalRowStrip,
         showMarginalColStrip,
         marginalRow,
@@ -1868,13 +1878,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       if (svg.empty()) return
       const set = highlightedRowKeys
       const dimActive = set != null && set.size > 0
-      svg
-        .selectAll<SVGGElement, unknown>("g.resilience-row")
-        .each(function () {
-          const rowKey = this.getAttribute("data-row") ?? ""
-          const op = !dimActive ? 1 : set!.has(rowKey) ? 1 : 0.35
-          this.setAttribute("opacity", String(op))
-        })
+      svg.selectAll<SVGGElement, unknown>("g.resilience-row").each(function () {
+        const rowKey = this.getAttribute("data-row") ?? ""
+        const op = !dimActive ? 1 : set!.has(rowKey) ? 1 : 0.35
+        this.setAttribute("opacity", String(op))
+      })
     }, [highlightedRowKeys])
 
     return (

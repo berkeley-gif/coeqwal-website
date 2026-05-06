@@ -2,10 +2,7 @@ import JSZip from "jszip"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import { themeValues } from "@repo/ui/themes/theme"
 import type { ShareItem } from "../../share/types"
-import {
-  handlerForItem,
-  type CsvLookups,
-} from "../../share/variants"
+import { handlerForItem, type CsvLookups } from "../../share/variants"
 import { withExt } from "../../share/utils/filename"
 
 /**
@@ -275,7 +272,11 @@ export function barChartDataToCSV(
   const firstTiers = data[outcomes[0]!]!
   const tierNames = firstTiers.map((t) => t.label ?? "")
 
-  const tableHeader = ["Outcome", ...tierNames.map(csvEscape), "Total Locations"]
+  const tableHeader = [
+    "Outcome",
+    ...tierNames.map(csvEscape),
+    "Total Locations",
+  ]
 
   const rows = outcomes.map((outcome) => {
     const tiers = data[outcome]!
@@ -592,10 +593,7 @@ export function exportShareItemAsCSV(
  * the same basename whether they download an item one at a time or as
  * part of the ZIP.
  */
-function shareItemFilenameLabel(
-  item: ShareItem,
-  lookups: CsvLookups,
-): string {
+function shareItemFilenameLabel(item: ShareItem, lookups: CsvLookups): string {
   return handlerForItem(item).filenameLabel(item as never, lookups)
 }
 
@@ -607,10 +605,7 @@ function shareItemFilenameLabel(
  * each other. This appends `-2`, `-3`, ... to subsequent collisions
  * so every entry survives.
  */
-function makeUniqueFilename(
-  base: string,
-  used: Set<string>,
-): string {
+function makeUniqueFilename(base: string, used: Set<string>): string {
   if (!used.has(base)) {
     used.add(base)
     return base

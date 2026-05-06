@@ -512,9 +512,8 @@ function ScenarioExplorerInner() {
   // which threw away the row click signal.
   const handleResilienceSidebarScenarioShare = useCallback(
     async (scenarioId: string): Promise<void> => {
-      const result = await resilienceScenarioSoloCaptureRef.current?.(
-        scenarioId,
-      )
+      const result =
+        await resilienceScenarioSoloCaptureRef.current?.(scenarioId)
       if (!result) return
       const item: ShareItem = {
         id: `resilience-${Date.now()}-${scenarioId}`,
@@ -534,11 +533,7 @@ function ScenarioExplorerInner() {
       }
       addShareItem(item)
     },
-    [
-      resilienceControls,
-      resilienceVisibleOutcomes,
-      addShareItem,
-    ],
+    [resilienceControls, resilienceVisibleOutcomes, addShareItem],
   )
 
   // Keep the Resilience "View:" rail in sync with the sidebar
@@ -631,7 +626,9 @@ function ScenarioExplorerInner() {
                   background: canCaptureRadar
                     ? theme.palette.interaction.selectedBackground
                     : undefined,
-                  color: canCaptureRadar ? theme.palette.blue.bright : undefined,
+                  color: canCaptureRadar
+                    ? theme.palette.blue.bright
+                    : undefined,
                 },
               }}
             >

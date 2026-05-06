@@ -3305,4 +3305,3 @@ function ResiliencePanelTitle({
     </Box>
   )
 }
-

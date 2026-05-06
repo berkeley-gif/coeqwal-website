@@ -84,8 +84,7 @@ function migrateEnvelope(envIn: unknown): ShareEnvelope | null {
     const next = step(env)
     if (typeof next !== "object" || next === null) return null
     env = next as Record<string, unknown>
-    version =
-      typeof env.version === "number" ? env.version : version + 1
+    version = typeof env.version === "number" ? env.version : version + 1
   }
   return env as unknown as ShareEnvelope
 }

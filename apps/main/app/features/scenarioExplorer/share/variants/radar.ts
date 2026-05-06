@@ -19,10 +19,7 @@ import {
   normalizeShareRadarHydro,
   type ShareRadarLiveDataFields,
 } from "../utils/shareRadarLiveData"
-import {
-  hydroclimateSlug,
-  joinScenarioSlugs,
-} from "../utils/filename"
+import { hydroclimateSlug, joinScenarioSlugs } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 

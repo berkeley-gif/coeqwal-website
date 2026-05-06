@@ -134,7 +134,8 @@ export default function ScenarioSelectionSidebar({
     async (scenarioId: string): Promise<void> => {
       if (exploreMode === "radar") {
         await stageShareItem({
-          capture: () => onCaptureRadarScenario?.(scenarioId) ?? Promise.resolve(null),
+          capture: () =>
+            onCaptureRadarScenario?.(scenarioId) ?? Promise.resolve(null),
           buildItem: (captured) => ({
             id: crypto.randomUUID(),
             type: "radar",

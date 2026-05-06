@@ -80,10 +80,10 @@ export default function ShareUrlVersionNotice() {
             mt: 0.25,
           }}
         >
-          This URL was created with an older or newer version of COEQWAL
-          than what is running here. The shared scenarios were loaded
-          using the current schema, so a few details may render
-          differently than the sender saw.
+          This URL was created with an older or newer version of COEQWAL than
+          what is running here. The shared scenarios were loaded using the
+          current schema, so a few details may render differently than the
+          sender saw.
         </Typography>
       </Box>
       <IconButton

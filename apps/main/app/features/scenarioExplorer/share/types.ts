@@ -106,12 +106,7 @@ export type ShareItem =
        * values rehydrate to "panel" for backwards-compatible URL round
        * trips.
        */
-      tileScope?:
-        | "panel"
-        | "scenario"
-        | "outcome"
-        | "hydroclimate"
-        | "quadrant"
+      tileScope?: "panel" | "scenario" | "outcome" | "hydroclimate" | "quadrant"
       /**
        * Identifier of the captured tile when `tileScope` is one of
        * the small-multiples kinds (scenarioId, outcome code, or

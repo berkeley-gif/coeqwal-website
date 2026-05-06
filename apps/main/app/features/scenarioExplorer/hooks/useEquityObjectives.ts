@@ -54,16 +54,28 @@ export function useEquityObjectives({
   const gwStor = useTierLocationAssignments(currentScenario, "GW_STOR")
   const deltaEco = useTierLocationAssignments(currentScenario, "DELTA_ECO")
   const fwExp = useTierLocationAssignments(currentScenario, "FW_EXP")
-  const fwDeltaUses = useTierLocationAssignments(currentScenario, "FW_DELTA_USES")
-  const wrcSalmonAb = useTierLocationAssignments(currentScenario, "WRC_SALMON_AB")
+  const fwDeltaUses = useTierLocationAssignments(
+    currentScenario,
+    "FW_DELTA_USES",
+  )
+  const wrcSalmonAb = useTierLocationAssignments(
+    currentScenario,
+    "WRC_SALMON_AB",
+  )
 
   const baselineTarget = compareToBaseline ? baselineScenario : null
   const baselineCwsDel = useTierLocationAssignments(baselineTarget, "CWS_DEL")
   const baselineAgRev = useTierLocationAssignments(baselineTarget, "AG_REV")
-  const baselineEnvFlows = useTierLocationAssignments(baselineTarget, "ENV_FLOWS")
+  const baselineEnvFlows = useTierLocationAssignments(
+    baselineTarget,
+    "ENV_FLOWS",
+  )
   const baselineResStor = useTierLocationAssignments(baselineTarget, "RES_STOR")
   const baselineGwStor = useTierLocationAssignments(baselineTarget, "GW_STOR")
-  const baselineDeltaEco = useTierLocationAssignments(baselineTarget, "DELTA_ECO")
+  const baselineDeltaEco = useTierLocationAssignments(
+    baselineTarget,
+    "DELTA_ECO",
+  )
   const baselineFwExp = useTierLocationAssignments(baselineTarget, "FW_EXP")
   const baselineFwDeltaUses = useTierLocationAssignments(
     baselineTarget,

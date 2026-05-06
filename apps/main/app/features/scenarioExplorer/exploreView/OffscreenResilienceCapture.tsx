@@ -20,8 +20,10 @@ import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
 import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
 
-export const RESILIENCE_TILE_CAPTURE_WIDTH = CAPTURE_DIMENSIONS.resilienceTile.width
-export const RESILIENCE_TILE_CAPTURE_HEIGHT = CAPTURE_DIMENSIONS.resilienceTile.height
+export const RESILIENCE_TILE_CAPTURE_WIDTH =
+  CAPTURE_DIMENSIONS.resilienceTile.width
+export const RESILIENCE_TILE_CAPTURE_HEIGHT =
+  CAPTURE_DIMENSIONS.resilienceTile.height
 
 export interface CaptureResilienceOffscreenInput {
   /**

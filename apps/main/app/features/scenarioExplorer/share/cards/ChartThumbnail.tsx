@@ -63,7 +63,13 @@ export default function ChartThumbnail({
   const theme = useTheme()
 
   if (cachedSvg) {
-    return <SvgThumbnail svg={cachedSvg} ariaLabel={ariaLabel} aspectRatio={aspectRatio} />
+    return (
+      <SvgThumbnail
+        svg={cachedSvg}
+        ariaLabel={ariaLabel}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
   if (cachedImageDataUrl) {
