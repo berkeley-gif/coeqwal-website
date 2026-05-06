@@ -181,6 +181,7 @@ export function useEquityObjectives({
           locationId: location.location_id,
           locationName: location.location_name,
           tierLevel: currentTierLevel,
+          baselineTierLevel, // Added for share functionality
           tierCode,
         })
       })

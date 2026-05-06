@@ -653,8 +653,11 @@ export default function SharePanel() {
         Object.keys(item.cachedChartData).length === 0
       )
         return
+      // Reuse the same filename label PNG/SVG already use, with a
+      // `-data` suffix. Result: `coeqwal-distribution-s0042-data-<ts>.csv`
+      // sits next to its sibling `-<ts>.png` and `.svg` files.
       const filename = getTimestampedFilename(
-        `coeqwal-${item.type}-data`,
+        `${shareItemFilenameLabel(item)}-data`,
         "csv",
       )
       exportShareItemAsCSV(

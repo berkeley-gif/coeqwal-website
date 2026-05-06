@@ -130,15 +130,18 @@ export type ShareItem =
     })
 
 /**
- * On-disk shape of a share item. Strips `cachedChartData` (live
- * data, rebuilt from the comparison hooks at render time) and
- * keeps `cachedSvg` + `cachedImageDataUrl` so the share cards can
- * render and download without a network round trip after reload.
+ * On-disk shape of a share item. Currently the same as `ShareItem`:
+ * `cachedSvg`, `cachedImageDataUrl`, and `cachedChartData` all
+ * survive a reload so the share cards render and the data-download
+ * icons stay enabled (only the bar chart variant has a live
+ * recompute path; the others would otherwise lose their data).
  *
- * `share/persist.ts` enforces this at runtime; the type below
- * mirrors the same shape so misuse is caught at compile time.
+ * `share/persist.ts` enforces this at runtime via `toPersisted`;
+ * the alias is kept as a named, mutable contract so a future
+ * strip-on-save policy can re-introduce an `Omit<...>` without
+ * having to chase down every call site.
  */
-export type PersistedShareItem = Omit<ShareItem, "cachedChartData">
+export type PersistedShareItem = ShareItem
 
 /**
  * Variant helper. Use this when a function only handles one kind

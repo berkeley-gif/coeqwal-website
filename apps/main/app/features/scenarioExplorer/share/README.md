@@ -76,9 +76,15 @@ the snapshot's fixed dimensions. There is no live-DOM cloning in any
 capture path.
 
 `PersistedShareItem` is the on-disk shape. `persist.ts#toPersisted`
-strips `cachedChartData` (live data, rebuilt at render time) and keeps
-both `cachedSvg` and `cachedImageDataUrl` so reload restores the same
-thumbnail and downloads keep working without a fresh capture.
+preserves `cachedSvg`, `cachedImageDataUrl`, AND `cachedChartData`
+so reload restores the same thumbnail, the PNG / SVG download paths
+keep working without a fresh capture, and the data-download icons
+stay enabled for radar / equity / resilience items (only the bar
+chart variant has a live recompute path through
+`useResolvedScenarioTiers`; the rest would otherwise lose their
+data on every reload). `saveShareState` already swallows
+quota-exceeded errors, so an oversized tray simply skips the persist
+and in-memory state takes over for the rest of the session.
 
 ## The variant registry
 
@@ -129,8 +135,10 @@ export type ShareItem =
     })
 ```
 
-`PersistedShareItem` is `Omit<ShareItem, "cachedChartData">`, so a new
-variant is automatically covered.
+`PersistedShareItem` is currently `ShareItem` itself (the alias is
+kept so a future strip-on-save policy can reintroduce an
+`Omit<...>` without rewriting every caller), so a new variant is
+automatically covered.
 
 ### 2. Add a `CAPTURE_DIMENSIONS` entry
 
@@ -357,9 +365,24 @@ const myNewChartHandler: VariantHandler<MyChartItem> = {
 
   // Optional. Implement if cachedChartData carries a meaningful payload
   // and downstream tools should be able to download it as a table.
+  // Always start the section with `buildCsvHeaderBlock` so the
+  // preamble (variant title, scenario(s), hydroclimate, tier legend)
+  // matches every other variant. If your data has tier columns, set
+  // `includeTierScale: true` and emit tier values as integers 1-4 -
+  // see "CSV pipeline" below for the full convention.
   exportCsv(item, lookups) {
     if (!item.cachedChartData) return null
-    return /* build CSV string from item.cachedChartData */
+    const scenarios = item.scenarioIds.map((id) => ({
+      id,
+      label: lookups.scenarioNameLookup(id),
+    }))
+    const header = buildCsvHeaderBlock({
+      variantTitle: "My new chart",
+      scenarios,
+      includeTierScale: true, // drop if your data has no tier column
+    })
+    const rows = /* build data rows from item.cachedChartData */
+    return [...header, "", ...rows].join("\n")
   },
 }
 
@@ -437,6 +460,70 @@ section. Per-variant CSV body builders (`barChartDataToCSV`,
 `resilienceHeatmapDataToCSV`, `resilienceQuadrantDataToCSV`) live in
 the same file and are imported by the handlers; they are pure
 string-builders so the same code drives single-item and bulk export.
+
+### CSV pipeline conventions
+
+Every variant CSV section, single-card or bulk, uses the same shape:
+
+```
+Coeqwal export,<variant title>
+Scenario,<label>                   (or Scenarios,<a>; <b>; <c>)
+Hydroclimate,<hc>                  (when present)
+Compared to baseline,yes|no        (when applicable)
+<extra key,value rows>             (e.g. Subject / View / Encoding for resilience)
+Tier scale,1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical
+                                   (blank line)
+<table header row>
+<data rows...>
+```
+
+The header block is emitted by `buildCsvHeaderBlock(input)` in
+`exportUtils.ts`. New variant CSV writers MUST call it; do not roll
+your own `Scenario,…` / `Compared to baseline,…` rows. The variant
+handler is the right place to populate `CsvHeaderInput`: it has the
+share item, the scenario-name lookup, and the per-variant context.
+
+#### Tier representation
+
+Wherever a tier value appears as a data cell, emit it as an integer
+1-4 (decimal sub-tier scores are allowed when the chart axis is
+continuous, e.g. radar). Set `includeTierScale: true` so the legend
+ships in the header block. Bar chart's pivoted layout keeps tier
+**labels** as column headers (those are bin labels, not values); it
+still passes `includeTierScale: true` for consistency.
+
+For comparison columns (e.g. `Tier` vs `Baseline tier`) both columns
+must use the same representation. The equity payload now carries
+`tierLevel: number` and `baselineTierLevel: number` (added in
+`useEquityObjectives`); use those rather than the legacy formatted
+`"Tier N"` strings.
+
+#### Bulk export section banners
+
+`exportAllShareItemsAsCSV` prefixes each section with a single-cell
+banner row of the form `########  <variant title> - <scenario(s)>`,
+extracted from the section's own header block. The banner makes
+section boundaries trivial to find when the file is opened in a
+spreadsheet without breaking column alignment.
+
+#### Filename convention
+
+PNG, SVG, and CSV downloads all derive their filename from
+`handler.filenameLabel(item)`, with extension and timestamp added by
+`getTimestampedFilename`. The CSV path additionally appends a
+`-data` suffix so a user with all three downloads from the same card
+can sort them next to each other:
+
+```
+coeqwal-distribution-s0042-2026-XX-XX.png
+coeqwal-distribution-s0042-2026-XX-XX.svg
+coeqwal-distribution-s0042-data-2026-XX-XX.csv
+```
+
+`filenameLabel` should always include the scenario identity (a
+single id, a count, or a stable feature like view name); two cards
+of the same variant from different scenarios must produce different
+filenames or the user can't tell their downloads apart.
 
 ### Known limitation: one raster size per variant type
 

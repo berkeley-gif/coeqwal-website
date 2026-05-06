@@ -20,7 +20,9 @@ export interface Objective {
   locationId: string
   locationName: string
   tierLevel: number
-  tierCode: string // Optional: tier/outcome code for coordinate lookup
+  // Added for share functionality
+  baselineTierLevel?: number
+  tierCode: string // tier/outcome code for coordinate lookup
 }
 
 export interface Position {

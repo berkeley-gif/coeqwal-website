@@ -60,6 +60,16 @@ interface ScenarioSelectionSidebarProps {
   } | null>
   onResilienceScenarioShare?: (scenarioId: string) => void | Promise<void>
   onEquityScenarioShare?: (scenarioId: string) => void | Promise<void>
+  /**
+   * When true, the per-row share icon and the theme-header
+   * "share all" icon are rendered as disabled. The pin icon stays
+   * active. Mode-specific gates - currently radar uses this when no
+   * axes are selected, since capturing a blank wireframe would
+   * produce a useless card.
+   */
+  shareDisabled?: boolean
+  /** Tooltip shown over disabled share icons explaining the gate. */
+  shareDisabledTooltip?: React.ReactNode
 }
 
 export default function ScenarioSelectionSidebar({
@@ -71,6 +81,8 @@ export default function ScenarioSelectionSidebar({
   onCaptureRadarScenarios,
   onResilienceScenarioShare,
   onEquityScenarioShare,
+  shareDisabled = false,
+  shareDisabledTooltip,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -433,6 +445,8 @@ export default function ScenarioSelectionSidebar({
                 onRowHover={onRowHover}
                 singleSelect={singleSelect}
                 onShareScenarios={shareThemeScenarios}
+                shareDisabled={shareDisabled}
+                shareDisabledTooltip={shareDisabledTooltip}
               />,
             )
           }
@@ -577,6 +591,8 @@ export default function ScenarioSelectionSidebar({
                       }}
                       togglePinnedScenario={togglePinnedScenario}
                       hidePinning
+                      shareDisabled={shareDisabled}
+                      shareDisabledTooltip={shareDisabledTooltip}
                     />
                   }
                 />

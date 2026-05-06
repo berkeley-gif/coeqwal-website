@@ -42,6 +42,10 @@ const equityHandler: VariantHandler<EquityItem> = {
       hydroclimate: item.hydroclimate,
       cachedSvg: item.cachedSvg,
       cachedImageDataUrl: item.cachedImageDataUrl,
+      // TierGrid encodes outcome status entirely in tier color and
+      // ships no internal color key. Mount the shared legend so PNG
+      // and SVG exports of the card can be read on their own.
+      showTierLegend: true,
       note: item.note,
       onNoteChange: ctx.onNoteChange,
       onRemove: ctx.onRemove,
@@ -77,10 +81,14 @@ const equityHandler: VariantHandler<EquityItem> = {
   exportCsv(item, lookups) {
     if (!item.cachedChartData) return null
     const scenarioLabel = lookups.scenarioNameLookup(item.scenarioId)
-    return equityDataToCSV(
-      item.cachedChartData as unknown as EquityChartDataShape,
-      scenarioLabel,
-    )
+    const data = item.cachedChartData as unknown as EquityChartDataShape
+    return equityDataToCSV(data, {
+      variantTitle: "Distribution",
+      scenarios: [{ id: item.scenarioId, label: scenarioLabel }],
+      hydroclimate: item.hydroclimate,
+      compareToBaseline: data.compareToBaseline,
+      includeTierScale: true,
+    })
   },
 }
 

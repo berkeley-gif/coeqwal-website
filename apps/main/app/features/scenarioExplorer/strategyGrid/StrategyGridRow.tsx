@@ -541,6 +541,8 @@ export function InlineRowActions({
   dense,
   pinTourRef,
   shareTourRef,
+  shareDisabled = false,
+  shareDisabledTooltip,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -560,6 +562,12 @@ export function InlineRowActions({
    */
   pinTourRef?: React.RefCallback<HTMLElement | null>
   shareTourRef?: React.RefCallback<HTMLElement | null>
+  /**
+   * Disables the share icon (pin stays active). The tooltip swaps to
+   * `shareDisabledTooltip` so callers can explain the gate.
+   */
+  shareDisabled?: boolean
+  shareDisabledTooltip?: React.ReactNode
 }) {
   const theme = useTheme()
   const shareItems = useScenarioExplorerStore((s) => s.shareItems)
@@ -683,7 +691,11 @@ export function InlineRowActions({
         sx={{ display: "inline-flex", alignItems: "center" }}
       >
         <Tooltip
-          title={shareTooltip}
+          title={
+            shareDisabled
+              ? (shareDisabledTooltip ?? shareTooltip)
+              : shareTooltip
+          }
           arrow
           placement="top-start"
           slotProps={{
@@ -699,32 +711,42 @@ export function InlineRowActions({
             },
           }}
         >
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation()
-              onShare()
-              setJustShared(true)
-            }}
-            sx={{
-              p: iconPad,
-              ...iconButtonTight,
-              ...(shareIconNudgeTop != null && {
-                position: "relative",
-                top: shareIconNudgeTop,
-              }),
-              color: isShared
-                ? theme.palette.blue.bright
-                : theme.palette.grey[500],
-              "&:hover": {
+          {/* span wrapper keeps the tooltip working when the button
+              is disabled; MUI suppresses pointer events on a
+              disabled button, which would otherwise swallow hover. */}
+          <span style={{ display: "inline-flex" }}>
+            <IconButton
+              size="small"
+              disabled={shareDisabled}
+              onClick={(e) => {
+                e.stopPropagation()
+                onShare()
+                setJustShared(true)
+              }}
+              sx={{
+                p: iconPad,
+                ...iconButtonTight,
+                ...(shareIconNudgeTop != null && {
+                  position: "relative",
+                  top: shareIconNudgeTop,
+                }),
                 color: isShared
                   ? theme.palette.blue.bright
-                  : theme.palette.grey[700],
-              },
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: iconSize }} />
-          </IconButton>
+                  : theme.palette.grey[500],
+                "&:hover": {
+                  color: isShared
+                    ? theme.palette.blue.bright
+                    : theme.palette.grey[700],
+                },
+                "&.Mui-disabled": {
+                  color: theme.palette.grey[400],
+                  opacity: 0.5,
+                },
+              }}
+            >
+              <icons.IosShare sx={{ fontSize: iconSize }} />
+            </IconButton>
+          </span>
         </Tooltip>
       </Box>
     </Box>

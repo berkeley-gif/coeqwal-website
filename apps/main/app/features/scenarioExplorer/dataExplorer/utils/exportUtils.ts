@@ -143,6 +143,100 @@ function csvQuote(val: string): string {
   return `"${val.replace(/"/g, '""')}"`
 }
 
+/**
+ * Shared input for the CSV header block emitted at the top of every
+ * share-item CSV section. Variant builders populate this from the
+ * share item; the helper renders a uniform key,value preamble so
+ * single-card downloads and multi-section bulk exports have the same
+ * shape.
+ */
+export interface CsvHeaderInput {
+  /**
+   * Human-readable variant name shown in the first row, e.g.
+   * "Distribution", "Radar", "Bar chart", "Resilience heatmap",
+   * "Resilience quadrant".
+   */
+  variantTitle: string
+  /**
+   * One scenario for single-scenario variants (bar chart, equity,
+   * single-tile resilience), many for radar / aggregate resilience.
+   * Labels are emitted joined with `; ` so the row stays a single
+   * CSV cell.
+   */
+  scenarios?: { id: string; label: string }[]
+  /** Shown as a `Hydroclimate,<hc>` row when present. */
+  hydroclimate?: string
+  /** Emits `Compared to baseline,yes|no` when present. */
+  compareToBaseline?: boolean
+  /**
+   * When true, appends the canonical tier legend row. Variants whose
+   * data table contains any tier column should set this. Bar chart's
+   * pivoted layout also sets it because the column headers ARE the
+   * tier labels - the legend is harmless and reinforces the convention.
+   */
+  includeTierScale?: boolean
+  /**
+   * Variant-specific key,value rows inserted between the standard
+   * fields and the tier scale. Resilience uses this for `Subject`,
+   * `View`, and `Encoding`. Bar chart uses it for `View`.
+   */
+  extra?: Array<[string, string]>
+}
+
+/**
+ * Canonical tier scale string. Mirrors `TIER_LABELS` in
+ * `app/content/tiers.ts`. Inlined here rather than imported so this
+ * util stays free of app-content dependencies.
+ */
+const TIER_SCALE_TEXT =
+  "1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical"
+
+/**
+ * Render the standard CSV header preamble. Returns the rows WITHOUT
+ * a trailing blank line so the caller can decide what comes next
+ * (data table immediately, or a section banner first).
+ *
+ * Layout:
+ *
+ *   Coeqwal export,<variantTitle>
+ *   Scenario,<label>                          (or Scenarios,<a>; <b>; <c>)
+ *   Hydroclimate,<hc>                         (when present)
+ *   Compared to baseline,yes|no               (when present)
+ *   <extra key,value rows...>
+ *   Tier scale,1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical   (when includeTierScale)
+ */
+export function buildCsvHeaderBlock(input: CsvHeaderInput): string[] {
+  const rows: string[] = []
+  rows.push(`Coeqwal export,${csvEscape(input.variantTitle)}`)
+
+  if (input.scenarios && input.scenarios.length > 0) {
+    const labels = input.scenarios.map((s) => s.label).join("; ")
+    const key = input.scenarios.length === 1 ? "Scenario" : "Scenarios"
+    rows.push(`${key},${csvEscape(labels)}`)
+  }
+
+  if (input.hydroclimate) {
+    rows.push(`Hydroclimate,${csvEscape(input.hydroclimate)}`)
+  }
+
+  if (input.compareToBaseline != null) {
+    rows.push(`Compared to baseline,${input.compareToBaseline ? "yes" : "no"}`)
+  }
+
+  if (input.extra) {
+    for (const [k, v] of input.extra) {
+      if (v == null || v === "") continue
+      rows.push(`${csvEscape(k)},${csvEscape(v)}`)
+    }
+  }
+
+  if (input.includeTierScale) {
+    rows.push(`Tier scale,${csvEscape(TIER_SCALE_TEXT)}`)
+  }
+
+  return rows
+}
+
 export type BarTierEntry = {
   label?: string
   value?: number
@@ -153,24 +247,21 @@ export type BarTierEntry = {
 /**
  * Convert bar chart tier data into a readable CSV string.
  *
- * Values are reported as number of locations per tier.
- * Single-location outcomes get a 1 in their active tier.
+ * Values are reported as number of locations per tier. Single-location
+ * outcomes get a 1 in their active tier. The outcome column carries
+ * display names rather than the raw `OutcomeCode` keys when an
+ * `outcomeNameLookup` is supplied.
  *
- *   Scenario, <name>
+ * Layout:
+ *
+ *   <header block>                            (via buildCsvHeaderBlock)
  *   Outcome, Optimal, Acceptable, At-risk, Critical, Total Locations
  *   Community deliveries, 1, 2, 1, 0, 4
  *   Ag revenue, 0, 1, 0, 0, 1
- *   ...
- *
- * The outcome column carries display names rather than the raw
- * `OutcomeCode` keys when an `outcomeNameLookup` is supplied; this
- * keeps the bar chart and radar exports human-readable and aligned
- * with the resilience export which already ships display labels in
- * its payload.
  */
 export function barChartDataToCSV(
   data: Record<string, BarTierEntry[]>,
-  scenarioLabel: string,
+  header: CsvHeaderInput,
   outcomeNameLookup?: (code: string) => string,
 ): string {
   const outcomes = Object.keys(data)
@@ -179,7 +270,7 @@ export function barChartDataToCSV(
   const firstTiers = data[outcomes[0]!]!
   const tierNames = firstTiers.map((t) => t.label ?? "")
 
-  const header = ["Outcome", ...tierNames.map(csvEscape), "Total Locations"]
+  const tableHeader = ["Outcome", ...tierNames.map(csvEscape), "Total Locations"]
 
   const rows = outcomes.map((outcome) => {
     const tiers = data[outcome]!
@@ -199,8 +290,9 @@ export function barChartDataToCSV(
   })
 
   return [
-    `Scenario,${csvEscape(scenarioLabel)}`,
-    header.join(","),
+    ...buildCsvHeaderBlock(header),
+    "",
+    tableHeader.join(","),
     ...rows.map((r) => r.join(",")),
   ].join("\n")
 }
@@ -208,16 +300,16 @@ export function barChartDataToCSV(
 /**
  * Convert radar chart data into a readable CSV string.
  *
- * Layout: outcomes as rows, scenarios as columns.
- *
- *   Scale: 1 = Optimal  2 = Acceptable  3 = At-risk  4 = Critical
- *   (blank line)
- *   Outcome, Scenario A, Scenario B
- *   Delta Exports, 2.35, 1.80
- *   Delta Outflow, 1.50, 2.00
+ * Layout: outcomes as rows, scenarios as columns. The shared header
+ * block carries the scenarios list and the tier scale legend; the
+ * data table is `Key outcomes,<scenario-1>,<scenario-2>,...` followed
+ * by one row per outcome with decimal tier scores (1.0-4.0). The
+ * decimal carries sub-tier interpolation that integer rounding would
+ * lose, so radar deliberately keeps decimals.
  */
 export function radarDataToCSV(
   rawData: Record<string, unknown>,
+  header: CsvHeaderInput,
   scenarioIds?: string[],
   scenarioNameLookup?: (id: string) => string,
   outcomeNameLookup?: (code: string) => string,
@@ -244,11 +336,7 @@ export function radarDataToCSV(
   )
 
   const lines: string[] = []
-  lines.push(
-    csvQuote(
-      "Scale: 1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical",
-    ),
-  )
+  lines.push(...buildCsvHeaderBlock(header))
   lines.push("")
   lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
 
@@ -319,6 +407,7 @@ export type EquityChartDataShape = {
     id: number
     tier: string
     baselineTier?: string
+    baselineTierLevel?: number
     category: string
     locationId: string
     locationName: string
@@ -328,30 +417,22 @@ export type EquityChartDataShape = {
 }
 
 /**
- * Convert a flat resilience heatmap payload into a CSV table.
- * Layout: one row per (row, column) cell with tier and value columns.
- *
- * Tier is the categorical (1-4) bucket the heatmap drew, value is
- * the underlying continuous score. The earlier delta and count
- * columns were dropped: delta duplicates the value comparison
- * already encoded in the chart, and count was an internal
- * distribution-bucket size that shipped to the export by accident.
+ * Convert a flat resilience heatmap payload into a CSV table. Layout:
+ * one row per (row, column) cell with tier and value columns. Tier
+ * is the categorical (1-4) bucket the heatmap drew, value is the
+ * underlying continuous score. Variant-specific metadata (Subject,
+ * View, Encoding) rides through the header block's `extra` channel.
  */
 export function resilienceHeatmapDataToCSV(
   data: ResilienceHeatmapChartDataShape,
+  header: CsvHeaderInput,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
-  const header = ["Row", "Column", "Tier", "Value"]
+  const tableHeader = ["Row", "Column", "Tier", "Value"]
   const lines: string[] = []
-  if (data.tileLabel) {
-    lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)
-  }
-  if (data.view) lines.push(`View,${csvEscape(String(data.view))}`)
-  if (data.cellEncoding) {
-    lines.push(`Encoding,${csvEscape(String(data.cellEncoding))}`)
-  }
-  if (lines.length > 0) lines.push("")
-  lines.push(header.join(","))
+  lines.push(...buildCsvHeaderBlock(header))
+  lines.push("")
+  lines.push(tableHeader.join(","))
   for (const row of data.rows) {
     lines.push(
       [
@@ -368,27 +449,26 @@ export function resilienceHeatmapDataToCSV(
 /**
  * Convert a distribution-card payload into a CSV table. Layout: one
  * row per (location, outcome) tier assignment, with a baseline-tier
- * column when comparison was on at capture time.
+ * column when comparison was on at capture time. Both the scenario
+ * tier and baseline tier columns are integers 1-4; the canonical
+ * tier scale legend rides through the shared header block.
  */
 export function equityDataToCSV(
   data: EquityChartDataShape,
-  scenarioLabel: string,
+  header: CsvHeaderInput,
 ): string | null {
   if (!Array.isArray(data.objectives) || data.objectives.length === 0) {
     return null
   }
 
   const lines: string[] = []
-  lines.push(`Scenario,${csvEscape(scenarioLabel)}`)
-  lines.push(
-    `Compared to baseline,${data.compareToBaseline ? "yes" : "no"}`,
-  )
+  lines.push(...buildCsvHeaderBlock(header))
   lines.push("")
 
-  const header = data.compareToBaseline
+  const tableHeader = data.compareToBaseline
     ? ["Outcome", "Location", "Tier", "Baseline tier"]
     : ["Outcome", "Location", "Tier"]
-  lines.push(header.join(","))
+  lines.push(tableHeader.join(","))
 
   for (const obj of data.objectives) {
     const row = [
@@ -397,7 +477,15 @@ export function equityDataToCSV(
       String(obj.tierLevel),
     ]
     if (data.compareToBaseline) {
-      row.push(obj.baselineTier ? csvEscape(obj.baselineTier) : "")
+      // Prefer the integer field; fall back to parsing the legacy
+      // formatted string ("Tier N") for items that were captured
+      // before `baselineTierLevel` was added to the payload.
+      const baselineLevel =
+        obj.baselineTierLevel ??
+        (obj.baselineTier
+          ? parseInt(obj.baselineTier.replace(/^Tier\s+/, ""), 10)
+          : Number.NaN)
+      row.push(Number.isFinite(baselineLevel) ? String(baselineLevel) : "")
     }
     lines.push(row.join(","))
   }
@@ -407,21 +495,21 @@ export function equityDataToCSV(
 /**
  * Convert a quadrant scatter payload into a CSV table. Uses the
  * payload's xLabel / yLabel as the X and Y column headers so the
- * captured axis metadata rides through the export.
+ * captured axis metadata rides through the export. Tier is an
+ * integer 1-4; the legend rides through the shared header block.
  */
 export function resilienceQuadrantDataToCSV(
   data: ResilienceQuadrantChartDataShape,
+  header: CsvHeaderInput,
 ): string | null {
   if (!Array.isArray(data.rows) || data.rows.length === 0) return null
   const xLabel = data.xLabel ?? "X"
   const yLabel = data.yLabel ?? "Y"
-  const header = ["Item", csvEscape(xLabel), csvEscape(yLabel), "Tier"]
+  const tableHeader = ["Item", csvEscape(xLabel), csvEscape(yLabel), "Tier"]
   const lines: string[] = []
-  if (data.tileLabel) {
-    lines.push(`Subject,${csvEscape(String(data.tileLabel))}`)
-    lines.push("")
-  }
-  lines.push(header.join(","))
+  lines.push(...buildCsvHeaderBlock(header))
+  lines.push("")
+  lines.push(tableHeader.join(","))
   for (const row of data.rows) {
     lines.push(
       [
@@ -483,9 +571,54 @@ export function exportShareItemAsCSV(
 }
 
 /**
+ * Strip CSV quoting (matching outer double quotes, escaped `""`)
+ * from a single cell value. Used by the bulk-export banner builder
+ * to recover the human label from an already-CSV-encoded line.
+ */
+function unquoteCsvCell(cell: string): string {
+  if (cell.length >= 2 && cell.startsWith('"') && cell.endsWith('"')) {
+    return cell.slice(1, -1).replace(/""/g, '"')
+  }
+  return cell
+}
+
+/**
+ * Pull the variant title and the scenario(s) cell out of the first
+ * few rows of an already-rendered section CSV (which always opens
+ * with a `Coeqwal export,<title>` row and a `Scenario(s),<labels>`
+ * row courtesy of `buildCsvHeaderBlock`). Used to render the
+ * single-cell banner row that delimits sections in the bulk export.
+ */
+function bannerRowFromSection(csv: string): string {
+  const lines = csv.split("\n")
+  let variantTitle = "Section"
+  let scenarioLabel = ""
+  // The header block is short (<= ~8 rows). Limit the scan so a
+  // big data table can't drag this into O(n) work per section.
+  for (const line of lines.slice(0, 12)) {
+    if (line.startsWith("Coeqwal export,")) {
+      variantTitle = unquoteCsvCell(line.slice("Coeqwal export,".length))
+    } else if (line.startsWith("Scenarios,")) {
+      scenarioLabel = unquoteCsvCell(line.slice("Scenarios,".length))
+      break
+    } else if (line.startsWith("Scenario,")) {
+      scenarioLabel = unquoteCsvCell(line.slice("Scenario,".length))
+      break
+    }
+  }
+  const tail = scenarioLabel ? ` - ${scenarioLabel}` : ""
+  // The whole banner is a single CSV cell so it lands in column A
+  // of any spreadsheet without column drift. csvEscape adds quoting
+  // only if the label contains a comma / quote / newline.
+  return csvEscape(`########  ${variantTitle}${tail}`)
+}
+
+/**
  * Export every share-item's chart data into one multi-section CSV.
- * Each variant's section is rendered through its registry handler;
- * empty sections (no cachedChartData, no exporter) are dropped.
+ * Each variant's section is rendered through its registry handler
+ * and prefixed with a single-cell banner row so section boundaries
+ * are easy to spot when the file is opened in a spreadsheet. Empty
+ * sections (no cachedChartData, no exporter) are dropped.
  */
 export function exportAllShareItemsAsCSV(
   items: ShareItem[],
@@ -498,6 +631,7 @@ export function exportAllShareItemsAsCSV(
   for (const item of items) {
     const csv = renderShareItemCsv(item, lookups)
     if (csv) {
+      sections.push(bannerRowFromSection(csv))
       sections.push(csv)
       sections.push("")
     }

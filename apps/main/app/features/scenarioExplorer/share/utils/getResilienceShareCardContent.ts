@@ -87,16 +87,13 @@ function buildHydroChip(
   hydroShortLabel: (hc: string) => string,
 ): string {
   if (hydroclimates.length === 0) {
-    return "Hydro: (none selected)"
+    return "Hydroclimate: (none selected)"
   }
   if (isFullHydroSelection(hydroclimates)) {
-    return "Hydro: All three periods"
+    return "Hydroclimate: All three periods"
   }
-  return `Hydro: ${hydroclimates.map(hydroShortLabel).join(", ")}`
+  return `Hydroclimate: ${hydroclimates.map(hydroShortLabel).join(", ")}`
 }
-
-const MAX_SCENARIO_NAMES = 3
-const MAX_OUTCOME_NAMES = 5
 
 function buildScenarioChip(
   scenarioIds: string[],
@@ -105,12 +102,7 @@ function buildScenarioChip(
   if (scenarioIds.length === 0) {
     return "Scenarios: Full library"
   }
-  const shown = scenarioIds.slice(0, MAX_SCENARIO_NAMES).map(scenarioLabel)
-  const rest = scenarioIds.length - MAX_SCENARIO_NAMES
-  if (rest > 0) {
-    return `Scenarios: ${shown.join(", ")} (+${rest} more)`
-  }
-  return `Scenarios: ${shown.join(", ")}`
+  return `Scenarios: ${scenarioIds.map(scenarioLabel).join(", ")}`
 }
 
 function buildOutcomeChip(
@@ -120,12 +112,7 @@ function buildOutcomeChip(
   if (outcomeCodes.length === 0) {
     return "Outcomes: (none)"
   }
-  const shown = outcomeCodes.slice(0, MAX_OUTCOME_NAMES).map(outcomeLabel)
-  const rest = outcomeCodes.length - MAX_OUTCOME_NAMES
-  if (rest > 0) {
-    return `Outcomes: ${shown.join(", ")} (+${rest} more)`
-  }
-  return `Outcomes: ${shown.join(", ")}`
+  return `Outcomes: ${outcomeCodes.map(outcomeLabel).join(", ")}`
 }
 
 /**

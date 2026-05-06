@@ -72,15 +72,51 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
     return `coeqwal-resilience-${item.view}`
   },
 
-  exportCsv(item) {
+  exportCsv(item, lookups) {
     if (!item.cachedChartData) return null
     const data = item.cachedChartData as Record<string, unknown>
-    return data.view === "quadrant"
+    const isQuadrant = data.view === "quadrant"
+    const scenarios = item.scenarioIds.map((id) => ({
+      id,
+      label: lookups.scenarioNameLookup(id),
+    }))
+    const hydroclimate =
+      item.hydroclimates.length === 1 ? item.hydroclimates[0] : undefined
+    const extra: Array<[string, string]> = []
+    const tileLabel = data.tileLabel as string | undefined
+    // `Sliced by` answers "what dimension is this tile pivoting on?".
+    // For outcome / hydroclimate / quadrant tiles it carries information
+    // the `Scenarios` row doesn't (the outcome name, hydroclimate label,
+    // or LOI code). For a scenario-scoped small multiple the label
+    // collapses to the scenario name and would simply repeat the only
+    // entry in `Scenarios`. Drop it in that case so the header stays
+    // meaningful.
+    if (tileLabel) {
+      const onlyScenarioLabel =
+        scenarios.length === 1 ? scenarios[0]!.label : undefined
+      if (tileLabel !== onlyScenarioLabel) {
+        extra.push(["Sliced by", tileLabel])
+      }
+    }
+    if (typeof data.view === "string") extra.push(["View", data.view])
+    if (typeof data.cellEncoding === "string") {
+      extra.push(["Encoding", data.cellEncoding])
+    }
+    const header = {
+      variantTitle: isQuadrant ? "Resilience quadrant" : "Resilience heatmap",
+      scenarios,
+      hydroclimate,
+      extra,
+      includeTierScale: true,
+    }
+    return isQuadrant
       ? resilienceQuadrantDataToCSV(
           data as unknown as ResilienceQuadrantChartDataShape,
+          header,
         )
       : resilienceHeatmapDataToCSV(
           data as unknown as ResilienceHeatmapChartDataShape,
+          header,
         )
   },
 }

@@ -79,6 +79,16 @@ export default function ResilienceShareCard({
     </Box>
   ) : undefined
 
+  // The panel-scope capture embeds a tier legend into its SVG: the
+  // small-multiples wrapper paints a shared bottom-of-grid legend, and
+  // the aggregate heatmap renders its own internal legend (the panel
+  // path does not pass `hideLegend`). Every other capture path
+  // explicitly hides the chart-internal legend (single-tile and
+  // scenario-solo set `hideLegend: true`) or has none at all (the
+  // quadrant scatter), so those cards must mount the shared card
+  // legend to stay decodable on their own.
+  const showTierLegend = item.tileScope !== "panel"
+
   return (
     <ShareSnapshotCard
       id={item.id}
@@ -90,6 +100,7 @@ export default function ResilienceShareCard({
       cachedSvg={item.cachedSvg}
       cachedImageDataUrl={item.cachedImageDataUrl}
       liveChart={liveChart}
+      showTierLegend={showTierLegend}
       note={item.note}
       onNoteChange={onNoteChange}
       onRemove={onRemove}

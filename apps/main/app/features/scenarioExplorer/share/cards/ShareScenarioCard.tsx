@@ -13,6 +13,7 @@ import { getSingleValueLocationCount } from "../../../../content/outcomes"
 import type { OutcomeDisplayMode } from "../../store"
 import ShareCardShell from "../ShareCardShell"
 import HydroclimateBadge from "./HydroclimateBadge"
+import ShareCardTierLegend from "./ShareCardTierLegend"
 
 interface ShareScenarioCardProps {
   scenarioId: string
@@ -331,6 +332,12 @@ export default function ShareScenarioCard({
             })}
           </Box>
         ))}
+
+      {/* Tier legend - bar-chart glyphs encode the tier exclusively in
+          color, with no built-in key. Mount the shared legend whenever
+          the glyph grid renders so PNG / SVG exports of the card carry
+          the same context the live UI surfaces through tooltips. */}
+      {chartData && outcomeNames.length > 0 && <ShareCardTierLegend />}
     </ShareCardShell>
   )
 }

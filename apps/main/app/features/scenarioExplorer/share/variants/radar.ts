@@ -134,8 +134,18 @@ const radarHandler: VariantHandler<RadarItem> = {
 
   exportCsv(item, lookups) {
     if (!item.cachedChartData) return null
+    const scenarios = item.scenarioIds.map((id) => ({
+      id,
+      label: lookups.scenarioNameLookup(id),
+    }))
     return radarDataToCSV(
       item.cachedChartData as Record<string, unknown>,
+      {
+        variantTitle: "Radar",
+        scenarios,
+        hydroclimate: item.hydroclimate,
+        includeTierScale: true,
+      },
       item.scenarioIds,
       lookups.scenarioNameLookup,
       lookups.outcomeNameLookup,

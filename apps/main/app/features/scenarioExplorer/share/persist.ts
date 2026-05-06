@@ -8,12 +8,16 @@
  * change.
  *
  * Scope of persistence:
- *  - `cachedChartData` is always stripped, every variant. It is
- *    rebuilt from the comparison hooks at render time, costs little
- *    to recompute, and would balloon localStorage otherwise.
- *  - `cachedSvg` and `cachedImageDataUrl` are preserved on every
- *    variant. The SVG is the format the share cards actually render
- *    (rasterized to PNG on demand at download time).
+ *  - `cachedSvg`, `cachedImageDataUrl`, and `cachedChartData` are all
+ *    preserved on every variant. The SVG is what the share cards
+ *    render (rasterized to PNG on demand). `cachedChartData` is the
+ *    structured payload the per-variant CSV builders consume; keeping
+ *    it on disk is what makes the data-download icons work for
+ *    radar / equity / resilience after a page reload (only barChart
+ *    items have a recompute path through `useResolvedScenarioTiers`).
+ *  - `saveShareState` already swallows quota-exceeded errors, so a
+ *    user with an oversized tray simply skips the persist (in-memory
+ *    state still works for the rest of the session).
  *
  * Versioning model
  * ----------------
@@ -87,18 +91,18 @@ function migrateEnvelope(envIn: unknown): ShareEnvelope | null {
 }
 
 /**
- * Strip runtime-only fields from a `ShareItem` so the result is
- * safe to JSON.stringify into localStorage. The fields to strip
- * are variant-aware, see file header.
+ * Project a `ShareItem` to its persisted shape. The persisted shape
+ * currently includes every runtime field; the function exists as a
+ * single chokepoint where future strip-on-save policies can be
+ * applied (e.g. dropping a transient computed field) without every
+ * call site needing to learn about it.
  *
- * The return type is `PersistedShareItem`, which encodes the same
- * stripping policy at the type level. If this function and the
- * type drift, TypeScript will reject the assignment.
+ * The return type is `PersistedShareItem`. If the item shape and
+ * the persisted shape drift, TypeScript will reject the assignment
+ * here, which is the desired loud failure.
  */
 function toPersisted(item: ShareItem): PersistedShareItem {
-  const { cachedChartData: _cachedChartData, ...rest } = item
-  void _cachedChartData
-  return rest
+  return item
 }
 
 /**

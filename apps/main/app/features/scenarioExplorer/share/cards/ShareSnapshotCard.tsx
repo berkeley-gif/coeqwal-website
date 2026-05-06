@@ -12,6 +12,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import ShareCardShell from "../ShareCardShell"
 import HydroclimateBadge from "./HydroclimateBadge"
 import ChartThumbnail from "./ChartThumbnail"
+import ShareCardTierLegend from "./ShareCardTierLegend"
 
 interface ShareSnapshotCardProps {
   id: string
@@ -45,6 +46,15 @@ interface ShareSnapshotCardProps {
    * needed.
    */
   liveChart?: React.ReactNode
+  /**
+   * When true, the card mounts a compact tier-color legend below the
+   * thumbnail. Use for variants whose captured chart paints tier
+   * colors but does not include its own legend (Distribution /
+   * TierGrid, Resilience quadrant). Skip for charts whose SVG already
+   * carries a tier legend (resilience heatmap and small multiples)
+   * to avoid a duplicated key.
+   */
+  showTierLegend?: boolean
   note?: string
   onNoteChange?: (note: string) => void
   onRemove?: (id: string) => void
@@ -61,6 +71,7 @@ export default function ShareSnapshotCard({
   cachedSvg,
   cachedImageDataUrl,
   liveChart,
+  showTierLegend = false,
   note,
   onNoteChange,
   onRemove,
@@ -139,6 +150,8 @@ export default function ShareSnapshotCard({
         ariaLabel={title}
         variant="bordered"
       />
+
+      {showTierLegend && <ShareCardTierLegend />}
 
       {chips.length > 0 && (
         <Box

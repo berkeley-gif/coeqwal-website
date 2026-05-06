@@ -85,7 +85,23 @@ const barChartHandler: VariantHandler<BarChartItem> = {
       { label?: string; value?: number; rawCount?: number }[]
     >
     const scenarioLabel = lookups.scenarioNameLookup(item.scenarioId)
-    const csv = barChartDataToCSV(data, scenarioLabel, lookups.outcomeNameLookup)
+    const viewLabel =
+      item.viewMode === "average"
+        ? "Key outcomes average"
+        : item.viewMode === "distribution"
+          ? "Key outcomes distribution"
+          : "Key outcomes bar chart"
+    const csv = barChartDataToCSV(
+      data,
+      {
+        variantTitle: "Bar chart",
+        scenarios: [{ id: item.scenarioId, label: scenarioLabel }],
+        hydroclimate: item.hydroclimate,
+        extra: [["View", viewLabel]],
+        includeTierScale: true,
+      },
+      lookups.outcomeNameLookup,
+    )
     return csv || null
   },
 }

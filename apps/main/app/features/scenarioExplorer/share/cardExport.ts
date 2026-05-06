@@ -29,7 +29,7 @@
  *     across calls).
  */
 
-import { toPng, toSvg } from "html-to-image"
+import { getFontEmbedCSS, toPng, toSvg } from "html-to-image"
 import {
   downloadFromDataUrl,
   downloadSvgString,
@@ -55,6 +55,118 @@ interface ExportOptions {
 const DEFAULT_RASTER_SCALE = 2
 
 /**
+ * Web font embedding pipeline.
+ *
+ * `html-to-image` walks every document stylesheet on each call to
+ * collect `@font-face` rules and inline them into the export. That
+ * walk does two things we want to avoid on every share download:
+ *
+ *   1. It re-fetches and re-parses remote font CSS (Google Fonts,
+ *      Emotion runtime CSS, the Next.js font loader's stylesheets).
+ *   2. Its regex parser cannot round-trip every remote rule through
+ *      `CSSStyleSheet.insertRule`. When a rule fails the library
+ *      catches the throw and `console.error`s it. The export still
+ *      completes, but Next.js's dev overlay surfaces every
+ *      `console.error` as a red "Console Error" toast.
+ *
+ * The library is designed for this. `Options.fontEmbedCSS` is
+ * documented as: "Use with `getFontEmbedCSS()` to create embed CSS
+ * for use across multiple calls to library functions". When that
+ * option is set, `embedWebFonts` skips the entire stylesheet walk
+ * and uses the precomputed string directly.
+ *
+ * Strategy:
+ *
+ *   - Lazily compute `getFontEmbedCSS(document.body)` ONCE per
+ *     session, keyed at module scope. `document.body` is the widest
+ *     possible filter so the cached CSS covers every web font any
+ *     card on the page could use.
+ *   - The single warm-up call still hits the noisy path, so we
+ *     scope-suppress only the library's own error patterns for the
+ *     duration of that one call. Every other `console.error` -
+ *     including unrelated app or library errors during the warm-up
+ *     window - flows through unchanged.
+ *   - Every subsequent `toPng` / `toSvg` passes the cached CSS as
+ *     `fontEmbedCSS`. The library never walks stylesheets again, so
+ *     no more noise to suppress and exports get faster.
+ *   - If the warm-up rejects entirely, we surface ONE
+ *     `console.warn` (so the failure is visible) and fall back to
+ *     `skipFonts: true`. Exports keep working with system-font
+ *     fallbacks rather than degrading silently.
+ */
+const HTML_TO_IMAGE_FONT_NOISE_PATTERNS = [
+  "Error inserting rule from remote css",
+  "Error loading remote css",
+  "Error inlining remote css file",
+  "Error loading remote stylesheet",
+  "Error while reading CSS rules from",
+]
+
+/**
+ * Result of the bootstrap call to `getFontEmbedCSS`.
+ *
+ *   - `string`: precomputed font CSS, possibly empty (the page has
+ *     no `@font-face` rules to embed; legitimate, not a failure).
+ *   - `null`: warm-up rejected. Callers should fall back to
+ *     `skipFonts: true` and the user has already seen one warning.
+ */
+type FontEmbedResult = string | null
+
+let fontEmbedPromise: Promise<FontEmbedResult> | null = null
+
+function getCachedFontEmbedCSS(): Promise<FontEmbedResult> {
+  if (fontEmbedPromise) return fontEmbedPromise
+  if (typeof document === "undefined") {
+    fontEmbedPromise = Promise.resolve(null)
+    return fontEmbedPromise
+  }
+  fontEmbedPromise = (async () => {
+    const original = console.error
+    const isLibraryNoise = (args: unknown[]): boolean => {
+      const first = args[0]
+      return (
+        typeof first === "string" &&
+        HTML_TO_IMAGE_FONT_NOISE_PATTERNS.some((p) => first.includes(p))
+      )
+    }
+    console.error = (...args: unknown[]) => {
+      if (isLibraryNoise(args)) return
+      original.apply(console, args)
+    }
+    try {
+      return await getFontEmbedCSS(document.body)
+    } catch (err) {
+      original.call(
+        console,
+        "[Share] font embed warm-up failed; PNG / SVG exports will use system-font fallbacks:",
+        err,
+      )
+      return null
+    } finally {
+      console.error = original
+    }
+  })()
+  return fontEmbedPromise
+}
+
+/**
+ * Resolve the font-embed options to merge into a `toPng` / `toSvg`
+ * call. Either:
+ *
+ *   - `{ fontEmbedCSS: "..." }`: use the precomputed (possibly empty)
+ *     CSS. Library skips the stylesheet walk.
+ *   - `{ skipFonts: true }`: warm-up failed; force the library off
+ *     the noisy path. Web fonts in the export render in system-font
+ *     fallbacks but the export still completes.
+ */
+async function fontEmbedOptions(): Promise<
+  { fontEmbedCSS: string } | { skipFonts: true }
+> {
+  const css = await getCachedFontEmbedCSS()
+  return css == null ? { skipFonts: true } : { fontEmbedCSS: css }
+}
+
+/**
  * Capture a live share-card element to PNG and trigger a browser
  * download. Returns true on success so callers can chain a fallback
  * path when the live element is missing or html-to-image rejects
@@ -67,11 +179,13 @@ export async function downloadCardAsPng(
 ): Promise<boolean> {
   try {
     const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
+    const fontOpts = await fontEmbedOptions()
     const dataUrl = await toPng(liveEl, {
       pixelRatio: dpr * (options.rasterScale ?? DEFAULT_RASTER_SCALE),
       backgroundColor: options.backgroundColor,
       filter: cardElementFilter,
       cacheBust: true,
+      ...fontOpts,
     })
     await downloadFromDataUrl(dataUrl, filename)
     return true
@@ -93,10 +207,12 @@ export async function downloadCardAsSvg(
   options: Pick<ExportOptions, "backgroundColor">,
 ): Promise<boolean> {
   try {
+    const fontOpts = await fontEmbedOptions()
     const dataUrl = await toSvg(liveEl, {
       backgroundColor: options.backgroundColor,
       filter: cardElementFilter,
       cacheBust: true,
+      ...fontOpts,
     })
     const svg = decodeSvgDataUrl(dataUrl)
     if (!svg) return false

@@ -30,6 +30,14 @@ interface ThemeGroupHeaderProps {
    * header never has to know which capture pipeline is active.
    */
   onShareScenarios: (scenarioIds: string[]) => void | Promise<void>
+  /**
+   * Disables the "share all" icon. Used when the active mode can't
+   * produce a meaningful card given the current state (e.g. radar
+   * has no axes selected).
+   */
+  shareDisabled?: boolean
+  /** Tooltip shown over the disabled share icon explaining the gate. */
+  shareDisabledTooltip?: React.ReactNode
 }
 
 export default function ThemeGroupHeader({
@@ -39,6 +47,8 @@ export default function ThemeGroupHeader({
   onRowHover,
   singleSelect = false,
   onShareScenarios,
+  shareDisabled = false,
+  shareDisabledTooltip,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
@@ -182,31 +192,44 @@ export default function ThemeGroupHeader({
 
         <Tooltip
           title={
-            allShared
-              ? "All shared"
-              : `Share all ${themeConfig.label} scenarios`
+            shareDisabled
+              ? (shareDisabledTooltip ??
+                `Share all ${themeConfig.label} scenarios`)
+              : allShared
+                ? "All shared"
+                : `Share all ${themeConfig.label} scenarios`
           }
           arrow
         >
-          <IconButton
-            className="theme-action-icon"
-            size="small"
-            onClick={() => {
-              void onShareScenarios(scenarioIds)
-            }}
-            sx={{
-              p: 0.25,
-              // The icon stays visible at all times. `allShared` no
-              // longer reflects share state in non-bar-chart contexts
-              // (sidebar dispatches equity / radar / resilience), and
-              // hiding the action by default made it undiscoverable.
-              opacity: 1,
-              color: theme.palette.text.primary,
-              transition: "opacity 200ms ease",
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-          </IconButton>
+          {/* span wrapper preserves tooltip hover when the button is
+              disabled - MUI suppresses pointer events on disabled
+              buttons. */}
+          <span style={{ display: "inline-flex" }}>
+            <IconButton
+              className="theme-action-icon"
+              size="small"
+              disabled={shareDisabled}
+              onClick={() => {
+                void onShareScenarios(scenarioIds)
+              }}
+              sx={{
+                p: 0.25,
+                // The icon stays visible at all times. `allShared` no
+                // longer reflects share state in non-bar-chart contexts
+                // (sidebar dispatches equity / radar / resilience), and
+                // hiding the action by default made it undiscoverable.
+                opacity: 1,
+                color: theme.palette.text.primary,
+                transition: "opacity 200ms ease",
+                "&.Mui-disabled": {
+                  color: theme.palette.grey[400],
+                  opacity: 0.5,
+                },
+              }}
+            >
+              <icons.IosShare sx={{ fontSize: "0.8rem" }} />
+            </IconButton>
+          </span>
         </Tooltip>
       </Box>
     </Box>

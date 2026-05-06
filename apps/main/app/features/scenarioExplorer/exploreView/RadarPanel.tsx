@@ -146,6 +146,15 @@ interface RadarPanelProps {
    * empty-selection fallback that shows the full library.
    */
   onCanCaptureChange?: (canCapture: boolean) => void
+  /**
+   * Notifies the parent whether sidebar share icons (single-scenario
+   * row icon + theme-header "share all") should be enabled. Sidebar
+   * actions don't depend on what's currently on the chart - they
+   * capture explicitly chosen scenarios. They only need at least one
+   * axis selected, otherwise the captured card would be a blank
+   * wireframe with no spokes.
+   */
+  onCanShareFromSidebarChange?: (canShare: boolean) => void
 }
 
 export default function RadarPanel({
@@ -156,6 +165,7 @@ export default function RadarPanel({
   onSingleCaptureReady,
   onMultiCaptureReady,
   onCanCaptureChange,
+  onCanShareFromSidebarChange,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -654,6 +664,15 @@ export default function RadarPanel({
   useEffect(() => {
     onCanCaptureChange?.(canCaptureRadar)
   }, [canCaptureRadar, onCanCaptureChange])
+
+  // Sidebar share icons capture explicitly chosen scenarios, so
+  // they don't care whether the live chart has any traces - only
+  // whether the radar has at least one axis to draw on. Without
+  // axes the captured card would be a blank wireframe.
+  const canShareRadarFromSidebar = visibleAxisNames.length > 0
+  useEffect(() => {
+    onCanShareFromSidebarChange?.(canShareRadarFromSidebar)
+  }, [canShareRadarFromSidebar, onCanShareFromSidebarChange])
 
   // Sidebar single-scenario share.
   const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(

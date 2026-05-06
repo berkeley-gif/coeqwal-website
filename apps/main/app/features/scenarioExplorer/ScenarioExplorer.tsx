@@ -299,6 +299,19 @@ function ScenarioExplorerInner() {
     setCanCaptureRadar(canCapture)
   }, [])
 
+  // Sidebar share-icon gate: enabled iff the radar has at least one
+  // axis selected. Independent of `canCaptureRadar` because sidebar
+  // actions capture explicitly chosen scenarios rather than whatever
+  // is currently on the chart, so they don't care about trace count.
+  const [canShareRadarFromSidebar, setCanShareRadarFromSidebar] =
+    useState(false)
+  const handleRadarCanShareFromSidebarChange = useCallback(
+    (canShare: boolean) => {
+      setCanShareRadarFromSidebar(canShare)
+    },
+    [],
+  )
+
   const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
     return radarSingleCaptureRef.current?.(scenarioId) ?? null
   }, [])
@@ -778,6 +791,14 @@ function ScenarioExplorerInner() {
                           ? handleEquitySidebarScenarioShare
                           : undefined
                       }
+                      shareDisabled={
+                        exploreMode === "radar" && !canShareRadarFromSidebar
+                      }
+                      shareDisabledTooltip={
+                        exploreMode === "radar"
+                          ? "Select at least one axis to share"
+                          : undefined
+                      }
                     />
                   )
                 }
@@ -804,6 +825,9 @@ function ScenarioExplorerInner() {
                     onSingleCaptureReady={handleRadarSingleCaptureReady}
                     onMultiCaptureReady={handleRadarMultiCaptureReady}
                     onCanCaptureChange={handleRadarCanCaptureChange}
+                    onCanShareFromSidebarChange={
+                      handleRadarCanShareFromSidebarChange
+                    }
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}
