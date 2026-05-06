@@ -104,7 +104,7 @@ Each handler owns:
 | `renderCard(item, ctx)` | Returns the card React node. | `ShareItemView.tsx`. |
 | `encodeUrlToken(item)` | Body of the URL token (no prefix, no leading dot). | `url.ts#encodeOne`. |
 | `decodeUrlToken(parts)` | Inverse; receives parts after the prefix is stripped. | `url.ts#decodeOne`. |
-| `filenameLabel(item)` | Fragment fed to `getTimestampedFilename`. | `Share.tsx` PNG/SVG/CSV downloads. |
+| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`. | `Share.tsx` PNG/SVG/CSV downloads. |
 | `exportCsv(item, lookups)` | Returns a CSV body string or `null`. Optional. | `exportUtils.ts` single + bulk CSV export. |
 
 Dispatchers do not branch on `item.type`. They look up the handler
@@ -359,8 +359,17 @@ const myNewChartHandler: VariantHandler<MyChartItem> = {
     }
   },
 
-  filenameLabel(item) {
-    return `coeqwal-mychart-${item.scenarioIds.length}scenarios`
+  // Build the download basename from helpers in `share/utils/filename.ts`.
+  // Use `slugifyForFilename` on user-facing text, `hydroclimateSlug` for
+  // the hydroclimate (compact form: `hist`, `cc50`, ...), and
+  // `joinScenarioSlugs` for multi-scenario items (it dedupes
+  // consecutive duplicate slugs). The caller appends the extension.
+  filenameLabel(item, lookups) {
+    const ids = joinScenarioSlugs(
+      item.scenarioIds,
+      lookups.scenarioShortLabelLookup,
+    )
+    return ["coeqwal-mychart", ids].filter(Boolean).join("-")
   },
 
   // Optional. Implement if cachedChartData carries a meaningful payload
@@ -509,21 +518,63 @@ spreadsheet without breaking column alignment.
 #### Filename convention
 
 PNG, SVG, and CSV downloads all derive their filename from
-`handler.filenameLabel(item)`, with extension and timestamp added by
-`getTimestampedFilename`. The CSV path additionally appends a
-`-data` suffix so a user with all three downloads from the same card
-can sort them next to each other:
+`handler.filenameLabel(item, lookups)`, with the extension added by
+`withExt` (no timestamp). The per-item CSV path additionally appends
+a `-data` suffix so a user with all three downloads from the same
+card can sort them next to each other:
 
 ```
-coeqwal-distribution-s0042-2026-XX-XX.png
-coeqwal-distribution-s0042-2026-XX-XX.svg
-coeqwal-distribution-s0042-data-2026-XX-XX.csv
+coeqwal-distribution-current-ops-hist.png
+coeqwal-distribution-current-ops-hist.svg
+coeqwal-distribution-current-ops-hist-data.csv
 ```
 
-`filenameLabel` should always include the scenario identity (a
-single id, a count, or a stable feature like view name); two cards
-of the same variant from different scenarios must produce different
-filenames or the user can't tell their downloads apart.
+The bulk CSV is `coeqwal-tray-export.csv` — fixed name, no scenario
+metadata, since it concatenates every share item.
+
+##### Building the basename
+
+Use the helpers in [`share/utils/filename.ts`](utils/filename.ts):
+
+- `slugifyForFilename(text)` — lowercase, ASCII-only, hyphen-
+  separated. Use this on every user-facing label.
+- `hydroclimateSlug(hc)` — compact form (`hist`, `cc50`, `cc75`,
+  `cc95`); falls back to `slugifyForFilename` for unknown values.
+  Add new climates to the `HC_SLUG` map intentionally.
+- `joinScenarioSlugs(ids, shortLabelLookup)` — joins with `-vs-`
+  and dedupes consecutive identical slugs so two ids that share a
+  short label can't render `current-ops-vs-current-ops`.
+- `withExt(label, ext)` — appends the extension. Called by
+  `Share.tsx`, not the handler.
+
+Compose with `[...].filter(Boolean).join("-")` so a missing segment
+(e.g. baseline-off, no scenarios for an aggregate view) doesn't leave
+a stray `--` in the name.
+
+##### Disambiguators every variant should encode
+
+`filenameLabel` should encode every choice that meaningfully changes
+the captured content. Otherwise two captures of the "same" card at
+different settings collide and the OS quietly suffixes `(1)`. For the
+existing variants:
+
+| Variant | Encoded segments |
+|---|---|
+| `barChart` | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
+| `radar` | every scenario short label joined by `-vs-`, hydroclimate. |
+| `equity` | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate. |
+| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate` / `quadrant`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it). |
+
+When in doubt: include scenario identity, the chosen hydroclimate,
+and any boolean toggle that changes the chart content (overlay on/off,
+view mode, compare-to-baseline). Skip ephemeral UI state (sort order,
+zoom level) — that belongs to the live view, not the file on disk.
+
+##### Out of scope
+
+`getTimestampedFilename` (in `dataExplorer/utils/exportUtils.ts`) is
+still used by non-share downloads (`MapView.tsx`, `TableView.tsx`).
+Do not pull it into share variants.
 
 ### Known limitation: one raster size per variant type
 

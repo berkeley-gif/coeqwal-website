@@ -524,17 +524,22 @@ export function resilienceQuadrantDataToCSV(
 }
 
 /**
- * Build the lookup pair the share variant registry expects. Treats
+ * Build the lookup trio the share variant registry expects. Treats
  * the optional callbacks as identity-on-missing so handler code can
  * stay branchless: a missing scenario name falls back to the id, a
- * missing outcome label falls back to the code.
+ * missing outcome label falls back to the code, a missing short
+ * label falls back to the long name (and ultimately the id).
  */
 function buildCsvLookups(
   scenarioNameLookup?: (id: string) => string,
   outcomeNameLookup?: (code: string) => string,
+  scenarioShortLabelLookup?: (id: string) => string,
 ) {
+  const scenarioName = (id: string) => scenarioNameLookup?.(id) ?? id
   return {
-    scenarioNameLookup: (id: string) => scenarioNameLookup?.(id) ?? id,
+    scenarioNameLookup: scenarioName,
+    scenarioShortLabelLookup: (id: string) =>
+      scenarioShortLabelLookup?.(id) ?? scenarioName(id),
     outcomeNameLookup: (code: string) => outcomeNameLookup?.(code) ?? code,
   }
 }
@@ -564,8 +569,13 @@ export function exportShareItemAsCSV(
   filename: string,
   scenarioNameLookup?: (id: string) => string,
   outcomeNameLookup?: (code: string) => string,
+  scenarioShortLabelLookup?: (id: string) => string,
 ) {
-  const lookups = buildCsvLookups(scenarioNameLookup, outcomeNameLookup)
+  const lookups = buildCsvLookups(
+    scenarioNameLookup,
+    outcomeNameLookup,
+    scenarioShortLabelLookup,
+  )
   const csv = renderShareItemCsv(item, lookups)
   if (csv) downloadCSV(csv, filename)
 }
@@ -625,8 +635,13 @@ export function exportAllShareItemsAsCSV(
   filename: string,
   scenarioNameLookup?: (id: string) => string,
   outcomeNameLookup?: (code: string) => string,
+  scenarioShortLabelLookup?: (id: string) => string,
 ) {
-  const lookups = buildCsvLookups(scenarioNameLookup, outcomeNameLookup)
+  const lookups = buildCsvLookups(
+    scenarioNameLookup,
+    outcomeNameLookup,
+    scenarioShortLabelLookup,
+  )
   const sections: string[] = []
   for (const item of items) {
     const csv = renderShareItemCsv(item, lookups)

@@ -14,6 +14,11 @@ import {
   type EquityChartDataShape,
 } from "../../dataExplorer/utils/exportUtils"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
+import ShareEquityLiveChart from "../live/ShareEquityLiveChart"
+import {
+  hydroclimateSlug,
+  slugifyForFilename,
+} from "../utils/filename"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -30,6 +35,16 @@ const equityHandler: VariantHandler<EquityItem> = {
 
   renderCard(item, ctx) {
     const info = ctx.scenarioLookup.get(item.scenarioId)
+    // URL-restored items arrive without `cachedSvg` / `cachedImageDataUrl`,
+    // so build a live fallback the snapshot card can mount when both
+    // caches are absent (parallels the radar handler's `liveChart`).
+    const hasVisualCache = !!item.cachedSvg || !!item.cachedImageDataUrl
+    const liveChart = hasVisualCache
+      ? undefined
+      : React.createElement(ShareEquityLiveChart, {
+          scenarioId: item.scenarioId,
+          compareToBaseline: item.compareToBaseline,
+        })
     return React.createElement(ShareSnapshotCard, {
       id: item.id,
       toolLabel: "Distribution",
@@ -42,6 +57,7 @@ const equityHandler: VariantHandler<EquityItem> = {
       hydroclimate: item.hydroclimate,
       cachedSvg: item.cachedSvg,
       cachedImageDataUrl: item.cachedImageDataUrl,
+      liveChart,
       // TierGrid encodes outcome status entirely in tier color and
       // ships no internal color key. Mount the shared legend so PNG
       // and SVG exports of the card can be read on their own.
@@ -74,8 +90,15 @@ const equityHandler: VariantHandler<EquityItem> = {
     }
   },
 
-  filenameLabel(item) {
-    return `coeqwal-distribution-${item.scenarioId}`
+  filenameLabel(item, lookups) {
+    const scen = slugifyForFilename(
+      lookups.scenarioShortLabelLookup(item.scenarioId),
+    )
+    const baseline = item.compareToBaseline ? "vs-baseline" : ""
+    const hc = hydroclimateSlug(item.hydroclimate)
+    return ["coeqwal-distribution", scen, baseline, hc]
+      .filter(Boolean)
+      .join("-")
   },
 
   exportCsv(item, lookups) {

@@ -10,6 +10,10 @@ import { barChartDataToCSV } from "../../dataExplorer/utils/exportUtils"
 import ShareScenarioCard from "../cards/ShareScenarioCard"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
+import {
+  hydroclimateSlug,
+  slugifyForFilename,
+} from "../utils/filename"
 
 type BarChartItem = ShareItemOfType<"barChart">
 
@@ -74,8 +78,21 @@ const barChartHandler: VariantHandler<BarChartItem> = {
     }
   },
 
-  filenameLabel(item) {
-    return `coeqwal-${item.scenarioId}-${item.viewMode}`
+  filenameLabel(item, lookups) {
+    const scen = slugifyForFilename(
+      lookups.scenarioShortLabelLookup(item.scenarioId),
+    )
+    // Bar chart's runtime `viewMode` reuses the word "distribution"
+    // for the per-row glyph display, which collides visually with the
+    // equity tool's filename token. Rename in filenames only.
+    const view =
+      item.viewMode === "distribution"
+        ? "bars"
+        : item.viewMode === "average"
+          ? "avg"
+          : "bar"
+    const hc = hydroclimateSlug(item.hydroclimate)
+    return ["coeqwal-bar-chart", scen, view, hc].filter(Boolean).join("-")
   },
 
   exportCsv(item, lookups) {

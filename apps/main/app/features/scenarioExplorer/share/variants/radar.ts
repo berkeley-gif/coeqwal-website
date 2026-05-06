@@ -19,6 +19,10 @@ import {
   normalizeShareRadarHydro,
   type ShareRadarLiveDataFields,
 } from "../utils/shareRadarLiveData"
+import {
+  hydroclimateSlug,
+  joinScenarioSlugs,
+} from "../utils/filename"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -128,8 +132,16 @@ const radarHandler: VariantHandler<RadarItem> = {
     }
   },
 
-  filenameLabel(item) {
-    return `coeqwal-radar-${item.scenarioIds.length}scenarios`
+  filenameLabel(item, lookups) {
+    // joinScenarioSlugs dedupes consecutive identical short-label
+    // slugs so two ids that share a label don't yield
+    // `current-ops-vs-current-ops`.
+    const ids = joinScenarioSlugs(
+      item.scenarioIds,
+      lookups.scenarioShortLabelLookup,
+    )
+    const hc = hydroclimateSlug(item.hydroclimate)
+    return ["coeqwal-radar", ids, hc].filter(Boolean).join("-")
   },
 
   exportCsv(item, lookups) {

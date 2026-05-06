@@ -20,6 +20,10 @@ import {
   type ResilienceQuadrantChartDataShape,
 } from "../../dataExplorer/utils/exportUtils"
 import ResilienceShareCard from "../cards/ResilienceShareCard"
+import {
+  hydroclimateSlug,
+  slugifyForFilename,
+} from "../utils/filename"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -68,8 +72,33 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
     }
   },
 
-  filenameLabel(item) {
-    return `coeqwal-resilience-${item.view}`
+  filenameLabel(item, lookups) {
+    const scope = item.tileScope ?? "panel"
+    // Per-tile slug: the small-multiples kinds carry a tileId that
+    // resolves to a scenario / outcome / hydroclimate label. Panel
+    // and quadrant captures have nothing to add here.
+    const tail =
+      scope === "scenario" && item.tileId
+        ? slugifyForFilename(lookups.scenarioShortLabelLookup(item.tileId))
+        : scope === "outcome" && item.tileId
+          ? slugifyForFilename(lookups.outcomeNameLookup(item.tileId))
+          : scope === "hydroclimate" && item.tileId
+            ? hydroclimateSlug(item.tileId)
+            : ""
+    // For a hydroclimate small multiple `tail` already names the
+    // hydroclimate; appending `hc` again would duplicate it. The
+    // other scopes append the captured hydroclimate(s) so two
+    // captures of the same scope/tile at different climates don't
+    // collide.
+    const hc =
+      scope === "hydroclimate"
+        ? ""
+        : item.hydroclimates.length === 1
+          ? hydroclimateSlug(item.hydroclimates[0]!)
+          : item.hydroclimates.length > 1
+            ? "multi-hc"
+            : ""
+    return ["coeqwal-resilience", scope, tail, hc].filter(Boolean).join("-")
   },
 
   exportCsv(item, lookups) {

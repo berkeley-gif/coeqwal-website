@@ -68,10 +68,18 @@ export interface RenderContext {
 /**
  * Display-name lookups threaded into CSV exports so column headers
  * carry human-readable labels instead of the internal codes the
- * runtime stores.
+ * runtime stores. Also reused by `filenameLabel` so download
+ * filenames can use the same scenario short labels users see in
+ * the share UI.
  */
 export interface CsvLookups {
   scenarioNameLookup: (id: string) => string
+  /**
+   * Short label used in filenames and compact UI affordances.
+   * Falls back to `scenarioNameLookup` (and ultimately the id) when
+   * the display layer has not registered a short label.
+   */
+  scenarioShortLabelLookup: (id: string) => string
   outcomeNameLookup: (code: string) => string
 }
 
@@ -105,8 +113,14 @@ export interface VariantHandler<T extends ShareItem> {
    * body segment.
    */
   decodeUrlToken: (parts: string[]) => T | null
-  /** Filename fragment fed to `getTimestampedFilename` for downloads. */
-  filenameLabel: (item: T) => string
+  /**
+   * Builds the basename (no extension) used by every share download
+   * for this variant: PNG, SVG, and the per-item CSV. Receives the
+   * shared `CsvLookups` so filenames can use the same scenario short
+   * labels as the share UI. The caller adds the extension via
+   * `withExt`; the per-item CSV path also appends a `-data` suffix.
+   */
+  filenameLabel: (item: T, lookups: CsvLookups) => string
   /**
    * Optional CSV builder. Returns a CSV body string for the item, or
    * null when there is nothing to export (no cached data, empty

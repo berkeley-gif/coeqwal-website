@@ -7,6 +7,11 @@
  * item has no cached PNG. Props mirror explore `RadarPanel` + `RadarPlot`
  * semantics: `showRadarRange` controls axis min/max shading. `showTierZones`
  * controls the tier band background (stored on the share item or URL).
+ *
+ * Renders at full capture dimensions inside `CapturedSizeFrame` so
+ * the URL-restored view scales the same way a cached SVG thumbnail
+ * does (uniform CSS scale of the whole chart vs. a responsive
+ * re-layout at the card width).
  */
 
 import React, { useMemo } from "react"
@@ -18,6 +23,11 @@ import {
   type RadarPlotAxisLabelDetailStyle,
 } from "@repo/viz"
 import { useRadarPlotTheme } from "../../hooks/useRadarPlotTheme"
+import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
+import CapturedSizeFrame from "./CapturedSizeFrame"
+
+const RADAR_W = CAPTURE_DIMENSIONS.radar.width
+const RADAR_H = CAPTURE_DIMENSIONS.radar.height
 
 export interface ShareRadarLiveChartProps {
   /** Filtered radar data matching the share item's scenarioIds. */
@@ -96,29 +106,25 @@ export default function ShareRadarLiveChart({
     )
   }
 
-  // Match `ShareRadarCard` cached image layout: `width: 100%`, natural height
-  // from a square raster. `RadarPlot` defaults to `containerMinHeight: 400` for
-  // the main panel. In a card that forces overflow/clipping, so we pass 0 and
-  // give the component a real square from `aspectRatio` (same as explore SVG).
+  // Render at capture dimensions and let `CapturedSizeFrame` CSS-
+  // scale the whole chart down. RadarPlot stays in `responsive` mode
+  // (its non-responsive path never initializes `updateChart`); the
+  // 600x600 host box is what its internal ResizeObserver picks up,
+  // so it lays out at the same size the offscreen capture used.
   return (
-    <Box
+    <CapturedSizeFrame
+      captureWidth={RADAR_W}
+      captureHeight={RADAR_H}
       sx={{
         mt: 1,
-        width: "100%",
-        position: "relative",
-        aspectRatio: "1 / 1",
         borderRadius: theme.borderRadius.sm,
         backgroundColor: theme.palette.common.white,
-        overflow: "hidden",
       }}
     >
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          width: `${RADAR_W}px`,
+          height: `${RADAR_H}px`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -146,6 +152,6 @@ export default function ShareRadarLiveChart({
           palette={radarPalette}
         />
       </Box>
-    </Box>
+    </CapturedSizeFrame>
   )
 }

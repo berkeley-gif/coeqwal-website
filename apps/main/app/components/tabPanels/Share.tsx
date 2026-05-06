@@ -39,7 +39,10 @@ import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareItemView from "../../features/scenarioExplorer/share/ShareItemView"
 import ShareUrlVersionNotice from "../../features/scenarioExplorer/share/ui/ShareUrlVersionNotice"
 import { CAPTURE_DIMENSIONS } from "../../features/scenarioExplorer/share/capture/dimensions"
-import { handlerForItem } from "../../features/scenarioExplorer/share/variants"
+import {
+  handlerForItem,
+  type CsvLookups,
+} from "../../features/scenarioExplorer/share/variants"
 import {
   downloadFromDataUrl,
   downloadSvgString,
@@ -47,8 +50,8 @@ import {
   embedFontStylesInSvg,
   exportShareItemAsCSV,
   exportAllShareItemsAsCSV,
-  getTimestampedFilename,
 } from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
+import { withExt } from "../../features/scenarioExplorer/share/utils/filename"
 import {
   downloadCardAsPng,
   downloadCardAsSvg,
@@ -100,9 +103,16 @@ function transformToCSS(
  * / barChart but currently rounds resilience tile and quadrant
  * captures up to the panel size at PNG-from-cachedSvg time. See the
  * README "RASTER_SIZE per tileScope" follow-up note.
+ *
+ * `lookups` is forwarded straight into the handler so filenames can
+ * use the same scenario short labels users see in the share UI
+ * (e.g. `current-ops`) instead of internal ids (`s0042`).
  */
-function shareItemFilenameLabel(item: ShareItem): string {
-  return handlerForItem(item).filenameLabel(item)
+function shareItemFilenameLabel(
+  item: ShareItem,
+  lookups: CsvLookups,
+): string {
+  return handlerForItem(item).filenameLabel(item as never, lookups)
 }
 
 function shareItemRasterSize(item: ShareItem) {
@@ -125,8 +135,9 @@ async function downloadShareItemAsPng(
   item: ShareItem,
   liveEl: HTMLElement | null,
   backgroundColor: string,
+  lookups: CsvLookups,
 ): Promise<void> {
-  const filename = getTimestampedFilename(shareItemFilenameLabel(item), "png")
+  const filename = withExt(shareItemFilenameLabel(item, lookups), "png")
 
   if (liveEl) {
     const ok = await downloadCardAsPng(liveEl, filename, { backgroundColor })
@@ -170,8 +181,9 @@ async function downloadShareItemAsSvg(
   item: ShareItem,
   liveEl: HTMLElement | null,
   backgroundColor: string,
+  lookups: CsvLookups,
 ): Promise<void> {
-  const filename = getTimestampedFilename(shareItemFilenameLabel(item), "svg")
+  const filename = withExt(shareItemFilenameLabel(item, lookups), "svg")
 
   if (liveEl) {
     const ok = await downloadCardAsSvg(liveEl, filename, { backgroundColor })
@@ -306,6 +318,7 @@ function StoryCard({
   scenarioLookup,
   allChartData,
   radarLiveByHydro,
+  csvLookups,
 }: {
   item: ShareItem
   onRemoveFromStory: (id: string) => void
@@ -325,6 +338,7 @@ function StoryCard({
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
+  csvLookups: CsvLookups
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -342,16 +356,18 @@ function StoryCard({
       item,
       contentRef.current,
       theme.palette.common.white,
+      csvLookups,
     )
-  }, [item, theme.palette.common.white])
+  }, [item, theme.palette.common.white, csvLookups])
 
   const handleDownloadSvg = useCallback(async () => {
     await downloadShareItemAsSvg(
       item,
       contentRef.current,
       theme.palette.common.white,
+      csvLookups,
     )
-  }, [item, theme.palette.common.white])
+  }, [item, theme.palette.common.white, csvLookups])
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
@@ -646,6 +662,23 @@ export default function SharePanel() {
     [scenarioLookup],
   )
 
+  const scenarioShortLabelLookup = useCallback(
+    (id: string) => scenarioLookup.get(id)?.shortLabel ?? id,
+    [scenarioLookup],
+  )
+
+  // Bundled lookups passed wherever a handler-driven helper needs
+  // to resolve scenario / outcome ids to display labels (filename
+  // construction, CSV column headers).
+  const csvLookups = useMemo<CsvLookups>(
+    () => ({
+      scenarioNameLookup,
+      scenarioShortLabelLookup,
+      outcomeNameLookup,
+    }),
+    [scenarioNameLookup, scenarioShortLabelLookup, outcomeNameLookup],
+  )
+
   const handleDownloadData = useCallback(
     (item: ShareItem) => {
       if (
@@ -654,10 +687,10 @@ export default function SharePanel() {
       )
         return
       // Reuse the same filename label PNG/SVG already use, with a
-      // `-data` suffix. Result: `coeqwal-distribution-s0042-data-<ts>.csv`
-      // sits next to its sibling `-<ts>.png` and `.svg` files.
-      const filename = getTimestampedFilename(
-        `${shareItemFilenameLabel(item)}-data`,
+      // `-data` suffix so the CSV sits next to its sibling `.png`
+      // and `.svg` files in the user's downloads folder.
+      const filename = withExt(
+        `${shareItemFilenameLabel(item, csvLookups)}-data`,
         "csv",
       )
       exportShareItemAsCSV(
@@ -665,9 +698,15 @@ export default function SharePanel() {
         filename,
         scenarioNameLookup,
         outcomeNameLookup,
+        scenarioShortLabelLookup,
       )
     },
-    [scenarioNameLookup, outcomeNameLookup],
+    [
+      csvLookups,
+      scenarioNameLookup,
+      outcomeNameLookup,
+      scenarioShortLabelLookup,
+    ],
   )
 
   // Story-canvas card refs are the primary live-element source for
@@ -704,19 +743,37 @@ export default function SharePanel() {
     const items = storyItems.length > 0 ? storyItems : shareItems
     for (const item of items) {
       const el = resolveLiveCardEl(item.id)
-      await downloadShareItemAsPng(item, el, theme.palette.common.white)
+      await downloadShareItemAsPng(
+        item,
+        el,
+        theme.palette.common.white,
+        csvLookups,
+      )
     }
-  }, [storyItems, shareItems, theme.palette.common.white, resolveLiveCardEl])
+  }, [
+    storyItems,
+    shareItems,
+    theme.palette.common.white,
+    resolveLiveCardEl,
+    csvLookups,
+  ])
 
   const handleDownloadAllData = useCallback(() => {
     const items = storyItems.length > 0 ? storyItems : shareItems
     exportAllShareItemsAsCSV(
       items,
-      getTimestampedFilename("coeqwal-chart-data", "csv"),
+      withExt("coeqwal-tray-export", "csv"),
       scenarioNameLookup,
       outcomeNameLookup,
+      scenarioShortLabelLookup,
     )
-  }, [storyItems, shareItems, scenarioNameLookup, outcomeNameLookup])
+  }, [
+    storyItems,
+    shareItems,
+    scenarioNameLookup,
+    outcomeNameLookup,
+    scenarioShortLabelLookup,
+  ])
 
   // ── Empty state: no share items at all ──
   if (shareItems.length === 0) {
@@ -900,6 +957,7 @@ export default function SharePanel() {
                           >
                         }
                         radarLiveByHydro={radarLiveByHydro}
+                        csvLookups={csvLookups}
                       />
                     ))}
                   </Box>
