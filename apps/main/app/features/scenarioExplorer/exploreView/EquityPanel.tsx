@@ -459,7 +459,9 @@ export default function EquityPanel() {
               {obj.locationName}
             </Box>
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
-              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+              {(obj.tierCode &&
+                OUTCOME_NAMES[obj.tierCode as keyof typeof OUTCOME_NAMES]) ||
+                obj.tierCode}
             </Box>
             <Box
               sx={{
@@ -520,7 +522,9 @@ export default function EquityPanel() {
               {obj.locationName}
             </Box>
             <Box sx={{ color: "#718096", fontSize: "12px", mb: 0.75 }}>
-              {OUTCOME_NAMES[obj.tierCode] || obj.tierCode}
+              {(obj.tierCode &&
+                OUTCOME_NAMES[obj.tierCode as keyof typeof OUTCOME_NAMES]) ||
+                obj.tierCode}
             </Box>
             <Box
               sx={{
