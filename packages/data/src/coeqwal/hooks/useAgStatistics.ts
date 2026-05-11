@@ -11,6 +11,7 @@ import { CACHE_KEYS } from "../../cache/keys"
 import {
   fetchAgAggregatesMonthly,
   fetchAgAggregatesPeriod,
+  fetchAgDemandUnitsList,
   fetchAgDemandUnitsDeliveryMonthly,
   fetchAgDemandUnitsShortageMonthly,
   fetchAgDemandUnitsPeriod,
@@ -18,6 +19,7 @@ import {
 import type {
   AgAggregateMonthlyResponse,
   AgAggregatePeriodResponse,
+  AgDemandUnitsListResponse,
   AgDemandUnitDeliveryMonthlyResponse,
   AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodResponse,
@@ -82,6 +84,44 @@ export function useAgAggregatesPeriod(scenarioId: string | null) {
     isLoading,
     error,
     hasData: !!data && Object.keys(data.aggregates).length > 0,
+  }
+}
+
+/**
+ * Fetch the list of AG demand-unit entities, optionally filtered.
+ * Used to populate the "Add a demand unit" dropdown in AgSection.
+ *
+ * @param filters - Optional region / cs3_type / provider filters
+ * @returns The demand-unit list, count, plus loading and error state
+ */
+export function useAgDemandUnitsList(filters?: {
+  region?: string
+  cs3_type?: string
+  provider?: string
+}) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<AgDemandUnitsListResponse>(
+    CACHE_KEYS.agDemandUnitsList(filters),
+    () => fetchAgDemandUnitsList(filters),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    demandUnits: data?.demand_units ?? [],
+    total: data?.count ?? 0,
+    isLoading,
+    error,
+    hasData: !!data && (data.count ?? 0) > 0,
   }
 }
 

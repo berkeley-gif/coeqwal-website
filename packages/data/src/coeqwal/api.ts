@@ -248,11 +248,34 @@ export const ENDPOINTS = {
   // AG Demand Units endpoints (150 agricultural demand units)
 
   /**
-   * Monthly delivery statistics for AG demand units
+   * List of AG demand-unit entities with optional filters.
+   * Powers the "Add a demand unit" dropdown in the AG section.
+   * @param filters - Optional region / cs3_type / provider filters
+   */
+  agDemandUnitsList: (filters?: {
+    region?: string
+    cs3_type?: string
+    provider?: string
+  }) => {
+    const params = [
+      filters?.region && `region=${filters.region}`,
+      filters?.cs3_type != null && `cs3_type=${filters.cs3_type}`,
+      filters?.provider && `provider=${filters.provider}`,
+    ]
+      .filter(Boolean)
+      .join("&")
+    return `/statistics/ag-demand-units${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Monthly surface-water delivery statistics for AG demand units.
+   * Backend route is `sw-delivery-monthly`. The frontend remaps the
+   * response's `monthly_sw_delivery` field to `monthly_delivery` so the
+   * matrix code can reuse the same shape as CWS aggregates.
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-demand-units/delivery-monthly`,
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly`,
 
   /**
    * Monthly shortage statistics for AG demand units

@@ -872,6 +872,42 @@ export interface AgAggregatePeriodResponse {
 // ============================================================================
 
 /**
+ * One row in the AG demand-units list endpoint. Used to populate the
+ * "Add a demand unit" dropdown in AgSection. Fields mirror the columns in
+ * `du_agriculture_entity` plus a few aggregate-style helpers
+ */
+export interface AgDemandUnitListItem {
+  /** Demand unit id, e.g. "64_PA1" */
+  du_id: string
+  /** Numeric WBA id as a string */
+  wba_id: string | null
+  /** Hydrologic region: "SAC", "SJR", "TULARE", or null */
+  hydrologic_region: string | null
+  /** CS3 contractor type: "PA", "SA", "XA", "PR", "NR", or null */
+  cs3_type: string | null
+  /** Display name, e.g. "Westlands WD" */
+  agency: string | null
+  /** Water provider: "CVP", "SWP", "Reclamation", or null */
+  provider: string | null
+  /** True if this DU has groundwater supply data */
+  gw: boolean
+  /** True if this DU has surface-water supply data */
+  sw: boolean
+  /** Total acres if known */
+  total_acres: number | null
+  /** True if a GIS polygon exists for this DU */
+  has_gis_data: boolean
+}
+
+/**
+ * Response from `/api/statistics/ag-demand-units` (the list endpoint)
+ */
+export interface AgDemandUnitsListResponse {
+  demand_units: AgDemandUnitListItem[]
+  count: number
+}
+
+/**
  * AG demand unit delivery data with monthly statistics
  */
 export interface AgDemandUnitDeliveryData {
@@ -920,7 +956,12 @@ export interface AgDemandUnitShortageMonthlyResponse {
 }
 
 /**
- * Period summary for an AG demand unit
+ * Period summary for an AG demand unit.
+ *
+ * Shape mirrors the backend's `ag_du_period_summary` table.
+ * AG demand units distinguish demand (applied water requirement) from
+ * actual surface-water delivery, with the remainder met by groundwater
+ * pumping or counted as shortage
  */
 export interface AgDemandUnitPeriodSummary {
   /** Agency name */
@@ -937,12 +978,22 @@ export interface AgDemandUnitPeriodSummary {
   simulation_end_year: number
   /** Total years in record */
   total_years: number
-  /** Annual average delivery in TAF */
-  annual_delivery_avg_taf: number
-  /** Coefficient of variation for annual delivery */
-  annual_delivery_cv: number
-  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
-  delivery_exceedance: Record<string, number>
+  /** Annual average applied-water demand in TAF */
+  annual_demand_avg_taf: number
+  /** Coefficient of variation for annual demand */
+  annual_demand_cv: number | null
+  /** Demand exceedance values keyed by percentile (p5, p10, p25, p50, p75, p90, p95) */
+  demand_exceedance: Record<string, number>
+  /** Annual average surface-water delivery in TAF */
+  annual_sw_delivery_avg_taf: number | null
+  /** Coefficient of variation for annual SW delivery */
+  annual_sw_delivery_cv: number | null
+  /** Annual average groundwater pumping in TAF */
+  annual_gw_pumping_avg_taf: number | null
+  /** Coefficient of variation for annual GW pumping */
+  annual_gw_pumping_cv: number | null
+  /** GW pumping as a percentage of total demand */
+  gw_pumping_pct_of_demand: number | null
   /** Annual average shortage in TAF (null if no shortage data) */
   annual_shortage_avg_taf: number | null
   /** Number of years with shortage > 0 */
@@ -951,12 +1002,11 @@ export interface AgDemandUnitPeriodSummary {
   shortage_frequency_pct: number | null
   /** Average shortage as percentage of demand */
   annual_shortage_pct_of_demand: number | null
-  /** Percentage of months meeting full demand */
+  /** Average percent of annual demand met, computed by the backend as
+   *  (annual_demand - annual_shortage) / annual_demand × 100 */
   reliability_pct: number | null
-  /** Average percent of demand met */
+  /** Same value as `reliability_pct`, kept for backward compatibility */
   avg_pct_demand_met: number | null
-  /** Annual average demand in TAF */
-  annual_demand_avg_taf: number | null
 }
 
 /**

@@ -88,6 +88,8 @@ export type {
   AgAggregatePeriodSummary,
   AgAggregatePeriodResponse,
   // AG Demand Unit types
+  AgDemandUnitListItem,
+  AgDemandUnitsListResponse,
   AgDemandUnitDeliveryData,
   AgDemandUnitDeliveryMonthlyResponse,
   AgDemandUnitShortageData,
@@ -167,6 +169,7 @@ export {
   // AG fetchers
   fetchAgAggregatesMonthly,
   fetchAgAggregatesPeriod,
+  fetchAgDemandUnitsList,
   fetchAgDemandUnitsDeliveryMonthly,
   fetchAgDemandUnitsShortageMonthly,
   fetchAgDemandUnitsPeriod,

@@ -37,6 +37,7 @@ import type {
   DemandUnitPeriodResponse,
   AgAggregateMonthlyResponse,
   AgAggregatePeriodResponse,
+  AgDemandUnitsListResponse,
   AgDemandUnitDeliveryMonthlyResponse,
   AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodResponse,
@@ -910,7 +911,35 @@ export async function fetchAgAggregatesPeriod(
 // ============================================================================
 
 /**
- * Fetch monthly delivery statistics for AG demand units
+ * Fetch the list of AG demand-unit entities, optionally filtered.
+ * Used to populate the "Add a demand unit" dropdown in AgSection.
+ *
+ * @param filters - Optional region / cs3_type / provider filters
+ * @returns Demand-unit list plus a `count` total
+ *
+ * @example
+ * ```typescript
+ * const { demand_units } = await fetchAgDemandUnitsList({ region: "SJR" })
+ * ```
+ */
+export async function fetchAgDemandUnitsList(filters?: {
+  region?: string
+  cs3_type?: string
+  provider?: string
+}): Promise<AgDemandUnitsListResponse> {
+  return apiFetcher<AgDemandUnitsListResponse>(
+    ENDPOINTS.agDemandUnitsList(filters),
+    { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+/**
+ * Fetch monthly surface-water delivery statistics for AG demand units.
+ *
+ * The backend route is `sw-delivery-monthly` and returns each DU's monthly
+ * stats under `monthly_sw_delivery`. We remap that to `monthly_delivery`
+ * here so the frontend can reuse `AgDemandUnitDeliveryData` and the same
+ * matrix code path as CWS aggregates
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @returns Monthly delivery statistics for 150 AG demand units
@@ -922,13 +951,45 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
     throw new Error("Scenario ID is required")
   }
 
-  return apiFetcher<AgDemandUnitDeliveryMonthlyResponse>(
+  // Backend response shape: { demand_units: { [duId]: { monthly_sw_delivery: {...}, ... } } }
+  // We surface it as `monthly_delivery` for downstream callers
+  type RawDuEntry = {
+    agency: string
+    hydrologic_region: string | null
+    cs3_type: string | null
+    provider: string | null
+    monthly_sw_delivery?: Record<string, unknown>
+    monthly_delivery?: Record<string, unknown>
+  }
+  type RawResponse = {
+    scenario_id: string
+    demand_units: Record<string, RawDuEntry>
+  }
+
+  const raw = await apiFetcher<RawResponse>(
     ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId),
     {
       baseUrl: DEFAULT_API_BASE,
-      timeout: 30000, // 150 DUs × 12 months = large payload
+      timeout: 30000,
     },
   )
+
+  const remapped: AgDemandUnitDeliveryMonthlyResponse = {
+    scenario_id: raw.scenario_id,
+    demand_units: {},
+  }
+  for (const [duId, entry] of Object.entries(raw.demand_units ?? {})) {
+    const monthly = entry.monthly_sw_delivery ?? entry.monthly_delivery ?? {}
+    remapped.demand_units[duId] = {
+      agency: entry.agency,
+      hydrologic_region: entry.hydrologic_region,
+      cs3_type: entry.cs3_type,
+      provider: entry.provider,
+      monthly_delivery:
+        monthly as AgDemandUnitDeliveryMonthlyResponse["demand_units"][string]["monthly_delivery"],
+    }
+  }
+  return remapped
 }
 
 /**

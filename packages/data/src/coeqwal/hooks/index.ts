@@ -48,6 +48,7 @@ export {
 export {
   useAgAggregatesMonthly,
   useAgAggregatesPeriod,
+  useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,
   useAgDemandUnitsShortageMonthly,
   useAgDemandUnitsPeriod,

@@ -11,7 +11,14 @@
  */
 
 import React, { useState, useMemo, useEffect } from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  CircularProgress,
+  Button,
+} from "@repo/ui/mui"
+import { AddIcon } from "@repo/ui/mui"
 import { CompactSelect, MobileModal } from "@repo/ui"
 import { PercentileMatrix } from "@repo/viz"
 import type {
@@ -26,6 +33,7 @@ import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import {
+  useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,
   useAgDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
@@ -33,6 +41,7 @@ import type {
   AgAggregateData,
   AgAggregatePeriodSummary,
   AgDemandUnitDeliveryData,
+  AgDemandUnitListItem,
   AgDemandUnitPeriodSummary,
   CwsDeliveryMonthlyStats,
   BatchStatisticsResponse,
@@ -45,6 +54,8 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import { useHydroclimateAvailability } from "../../../scenarios/hooks"
+import { HydroclimateUnavailablePlaceholder } from "../../../scenarios/components/HydroclimateUnavailablePlaceholder"
 import { SectionHeader } from "./SectionHeader"
 
 // ============================================================================
@@ -59,28 +70,17 @@ const AG_TIER_METRIC = getMetricsByCategory("agricultural-water").find(
   (m) => m.isTier,
 )
 
-/** Entity level for AG data */
-type AgEntityLevel = "aggregates" | "demand-units"
-
-/** Region filter for demand units */
-type AgRegionFilter = "all" | "SAC" | "SJR" | "TULARE"
-
-const _AG_ENTITY_LEVEL_OPTIONS = [
-  { value: "aggregates" as const, label: "Project totals" },
-  { value: "demand-units" as const, label: "Demand units" },
-]
-
 const AG_SCALE_OPTIONS = [
   { value: "absolute" as const, label: "Absolute scale" },
   { value: "relative" as const, label: "Relative scale" },
 ]
 
-const _AG_REGION_OPTIONS = [
-  { value: "all" as const, label: "All regions" },
-  { value: "SAC" as const, label: "Sacramento" },
-  { value: "SJR" as const, label: "San Joaquin" },
-  { value: "TULARE" as const, label: "Tulare" },
-]
+/** Human-readable label for each hydrologic region code */
+const AG_REGION_LABELS: Record<string, string> = {
+  SAC: "Sacramento",
+  SJR: "San Joaquin",
+  TULARE: "Tulare",
+}
 
 /** Color scheme for delivery percentile bands (blue) */
 const DELIVERY_BAND_COLORS = {
@@ -177,6 +177,10 @@ function DeliveryBandsLegend() {
 interface AgTierChartsProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Sibling-group ids with no variant for the active hydroclimate */
+  missingSet: Set<string>
+  /** Active hydroclimate value, used to label the missing-variant placeholder */
+  hydroclimate: string
   /** Whether this is inside a modal (affects tooltip z-index) */
   isModal?: boolean
 }
@@ -184,6 +188,8 @@ interface AgTierChartsProps {
 function AgTierCharts({
   scenarios,
   scenarioNames,
+  missingSet,
+  hydroclimate,
   isModal = false,
 }: AgTierChartsProps) {
   const theme = useTheme()
@@ -197,6 +203,27 @@ function AgTierCharts({
   return (
     <>
       {scenarios.map((scenarioId, index) => {
+        if (missingSet.has(scenarioId)) {
+          return (
+            <Box
+              key={scenarioId}
+              sx={{
+                gridColumn: index + 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: TIER_CHART_SIZE,
+              }}
+            >
+              <HydroclimateUnavailablePlaceholder
+                hydroclimate={hydroclimate}
+                groupId={scenarioId}
+                variant="inline"
+              />
+            </Box>
+          )
+        }
+
         if (isLoading) {
           return (
             <Box
@@ -471,12 +498,22 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
 
     Object.entries(periodResult.demandUnits).forEach(
       ([duId, summary]: [string, AgDemandUnitPeriodSummary]) => {
+        // `annual_sw_delivery_avg_taf` is the average annual surface-water
+        // delivery. We display it as the cell's "TAF/yr" line because that's
+        // the same quantity the monthly bands above show
+        const swDeliveryAvg = summary.annual_sw_delivery_avg_taf ?? undefined
+
+        // `reliability_pct` is precomputed by the backend as
+        // (annual_demand - annual_shortage) / annual_demand × 100,
+        // i.e. average % of demand met across the simulation period
+        const reliabilityPct = summary.reliability_pct ?? undefined
+
         if (!entityMap[duId]) {
           entityMap[duId] = {
             shortCode: duId,
             label: summary.agency,
-            annualDeliveryAvg: summary.annual_delivery_avg_taf,
-            reliabilityPct: summary.reliability_pct,
+            annualDeliveryAvg: swDeliveryAvg,
+            reliabilityPct,
             hydrologicRegion: summary.hydrologic_region,
           }
         }
@@ -484,17 +521,9 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
         if (!cellStats[duId]) {
           cellStats[duId] = {}
         }
-        // P95 delivery fulfillment = delivery exceeded in 95% of years / annual demand × 100.
-        // Matches the environmental-water convention (100 − shortage_pct_95). Higher = better.
-        const p95Demand = summary.annual_demand_avg_taf
-        const p95Delivery = summary.delivery_exceedance?.["p95"]
-        const p95Fulfillment =
-          p95Delivery !== undefined && p95Demand != null && p95Demand > 0
-            ? Math.min(100, (p95Delivery / p95Demand) * 100)
-            : undefined
         cellStats[duId][scenarioId] = {
-          annualAvgTaf: summary.annual_delivery_avg_taf,
-          reliabilityPct: p95Fulfillment,
+          annualAvgTaf: swDeliveryAvg,
+          reliabilityPct,
         }
       },
     )
@@ -539,44 +568,102 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
 }
 
 /**
- * Combined hook that delegates to the appropriate entity-level hook.
+ * Combined hook for the monthly AG matrix.
  *
- * The "aggregates" view sources from the batched response (`agBatch`).
- * The "demand-units" view still fans out per scenario because the batch
- * API doesn't cover AG demand units.
+ * Project aggregates source from the batched response (`agBatch`). When
+ * `additionalDemandUnitIds` has entries, those specific demand-unit rows
+ * are spliced in on top of the aggregates rows, using data from the
+ * per-scenario demand-units fetch. The fan-out fetch only runs when at
+ * least one DU has been added.
  */
 function useMultiScenarioAgData(
   scenarios: string[],
-  entityLevel: AgEntityLevel,
   agBatch: Record<string, BatchAgData> | undefined,
   isBatchLoading: boolean,
+  additionalDemandUnitIds: string[],
+  addedDemandUnitsList: AgDemandUnitListItem[],
 ) {
   const aggregatesData = useMemo(
     () => buildAgAggregatesData(scenarios, agBatch),
     [scenarios, agBatch],
   )
-  const demandUnitsData = useMultiScenarioAgDemandUnits(scenarios)
 
-  switch (entityLevel) {
-    case "demand-units":
+  const hasAddedDus = additionalDemandUnitIds.length > 0
+  const demandUnitsData = useMultiScenarioAgDemandUnits(
+    hasAddedDus ? scenarios : [],
+  )
+
+  // Build the added-DU subset (entities + matrix + cell stats) from the fan-out
+  // response, restricted to the ids the user picked. Falls back to a stub
+  // entity row sourced from the list endpoint so the row appears immediately,
+  // before per-scenario data arrives
+  const added = useMemo(() => {
+    if (!hasAddedDus) {
       return {
-        entities: demandUnitsData.entities,
-        matrixData: demandUnitsData.matrixData,
-        cellStats: demandUnitsData.cellStats,
-        isLoading: demandUnitsData.isLoading,
-        error: demandUnitsData.error,
-        loadingScenarios: demandUnitsData.loadingScenarios,
+        entities: [] as EntityInfo[],
+        matrixData: {} as MatrixDataType,
+        cellStats: {} as CellStatsMap,
       }
-    case "aggregates":
-    default:
-      return {
-        entities: aggregatesData.entities,
-        matrixData: aggregatesData.matrixData,
-        cellStats: aggregatesData.cellStats,
-        isLoading: isBatchLoading,
-        error: null,
-        loadingScenarios: isBatchLoading ? scenarios : [],
+    }
+
+    const idSet = new Set(additionalDemandUnitIds)
+    const entities: EntityInfo[] = []
+    const matrixData: MatrixDataType = {}
+    const cellStats: CellStatsMap = {}
+
+    additionalDemandUnitIds.forEach((duId) => {
+      const fromFanOut = demandUnitsData.entities.find(
+        (e) => e.shortCode === duId,
+      )
+      if (fromFanOut) {
+        entities.push(fromFanOut)
+      } else {
+        const fromList = addedDemandUnitsList.find((du) => du.du_id === duId)
+        entities.push({
+          shortCode: duId,
+          label: fromList?.agency ?? duId,
+          hydrologicRegion: fromList?.hydrologic_region ?? null,
+        })
       }
+      if (demandUnitsData.matrixData[duId]) {
+        matrixData[duId] = demandUnitsData.matrixData[duId]
+      }
+      if (demandUnitsData.cellStats[duId]) {
+        cellStats[duId] = demandUnitsData.cellStats[duId]
+      }
+    })
+
+    return { entities, matrixData, cellStats }
+  }, [
+    hasAddedDus,
+    additionalDemandUnitIds,
+    addedDemandUnitsList,
+    demandUnitsData.entities,
+    demandUnitsData.matrixData,
+    demandUnitsData.cellStats,
+  ])
+
+  if (!hasAddedDus) {
+    return {
+      entities: aggregatesData.entities,
+      matrixData: aggregatesData.matrixData,
+      cellStats: aggregatesData.cellStats,
+      isLoading: isBatchLoading,
+      error: null,
+      loadingScenarios: isBatchLoading ? scenarios : [],
+    }
+  }
+
+  // Added DUs render at the top, aggregates below
+  return {
+    entities: [...added.entities, ...aggregatesData.entities],
+    matrixData: { ...aggregatesData.matrixData, ...added.matrixData },
+    cellStats: { ...aggregatesData.cellStats, ...added.cellStats },
+    isLoading: isBatchLoading || demandUnitsData.isLoading,
+    error: demandUnitsData.error,
+    loadingScenarios: isBatchLoading
+      ? scenarios
+      : demandUnitsData.loadingScenarios,
   }
 }
 
@@ -602,15 +689,26 @@ function MonthlyAgSection({
   isModal = false,
 }: MonthlyAgSectionProps) {
   const theme = useTheme()
-  const [entityLevel, _setEntityLevel] = useState<AgEntityLevel>("aggregates")
   const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
-  const [regionFilter, _setRegionFilter] = useState<AgRegionFilter>("all")
+  const [selectedDemandUnit, setSelectedDemandUnit] = useState<string>("")
+  const [additionalDemandUnits, setAdditionalDemandUnits] = useState<string[]>(
+    [],
+  )
+
+  const { demandUnits: demandUnitsList, isLoading: demandUnitsLoading } =
+    useAgDemandUnitsList()
 
   const { entities, matrixData, cellStats, error, loadingScenarios } =
-    useMultiScenarioAgData(scenarios, entityLevel, agBatch, isBatchLoading)
+    useMultiScenarioAgData(
+      scenarios,
+      agBatch,
+      isBatchLoading,
+      additionalDemandUnits,
+      demandUnitsList,
+    )
 
-  // Track when data arrives - set true when entities load, false when empty
-  // (e.g., switching entity level before data loads)
+  // Track when data arrives. We flip false once entities are empty so the
+  // skeleton can re-appear if scenarios change
   const [hasReceivedData, setHasReceivedData] = useState(false)
   useEffect(() => {
     if (entities.length > 0) {
@@ -620,32 +718,68 @@ function MonthlyAgSection({
     }
   }, [entities.length])
 
-  // Filter entities by region
-  const filteredEntities = useMemo(() => {
-    if (entityLevel === "demand-units" && regionFilter !== "all") {
-      return entities.filter((e) => e.hydrologicRegion === regionFilter)
-    }
-    return entities
-  }, [entities, entityLevel, regionFilter])
+  // Group options for the "Add a demand unit" CompactSelect: by hydrologic
+  // region (Sacramento / San Joaquin / Tulare / Other), with already-added
+  // ids removed. Label format is "Agency (du_id)" to disambiguate
+  const demandUnitGroups = useMemo(() => {
+    if (demandUnitsList.length === 0) return []
+    const excludedIds = new Set(additionalDemandUnits)
 
-  // Convert to PercentileMatrix format
+    const groupedByRegion: Record<string, AgDemandUnitListItem[]> = {}
+    demandUnitsList.forEach((du) => {
+      if (!du || !du.du_id) return
+      const regionLabel = du.hydrologic_region
+        ? (AG_REGION_LABELS[du.hydrologic_region] ?? du.hydrologic_region)
+        : "Other"
+      if (!groupedByRegion[regionLabel]) {
+        groupedByRegion[regionLabel] = []
+      }
+      groupedByRegion[regionLabel].push(du)
+    })
+
+    return Object.entries(groupedByRegion)
+      .map(([regionLabel, units]) => ({
+        label: regionLabel,
+        options: units
+          .filter((du) => !excludedIds.has(du.du_id))
+          .map((du) => ({
+            value: du.du_id,
+            label: `${du.agency ?? du.du_id} (${du.du_id})`,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label)),
+      }))
+      .filter((g) => g.options.length > 0)
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [demandUnitsList, additionalDemandUnits])
+
+  const handleAddDemandUnit = () => {
+    if (
+      selectedDemandUnit &&
+      !additionalDemandUnits.includes(selectedDemandUnit)
+    ) {
+      setAdditionalDemandUnits((prev) => [...prev, selectedDemandUnit])
+      setSelectedDemandUnit("")
+    }
+  }
+
+  const handleRemoveDemandUnit = (duId: string) => {
+    setAdditionalDemandUnits((prev) => prev.filter((id) => id !== duId))
+  }
+
   const reservoirData: ReservoirData[] = useMemo(
     () =>
-      filteredEntities.map((entity) => ({
+      entities.map((entity) => ({
         reservoirId: entity.shortCode,
         reservoirName: entity.label,
         capacityTaf: 0,
         deadPoolTaf: 0,
       })),
-    [filteredEntities],
+    [entities],
   )
-
-  // matrixData is already in the correct format for PercentileMatrix
-  const percentileData = matrixData
 
   return (
     <>
-      {/* Header row */}
+      {/* Header row: title/legend on the left, "add a demand unit" controls on the right */}
       <Box
         sx={{
           gridColumn: "1 / -1",
@@ -665,12 +799,9 @@ function MonthlyAgSection({
                 gap: theme.space.gap.sm,
               }}
             >
-              <Typography variant="compactCaption" sx={{ fontWeight: 500 }}>
-                Project totals
-              </Typography>
               <Typography
                 variant="compactCaption"
-                sx={{ color: theme.palette.grey[500], ml: theme.space.gap.sm }}
+                sx={{ color: theme.palette.grey[500] }}
               >
                 shown on
               </Typography>
@@ -686,8 +817,7 @@ function MonthlyAgSection({
           description={
             <>
               Water year (Oct-Sep) · {scenarios.length} scenario
-              {scenarios.length !== 1 ? "s" : ""} · {filteredEntities.length}{" "}
-              project aggregates
+              {scenarios.length !== 1 ? "s" : ""}
               <Box
                 component="span"
                 sx={{
@@ -733,22 +863,128 @@ function MonthlyAgSection({
             </>
           }
         />
+
+        {/* Add demand unit controls */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.gap.sm,
+          }}
+        >
+          <CompactSelect
+            value={selectedDemandUnit}
+            onChange={setSelectedDemandUnit}
+            groups={demandUnitGroups}
+            placeholder="add a demand unit"
+            disabled={demandUnitsLoading}
+            minWidth={220}
+            maxMenuHeight={400}
+            aria-label="Select demand unit to add"
+            menuZIndex={isModal ? 9999 : undefined}
+          />
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+            onClick={handleAddDemandUnit}
+            disabled={!selectedDemandUnit}
+            sx={{
+              ...theme.typography.dashboard,
+              textTransform: "none",
+              color: selectedDemandUnit
+                ? theme.palette.blue.dark
+                : theme.palette.grey[400],
+              px: theme.space.component.md,
+              "&:hover": {
+                backgroundColor: theme.palette.blue.pale,
+              },
+              "&.Mui-disabled": {
+                color: theme.palette.grey[300],
+              },
+            }}
+          >
+            Add
+          </Button>
+        </Box>
       </Box>
 
-      {/* Loading state with skeleton - show until we've received data */}
+      {/* Added demand-unit chips */}
+      {additionalDemandUnits.length > 0 && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1,
+            mb: theme.space.component.sm,
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{
+              color: theme.palette.grey[500],
+              mr: 0.5,
+              alignSelf: "center",
+            }}
+          >
+            Added:
+          </Typography>
+          {additionalDemandUnits.map((id) => {
+            const du = demandUnitsList.find((d) => d.du_id === id)
+            const label = du?.agency ?? id
+            return (
+              <Box
+                key={id}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  backgroundColor: theme.palette.grey[100],
+                  borderRadius: theme.borderRadius.sm,
+                  fontSize: "0.75rem",
+                }}
+              >
+                {label}
+                <Box
+                  component="button"
+                  onClick={() => handleRemoveDemandUnit(id)}
+                  sx={{
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    color: theme.palette.grey[500],
+                    "&:hover": { color: theme.palette.grey[700] },
+                  }}
+                  aria-label={`Remove ${label}`}
+                >
+                  ×
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* Loading state with skeleton. Five aggregate rows plus any added DUs */}
       {!hasReceivedData && !error && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrixSkeleton
             scenarios={scenarios}
-            rowCount={entityLevel === "aggregates" ? 5 : 8}
+            rowCount={5 + additionalDemandUnits.length}
             message="Loading AG data..."
             labelColumnWidth={140}
           />
         </Box>
       )}
 
-      {/* Error state - only show if no data at all */}
-      {error && filteredEntities.length === 0 && (
+      {/* Error state, only when there's nothing to show */}
+      {error && entities.length === 0 && (
         <Box
           sx={{
             gridColumn: "1 / -1",
@@ -767,40 +1003,14 @@ function MonthlyAgSection({
         </Box>
       )}
 
-      {/* Empty state for filtered demand units */}
-      {hasReceivedData &&
-        filteredEntities.length === 0 &&
-        !error &&
-        entityLevel === "demand-units" && (
-          <Box
-            sx={{
-              gridColumn: "1 / -1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: 200,
-              backgroundColor: theme.palette.grey[50],
-              borderRadius: theme.borderRadius.sm,
-              border: `1px dashed ${theme.palette.grey[300]}`,
-            }}
-          >
-            <Typography
-              variant="compactCaption"
-              sx={{ color: theme.palette.grey[400] }}
-            >
-              No demand units found for the selected region.
-            </Typography>
-          </Box>
-        )}
-
-      {/* Matrix visualization - show once we've received data */}
-      {hasReceivedData && filteredEntities.length > 0 && (
+      {/* Matrix */}
+      {hasReceivedData && entities.length > 0 && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrix
             reservoirs={reservoirData}
             scenarios={scenarios}
             scenarioNames={scenarioNames}
-            data={percentileData}
+            data={matrixData}
             responsive
             labelColumnWidth={140}
             showScenarioHeaders={false}
@@ -838,6 +1048,14 @@ export default function AgSection({
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const agBatch = batchData?.ag
+
+  // Columns whose sibling-group id has no scenario variant for the active
+  // hydroclimate. Used to swap the per-column tier glyph for the inline
+  // placeholder, and to surface a small "Unavailable" strip above the
+  // monthly-deliveries block. Stays empty in production today since every
+  // group has all three variants
+  const { missing, hydroclimate } = useHydroclimateAvailability(scenarios)
+  const missingSet = useMemo(() => new Set(missing), [missing])
 
   return (
     <>
@@ -882,7 +1100,12 @@ export default function AgSection({
                 description="134 agricultural demand units"
               />
             </Box>
-            <AgTierCharts scenarios={scenarios} scenarioNames={scenarioNames} />
+            <AgTierCharts
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+              missingSet={missingSet}
+              hydroclimate={hydroclimate}
+            />
           </ChartGridProvider>
         </Box>
 
@@ -896,6 +1119,32 @@ export default function AgSection({
             p: theme.space.component.lg,
           }}
         >
+          {missing.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: theme.space.gap.sm,
+                mb: theme.space.component.sm,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ color: theme.palette.grey[600] }}
+              >
+                Unavailable in this hydroclimate:
+              </Typography>
+              {missing.map((groupId) => (
+                <HydroclimateUnavailablePlaceholder
+                  key={groupId}
+                  hydroclimate={hydroclimate}
+                  groupId={groupId}
+                  variant="inline"
+                />
+              ))}
+            </Box>
+          )}
           <ChartGridProvider scenarios={scenarios}>
             <MonthlyAgSection
               scenarios={scenarios}
@@ -982,6 +1231,8 @@ export default function AgSection({
               <AgTierCharts
                 scenarios={scenarios}
                 scenarioNames={scenarioNames}
+                missingSet={missingSet}
+                hydroclimate={hydroclimate}
                 isModal
               />
             </ChartGridProvider>
@@ -997,6 +1248,32 @@ export default function AgSection({
               p: theme.space.component.lg,
             }}
           >
+            {missing.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: theme.space.gap.sm,
+                  mb: theme.space.component.sm,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[600] }}
+                >
+                  Unavailable in this hydroclimate:
+                </Typography>
+                {missing.map((groupId) => (
+                  <HydroclimateUnavailablePlaceholder
+                    key={groupId}
+                    hydroclimate={hydroclimate}
+                    groupId={groupId}
+                    variant="inline"
+                  />
+                ))}
+              </Box>
+            )}
             <ChartGridProvider scenarios={scenarios}>
               <MonthlyAgSection
                 scenarios={scenarios}

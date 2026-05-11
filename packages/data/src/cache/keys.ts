@@ -246,11 +246,31 @@ export const CACHE_KEYS = {
   // AG Demand Units cache keys (150 agricultural demand units)
 
   /**
-   * Monthly delivery statistics for AG demand units
+   * List of AG demand-unit entities with optional filters
+   * @param filters - Optional region / cs3_type / provider filters
+   */
+  agDemandUnitsList: (filters?: {
+    region?: string
+    cs3_type?: string
+    provider?: string
+  }) => {
+    const params = [
+      filters?.region && `region=${filters.region}`,
+      filters?.cs3_type != null && `cs3_type=${filters.cs3_type}`,
+      filters?.provider && `provider=${filters.provider}`,
+    ]
+      .filter(Boolean)
+      .join("&")
+    return `/api/statistics/ag-demand-units${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Monthly surface-water delivery statistics for AG demand units.
+   * Matches the backend's `sw-delivery-monthly` route
    * @param scenarioId - Scenario ID
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/delivery-monthly`,
+    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly`,
 
   /**
    * Monthly shortage statistics for AG demand units
