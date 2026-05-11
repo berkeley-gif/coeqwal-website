@@ -52,7 +52,13 @@ export interface ResolvedIdMapping {
   reverseMap: Map<string, string>
 }
 
-/** Pure resolver: sibling-group id -> short_code for the given hydroclimate */
+/**
+ * Pure resolver: sibling-group id -> variant short_code, or `null` if no
+ * variant exists for this hydroclimate
+ *
+ * Callers must treat `null` as "data not available for this hydroclimate"
+ * and render a placeholder. Do not substitute another variant's data.
+ */
 function resolveMapping(
   siblingGroups: readonly Scenario[],
   variantMap: ReadonlyMap<string, Record<number, string>>,
@@ -63,8 +69,7 @@ function resolveMapping(
   for (const group of siblingGroups) {
     const variants = variantMap.get(group.siblingGroup)
     if (!variants) continue
-    mapping[group.scenarioId] =
-      variants[hcId] ?? variants[HISTORICAL_HC_ID] ?? group.scenarioId
+    mapping[group.scenarioId] = variants[hcId] ?? null
   }
   return mapping
 }
@@ -90,12 +95,44 @@ function buildResolved(
       reverseMap.set(resolved, groupId)
     }
   }
-  return {
+  const result: ResolvedIdMapping = {
     hydroclimate,
     idMapping,
     resolvedIds,
     missingScenarioIds,
     reverseMap,
+  }
+  maybeLogResolution(result)
+  return result
+}
+
+/**
+ * Dev-only diagnostic logger
+ *
+ * Prints one line per (hydroclimate, mapping) pair the first time we see
+ * it. Spot-check by switching hydroclimates in the chooser and watching
+ * for a fresh line per switch.
+ *
+ * `console.warn` is used when any sibling group has no variant for the
+ * active hydroclimate so the missing-data path is impossible to miss.
+ */
+const lastLoggedByHc: Record<string, string> = {}
+function maybeLogResolution(r: ResolvedIdMapping): void {
+  if (process.env.NODE_ENV !== "development") return
+  if (r.resolvedIds.length === 0 && r.missingScenarioIds.length === 0) return
+  const fingerprint = JSON.stringify(r.idMapping)
+  if (lastLoggedByHc[r.hydroclimate] === fingerprint) return
+  lastLoggedByHc[r.hydroclimate] = fingerprint
+
+  const tag = `[hydroclimate:${r.hydroclimate}]`
+  const summary = `${r.resolvedIds.length} resolved, ${r.missingScenarioIds.length} missing`
+  if (r.missingScenarioIds.length > 0) {
+    console.warn(`${tag} ${summary}`, {
+      missing: r.missingScenarioIds,
+      mapping: r.idMapping,
+    })
+  } else {
+    console.log(`${tag} ${summary}`, r.idMapping)
   }
 }
 

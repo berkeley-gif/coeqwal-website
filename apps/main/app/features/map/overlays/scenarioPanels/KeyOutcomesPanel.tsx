@@ -46,9 +46,11 @@ export function KeyOutcomesPanel({
 
   // Resolve the sibling-group scenarioId (e.g. "s0020") to the per-hydroclimate
   // variant short_code so the bar chart tiers reflect the user's hydroclimate
-  // selection in the KeyOperationsPanel above.
+  // selection in the KeyOperationsPanel above. `null` means this sibling
+  // group has no variant for the active hydroclimate, in which case
+  // `useScenarioTiers` no-ops and the bar chart renders empty.
   const { idMapping } = useResolvedIdMapping()
-  const resolvedScenarioId = idMapping[scenarioId] ?? scenarioId
+  const resolvedScenarioId = idMapping[scenarioId] ?? null
 
   // Warm SWR for every hydroclimate variant so switching climates never
   // triggers a round-trip (and therefore never flashes "no data").

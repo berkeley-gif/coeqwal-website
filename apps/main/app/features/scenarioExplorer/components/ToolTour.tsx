@@ -472,7 +472,8 @@ export default function ToolTour() {
       const scenarioId = el.dataset.tourScenarioId
       const outcomeCode = el.dataset.tourOutcomeCode
       if (!scenarioId || !outcomeCode) return
-      const resolvedId = hcIdMapping[scenarioId] ?? scenarioId
+      const resolvedId = hcIdMapping[scenarioId]
+      if (resolvedId == null) return
       const current = useMapStore.getState().activeOutcomeVisualization
       if (!current || current.outcomeCode !== outcomeCode) {
         mapActions.clearMapTooltips()

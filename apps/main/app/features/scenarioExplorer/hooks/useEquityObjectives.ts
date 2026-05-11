@@ -39,9 +39,13 @@ export function useEquityObjectives({
 }: UseEquityObjectivesInput): UseEquityObjectivesResult {
   const { outcomeNames, idMapping } = useResolvedScenarioTiers()
 
-  const baselineScenario = idMapping[BASELINE_SCENARIO] || BASELINE_SCENARIO
+  // `null` here means the sibling group has no variant for the active
+  // hydroclimate. `useTierLocationAssignments` no-ops on `null`, so the
+  // assembled tier data is empty and the equity panel renders a "no data"
+  // state.
+  const baselineScenario = idMapping[BASELINE_SCENARIO] ?? null
   const currentScenario = scenarioId
-    ? idMapping[scenarioId] || scenarioId
+    ? (idMapping[scenarioId] ?? null)
     : baselineScenario
 
   // Per-outcome tier queries. SWR shares cached responses across the

@@ -83,7 +83,8 @@ export function useMapVisualizationAction() {
   const showOnMapForGroup = useCallback(
     (outcomeCode: string, siblingGroupId: string) => {
       if (!isMapVisible) return
-      const resolvedId = idMapping[siblingGroupId] ?? siblingGroupId
+      const resolvedId = idMapping[siblingGroupId]
+      if (resolvedId == null) return
 
       // Only clear pinned tooltips when the outcome changes. When switching
       // scenarios within the same outcome, tooltips stay and update their
@@ -116,7 +117,8 @@ export function useMapVisualizationAction() {
     if (!isMapVisible || selectedScenarios.length === 0) return
 
     for (const siblingGroupId of selectedScenarios) {
-      const resolvedId = idMapping[siblingGroupId] ?? siblingGroupId
+      const resolvedId = idMapping[siblingGroupId]
+      if (resolvedId == null) continue
       preload(
         CACHE_KEYS.tierLocationsBatch(resolvedId, PREFETCHABLE_TIER_CODES),
         () =>
