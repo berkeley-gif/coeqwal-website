@@ -3,14 +3,14 @@
 import { useCallback, useEffect } from "react"
 import { preload } from "swr"
 import { useScenarioExplorerStore } from "../../scenarioExplorer/store"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import {
+  useResolvedIdMapping,
+  useResolvedIdMappings,
+} from "../../scenarios/hooks"
 import { mapActions, useMapMode, useMapStore } from "../store"
 import { OUTCOME_LAYER_REGISTRY } from "../config/outcomeLayerRegistry"
 import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
-import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
-
-const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 // Only multi-value outcomes need prefetching via /locations - single-value
 // outcomes are served by SWR and shared with the glyph cache.
@@ -34,13 +34,13 @@ const PREFETCHABLE_TIER_CODES: string[] = Object.entries(OUTCOME_LAYER_REGISTRY)
  */
 export function useMapVisualizationAction() {
   const showMap = useScenarioExplorerStore((s) => s.showMap)
-  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
   const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
   const mapMode = useMapMode()
   const isMapVisible =
     showMap || mapMode === "learn" || mapMode === "get-started"
 
-  const { buildIdMapping } = useScenarioList()
+  const { idMapping } = useResolvedIdMapping()
+  const allMappings = useResolvedIdMappings()
 
   /** Fixed-scenario entry point (Learn section). */
   const showOnMap = useCallback(
@@ -65,9 +65,8 @@ export function useMapVisualizationAction() {
   const prefetchAllOutcomesForScenario = useCallback(
     (resolvedScenarioId: string, siblingGroupId: string) => {
       const ids = new Set<string>([resolvedScenarioId])
-      for (const hc of ALL_HYDROCLIMATES) {
-        const mapping = buildIdMapping(hc)
-        const resolved = mapping[siblingGroupId]
+      for (const { idMapping: hcMapping } of Object.values(allMappings)) {
+        const resolved = hcMapping[siblingGroupId]
         if (resolved) ids.add(resolved)
       }
       for (const id of ids) {
@@ -77,15 +76,14 @@ export function useMapVisualizationAction() {
         ).catch(() => {})
       }
     },
-    [buildIdMapping],
+    [allMappings],
   )
 
   /** Hydroclimate-aware entry point (list view / explore tools). */
   const showOnMapForGroup = useCallback(
     (outcomeCode: string, siblingGroupId: string) => {
       if (!isMapVisible) return
-      const mapping = buildIdMapping(hydroclimate)
-      const resolvedId = mapping[siblingGroupId] ?? siblingGroupId
+      const resolvedId = idMapping[siblingGroupId] ?? siblingGroupId
 
       // Only clear pinned tooltips when the outcome changes. When switching
       // scenarios within the same outcome, tooltips stay and update their
@@ -102,12 +100,7 @@ export function useMapVisualizationAction() {
       )
       prefetchAllOutcomesForScenario(resolvedId, siblingGroupId)
     },
-    [
-      isMapVisible,
-      buildIdMapping,
-      hydroclimate,
-      prefetchAllOutcomesForScenario,
-    ],
+    [isMapVisible, idMapping, prefetchAllOutcomesForScenario],
   )
 
   const clearMap = useCallback(() => {
@@ -122,9 +115,8 @@ export function useMapVisualizationAction() {
   useEffect(() => {
     if (!isMapVisible || selectedScenarios.length === 0) return
 
-    const mapping = buildIdMapping(hydroclimate)
     for (const siblingGroupId of selectedScenarios) {
-      const resolvedId = mapping[siblingGroupId] ?? siblingGroupId
+      const resolvedId = idMapping[siblingGroupId] ?? siblingGroupId
       preload(
         CACHE_KEYS.tierLocationsBatch(resolvedId, PREFETCHABLE_TIER_CODES),
         () =>
@@ -134,7 +126,7 @@ export function useMapVisualizationAction() {
           ),
       ).catch(() => {})
     }
-  }, [isMapVisible, selectedScenarios, hydroclimate, buildIdMapping])
+  }, [isMapVisible, selectedScenarios, idMapping])
 
   // Re-resolve the stored scenarioId when hydroclimate changes.
   const activeVisualization = useMapStore((s) => s.activeOutcomeVisualization)
@@ -142,8 +134,7 @@ export function useMapVisualizationAction() {
   useEffect(() => {
     if (!activeVisualization?.siblingGroupId) return
 
-    const mapping = buildIdMapping(hydroclimate)
-    const newResolvedId = mapping[activeVisualization.siblingGroupId]
+    const newResolvedId = idMapping[activeVisualization.siblingGroupId]
     if (newResolvedId && newResolvedId !== activeVisualization.scenarioId) {
       mapActions.setOutcomeVisualization(
         activeVisualization.outcomeCode,
@@ -151,7 +142,7 @@ export function useMapVisualizationAction() {
         activeVisualization.siblingGroupId,
       )
     }
-  }, [hydroclimate, activeVisualization, buildIdMapping])
+  }, [activeVisualization, idMapping])
 
   return { showOnMap, showOnMapForGroup, clearMap, isMapVisible }
 }

@@ -28,6 +28,7 @@ import type {
 } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import { useResolvedIdMappings } from "../../scenarios/hooks/useResolvedIdMapping"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
@@ -77,7 +78,8 @@ export function useResilienceLoiSensitivity({
   scopeScenarioIds,
 }: UseResilienceLoiSensitivityOptions): UseResilienceLoiSensitivityResult {
   const effectiveOpsRefHc = opsRefHc ?? climateRefHc
-  const { siblingGroups, buildIdMapping } = useScenarioList()
+  const { siblingGroups } = useScenarioList()
+  const allMappings = useResolvedIdMappings()
 
   const [perScenario, setPerScenario] = useState<PerScenarioByHc>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -85,9 +87,9 @@ export function useResilienceLoiSensitivity({
 
   const lastKeyRef = useRef<string | null>(null)
 
-  // Snapshot mapping per HC once and iterate. buildIdMapping is stable
-  // across renders as long as variantMap is stable, so we memoize only
-  // the things that actually change.
+  // Snapshot mapping per HC once and iterate. allMappings is stable
+  // across renders as long as variantMap is stable (it is memoized in
+  // useResolvedIdMappings), so we memoize only the things that actually change.
   const siblingGroupIds = useMemo(
     () => siblingGroups.map((s) => s.scenarioId),
     [siblingGroups],
@@ -110,10 +112,13 @@ export function useResilienceLoiSensitivity({
     setIsLoading(true)
     setError(null)
 
-    const mappings: Record<ResilienceHydroclimate, Record<string, string>> = {
-      historical: buildIdMapping("historical"),
-      cc50: buildIdMapping("cc50"),
-      cc95: buildIdMapping("cc95"),
+    const mappings: Record<
+      ResilienceHydroclimate,
+      Record<string, string | null>
+    > = {
+      historical: allMappings.historical?.idMapping ?? {},
+      cc50: allMappings.cc50?.idMapping ?? {},
+      cc95: allMappings.cc95?.idMapping ?? {},
     }
 
     // Use the batch endpoint even for a single outcome so the resulting
@@ -172,7 +177,7 @@ export function useResilienceLoiSensitivity({
     return () => {
       cancelled = true
     }
-  }, [outcomeCode, siblingGroupIds, buildIdMapping])
+  }, [outcomeCode, siblingGroupIds, allMappings])
 
   const scopeIds = useMemo<readonly string[]>(() => {
     if (scopeScenarioIds && scopeScenarioIds.length > 0) return scopeScenarioIds

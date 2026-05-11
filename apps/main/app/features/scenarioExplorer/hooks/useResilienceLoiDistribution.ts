@@ -24,6 +24,7 @@ import type {
 import { CACHE_KEYS } from "@repo/data/cache"
 import type { ResilienceGlyphEntry } from "@repo/viz"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import { useResolvedIdMappings } from "../../scenarios/hooks/useResolvedIdMapping"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
@@ -78,7 +79,8 @@ export function useResilienceLoiDistribution({
   scopeScenarioIds,
   enabled,
 }: UseResilienceLoiDistributionOptions): UseResilienceLoiDistributionResult {
-  const { siblingGroups, buildIdMapping } = useScenarioList()
+  const { siblingGroups } = useScenarioList()
+  const allMappings = useResolvedIdMappings()
 
   const [data, setData] = useState<PerScenarioByHcByOutcome>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -116,10 +118,13 @@ export function useResilienceLoiDistribution({
     setIsLoading(true)
     setError(null)
 
-    const mappings: Record<ResilienceHydroclimate, Record<string, string>> = {
-      historical: buildIdMapping("historical"),
-      cc50: buildIdMapping("cc50"),
-      cc95: buildIdMapping("cc95"),
+    const mappings: Record<
+      ResilienceHydroclimate,
+      Record<string, string | null>
+    > = {
+      historical: allMappings.historical?.idMapping ?? {},
+      cc50: allMappings.cc50?.idMapping ?? {},
+      cc95: allMappings.cc95?.idMapping ?? {},
     }
 
     // Batch per (scenario, hc): one HTTP call covers every outcomeCode
@@ -187,7 +192,7 @@ export function useResilienceLoiDistribution({
     outcomeCodes,
     hydroclimates,
     scopeIds,
-    buildIdMapping,
+    allMappings,
   ])
 
   const byCell = useMemo<LoiDistributionByCell>(() => {

@@ -18,3 +18,9 @@ export {
 } from "./useScenarioSummary"
 
 export { useScenarioList, type ScenarioListItem } from "./useScenarioList"
+
+export {
+  useResolvedIdMapping,
+  useResolvedIdMappings,
+  type ResolvedIdMapping,
+} from "./useResolvedIdMapping"

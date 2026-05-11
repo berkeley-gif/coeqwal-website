@@ -62,8 +62,9 @@ import {
   type OutcomeCode,
 } from "../../../content/outcomes"
 import {
-  hydroclimateOptions,
   HYDROCLIMATE_SHORT_LABELS,
+  HYDROCLIMATE_LABELS_BY_VALUE,
+  HYDROCLIMATE_DESCRIPTIONS_BY_VALUE,
 } from "../../../content/scenarios"
 import { getTierLabel } from "../../../content/tiers"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
@@ -294,13 +295,8 @@ interface ResiliencePanelProps {
   onTileShare?: (tileId: string) => void | Promise<boolean> | boolean
 }
 
-const HYDROCLIMATE_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
-  hydroclimateOptions.map((h) => [h.value, h.description]),
-)
-
-const HYDROCLIMATE_LABELS: Record<string, string> = Object.fromEntries(
-  hydroclimateOptions.map((h) => [h.value, h.label]),
-)
+const HYDROCLIMATE_DESCRIPTIONS = HYDROCLIMATE_DESCRIPTIONS_BY_VALUE
+const HYDROCLIMATE_LABELS = HYDROCLIMATE_LABELS_BY_VALUE
 
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
 

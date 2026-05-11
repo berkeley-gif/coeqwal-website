@@ -883,9 +883,10 @@ export default function TierAnimationSection() {
   // future multi-hydroclimate columns), so we deliberately ignore the global
   // `useScenarioExplorerStore.hydroclimate` value and do not expose an
   // in-storyboard hydroclimate chooser. If multi-hydroclimate playback is
-  // ever desired, reintroduce the store read here, the `buildIdMapping`
-  // resolution, the `useOutcomeTierOverrides` call below, and the
-  // `hydroclimate` / `onHydroclimateChange` props on `BeatTextOverlay`.
+  // ever desired, reintroduce the store read here, a `useResolvedIdMapping`
+  // call to translate the sibling-group id, the `useOutcomeTierOverrides`
+  // call below, and the `hydroclimate` / `onHydroclimateChange` props on
+  // `BeatTextOverlay`.
   const resolvedScenarioId = "s0020"
   const { chartData: tierChartData } = useScenarioTiers(resolvedScenarioId)
   // No per-location tier overrides are applied. Kept as an empty record so

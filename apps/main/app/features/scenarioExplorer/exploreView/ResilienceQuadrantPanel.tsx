@@ -43,7 +43,7 @@ import {
   getOutcomeName,
   type OutcomeCode,
 } from "../../../content/outcomes"
-import { hydroclimateOptions } from "../../../content/scenarios"
+import { HYDROCLIMATE_LABELS_BY_VALUE } from "../../../content/scenarios"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "../utils/scenarioIdSort"
 import type { ResilienceControlsState } from "./ResiliencePanel"
 import {
@@ -91,9 +91,7 @@ import type { ResilienceQuadrantCaptureFn } from "../share/capture/types"
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
 const CLIMATE_REF_HC: ResilienceHydroclimate = "cc95"
 
-const HYDROCLIMATE_LABELS: Record<string, string> = Object.fromEntries(
-  hydroclimateOptions.map((h) => [h.value, h.label]),
-)
+const HYDROCLIMATE_LABELS = HYDROCLIMATE_LABELS_BY_VALUE
 
 const NOD_SOD_SET = new Set<string>(NOD_SOD_OUTCOME_CODES)
 

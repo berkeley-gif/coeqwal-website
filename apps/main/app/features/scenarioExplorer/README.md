@@ -169,10 +169,10 @@ There is no separate hydroclimate API endpoint. The flow is:
 1. User picks a hydroclimate in `HydroclimateChooser` -> store's `hydroclimate` (e.g., `"historical"`)
 2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (e.g., `"historical"` -> `2`)
 3. `GET /api/scenarios` returns all 72+ scenarios, each with `hydroclimate_id` and `sibling_group`
-4. `buildIdMapping(hydroclimate)` resolves sibling group IDs -> actual scenario codes for the active hydroclimate
+4. `useResolvedIdMapping()` resolves sibling group IDs -> actual scenario codes for the active hydroclimate
 5. `useMultipleScenarioTiers(idMapping)` batch-fetches tier data for the resolved codes and re-keys results back to sibling group IDs
 
-You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-5 into a single hook call. See `packages/data/README.md` for details.
+You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-5 into a single hook call. For tools that need raw resolved IDs (e.g. statistics or batch endpoints that don't go through the tier hook), call `useResolvedIdMapping()` (or `useResolvedIdMappings()` for all hydroclimates at once) directly. See `packages/data/README.md` for details.
 
 ### Data hooks
 
@@ -197,9 +197,15 @@ import { useComparisonData } from "../hooks/useComparisonData"
 const { data, axes, lineColors, baselineScenario, isLoading } =
   useComparisonData()
 
-// Lower-level: scenario list with manual hydroclimate mapping (for advanced use cases)
+// Lower-level: scenario list (sibling group metadata, display helpers)
 import { useScenarioList } from "../../scenarios/hooks"
-const { siblingGroups, buildIdMapping, getDisplayName } = useScenarioList()
+const { siblingGroups, getDisplayName } = useScenarioList()
+
+// Lower-level: resolved IDs for the active hydroclimate
+// (use when you need to call a non-tier endpoint with hc-correct scenario codes)
+import { useResolvedIdMapping } from "../../scenarios/hooks"
+const { idMapping, resolvedIds, missingScenarioIds, reverseMap } =
+  useResolvedIdMapping()
 ```
 
 ## How to add a new tool

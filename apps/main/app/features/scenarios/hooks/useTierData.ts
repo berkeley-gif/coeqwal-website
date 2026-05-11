@@ -181,15 +181,23 @@ export function useScenarioTiers(scenarioId: string | null) {
 }
 
 /**
- * Fetch tier data for multiple scenarios.
+ * Fetch tier data for multiple scenarios in one batched request.
  *
- * @param idMapping - Optional mapping of display IDs to fetch IDs.
- *   When provided, fetches tier data for `Object.values(idMapping)` (the
- *   resolved short_codes for the active hydroclimate) and re-keys all output
- *   data structures using `Object.keys(idMapping)` (the sibling group IDs).
- *   When omitted, falls back to fetching all active scenario IDs directly.
+ * Most call sites should reach this through `useResolvedScenarioTiers`,
+ * which wires up the hydroclimate resolution for you.
+ *
+ * @param idMapping - sibling-group id -> resolved short_code (typically
+ *   from `useResolvedIdMapping().idMapping`). Output data is re-keyed
+ *   back to sibling-group ids so consumers index by group, not variant.
+ *   `null` values mark sibling groups with no variant for the active
+ *   hydroclimate. They are skipped (no fetch, not present in the output).
+ *
+ *   If omitted entirely, every active scenario id is fetched directly
+ *   with no re-keying. Used by tools that want raw variant data.
  */
-export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
+export function useMultipleScenarioTiers(
+  idMapping?: Record<string, string | null>,
+) {
   const theme = useTheme()
   const { mutate } = useSWRConfig()
 
@@ -205,10 +213,15 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     isLoading: tiersLoading,
   } = useTiers()
 
-  // When a mapping is provided, fetch only the resolved IDs (typically 24).
-  // Otherwise fall back to all active IDs (legacy behavior).
+  // With a mapping: fetch only the non-null resolved short_codes (one per
+  // sibling group, typically 24). Without a mapping: fetch every active
+  // scenario id. Null entries mark "no variant for this hydroclimate" and
+  // are skipped.
   const fetchIds = useMemo(
-    () => (idMapping ? Object.values(idMapping) : fallbackIds),
+    () =>
+      idMapping
+        ? Object.values(idMapping).filter((v): v is string => v != null)
+        : fallbackIds,
     [idMapping, fallbackIds],
   )
 
@@ -217,7 +230,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     if (!idMapping) return null
     const m = new Map<string, string>()
     Object.entries(idMapping).forEach(([groupId, resolvedId]) => {
-      m.set(resolvedId, groupId)
+      if (resolvedId != null) m.set(resolvedId, groupId)
     })
     return m
   }, [idMapping])

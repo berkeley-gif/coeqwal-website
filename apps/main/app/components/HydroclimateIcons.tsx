@@ -1,16 +1,16 @@
 "use client"
 
 /**
- * HydroclimateIcons - Colored hydroclimate icons packed inside a category circle
+ * Hydroclimate icons
  *
- * Renders the 6 hydroclimate MUI icons as small colored circles arranged
- * inside a container circle, matching the visual style of ScenarioDots.
+ * Renders each `hydroclimateOptions` entry as a small colored MUI icon in
+ * a grid
  */
 
 import React from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { hydroclimateOptions } from "../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../features/scenarios/components/HydroclimateChooser"
+import { HYDROCLIMATE_CONFIG } from "../features/scenarios/hydroclimateConfig"
 
 interface HydroclimateIconsProps {
   /** Diameter of the container circle in px */

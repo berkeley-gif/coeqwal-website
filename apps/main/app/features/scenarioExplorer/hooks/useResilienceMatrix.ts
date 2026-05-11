@@ -25,6 +25,7 @@ import {
   useScenarioList,
   type Scenario,
 } from "../../scenarios/hooks/useScenarioList"
+import { useResolvedIdMappings } from "../../scenarios/hooks/useResolvedIdMapping"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import type { OutcomeScoreData } from "../../scenarios/hooks/useTierData"
@@ -206,23 +207,19 @@ const NOD_SOD_SET = new Set<string>(NOD_SOD_OUTCOME_CODES)
  */
 export function useResilienceMatrix(): UseResilienceMatrixResult {
   const {
-    buildIdMapping,
     siblingGroups,
     getDisplayName,
     isLoading: scenariosLoading,
     error: scenariosError,
   } = useScenarioList()
 
-  const historicalMapping = useMemo(
-    () => buildIdMapping(HC_HISTORICAL),
-    [buildIdMapping],
-  )
-  const cc50Mapping = useMemo(() => buildIdMapping(HC_CC50), [buildIdMapping])
-  const cc95Mapping = useMemo(() => buildIdMapping(HC_CC95), [buildIdMapping])
+  const mappings = useResolvedIdMappings()
 
-  const historicalTiers = useMultipleScenarioTiers(historicalMapping)
-  const cc50Tiers = useMultipleScenarioTiers(cc50Mapping)
-  const cc95Tiers = useMultipleScenarioTiers(cc95Mapping)
+  const historicalTiers = useMultipleScenarioTiers(
+    mappings[HC_HISTORICAL]?.idMapping,
+  )
+  const cc50Tiers = useMultipleScenarioTiers(mappings[HC_CC50]?.idMapping)
+  const cc95Tiers = useMultipleScenarioTiers(mappings[HC_CC95]?.idMapping)
 
   const scenarioIds = useMemo(
     () => siblingGroups.map((s) => s.scenarioId),

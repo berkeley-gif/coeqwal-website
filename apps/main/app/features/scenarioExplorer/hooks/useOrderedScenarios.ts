@@ -13,7 +13,10 @@
 import { useMemo } from "react"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+import {
+  useMultipleScenarioTiers,
+  useResolvedIdMapping,
+} from "../../scenarios/hooks"
 import type { Scenario } from "../../scenarios/hooks/useScenarioList"
 import type { OutcomeScoreData } from "../../scenarios/hooks"
 import type { OutcomeName } from "../../scenarios/components/shared"
@@ -59,7 +62,6 @@ export function useOrderedScenarios(): OrderedScenariosResult {
   const {
     sortBy,
     sortDirection,
-    hydroclimate,
     pinnedScenarioIds,
     searchQuery,
     selectedTheme,
@@ -72,15 +74,11 @@ export function useOrderedScenarios(): OrderedScenariosResult {
 
   const {
     siblingGroups,
-    buildIdMapping,
     isLoading: scenariosLoading,
     error: scenariosError,
   } = useScenarioList()
 
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimate),
-    [buildIdMapping, hydroclimate],
-  )
+  const { idMapping } = useResolvedIdMapping()
 
   const {
     allChartData,

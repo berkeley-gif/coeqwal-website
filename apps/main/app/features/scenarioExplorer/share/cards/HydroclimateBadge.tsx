@@ -1,12 +1,21 @@
 "use client"
 
+/**
+ * Multi-line hydroclimate badge for share cards: label on top, description
+ * below, accent-tinted shell. Pass the hydroclimate value (e.g. `"cc50"`)
+ * and the rest is pulled from `hydroclimateOptions` + `HYDROCLIMATE_CONFIG`.
+ *
+ * For the single-line toolbar pill (title only, no description), use the
+ * `HydroclimateBadge` from `@repo/ui` with `getHydroclimateBadgeDisplay(hc)`
+ */
+
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   hydroclimateOptions,
   type HydroclimateOption,
 } from "../../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../../scenarios/components/HydroclimateChooser"
+import { HYDROCLIMATE_CONFIG } from "../../../scenarios/hydroclimateConfig"
 
 interface HydroclimateBadgeProps {
   hydroclimate?: string

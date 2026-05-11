@@ -1,7 +1,7 @@
 /**
  * Scenario metadata and static content
  *
- * Labels and descriptions come from the API. This file provides only
+ * Labels and descriptions come from the API. This file provides
  * theme assignment and icon paths, keyed by sibling_group (the historical
  * variant's short_code). Scenarios in the same sibling_group share the
  * same theme since they represent the same strategy under different
@@ -91,6 +91,11 @@ export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
   3: "cc50",
   4: "cc95",
 }
+
+/** The hydroclimate values the app supports so far: `"historical"`, `"cc50"`, `"cc95"` */
+export const ALL_HYDROCLIMATES: readonly string[] = Object.keys(
+  HYDROCLIMATE_ID_MAP,
+)
 
 export interface OperationIcon {
   path: string
@@ -394,3 +399,11 @@ export const HYDROCLIMATE_SHORT_LABELS: Record<string, string> = {
   cc50: "Moderate risk",
   cc95: "High risk",
 }
+
+/** Full display label keyed by hydroclimate value (e.g. `"historical"` -> `"Historical"`) */
+export const HYDROCLIMATE_LABELS_BY_VALUE: Record<string, string> =
+  Object.fromEntries(hydroclimateOptions.map((o) => [o.value, o.label]))
+
+/** Long-form description keyed by hydroclimate value (tooltips, info panels) */
+export const HYDROCLIMATE_DESCRIPTIONS_BY_VALUE: Record<string, string> =
+  Object.fromEntries(hydroclimateOptions.map((o) => [o.value, o.description]))

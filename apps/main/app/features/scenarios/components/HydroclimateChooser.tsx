@@ -1,50 +1,24 @@
 "use client"
 
 /**
- * HydroclimateChooser - Circular icon-based hydroclimate selector
+ * Hydroclimate selector UI
  *
- * Displays hydroclimate options as circular icons using MUI icons.
- * Currently only "Historical" is available, others are disabled.
+ * One icon per option in `hydroclimateOptions`, colored by `HYDROCLIMATE_CONFIG`.
+ * Options absent from `ALL_HYDROCLIMATES` (no scenario data) render greyed out
+ * and unclickable. Pass `disabledValues` to disable additional options.
  */
 
 import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  HistoryIcon,
-  WbSunnyIcon,
-  LocalFireDepartmentIcon,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, HistoryIcon } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
 import {
   hydroclimateOptions,
-  HYDROCLIMATE_ID_MAP,
+  ALL_HYDROCLIMATES,
 } from "../../../content/scenarios"
+import { HYDROCLIMATE_CONFIG } from "../hydroclimateConfig"
 
 /** Set of hydroclimate option values that have actual scenario data */
-const AVAILABLE_HYDROCLIMATES = new Set(Object.keys(HYDROCLIMATE_ID_MAP))
-
-export const HYDROCLIMATE_CONFIG: Record<
-  string,
-  {
-    icon: React.ElementType
-    bgColor: string
-  }
-> = {
-  historical: {
-    icon: HistoryIcon,
-    bgColor: "#2d89b7",
-  },
-  cc50: {
-    icon: WbSunnyIcon,
-    bgColor: "#e89830",
-  },
-  cc95: {
-    icon: LocalFireDepartmentIcon,
-    bgColor: "#c62828",
-  },
-}
+const AVAILABLE_HYDROCLIMATES = new Set(ALL_HYDROCLIMATES)
 
 interface HydroclimateChooserProps {
   /** Currently selected hydroclimate value */

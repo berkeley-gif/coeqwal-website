@@ -2,7 +2,6 @@ import { useMemo, useCallback } from "react"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 import {
   getScenarioMetadata,
-  HYDROCLIMATE_ID_MAP,
   type ScenarioTheme,
   type Scenario,
 } from "../../../content/scenarios"
@@ -12,7 +11,7 @@ export type { Scenario, ScenarioTheme }
 const HISTORICAL_HC_ID = 2
 
 /**
- * Hook to fetch and manage the list of available scenarios from the API.
+ * Hook to fetch and manage the list of available scenarios from the API
  *
  * Labels and descriptions come directly from the API. Theme and icon are
  * resolved via the scenario's sibling_group (the historical variant's
@@ -83,27 +82,6 @@ export function useScenarioList() {
     [siblingGroups],
   )
 
-  /**
-   * Build an ID mapping from sibling group IDs to the resolved short_code
-   * for a given hydroclimate period string (e.g., "historical", "cc50").
-   * Falls back to the historical variant if the requested hydroclimate is missing.
-   */
-  const buildIdMapping = useCallback(
-    (hydroclimate: string): Record<string, string> => {
-      const hcId = HYDROCLIMATE_ID_MAP[hydroclimate] ?? HISTORICAL_HC_ID
-      const mapping: Record<string, string> = {}
-      siblingGroups.forEach((group) => {
-        const variants = variantMap.get(group.siblingGroup)
-        if (variants) {
-          mapping[group.scenarioId] =
-            variants[hcId] ?? variants[HISTORICAL_HC_ID] ?? group.scenarioId
-        }
-      })
-      return mapping
-    },
-    [siblingGroups, variantMap],
-  )
-
   const scenarioIds = useMemo(
     () => scenarios.filter((s) => s.isActive).map((s) => s.scenarioId),
     [scenarios],
@@ -158,7 +136,6 @@ export function useScenarioList() {
     siblingGroupIds,
     siblingGroupMap,
     variantMap,
-    buildIdMapping,
     getScenario,
     getDisplayName,
     getThemeForScenario,

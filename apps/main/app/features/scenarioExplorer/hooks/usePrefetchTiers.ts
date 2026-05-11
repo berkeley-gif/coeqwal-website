@@ -5,11 +5,8 @@ import {
   fetchTierLocationAssignmentsBatch,
 } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
-import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
+import { useResolvedIdMappings } from "../../scenarios/hooks/useResolvedIdMapping"
 import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
-
-const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 // Normalize once at module scope so the prefetch cache key and any consumer
 // that passes OUTCOME_CODE_ORDER straight through resolve to the same SWR key.
@@ -31,14 +28,14 @@ const ALL_OUTCOME_CODES = Array.from(new Set(OUTCOME_CODE_ORDER)).sort()
  * Call this once near the top of the Explore tab tree (e.g. ScenarioExplorer).
  */
 export function usePrefetchTiers() {
-  const { buildIdMapping } = useScenarioList()
+  const allMappings = useResolvedIdMappings()
   const didPrefetch = useRef(false)
 
   useEffect(() => {
     if (didPrefetch.current) return
 
-    const mappings = ALL_HYDROCLIMATES.map((hc) => buildIdMapping(hc))
-    const allEmpty = mappings.every((m) => Object.keys(m).length === 0)
+    const perHc = Object.values(allMappings)
+    const allEmpty = perHc.every((m) => m.resolvedIds.length === 0)
     if (allEmpty) return
 
     didPrefetch.current = true
@@ -47,14 +44,13 @@ export function usePrefetchTiers() {
     // same (scenario, codes) batch for sibling scenarios that share an id.
     const allScenarioIds = new Set<string>()
 
-    for (const mapping of mappings) {
-      const ids = Object.values(mapping)
-      if (ids.length === 0) continue
+    for (const { resolvedIds } of perHc) {
+      if (resolvedIds.length === 0) continue
 
-      const key = CACHE_KEYS.allScenarioTiers(ids)
-      preload(key, () => fetchAllScenarioTiers(ids))
+      const key = CACHE_KEYS.allScenarioTiers(resolvedIds)
+      preload(key, () => fetchAllScenarioTiers(resolvedIds))
 
-      for (const id of ids) allScenarioIds.add(id)
+      for (const id of resolvedIds) allScenarioIds.add(id)
     }
 
     // Warm the batch location-assignments cache for every visible scenario.
@@ -66,5 +62,5 @@ export function usePrefetchTiers() {
         fetchTierLocationAssignmentsBatch(id, ALL_OUTCOME_CODES),
       )
     }
-  }, [buildIdMapping])
+  }, [allMappings])
 }

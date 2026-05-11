@@ -16,18 +16,15 @@ import { CACHE_KEYS } from "@repo/data/cache"
 import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
+  useResolvedIdMapping,
+  useResolvedIdMappings,
   useScenarioTiers,
 } from "../../../scenarios/hooks"
-import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { useMapVisualizationAction, useActiveMapOutcome } from "../../hooks"
-import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
-import { HYDROCLIMATE_ID_MAP } from "../../../../content/scenarios"
 import type { OutcomeCode } from "../../../../content/outcomes"
-
-const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 interface KeyOutcomesPanelProps {
   scenarioId?: string
@@ -50,22 +47,21 @@ export function KeyOutcomesPanel({
   // Resolve the sibling-group scenarioId (e.g. "s0020") to the per-hydroclimate
   // variant short_code so the bar chart tiers reflect the user's hydroclimate
   // selection in the KeyOperationsPanel above.
-  const { hydroclimate } = useScenarioExplorerStore()
-  const { buildIdMapping } = useScenarioList()
-  const resolvedScenarioId =
-    buildIdMapping(hydroclimate)[scenarioId] ?? scenarioId
+  const { idMapping } = useResolvedIdMapping()
+  const resolvedScenarioId = idMapping[scenarioId] ?? scenarioId
 
   // Warm SWR for every hydroclimate variant so switching climates never
   // triggers a round-trip (and therefore never flashes "no data").
+  const allMappings = useResolvedIdMappings()
   useEffect(() => {
-    for (const hc of ALL_HYDROCLIMATES) {
-      const variantId = buildIdMapping(hc)[scenarioId]
+    for (const { idMapping: hcMapping } of Object.values(allMappings)) {
+      const variantId = hcMapping[scenarioId]
       if (!variantId) continue
       preload(CACHE_KEYS.scenarioTiers(variantId), () =>
         fetchScenarioTiers(variantId),
       )
     }
-  }, [scenarioId, buildIdMapping])
+  }, [scenarioId, allMappings])
 
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(resolvedScenarioId)

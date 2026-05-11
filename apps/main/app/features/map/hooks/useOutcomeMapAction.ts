@@ -35,8 +35,8 @@ export function useOutcomeMapAction() {
   )
 
   /**
-   * Fixed-scenario variant - does not re-resolve via `buildIdMapping`, so
-   * the caller controls exactly which scenarioId the tier fetch hits.
+   * Fixed-scenario variant - does not re-resolve via the active hydroclimate,
+   * so the caller controls exactly which scenarioId the tier fetch hits.
    * Use this when you need a stable scenario (e.g. aggregate views that
    * don't belong to any one hydroclimate and want to anchor on the
    * historical baseline).

@@ -1,40 +1,32 @@
-import { useMemo } from "react"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import {
+  useResolvedIdMapping,
+  useScenarioList,
+} from "../../scenarios/hooks"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
-import { useScenarioExplorerStore } from "../store"
 
 /**
  * Convenience hook that resolves the active hydroclimate and fetches
  * tier data in a single call.
  *
- * Internally reads `hydroclimate` from the store, builds the sibling
- * group and resolved scenario ID mapping, and passes it to
- * `useMultipleScenarioTiers`. Returns everything that hook returns, plus
- * the resolved `idMapping` and common scenario-list helpers.
- *
- * Use this in any tool panel that needs tier data for the currently selected
- * hydroclimate.
+ * Composes {@link useResolvedIdMapping} with `useMultipleScenarioTiers` so
+ * tool panels can drop in a single hook call. Use this in any tool panel
+ * that needs tier data for the currently selected hydroclimate.
  */
 export function useResolvedScenarioTiers() {
-  const { hydroclimate } = useScenarioExplorerStore()
+  const { idMapping, missingScenarioIds } = useResolvedIdMapping()
   const {
-    buildIdMapping,
     getDisplayName,
     getThemeForScenario,
     siblingGroups,
     siblingGroupMap,
   } = useScenarioList()
 
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimate),
-    [buildIdMapping, hydroclimate],
-  )
-
   const tierData = useMultipleScenarioTiers(idMapping)
 
   return {
     ...tierData,
     idMapping,
+    missingScenarioIds,
     siblingGroups,
     siblingGroupMap,
     getDisplayName,

@@ -1,8 +1,16 @@
 "use client"
 
 /**
- * HydroclimateBadge, compact read-only pill for the active hydroclimate (title only).
- * Presentational only: pass label text and accent color from app data.
+ * Compact read-only pill for the active hydroclimate (title only)
+ *
+ * Presentational only, pass label text and accent color from app data.
+ *
+ * For toolbar and map overlay contexts, derive `title` / `accentColor` via
+ * `getHydroclimateBadgeDisplay(hc)` in `apps/main`.
+ *
+ * For Share cards, a richer multi-line variant lives at
+ * `apps/main/app/features/scenarioExplorer/share/cards/HydroclimateBadge.tsx`.
+ * Use that one when you need both label and description rendered together.
  */
 
 import React from "react"
@@ -14,8 +22,8 @@ export interface HydroclimateBadgeProps {
   /** Hex color for border / background tint */
   accentColor: string
   /**
-   * `tinted`, translucent scorecard-style wash (toolbar).
-   * `solid`, fully opaque light pastel from the accent (e.g. over map).
+   * - `tinted`, translucent scorecard-style wash (toolbar)
+   * - `solid`, fully opaque light pastel from the accent (e.g. over map)
    */
   surface?: "tinted" | "solid"
 }

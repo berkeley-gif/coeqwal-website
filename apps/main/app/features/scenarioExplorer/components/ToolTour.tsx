@@ -36,7 +36,7 @@ import ListTourControlIllustration, {
 import { useTourAnchorResolver } from "../tour/TourAnchorContext"
 import { mapActions, useMapStore } from "../../map/store"
 import type { OutcomeVisualization } from "../../map/store"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import { useResolvedIdMapping } from "../../scenarios/hooks/useResolvedIdMapping"
 
 const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
 
@@ -297,8 +297,7 @@ export default function ToolTour() {
     demoFired: boolean
   } | null>(null)
 
-  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
-  const { buildIdMapping } = useScenarioList()
+  const { idMapping: hcIdMapping } = useResolvedIdMapping()
 
   // Temporarily reveal the Key operations column while the operations
   // tour step is active, then restore the user's previous chip state
@@ -473,8 +472,7 @@ export default function ToolTour() {
       const scenarioId = el.dataset.tourScenarioId
       const outcomeCode = el.dataset.tourOutcomeCode
       if (!scenarioId || !outcomeCode) return
-      const mapping = buildIdMapping(hydroclimate)
-      const resolvedId = mapping[scenarioId] ?? scenarioId
+      const resolvedId = hcIdMapping[scenarioId] ?? scenarioId
       const current = useMapStore.getState().activeOutcomeVisualization
       if (!current || current.outcomeCode !== outcomeCode) {
         mapActions.clearMapTooltips()
@@ -486,7 +484,7 @@ export default function ToolTour() {
     })
 
     return () => window.cancelAnimationFrame(raf)
-  }, [step, showMap, resolve, version, buildIdMapping, hydroclimate])
+  }, [step, showMap, resolve, version, hcIdMapping])
 
   const isFirst = tourStep === 0
   const isLast = steps.length > 0 && tourStep === steps.length - 1

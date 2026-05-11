@@ -1,9 +1,9 @@
 import { useMemo } from "react"
 import {
   useMultipleScenarioTiers,
+  useResolvedIdMapping,
   useScenarioList,
 } from "../../../scenarios/hooks"
-import { useScenarioExplorerStore } from "../../store"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import {
   getOutcomeCodeFromMetricId,
@@ -33,17 +33,8 @@ export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
  * Uses hydroclimate-aware ID mapping so only 24 scenarios are fetched.
  */
 function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
-  const { hydroclimate } = useScenarioExplorerStore()
-  const {
-    buildIdMapping,
-    getDisplayName,
-    isLoading: scenariosLoading,
-  } = useScenarioList()
-
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimate),
-    [buildIdMapping, hydroclimate],
-  )
+  const { idMapping } = useResolvedIdMapping()
+  const { getDisplayName, isLoading: scenariosLoading } = useScenarioList()
 
   const {
     allChartData,

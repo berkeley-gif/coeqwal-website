@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react"
 import {
   useMultipleScenarioTiers,
+  useResolvedIdMapping,
   useScenarioList,
   OUTCOME_CODE_ORDER,
   getOutcomeName,
@@ -56,22 +57,12 @@ export function useComparisonData(
   hydroclimateOverride?: string,
   includeAllScenariosInParallelPlot = false,
 ) {
-  const { buildIdMapping, getDisplayName, getThemeForScenario } =
-    useScenarioList()
+  const { getDisplayName, getThemeForScenario } = useScenarioList()
 
-  const {
-    hydroclimate: storeHydroclimate,
-    showAlternativeBaselines,
-    showOnlyChosen,
-    selectedScenarios,
-  } = useScenarioExplorerStore()
+  const { showAlternativeBaselines, showOnlyChosen, selectedScenarios } =
+    useScenarioExplorerStore()
 
-  const hydroclimate = hydroclimateOverride ?? storeHydroclimate
-
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimate),
-    [buildIdMapping, hydroclimate],
-  )
+  const { hydroclimate, idMapping } = useResolvedIdMapping(hydroclimateOverride)
 
   const {
     allScoreData,

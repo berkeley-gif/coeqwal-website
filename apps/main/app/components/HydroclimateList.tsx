@@ -11,7 +11,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { TruncatedText } from "@repo/ui"
 import { hydroclimateOptions } from "../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../features/scenarios/components/HydroclimateChooser"
+import { HYDROCLIMATE_CONFIG } from "../features/scenarios/hydroclimateConfig"
 
 interface HydroclimateListProps {
   /** Text and border color (adapts to light/dark backgrounds) */

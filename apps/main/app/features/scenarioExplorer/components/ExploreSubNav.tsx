@@ -23,6 +23,7 @@ import {
   AppsIcon,
   GridOnIcon,
   CompareArrowsIcon,
+  InsightsIcon,
   icons,
 } from "@repo/ui/mui"
 import {
@@ -95,10 +96,10 @@ const FLOW: FlowStep[] = [
     purpose: "Stress-test",
   },
   {
-    mode: null,
-    icon: <icons.IosShare sx={{ fontSize: "1.1rem" }} />,
-    label: "Share",
-    purpose: "Save charts + notes",
+    mode: "data",
+    icon: <InsightsIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Data in depth",
+    purpose: "Explore underlying data",
   },
 ]
 
@@ -232,12 +233,9 @@ export default function ExploreSubNav() {
             }}
           />
 
-          {/* Flow map. Same curation journey as the WelcomeStrip, adapted
-              to the dark sub-nav background: pills carry label + purpose,
-              separated by chevrons. Clicking Share jumps to the top-level
-              Share tab. All others switch exploreMode. */}
+          {/* Buttons to the different tools */}
           {FLOW.filter((step) => !step.research || showResearchTools).map(
-            (step, i, visibleFlow) => {
+            (step) => {
               const isShare = step.mode === null
               const active = step.mode !== null && exploreMode === step.mode
               const handleClick = () => {
@@ -324,16 +322,6 @@ export default function ExploreSubNav() {
                       </Box>
                     </Box>
                   </Box>
-                  {i < visibleFlow.length - 1 && (
-                    <icons.ChevronRight
-                      aria-hidden
-                      sx={{
-                        fontSize: "1rem",
-                        color: alpha(theme.palette.common.white, 0.5),
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
                 </React.Fragment>
               )
             },
