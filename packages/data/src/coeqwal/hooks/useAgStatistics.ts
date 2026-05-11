@@ -126,19 +126,30 @@ export function useAgDemandUnitsList(filters?: {
 }
 
 /**
- * Fetch monthly delivery statistics for AG demand units
+ * Fetch monthly surface-water delivery statistics for AG demand units.
  *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @returns Monthly delivery for 150 AG demand units
+ * Only fetches when both `scenarioId` and `duIds` are provided. Pass the
+ * specific demand units the UI cares about so the backend filters the
+ * response with its `du_id` query param rather than returning all 150
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020"), or null to suspend
+ * @param duIds - Demand unit IDs to fetch. Empty suspends the fetch
+ * @returns Monthly delivery for the requested AG demand units
  */
-export function useAgDemandUnitsDeliveryMonthly(scenarioId: string | null) {
+export function useAgDemandUnitsDeliveryMonthly(
+  scenarioId: string | null,
+  duIds: string[] = [],
+) {
+  const shouldFetch = scenarioId !== null && duIds.length > 0
   const {
     data,
     error: swrError,
     isLoading,
   } = useSWR<AgDemandUnitDeliveryMonthlyResponse>(
-    scenarioId ? CACHE_KEYS.agDemandUnitsDeliveryMonthly(scenarioId) : null,
-    () => fetchAgDemandUnitsDeliveryMonthly(scenarioId!),
+    shouldFetch
+      ? CACHE_KEYS.agDemandUnitsDeliveryMonthly(scenarioId!, duIds)
+      : null,
+    () => fetchAgDemandUnitsDeliveryMonthly(scenarioId!, duIds),
     {
       revalidateOnFocus: false,
     },
@@ -188,19 +199,30 @@ export function useAgDemandUnitsShortageMonthly(scenarioId: string | null) {
 }
 
 /**
- * Fetch period-of-record summary for AG demand units
+ * Fetch period-of-record summary for AG demand units.
  *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @returns Period summary with delivery exceedance for 150 AG demand units
+ * Only fetches when both `scenarioId` and `duIds` are provided. Pass the
+ * specific demand units the UI cares about so the backend filters the
+ * response rather than returning all 150
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020"), or null to suspend
+ * @param duIds - Demand unit IDs to fetch. Empty suspends the fetch
+ * @returns Period summary for the requested AG demand units
  */
-export function useAgDemandUnitsPeriod(scenarioId: string | null) {
+export function useAgDemandUnitsPeriod(
+  scenarioId: string | null,
+  duIds: string[] = [],
+) {
+  const shouldFetch = scenarioId !== null && duIds.length > 0
   const {
     data,
     error: swrError,
     isLoading,
   } = useSWR<AgDemandUnitPeriodResponse>(
-    scenarioId ? CACHE_KEYS.agDemandUnitsPeriod(scenarioId) : null,
-    () => fetchAgDemandUnitsPeriod(scenarioId!),
+    shouldFetch
+      ? CACHE_KEYS.agDemandUnitsPeriod(scenarioId!, duIds)
+      : null,
+    () => fetchAgDemandUnitsPeriod(scenarioId!, duIds),
     {
       revalidateOnFocus: false,
     },

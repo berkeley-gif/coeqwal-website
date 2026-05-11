@@ -272,10 +272,19 @@ export const ENDPOINTS = {
    * Backend route is `sw-delivery-monthly`. The frontend remaps the
    * response's `monthly_sw_delivery` field to `monthly_delivery` so the
    * matrix code can reuse the same shape as CWS aggregates.
+   *
+   * Pass `duIds` to restrict the response to specific demand units via
+   * the backend's comma-separated `du_id` filter. The list is sorted so
+   * different call orders produce the same URL (and same SWR cache key)
    * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duIds - Optional list of demand unit IDs to fetch
    */
-  agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly`,
+  agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length
+      ? `?du_id=${[...duIds].sort().join(",")}`
+      : ""
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+  },
 
   /**
    * Monthly shortage statistics for AG demand units
@@ -285,11 +294,19 @@ export const ENDPOINTS = {
     `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
 
   /**
-   * Period-of-record summary for AG demand units
+   * Period-of-record summary for AG demand units.
+   * Pass `duIds` to restrict the response to specific demand units via
+   * the backend's comma-separated `du_id` filter. The list is sorted
+   * so different call orders share a cache entry
    * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duIds - Optional list of demand unit IDs to fetch
    */
-  agDemandUnitsPeriod: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
+  agDemandUnitsPeriod: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length
+      ? `?du_id=${[...duIds].sort().join(",")}`
+      : ""
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary${qs}`
+  },
 
   // Reservoir period summary endpoint
 

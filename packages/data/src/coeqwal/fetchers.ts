@@ -939,13 +939,18 @@ export async function fetchAgDemandUnitsList(filters?: {
  * The backend route is `sw-delivery-monthly` and returns each DU's monthly
  * stats under `monthly_sw_delivery`. We remap that to `monthly_delivery`
  * here so the frontend can reuse `AgDemandUnitDeliveryData` and the same
- * matrix code path as CWS aggregates
+ * matrix code path as CWS aggregates.
+ *
+ * Pass `duIds` to scope the response to specific demand units. The list
+ * gets serialized to the backend's comma-separated `du_id` filter
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
- * @returns Monthly delivery statistics for 150 AG demand units
+ * @param duIds - Optional list of demand unit IDs to fetch
+ * @returns Monthly delivery statistics for the requested AG demand units
  */
 export async function fetchAgDemandUnitsDeliveryMonthly(
   scenarioId: string,
+  duIds?: string[],
 ): Promise<AgDemandUnitDeliveryMonthlyResponse> {
   if (!scenarioId) {
     throw new Error("Scenario ID is required")
@@ -967,7 +972,7 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
   }
 
   const raw = await apiFetcher<RawResponse>(
-    ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId),
+    ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId, duIds),
     {
       baseUrl: DEFAULT_API_BASE,
       timeout: 30000,
@@ -1015,23 +1020,27 @@ export async function fetchAgDemandUnitsShortageMonthly(
 }
 
 /**
- * Fetch period-of-record summary for AG demand units
+ * Fetch period-of-record summary for AG demand units.
+ * Pass `duIds` to scope the response to specific demand units via the
+ * backend's comma-separated `du_id` filter
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
- * @returns Period summary with delivery exceedance for 150 AG demand units
+ * @param duIds - Optional list of demand unit IDs to fetch
+ * @returns Period summary for the requested AG demand units
  */
 export async function fetchAgDemandUnitsPeriod(
   scenarioId: string,
+  duIds?: string[],
 ): Promise<AgDemandUnitPeriodResponse> {
   if (!scenarioId) {
     throw new Error("Scenario ID is required")
   }
 
   return apiFetcher<AgDemandUnitPeriodResponse>(
-    ENDPOINTS.agDemandUnitsPeriod(scenarioId),
+    ENDPOINTS.agDemandUnitsPeriod(scenarioId, duIds),
     {
       baseUrl: DEFAULT_API_BASE,
-      timeout: 30000, // 150 DUs = large payload
+      timeout: 30000,
     },
   )
 }

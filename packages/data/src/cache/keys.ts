@@ -266,11 +266,18 @@ export const CACHE_KEYS = {
 
   /**
    * Monthly surface-water delivery statistics for AG demand units.
-   * Matches the backend's `sw-delivery-monthly` route
+   * Matches the backend's `sw-delivery-monthly` route.
+   * `duIds` are sorted before being encoded so different call orders
+   * share the same SWR cache entry
    * @param scenarioId - Scenario ID
+   * @param duIds - Optional list of demand unit IDs that scope the response
    */
-  agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly`,
+  agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length
+      ? `?du_id=${[...duIds].sort().join(",")}`
+      : ""
+    return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+  },
 
   /**
    * Monthly shortage statistics for AG demand units
@@ -280,11 +287,17 @@ export const CACHE_KEYS = {
     `/api/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
 
   /**
-   * Period-of-record summary for AG demand units
+   * Period-of-record summary for AG demand units.
+   * `duIds` are sorted before encoding for stable cache keys
    * @param scenarioId - Scenario ID
+   * @param duIds - Optional list of demand unit IDs that scope the response
    */
-  agDemandUnitsPeriod: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
+  agDemandUnitsPeriod: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length
+      ? `?du_id=${[...duIds].sort().join(",")}`
+      : ""
+    return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary${qs}`
+  },
 
   // Wildlife Refuge Demand Units cache keys (18 refuge demand units)
 

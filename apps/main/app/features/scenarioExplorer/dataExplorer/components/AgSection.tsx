@@ -463,20 +463,23 @@ function buildAgAggregatesData(
 }
 
 /**
- * Hook to fetch AG demand unit delivery data for multiple scenarios.
- * Also fetches period summary for cell stats.
+ * Hook to fetch AG demand-unit delivery and period data for multiple
+ * scenarios, scoped to a specific list of demand-unit ids.
  *
- * Note: AG shortage is not reported because CalSim assumes AG demand units
- * make up any shortage with groundwater pumping.
+ * The underlying hooks self-gate on `duIds.length > 0`. When the list is
+ * empty (no DUs added yet) no network requests fire. Each fetch returns
+ * only the requested rows via the backend's `du_id` filter, so adding
+ * one DU pulls one DU per scenario instead of all 150.
+ *
+ * AG shortage is not surfaced here because CalSim assumes AG demand
+ * units make up any shortage with groundwater pumping
  */
-function useMultiScenarioAgDemandUnits(scenarios: string[]) {
-  const deliveryResults = useMultiScenarioSlots(
-    scenarios,
-    useAgDemandUnitsDeliveryMonthly,
+function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
+  const deliveryResults = useMultiScenarioSlots(scenarios, (id) =>
+    useAgDemandUnitsDeliveryMonthly(id, duIds),
   )
-  const periodResults = useMultiScenarioSlots(
-    scenarios,
-    useAgDemandUnitsPeriod,
+  const periodResults = useMultiScenarioSlots(scenarios, (id) =>
+    useAgDemandUnitsPeriod(id, duIds),
   )
 
   const isLoading =
@@ -570,11 +573,14 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
 /**
  * Combined hook for the monthly AG matrix.
  *
- * Project aggregates source from the batched response (`agBatch`). When
- * `additionalDemandUnitIds` has entries, those specific demand-unit rows
- * are spliced in on top of the aggregates rows, using data from the
- * per-scenario demand-units fetch. The fan-out fetch only runs when at
- * least one DU has been added.
+ * Project aggregates source from the batched response (`agBatch`).
+ * When `additionalDemandUnitIds` has entries, the per-DU fetch fires
+ * scoped to just those ids, and the resulting rows are spliced on top
+ * of the aggregate rows. The inner hooks self-gate when the id list is
+ * empty, so no network calls fire until a DU is added.
+ *
+ * `addedDemandUnitsList` is used purely as a label fallback so the row
+ * label and chip render immediately while the per-DU fetch is in flight
  */
 function useMultiScenarioAgData(
   scenarios: string[],
@@ -588,59 +594,35 @@ function useMultiScenarioAgData(
     [scenarios, agBatch],
   )
 
-  const hasAddedDus = additionalDemandUnitIds.length > 0
   const demandUnitsData = useMultiScenarioAgDemandUnits(
-    hasAddedDus ? scenarios : [],
+    scenarios,
+    additionalDemandUnitIds,
   )
 
-  // Build the added-DU subset (entities + matrix + cell stats) from the fan-out
-  // response, restricted to the ids the user picked. Falls back to a stub
-  // entity row sourced from the list endpoint so the row appears immediately,
-  // before per-scenario data arrives
-  const added = useMemo(() => {
-    if (!hasAddedDus) {
-      return {
-        entities: [] as EntityInfo[],
-        matrixData: {} as MatrixDataType,
-        cellStats: {} as CellStatsMap,
-      }
-    }
+  const hasAddedDus = additionalDemandUnitIds.length > 0
 
-    const idSet = new Set(additionalDemandUnitIds)
-    const entities: EntityInfo[] = []
-    const matrixData: MatrixDataType = {}
-    const cellStats: CellStatsMap = {}
-
-    additionalDemandUnitIds.forEach((duId) => {
+  // Order the added rows by the user's add-order, falling back to a stub
+  // entity from the list endpoint when the per-DU response hasn't landed
+  // yet so the row appears immediately
+  const addedEntities = useMemo<EntityInfo[]>(() => {
+    if (!hasAddedDus) return []
+    return additionalDemandUnitIds.map((duId) => {
       const fromFanOut = demandUnitsData.entities.find(
         (e) => e.shortCode === duId,
       )
-      if (fromFanOut) {
-        entities.push(fromFanOut)
-      } else {
-        const fromList = addedDemandUnitsList.find((du) => du.du_id === duId)
-        entities.push({
-          shortCode: duId,
-          label: fromList?.agency ?? duId,
-          hydrologicRegion: fromList?.hydrologic_region ?? null,
-        })
-      }
-      if (demandUnitsData.matrixData[duId]) {
-        matrixData[duId] = demandUnitsData.matrixData[duId]
-      }
-      if (demandUnitsData.cellStats[duId]) {
-        cellStats[duId] = demandUnitsData.cellStats[duId]
+      if (fromFanOut) return fromFanOut
+      const fromList = addedDemandUnitsList.find((du) => du.du_id === duId)
+      return {
+        shortCode: duId,
+        label: fromList?.agency ?? duId,
+        hydrologicRegion: fromList?.hydrologic_region ?? null,
       }
     })
-
-    return { entities, matrixData, cellStats }
   }, [
     hasAddedDus,
     additionalDemandUnitIds,
     addedDemandUnitsList,
     demandUnitsData.entities,
-    demandUnitsData.matrixData,
-    demandUnitsData.cellStats,
   ])
 
   if (!hasAddedDus) {
@@ -654,11 +636,10 @@ function useMultiScenarioAgData(
     }
   }
 
-  // Added DUs render at the top, aggregates below
   return {
-    entities: [...added.entities, ...aggregatesData.entities],
-    matrixData: { ...aggregatesData.matrixData, ...added.matrixData },
-    cellStats: { ...aggregatesData.cellStats, ...added.cellStats },
+    entities: [...addedEntities, ...aggregatesData.entities],
+    matrixData: { ...aggregatesData.matrixData, ...demandUnitsData.matrixData },
+    cellStats: { ...aggregatesData.cellStats, ...demandUnitsData.cellStats },
     isLoading: isBatchLoading || demandUnitsData.isLoading,
     error: demandUnitsData.error,
     loadingScenarios: isBatchLoading
@@ -744,7 +725,10 @@ function MonthlyAgSection({
           .filter((du) => !excludedIds.has(du.du_id))
           .map((du) => ({
             value: du.du_id,
-            label: `${du.agency ?? du.du_id} (${du.du_id})`,
+            // Agency strings can already contain "(X% of total)" to mark
+            // entities split across multiple model DUs by acreage. No need
+            // to append the du_id, which would produce two parentheticals
+            label: du.agency ?? du.du_id,
           }))
           .sort((a, b) => a.label.localeCompare(b.label)),
       }))
