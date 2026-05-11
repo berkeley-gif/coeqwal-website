@@ -41,6 +41,7 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import { useResolvedSelectedScenarios } from "../hooks/useResolvedSelectedScenarios"
 import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
@@ -1163,6 +1164,33 @@ function ReservoirStorageSection({
 }
 
 /**
+ * Rewrite a batch slice keyed by API short_code to one keyed by
+ * sibling-group id. If an entry carries an inner `scenario_id` (only
+ * `BatchStorageData` does today), it's rewritten too so downstream code
+ * can use either key interchangeably.
+ *
+ * Used inside `CategoryView` to translate `useBatchStatistics` responses
+ * back into the group-id space the section components expect.
+ */
+function rekeyByGroup<T>(
+  slice: Record<string, T> | undefined,
+  resolvedToGroup: Map<string, string>,
+): Record<string, T> | undefined {
+  if (!slice) return slice
+  const out: Record<string, T> = {}
+  for (const [shortCode, entry] of Object.entries(slice)) {
+    const groupId = resolvedToGroup.get(shortCode)
+    if (!groupId) continue
+    if (entry && typeof entry === "object" && "scenario_id" in entry) {
+      out[groupId] = { ...entry, scenario_id: groupId } as T
+    } else {
+      out[groupId] = entry
+    }
+  }
+  return out
+}
+
+/**
  * CategoryView: Outcomes organized by category with collapsible sections
  */
 export default function CategoryView() {
@@ -1190,15 +1218,36 @@ export default function CategoryView() {
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
-  // Prefetch batch statistics data for all selected scenarios.
-  // One request replaces the per-scenario fan-out for storage, CWS, AG, and
-  // env_flow. Sections that consume these slices read from `batchData`
-  // directly. Sections backed by endpoints not in the batch (refuge, delta,
+  // Resolve the user's selected sibling-group ids to short_codes for the
+  // active hydroclimate. The batch endpoint speaks short_codes. The rest
+  // of the UI (and all section components) speaks sibling-group ids, so
+  // we re-key the response below before forwarding.
+  const resolved = useResolvedSelectedScenarios()
+
+  // Single batch fetch covering storage, CWS, AG, and env_flow for every
+  // resolved scenario. `rawBatchData` is keyed by short_code from the API.
+  // The `batchData` memo below re-keys it by sibling-group id so sections
+  // can keep using `batchData?.<type>?.[scenarioId]` against group ids.
+  // Sections backed by endpoints not in the batch (refuge, delta monthly,
   // M&I contractors, demand units, spill) still use `useMultiScenarioSlots`.
-  const { data: batchData, isLoading: isBatchLoading } = useBatchStatistics(
-    selectedScenarios,
+  const { data: rawBatchData, isLoading: isBatchLoading } = useBatchStatistics(
+    resolved.resolvedIds,
     { types: ["storage", "cws", "ag", "env_flow"] },
   )
+
+  const batchData = useMemo<BatchStatisticsResponse | undefined>(() => {
+    if (!rawBatchData) return rawBatchData
+    const map = resolved.resolvedToGroup
+    return {
+      scenarios: resolved.selectedGroupIds.filter(
+        (id) => resolved.groupToResolved[id] != null,
+      ),
+      storage: rekeyByGroup(rawBatchData.storage, map),
+      cws: rekeyByGroup(rawBatchData.cws, map),
+      ag: rekeyByGroup(rawBatchData.ag, map),
+      env_flow: rekeyByGroup(rawBatchData.env_flow, map),
+    }
+  }, [rawBatchData, resolved])
 
   // Build scenario ID -> display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {
