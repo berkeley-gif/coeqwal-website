@@ -61,6 +61,8 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import { useHydroclimateAvailability } from "../../../scenarios/hooks"
+import { HydroclimateUnavailablePlaceholder } from "../../../scenarios/components/HydroclimateUnavailablePlaceholder"
 import { SectionHeader } from "./SectionHeader"
 
 // ============================================================================
@@ -266,6 +268,10 @@ const TIER_CHART_SIZE = 90
 interface CwsTierChartsProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Sibling-group ids with no variant for the active hydroclimate */
+  missingSet: Set<string>
+  /** Active hydroclimate value, used to label the missing-variant placeholder */
+  hydroclimate: string
   /** Whether this is inside a modal (affects tooltip z-index) */
   isModal?: boolean
 }
@@ -273,6 +279,8 @@ interface CwsTierChartsProps {
 function CwsTierCharts({
   scenarios,
   scenarioNames,
+  missingSet,
+  hydroclimate,
   isModal = false,
 }: CwsTierChartsProps) {
   const theme = useTheme()
@@ -286,6 +294,27 @@ function CwsTierCharts({
   return (
     <>
       {scenarios.map((scenarioId, index) => {
+        if (missingSet.has(scenarioId)) {
+          return (
+            <Box
+              key={scenarioId}
+              sx={{
+                gridColumn: index + 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: TIER_CHART_SIZE,
+              }}
+            >
+              <HydroclimateUnavailablePlaceholder
+                hydroclimate={hydroclimate}
+                groupId={scenarioId}
+                variant="inline"
+              />
+            </Box>
+          )
+        }
+
         if (isLoading) {
           return (
             <Box
@@ -1771,6 +1800,14 @@ export default function CwsSection({
   const [isExpanded, setIsExpanded] = useState(false)
   const cwsBatch = batchData?.cws
 
+  // Columns whose sibling-group id has no scenario variant for the active
+  // hydroclimate. Used to swap the per-column tier glyph for the inline
+  // placeholder, and to surface a small "Unavailable" strip above the
+  // monthly-deliveries block. Stays empty in production today since every
+  // group has all three variants
+  const { missing, hydroclimate } = useHydroclimateAvailability(scenarios)
+  const missingSet = useMemo(() => new Set(missing), [missing])
+
   return (
     <>
       {/* Sticky scenario header row */}
@@ -1817,6 +1854,8 @@ export default function CwsSection({
             <CwsTierCharts
               scenarios={scenarios}
               scenarioNames={scenarioNames}
+              missingSet={missingSet}
+              hydroclimate={hydroclimate}
             />
           </ChartGridProvider>
         </Box>
@@ -1831,6 +1870,32 @@ export default function CwsSection({
             p: theme.space.component.lg,
           }}
         >
+          {missing.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: theme.space.gap.sm,
+                mb: theme.space.component.sm,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ color: theme.palette.grey[600] }}
+              >
+                Unavailable in this hydroclimate:
+              </Typography>
+              {missing.map((groupId) => (
+                <HydroclimateUnavailablePlaceholder
+                  key={groupId}
+                  hydroclimate={hydroclimate}
+                  groupId={groupId}
+                  variant="inline"
+                />
+              ))}
+            </Box>
+          )}
           <ChartGridProvider scenarios={scenarios}>
             <MonthlyCwsSection
               scenarios={scenarios}
@@ -1914,6 +1979,8 @@ export default function CwsSection({
               <CwsTierCharts
                 scenarios={scenarios}
                 scenarioNames={scenarioNames}
+                missingSet={missingSet}
+                hydroclimate={hydroclimate}
                 isModal
               />
             </ChartGridProvider>
@@ -1929,6 +1996,32 @@ export default function CwsSection({
               p: theme.space.component.lg,
             }}
           >
+            {missing.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: theme.space.gap.sm,
+                  mb: theme.space.component.sm,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[600] }}
+                >
+                  Unavailable in this hydroclimate:
+                </Typography>
+                {missing.map((groupId) => (
+                  <HydroclimateUnavailablePlaceholder
+                    key={groupId}
+                    hydroclimate={hydroclimate}
+                    groupId={groupId}
+                    variant="inline"
+                  />
+                ))}
+              </Box>
+            )}
             <ChartGridProvider scenarios={scenarios}>
               <MonthlyCwsSection
                 scenarios={scenarios}
