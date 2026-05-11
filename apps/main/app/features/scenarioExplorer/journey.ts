@@ -52,14 +52,6 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
     nextLabel: "Open Share",
     nextRationale: "Review everything you've saved and build your water story.",
   },
-  comparison: {
-    mode: "comparison",
-    purpose:
-      "Side-by-side view for comparing a small set of scenarios in detail.",
-    nextMode: null,
-    nextLabel: "",
-    nextRationale: "",
-  },
   data: {
     mode: "data",
     purpose: "Dig into the underlying data for the selected scenarios.",
@@ -82,7 +74,6 @@ export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
   radar: "Radar chart",
   equity: "Distribution",
   resilience: "Resilience heatmap",
-  comparison: "Comparison",
   data: "Data explorer",
 }
 

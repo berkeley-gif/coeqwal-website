@@ -27,7 +27,6 @@ export type ExploreMode =
   | "list"
   | "radar"
   | "equity"
-  | "comparison"
   | "resilience"
   | "data"
 
@@ -65,7 +64,6 @@ function defaultJourney(): JourneyPersist {
       list: false,
       radar: false,
       equity: false,
-      comparison: false,
       resilience: false,
       data: false,
     },
@@ -120,9 +118,9 @@ interface ScenarioExplorerState {
   /**
    * Single scenario focused by the Distribution (equity) tool. Kept
    * orthogonal to `selectedScenarios` so entering/leaving Distribution
-   * does not stomp the shared multi-select used by List, Radar,
-   * Resilience, and Comparison. Null until the user explicitly picks a
-   * radio. EquityPanel falls back to the baseline in that case.
+   * does not stomp the shared multi-select used by List, Radar, and
+   * Resilience. Null until the user explicitly picks a radio.
+   * EquityPanel falls back to the baseline in that case.
    */
   equityFocusScenario: string | null
   pinnedScenarioIds: string[]

@@ -4,10 +4,10 @@
  * CategoryView - Outcome categories accordion view
  *
  * Displays outcomes grouped by category with expandable sections.
- * Used in the Data Explorer for browsing outcomes.
+ * Used in the Data in depth tool.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import {
   Box,
   Typography,
@@ -17,6 +17,8 @@ import {
   useTheme,
   CircularProgress,
   Button,
+  alpha,
+  type Theme,
 } from "@repo/ui/mui"
 import { CompactSelect, MobileModal, InfoTooltip } from "@repo/ui"
 import { TierGlyphWithTooltip } from "../../../tooltips/TierGlyphWithTooltip"
@@ -60,6 +62,147 @@ import { useScenarioList } from "../../../scenarios/hooks"
  * Set to true to test the batch endpoint, false for existing individual-request behavior
  */
 const USE_BATCH_API = true
+
+/**
+ * Visual treatment for category accordions in the Data in Depth view.
+ * Exposed as a live toggle so we can compare the three options before locking one in.
+ */
+export type SectionStyleVariant = "subtle" | "vibrant" | "both"
+
+const SECTION_STYLE_OPTIONS = [
+  { value: "subtle" as const, label: "Subtle" },
+  { value: "vibrant" as const, label: "Vibrant" },
+  { value: "both" as const, label: "Both" },
+]
+
+const SECTION_STYLE_STORAGE_KEY = "coeqwal:data-section-style"
+const DEFAULT_SECTION_STYLE: SectionStyleVariant = "subtle"
+
+/** Read the persisted section-style choice. Falls back to the default. */
+function readSectionStyle(): SectionStyleVariant {
+  if (typeof window === "undefined") return DEFAULT_SECTION_STYLE
+  const raw = window.localStorage.getItem(SECTION_STYLE_STORAGE_KEY)
+  if (raw === "subtle" || raw === "vibrant" || raw === "both") return raw
+  return DEFAULT_SECTION_STYLE
+}
+
+/**
+ * Outer Accordion sx for a given category. Owns the card chrome
+ * (background, border, shadow). The colored rail lives on the
+ * AccordionSummary so it does not extend down the open contents.
+ */
+function getAccordionStyles(
+  theme: Theme,
+  _color: string,
+  variant: SectionStyleVariant,
+  isExpanded: boolean,
+) {
+  const base = {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: "none",
+    border: theme.border.light,
+    mb: theme.space.component.lg,
+    transition: theme.transition.default,
+    "&:before": { display: "none" },
+  } as const
+
+  if (variant === "vibrant") {
+    return base
+  }
+
+  return {
+    ...base,
+    "&:hover": {
+      boxShadow: isExpanded ? "none" : theme.shadow.subtle,
+    },
+  }
+}
+
+/**
+ * AccordionSummary sx for a given category. Holds the colored left
+ * rail (subtle / both) and the faint category tint when expanded
+ * (vibrant / both).
+ */
+function getSummaryStyles(
+  theme: Theme,
+  color: string,
+  variant: SectionStyleVariant,
+  isExpanded: boolean,
+) {
+  const tinted = alpha(color, 0.04)
+  const useTint =
+    isExpanded && (variant === "vibrant" || variant === "both")
+  const showRail = variant === "subtle" || variant === "both"
+
+  return {
+    backgroundColor: useTint ? tinted : theme.palette.background.paper,
+    ...(showRail ? { borderLeft: `4px solid ${color}` } : {}),
+    borderBottom: isExpanded ? theme.border.light : "none",
+    minHeight: 64,
+    "&:hover": {
+      backgroundColor: useTint ? tinted : theme.palette.grey[50],
+    },
+    "& .MuiAccordionSummary-content": {
+      my: 1.5,
+    },
+    ...(isExpanded && {
+      position: "sticky" as const,
+      top: 0,
+      zIndex: 10,
+    }),
+  }
+}
+
+/**
+ * Icon-chip sx (the colored square next to the category title).
+ * The chip changes from a small filled square (subtle) to a larger
+ * gradient square (vibrant), with the "both" variant sitting in between.
+ */
+function getIconChipStyles(
+  theme: Theme,
+  color: string,
+  variant: SectionStyleVariant,
+) {
+  if (variant === "subtle") {
+    return {
+      width: 32,
+      height: 32,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: theme.borderRadius.sm,
+      backgroundColor: color,
+      color: theme.palette.common.white,
+      fontSize: 20,
+    }
+  }
+
+  if (variant === "vibrant") {
+    return {
+      width: 44,
+      height: 44,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: theme.borderRadius.sm,
+      background: `linear-gradient(135deg, ${color} 0%, ${alpha(color, 0.7)} 100%)`,
+      color: theme.palette.common.white,
+      fontSize: 24,
+    }
+  }
+
+  return {
+    width: 40,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: color,
+    color: theme.palette.common.white,
+    fontSize: 22,
+  }
+}
 
 /**
  * SectionHeader - Reusable header for chart sections
@@ -978,7 +1121,7 @@ function ReservoirStorageSection({
           position: "sticky",
           top: 64, // Below the accordion header (minHeight: 64)
           zIndex: 9,
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.paper,
           py: theme.space.component.sm,
           mx: -theme.space.component.xl, // Extend to edges
           px: theme.space.component.xl,
@@ -1076,6 +1219,20 @@ export default function CategoryView() {
   const [hasBeenExpanded, setHasBeenExpanded] = React.useState<Set<string>>(
     new Set(),
   )
+
+  // Section-style toggle. Lazy-initialised from localStorage so SSR sees the
+  // default and the persisted value is picked up on the first client render.
+  const [sectionStyle, setSectionStyle] =
+    React.useState<SectionStyleVariant>(DEFAULT_SECTION_STYLE)
+  useEffect(() => {
+    setSectionStyle(readSectionStyle())
+  }, [])
+  const handleSectionStyleChange = (next: SectionStyleVariant) => {
+    setSectionStyle(next)
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(SECTION_STYLE_STORAGE_KEY, next)
+    }
+  }
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
@@ -1174,47 +1331,59 @@ export default function CategoryView() {
         overflowY: "auto",
       }}
     >
+      {/* Section-style preview toggle (temporary; remove once we lock in a winner) */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: theme.space.gap.sm,
+          mb: theme.space.component.md,
+        }}
+      >
+        <Typography
+          variant="compactCaption"
+          sx={{ color: theme.palette.grey[500] }}
+        >
+          Section style:
+        </Typography>
+        <CompactSelect
+          value={sectionStyle}
+          onChange={(v) => handleSectionStyleChange(v as SectionStyleVariant)}
+          options={SECTION_STYLE_OPTIONS}
+          aria-label="Section style"
+        />
+      </Box>
+
       {outcomeCategories.map((category) => {
         const metrics = getMetricsByCategory(category.id)
         const tierMetrics = metrics.filter((m) => m.isTier)
         const nonTierMetrics = metrics.filter((m) => !m.isTier)
+        const isExpanded = expanded.includes(category.id)
+        const categoryColor = getOutcomeCategoryColor(theme, category.id)
 
         return (
           <Accordion
             key={category.id}
-            expanded={expanded.includes(category.id)}
+            expanded={isExpanded}
             onChange={() => handleAccordionChange(category.id)}
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              boxShadow: "none",
-              border: theme.border.light,
-              mb: theme.space.component.lg,
-              "&:before": { display: "none" },
-            }}
+            sx={getAccordionStyles(
+              theme,
+              categoryColor,
+              sectionStyle,
+              isExpanded,
+            )}
           >
             <AccordionSummary
               expandIcon={
                 <ExpandMoreIcon sx={{ color: theme.palette.grey[400] }} />
               }
-              sx={{
-                backgroundColor: theme.palette.background.paper,
-                borderBottom: expanded.includes(category.id)
-                  ? theme.border.light
-                  : "none",
-                minHeight: 64,
-                "&:hover": {
-                  backgroundColor: theme.palette.grey[50],
-                },
-                "& .MuiAccordionSummary-content": {
-                  my: 1.5,
-                },
-                // Sticky positioning when expanded
-                ...(expanded.includes(category.id) && {
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 10,
-                }),
-              }}
+              sx={getSummaryStyles(
+                theme,
+                categoryColor,
+                sectionStyle,
+                isExpanded,
+              )}
             >
               <Box
                 sx={{
@@ -1225,17 +1394,7 @@ export default function CategoryView() {
                 }}
               >
                 <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: theme.borderRadius.sm,
-                    backgroundColor: `${getOutcomeCategoryColor(theme, category.id)}15`,
-                    color: getOutcomeCategoryColor(theme, category.id),
-                    fontSize: 20,
-                  }}
+                  sx={getIconChipStyles(theme, categoryColor, sectionStyle)}
                 >
                   {category.icon}
                 </Box>

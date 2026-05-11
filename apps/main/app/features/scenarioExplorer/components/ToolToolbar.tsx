@@ -69,7 +69,6 @@ export default function ToolToolbar({
   useEffect(() => {
     if (!HOW_TO_READ_ENABLED) return
     if (
-      exploreMode !== "comparison" &&
       exploreMode !== "data" &&
       exploreMode !== "list" &&
       !seenHowToRead[exploreMode]

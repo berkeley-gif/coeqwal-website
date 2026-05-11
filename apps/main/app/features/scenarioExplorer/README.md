@@ -43,7 +43,7 @@ All tools are rendered inside `UnifiedToolLayout`, which provides a persistent t
 
 - **Sidebar** (optional): `ScenarioSelectionSidebar`. Scenario checkboxes, theme filter, pinning. Shown in non-list modes. Omitted in list mode.
 - **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips (Definitions, Baselines, Key ops, Chosen only), distribution toggle, show-map toggle, location picker, hydroclimate chooser. In list mode, uses CSS Grid aligned with `StrategyGrid` columns. In other modes, uses inline flex layout.
-- **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
+- **Tool content**: The active tool component (ListView, RadarPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
 ## Key components
@@ -58,7 +58,7 @@ Renders the top-level tab bar and, when `mainView === "explorer"`, wraps everyth
 
 ```typescript
 {exploreMode === "list" && <ListView />}
-{exploreMode === "comparison" && <ComparisonPanel />}
+{exploreMode === "radar" && <RadarPanel />}
 {exploreMode === "equity" && <EquityPanel />}
 {exploreMode === "resilience" && <ResiliencePanel />}
 {exploreMode === "data" && <DataExplorerView />}
@@ -193,9 +193,9 @@ const {
 } = useResolvedScenarioTiers()
 
 // Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, parallel plot transforms)
-import { useComparisonData } from "../hooks/useComparisonData"
+import { useTierChartData } from "../hooks/useTierChartData"
 const { data, axes, lineColors, baselineScenario, isLoading } =
-  useComparisonData()
+  useTierChartData()
 
 // Lower-level: scenario list (sibling group metadata, display helpers)
 import { useScenarioList } from "../../scenarios/hooks"

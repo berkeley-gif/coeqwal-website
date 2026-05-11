@@ -907,6 +907,10 @@ const theme = createTheme({
     background: {
       default: themeValues.palette.common.white,
       paper: themeValues.palette.common.white,
+      // Outer tool-pane surface that white "paper" cards float on.
+      // Used by the explorer tools (List, Radar, Resilience, Equity,
+      // Data in Depth) for their main scrollable area.
+      toolPanel: themeValues.palette.grey[100],
     },
     text: {
       primary: themeValues.palette.brand.panelDark,
@@ -1854,6 +1858,12 @@ export default theme
  * @see https://www.typescriptlang.org/docs/handbook/2/typeof-types.html
  */
 declare module "@mui/material/styles" {
+  // Add the tool-pane surface to MUI's standard background type so
+  // `theme.palette.background.toolPanel` autocompletes.
+  interface TypeBackground {
+    toolPanel: string
+  }
+
   // Custom palette colors - derived from themeValues.palette
   interface Palette {
     interaction: { hoverBackground: string; selectedBackground: string }

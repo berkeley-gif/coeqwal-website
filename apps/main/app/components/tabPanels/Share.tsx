@@ -29,7 +29,7 @@ import {
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
-import { useComparisonData } from "../../features/scenarioExplorer/hooks/useComparisonData"
+import { useTierChartData } from "../../features/scenarioExplorer/hooks/useTierChartData"
 import {
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
@@ -72,7 +72,7 @@ import { encodeShareItems } from "../../features/scenarioExplorer/share/url"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
- * and `useComparisonData(period, true)` in the share panel and drawer.
+ * and `useTierChartData(period, true)` in the share panel and drawer.
  */
 export type ShareRenderLiveData = ShareRadarLiveDataFields
 export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/share/utils/shareRadarLiveData"
@@ -545,12 +545,12 @@ export default function SharePanel() {
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
 
-  // One `useComparisonData(period, true)` per explore hydro so share
+  // One `useTierChartData(period, true)` per explore hydro so share
   // items use `item.hydroclimate`, with full parallel rows (not
   // showOnlyChosen-filtered) for URL / mixed-tray rehydration.
-  const compHistorical = useComparisonData("historical", true)
-  const compCc50 = useComparisonData("cc50", true)
-  const compCc95 = useComparisonData("cc95", true)
+  const compHistorical = useTierChartData("historical", true)
+  const compCc50 = useTierChartData("cc50", true)
+  const compCc95 = useTierChartData("cc95", true)
 
   const radarLiveByHydro = useMemo(
     () =>

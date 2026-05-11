@@ -14,7 +14,7 @@ export function normalizeShareRadarHydro(hc: string): ShareRadarHydroKey {
 
 /**
  * Live radar fields passed to each share card, scoped to one hydroclimate
- * (from `useComparisonData(hc, true)`).
+ * (from `useTierChartData(hc, true)`).
  */
 export interface ShareRadarLiveDataFields {
   radarPlotData: VerticalParallelLineData[]

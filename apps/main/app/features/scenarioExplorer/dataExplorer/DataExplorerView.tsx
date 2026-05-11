@@ -108,7 +108,7 @@ export default function DataExplorerView({
         sx={{
           flex: 1,
           overflowY: "auto",
-          backgroundColor: theme.palette.grey[50],
+          backgroundColor: theme.palette.background.toolPanel,
         }}
       >
         {!hasData ? (

@@ -1851,7 +1851,7 @@ export default function CwsSection({
           position: "sticky",
           top: 64,
           zIndex: 9,
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.paper,
           py: theme.space.component.sm,
           mx: -theme.space.component.xl,
           px: theme.space.component.xl,

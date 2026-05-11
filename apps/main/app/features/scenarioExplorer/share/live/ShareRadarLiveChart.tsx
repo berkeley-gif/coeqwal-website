@@ -36,7 +36,7 @@ export interface ShareRadarLiveChartProps {
   axes: string[]
   /** Line colors in the same order as `data`. */
   lineColors?: string[]
-  /** Baseline scenario from useComparisonData. */
+  /** Baseline scenario from useTierChartData. */
   baselineData?: VerticalParallelLineData | null
   /** Per-axis min/max across all scenarios in the hydroclimate. */
   axisRange?: Record<string, { min: number; max: number }>

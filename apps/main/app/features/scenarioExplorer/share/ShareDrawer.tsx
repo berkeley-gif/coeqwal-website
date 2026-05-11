@@ -12,7 +12,7 @@ import {
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-import { useComparisonData } from "../hooks/useComparisonData"
+import { useTierChartData } from "../hooks/useTierChartData"
 import {
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
@@ -130,9 +130,9 @@ export default function ShareDrawer() {
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
 
-  const compHistorical = useComparisonData("historical", true)
-  const compCc50 = useComparisonData("cc50", true)
-  const compCc95 = useComparisonData("cc95", true)
+  const compHistorical = useTierChartData("historical", true)
+  const compCc50 = useTierChartData("cc50", true)
+  const compCc95 = useTierChartData("cc95", true)
 
   const radarLiveByHydro = useMemo(
     () =>

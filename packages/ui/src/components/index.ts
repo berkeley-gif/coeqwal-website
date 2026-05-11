@@ -106,6 +106,10 @@ export {
 } from "./icons/DocumentIcons"
 export { WaterDroplet } from "./icons/WaterDroplet"
 export type { WaterDropletProps } from "./icons/WaterDroplet"
+export { Salmon } from "./icons/Salmon"
+export type { SalmonProps } from "./icons/Salmon"
+export { EnvironmentalRefuge } from "./icons/EnvironmentalRefuge"
+export type { EnvironmentalRefugeProps } from "./icons/EnvironmentalRefuge"
 
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"

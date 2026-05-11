@@ -22,7 +22,6 @@ import {
   AdjustIcon,
   AppsIcon,
   GridOnIcon,
-  CompareArrowsIcon,
   InsightsIcon,
   icons,
 } from "@repo/ui/mui"
@@ -75,13 +74,6 @@ const FLOW: FlowStep[] = [
     icon: <AdjustIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Radar",
     purpose: "Compare tradeoffs",
-  },
-  {
-    mode: "comparison",
-    icon: <CompareArrowsIcon sx={{ fontSize: "1.1rem" }} />,
-    label: "Comparison",
-    purpose: "Side by side",
-    research: true,
   },
   {
     mode: "equity",

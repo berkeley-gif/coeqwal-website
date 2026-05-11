@@ -8,9 +8,6 @@ import {
 } from "../../scenarios/hooks"
 import {
   type VerticalParallelLineData,
-  type TierHeatmapCell,
-  type SankeyScenarioFlow,
-  type TierSankeyGroup,
   getThemeLineColor,
 } from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
@@ -29,8 +26,6 @@ import {
 } from "../utils/scenarioIdSort"
 
 const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
-export const SANKEY_ALL_OUTCOMES = "__ALL__"
-
 const HC_HISTORICAL = "historical"
 
 /** Convert a tier mean (1-4 scale) to the radar chart's internal format,
@@ -40,20 +35,24 @@ function tierMeanToRadarValue(tierMean: number): number {
 }
 
 /**
- * Hook to transform tier data for VerticalParallelLinePlot.
+ * Tier data shaped for the radar chart and parallel-line plot
  *
- * Reads the active hydroclimatePeriod from the store, resolves each sibling
- * group to the correct variant's short_code, and passes the mapping into
- * useMultipleScenarioTiers so only 24 scenarios are fetched per hydroclimate.
- * All returned data is keyed by sibling group IDs, making downstream code
- * hydroclimate-agnostic.
+ * Reads the active hydroclimate from the store, resolves each sibling
+ * group to its variant's `short_code`, and fetches a single batch of
+ * tier results. All returned data is keyed by sibling-group ids so
+ * downstream chart code stays hydroclimate-agnostic.
  *
- * @param hydroclimateOverride When set (e.g. for share live radar), use this
- *   period for tier mapping and NOD/SOD handling instead of the store value.
- * @param includeAllScenariosInParallelPlot When true, do not filter by
- *   showOnlyChosen so every scenario row is available (share tray / URL).
+ * Used by RadarPanel, the Share tab, ShareDrawer, and the share-live
+ * radar chart.
+ *
+ * @param hydroclimateOverride Pin the hook to a specific hydroclimate
+ *   instead of reading the store (used by share captures rendered
+ *   out of band)
+ * @param includeAllScenariosInParallelPlot Skip the `showOnlyChosen`
+ *   filter so every scenario row appears in the plot (used by the
+ *   share tray and share URL hydration)
  */
-export function useComparisonData(
+export function useTierChartData(
   hydroclimateOverride?: string,
   includeAllScenariosInParallelPlot = false,
 ) {
@@ -66,7 +65,6 @@ export function useComparisonData(
 
   const {
     allScoreData,
-    allScenariosData,
     scenarioIds: allScenarioIds,
     isLoading: tiersLoading,
     error: tiersError,
@@ -121,11 +119,6 @@ export function useComparisonData(
     [scenarioIds, getThemeForScenario],
   )
 
-  const allScenarioIndexWithinTheme = useMemo(
-    () => buildIndexWithinThemeMap(allScenarioIds, getThemeForScenario),
-    [allScenarioIds, getThemeForScenario],
-  )
-
   // Build scenarios array with dynamic names and theme-aligned colors.
   // Within each theme, palette index follows the same order as the scenario sidebar
   // (primary baseline first, then ascending short code).
@@ -144,23 +137,6 @@ export function useComparisonData(
     getDisplayName,
     getThemeForScenario,
     scenarioIndexWithinTheme,
-  ])
-
-  const allScenarios = useMemo(() => {
-    return allScenarioIds.map((id) => {
-      const theme = getThemeForScenario(id) as ThemeKey
-      const idx = allScenarioIndexWithinTheme.get(id) ?? 0
-      return {
-        id,
-        name: getDisplayName(id),
-        color: getThemeLineColor(theme, idx, id),
-      }
-    })
-  }, [
-    allScenarioIds,
-    getDisplayName,
-    getThemeForScenario,
-    allScenarioIndexWithinTheme,
   ])
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
@@ -274,7 +250,6 @@ export function useComparisonData(
   }, [allScoreData, allScenarioIds, hydroclimate])
 
   const lineColors = useMemo(() => {
-    // Create a lookup from the scenarios array
     const colorMap = new Map<string, string>(
       scenarios.map((s) => [s.id, s.color]),
     )
@@ -316,173 +291,6 @@ export function useComparisonData(
     }
   }, [parallelPlotData, allScoreData, getDisplayName, hydroclimate])
 
-  // Tier heatmap data: scenario × outcome matrix
-  const heatmapCells = useMemo<TierHeatmapCell[]>(() => {
-    if (!allScoreData || !allScenariosData) return []
-    const cells: TierHeatmapCell[] = []
-    scenarios.forEach(({ id: scenarioId, name }) => {
-      const scores = allScoreData[scenarioId]
-      const raw = allScenariosData[scenarioId]
-      if (!scores) return
-      OUTCOME_CODE_ORDER.forEach((code) => {
-        const score = scores[code]
-        if (!score) return
-        let tierLevel: number
-        if (
-          raw?.tiers[code]?.type === "single_value" &&
-          raw.tiers[code].level
-        ) {
-          tierLevel = raw.tiers[code].level!
-        } else {
-          tierLevel = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
-        }
-        cells.push({
-          scenarioId,
-          scenarioName: name,
-          outcomeCode: code,
-          outcomeName: getOutcomeName(code),
-          tierLevel,
-          normalizedScore: score.normalized_score,
-        })
-      })
-    })
-    return cells
-  }, [allScoreData, allScenariosData, scenarios])
-
-  // Sankey data builder: returns flows for a given multi-value outcome code
-  const getSankeyData = useMemo(() => {
-    return (outcomeCode: string): SankeyScenarioFlow[] => {
-      if (!allScenariosData) return []
-      return scenarios
-        .map(({ id, name, color }) => {
-          const tierInfo = allScenariosData[id]?.tiers[outcomeCode]
-          if (!tierInfo || tierInfo.type !== "multi_value" || !tierInfo.data)
-            return null
-          return {
-            scenarioId: id,
-            scenarioName: name,
-            color,
-            flows: tierInfo.data.map((d) => ({
-              tier: d.tier,
-              value: d.value,
-            })),
-          }
-        })
-        .filter(Boolean) as SankeyScenarioFlow[]
-    }
-  }, [allScenariosData, scenarios])
-
-  // Multi-value outcome codes (for Sankey selector and "All Outcomes" aggregation)
-  const multiValueOutcomeCodes = useMemo(() => {
-    if (!allScenariosData) return [] as string[]
-    const firstScenario = Object.values(allScenariosData)[0]
-    if (!firstScenario) return [] as string[]
-    return OUTCOME_CODE_ORDER.filter(
-      (code) => firstScenario.tiers[code]?.type === "multi_value",
-    )
-  }, [allScenariosData])
-
-  // Sankey builder using ALL scenarios (unfiltered) for discovery/selection mode.
-  // When SANKEY_ALL_OUTCOMES, uses compound keys like "CWS_DEL:tier1" for per-outcome layout.
-  const getAllSankeyData = useMemo(() => {
-    return (outcomeCode: string): SankeyScenarioFlow[] => {
-      if (!allScenariosData) return []
-
-      if (outcomeCode === SANKEY_ALL_OUTCOMES) {
-        return allScenarios
-          .map(({ id, name, color }) => {
-            const scenarioTiers = allScenariosData[id]?.tiers
-            if (!scenarioTiers) return null
-            const flows: { tier: string; value: number }[] = []
-            multiValueOutcomeCodes.forEach((code) => {
-              const ti = scenarioTiers[code]
-              if (ti?.type === "multi_value" && ti.data) {
-                ti.data.forEach((d) => {
-                  if (d.value > 0) {
-                    flows.push({ tier: `${code}:${d.tier}`, value: d.value })
-                  }
-                })
-              }
-            })
-            if (flows.length === 0) return null
-            return { scenarioId: id, scenarioName: name, color, flows }
-          })
-          .filter(Boolean) as SankeyScenarioFlow[]
-      }
-
-      return allScenarios
-        .map(({ id, name, color }) => {
-          const tierInfo = allScenariosData[id]?.tiers[outcomeCode]
-          if (!tierInfo || tierInfo.type !== "multi_value" || !tierInfo.data)
-            return null
-          return {
-            scenarioId: id,
-            scenarioName: name,
-            color,
-            flows: tierInfo.data.map((d) => ({
-              tier: d.tier,
-              value: d.value,
-            })),
-          }
-        })
-        .filter(Boolean) as SankeyScenarioFlow[]
-    }
-  }, [allScenariosData, allScenarios, multiValueOutcomeCodes])
-
-  // Weighted-average Sankey: one flow per outcome to its rounded tier.
-  // When SANKEY_ALL_OUTCOMES, uses compound keys for per-outcome layout.
-  const getWeightedSankeyData = useMemo(() => {
-    return (outcomeCode: string): SankeyScenarioFlow[] => {
-      if (!allScoreData) return []
-
-      if (outcomeCode === SANKEY_ALL_OUTCOMES) {
-        return allScenarios
-          .map(({ id, name, color }) => {
-            const scores = allScoreData[id]
-            if (!scores) return null
-            const flows: { tier: string; value: number }[] = []
-            OUTCOME_CODE_ORDER.forEach((code) => {
-              const s = scores[code]
-              if (!s) return
-              const t = Math.min(4, Math.max(1, Math.round(s.weighted_score)))
-              flows.push({ tier: `${code}:tier${t}`, value: 1 })
-            })
-            if (flows.length === 0) return null
-            return { scenarioId: id, scenarioName: name, color, flows }
-          })
-          .filter(Boolean) as SankeyScenarioFlow[]
-      }
-
-      return allScenarios
-        .map(({ id, name, color }) => {
-          const score = allScoreData[id]?.[outcomeCode]
-          if (!score) return null
-          const tier = Math.min(
-            4,
-            Math.max(1, Math.round(score.weighted_score)),
-          )
-          const tierKey = `tier${tier}`
-          return {
-            scenarioId: id,
-            scenarioName: name,
-            color,
-            flows: [{ tier: tierKey, value: 1 }],
-          }
-        })
-        .filter(Boolean) as SankeyScenarioFlow[]
-    }
-  }, [allScoreData, allScenarios])
-
-  // Groups for the grouped Sankey layout (one group per outcome)
-  const sankeyGroups = useMemo<TierSankeyGroup[]>(
-    () =>
-      OUTCOME_CODE_ORDER.map((code) => ({
-        key: code,
-        label: getOutcomeName(code),
-      })),
-    [],
-  )
-
   return {
     data: parallelPlotData,
     axes,
@@ -494,12 +302,6 @@ export function useComparisonData(
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,
-    heatmapCells,
-    getSankeyData,
-    getAllSankeyData,
-    getWeightedSankeyData,
-    sankeyGroups,
-    multiValueOutcomeCodes,
     morphGeneration,
   }
 }

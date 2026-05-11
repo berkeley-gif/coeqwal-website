@@ -10,12 +10,12 @@ import React from "react"
 import {
   HomeIcon,
   AgricultureIcon,
-  SetMealIcon,
   ScienceIcon,
   WaterDropIcon,
   WavesIcon,
   type Theme,
 } from "@repo/ui/mui"
+import { Salmon, EnvironmentalRefuge } from "@repo/ui"
 
 export type TemporalScale = "monthly" | "annual" | "period-of-record"
 export type AggregationType =
@@ -92,7 +92,7 @@ export const outcomeCategories = [
   {
     id: "environmental-water",
     name: "Environmental water - refuges",
-    icon: <SetMealIcon fontSize="small" />,
+    icon: <EnvironmentalRefuge />,
   },
   {
     id: "delta-salinity",
@@ -112,7 +112,7 @@ export const outcomeCategories = [
   {
     id: "salmon-abundance",
     name: "Winter-run salmon",
-    icon: <SetMealIcon fontSize="small" />,
+    icon: <Salmon />,
   },
 ]
 

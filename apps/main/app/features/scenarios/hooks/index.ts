@@ -24,3 +24,8 @@ export {
   useResolvedIdMappings,
   type ResolvedIdMapping,
 } from "./useResolvedIdMapping"
+
+export {
+  useHydroclimateAvailability,
+  type HydroclimateAvailability,
+} from "./useHydroclimateAvailability"

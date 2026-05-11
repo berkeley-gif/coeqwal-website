@@ -21,7 +21,7 @@ import {
   useScenarioTiers,
 } from "../../../scenarios/hooks"
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
-import { HydroclimateUnavailablePlaceholder } from "../../../scenarios/components/HydroclimateUnavailablePlaceholder"
+import { HydroclimateGate } from "../../../scenarios/components/HydroclimateGate"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { useMapVisualizationAction, useActiveMapOutcome } from "../../hooks"
@@ -48,11 +48,10 @@ export function KeyOutcomesPanel({
   // Resolve the sibling-group scenarioId (e.g. "s0020") to the per-hydroclimate
   // variant short_code so the bar chart tiers reflect the user's hydroclimate
   // selection in the KeyOperationsPanel above. `null` means this sibling
-  // group has no variant for the active hydroclimate, in which case we
-  // render `HydroclimateUnavailablePlaceholder` in place of the glyph grids.
-  const { idMapping, missingScenarioIds, hydroclimate } = useResolvedIdMapping()
+  // group has no variant for the active hydroclimate, in which case
+  // `useScenarioTiers` no-ops and `HydroclimateGate` renders a placeholder.
+  const { idMapping } = useResolvedIdMapping()
   const resolvedScenarioId = idMapping[scenarioId] ?? null
-  const isMissingVariant = missingScenarioIds.includes(scenarioId)
 
   // Warm SWR for every hydroclimate variant so switching climates never
   // triggers a round-trip (and therefore never flashes "no data").
@@ -186,61 +185,47 @@ export function KeyOutcomesPanel({
         Key outcomes
       </Typography>
 
-      {isMissingVariant ? (
-        <HydroclimateUnavailablePlaceholder
-          hydroclimate={hydroclimate}
-          groupId={scenarioId}
-          variant="block"
-        />
-      ) : (
-        <>
-          {/* Multiple location outcomes - first 5 */}
-          <Typography
-            variant="smallSectionLabel"
-            sx={{ mb: theme.space.component.sm }}
-          >
-            Multiple location outcomes
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(3, 1fr)",
-                sm: "repeat(5, 1fr)",
-              },
-              gap: theme.space.gap.sm,
-              alignItems: "start",
-              // Tightened gap between the two grids so "Single location
-              // outcomes" sits closer to the "Multiple location outcomes"
-              // grid above it.
-              mb: theme.space.component.xs,
-            }}
-          >
-            {multipleLocationOutcomes.map(renderOutcomeItem)}
-          </Box>
+      <HydroclimateGate scenarioId={scenarioId} variant="block">
+        {/* Multiple location outcomes - first 5 */}
+        <Typography
+          variant="smallSectionLabel"
+          sx={{ mb: theme.space.component.sm }}
+        >
+          Multiple location outcomes
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(5, 1fr)" },
+            gap: theme.space.gap.sm,
+            alignItems: "start",
+            // Tightened gap between the two grids so "Single location
+            // outcomes" sits closer to the "Multiple location outcomes"
+            // grid above it.
+            mb: theme.space.component.xs,
+          }}
+        >
+          {multipleLocationOutcomes.map(renderOutcomeItem)}
+        </Box>
 
-          {/* Single location outcomes - last 4 */}
-          <Typography
-            variant="smallSectionLabel"
-            sx={{ mb: theme.space.component.sm }}
-          >
-            Single location outcomes
-          </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(3, 1fr)",
-                sm: "repeat(4, 1fr)",
-              },
-              gap: theme.space.gap.sm,
-              alignItems: "start",
-            }}
-          >
-            {singleLocationOutcomes.map(renderOutcomeItem)}
-          </Box>
-        </>
-      )}
+        {/* Single location outcomes - last 4 */}
+        <Typography
+          variant="smallSectionLabel"
+          sx={{ mb: theme.space.component.sm }}
+        >
+          Single location outcomes
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)" },
+            gap: theme.space.gap.sm,
+            alignItems: "start",
+          }}
+        >
+          {singleLocationOutcomes.map(renderOutcomeItem)}
+        </Box>
+      </HydroclimateGate>
     </Box>
   )
 }

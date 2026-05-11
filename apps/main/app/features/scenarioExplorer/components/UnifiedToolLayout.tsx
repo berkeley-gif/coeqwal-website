@@ -122,7 +122,7 @@ export default function UnifiedToolLayout({
         }}
       >
         {/* Chart title row */}
-        {exploreMode !== "comparison" && exploreMode !== "data" && (
+        {exploreMode !== "data" && (
           <Box sx={{ flexShrink: 0 }}>
             <ToolJourneyStrip mode={exploreMode} />
           </Box>

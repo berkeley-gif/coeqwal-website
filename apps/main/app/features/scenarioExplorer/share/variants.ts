@@ -100,7 +100,7 @@ export interface DataRehydrationContext {
   /**
    * Per-hydroclimate radar live fields. Each entry already carries
    * the scenario-keyed plot data the radar exporter needs. Sourced
-   * from `useComparisonData(hc, true)`.
+   * from `useTierChartData(hc, true)`.
    */
   radarLiveByHydro: Record<ShareRadarHydroKey, ShareRadarLiveDataFields>
   /**

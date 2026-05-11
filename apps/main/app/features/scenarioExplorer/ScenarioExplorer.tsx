@@ -24,7 +24,6 @@ import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import ToolTour from "./components/ToolTour"
 import { TourAnchorProvider, useTourAnchor } from "./tour/TourAnchorContext"
 import {
-  ComparisonPanel,
   EquityPanel,
   ResiliencePanel,
   ResilienceQuadrantPanel,
@@ -828,12 +827,6 @@ function ScenarioExplorerInner() {
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}
-                {exploreMode === "comparison" && (
-                  <ComparisonPanel
-                    highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
-                  />
-                )}
                 {exploreMode === "resilience" &&
                   (resilienceControls.view === "quadrant" ? (
                     <ResilienceQuadrantPanel

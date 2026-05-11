@@ -4,7 +4,7 @@
  * RadarPanel - Radar chart view for scenario comparison.
  *
  * Wraps the @repo/viz RadarPlot component with store-driven data
- * via the shared useComparisonData hook. Supports hover coordination
+ * via the shared useTierChartData hook. Supports hover coordination
  * with the sidebar and other panels. Sidebar `highlightedIds` append
  * scenarios to the chart so their traces render even when not selected.
  */
@@ -27,7 +27,7 @@ import {
   type VerticalParallelLineData,
 } from "@repo/viz"
 import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
-import { useComparisonData } from "../hooks/useComparisonData"
+import { useTierChartData } from "../hooks/useTierChartData"
 import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -456,7 +456,7 @@ export default function RadarPanel({
     isLoading,
     hasData,
     morphGeneration,
-  } = useComparisonData()
+  } = useTierChartData()
 
   const selectedSet = useMemo(
     () => new Set(selectedScenarios),
