@@ -490,6 +490,7 @@ export default function AlignedScenarioGrid({
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.borderRadius.md,
         border: theme.border.light,
+        boxShadow: theme.shadow.subtle,
         p: theme.space.component.lg,
       }}
     >

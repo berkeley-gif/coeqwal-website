@@ -30,7 +30,7 @@ export function EnvironmentalRefuge({
   // rising up between the wing peaks to a small head and a forward-
   // pointing beak. Goes clockwise from the left wing tip.
   const heronPath =
-    "M2 7.5 C5 3 8 3 11 6 L11.4 5.6 C11 4 11 2 11.6 0.8 L12.2 0.5 L14.2 1.2 L13 1.6 C13 3 13.2 4.6 12.8 5.6 L13 6 C16 3 19 3 22 7.5 C19.5 6 17 6.5 14.2 8 C13.6 8.4 12.6 8.6 12 8.6 C11.4 8.6 10.4 8.4 9.8 8 C7 6.5 4.5 6 2 7.5 Z"
+    "M2 7.5 C5 3 8 3 11 6 L11.9 5.6 C11.7 4 11.8 2 12.4 0.7 L12.5 0.4 L14.2 0.9 L13 1.3 C12.8 2.5 12.7 4.5 12.6 5.6 L12.7 6 C16 3 19 3 22 7.5 C19.5 6 17 6.5 14.2 8 C13.6 8.4 12.6 8.6 12 8.6 C11.4 8.6 10.4 8.4 9.8 8 C7 6.5 4.5 6 2 7.5 Z"
 
   return (
     <svg

@@ -101,6 +101,7 @@ export type {
   BatchStorageData,
   BatchCwsData,
   BatchAgData,
+  BatchEnvFlowData,
   BatchStatisticsResponse,
   // Wildlife Refuge types
   RefugeDemandUnitData,

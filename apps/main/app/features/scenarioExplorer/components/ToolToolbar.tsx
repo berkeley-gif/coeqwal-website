@@ -7,28 +7,19 @@
  * with StrategyGrid columns. Otherwise uses a flex layout.
  */
 
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback } from "react"
 import {
   Box,
   Typography,
   useTheme,
   LocationOnIcon,
   Switch,
-  InfoOutlinedIcon,
 } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
 import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../store"
-import { HowToReadChartModal } from "./HowToReadChartModal"
 import { useTourAnchor } from "../tour/TourAnchorContext"
-
-/** Temporarily hide the "How to read this chart?" entry point across
- *  all tools. The modal content is not ready for external viewing yet;
- *  the modal itself, HowToReadChartModal, and the per-tool content
- *  under howToReadContent/ are intentionally preserved. Flip this
- *  flag back to `true` to restore the chip + first-visit auto-open. */
-const HOW_TO_READ_ENABLED = false
 
 interface ToolToolbarProps {
   gridAligned?: boolean
@@ -49,64 +40,11 @@ export default function ToolToolbar({
     setOutcomeDisplayMode,
     showKeyOperations,
     exploreMode,
-    seenHowToRead,
-    markHowToReadSeen,
   } = useScenarioExplorerStore()
 
   const showToolbarHydroclimateChooser = exploreMode !== "resilience"
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
-
-  // "How to read this chart?" modal. Each tool has its own content
-  // keyed by exploreMode (see HowToReadChartModal + howToReadContent/).
-  //
-  // List no longer auto-opens a welcome strip. Equity is
-  // owned by another developer and gets the legacy modal flow.
-  //
-  // When HOW_TO_READ_ENABLED is true, the chip opens the modal.
-  const [howToReadOpen, setHowToReadOpen] = useState(false)
-
-  useEffect(() => {
-    if (!HOW_TO_READ_ENABLED) return
-    if (
-      exploreMode !== "data" &&
-      exploreMode !== "list" &&
-      !seenHowToRead[exploreMode]
-    ) {
-      setHowToReadOpen(true)
-      markHowToReadSeen(exploreMode)
-    }
-  }, [exploreMode, seenHowToRead, markHowToReadSeen])
-
-  // Dev-only keystroke: press "?" to force-open the "How to read this
-  // chart?" modal for the active tool, even while HOW_TO_READ_ENABLED is
-  // false. Lets content authors review the legacy copy without flipping
-  // the flag or exposing the chip to end users. Ignored when typing in
-  // inputs or when any modifier key is held.
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null
-      if (
-        t &&
-        (t.tagName === "INPUT" ||
-          t.tagName === "TEXTAREA" ||
-          t.isContentEditable)
-      ) {
-        return
-      }
-      if (e.altKey || e.ctrlKey || e.metaKey) return
-      if (e.key === "?") {
-        e.preventDefault()
-        setHowToReadOpen((v) => !v)
-      }
-    }
-    document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [])
-
-  const handleHowToReadClick = () => {
-    setHowToReadOpen(true)
-  }
 
   // Register the climate-chip group as a tour anchor for the radar
   // tour. Resilience reuses this control too but its tour does not
@@ -145,43 +83,6 @@ export default function ToolToolbar({
           display: "contents",
         }}
       >
-        {HOW_TO_READ_ENABLED && (
-          <Box
-            component="button"
-            type="button"
-            onClick={handleHowToReadClick}
-            aria-label="How to read this chart"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 0.75,
-              py: 0.25,
-              border: "none",
-              borderRadius: "12px",
-              cursor: "pointer",
-              background: "transparent",
-              color: theme.palette.blue.bright,
-              transition: "background-color 120ms",
-              "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-              },
-            }}
-          >
-            <InfoOutlinedIcon sx={{ fontSize: "1rem" }} />
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                color: "inherit",
-              }}
-            >
-              How to read this chart?
-            </Typography>
-          </Box>
-        )}
-        {HOW_TO_READ_ENABLED && <VerticalDivider />}
         {/* Outcome view toggle (Average / Bar / Distribution) hidden
             . The list view reverts to its bar-chart
             default. The glyph click-through to map layers is
@@ -292,90 +193,79 @@ export default function ToolToolbar({
     </>
   )
 
-  const howToReadModal = (
-    <HowToReadChartModal
-      open={howToReadOpen}
-      onClose={() => setHowToReadOpen(false)}
-      exploreMode={exploreMode}
-    />
-  )
-
   if (gridAligned) {
     const SM = 600
     const FULL = theme.scenarios.grid.fullBreakpoint
 
     return (
-      <>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: theme.scenarios.grid.columns.xs,
-            [`@container strategy-grid (min-width: ${SM}px)`]: {
-              gridTemplateColumns: showKeyOperations
-                ? "32px minmax(0, 600px) 140px 1fr"
-                : "32px minmax(0, 600px) 0px 1fr",
-            },
-            [`@container strategy-grid (min-width: ${FULL}px)`]: {
-              gridTemplateColumns: showKeyOperations
-                ? theme.scenarios.grid.columns.full
-                : "32px 0.382fr 0px 1fr",
-            },
-            transition: "grid-template-columns 300ms ease",
-            columnGap: theme.scenarios.grid.gap.default,
-            px: theme.space.tool.px,
-            py: 0.5,
-            minHeight: 44,
-            alignItems: "center",
-          }}
-        >
-          {!hideTitle && (
-            <Box
-              sx={{
-                gridColumn: "1 / -1",
-                [`@container strategy-grid (min-width: ${SM}px)`]: {
-                  gridColumn: "1 / 4",
-                },
-                display: "none",
-                [`@container strategy-grid (min-width: ${FULL}px)`]: {
-                  display: "flex",
-                },
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "0.9375rem",
-                  fontWeight: 600,
-                  lineHeight: 1.3,
-                  color: theme.palette.text.primary,
-                }}
-              >
-                Scenario library
-              </Typography>
-            </Box>
-          )}
-
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: theme.scenarios.grid.columns.xs,
+          [`@container strategy-grid (min-width: ${SM}px)`]: {
+            gridTemplateColumns: showKeyOperations
+              ? "32px minmax(0, 600px) 140px 1fr"
+              : "32px minmax(0, 600px) 0px 1fr",
+          },
+          [`@container strategy-grid (min-width: ${FULL}px)`]: {
+            gridTemplateColumns: showKeyOperations
+              ? theme.scenarios.grid.columns.full
+              : "32px 0.382fr 0px 1fr",
+          },
+          transition: "grid-template-columns 300ms ease",
+          columnGap: theme.scenarios.grid.gap.default,
+          px: theme.space.tool.px,
+          py: 0.5,
+          minHeight: 44,
+          alignItems: "center",
+        }}
+      >
+        {!hideTitle && (
           <Box
-            ref={listViewAreaTourRef}
             sx={{
               gridColumn: "1 / -1",
-              pl: 0,
-              ...(!hideTitle && {
-                [`@container strategy-grid (min-width: ${FULL}px)`]: {
-                  gridColumn: "4",
-                },
-              }),
-              display: "flex",
+              [`@container strategy-grid (min-width: ${SM}px)`]: {
+                gridColumn: "1 / 4",
+              },
+              display: "none",
+              [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                display: "flex",
+              },
               alignItems: "center",
-              alignSelf: "stretch",
-              gap: 2,
             }}
           >
-            {viewControls}
+            <Typography
+              sx={{
+                fontSize: "0.9375rem",
+                fontWeight: 600,
+                lineHeight: 1.3,
+                color: theme.palette.text.primary,
+              }}
+            >
+              Scenario library
+            </Typography>
           </Box>
+        )}
+
+        <Box
+          ref={listViewAreaTourRef}
+          sx={{
+            gridColumn: "1 / -1",
+            pl: 0,
+            ...(!hideTitle && {
+              [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                gridColumn: "4",
+              },
+            }),
+            display: "flex",
+            alignItems: "center",
+            alignSelf: "stretch",
+            gap: 2,
+          }}
+        >
+          {viewControls}
         </Box>
-        {howToReadModal}
-      </>
+      </Box>
     )
   }
 
@@ -383,23 +273,20 @@ export default function ToolToolbar({
   const nonListViewAreaRef =
     exploreMode === "radar" ? radarViewAreaTourRef : undefined
   return (
-    <>
-      <Box
-        ref={nonListViewAreaRef}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          px: theme.space.tool.px,
-          py: 0.5,
-          minHeight: 44,
-          flexWrap: "wrap",
-        }}
-      >
-        {viewControls}
-      </Box>
-      {howToReadModal}
-    </>
+    <Box
+      ref={nonListViewAreaRef}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        px: theme.space.tool.px,
+        py: 0.5,
+        minHeight: 44,
+        flexWrap: "wrap",
+      }}
+    >
+      {viewControls}
+    </Box>
   )
 }
 

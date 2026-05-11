@@ -24,9 +24,8 @@ import type { ChartDataPoint } from "../../../scenarios/components/shared"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import {
-  useAgAggregatesMonthly,
-  useAgAggregatesPeriod,
   useAgDemandUnitsDeliveryMonthly,
   useAgDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
@@ -36,6 +35,8 @@ import type {
   AgDemandUnitDeliveryData,
   AgDemandUnitPeriodSummary,
   CwsDeliveryMonthlyStats,
+  BatchStatisticsResponse,
+  BatchAgData,
 } from "@repo/data/coeqwal"
 import {
   outcomeCategories,
@@ -44,6 +45,7 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import { SectionHeader } from "./SectionHeader"
 
 // ============================================================================
 // Constants
@@ -104,60 +106,6 @@ const AG_AGGREGATE_SORT_ORDER: Record<string, number> = {
   swp_pag: 2,
   cvp_pag_n: 3,
   cvp_pag_s: 4,
-}
-
-// ============================================================================
-// Section Header Component
-// ============================================================================
-
-interface SectionHeaderProps {
-  title: string
-  titleAdornment?: React.ReactNode
-  description?: React.ReactNode
-}
-
-function SectionHeader({
-  title,
-  titleAdornment,
-  description,
-}: SectionHeaderProps) {
-  const theme = useTheme()
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: theme.space.gap.sm,
-        }}
-      >
-        <Typography
-          variant="overline"
-          sx={{
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {title}
-        </Typography>
-        {titleAdornment}
-      </Box>
-
-      {description && (
-        <Box
-          sx={{
-            color: theme.palette.grey[600],
-            mt: 0.5,
-            ...theme.typography.dashboard,
-          }}
-        >
-          {description}
-        </Box>
-      )}
-    </Box>
-  )
 }
 
 // ============================================================================
@@ -413,41 +361,25 @@ function deliveryStatsToPercentiles(
 }
 
 /**
- * Hook to fetch AG aggregate data for multiple scenarios
+ * Build the AG aggregates view from the batch response.
  *
- * AG aggregates have delivery data only.
+ * Sourced from `batchData.ag[scenarioId].monthly.aggregates` and
+ * `.period.aggregates`. AG aggregates have delivery data only. Loading
+ * state is owned by the batch hook upstream.
  */
-function useMultiScenarioAgAggregates(scenarios: string[]) {
-  // Fetch monthly data for each scenario
-  const monthlyResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAgAggregatesMonthly(scenarioId)
-  })
-
-  // Fetch period summary for ALL scenarios (for per-cell stats)
-  const periodResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAgAggregatesPeriod(scenarioId)
-  })
-
-  const isLoading =
-    monthlyResults.some((r) => r.isLoading) ||
-    periodResults.some((r) => r.isLoading)
-  const error =
-    monthlyResults.find((r) => r.error)?.error ??
-    periodResults.find((r) => r.error)?.error ??
-    null
-
+function buildAgAggregatesData(
+  scenarios: string[],
+  agBatch: Record<string, BatchAgData> | undefined,
+) {
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
   const cellStats: CellStatsMap = {}
 
-  // Process period summaries for all scenarios to build cell stats
-  periodResults.forEach((periodResult, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !periodResult.aggregates) return
+  scenarios.forEach((scenarioId) => {
+    const periodAggregates = agBatch?.[scenarioId]?.period?.aggregates
+    if (!periodAggregates) return
 
-    Object.entries(periodResult.aggregates).forEach(
+    Object.entries(periodAggregates).forEach(
       ([shortCode, summary]: [string, AgAggregatePeriodSummary]) => {
         if (!entityMap[shortCode]) {
           const displayLabel =
@@ -469,12 +401,11 @@ function useMultiScenarioAgAggregates(scenarios: string[]) {
     )
   })
 
-  // Process monthly data for each scenario
-  monthlyResults.forEach((result, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !result.aggregates) return
+  scenarios.forEach((scenarioId) => {
+    const monthlyAggregates = agBatch?.[scenarioId]?.monthly?.aggregates
+    if (!monthlyAggregates) return
 
-    Object.entries(result.aggregates).forEach(
+    Object.entries(monthlyAggregates).forEach(
       ([shortCode, data]: [string, AgAggregateData]) => {
         if (!data) return
         if (!entityMap[shortCode]) {
@@ -492,11 +423,6 @@ function useMultiScenarioAgAggregates(scenarios: string[]) {
     )
   })
 
-  // Track which scenarios are still loading
-  const loadingScenarios = scenarios.filter(
-    (_, index) => monthlyResults[index]?.isLoading ?? false,
-  )
-
   const entities = Object.values(entityMap)
     .filter((e) => e && e.label)
     .sort((a, b) => {
@@ -506,7 +432,7 @@ function useMultiScenarioAgAggregates(scenarios: string[]) {
       return (a.label ?? "").localeCompare(b.label ?? "")
     })
 
-  return { entities, matrixData, cellStats, isLoading, error, loadingScenarios }
+  return { entities, matrixData, cellStats }
 }
 
 /**
@@ -517,17 +443,14 @@ function useMultiScenarioAgAggregates(scenarios: string[]) {
  * make up any shortage with groundwater pumping.
  */
 function useMultiScenarioAgDemandUnits(scenarios: string[]) {
-  // Fetch delivery monthly for each scenario
-  const deliveryResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAgDemandUnitsDeliveryMonthly(scenarioId)
-  })
-
-  // Fetch period summary for ALL scenarios (for per-cell stats)
-  const periodResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAgDemandUnitsPeriod(scenarioId)
-  })
+  const deliveryResults = useMultiScenarioSlots(
+    scenarios,
+    useAgDemandUnitsDeliveryMonthly,
+  )
+  const periodResults = useMultiScenarioSlots(
+    scenarios,
+    useAgDemandUnitsPeriod,
+  )
 
   const isLoading =
     deliveryResults.some((r) => r.isLoading) ||
@@ -616,13 +539,22 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
 }
 
 /**
- * Combined hook that delegates to the appropriate entity-level hook
+ * Combined hook that delegates to the appropriate entity-level hook.
+ *
+ * The "aggregates" view sources from the batched response (`agBatch`).
+ * The "demand-units" view still fans out per scenario because the batch
+ * API doesn't cover AG demand units.
  */
 function useMultiScenarioAgData(
   scenarios: string[],
   entityLevel: AgEntityLevel,
+  agBatch: Record<string, BatchAgData> | undefined,
+  isBatchLoading: boolean,
 ) {
-  const aggregatesData = useMultiScenarioAgAggregates(scenarios)
+  const aggregatesData = useMemo(
+    () => buildAgAggregatesData(scenarios, agBatch),
+    [scenarios, agBatch],
+  )
   const demandUnitsData = useMultiScenarioAgDemandUnits(scenarios)
 
   switch (entityLevel) {
@@ -641,9 +573,9 @@ function useMultiScenarioAgData(
         entities: aggregatesData.entities,
         matrixData: aggregatesData.matrixData,
         cellStats: aggregatesData.cellStats,
-        isLoading: aggregatesData.isLoading,
-        error: aggregatesData.error,
-        loadingScenarios: aggregatesData.loadingScenarios,
+        isLoading: isBatchLoading,
+        error: null,
+        loadingScenarios: isBatchLoading ? scenarios : [],
       }
   }
 }
@@ -655,12 +587,18 @@ function useMultiScenarioAgData(
 interface MonthlyAgSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** AG slice of the batched response (keyed by scenario id) */
+  agBatch: Record<string, BatchAgData> | undefined
+  /** Whether the batched fetch is still in flight */
+  isBatchLoading: boolean
   isModal?: boolean
 }
 
 function MonthlyAgSection({
   scenarios,
   scenarioNames,
+  agBatch,
+  isBatchLoading,
   isModal = false,
 }: MonthlyAgSectionProps) {
   const theme = useTheme()
@@ -669,7 +607,7 @@ function MonthlyAgSection({
   const [regionFilter, _setRegionFilter] = useState<AgRegionFilter>("all")
 
   const { entities, matrixData, cellStats, error, loadingScenarios } =
-    useMultiScenarioAgData(scenarios, entityLevel)
+    useMultiScenarioAgData(scenarios, entityLevel, agBatch, isBatchLoading)
 
   // Track when data arrives - set true when entities load, false when empty
   // (e.g., switching entity level before data loads)
@@ -885,21 +823,21 @@ function MonthlyAgSection({
 interface AgSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
-  /** Pre-fetched batch data for performance (optional) */
-  batchData?: import("@repo/data/coeqwal").BatchStatisticsResponse
+  /** Pre-fetched batch response (storage/cws/ag/env_flow keyed by scenario) */
+  batchData: BatchStatisticsResponse | undefined
+  /** Whether the batched fetch is still in flight */
+  isBatchLoading: boolean
 }
 
 export default function AgSection({
   scenarios,
   scenarioNames,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   batchData,
+  isBatchLoading,
 }: AgSectionProps) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
-
-  // Note: batchData contains pre-fetched AG aggregate data
-  // It can be used to speed up initial rendering (future enhancement)
+  const agBatch = batchData?.ag
 
   return (
     <>
@@ -928,9 +866,10 @@ export default function AgSection({
       <Box sx={{ mt: theme.space.component.md }}>
         <Box
           sx={{
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: theme.borderRadius.md,
-            border: theme.border.light,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
             mb: theme.space.component.lg,
           }}
@@ -950,9 +889,10 @@ export default function AgSection({
         {/* Monthly delivery section */}
         <Box
           sx={{
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: theme.borderRadius.md,
-            border: theme.border.light,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
           }}
         >
@@ -960,6 +900,8 @@ export default function AgSection({
             <MonthlyAgSection
               scenarios={scenarios}
               scenarioNames={scenarioNames}
+              agBatch={agBatch}
+              isBatchLoading={isBatchLoading}
             />
           </ChartGridProvider>
         </Box>
@@ -1019,9 +961,10 @@ export default function AgSection({
           {/* Revenue tier section */}
           <Box
             sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: theme.borderRadius.md,
-              border: theme.border.light,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
               mb: theme.space.component.lg,
             }}
@@ -1047,9 +990,10 @@ export default function AgSection({
           {/* Monthly delivery section */}
           <Box
             sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: theme.borderRadius.md,
-              border: theme.border.light,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
             }}
           >
@@ -1057,6 +1001,8 @@ export default function AgSection({
               <MonthlyAgSection
                 scenarios={scenarios}
                 scenarioNames={scenarioNames}
+                agBatch={agBatch}
+                isBatchLoading={isBatchLoading}
                 isModal
               />
             </ChartGridProvider>

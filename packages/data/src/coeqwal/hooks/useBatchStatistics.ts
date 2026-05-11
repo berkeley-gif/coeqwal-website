@@ -3,8 +3,8 @@
 /**
  * Hook for batch-fetching statistics data for multiple scenarios
  *
- * This hook dramatically improves Data Explorer load time by fetching
- * storage, CWS, and AG data in a single request instead of N×M requests.
+ * Powers the Data Explorer's "Data in Depth" tab: storage, CWS, AG, and
+ * env_flow data for N scenarios arrive in one request instead of dozens.
  */
 
 import useSWR from "swr"
@@ -15,12 +15,13 @@ import type {
   BatchStorageData,
   BatchCwsData,
   BatchAgData,
+  BatchEnvFlowData,
 } from "../types"
 
-export type DataType = "storage" | "cws" | "ag"
+export type DataType = "storage" | "cws" | "ag" | "env_flow"
 
 interface UseBatchStatisticsOptions {
-  /** Data types to fetch (default: all) */
+  /** Data types to fetch (default: all four) */
   types?: DataType[]
   /** Whether to fetch data (default: true) */
   enabled?: boolean
@@ -35,6 +36,8 @@ interface UseBatchStatisticsReturn {
   cws: Record<string, BatchCwsData> | undefined
   /** AG data by scenario ID */
   ag: Record<string, BatchAgData> | undefined
+  /** Environmental flow data by scenario ID */
+  envFlow: Record<string, BatchEnvFlowData> | undefined
   /** Whether data is loading */
   isLoading: boolean
   /** Whether any data has been fetched */
@@ -75,12 +78,11 @@ export function useBatchStatistics(
   scenarios: string[],
   options: UseBatchStatisticsOptions = {},
 ): UseBatchStatisticsReturn {
-  const { types = ["storage", "cws", "ag"], enabled = true } = options
+  const { types = ["storage", "cws", "ag", "env_flow"], enabled = true } =
+    options
 
-  // Only fetch if we have scenarios and enabled
   const shouldFetch = enabled && scenarios.length > 0
 
-  // Create a stable cache key
   const cacheKey = shouldFetch
     ? CACHE_KEYS.batchStatistics(scenarios, types)
     : null
@@ -97,7 +99,7 @@ export function useBatchStatistics(
     {
       revalidateOnFocus: false,
       // When scenarios change the cache key changes, so fresh data is fetched
-      // automatically.no need to suppress deduplication.
+      // automatically. No need to suppress deduplication.
       revalidateOnReconnect: true,
     },
   )
@@ -109,6 +111,7 @@ export function useBatchStatistics(
     storage: data?.storage,
     cws: data?.cws,
     ag: data?.ag,
+    envFlow: data?.env_flow,
     isLoading,
     isValidating,
     error,
@@ -116,9 +119,7 @@ export function useBatchStatistics(
   }
 }
 
-/**
- * Helper to extract storage data for a specific scenario from batch response
- */
+/** Per-scenario lookup helpers for the batch response */
 export function getStorageForScenario(
   batchData: BatchStatisticsResponse | undefined,
   scenarioId: string,
@@ -126,9 +127,6 @@ export function getStorageForScenario(
   return batchData?.storage?.[scenarioId]
 }
 
-/**
- * Helper to extract CWS data for a specific scenario from batch response
- */
 export function getCwsForScenario(
   batchData: BatchStatisticsResponse | undefined,
   scenarioId: string,
@@ -136,12 +134,16 @@ export function getCwsForScenario(
   return batchData?.cws?.[scenarioId]
 }
 
-/**
- * Helper to extract AG data for a specific scenario from batch response
- */
 export function getAgForScenario(
   batchData: BatchStatisticsResponse | undefined,
   scenarioId: string,
 ): BatchAgData | undefined {
   return batchData?.ag?.[scenarioId]
+}
+
+export function getEnvFlowForScenario(
+  batchData: BatchStatisticsResponse | undefined,
+  scenarioId: string,
+): BatchEnvFlowData | undefined {
+  return batchData?.env_flow?.[scenarioId]
 }

@@ -29,25 +29,38 @@ ScenarioExplorer
 
 ## Data hooks
 
-The components use these data-fetching hooks:
+- `useMetricData` - tier data for metrics
+- `useBatchStatistics` - batched fetch for storage, CWS, AG, and env_flow.
+  Called once in `CategoryView` and threaded into the section components
+  that consume the corresponding slices.
+- `useMultiScenarioSlots` - stable per-scenario hook fan-out for sections
+  not covered by the batch endpoint (refuge, delta, M&I contractors,
+  demand units, spill, additional reservoirs)
 
-- `useMetricData` - Tier data for metrics
-- `useBatchStatistics` - Batch fetch for storage, CWS, and AG data (used in CategoryView)
-- `useStorageMonthly` - Reservoir storage percentiles
-- `useCwsAggregatesMonthly` - CWS aggregate delivery/shortage
-- `useAgAggregatesMonthly` - Agricultural delivery data
+## Performance: batched fetches
 
-## Performance optimization
-
-The `CategoryView` component uses `useBatchStatistics` to prefetch data for all selected scenarios in a single API request. This dramatically reduces load time compared to making individual requests for each scenario and data type.
+`CategoryView` calls `useBatchStatistics(selectedScenarios)` once and
+passes the result down to the sections backed by the batch endpoint
+(storage, CWS aggregates, AG aggregates, env_flow). Each section reads
+its slice from `batchData` instead of fanning out N individual requests.
 
 ```typescript
-// Example: Prefetch storage, CWS, and AG data for selected scenarios
-const { data: batchData, isLoading } = useBatchStatistics(selectedScenarios)
+const { data: batchData, isLoading: isBatchLoading } = useBatchStatistics(
+  selectedScenarios,
+  { types: ["storage", "cws", "ag", "env_flow"] },
+)
 
-// The batch data is passed to child components for faster rendering
-<CwsSection scenarios={scenarios} batchData={batchData} />
-<AgSection scenarios={scenarios} batchData={batchData} />
+<ReservoirStorageSection scenarios={scenarios} batchData={batchData} isBatchLoading={isBatchLoading} />
+<CwsSection scenarios={scenarios} batchData={batchData} isBatchLoading={isBatchLoading} />
+<AgSection scenarios={scenarios} batchData={batchData} isBatchLoading={isBatchLoading} />
+<EnvFlowSection scenarios={scenarios} batchData={batchData} isBatchLoading={isBatchLoading} />
 ```
 
-The batch endpoint (`/api/statistics/batch`) reduces ~24 individual API requests to just 1 request.
+The batch endpoint (`/api/statistics/batch`) collapses what was N
+scenarios × M sub-queries into a single request whose sub-queries fan
+out in parallel server-side.
+
+Sections backed by other endpoints (M&I contractors, demand units,
+refuge, delta, spill, additional reservoirs) keep using
+`useMultiScenarioSlots`, which calls a fixed number of hook slots so the
+hook order stays stable when the scenario list changes mid-render.

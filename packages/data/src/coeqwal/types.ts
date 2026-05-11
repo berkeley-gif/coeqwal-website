@@ -1017,7 +1017,12 @@ export interface ReservoirPeriodSummaryResponse {
 // ============================================================================
 
 /**
- * Storage data for a single scenario in batch response
+ * Storage data for a single scenario in batch response.
+ *
+ * Mirrors `fetch_storage_monthly` on the backend. `monthly_percent` and
+ * `monthly_taf` are keyed by water-month string. Note the backend doesn't
+ * populate `dead_pool_taf` here. To get dead-pool metadata, use
+ * `useGroupedReservoirPercentiles`.
  */
 export interface BatchStorageData {
   scenario_id: string
@@ -1026,9 +1031,8 @@ export interface BatchStorageData {
     {
       name: string
       capacity_taf: number | null
-      dead_pool_taf: number | null
-      monthly_percent: Record<string, MonthlyPercentiles>
-      monthly_taf: Record<string, MonthlyPercentiles>
+      monthly_percent: MonthlyPercentiles
+      monthly_taf: MonthlyPercentiles
     }
   >
 }
@@ -1050,15 +1054,31 @@ export interface BatchAgData {
 }
 
 /**
+ * Environmental flow data for a single scenario in batch response.
+ *
+ * Each sub-call may fail independently in the backend (which returns the
+ * partial result rather than failing the whole batch), so each field is
+ * optional.
+ */
+export interface BatchEnvFlowData {
+  monthly?: ChannelsMonthlyResponse
+  seasonal?: ChannelsSeasonalResponse
+  period?: ChannelsPeriodSummaryResponse
+}
+
+/**
  * Response from /api/statistics/batch
  *
- * Combines storage, CWS, and AG data for multiple scenarios in a single response.
+ * Combines storage, CWS, AG, and env_flow data for multiple scenarios in
+ * a single response. Sub-fields are populated only when the caller requests
+ * the corresponding type via the `types` query param.
  */
 export interface BatchStatisticsResponse {
   scenarios: string[]
   storage?: Record<string, BatchStorageData>
   cws?: Record<string, BatchCwsData>
   ag?: Record<string, BatchAgData>
+  env_flow?: Record<string, BatchEnvFlowData>
 }
 
 // ============================================================================

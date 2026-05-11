@@ -41,6 +41,7 @@ import {
   type OutcomeCode,
   type NodSodCode,
 } from "../../../content/outcomes"
+import { HYDROCLIMATE_LABELS_BY_VALUE } from "../../../content/scenarios"
 
 const HC_HISTORICAL = "historical"
 const HC_CC50 = "cc50"
@@ -258,6 +259,17 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
       },
     }
 
+    // Per-hc set of scenarios with no variant for that hydroclimate.
+    // Used to mark aggregate cells with a specific tooltip reason so the
+    // hatch pattern doesn't read as a generic "no data" gap.
+    // NOD/SOD cells are sourced from a separate dataset and have their
+    // own availability path.
+    const missingByHc: Record<ResilienceHydroclimate, Set<string>> = {
+      [HC_HISTORICAL]: new Set(mappings[HC_HISTORICAL]?.missingScenarioIds),
+      [HC_CC50]: new Set(mappings[HC_CC50]?.missingScenarioIds),
+      [HC_CC95]: new Set(mappings[HC_CC95]?.missingScenarioIds),
+    }
+
     for (const scenarioId of scenarioIds) {
       const perOutcome: Record<
         string,
@@ -275,6 +287,17 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
               outcomeCode as NodSodCode,
               hc,
             )
+          } else if (missingByHc[hc].has(scenarioId)) {
+            const hcLabel = HYDROCLIMATE_LABELS_BY_VALUE[hc] ?? hc
+            perHc[hc] = {
+              scenarioId,
+              outcomeCode,
+              hydroclimate: hc,
+              available: false,
+              unavailableReason: `${scenarioId} has not been run with the ${hcLabel} hydroclimate`,
+              continuousValue: null,
+              tierLevel: null,
+            }
           } else {
             const { scores, raw } = hcSources[hc]
             perHc[hc] = buildAggregateCell(
@@ -293,6 +316,7 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
     return result
   }, [
     scenarioIds,
+    mappings,
     historicalTiers.allScoreData,
     historicalTiers.allScenariosData,
     cc50Tiers.allScoreData,

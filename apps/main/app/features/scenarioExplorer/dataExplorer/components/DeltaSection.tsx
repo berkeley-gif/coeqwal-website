@@ -23,8 +23,15 @@ import type { ReservoirData, MonthlyPercentiles } from "@repo/viz"
 import { GridScenarioHeader, GridRow } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
-import { useDeltaMonthly, useChannelsMonthly } from "@repo/data/coeqwal/hooks"
-import type { DeltaMonthlyStats, ChannelMonthlyStats } from "@repo/data/coeqwal"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { useDeltaMonthly } from "@repo/data/coeqwal/hooks"
+import type {
+  DeltaMonthlyStats,
+  ChannelMonthlyStats,
+  BatchStatisticsResponse,
+  BatchEnvFlowData,
+} from "@repo/data/coeqwal"
+import { SectionHeader } from "./SectionHeader"
 
 // ============================================================================
 // Constants
@@ -175,25 +182,29 @@ function buildChannelEntities(
 // Multi-scenario data hooks
 // ============================================================================
 
-function useMultiScenarioChannels(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useChannelsMonthly(scenarioId)
-  })
-
-  const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter(
-    (_, i) => results[i]?.isLoading ?? false,
-  )
-
+/**
+ * Pull each scenario's monthly channel rows out of the batched env_flow
+ * response. The DeltaSection only consumes a fixed subset of channels
+ * (Sacramento at Hood, SJR at Vernalis, Banks, Tracy), so we keep the
+ * full row list and let `buildChannelMatrix` filter at use time.
+ */
+function deriveChannelData(
+  scenarios: string[],
+  envFlowBatch: Record<string, BatchEnvFlowData> | undefined,
+  isBatchLoading: boolean,
+) {
   const allData: Record<string, ChannelMonthlyStats[]> = {}
-  results.forEach((result, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !result.rows.length) return
-    allData[scenarioId] = result.rows
+  scenarios.forEach((scenarioId) => {
+    const rows = envFlowBatch?.[scenarioId]?.monthly?.data
+    if (!rows?.length) return
+    allData[scenarioId] = rows
   })
 
-  return { allData, isLoading, loadingScenarios }
+  return {
+    allData,
+    isLoading: isBatchLoading,
+    loadingScenarios: isBatchLoading ? scenarios : [],
+  }
 }
 
 function buildChannelMatrix(
@@ -223,10 +234,7 @@ function buildChannelMatrix(
 }
 
 function useMultiScenarioDelta(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useDeltaMonthly(scenarioId)
-  })
+  const results = useMultiScenarioSlots(scenarios, useDeltaMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -353,45 +361,6 @@ function BandsLegend({
 }
 
 // ============================================================================
-// Section header
-// ============================================================================
-
-function SectionHeader({
-  title,
-  description,
-}: {
-  title: string
-  description?: React.ReactNode
-}) {
-  const theme = useTheme()
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Typography
-        variant="overline"
-        sx={{
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {title}
-      </Typography>
-      {description && (
-        <Box
-          sx={{
-            color: theme.palette.grey[600],
-            mt: 0.5,
-            ...theme.typography.dashboard,
-          }}
-        >
-          {description}
-        </Box>
-      )}
-    </Box>
-  )
-}
-
-// ============================================================================
 // X2 text stats cell (rendered per scenario inside GridRow)
 // ============================================================================
 
@@ -426,21 +395,31 @@ function X2StatCell({ avg, cv }: { avg: number | null; cv: number | null }) {
 interface DeltaSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Pre-fetched batch response (storage/cws/ag/env_flow keyed by scenario) */
+  batchData: BatchStatisticsResponse | undefined
+  /** Whether the batched fetch is still in flight */
+  isBatchLoading: boolean
 }
 
 export default function DeltaSection({
   scenarios,
   scenarioNames,
+  batchData,
+  isBatchLoading,
 }: DeltaSectionProps) {
   const theme = useTheme()
 
   const { allData, isLoading, loadingScenarios } =
     useMultiScenarioDelta(scenarios)
+
   const {
     allData: channelData,
     isLoading: channelsLoading,
     loadingScenarios: channelLoadingScenarios,
-  } = useMultiScenarioChannels(scenarios)
+  } = useMemo(
+    () => deriveChannelData(scenarios, batchData?.env_flow, isBatchLoading),
+    [scenarios, batchData, isBatchLoading],
+  )
 
   const hasData = !isLoading && Object.keys(allData).length > 0
   const hasChannelData = !channelsLoading && Object.keys(channelData).length > 0
@@ -528,6 +507,7 @@ export default function DeltaSection({
     backgroundColor: theme.palette.background.paper,
     borderRadius: theme.borderRadius.md,
     border: theme.border.light,
+    boxShadow: theme.shadow.subtle,
     p: theme.space.component.lg,
     mb: theme.space.component.lg,
   }

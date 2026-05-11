@@ -17,6 +17,7 @@ import {
 } from "@repo/ui/mui"
 import { useSpillMonthly } from "@repo/data/coeqwal/hooks"
 import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
 interface SpillFrequencySectionProps {
   scenarios: string[]
@@ -89,10 +90,10 @@ function getMonthName(month: number): string {
  * Hook to fetch spill data for multiple scenarios
  */
 function useMultiScenarioSpillData(scenarioIds: string[]) {
-  const results = scenarioIds.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useSpillMonthly(scenarioId, "major")
-  })
+  const results = useMultiScenarioSlots(scenarioIds, (s) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
+    useSpillMonthly(s, "major"),
+  )
 
   const isLoading = results.some((r) => r.isLoading)
   const error = results.find((r) => r.error)?.error ?? null

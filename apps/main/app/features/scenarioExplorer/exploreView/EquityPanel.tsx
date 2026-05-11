@@ -20,10 +20,12 @@ import {
 } from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
+import { BASELINE_SCENARIO_ID } from "../constants"
 import { mapActions, useMapStore } from "../../map/store"
 import { getTierColorsFromTheme } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import { useEquityObjectives } from "../hooks/useEquityObjectives"
+import { HydroclimateGate } from "../../scenarios/components/HydroclimateGate"
 import { OUTCOME_NAMES, type OutcomeCode } from "../../../content/outcomes"
 import {
   OUTCOME_LAYER_REGISTRY,
@@ -666,19 +668,24 @@ export default function EquityPanel() {
           minHeight: 0,
         }}
       >
-        <TierGrid
-          objectives={objectives}
-          categories={categories}
-          tiers={TIERS}
-          colorMode="tier"
-          showComparison={showEquityComparison}
-          selectedObjectives={selectedObjectives}
-          onObjectiveClick={handleObjectiveClick}
-          onCategoryClick={handleCategoryClick}
-          onTierCategoryClick={handleTierCategoryClick}
-          onShowOnMap={handleShowOnMap}
-          showMapView={showMap}
-        />
+        <HydroclimateGate
+          scenarioId={equityFocusScenario ?? BASELINE_SCENARIO_ID}
+          variant="block"
+        >
+          <TierGrid
+            objectives={objectives}
+            categories={categories}
+            tiers={TIERS}
+            colorMode="tier"
+            showComparison={showEquityComparison}
+            selectedObjectives={selectedObjectives}
+            onObjectiveClick={handleObjectiveClick}
+            onCategoryClick={handleCategoryClick}
+            onTierCategoryClick={handleTierCategoryClick}
+            onShowOnMap={handleShowOnMap}
+            showMapView={showMap}
+          />
+        </HydroclimateGate>
       </Box>
 
       {/* Context menu for filtering tier-category cells */}

@@ -45,23 +45,22 @@ import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
 import { useSpillMonthly, useBatchStatistics } from "@repo/data/coeqwal/hooks"
-import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
+import type {
+  SpillMonthlyReservoirData,
+  BatchStatisticsResponse,
+} from "@repo/data/coeqwal"
 import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
 import EnvFlowSection from "./EnvFlowSection"
 import RefugeSection from "./RefugeSection"
 import DeltaSection from "./DeltaSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import { ChartGridProvider } from "./ChartGridContext"
+import { SectionHeader } from "./SectionHeader"
 import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
 import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
-
-/**
- * Feature flag: Use batch API for fetching statistics
- * Set to true to test the batch endpoint, false for existing individual-request behavior
- */
-const USE_BATCH_API = true
 
 /**
  * Visual treatment for category accordions in the Data in Depth view.
@@ -202,73 +201,6 @@ function getIconChipStyles(
     color: theme.palette.common.white,
     fontSize: 22,
   }
-}
-
-/**
- * SectionHeader - Reusable header for chart sections
- *
- * Displays a section title with optional inline adornment (e.g., dropdown)
- * and a description line below. Used for "Storage distribution", "Monthly storage", etc.
- *
- * Layout:
- * ┌─────────────────────────────────────────┐
- * │ TITLE [titleAdornment]                  │
- * │ description text                        │
- * └─────────────────────────────────────────┘
- */
-interface SectionHeaderProps {
-  /** Section title (e.g., "Storage distribution") */
-  title: string
-  /** Inline element after title (e.g., dropdown) - displayed on same line */
-  titleAdornment?: React.ReactNode
-  /** Description text below title (can be string or ReactNode for tooltips) */
-  description?: React.ReactNode
-}
-
-function SectionHeader({
-  title,
-  titleAdornment,
-  description,
-}: SectionHeaderProps) {
-  const theme = useTheme()
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      {/* Title row with optional inline adornment */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: theme.space.gap.sm,
-        }}
-      >
-        <Typography
-          variant="overline"
-          sx={{
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {title}
-        </Typography>
-        {titleAdornment}
-      </Box>
-
-      {/* Description line */}
-      {description && (
-        <Box
-          sx={{
-            color: theme.palette.grey[600],
-            mt: 0.5,
-            ...theme.typography.dashboard,
-          }}
-        >
-          {description}
-        </Box>
-      )}
-    </Box>
-  )
 }
 
 /**
@@ -585,10 +517,14 @@ export type VolumeScaleMode = "absolute" | "relative"
 function MonthlyStorageSection({
   scenarios,
   cellColors,
+  batchData,
+  isBatchLoading,
   isModal = false,
 }: {
   scenarios: string[]
   cellColors?: Record<string, Record<string, string>>
+  batchData: BatchStatisticsResponse | undefined
+  isBatchLoading: boolean
   /** Whether this section is inside a modal (affects dropdown z-index) */
   isModal?: boolean
 }): React.ReactElement {
@@ -841,6 +777,8 @@ function MonthlyStorageSection({
           displayMode={displayMode}
           volumeScaleMode={volumeScaleMode}
           additionalReservoirs={additionalReservoirs}
+          batchData={batchData}
+          isBatchLoading={isBatchLoading}
         />
       </Box>
     </>
@@ -856,10 +794,10 @@ function MonthlyStorageSection({
  * Calls useSpillMonthly for each scenario and merges results
  */
 function useMultiScenarioSpillData(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useSpillMonthly(scenarioId, "major")
-  })
+  const results = useMultiScenarioSlots(scenarios, (s) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
+    useSpillMonthly(s, "major"),
+  )
 
   const isLoading = results.some((r) => r.isLoading)
   const error = results.find((r) => r.error)?.error ?? null
@@ -1016,11 +954,15 @@ function ReservoirStorageContent({
   scenarios,
   scenarioNames,
   cellColors,
+  batchData,
+  isBatchLoading,
   isModal = false,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
   cellColors: Record<string, Record<string, string>>
+  batchData: BatchStatisticsResponse | undefined
+  isBatchLoading: boolean
   /** Whether this content is inside a modal (affects dropdown z-index) */
   isModal?: boolean
 }) {
@@ -1034,6 +976,7 @@ function ReservoirStorageContent({
           backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.md,
           border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
           p: theme.space.component.lg,
           mb: theme.space.component.lg,
         }}
@@ -1082,6 +1025,7 @@ function ReservoirStorageContent({
           backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.md,
           border: theme.border.light,
+          boxShadow: theme.shadow.subtle,
           p: theme.space.component.lg,
         }}
       >
@@ -1089,6 +1033,8 @@ function ReservoirStorageContent({
           <MonthlyStorageSection
             scenarios={scenarios}
             cellColors={cellColors}
+            batchData={batchData}
+            isBatchLoading={isBatchLoading}
             isModal={isModal}
           />
         </ChartGridProvider>
@@ -1105,9 +1051,13 @@ function ReservoirStorageContent({
 function ReservoirStorageSection({
   scenarios,
   scenarioNames,
+  batchData,
+  isBatchLoading,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  batchData: BatchStatisticsResponse | undefined
+  isBatchLoading: boolean
 }) {
   const theme = useTheme()
   const cellColors = useReservoirTierColors(scenarios)
@@ -1143,6 +1093,8 @@ function ReservoirStorageSection({
           scenarios={scenarios}
           scenarioNames={scenarioNames}
           cellColors={cellColors}
+          batchData={batchData}
+          isBatchLoading={isBatchLoading}
         />
       </Box>
 
@@ -1201,6 +1153,8 @@ function ReservoirStorageSection({
           scenarios={scenarios}
           scenarioNames={scenarioNames}
           cellColors={cellColors}
+          batchData={batchData}
+          isBatchLoading={isBatchLoading}
           isModal
         />
       </MobileModal>
@@ -1236,14 +1190,15 @@ export default function CategoryView() {
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
-  // Prefetch batch statistics data for all selected scenarios
-  // This dramatically improves load time by fetching storage, CWS, and AG data
-  // in a single request instead of N×M individual requests
-  // Controlled by USE_BATCH_API flag at top of file
-  const { data: batchData } = useBatchStatistics(selectedScenarios, {
-    types: ["storage", "cws", "ag"],
-    enabled: USE_BATCH_API,
-  })
+  // Prefetch batch statistics data for all selected scenarios.
+  // One request replaces the per-scenario fan-out for storage, CWS, AG, and
+  // env_flow. Sections that consume these slices read from `batchData`
+  // directly. Sections backed by endpoints not in the batch (refuge, delta,
+  // M&I contractors, demand units, spill) still use `useMultiScenarioSlots`.
+  const { data: batchData, isLoading: isBatchLoading } = useBatchStatistics(
+    selectedScenarios,
+    { types: ["storage", "cws", "ag", "env_flow"] },
+  )
 
   // Build scenario ID -> display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {
@@ -1412,66 +1367,111 @@ export default function CategoryView() {
 
             <AccordionDetails
               sx={{
-                pt: theme.space.component.sm,
+                pt: theme.space.component.lg,
                 px: theme.space.component.xl,
                 pb: theme.space.component.xl,
+                backgroundColor: theme.palette.background.toolPanel,
               }}
             >
               {!hasBeenExpanded.has(category.id) ? null : category.id ===
                   "reservoir-storage" && selectedScenarios.length > 0 ? (
-                <ReservoirStorageSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                />
-              ) : category.id === "community-water" &&
-                selectedScenarios.length > 0 ? (
-                <CwsSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                  batchData={USE_BATCH_API ? batchData : undefined}
-                />
-              ) : category.id === "agricultural-water" &&
-                selectedScenarios.length > 0 ? (
-                <AgSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                  batchData={USE_BATCH_API ? batchData : undefined}
-                />
-              ) : category.id === "env-flow-statistics" &&
-                selectedScenarios.length > 0 ? (
-                <EnvFlowSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                />
-              ) : category.id === "environmental-water" &&
-                selectedScenarios.length > 0 ? (
-                <RefugeSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                />
-              ) : category.id === "delta-salinity" &&
-                selectedScenarios.length > 0 ? (
-                <DeltaSection
-                  scenarios={selectedScenarios}
-                  scenarioNames={scenarioNames}
-                />
-              ) : (
-                <>
-                  {/* Standard tier metrics for non-reservoir categories */}
-                  {tierMetrics.length > 0 && (
-                    <Box sx={{ mb: theme.space.section.sm }}>
-                      <Typography
-                        variant="smallSectionLabel"
-                        sx={{
-                          display: "block",
-                          mb: theme.space.component.lg,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        Outcome Tiers
-                      </Typography>
-                      {tierMetrics.map((metric) => (
+                  <ReservoirStorageSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                    batchData={batchData}
+                    isBatchLoading={isBatchLoading}
+                  />
+                ) : category.id === "community-water" &&
+                  selectedScenarios.length > 0 ? (
+                  <CwsSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                    batchData={batchData}
+                    isBatchLoading={isBatchLoading}
+                  />
+                ) : category.id === "agricultural-water" &&
+                  selectedScenarios.length > 0 ? (
+                  <AgSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                    batchData={batchData}
+                    isBatchLoading={isBatchLoading}
+                  />
+                ) : category.id === "env-flow-statistics" &&
+                  selectedScenarios.length > 0 ? (
+                  <EnvFlowSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                    batchData={batchData}
+                    isBatchLoading={isBatchLoading}
+                  />
+                ) : category.id === "environmental-water" &&
+                  selectedScenarios.length > 0 ? (
+                  <RefugeSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                  />
+                ) : category.id === "delta-salinity" &&
+                  selectedScenarios.length > 0 ? (
+                  <DeltaSection
+                    scenarios={selectedScenarios}
+                    scenarioNames={scenarioNames}
+                    batchData={batchData}
+                    isBatchLoading={isBatchLoading}
+                  />
+                ) : (
+                  <>
+                    {/* Standard tier metrics for non-reservoir categories */}
+                    {tierMetrics.length > 0 && (
+                      <Box sx={{ mb: theme.space.section.sm }}>
+                        <Typography
+                          variant="smallSectionLabel"
+                          sx={{
+                            display: "block",
+                            mb: theme.space.component.lg,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                          }}
+                        >
+                          Outcome Tiers
+                        </Typography>
+                        {tierMetrics.map((metric) => (
+                          <MetricCard
+                            key={metric.id}
+                            metric={metric}
+                            scenarios={selectedScenarios}
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                )}
+
+                {/* Other metrics - skip for categories with custom sections or incomplete data */}
+                {nonTierMetrics.length > 0 &&
+                  category.id !== "reservoir-storage" &&
+                  category.id !== "community-water" &&
+                  category.id !== "agricultural-water" &&
+                  category.id !== "env-flow-statistics" &&
+                  category.id !== "environmental-water" &&
+                  category.id !== "delta-salinity" &&
+                  category.id !== "groundwater-storage" &&
+                  category.id !== "salmon-abundance" && (
+                    <Box>
+                      {tierMetrics.length > 0 && (
+                        <Typography
+                          variant="smallSectionLabel"
+                          sx={{
+                            display: "block",
+                            mb: theme.space.component.lg,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                          }}
+                        >
+                          Additional Metrics
+                        </Typography>
+                      )}
+                      {nonTierMetrics.map((metric) => (
                         <MetricCard
                           key={metric.id}
                           metric={metric}
@@ -1480,42 +1480,6 @@ export default function CategoryView() {
                       ))}
                     </Box>
                   )}
-                </>
-              )}
-
-              {/* Other metrics - skip for categories with custom sections or incomplete data */}
-              {nonTierMetrics.length > 0 &&
-                category.id !== "reservoir-storage" &&
-                category.id !== "community-water" &&
-                category.id !== "agricultural-water" &&
-                category.id !== "env-flow-statistics" &&
-                category.id !== "environmental-water" &&
-                category.id !== "delta-salinity" &&
-                category.id !== "groundwater-storage" &&
-                category.id !== "salmon-abundance" && (
-                  <Box>
-                    {tierMetrics.length > 0 && (
-                      <Typography
-                        variant="smallSectionLabel"
-                        sx={{
-                          display: "block",
-                          mb: theme.space.component.lg,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                        }}
-                      >
-                        Additional Metrics
-                      </Typography>
-                    )}
-                    {nonTierMetrics.map((metric) => (
-                      <MetricCard
-                        key={metric.id}
-                        metric={metric}
-                        scenarios={selectedScenarios}
-                      />
-                    ))}
-                  </Box>
-                )}
             </AccordionDetails>
           </Accordion>
         )
@@ -1545,6 +1509,7 @@ function MetricCard({
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.borderRadius.md,
         border: theme.border.light,
+        boxShadow: theme.shadow.subtle,
         transition: theme.transition.default,
         "&:hover": {
           borderColor: theme.palette.grey[300],

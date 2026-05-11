@@ -26,6 +26,7 @@ import type { LayoutMode } from "./StrategyGridHeader"
 import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import ThemeGroupHeader from "../components/ThemeGroupHeader"
+import { HydroclimateGate } from "../../scenarios/components/HydroclimateGate"
 import { useScenarioExplorerStore } from "../store"
 import { captureBarChartRow } from "./captureBarChartRow"
 import { stageShareItem } from "../share/stage"
@@ -377,43 +378,48 @@ export function StrategyGridContent({
       }
 
       rows.push(
-        <StrategyGridRow
+        <HydroclimateGate
           key={scenario.scenarioId}
-          scenario={scenario}
-          isFirst={!themeSubheaderMode && opts.isFirstGroup && index === 0}
-          tourListFirstItem={opts.registerTourFirstListItem && index === 0}
-          isHighlighted={isHighlighted}
-          isChosen={selectedScenarios.includes(scenario.scenarioId)}
-          compact={compact}
-          layoutMode={layoutMode}
-          showOperations={showOperations}
-          outcomesOnly={outcomesOnly}
-          outcomeNames={outcomeNames}
-          getChartDataForScenario={getChartDataForScenario}
-          selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
-          activeTooltip={activeTooltip}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          sortEnabled={sortEnabled}
-          glyphSize={glyphSize}
-          isAlignedGrid={isAlignedGrid}
-          onToggleScenario={onToggleScenario}
-          onTierClick={onTierClick}
-          onTooltipToggle={createTooltipHandler(scenario)}
-          onInfoTooltipToggle={onTooltipToggle}
-          onSortChange={onSortChange}
-          showThemeBadge={
-            opts.showThemeBadgeInPinnedSection === true
-              ? true
-              : showThemeBadgeUnpinned
-          }
-          onThemeBadgeClick={onThemeBadgeClick}
-          onIconClick={onIconClick}
-          scenarioColor={scenarioColors?.[scenario.scenarioId]}
-          isPinned={pinnedSet.has(scenario.scenarioId)}
-          isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
-          onRowHover={onRowHover}
-        />,
+          scenarioId={scenario.scenarioId}
+          variant="inline"
+        >
+          <StrategyGridRow
+            scenario={scenario}
+            isFirst={!themeSubheaderMode && opts.isFirstGroup && index === 0}
+            tourListFirstItem={opts.registerTourFirstListItem && index === 0}
+            isHighlighted={isHighlighted}
+            isChosen={selectedScenarios.includes(scenario.scenarioId)}
+            compact={compact}
+            layoutMode={layoutMode}
+            showOperations={showOperations}
+            outcomesOnly={outcomesOnly}
+            outcomeNames={outcomeNames}
+            getChartDataForScenario={getChartDataForScenario}
+            selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
+            activeTooltip={activeTooltip}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            sortEnabled={sortEnabled}
+            glyphSize={glyphSize}
+            isAlignedGrid={isAlignedGrid}
+            onToggleScenario={onToggleScenario}
+            onTierClick={onTierClick}
+            onTooltipToggle={createTooltipHandler(scenario)}
+            onInfoTooltipToggle={onTooltipToggle}
+            onSortChange={onSortChange}
+            showThemeBadge={
+              opts.showThemeBadgeInPinnedSection === true
+                ? true
+                : showThemeBadgeUnpinned
+            }
+            onThemeBadgeClick={onThemeBadgeClick}
+            onIconClick={onIconClick}
+            scenarioColor={scenarioColors?.[scenario.scenarioId]}
+            isPinned={pinnedSet.has(scenario.scenarioId)}
+            isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
+            onRowHover={onRowHover}
+          />
+        </HydroclimateGate>,
       )
 
       if (shouldShowDivider) {

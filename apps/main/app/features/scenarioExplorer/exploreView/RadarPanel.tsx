@@ -31,6 +31,8 @@ import { useTierChartData } from "../hooks/useTierChartData"
 import { useRadarPlotTheme } from "../hooks/useRadarPlotTheme"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
+import { useHydroclimateAvailability } from "../../scenarios/hooks/useHydroclimateAvailability"
+import { HydroclimateUnavailablePlaceholder } from "../../scenarios/components/HydroclimateUnavailablePlaceholder"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
   getOutcomeName,
@@ -457,6 +459,15 @@ export default function RadarPanel({
     hasData,
     morphGeneration,
   } = useTierChartData()
+
+  // Surface a panel-level placeholder when the user has selected scenarios
+  // but none of them have a variant for the active hydroclimate. Without
+  // this the radar would render an empty chart and the user would have
+  // no signal that the absence is intentional.
+  const { allMissing: allSelectedMissing } =
+    useHydroclimateAvailability(selectedScenarios)
+  const showUnavailableBlock =
+    selectedScenarios.length > 0 && !radarShowAll && allSelectedMissing
 
   const selectedSet = useMemo(
     () => new Set(selectedScenarios),
@@ -1035,6 +1046,12 @@ export default function RadarPanel({
             transform: "translateY(-10px)",
           }}
         >
+          {showUnavailableBlock ? (
+            <HydroclimateUnavailablePlaceholder
+              hydroclimate={hydroclimate}
+              variant="block"
+            />
+          ) : (
           <RadarPlot
             data={filteredData}
             axes={visibleAxisNames}
@@ -1063,6 +1080,7 @@ export default function RadarPanel({
             axisLabelDetailChrome={axisLabelDetailChrome}
             palette={radarPalette}
           />
+          )}
 
           {/* Per-axis info icons with click-to-open definition popover.
               Positioned using the same pixel coordinates the RadarPlot

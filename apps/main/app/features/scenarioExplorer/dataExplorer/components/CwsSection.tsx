@@ -33,10 +33,9 @@ import type {
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import useSWR from "swr"
 import {
-  useCwsAggregatesMonthly,
-  useCwsAggregatesPeriod,
   useMiContractorsMonthly,
   useMiContractorsPeriod,
   useDemandUnitsList,
@@ -52,6 +51,8 @@ import type {
   DemandUnitData,
   DemandUnitPeriodSummary,
   DemandUnitStatisticsResponse,
+  BatchStatisticsResponse,
+  BatchCwsData,
 } from "@repo/data/coeqwal"
 import {
   outcomeCategories,
@@ -60,6 +61,7 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import { SectionHeader } from "./SectionHeader"
 
 // ============================================================================
 // Constants
@@ -123,61 +125,6 @@ const CWS_AGGREGATE_SORT_ORDER: Record<string, number> = {
   cvp_sod: 7,
 }
 
-// ============================================================================
-// Section Header Component
-// ============================================================================
-
-interface SectionHeaderProps {
-  title: string
-  titleAdornment?: React.ReactNode
-  description?: React.ReactNode
-}
-
-function SectionHeader({
-  title,
-  titleAdornment,
-  description,
-}: SectionHeaderProps) {
-  const theme = useTheme()
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      {/* Title row with optional inline adornment */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: theme.space.gap.sm,
-        }}
-      >
-        <Typography
-          variant="overline"
-          sx={{
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {title}
-        </Typography>
-        {titleAdornment}
-      </Box>
-
-      {/* Description line */}
-      {description && (
-        <Box
-          sx={{
-            color: theme.palette.grey[600],
-            mt: 0.5,
-            ...theme.typography.dashboard,
-          }}
-        >
-          {description}
-        </Box>
-      )}
-    </Box>
-  )
-}
 
 // ============================================================================
 // Legend Components
@@ -486,39 +433,24 @@ export interface CellStats {
 export type CellStatsMap = Record<string, Record<string, CellStats>>
 
 /**
- * Hook to fetch CWS aggregate data for multiple scenarios
+ * Build the CWS aggregates view from the batch response.
+ *
+ * Sourced from `batchData.cws[scenarioId].monthly.aggregates` and
+ * `.period.aggregates`. Loading state is owned by the batch hook upstream.
  */
-function useMultiScenarioCwsAggregates(scenarios: string[]) {
-  // Fetch monthly data for each scenario
-  const monthlyResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCwsAggregatesMonthly(scenarioId)
-  })
-
-  // Fetch period summary for ALL scenarios (for per-cell stats)
-  const periodResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCwsAggregatesPeriod(scenarioId)
-  })
-
-  const isLoading =
-    monthlyResults.some((r) => r.isLoading) ||
-    periodResults.some((r) => r.isLoading)
-  const error =
-    monthlyResults.find((r) => r.error)?.error ??
-    periodResults.find((r) => r.error)?.error ??
-    null
-
+function buildCwsAggregatesData(
+  scenarios: string[],
+  cwsBatch: Record<string, BatchCwsData> | undefined,
+) {
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
   const cellStats: CellStatsMap = {}
 
-  // Process period summaries for all scenarios to build cell stats
-  periodResults.forEach((periodResult, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !periodResult.aggregates) return
+  scenarios.forEach((scenarioId) => {
+    const periodAggregates = cwsBatch?.[scenarioId]?.period?.aggregates
+    if (!periodAggregates) return
 
-    Object.entries(periodResult.aggregates).forEach(
+    Object.entries(periodAggregates).forEach(
       ([shortCode, summary]: [string, CwsAggregatePeriodSummary]) => {
         // Build entity metadata from first scenario that has data
         if (!entityMap[shortCode]) {
@@ -554,12 +486,11 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     )
   })
 
-  // Process monthly data for each scenario
-  monthlyResults.forEach((result, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !result.aggregates) return
+  scenarios.forEach((scenarioId) => {
+    const monthlyAggregates = cwsBatch?.[scenarioId]?.monthly?.aggregates
+    if (!monthlyAggregates) return
 
-    Object.entries(result.aggregates).forEach(
+    Object.entries(monthlyAggregates).forEach(
       ([shortCode, data]: [string, CwsAggregateData]) => {
         if (!data) return // Skip if data is null/undefined
         if (!entityMap[shortCode]) {
@@ -730,20 +661,12 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
       return (a.label ?? "").localeCompare(b.label ?? "")
     })
 
-  // Track which scenarios are still loading
-  const loadingScenarios = scenarios.filter(
-    (_, index) => monthlyResults[index]?.isLoading ?? false,
-  )
-
   return {
     entities,
     matrixData,
     cellStats,
     breakdownData,
     breakdownComponents,
-    isLoading,
-    error,
-    loadingScenarios,
   }
 }
 
@@ -782,17 +705,14 @@ function computeOtherSwp(
  * Hook to fetch M&I contractor data for multiple scenarios
  */
 function useMultiScenarioMiContractors(scenarios: string[]) {
-  // Fetch monthly data for each scenario
-  const monthlyResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useMiContractorsMonthly(scenarioId)
-  })
-
-  // Fetch period summary for ALL scenarios (for per-cell stats)
-  const periodResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useMiContractorsPeriod(scenarioId)
-  })
+  const monthlyResults = useMultiScenarioSlots(
+    scenarios,
+    useMiContractorsMonthly,
+  )
+  const periodResults = useMultiScenarioSlots(
+    scenarios,
+    useMiContractorsPeriod,
+  )
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||
@@ -935,17 +855,8 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
  * Hook to fetch urban demand unit data for multiple scenarios
  */
 function useMultiScenarioDemandUnits(scenarios: string[]) {
-  // Fetch monthly data for each scenario
-  const monthlyResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useDemandUnitsMonthly(scenarioId)
-  })
-
-  // Fetch period summary for ALL scenarios (for per-cell stats)
-  const periodResults = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useDemandUnitsPeriod(scenarioId)
-  })
+  const monthlyResults = useMultiScenarioSlots(scenarios, useDemandUnitsMonthly)
+  const periodResults = useMultiScenarioSlots(scenarios, useDemandUnitsPeriod)
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||
@@ -1253,15 +1164,24 @@ function useIndividualDemandUnitsData(
 
 /**
  * Combined hook that delegates to the appropriate entity-level hook
- * Also supports adding individual demand units from any entity level
+ * Also supports adding individual demand units from any entity level.
+ *
+ * The "aggregates" view sources from the batched response (`cwsBatch`).
+ * The other views (M&I contractors, demand units) still fan out per
+ * scenario because the batch API doesn't cover them.
  */
 function useMultiScenarioCwsData(
   scenarios: string[],
   entityLevel: CwsEntityLevel,
+  cwsBatch: Record<string, BatchCwsData> | undefined,
+  isBatchLoading: boolean,
   additionalDemandUnitIds: string[] = [],
   demandUnitsList: Array<{ du_id: string; label: string; group?: string }> = [],
 ) {
-  const aggregatesData = useMultiScenarioCwsAggregates(scenarios)
+  const aggregatesData = useMemo(
+    () => buildCwsAggregatesData(scenarios, cwsBatch),
+    [scenarios, cwsBatch],
+  )
   const contractorsData = useMultiScenarioMiContractors(scenarios)
   const demandUnitsData = useMultiScenarioDemandUnits(scenarios)
 
@@ -1313,10 +1233,9 @@ function useMultiScenarioCwsData(
       baseCellStats = aggregatesData.cellStats
       breakdownData = aggregatesData.breakdownData
       breakdownComponents = aggregatesData.breakdownComponents
-      isLoading =
-        aggregatesData.isLoading || individualDemandUnitsData.isLoading
-      error = aggregatesData.error ?? individualDemandUnitsData.error ?? null
-      loadingScenarios = aggregatesData.loadingScenarios
+      isLoading = isBatchLoading || individualDemandUnitsData.isLoading
+      error = individualDemandUnitsData.error ?? null
+      loadingScenarios = isBatchLoading ? scenarios : []
       break
   }
 
@@ -1365,6 +1284,10 @@ function useMultiScenarioCwsData(
 interface MonthlyCwsSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** CWS slice of the batched response (keyed by scenario id) */
+  cwsBatch: Record<string, BatchCwsData> | undefined
+  /** Whether the batched fetch is still in flight */
+  isBatchLoading: boolean
   /** Whether this section is inside a modal (affects dropdown z-index) */
   isModal?: boolean
 }
@@ -1372,6 +1295,8 @@ interface MonthlyCwsSectionProps {
 function MonthlyCwsSection({
   scenarios,
   scenarioNames,
+  cwsBatch,
+  isBatchLoading,
   isModal = false,
 }: MonthlyCwsSectionProps) {
   const theme = useTheme()
@@ -1400,6 +1325,8 @@ function MonthlyCwsSection({
   } = useMultiScenarioCwsData(
     scenarios,
     entityLevel,
+    cwsBatch,
+    isBatchLoading,
     additionalDemandUnits,
     demandUnitsList,
   )
@@ -1828,20 +1755,21 @@ function MonthlyCwsSection({
 interface CwsSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
-  /** Pre-fetched batch data for performance (optional) */
-  batchData?: import("@repo/data/coeqwal").BatchStatisticsResponse
+  /** Pre-fetched batch response (storage/cws/ag/env_flow keyed by scenario) */
+  batchData: BatchStatisticsResponse | undefined
+  /** Whether the batched fetch is still in flight */
+  isBatchLoading: boolean
 }
 
 export default function CwsSection({
   scenarios,
   scenarioNames,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   batchData,
+  isBatchLoading,
 }: CwsSectionProps) {
-  // Note: batchData contains pre-fetched CWS aggregate data
-  // It can be used to speed up initial rendering (future enhancement)
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
+  const cwsBatch = batchData?.cws
 
   return (
     <>
@@ -1873,6 +1801,7 @@ export default function CwsSection({
             backgroundColor: theme.palette.background.paper,
             borderRadius: theme.borderRadius.md,
             border: theme.border.light,
+            boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
             mb: theme.space.component.lg,
           }}
@@ -1898,6 +1827,7 @@ export default function CwsSection({
             backgroundColor: theme.palette.background.paper,
             borderRadius: theme.borderRadius.md,
             border: theme.border.light,
+            boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
           }}
         >
@@ -1905,6 +1835,8 @@ export default function CwsSection({
             <MonthlyCwsSection
               scenarios={scenarios}
               scenarioNames={scenarioNames}
+              cwsBatch={cwsBatch}
+              isBatchLoading={isBatchLoading}
             />
           </ChartGridProvider>
         </Box>
@@ -1964,6 +1896,7 @@ export default function CwsSection({
               backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
               border: theme.border.light,
+              boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
               mb: theme.space.component.lg,
             }}
@@ -1992,6 +1925,7 @@ export default function CwsSection({
               backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
               border: theme.border.light,
+              boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
             }}
           >
@@ -1999,6 +1933,8 @@ export default function CwsSection({
               <MonthlyCwsSection
                 scenarios={scenarios}
                 scenarioNames={scenarioNames}
+                cwsBatch={cwsBatch}
+                isBatchLoading={isBatchLoading}
                 isModal
               />
             </ChartGridProvider>

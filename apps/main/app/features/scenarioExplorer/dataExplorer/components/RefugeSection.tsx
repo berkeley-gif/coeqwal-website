@@ -26,6 +26,8 @@ import type {
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
+import { SectionHeader } from "./SectionHeader"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import {
   useRefugeDemandUnitsList,
   useRefugeDusDeliveryMonthly,
@@ -259,10 +261,10 @@ function shortageRowsToMonthlyPercentiles(
 // ============================================================================
 
 function useMultiScenarioRefugeDelivery(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useRefugeDusDeliveryMonthly(scenarioId)
-  })
+  const results = useMultiScenarioSlots(
+    scenarios,
+    useRefugeDusDeliveryMonthly,
+  )
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -289,10 +291,10 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
 }
 
 function useMultiScenarioRefugeShortage(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useRefugeDusShortageMonthly(scenarioId)
-  })
+  const results = useMultiScenarioSlots(
+    scenarios,
+    useRefugeDusShortageMonthly,
+  )
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -324,10 +326,7 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
  * so PercentileMatrix can render per-cell stats below each chart.
  */
 function useMultiScenarioRefugePeriod(scenarios: string[]) {
-  const results = scenarios.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useRefugeDusPeriod(scenarioId)
-  })
+  const results = useMultiScenarioSlots(scenarios, useRefugeDusPeriod)
 
   const isLoading = results.some((r) => r.isLoading)
   const cellStats: CellStatsMap = {}
@@ -350,54 +349,6 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
   })
 
   return { cellStats, isLoading }
-}
-
-// ============================================================================
-// Section header
-// ============================================================================
-
-interface SectionHeaderProps {
-  title: string
-  titleAdornment?: React.ReactNode
-  description?: React.ReactNode
-}
-
-function SectionHeader({
-  title,
-  titleAdornment,
-  description,
-}: SectionHeaderProps) {
-  const theme = useTheme()
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box
-        sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
-      >
-        <Typography
-          variant="overline"
-          sx={{
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {title}
-        </Typography>
-        {titleAdornment}
-      </Box>
-      {description && (
-        <Box
-          sx={{
-            color: theme.palette.grey[600],
-            mt: 0.5,
-            ...theme.typography.dashboard,
-          }}
-        >
-          {description}
-        </Box>
-      )}
-    </Box>
-  )
 }
 
 // ============================================================================
@@ -549,6 +500,7 @@ export default function RefugeSection({
               backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
               border: theme.border.light,
+              boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
               mb: theme.space.component.lg,
             }}

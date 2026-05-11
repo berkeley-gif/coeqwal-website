@@ -26,6 +26,7 @@ import type {
 } from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
 import { useScenarioExplorerStore } from "../../store"
+import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
 /**
  * ScenarioCard - Individual scenario display with chart for one reservoir
@@ -231,12 +232,7 @@ function ReservoirSection({
  * Hook to fetch reservoir data for multiple scenarios
  */
 function useMultiScenarioReservoirData(scenarioIds: string[]) {
-  // Fetch data for each scenario in parallel using individual hooks
-  // This approach works with SWR's caching
-  const results = scenarioIds.map((scenarioId) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAllReservoirPercentiles(scenarioId)
-  })
+  const results = useMultiScenarioSlots(scenarioIds, useAllReservoirPercentiles)
 
   const isLoading = results.some((r) => r.isLoading)
   const error = results.find((r) => r.error)?.error ?? null

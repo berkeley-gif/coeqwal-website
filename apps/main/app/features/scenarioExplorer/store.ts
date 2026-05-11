@@ -49,7 +49,6 @@ export type OutcomeDisplayMode = "average" | "bar" | "distribution"
 const JOURNEY_STORAGE_KEY = "coeqwal-journey-v1"
 
 type JourneyPersist = {
-  seenHowToRead: Record<ExploreMode, boolean>
   /** True once the welcome strip has been dismissed with "Don't show again". */
   welcomeDismissedPermanently: boolean
   /** True once the baseline has been auto-pinned on first visit. */
@@ -60,13 +59,6 @@ type JourneyPersist = {
 
 function defaultJourney(): JourneyPersist {
   return {
-    seenHowToRead: {
-      list: false,
-      radar: false,
-      equity: false,
-      resilience: false,
-      data: false,
-    },
     welcomeDismissedPermanently: false,
     baselinePrePinned: false,
     seenBaselinePinHint: false,
@@ -79,12 +71,7 @@ function loadJourneyState(): JourneyPersist {
     const raw = localStorage.getItem(JOURNEY_STORAGE_KEY)
     if (!raw) return defaultJourney()
     const parsed = JSON.parse(raw) as Partial<JourneyPersist>
-    const base = defaultJourney()
     return {
-      seenHowToRead: {
-        ...base.seenHowToRead,
-        ...(parsed.seenHowToRead ?? {}),
-      },
       welcomeDismissedPermanently: Boolean(parsed.welcomeDismissedPermanently),
       baselinePrePinned: Boolean(parsed.baselinePrePinned),
       seenBaselinePinHint: Boolean(parsed.seenBaselinePinHint),
@@ -206,8 +193,6 @@ interface ScenarioExplorerState {
   selectedTier: { strategy: string; outcome: string } | null
 
   // Beginner journey
-  /** Per-mode flag: has the user seen the HowToRead modal for this tool yet? Drives first-visit auto-open. */
-  seenHowToRead: Record<ExploreMode, boolean>
   /** Whether the welcome strip has been permanently dismissed (persisted). */
   welcomeDismissedPermanently: boolean
   /** Whether the welcome strip was dismissed in this session only (not persisted). */
@@ -332,7 +317,6 @@ interface ScenarioExplorerActions {
   setSelectedTier: (tier: { strategy: string; outcome: string } | null) => void
 
   // Beginner journey
-  markHowToReadSeen: (mode: ExploreMode) => void
   dismissWelcome: (permanent: boolean) => void
   /** Re-open the WelcomeStrip after it has been dismissed. Clears
    *  both the session and persisted dismissal flags so the strip
@@ -411,7 +395,6 @@ const initialState: ScenarioExplorerState = {
   sortDirection: "asc",
   isSortActive: false,
   selectedTier: null,
-  seenHowToRead: persistedJourney.seenHowToRead,
   welcomeDismissedPermanently: persistedJourney.welcomeDismissedPermanently,
   welcomeDismissedThisSession: false,
   baselinePrePinned: persistedJourney.baselinePrePinned,
@@ -816,11 +799,6 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
 
     // Beginner journey
-    markHowToReadSeen: (mode) =>
-      set((state) => {
-        state.seenHowToRead[mode] = true
-      }),
-
     dismissWelcome: (permanent) =>
       set((state) => {
         state.welcomeDismissedThisSession = true
@@ -912,14 +890,12 @@ useScenarioExplorerStore.subscribe((state) => {
 let prevJourneyRef: JourneyPersist = persistedJourney
 useScenarioExplorerStore.subscribe((state) => {
   if (
-    state.seenHowToRead !== prevJourneyRef.seenHowToRead ||
     state.welcomeDismissedPermanently !==
       prevJourneyRef.welcomeDismissedPermanently ||
     state.baselinePrePinned !== prevJourneyRef.baselinePrePinned ||
     state.seenBaselinePinHint !== prevJourneyRef.seenBaselinePinHint
   ) {
     prevJourneyRef = {
-      seenHowToRead: state.seenHowToRead,
       welcomeDismissedPermanently: state.welcomeDismissedPermanently,
       baselinePrePinned: state.baselinePrePinned,
       seenBaselinePinHint: state.seenBaselinePinHint,
