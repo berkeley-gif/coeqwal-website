@@ -30,10 +30,6 @@ const nextConfig = {
     },
   },
 
-  experimental: {
-    optimizePackageImports: ["@mui/icons-material", "@mui/material"],
-  },
-
   // Webpack rule (used when you run with --webpack, and for non-turbo tooling paths)
   webpack: (config) => {
     config.module.rules.push({
