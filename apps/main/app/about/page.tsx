@@ -1,13 +1,12 @@
 "use client"
 
 /**
- * About Page - Information about the COEQWAL project
+ * About page: Information about the COEQWAL project
  *
  * Provides background information on funding and methodology
  */
-import React, { useEffect, Suspense } from "react"
+import React, { useEffect } from "react"
 import { useTheme } from "@repo/ui/mui"
-import { Header } from "../components/Header"
 import { CenterImageText } from "../components/CenterImageText"
 import { TieredImageText } from "../components/TieredImageText"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
@@ -104,9 +103,6 @@ export default function AboutPage() {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <Header />
-      </Suspense>
       <CenterImageText
         id="intro"
         ariaLabel="intro"

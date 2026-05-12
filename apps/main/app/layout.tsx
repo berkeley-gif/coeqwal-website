@@ -1,7 +1,18 @@
 /**
- * Root layout - Application root with providers
+ * Root layout: Application root with providers.
  *
- * Sets up theme, translations, and font loading for the entire app.
+ * Sets up theme, translations, font loading, the tabs context, the global
+ * `Header`, and the `SkipLink` anchor for the entire app.
+ *
+ * Two Suspense boundaries live here, both for `useSearchParams()` consumers:
+ *
+ *   - `ActiveThemePanel` reads `?theme=...` to decide whether to render.
+ *   - `Header` reads `?theme=...` (via `usePanelRoute`) to highlight the
+ *     active theme button in the nav.
+ *
+ * The Header sits inside `TabsProvider` so it can read the real
+ * `isPastHero` value on the home page. On `/data` and `/about`, `useTabs`
+ * returns safe defaults regardless, so the same Header markup works there.
  */
 
 import { StrictMode, Suspense } from "react"
@@ -9,9 +20,11 @@ import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { DataProvider } from "@repo/data/providers"
-import { PanelTuner } from "@repo/ui"
+import { PanelTuner, SkipLink } from "@repo/ui"
 import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
+import { Header } from "./components/Header"
+import { TabsProvider } from "./context/Tabs"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -36,7 +49,17 @@ export default function RootLayout({
                   <ActiveThemePanel />
                 </Suspense>
 
-                {children}
+                <TabsProvider>
+                  {/* WCAG 2.4.1: SkipLink must be the first focusable element in the DOM */}
+                  <SkipLink />
+
+                  {/* WCAG 2.4.3: Header before main content for tab order */}
+                  <Suspense fallback={null}>
+                    <Header />
+                  </Suspense>
+
+                  {children}
+                </TabsProvider>
 
                 <PanelTuner />
               </ThemeRegistry>

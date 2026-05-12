@@ -325,23 +325,28 @@ MUI's `sx` prop uses Emotion CSS-in-JS, which processes styles at runtime. When 
    zIndex: 10,
    ```
 
-2. **Explicit hydration boundaries**: We use wrapper components (`ClientProviders.tsx`) to establish clear boundaries between Server and Client Components.
+2. **Explicit hydration boundaries**: Client providers are rendered directly inside Server Components. Layout-wide providers (theme, translations, data, `TabsProvider`) live in `app/layout.tsx`. Home-page-only providers (`MapProvider`) are rendered inline in `app/page.tsx`.
 
 3. **Dynamic imports for heavy libraries**: The Mapbox map is dynamically imported with `ssr: false` to reduce initial bundle size.
 
 ### Architecture
 
 ```
-page.tsx (Server Component)
-└── ClientProviders (Client boundary - provides MapProvider, TabsProvider)
+layout.tsx (Server Component)
+├── TranslationProvider, DataProvider, ThemeRegistry
+├── Suspense > ActiveThemePanel
+└── TabsProvider
     ├── SkipLink
-    ├── Header
-    ├── DynamicMap (dynamic import, ssr: false)
-    ├── FloatingGlossary
-    └── MainContent (Server Component - inlined theme values)
-        ├── IntroSection (Client - uses hooks)
-        ├── SmoothTabs (Client - uses hooks)
-        └── TabPanels (Client - uses hooks)
+    ├── Suspense > Header
+    └── {children}
+        └── page.tsx (Server Component)
+            └── MapProvider
+                ├── DynamicMap (dynamic import, ssr: false)
+                ├── FloatingGlossary
+                └── MainContent (Server Component - inlined theme values)
+                    ├── Suspense > IntroSection (Client - uses hooks)
+                    ├── SmoothTabs (Client - uses hooks)
+                    └── Suspense > TabPanels (Client - uses hooks)
 ```
 
 ### Guidelines

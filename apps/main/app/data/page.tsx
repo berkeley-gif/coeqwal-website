@@ -1,13 +1,10 @@
 "use client"
 
 /**
- * Data Page - Data downloads and API access
- *
- * Provides downloadable data files and API documentation
- * for scenario outcomes and metrics.
+ * Data page: Data downloads and API access
  */
 
-import React, { useState, useEffect, useMemo, Suspense } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -23,7 +20,6 @@ import {
   alpha,
   useTheme,
 } from "@repo/ui/mui"
-import { Header } from "../components/Header"
 import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import { CenteredTextSection } from "../components/CenteredTextSection"
@@ -45,13 +41,6 @@ const THEME_ORDER: ScenarioTheme[] = [
   "unthemed",
 ]
 
-// ── Shared dropdown option components ────────────────────────────────────────
-
-/**
- * Two-row dropdown option matching the StrategyHeader eyebrow convention.
- * Top row: SCENARIOID (overline). Bottom row: full scenario label.
- * Theme is conveyed by the ListSubheader group above, so no badge here.
- */
 function ScenarioOption({ scenarioId }: { scenarioId: string }) {
   const theme = useTheme()
   const { getDisplayName } = useScenarioList()
@@ -109,8 +98,8 @@ function SelectedScenarioValue({ scenarioId }: { scenarioId: string }) {
 }
 
 /**
- * Grouped scenario Select. Encapsulates all styling and rendering logic;
- * callers supply id, value, onChange, the grouped data, and disabled state.
+ * Grouped scenario Select. Encapsulates all styling and rendering logic.
+ * Callers supply id, value, onChange, the grouped data, and disabled state.
  */
 function ScenarioSelect({
   id,
@@ -213,8 +202,6 @@ function ThemeSubheader({ themeKey }: { themeKey: ScenarioTheme }) {
   )
 }
 
-// ── Shared Select styling (matches CompactSelect visual language) ─────────────
-
 const SELECT_SX = {
   backgroundColor: "common.white",
   "& .MuiOutlinedInput-notchedOutline": {
@@ -228,8 +215,6 @@ const SELECT_SX = {
     borderWidth: "1px",
   },
 }
-
-// ── Page component──
 
 export default function DataPage() {
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
@@ -325,10 +310,6 @@ export default function DataPage() {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <Header />
-      </Suspense>
-
       {/* Main content wrapper */}
       <Box
         sx={{
@@ -578,11 +559,6 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       display: "inline-block",
-                      // Match the trailing mb on row 1's ScenarioSelect
-                      // FormControl so the row 2 -> row 3 gap equals
-                      // the row 1 -> row 2 gap (grid rowSpacing is
-                      // uniform, so row-1's extra breathing room is
-                      // contributed entirely by that section.sm).
                       mb: (theme) => theme.space.section.sm,
                       color: "common.white",
                       textDecoration: "underline",
