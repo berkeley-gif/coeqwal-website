@@ -18,6 +18,12 @@ applications:
         baseDirectory: apps/main/out
         files:
           - "**/*"
+      cache:
+        # Cache the pnpm content-addressable store only. node_modules is
+        # rebuilt fresh by pnpm install each run, which avoids hardlink
+        # drift across cached builds.
+        paths:
+          - ~/.cache/pnpm/**/*
       buildPath: /
     environment:
       variables:
@@ -41,6 +47,12 @@ applications:
         baseDirectory: apps/storyline-climate/out
         files:
           - "**/*"
+      cache:
+        # Cache the pnpm content-addressable store only. node_modules is
+        # rebuilt fresh by pnpm install each run, which avoids hardlink
+        # drift across cached builds.
+        paths:
+          - ~/.cache/pnpm/**/*
       buildPath: /
     environment:
       variables:
@@ -64,6 +76,12 @@ applications:
         baseDirectory: apps/storyline-flow/out
         files:
           - "**/*"
+      cache:
+        # Cache the pnpm content-addressable store only. node_modules is
+        # rebuilt fresh by pnpm install each run, which avoids hardlink
+        # drift across cached builds.
+        paths:
+          - ~/.cache/pnpm/**/*
       buildPath: /
     environment:
       variables:
