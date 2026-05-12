@@ -1,0 +1,70 @@
+version: 1
+applications:
+  - appRoot: apps/main
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - npm install -g pnpm@10.0.0
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=main
+      artifacts:
+        baseDirectory: apps/main/out
+        files:
+          - "**/*"
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: 22
+
+  - appRoot: apps/storyline-climate
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - npm install -g pnpm@10.0.0
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-climate
+      artifacts:
+        baseDirectory: apps/storyline-climate/out
+        files:
+          - "**/*"
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: 22
+
+  - appRoot: apps/storyline-flow
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - npm install -g pnpm@10.0.0
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-flow
+      artifacts:
+        baseDirectory: apps/storyline-flow/out
+        files:
+          - "**/*"
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: 22
