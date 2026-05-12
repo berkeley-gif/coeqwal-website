@@ -408,6 +408,30 @@ Ideally a quarterly review, but at least yearly:
 - Keep node, NextJS, and package versions up-to-date
 - Review and maintain configs
 
+### Node version cadence
+
+The three apps and the Amplify build images target a single Node major. The strategy is to ride the current Active LTS, then bump one major shortly after the next LTS enters maintenance. That keeps us continuously on a supported LTS without scrambling near EOL.
+
+Current target: **Node 22 LTS**.
+
+| Node major | Active LTS until | Maintenance LTS until | EOL      |
+|------------|------------------|-----------------------|----------|
+| 20         | Oct 2024         | Apr 2026              | Apr 2026 |
+| 22 (now)   | Oct 2025         | Oct 2026              | Apr 2027 |
+| 24         | Oct 2026         | Oct 2027              | Apr 2028 |
+
+Next planned bump: **Node 22 -> 24 in Q1 2027** (after Node 22 enters maintenance LTS in Oct 2026, before its EOL in Apr 2027).
+
+Files to touch when bumping (half a day, low risk):
+
+- Root [package.json](package.json) `engines.node` and `devDependencies.@types/node`
+- Root [.nvmrc](.nvmrc)
+- This README's "Installation" section (the `nvm install 22.21.1` snippet)
+- All three [apps/main/amplify.yml](apps/main/amplify.yml), [apps/storyline-flow/amplify.yml](apps/storyline-flow/amplify.yml), [apps/storyline-climate/amplify.yml](apps/storyline-climate/amplify.yml) (`nvm install <n>` and `NODE_VERSION`)
+- Whichever Amplify Console inline build specs are still in use - re-paste the updated YAML
+
+Validate by dispatching the Deploy to Amplify workflow against each app on `dev` and smoke-testing the resulting site. Backout: revert the commit, re-paste the previous YAML into the console.
+
 ### Next steps
 
 - In the near future, I'd like to implement pnpm cataloging to keep package versions in sync. This looks like having a `pnpm-workspace.yaml` that contains packages and versions like so:
