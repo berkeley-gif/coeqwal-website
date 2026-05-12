@@ -1,9 +1,7 @@
 /**
  * EnvironmentalRefuge, two filled water bands lifted from MUI's
  * `WavesIcon` (our environmental-river-flows glyph) under a single
- * filled heron-in-flight silhouette: arched wings with a long neck
- * extending up between them to a small head and a forward-pointing
- * beak. Reads as "wildlife refuge / wetlands" at small sizes.
+ * filled heron-in-flight silhouette
  */
 
 import type { SVGProps } from "react"

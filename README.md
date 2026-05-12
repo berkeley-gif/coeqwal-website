@@ -189,6 +189,42 @@ pnpm lint --filter=main
 pnpm build --filter=main
 ```
 
+## How to deploy
+
+The COEQWAL website is hosted on AWS Amplify as three independent apps that share this monorepo. Each app deploys on its own. The dispatcher is a GitHub Actions workflow ([Deploy to Amplify](.github/workflows/deploy-amplify.yml)), which assumes a GitHub OIDC role and calls `aws amplify start-job` for the selected app. Build spec source-of-truth is the repo-root [amplify.yml](amplify.yml).
+
+### Deployment process for developers
+
+- **On-demand:** in this repo on GitHub, open the **Actions** tab, pick **Deploy to Amplify** in the sidebar, click **Run workflow**, choose your app (`main`, `storyline-flow`, `storyline-climate`, or `all-three`) and branch (`dev` today, `production-<name>` after launch). The run goes green only when Amplify reports `SUCCEED`.
+
+- **Auto-deploy on push:** a push to `dev` that touches `apps/<X>/**` automatically dispatches the workflow for just that app. Pushes that only touch packages, the lockfile, or other paths do not auto-deploy any app.
+
+- **Shared-package PRs:** opening a PR to `dev` that touches `packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, or root `package.json` triggers [Notify package changes](.github/workflows/notify-package-changes.yml). When working, it posts a single sticky comment (header `package-deploy-impact`) listing the apps that depend on the changed code, their [CODEOWNERS](.github/CODEOWNERS), and a dispatch link for each. The comment never triggers a deploy. Status today: see [Roadmap](#roadmap).
+
+- **Production:** never auto-deploys. Each app gets its own `production-<name>` branch and its own production Amplify app, dispatched manually from the same workflow.
+
+- **When a build fails:** open the failed run in the Actions tab. The GHA wait step surfaces `FAILED` / `CANCELLED` from `aws amplify get-job`. Click through to the Amplify Console build log for the actual `pnpm install` / `next build` output.
+
+- Each Amplify Console inline spec is kept as a fallback mirror of root [amplify.yml](amplify.yml). If the root file is ever removed, Amplify falls back to the Console version.
+
+### Adding a new app to the deploy pipeline
+
+This complements [Adding a new app](#adding-a-new-app), which covers the code scaffolding. It assumes `apps/<name>/` already builds locally and produces a static export at `apps/<name>/out/`.
+
+1. **Amplify Console:** create a new Amplify app pointed at `berkeley-gif/coeqwal-website`, branch `dev`. Set `AMPLIFY_MONOREPO_APP_ROOT=apps/<name>`. Build instance: Standard. **Disable auto-build on `dev`** (deploys are driven by GitHub Actions, not webhooks). Paste a per-app fallback inline build spec mirroring the matching stanza in root [amplify.yml](amplify.yml). Note the resulting App ID (`dxxxxxxxxxxxxx`).
+
+2. **IAM:** extend the inline `amplify-start-job` policy on role `coeqwal-website-amplify-deploy-role` to include the new app's ARN under `Resource:` for actions `amplify:StartJob`, `amplify:GetJob`, `amplify:ListJobs`.
+
+3. **Root [amplify.yml](amplify.yml):** add a fourth `applications:` stanza copy-pasted from one of the existing three, with `appRoot: apps/<name>`, `baseDirectory: apps/<name>/out`, `--filter=<name>`. Keep the same `cache:` block (pnpm store only) and `NODE_VERSION` pin.
+
+4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to the `workflow_dispatch.inputs.apps.options` list and `production-<name>` to the `branch.options` list. Add `apps/<name>/**` to the `push.paths` filter and to the `dorny/paths-filter` filter map. Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step.
+
+5. **[.github/CODEOWNERS](.github/CODEOWNERS):** add `/apps/<name>/  @owner1 @owner2`. The notify workflow reads CODEOWNERS as the source of truth for which apps are tracked, so this is what wires the new app into the package-impact comment.
+
+6. **Smoke test:** in the Actions tab, dispatch **Deploy to Amplify** for `<name>` on branch `dev`. Confirm `SUCCEED` in the Amplify Console. Then push a one-line edit under `apps/<name>/` on a feature branch and merge to `dev`; confirm only `<name>` auto-deploys.
+
+7. **Custom domain (later, at launch):** in Amplify Console, attach `<sub>.coeqwal.org`, validate via ACM.
+
 ## Do local dev builds feel sluggish?
 
 ### Try clearing your cache
@@ -428,29 +464,18 @@ Files to touch when bumping:
 
 Validate by dispatching the Deploy to Amplify workflow against each app on `dev` and smoke-testing the resulting site. Backout: revert the commit, re-paste the previous YAML into the console.
 
-### Next steps
+## Roadmap
 
-- In the near future, I'd like to implement pnpm cataloging to keep package versions in sync. This looks like having a `pnpm-workspace.yaml` that contains packages and versions like so:
+Outstanding items, in no particular order:
 
-```
-catalog:
-  react: 19.0.0
-  react-dom: 19.0.0
-  next: 15.5.9
-  typescript: 5.8.2
-  turbo: 2.7.5
-```
+- **Refine deploy triggers.** Today the `push:` paths filter in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) only watches `apps/main/**`, `apps/storyline-flow/**`, `apps/storyline-climate/**`. A change to the shared build spec ([amplify.yml](amplify.yml)) or the GitHub Actions workflows themselves does not auto-trigger any deploy and must be dispatched by hand. Decide which of `amplify.yml`, `.github/workflows/**`, root `package.json`, `pnpm-lock.yaml`, `turbo.json` should fan out to all three apps on push and update the filter and `resolve` job accordingly.
 
-Then in each app/package that needs them:
+- **Fix the `Notify package changes` workflow.** Currently failing with `Unable to locate executable file: pnpm`, originating from `actions/setup-node@v5`'s Corepack auto-detection of the root `packageManager: pnpm@10.0.0`. The script [`compute-affected-apps.mjs`](.github/scripts/compute-affected-apps.mjs) only uses Node built-ins, so the cleanest fix is to drop the `setup-node` step entirely (Ubuntu runners already ship with Node). Once unblocked, finish the remaining smoke tests (packages-only PR and combined packages-plus-app PR).
 
-```
-{
-  "dependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "next": "catalog:"
-  }
-}
-```
+- **Production cutover at launch.** Create `production-main`, `production-storyline-flow`, `production-storyline-climate` branches and three matching production Amplify apps. Cut over custom domains (`coeqwal.org`, `flow.coeqwal.org`, `climate.coeqwal.org`) via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
 
-This can be optional and per app. If you are a developer responsible for making sure an app "stays in place" over time, you can pin a version in your `package.json`.
+- **Re-tidy Amplify Console inline build specs.** Each Console fallback should mirror its matching stanza in root [amplify.yml](amplify.yml) including the store-only `cache: { paths: [~/.cache/pnpm/**/*] }` block. Trivial paste-three-files task whenever convenient.
+
+- **pnpm catalog.** Adopt `catalog:` in `pnpm-workspace.yaml` to keep shared library versions (`react`, `react-dom`, `next`, `typescript`, `turbo`) in sync across workspaces. Apps can opt out by pinning a specific version in their own `package.json`.
+
+- **Node 24 LTS cadence.** Bump from Node 22 to Node 24 shortly after Node 24 enters Maintenance LTS in April 2028 (see [Node version cadence](#node-version-cadence)).

@@ -2,15 +2,7 @@
 
 /**
  * WaterThemesPanel.Sticky scrollytelling panel for the "What water issues
- * matter to you?" section of the IntroSection.
- *
- * Scroll phases:
- *   1. Delta Aerials image visible with dashed circle outlines
- *   2. Image fades out, gradient shows through
- *   3. Photos fill the circles and labels appear (all at once)
- *
- * The SVG overlay uses the image's native coordinate space (2784×1066) so
- * circles stay locked to landmarks regardless of viewport size.
+ * matter to you?" section of the IntroSection
  */
 
 import React from "react"

@@ -21,8 +21,8 @@ import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
-import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
-import { parseShareUrl } from "../../features/scenarioExplorer/share/url"
+// Share url -> state rehydration
+import { useShareUrlRehydration } from "../../features/scenarioExplorer/share"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },
@@ -62,10 +62,23 @@ export default function TabPanels() {
     offsetPx: collapsedHeaderHeight,
   })
 
-  // Sole owner of the ?tab= URL parameter.
-  // Adds ?tab= when user scrolls into the tabs area, removes it when they leave.
-  // Also updates ?tab= when activeTab changes (click, auto-advance, URL init).
-  // useTabNavigation only dispatches context state.it does not touch the URL.
+  // Mount-once rehydration of share-link state into the scenario-explorer
+  // store. Reads window.location.search directly, so it does not suspend.
+  // Lives in apps/main/app/features/scenarioExplorer/share/useShareUrlRehydration.ts
+  useShareUrlRehydration()
+
+  /*
+   * URL <-> activeTab sync for ?tab=
+   *
+   * Sole owner of the ?tab= URL parameter.
+   * Adds ?tab= when user scrolls into the tabs area, removes it when they leave.
+   * Also updates ?tab= when activeTab changes (click, auto-advance, URL init).
+   * useTabNavigation only dispatches context state.it does not touch the URL.
+   *
+   * This is the only useSearchParams call in TabPanels, and the only reason
+   * the surrounding <Suspense> boundary in page.tsx exists. Other URL reads
+   * in this file go through window.location.search and do not suspend.
+   */
   useEffect(() => {
     const urlTab = searchParams.get("tab") as TabKey | null
     const params = new URLSearchParams(searchParams.toString())
@@ -86,8 +99,18 @@ export default function TabPanels() {
     }
   }, [isInTabsArea, activeTab, searchParams, router])
 
-  // On initial load with ?tab=..., sync state + scroll once.
-  // Also rehydrate ?scenarios= and ?climate= into the scenario explorer store.
+  /*
+   * Effect 2: mount-once initial-load sync for ?tab=
+   *
+   * Reads window.location.search directly, so it does not call
+   * useSearchParams and does not suspend. Runs once on mount to honor a
+   * deep-link tab choice. Stashes the target tab in pendingUrlTabScrollRef
+   * so the next effect can scroll the matching panel into view after
+   * AnimatePresence (mode="wait") mounts it.
+   *
+   * Share-link rehydration of explorer store state lives in
+   * useShareUrlRehydration above. The two run side by side at mount.
+   */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const rawTab = params.get("tab")
@@ -97,58 +120,6 @@ export default function TabPanels() {
       pendingUrlTabScrollRef.current = urlTab
       dispatch(setActiveTab(urlTab))
     }
-
-    const climateParam = params.get("climate")
-    if (climateParam) {
-      useScenarioExplorerStore.getState().setHydroclimate(climateParam)
-    }
-
-    const itemsParam = params.get("items")
-    if (itemsParam) {
-      const {
-        items: parsed,
-        storyItemIds,
-        versionMismatch,
-      } = parseShareUrl(params)
-      const store = useScenarioExplorerStore.getState()
-      if (parsed.length > 0) {
-        store.setShareItems(parsed)
-        if (storyItemIds.length > 0) {
-          store.reorderStory(storyItemIds)
-        }
-      }
-      if (versionMismatch) {
-        store.setShareUrlVersionMismatch(true)
-      }
-    } else {
-      const scenariosParam = params.get("scenarios")
-      if (scenariosParam) {
-        const ids = scenariosParam.split(",").filter(Boolean)
-        if (ids.length > 0) {
-          const items = ids.map((raw) => {
-            const [scenarioId, modeSuffix] = raw.includes(":")
-              ? [raw.split(":")[0]!, raw.split(":")[1]]
-              : [raw, undefined]
-            return {
-              id: crypto.randomUUID(),
-              type: "barChart" as const,
-              scenarioId,
-              viewMode:
-                modeSuffix === "average"
-                  ? ("average" as const)
-                  : modeSuffix === "distribution"
-                    ? ("distribution" as const)
-                    : ("bar" as const),
-              hydroclimate: climateParam || "historical",
-            }
-          })
-          useScenarioExplorerStore.getState().setShareItems(items)
-        }
-      }
-    }
-
-    // Scroll runs in a separate effect so AnimatePresence can mount the
-    // correct TabPanel first (mode="wait" delays the entering panel).
   }, [dispatch])
 
   useEffect(() => {

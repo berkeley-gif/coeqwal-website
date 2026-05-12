@@ -1,7 +1,5 @@
 /**
- * Salmon, a clean side-profile fish silhouette used for the salmon
- * category icon: a smooth almond body with a deeply forked tail and
- * a single dorsal fin on the back. Faces right.
+ * salmon category icon
  */
 
 import type { SVGProps } from "react"
@@ -18,9 +16,7 @@ export function Salmon({
   color = "currentColor",
   ...svgProps
 }: SalmonProps) {
-  // Body, clockwise from the snout. Slim, streamlined fusiform outline
-  // that tapers to a fine snout on the right and a deeply forked tail
-  // on the left.
+
   const bodyPath =
     "M22 12 C22 11 20 9.5 14 9 C11 9 8 9.3 5.5 10 L1 5 L4 12 L1 19 L5.5 14 C8 14.7 11 15 14 15 C20 14.5 22 13 22 12 Z"
 

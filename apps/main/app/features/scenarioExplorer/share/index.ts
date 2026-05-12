@@ -49,6 +49,8 @@ export {
   type ParsedShareUrl,
 } from "./url"
 
+export { useShareUrlRehydration } from "./useShareUrlRehydration"
+
 export {
   offscreenCapture,
   type OffscreenCaptureInput,
