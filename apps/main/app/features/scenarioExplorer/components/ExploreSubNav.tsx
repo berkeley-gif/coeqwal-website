@@ -23,7 +23,6 @@ import {
   AppsIcon,
   GridOnIcon,
   InsightsIcon,
-  icons,
 } from "@repo/ui/mui"
 import {
   useScenarioExplorerStore,

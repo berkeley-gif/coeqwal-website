@@ -45,8 +45,8 @@ export default function Home() {
         <Suspense fallback={null}>
           <IntroSection />
         </Suspense>
+        <SmoothTabs />
         <Suspense fallback={null}>
-          <SmoothTabs />
           <TabPanels />
         </Suspense>
       </MainContent>

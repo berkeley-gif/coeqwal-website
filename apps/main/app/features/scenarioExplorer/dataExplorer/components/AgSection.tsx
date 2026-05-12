@@ -476,9 +476,11 @@ function buildAgAggregatesData(
  */
 function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
   const deliveryResults = useMultiScenarioSlots(scenarios, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsDeliveryMonthly(id, duIds),
   )
   const periodResults = useMultiScenarioSlots(scenarios, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsPeriod(id, duIds),
   )
 

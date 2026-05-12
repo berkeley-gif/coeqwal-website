@@ -8,7 +8,7 @@ import { TwoColumnInterstitial } from "@repo/ui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import { usePanelRoute } from "../../hooks/usePanelRoute"
+//import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 import ExploreSubNav from "../../features/scenarioExplorer/components/ExploreSubNav"
 
@@ -20,7 +20,11 @@ function TabDescription({
   tab: TabKey
   onScrollPromptClick: () => void
 }) {
-  usePanelRoute()
+  // Dormant call. Uncomment if TabDescription needs theme route state.
+  // usePanelRoute reads useSearchParams, so restoring this requires a
+  // Suspense boundary above SmoothTabs in page.tsx. Re-import from
+  // "../../hooks/usePanelRoute".
+  // usePanelRoute()
 
   switch (tab) {
     case "learn":
