@@ -1,5 +1,12 @@
 name: Deploy to Amplify
 
+# Fires in two ways:
+#   1. Manual via workflow_dispatch -> deploys the chosen app(s) on the chosen branch.
+#   2. Automatic on push to dev that touches an apps/<X>/** path -> deploys
+#      only those X. Pushes that only touch packages/** or other paths are
+#      ignored by this workflow. See notify-package-changes.yml for the
+#      PR-time notification that handles shared-package changes.
+
 on:
   workflow_dispatch:
     inputs:
@@ -23,40 +30,86 @@ on:
           - production-main
           - production-storyline-flow
           - production-storyline-climate
+  push:
+    branches: [dev]
+    paths:
+      - "apps/main/**"
+      - "apps/storyline-flow/**"
+      - "apps/storyline-climate/**"
 
 permissions:
   id-token: write
   contents: read
 
+# Serialize per-branch so two pushes to dev (or a dispatch racing a push)
+# queue instead of clobbering each other in Amplify (StartJob rejects when a
+# job is already pending or running for a branch). cancel-in-progress: false
+# keeps the queue intact rather than dropping queued work.
 concurrency:
-  group: deploy-amplify-${{ inputs.apps }}-${{ inputs.branch }}
+  group: deploy-amplify-${{ inputs.branch || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   resolve:
-    name: Resolve apps to deploy
+    name: Resolve apps and branch
     runs-on: ubuntu-latest
     outputs:
-      apps: ${{ steps.expand.outputs.apps }}
+      apps: ${{ steps.compute.outputs.apps }}
+      branch: ${{ steps.compute.outputs.branch }}
     steps:
-      - id: expand
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v3
+        if: github.event_name == 'push'
+        id: filter
+        with:
+          filters: |
+            main: 'apps/main/**'
+            storyline-flow: 'apps/storyline-flow/**'
+            storyline-climate: 'apps/storyline-climate/**'
+
+      - id: compute
         env:
+          EVENT: ${{ github.event_name }}
           SELECTION: ${{ inputs.apps }}
+          DISPATCH_BRANCH: ${{ inputs.branch }}
+          PUSH_BRANCH: ${{ github.ref_name }}
+          MAIN_CHANGED: ${{ steps.filter.outputs.main || 'false' }}
+          FLOW_CHANGED: ${{ steps.filter.outputs.storyline-flow || 'false' }}
+          CLIMATE_CHANGED: ${{ steps.filter.outputs.storyline-climate || 'false' }}
         run: |
           set -euo pipefail
-          case "$SELECTION" in
-            main)               APPS='["main"]' ;;
-            storyline-flow)     APPS='["storyline-flow"]' ;;
-            storyline-climate)  APPS='["storyline-climate"]' ;;
-            all-three)          APPS='["main","storyline-flow","storyline-climate"]' ;;
-            *) echo "::error::Unknown selection $SELECTION"; exit 1 ;;
-          esac
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            BRANCH="$DISPATCH_BRANCH"
+            case "$SELECTION" in
+              main)               APPS='["main"]' ;;
+              storyline-flow)     APPS='["storyline-flow"]' ;;
+              storyline-climate)  APPS='["storyline-climate"]' ;;
+              all-three)          APPS='["main","storyline-flow","storyline-climate"]' ;;
+              *) echo "::error::Unknown selection $SELECTION"; exit 1 ;;
+            esac
+          else
+            BRANCH="$PUSH_BRANCH"
+            APPS='[]'
+            [[ "$MAIN_CHANGED"    == "true" ]] && APPS=$(jq -c '. + ["main"]' <<<"$APPS")
+            [[ "$FLOW_CHANGED"    == "true" ]] && APPS=$(jq -c '. + ["storyline-flow"]' <<<"$APPS")
+            [[ "$CLIMATE_CHANGED" == "true" ]] && APPS=$(jq -c '. + ["storyline-climate"]' <<<"$APPS")
+          fi
           echo "apps=$APPS" >> "$GITHUB_OUTPUT"
-          echo "Will deploy: $APPS on branch ${{ inputs.branch }}"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Will deploy: $APPS on branch $BRANCH"
 
   deploy:
-    name: ${{ matrix.app }} -> ${{ inputs.branch }}
+    name: ${{ matrix.app }} -> ${{ needs.resolve.outputs.branch }}
     needs: resolve
+    # Defensive: skip if resolve produced an empty array. Shouldn't happen
+    # given the workflow-level paths filter, but if a push slips through
+    # (e.g., paths-filter sees no diff because of a force-push), this avoids
+    # a runtime matrix error.
+    if: needs.resolve.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -66,7 +119,7 @@ jobs:
       - name: Resolve Amplify app id
         id: lookup
         env:
-          BRANCH: ${{ inputs.branch }}
+          BRANCH: ${{ needs.resolve.outputs.branch }}
           APP: ${{ matrix.app }}
         run: |
           set -euo pipefail
@@ -95,7 +148,7 @@ jobs:
         id: start
         env:
           APP_ID: ${{ steps.lookup.outputs.app_id }}
-          BRANCH: ${{ inputs.branch }}
+          BRANCH: ${{ needs.resolve.outputs.branch }}
         run: |
           set -euo pipefail
           JOB_ID=$(aws amplify start-job \
@@ -111,7 +164,7 @@ jobs:
       - name: Wait for Amplify job to finish
         env:
           APP_ID: ${{ steps.lookup.outputs.app_id }}
-          BRANCH: ${{ inputs.branch }}
+          BRANCH: ${{ needs.resolve.outputs.branch }}
           JOB_ID: ${{ steps.start.outputs.job_id }}
         run: |
           set -euo pipefail

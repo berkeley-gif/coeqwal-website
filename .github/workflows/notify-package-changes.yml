@@ -1,0 +1,50 @@
+name: Notify package changes
+
+# Fires on PRs to dev that touch shared workspaces (packages, lockfile,
+# workspace, turbo.json, root package.json). Posts a single sticky comment
+# listing the apps that depend on the changed code, their CODEOWNERS, and
+# dispatch links for the Deploy to Amplify workflow.
+#
+# No deploys are triggered by this workflow. The comment is purely
+# informational.
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "package.json"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  notify:
+    name: Compute and post sticky comment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Compute affected apps and render comment
+        id: compute
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node .github/scripts/compute-affected-apps.mjs
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: steps.compute.outputs.skip != 'true'
+        with:
+          header: package-deploy-impact
+          message: ${{ steps.compute.outputs.markdown }}

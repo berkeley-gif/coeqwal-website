@@ -90,7 +90,7 @@ All three apps use `output: "export"` in their Next.js config, producing fully s
 
 ### Visualization
 
-The `@repo/viz` package contains custom D3 chart components covering a wide range of chart types: line, bar, radar, sankey, dumbbell, percentile bands, dot strips, parallel plots, heatmaps, distribution glyphs, and more. These are purpose-built for water data and scenario comparison.
+The `@repo/viz` package contains custom D3 chart components covering a wide range of chart types. These are purpose-built for water data and scenario comparison.
 
 ### Internationalization
 
@@ -100,21 +100,25 @@ Under construction
 
 ### Prerequisites
 
-Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for version management.
+Node.js: install the version pinned in [`.nvmrc`](.nvmrc) (currently `22.x`, see [Node version cadence](#node-version-cadence) below). With nvm or fnm, `nvm install` / `nvm use` read `.nvmrc` automatically:
 
 ```sh
-nvm install 22.21.1
-nvm use 22.21.1
+nvm install
+nvm use
+node -v   # should print v22.x.y
 ```
 
-pnpm: Install pnpm using Corepack locally (included in Node.js 22.x).
+If you don't use a version manager, install any Node 22 LTS patch through your system package manager.
+
+pnpm: install via Corepack. The version is pinned in the root `package.json` `packageManager` field (currently `pnpm@10.0.0`):
 
 ```sh
 corepack enable
 corepack prepare pnpm@10.0.0 --activate
+pnpm -v   # should print 10.0.0
 ```
 
-Note (in case you were reading the `amplify.yml` and wondering): Locally it's easiest to use Corepack. AWS Amplify instead installs pnpm globally in the container they use to run the build.
+Amplify uses the same Corepack flow in its build container (see each app's `amplify.yml`), so the pnpm version stays in sync with what you run locally. When bumping pnpm, update the root `package.json` `packageManager` field and all three `apps/*/amplify.yml` files together.
 
 ### Installing the repo and packages
 
@@ -386,7 +390,7 @@ This will create a new package in the `packages` directory with a `package.json`
 - Fill in the scripts and dependencies in the `package.json` file.
   - `name` should be `"@repo/<my-new-package>"`
   - include `"type": "module"`,
-  - scripts and dependencies should generally be as in the `map` or `i18n` package. Note that you should write in `eslint": "^9.15.0` as a devDependency. I haven't automated that yet.
+  - scripts and dependencies should generally be as in the `map` package. Add `eslint` as a devDependency, matching the root pin (currently `^9.39.2`). I haven't automated that yet.
   - refer to these packages for suggestions for the dependencies and dev dependencies.
 - Add a `tsconfig.json` file to the package to use the shared typescript config (copy from `i18n package`).
 - Add an `eslint.config.mjs` file to the package to use the shared eslint config (copy from `i18n package`).
@@ -414,21 +418,13 @@ The three apps and the Amplify build images target a single Node major. The stra
 
 Current target: **Node 22 LTS**.
 
-| Node major | Active LTS until | Maintenance LTS until | EOL      |
-|------------|------------------|-----------------------|----------|
-| 20         | Oct 2024         | Apr 2026              | Apr 2026 |
-| 22 (now)   | Oct 2025         | Oct 2026              | Apr 2027 |
-| 24         | Oct 2026         | Oct 2027              | Apr 2028 |
-
-Next planned bump: **Node 22 -> 24 in Q1 2027** (after Node 22 enters maintenance LTS in Oct 2026, before its EOL in Apr 2027).
-
-Files to touch when bumping (half a day, low risk):
+Files to touch when bumping:
 
 - Root [package.json](package.json) `engines.node` and `devDependencies.@types/node`
 - Root [.nvmrc](.nvmrc)
-- This README's "Installation" section (the `nvm install 22.21.1` snippet)
+- This README's "Installation" section
 - All three [apps/main/amplify.yml](apps/main/amplify.yml), [apps/storyline-flow/amplify.yml](apps/storyline-flow/amplify.yml), [apps/storyline-climate/amplify.yml](apps/storyline-climate/amplify.yml) (`nvm install <n>` and `NODE_VERSION`)
-- Whichever Amplify Console inline build specs are still in use - re-paste the updated YAML
+- Each Amplify Console inline build spec - re-paste the updated YAML for the `dev` branch of every app
 
 Validate by dispatching the Deploy to Amplify workflow against each app on `dev` and smoke-testing the resulting site. Backout: revert the commit, re-paste the previous YAML into the console.
 
@@ -438,11 +434,11 @@ Validate by dispatching the Deploy to Amplify workflow against each app on `dev`
 
 ```
 catalog:
-  react: 19.2.1
-  react-dom: 19.2.1
+  react: 19.0.0
+  react-dom: 19.0.0
   next: 15.5.9
   typescript: 5.8.2
-  turbo: 2.6.3
+  turbo: 2.7.5
 ```
 
 Then in each app/package that needs them:
