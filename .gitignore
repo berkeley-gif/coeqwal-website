@@ -40,6 +40,10 @@ docs/
 **/*.peak.jsx
 **/*.peak.js
 
-# Developer scripts
+# Developer scratch scripts. CI scripts under .github/scripts/ are tracked
+# (see negation below). The `scripts` line is intentionally broad to catch
+# any developer scratch dir at any depth.
 scripts
 apps/main/scripts
+!.github/scripts/
+!.github/scripts/**
