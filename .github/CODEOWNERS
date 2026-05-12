@@ -1,0 +1,25 @@
+# Code owners for coeqwal-website
+#
+# GitHub uses this file to auto-request reviews when a PR touches matching
+# paths. Owners receive a notification per their own GitHub email settings.
+#
+# This is so app owners receive a notification if a Turborepo package change affects their app.
+
+*                              @fantauzza @melijimenez11
+
+# Per-app ownership
+/apps/main/                    @fantauzza @melijimenez11
+/apps/storyline-flow/          @yunhsinkuo
+/apps/storyline-climate/       @yunhsinkuo
+
+# Shared workspaces: all owners review changes
+/packages/                     @fantauzza @melijimenez11 @yunhsinkuo
+
+# Build + deploy infrastructure (workflow, Amplify specs, lockfile)
+/.github/                      @fantauzza @melijimenez11 @yunhsinkuo
+/apps/main/amplify.yml         @fantauzza @melijimenez11 @yunhsinkuo
+/apps/storyline-flow/amplify.yml      @fantauzza @melijimenez11 @yunhsinkuo
+/apps/storyline-climate/amplify.yml   @fantauzza @melijimenez11 @yunhsinkuo
+/pnpm-lock.yaml                @fantauzza @melijimenez11 @yunhsinkuo
+/pnpm-workspace.yaml           @fantauzza @melijimenez11 @yunhsinkuo
+/turbo.json                    @fantauzza @melijimenez11 @yunhsinkuo

@@ -1,0 +1,30 @@
+version: 1
+applications:
+  - appRoot: apps/storyline-climate
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - corepack enable
+            - corepack prepare pnpm@10.0.0 --activate
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - export NODE_OPTIONS="--max-old-space-size=4096"
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-climate
+      artifacts:
+        baseDirectory: apps/storyline-climate/out
+        files:
+          - "**/*"
+      cache:
+        paths:
+          - node_modules/**/*
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: "22"

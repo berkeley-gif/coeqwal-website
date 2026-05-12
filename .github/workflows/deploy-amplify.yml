@@ -1,0 +1,135 @@
+name: Deploy to Amplify
+
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: "Which app(s) to deploy"
+        required: true
+        type: choice
+        default: main
+        options:
+          - main
+          - storyline-flow
+          - storyline-climate
+          - all-three
+      branch:
+        description: "Amplify branch to deploy"
+        required: true
+        type: choice
+        default: dev
+        options:
+          - dev
+          - production-main
+          - production-storyline-flow
+          - production-storyline-climate
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-amplify-${{ inputs.apps }}-${{ inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    name: Resolve apps to deploy
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.expand.outputs.apps }}
+    steps:
+      - id: expand
+        env:
+          SELECTION: ${{ inputs.apps }}
+        run: |
+          set -euo pipefail
+          case "$SELECTION" in
+            main)               APPS='["main"]' ;;
+            storyline-flow)     APPS='["storyline-flow"]' ;;
+            storyline-climate)  APPS='["storyline-climate"]' ;;
+            all-three)          APPS='["main","storyline-flow","storyline-climate"]' ;;
+            *) echo "::error::Unknown selection $SELECTION"; exit 1 ;;
+          esac
+          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "Will deploy: $APPS on branch ${{ inputs.branch }}"
+
+  deploy:
+    name: ${{ matrix.app }} -> ${{ inputs.branch }}
+    needs: resolve
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.resolve.outputs.apps) }}
+    steps:
+      - name: Resolve Amplify app id
+        id: lookup
+        env:
+          BRANCH: ${{ inputs.branch }}
+          APP: ${{ matrix.app }}
+        run: |
+          set -euo pipefail
+          # Static map of (branch, app) -> Amplify appId.
+          # production-* entries are placeholders until those apps exist.
+          declare -A MAP=(
+            ["dev:main"]="d2yqk6im560ffz"
+            ["dev:storyline-flow"]="d11fk80jyl948s"
+            ["dev:storyline-climate"]="d1tv02ylgdru7l"
+          )
+          ID="${MAP[${BRANCH}:${APP}]:-}"
+          if [[ -z "$ID" ]]; then
+            echo "::error::No Amplify appId mapped for branch=$BRANCH app=$APP"
+            exit 1
+          fi
+          echo "app_id=$ID" >> "$GITHUB_OUTPUT"
+          echo "Resolved $APP on $BRANCH -> $ID"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AMPLIFY_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+
+      - name: Start Amplify job
+        id: start
+        env:
+          APP_ID: ${{ steps.lookup.outputs.app_id }}
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+          JOB_ID=$(aws amplify start-job \
+            --app-id "$APP_ID" \
+            --branch-name "$BRANCH" \
+            --job-type RELEASE \
+            --query 'jobSummary.jobId' \
+            --output text)
+          echo "Started Amplify job $JOB_ID for $APP_ID on $BRANCH"
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+          echo "View: https://console.aws.amazon.com/amplify/home?region=us-west-2#/${APP_ID}/${BRANCH}/${JOB_ID}"
+
+      - name: Wait for Amplify job to finish
+        env:
+          APP_ID: ${{ steps.lookup.outputs.app_id }}
+          BRANCH: ${{ inputs.branch }}
+          JOB_ID: ${{ steps.start.outputs.job_id }}
+        run: |
+          set -euo pipefail
+          # Poll every 15s for up to 30 minutes. A normal build is 3-8 min.
+          for _ in $(seq 1 120); do
+            STATUS=$(aws amplify get-job \
+              --app-id "$APP_ID" \
+              --branch-name "$BRANCH" \
+              --job-id "$JOB_ID" \
+              --query 'job.summary.status' \
+              --output text)
+            echo "[$(date -u +%H:%M:%S)] status=$STATUS"
+            case "$STATUS" in
+              SUCCEED)           exit 0 ;;
+              FAILED|CANCELLED)  echo "::error::Amplify job $JOB_ID ended $STATUS"; exit 1 ;;
+              PENDING|PROVISIONING|RUNNING) sleep 15 ;;
+              *) echo "::warning::Unexpected status '$STATUS'"; sleep 15 ;;
+            esac
+          done
+          echo "::error::Timed out waiting for Amplify job $JOB_ID"
+          exit 1
