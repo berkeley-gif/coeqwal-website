@@ -57,7 +57,7 @@ jobs:
       apps: ${{ steps.compute.outputs.apps }}
       branch: ${{ steps.compute.outputs.branch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: github.event_name == 'push'
         with:
           fetch-depth: 2
