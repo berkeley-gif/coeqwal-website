@@ -13,6 +13,7 @@ applications:
             - pnpm install --frozen-lockfile
         build:
           commands:
+            - export NODE_OPTIONS="--max-old-space-size=4096"
             - pnpm rebuild
             - npx turbo run build --filter=storyline-flow
       artifacts:
