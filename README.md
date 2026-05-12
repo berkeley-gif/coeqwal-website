@@ -118,7 +118,7 @@ corepack prepare pnpm@10.0.0 --activate
 pnpm -v   # should print 10.0.0
 ```
 
-Amplify uses the same Corepack flow in its build container (see each app's `amplify.yml`), so the pnpm version stays in sync with what you run locally. When bumping pnpm, update the root `package.json` `packageManager` field and all three `apps/*/amplify.yml` files together.
+Amplify installs pnpm with `npm install -g pnpm@<version>` in its build container (see the three per-app stanzas in [`amplify.yml`](amplify.yml) at the repo root). When bumping pnpm, update the root `package.json` `packageManager` field and all three `npm install -g pnpm@X` lines in `amplify.yml` together.
 
 ### Installing the repo and packages
 
@@ -423,8 +423,8 @@ Files to touch when bumping:
 - Root [package.json](package.json) `engines.node` and `devDependencies.@types/node`
 - Root [.nvmrc](.nvmrc)
 - This README's "Installation" section
-- All three [apps/main/amplify.yml](apps/main/amplify.yml), [apps/storyline-flow/amplify.yml](apps/storyline-flow/amplify.yml), [apps/storyline-climate/amplify.yml](apps/storyline-climate/amplify.yml) (`nvm install <n>` and `NODE_VERSION`)
-- Each Amplify Console inline build spec - re-paste the updated YAML for the `dev` branch of every app
+- Root [amplify.yml](amplify.yml) (the three `nvm install <n>` lines and the three `NODE_VERSION` values, one per app stanza)
+- Each Amplify Console inline build spec (kept as a fallback in case root `amplify.yml` is ever removed; re-paste the matching stanza)
 
 Validate by dispatching the Deploy to Amplify workflow against each app on `dev` and smoke-testing the resulting site. Backout: revert the commit, re-paste the previous YAML into the console.
 
