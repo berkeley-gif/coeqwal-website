@@ -3,6 +3,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { LinedList } from "@repo/ui"
 import PanelShell from "./PanelShell"
+import PanelHeading from "./PanelHeading"
 
 const VIZ_TOOLS: ReadonlyArray<{
   title: string
@@ -44,14 +45,7 @@ export default function InterpretingOutcomesPanel() {
 
   return (
     <PanelShell background={exploreBg}>
-      <Typography
-        variant="h3"
-        component="h2"
-        color="text.secondary"
-        sx={{ maxWidth: "66%", mb: theme.space.section.lg }}
-      >
-        Interpreting scenario outcomes
-      </Typography>
+      <PanelHeading title="Interpreting scenario outcomes" />
 
       <Box
         sx={{
@@ -67,8 +61,8 @@ export default function InterpretingOutcomesPanel() {
             color="text.secondary"
             sx={{ mb: theme.space.section.md }}
           >
-            The visualization tools help to understand how different management
-            strategies and hydroclimate conditions affect:
+            The visualization tools help to understand how different
+            management strategies and hydroclimate conditions affect:
           </Typography>
           <LinedList
             items={[
@@ -97,7 +91,11 @@ export default function InterpretingOutcomesPanel() {
 
         {/* Right - visualization tools */}
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: sp.sm }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: sp.sm }}
+          >
             Each tool highlights these perspectives in different ways:
           </Typography>
           <LinedList

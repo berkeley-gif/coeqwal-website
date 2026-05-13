@@ -3,6 +3,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoCard } from "@repo/ui"
 import PanelShell from "./PanelShell"
+import PanelHeading from "./PanelHeading"
 import { usePanelRoute } from "../../../../hooks/usePanelRoute"
 
 const WATER_ISSUE_THEMES = [
@@ -45,6 +46,11 @@ export default function WaterIssuesPanel() {
 
   return (
     <PanelShell background={theme.palette.blue.dark}>
+      <PanelHeading
+        title="What water issues interest you?"
+        lead="COEQWAL scenarios are designed to address key water challenges across California, including:"
+      />
+
       <Box
         sx={{
           display: "grid",
@@ -54,28 +60,6 @@ export default function WaterIssuesPanel() {
           rowGap: sp.lg,
         }}
       >
-        <Typography
-          variant="h3"
-          component="h2"
-          color="text.secondary"
-          sx={{
-            gridColumn: "1 / -1",
-            maxWidth: "66%",
-            mb: theme.space.section.md,
-          }}
-        >
-          What water issues interest you?
-        </Typography>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: sp.lg }}
-        >
-          COEQWAL scenarios are designed to address key water challenges across
-          California, including:
-        </Typography>
-
         {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
           const active = themeKey !== "governance"
           return (
@@ -83,21 +67,23 @@ export default function WaterIssuesPanel() {
               key={themeKey}
               title={title}
               description={description}
-              onClick={active ? () => openThemePanel(themeKey) : undefined}
+              onClick={
+                active ? () => openThemePanel(themeKey) : undefined
+              }
               dimmed={!active}
               variant="onDark"
             />
           )
         })}
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ gridColumn: "1 / -1", mt: sp.lg }}
-        >
-          Click on each water issue to learn more.
-        </Typography>
       </Box>
+
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mt: sp.lg }}
+      >
+        Click on each water issue to learn more.
+      </Typography>
     </PanelShell>
   )
 }

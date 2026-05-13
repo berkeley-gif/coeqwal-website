@@ -1,8 +1,9 @@
 "use client"
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { LinedList, WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
+import PanelHeading from "./PanelHeading"
 
 const CAVEATS = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
@@ -19,21 +20,10 @@ export default function BeforeYouBeginPanel() {
 
   return (
     <PanelShell background={theme.palette.tabPanels.exploreDeep}>
-      <Typography
-        variant="h3"
-        component="h2"
-        color="text.secondary"
-        sx={{ maxWidth: "66%", mb: theme.space.section.md }}
-      >
-        Before you begin your exploration
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ maxWidth: "50%", mb: theme.space.section.md }}
-      >
-        There are a few things to keep in mind:
-      </Typography>
+      <PanelHeading
+        title="Before you begin your exploration"
+        lead="There are a few things to keep in mind:"
+      />
 
       <Box
         sx={{

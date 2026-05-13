@@ -1,3 +1,4 @@
+export { default as PanelHeading } from "./PanelHeading"
 export { default as WelcomePanel } from "./WelcomePanel"
 export { default as WaterIssuesPanel } from "./WaterIssuesPanel"
 export { default as HydroclimateFuturesPanel } from "./HydroclimateFuturesPanel"

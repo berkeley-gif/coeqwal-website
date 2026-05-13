@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { InfoCard, MobileModal } from "@repo/ui"
 import PanelShell from "./PanelShell"
+import PanelHeading from "./PanelHeading"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { getOutcomeName, type OutcomeCode } from "../../../../content/outcomes"
 
@@ -67,7 +68,6 @@ const KEY_OUTCOMES: ReadonlyArray<{
 
 export default function KeyOutcomesPanel() {
   const theme = useTheme()
-  const sp = theme.space.component
   const exploreBg = theme.palette.tabPanels.explore
   const [outcomeDefinitionModal, setOutcomeDefinitionModal] =
     useState<OutcomeCode | null>(null)
@@ -75,33 +75,11 @@ export default function KeyOutcomesPanel() {
   return (
     <>
       <PanelShell background={exploreBg}>
-        <Typography
-          variant="h3"
-          component="h2"
-          color="text.secondary"
-          sx={{ maxWidth: "66%", mb: sp.sm }}
-        >
-          Key outcomes
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{
-            maxWidth: "66%",
-            mb: theme.space.section.md,
-            opacity: 0.85,
-          }}
-        >
-          How are scenario results described?
-        </Typography>
-
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ maxWidth: "50%", mb: theme.space.section.md }}
-        >
-          The results of each scenario are summarized by nine key outcomes:
-        </Typography>
+        <PanelHeading
+          title="Key outcomes"
+          kicker="How are scenario results described?"
+          lead="The results of each scenario are summarized by nine key outcomes:"
+        />
 
         <Box
           sx={{

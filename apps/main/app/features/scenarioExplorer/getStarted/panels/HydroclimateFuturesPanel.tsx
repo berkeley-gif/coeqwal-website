@@ -3,6 +3,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoCard } from "@repo/ui"
 import PanelShell from "./PanelShell"
+import PanelHeading from "./PanelHeading"
 
 const HYDROCLIMATES = [
   {
@@ -38,25 +39,10 @@ export default function HydroclimateFuturesPanel() {
 
   return (
     <PanelShell background={theme.palette.nature.forest}>
-      <Typography
-        variant="h3"
-        component="h2"
-        color="text.secondary"
-        sx={{ maxWidth: "66%", mb: sp.sm }}
-      >
-        Hydroclimate futures
-      </Typography>
-      <Typography
-        variant="body1"
-        color="text.secondary"
-        sx={{
-          maxWidth: "66%",
-          mb: theme.space.section.md,
-          opacity: 0.85,
-        }}
-      >
-        How are climate change impacts evaluated?
-      </Typography>
+      <PanelHeading
+        title="Hydroclimate futures"
+        kicker="How are climate change impacts evaluated?"
+      />
 
       <Box
         sx={{
@@ -70,12 +56,14 @@ export default function HydroclimateFuturesPanel() {
         <Typography variant="body2" color="text.secondary">
           COEQWAL evaluates how the outcomes of different water management
           strategies are affected by alternative hydroclimate futures. We
-          specifically evaluate how the outcomes of water management strategies
-          change with climate-driven shifts in water supplies and temperature.
+          specifically evaluate how the outcomes of water management
+          strategies change with climate-driven shifts in water supplies
+          and temperature.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          The COEQWAL scenario library evaluates various hydroclimates that
-          represent different levels of risk to the water supply system:
+          The COEQWAL scenario library evaluates various hydroclimates
+          that represent different levels of risk to the water supply
+          system:
         </Typography>
       </Box>
 
