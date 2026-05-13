@@ -344,9 +344,11 @@ layout.tsx (Server Component)
                 ├── DynamicMap (dynamic import, ssr: false)
                 ├── FloatingGlossary
                 └── MainContent (Server Component - inlined theme values)
-                    ├── Suspense > IntroSection (Client - uses hooks)
+                    ├── IntroSection (Client - uses hooks)
+                    │   ├── VideoHero, About sticky panel, ... (render at SSG)
+                    │   └── Suspense > WaterThemesPanel (uses ?theme=)
                     ├── SmoothTabs (Client - uses hooks)
-                    └── Suspense > TabPanels (Client - uses hooks)
+                    └── Suspense > TabPanels (Client - uses ?tab=)
 ```
 
 ### Guidelines

@@ -7,12 +7,8 @@
  * `TabsProvider`, theme / translation / data providers) live in
  * `app/layout.tsx` and apply to every route.
  *
- * The two Suspense boundaries below exist because of `useSearchParams()`:
- *
- *   - `IntroSection` contains `WaterThemesPanel`, which reads `?theme=...`
- *     via `usePanelRoute`.
- *   - `TabPanels` reads `?tab=...` via `useSearchParams` in its URL
- *     <-> activeTab sync (see Effect 1 in `TabPanels.tsx`).
+ * Only one Suspense boundary lives here, around `TabPanels`, which reads
+ * `?tab=...` via `useSearchParams` in its URL <-> activeTab sync.
  *
  * In Next.js App Router under SSG, any client component that calls
  * `useSearchParams()` must have a Suspense boundary above it. Search
@@ -39,9 +35,7 @@ export default function Home() {
 
       {/* WCAG 2.4.1: SkipLink target lives on the <main> element below */}
       <MainContent>
-        <Suspense fallback={null}>
-          <IntroSection />
-        </Suspense>
+        <IntroSection />
         <SmoothTabs />
         <Suspense fallback={null}>
           <TabPanels />

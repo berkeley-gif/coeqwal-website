@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo, useState } from "react"
+import { Suspense, useRef, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
@@ -91,7 +91,7 @@ const IntroSection = () => {
   const morphHeadlineRef = useRef<HTMLDivElement>(null)
   // Invisible fixed marker at the viewport's vertical center.
   // Used by `useMeetingProgress` to time the About→WaterThemes
-  // text crossfade against the *visible* headline position: during
+  // text crossfade against the visible headline position: during
   // the About panel the headline has glided to viewport center, so
   // the seam "visually" crosses the headline when the seam passes
   // the center line, not when it passes the headline's default
@@ -116,8 +116,8 @@ const IntroSection = () => {
   // Measure the morphing headline's rendered height so the
   // viewport-center marker below can be sized to match. The marker
   // is what `useMeetingProgress` compares against to time the
-  // About→WaterThemes text crossfade and the return-to-top glide;
-  // it needs a real (non-zero) height so gap2Start (seam reaches
+  // About→WaterThemes text crossfade and the return-to-top glide.
+  // It needs a real (non-zero) height so gap2Start (seam reaches
   // centered headline's bottom) and gap2End (seam reaches centered
   // headline's top) are two distinct scroll events spanning the
   // centered headline's vertical extent.
@@ -164,7 +164,7 @@ const IntroSection = () => {
   // within the headline's vertical extent. The fade starts when the
   // trailing edge of panel A meets the BOTTOM of the headline (gap
   // first overlaps) and ends when the leading edge of panel B meets
-  // the TOP of the headline (gap has fully passed). Because the
+  // the top of the headline (gap has fully passed). Because the
   // headline is position:fixed, useMeetingProgress treats its scroll
   // rate as 0, so each window's width equals the headline's own
   // height. The text visibly changes as the gap swipes past it.
@@ -181,7 +181,7 @@ const IntroSection = () => {
     { edgeA: "bottom", edgeB: "top" },
   )
 
-  // Transition 0 (VideoHero → About): gap enters when hero's bottom
+  // Transition 0 (VideoHero -> About): gap enters when hero's bottom
   // reaches the headline's bottom. Leaves when About's top reaches the
   // headline's top.
   const gap1Start = useMeetingProgress(
@@ -197,12 +197,12 @@ const IntroSection = () => {
     { edgeA: "top", edgeB: "top" },
   )
 
-  // Transition 1 (About → WaterThemes): measure against the
+  // Transition 1 (About -> WaterThemes): measure against the
   // viewport-center marker, which is sized to the headline's own
   // height and centered on the viewport. That way the two meeting
   // events span the centered headline's vertical extent. gap2Start
   // is when the seam reaches the centered headline's BOTTOM, gap2End
-  // is when the seam reaches its TOP, mirroring the gap1 pattern
+  // is when the seam reaches its top, mirroring the gap1 pattern
   // that uses the headline ref directly while it sits at its default
   // top anchor.
   const gap2Start = useMeetingProgress(
@@ -218,7 +218,7 @@ const IntroSection = () => {
     { edgeA: "top", edgeB: "top" },
   )
 
-  // Delay the About→WaterThemes text crossfade until slightly after
+  // Delay the About -> WaterThemes text crossfade until slightly after
   // the seam has fully swept past the centered headline. Without
   // this delay the dark-blue panel-3 text fades in while the white
   // inset-frame seam is still crossing the headline, which reads as
@@ -247,13 +247,13 @@ const IntroSection = () => {
   // from the text crossfade (`crossfadeRanges`) so the vertical
   // translation can take more scroll distance than the crossfade.
   //
-  // Enter: starts as the VideoHero→About seam reaches the headline's
+  // Enter: starts as the VideoHero ->About seam reaches the headline's
   // bottom (gap1Start), finishes ~halfway between gap1End and the
   // About→WaterThemes seam approach. That stretches the downward
   // glide well past the text crossfade for a slower, smoother feel.
   //
   // Exit: anchored off `gap2End` (seam reaches the top of the
-  // centered headline), deliberately NOT off `textCrossfadeEnd`.
+  // centered headline), deliberately not off `textCrossfadeEnd`.
   // The delay applied to the text crossfade is a cosmetic shift to
   // avoid dark-blue text over the white seam. The motion pause +
   // glide back up to the top anchor should still be scheduled
@@ -479,21 +479,22 @@ const IntroSection = () => {
         </StickyScrollSection>
       </div>
 
-      {/* Water themes.sticky scrollytelling with circle overlays.
-          `borderBottom` is intentionally omitted: the outer frame
-          wrapper and the next section's outer Box are both pure
-          white, so the 1px theme.border.light divider that used to
-          render here appeared as a stray hairline at the panel 3 →
-          panel 4 seam and was inconsistent with the other
-          panel-to-panel transitions in this intro. */}
-      <WaterThemesPanel
-        panelRef={waterThemesPanelRef}
-        dockRef={waterThemesDockRef}
-        contentOpacity={waterThemesOpacity}
-        borderRadius={tunerRadius()}
-        inset={{ x: tunerInsetX(), y: tunerInsetY() }}
-        frameBackground={theme.palette.common.white}
-      />
+      {/* 
+          WaterThemesPanel reads `?theme=...` via `usePanelRoute`
+          (which calls `useSearchParams`), so it must sit under a
+          Suspense boundary. The boundary is local here, not around
+          the entire IntroSection in page.tsx, so the rest of the
+          intro (VideoHero, About panel) renders at SSG. */}
+      <Suspense fallback={null}>
+        <WaterThemesPanel
+          panelRef={waterThemesPanelRef}
+          dockRef={waterThemesDockRef}
+          contentOpacity={waterThemesOpacity}
+          borderRadius={tunerRadius()}
+          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+          frameBackground={theme.palette.common.white}
+        />
+      </Suspense>
 
       {/* Want to know more?.frame + rounded inset panel.
           The `id` sits on the OUTER white frame wrapper (not the
