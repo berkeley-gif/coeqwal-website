@@ -1,15 +1,21 @@
 "use client"
 
 /**
- * Global Error Boundary
+ * Route-segment error boundary.
  *
- * Next.js App Router automatically uses this file to catch
- * unhandled errors in the route segment and its children.
+ * Next.js App Router auto-mounts this file as a React error boundary
+ * around the route segment's `page.tsx` and its children. It catches
+ * unhandled errors thrown during render of the segment's content while
+ * leaving the surrounding `layout.tsx` (Header, TabsProvider, theme,
+ * translations) intact and interactive.
+ *
+ * For errors thrown inside `layout.tsx`, see `app/global-error.tsx`,
+ * which replaces the entire document.
  */
 
 import { ErrorFallback } from "@repo/ui"
 
-export default function GlobalError({
+export default function RouteSegmentError({
   reset,
 }: {
   error: Error & { digest?: string }
