@@ -17,6 +17,9 @@
  */
 
 import { Suspense } from "react"
+import { Box } from "@repo/ui/mui"
+import { ErrorFallback } from "@repo/ui"
+import { ErrorBoundary } from "@repo/utils"
 import { MapProvider } from "@repo/map/client"
 import { MainContent } from "./components/MainContent"
 import { DynamicMap } from "./components/DynamicMap"
@@ -24,6 +27,24 @@ import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
 import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
+
+/**
+ * Visible fallback shown when `TabPanels` crashes. TabPanels is the
+ * main interactive surface (Learn / Explore / Share), so the user
+ * needs to know it failed and have a retry path. The wrapper Box
+ * keeps the fallback inside the tab strip's normal flow so the page
+ * does not jump.
+ */
+function TabPanelsErrorFallback() {
+  return (
+    <Box sx={{ minHeight: 320, display: "flex", justifyContent: "center" }}>
+      <ErrorFallback
+        title="This tab couldn't load"
+        message="Something went wrong rendering this section. You can try again or refresh the page."
+      />
+    </Box>
+  )
+}
 
 export default function Home() {
   return (
@@ -37,9 +58,11 @@ export default function Home() {
       <MainContent>
         <IntroSection />
         <SmoothTabs />
-        <Suspense fallback={null}>
-          <TabPanels />
-        </Suspense>
+        <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
+          <Suspense fallback={null}>
+            <TabPanels />
+          </Suspense>
+        </ErrorBoundary>
       </MainContent>
     </MapProvider>
   )

@@ -21,6 +21,7 @@ import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { DataProvider } from "@repo/data/providers"
 import { PanelTuner, SkipLink } from "@repo/ui"
+import { ErrorBoundary } from "@repo/utils"
 import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
 import { Header } from "./components/Header"
@@ -45,18 +46,29 @@ export default function RootLayout({
           <TranslationProvider initialLocale="en">
             <DataProvider>
               <ThemeRegistry>
-                <Suspense fallback={null}>
-                  <ActiveThemePanel />
-                </Suspense>
+                {/* ActiveThemePanel renders only when `?theme=...` is set.
+                    Silent null fallback on error keeps the rest of the
+                    layout intact; the route-level `app/error.tsx`
+                    catches anything fatal that bubbles up. */}
+                <ErrorBoundary fallback={null}>
+                  <Suspense fallback={null}>
+                    <ActiveThemePanel />
+                  </Suspense>
+                </ErrorBoundary>
 
                 <TabsProvider>
                   {/* WCAG 2.4.1: SkipLink must be the first focusable element in the DOM */}
                   <SkipLink />
 
-                  {/* WCAG 2.4.3: Header before main content for tab order */}
-                  <Suspense fallback={null}>
-                    <Header />
-                  </Suspense>
+                  {/* WCAG 2.4.3: Header before main content for tab order.
+                      Silent null fallback on error: a broken Header
+                      should not replace the entire navigation bar with
+                      an error UI. The rest of the app still works. */}
+                  <ErrorBoundary fallback={null}>
+                    <Suspense fallback={null}>
+                      <Header />
+                    </Suspense>
+                  </ErrorBoundary>
 
                   {children}
                 </TabsProvider>

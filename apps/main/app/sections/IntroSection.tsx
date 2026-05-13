@@ -4,6 +4,7 @@ import { Suspense, useRef, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { ErrorBoundary } from "@repo/utils"
 import {
   CoeqwalPanel,
   NavArrow,
@@ -484,17 +485,23 @@ const IntroSection = () => {
           (which calls `useSearchParams`), so it must sit under a
           Suspense boundary. The boundary is local here, not around
           the entire IntroSection in page.tsx, so the rest of the
-          intro (VideoHero, About panel) renders at SSG. */}
-      <Suspense fallback={null}>
-        <WaterThemesPanel
-          panelRef={waterThemesPanelRef}
-          dockRef={waterThemesDockRef}
-          contentOpacity={waterThemesOpacity}
-          borderRadius={tunerRadius()}
-          inset={{ x: tunerInsetX(), y: tunerInsetY() }}
-          frameBackground={theme.palette.common.white}
-        />
-      </Suspense>
+          intro (VideoHero, About panel) renders at SSG.
+
+          Silent null fallback on error: this is a passive scroll
+          decoration. Replacing it with an error UI mid-intro would
+          be more disruptive than letting it disappear. */}
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <WaterThemesPanel
+            panelRef={waterThemesPanelRef}
+            dockRef={waterThemesDockRef}
+            contentOpacity={waterThemesOpacity}
+            borderRadius={tunerRadius()}
+            inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+            frameBackground={theme.palette.common.white}
+          />
+        </Suspense>
+      </ErrorBoundary>
 
       {/* Want to know more?.frame + rounded inset panel.
           The `id` sits on the OUTER white frame wrapper (not the
