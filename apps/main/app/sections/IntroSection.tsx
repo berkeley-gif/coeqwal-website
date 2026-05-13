@@ -9,10 +9,7 @@ import {
   CoeqwalPanel,
   NavArrow,
   ScrollToButton,
-  tunerRadius,
-  tunerInsetX,
-  tunerInsetY,
-  tunerInsetYPx,
+  resolveCssLengthPx,
 } from "@repo/ui"
 import { motion } from "@repo/motion"
 import {
@@ -385,8 +382,8 @@ const IntroSection = () => {
         />
       </div>
 
-      {/* About COEQWAL.headline handled by MorphingHeadline overlay on lg+;
-          responsiveHeadline fills in on smaller screens.
+      {/* About COEQWAL.headline handled by MorphingHeadline overlay on lg+.
+          ResponsiveHeadline fills in on smaller screens.
           Wrapped in a StickyScrollSection so the panel pins at the
           header for a ~100vh scroll runway before unpinning into the
           WaterThemesPanel. Mirrors the WaterThemesPanel geometry
@@ -420,9 +417,12 @@ const IntroSection = () => {
             // the bottom frame-gap under `overflow: hidden` and makes
             // the rounded card sit flush with the sticky bottom edge
             // instead of floating with symmetric top/bottom padding.
-            minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${tunerInsetY()})`}
-            borderRadius={tunerRadius()}
-            inset={{ x: tunerInsetX(), y: tunerInsetY() }}
+            minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${theme.layout.panel.insetY})`}
+            borderRadius={theme.layout.panel.radius}
+            inset={{
+              x: theme.layout.panel.insetX,
+              y: theme.layout.panel.insetY,
+            }}
             frameBackground={theme.palette.common.white}
             contentMotionStyle={{ opacity: aboutOpacity }}
             responsiveHeadline={
@@ -471,8 +471,12 @@ const IntroSection = () => {
                 // the target panel's rounded card flush below the
                 // header by subtracting the header height and adding
                 // back one top frame-gap. Resolved at click time so
-                // live PanelTuner edits take effect.
-                scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+                // the responsive `clamp()` value is read at the
+                // viewport's current width.
+                scrollOffset={() =>
+                  theme.layout.headerHeight -
+                  resolveCssLengthPx(theme.layout.panel.insetY, 24)
+                }
                 ariaLabel="Scroll down to the water issues section"
               />
             }
@@ -495,10 +499,13 @@ const IntroSection = () => {
           <WaterThemesPanel
             panelRef={waterThemesPanelRef}
             dockRef={waterThemesDockRef}
-            contentOpacity={waterThemesOpacity}
-            borderRadius={tunerRadius()}
-            inset={{ x: tunerInsetX(), y: tunerInsetY() }}
-            frameBackground={theme.palette.common.white}
+          contentOpacity={waterThemesOpacity}
+          borderRadius={theme.layout.panel.radius}
+          inset={{
+            x: theme.layout.panel.insetX,
+            y: theme.layout.panel.insetY,
+          }}
+          frameBackground={theme.palette.common.white}
           />
         </Suspense>
       </ErrorBoundary>
@@ -514,8 +521,8 @@ const IntroSection = () => {
         id="want-to-know-more"
         sx={{
           backgroundColor: theme.palette.common.white,
-          px: tunerInsetX(),
-          py: tunerInsetY(),
+          px: theme.layout.panel.insetX,
+          py: theme.layout.panel.insetY,
         }}
       >
         <Box
@@ -523,7 +530,7 @@ const IntroSection = () => {
           aria-label="On this site, you can"
           sx={{
             backgroundColor: "brand.panelLight",
-            borderRadius: tunerRadius(),
+            borderRadius: theme.layout.panel.radius,
             overflow: "hidden",
             px: theme.space.panel.padding,
             pt: theme.space.panel.padding,

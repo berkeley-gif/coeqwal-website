@@ -1,15 +1,15 @@
 "use client"
 
 /**
- * ScenarioExplorer - Content area for the Explore tab.
+ * ScenarioExplorer - Content area for the Explore tab
  *
  * Navigation (ExploreSubNav) has been lifted to the page shell so it
  * participates in the sticky stacking alongside SmoothTabs. This
  * component only renders the active view content.
  *
  * All explore modes route through UnifiedToolLayout:
- *   - List mode: no sidebar, ToolToolbar with grid-aligned search/chips
- *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
+ *   - List mode: no sidebar, ToolToolbar (because of its grid layout)
+ *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + ChartControlsBar
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"

@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * RadarPanel - Radar chart view for scenario comparison.
+ * RadarPanel - Radar chart view for scenario comparison
  *
  * Wraps the @repo/viz RadarPlot component with store-driven data
  * via the shared useTierChartData hook. Supports hover coordination

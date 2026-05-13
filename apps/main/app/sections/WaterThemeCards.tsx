@@ -1,12 +1,10 @@
 "use client"
 
 /**
- * WaterThemeCards.extracted from IntroSection for safekeeping.
+ * WaterThemeCards
  *
  * Contains the ThemeCard component and the grid layouts for the
  * four main water-theme cards + two provisional theme cards.
- * Originally rendered as children of the "What water issues matter to you?"
- * CoeqwalPanel in IntroSection.
  */
 
 import Image from "next/image"

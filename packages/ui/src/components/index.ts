@@ -150,18 +150,6 @@ export type { ChartToastProps } from "./common/ChartToast"
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"
 
-// Tuner widgets (design/review tools)
-export {
-  PanelTuner,
-  ChartTuner,
-  createTunerDarkTheme,
-  PANEL_RADIUS_VAR,
-  PANEL_INSET_X_VAR,
-  PANEL_INSET_Y_VAR,
-  tunerRadius,
-  tunerInsetX,
-  tunerInsetY,
-  tunerInsetXPx,
-  tunerInsetYPx,
-} from "./tuner"
-export type { ChartTunerProps, TunerPreset, WalkthroughStep } from "./tuner"
+// CSS-length utility for resolving theme `clamp(...)` strings to pixels
+// at runtime. Used for scroll-offset math against `theme.layout.panel.*`.
+export { resolveCssLengthPx } from "../themes/measureCssLength"

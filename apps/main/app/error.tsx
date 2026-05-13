@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Route-segment error boundary.
+ * Route-segment error boundary
  *
  * Next.js App Router auto-mounts this file as a React error boundary
  * around the route segment's `page.tsx` and its children. It catches

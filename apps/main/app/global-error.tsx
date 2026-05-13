@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * App-level (layout) error boundary.
+ * App-level (layout) error boundary
  *
  * Next.js App Router auto-mounts this file when an error is thrown
  * inside `app/layout.tsx` itself (theme registry, translation provider,

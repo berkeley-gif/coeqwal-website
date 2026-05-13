@@ -3,7 +3,7 @@
 /**
  * KeyboardShortcuts - Global keyboard shortcuts handler with help modal
  *
- * Provides global keyboard shortcuts for the scenario explorer:
+ * Provides global keyboard shortcuts for accessibility the scenario explorer:
  * - / : Focus search input
  * - ? : Show keyboard shortcuts help
  * - Alt+C : Clear scenario selections

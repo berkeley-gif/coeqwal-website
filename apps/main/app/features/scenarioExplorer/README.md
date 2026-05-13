@@ -72,13 +72,9 @@ Shared layout chrome for all explore modes. Receives `sidebar` (optional), `tool
 - Map panel: transparent 25% reveal area when `showMap` is true
 - Manages map mode via `mapActions` from the map store
 
-### EquityPanel.tsx / ResiliencePanel.tsx
-
-Currently placeholder panels. Ready for implementation.the layout chrome (sidebar, toolbar, map) is already provided by `UnifiedToolLayout`.
-
 ### ListView.tsx
 
-Renders scenarios using the `StrategyGrid` system. Supports search filtering, outcome sorting, and hover coordination with the comparison panel.
+Renders scenarios using the `StrategyGrid` system. Supports search filtering, outcome sorting, and hover coordination with the comparison panel. It has a different layout scheme than the other tools, because of its dependence on the rows.
 
 ## State management
 
@@ -156,7 +152,7 @@ The Zustand store (with Immer) manages state shared across components.
 
 **Use local React state for:**
 
-- UI-specific toggles (e.g., chart mode, modal open/close)
+- UI-specific toggles (e.g., a chart mode, modal open/close)
 - Hover states and ephemeral interactions
 - Component-specific sorting and filtering
 

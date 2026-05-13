@@ -48,11 +48,10 @@ StrictMode
     └── DataProvider
         └── ThemeRegistry (MUI)
             ├── ErrorBoundary > Suspense > ActiveThemePanel    (off-canvas theme drawer)
-            ├── TabsProvider
-            │   ├── SkipLink                                   (WCAG 2.4.1)
-            │   ├── ErrorBoundary > Suspense > Header
-            │   └── {children}                                 (page content)
-            └── PanelTuner
+            └── TabsProvider
+                ├── SkipLink                                   (WCAG 2.4.1)
+                ├── ErrorBoundary > Suspense > Header
+                └── {children}                                 (page content)
 ```
 
 **Translation provider:** Wrapping `DataProvider`, `ThemeRegistry`, and all layout chrome as shown. Swap your new package in at that layer.

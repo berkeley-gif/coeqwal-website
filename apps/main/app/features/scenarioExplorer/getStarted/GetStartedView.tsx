@@ -8,9 +8,6 @@ import {
   BarredColumns,
   WaterDroplet,
   MobileModal,
-  tunerRadius,
-  tunerInsetX,
-  tunerInsetY,
 } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
@@ -22,18 +19,8 @@ import { getOutcomeName, type OutcomeCode } from "../../../content/outcomes"
 /*───────────────── */
 /* Rounded-panel shell for get-started sections.                               */
 /* Frame (outer) holds the inset. Card (inner) holds the rounded corners.      */
-/* Tune these three constants to adjust all nine sections at once.             */
+/* Radius + inset come from `theme.layout.panel`.                              */
 /*───────────────── */
-
-/**
- * Corner radius + inset values are read from CSS custom properties so they
- * can be tuned live via the PanelTuner widget (summoned with Cmd/Ctrl+K).
- * The `tuner*()` helpers expand to `var(<name>, <fallback>)` so panels
- * render with sensible defaults whenever the tuner hasn't written values.
- */
-const GET_STARTED_RADIUS = tunerRadius()
-const GET_STARTED_INSET_X = tunerInsetX()
-const GET_STARTED_INSET_Y = tunerInsetY()
 
 /** Height (in pixels) of the soft fade between the dark wash and the
  *  transparent map panel window, applied at the bottom of the pre-map
@@ -76,14 +63,14 @@ function GetStartedPanelShell({
       sx={{
         pointerEvents: "auto",
         backgroundColor: frameBackground ?? "transparent",
-        px: GET_STARTED_INSET_X,
-        py: GET_STARTED_INSET_Y,
+        px: theme.layout.panel.insetX,
+        py: theme.layout.panel.insetY,
       }}
     >
       <Box
         sx={{
           backgroundColor: background,
-          borderRadius: GET_STARTED_RADIUS,
+          borderRadius: theme.layout.panel.radius,
           overflow: "hidden",
           minHeight: resolvedMinHeight,
           display: "flex",
@@ -698,13 +685,13 @@ export default function GetStartedView() {
       <Box
         sx={{
           pointerEvents: "auto",
-          px: GET_STARTED_INSET_X,
-          py: GET_STARTED_INSET_Y,
+          px: theme.layout.panel.insetX,
+          py: theme.layout.panel.insetY,
         }}
       >
         <Box
           sx={{
-            borderRadius: GET_STARTED_RADIUS,
+            borderRadius: theme.layout.panel.radius,
             overflow: "hidden",
           }}
         >

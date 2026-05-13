@@ -178,8 +178,9 @@ export interface BaseHeaderProps {
 
   /** Optional symmetric inset from the left and right edges of the
    *  viewport. Lets the header pull in to match a rounded-panel side
-   *  frame (typically `tunerInsetX()`). Defaults to `0`, behavior is
-   *  identical to today for any consumer that does not pass this. */
+   *  frame (typically `theme.layout.panel.insetX`). Defaults to `0`,
+   *  behavior is identical to today for any consumer that does not
+   *  pass this. */
   sideOffset?: string | number
 }
 

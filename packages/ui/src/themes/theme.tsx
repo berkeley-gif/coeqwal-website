@@ -592,6 +592,23 @@ export const themeValues = {
     controls: {
       standard: 20, // px - checkbox/radio size (20px × 20px)
     },
+    /**
+     * Rounded panel shell tokens.
+     *
+     * `radius` is the corner radius for inset rounded panels.
+     * `insetX` / `insetY` are the frame paddings around those panels,
+     * typically applied as `px` / `py` on the outer wrapper.
+     *
+     * `insetX` and `insetY` are CSS `clamp(...)` strings so they scale
+     * with viewport size. To get the current resolved value in pixels
+     * (e.g. for scroll-offset math), pass the string to
+     * `resolveCssLengthPx` from `@repo/ui`.
+     */
+    panel: {
+      radius: "24px",
+      insetX: "clamp(16px, 3vw, 40px)",
+      insetY: "clamp(16px, 3vw, 32px)",
+    },
   },
 
   // Design tokens (from above)

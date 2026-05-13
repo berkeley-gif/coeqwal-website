@@ -20,7 +20,7 @@ import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { DataProvider } from "@repo/data/providers"
-import { PanelTuner, SkipLink } from "@repo/ui"
+import { SkipLink } from "@repo/ui"
 import { ErrorBoundary } from "@repo/utils"
 import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
@@ -72,8 +72,6 @@ export default function RootLayout({
 
                   {children}
                 </TabsProvider>
-
-                <PanelTuner />
               </ThemeRegistry>
             </DataProvider>
           </TranslationProvider>

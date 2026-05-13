@@ -13,8 +13,7 @@ import {
   ScrollToButton,
   resolveRadius,
   resolveInset,
-  tunerInsetY,
-  tunerInsetYPx,
+  resolveCssLengthPx,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -394,7 +393,7 @@ function WaterThemesPanelContent({
           // to land on the same viewport row as the headline.
           "@media (max-height: 859px)": {
             justifyContent: "flex-start",
-            pt: `calc(${theme.space.panel.topOffset} - ${theme.layout.headerHeight}px - ${tunerInsetY()})`,
+            pt: `calc(${theme.space.panel.topOffset} - ${theme.layout.headerHeight}px - ${theme.layout.panel.insetY})`,
           },
         }}
       >
@@ -542,9 +541,12 @@ function WaterThemesPanelContent({
           scrollToId="want-to-know-more"
           // Same offset math as the VideoHero / About buttons: land
           // the target section's rounded card flush below the fixed
-          // header. Resolved at click time so live PanelTuner edits
-          // take effect immediately.
-          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+          // header. Resolved at click time so the responsive
+          // `clamp()` value is read at the viewport's current width.
+          scrollOffset={() =>
+            theme.layout.headerHeight -
+            resolveCssLengthPx(theme.layout.panel.insetY, 24)
+          }
           ariaLabel="Scroll down to the want to know more section"
         />
       </Box>

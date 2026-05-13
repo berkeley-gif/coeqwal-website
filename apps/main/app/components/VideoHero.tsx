@@ -20,7 +20,7 @@ import {
   ScrollToButton,
   resolveRadius,
   resolveInset,
-  tunerInsetYPx,
+  resolveCssLengthPx,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -355,12 +355,15 @@ export default function VideoHero({
           scrollToId="about-coeqwal"
           // Scroll so the About panel's rounded card sits flush
           // below the header: subtract the header height, then add
-          // back one top frame-gap (`tunerInsetY`) so the frame
-          // strip tucks under the header instead of appearing as
-          // extra whitespace above the card. Resolved at click
-          // time so live PanelTuner edits to `--panel-inset-y`
-          // take effect immediately.
-          scrollOffset={() => theme.layout.headerHeight - tunerInsetYPx()}
+          // back one top frame-gap (`theme.layout.panel.insetY`) so
+          // the frame strip tucks under the header instead of
+          // appearing as extra whitespace above the card. Resolved
+          // at click time so the responsive `clamp()` value is
+          // read at the viewport's current width.
+          scrollOffset={() =>
+            theme.layout.headerHeight -
+            resolveCssLengthPx(theme.layout.panel.insetY, 24)
+          }
           ariaLabel="Scroll down to learn more"
         />
       </Box>
