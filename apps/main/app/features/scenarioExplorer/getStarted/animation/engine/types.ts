@@ -27,7 +27,7 @@
 import type { RefObject } from "react"
 import type { BeatDef } from "../animationTiming"
 import type { LocationInfo } from "../OutcomeMorphOverlay"
-import type { LocationHighlight } from "../../../map/store"
+import type { LocationHighlight } from "../../../../map/store"
 import type { MapRef } from "@repo/map"
 
 /**

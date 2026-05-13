@@ -267,7 +267,7 @@ export default function VisualizationLayers({
               (activeOutcomeVisualization is null during the animation).
               Demand-units in get-started mode is owned by
               `InteractivePaintArbiter` (see
-              `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/InteractivePaintArbiter.ts`)
+              `apps/main/app/features/scenarioExplorer/getStarted/animation/engine/arbiters/InteractivePaintArbiter.ts`)
               to enforce the storyboard's single-writer-per-resource
               invariant. Skip the OPL mount in that case so both
               writers don't race for the layer. */}

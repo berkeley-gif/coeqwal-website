@@ -12,8 +12,8 @@
  * `commit()` with one `setLocationHighlights` call per tick.
  */
 
-import { mapActions } from "../../../../map/store"
-import type { LocationHighlight } from "../../../../map/store"
+import { mapActions } from "../../../../../map/store"
+import type { LocationHighlight } from "../../../../../map/store"
 import type { Arbiter, BeatEngineContext, MapPopupActor } from "../types"
 
 export class MapPopupArbiter implements Arbiter<MapPopupActor> {

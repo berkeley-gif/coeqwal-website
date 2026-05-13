@@ -21,9 +21,12 @@ features/scenarioExplorer/
 ├── constants.ts                  BASELINE_SCENARIO_ID and other feature-wide constants.
 │
 ├── getStarted/                   Sub-tab 1: onboarding. Self-contained.
-│   ├── GetStartedView.tsx
-│   ├── TierAnimationSection.tsx, OutcomeMorphOverlay.tsx, ...
-│   └── engine/                   BeatEngine + per-beat config for the timeline.
+│   ├── GetStartedView.tsx        Thin orchestrator: composes panels + animation.
+│   ├── getStartedViewport.ts     Sizing helper used by both panels and animation.
+│   ├── panels/                   The eight content panels + the shared PanelShell.
+│   └── animation/                Tier animation surface (TierAnimationSection,
+│       │                         BeatText/OutcomeMorph overlays, BeatEngine).
+│       └── engine/               BeatEngine + arbiters + per-beat config.
 │
 ├── tools/                        Sub-tab 2: the five Explore tools.
 │   ├── index.ts                  Barrel imported by ScenarioExplorer.tsx.
@@ -448,6 +451,6 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 ### Reference implementations
 
 - **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) - Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
-- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
+- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/animation/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
 
 For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.

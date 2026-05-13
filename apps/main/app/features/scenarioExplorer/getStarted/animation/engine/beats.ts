@@ -24,8 +24,8 @@
  */
 
 import type { BeatTableEntry } from "./types"
-import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
-import { getTierLabel } from "../../../../content/tiers"
+import { getDemandUnitDisplayName } from "../../../../map/config/demandUnitNames"
+import { getTierLabel } from "../../../../../content/tiers"
 
 // Beat 4 thresholds. Kept here rather than imported from
 // `TierAnimationSection.tsx` so the engine package has no upward

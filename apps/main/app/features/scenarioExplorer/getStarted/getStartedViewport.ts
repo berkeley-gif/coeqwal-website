@@ -1,7 +1,7 @@
 /**
  * Default height for get-started map and panel cards: the viewport minus
  * the sticky header stack and a fixed breathing margin. This matches
- * `GetStartedPanelShell` default `minHeight` and the tier map panel
+ * `panels/PanelShell` default `minHeight` and the tier map panel
  * so the map overlay and shell cards share one layout rule.
  */
 
@@ -28,7 +28,7 @@ function stickyStackOffsetPx(theme: LayoutSlice) {
  * scrolls so the title + Play button park at the top of the visible
  * area, and the extra pixels hold the remaining reveals without
  * crowding. Defaults to 0 (strict viewport fit) for the standard
- * `GetStartedPanelShell` behavior.
+ * `panels/PanelShell` behavior.
  */
 export function getStartedViewportCardHeightCss(
   theme: LayoutSlice,

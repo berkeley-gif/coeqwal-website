@@ -24,7 +24,7 @@ import {
 import {
   debugLog,
   logDuState,
-} from "../../../scenarioExplorer/getStarted/engine"
+} from "../../../scenarioExplorer/getStarted/animation/engine"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

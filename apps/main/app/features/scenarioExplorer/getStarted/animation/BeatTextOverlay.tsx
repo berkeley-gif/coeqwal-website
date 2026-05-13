@@ -24,7 +24,7 @@ import {
   secondsToProgress,
   STORYBOARD_VISUAL_LIFT_PX,
 } from "./animationTiming"
-import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
+import { OUTCOME_CODE_ORDER } from "../../../../content/outcomes"
 
 /* ── Per-beat progress-fraction widths, derived from the seconds-based
  *    primitives in `animationTiming.ts`. ──
@@ -97,7 +97,7 @@ interface BeatTextOverlayProps {
    *  `applyNarrationFrame(v)` dispatcher into `.current` on mount
    *  and clears it on unmount. The arbiter reads through the ref
    *  every tick. See
-   *  `apps/main/app/features/scenarioExplorer/getStarted/engine/arbiters/NarrationArbiter.ts`. */
+   *  `apps/main/app/features/scenarioExplorer/getStarted/animation/engine/arbiters/NarrationArbiter.ts`. */
   narrationTickRef: RefObject<((v: number) => void) | null>
   headingOpacity: MotionValue<number>
   /** Multiplicative opacity applied on top of the progress-driven fade

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState, useMemo } from "react"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
-import type { LocationHighlight } from "../../map/store"
+import type { LocationHighlight } from "../../../map/store"
 
 interface PinnedLocationsListProps {
   highlights: LocationHighlight[]

@@ -23,16 +23,16 @@ import {
   useActiveOutcomeVisualization,
   useLocationHighlights,
   useMapStore,
-} from "../../map/store"
+} from "../../../map/store"
 import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
-} from "../../map/config/outcomeLayerRegistry"
-import { resolveOutcomeCamera } from "../../map/config/resolveOutcomeCamera"
+} from "../../../map/config/outcomeLayerRegistry"
+import { resolveOutcomeCamera } from "../../../map/config/resolveOutcomeCamera"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
-} from "../../map/config/outcomeLocations"
+} from "../../../map/config/outcomeLocations"
 import { useTierAnimationData } from "./useTierAnimationData"
 import type { OutcomeLocationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
@@ -49,13 +49,13 @@ import BeatTextOverlay from "./BeatTextOverlay"
 import _PinnedLocationsList from "./PinnedLocationsList"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
-import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
-import { getTierLabel } from "../../../content/tiers"
-import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
-import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../../content/outcomes"
+import { getTierLabel } from "../../../../content/tiers"
+import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
+import { useScenarioTiers } from "../../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { BEATS, FINAL_BEAT_INDEX } from "./animationTiming"
-import { getStartedViewportCardHeightCss } from "./getStartedViewport"
+import { getStartedViewportCardHeightCss } from "../getStartedViewport"
 import {
   useBeatEngine,
   BEAT_TABLE,
@@ -1432,7 +1432,7 @@ export default function TierAnimationSection() {
     }
 
     // ── Store highlights (drives map Popups -- independent of map style) ──
-    const highlights: import("../../map/store").LocationHighlight[] = []
+    const highlights: import("../../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
     for (const [key, info] of activeLocationSet) {
