@@ -25,9 +25,9 @@ Workspace packages (consumed via `workspace:*` in `package.json`):
 | `@repo/state`          | Zustand + Immer re-exports backing `app/features/map/store.ts` and `app/features/scenarioExplorer/store.ts`                                  |
 | `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/dataExplorer` and `app/features/scenarios/components/shared`                       |
 
-Notable third-party deps in this app's `package.json`:
+Notable third-party packages in this app's `package.json`:
 
-| Dep                                 | Used for                                                                  |
+| Packages                                 | Used for                                                                  |
 | ----------------------------------- | ------------------------------------------------------------------------- |
 | `@emotion/react`, `@emotion/styled` | MUI's CSS-in-JS engine                                                    |
 | `swr`                               | API caching layer (typed hooks live in `@repo/data`)                      |
