@@ -280,9 +280,7 @@ export const ENDPOINTS = {
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
-    const qs = duIds?.length
-      ? `?du_id=${[...duIds].sort().join(",")}`
-      : ""
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
   },
 
@@ -302,9 +300,7 @@ export const ENDPOINTS = {
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsPeriod: (scenarioId: string, duIds?: string[]) => {
-    const qs = duIds?.length
-      ? `?du_id=${[...duIds].sort().join(",")}`
-      : ""
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary${qs}`
   },
 

@@ -1052,34 +1052,34 @@ export default function RadarPanel({
               variant="block"
             />
           ) : (
-          <RadarPlot
-            data={filteredData}
-            axes={visibleAxisNames}
-            responsive
-            lineColors={filteredLineColors}
-            baselineData={baselineScenario ?? undefined}
-            highlightBaseline={highlightBaseline}
-            chosenIds={chosenIds}
-            highlightedIds={highlightedIds}
-            morphGeneration={morphGeneration}
-            pinnedScenarioIds={pinnedSet}
-            onDotClick={(scenarioId, axis) =>
-              showOutcomeOnMap(axis, scenarioId)
-            }
-            activeMapDot={activeMapDot}
-            dimUnpinned={dimUnpinned}
-            axisRange={showRadarRange ? axisRange : undefined}
-            showTierZones={showTierZones}
-            showAllPaths
-            showDotsOnly={showDotsOnly}
-            dimUnselected={radarShowAll && selectedScenarios.length > 0}
-            svgRefCallback={handleSvgRef}
-            onDotHover={handleDotHover}
-            onAxisPositions={handleAxisPositions}
-            axisLabelDetailStyle={radarAxisLabelDetailStyle}
-            axisLabelDetailChrome={axisLabelDetailChrome}
-            palette={radarPalette}
-          />
+            <RadarPlot
+              data={filteredData}
+              axes={visibleAxisNames}
+              responsive
+              lineColors={filteredLineColors}
+              baselineData={baselineScenario ?? undefined}
+              highlightBaseline={highlightBaseline}
+              chosenIds={chosenIds}
+              highlightedIds={highlightedIds}
+              morphGeneration={morphGeneration}
+              pinnedScenarioIds={pinnedSet}
+              onDotClick={(scenarioId, axis) =>
+                showOutcomeOnMap(axis, scenarioId)
+              }
+              activeMapDot={activeMapDot}
+              dimUnpinned={dimUnpinned}
+              axisRange={showRadarRange ? axisRange : undefined}
+              showTierZones={showTierZones}
+              showAllPaths
+              showDotsOnly={showDotsOnly}
+              dimUnselected={radarShowAll && selectedScenarios.length > 0}
+              svgRefCallback={handleSvgRef}
+              onDotHover={handleDotHover}
+              onAxisPositions={handleAxisPositions}
+              axisLabelDetailStyle={radarAxisLabelDetailStyle}
+              axisLabelDetailChrome={axisLabelDetailChrome}
+              palette={radarPalette}
+            />
           )}
 
           {/* Per-axis info icons with click-to-open definition popover.

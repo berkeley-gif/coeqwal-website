@@ -127,7 +127,6 @@ const CWS_AGGREGATE_SORT_ORDER: Record<string, number> = {
   cvp_sod: 7,
 }
 
-
 // ============================================================================
 // Legend Components
 // ============================================================================
@@ -738,10 +737,7 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
     scenarios,
     useMiContractorsMonthly,
   )
-  const periodResults = useMultiScenarioSlots(
-    scenarios,
-    useMiContractorsPeriod,
-  )
+  const periodResults = useMultiScenarioSlots(scenarios, useMiContractorsPeriod)
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||

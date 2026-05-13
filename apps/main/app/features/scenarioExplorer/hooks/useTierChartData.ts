@@ -6,10 +6,7 @@ import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../scenarios/hooks"
-import {
-  type VerticalParallelLineData,
-  getThemeLineColor,
-} from "@repo/viz"
+import { type VerticalParallelLineData, getThemeLineColor } from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 import {

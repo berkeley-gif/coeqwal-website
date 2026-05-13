@@ -1,7 +1,4 @@
-import {
-  useResolvedIdMapping,
-  useScenarioList,
-} from "../../scenarios/hooks"
+import { useResolvedIdMapping, useScenarioList } from "../../scenarios/hooks"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
 
 /**

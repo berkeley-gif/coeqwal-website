@@ -56,9 +56,7 @@ export interface ResolvedSelectedScenarios {
  * ```
  */
 export function useResolvedSelectedScenarios(): ResolvedSelectedScenarios {
-  const selectedGroupIds = useScenarioExplorerStore(
-    (s) => s.selectedScenarios,
-  )
+  const selectedGroupIds = useScenarioExplorerStore((s) => s.selectedScenarios)
   const { hydroclimate, idMapping } = useResolvedIdMapping()
 
   return useMemo(() => {

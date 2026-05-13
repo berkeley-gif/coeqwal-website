@@ -1259,9 +1259,7 @@ export default function CategoryView() {
                   width: "100%",
                 }}
               >
-                <Box
-                  sx={getIconChipStyles(theme, categoryColor)}
-                >
+                <Box sx={getIconChipStyles(theme, categoryColor)}>
                   {category.icon}
                 </Box>
                 <Typography
@@ -1286,103 +1284,67 @@ export default function CategoryView() {
             >
               {!hasBeenExpanded.has(category.id) ? null : category.id ===
                   "reservoir-storage" && selectedScenarios.length > 0 ? (
-                  <ReservoirStorageSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                    batchData={batchData}
-                    isBatchLoading={isBatchLoading}
-                  />
-                ) : category.id === "community-water" &&
-                  selectedScenarios.length > 0 ? (
-                  <CwsSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                    batchData={batchData}
-                    isBatchLoading={isBatchLoading}
-                  />
-                ) : category.id === "agricultural-water" &&
-                  selectedScenarios.length > 0 ? (
-                  <AgSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                    batchData={batchData}
-                    isBatchLoading={isBatchLoading}
-                  />
-                ) : category.id === "env-flow-statistics" &&
-                  selectedScenarios.length > 0 ? (
-                  <EnvFlowSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                    batchData={batchData}
-                    isBatchLoading={isBatchLoading}
-                  />
-                ) : category.id === "environmental-water" &&
-                  selectedScenarios.length > 0 ? (
-                  <RefugeSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                  />
-                ) : category.id === "delta-salinity" &&
-                  selectedScenarios.length > 0 ? (
-                  <DeltaSection
-                    scenarios={selectedScenarios}
-                    scenarioNames={scenarioNames}
-                    batchData={batchData}
-                    isBatchLoading={isBatchLoading}
-                  />
-                ) : (
-                  <>
-                    {/* Standard tier metrics for non-reservoir categories */}
-                    {tierMetrics.length > 0 && (
-                      <Box sx={{ mb: theme.space.section.sm }}>
-                        <Typography
-                          variant="smallSectionLabel"
-                          sx={{
-                            display: "block",
-                            mb: theme.space.component.lg,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.06em",
-                          }}
-                        >
-                          Outcome Tiers
-                        </Typography>
-                        {tierMetrics.map((metric) => (
-                          <MetricCard
-                            key={metric.id}
-                            metric={metric}
-                            scenarios={selectedScenarios}
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  </>
-                )}
-
-                {/* Other metrics - skip for categories with custom sections or incomplete data */}
-                {nonTierMetrics.length > 0 &&
-                  category.id !== "reservoir-storage" &&
-                  category.id !== "community-water" &&
-                  category.id !== "agricultural-water" &&
-                  category.id !== "env-flow-statistics" &&
-                  category.id !== "environmental-water" &&
-                  category.id !== "delta-salinity" &&
-                  category.id !== "groundwater-storage" &&
-                  category.id !== "salmon-abundance" && (
-                    <Box>
-                      {tierMetrics.length > 0 && (
-                        <Typography
-                          variant="smallSectionLabel"
-                          sx={{
-                            display: "block",
-                            mb: theme.space.component.lg,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.06em",
-                          }}
-                        >
-                          Additional Metrics
-                        </Typography>
-                      )}
-                      {nonTierMetrics.map((metric) => (
+                <ReservoirStorageSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                  batchData={batchData}
+                  isBatchLoading={isBatchLoading}
+                />
+              ) : category.id === "community-water" &&
+                selectedScenarios.length > 0 ? (
+                <CwsSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                  batchData={batchData}
+                  isBatchLoading={isBatchLoading}
+                />
+              ) : category.id === "agricultural-water" &&
+                selectedScenarios.length > 0 ? (
+                <AgSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                  batchData={batchData}
+                  isBatchLoading={isBatchLoading}
+                />
+              ) : category.id === "env-flow-statistics" &&
+                selectedScenarios.length > 0 ? (
+                <EnvFlowSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                  batchData={batchData}
+                  isBatchLoading={isBatchLoading}
+                />
+              ) : category.id === "environmental-water" &&
+                selectedScenarios.length > 0 ? (
+                <RefugeSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
+              ) : category.id === "delta-salinity" &&
+                selectedScenarios.length > 0 ? (
+                <DeltaSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                  batchData={batchData}
+                  isBatchLoading={isBatchLoading}
+                />
+              ) : (
+                <>
+                  {/* Standard tier metrics for non-reservoir categories */}
+                  {tierMetrics.length > 0 && (
+                    <Box sx={{ mb: theme.space.section.sm }}>
+                      <Typography
+                        variant="smallSectionLabel"
+                        sx={{
+                          display: "block",
+                          mb: theme.space.component.lg,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Outcome Tiers
+                      </Typography>
+                      {tierMetrics.map((metric) => (
                         <MetricCard
                           key={metric.id}
                           metric={metric}
@@ -1391,6 +1353,42 @@ export default function CategoryView() {
                       ))}
                     </Box>
                   )}
+                </>
+              )}
+
+              {/* Other metrics - skip for categories with custom sections or incomplete data */}
+              {nonTierMetrics.length > 0 &&
+                category.id !== "reservoir-storage" &&
+                category.id !== "community-water" &&
+                category.id !== "agricultural-water" &&
+                category.id !== "env-flow-statistics" &&
+                category.id !== "environmental-water" &&
+                category.id !== "delta-salinity" &&
+                category.id !== "groundwater-storage" &&
+                category.id !== "salmon-abundance" && (
+                  <Box>
+                    {tierMetrics.length > 0 && (
+                      <Typography
+                        variant="smallSectionLabel"
+                        sx={{
+                          display: "block",
+                          mb: theme.space.component.lg,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Additional Metrics
+                      </Typography>
+                    )}
+                    {nonTierMetrics.map((metric) => (
+                      <MetricCard
+                        key={metric.id}
+                        metric={metric}
+                        scenarios={selectedScenarios}
+                      />
+                    ))}
+                  </Box>
+                )}
             </AccordionDetails>
           </Accordion>
         )

@@ -219,9 +219,7 @@ export function useAgDemandUnitsPeriod(
     error: swrError,
     isLoading,
   } = useSWR<AgDemandUnitPeriodResponse>(
-    shouldFetch
-      ? CACHE_KEYS.agDemandUnitsPeriod(scenarioId!, duIds)
-      : null,
+    shouldFetch ? CACHE_KEYS.agDemandUnitsPeriod(scenarioId!, duIds) : null,
     () => fetchAgDemandUnitsPeriod(scenarioId!, duIds),
     {
       revalidateOnFocus: false,

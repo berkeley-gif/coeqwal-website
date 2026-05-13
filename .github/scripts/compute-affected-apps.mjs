@@ -43,7 +43,8 @@ for (const file of diff.split("\n")) {
     continue
   }
   if (file === "pnpm-lock.yaml") broadImpact.add("pnpm-lock.yaml")
-  else if (file === "pnpm-workspace.yaml") broadImpact.add("pnpm-workspace.yaml")
+  else if (file === "pnpm-workspace.yaml")
+    broadImpact.add("pnpm-workspace.yaml")
   else if (file === "turbo.json") broadImpact.add("turbo.json")
   else if (file === "package.json") broadImpact.add("package.json")
 }
@@ -72,7 +73,9 @@ for (const rawLine of codeowners.split("\n")) {
 
 const appNames = Object.keys(appOwners).sort()
 if (appNames.length === 0) {
-  console.error("No tracked apps found in .github/CODEOWNERS (looking for /apps/<name>/ entries)")
+  console.error(
+    "No tracked apps found in .github/CODEOWNERS (looking for /apps/<name>/ entries)",
+  )
   process.exit(1)
 }
 

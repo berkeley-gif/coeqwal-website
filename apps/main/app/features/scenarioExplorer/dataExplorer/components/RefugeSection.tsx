@@ -261,10 +261,7 @@ function shortageRowsToMonthlyPercentiles(
 // ============================================================================
 
 function useMultiScenarioRefugeDelivery(scenarios: string[]) {
-  const results = useMultiScenarioSlots(
-    scenarios,
-    useRefugeDusDeliveryMonthly,
-  )
+  const results = useMultiScenarioSlots(scenarios, useRefugeDusDeliveryMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -291,10 +288,7 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
 }
 
 function useMultiScenarioRefugeShortage(scenarios: string[]) {
-  const results = useMultiScenarioSlots(
-    scenarios,
-    useRefugeDusShortageMonthly,
-  )
+  const results = useMultiScenarioSlots(scenarios, useRefugeDusShortageMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(

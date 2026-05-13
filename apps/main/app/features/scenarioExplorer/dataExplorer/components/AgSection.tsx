@@ -1070,10 +1070,10 @@ export default function AgSection({
       <Box sx={{ mt: theme.space.component.md }}>
         <Box
           sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          boxShadow: theme.shadow.subtle,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: theme.borderRadius.md,
+            border: theme.border.light,
+            boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
             mb: theme.space.component.lg,
           }}
@@ -1098,10 +1098,10 @@ export default function AgSection({
         {/* Monthly delivery section */}
         <Box
           sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          boxShadow: theme.shadow.subtle,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: theme.borderRadius.md,
+            border: theme.border.light,
+            boxShadow: theme.shadow.subtle,
             p: theme.space.component.lg,
           }}
         >
@@ -1196,10 +1196,10 @@ export default function AgSection({
           {/* Revenue tier section */}
           <Box
             sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          boxShadow: theme.shadow.subtle,
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: theme.borderRadius.md,
+              border: theme.border.light,
+              boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
               mb: theme.space.component.lg,
             }}
@@ -1227,10 +1227,10 @@ export default function AgSection({
           {/* Monthly delivery section */}
           <Box
             sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          boxShadow: theme.shadow.subtle,
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: theme.borderRadius.md,
+              border: theme.border.light,
+              boxShadow: theme.shadow.subtle,
               p: theme.space.component.lg,
             }}
           >

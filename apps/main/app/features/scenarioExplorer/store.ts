@@ -23,12 +23,7 @@ export type { ShareItem, ShareItemPatch } from "./share/types"
 /**
  * The current tool within the explorer view.
  */
-export type ExploreMode =
-  | "list"
-  | "radar"
-  | "equity"
-  | "resilience"
-  | "data"
+export type ExploreMode = "list" | "radar" | "equity" | "resilience" | "data"
 
 /**
  * The main view within the Explore section.

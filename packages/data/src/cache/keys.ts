@@ -273,9 +273,7 @@ export const CACHE_KEYS = {
    * @param duIds - Optional list of demand unit IDs that scope the response
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
-    const qs = duIds?.length
-      ? `?du_id=${[...duIds].sort().join(",")}`
-      : ""
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
   },
 
@@ -293,9 +291,7 @@ export const CACHE_KEYS = {
    * @param duIds - Optional list of demand unit IDs that scope the response
    */
   agDemandUnitsPeriod: (scenarioId: string, duIds?: string[]) => {
-    const qs = duIds?.length
-      ? `?du_id=${[...duIds].sort().join(",")}`
-      : ""
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary${qs}`
   },
 

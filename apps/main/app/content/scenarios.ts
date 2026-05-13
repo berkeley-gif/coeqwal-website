@@ -93,9 +93,8 @@ export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
 }
 
 /** The hydroclimate values the app supports so far: `"historical"`, `"cc50"`, `"cc95"` */
-export const ALL_HYDROCLIMATES: readonly string[] = Object.keys(
-  HYDROCLIMATE_ID_MAP,
-)
+export const ALL_HYDROCLIMATES: readonly string[] =
+  Object.keys(HYDROCLIMATE_ID_MAP)
 
 export interface OperationIcon {
   path: string

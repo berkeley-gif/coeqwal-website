@@ -8,11 +8,7 @@
  */
 
 import type { ElementType } from "react"
-import {
-  HistoryIcon,
-  WbSunnyIcon,
-  LocalFireDepartmentIcon,
-} from "@repo/ui/mui"
+import { HistoryIcon, WbSunnyIcon, LocalFireDepartmentIcon } from "@repo/ui/mui"
 
 export interface HydroclimateVisualConfig {
   /** MUI icon component rendered inside the colored circle */
