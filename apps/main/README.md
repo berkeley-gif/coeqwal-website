@@ -23,7 +23,7 @@ Workspace packages (consumed via `workspace:*` in `package.json`):
 | `@repo/motion`         | Animated transitions in `app/sections/IntroSection.tsx`, tab panels, scenario explorer cards                                                 |
 | `@repo/scrollytelling` | `StickyScrollSection`, `useScrollProgress`, `useMeetingProgress` in `app/sections/IntroSection.tsx` and the Learn-tab scenes                 |
 | `@repo/state`          | Zustand + Immer re-exports backing `app/features/map/store.ts` and `app/features/scenarioExplorer/store.ts`                                  |
-| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/dataExplorer` and `app/features/scenarios/components/shared`                       |
+| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/tools/panels/dataInDepth` and `app/features/scenarios/components/shared`                       |
 
 Notable third-party packages in this app's `package.json`:
 

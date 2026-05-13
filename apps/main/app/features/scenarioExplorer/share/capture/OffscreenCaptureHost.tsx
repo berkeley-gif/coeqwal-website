@@ -29,7 +29,7 @@ import {
   rasterizeSvgClone,
   composeLiveSvgsToString,
   rasterizeSvgString,
-} from "../../dataExplorer/utils/exportUtils"
+} from "../../tools/panels/dataInDepth/utils/exportUtils"
 import { captureDoctor } from "./captureDoctor"
 
 const DEFAULT_CAPTURE_SIZE = 600

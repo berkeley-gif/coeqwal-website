@@ -28,8 +28,8 @@ import {
 } from "@dnd-kit/sortable"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
-import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
-import { useTierChartData } from "../../features/scenarioExplorer/hooks/useTierChartData"
+import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/tools/hooks/useResolvedScenarioTiers"
+import { useTierChartData } from "../../features/scenarioExplorer/tools/hooks/useTierChartData"
 import {
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
@@ -50,7 +50,7 @@ import {
   embedFontStylesInSvg,
   exportShareItemAsCSV,
   exportAllShareItemsAsZip,
-} from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
+} from "../../features/scenarioExplorer/tools/panels/dataInDepth/utils/exportUtils"
 import { withExt } from "../../features/scenarioExplorer/share/utils/filename"
 import {
   downloadCardAsPng,

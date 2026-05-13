@@ -199,8 +199,8 @@ live in `packages/viz/src/components/` (`RadarPlotSnapshot`,
 `ResilienceHeatmapSnapshot`, `TierGridSnapshot`,
 `ResilienceQuadrantSnapshot`). For locally composed views, define
 the snapshot inside the feature folder
-(`exploreView/ResiliencePanelChartView`,
-`strategyGrid/BarChartRowSnapshot`). Either pattern is fine; the
+(`tools/panels/resilience/ResiliencePanelChartView`,
+`tools/panels/list/grid/BarChartRowSnapshot`). Either pattern is fine; the
 snapshot's only job is to render at fixed dimensions without any
 live-mount side effects.
 
@@ -477,7 +477,7 @@ an `@import` for the Neue Haas font family so renderers that honor
 web fonts match the on-screen typography.
 
 CSV export for the whole tray flows through
-`exportAllShareItemsAsZip` (in `dataExplorer/utils/exportUtils.ts`),
+`exportAllShareItemsAsZip` (in `tools/panels/dataInDepth/utils/exportUtils.ts`),
 which iterates the items and asks each handler's `exportCsv` for its
 body. Per-variant CSV body builders (`barChartDataToCSV`,
 `radarDataToCSV`, `equityDataToCSV`,
@@ -619,7 +619,7 @@ zoom level) — that belongs to the live view, not the file on disk.
 
 ##### Out of scope
 
-`getTimestampedFilename` (in `dataExplorer/utils/exportUtils.ts`) is
+`getTimestampedFilename` (in `tools/panels/dataInDepth/utils/exportUtils.ts`) is
 still used by non-share downloads (`MapView.tsx`, `TableView.tsx`).
 Do not pull it into share variants.
 

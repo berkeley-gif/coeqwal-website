@@ -10,6 +10,72 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 - **Styling**: MUI v7 (`@repo/ui/mui`)
 - **Location**: `apps/main/app/features/scenarioExplorer/`
 
+## Directory layout
+
+The Explore tab has two surfaces (Get started, Tools). The directory tree mirrors that:
+
+```
+features/scenarioExplorer/
+├── ScenarioExplorer.tsx          orchestrator. Routes by mainView + exploreMode.
+├── store.ts                      Zustand store. Owns mainView, exploreMode, etc.
+├── constants.ts                  BASELINE_SCENARIO_ID and other feature-wide constants.
+│
+├── getStarted/                   Sub-tab 1: onboarding. Self-contained.
+│   ├── GetStartedView.tsx
+│   ├── TierAnimationSection.tsx, OutcomeMorphOverlay.tsx, ...
+│   └── engine/                   BeatEngine + per-beat config for the timeline.
+│
+├── tools/                        Sub-tab 2: the five Explore tools.
+│   ├── index.ts                  Barrel imported by ScenarioExplorer.tsx.
+│   ├── panels/                   The five tool implementations.
+│   │   ├── list/                 List tool. ListView + the StrategyGrid widget.
+│   │   │   ├── ListView.tsx
+│   │   │   ├── grid/             The grid widget (StrategyGrid + headers + rows).
+│   │   │   ├── listTour.ts
+│   │   │   └── ListTour*Illustration.tsx
+│   │   ├── radar/                Radar tool: panel, axis-detail controls, capture, theme hook.
+│   │   ├── equity/               Distribution tool (store key "equity").
+│   │   ├── resilience/           Resilience heatmap + quadrant + controls + 5 hooks.
+│   │   └── dataInDepth/          "Data in depth". Has its own components/, hooks/, utils/, config/ (outcomeDefinitions metric catalog).
+│   ├── chrome/                   Layout chrome shared by explorer tools (subfolders by role).
+│   │   ├── hydroclimateBadgeDisplay.ts  Helper used by ToolToolbar + UnifiedToolLayout.
+│   │   ├── layout/               Shell, chart-controls slot, tool title strip.
+│   │   │   ├── UnifiedToolLayout.tsx
+│   │   │   ├── ChartControlsBar.tsx, ToolJourneyStrip.tsx, TakeTheTourButton.tsx
+│   │   │   ├── journey.ts        Per-mode purpose / "now try..." nudge config (consumed by ToolJourneyStrip).
+│   │   ├── nav/
+│   │   │   └── ExploreSubNav.tsx Get started / Tools nav + tool sub-tabs (also imported from SmoothTabs).
+│   │   ├── toolbar/
+│   │   │   └── ToolToolbar.tsx
+│   │   ├── sidebar/              Scenario rail + list widgets also reused by the list grid.
+│   │   │   ├── ScenarioSelectionSidebar.tsx
+│   │   │   ├── ThemeGroupHeader.tsx, SearchAndChips.tsx
+│   │   ├── overlays/
+│   │   │   ├── ToolTour.tsx, KeyboardShortcuts.tsx
+│   │   └── chips/
+│   │       └── InlineToggleChip.tsx, ToggleChip.tsx, TogglePair.tsx
+│   ├── tour/                     Cross-cutting tour primitives (anchors, types, content barrel).
+│   └── hooks/                    Cross-cutting data hooks (useResolvedScenarioTiers, etc.).
+│
+├── share/                        Share drawer + capture pipeline + URL persist + cards.
+└── utils/                        scenarioIdSort, scenarioThemeOrder.
+```
+
+Tool-specific code (panel components, offscreen captures, per-tool hooks, per-tool tour content, per-tool metric catalogs) lives inside its `tools/panels/<tool>/` folder. Cross-cutting code used across tools (layout chrome, tour primitives, data hooks) lives under `tools/`. Code shared with the top-level Share tab (the share pipeline) and feature-wide helpers (`utils/`) live at the feature root. Cross-cutting outcome metadata used by every tool lives in `apps/main/app/content/outcomes.ts` (not here).
+
+### Error boundaries
+
+`ScenarioExplorer.tsx` wraps each surface in its own `<ErrorBoundary>` (from `@repo/utils`):
+
+| Boundary | What it wraps | Reset | Fallback |
+| --- | --- | --- | --- |
+| Get started | `<GetStartedView />` | Auto via mount/unmount on `mainView` | `ErrorFallback` with retry |
+| Active tool | tool component inside `<UnifiedToolLayout>` | `key={exploreMode}` | `ErrorFallback`, "try a different tool" |
+| Share drawer | `<ShareDrawer />` | Auto on leaving explorer | `null` (drawer disappears) |
+| Tool tour | `<ToolTour />` | Auto on leaving explorer | `null` (tour ends) |
+
+The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these (e.g. `TourAnchorProvider`, prefetch hook, layout-level effects).
+
 ## Architecture
 
 ### Main app navigation
@@ -174,7 +240,7 @@ You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-
 
 ```typescript
 // Primary hook - tier data with automatic hydroclimate resolution
-import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTiers"
 const {
   allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
@@ -189,7 +255,7 @@ const {
 } = useResolvedScenarioTiers()
 
 // Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, parallel plot transforms)
-import { useTierChartData } from "../hooks/useTierChartData"
+import { useTierChartData } from "../tools/hooks/useTierChartData"
 const { data, axes, lineColors, baselineScenario, isLoading } =
   useTierChartData()
 
@@ -206,16 +272,25 @@ const { idMapping, resolvedIds, missingScenarioIds, reverseMap } =
 
 ## How to add a new tool
 
-### Step 1: Create your tool component
+### Step 1: Create the tool folder
 
-Create `exploreView/YourToolPanel.tsx`:
+Make `tools/panels/yourTool/` and put the panel in it. Tool-specific captures, hooks, and tour content live next to the panel:
+
+```
+tools/panels/yourTool/
+├── YourToolPanel.tsx
+├── OffscreenYourToolCapture.tsx     (if the tool offers a "save snapshot" share)
+├── useYourToolFooBar.ts             (any tool-specific hooks)
+└── yourToolTour.ts                  (optional, per-tool tour content)
+```
 
 ```typescript
+// tools/panels/yourTool/YourToolPanel.tsx
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "../store"
-import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+import { useScenarioExplorerStore } from "../../../store"
+import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 
 export default function YourToolPanel() {
   const theme = useTheme()
@@ -231,17 +306,17 @@ export default function YourToolPanel() {
 }
 ```
 
-### Step 2: Export from barrel
+### Step 2: Export from the tools barrel
 
-In `exploreView/index.ts`:
+Add to `tools/index.ts`:
 
 ```typescript
-export { default as YourToolPanel } from "./YourToolPanel"
+export { default as YourToolPanel } from "./panels/yourTool/YourToolPanel"
 ```
 
 ### Step 3: Add rendering in ScenarioExplorer.tsx
 
-Inside the `UnifiedToolLayout` children:
+Inside the `UnifiedToolLayout` children (already wrapped in the active-tool `<ErrorBoundary>`):
 
 ```typescript
 {exploreMode === "yourTool" && <YourToolPanel />}
@@ -252,7 +327,8 @@ Inside the `UnifiedToolLayout` children:
 If you need a new toolbar tab (rather than replacing an existing placeholder):
 
 1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
-2. Add to `TOOL_TABS` in `ScenarioExplorer.tsx`
+2. Add to the FLOW config in `tools/chrome/nav/ExploreSubNav.tsx` so the tab appears in the sub-nav
+3. Add an entry to `JOURNEY` in `journey.ts` so the "now try..." nudge works
 
 If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist. Just replace the placeholder component contents.
 
@@ -270,7 +346,7 @@ For developers porting an external visualization:
 - [ ] **Please use the site persistent Mapbox map** See "Map integration" below. We can add an option to change the basemap.
 - [ ] **Render custom dot markers** on the shared map using `setMotionChildren` from `useMap()`. Do not modify the existing marker components (`TierMarkers.tsx`, `TierLocationLabels.tsx`). See "Custom dot markers" under "Map integration" below.
 - [ ] **Keep visualization-specific state local** i.e. view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
-- [ ] **Export is already wired**.`EquityPanel` is already exported from `exploreView/index.ts` and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
+- [ ] **Export is already wired**.`EquityPanel` is already exported from `tools/index.ts` (via `tools/panels/equity/EquityPanel.tsx`) and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
 
 ## Map integration
 

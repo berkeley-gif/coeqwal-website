@@ -1,5 +1,5 @@
 /**
- * Scenario Explorer store - state management for multi-view scenario exploration
+ * Scenario Explorer store: state management for multi-view scenario exploration
  *
  * This store manages state that is shared across multiple components in the
  * Scenario Explorer feature. Local UI state (like modal open/close, hover states)
@@ -10,10 +10,10 @@ import { create, immer } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 import { BASELINE_SCENARIO_ID } from "./constants"
-import type { TourTool } from "./tour/types"
+import type { TourTool } from "./tools/tour/types"
 import type { ShareItem, ShareItemPatch } from "./share/types"
 import { loadShareState, saveShareState } from "./share/persist"
-export type { TourTool } from "./tour/types"
+export type { TourTool } from "./tools/tour/types"
 export type { ShareItem, ShareItemPatch } from "./share/types"
 
 // ============================================================================
@@ -313,9 +313,7 @@ interface ScenarioExplorerActions {
 
   // Beginner journey
   dismissWelcome: (permanent: boolean) => void
-  /** Re-open the WelcomeStrip after it has been dismissed. Clears
-   *  both the session and persisted dismissal flags so the strip
-   *  renders again on the List view. */
+  /** Clears session and persisted dismissal flags for the beginner welcome flow. */
   reopenWelcome: () => void
   /** Idempotently pre-pin the baseline scenario on first visit. */
   ensureBaselinePrePin: () => void

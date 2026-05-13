@@ -10,7 +10,7 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 //import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
-import ExploreSubNav from "../../features/scenarioExplorer/components/ExploreSubNav"
+import ExploreSubNav from "../../features/scenarioExplorer/tools/chrome/nav/ExploreSubNav"
 
 /** Renders the active tab's description panel content */
 function TabDescription({

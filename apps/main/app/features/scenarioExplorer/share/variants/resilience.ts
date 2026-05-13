@@ -24,12 +24,12 @@ import {
   resilienceQuadrantDataToCSV,
   type ResilienceHeatmapChartDataShape,
   type ResilienceQuadrantChartDataShape,
-} from "../../dataExplorer/utils/exportUtils"
-import { useResilienceAggregate } from "../../hooks/useResilienceAggregate"
+} from "../../tools/panels/dataInDepth/utils/exportUtils"
+import { useResilienceAggregate } from "../../tools/panels/resilience/useResilienceAggregate"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
-} from "../../hooks/useResilienceMatrix"
+} from "../../tools/panels/resilience/useResilienceMatrix"
 import ResilienceShareCard from "../cards/ResilienceShareCard"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import type { ShareItemOfType } from "../types"

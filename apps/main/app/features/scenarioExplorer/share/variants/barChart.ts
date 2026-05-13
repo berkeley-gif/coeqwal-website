@@ -6,7 +6,7 @@
 
 import React, { useEffect } from "react"
 import type { ChartDataPoint } from "../../../scenarios/components/shared/types"
-import { barChartDataToCSV } from "../../dataExplorer/utils/exportUtils"
+import { barChartDataToCSV } from "../../tools/panels/dataInDepth/utils/exportUtils"
 import ShareScenarioCard from "../cards/ShareScenarioCard"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"

@@ -62,7 +62,7 @@ export interface MobileModalProps {
   /**
    * Content to render between the title row and the content area with zero
    * container padding. The child controls all its own spacing and borders.
-   * Use this for full-bleed bars like SelectionBanner.
+   * Use this for full-bleed bars (e.g. a sticky summary strip above the body).
    */
   subHeader?: React.ReactNode
   /**

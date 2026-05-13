@@ -22,7 +22,7 @@ import {
   mergeRadarAxisLabelDetailStyle,
   type RadarPlotAxisLabelDetailStyle,
 } from "@repo/viz"
-import { useRadarPlotTheme } from "../../hooks/useRadarPlotTheme"
+import { useRadarPlotTheme } from "../../tools/panels/radar/useRadarPlotTheme"
 import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
 import CapturedSizeFrame from "./CapturedSizeFrame"
 

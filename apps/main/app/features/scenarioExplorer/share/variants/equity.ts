@@ -9,8 +9,8 @@ import { OUTCOME_NAMES, type OutcomeCode } from "../../../../content/outcomes"
 import {
   equityDataToCSV,
   type EquityChartDataShape,
-} from "../../dataExplorer/utils/exportUtils"
-import { useEquityObjectives } from "../../hooks/useEquityObjectives"
+} from "../../tools/panels/dataInDepth/utils/exportUtils"
+import { useEquityObjectives } from "../../tools/panels/equity/useEquityObjectives"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
 import ShareEquityLiveChart from "../live/ShareEquityLiveChart"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"

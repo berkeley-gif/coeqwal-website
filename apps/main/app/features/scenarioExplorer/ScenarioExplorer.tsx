@@ -14,21 +14,26 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
+import { ErrorBoundary } from "@repo/utils"
+import { ErrorFallback } from "@repo/ui"
 import GetStartedView from "./getStarted/GetStartedView"
-import UnifiedToolLayout from "./components/UnifiedToolLayout"
-import ToolToolbar from "./components/ToolToolbar"
-import ChartControlsBar from "./components/ChartControlsBar"
-import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
+import UnifiedToolLayout from "./tools/chrome/layout/UnifiedToolLayout"
+import ToolToolbar from "./tools/chrome/toolbar/ToolToolbar"
+import ChartControlsBar from "./tools/chrome/layout/ChartControlsBar"
+import ScenarioSelectionSidebar from "./tools/chrome/sidebar/ScenarioSelectionSidebar"
 import ShareDrawer from "./share/ShareDrawer"
-import KeyboardShortcuts from "./components/KeyboardShortcuts"
-import ToolTour from "./components/ToolTour"
-import { TourAnchorProvider, useTourAnchor } from "./tour/TourAnchorContext"
+import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
+import ToolTour from "./tools/chrome/overlays/ToolTour"
+import { TourAnchorProvider, useTourAnchor } from "./tools/tour/TourAnchorContext"
 import {
   EquityPanel,
   ResiliencePanel,
   ResilienceQuadrantPanel,
   RadarPanel,
-} from "./exploreView"
+  ListView,
+  DataExplorerView,
+  ResilienceControls,
+} from "./tools"
 import type {
   SingleScenarioCaptureFn,
   MultiScenarioCaptureFn,
@@ -37,18 +42,15 @@ import type {
   ResilienceTileCaptureFn,
   ResilienceQuadrantCaptureFn,
   ResilienceScenarioSoloCaptureFn,
-} from "./exploreView"
-import { captureEquityOffscreen } from "./exploreView/OffscreenEquityCapture"
+} from "./tools"
+import { captureEquityOffscreen } from "./tools/panels/equity/OffscreenEquityCapture"
 import { stageShareItem } from "./share/stage"
-import ResilienceControls from "./exploreView/ResilienceControls"
-import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
+import { RESILIENCE_HYDROCLIMATES } from "./tools/panels/resilience/useResilienceMatrix"
 import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
-import ListView from "./exploreView/ListView"
-import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
 import type { ShareItem } from "./store"
 import { useMapMode, mapActions } from "../map/store"
-import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
+import { usePrefetchTiers } from "./tools/hooks/usePrefetchTiers"
 
 function SimpleButton({
   label,
@@ -89,7 +91,7 @@ function SimpleButton({
   )
 }
 
-import { InlineToggleChip } from "./components/InlineToggleChip"
+import { InlineToggleChip } from "./tools/chrome/chips/InlineToggleChip"
 
 export default function ScenarioExplorer() {
   return (
@@ -759,7 +761,18 @@ function ScenarioExplorerInner() {
             ...(!isMapPassThrough && { pointerEvents: "auto" }),
           }}
         >
-          {mainView === "get-started" && <GetStartedView />}
+          {mainView === "get-started" && (
+            <ErrorBoundary
+              fallback={
+                <ErrorFallback
+                  title="Get started couldn't load"
+                  message="This might be a temporary issue. Try refreshing the page or switch to the Tools sub-tab."
+                />
+              }
+            >
+              <GetStartedView />
+            </ErrorBoundary>
+          )}
 
           {mainView === "explorer" && (
             <Box sx={{ flex: 1, overflow: "hidden" }}>
@@ -806,51 +819,61 @@ function ScenarioExplorerInner() {
                 }
                 chartControls={isListMode ? undefined : chartControls}
               >
-                {isListMode && (
-                  <ListView
-                    highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
-                  />
-                )}
-                {exploreMode === "radar" && (
-                  <RadarPanel
-                    highlightedIds={highlightedIds}
-                    onOutcomeHover={handleOutcomeHover}
-                    onScenarioColors={setRadarScenarioColors}
-                    onCaptureReady={handleRadarCaptureReady}
-                    onSingleCaptureReady={handleRadarSingleCaptureReady}
-                    onMultiCaptureReady={handleRadarMultiCaptureReady}
-                    onCanCaptureChange={handleRadarCanCaptureChange}
-                    onCanShareFromSidebarChange={
-                      handleRadarCanShareFromSidebarChange
-                    }
-                  />
-                )}
-                {exploreMode === "equity" && <EquityPanel />}
-                {exploreMode === "resilience" &&
-                  (resilienceControls.view === "quadrant" ? (
-                    <ResilienceQuadrantPanel
-                      controls={resilienceControls}
-                      onControlsChange={handleResilienceControlsChange}
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                      onCaptureReady={handleResilienceQuadrantCaptureReady}
+                <ErrorBoundary
+                  key={exploreMode}
+                  fallback={
+                    <ErrorFallback
+                      title="This tool couldn't load"
+                      message="Try a different tool above, or refresh the page."
                     />
-                  ) : (
-                    <ResiliencePanel
-                      controls={resilienceControls}
+                  }
+                >
+                  {isListMode && (
+                    <ListView
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
-                      onControlsChange={handleResilienceControlsChange}
-                      onCaptureReady={handleResilienceCaptureReady}
-                      onCaptureTileReady={handleResilienceTileCaptureReady}
-                      onCaptureScenarioSoloReady={
-                        handleResilienceScenarioSoloCaptureReady
+                    />
+                  )}
+                  {exploreMode === "radar" && (
+                    <RadarPanel
+                      highlightedIds={highlightedIds}
+                      onOutcomeHover={handleOutcomeHover}
+                      onScenarioColors={setRadarScenarioColors}
+                      onCaptureReady={handleRadarCaptureReady}
+                      onSingleCaptureReady={handleRadarSingleCaptureReady}
+                      onMultiCaptureReady={handleRadarMultiCaptureReady}
+                      onCanCaptureChange={handleRadarCanCaptureChange}
+                      onCanShareFromSidebarChange={
+                        handleRadarCanShareFromSidebarChange
                       }
-                      onTileShare={handleResilienceTileSnapshot}
                     />
-                  ))}
-                {exploreMode === "data" && <DataExplorerView />}
+                  )}
+                  {exploreMode === "equity" && <EquityPanel />}
+                  {exploreMode === "resilience" &&
+                    (resilienceControls.view === "quadrant" ? (
+                      <ResilienceQuadrantPanel
+                        controls={resilienceControls}
+                        onControlsChange={handleResilienceControlsChange}
+                        highlightedIds={highlightedIds}
+                        onScenarioHover={handleToolScenarioHover}
+                        onCaptureReady={handleResilienceQuadrantCaptureReady}
+                      />
+                    ) : (
+                      <ResiliencePanel
+                        controls={resilienceControls}
+                        highlightedIds={highlightedIds}
+                        onScenarioHover={handleToolScenarioHover}
+                        onControlsChange={handleResilienceControlsChange}
+                        onCaptureReady={handleResilienceCaptureReady}
+                        onCaptureTileReady={handleResilienceTileCaptureReady}
+                        onCaptureScenarioSoloReady={
+                          handleResilienceScenarioSoloCaptureReady
+                        }
+                        onTileShare={handleResilienceTileSnapshot}
+                      />
+                    ))}
+                  {exploreMode === "data" && <DataExplorerView />}
+                </ErrorBoundary>
               </UnifiedToolLayout>
             </Box>
           )}
@@ -858,8 +881,16 @@ function ScenarioExplorerInner() {
       </Box>
 
       <KeyboardShortcuts />
-      {mainView === "explorer" && <ShareDrawer />}
-      {mainView === "explorer" && <ToolTour />}
+      {mainView === "explorer" && (
+        <ErrorBoundary fallback={null}>
+          <ShareDrawer />
+        </ErrorBoundary>
+      )}
+      {mainView === "explorer" && (
+        <ErrorBoundary fallback={null}>
+          <ToolTour />
+        </ErrorBoundary>
+      )}
     </Box>
   )
 }

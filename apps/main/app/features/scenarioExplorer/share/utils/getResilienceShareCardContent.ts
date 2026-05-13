@@ -4,9 +4,9 @@
  */
 
 import type { ShareItem } from "../../store"
-import { RESILIENCE_HYDROCLIMATES } from "../../hooks/useResilienceMatrix"
-import type { ResilienceHeatmapChartData } from "../../exploreView/ResiliencePanel"
-import type { ResilienceQuadrantChartData } from "../../exploreView/ResilienceQuadrantPanel"
+import { RESILIENCE_HYDROCLIMATES } from "../../tools/panels/resilience/useResilienceMatrix"
+import type { ResilienceHeatmapChartData } from "../../tools/panels/resilience/ResiliencePanel"
+import type { ResilienceQuadrantChartData } from "../../tools/panels/resilience/ResilienceQuadrantPanel"
 
 export type ResilienceShareItem = Extract<ShareItem, { type: "resilience" }>
 

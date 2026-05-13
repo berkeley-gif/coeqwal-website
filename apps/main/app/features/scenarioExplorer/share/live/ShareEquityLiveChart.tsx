@@ -27,7 +27,7 @@
 import React from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { TierGridSnapshot } from "@repo/viz"
-import { useEquityObjectives } from "../../hooks/useEquityObjectives"
+import { useEquityObjectives } from "../../tools/panels/equity/useEquityObjectives"
 import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
 import CapturedSizeFrame from "./CapturedSizeFrame"
 

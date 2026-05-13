@@ -11,8 +11,8 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
-import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-import { useTierChartData } from "../hooks/useTierChartData"
+import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTiers"
+import { useTierChartData } from "../tools/hooks/useTierChartData"
 import {
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,

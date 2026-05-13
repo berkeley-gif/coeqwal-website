@@ -33,12 +33,12 @@ import {
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
 } from "@repo/viz"
-import { useResilienceAggregate } from "../../hooks/useResilienceAggregate"
+import { useResilienceAggregate } from "../../tools/panels/resilience/useResilienceAggregate"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
-} from "../../hooks/useResilienceMatrix"
-import { useResilienceHeatmapTheme } from "../../hooks/useResilienceHeatmapTheme"
+} from "../../tools/panels/resilience/useResilienceMatrix"
+import { useResilienceHeatmapTheme } from "../../tools/panels/resilience/useResilienceHeatmapTheme"
 import {
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
