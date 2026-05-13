@@ -12,7 +12,10 @@ import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
-import { useScenarioExplorerStore, type OutcomeDisplayMode } from "../../../store"
+import {
+  useScenarioExplorerStore,
+  type OutcomeDisplayMode,
+} from "../../../store"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
 
 interface ToolToolbarProps {

@@ -26,7 +26,10 @@ import { getTierColorsFromTheme } from "../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
 import { HydroclimateGate } from "../../../../scenarios/components/HydroclimateGate"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../../../../content/outcomes"
+import {
+  OUTCOME_NAMES,
+  type OutcomeCode,
+} from "../../../../../content/outcomes"
 import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,

@@ -50,12 +50,7 @@
  * its centered position rather than its default top anchor.
  */
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type RefObject,
-} from "react"
+import { useEffect, useMemo, useState, type RefObject } from "react"
 import {
   useScrollProgress,
   useMotionValue,
@@ -193,12 +188,10 @@ export function useMorphingHeadlineChoreography({
     headlineRef,
     { edgeA: "bottom", edgeB: "bottom" },
   )
-  const gap1End = useMeetingProgress(
-    containerRef,
-    aboutPanelRef,
-    headlineRef,
-    { edgeA: "top", edgeB: "top" },
-  )
+  const gap1End = useMeetingProgress(containerRef, aboutPanelRef, headlineRef, {
+    edgeA: "top",
+    edgeB: "top",
+  })
 
   // Transition 1 (About -> WaterThemes): measure against the
   // viewport-center marker, which is sized to the headline's height
@@ -247,8 +240,7 @@ export function useMorphingHeadlineChoreography({
   // motion pause + return glide should still be scheduled relative
   // to the seam itself so timing doesn't drift if the text delay is
   // tweaked later.
-  const centerEnterEnd =
-    gap1End + (gap2Start - gap1End) * CENTER_ENTER_FRACTION
+  const centerEnterEnd = gap1End + (gap2Start - gap1End) * CENTER_ENTER_FRACTION
   const centerEnterRange: [number, number] = [gap1Start, centerEnterEnd]
   const centerExitPause = gap2Duration * CENTER_EXIT_PAUSE_FACTOR
   const centerExitDuration = gap2Duration * CENTER_EXIT_DURATION_FACTOR

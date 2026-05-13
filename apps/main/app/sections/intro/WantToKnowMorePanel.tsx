@@ -83,10 +83,10 @@ export function WantToKnowMorePanel() {
           }}
         >
           <Typography variant="body1">
-            Water is limited and every choice has trade-offs. COEQWAL allows
-            you to explore different water scenarios and understand how
-            decisions shape potential futures for communities, farms, rivers,
-            and the Delta.
+            Water is limited and every choice has trade-offs. COEQWAL allows you
+            to explore different water scenarios and understand how decisions
+            shape potential futures for communities, farms, rivers, and the
+            Delta.
           </Typography>
 
           <Box

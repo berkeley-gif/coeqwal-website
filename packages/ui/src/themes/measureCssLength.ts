@@ -13,10 +13,7 @@
  * const insetYPx = resolveCssLengthPx(theme.layout.panel.insetY, 24)
  * scrollTo({ top: target.offsetTop - theme.layout.headerHeight + insetYPx })
  */
-export function resolveCssLengthPx(
-  cssExpr: string,
-  fallback: number,
-): number {
+export function resolveCssLengthPx(cssExpr: string, fallback: number): number {
   if (typeof window === "undefined" || typeof document === "undefined") {
     return fallback
   }

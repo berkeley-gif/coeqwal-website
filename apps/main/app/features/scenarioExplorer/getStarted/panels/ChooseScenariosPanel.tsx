@@ -35,8 +35,8 @@ export default function ChooseScenariosPanel() {
         color="text.secondary"
         sx={{ maxWidth: "50%", mb: theme.space.section.md }}
       >
-        To use the library effectively, you may want to start by asking
-        these questions:
+        To use the library effectively, you may want to start by asking these
+        questions:
       </Typography>
 
       <BarredColumns
@@ -47,8 +47,7 @@ export default function ChooseScenariosPanel() {
               "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
           },
           {
-            title:
-              "How could alternative strategies impact my water interest?",
+            title: "How could alternative strategies impact my water interest?",
             description:
               "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
           },
@@ -64,9 +63,9 @@ export default function ChooseScenariosPanel() {
       />
 
       <Typography variant="body2" color="text.secondary">
-        As you explore scenarios with different visualization tools, use
-        the &ldquo;share&rdquo; icon to save graphs, text, or maps of
-        interest. These will be saved in the{" "}
+        As you explore scenarios with different visualization tools, use the
+        &ldquo;share&rdquo; icon to save graphs, text, or maps of interest.
+        These will be saved in the{" "}
         <Typography component="span" variant="body2" fontWeight={600}>
           SHARE
         </Typography>{" "}

@@ -70,12 +70,12 @@ Tool-specific code (panel components, offscreen captures, per-tool hooks, per-to
 
 `ScenarioExplorer.tsx` wraps each surface in its own `<ErrorBoundary>` (from `@repo/utils`):
 
-| Boundary | What it wraps | Reset | Fallback |
-| --- | --- | --- | --- |
-| Get started | `<GetStartedView />` | Auto via mount/unmount on `mainView` | `ErrorFallback` with retry |
-| Active tool | tool component inside `<UnifiedToolLayout>` | `key={exploreMode}` | `ErrorFallback`, "try a different tool" |
-| Share drawer | `<ShareDrawer />` | Auto on leaving explorer | `null` (drawer disappears) |
-| Tool tour | `<ToolTour />` | Auto on leaving explorer | `null` (tour ends) |
+| Boundary     | What it wraps                               | Reset                                | Fallback                                |
+| ------------ | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
+| Get started  | `<GetStartedView />`                        | Auto via mount/unmount on `mainView` | `ErrorFallback` with retry              |
+| Active tool  | tool component inside `<UnifiedToolLayout>` | `key={exploreMode}`                  | `ErrorFallback`, "try a different tool" |
+| Share drawer | `<ShareDrawer />`                           | Auto on leaving explorer             | `null` (drawer disappears)              |
+| Tool tour    | `<ToolTour />`                              | Auto on leaving explorer             | `null` (tour ends)                      |
 
 The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these (e.g. `TourAnchorProvider`, prefetch hook, layout-level effects).
 

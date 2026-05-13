@@ -72,8 +72,8 @@ export default function WaterIssuesPanel() {
           color="text.secondary"
           sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: sp.lg }}
         >
-          COEQWAL scenarios are designed to address key water challenges
-          across California, including:
+          COEQWAL scenarios are designed to address key water challenges across
+          California, including:
         </Typography>
 
         {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
@@ -83,9 +83,7 @@ export default function WaterIssuesPanel() {
               key={themeKey}
               title={title}
               description={description}
-              onClick={
-                active ? () => openThemePanel(themeKey) : undefined
-              }
+              onClick={active ? () => openThemePanel(themeKey) : undefined}
               dimmed={!active}
               variant="onDark"
             />

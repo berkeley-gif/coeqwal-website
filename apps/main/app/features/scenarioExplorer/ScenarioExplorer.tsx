@@ -24,7 +24,10 @@ import ScenarioSelectionSidebar from "./tools/chrome/sidebar/ScenarioSelectionSi
 import ShareDrawer from "./share/ShareDrawer"
 import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
 import ToolTour from "./tools/chrome/overlays/ToolTour"
-import { TourAnchorProvider, useTourAnchor } from "./tools/tour/TourAnchorContext"
+import {
+  TourAnchorProvider,
+  useTourAnchor,
+} from "./tools/tour/TourAnchorContext"
 import {
   EquityPanel,
   ResiliencePanel,

@@ -41,10 +41,7 @@ export const AboutCoeqwalPanel = forwardRef<
   const theme = useTheme()
 
   return (
-    <div
-      ref={ref}
-      style={{ backgroundColor: theme.palette.common.white }}
-    >
+    <div ref={ref} style={{ backgroundColor: theme.palette.common.white }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -98,8 +95,8 @@ export const AboutCoeqwalPanel = forwardRef<
               <br />
               <br />
               Using water planning models, COEQWAL sheds light on how
-              alternative decisions and climate change scenarios shape our
-              water future.
+              alternative decisions and climate change scenarios shape our water
+              future.
             </>
           }
           cta={

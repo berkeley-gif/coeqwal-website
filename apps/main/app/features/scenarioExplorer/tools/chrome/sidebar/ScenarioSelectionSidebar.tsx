@@ -25,7 +25,10 @@ import { InlineRowActions } from "../../panels/list/grid"
 import type { ScenarioTheme } from "../../../../../content/scenarios"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 import { stageShareItem } from "../../../share/stage"
-import { getTierLabel, getTierColorsFromTheme } from "../../../../../content/tiers"
+import {
+  getTierLabel,
+  getTierColorsFromTheme,
+} from "../../../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
