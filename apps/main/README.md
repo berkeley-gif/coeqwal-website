@@ -39,18 +39,23 @@ Notable third-party deps in this app's `package.json`:
 
 ## Layout and rendering model
 
-`app/layout.tsx` (Server Component) sets up the layout-level providers and the always-on chrome:
+`app/layout.tsx` (Server Component) sets up the layout-level providers and the always-on components:
 
 ```
-TranslationProvider
-└── DataProvider
-    └── ThemeRegistry (MUI)
-        ├── ErrorBoundary > Suspense > ActiveThemePanel    (off-canvas theme drawer)
-        └── TabsProvider
-            ├── SkipLink                                   (WCAG 2.4.1)
-            ├── ErrorBoundary > Suspense > Header
-            └── {children}                                 (page content)
+StrictMode
+├── FontLoader (Adobe Fonts kit)
+└── TranslationProvider
+    └── DataProvider
+        └── ThemeRegistry (MUI)
+            ├── ErrorBoundary > Suspense > ActiveThemePanel    (off-canvas theme drawer)
+            ├── TabsProvider
+            │   ├── SkipLink                                   (WCAG 2.4.1)
+            │   ├── ErrorBoundary > Suspense > Header
+            │   └── {children}                                 (page content)
+            └── PanelTuner
 ```
+
+**Translation provider:** Wrapping `DataProvider`, `ThemeRegistry`, and all layout chrome as shown. Swap your new package in at that layer.
 
 `app/page.tsx` (Server Component) renders the home-only stack:
 
