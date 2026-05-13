@@ -1,7 +1,7 @@
 /**
  * Outcome content - single source of truth for outcome codes and display names
  *
- * Design principle: Short codes are the canonical identifier.
+ * Short codes are the canonical identifier.
  * Pass codes through components/state, look up display names only at render time.
  */
 
@@ -11,7 +11,7 @@
 
 /**
  * Canonical mapping from API short codes to UI display names.
- * This is the SINGLE source of truth for outcome names.
+ * This is the source of truth for outcome names.
  */
 export const OUTCOME_NAMES = {
   CWS_DEL: "Community deliveries",

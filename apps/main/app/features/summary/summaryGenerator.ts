@@ -299,7 +299,7 @@ export function generateOutcomeSummary(
 }
 
 /**
- * Format a list of location names for display (internal helper)
+ * Format a list of location names for display
  */
 function formatLocationList(locations: AtRiskLocation[], maxItems = 5): string {
   if (locations.length === 0) return ""

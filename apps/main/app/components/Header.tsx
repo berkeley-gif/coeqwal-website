@@ -21,7 +21,7 @@ export function Header() {
   const pathname = usePathname()
   const theme = useTheme()
 
-  // -- Context for the theme panels
+  // Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
 
   const { isPastHero: rawIsPastHero } = useTabs()

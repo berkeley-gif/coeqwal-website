@@ -24,8 +24,8 @@ import {
   useScrollValue,
 } from "@repo/scrollytelling"
 import type { MotionValue } from "@repo/motion"
-import { WATER_THEMES } from "../content/themes"
-import { usePanelRoute } from "../hooks/usePanelRoute"
+import { WATER_THEMES } from "../../content/themes"
+import { usePanelRoute } from "../../hooks/usePanelRoute"
 
 /*───────────────── */
 /* IMAGE & CIRCLE CONFIG                                                       */
