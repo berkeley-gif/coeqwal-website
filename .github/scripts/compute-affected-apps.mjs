@@ -1,10 +1,9 @@
 // Computes which apps in apps/* are affected by a PR's changes to
-// packages/, the lockfile, the workspace file, turbo.json, or the root
-// package.json. Renders a Markdown body for the sticky PR comment.
+// packages/, pnpm-workspace.yaml, turbo.json, or the root package.json.
+// Renders a Markdown body for the sticky PR comment.
 //
-// The sticky comment ALWAYS posts. When no apps are affected (e.g., a
-// lockfile-regen-only PR) the comment explains why so the PR has a record
-// instead of silent silence.
+// The sticky comment ALWAYS posts. When no apps are affected, the comment
+// explains why so the PR has a record instead of silent silence.
 //
 // Inputs (env):
 //   BASE_SHA            PR base commit (github.event.pull_request.base.sha)
@@ -12,7 +11,6 @@
 //   GITHUB_REPOSITORY   owner/name, used to build dispatch links
 //   GITHUB_OUTPUT       path to the step's output file
 //   GITHUB_STEP_SUMMARY path to the job summary file (optional, GH-provided)
-//   PR_LABELS           comma-separated labels on the PR (used for opt-outs)
 //
 // Outputs (to $GITHUB_OUTPUT):
 //   markdown=<multiline>  Markdown body for the sticky comment
@@ -31,10 +29,6 @@ const headSha = process.env.HEAD_SHA
 const repo = process.env.GITHUB_REPOSITORY
 const ghOutput = process.env.GITHUB_OUTPUT
 const ghSummary = process.env.GITHUB_STEP_SUMMARY
-const prLabels = (process.env.PR_LABELS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean)
 
 if (!baseSha || !headSha || !repo || !ghOutput) {
   console.error(
@@ -42,8 +36,6 @@ if (!baseSha || !headSha || !repo || !ghOutput) {
   )
   process.exit(1)
 }
-
-const lockfileRegen = prLabels.includes("lockfile-regen")
 
 const diff = execSync(`git diff --name-only ${baseSha}...${headSha}`, {
   encoding: "utf8",
@@ -59,9 +51,7 @@ for (const file of diff.split("\n")) {
     changedPackages.add(m[1])
     continue
   }
-  if (file === "pnpm-lock.yaml") broadImpact.add("pnpm-lock.yaml")
-  else if (file === "pnpm-workspace.yaml")
-    broadImpact.add("pnpm-workspace.yaml")
+  if (file === "pnpm-workspace.yaml") broadImpact.add("pnpm-workspace.yaml")
   else if (file === "turbo.json") broadImpact.add("turbo.json")
   else if (file === "package.json") broadImpact.add("package.json")
 }
@@ -72,18 +62,6 @@ console.log(
 console.log(
   `Broad-impact files: ${[...broadImpact].sort().join(", ") || "(none)"}`,
 )
-console.log(`PR labels: ${prLabels.join(", ") || "(none)"}`)
-
-// Lockfile dedupe: when packages/** changed in the same PR, the lockfile
-// change is almost certainly downstream of the package change. Don't
-// double-flag every app on top of the package-specific list.
-const lockfileDeduped = changedPackages.size > 0 && broadImpact.has("pnpm-lock.yaml")
-if (lockfileDeduped) {
-  broadImpact.delete("pnpm-lock.yaml")
-  console.log(
-    "Suppressing pnpm-lock.yaml broad-impact (packages/** changed in the same PR)",
-  )
-}
 
 // Source of truth for "which apps does this monorepo deploy + who owns them"
 // is CODEOWNERS. A line like `/apps/main/  @user1 @user2` means main is a
@@ -166,35 +144,10 @@ if (broadImpact.size > 0) {
 const repoUrl = `https://github.com/${repo}`
 const workflowUrl = `${repoUrl}/actions/workflows/deploy-amplify.yml`
 
-// Decide whether to post the impact comment or a skip-reason comment.
-// "Skip-reason" still posts a sticky comment so the PR has a record; this is
-// a deliberate change from the old behavior of posting nothing on skip.
-const lockfileOnlyBroadImpact =
-  broadImpact.size === 1 && broadImpact.has("pnpm-lock.yaml")
-const lockfileRegenSkip =
-  lockfileRegen &&
-  changedPackages.size === 0 &&
-  lockfileOnlyBroadImpact
-
 let markdown
 let summaryLine
 
-if (lockfileRegenSkip) {
-  // Honor the lockfile-regen label: don't broaden to all apps for a
-  // lockfile-only PR.
-  const lines = []
-  lines.push("## Package change impact: skipped")
-  lines.push("")
-  lines.push(
-    "This PR only modifies `pnpm-lock.yaml` and is labelled `lockfile-regen`. The package-impact comment was suppressed because the change is a regeneration that does not require any app to redeploy.",
-  )
-  lines.push("")
-  lines.push(
-    "If a transitive bump in this lockfile actually does affect a runtime dependency, remove the `lockfile-regen` label to re-run the workflow and get the full app list.",
-  )
-  markdown = lines.join("\n")
-  summaryLine = `Skipped (lockfile-regen label, lockfile-only PR)`
-} else if (affected.size === 0) {
+if (affected.size === 0) {
   const lines = []
   lines.push("## Package change impact: no apps flagged")
   lines.push("")
@@ -246,13 +199,7 @@ if (lockfileRegenSkip) {
     lines.push(`**Broad-impact files changed**: ${list}`)
     lines.push("")
     lines.push(
-      "> A broad-impact file changed (lockfile, workspace, `turbo.json`, or root `package.json`). All apps are listed because their builds could be affected. For lockfile-only regenerations, add the `lockfile-regen` label to suppress this.",
-    )
-  }
-  if (lockfileDeduped) {
-    lines.push("")
-    lines.push(
-      "> `pnpm-lock.yaml` also changed but was suppressed because `packages/**` changed in the same PR (the lockfile change is almost certainly downstream).",
+      "> A broad-impact file changed (workspace, `turbo.json`, or root `package.json`). All apps are listed because their builds could be affected.",
     )
   }
 
@@ -290,12 +237,6 @@ if (ghSummary) {
     summary.push(
       `- Broad-impact files: ${[...broadImpact].sort().map((f) => `\`${f}\``).join(", ")}`,
     )
-  }
-  if (lockfileDeduped) {
-    summary.push("- `pnpm-lock.yaml` deduped (packages/** also changed)")
-  }
-  if (lockfileRegen) {
-    summary.push("- PR has `lockfile-regen` label")
   }
   if (missingFromCodeowners.length > 0) {
     summary.push(

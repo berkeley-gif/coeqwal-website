@@ -2,6 +2,12 @@ name: Enforce package-PR rule
 
 # Enforces a soft policy: shared package changes must be delivered to dev via a
 # pull request, never via a direct push.
+#
+# Markdown-only edits (READMEs etc.) under any of the watched paths are
+# excluded.
+#
+# A violation generates a failed workflow run on the Actions tab. Whoever
+# pushed gets the standard GitHub "workflow failed" email.
 
 on:
   push:
@@ -12,10 +18,11 @@ on:
       - "pnpm-workspace.yaml"
       - "turbo.json"
       - "package.json"
+      - "!**/*.md"
+      - "!**/*.mdx"
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   enforce:
@@ -29,14 +36,11 @@ jobs:
           fetch-depth: 0
 
       - name: Inspect push commits for PR provenance
-        id: inspect
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
-          PUSHER: ${{ github.event.pusher.name }}
-          PUSHER_LOGIN: ${{ github.actor }}
         run: |
           set -euo pipefail
           # First push to a new branch reports BEFORE_SHA as 40 zeros. Treat
@@ -44,15 +48,19 @@ jobs:
           # package-change push by itself).
           if [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
             echo "Branch-creation push (no prior history). Skipping enforcement."
-            echo "violations=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           COMMITS=$(git rev-list "${BEFORE_SHA}..${AFTER_SHA}")
           VIOLATIONS=""
           for SHA in $COMMITS; do
-            # Touched paths in this single commit
-            TOUCHED=$(git show --name-only --pretty=format: "$SHA" | grep -E '^(packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|turbo\.json$|package\.json$)' || true)
+            # Watched package paths touched by this commit, with .md and .mdx
+            # filtered out so a docs-only change inside packages/ does not
+            # count as a package change.
+            TOUCHED=$(git show --name-only --pretty=format: "$SHA" \
+              | grep -E '^(packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|turbo\.json$|package\.json$)' \
+              | grep -vE '\.(md|mdx)$' \
+              || true)
             if [[ -z "$TOUCHED" ]]; then
               continue
             fi
@@ -70,58 +78,12 @@ jobs:
 
           if [[ -z "$VIOLATIONS" ]]; then
             echo "All package-touching commits in this push were delivered via merged PRs."
-            echo "violations=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "::error title=Direct package push to dev::One or more commits in this push touched packages/**, the lockfile, the workspace file, turbo.json, or root package.json without going through a pull request. Project policy requires a PR for these paths so the Notify package changes workflow can run and the right owners are pinged."
-          {
-            echo 'violations<<__EOF__'
-            echo "$VIOLATIONS"
-            echo '__EOF__'
-          } >> "$GITHUB_OUTPUT"
-          # Surface every violating sha in the run log.
+          echo "::error title=Direct package push to dev::One or more commits in this push touched packages/**, the lockfile, the workspace file, turbo.json, or root package.json without going through a pull request. Project policy requires a PR for these paths so the Notify package changes workflow can run and the right owners are pinged. See the run log for the offending commit shas."
+          # Surface every violating sha in the run log so the failed-run email
+          # has actionable information without needing to open the run.
           echo "Violating commits:"
           echo "$VIOLATIONS"
           exit 1
-
-      - name: Open tracking issue on violation
-        if: failure() && steps.inspect.outputs.violations != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          PUSHER_LOGIN: ${{ github.actor }}
-          AFTER_SHA: ${{ github.sha }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          VIOLATIONS: ${{ steps.inspect.outputs.violations }}
-        run: |
-          set -euo pipefail
-          BODY_FILE=$(mktemp)
-          {
-            echo "@${PUSHER_LOGIN} pushed one or more commits directly to \`dev\` that touched shared workspaces (\`packages/**\`, \`pnpm-lock.yaml\`, \`pnpm-workspace.yaml\`, \`turbo.json\`, or root \`package.json\`)."
-            echo
-            echo "Project policy is that these paths must be delivered via a pull request so the Notify package changes workflow can post a sticky comment listing the affected apps and pinging their owners."
-            echo
-            echo "**Violating commits:**"
-            echo
-            while IFS= read -r SHA; do
-              [[ -z "$SHA" ]] && continue
-              echo "- ${SHA} (https://github.com/${REPO}/commit/${SHA})"
-            done <<< "$VIOLATIONS"
-            echo
-            echo "**Workflow run:** ${RUN_URL}"
-            echo
-            echo "### What to do"
-            echo
-            echo "1. Open a retroactive PR that touches the same paths (or a one-line no-op edit) so the notify workflow runs and the affected app owners get the standard ping."
-            echo "2. If the change should not have shipped, revert the offending commits in a PR."
-            echo "3. Going forward, branch off \`dev\`, push to a feature branch, open a PR into \`dev\`."
-          } > "$BODY_FILE"
-
-          gh api "repos/${REPO}/issues" \
-            --method POST \
-            -f title="Direct package push to dev: ${AFTER_SHA:0:7}" \
-            -F "body=@${BODY_FILE}" \
-            -f assignees[]="${PUSHER_LOGIN}" \
-            > /dev/null
-          echo "Tracking issue created."
