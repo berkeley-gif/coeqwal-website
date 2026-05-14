@@ -273,83 +273,605 @@ const { idMapping, resolvedIds, missingScenarioIds, reverseMap } =
   useResolvedIdMapping()
 ```
 
-## How to add a new tool
+## How to add a new visualization
 
-### Step 1: Create the tool folder
+There are four steps. Each one is a small, isolated change. The shared chrome (sidebar, toolbar, hydroclimate chooser, map reveal) is already mounted around your panel, so you do not build it yourself. You read from the Zustand store and feed plain data into a chart.
 
-Make `tools/panels/yourTool/` and put the panel in it. Tool-specific captures, hooks, and tour content live next to the panel:
+### 1. Set up your panel
+
+Path: `apps/main/app/features/scenarioExplorer/tools/panels/<yourTool>/`
+
+Create a folder named after your tool. Tool-specific captures, hooks, and tour content live next to the panel:
 
 ```
 tools/panels/yourTool/
-├── YourToolPanel.tsx
-├── OffscreenYourToolCapture.tsx     (if the tool offers a "save snapshot" share)
-├── useYourToolFooBar.ts             (any tool-specific hooks)
-└── yourToolTour.ts                  (optional, per-tool tour content)
+├── YourToolPanel.tsx              the panel component (required)
+├── useYourToolData.ts             optional, a panel-local data hook (recommended)
+├── OffscreenYourToolCapture.tsx   optional, for share/snapshot
+└── yourToolTour.ts                optional, per-tool tour content
 ```
 
-```typescript
-// tools/panels/yourTool/YourToolPanel.tsx
+Minimum panel skeleton:
+
+```tsx
 "use client"
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
+import { MyChart } from "@repo/viz"
 import { useScenarioExplorerStore } from "../../../store"
-import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
+import { useYourToolData } from "./useYourToolData"
 
 export default function YourToolPanel() {
-  const theme = useTheme()
   const { selectedScenarios } = useScenarioExplorerStore()
-  const { allChartData, allScoreData, siblingGroups, isLoading, error } =
-    useResolvedScenarioTiers()
+  const { data, axes, colors, isLoading } = useYourToolData()
+
+  if (isLoading) return null
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      {/* Your tool implementation */}
+    <Box sx={{ display: "flex", height: "100%" }}>
+      <MyChart data={data} axes={axes} colors={colors} />
     </Box>
   )
 }
 ```
 
-### Step 2: Export from the tools barrel
+Things to keep in mind:
 
-Add to `tools/index.ts`:
+- Start the file with `"use client"`. Panels read the store and use hooks.
+- Read scenario state from `useScenarioExplorerStore()`. Do not accept it as a prop from `ScenarioExplorer.tsx`.
+- Use MUI `sx` for layout. Import `Box`, `Typography`, etc. from `@repo/ui/mui`.
+- Keep tool-only UI state (view mode, color mode, picked reservoir) in local `useState`. Only cross-cutting state goes in the store.
 
-```typescript
+### 2. Hook up your data
+
+Path: data hooks come from `@repo/data` and from the local `tools/hooks/` folder.
+
+You do **not** call `fetch()` and you do **not** read `hydroclimate` yourself to resolve sibling-group ids. Use a data hook that handles hydroclimate resolution for you. The canonical entry points are `useResolvedScenarioTiers()` for tier data and `useResolvedIdMapping()` for resolved scenario codes that you can hand to any non-tier hook.
+
+A typical panel-local data hook looks like this:
+
+```ts
+"use client"
+
+import { useMemo } from "react"
+import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
+import { useScenarioExplorerStore } from "../../../store"
+
+export function useYourToolData() {
+  const { allScoreData, isLoading, error } = useResolvedScenarioTiers()
+  const { selectedScenarios } = useScenarioExplorerStore()
+
+  const data = useMemo(
+    () =>
+      selectedScenarios.map((id) => shapeForChart(allScoreData?.[id])),
+    [allScoreData, selectedScenarios],
+  )
+
+  return { data, isLoading, error }
+}
+```
+
+The hook reads from the store, fetches via a shared hook, reshapes the result, and returns the plain inputs the chart needs. See "Where the data comes from" below for the full list of available hooks.
+
+### 3. Write your visualization
+
+Path: `packages/viz`. This is the reusable chart component.
+
+If your chart is generic (any bar, line, matrix, or radar that takes `data + colors + dimensions`) it belongs here. If it is tightly bound to scenario explorer concepts (scenario theme coloring, capture for sharing, sidebar wiring), keep it inline in your panel.
+
+Create a new file at `packages/viz/src/components/MyChart.tsx`. The package has a full skeleton in its own README, but the rules in short form are:
+
+- File starts with `"use client"`.
+- Component is `React.memo(({ ... }) => { ... })` with `MyChart.displayName = "MyChart"` and a default export.
+- Props interface is named `MyChartProps`, exported, defined in the same file.
+- D3 imports are named: `import { scaleLinear, select } from "d3"`. Never `import * as d3`.
+- Imperative draws use `useCallback(updateChart)` plus `useEffect(() => updateChart(w, h), [w, h, updateChart])`. Never one big `useEffect` that mixes sizing and drawing.
+- Responsive sizing uses `useResizeObserver` from `../hooks/useResizeObserver`. Never `clientWidth`.
+
+Pure SVG glyphs (think `OutcomeGlyph` or `StickChart`) can skip the resize and `useEffect` plumbing and just render JSX.
+
+Export from the barrel at `packages/viz/src/index.ts`:
+
+```ts
+export { default as MyChart } from "./components/MyChart"
+export type { MyChartProps } from "./components/MyChart"
+```
+
+Apps then `import { MyChart } from "@repo/viz"`. If you need a new D3 helper that the barrel does not already export, add it to the curated re-export list in the same file. Do not add `d3` as a dependency in the app.
+
+**Rule of thumb: viz takes no scenario IDs and no store reads.** A viz component receives plain data and emits plain events. If your draft chart imports `useScenarioExplorerStore`, it belongs in a panel, not in `@repo/viz`.
+
+Read "Avoiding hover flicker" below before you write any interactive D3 chart. The rules there are not optional.
+
+### 4. The store, the sub-nav, and the barrel
+
+The three small edits that make your panel appear as a tab.
+
+If you can copy `RadarPanel` or `EquityPanel` and change one of the inputs, you're already 80% done.
+
+Edit one: export the panel from the tools barrel.
+
+```ts
 export { default as YourToolPanel } from "./panels/yourTool/YourToolPanel"
 ```
 
-### Step 3: Add rendering in ScenarioExplorer.tsx
+Edit two: mount the panel in `ScenarioExplorer.tsx`. Inside the existing `<ErrorBoundary>` (which uses `key={exploreMode}` to reset per tool):
 
-Inside the `UnifiedToolLayout` children (already wrapped in the active-tool `<ErrorBoundary>`):
-
-```typescript
+```tsx
 {exploreMode === "yourTool" && <YourToolPanel />}
 ```
 
-### Step 4: Add the mode type (if creating a new tab)
+Edit three: register the tab. This is the explicit "store" part, and it spans three files.
 
-If you need a new toolbar tab (rather than replacing an existing placeholder):
+1. `apps/main/app/features/scenarioExplorer/store.ts`. Extend the `ExploreMode` union:
 
-1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
-2. Add to the FLOW config in `tools/chrome/nav/ExploreSubNav.tsx` so the tab appears in the sub-nav
-3. Add an entry to `JOURNEY` in `journey.ts` so the "now try..." nudge works
+   ```ts
+   export type ExploreMode =
+     | "list"
+     | "radar"
+     | "equity"
+     | "resilience"
+     | "data"
+     | "yourTool"
+   ```
 
-If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist. Just replace the placeholder component contents.
+   You do not need to add any new state slice unless your tool stores tool-specific values in the store. If it does, add the fields next to existing ones (look at `equityFocusScenario`, `radarVisibleAxes`, `dimUnpinned`) and add setters to the store actions block.
 
-## Quick checklist: integrating a new visualization
+2. `apps/main/app/features/scenarioExplorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
 
-For developers porting an external visualization:
+   ```ts
+   {
+     mode: "yourTool",
+     icon: <YourIcon sx={{ fontSize: "1.1rem" }} />,
+     label: "Your tool",
+     purpose: "One-sentence purpose",
+   },
+   ```
 
-- [ ] **Replace the placeholder content** in `EquityPanel.tsx` with your React component
-- [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimate`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
-- [ ] **Fetch data via hooks**.use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
-- [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click. For map visualization, use `mapActions.setOutcomeVisualization()` (see "Map integration" below).
-- [ ] **Use MUI `sx` prop** for all styling. Please remember to remove any imports from other css. Import from `@repo/ui/mui`.
-- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>`. Standard React + D3 pattern. The existing `@repo/viz` components do this. Use them as reference.
-- [ ] **Port pure d3 visualizations as-is**. You can place them directly in your component, or if there is a case for reuse, in the `@repo/viz`package.
-- [ ] **Please use the site persistent Mapbox map** See "Map integration" below. We can add an option to change the basemap.
-- [ ] **Render custom dot markers** on the shared map using `setMotionChildren` from `useMap()`. Do not modify the existing marker components (`TierMarkers.tsx`, `TierLocationLabels.tsx`). See "Custom dot markers" under "Map integration" below.
-- [ ] **Keep visualization-specific state local** i.e. view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
-- [ ] **Export is already wired**.`EquityPanel` is already exported from `tools/index.ts` (via `tools/panels/equity/EquityPanel.tsx`) and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
+3. `apps/main/app/features/scenarioExplorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
+
+   ```ts
+   yourTool: {
+     purpose: "Why this view exists, in one sentence",
+     nudge: "Now try the next tool to ...",
+   },
+   ```
+
+If you are replacing an existing placeholder (Equity or Resilience), the mode, FLOW step, and JOURNEY entry already exist. Skip edit three entirely.
+
+That's the full set of files. Five touchpoints total for a new tab. Three for a replacement.
+
+## Worked example: the radar chart
+
+Here is how the four steps above play out for the radar chart.
+
+### Step 1: the panel
+
+Path: `apps/main/app/features/scenarioExplorer/tools/panels/radar/`
+
+```
+tools/panels/radar/
+├── RadarPanel.tsx                         the panel
+├── OffscreenRadarCapture.tsx              share capture
+├── RadarAxisDetailScenarioControls.tsx    axis detail UI
+├── useRadarPlotTheme.ts                   theme-derived colors
+└── radarTour.ts                           per-tool tour
+```
+
+The panel reads from the store and then hands plain props to `RadarPlot`:
+
+```tsx
+"use client"
+
+import { RadarPlot } from "@repo/viz"
+import { useScenarioExplorerStore } from "../../../store"
+import { useTierChartData } from "../../hooks/useTierChartData"
+
+export default function RadarPanel({ highlightedIds, onScenarioHover }) {
+  const { selectedScenarios, pinnedScenarioIds, showTierZones } =
+    useScenarioExplorerStore()
+
+  const { data, axes, axisRange, lineColors, baselineScenario, isLoading } =
+    useTierChartData()
+
+  if (isLoading) return null
+
+  return (
+    <RadarPlot
+      scenarios={data}
+      axes={axes}
+      axisRange={axisRange}
+      colors={lineColors}
+      baselineData={baselineScenario}
+      chosenIds={selectedScenarios}
+      pinnedScenarioIds={pinnedScenarioIds}
+      highlightedIds={highlightedIds}
+      showTierZones={showTierZones}
+      onScenarioHover={onScenarioHover}
+    />
+  )
+}
+```
+
+`RadarPanel` never touches `fetch`, never reads `hydroclimate`, and never builds an axis scale. It composes store reads and a data hook, then passes plain data to `RadarPlot`.
+
+### Step 2: the data hook
+
+Path: `apps/main/app/features/scenarioExplorer/tools/hooks/useTierChartData.ts`
+
+This is the panel's data hook. It composes shared building blocks rather than calling fetchers directly:
+
+```ts
+export function useTierChartData() {
+  const { getDisplayName, getThemeForScenario } = useScenarioList()
+
+  const { showAlternativeBaselines, showOnlyChosen, selectedScenarios } =
+    useScenarioExplorerStore()
+
+  const { hydroclimate, idMapping } = useResolvedIdMapping()
+
+  const {
+    allScoreData,
+    scenarioIds: allScenarioIds,
+    isLoading,
+    error,
+  } = useMultipleScenarioTiers(idMapping)
+
+  // shape allScoreData into chart data, build axes, pick colors, etc.
+  return { data, axes, axisRange, lineColors, baselineScenario, isLoading, error }
+}
+```
+
+The chain of calls is:
+
+1. `useResolvedIdMapping()` reads the active `hydroclimate` from the store and resolves each sibling-group id to its variant's `short_code`.
+2. `useMultipleScenarioTiers(idMapping)` batch-fetches tier data for those resolved codes through `useSWR`. Results are re-keyed back to sibling-group ids so downstream code stays hydroclimate-agnostic.
+3. `useScenarioExplorerStore()` provides selection and display options (`selectedScenarios`, `showAlternativeBaselines`, `showOnlyChosen`).
+4. `useScenarioList()` provides display helpers (`getDisplayName`, `getThemeForScenario`) that are used to color and label traces.
+
+The fetch itself happens inside SWR. By the time `RadarPanel` mounts, the cache is already warm because `ScenarioExplorer.tsx` calls `usePrefetchTiers()` near the top of the Explore tree. The hook's `useSWR` call is a cache lookup, not a network request.
+
+### Step 3: the chart
+
+Path: `packages/viz/src/components/RadarPlot.tsx`
+
+`RadarPlot` knows nothing about scenarios. Its props are plain data:
+
+```ts
+export interface RadarPlotProps {
+  scenarios: VerticalParallelLineData[]
+  axes: string[]
+  axisRange: { min: number; max: number }
+  colors: Record<string, string>
+  baselineData?: VerticalParallelLineData
+  chosenIds?: string[]
+  pinnedScenarioIds?: string[]
+  highlightedIds?: string[]
+  showTierZones?: boolean
+  onScenarioHover?: (id: string | null) => void
+  // interactive, animate, onReady for capture
+}
+```
+
+It uses D3 to draw the polygons and labels, exposes a `ResizeObserver` for responsive sizing, and emits hover events back through `onScenarioHover`. It is exported by name from `packages/viz/src/index.ts` so apps can `import { RadarPlot } from "@repo/viz"`.
+
+### Step 4: wire it up
+
+In `apps/main/app/features/scenarioExplorer/tools/index.ts`:
+
+```ts
+export { default as RadarPanel } from "./panels/radar/RadarPanel"
+```
+
+In `apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx`:
+
+```tsx
+{exploreMode === "radar" && (
+  <RadarPanel
+    highlightedIds={highlightedIds}
+    onScenarioHover={handleScenarioHover}
+  />
+)}
+```
+
+The mode `"radar"` is already in `ExploreMode`. The `FLOW` step in `ExploreSubNav.tsx` already exists. The `JOURNEY["radar"]` entry already exists. The radar tab was added once. Today the only change a developer makes is to the panel itself or its data hook.
+
+## Where the data comes from
+
+Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
+
+| You need...                                                    | Hook                                              | What you get back                                                          |
+| -------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| All 9 outcomes for every scenario, hydroclimate-resolved       | `useResolvedScenarioTiers()`                      | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`           |
+| Same, plus radar and parallel transforms                       | `useTierChartData()`                              | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`              |
+| Per-location tier assignments for one outcome                  | `useTierLocationAssignments(id, code)`            | `locations[]` with `tier_level`                                            |
+| Many outcomes' locations at once for a single scenario         | `useTierLocationAssignmentsBatch(id, codes)`      | batched response, splays into the single-outcome cache                     |
+| Reservoir, CWS, AG, env-flow, or Delta statistics              | the matching domain hook in `@repo/data`          | see the "Every hook in the package" table in `packages/data/README.md`     |
+| Storage, CWS, AG, and env-flow in one call (Data in Depth)     | `useBatchStatistics(scenarios, types?)`           | one bundle keyed by scenario                                               |
+| A static local JSON or GeoJSON file from `public/`             | `useLocalData(url)`                               | parsed body                                                                |
+
+Hard rules:
+
+- Never call `fetch()` or a raw fetcher from inside a panel.
+- Never read `hydroclimate` from the store and resolve scenario ids yourself. The hooks above do it.
+- If you need resolved scenario codes to hand to a non-tier domain hook, call `useResolvedIdMapping()` and pass the resulting `resolvedIds` through.
+
+For everything caching-related (cache keys, preloading, `useLocalData` options), see `packages/data/README.md`.
+
+## Wire it up
+
+Once your panel exists and reads data, two edits make it visible.
+
+`apps/main/app/features/scenarioExplorer/tools/index.ts`:
+
+```ts
+export { default as YourToolPanel } from "./panels/yourTool/YourToolPanel"
+```
+
+`apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx`, inside the existing active-tool `<ErrorBoundary>`:
+
+```tsx
+{exploreMode === "yourTool" && <YourToolPanel />}
+```
+
+That is the whole wire-up for a tool that reuses an existing placeholder mode like `"equity"` or `"resilience"`. The error boundary uses `key={exploreMode}`, so errors in your tool reset cleanly when the user switches tabs. The shared chrome (`UnifiedToolLayout`, `ToolToolbar`, `ScenarioSelectionSidebar`, map reveal) is already rendered around your panel.
+
+## Add a new tab
+
+Skip this section if you are reusing an existing placeholder mode.
+
+Three edits, all in the scenario-explorer feature.
+
+1. `apps/main/app/features/scenarioExplorer/store.ts`. Add to the `ExploreMode` union:
+
+   ```ts
+   export type ExploreMode =
+     | "list"
+     | "radar"
+     | "equity"
+     | "resilience"
+     | "data"
+     | "yourTool"
+   ```
+
+2. `apps/main/app/features/scenarioExplorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
+
+   ```ts
+   {
+     mode: "yourTool",
+     icon: <YourIcon sx={{ fontSize: "1.1rem" }} />,
+     label: "Your tool",
+     purpose: "One-sentence purpose",
+   },
+   ```
+
+3. `apps/main/app/features/scenarioExplorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
+
+   ```ts
+   yourTool: {
+     purpose: "Why this view exists, in one sentence",
+     nudge: "Now try ...",
+   },
+   ```
+
+`ExploreSubNav` calls `setExploreMode(step.mode)` when the user clicks the tab. The store's `setExploreMode` also resets any in-flight tool tour for you. `ToolJourneyStrip` reads `JOURNEY[exploreMode]` to show the purpose line and the next-step nudge.
+
+If your tool needs its own state slice (selected reservoir, focus scenario, axis visibility), add those fields and setters to `store.ts` next to the existing examples (`radarVisibleAxes`, `equityFocusScenario`, `showRadarRange`).
+
+## Wire to the scenario sidebar
+
+The sidebar (`ScenarioSelectionSidebar`) is mounted by `UnifiedToolLayout` for every non-list tool. It writes scenario selection directly to the Zustand store. Your panel reads that selection from the store.
+
+```ts
+const { selectedScenarios, pinnedScenarioIds, highlightedScenario } =
+  useScenarioExplorerStore()
+```
+
+That is it. You do not import the sidebar component. You do not pass selection through props.
+
+### Two-way hover
+
+If you want sidebar row hover to highlight chart elements and chart hover to highlight sidebar rows, route both through the orchestrator. `ScenarioExplorer.tsx` already does this for `RadarPanel`. The pattern:
+
+1. Orchestrator holds `highlightedIds` in local state.
+2. Orchestrator passes `onRowHover` to the sidebar. When a sidebar row is hovered, the sidebar calls `onRowHover([id])`. The orchestrator stores it.
+3. Orchestrator passes `highlightedIds` and `onScenarioHover` down to your panel.
+4. The panel emphasizes elements whose id is in `highlightedIds`, and calls `onScenarioHover(id)` when the user hovers a chart element.
+
+In `ScenarioExplorer.tsx`:
+
+```tsx
+const [highlightedIds, setHighlightedIds] = useState<string[]>([])
+
+const handleRowHover = useCallback(
+  (ids: string[] | null) => setHighlightedIds(ids ?? []),
+  [],
+)
+
+const handleScenarioHover = useCallback(
+  (id: string | null) =>
+    startTransition(() => setHighlightedIds(id ? [id] : [])),
+  [],
+)
+
+return (
+  <UnifiedToolLayout
+    sidebar={
+      <ScenarioSelectionSidebar
+        onRowHover={handleRowHover}
+        hoveredInteraction={hoveredInteraction}
+      />
+    }
+    toolbar={<ToolToolbar />}
+  >
+    {exploreMode === "yourTool" && (
+      <YourToolPanel
+        highlightedIds={highlightedIds}
+        onScenarioHover={handleScenarioHover}
+      />
+    )}
+  </UnifiedToolLayout>
+)
+```
+
+In your panel:
+
+```tsx
+type YourToolPanelProps = {
+  highlightedIds: string[]
+  onScenarioHover: (id: string | null) => void
+}
+
+export default function YourToolPanel({
+  highlightedIds,
+  onScenarioHover,
+}: YourToolPanelProps) {
+  // ...
+}
+```
+
+Wrapping the orchestrator's `setHighlightedIds` in `startTransition` keeps the sidebar update at low priority, so the chart hover visuals paint before the sidebar reflows. See "Avoiding hover flicker" below for the full set of rules.
+
+## Wire to the hydroclimate chooser
+
+The chooser lives in `ToolToolbar` and is controlled by `hydroclimate` and `setHydroclimate` in the store. It is visible in every mode except `"resilience"`.
+
+You do not import the chooser. You do not read `hydroclimate` from the store and resolve scenario ids by hand. Use the right hook.
+
+```tsx
+// Wrong. This breaks the moment the user switches hydroclimate, because the
+// scenario id you read from selectedScenarios is a sibling-group id, not the
+// resolved variant id for the active hydroclimate.
+const { hydroclimate, selectedScenarios } = useScenarioExplorerStore()
+const { data } = useScenarioTiers(selectedScenarios[0])
+
+// Right. The hook reads hydroclimate and does the resolution for you.
+const { allScoreData } = useResolvedScenarioTiers()
+```
+
+If you are calling a non-tier hook (reservoir, AG, env-flow, Delta, batch statistics), resolve ids once with `useResolvedIdMapping()` and pass `resolvedIds` into the domain hook:
+
+```ts
+const { resolvedIds } = useResolvedIdMapping()
+const { data } = useBatchStatistics(resolvedIds, { types: ["storage"] })
+```
+
+That is the entire contract. The hydroclimate chooser updates the store, the resolver hooks pick up the change, and your panel re-renders with the new data.
+
+If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/tools/chrome/toolbar/ToolToolbar.tsx`.
+
+## Avoiding hover flicker
+
+D3 imperative charts are sensitive to unnecessary React re-renders. Each render of the `updateChart` callback triggers `svg.selectAll("*").remove()`, which is a full tear-down and rebuild. Even with `hasAnimatedRef` guards that skip entrance animations on subsequent draws, the remove-and-rebuild cycle causes visible flicker.
+
+Follow all of these rules for any chart that has hover or tooltip interactions.
+
+### 1. Never use React state for tooltips
+
+`useState<TooltipState>` inside a chart component causes a React re-render on every mouseenter and mouseleave. Even if `updateChart` does not re-fire, React still reconciles the JSX tree, and the conditional `{tooltip && <div>...</div>}` causes DOM churn.
+
+Mount a permanent tooltip `<div>` with `display: none` and a `ref`. Toggle it imperatively from the D3 event handlers.
+
+```tsx
+const tooltipRef = useRef<HTMLDivElement>(null)
+
+// In D3 mouseenter handler:
+tooltipRef.current!.style.display = "block"
+tooltipRef.current!.style.left = `${x}px`
+tooltipRef.current!.innerHTML = "..."
+
+// In D3 mouseleave handler:
+tooltipRef.current!.style.display = "none"
+```
+
+### 2. Debounce parent notifications
+
+When a chart calls `onScenarioHover?.(id)`, that typically triggers `setState` in the orchestrator, which re-renders the entire tree. Even if `React.memo` prevents the chart from re-rendering, the parent reconciliation can block the main thread and delay paint of the D3 hover visuals.
+
+- Debounce the notify (80 ms works well) so rapid dot-to-dot movement fires at most one callback.
+- Deduplicate. Track the last notified id in a ref. Skip the callback if hovering a different dot of the same scenario.
+- Use `startTransition` in the parent's handler so the sidebar update is low priority.
+
+```tsx
+// In the chart:
+const lastNotifiedIdRef = useRef<string | null>(null)
+
+if (lastNotifiedIdRef.current !== scenario.id) {
+  hoverTimer = setTimeout(() => {
+    lastNotifiedIdRef.current = scenario.id
+    onScenarioHoverRef.current?.(scenario.id)
+  }, 80)
+}
+
+// In the parent:
+import { startTransition } from "react"
+startTransition(() => setHighlightedIds([id]))
+```
+
+### 3. Hoist default prop values to module scope
+
+Default values in destructuring (`colors = { default: "#666" }`) create new object references every render. That defeats `React.memo` and recreates the `updateChart` callback.
+
+```tsx
+// Bad. New object identity every render.
+({ colors = { default: "#666", highlighted: "#1a3a5c" } }) => { ... }
+
+// Good. Stable reference.
+const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c" }
+({ colors = DEFAULT_COLORS }) => { ... }
+```
+
+### 4. Use primitive `useMemo` dependencies for theme colors
+
+MUI's `useTheme()` returns objects (`theme.palette.grey`, `theme.palette.waterThemes`) with new identity on every render even though the values inside have not changed. If you pass these through `useMemo`, the memo recomputes every render.
+
+```tsx
+// Bad. theme.palette.grey is a new object ref each render.
+const chartColors = useMemo(
+  () => ({ default: theme.palette.grey[600] }),
+  [theme.palette.grey],
+)
+
+// Good. Extract primitive strings first.
+const grey600 = theme.palette.grey[600]
+const chartColors = useMemo(
+  () => ({ default: grey600 }),
+  [grey600],
+)
+```
+
+### 5. Guard entrance animations
+
+Use a `hasAnimatedRef` so entrance transitions only play once. Subsequent `updateChart` calls should use `duration(0)`.
+
+```tsx
+const hasAnimatedRef = useRef(false)
+// inside updateChart:
+const T_DUR = hasAnimatedRef.current ? 0 : 500
+hasAnimatedRef.current = true
+```
+
+### 6. Keep `updateChart` deps minimal
+
+Every value in `updateChart`'s `useCallback` dependency array is a potential re-render trigger. For callbacks like `onScenarioHover` and `onScenarioClick`, use refs instead of putting them in the dep array.
+
+```tsx
+const onScenarioHoverRef = useRef(onScenarioHover)
+useEffect(() => {
+  onScenarioHoverRef.current = onScenarioHover
+}, [onScenarioHover])
+
+// Inside updateChart, use onScenarioHoverRef.current, not onScenarioHover.
+```
+
+### Quick checklist for new D3 charts
+
+- [ ] Tooltip via ref, not `useState`
+- [ ] `onScenarioHover` and `onScenarioClick` stored in refs, not in `updateChart` deps
+- [ ] Default prop values hoisted to module constants
+- [ ] Parent uses `startTransition` for hover state updates
+- [ ] `hasAnimatedRef` guards entrance animations
+- [ ] All `useMemo` deps are primitives (strings, numbers, booleans), not theme objects
 
 ## Map integration
 
