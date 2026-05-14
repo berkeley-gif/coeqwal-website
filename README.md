@@ -390,7 +390,7 @@ This complements [Adding a new app](#adding-a-new-app), which covers the code sc
 
 3. **Root [amplify.yml](amplify.yml):** add a fourth `applications:` stanza copy-pasted from one of the existing three, with `appRoot: apps/<name>`, `baseDirectory: apps/<name>/out`, `--filter=<name>`. Keep the same `cache:` block (pnpm store only) and `NODE_VERSION` pin.
 
-4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to the `workflow_dispatch.inputs.apps.options` list and `production-<name>` to the `branch.options` list. Add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths` filter, and add a matching block to the `dorny/paths-filter` filter map. Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step.
+4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to the `workflow_dispatch.inputs.apps.options` list and `production-<name>` to the `branch.options` list. Add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths` filter, and add a matching block to the `dorny/paths-filter` filter map (note the step uses `predicate-quantifier: 'every'` so the `!*.md` line works as an exclusion). Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step.
 
 5. **[.github/CODEOWNERS](.github/CODEOWNERS):** add `/apps/<name>/  @owner1 @owner2`. The notify workflow reads CODEOWNERS as the source of truth for which apps are tracked, so this is what wires the new app into the package-impact comment. (If you forget this step, the notify workflow will warn about the drift on the next package PR.)
 
