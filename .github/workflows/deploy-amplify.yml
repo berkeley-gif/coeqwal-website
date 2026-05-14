@@ -70,13 +70,33 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: dorny/paths-filter@v3
+      # dorny/paths-filter pattern semantics, per
+      # https://github.com/dorny/paths-filter#usage:
+      #
+      #   - Each filter is a list of glob patterns (picomatch syntax).
+      #   - A pattern starting with `!` is a negation: it matches files
+      #     that do NOT match the rest of the pattern.
+      #   - `predicate-quantifier` controls how multiple patterns combine
+      #     for a single file:
+      #       'some'  (default) - file matches the filter if it matches
+      #                           ANY one pattern (positive OR negation).
+      #                           This makes `'!**/*.md'` flip the filter
+      #                           to true for nearly every non-md file,
+      #                           which is almost never what you want.
+      #       'every'           - file matches only if it matches ALL
+      #                           patterns. This is the gitignore-like
+      #                           "include this folder, then subtract md"
+      #                           behavior we want here.
+      #
+      # So the rule below means, for the `main` filter:
+      #   file matches `apps/main/**` AND file does NOT match
+      #   `apps/main/**/*.md` -> filter is true.
+      #
+      - uses: dorny/paths-filter@v4
         if: github.event_name == 'push'
         id: filter
         with:
-          # Each filter excludes markdown so doc-only edits inside the app
-          # folder don't trigger a rebuild even if the workflow-level paths
-          # filter let the workflow start.
+          predicate-quantifier: "every"
           filters: |
             main:
               - 'apps/main/**'
