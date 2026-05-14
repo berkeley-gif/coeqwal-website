@@ -1,6 +1,8 @@
 # @repo/data
 
-Shared data fetching package for COEQWAL applications. Provides a typed integration layer between external APIs and React components with SWR-based caching.
+Shared data fetching package for COEQWAL applications. Provides a typed integration layer between external APIs and React components with SWR-based (stale-while-revalidate) caching. All API data is served through SWR.
+
+Each Next.js app that consumes api data should wrap its tree in DataProvider (typically in `layout.tsx`), which sets SWRConfig once for the whole app.
 
 ## Architecture
 
