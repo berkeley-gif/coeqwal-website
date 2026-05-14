@@ -1,19 +1,7 @@
 name: Enforce package-PR rule
 
-# Enforces a soft policy: shared-workspace changes (packages/**, lockfile,
-# workspace, turbo.json, root package.json) must be delivered to dev via a
+# Enforces a soft policy: shared package changes must be delivered to dev via a
 # pull request, never via a direct push.
-#
-# This is detection-and-accountability, not prevention. The push has
-# already landed by the time the workflow fires (GitHub Actions cannot
-# pre-receive-reject a push). The workflow fails loudly and opens a
-# tracking issue so the offender knows to follow up. Pair this with the
-# README's documentation of the rule.
-#
-# A push is treated as PR-delivered when the head commit (or any commit in
-# the push range) is associated with a merged pull request. We use
-# `gh api repos/.../commits/<sha>/pulls` and require the PR to be merged
-# into `dev`.
 
 on:
   push:
