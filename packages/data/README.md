@@ -500,3 +500,4 @@ No outcome should fetch GeoJSON from the API for map rendering. The `fetchTierLo
 3. **Add cache key** in `src/cache/keys.ts`
 4. **Add hook** in `src/coeqwal/hooks/`
 5. **Export** from the appropriate index file
+
