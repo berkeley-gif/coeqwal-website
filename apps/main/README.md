@@ -54,7 +54,7 @@ StrictMode
                 └── {children}                                 (page content)
 ```
 
-**Translation provider:** Wrapping `DataProvider`, `ThemeRegistry`, and all layout chrome as shown. Swap your new package in at that layer.
+**Translation provider:** Wrapping `DataProvider`, `ThemeRegistry`, and all layout chrome as shown. We can swap the new translation package in at that layer.
 
 `app/page.tsx` (Server Component) renders the home-only stack:
 
