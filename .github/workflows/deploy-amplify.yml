@@ -6,6 +6,11 @@ name: Deploy to Amplify
 #      only those X. Pushes that only touch packages/** or other paths are
 #      ignored by this workflow. See notify-package-changes.yml for the
 #      PR-time notification that handles shared-package changes.
+#
+# Markdown-only edits inside an app folder do NOT trigger an auto-deploy.
+# Those are excluded via the dorny/paths-filter step below. The workflow-
+# level `paths:` filter does the same exclusion at the trigger stage so the
+# workflow is not even invoked for doc-only pushes.
 
 on:
   workflow_dispatch:
@@ -36,6 +41,9 @@ on:
       - "apps/main/**"
       - "apps/storyline-flow/**"
       - "apps/storyline-climate/**"
+      - "!apps/main/**/*.md"
+      - "!apps/storyline-flow/**/*.md"
+      - "!apps/storyline-climate/**/*.md"
 
 permissions:
   id-token: write
@@ -66,10 +74,19 @@ jobs:
         if: github.event_name == 'push'
         id: filter
         with:
+          # Each filter excludes markdown so doc-only edits inside the app
+          # folder don't trigger a rebuild even if the workflow-level paths
+          # filter let the workflow start.
           filters: |
-            main: 'apps/main/**'
-            storyline-flow: 'apps/storyline-flow/**'
-            storyline-climate: 'apps/storyline-climate/**'
+            main:
+              - 'apps/main/**'
+              - '!apps/main/**/*.md'
+            storyline-flow:
+              - 'apps/storyline-flow/**'
+              - '!apps/storyline-flow/**/*.md'
+            storyline-climate:
+              - 'apps/storyline-climate/**'
+              - '!apps/storyline-climate/**/*.md'
 
       - id: compute
         env:
@@ -102,14 +119,30 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "Will deploy: $APPS on branch $BRANCH"
 
+  guard-production:
+    # Production guard. The (branch, app) -> appId map below only knows about
+    # `dev`. Dispatching `production-*` would fail late at the AWS call with
+    # a generic "No Amplify appId mapped" message. Bail early with a clear
+    # explanation so the dispatcher knows what they need to do (create the
+    # production Amplify apps and add the rows to MAP).
+    name: Guard production branches
+    needs: resolve
+    if: startsWith(needs.resolve.outputs.branch, 'production-')
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::error title=Production not yet wired up::Branch '${{ needs.resolve.outputs.branch }}' has no Amplify app mapping in deploy-amplify.yml. Production Amplify apps for main, storyline-flow, and storyline-climate must be created first, then the MAP block in this workflow's 'Resolve Amplify app id' step extended with the new appIds. See README 'Production cutover' for the playbook."
+          exit 1
+
   deploy:
     name: ${{ matrix.app }} -> ${{ needs.resolve.outputs.branch }}
     needs: resolve
     # Defensive: skip if resolve produced an empty array. Shouldn't happen
     # given the workflow-level paths filter, but if a push slips through
     # (e.g., paths-filter sees no diff because of a force-push), this avoids
-    # a runtime matrix error.
-    if: needs.resolve.outputs.apps != '[]'
+    # a runtime matrix error. Also skip when the branch is production-*; the
+    # guard-production job will surface the error.
+    if: needs.resolve.outputs.apps != '[]' && !startsWith(needs.resolve.outputs.branch, 'production-')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -123,8 +156,8 @@ jobs:
           APP: ${{ matrix.app }}
         run: |
           set -euo pipefail
-          # Static map of (branch, app) -> Amplify appId.
-          # production-* entries are placeholders until those apps exist.
+          # Static map of (branch, app) -> Amplify appId. Add production-*
+          # rows here when the production Amplify apps are created.
           declare -A MAP=(
             ["dev:main"]="d2yqk6im560ffz"
             ["dev:storyline-flow"]="d11fk80jyl948s"

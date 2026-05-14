@@ -2,11 +2,17 @@ name: Notify package changes
 
 # Fires on PRs to dev that touch shared workspaces (packages, lockfile,
 # workspace, turbo.json, root package.json). Posts a single sticky comment
-# listing the apps that depend on the changed code, their CODEOWNERS, and
-# dispatch links for the Deploy to Amplify workflow.
+# listing the apps that depend on the changed code, their CODEOWNERS, and a
+# dispatch link for the Deploy to Amplify workflow. The comment never
+# triggers a deploy.
 #
-# No deploys are triggered by this workflow. The comment is purely
-# informational.
+# The comment is "sticky" via marocchino/sticky-pull-request-comment with the
+# header `package-deploy-impact`. Subsequent runs on the same PR update the
+# same comment in place rather than stacking.
+#
+# Lockfile-regen escape hatch: add the PR label `lockfile-regen` to suppress
+# the all-apps broad-impact entry for lockfile-only PRs. The script will
+# still post a sticky comment explaining what was skipped.
 
 on:
   pull_request:
@@ -27,13 +33,14 @@ jobs:
     name: Compute and post sticky comment
     runs-on: ubuntu-latest
     steps:
+      # Ubuntu runners ship with Node already, and the script only uses Node
+      # built-ins. We deliberately do NOT use actions/setup-node here because
+      # its Corepack auto-detection trips over the root package.json's
+      # `packageManager: pnpm@<v>` field with `Unable to locate executable
+      # file: pnpm`. The script needs no pnpm.
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "22"
 
       - name: Compute affected apps and render comment
         id: compute
@@ -41,10 +48,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: node .github/scripts/compute-affected-apps.mjs
 
       - uses: marocchino/sticky-pull-request-comment@v2
-        if: steps.compute.outputs.skip != 'true'
         with:
           header: package-deploy-impact
           message: ${{ steps.compute.outputs.markdown }}

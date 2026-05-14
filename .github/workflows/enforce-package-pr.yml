@@ -1,0 +1,139 @@
+name: Enforce package-PR rule
+
+# Enforces a soft policy: shared-workspace changes (packages/**, lockfile,
+# workspace, turbo.json, root package.json) must be delivered to dev via a
+# pull request, never via a direct push.
+#
+# This is detection-and-accountability, not prevention. The push has
+# already landed by the time the workflow fires (GitHub Actions cannot
+# pre-receive-reject a push). The workflow fails loudly and opens a
+# tracking issue so the offender knows to follow up. Pair this with the
+# README's documentation of the rule.
+#
+# A push is treated as PR-delivered when the head commit (or any commit in
+# the push range) is associated with a merged pull request. We use
+# `gh api repos/.../commits/<sha>/pulls` and require the PR to be merged
+# into `dev`.
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "package.json"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  enforce:
+    name: Was this push delivered via a PR?
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # We need the full push range to inspect each commit. github.event.before
+          # is the previous head; github.sha is the new head.
+          fetch-depth: 0
+
+      - name: Inspect push commits for PR provenance
+        id: inspect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+          PUSHER: ${{ github.event.pusher.name }}
+          PUSHER_LOGIN: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          # First push to a new branch reports BEFORE_SHA as 40 zeros. Treat
+          # that as nothing to enforce against (branch creation is not a
+          # package-change push by itself).
+          if [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "Branch-creation push (no prior history). Skipping enforcement."
+            echo "violations=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMITS=$(git rev-list "${BEFORE_SHA}..${AFTER_SHA}")
+          VIOLATIONS=""
+          for SHA in $COMMITS; do
+            # Touched paths in this single commit
+            TOUCHED=$(git show --name-only --pretty=format: "$SHA" | grep -E '^(packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|turbo\.json$|package\.json$)' || true)
+            if [[ -z "$TOUCHED" ]]; then
+              continue
+            fi
+            # Ask the GitHub API which PRs (if any) contain this commit.
+            # `state=closed merged_at!=null base.ref=dev` is the green path.
+            PR_JSON=$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "dev")]')
+            PR_COUNT=$(echo "$PR_JSON" | jq 'length')
+            if [[ "$PR_COUNT" -eq 0 ]]; then
+              VIOLATIONS+="$SHA"$'\n'
+            else
+              PR_NUM=$(echo "$PR_JSON" | jq '.[0].number')
+              echo "Commit $SHA delivered via PR #$PR_NUM (OK)"
+            fi
+          done
+
+          if [[ -z "$VIOLATIONS" ]]; then
+            echo "All package-touching commits in this push were delivered via merged PRs."
+            echo "violations=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "::error title=Direct package push to dev::One or more commits in this push touched packages/**, the lockfile, the workspace file, turbo.json, or root package.json without going through a pull request. Project policy requires a PR for these paths so the Notify package changes workflow can run and the right owners are pinged."
+          {
+            echo 'violations<<__EOF__'
+            echo "$VIOLATIONS"
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
+          # Surface every violating sha in the run log.
+          echo "Violating commits:"
+          echo "$VIOLATIONS"
+          exit 1
+
+      - name: Open tracking issue on violation
+        if: failure() && steps.inspect.outputs.violations != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PUSHER_LOGIN: ${{ github.actor }}
+          AFTER_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          VIOLATIONS: ${{ steps.inspect.outputs.violations }}
+        run: |
+          set -euo pipefail
+          BODY_FILE=$(mktemp)
+          {
+            echo "@${PUSHER_LOGIN} pushed one or more commits directly to \`dev\` that touched shared workspaces (\`packages/**\`, \`pnpm-lock.yaml\`, \`pnpm-workspace.yaml\`, \`turbo.json\`, or root \`package.json\`)."
+            echo
+            echo "Project policy is that these paths must be delivered via a pull request so the Notify package changes workflow can post a sticky comment listing the affected apps and pinging their owners."
+            echo
+            echo "**Violating commits:**"
+            echo
+            while IFS= read -r SHA; do
+              [[ -z "$SHA" ]] && continue
+              echo "- ${SHA} (https://github.com/${REPO}/commit/${SHA})"
+            done <<< "$VIOLATIONS"
+            echo
+            echo "**Workflow run:** ${RUN_URL}"
+            echo
+            echo "### What to do"
+            echo
+            echo "1. Open a retroactive PR that touches the same paths (or a one-line no-op edit) so the notify workflow runs and the affected app owners get the standard ping."
+            echo "2. If the change should not have shipped, revert the offending commits in a PR."
+            echo "3. Going forward, branch off \`dev\`, push to a feature branch, open a PR into \`dev\`."
+          } > "$BODY_FILE"
+
+          gh api "repos/${REPO}/issues" \
+            --method POST \
+            -f title="Direct package push to dev: ${AFTER_SHA:0:7}" \
+            -F "body=@${BODY_FILE}" \
+            -f assignees[]="${PUSHER_LOGIN}" \
+            > /dev/null
+          echo "Tracking issue created."
