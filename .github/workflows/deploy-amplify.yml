@@ -26,15 +26,16 @@ on:
           - storyline-climate
           - all-three
       branch:
+        # Only `dev` is offered today. Production branches will be added to
+        # this list, the MAP block in the deploy job, and the README "Apps and
+        # Amplify ids" table when the production Amplify apps are created
+        # (see README "Production deploys" for the playbook).
         description: "Amplify branch to deploy"
         required: true
         type: choice
         default: dev
         options:
           - dev
-          - production-main
-          - production-storyline-flow
-          - production-storyline-climate
   push:
     branches: [dev]
     paths:
@@ -160,8 +161,9 @@ jobs:
           APP: ${{ matrix.app }}
         run: |
           set -euo pipefail
-          # Static map of (branch, app) -> Amplify appId. Add production-*
-          # rows here when the production Amplify apps are created.
+          # Static map of (branch, app) -> Amplify appId. When wiring a
+          # production app, add its row here AND add `production-<name>` to
+          # the `branch:` dropdown above. See README "Production deploys".
           declare -A MAP=(
             ["dev:main"]="d2yqk6im560ffz"
             ["dev:storyline-flow"]="d11fk80jyl948s"

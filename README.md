@@ -225,22 +225,25 @@ pnpm build --filter=main
 
 ## How to deploy
 
-The COEQWAL website is hosted on AWS Amplify as three independent apps that share this monorepo. The dispatcher is a GitHub Actions workflow ([Deploy to Amplify](.github/workflows/deploy-amplify.yml)) which assumes a GitHub OIDC role (`coeqwal-website-amplify-deploy-role`) and calls `aws amplify start-job` for each selected app. The Amplify build-spec source-of-truth is the repo-root [`amplify.yml`](amplify.yml). The Amplify Console inline build spec for each app is kept as a fallback that mirrors the matching root stanza; if the root file is ever removed, Amplify falls back to the Console version.
+The COEQWAL website is hosted on AWS Amplify as the independent apps that share this monorepo. The dispatcher is a GitHub Actions workflow ([Deploy to Amplify](.github/workflows/deploy-amplify.yml)) which assumes a GitHub OIDC (GitHub OpenID Connect) role (`coeqwal-website-amplify-deploy-role`) and calls `aws amplify start-job` for each selected app. The Amplify build-spec source-of-truth is the repo-root [`amplify.yml`](amplify.yml). The online Amplify Console build spec has been entered in teh console for each app as a fallback that mirrors each app's matching stanza. If the root file is ever removed, Amplify falls back to the Console version.
 
 ### Deployment rules at a glance
 
+Markdown means `*.md` and `*.mdx`. "Shared workspaces" means `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, and the root `package.json`.
+
 | Trigger | What happens |
 |---|---|
-| Push to `dev` touching `apps/<x>/**` (excluding `*.md`) | That one app auto-deploys |
+| Push to `dev` touching one or more `apps/<x>/**` (non-Markdown) | Each touched app auto-deploys. Multiple apps run as a matrix and serialize per branch. |
 | Push to `dev` touching only Markdown inside an app folder | Nothing |
-| Push to `dev` touching only the root README, `docs/`, `.github/CODEOWNERS`, etc. | Nothing |
-| Push to `dev` touching `packages/**` (non-md), `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` | **Flagged by policy.** The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow fails the run and the pusher gets the standard "workflow failed" email. Use a PR instead. |
-| Push to `dev` touching only Markdown inside `packages/**` | Nothing (the enforce workflow ignores `*.md`) |
-| PR into `dev` touching `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps + CODEOWNERS + dispatch links. **Never triggers a deploy.** |
-| PR or push touching only `pnpm-lock.yaml` | Nothing. Lockfile churn is treated as a non-event (too noisy to broadcast). |
-| `workflow_dispatch` of **Deploy to Amplify** | Deploys the chosen app(s) on the chosen branch |
-| Push to a `production-*` branch | Nothing automatic |
-| `workflow_dispatch` for `branch: production-*` | Will fail at the **Resolve Amplify app id** step with `No Amplify appId mapped for branch=production-<x> app=<x>` until the production Amplify apps are wired up and the `MAP` block is extended |
+| PR into `dev` touching only an app folder | Nothing automatic. The deploy fires when the PR merges and `dev` receives the push. |
+| PR into `dev` touching shared workspaces (non-Markdown) | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps, their CODEOWNERS, and a per-app dispatch link. **Never triggers a deploy.** |
+| Push to `dev` (not via PR) touching shared workspaces or `pnpm-lock.yaml` (non-Markdown) | [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) fails the run; the pusher gets a "workflow failed" email. Open a PR instead. |
+| Anything touching only Markdown under `packages/**` | Nothing. Markdown is exempt from both the notify and enforce workflows. |
+| Anything touching only `pnpm-lock.yaml` | Nothing. Lockfile churn is treated as a non-event (too noisy to broadcast as "every app may need to redeploy"). |
+| Push to `dev` touching only the root README, `docs/`, `.github/**`, or other unmapped paths | Nothing |
+| `workflow_dispatch` of **Deploy to Amplify** (Actions tab -> Run workflow) | Deploys the chosen app(s) on `dev`. Use this to ship a package change into your app on demand. |
+
+Production is not yet wired. The `branch:` dropdown only offers `dev`. Production branches and their Amplify apps will be created at launch, per **Production deploys** below.
 
 ### Apps and Amplify ids
 
@@ -258,7 +261,7 @@ All three share the single repo-root [`amplify.yml`](amplify.yml) with one `appl
 2. Pick **Deploy to Amplify** in the sidebar.
 3. Click **Run workflow** (top right).
 4. Choose your app (`main`, `storyline-flow`, `storyline-climate`, or `all-three`).
-5. Choose the branch (`dev` today; `production-<name>` after launch).
+5. Choose the branch. Today only `dev` is offered. After launch the dropdown will also include each app's `production-<name>` (see **Production deploys**).
 6. Click **Run workflow**.
 
 The action calls `aws amplify start-job` for the selected app(s) and polls `get-job` until terminal. The GitHub run turns green only if Amplify reports `SUCCEED`.
@@ -329,21 +332,27 @@ GitHub's branch protection / rulesets cannot conditionally require a PR by path.
 
 ### Production deploys
 
-Each app gets its own production branch and its own production Amplify app at launch:
+> **Status:** production is not wired up yet. The `branch:` dropdown in the Deploy to Amplify workflow only offers `dev`. The plan below is the playbook for cutover at launch.
+
+At launch each app will get its own production branch and its own production Amplify app:
 
 - `production-main` -> production Amplify app for `coeqwal.org`
 - `production-storyline-flow` -> production Amplify app for `flow.coeqwal.org`
 - `production-storyline-climate` -> production Amplify app for `climate.coeqwal.org`
 
-Production deploys are **manual only**: dispatch the workflow with `branch: production-<name>`. A push to a production branch is not a trigger. If an app is feature-complete and no one is actively working on it, it can sit on its production branch indefinitely. Future changes on `dev` or in `packages/*` will not touch the frozen production app, because that production branch has its own lockfile and source tree.
+Production deploys will be **manual only**: dispatch the workflow with `branch: production-<name>`. A push to a production branch will not be a trigger. If an app is feature-complete and no one is actively working on it, it can sit on its production branch indefinitely. Future changes on `dev` or in `packages/*` will not touch the frozen production app, because that production branch has its own lockfile and source tree.
 
-Until the production Amplify apps exist, dispatching `branch: production-*` will fail at the **Resolve Amplify app id** step with `No Amplify appId mapped for branch=production-<x> app=<x>`. To wire production up:
+To wire one app's production up (do this per app, not all at once):
 
-1. Create the three production Amplify apps in the Console (one per app), pointed at the matching `production-<name>` branch with `AMPLIFY_MONOREPO_APP_ROOT` set.
-2. Note the resulting App IDs.
-3. Extend the IAM role `coeqwal-website-amplify-deploy-role` policy `Resource:` list to include the new app ARNs.
-4. In [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml), add the `production-<name>:<app>` rows to the `MAP` block in the **Resolve Amplify app id** step.
-5. Smoke-test by dispatching `branch: production-<name>` for that app and confirming `SUCCEED`.
+1. Create the production git branch: `git checkout -B production-<name> origin/dev && git push -u origin production-<name>`.
+2. Create the production Amplify app in the AWS Console pointed at `berkeley-gif/coeqwal-website` branch `production-<name>`, with `AMPLIFY_MONOREPO_APP_ROOT=apps/<name>`. Disable auto-build on the branch (deploys are GHA-driven). Paste a per-app fallback inline build spec mirroring the matching stanza in root [`amplify.yml`](amplify.yml). Note the resulting App ID (`dxxxxxxxxxxxxx`).
+3. Extend the IAM role `coeqwal-website-amplify-deploy-role` policy `Resource:` list to include the new app's ARN for `amplify:StartJob`, `amplify:GetJob`, `amplify:ListJobs`.
+4. In [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):
+   - Add `production-<name>` to the `branch:` `workflow_dispatch.inputs.branch.options` list.
+   - Add the `["production-<name>:<name>"]="d<appId>"` row to the `MAP` block in the **Resolve Amplify app id** step.
+5. Smoke-test by dispatching `Deploy to Amplify` with that app on `branch: production-<name>` and confirming `SUCCEED`.
+6. Cut the custom domain over via ACM in the Amplify Console.
+7. Add a row to the **Apps and Amplify ids** table above with the new App ID and current/launch domain.
 
 ### What auto-deploys, when
 
@@ -353,7 +362,8 @@ Steady-state behavior on `dev`:
 - Push touching **only Markdown inside an app folder** -> no auto-deploy.
 - Push touching **only shared packages** (`packages/*` non-md, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) -> no auto-deploy. Should have come through a PR; the **Enforce package-PR rule** workflow fails the run if it didn't.
 - Push touching **only root README, `.github/CODEOWNERS`, or other unmapped paths** -> nothing.
-- Push to a `production-*` branch -> nothing automatic. Production is always a manual dispatch.
+
+Production branches don't exist yet, so there's no production behavior to describe. See **Production deploys** for the cutover playbook.
 
 ### When a build fails
 
@@ -387,7 +397,7 @@ This complements [Adding a new app](#adding-a-new-app), which covers the code sc
 
 3. **Root [amplify.yml](amplify.yml):** add a fourth `applications:` stanza copy-pasted from one of the existing three, with `appRoot: apps/<name>`, `baseDirectory: apps/<name>/out`, `--filter=<name>`. Keep the same `cache:` block (pnpm store only) and `NODE_VERSION` pin.
 
-4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to the `workflow_dispatch.inputs.apps.options` list and `production-<name>` to the `branch.options` list. Add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths` filter, and add a matching block to the `dorny/paths-filter` filter map (note the step uses `predicate-quantifier: 'every'` so the `!*.md` line works as an exclusion). Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step.
+4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to the `workflow_dispatch.inputs.apps.options` list. Add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths` filter, and add a matching block to the `dorny/paths-filter` filter map (note the step uses `predicate-quantifier: 'every'` so the `!*.md` line works as an exclusion). Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step. Do **not** add a `production-<name>` entry until that production app is actually being wired up — that's covered separately by the **Production deploys** playbook.
 
 5. **[.github/CODEOWNERS](.github/CODEOWNERS):** add `/apps/<name>/  @owner1 @owner2`. The notify workflow reads CODEOWNERS as the source of truth for which apps are tracked, so this is what wires the new app into the package-impact comment. (If you forget this step, the notify workflow will warn about the drift on the next package PR.)
 
@@ -647,7 +657,7 @@ Outstanding items, in no particular order:
 
 - **Decide auto-deploy behavior for shared build files.** Today the `push:` paths filter in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) only watches `apps/<x>/**`. A change to the shared build spec ([amplify.yml](amplify.yml)) or the GitHub Actions workflows themselves does not auto-trigger any deploy and must be dispatched by hand. Decide which of `amplify.yml`, `.github/workflows/**` should fan out to all three apps on push and extend the filter and `resolve` job if so. (`pnpm-lock.yaml`, `turbo.json`, root `package.json` are intentionally excluded; they go through the package-PR path.)
 
-- **Production cutover at launch.** Create `production-main`, `production-storyline-flow`, `production-storyline-climate` branches and three matching production Amplify apps. Add the `production-*:<app>` rows to the `MAP` block in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) (the workflow currently fails at the **Resolve Amplify app id** step when dispatched against `production-*` because the rows are missing). Cut over custom domains (`coeqwal.org`, `flow.coeqwal.org`, `climate.coeqwal.org`) via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
+- **Production cutover at launch.** Per-app, follow the **Production deploys** playbook: create the `production-<name>` git branch, create the production Amplify app, extend the IAM role's `Resource:` list, add the branch to the workflow's `branch:` dropdown, add the `MAP` row, smoke-test, cut over the custom domain via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
 
 - **Re-tidy Amplify Console inline build specs.** Each Console fallback should mirror its matching stanza in root [amplify.yml](amplify.yml) including the store-only `cache: { paths: [~/.cache/pnpm/**/*] }` block. Trivial paste-three-files task whenever convenient.
 
