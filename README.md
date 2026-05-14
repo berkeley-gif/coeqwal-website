@@ -284,6 +284,20 @@ The workflow also writes a per-run **step summary** in the Actions UI explaining
 
 If the comment was suppressed (no apps depend on the changed packages, or the `lockfile-regen` label was applied), the script still posts a sticky comment that explains why so the PR has a record.
 
+### How to deploy your app after a package change
+
+Package changes do **not** auto-deploy any app. The Notify package changes comment lists the apps that depend on the changed code, but it never starts a build. This is deliberate: a stable already-deployed app should not silently absorb a new package version just because someone else's PR touched a shared file.
+
+Once a package PR merges to `dev`, here is what each app owner should do, depending on which of the three situations applies:
+
+1. **You actively maintain the app and have already validated it against this package change** (e.g., the package PR was opened from your branch and you ran your app locally against it). Open the **Actions** tab, run [Deploy to Amplify](.github/workflows/deploy-amplify.yml), pick your app, branch `dev`, and click **Run workflow**. The run goes green only if Amplify reports `SUCCEED`. Done.
+
+2. **You actively maintain the app but have not yet validated it against the package change.** Pull the latest `dev`, run `pnpm install` at the repo root, then `pnpm dev --filter <your-app>` and verify your app still works. When you're satisfied, dispatch the deploy as in (1). If you're making your own follow-up edits to your app folder, you can also just push them to `dev` (or merge a PR into `dev`); the per-app auto-deploy will fire and pick up the new package version at the same time.
+
+3. **The app is feature-complete and no longer in active development.** Do nothing. The dev Amplify app keeps running on its current build and only picks up the package change the next time someone explicitly deploys it. After production cutover, the production Amplify app for that app is on its own `production-<name>` branch with its own frozen lockfile and source, so the package change on `dev` never reaches production unless someone explicitly dispatches a production deploy.
+
+If you are unsure which situation applies to you, default to (2) — the cost of a local sanity check is small relative to shipping a regression.
+
 ### Lockfile-regen escape hatch
 
 By default any change to `pnpm-lock.yaml` is treated as broad-impact and flags every app. Two refinements reduce noise:
@@ -293,16 +307,28 @@ By default any change to `pnpm-lock.yaml` is treated as broad-impact and flags e
 
 ### Direct push to `dev` of package changes is not allowed
 
-Project policy: shared-workspace changes (`packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) must be delivered to `dev` via a pull request, not a direct push. This is what makes the **Notify package changes** workflow fire and the right owners get pinged.
-
-The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow detects violations after the fact: it inspects each commit in the push and asks GitHub whether the commit was delivered via a merged PR. If any commit touched a restricted path without a PR, the workflow:
-
-1. Fails loudly with a workflow-level error annotation.
-2. Opens a tracking GitHub Issue assigned to the pusher, naming the violating commits and linking the run.
-
-This is detection-and-accountability, not prevention. GitHub Actions cannot pre-receive-reject a push, and GitHub branch protection cannot conditionally require a PR by path. If you want true prevention later, the only option is a branch ruleset that requires a PR for **all** dev pushes (which would also force app-folder changes through PRs).
+Project policy: shared-workspace changes (`packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) must be delivered to `dev` via a pull request, not a direct push. The PR is what makes the **Notify package changes** workflow fire and the right owners get pinged. Direct pushes skip that ping entirely, which is exactly what the policy is meant to prevent.
 
 App-folder changes can still be pushed directly to `dev` without a PR. The enforcement only fires for shared-workspace paths.
+
+#### What literally happens if a package change is pushed directly to `dev`
+
+The push lands on `dev` (GitHub Actions cannot pre-receive-reject — by the time a workflow fires, the commits are already in the branch). Then:
+
+1. The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow fires immediately because the push touched a restricted path.
+2. It walks every commit in the push range and asks GitHub (`gh api repos/<repo>/commits/<sha>/pulls`) which merged PR each commit was delivered through. A direct push has no such PR.
+3. The workflow **fails** with a loud `::error::` annotation in the run log naming the offending commit SHAs.
+4. The workflow opens a **tracking GitHub Issue** assigned to the pusher (`github.actor`). The issue lists each violating commit, links to the workflow run, and includes a "what to do" checklist.
+5. The [Notify package changes](.github/workflows/notify-package-changes.yml) workflow does **not** run (it only fires on `pull_request`), so no sticky comment, no @-mention of affected app owners. This is the actual harm: nobody knows which apps to redeploy.
+
+To remediate after a direct-push violation:
+
+- Open a follow-up PR that touches one of the same restricted paths (a one-line no-op edit to the same file is enough) so the Notify package changes workflow runs and the affected app owners get the standard ping.
+- Or, if the change should not have shipped at all, revert the offending commits in a PR.
+
+#### Why GitHub branch protection isn't doing this
+
+GitHub's branch protection / rulesets cannot conditionally require a PR by path. The closest options are: (a) require a PR for **all** changes to `dev`, which would also force every app-folder edit through a PR; or (b) a Push Ruleset's "Restrict file paths" rule, which blocks the paths from being pushed *at all* — including via PR merges, which is also wrong. The detect-and-flag workflow is the closest fit for "block direct pushes of these paths only, allow PR merges."
 
 ### Production deploys
 
