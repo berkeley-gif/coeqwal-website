@@ -139,30 +139,14 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "Will deploy: $APPS on branch $BRANCH"
 
-  guard-production:
-    # Production guard. The (branch, app) -> appId map below only knows about
-    # `dev`. Dispatching `production-*` would fail late at the AWS call with
-    # a generic "No Amplify appId mapped" message. Bail early with a clear
-    # explanation so the dispatcher knows what they need to do (create the
-    # production Amplify apps and add the rows to MAP).
-    name: Guard production branches
-    needs: resolve
-    if: startsWith(needs.resolve.outputs.branch, 'production-')
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "::error title=Production not yet wired up::Branch '${{ needs.resolve.outputs.branch }}' has no Amplify app mapping in deploy-amplify.yml. Production Amplify apps for main, storyline-flow, and storyline-climate must be created first, then the MAP block in this workflow's 'Resolve Amplify app id' step extended with the new appIds. See README 'Production cutover' for the playbook."
-          exit 1
-
   deploy:
     name: ${{ matrix.app }} -> ${{ needs.resolve.outputs.branch }}
     needs: resolve
     # Defensive: skip if resolve produced an empty array. Shouldn't happen
     # given the workflow-level paths filter, but if a push slips through
     # (e.g., paths-filter sees no diff because of a force-push), this avoids
-    # a runtime matrix error. Also skip when the branch is production-*; the
-    # guard-production job will surface the error.
-    if: needs.resolve.outputs.apps != '[]' && !startsWith(needs.resolve.outputs.branch, 'production-')
+    # a runtime matrix error.
+    if: needs.resolve.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

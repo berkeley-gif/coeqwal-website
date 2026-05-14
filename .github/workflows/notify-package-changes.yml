@@ -1,25 +1,22 @@
 name: Notify package changes
 
-# Fires on PRs to dev that touch shared workspaces (packages, lockfile,
-# workspace, turbo.json, root package.json). Posts a single sticky comment
-# listing the apps that depend on the changed code, their CODEOWNERS, and a
-# dispatch link for the Deploy to Amplify workflow. The comment never
-# triggers a deploy.
+# Fires on PRs to dev that touch shared workspaces (packages, workspace,
+# turbo.json, root package.json). Posts a single sticky comment listing the
+# apps that depend on the changed code, their CODEOWNERS, and a dispatch
+# link for the Deploy to Amplify workflow. The comment never triggers a
+# deploy.
 #
 # The comment is "sticky" via marocchino/sticky-pull-request-comment with the
 # header `package-deploy-impact`. Subsequent runs on the same PR update the
 # same comment in place rather than stacking.
 #
-# Lockfile-regen escape hatch: add the PR label `lockfile-regen` to suppress
-# the all-apps broad-impact entry for lockfile-only PRs. The script will
-# still post a sticky comment explaining what was skipped.
+# pnpm-lock.yaml is deliberately excluded from the trigger paths.
 
 on:
   pull_request:
     branches: [dev]
     paths:
       - "packages/**"
-      - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "turbo.json"
       - "package.json"
@@ -48,7 +45,6 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: node .github/scripts/compute-affected-apps.mjs
 
       - uses: marocchino/sticky-pull-request-comment@v2

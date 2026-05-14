@@ -23,8 +23,8 @@ Dependencies and configurations set at the root level are overriden by local dep
   - [On-demand deploys](#on-demand-deploys)
   - [Auto-deploy on push to `dev`](#auto-deploy-on-push-to-dev)
   - [Shared-package PRs](#shared-package-prs)
-  - [Lockfile-regen escape hatch](#lockfile-regen-escape-hatch)
-  - [Direct push to `dev` of package changes is not allowed](#direct-push-to-dev-of-package-changes-is-not-allowed)
+  - [How to deploy your app after a package change](#how-to-deploy-your-app-after-a-package-change)
+  - [Direct push to `dev` of package changes is flagged](#direct-push-to-dev-of-package-changes-is-flagged)
   - [Production deploys](#production-deploys)
   - [What auto-deploys, when](#what-auto-deploys-when)
   - [When a build fails](#when-a-build-fails)
@@ -234,11 +234,13 @@ The COEQWAL website is hosted on AWS Amplify as three independent apps that shar
 | Push to `dev` touching `apps/<x>/**` (excluding `*.md`) | That one app auto-deploys |
 | Push to `dev` touching only Markdown inside an app folder | Nothing |
 | Push to `dev` touching only the root README, `docs/`, `.github/CODEOWNERS`, etc. | Nothing |
-| Push to `dev` touching `packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` | **Blocked by policy.** The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow fails and opens a tracking issue assigned to the pusher. Use a PR instead. |
-| PR into `dev` touching `packages/**`, lockfile, workspace, `turbo.json`, root `package.json` | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps + CODEOWNERS + dispatch links. **Never triggers a deploy.** |
+| Push to `dev` touching `packages/**` (non-md), `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` | **Flagged by policy.** The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow fails the run and the pusher gets the standard "workflow failed" email. Use a PR instead. |
+| Push to `dev` touching only Markdown inside `packages/**` | Nothing (the enforce workflow ignores `*.md`) |
+| PR into `dev` touching `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps + CODEOWNERS + dispatch links. **Never triggers a deploy.** |
+| PR or push touching only `pnpm-lock.yaml` | Nothing. Lockfile churn is treated as a non-event (too noisy to broadcast). |
 | `workflow_dispatch` of **Deploy to Amplify** | Deploys the chosen app(s) on the chosen branch |
 | Push to a `production-*` branch | Nothing automatic |
-| `workflow_dispatch` for `branch: production-*` | Will fail until production Amplify apps are wired up (the workflow has an early guard with a clear error) |
+| `workflow_dispatch` for `branch: production-*` | Will fail at the **Resolve Amplify app id** step with `No Amplify appId mapped for branch=production-<x> app=<x>` until the production Amplify apps are wired up and the `MAP` block is extended |
 
 ### Apps and Amplify ids
 
@@ -271,7 +273,7 @@ If a single push touches more than one app folder (e.g., `apps/main/**` and `app
 
 ### Shared-package PRs
 
-Opening a PR to `dev` that touches `packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, or root `package.json` triggers [Notify package changes](.github/workflows/notify-package-changes.yml). The script [`compute-affected-apps.mjs`](.github/scripts/compute-affected-apps.mjs):
+Opening a PR to `dev` that touches `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, or root `package.json` triggers [Notify package changes](.github/workflows/notify-package-changes.yml). The script [`compute-affected-apps.mjs`](.github/scripts/compute-affected-apps.mjs):
 
 1. Reads `.github/CODEOWNERS` to learn which apps the monorepo deploys.
 2. Reads each `apps/<x>/package.json` to learn each app's `@repo/*` deps.
@@ -280,9 +282,11 @@ Opening a PR to `dev` that touches `packages/**`, `pnpm-lock.yaml`, `pnpm-worksp
 
 The comment never triggers a deploy. Devs decide when to ship a new package version into their app by clicking the dispatch link.
 
-The workflow also writes a per-run **step summary** in the Actions UI explaining the decision (which packages changed, which apps were flagged, whether the lockfile was deduped, whether the `lockfile-regen` label was honored, and any CODEOWNERS drift warnings).
+`pnpm-lock.yaml` is intentionally **not** in the trigger paths and **not** in the script's broad-impact set. Lockfile churn (manual regeneration, transitive bumps, dependabot) was too noisy to broadcast as "every app may need to redeploy", so a lockfile-only PR doesn't run notify at all and a mixed PR doesn't list the lockfile in the sticky comment.
 
-If the comment was suppressed (no apps depend on the changed packages, or the `lockfile-regen` label was applied), the script still posts a sticky comment that explains why so the PR has a record.
+The workflow also writes a per-run **step summary** in the Actions UI explaining the decision (which packages changed, which apps were flagged, and any CODEOWNERS drift warnings).
+
+If no apps end up flagged (e.g., the changed package isn't depended on by any app), the script still posts a sticky comment that explains why so the PR has a record.
 
 ### How to deploy your app after a package change
 
@@ -298,18 +302,11 @@ Once a package PR merges to `dev`, here is what each app owner should do, depend
 
 If you are unsure which situation applies to you, default to (2) — the cost of a local sanity check is small relative to shipping a regression.
 
-### Lockfile-regen escape hatch
+### Direct push to `dev` of package changes is flagged
 
-By default any change to `pnpm-lock.yaml` is treated as broad-impact and flags every app. Two refinements reduce noise:
+Project policy: shared-workspace changes (`packages/**` non-md, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) should be delivered to `dev` via a pull request, not a direct push. The PR is what makes the **Notify package changes** workflow fire and the right owners get pinged. Direct pushes skip that ping, which is exactly what the policy is meant to prevent.
 
-- **Dedupe**: if `packages/**` also changed in the same PR, the lockfile broad-impact line is suppressed. The package change is the real source; the lockfile delta is almost certainly downstream.
-- **PR label `lockfile-regen`**: for lockfile-only PRs (e.g., re-sorted entries, or a transitive bump that doesn't touch a direct dep), apply the `lockfile-regen` label and the comment will skip the all-apps broadcast. The sticky comment still posts, but it explains the skip.
-
-### Direct push to `dev` of package changes is not allowed
-
-Project policy: shared-workspace changes (`packages/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) must be delivered to `dev` via a pull request, not a direct push. The PR is what makes the **Notify package changes** workflow fire and the right owners get pinged. Direct pushes skip that ping entirely, which is exactly what the policy is meant to prevent.
-
-App-folder changes can still be pushed directly to `dev` without a PR. The enforcement only fires for shared-workspace paths.
+App-folder changes can still be pushed directly to `dev` without a PR. The enforcement only fires for shared-workspace paths. Markdown changes anywhere (including under `packages/**`) are also exempt — they're documentation, not a package change.
 
 #### What literally happens if a package change is pushed directly to `dev`
 
@@ -318,7 +315,7 @@ The push lands on `dev` (GitHub Actions cannot pre-receive-reject — by the tim
 1. The [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) workflow fires immediately because the push touched a restricted path.
 2. It walks every commit in the push range and asks GitHub (`gh api repos/<repo>/commits/<sha>/pulls`) which merged PR each commit was delivered through. A direct push has no such PR.
 3. The workflow **fails** with a loud `::error::` annotation in the run log naming the offending commit SHAs.
-4. The workflow opens a **tracking GitHub Issue** assigned to the pusher (`github.actor`). The issue lists each violating commit, links to the workflow run, and includes a "what to do" checklist.
+4. Whoever pushed gets the standard GitHub "workflow failed" email. We deliberately do **not** open a tracking issue (would clutter the Issues tab); the failed run plus the email are the durable signal.
 5. The [Notify package changes](.github/workflows/notify-package-changes.yml) workflow does **not** run (it only fires on `pull_request`), so no sticky comment, no @-mention of affected app owners. This is the actual harm: nobody knows which apps to redeploy.
 
 To remediate after a direct-push violation:
@@ -328,7 +325,7 @@ To remediate after a direct-push violation:
 
 #### Why GitHub branch protection isn't doing this
 
-GitHub's branch protection / rulesets cannot conditionally require a PR by path. The closest options are: (a) require a PR for **all** changes to `dev`, which would also force every app-folder edit through a PR; or (b) a Push Ruleset's "Restrict file paths" rule, which blocks the paths from being pushed *at all* — including via PR merges, which is also wrong. The detect-and-flag workflow is the closest fit for "block direct pushes of these paths only, allow PR merges."
+GitHub's branch protection / rulesets cannot conditionally require a PR by path. The closest options are: (a) require a PR for **all** changes to `dev`, which would also force every app-folder edit through a PR; or (b) a Push Ruleset's "Restrict file paths" rule, which blocks the paths from being pushed *at all* — including via PR merges, which is also wrong. The detect-and-flag workflow is the closest fit for "flag direct pushes of these paths only, allow PR merges."
 
 ### Production deploys
 
@@ -340,7 +337,7 @@ Each app gets its own production branch and its own production Amplify app at la
 
 Production deploys are **manual only**: dispatch the workflow with `branch: production-<name>`. A push to a production branch is not a trigger. If an app is feature-complete and no one is actively working on it, it can sit on its production branch indefinitely. Future changes on `dev` or in `packages/*` will not touch the frozen production app, because that production branch has its own lockfile and source tree.
 
-Until the production Amplify apps exist, dispatching `branch: production-*` will fail at the **Guard production branches** step with a clear error message pointing back here. To wire production up:
+Until the production Amplify apps exist, dispatching `branch: production-*` will fail at the **Resolve Amplify app id** step with `No Amplify appId mapped for branch=production-<x> app=<x>`. To wire production up:
 
 1. Create the three production Amplify apps in the Console (one per app), pointed at the matching `production-<name>` branch with `AMPLIFY_MONOREPO_APP_ROOT` set.
 2. Note the resulting App IDs.
@@ -354,7 +351,7 @@ Steady-state behavior on `dev`:
 
 - Push touching **only your app's folder** (`apps/<name>/**`, excluding `*.md`) -> that one app auto-deploys.
 - Push touching **only Markdown inside an app folder** -> no auto-deploy.
-- Push touching **only shared packages** (`packages/*`, lockfile, workspace, `turbo.json`, root `package.json`) -> no auto-deploy. Should have come through a PR; the **Enforce package-PR rule** workflow opens an issue if it didn't.
+- Push touching **only shared packages** (`packages/*` non-md, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json`) -> no auto-deploy. Should have come through a PR; the **Enforce package-PR rule** workflow fails the run if it didn't.
 - Push touching **only root README, `.github/CODEOWNERS`, or other unmapped paths** -> nothing.
 - Push to a `production-*` branch -> nothing automatic. Production is always a manual dispatch.
 
@@ -650,7 +647,7 @@ Outstanding items, in no particular order:
 
 - **Decide auto-deploy behavior for shared build files.** Today the `push:` paths filter in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) only watches `apps/<x>/**`. A change to the shared build spec ([amplify.yml](amplify.yml)) or the GitHub Actions workflows themselves does not auto-trigger any deploy and must be dispatched by hand. Decide which of `amplify.yml`, `.github/workflows/**` should fan out to all three apps on push and extend the filter and `resolve` job if so. (`pnpm-lock.yaml`, `turbo.json`, root `package.json` are intentionally excluded; they go through the package-PR path.)
 
-- **Production cutover at launch.** Create `production-main`, `production-storyline-flow`, `production-storyline-climate` branches and three matching production Amplify apps. Add the `production-*:<app>` rows to the `MAP` block in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) (the workflow currently fails early with a clear error when dispatched against `production-*` because the rows are missing). Cut over custom domains (`coeqwal.org`, `flow.coeqwal.org`, `climate.coeqwal.org`) via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
+- **Production cutover at launch.** Create `production-main`, `production-storyline-flow`, `production-storyline-climate` branches and three matching production Amplify apps. Add the `production-*:<app>` rows to the `MAP` block in [.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml) (the workflow currently fails at the **Resolve Amplify app id** step when dispatched against `production-*` because the rows are missing). Cut over custom domains (`coeqwal.org`, `flow.coeqwal.org`, `climate.coeqwal.org`) via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
 
 - **Re-tidy Amplify Console inline build specs.** Each Console fallback should mirror its matching stanza in root [amplify.yml](amplify.yml) including the store-only `cache: { paths: [~/.cache/pnpm/**/*] }` block. Trivial paste-three-files task whenever convenient.
 
