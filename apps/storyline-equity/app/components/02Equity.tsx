@@ -11,42 +11,15 @@ import {
 } from "@repo/scrollytelling"
 
 const burdenItems = [
-  {
-    name: "Households",
-    tag: "Higher bills",
-    copy: "When water gets tighter, costs often rise first for people who have the least room to absorb the change.",
-    accent: 0.72,
-  },
-  {
-    name: "Farms",
-    tag: "Delivery cuts",
-    copy: "Agricultural users can face reduced deliveries, forcing hard choices about crops, labor, and season timing.",
-    accent: 0.58,
-  },
-  {
-    name: "Rivers",
-    tag: "Lower flows",
-    copy: "Environmental flows can shrink too, which means salmon, wetlands, and water quality often take a hit.",
-    accent: 0.46,
-  },
+  { name: "Households", tag: "Higher bills", accent: 0.72 },
+  { name: "Farms", tag: "Delivery cuts", accent: 0.58 },
+  { name: "Rivers", tag: "Lower flows", accent: 0.46 },
 ] as const
 
 const balanceItems = [
-  {
-    name: "Transparency",
-    value: "Show who is affected",
-    copy: "Clear data makes tradeoffs visible, which helps communities discuss scarcity before decisions are locked in.",
-  },
-  {
-    name: "Flexibility",
-    value: "Adapt plans quickly",
-    copy: "Drought rules and allocations need room to shift as conditions change across years and regions.",
-  },
-  {
-    name: "Protection",
-    value: "Shield the most exposed",
-    copy: "Equity improves when planning explicitly protects households, small systems, and ecosystems with fewer buffers.",
-  },
+  { name: "Transparency", value: "Show who is affected" },
+  { name: "Flexibility", value: "Adapt plans quickly" },
+  { name: "Protection", value: "Shield the most exposed" },
 ] as const
 
 function AnimatedMetricCard({
@@ -73,9 +46,6 @@ function AnimatedMetricCard({
       <Box className="metric-track">
         <motion.div className="metric-fill" style={{ scaleX: fill }} />
       </Box>
-      <Typography variant="body2" className="metric-copy">
-        {item.copy}
-      </Typography>
     </motion.article>
   )
 }
@@ -98,9 +68,6 @@ function NarrativeCard({
     <motion.div className="balance-row" style={{ opacity, y }}>
       <Box>
         <div className="balance-label">{item.name}</div>
-        <Typography variant="body2" className="metric-copy">
-          {item.copy}
-        </Typography>
       </Box>
       <div className="balance-value">{item.value}</div>
     </motion.div>
@@ -139,14 +106,8 @@ function BurdenContent() {
       <Box className="story-stage-grid">
         <ScrollElement enter={[0.05, 0.2]} hold={[0.2, 0.55]} exit={[0.9, 1]}>
           <Box className="section-copy">
-            <p className="section-kicker">Section 1</p>
             <Typography variant="h2" className="section-title">
               Scarcity rarely lands evenly.
-            </Typography>
-            <Typography variant="body1" className="section-text">
-              A shortage is not just a hydrologic problem. It is also a
-              distribution problem. Some groups lose access, some absorb higher
-              costs, and some experience the impacts earlier than others.
             </Typography>
           </Box>
         </ScrollElement>
@@ -179,14 +140,8 @@ function BalanceContent() {
       <Box className="story-stage-grid">
         <ScrollElement enter={[0.05, 0.2]} hold={[0.2, 0.55]} exit={[0.9, 1]}>
           <Box className="section-copy">
-            <p className="section-kicker">Section 2</p>
             <Typography variant="h2" className="section-title">
-              Better planning makes the tradeoffs explicit.
-            </Typography>
-            <Typography variant="body1" className="section-text">
-              Equity-centered planning does not remove scarcity, but it helps
-              decision-makers see who is exposed, who has flexibility, and where
-              protections are needed first.
+              Better planning makes tradeoffs explicit.
             </Typography>
           </Box>
         </ScrollElement>
@@ -204,11 +159,7 @@ function BalanceContent() {
                 />
               ))}
             </Box>
-            <Typography variant="body2" className="balance-note">
-              This is the simplest possible proof of concept: one free-scrolling
-              opener, then two sticky narrative panels powered by
-              <strong> @repo/scrollytelling</strong>.
-            </Typography>
+            {/* intentionally minimal notes */}
           </Box>
         </ScrollElement>
       </Box>

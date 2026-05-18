@@ -1,0 +1,29 @@
+{
+  "name": "storyline-management",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0"
+  },
+  "dependencies": {
+    "@repo/i18n": "workspace:*",
+    "@repo/motion": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.0.0"
+  }
+}

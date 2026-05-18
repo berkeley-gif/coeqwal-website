@@ -7,7 +7,7 @@ export default function RainAnimation() {
   const [travelPx, setTravelPx] = useState(0)
 
   useEffect(() => {
-    let startTime = Date.now()
+    const startTime = Date.now()
 
     const updateIntensity = () => {
       const elapsed = (Date.now() - startTime) / 1000

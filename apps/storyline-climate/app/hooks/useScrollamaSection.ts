@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from "react"
-import type { StepEvent, StepProgressEvent } from "react-scrollama"
+import type { StepEvent } from "react-scrollama"
 import { appActions, SectionId } from "../store"
 
 /**
@@ -35,7 +35,7 @@ export function useScrollamaSection() {
    * Used for animations like rivers that need 0-1 progress values.
    */
   const onStepProgress = useCallback(
-    ({ data, progress }: StepProgressEvent<SectionId>) => {
+    () => {
       // Rivers animation uses progress to draw rivers progressively
     },
     [],

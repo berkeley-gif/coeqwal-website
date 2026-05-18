@@ -8,6 +8,7 @@ import type { StepEvent } from "react-scrollama"
 
 import Opener from "./components/01Opener"
 import { BurdenSection, BalanceSection } from "./components/02Equity"
+import { BaseHeader } from "@repo/ui"
 
 type SectionId = "opener" | "yo" | "balance"
 
@@ -19,7 +20,13 @@ export default function StoryContainer() {
   }
 
   return (
-    <ContentContainer onStepEnter={onStepEnter} activeSection={activeSection} />
+    <>
+      <BaseHeader backgroundColor="overlay.waterDark" />
+      <ContentContainer
+        onStepEnter={onStepEnter}
+        activeSection={activeSection}
+      />
+    </>
   )
 }
 
@@ -61,15 +68,7 @@ function ContentContainer({
         </Step>
       </Scrollama>
 
-      <Box className="outro">
-        <Box className="outro-panel">
-          <p>
-            This is a minimal demo of <strong>@repo/scrollytelling</strong>: the
-            opener scrolls normally, while the two narrative blocks pin in place
-            and react to scroll progress.
-          </p>
-        </Box>
-      </Box>
+      {/* minimal outro intentionally left blank */}
     </Box>
   )
 }
