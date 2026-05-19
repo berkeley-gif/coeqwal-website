@@ -41,19 +41,11 @@ export default function WelcomePanel() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               COEQWAL uses the{" "}
-              <Typography
-                component="span"
-                variant="body2"
-                fontWeight={600}
-              >
+              <Typography component="span" variant="body2" fontWeight={600}>
                 CalSim3
               </Typography>{" "}
               water planning model to evaluate how different{" "}
-              <Typography
-                component="span"
-                variant="body2"
-                fontWeight={600}
-              >
+              <Typography component="span" variant="body2" fontWeight={600}>
                 scenarios
               </Typography>{" "}
               affect outcomes for communities, farms, and the environment.
@@ -64,33 +56,25 @@ export default function WelcomePanel() {
               sx={{ mt: sp.md }}
             >
               Each scenario pairs a{" "}
-              <Typography
-                component="span"
-                variant="body2"
-                fontWeight={600}
-              >
+              <Typography component="span" variant="body2" fontWeight={600}>
                 water management strategy
               </Typography>{" "}
-              (the operating rules, policies, and infrastructure decisions
-              that determine how water is allocated) with a{" "}
-              <Typography
-                component="span"
-                variant="body2"
-                fontWeight={600}
-              >
+              (the operating rules, policies, and infrastructure decisions that
+              determine how water is allocated) with a{" "}
+              <Typography component="span" variant="body2" fontWeight={600}>
                 hydroclimate
               </Typography>{" "}
-              (the temperature and precipitation patterns that determine
-              how much water is available).
+              (the temperature and precipitation patterns that determine how
+              much water is available).
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: sp.md }}
             >
-              The management strategy represents what we can control and
-              the hydroclimate represents what we can&rsquo;t control and
-              must prepare for.
+              The management strategy represents what we can control and the
+              hydroclimate represents what we can&rsquo;t control and must
+              prepare for.
             </Typography>
           </Box>
 
@@ -111,18 +95,16 @@ export default function WelcomePanel() {
               color="text.secondary"
               sx={{ mt: sp.md }}
             >
-              Each scenario is associated with dozens of outcome variables
-              that describe how water is allocated to different locations
-              and users.
+              Each scenario is associated with dozens of outcome variables that
+              describe how water is allocated to different locations and users.
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: sp.md }}
             >
-              Visualization tools can be used to compare scenarios,
-              examine outcomes, and interpret results across different
-              perspectives.
+              Visualization tools can be used to compare scenarios, examine
+              outcomes, and interpret results across different perspectives.
             </Typography>
             <Typography
               variant="body2"
@@ -139,18 +121,12 @@ export default function WelcomePanel() {
                   p: 0,
                   color: "text.secondary",
                   textDecoration: "underline",
-                  textDecorationColor: alpha(
-                    theme.palette.common.white,
-                    0.4,
-                  ),
+                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
                   textUnderlineOffset: "3px",
                   cursor: "pointer",
                   font: "inherit",
                   "&:hover": {
-                    textDecorationColor: alpha(
-                      theme.palette.common.white,
-                      0.8,
-                    ),
+                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
                   },
                 }}
               >
@@ -170,8 +146,8 @@ export default function WelcomePanel() {
               What you&rsquo;ll learn
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              By exploring the scenario library, you will gain
-              understanding of how:
+              By exploring the scenario library, you will gain understanding of
+              how:
             </Typography>
             <LinedList
               items={[

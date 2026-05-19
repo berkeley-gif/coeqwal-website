@@ -5,10 +5,10 @@
  *
  * Purely grid + data. Controls are in other components.
  * Uses a single CSS Grid (checkbox | scenario | operations | outcomes)
- * for a single scroll container, 
+ * for a single scroll container,
  * with subgrid rows for column alignment.
  *
- * Row order shared with scenarioSelectionSidebar and determined in `useOrderedScenarios`. 
+ * Row order shared with scenarioSelectionSidebar and determined in `useOrderedScenarios`.
  * Tier chart data from `useResolvedScenarioTiers` (API batch via SWR, warmed by `usePrefetchTiers`).
  */
 

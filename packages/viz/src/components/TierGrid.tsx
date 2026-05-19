@@ -64,11 +64,13 @@ export interface TierGridProps {
   /** Scenario the grid currently represents (Distribution tool focus). */
   focusScenarioId?: string
   /** Chart → sidebar hover sync. Emitted when the pointer is over the grid or a dot. */
-  onChartHover?: (info: {
-    scenarioId: string
-    outcome?: string
-    tierValue?: number
-  } | null) => void
+  onChartHover?: (
+    info: {
+      scenarioId: string
+      outcome?: string
+      tierValue?: number
+    } | null,
+  ) => void
 }
 
 // ============================================================================
@@ -861,10 +863,7 @@ export default function TierGrid({
           .on("mouseover", function (this: SVGPathElement, event, d) {
             const sid = focusScenarioIdRef.current
             if (sid && onChartHoverRef.current) {
-              const tierLevel = parseInt(
-                d.obj.tier.replace(/^Tier\s+/, ""),
-                10,
-              )
+              const tierLevel = parseInt(d.obj.tier.replace(/^Tier\s+/, ""), 10)
               onChartHoverRef.current({
                 scenarioId: sid,
                 outcome: d.obj.category,

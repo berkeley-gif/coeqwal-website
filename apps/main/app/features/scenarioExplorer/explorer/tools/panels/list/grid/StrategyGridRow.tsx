@@ -150,16 +150,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onRowHover,
 }: StrategyGridRowProps) {
   const theme = useTheme()
-  const outcomeDisplayMode = useExplorerStore(
-    (s) => s.outcomeDisplayMode,
-  )
+  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
   const isListMode = useExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useExplorerStore((s) => s.showDefinitions)
   const addShareItem = useExplorerStore((s) => s.addShareItem)
   const hydroclimate = useExplorerStore((s) => s.hydroclimate)
-  const togglePinnedScenario = useExplorerStore(
-    (s) => s.togglePinnedScenario,
-  )
+  const togglePinnedScenario = useExplorerStore((s) => s.togglePinnedScenario)
 
   const accentColor = scenarioColor || theme.palette.blue.bright
   const outcomeColRef = useRef<HTMLDivElement>(null)
@@ -935,9 +931,7 @@ function NonCompactRowContent({
 }) {
   const theme = useTheme()
   const isListMode = useExplorerStore((s) => s.exploreMode === "list")
-  const outcomeDisplayMode = useExplorerStore(
-    (s) => s.outcomeDisplayMode,
-  )
+  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
 
   const isWrappedMode = layoutMode === "wrapped"
   const isCompactMode = layoutMode === "compact"

@@ -218,28 +218,28 @@ pnpm build --filter=main
 
 ## How to deploy
 
-The COEQWAL website is hosted on AWS Amplify as the independent apps that share this monorepo. The dispatcher is a GitHub Actions workflow ([Deploy to Amplify](.github/workflows/deploy-amplify.yml)) which assumes a GitHub OIDC (GitHub OpenID Connect) role (`coeqwal-website-amplify-deploy-role`) and calls `aws amplify start-job` for each selected app. 
+The COEQWAL website is hosted on AWS Amplify as the independent apps that share this monorepo. The dispatcher is a GitHub Actions workflow ([Deploy to Amplify](.github/workflows/deploy-amplify.yml)) which assumes a GitHub OIDC (GitHub OpenID Connect) role (`coeqwal-website-amplify-deploy-role`) and calls `aws amplify start-job` for each selected app.
 
 ### Deployment rules
 
 "Shared workspaces" are `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, and the root `package.json`.
 
-| Trigger | What happens |
-|---|---|
-| Push or PR merge to `dev` touching one or more `apps/<x>/**` (non-Markdown) | Each app with changes auto-deploys. |
-| PR into `dev` touching shared workspaces (non-Markdown) | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps, their [CODEOWNERS](.github/CODEOWNERS), and a per-app dispatch link. **Never triggers a deploy.** |
-| Push to `dev` (not via PR) touching shared workspaces or `pnpm-lock.yaml` (non-Markdown) | [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) fails the run. The pusher gets a "workflow failed" email. Please open a PR for shared workspaces. |
-| Anything touching only Markdown | Nothing. Markdown is exempt from both notify and enforce. |
-| Anything touching only `pnpm-lock.yaml` | Nothing. Lockfile churn is treated as a non-event. |
-| **Deploy to Amplify** via GitHub Actions tab -> Run workflow | Manually deploys the chosen app(s) on `dev`. |
+| Trigger                                                                                  | What happens                                                                                                                                                                                                           |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push or PR merge to `dev` touching one or more `apps/<x>/**` (non-Markdown)              | Each app with changes auto-deploys.                                                                                                                                                                                    |
+| PR into `dev` touching shared workspaces (non-Markdown)                                  | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps, their [CODEOWNERS](.github/CODEOWNERS), and a per-app dispatch link. **Never triggers a deploy.** |
+| Push to `dev` (not via PR) touching shared workspaces or `pnpm-lock.yaml` (non-Markdown) | [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) fails the run. The pusher gets a "workflow failed" email. Please open a PR for shared workspaces.                                                  |
+| Anything touching only Markdown                                                          | Nothing. Markdown is exempt from both notify and enforce.                                                                                                                                                              |
+| Anything touching only `pnpm-lock.yaml`                                                  | Nothing. Lockfile churn is treated as a non-event.                                                                                                                                                                     |
+| **Deploy to Amplify** via GitHub Actions tab -> Run workflow                             | Manually deploys the chosen app(s) on `dev`.                                                                                                                                                                           |
 
 ### Apps and Amplify ids
 
-| Console name | App ID | Repo path | Custom domain (today -> launch) |
-|---|---|---|---|
-| `coeqwal-website-dev` | `d2yqk6im560ffz` | `apps/main` | `dev.coeqwal.org` -> `coeqwal.org` |
-| `storyline-flow-dev` | `d11fk80jyl948s` | `apps/storyline-flow` | `flow.coeqwal.org` |
-| `storyline-climate-dev` | `d1tv02ylgdru7l` | `apps/storyline-climate` | `climate.coeqwal.org` |
+| Console name            | App ID           | Repo path                | Custom domain (today -> launch)    |
+| ----------------------- | ---------------- | ------------------------ | ---------------------------------- |
+| `coeqwal-website-dev`   | `d2yqk6im560ffz` | `apps/main`              | `dev.coeqwal.org` -> `coeqwal.org` |
+| `storyline-flow-dev`    | `d11fk80jyl948s` | `apps/storyline-flow`    | `flow.coeqwal.org`                 |
+| `storyline-climate-dev` | `d1tv02ylgdru7l` | `apps/storyline-climate` | `climate.coeqwal.org`              |
 
 The Amplify build-spec source-of-truth is the repo-root [`amplify.yml`](amplify.yml). The online Amplify Console build spec has been entered in the console for each app as a fallback that mirrors each app's matching stanza. If the root file is ever removed, Amplify falls back to the console version.
 
@@ -518,7 +518,6 @@ Validate by dispatching the Deploy to Amplify workflow against each app on `dev`
 Outstanding items, in no particular order:
 
 - **Sync `next` versions across apps.** The apps currently drift (some on `^15.5.9`, some on `^15.2.1`). Bump the stragglers so all apps share one `next` version. Adopting `catalog:` (below) would make this enforceable going forward.
-
 
 - **Production cutover at launch.** Per-app: create the `production-<name>` git branch, create the production Amplify app, add the branch to the GiHub Action workflow's `branch:` dropdown, add the `MAP` row, smoke-test, cut over the custom domain via ACM. Enable Amplify Firewall (WAF) on the production apps only. Narrow CORS and presign allowlists from `*` to production hostnames.
 

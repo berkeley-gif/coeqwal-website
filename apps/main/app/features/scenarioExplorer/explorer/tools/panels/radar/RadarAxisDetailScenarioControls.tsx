@@ -38,9 +38,7 @@ function RadarAxisDetailScenarioControlsInner({
   const theme = useTheme()
   const toggleScenario = useExplorerStore((s) => s.toggleScenario)
   const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
-  const outcomeDisplayMode = useExplorerStore(
-    (s) => s.outcomeDisplayMode,
-  )
+  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
   const addShareItem = useExplorerStore((s) => s.addShareItem)
   const radarVisibleAxes = useExplorerStore((s) => s.radarVisibleAxes)
   const showRadarRange = useExplorerStore((s) => s.showRadarRange)

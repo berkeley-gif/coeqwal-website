@@ -1,13 +1,13 @@
 /**
  * getStartedViewport - a sizing helper. Computes CSS height value, so the content panels (PanelShell) and the tier animation (TierAnimationSection) share one layout rule.
- * 
+ *
  * Default height = the viewport minus
  * the sticky header stack and a fixed breathing margin. This matches
  * `panels/PanelShell` default `minHeight` and the tier map panel
  * so the map overlay and shell cards share one layout rule.
- * 
+ *
  * The formula is: 100vh - stickyStackOffsetPx - GET_STARTED_PANEL_BREATHING_PX
- * 
+ *
  */
 
 export const GET_STARTED_PANEL_BREATHING_PX = 80

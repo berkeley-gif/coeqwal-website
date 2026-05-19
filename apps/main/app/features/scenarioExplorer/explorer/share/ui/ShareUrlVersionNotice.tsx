@@ -31,9 +31,7 @@ export default function ShareUrlVersionNotice() {
   const shareUrlVersionMismatch = useExplorerStore(
     (s) => s.shareUrlVersionMismatch,
   )
-  const dismiss = useExplorerStore(
-    (s) => s.dismissShareUrlVersionMismatch,
-  )
+  const dismiss = useExplorerStore((s) => s.dismissShareUrlVersionMismatch)
 
   if (!shareUrlVersionMismatch) return null
 

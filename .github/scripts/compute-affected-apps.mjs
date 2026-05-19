@@ -16,12 +16,7 @@
 //   markdown=<multiline>  Markdown body for the sticky comment
 
 import { execSync } from "node:child_process"
-import {
-  appendFileSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-} from "node:fs"
+import { appendFileSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { join } from "node:path"
 
 const baseSha = process.env.BASE_SHA
@@ -230,12 +225,18 @@ if (ghSummary) {
   summary.push(`- Decision: **${summaryLine}**`)
   if (changedPackages.size > 0) {
     summary.push(
-      `- Changed packages: ${[...changedPackages].sort().map((p) => `\`@repo/${p}\``).join(", ")}`,
+      `- Changed packages: ${[...changedPackages]
+        .sort()
+        .map((p) => `\`@repo/${p}\``)
+        .join(", ")}`,
     )
   }
   if (broadImpact.size > 0) {
     summary.push(
-      `- Broad-impact files: ${[...broadImpact].sort().map((f) => `\`${f}\``).join(", ")}`,
+      `- Broad-impact files: ${[...broadImpact]
+        .sort()
+        .map((f) => `\`${f}\``)
+        .join(", ")}`,
     )
   }
   if (missingFromCodeowners.length > 0) {

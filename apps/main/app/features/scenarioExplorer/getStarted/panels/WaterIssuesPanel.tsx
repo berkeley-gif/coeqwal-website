@@ -67,9 +67,7 @@ export default function WaterIssuesPanel() {
               key={themeKey}
               title={title}
               description={description}
-              onClick={
-                active ? () => openThemePanel(themeKey) : undefined
-              }
+              onClick={active ? () => openThemePanel(themeKey) : undefined}
               dimmed={!active}
               variant="onDark"
             />
@@ -77,11 +75,7 @@ export default function WaterIssuesPanel() {
         })}
       </Box>
 
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ mt: sp.lg }}
-      >
+      <Typography variant="body2" color="text.secondary" sx={{ mt: sp.lg }}>
         Click on each water issue to learn more.
       </Typography>
     </PanelShell>

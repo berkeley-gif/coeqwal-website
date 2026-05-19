@@ -27,4 +27,3 @@ function StickyContainer({
 }
 
 export default StickyContainer
-

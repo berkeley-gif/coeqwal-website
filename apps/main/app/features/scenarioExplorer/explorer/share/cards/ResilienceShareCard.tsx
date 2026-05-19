@@ -9,7 +9,10 @@ import {
   getResilienceShareCardContent,
   type ResilienceShareCardLookups,
 } from "../utils/getResilienceShareCardContent"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../../../../content/outcomes"
+import {
+  OUTCOME_NAMES,
+  type OutcomeCode,
+} from "../../../../../content/outcomes"
 import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
 
 type ResilienceItem = Extract<ShareItem, { type: "resilience" }>

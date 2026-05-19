@@ -395,9 +395,7 @@ export default function ResiliencePanel({
   const setResilienceVisibleOutcomes = useExplorerStore(
     (s) => s.setResilienceVisibleOutcomes,
   )
-  const distributionMode = useExplorerStore(
-    (s) => s.resilienceDistributionMode,
-  )
+  const distributionMode = useExplorerStore((s) => s.resilienceDistributionMode)
   // Map hydroclimate lives on the scenario explorer store. The toolbar
   // `HydroclimateChooser` writes to the same setter. We call it when the
   // user clicks a heatmap cell so the map repaints for that cell's
@@ -3258,9 +3256,6 @@ function ResiliencePanelTitle({
     hydroclimate: "hydroclimates",
   }
 
-  let title: string
-  let subtitle: string
-
   const zDim: ZDim =
     view === "aggregate"
       ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
@@ -3275,24 +3270,20 @@ function ResiliencePanelTitle({
       ? "aggregate"
       : zMode
 
-  title =
+  const title =
     effectiveMode === "facet"
       ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
       : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
 
   const scopeBits: string[] = []
   if (scenarioCount > 0) {
-    scopeBits.push(
-      `${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`,
-    )
+    scopeBits.push(`${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`)
   } else {
     scopeBits.push("entire scenario library")
   }
   scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
-  scopeBits.push(
-    `${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`,
-  )
-  subtitle = scopeBits.join(" · ")
+  scopeBits.push(`${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`)
+  const subtitle = scopeBits.join(" · ")
 
   return (
     <Box

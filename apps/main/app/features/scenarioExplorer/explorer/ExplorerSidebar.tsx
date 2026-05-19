@@ -20,9 +20,7 @@ export default function ExplorerSidebar({
 }: ExplorerSidebarProps) {
   return (
     <ScenarioSelectionSidebar
-      scenarioColors={
-        exploreMode === "radar" ? radarScenarioColors : undefined
-      }
+      scenarioColors={exploreMode === "radar" ? radarScenarioColors : undefined}
       hoveredInteraction={hover.hoveredInteraction}
       onRowHover={hover.onSidebarRowHover}
       singleSelect={exploreMode === "equity"}

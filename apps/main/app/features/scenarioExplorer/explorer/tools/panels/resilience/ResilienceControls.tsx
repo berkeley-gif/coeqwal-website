@@ -54,9 +54,7 @@ import {
 import {
   ALL_RADAR_AXES_ORDER,
   OUTCOME_CODE_ORDER,
-  OUTCOME_REGIONAL_VARIANTS,
   getOutcomeName,
-  type OutcomeCode,
 } from "../../../../../../content/outcomes"
 import {
   hydroclimateOptions,
@@ -319,27 +317,6 @@ export default function ResilienceControls({
     (s) => s.resilienceVisibleOutcomes,
   )
 
-  const outcomeItems = useMemo(() => {
-    const items: { code: string; label: string; indent?: boolean }[] = []
-    for (const code of OUTCOME_CODE_ORDER) {
-      items.push({ code, label: getOutcomeName(code) })
-      const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-      if (variants) {
-        items.push({
-          code: variants[0],
-          label: getOutcomeName(variants[0]),
-          indent: true,
-        })
-        items.push({
-          code: variants[1],
-          label: getOutcomeName(variants[1]),
-          indent: true,
-        })
-      }
-    }
-    return items
-  }, [])
-
   const scenarioItems = useMemo(() => {
     return siblingGroups.map((s) => ({
       id: s.scenarioId,
@@ -379,9 +356,7 @@ export default function ResilienceControls({
       if (nextDim === pivotDim && mode === pivotMode) return
       const extra: Partial<ResilienceControlsState> =
         nextDim === pivotDim ? {} : { transposed: false }
-      writeChange(
-        planPivotPatch(nextDim, mode, controlsSnapshot, extra),
-      )
+      writeChange(planPivotPatch(nextDim, mode, controlsSnapshot, extra))
     },
     [controlsSnapshot, writeChange, pivotDim, pivotMode],
   )

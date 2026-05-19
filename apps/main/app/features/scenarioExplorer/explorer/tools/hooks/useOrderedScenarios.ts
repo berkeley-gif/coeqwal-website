@@ -108,23 +108,16 @@ export function computeOrderedScenarios({
       if (!bScores?.[sortBy]) return -1
       const aScore = aScores[sortBy].weighted_score
       const bScore = bScores[sortBy].weighted_score
-      const delta =
-        sortDirection === "asc" ? aScore - bScore : bScore - aScore
+      const delta = sortDirection === "asc" ? aScore - bScore : bScore - aScore
       if (delta !== 0) return delta
-      return compareScenarioIdsForThemeSubgroupOrder(
-        a.scenarioId,
-        b.scenarioId,
-      )
+      return compareScenarioIdsForThemeSubgroupOrder(a.scenarioId, b.scenarioId)
     })
   } else {
     baseScenarios.sort((a, b) => {
       const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
       const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
       if (aOrder !== bOrder) return aOrder - bOrder
-      return compareScenarioIdsForThemeSubgroupOrder(
-        a.scenarioId,
-        b.scenarioId,
-      )
+      return compareScenarioIdsForThemeSubgroupOrder(a.scenarioId, b.scenarioId)
     })
   }
 

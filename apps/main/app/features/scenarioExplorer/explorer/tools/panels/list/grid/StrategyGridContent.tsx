@@ -241,9 +241,7 @@ export function StrategyGridContent({
     return map
   }, [themeSubheaderMode, pinnedScenarios, themeScenarioIds])
 
-  const outcomeDisplayMode = useExplorerStore(
-    (s) => s.outcomeDisplayMode,
-  )
+  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
   const hydroclimate = useExplorerStore((s) => s.hydroclimate)
   const addShareItem = useExplorerStore((s) => s.addShareItem)
 

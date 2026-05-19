@@ -31,9 +31,7 @@ export type ExploreHover = {
 }
 
 export function useExploreHoverCoordination(): ExploreHover {
-  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(
-    null,
-  )
+  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
   const [hoveredInteraction, setHoveredInteraction] =
     useState<HoveredInteraction | null>(null)
 

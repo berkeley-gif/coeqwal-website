@@ -176,11 +176,13 @@ export default function EquityPanel({
   onChartHover,
 }: {
   highlightedIds?: Set<string> | null
-  onChartHover?: (info: {
-    scenarioId: string
-    outcome?: string
-    tierValue?: number
-  } | null) => void
+  onChartHover?: (
+    info: {
+      scenarioId: string
+      outcome?: string
+      tierValue?: number
+    } | null,
+  ) => void
 }) {
   const theme = useTheme()
   const { mapRef, setMotionChildren } = useMap()

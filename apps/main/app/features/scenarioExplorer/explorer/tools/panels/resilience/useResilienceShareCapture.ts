@@ -53,7 +53,12 @@ export function useResilienceShareCapture(): ResilienceShareCapture {
       result: result ?? null,
     })
     addShareItem(item)
-  }, [selectedScenarios, resilienceVisibleOutcomes, addShareItem])
+  }, [
+    resilienceCapture.ref,
+    selectedScenarios,
+    resilienceVisibleOutcomes,
+    addShareItem,
+  ])
 
   const shareTile = useCallback(
     async (
@@ -73,7 +78,12 @@ export function useResilienceShareCapture(): ResilienceShareCapture {
       addShareItem(item)
       return true
     },
-    [selectedScenarios, resilienceVisibleOutcomes, addShareItem],
+    [
+      resilienceTileCapture.ref,
+      selectedScenarios,
+      resilienceVisibleOutcomes,
+      addShareItem,
+    ],
   )
 
   const shareScenario = useCallback(
@@ -91,7 +101,11 @@ export function useResilienceShareCapture(): ResilienceShareCapture {
       })
       addShareItem(item)
     },
-    [resilienceVisibleOutcomes, addShareItem],
+    [
+      resilienceScenarioSoloCapture.ref,
+      resilienceVisibleOutcomes,
+      addShareItem,
+    ],
   )
 
   return useMemo(

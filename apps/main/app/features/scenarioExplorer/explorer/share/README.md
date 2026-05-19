@@ -604,12 +604,12 @@ the captured content. Otherwise two captures of the "same" card at
 different settings collide and the OS quietly suffixes `(1)`. For the
 existing variants:
 
-| Variant      | Encoded segments                                                                                                                                                                                                                                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename.         |
-| `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                                    |
-| `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                           |
-| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it). |
+| Variant      | Encoded segments                                                                                                                                                                                                                                      |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
+| `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                            |
+| `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                   |
+| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it).      |
 
 When in doubt: include scenario identity, the chosen hydroclimate,
 and any boolean toggle that changes the chart content (overlay on/off,

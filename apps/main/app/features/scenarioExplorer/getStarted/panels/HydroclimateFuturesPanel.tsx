@@ -56,14 +56,12 @@ export default function HydroclimateFuturesPanel() {
         <Typography variant="body2" color="text.secondary">
           COEQWAL evaluates how the outcomes of different water management
           strategies are affected by alternative hydroclimate futures. We
-          specifically evaluate how the outcomes of water management
-          strategies change with climate-driven shifts in water supplies
-          and temperature.
+          specifically evaluate how the outcomes of water management strategies
+          change with climate-driven shifts in water supplies and temperature.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          The COEQWAL scenario library evaluates various hydroclimates
-          that represent different levels of risk to the water supply
-          system:
+          The COEQWAL scenario library evaluates various hydroclimates that
+          represent different levels of risk to the water supply system:
         </Typography>
       </Box>
 

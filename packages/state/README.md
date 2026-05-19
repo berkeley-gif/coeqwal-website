@@ -41,11 +41,11 @@ The table below lists which store properties a new tool panel should read from o
 
 #### Read from store
 
-| Property              | Type             | Why your panel needs it                                                                       |
-| --------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
-| `selectedScenarios`   | `string[]`       | Which scenarios to render. The sidebar checkboxes manage this.                                |
-| `hydroclimate`        | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.        |
-| `highlightedScenario` | `string \| null` | Scenario the user is hovering in the sidebar. Visually emphasize it in your visualization.    |
+| Property              | Type             | Why your panel needs it                                                                    |
+| --------------------- | ---------------- | ------------------------------------------------------------------------------------------ |
+| `selectedScenarios`   | `string[]`       | Which scenarios to render. The sidebar checkboxes manage this.                             |
+| `hydroclimate`        | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.     |
+| `highlightedScenario` | `string \| null` | Scenario the user is hovering in the sidebar. Visually emphasize it in your visualization. |
 
 #### Write to store (actions)
 

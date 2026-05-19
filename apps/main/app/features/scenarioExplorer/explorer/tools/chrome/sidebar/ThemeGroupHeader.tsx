@@ -11,10 +11,7 @@ import {
 import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
-import {
-  useExplorerStore,
-  type OutcomeDisplayMode,
-} from "../../../store"
+import { useExplorerStore, type OutcomeDisplayMode } from "../../../store"
 
 interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme

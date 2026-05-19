@@ -103,9 +103,7 @@ export default function ActiveToolPanel({
       return (
         <ToolErrorBoundary tool="resilience">
           <ToolIsland
-            controls={
-              <ResilienceChartControls share={share.resilience} />
-            }
+            controls={<ResilienceChartControls share={share.resilience} />}
             panel={
               <ResiliencePanel
                 highlightedIds={hover.highlightedIds}

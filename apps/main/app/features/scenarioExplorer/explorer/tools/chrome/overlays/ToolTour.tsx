@@ -183,7 +183,7 @@ export default function ToolTour() {
   // ------------------------------------------------------------------
   // Store + step definition
   // ------------------------------------------------------------------
- 
+
   const tourTool = useExplorerStore((s) => s.tour.tool)
   const tourStep = useExplorerStore((s) => s.tour.step)
   const endTour = useExplorerStore((s) => s.endTour)
@@ -192,15 +192,9 @@ export default function ToolTour() {
   // Subscribed for list map demo only. Map viz must run after showMap settles
   // (UnifiedToolView clears outcome viz in its showMap effect cleanup).
   const showMap = useExplorerStore((s) => s.showMap)
-  const setShowKeyOperations = useExplorerStore(
-    (s) => s.setShowKeyOperations,
-  )
-  const setShowAxisSelector = useExplorerStore(
-    (s) => s.setShowAxisSelector,
-  )
-  const setHighlightBaseline = useExplorerStore(
-    (s) => s.setHighlightBaseline,
-  )
+  const setShowKeyOperations = useExplorerStore((s) => s.setShowKeyOperations)
+  const setShowAxisSelector = useExplorerStore((s) => s.setShowAxisSelector)
+  const setHighlightBaseline = useExplorerStore((s) => s.setHighlightBaseline)
   const setShowRadarRange = useExplorerStore((s) => s.setShowRadarRange)
 
   const { resolve, version } = useTourAnchorResolver()
@@ -296,8 +290,7 @@ export default function ToolTour() {
   useEffect(() => {
     if (!step) return
     if (step.id !== "list.step1.operations") return
-    const prevShowKeyOperations =
-      useExplorerStore.getState().showKeyOperations
+    const prevShowKeyOperations = useExplorerStore.getState().showKeyOperations
     opsDemoRef.current = { prevShowKeyOperations }
     if (!prevShowKeyOperations) {
       setShowKeyOperations(true)
@@ -323,8 +316,7 @@ export default function ToolTour() {
   useEffect(() => {
     if (!step) return
     if (step.id !== "radar.step1.axisChooser") return
-    const prevShowAxisSelector =
-      useExplorerStore.getState().showAxisSelector
+    const prevShowAxisSelector = useExplorerStore.getState().showAxisSelector
     axisSelectorDemoRef.current = { prevShowAxisSelector }
     if (!prevShowAxisSelector) {
       setShowAxisSelector(true)
@@ -347,8 +339,7 @@ export default function ToolTour() {
   useEffect(() => {
     if (!step) return
     if (step.id !== "radar.step1.highlightBaseline") return
-    const prevHighlightBaseline =
-      useExplorerStore.getState().highlightBaseline
+    const prevHighlightBaseline = useExplorerStore.getState().highlightBaseline
     highlightBaselineDemoRef.current = { prevHighlightBaseline }
     if (!prevHighlightBaseline) {
       setHighlightBaseline(true)
@@ -371,8 +362,7 @@ export default function ToolTour() {
   useEffect(() => {
     if (!step) return
     if (step.id !== "radar.step1.libraryRange") return
-    const prevShowRadarRange =
-      useExplorerStore.getState().showRadarRange
+    const prevShowRadarRange = useExplorerStore.getState().showRadarRange
     radarRangeDemoRef.current = { prevShowRadarRange }
     if (!prevShowRadarRange) {
       setShowRadarRange(true)

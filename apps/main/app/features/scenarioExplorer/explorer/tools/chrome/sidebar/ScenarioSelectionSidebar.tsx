@@ -9,7 +9,7 @@
  *    optional theme badge, scenario title, description)
  *
  * Search and visibility controls live in ToolToolbar.
- * 
+ *
  * Row order comes from `useOrderedScenarios` so it stays in lockstep with ListView.
  * Share dispatch lives in `useSidebarShareActions`.
  */
@@ -24,7 +24,10 @@ import {
 } from "../../../../../scenarios/components/shared"
 import { InlineRowActions } from "../../panels/list/grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
-import { useOrderedScenarios, useScenarioSortScores } from "../../hooks/useOrderedScenarios"
+import {
+  useOrderedScenarios,
+  useScenarioSortScores,
+} from "../../hooks/useOrderedScenarios"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
 import { useTourAnchor } from "../../tour/TourAnchorContext"

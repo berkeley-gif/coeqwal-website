@@ -34,12 +34,9 @@ export function useScrollamaSection() {
    * Called during scroll within a step that has progress tracking enabled.
    * Used for animations like rivers that need 0-1 progress values.
    */
-  const onStepProgress = useCallback(
-    () => {
-      // Rivers animation uses progress to draw rivers progressively
-    },
-    [],
-  )
+  const onStepProgress = useCallback(() => {
+    // Rivers animation uses progress to draw rivers progressively
+  }, [])
 
   return {
     onStepEnter,

@@ -80,41 +80,41 @@ Every hook in this package is a variant of this five-line shape:
 export function useScenarioTiers(scenarioId: string | null) {
   const { data, error, isLoading } = useSWR(
     scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null, // 1. key (null = skip)
-    () => fetchScenarioTiers(scenarioId!),                    // 2. fetcher
-    { revalidateOnFocus: false },                             // 3. options
+    () => fetchScenarioTiers(scenarioId!), // 2. fetcher
+    { revalidateOnFocus: false }, // 3. options
   )
   return { data, isLoading, error: error?.message ?? null }
 }
 ```
 
-Keys live in one file (`src/cache/keys.ts`), fetchers in another (`src/coeqwal/fetchers.ts`), and each hook combines them. Centralizing keys is what guarantees two callers that *think* they're asking for the same data actually land on the same Map entry, instead of silently making two requests under almost-identical strings.
+Keys live in one file (`src/cache/keys.ts`), fetchers in another (`src/coeqwal/fetchers.ts`), and each hook combines them. Centralizing keys is what guarantees two callers that _think_ they're asking for the same data actually land on the same Map entry, instead of silently making two requests under almost-identical strings.
 
 ### Every cache key in the package
 
 Defined in `packages/data/src/cache/keys.ts`. Static keys are plain strings (mirroring API paths so the global fetcher can prepend the base URL); dynamic keys are functions that return a string or tuple.
 
-| Domain                       | Key                                                                                                                                                                                              | Shape                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Tier metadata                | `TIER_LIST`                                                                                                                                                                                      | `"/api/tiers/list"`                                                                  |
-| Scenarios                    | `SCENARIOS`                                                                                                                                                                                      | `"/api/scenarios"`                                                                   |
-| Tier scores (single)         | `scenarioTiers(id)`                                                                                                                                                                              | `"/api/tiers/scenarios/{id}/tiers"`                                                  |
-| Tier scores (one outcome)    | `scenarioTierByCode(id, code)`                                                                                                                                                                   | `"/api/tiers/scenarios/{id}/tiers/{code}"`                                           |
-| Tier scores (batch)          | `allScenarioTiers(ids)`                                                                                                                                                                          | `["all-scenario-tiers", ...sortedIds]`                                               |
-| Tier scores (lazy batch)     | `lazyScenarioTiers(ids)`                                                                                                                                                                         | `["lazy-scenario-tiers", ...ids]`                                                    |
-| Tier locations (single)      | `tierLocations(id, code)`                                                                                                                                                                        | `"/tier-map/{id}/{code}/locations"`                                                  |
-| Tier locations (batch)       | `tierLocationsBatch(id, codes)`                                                                                                                                                                  | `["tier-locations-batch", id, ...sortedCodes]`                                       |
-| Reservoir lists              | `STATISTICS_RESERVOIRS`, `STATISTICS_RESERVOIRS_ALL`, `STATISTICS_SCENARIOS`                                                                                                                     | static URLs                                                                          |
-| Reservoir percentiles        | `reservoirPercentiles(id, resId)`, `allReservoirPercentiles(id)`, `groupedReservoirPercentiles(id, group)`                                                                                       | per-scenario URLs                                                                    |
-| Reservoir storage / spill    | `storageMonthly(id, group)`, `spillMonthly(id, group)`, `reservoirPeriodSummary(id)`                                                                                                             | per-scenario URLs                                                                    |
-| CWS aggregates               | `CWS_AGGREGATES_LIST`, `cwsAggregatesMonthly(id, agg?)`, `cwsAggregatesPeriod(id, agg?)`                                                                                                         | static + per-scenario                                                                |
-| M&I contractors              | `MI_CONTRACTORS_LIST`, `miContractorsList(group?)`, `miContractorsMonthly(id, c?)`, `miContractorsPeriod(id, c?)`                                                                                | static + per-scenario                                                                |
-| Urban demand units           | `DEMAND_UNITS_LIST`, `DEMAND_UNITS_GROUPS`, `demandUnitsList(group?)`, `demandUnitStatistics(id, duId)`, `demandUnitsMonthly(id, duId?, group?)`, `demandUnitsPeriod(id, duId?, group?)`         | static + per-scenario                                                                |
-| AG aggregates                | `agAggregatesMonthly(id)`, `agAggregatesPeriod(id)`                                                                                                                                              | per-scenario                                                                         |
-| AG demand units              | `agDemandUnitsList(filters?)`, `agDemandUnitsDeliveryMonthly(id, duIds?)`, `agDemandUnitsShortageMonthly(id)`, `agDemandUnitsPeriod(id, duIds?)`                                                 | `duIds` sorted before encoding                                                       |
-| Refuge demand units          | `REFUGE_DUS_LIST`, `refugeDusDeliveryMonthly(id, duId?)`, `refugeDusShortageMonthly(id, duId?)`, `refugeDusPeriod(id, duId?)`                                                                    | static + per-scenario                                                                |
-| Channels (env flows)         | `CHANNELS_LIST`, `ENV_FLOW_SEASONS`, `channelsMonthly(id, channelId?)`, `channelsSeasonal(id, channelId?)`, `channelsPeriodSummary(id, channelId?)`                                              | static + per-scenario                                                                |
-| Delta                        | `deltaMonthly(id, category?)`                                                                                                                                                                    | per-scenario                                                                         |
-| Batch statistics             | `batchStatistics(scenarios, types)`                                                                                                                                                              | `["batch-statistics", ...scenarios, ...types]`                                       |
+| Domain                    | Key                                                                                                                                                                                      | Shape                                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Tier metadata             | `TIER_LIST`                                                                                                                                                                              | `"/api/tiers/list"`                            |
+| Scenarios                 | `SCENARIOS`                                                                                                                                                                              | `"/api/scenarios"`                             |
+| Tier scores (single)      | `scenarioTiers(id)`                                                                                                                                                                      | `"/api/tiers/scenarios/{id}/tiers"`            |
+| Tier scores (one outcome) | `scenarioTierByCode(id, code)`                                                                                                                                                           | `"/api/tiers/scenarios/{id}/tiers/{code}"`     |
+| Tier scores (batch)       | `allScenarioTiers(ids)`                                                                                                                                                                  | `["all-scenario-tiers", ...sortedIds]`         |
+| Tier scores (lazy batch)  | `lazyScenarioTiers(ids)`                                                                                                                                                                 | `["lazy-scenario-tiers", ...ids]`              |
+| Tier locations (single)   | `tierLocations(id, code)`                                                                                                                                                                | `"/tier-map/{id}/{code}/locations"`            |
+| Tier locations (batch)    | `tierLocationsBatch(id, codes)`                                                                                                                                                          | `["tier-locations-batch", id, ...sortedCodes]` |
+| Reservoir lists           | `STATISTICS_RESERVOIRS`, `STATISTICS_RESERVOIRS_ALL`, `STATISTICS_SCENARIOS`                                                                                                             | static URLs                                    |
+| Reservoir percentiles     | `reservoirPercentiles(id, resId)`, `allReservoirPercentiles(id)`, `groupedReservoirPercentiles(id, group)`                                                                               | per-scenario URLs                              |
+| Reservoir storage / spill | `storageMonthly(id, group)`, `spillMonthly(id, group)`, `reservoirPeriodSummary(id)`                                                                                                     | per-scenario URLs                              |
+| CWS aggregates            | `CWS_AGGREGATES_LIST`, `cwsAggregatesMonthly(id, agg?)`, `cwsAggregatesPeriod(id, agg?)`                                                                                                 | static + per-scenario                          |
+| M&I contractors           | `MI_CONTRACTORS_LIST`, `miContractorsList(group?)`, `miContractorsMonthly(id, c?)`, `miContractorsPeriod(id, c?)`                                                                        | static + per-scenario                          |
+| Urban demand units        | `DEMAND_UNITS_LIST`, `DEMAND_UNITS_GROUPS`, `demandUnitsList(group?)`, `demandUnitStatistics(id, duId)`, `demandUnitsMonthly(id, duId?, group?)`, `demandUnitsPeriod(id, duId?, group?)` | static + per-scenario                          |
+| AG aggregates             | `agAggregatesMonthly(id)`, `agAggregatesPeriod(id)`                                                                                                                                      | per-scenario                                   |
+| AG demand units           | `agDemandUnitsList(filters?)`, `agDemandUnitsDeliveryMonthly(id, duIds?)`, `agDemandUnitsShortageMonthly(id)`, `agDemandUnitsPeriod(id, duIds?)`                                         | `duIds` sorted before encoding                 |
+| Refuge demand units       | `REFUGE_DUS_LIST`, `refugeDusDeliveryMonthly(id, duId?)`, `refugeDusShortageMonthly(id, duId?)`, `refugeDusPeriod(id, duId?)`                                                            | static + per-scenario                          |
+| Channels (env flows)      | `CHANNELS_LIST`, `ENV_FLOW_SEASONS`, `channelsMonthly(id, channelId?)`, `channelsSeasonal(id, channelId?)`, `channelsPeriodSummary(id, channelId?)`                                      | static + per-scenario                          |
+| Delta                     | `deltaMonthly(id, category?)`                                                                                                                                                            | per-scenario                                   |
+| Batch statistics          | `batchStatistics(scenarios, types)`                                                                                                                                                      | `["batch-statistics", ...scenarios, ...types]` |
 
 > **Why tuple keys?** SWR compares keys structurally, so a tuple lets the same logical request (e.g. "tier data for these N scenarios") share a slot regardless of array identity. List inputs are deduped and sorted inside the key builder so different caller orderings collapse to one entry.
 
@@ -122,54 +122,54 @@ Defined in `packages/data/src/cache/keys.ts`. Static keys are plain strings (mir
 
 Exported from `@repo/data/coeqwal/hooks` (and `@repo/data/fetching` for `useLocalData`). One row per hook, paired with the cache key it owns and the data shape it returns.
 
-| Domain                  | Hook                                          | Cache key                            | What it fetches                                                                                                            |
-| ----------------------- | --------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Tier metadata           | `useTiers()`                                  | `TIER_LIST`                          | Outcome definitions: short codes, names, tier types, and tier counts for all 9 outcomes                                    |
-| Tier metadata           | `useTierMapping()`                            | derived from `useTiers`              | `short_code` -> display-name lookup table, derived in-memory from `useTiers`                                               |
-| Scenarios               | `useScenarios()`                              | `SCENARIOS`                          | Full scenario list: short codes, run names, descriptions, hydroclimate ids, sibling-group ids, and active flags            |
-| Tier scores             | `useScenarioTiers(id)`                        | `scenarioTiers(id)`                  | All 9 outcomes for one scenario: weighted score, normalized score, gini, band bounds, and tier distribution counts         |
-| Tier scores             | `useScenarioTierByCode(id, code)`             | `scenarioTierByCode(id, code)`       | Same as `useScenarioTiers` scoped to one outcome (lighter payload)                                                         |
-| Tier locations          | `useTierLocationAssignments(id, code)`        | `tierLocations(id, code)`            | Per-location `tier_level` for one scenario+outcome pair (e.g. 121 demand units for `CWS_DEL`); no geometry                 |
-| Tier locations          | `useTierLocationAssignmentsBatch(id, codes)`  | `tierLocationsBatch(id, codes)`      | Same as above for multiple outcomes in one HTTP request; splays results into the single-outcome cache on success           |
-| Reservoirs              | `useReservoirList()`                          | `STATISTICS_RESERVOIRS`              | Grouped reservoirs that have percentile data available (the default explore list)                                          |
-| Reservoirs              | `useAllReservoirsList()`                      | `STATISTICS_RESERVOIRS_ALL`          | Full reservoir list with statistics, used to populate the "add reservoir" dropdown                                         |
-| Reservoirs              | `useScenariosWithPercentiles()`               | `STATISTICS_SCENARIOS`               | Scenarios that have percentile data computed (for gating UI)                                                               |
-| Reservoirs              | `useReservoirPercentiles(id, resId)`          | `reservoirPercentiles(id, resId)`    | Monthly storage percentiles (q0-q100) for one reservoir in one scenario                                                    |
-| Reservoirs              | `useAllReservoirPercentiles(id)`              | `allReservoirPercentiles(id)`        | Monthly storage percentiles for every reservoir in one scenario                                                            |
-| Reservoirs              | `useGroupedReservoirPercentiles(id, group)`   | `groupedReservoirPercentiles(...)`   | Monthly storage percentiles for one reservoir group (e.g. `"major"`)                                                       |
-| Reservoirs              | `useStorageMonthly(id, group)`                | `storageMonthly(id, group)`          | Monthly storage in both % of capacity and TAF for a reservoir group                                                        |
-| Reservoirs              | `useSpillMonthly(id, group)`                  | `spillMonthly(id, group)`            | Monthly spill frequency and spill magnitude statistics                                                                     |
-| Reservoirs              | `useMultipleReservoirPercentiles(ids)`        | per-scenario fan-out                 | Fan-out wrapper that calls `useReservoirPercentiles` once per scenario id                                                  |
-| Reservoirs              | `useReservoirPeriodSummary(id)`               | `reservoirPeriodSummary(id)`         | Period-of-record summary (storage exceedance + spill aggregates) across all reservoirs in a scenario                       |
-| CWS aggregates          | `useCwsAggregatesList()`                      | `CWS_AGGREGATES_LIST`                | CWS aggregate entities (SWP/CVP North-of-Delta, South-of-Delta, MWD, totals)                                               |
-| CWS aggregates          | `useCwsAggregatesMonthly(id, agg?)`           | `cwsAggregatesMonthly(...)`          | Monthly delivery and shortage percentile bands per CWS aggregate for one scenario                                          |
-| CWS aggregates          | `useCwsAggregatesPeriod(id, agg?)`            | `cwsAggregatesPeriod(...)`           | Period-of-record summary per CWS aggregate: avg annual delivery, reliability %, shortage frequency                         |
-| M&I contractors         | `useMiContractorsList(group?)`                | `miContractorsList(group?)`          | The 30 SWP water agency contractors, optionally filtered by group                                                          |
-| M&I contractors         | `useMiContractorsMonthly(id, contractor?)`    | `miContractorsMonthly(...)`          | Monthly delivery and shortage stats per M&I contractor for one scenario                                                    |
-| M&I contractors         | `useMiContractorsPeriod(id, contractor?)`     | `miContractorsPeriod(...)`           | Period-of-record summary per M&I contractor                                                                                |
-| Urban demand units      | `useDemandUnitsList(group?)`                  | `demandUnitsList(group?)`            | 46 urban demand units, optionally filtered by hydrologic-region group                                                      |
-| Urban demand units      | `useDemandUnitsGroups()`                      | `DEMAND_UNITS_GROUPS`                | Urban demand units organized into hydrologic-region groups for grouped dropdowns                                           |
-| Urban demand units      | `useDemandUnitStatistics(id, duId)`           | `demandUnitStatistics(id, duId)`     | Full statistics for one demand unit in one scenario: monthly delivery + monthly shortage + period summary                  |
-| Urban demand units      | `useDemandUnitsMonthly(id, duId?, group?)`    | `demandUnitsMonthly(...)`            | Monthly delivery and shortage percentiles per demand unit                                                                  |
-| Urban demand units      | `useDemandUnitsPeriod(id, duId?, group?)`     | `demandUnitsPeriod(...)`             | Period-of-record summary per demand unit                                                                                   |
-| AG aggregates           | `useAgAggregatesMonthly(id)`                  | `agAggregatesMonthly(id)`            | Monthly delivery stats for the 5 AG project aggregates (CVP/SWP/local breakdowns)                                          |
-| AG aggregates           | `useAgAggregatesPeriod(id)`                   | `agAggregatesPeriod(id)`             | Period-of-record summary per AG aggregate                                                                                  |
-| AG demand units         | `useAgDemandUnitsList(filters?)`              | `agDemandUnitsList(filters?)`        | ~150 AG demand units, filterable by region / cs3 type / provider                                                           |
-| AG demand units         | `useAgDemandUnitsDeliveryMonthly(id, duIds?)` | `agDemandUnitsDeliveryMonthly(...)`  | Monthly surface-water delivery per AG demand unit (optionally scoped to a subset of `du_id`s)                              |
-| AG demand units         | `useAgDemandUnitsShortageMonthly(id)`         | `agDemandUnitsShortageMonthly(id)`   | Monthly shortage stats per AG demand unit                                                                                  |
-| AG demand units         | `useAgDemandUnitsPeriod(id, duIds?)`          | `agDemandUnitsPeriod(...)`           | Period-of-record summary per AG demand unit                                                                                |
-| Refuge                  | `useRefugeDemandUnitsList()`                  | `REFUGE_DUS_LIST`                    | 18 wildlife refuge demand units with metadata                                                                              |
-| Refuge                  | `useRefugeDusDeliveryMonthly(id, duId?)`      | `refugeDusDeliveryMonthly(...)`      | Monthly surface-water delivery percentile bands per refuge DU                                                              |
-| Refuge                  | `useRefugeDusShortageMonthly(id, duId?)`      | `refugeDusShortageMonthly(...)`      | Monthly shortage percentile bands per refuge DU                                                                            |
-| Refuge                  | `useRefugeDusPeriod(id, duId?)`               | `refugeDusPeriod(...)`               | Period-of-record summary per refuge DU                                                                                     |
-| Channels (env flows)    | `useChannelsList(class?, watershed?)`         | `CHANNELS_LIST` (or filtered URL)    | All 59 CalSim channel reaches with watershed and capability attributes                                                     |
-| Channels (env flows)    | `useEnvFlowSeasons()`                         | `ENV_FLOW_SEASONS`                   | The 5 CEFF seasonal definitions (static lookup)                                                                            |
-| Channels (env flows)    | `useChannelsMonthly(id, channelId?)`          | `channelsMonthly(...)`               | Monthly % of natural unimpaired flow per channel (Metric 1)                                                                |
-| Channels (env flows)    | `useChannelsSeasonal(id, channelId?)`         | `channelsSeasonal(...)`              | Seasonal flow volumes + % unimpaired + % functional flow per channel (Metrics 1 + 2)                                       |
-| Channels (env flows)    | `useChannelsPeriodSummary(id, channelId?)`    | `channelsPeriodSummary(...)`         | Pearson r flow-alteration index per channel (Metric 3) + full-period aggregates                                            |
-| Delta                   | `useDeltaMonthly(id, category?)`              | `deltaMonthly(id, category?)`        | Monthly Delta statistics: X2 position, salinity compliance, salinity at pumps, outflow (8 variables × 12 water months)     |
-| Batch stats             | `useBatchStatistics(scenarios, types?)`       | `batchStatistics(scenarios, types)`  | Storage + CWS + AG + env-flow in **one** HTTP request for many scenarios; powers the Data in Depth tool                    |
-| Local JSON              | `useLocalData(url, options?)`                 | URL or custom cache key              | Any JSON / GeoJSON file served from `public/` (markers, content files, static lookups)                                     |
+| Domain               | Hook                                          | Cache key                           | What it fetches                                                                                                        |
+| -------------------- | --------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Tier metadata        | `useTiers()`                                  | `TIER_LIST`                         | Outcome definitions: short codes, names, tier types, and tier counts for all 9 outcomes                                |
+| Tier metadata        | `useTierMapping()`                            | derived from `useTiers`             | `short_code` -> display-name lookup table, derived in-memory from `useTiers`                                           |
+| Scenarios            | `useScenarios()`                              | `SCENARIOS`                         | Full scenario list: short codes, run names, descriptions, hydroclimate ids, sibling-group ids, and active flags        |
+| Tier scores          | `useScenarioTiers(id)`                        | `scenarioTiers(id)`                 | All 9 outcomes for one scenario: weighted score, normalized score, gini, band bounds, and tier distribution counts     |
+| Tier scores          | `useScenarioTierByCode(id, code)`             | `scenarioTierByCode(id, code)`      | Same as `useScenarioTiers` scoped to one outcome (lighter payload)                                                     |
+| Tier locations       | `useTierLocationAssignments(id, code)`        | `tierLocations(id, code)`           | Per-location `tier_level` for one scenario+outcome pair (e.g. 121 demand units for `CWS_DEL`); no geometry             |
+| Tier locations       | `useTierLocationAssignmentsBatch(id, codes)`  | `tierLocationsBatch(id, codes)`     | Same as above for multiple outcomes in one HTTP request; splays results into the single-outcome cache on success       |
+| Reservoirs           | `useReservoirList()`                          | `STATISTICS_RESERVOIRS`             | Grouped reservoirs that have percentile data available (the default explore list)                                      |
+| Reservoirs           | `useAllReservoirsList()`                      | `STATISTICS_RESERVOIRS_ALL`         | Full reservoir list with statistics, used to populate the "add reservoir" dropdown                                     |
+| Reservoirs           | `useScenariosWithPercentiles()`               | `STATISTICS_SCENARIOS`              | Scenarios that have percentile data computed (for gating UI)                                                           |
+| Reservoirs           | `useReservoirPercentiles(id, resId)`          | `reservoirPercentiles(id, resId)`   | Monthly storage percentiles (q0-q100) for one reservoir in one scenario                                                |
+| Reservoirs           | `useAllReservoirPercentiles(id)`              | `allReservoirPercentiles(id)`       | Monthly storage percentiles for every reservoir in one scenario                                                        |
+| Reservoirs           | `useGroupedReservoirPercentiles(id, group)`   | `groupedReservoirPercentiles(...)`  | Monthly storage percentiles for one reservoir group (e.g. `"major"`)                                                   |
+| Reservoirs           | `useStorageMonthly(id, group)`                | `storageMonthly(id, group)`         | Monthly storage in both % of capacity and TAF for a reservoir group                                                    |
+| Reservoirs           | `useSpillMonthly(id, group)`                  | `spillMonthly(id, group)`           | Monthly spill frequency and spill magnitude statistics                                                                 |
+| Reservoirs           | `useMultipleReservoirPercentiles(ids)`        | per-scenario fan-out                | Fan-out wrapper that calls `useReservoirPercentiles` once per scenario id                                              |
+| Reservoirs           | `useReservoirPeriodSummary(id)`               | `reservoirPeriodSummary(id)`        | Period-of-record summary (storage exceedance + spill aggregates) across all reservoirs in a scenario                   |
+| CWS aggregates       | `useCwsAggregatesList()`                      | `CWS_AGGREGATES_LIST`               | CWS aggregate entities (SWP/CVP North-of-Delta, South-of-Delta, MWD, totals)                                           |
+| CWS aggregates       | `useCwsAggregatesMonthly(id, agg?)`           | `cwsAggregatesMonthly(...)`         | Monthly delivery and shortage percentile bands per CWS aggregate for one scenario                                      |
+| CWS aggregates       | `useCwsAggregatesPeriod(id, agg?)`            | `cwsAggregatesPeriod(...)`          | Period-of-record summary per CWS aggregate: avg annual delivery, reliability %, shortage frequency                     |
+| M&I contractors      | `useMiContractorsList(group?)`                | `miContractorsList(group?)`         | The 30 SWP water agency contractors, optionally filtered by group                                                      |
+| M&I contractors      | `useMiContractorsMonthly(id, contractor?)`    | `miContractorsMonthly(...)`         | Monthly delivery and shortage stats per M&I contractor for one scenario                                                |
+| M&I contractors      | `useMiContractorsPeriod(id, contractor?)`     | `miContractorsPeriod(...)`          | Period-of-record summary per M&I contractor                                                                            |
+| Urban demand units   | `useDemandUnitsList(group?)`                  | `demandUnitsList(group?)`           | 46 urban demand units, optionally filtered by hydrologic-region group                                                  |
+| Urban demand units   | `useDemandUnitsGroups()`                      | `DEMAND_UNITS_GROUPS`               | Urban demand units organized into hydrologic-region groups for grouped dropdowns                                       |
+| Urban demand units   | `useDemandUnitStatistics(id, duId)`           | `demandUnitStatistics(id, duId)`    | Full statistics for one demand unit in one scenario: monthly delivery + monthly shortage + period summary              |
+| Urban demand units   | `useDemandUnitsMonthly(id, duId?, group?)`    | `demandUnitsMonthly(...)`           | Monthly delivery and shortage percentiles per demand unit                                                              |
+| Urban demand units   | `useDemandUnitsPeriod(id, duId?, group?)`     | `demandUnitsPeriod(...)`            | Period-of-record summary per demand unit                                                                               |
+| AG aggregates        | `useAgAggregatesMonthly(id)`                  | `agAggregatesMonthly(id)`           | Monthly delivery stats for the 5 AG project aggregates (CVP/SWP/local breakdowns)                                      |
+| AG aggregates        | `useAgAggregatesPeriod(id)`                   | `agAggregatesPeriod(id)`            | Period-of-record summary per AG aggregate                                                                              |
+| AG demand units      | `useAgDemandUnitsList(filters?)`              | `agDemandUnitsList(filters?)`       | ~150 AG demand units, filterable by region / cs3 type / provider                                                       |
+| AG demand units      | `useAgDemandUnitsDeliveryMonthly(id, duIds?)` | `agDemandUnitsDeliveryMonthly(...)` | Monthly surface-water delivery per AG demand unit (optionally scoped to a subset of `du_id`s)                          |
+| AG demand units      | `useAgDemandUnitsShortageMonthly(id)`         | `agDemandUnitsShortageMonthly(id)`  | Monthly shortage stats per AG demand unit                                                                              |
+| AG demand units      | `useAgDemandUnitsPeriod(id, duIds?)`          | `agDemandUnitsPeriod(...)`          | Period-of-record summary per AG demand unit                                                                            |
+| Refuge               | `useRefugeDemandUnitsList()`                  | `REFUGE_DUS_LIST`                   | 18 wildlife refuge demand units with metadata                                                                          |
+| Refuge               | `useRefugeDusDeliveryMonthly(id, duId?)`      | `refugeDusDeliveryMonthly(...)`     | Monthly surface-water delivery percentile bands per refuge DU                                                          |
+| Refuge               | `useRefugeDusShortageMonthly(id, duId?)`      | `refugeDusShortageMonthly(...)`     | Monthly shortage percentile bands per refuge DU                                                                        |
+| Refuge               | `useRefugeDusPeriod(id, duId?)`               | `refugeDusPeriod(...)`              | Period-of-record summary per refuge DU                                                                                 |
+| Channels (env flows) | `useChannelsList(class?, watershed?)`         | `CHANNELS_LIST` (or filtered URL)   | All 59 CalSim channel reaches with watershed and capability attributes                                                 |
+| Channels (env flows) | `useEnvFlowSeasons()`                         | `ENV_FLOW_SEASONS`                  | The 5 CEFF seasonal definitions (static lookup)                                                                        |
+| Channels (env flows) | `useChannelsMonthly(id, channelId?)`          | `channelsMonthly(...)`              | Monthly % of natural unimpaired flow per channel (Metric 1)                                                            |
+| Channels (env flows) | `useChannelsSeasonal(id, channelId?)`         | `channelsSeasonal(...)`             | Seasonal flow volumes + % unimpaired + % functional flow per channel (Metrics 1 + 2)                                   |
+| Channels (env flows) | `useChannelsPeriodSummary(id, channelId?)`    | `channelsPeriodSummary(...)`        | Pearson r flow-alteration index per channel (Metric 3) + full-period aggregates                                        |
+| Delta                | `useDeltaMonthly(id, category?)`              | `deltaMonthly(id, category?)`       | Monthly Delta statistics: X2 position, salinity compliance, salinity at pumps, outflow (8 variables × 12 water months) |
+| Batch stats          | `useBatchStatistics(scenarios, types?)`       | `batchStatistics(scenarios, types)` | Storage + CWS + AG + env-flow in **one** HTTP request for many scenarios; powers the Data in Depth tool                |
+| Local JSON           | `useLocalData(url, options?)`                 | URL or custom cache key             | Any JSON / GeoJSON file served from `public/` (markers, content files, static lookups)                                 |
 
 Selectors (not hooks themselves) that pair with `useBatchStatistics`: `getStorageForScenario`, `getCwsForScenario`, `getAgForScenario`, `getEnvFlowForScenario` slice the batch response by scenario id.
 
@@ -192,11 +192,11 @@ Here is the flow for a typical Explore-tab panel:
 
 That last step is the punchline. The hook is doing a Map lookup, not an HTTP request. The fetcher argument passed to `useSWR` is the **fallback** that runs only on a cache miss. For warmed keys, it never executes.
 
-Hooks called *outside* the warmup path (e.g. an outcome the prefetch didn't cover, or a statistics endpoint that isn't preloaded) work the other way around: the slot is empty, the fetcher runs, the result lands in the Map, and the first render shows `isLoading: true`. Subsequent calls with the same key are cache hits like everything else.
+Hooks called _outside_ the warmup path (e.g. an outcome the prefetch didn't cover, or a statistics endpoint that isn't preloaded) work the other way around: the slot is empty, the fetcher runs, the result lands in the Map, and the first render shows `isLoading: true`. Subsequent calls with the same key are cache hits like everything else.
 
 ### Where preload happens in the codebase
 
-All preload calls live in `apps/main`. The package never preloads (it only defines hooks); the app decides *when* to fire requests because the app knows what the user is about to do.
+All preload calls live in `apps/main`. The package never preloads (it only defines hooks); the app decides _when_ to fire requests because the app knows what the user is about to do.
 
 #### The big one: `usePrefetchTiers`
 
@@ -204,7 +204,7 @@ The main cache-warming sweep. Lives in `apps/main/app/features/scenarioExplorer/
 
 ```tsx
 // apps/main/app/features/scenarioExplorer/explorer/useExplorerLifecycle.ts
-  usePrefetchTiers()
+usePrefetchTiers()
 ```
 
 That single hook call is what warms the cache for **every scenario in every hydroclimate** (the `allScenarioTiers` batch) plus the per-location batch for each scenario. By the time any panel under the Explore tab mounts, those keys are already populated or in flight.
@@ -219,9 +219,7 @@ for (const { resolvedIds } of perHc) {
 
 for (const id of allScenarioIds) {
   const key = CACHE_KEYS.tierLocationsBatch(id, ALL_OUTCOME_CODES)
-  preload(key, () =>
-    fetchTierLocationAssignmentsBatch(id, ALL_OUTCOME_CODES),
-  )
+  preload(key, () => fetchTierLocationAssignmentsBatch(id, ALL_OUTCOME_CODES))
 }
 ```
 
@@ -231,11 +229,11 @@ A `useRef` guard (`didPrefetch.current`) makes sure the warmup runs once per ses
 
 Smaller, scoped preloads that run when a specific panel or interaction tells us a particular cache slot is about to be needed.
 
-| Where                                                                                            | When                                                | What it warms                                                                                                                                |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/main/app/features/scenarioExplorer/tools/panels/resilience/useResilienceLoiDistribution.ts` | Resilience LOI distribution panel mounts            | `tierLocationsBatch(id, outcomeCodesArr)` for each scenario in the matrix                                                                    |
-| `apps/main/app/features/map/overlays/scenarioPanels/KeyOutcomesPanel.tsx`                         | Key Outcomes panel mounts in the Learn scrollytelling | `scenarioTiers(variantId)` for the panel's `scenarioId` (defaults to `s0020`) across every hydroclimate variant                              |
-| `apps/main/app/features/map/hooks/useMapVisualizationAction.ts`                                   | User selects an outcome on a scenario via the map   | `tierLocationsBatch(id, PREFETCHABLE_TIER_CODES)` for the scenarios the user is about to compare                                             |
+| Where                                                                                             | When                                                  | What it warms                                                                                                   |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `apps/main/app/features/scenarioExplorer/tools/panels/resilience/useResilienceLoiDistribution.ts` | Resilience LOI distribution panel mounts              | `tierLocationsBatch(id, outcomeCodesArr)` for each scenario in the matrix                                       |
+| `apps/main/app/features/map/overlays/scenarioPanels/KeyOutcomesPanel.tsx`                         | Key Outcomes panel mounts in the Learn scrollytelling | `scenarioTiers(variantId)` for the panel's `scenarioId` (defaults to `s0020`) across every hydroclimate variant |
+| `apps/main/app/features/map/hooks/useMapVisualizationAction.ts`                                   | User selects an outcome on a scenario via the map     | `tierLocationsBatch(id, PREFETCHABLE_TIER_CODES)` for the scenarios the user is about to compare                |
 
 A note on `KeyOutcomesPanel`: it is a scrollytelling panel in the Learn section, not the Explore tab. It shows the nine outcome glyphs for one specific scenario (the prop `scenarioId`, defaulting to `s0020`). Sitting next to it is a `KeyOperationsPanel` with a hydroclimate chooser. When the user flips climates, the panel needs `useScenarioTiers(variantId)` for that climate's variant of the same sibling group. The preload loop in `KeyOutcomesPanel.tsx:60-66` walks every hydroclimate, resolves the sibling group to its per-climate variant id, and warms `scenarioTiers(variantId)` for each. The result: the climate toggle changes a key but never an HTTP request.
 
@@ -290,7 +288,7 @@ The two interesting transitions:
 - **Step 5 -> 7.** The radar does not import a `@repo/data` hook directly. It imports `useTierChartData`, an app-level composer that calls the package hook plus does hydroclimate resolution, scenario filtering, and color assignment. The package stays pure. The app does the domain-specific shaping.
 - **Step 7 -> 8.** This is the payoff. The radar never shows a loading spinner under normal use, because the preload in step 2 fired the instant the user clicked into Explore, and the `useSWR` call in step 7 is just reading what is already in the Map.
 
-A user toggling hydroclimates is the same flow with a different `idMapping`. The new key already has its slot populated from the same step 2 preload (which warms *all* hydroclimates up front), so the radar swaps datasets without an HTTP round trip. Combined with `keepPreviousData`, the user sees an instant chart swap.
+A user toggling hydroclimates is the same flow with a different `idMapping`. The new key already has its slot populated from the same step 2 preload (which warms _all_ hydroclimates up front), so the radar swaps datasets without an HTTP round trip. Combined with `keepPreviousData`, the user sees an instant chart swap.
 
 ## Data fetching in the Data in Depth tool
 
@@ -309,18 +307,18 @@ const { data: rawBatchData, isLoading: isBatchLoading } = useBatchStatistics(
 
 `useBatchStatistics` is a `@repo/data` hook that hits the `batchStatistics(scenarios, types)` cache key. It returns four datasets in one response, keyed by API short_code. `CategoryView` then re-keys the response by sibling-group id (using `rekeyByGroup`) and passes the re-keyed `batchData` down as a prop to every section that needs it. Four of the six categories source from the batch directly:
 
-| Category              | Section component   | Source                                                |
-| --------------------- | ------------------- | ----------------------------------------------------- |
-| Reservoir storage     | `ReservoirStorageSection` | `batchData.storage`                                 |
-| Community water systems | `CwsSection`            | `batchData.cws` (project totals view)               |
-| Agricultural water    | `AgSection`              | `batchData.ag`                                      |
-| Environmental flows   | `EnvFlowSection`         | `batchData.env_flow`                                |
+| Category                | Section component         | Source                                |
+| ----------------------- | ------------------------- | ------------------------------------- |
+| Reservoir storage       | `ReservoirStorageSection` | `batchData.storage`                   |
+| Community water systems | `CwsSection`              | `batchData.cws` (project totals view) |
+| Agricultural water      | `AgSection`               | `batchData.ag`                        |
+| Environmental flows     | `EnvFlowSection`          | `batchData.env_flow`                  |
 
 Re-keying is what lets the rest of the UI keep speaking sibling-group ids ("`s0020`") while the API and the cache speak short codes ("`s0028`"). Sibling-group ids are the canonical identifier downstream of `CategoryView`.
 
 ### Lazy section rendering
 
-The batch fires immediately when scenarios are selected, but the *sections themselves* only mount the first time their accordion is expanded. `CategoryView` tracks `hasBeenExpanded` and gates section rendering on it:
+The batch fires immediately when scenarios are selected, but the _sections themselves_ only mount the first time their accordion is expanded. `CategoryView` tracks `hasBeenExpanded` and gates section rendering on it:
 
 ```tsx
 {!hasBeenExpanded.has(category.id) ? null : (
@@ -336,7 +334,7 @@ The batch endpoint covers storage, CWS aggregates, AG, and env flow. Anything el
 
 ```ts
 const monthlyResults = useMultiScenarioSlots(scenarios, useMiContractorsMonthly)
-const periodResults  = useMultiScenarioSlots(scenarios, useMiContractorsPeriod)
+const periodResults = useMultiScenarioSlots(scenarios, useMiContractorsPeriod)
 ```
 
 `useMultiScenarioSlots` calls the supplied hook once per scenario in a stable order. Each call gets its own cache slot. SWR deduplicates across the React tree, so if some other component asks for the same `(scenarioId, ...)` later in the same session, it's a cache hit.
@@ -700,29 +698,30 @@ Not every piece of data lives on the API. GeoJSON for map overlays, static marke
 ```tsx
 import { useLocalData } from "@repo/data/fetching"
 
-const { data, isLoading, error } = useLocalData<MarkerData[]>("/data/markers.json")
+const { data, isLoading, error } =
+  useLocalData<MarkerData[]>("/data/markers.json")
 ```
 
 It uses the same `useSWR` machinery as the API hooks, so you get the same `{ data, isLoading, error }` envelope and the same automatic deduplication: two components asking for the same file share one `fetch`.
 
 ### What it does differently from the API hooks
 
-| Behavior              | API hooks                                       | `useLocalData`                                  |
-| --------------------- | ----------------------------------------------- | ----------------------------------------------- |
-| Cache key             | `CACHE_KEYS.x(...)` from `cache/keys.ts`        | The URL itself (or a custom `cacheKey` option)  |
-| Fetcher               | `apiFetcher` (with retries, `FetchError`)       | Plain `fetch` + `response.json()`               |
-| `revalidateOnFocus`   | off                                             | off                                             |
-| `revalidateOnReconnect` | on                                            | **off** (local files do not change)             |
-| `revalidateIfStale`   | varies by hook                                  | **off**                                         |
-| `shouldRetryOnError`  | on (file might be transiently unavailable)      | **off** (file either exists or it does not)     |
+| Behavior                | API hooks                                  | `useLocalData`                                 |
+| ----------------------- | ------------------------------------------ | ---------------------------------------------- |
+| Cache key               | `CACHE_KEYS.x(...)` from `cache/keys.ts`   | The URL itself (or a custom `cacheKey` option) |
+| Fetcher                 | `apiFetcher` (with retries, `FetchError`)  | Plain `fetch` + `response.json()`              |
+| `revalidateOnFocus`     | off                                        | off                                            |
+| `revalidateOnReconnect` | on                                         | **off** (local files do not change)            |
+| `revalidateIfStale`     | varies by hook                             | **off**                                        |
+| `shouldRetryOnError`    | on (file might be transiently unavailable) | **off** (file either exists or it does not)    |
 
 ### Options
 
 ```tsx
 interface UseLocalDataOptions<T, R = T> {
-  transform?: (data: T) => R  // shape the raw JSON before returning it
-  cacheKey?: string           // override the default (which is the URL)
-  skip?: boolean              // conditional fetching, equivalent to passing null
+  transform?: (data: T) => R // shape the raw JSON before returning it
+  cacheKey?: string // override the default (which is the URL)
+  skip?: boolean // conditional fetching, equivalent to passing null
 }
 ```
 
@@ -733,21 +732,15 @@ interface UseLocalDataOptions<T, R = T> {
 const { data, isLoading } = useLocalData<MarkerData[]>("/data/markers.json")
 
 // With a transform (runs in useMemo, so it's stable across renders)
-const { data } = useLocalData<RawConfig, ParsedConfig>(
-  "/data/config.json",
-  { transform: (raw) => parseConfig(raw) },
-)
+const { data } = useLocalData<RawConfig, ParsedConfig>("/data/config.json", {
+  transform: (raw) => parseConfig(raw),
+})
 
 // Conditional fetch
-const { data } = useLocalData<TileSchema>(
-  ready ? "/data/tiles.json" : null,
-)
+const { data } = useLocalData<TileSchema>(ready ? "/data/tiles.json" : null)
 
 // Or equivalently with the skip flag
-const { data } = useLocalData<TileSchema>(
-  "/data/tiles.json",
-  { skip: !ready },
-)
+const { data } = useLocalData<TileSchema>("/data/tiles.json", { skip: !ready })
 ```
 
 ### When to use it (and when not to)
@@ -755,7 +748,7 @@ const { data } = useLocalData<TileSchema>(
 Use `useLocalData` for:
 
 - GeoJSON / TopoJSON consumed by the map (where it is not already in a Mapbox tileset)
-- Bundled JSON content like outcome metadata that the team wants the *frontend* to own
+- Bundled JSON content like outcome metadata that the team wants the _frontend_ to own
 - Configuration files served from `public/`
 - Anything that's a real HTTP request to your own origin and benefits from React-level dedup
 
@@ -944,7 +937,7 @@ export function MyPanel() {
     useResolvedScenarioTiers()
 
   if (isLoading) return <Spinner />
-  if (error)     return <ErrorState message={error} />
+  if (error) return <ErrorState message={error} />
 
   return <MyChart data={allScenariosData} outcomes={outcomeNames} />
 }

@@ -12,12 +12,11 @@ type EquityChartControlsProps = {
   share: ExploreShareCapture["equity"]
 }
 
-export default function EquityChartControls({ share }: EquityChartControlsProps) {
-  const {
-    showEquityComparison,
-    setShowEquityComparison,
-    equityFocusScenario,
-  } = useExplorerStore()
+export default function EquityChartControls({
+  share,
+}: EquityChartControlsProps) {
+  const { showEquityComparison, setShowEquityComparison, equityFocusScenario } =
+    useExplorerStore()
 
   const canSnapshot = equityFocusScenario !== null
   const { onSaveSnapshot } = share.chartControlsProps
@@ -33,10 +32,7 @@ export default function EquityChartControls({ share }: EquityChartControlsProps)
         label="Clear Map Selection"
         onClick={() => mapActions.clearLocationHighlights()}
       />
-      <SaveSnapshotButton
-        disabled={!canSnapshot}
-        onClick={onSaveSnapshot}
-      />
+      <SaveSnapshotButton disabled={!canSnapshot} onClick={onSaveSnapshot} />
     </ChartControlsBar>
   )
 }

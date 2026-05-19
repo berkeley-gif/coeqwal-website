@@ -48,18 +48,18 @@ export function useRadarShareCapture(): RadarShareCapture {
   const captureRadarScenario = useCallback(
     async (scenarioId: string) =>
       radarSingleCapture.ref.current?.(scenarioId) ?? null,
-    [radarSingleCapture.register],
+    [radarSingleCapture.ref],
   )
 
   const captureRadarScenarios = useCallback(
     async (scenarioIds: string[]) =>
       radarMultiCapture.ref.current?.(scenarioIds) ?? null,
-    [radarMultiCapture.register],
+    [radarMultiCapture.ref],
   )
 
   const saveSnapshot = useCallback(() => {
     void radarCapture.ref.current?.()
-  }, [radarCapture.register])
+  }, [radarCapture.ref])
 
   return useMemo(
     (): RadarShareCapture => ({

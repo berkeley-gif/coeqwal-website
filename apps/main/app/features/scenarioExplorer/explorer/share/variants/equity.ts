@@ -5,7 +5,10 @@
  */
 
 import React, { useEffect } from "react"
-import { OUTCOME_NAMES, type OutcomeCode } from "../../../../../content/outcomes"
+import {
+  OUTCOME_NAMES,
+  type OutcomeCode,
+} from "../../../../../content/outcomes"
 import {
   equityDataToCSV,
   type EquityChartDataShape,

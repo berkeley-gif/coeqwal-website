@@ -55,12 +55,12 @@ Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures
 
 `ScenarioExplorer.tsx` wraps each surface in its own `<ErrorBoundary>` (from `@repo/utils`):
 
-| Boundary     | What it wraps                               | Reset                                | Fallback                                |
-| ------------ | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
-| Get started  | `<GetStartedView />`                        | Auto via mount/unmount on `mainView` | `ErrorFallback` with retry              |
-| Active tool  | controls + panel in `ActiveToolPanel`       | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
-| Share drawer | `<ShareDrawer />` in `ExplorerToolView`     | Auto on leaving explorer             | `null` (drawer disappears)              |
-| Tool tour    | `<ToolTour />` in `ExplorerToolView`        | Auto on leaving explorer             | `null` (tour ends)                      |
+| Boundary     | What it wraps                           | Reset                                       | Fallback                                |
+| ------------ | --------------------------------------- | ------------------------------------------- | --------------------------------------- |
+| Get started  | `<GetStartedView />`                    | Auto via mount/unmount on `mainView`        | `ErrorFallback` with retry              |
+| Active tool  | controls + panel in `ActiveToolPanel`   | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
+| Share drawer | `<ShareDrawer />` in `ExplorerToolView` | Auto on leaving explorer                    | `null` (drawer disappears)              |
+| Tool tour    | `<ToolTour />` in `ExplorerToolView`    | Auto on leaving explorer                    | `null` (tour ends)                      |
 
 The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these.
 
@@ -93,9 +93,9 @@ Page shell: `ExploreSubNav` (writes `mainView` via feature store, `exploreMode` 
 
 The top-level tab bar has two entries controlled by `mainView` state:
 
-| View          | Label       | Description                                 |
-| ------------- | ----------- | ------------------------------------------- |
-| `get-started` | Get started | Onboarding / intro view                     |
+| View          | Label       | Description                                  |
+| ------------- | ----------- | -------------------------------------------- |
+| `get-started` | Get started | Onboarding / intro view                      |
 | `explorer`    | Go to tools | All exploration tools via `ExplorerToolView` |
 
 ### Tool modes
@@ -165,10 +165,10 @@ Renders scenarios using the `StrategyGrid` system. Supports search filtering, ou
 
 Two Zustand stores (all use Immer via `@repo/state/zustand`):
 
-| Store | File | Owns |
-| ----- | ---- | ---- |
-| `useScenarioExplorerStore` | [`store.ts`](store.ts) | Shell routing: `mainView` only |
-| `useExplorerStore` | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
+| Store                      | File                                 | Owns                                                |
+| -------------------------- | ------------------------------------ | --------------------------------------------------- |
+| `useScenarioExplorerStore` | [`store.ts`](store.ts)               | Shell routing: `mainView` only                      |
+| `useExplorerStore`         | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
 
 Get started and explorer **do not share fields**. They coordinate through intentional one-way reads (for example `useExplorerMapLayout` reads shell `mainView` plus explorer `showMap`), not a merged store.
 
@@ -176,30 +176,31 @@ Get started and explorer **do not share fields**. They coordinate through intent
 
 Get-started uses component-local React state and the app map store. No third Zustand store today:
 
-| State today | Owner | Notes |
-| ----------- | ----- | ----- |
-| Animation beat, play, pins, encoding mode | `TierAnimationSection` `useState` | Ephemeral scroll-through UI |
-| Outcome hover in Key outcomes panel | `KeyOutcomesPanel` `useState` | Panel-local |
-| Fetched tier/geojson for animation | `useTierAnimationData` | Data loading, not journey flags |
-| Get-started map visibility | app map store (`useMapMode`) | Shared map layer |
+| State today                               | Owner                             | Notes                           |
+| ----------------------------------------- | --------------------------------- | ------------------------------- |
+| Animation beat, play, pins, encoding mode | `TierAnimationSection` `useState` | Ephemeral scroll-through UI     |
+| Outcome hover in Key outcomes panel       | `KeyOutcomesPanel` `useState`     | Panel-local                     |
+| Fetched tier/geojson for animation        | `useTierAnimationData`            | Data loading, not journey flags |
+| Get-started map visibility                | app map store (`useMapMode`)      | Shared map layer                |
 
 Add a `getStarted/store.ts` only when a value must survive get-started panel navigation or hand off to explorer on first tools visit. Do **not** put `mainView` there - that is shell routing.
 
 #### Cross-store coordination (not shared state)
 
-| Caller | Reads | Purpose |
-| ------ | ----- | ------- |
-| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView` | Mount get-started vs tools surface |
-| `useExplorerMapLayout` | shell `mainView` + explorer `showMap` | Map pass-through styling per surface |
-| `useExplorerLifecycle` | shell `mainView` | Scroll-to-tabs on get-started → tools |
-| Share tab (app) | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards |
-| Get-started panels / animation | map store, local state | No explorer store reads today |
+| Caller                              | Reads                                  | Purpose                               |
+| ----------------------------------- | -------------------------------------- | ------------------------------------- |
+| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView`    | Mount get-started vs tools surface    |
+| `useExplorerMapLayout`              | shell `mainView` + explorer `showMap`  | Map pass-through styling per surface  |
+| `useExplorerLifecycle`              | shell `mainView`                       | Scroll-to-tabs on get-started → tools |
+| Share tab (app)                     | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards      |
+| Get-started panels / animation      | map store, local state                 | No explorer store reads today         |
 
 ### Three tiers (where new state goes)
 
 `useExplorerStore` is one Zustand instance composed from colocated slice files under [`explorer/store/`](explorer/store/). Fields belong in one of three tiers:
 
 1. **Workspace** (`workspaceSlice.ts`) - anything multiple tools or chrome read/write
+
    - Navigation: `exploreMode`, `tour`
    - Selection: `selectedScenarios`, `highlightedScenario`, `equityFocusScenario` (Distribution-only single focus, separate from multi-select)
    - Share tray: `shareItems`, `storyItemIds`, `showShareDrawer`
@@ -208,6 +209,7 @@ Add a `getStarted/store.ts` only when a value must survive get-started panel nav
    - `hydroclimate`
 
 2. **Tool session** - persists when switching tools within Explore, consumed by that tool (+ share for that tool)
+
    - **listSlice**: pins, stash fields, search, sort, theme/icon filters
    - **radarSlice**: `radarVisibleAxes`, `showRadarRange`, `radarShowAll`, etc.
    - **equitySlice**: `showEquityComparison`, `equityVisibleOutcomes`
@@ -254,35 +256,35 @@ New code outside `ResilienceControls` should use flat selectors and named setter
 
 Share buttons live in chart controls and the scenario sidebar, away from the panels that snapshot them. Each tool owns its capture logic:
 
-| Tool | Hook | Notes |
-| ---- | ---- | ----- |
-| Radar | `panels/radar/useRadarShareCapture.ts` | Panel registers capture refs on mount |
-| Equity | `panels/equity/useEquityShareCapture.ts` | Offscreen capture in the hook (no panel ref) |
-| Resilience | `panels/resilience/useResilienceShareCapture.ts` | Panel refs + `buildResilienceShareItem` |
+| Tool       | Hook                                             | Notes                                        |
+| ---------- | ------------------------------------------------ | -------------------------------------------- |
+| Radar      | `panels/radar/useRadarShareCapture.ts`           | Panel registers capture refs on mount        |
+| Equity     | `panels/equity/useEquityShareCapture.ts`         | Offscreen capture in the hook (no panel ref) |
+| Resilience | `panels/resilience/useResilienceShareCapture.ts` | Panel refs + `buildResilienceShareItem`      |
 
 `useExploreShareCapture` in `explorer/` composes the three hooks and returns `{ radar, equity, resilience }` grouped by consumer (`panelProps`, `sidebarProps`, `chartControlsProps`).
 
 #### Shell store (`useScenarioExplorerStore`)
 
-| Property   | Type       | Default         | Description            |
-| ---------- | ---------- | --------------- | ---------------------- |
+| Property   | Type       | Default         | Description                  |
+| ---------- | ---------- | --------------- | ---------------------------- |
 | `mainView` | `MainView` | `"get-started"` | Get started vs Tools surface |
 
 #### Explorer store (`useExplorerStore`) - selected fields
 
-| Property | Type | Default | Description |
-| -------- | ---- | ------- | ----------- |
-| `exploreMode` | `ExploreMode` | `"list"` | Active tool tab |
-| `selectedScenarios` | `string[]` | `[]` | Checked scenario IDs |
-| `pinnedScenarioIds` | `string[]` | `[]` | List-only: sticky comparison rows at top of grid |
-| `stashedPinnedScenarioIds` | `string[] \| null` | `null` | Pin stash when wrapped List layout caps pins |
-| `pinsTrimmedForMap` | `boolean` | `false` | Snackbar flag after auto-trim |
-| `selectedIconId` | `string \| null` | `null` | Key-ops icon filter (List tool) |
-| `shareItems` | `ShareItem[]` | `[]` | Captured cards in the share tray |
-| `storyItemIds` | `string[]` | `[]` | Ordered IDs for the Share tab story canvas |
+| Property                                      | Type                           | Default                           | Description                                      |
+| --------------------------------------------- | ------------------------------ | --------------------------------- | ------------------------------------------------ |
+| `exploreMode`                                 | `ExploreMode`                  | `"list"`                          | Active tool tab                                  |
+| `selectedScenarios`                           | `string[]`                     | `[]`                              | Checked scenario IDs                             |
+| `pinnedScenarioIds`                           | `string[]`                     | `[]`                              | List-only: sticky comparison rows at top of grid |
+| `stashedPinnedScenarioIds`                    | `string[] \| null`             | `null`                            | Pin stash when wrapped List layout caps pins     |
+| `pinsTrimmedForMap`                           | `boolean`                      | `false`                           | Snackbar flag after auto-trim                    |
+| `selectedIconId`                              | `string \| null`               | `null`                            | Key-ops icon filter (List tool)                  |
+| `shareItems`                                  | `ShareItem[]`                  | `[]`                              | Captured cards in the share tray                 |
+| `storyItemIds`                                | `string[]`                     | `[]`                              | Ordered IDs for the Share tab story canvas       |
 | `resilienceView`, `resilienceCellEncoding`, … | flat fields in resilienceSlice | see `DEFAULT_RESILIENCE_CONTROLS` |
-| `equityVisibleOutcomes` | `string[]` | `OUTCOME_CODE_ORDER` | Outcome codes staged on equity share cards |
-| `hydroclimate` | `string` | `"historical"` | Active hydroclimate |
+| `equityVisibleOutcomes`                       | `string[]`                     | `OUTCOME_CODE_ORDER`              | Outcome codes staged on equity share cards       |
+| `hydroclimate`                                | `string`                       | `"historical"`                    | Active hydroclimate                              |
 
 Sort state uses `sortBy` / `sortDirection` (`sortBy !== null` means sort is active).
 
@@ -417,8 +419,7 @@ export function useYourToolData() {
   const { selectedScenarios } = useScenarioExplorerStore()
 
   const data = useMemo(
-    () =>
-      selectedScenarios.map((id) => shapeForChart(allScoreData?.[id])),
+    () => selectedScenarios.map((id) => shapeForChart(allScoreData?.[id])),
     [allScoreData, selectedScenarios],
   )
 
@@ -473,7 +474,9 @@ export { default as YourToolPanel } from "./panels/yourTool/YourToolPanel"
 Edit two: mount the panel in `ScenarioExplorer.tsx`. Inside the existing `<ErrorBoundary>` (which uses `key={exploreMode}` to reset per tool):
 
 ```tsx
-{exploreMode === "yourTool" && <YourToolPanel />}
+{
+  exploreMode === "yourTool" && <YourToolPanel />
+}
 ```
 
 Edit three: register the tab. This is the explicit "store" part, and it spans three files.
@@ -593,7 +596,15 @@ export function useTierChartData() {
   } = useMultipleScenarioTiers(idMapping)
 
   // shape allScoreData into chart data, build axes, pick colors, etc.
-  return { data, axes, axisRange, lineColors, baselineScenario, isLoading, error }
+  return {
+    data,
+    axes,
+    axisRange,
+    lineColors,
+    baselineScenario,
+    isLoading,
+    error,
+  }
 }
 ```
 
@@ -641,12 +652,11 @@ export { default as RadarPanel } from "./panels/radar/RadarPanel"
 In `apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx`:
 
 ```tsx
-{exploreMode === "radar" && (
-  <RadarPanel
-    highlightedIds={highlightedIds}
-    onChartHover={onChartHover}
-  />
-)}
+{
+  exploreMode === "radar" && (
+    <RadarPanel highlightedIds={highlightedIds} onChartHover={onChartHover} />
+  )
+}
 ```
 
 The mode `"radar"` is already in `ExploreMode`. The `FLOW` step in `ExploreSubNav.tsx` already exists. The `JOURNEY["radar"]` entry already exists. The radar tab was added once. Today the only change a developer makes is to the panel itself or its data hook.
@@ -655,15 +665,15 @@ The mode `"radar"` is already in `ExploreMode`. The `FLOW` step in `ExploreSubNa
 
 Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
 
-| You need...                                                    | Hook                                              | What you get back                                                          |
-| -------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
-| All 9 outcomes for every scenario, hydroclimate-resolved       | `useResolvedScenarioTiers()`                      | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`           |
-| Same, plus radar and parallel transforms                       | `useTierChartData()`                              | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`              |
-| Per-location tier assignments for one outcome                  | `useTierLocationAssignments(id, code)`            | `locations[]` with `tier_level`                                            |
-| Many outcomes' locations at once for a single scenario         | `useTierLocationAssignmentsBatch(id, codes)`      | batched response, splays into the single-outcome cache                     |
-| Reservoir, CWS, AG, env-flow, or Delta statistics              | the matching domain hook in `@repo/data`          | see the "Every hook in the package" table in `packages/data/README.md`     |
-| Storage, CWS, AG, and env-flow in one call (Data in Depth)     | `useBatchStatistics(scenarios, types?)`           | one bundle keyed by scenario                                               |
-| A static local JSON or GeoJSON file from `public/`             | `useLocalData(url)`                               | parsed body                                                                |
+| You need...                                                | Hook                                         | What you get back                                                      |
+| ---------------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| All 9 outcomes for every scenario, hydroclimate-resolved   | `useResolvedScenarioTiers()`                 | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`       |
+| Same, plus radar and parallel transforms                   | `useTierChartData()`                         | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`          |
+| Per-location tier assignments for one outcome              | `useTierLocationAssignments(id, code)`       | `locations[]` with `tier_level`                                        |
+| Many outcomes' locations at once for a single scenario     | `useTierLocationAssignmentsBatch(id, codes)` | batched response, splays into the single-outcome cache                 |
+| Reservoir, CWS, AG, env-flow, or Delta statistics          | the matching domain hook in `@repo/data`     | see the "Every hook in the package" table in `packages/data/README.md` |
+| Storage, CWS, AG, and env-flow in one call (Data in Depth) | `useBatchStatistics(scenarios, types?)`      | one bundle keyed by scenario                                           |
+| A static local JSON or GeoJSON file from `public/`         | `useLocalData(url)`                          | parsed body                                                            |
 
 Hard rules:
 
@@ -755,9 +765,9 @@ If you want sidebar row hover to highlight chart elements and chart hover to scr
 
 Two state buckets, two directions:
 
-| State | Direction | Consumer |
-|-------|-----------|----------|
-| `highlightedIds` | Sidebar → chart | Panels emphasize matching scenario ids |
+| State                | Direction       | Consumer                                                 |
+| -------------------- | --------------- | -------------------------------------------------------- |
+| `highlightedIds`     | Sidebar → chart | Panels emphasize matching scenario ids                   |
 | `hoveredInteraction` | Chart → sidebar | Sidebar scrolls and shows optional outcome + tier detail |
 
 `ExplorerToolView` wires hover into `ExplorerSidebar` and `ActiveToolPanel`. Add props to your panel branch in `ActiveToolPanel.tsx`:
@@ -906,10 +916,7 @@ const chartColors = useMemo(
 
 // Good. Extract primitive strings first.
 const grey600 = theme.palette.grey[600]
-const chartColors = useMemo(
-  () => ({ default: grey600 }),
-  [grey600],
-)
+const chartColors = useMemo(() => ({ default: grey600 }), [grey600])
 ```
 
 ### 5. Guard entrance animations

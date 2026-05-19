@@ -1,6 +1,6 @@
 /**
  * Resilience slice - Resilience heatmap tool session state
- * 
+ *
  * So many settings! This tool needs clarity and simplification.
  */
 
@@ -105,7 +105,8 @@ export const resilienceInitialState: ResilienceState = {
   resilienceDeltaBaselineScenarioId:
     DEFAULT_RESILIENCE_CONTROLS.deltaBaselineScenarioId,
   resilienceAggregateScope: DEFAULT_RESILIENCE_CONTROLS.aggregateScope,
-  resilienceReorderBySimilarity: DEFAULT_RESILIENCE_CONTROLS.reorderBySimilarity,
+  resilienceReorderBySimilarity:
+    DEFAULT_RESILIENCE_CONTROLS.reorderBySimilarity,
   resilienceShowMarginals: DEFAULT_RESILIENCE_CONTROLS.showMarginals,
   resilienceShowAllScenarios: DEFAULT_RESILIENCE_CONTROLS.showAllScenarios,
   resilienceSelectedHydroclimates: new Set(
