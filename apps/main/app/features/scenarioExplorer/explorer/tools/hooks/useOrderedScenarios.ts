@@ -9,7 +9,7 @@
  */
 
 import { useMemo } from "react"
-import { useExplorerStore } from "../../store"
+import { useExplorerStore, useListSlice } from "../../store"
 import { useScenarioList } from "../../../../scenarios/hooks/useScenarioList"
 import {
   useMultipleScenarioTiers,
@@ -207,9 +207,8 @@ export function useOrderedScenarios(
     showOnlyTheme,
     selectedIconId,
     showOnlyChosen,
-    showAlternativeBaselines,
-    selectedScenarios,
-  } = useExplorerStore()
+  } = useListSlice()
+  const { showAlternativeBaselines, selectedScenarios } = useExplorerStore()
 
   const {
     siblingGroups,

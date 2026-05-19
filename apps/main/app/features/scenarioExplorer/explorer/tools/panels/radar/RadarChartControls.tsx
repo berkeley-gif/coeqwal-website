@@ -5,7 +5,7 @@ import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
 import { RadarTourAnchor } from "../../chrome/RadarTourAnchor"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 import type { ExploreShareCapture } from "../../../useExploreShareCapture"
 
 type RadarChartControlsProps = {
@@ -21,11 +21,10 @@ export default function RadarChartControls({ share }: RadarChartControlsProps) {
     setShowDotsOnly,
     showRadarRange,
     setShowRadarRange,
-    highlightBaseline,
-    setHighlightBaseline,
     radarShowAll,
     setRadarShowAll,
-  } = useExplorerStore()
+  } = useRadarSlice()
+  const { highlightBaseline, setHighlightBaseline } = useWorkspaceSlice()
 
   const { canCapture, onSaveSnapshot } = share.chartControlsProps
 

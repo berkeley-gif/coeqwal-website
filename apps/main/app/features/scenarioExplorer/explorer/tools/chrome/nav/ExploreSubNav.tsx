@@ -25,7 +25,7 @@ import {
   InsightsIcon,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore, type MainView } from "../../../../store"
-import { useExplorerStore, type ExploreMode } from "../../../store"
+import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
 
@@ -97,7 +97,7 @@ export default function ExploreSubNav() {
   const { navigateToTab } = useTabNavigation()
 
   const { mainView, setMainView } = useScenarioExplorerStore()
-  const { exploreMode, setExploreMode } = useExplorerStore()
+  const { exploreMode, setExploreMode } = useWorkspaceSlice()
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)

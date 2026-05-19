@@ -1,5 +1,8 @@
 /**
- * Equity slice - Distribution (equity) tool session state
+ * Equity store slice - Distribution (equity) tool session state.
+ *
+ * Tool settings here survive a page reload within the same tab
+ * (see `exploreSessionPersist.ts`).
  */
 
 import { OUTCOME_CODE_ORDER } from "../../../../content/outcomes"
@@ -24,9 +27,12 @@ export const equityInitialState: EquityState = {
 
 type ImmerSet = (fn: (state: EquitySlice) => void) => void
 
-export function createEquitySlice(set: ImmerSet): EquitySlice {
+export function createEquitySlice(
+  set: ImmerSet,
+  initial: EquityState = equityInitialState,
+): EquitySlice {
   return {
-    ...equityInitialState,
+    ...initial,
 
     setShowEquityComparison: (show) =>
       set((state) => {

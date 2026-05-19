@@ -1,12 +1,16 @@
 /**
- * List slice - List tool session state (pins, filters, sort). Persists when switching away from List and back.
+ * List store slice - List tool session state (pins, filters, sort).
+ *
+ * Part of the single `useExplorerStore` object. Persists when switching away
+ * from List and back. Tool settings here also survive a page reload within
+ * the same tab (see `exploreSessionPersist.ts`).
  *
  * Overlap with ScenarioSelectionSidebar is by design, not duplicate storage:
  *   - `searchQuery`, `showOnlyChosen`, theme/icon filters, and sort fields here
  *     are also read by the sidebar through `useOrderedScenarios`, so row order
  *     and filtering stay consistent across List and radar/equity/resilience/data.
  *   - `pinnedScenarioIds` is List-only. The sidebar never reads pins.
- *   - Multi-select checkboxes use `selectedScenarios` from workspaceSlice, not here.
+ *   - Multi-select checkboxes use `selectedScenarios` from workspaceStoreSlice.
  */
 
 import type { ScenarioTheme } from "../../../../content/scenarios"
@@ -71,9 +75,12 @@ export const listInitialState: ListState = {
 
 type ImmerSet = (fn: (state: ListSlice) => void) => void
 
-export function createListSlice(set: ImmerSet): ListSlice {
+export function createListSlice(
+  set: ImmerSet,
+  initial: ListState = listInitialState,
+): ListSlice {
   return {
-    ...listInitialState,
+    ...initial,
 
     togglePinnedScenario: (scenarioId) =>
       set((state) => {

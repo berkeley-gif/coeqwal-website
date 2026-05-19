@@ -5,7 +5,7 @@ import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
 import { SimpleButton } from "../../chrome/SimpleButton"
 import { mapActions } from "../../../../../map/store"
-import { useExplorerStore } from "../../../store"
+import { useExplorerStore, useEquitySlice } from "../../../store"
 import type { ExploreShareCapture } from "../../../useExploreShareCapture"
 
 type EquityChartControlsProps = {
@@ -15,8 +15,8 @@ type EquityChartControlsProps = {
 export default function EquityChartControls({
   share,
 }: EquityChartControlsProps) {
-  const { showEquityComparison, setShowEquityComparison, equityFocusScenario } =
-    useExplorerStore()
+  const { showEquityComparison, setShowEquityComparison } = useEquitySlice()
+  const { equityFocusScenario } = useExplorerStore()
 
   const canSnapshot = equityFocusScenario !== null
   const { onSaveSnapshot } = share.chartControlsProps

@@ -1,11 +1,17 @@
 /**
  * Scenario Explorer outer shell store: Explore-tab surface routing only.
  *
- * `mainView` selects GetStartedView vs ExplorerToolView.
+ * `mainView` selects GetStartedView vs ExplorerToolView. It survives a page
+ * reload within the same tab via sessionStorage (`exploreSessionPersist.ts`).
  */
 
 import { create, immer } from "@repo/state/zustand"
 import { useExplorerStore } from "./explorer/store"
+import {
+  loadExploreSessionState,
+  saveExploreSessionState,
+} from "./explorer/store/exploreSessionPersist"
+import { pickShellPersistedState } from "./explorer/store/pickSlices"
 
 export type MainView = "get-started" | "explorer"
 
@@ -23,9 +29,11 @@ interface ScenarioExplorerShellActions {
 type ScenarioExplorerShellStore = ScenarioExplorerShellState &
   ScenarioExplorerShellActions
 
+const shellSession = loadExploreSessionState()
+
 export const useScenarioExplorerStore = create<ScenarioExplorerShellStore>()(
   immer<ScenarioExplorerShellStore>((set) => ({
-    mainView: "get-started",
+    mainView: shellSession.shell.mainView,
 
     setMainView: (view) =>
       set((state) => {
@@ -36,3 +44,14 @@ export const useScenarioExplorerStore = create<ScenarioExplorerShellStore>()(
       }),
   })),
 )
+
+let prevShellSerialized = JSON.stringify(
+  pickShellPersistedState(useScenarioExplorerStore.getState()),
+)
+useScenarioExplorerStore.subscribe((state) => {
+  const next = pickShellPersistedState(state)
+  const serialized = JSON.stringify(next)
+  if (serialized === prevShellSerialized) return
+  prevShellSerialized = serialized
+  saveExploreSessionState({ shell: next })
+})

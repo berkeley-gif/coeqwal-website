@@ -10,7 +10,7 @@
  */
 
 import { useExplorerStore } from "../../../../store"
-import { applyResilienceControlsPatch } from "../../../../store/resilienceSlice"
+import { applyResilienceControlsPatch } from "../../../../store/resilienceStoreSlice"
 import type { ResilienceControlsState } from "../../../../store/resilienceTypes"
 
 /** Apply a planned controls change to the explorer store in one transaction */

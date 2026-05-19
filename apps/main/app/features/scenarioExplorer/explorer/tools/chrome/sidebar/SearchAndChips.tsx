@@ -17,7 +17,7 @@ import {
   useTheme,
   icons,
 } from "@repo/ui/mui"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useListSlice } from "../../../store"
 import ToggleChip from "../chips/ToggleChip"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
 
@@ -41,17 +41,19 @@ export default function SearchAndChips({
   const {
     searchQuery,
     setSearchQuery,
+    showOnlyChosen,
+    setShowOnlyChosen,
+    groupByTheme,
+    setGroupByTheme,
+  } = useListSlice()
+  const {
     showDefinitions,
     setShowDefinitions,
     showAlternativeBaselines,
     setShowAlternativeBaselines,
     showKeyOperations,
     setShowKeyOperations,
-    showOnlyChosen,
-    setShowOnlyChosen,
-    groupByTheme,
-    setGroupByTheme,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
 
   const searchAnchorRef = useTourAnchor("list.toolbar.search")
   const chipsRowAnchorRef = useTourAnchor("list.toolbar.chips")

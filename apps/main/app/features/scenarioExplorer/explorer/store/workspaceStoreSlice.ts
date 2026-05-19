@@ -1,25 +1,30 @@
 /**
- * Workspace slice - cross-tool "Explore tab" state
+ * Workspace store slice - cross-tool "Explore tab" state
  *
  * Fields here are read or written by more than one tool, or by chrome that wraps
  * every tool (toolbar, share drawer, sub-nav, hydroclimate chooser).
  *
- * What belongs here vs a tool slice:
+ * What belongs here vs a tool store slice:
  *   - Workspace: active tool tab, sidebar multi-select, share tray, map toggle,
  *     hydroclimate, toolbar chips that appear in multiple modes
- *   - Tool slice (listSlice, radarSlice, …): state that only one panel cares about,
- *     but should persist when the user switches tools and comes back
+ *   - Tool store slice (`listStoreSlice`, `radarStoreSlice`, …): state that only
+ *     one panel cares about, but should persist when the user switches tools
+ *     and comes back. Tool settings in those slices also survive a page reload
+ *     within the same tab via sessionStorage (see `exploreSessionPersist.ts`).
  *   - Local useState: hover, layout mode, modal open, panel-only picks
+ *
+ * Workspace fields listed in `WORKSPACE_PERSIST_KEYS` (`pickSlices.ts`) survive
+ * a page reload within the same tab. Share tray items use localStorage instead.
  *
  * Sidebar vs List grid - intentional sharing, not duplicate keys:
  *   `selectedScenarios` lives here and is written by both the List row checkboxes
  *   and ScenarioSelectionSidebar (radar, equity, resilience, data). List-only
- *   sticky comparison rows use `pinnedScenarioIds` in listSlice instead.
+ *   sticky comparison rows use `pinnedScenarioIds` in listStoreSlice instead.
  *
- *   Search, theme, icon, sort, and "chosen only" filters live in listSlice but
- *   are also consumed by ScenarioSelectionSidebar via `useOrderedScenarios`. That
- *   keeps one row order and filter set across List and sidebar tools when the user
- *   switches tabs. Those fields are not copied into a second slice.
+ *   Search, theme, icon, sort, and "chosen only" filters live in listStoreSlice
+ *   but are also consumed by ScenarioSelectionSidebar via `useOrderedScenarios`.
+ *   That keeps one row order and filter set across List and sidebar tools when
+ *   the user switches tabs. Those fields are not copied into a second slice.
  *
  * Distribution (equity) is a special case: `equityFocusScenario` is a single-select
  * focus kept separate from `selectedScenarios` until product merges them.
@@ -134,9 +139,12 @@ export const workspaceInitialState: WorkspaceState = {
 
 type ImmerSet = (fn: (state: WorkspaceSlice) => void) => void
 
-export function createWorkspaceSlice(set: ImmerSet): WorkspaceSlice {
+export function createWorkspaceSlice(
+  set: ImmerSet,
+  initial: WorkspaceState = workspaceInitialState,
+): WorkspaceSlice {
   return {
-    ...workspaceInitialState,
+    ...initial,
 
     setExploreMode: (mode) =>
       set((state) => {

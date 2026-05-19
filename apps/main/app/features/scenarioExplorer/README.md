@@ -199,7 +199,7 @@ Add a `getStarted/store.ts` only when a value must survive get-started panel nav
 
 `useExplorerStore` is one Zustand instance composed from colocated slice files under [`explorer/store/`](explorer/store/). Fields belong in one of three tiers:
 
-1. **Workspace** (`workspaceSlice.ts`) - anything multiple tools or chrome read/write
+1. **Workspace** (`workspaceStoreSlice.ts`) - anything multiple tools or chrome read/write
 
    - Navigation: `exploreMode`, `tour`
    - Selection: `selectedScenarios`, `highlightedScenario`, `equityFocusScenario` (Distribution-only single focus, separate from multi-select)
@@ -210,10 +210,10 @@ Add a `getStarted/store.ts` only when a value must survive get-started panel nav
 
 2. **Tool session** - persists when switching tools within Explore, consumed by that tool (+ share for that tool)
 
-   - **listSlice**: pins, stash fields, search, sort, theme/icon filters
-   - **radarSlice**: `radarVisibleAxes`, `showRadarRange`, `radarShowAll`, etc.
-   - **equitySlice**: `showEquityComparison`, `equityVisibleOutcomes`
-   - **resilienceSlice**: all `resilience*` fields, individual setters
+   - **listStoreSlice**: pins, stash fields, search, sort, theme/icon filters
+   - **radarStoreSlice**: `radarVisibleAxes`, `showRadarRange`, `radarShowAll`, etc.
+   - **equityStoreSlice**: `showEquityComparison`, `equityVisibleOutcomes`
+   - **resilienceStoreSlice**: all `resilience*` fields, individual setters
 
 3. **Ephemeral** - `useState` in a panel or section (equity objective picks, data-in-depth chart modes, hover, List layout mode)
 
@@ -225,23 +225,58 @@ Add a `getStarted/store.ts` only when a value must survive get-started panel nav
 
 ```
 explorer/store/
-  index.ts           create() merges slices, re-exports useExplorerStore
-  types.ts           ExploreMode, OutcomeDisplayMode
-  workspaceSlice.ts  exploreMode, selection, hydroclimate, share, chrome
-  listSlice.ts       pins, filters, sort
-  radarSlice.ts      axes, range, dots
-  equitySlice.ts     showEquityComparison, equityVisibleOutcomes
-  resilienceSlice.ts resilience* fields, DEFAULT_RESILIENCE_CONTROLS, selectResilienceControls
-  resilienceTypes.ts ResilienceControlsState and related types
+  index.ts              re-exports store, slice hooks, persist helpers
+  storeInstance.ts      create() merges slices + share/tool session subscriptions
+  types.ts              ExploreMode, OutcomeDisplayMode
+  workspaceStoreSlice.ts  exploreMode, selection, hydroclimate, share, chrome
+  listStoreSlice.ts       pins, filters, sort
+  radarStoreSlice.ts      axes, range, dots
+  equityStoreSlice.ts     showEquityComparison, equityVisibleOutcomes
+  resilienceStoreSlice.ts resilience* fields, DEFAULT_RESILIENCE_CONTROLS, selectResilienceControls
+  resilienceTypes.ts    ResilienceControlsState and related types
+  pickSlices.ts           persist key index + pickWorkspaceSlice / pickListSlice / …
+  exploreSessionPersist.ts  load/save Explore session to sessionStorage (source of truth)
+  useToolSlices.ts      useWorkspaceSlice(), useListSlice(), useRadarSlice(), …
 ```
 
 Import `useExplorerStore` from [`explorer/store.ts`](explorer/store.ts) (shim) or [`explorer/store/index.ts`](explorer/store/index.ts).
+
+#### Tool slice facades
+
+When a component only touches one store slice, prefer the slice hook over bare `useExplorerStore`:
+
+| Hook                   | Slice file                | Example consumers                                       |
+| ---------------------- | ------------------------- | ------------------------------------------------------- |
+| `useWorkspaceSlice()`  | `workspaceStoreSlice.ts`  | `SearchAndChips`, `RadarChartControls`, `ExploreSubNav` |
+| `useListSlice()`       | `listStoreSlice.ts`       | `useOrderedScenarios`, `SearchAndChips` (list fields)   |
+| `useRadarSlice()`      | `radarStoreSlice.ts`      | `RadarChartControls`                                    |
+| `useEquitySlice()`     | `equityStoreSlice.ts`     | `EquityChartControls`                                   |
+| `useResilienceSlice()` | `resilienceStoreSlice.ts` | resilience panel / controls                             |
+
+Each hook accepts an optional selector: `useListSlice((s) => s.searchQuery)`. Multi-field selectors use shallow compare via `useShallow`.
+
+Share tray and URL mismatch flags still use `useExplorerStore` where needed.
+
+#### Explore session persistence (sessionStorage)
+
+**Explore session state survives a page reload within the same tab.** Closing the tab clears sessionStorage. Implementation and key lists: [`exploreSessionPersist.ts`](explorer/store/exploreSessionPersist.ts) (authoritative) and [`pickSlices.ts`](explorer/store/pickSlices.ts) (key index).
+
+| Storage          | Scope                                                                         | Survives reload? | Survives tab close? |
+| ---------------- | ----------------------------------------------------------------------------- | ---------------- | ------------------- |
+| `localStorage`   | Share tray (`shareItems`, `storyItemIds`)                                     | Yes              | Yes                 |
+| `sessionStorage` | Shell `mainView`, workspace selection/chrome/cosmetics, all tool store slices | Yes (same tab)   | No                  |
+
+**sessionStorage key:** `coeqwal-explorer-tool-sessions-v2`
+
+**Workspace fields restored:** `selectedScenarios`, `equityFocusScenario`, `exploreMode`, `hydroclimate`, toolbar chrome (`showMap`, `showDefinitions`, …), chart cosmetics, `highlightedScenario`, `showShareDrawer`, `tour`.
+
+**Not in sessionStorage:** `shareItems`, `storyItemIds` (localStorage), `shareUrlVersionMismatch`, tool ephemeral flags (`showAxisSelector`, pin snackbars, …).
 
 #### Resilience controls write model
 
 Resilience uses the same flat store as radar, but the sentence control surface changes several fields together:
 
-- **Store (public API):** flat `resilience*` fields and individual setters in `resilienceSlice.ts`
+- **Store (public API):** flat `resilience*` fields and individual setters in `resilienceStoreSlice.ts`
 - **ResilienceControls domain** (`panels/resilience/controls/`): read → plan → write layering
   - `readSnapshot.ts` — `readControlsSnapshot`: flat store fields → `ResilienceControlsState`
   - `planPivotChange.ts` — `planPivotPatch`: sentence pivot UI → partial patch (no store write)
@@ -272,19 +307,19 @@ Share buttons live in chart controls and the scenario sidebar, away from the pan
 
 #### Explorer store (`useExplorerStore`) - selected fields
 
-| Property                                      | Type                           | Default                           | Description                                      |
-| --------------------------------------------- | ------------------------------ | --------------------------------- | ------------------------------------------------ |
-| `exploreMode`                                 | `ExploreMode`                  | `"list"`                          | Active tool tab                                  |
-| `selectedScenarios`                           | `string[]`                     | `[]`                              | Checked scenario IDs                             |
-| `pinnedScenarioIds`                           | `string[]`                     | `[]`                              | List-only: sticky comparison rows at top of grid |
-| `stashedPinnedScenarioIds`                    | `string[] \| null`             | `null`                            | Pin stash when wrapped List layout caps pins     |
-| `pinsTrimmedForMap`                           | `boolean`                      | `false`                           | Snackbar flag after auto-trim                    |
-| `selectedIconId`                              | `string \| null`               | `null`                            | Key-ops icon filter (List tool)                  |
-| `shareItems`                                  | `ShareItem[]`                  | `[]`                              | Captured cards in the share tray                 |
-| `storyItemIds`                                | `string[]`                     | `[]`                              | Ordered IDs for the Share tab story canvas       |
-| `resilienceView`, `resilienceCellEncoding`, … | flat fields in resilienceSlice | see `DEFAULT_RESILIENCE_CONTROLS` |
-| `equityVisibleOutcomes`                       | `string[]`                     | `OUTCOME_CODE_ORDER`              | Outcome codes staged on equity share cards       |
-| `hydroclimate`                                | `string`                       | `"historical"`                    | Active hydroclimate                              |
+| Property                                      | Type                                | Default                           | Description                                      |
+| --------------------------------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------------ |
+| `exploreMode`                                 | `ExploreMode`                       | `"list"`                          | Active tool tab                                  |
+| `selectedScenarios`                           | `string[]`                          | `[]`                              | Checked scenario IDs                             |
+| `pinnedScenarioIds`                           | `string[]`                          | `[]`                              | List-only: sticky comparison rows at top of grid |
+| `stashedPinnedScenarioIds`                    | `string[] \| null`                  | `null`                            | Pin stash when wrapped List layout caps pins     |
+| `pinsTrimmedForMap`                           | `boolean`                           | `false`                           | Snackbar flag after auto-trim                    |
+| `selectedIconId`                              | `string \| null`                    | `null`                            | Key-ops icon filter (List tool)                  |
+| `shareItems`                                  | `ShareItem[]`                       | `[]`                              | Captured cards in the share tray                 |
+| `storyItemIds`                                | `string[]`                          | `[]`                              | Ordered IDs for the Share tab story canvas       |
+| `resilienceView`, `resilienceCellEncoding`, … | flat fields in resilienceStoreSlice | see `DEFAULT_RESILIENCE_CONTROLS` |
+| `equityVisibleOutcomes`                       | `string[]`                          | `OUTCOME_CODE_ORDER`              | Outcome codes staged on equity share cards       |
+| `hydroclimate`                                | `string`                            | `"historical"`                    | Active hydroclimate                              |
 
 Sort state uses `sortBy` / `sortDirection` (`sortBy !== null` means sort is active).
 
@@ -746,7 +781,7 @@ Three edits, all in the scenario-explorer feature.
 
 `ExploreSubNav` calls `setExploreMode(step.mode)` when the user clicks the tab. The store's `setExploreMode` also resets any in-flight tool tour for you. `ToolJourneyStrip` reads `JOURNEY[exploreMode]` to show the purpose line and the next-step nudge.
 
-If your tool needs its own state slice, add fields and setters to the relevant file under `explorer/store/` (see `radarSlice.ts`, `equitySlice.ts`, `resilienceSlice.ts`).
+If your tool needs its own state slice, add fields and setters to the relevant file under `explorer/store/` (see `radarStoreSlice.ts`, `equityStoreSlice.ts`, `resilienceStoreSlice.ts`).
 
 ## Wire to the scenario sidebar
 

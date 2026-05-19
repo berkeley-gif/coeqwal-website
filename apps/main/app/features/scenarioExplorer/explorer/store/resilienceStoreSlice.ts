@@ -1,7 +1,9 @@
 /**
- * Resilience slice - Resilience heatmap tool session state
+ * Resilience store slice - Resilience heatmap tool session state.
  *
- * So many settings! This tool needs clarity and simplification.
+ * Tool settings here survive a page reload within the same tab
+ * (see `exploreSessionPersist.ts`), except `showResilienceOutcomeSelector`
+ * (open sheet).
  */
 
 import { OUTCOME_CODE_ORDER } from "../../../../content/outcomes"
@@ -216,9 +218,12 @@ export function applyResilienceControlsPatch(
 
 type ImmerSet = (fn: (state: ResilienceSlice) => void) => void
 
-export function createResilienceSlice(set: ImmerSet): ResilienceSlice {
+export function createResilienceSlice(
+  set: ImmerSet,
+  initial: ResilienceState = resilienceInitialState,
+): ResilienceSlice {
   return {
-    ...resilienceInitialState,
+    ...initial,
 
     setShowResilienceOutcomeSelector: (show) =>
       set((state) => {

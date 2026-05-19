@@ -1,5 +1,8 @@
 /**
- * Radar slice - Radar tool session state
+ * Radar store slice - Radar tool session state.
+ *
+ * Tool settings here survive a page reload within the same tab
+ * (see `exploreSessionPersist.ts`), except `showAxisSelector` (open popover).
  */
 
 import { OUTCOME_CODE_ORDER } from "../../../../content/outcomes"
@@ -33,9 +36,12 @@ export const radarInitialState: RadarState = {
 
 type ImmerSet = (fn: (state: RadarSlice) => void) => void
 
-export function createRadarSlice(set: ImmerSet): RadarSlice {
+export function createRadarSlice(
+  set: ImmerSet,
+  initial: RadarState = radarInitialState,
+): RadarSlice {
   return {
-    ...radarInitialState,
+    ...initial,
 
     setShowRadarRange: (show) =>
       set((state) => {
