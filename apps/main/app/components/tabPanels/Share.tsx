@@ -26,7 +26,10 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable"
-import { useExplorerStore, useWorkspaceSlice } from "../../features/scenarioExplorer/explorer/store"
+import {
+  useExplorerStore,
+  useWorkspaceSlice,
+} from "../../features/scenarioExplorer/explorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/explorer/tools/hooks/useResolvedScenarioTiers"
 import { useTierChartData } from "../../features/scenarioExplorer/explorer/tools/hooks/useTierChartData"

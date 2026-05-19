@@ -6,7 +6,12 @@
 
 import { useCallback, useMemo } from "react"
 import { useCaptureRef } from "../../../share/useCaptureRef"
-import { useExplorerStore, useResilienceSlice, useWorkspaceSlice, selectResilienceControls } from "../../../store"
+import {
+  useExplorerStore,
+  useResilienceSlice,
+  useWorkspaceSlice,
+  selectResilienceControls,
+} from "../../../store"
 import type {
   ResilienceCaptureFn,
   ResilienceScenarioSoloCaptureFn,

@@ -47,7 +47,11 @@ import {
   icons,
   useTheme,
 } from "@repo/ui/mui"
-import { useExplorerStore, useRadarSlice, useWorkspaceSlice } from "../../../store"
+import {
+  useExplorerStore,
+  useRadarSlice,
+  useWorkspaceSlice,
+} from "../../../store"
 import { TOUR_STEPS } from "../../tour/content"
 import ListTourBarIllustration from "../../panels/list/ListTourBarIllustration"
 import ListTourMapLegend from "../../panels/list/ListTourMapLegend"

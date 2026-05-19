@@ -22,7 +22,8 @@ export type EquityShareCapture = {
 
 export function useEquityShareCapture(): EquityShareCapture {
   const theme = useTheme()
-  const { equityFocusScenario, hydroclimate, addShareItem } = useWorkspaceSlice()
+  const { equityFocusScenario, hydroclimate, addShareItem } =
+    useWorkspaceSlice()
   const { equityVisibleOutcomes, showEquityComparison } = useEquitySlice()
 
   const stageEquityShareItem = useCallback(

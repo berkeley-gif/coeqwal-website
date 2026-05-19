@@ -6,7 +6,11 @@
  */
 
 import { useEffect } from "react"
-import { useExplorerStore, useResilienceSlice, useWorkspaceSlice } from "../../../store"
+import {
+  useExplorerStore,
+  useResilienceSlice,
+  useWorkspaceSlice,
+} from "../../../store"
 
 export function useResilienceSelectionSync(): void {
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
