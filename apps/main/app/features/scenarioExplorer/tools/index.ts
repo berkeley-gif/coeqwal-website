@@ -17,7 +17,6 @@ export type {
 export { default as EquityPanel } from "./panels/equity/EquityPanel"
 
 export { default as ResiliencePanel } from "./panels/resilience/ResiliencePanel"
-export { default as ResilienceQuadrantPanel } from "./panels/resilience/ResilienceQuadrantPanel"
 export { default as ResilienceControls } from "./panels/resilience/ResilienceControls"
 export type {
   ResilienceControlsState,
@@ -25,7 +24,6 @@ export type {
   CellEncoding,
   DeltaMode,
   AggregateScope,
-  QuadrantUnit,
   ResilienceChartDataRow,
   ResilienceHeatmapChartData,
   ResilienceCaptureResult,
@@ -33,10 +31,5 @@ export type {
   ResilienceTileCaptureFn,
   ResilienceScenarioSoloCaptureFn,
 } from "./panels/resilience/ResiliencePanel"
-export type {
-  ResilienceQuadrantChartData,
-  ResilienceQuadrantCaptureResult,
-  ResilienceQuadrantCaptureFn,
-} from "./panels/resilience/ResilienceQuadrantPanel"
 
 export { default as DataExplorerView } from "./panels/dataInDepth/DataExplorerView"

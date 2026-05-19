@@ -123,8 +123,12 @@ import type {
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
-  onOutcomeHover?: (
-    info: { scenarioId: string; outcome: string; tierValue: number } | null,
+  onChartHover?: (
+    info: {
+      scenarioId: string
+      outcome: string
+      tierValue: number
+    } | null,
   ) => void
   /** Notifies parent of the current scenarioId → color mapping for the radar chart */
   onScenarioColors?: (colors: Record<string, string>) => void
@@ -161,7 +165,7 @@ interface RadarPanelProps {
 
 export default function RadarPanel({
   highlightedIds = null,
-  onOutcomeHover,
+  onChartHover,
   onScenarioColors,
   onCaptureReady,
   onSingleCaptureReady,
@@ -246,7 +250,7 @@ export default function RadarPanel({
 
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      onOutcomeHover?.(
+      onChartHover?.(
         info
           ? {
               scenarioId: info.scenarioId,
@@ -256,7 +260,7 @@ export default function RadarPanel({
           : null,
       )
     },
-    [onOutcomeHover],
+    [onChartHover],
   )
 
   const [axisPositions, setAxisPositions] = useState<AxisPosition[]>([])

@@ -21,5 +21,4 @@ export type {
   MultiScenarioCaptureFn,
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
-  ResilienceQuadrantCaptureFn,
 } from "./types"

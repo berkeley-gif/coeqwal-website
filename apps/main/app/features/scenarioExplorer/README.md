@@ -38,7 +38,7 @@ features/scenarioExplorer/
 │   │   │   └── ListTour*Illustration.tsx
 │   │   ├── radar/                Radar tool: panel, axis-detail controls, capture, theme hook.
 │   │   ├── equity/               Distribution tool (store key "equity").
-│   │   ├── resilience/           Resilience heatmap + quadrant + controls + 5 hooks.
+│   │   ├── resilience/           Resilience heatmap + controls + hooks.
 │   │   └── dataInDepth/          "Data in depth". Has its own components/, hooks/, utils/, config/ (outcomeDefinitions metric catalog).
 │   ├── chrome/                   Layout chrome shared by explorer tools (subfolders by role).
 │   │   ├── hydroclimateBadgeDisplay.ts  Helper used by ToolToolbar + UnifiedToolLayout.
@@ -467,7 +467,7 @@ import { RadarPlot } from "@repo/viz"
 import { useScenarioExplorerStore } from "../../../store"
 import { useTierChartData } from "../../hooks/useTierChartData"
 
-export default function RadarPanel({ highlightedIds, onScenarioHover }) {
+export default function RadarPanel({ highlightedIds, onChartHover }) {
   const { selectedScenarios, pinnedScenarioIds, showTierZones } =
     useScenarioExplorerStore()
 
@@ -487,7 +487,7 @@ export default function RadarPanel({ highlightedIds, onScenarioHover }) {
       pinnedScenarioIds={pinnedScenarioIds}
       highlightedIds={highlightedIds}
       showTierZones={showTierZones}
-      onScenarioHover={onScenarioHover}
+      onDotHover={handleDotHover}
     />
   )
 }
@@ -548,12 +548,12 @@ export interface RadarPlotProps {
   pinnedScenarioIds?: string[]
   highlightedIds?: string[]
   showTierZones?: boolean
-  onScenarioHover?: (id: string | null) => void
+  onDotHover?: (scenarioId: string, outcome: string, tierValue: number) => void
   // interactive, animate, onReady for capture
 }
 ```
 
-It uses D3 to draw the polygons and labels, exposes a `ResizeObserver` for responsive sizing, and emits hover events back through `onScenarioHover`. It is exported by name from `packages/viz/src/index.ts` so apps can `import { RadarPlot } from "@repo/viz"`.
+It uses D3 to draw the polygons and labels, exposes a `ResizeObserver` for responsive sizing, and emits dot hover events through `onDotHover`. The panel maps those into `onChartHover` for sidebar coordination. It is exported by name from `packages/viz/src/index.ts` so apps can `import { RadarPlot } from "@repo/viz"`.
 
 ### Step 4: wire it up
 
@@ -569,7 +569,7 @@ In `apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx`:
 {exploreMode === "radar" && (
   <RadarPanel
     highlightedIds={highlightedIds}
-    onScenarioHover={handleScenarioHover}
+    onChartHover={onChartHover}
   />
 )}
 ```
@@ -671,34 +671,30 @@ That is it. You do not import the sidebar component. You do not pass selection t
 
 ### Two-way hover
 
-If you want sidebar row hover to highlight chart elements and chart hover to highlight sidebar rows, route both through the orchestrator. `ScenarioExplorer.tsx` already does this for `RadarPanel`. The pattern:
+If you want sidebar row hover to highlight chart elements and chart hover to scroll/highlight sidebar rows, route both through `useExploreHoverCoordination` in the orchestrator. `ScenarioExplorer.tsx` already wires this for Radar, Resilience, and Distribution (equity).
 
-1. Orchestrator holds `highlightedIds` in local state.
-2. Orchestrator passes `onRowHover` to the sidebar. When a sidebar row is hovered, the sidebar calls `onRowHover([id])`. The orchestrator stores it.
-3. Orchestrator passes `highlightedIds` and `onScenarioHover` down to your panel.
-4. The panel emphasizes elements whose id is in `highlightedIds`, and calls `onScenarioHover(id)` when the user hovers a chart element.
+Two state buckets, two directions:
+
+| State | Direction | Consumer |
+|-------|-----------|----------|
+| `highlightedIds` | Sidebar → chart | Panels emphasize matching scenario ids |
+| `hoveredInteraction` | Chart → sidebar | Sidebar scrolls and shows optional outcome + tier detail |
 
 In `ScenarioExplorer.tsx`:
 
 ```tsx
-const [highlightedIds, setHighlightedIds] = useState<string[]>([])
-
-const handleRowHover = useCallback(
-  (ids: string[] | null) => setHighlightedIds(ids ?? []),
-  [],
-)
-
-const handleScenarioHover = useCallback(
-  (id: string | null) =>
-    startTransition(() => setHighlightedIds(id ? [id] : [])),
-  [],
-)
+const {
+  highlightedIds,
+  hoveredInteraction,
+  onSidebarRowHover,
+  onChartHover,
+} = useExploreHoverCoordination()
 
 return (
   <UnifiedToolLayout
     sidebar={
       <ScenarioSelectionSidebar
-        onRowHover={handleRowHover}
+        onRowHover={onSidebarRowHover}
         hoveredInteraction={hoveredInteraction}
       />
     }
@@ -707,7 +703,7 @@ return (
     {exploreMode === "yourTool" && (
       <YourToolPanel
         highlightedIds={highlightedIds}
-        onScenarioHover={handleScenarioHover}
+        onChartHover={onChartHover}
       />
     )}
   </UnifiedToolLayout>
@@ -717,20 +713,24 @@ return (
 In your panel:
 
 ```tsx
+import type { HoveredInteraction } from "../orchestration/useExploreHoverCoordination"
+
 type YourToolPanelProps = {
-  highlightedIds: string[]
-  onScenarioHover: (id: string | null) => void
+  highlightedIds?: Set<string> | null
+  onChartHover?: (info: HoveredInteraction | null) => void
 }
 
 export default function YourToolPanel({
   highlightedIds,
-  onScenarioHover,
+  onChartHover,
 }: YourToolPanelProps) {
-  // ...
+  // Emphasize chart elements whose id is in highlightedIds.
+  // Call onChartHover({ scenarioId, outcome?, tierValue? }) on pointer enter,
+  // and onChartHover(null) on leave.
 }
 ```
 
-Wrapping the orchestrator's `setHighlightedIds` in `startTransition` keeps the sidebar update at low priority, so the chart hover visuals paint before the sidebar reflows. See "Avoiding hover flicker" below for the full set of rules.
+Wrapping the hook's state updates in `startTransition` keeps sidebar reflows low priority so chart hover visuals paint first. See "Avoiding hover flicker" below for D3-specific rules.
 
 ## Wire to the hydroclimate chooser
 
@@ -786,7 +786,7 @@ tooltipRef.current!.style.display = "none"
 
 ### 2. Debounce parent notifications
 
-When a chart calls `onScenarioHover?.(id)`, that typically triggers `setState` in the orchestrator, which re-renders the entire tree. Even if `React.memo` prevents the chart from re-rendering, the parent reconciliation can block the main thread and delay paint of the D3 hover visuals.
+When a chart calls `onChartHover?.(info)`, that typically triggers `setState` in the orchestrator, which re-renders the entire tree. Even if `React.memo` prevents the chart from re-rendering, the parent reconciliation can block the main thread and delay paint of the D3 hover visuals.
 
 - Debounce the notify (80 ms works well) so rapid dot-to-dot movement fires at most one callback.
 - Deduplicate. Track the last notified id in a ref. Skip the callback if hovering a different dot of the same scenario.
@@ -799,7 +799,11 @@ const lastNotifiedIdRef = useRef<string | null>(null)
 if (lastNotifiedIdRef.current !== scenario.id) {
   hoverTimer = setTimeout(() => {
     lastNotifiedIdRef.current = scenario.id
-    onScenarioHoverRef.current?.(scenario.id)
+    onChartHoverRef.current?.({
+      scenarioId: scenario.id,
+      outcome: axis,
+      tierValue,
+    })
   }, 80)
 }
 
@@ -853,21 +857,21 @@ hasAnimatedRef.current = true
 
 ### 6. Keep `updateChart` deps minimal
 
-Every value in `updateChart`'s `useCallback` dependency array is a potential re-render trigger. For callbacks like `onScenarioHover` and `onScenarioClick`, use refs instead of putting them in the dep array.
+Every value in `updateChart`'s `useCallback` dependency array is a potential re-render trigger. For callbacks like `onChartHover` and `onScenarioClick`, use refs instead of putting them in the dep array.
 
 ```tsx
-const onScenarioHoverRef = useRef(onScenarioHover)
+const onChartHoverRef = useRef(onChartHover)
 useEffect(() => {
-  onScenarioHoverRef.current = onScenarioHover
-}, [onScenarioHover])
+  onChartHoverRef.current = onChartHover
+}, [onChartHover])
 
-// Inside updateChart, use onScenarioHoverRef.current, not onScenarioHover.
+// Inside updateChart, use onChartHoverRef.current, not onChartHover.
 ```
 
 ### Quick checklist for new D3 charts
 
 - [ ] Tooltip via ref, not `useState`
-- [ ] `onScenarioHover` and `onScenarioClick` stored in refs, not in `updateChart` deps
+- [ ] `onChartHover` and `onScenarioClick` stored in refs, not in `updateChart` deps
 - [ ] Default prop values hoisted to module constants
 - [ ] Parent uses `startTransition` for hover state updates
 - [ ] `hasAnimatedRef` guards entrance animations

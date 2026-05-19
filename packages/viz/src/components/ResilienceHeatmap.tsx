@@ -202,6 +202,16 @@ export interface ResilienceHeatmapProps {
    * can supply it (or omit it) and the chart works unchanged.
    */
   highlightedRowKeys?: Set<string> | null
+  /**
+   * Column keys to keep at full opacity; columns whose key is not in the
+   * set are dimmed. Used when the horizontal axis is scenarios (e.g.
+   * by-hydroclimate view, aggregate over hydroclimates).
+   */
+  highlightedColKeys?: Set<string> | null
+  /** Emitted when the pointer enters or leaves a row axis tick label. */
+  onRowKeyHover?: (rowKey: string | null) => void
+  /** Emitted when the pointer enters or leaves a column axis tick label. */
+  onColKeyHover?: (colKey: string | null) => void
   /** Row key label formatter override (e.g. regional indent for NOD/SOD). */
   formatRowTick?: (row: ResilienceAxisItem) => string
   /** Optional row/col means for marginal strips. */
@@ -412,6 +422,9 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     onSquareHover,
     onSquareClick,
     highlightedRowKeys = null,
+    highlightedColKeys = null,
+    onRowKeyHover,
+    onColKeyHover,
     formatRowTick = defaultRowTick,
     marginals,
     showMarginals = false,
@@ -441,6 +454,16 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       onCellHoverRef.current = onCellHover
     }, [onCellHover])
+
+    const onRowKeyHoverRef = useRef(onRowKeyHover)
+    useEffect(() => {
+      onRowKeyHoverRef.current = onRowKeyHover
+    }, [onRowKeyHover])
+
+    const onColKeyHoverRef = useRef(onColKeyHover)
+    useEffect(() => {
+      onColKeyHoverRef.current = onColKeyHover
+    }, [onColKeyHover])
 
     // Stash the firstCellRef callback in a ref so `updateChart` can
     // invoke it after it re-renders the cells without having to list
@@ -495,6 +518,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     useEffect(() => {
       highlightedRowKeysRef.current = highlightedRowKeys
     }, [highlightedRowKeys])
+
+    const highlightedColKeysRef = useRef(highlightedColKeys)
+    useEffect(() => {
+      highlightedColKeysRef.current = highlightedColKeys
+    }, [highlightedColKeys])
 
     const cellIndex = useMemo(() => {
       const idx = new Map<string, ResilienceHeatmapCell>()
@@ -926,27 +954,30 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           return set.has(rowKey) ? 1 : 0.35
         }
 
+        const computeColOpacity = (colKey: string): number => {
+          const set = highlightedColKeysRef.current
+          if (!set || set.size === 0) return 1
+          return set.has(colKey) ? 1 : 0.35
+        }
+
         // Cells
         let firstCellEl: SVGRectElement | null = null
         rows.forEach((row) => {
           const y = yScale(row.key) ?? 0
-          const opacity = computeRowOpacity(row.key)
+          const rowOpacity = computeRowOpacity(row.key)
 
-          // Per-row group: lets the visual-only effect update the row's
-          // dim level by writing one `opacity` attribute on the group,
-          // which compounds with each child's `fill-opacity` so cells,
-          // distribution squares, glyph sub-tiles, and inner labels
-          // all dim together without a full SVG rebuild.
+          // Per-row group: row-axis dim applies to the whole row group.
           const rowGroup = g
             .append("g")
             .attr("class", "resilience-row")
             .attr("data-row", row.key)
-            .attr("opacity", opacity)
+            .attr("opacity", rowOpacity)
 
           columns.forEach((col) => {
             const cell = cellIndex.get(`${row.key}|${col.key}`)
             if (!cell) return
             const x = xScale(col.key) ?? 0
+            const cellOpacity = computeColOpacity(col.key)
 
             const resolved = resolveCellFill(cell)
 
@@ -963,6 +994,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
               .attr("stroke", "transparent")
               .attr("stroke-width", 2)
               .attr("cursor", onCellClickRef.current ? "pointer" : "default")
+              .attr("opacity", cellOpacity)
 
             if (!firstCellEl) {
               firstCellEl = rect.node() as SVGRectElement | null
@@ -1383,12 +1415,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           if (row.definitionTooltip && interactiveRef.current) {
             node
               .on("mouseenter", function (event: MouseEvent) {
+                onRowKeyHoverRef.current?.(row.key)
                 showAxisTooltipRef.current(event, row)
               })
               .on("mousemove", function (event: MouseEvent) {
                 positionAxisTooltipRef.current(event)
               })
-              .on("mouseleave", () => hideAxisTooltipRef.current())
+              .on("mouseleave", () => {
+                onRowKeyHoverRef.current?.(null)
+                hideAxisTooltipRef.current()
+              })
+          } else if (onRowKeyHoverRef.current && interactiveRef.current) {
+            node
+              .on("mouseenter", () => onRowKeyHoverRef.current?.(row.key))
+              .on("mouseleave", () => onRowKeyHoverRef.current?.(null))
           }
         })
 
@@ -1442,12 +1482,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           if (col.definitionTooltip && interactiveRef.current) {
             node
               .on("mouseenter", function (event: MouseEvent) {
+                onColKeyHoverRef.current?.(col.key)
                 showAxisTooltipRef.current(event, col)
               })
               .on("mousemove", function (event: MouseEvent) {
                 positionAxisTooltipRef.current(event)
               })
-              .on("mouseleave", () => hideAxisTooltipRef.current())
+              .on("mouseleave", () => {
+                onColKeyHoverRef.current?.(null)
+                hideAxisTooltipRef.current()
+              })
+          } else if (onColKeyHoverRef.current && interactiveRef.current) {
+            node
+              .on("mouseenter", () => onColKeyHoverRef.current?.(col.key))
+              .on("mouseleave", () => onColKeyHoverRef.current?.(null))
           }
         })
 
@@ -1884,6 +1932,20 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         this.setAttribute("opacity", String(op))
       })
     }, [highlightedRowKeys])
+
+    useEffect(() => {
+      const svg = select(svgRef.current)
+      if (svg.empty()) return
+      const set = highlightedColKeys
+      const dimActive = set != null && set.size > 0
+      svg
+        .selectAll<SVGRectElement, unknown>("rect.resilience-cell")
+        .each(function () {
+          const colKey = this.getAttribute("data-col") ?? ""
+          const op = !dimActive ? 1 : set!.has(colKey) ? 1 : 0.35
+          this.setAttribute("opacity", String(op))
+        })
+    }, [highlightedColKeys])
 
     return (
       <div

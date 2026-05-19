@@ -101,17 +101,15 @@ export type ShareItem =
       outcomeCodes: string[]
       /**
        * Which capture surface produced this item. "panel" captures the
-       * whole chart body, the small-multiples kinds capture a single
-       * tile, and "quadrant" captures the Leverage scatter. Absent
-       * values rehydrate to "panel" for backwards-compatible URL round
-       * trips.
+       * whole chart body; the small-multiples kinds capture a single
+       * tile. Absent values rehydrate to "panel" for backwards-compatible
+       * URL round trips.
        */
-      tileScope?: "panel" | "scenario" | "outcome" | "hydroclimate" | "quadrant"
+      tileScope?: "panel" | "scenario" | "outcome" | "hydroclimate"
       /**
        * Identifier of the captured tile when `tileScope` is one of
        * the small-multiples kinds (scenarioId, outcome code, or
-       * hydroclimate value). Omitted for panel and quadrant
-       * captures.
+       * hydroclimate value). Omitted for panel captures.
        */
       tileId?: string
       /** Human-facing label shown in the Share drawer/tab card subtitle. */
@@ -119,7 +117,7 @@ export type ShareItem =
       /**
        * Whether numeric cell values were visible in the heatmap at
        * capture time. Used to match share thumbnails and list
-       * context (not used for quadrant captures).
+       * context.
        */
       showCellNumbers?: boolean
     })

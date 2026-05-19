@@ -80,6 +80,7 @@ import ResiliencePanelChartView, {
   type ResiliencePanelChartViewProps,
   type ResiliencePanelChartViewHandlers,
 } from "./ResiliencePanelChartView"
+import type { HoveredInteraction } from "../../../orchestration/useExploreHoverCoordination"
 import { useResilienceHeatmapTheme } from "./useResilienceHeatmapTheme"
 
 export type ResilienceView =
@@ -87,7 +88,6 @@ export type ResilienceView =
   | "outcome"
   | "hydroclimate"
   | "aggregate"
-  | "quadrant"
 
 /**
  * Which axis of the (scenario, outcome, hydroclimate) cube the
@@ -190,13 +190,6 @@ export type DeltaMode = "none" | "vs_historical" | "vs_baseline"
 
 export type AggregateScope = "all" | "selected"
 
-/**
- * Unit of analysis for the quadrant view.
- * - `outcome`: one dot per outcome, averaged across sibling groups.
- * - `loi`: one dot per location of interest, within a single outcome.
- */
-export type QuadrantUnit = "outcome" | "loi"
-
 export interface ResilienceControlsState {
   view: ResilienceView
   cellEncoding: CellEncoding
@@ -215,8 +208,6 @@ export interface ResilienceControlsState {
   showAllScenarios: boolean
   selectedHydroclimates: ReadonlySet<ResilienceHydroclimate>
   showCellNumbers: boolean
-  quadrantUnit: QuadrantUnit
-  quadrantOutcome: string | null
   /**
    * Outcome mode primary focus. When set, Outcome mode renders a
    * single heatmap for this outcome. When null, Outcome mode shows
@@ -252,7 +243,7 @@ export interface ResilienceControlsState {
 interface ResiliencePanelProps {
   controls: ResilienceControlsState
   highlightedIds?: Set<string> | null
-  onScenarioHover?: (scenarioId: string | null) => void
+  onChartHover?: (info: HoveredInteraction | null) => void
   /**
    * Optional callback for mutating the shared control state. When
    * provided, the floating corner toolbar (transpose and display menu)
@@ -426,10 +417,37 @@ function getMapLinkBlockedMessage(
   return "This cell can't be linked to the map from the current view."
 }
 
+function resolveScenarioIdFromCell(
+  cell: ResilienceHeatmapCell,
+  effectiveView: ResilienceView,
+  aggregateOver: AggregateOver,
+): string | null {
+  if (cell.scenarioId) return cell.scenarioId
+  if (effectiveView === "aggregate") {
+    if (aggregateOver === "outcomes") return cell.rowKey
+    if (aggregateOver === "hydroclimates") return cell.colKey
+  }
+  return null
+}
+
+function hoverPayloadFromCell(
+  cell: ResilienceHeatmapCell,
+  scenarioId: string,
+): HoveredInteraction {
+  const outcome =
+    cell.outcomeCode != null ? getOutcomeName(cell.outcomeCode) : undefined
+  const tierValue = cell.tierLevel ?? cell.continuousValue ?? undefined
+  return {
+    scenarioId,
+    ...(outcome ? { outcome } : {}),
+    ...(tierValue != null ? { tierValue } : {}),
+  }
+}
+
 export default function ResiliencePanel({
   controls,
   highlightedIds = null,
-  onScenarioHover,
+  onChartHover,
   onCaptureReady,
   onCaptureTileReady,
   onCaptureScenarioSoloReady,
@@ -455,9 +473,6 @@ export default function ResiliencePanel({
   } = controls
 
   const { selectedScenarios } = useScenarioExplorerStore()
-  const setHighlightedScenario = useScenarioExplorerStore(
-    (s) => s.setHighlightedScenario,
-  )
   const showResilienceOutcomeSelector = useScenarioExplorerStore(
     (s) => s.showResilienceOutcomeSelector,
   )
@@ -720,9 +735,7 @@ export default function ResiliencePanel({
   // view's visible scenarios so we don't over-fetch. NOD/SOD aggregate
   // rows are skipped because they're already regional roll-ups.
   const loiDistributionEnabled =
-    cellEncoding === "distribution" &&
-    distributionMode === "location" &&
-    view !== "quadrant"
+    cellEncoding === "distribution" && distributionMode === "location"
 
   const loiDistributionScope = useMemo<readonly string[]>(() => {
     if (!loiDistributionEnabled) return []
@@ -1745,31 +1758,38 @@ export default function ResiliencePanel({
 
   // Hover coordination with the sidebar (debounced)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastHoveredIdRef = useRef<string | null>(null)
+  const lastHoverKeyRef = useRef<string | null>(null)
 
-  const notifyHover = useCallback(
-    (scenarioId: string | null) => {
-      if (lastHoveredIdRef.current === scenarioId) return
-      lastHoveredIdRef.current = scenarioId
+  const hoverKey = useCallback(
+    (info: HoveredInteraction | null) =>
+      info
+        ? `${info.scenarioId}|${info.outcome ?? ""}|${info.tierValue ?? ""}`
+        : null,
+    [],
+  )
+
+  const notifyChartHover = useCallback(
+    (info: HoveredInteraction | null) => {
+      const key = hoverKey(info)
+      if (lastHoverKeyRef.current === key) return
+      lastHoverKeyRef.current = key
       if (hoverTimerRef.current) {
         clearTimeout(hoverTimerRef.current)
         hoverTimerRef.current = null
       }
-      if (scenarioId != null) {
+      if (info != null) {
         startTransition(() => {
-          setHighlightedScenario(scenarioId)
-          onScenarioHover?.(scenarioId)
+          onChartHover?.(info)
         })
       } else {
         hoverTimerRef.current = setTimeout(() => {
           startTransition(() => {
-            setHighlightedScenario(null)
-            onScenarioHover?.(null)
+            onChartHover?.(null)
           })
         }, 150)
       }
     },
-    [setHighlightedScenario, onScenarioHover],
+    [hoverKey, onChartHover],
   )
 
   useEffect(() => {
@@ -1781,19 +1801,54 @@ export default function ResiliencePanel({
   const handleCellHover = useCallback(
     (cell: ResilienceHeatmapCell | null) => {
       if (!cell) {
-        notifyHover(null)
+        notifyChartHover(null)
         return
       }
-      if (view === "scenario") {
-        notifyHover(effectiveFocusScenarioId)
-      } else if (view === "outcome") {
-        notifyHover(cell.scenarioId ?? null)
-      } else {
-        // Aggregate view: no single scenario to highlight.
-        notifyHover(null)
+      const scenarioId = resolveScenarioIdFromCell(
+        cell,
+        effectiveView,
+        aggregateOver,
+      )
+      if (!scenarioId) {
+        notifyChartHover(null)
+        return
       }
+      notifyChartHover(hoverPayloadFromCell(cell, scenarioId))
     },
-    [view, effectiveFocusScenarioId, notifyHover],
+    [effectiveView, aggregateOver, notifyChartHover],
+  )
+
+  const handleTileHover = useCallback(
+    (tileId: string | null) => {
+      if (!tileId) {
+        notifyChartHover(null)
+        return
+      }
+      notifyChartHover({ scenarioId: tileId })
+    },
+    [notifyChartHover],
+  )
+
+  const handleRowKeyHover = useCallback(
+    (rowKey: string | null) => {
+      if (!rowKey) {
+        notifyChartHover(null)
+        return
+      }
+      notifyChartHover({ scenarioId: rowKey })
+    },
+    [notifyChartHover],
+  )
+
+  const handleColKeyHover = useCallback(
+    (colKey: string | null) => {
+      if (!colKey) {
+        notifyChartHover(null)
+        return
+      }
+      notifyChartHover({ scenarioId: colKey })
+    },
+    [notifyChartHover],
   )
 
   // Aggregate view has no "current" scenario/hydroclimate - every column
@@ -1989,7 +2044,7 @@ export default function ResiliencePanel({
           hoveredSquareHighlightRef.current = null
           emitLocationHighlights()
         } else {
-          notifyHover(null)
+          notifyChartHover(null)
         }
         return
       }
@@ -1998,14 +2053,15 @@ export default function ResiliencePanel({
         hoveredSquareHighlightRef.current = built?.highlight ?? null
         emitLocationHighlights()
       } else {
-        // "scenario" mode - drive sidebar highlight + scroll.
         const sid = info.entry.scenarioId
-        if (sid) notifyHover(sid)
+        if (sid) {
+          notifyChartHover(hoverPayloadFromCell(info.cell, sid))
+        }
       }
     },
     [
       distributionMode,
-      notifyHover,
+      notifyChartHover,
       buildLocationHighlight,
       emitLocationHighlights,
     ],
@@ -2111,11 +2167,50 @@ export default function ResiliencePanel({
     }
   }, [])
 
-  // Highlighted rows (sidebar hover sync). Only meaningful in outcome view
-  // where rows are scenarios.
-  const highlightedRowKeys = useMemo<Set<string> | null>(() => {
+  // Sidebar → chart: emphasize scenario rows, columns, or tiles.
+  const highlightedRowKeysFromSidebar = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
     if (view === "outcome") return new Set(highlightedIds)
+    if (
+      effectiveView === "aggregate" &&
+      aggregateOver === "outcomes" &&
+      !transposed
+    ) {
+      return new Set(highlightedIds)
+    }
+    if (
+      effectiveView === "aggregate" &&
+      aggregateOver === "hydroclimates" &&
+      transposed
+    ) {
+      return new Set(highlightedIds)
+    }
+    return null
+  }, [highlightedIds, view, effectiveView, aggregateOver, transposed])
+
+  const highlightedColKeysFromSidebar = useMemo<Set<string> | null>(() => {
+    if (!highlightedIds || highlightedIds.size === 0) return null
+    if (view === "hydroclimate") return new Set(highlightedIds)
+    if (
+      effectiveView === "aggregate" &&
+      aggregateOver === "hydroclimates" &&
+      !transposed
+    ) {
+      return new Set(highlightedIds)
+    }
+    if (
+      effectiveView === "aggregate" &&
+      aggregateOver === "outcomes" &&
+      transposed
+    ) {
+      return new Set(highlightedIds)
+    }
+    return null
+  }, [highlightedIds, view, effectiveView, aggregateOver, transposed])
+
+  const highlightedTileIdsFromSidebar = useMemo<Set<string> | null>(() => {
+    if (!highlightedIds || highlightedIds.size === 0) return null
+    if (view === "scenario") return new Set(highlightedIds)
     return null
   }, [highlightedIds, view])
 
@@ -2126,10 +2221,14 @@ export default function ResiliencePanel({
   }, [view, selectedScenarios])
 
   const effectiveRowHighlight = useMemo<Set<string> | null>(() => {
-    if (highlightedRowKeys && highlightedRowKeys.size > 0)
-      return highlightedRowKeys
+    if (
+      highlightedRowKeysFromSidebar &&
+      highlightedRowKeysFromSidebar.size > 0
+    ) {
+      return highlightedRowKeysFromSidebar
+    }
     return dimRowKeys
-  }, [highlightedRowKeys, dimRowKeys])
+  }, [highlightedRowKeysFromSidebar, dimRowKeys])
 
   const formatRowTick = useCallback(
     (row: ResilienceAxisItem) => {
@@ -2646,6 +2745,7 @@ export default function ResiliencePanel({
         columns: displayByScenarioColumns,
         tiles: displayByScenarioTiles,
         tileAspect: transposed ? "tall" : "wide",
+        highlightedTileIds: highlightedTileIdsFromSidebar,
       }
     }
     if (effectiveView === "outcome") {
@@ -2656,6 +2756,7 @@ export default function ResiliencePanel({
         columns: displayByOutcomeColumns,
         tiles: displayByOutcomeTiles,
         tileAspect: transposed ? "wide" : "tall",
+        highlightedRowKeys: effectiveRowHighlight,
       }
     }
     if (effectiveView === "hydroclimate") {
@@ -2667,6 +2768,7 @@ export default function ResiliencePanel({
         tiles: displayByHydroclimateTiles,
         tileAspect: transposed ? "tall" : "wide",
         columnLabelRotation: labelRotation,
+        highlightedColKeys: highlightedColKeysFromSidebar,
       }
     }
     return {
@@ -2676,7 +2778,18 @@ export default function ResiliencePanel({
       cells: displayCells,
       marginals: displayMarginals,
       showMarginals,
-      highlightedRowKeys: transposed ? undefined : effectiveRowHighlight,
+      highlightedRowKeys: transposed
+        ? highlightedColKeysFromSidebar
+        : highlightedRowKeysFromSidebar,
+      highlightedColKeys: transposed
+        ? highlightedRowKeysFromSidebar
+        : highlightedColKeysFromSidebar,
+      scenarioRowAxisHover:
+        (aggregateOver === "outcomes" && !transposed) ||
+        (aggregateOver === "hydroclimates" && transposed),
+      scenarioColAxisHover:
+        (aggregateOver === "hydroclimates" && !transposed) ||
+        (aggregateOver === "outcomes" && transposed),
       columnLabelRotation: labelRotation,
     }
   }, [
@@ -2701,6 +2814,9 @@ export default function ResiliencePanel({
     displayMarginals,
     showMarginals,
     effectiveRowHighlight,
+    highlightedRowKeysFromSidebar,
+    highlightedColKeysFromSidebar,
+    highlightedTileIdsFromSidebar,
   ])
 
   const chartViewVisuals = useMemo<
@@ -2784,6 +2900,15 @@ export default function ResiliencePanel({
   const liveHandlers: ResiliencePanelChartViewHandlers = {
     onCellHover: handleCellHover,
     onCellClick: isMapVisible ? handleCellClick : undefined,
+    onTileHover: view === "scenario" ? handleTileHover : undefined,
+    onRowKeyHover:
+      view === "outcome" || effectiveView === "aggregate"
+        ? handleRowKeyHover
+        : undefined,
+    onColKeyHover:
+      view === "hydroclimate" || effectiveView === "aggregate"
+        ? handleColKeyHover
+        : undefined,
     onSquareHover: handleSquareHover,
     onSquareClick: handleSquareClick,
     renderTileActions: renderTileShareAction,
@@ -3229,43 +3354,38 @@ function ResiliencePanelTitle({
   let title: string
   let subtitle: string
 
-  if (view === "quadrant") {
-    title = "Leverage"
-    subtitle = "Climate sensitivity against operational range"
-  } else {
-    const zDim: ZDim =
-      view === "aggregate"
-        ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
-        : (view as ZDim)
-    const zMode: ZMode = view === "aggregate" ? "aggregate" : "facet"
+  const zDim: ZDim =
+    view === "aggregate"
+      ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
+      : (view as ZDim)
+  const zMode: ZMode = view === "aggregate" ? "aggregate" : "facet"
 
-    // Mirror the sentence header's empty-selection fallback so the
-    // title reads aggregate when the panel is actually showing the
-    // library aggregate.
-    const effectiveMode: ZMode =
-      zMode === "facet" && zDim === "scenario" && scenarioCount === 0
-        ? "aggregate"
-        : zMode
+  // Mirror the sentence header's empty-selection fallback so the
+  // title reads aggregate when the panel is actually showing the
+  // library aggregate.
+  const effectiveMode: ZMode =
+    zMode === "facet" && zDim === "scenario" && scenarioCount === 0
+      ? "aggregate"
+      : zMode
 
-    title =
-      effectiveMode === "facet"
-        ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
-        : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
+  title =
+    effectiveMode === "facet"
+      ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
+      : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
 
-    const scopeBits: string[] = []
-    if (scenarioCount > 0) {
-      scopeBits.push(
-        `${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`,
-      )
-    } else {
-      scopeBits.push("entire scenario library")
-    }
-    scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
+  const scopeBits: string[] = []
+  if (scenarioCount > 0) {
     scopeBits.push(
-      `${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`,
+      `${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`,
     )
-    subtitle = scopeBits.join(" · ")
+  } else {
+    scopeBits.push("entire scenario library")
   }
+  scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
+  scopeBits.push(
+    `${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`,
+  )
+  subtitle = scopeBits.join(" · ")
 
   return (
     <Box

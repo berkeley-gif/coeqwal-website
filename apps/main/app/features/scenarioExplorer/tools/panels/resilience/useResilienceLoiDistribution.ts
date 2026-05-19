@@ -9,8 +9,7 @@
  * and assembles, per (outcome, hc), a list of `ResilienceGlyphEntry`
  * objects - one per LOI, with the tier level aggregated across scope.
  *
- * Mirrors the data-loading pattern of `useResilienceLoiSensitivity`:
- * preload SWR keys and dedupe in-flight requests. Gated by `enabled`
+ * Preloads SWR keys and dedupes in-flight requests. Gated by `enabled`
  * so we only fetch when the user is actually looking at this encoding.
  */
 

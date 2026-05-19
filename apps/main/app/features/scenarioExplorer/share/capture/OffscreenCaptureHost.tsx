@@ -78,7 +78,7 @@ export interface OffscreenCaptureInput {
    * How to assemble the captured SVG.
    * - `single` (default): expect exactly one `<svg>` in the host
    *   and serialize it. Used by single-chart variants (radar,
-   *   equity TierGrid, resilience tile, quadrant).
+   *   equity TierGrid, resilience tile).
    * - `compose`: compose every descendant `<svg>` into one
    *   stand-alone SVG sized to the host. Used by composed-React
    *   variants like the resilience panel (small-multiples grid)

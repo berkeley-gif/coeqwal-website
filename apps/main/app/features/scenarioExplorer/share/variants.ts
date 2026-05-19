@@ -163,8 +163,7 @@ export interface VariantHandler<T extends ShareItem> {
    * `ShareDataRehydrationHost` with every share item of this variant
    * that is currently missing `cachedChartData`. Expected to backfill
    * `cachedChartData` via `context.updateShareItem` once the resolver
-   * has data. Items whose data cannot be resolved (e.g. resilience
-   * quadrant captures with no live equivalent) are left as-is and
+   * has data. Items whose data cannot be resolved are left as-is and
    * silently skipped from the bulk ZIP.
    *
    * Component-shaped (rather than hook-shaped) so each variant can

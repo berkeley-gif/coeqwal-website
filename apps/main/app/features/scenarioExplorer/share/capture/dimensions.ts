@@ -24,7 +24,6 @@ export const CAPTURE_DIMENSIONS = {
   equity: { width: 900, height: 600 },
   resilienceTile: { width: 800, height: 520 },
   resiliencePanel: { width: 1200, height: 800 },
-  quadrant: { width: 800, height: 600 },
   barChartRow: { width: 720, height: 80 },
 } as const satisfies Record<string, CaptureSize>
 

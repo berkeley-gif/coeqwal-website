@@ -6,7 +6,6 @@
 import type { ShareItem } from "../../store"
 import { RESILIENCE_HYDROCLIMATES } from "../../tools/panels/resilience/useResilienceMatrix"
 import type { ResilienceHeatmapChartData } from "../../tools/panels/resilience/ResiliencePanel"
-import type { ResilienceQuadrantChartData } from "../../tools/panels/resilience/ResilienceQuadrantPanel"
 
 export type ResilienceShareItem = Extract<ShareItem, { type: "resilience" }>
 
@@ -40,7 +39,7 @@ export interface ResilienceShareCardContent {
   thumbnailDisclaimer?: string
   /** Prefix-styled chips: Hydro, Scenarios, Outcomes. */
   chips: string[]
-  /** Whether to mount ShareResilienceLiveChart (no PNG and not quadrant). */
+  /** Whether to mount ShareResilienceLiveChart when no PNG is cached. */
   showLiveAggregateFallback: boolean
   /** When true, show `thumbnailDisclaimer` under the live chart. */
   showThumbnailDisclaimer: boolean
@@ -53,26 +52,15 @@ const PANEL_VIEW_HEADLINE: Record<string, string> = {
   hydroclimate: "By hydroclimate",
 }
 
-function isQuadrantChartData(d: unknown): d is ResilienceQuadrantChartData {
-  return (
-    typeof d === "object" &&
-    d !== null &&
-    (d as { kind?: string }).kind === "resilience" &&
-    (d as { view?: string }).view === "quadrant"
-  )
-}
-
 function isHeatmapChartData(d: unknown): d is ResilienceHeatmapChartData {
   return (
     typeof d === "object" &&
     d !== null &&
-    (d as { kind?: string }).kind === "resilience" &&
-    (d as { view?: string }).view !== "quadrant"
+    (d as { kind?: string }).kind === "resilience"
   )
 }
 
 function encodingLabel(cellEncoding: string): string {
-  if (cellEncoding === "quadrant") return "Quadrant"
   return cellEncoding.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())
 }
 
@@ -123,11 +111,9 @@ export function getResilienceShareCardContent(
   lookups: ResilienceShareCardLookups,
 ): ResilienceShareCardContent {
   const cached = item.cachedChartData
-  const quadrantCached = isQuadrantChartData(cached) ? cached : null
   const heatmapCached = isHeatmapChartData(cached) ? cached : null
 
-  const showLiveAggregateFallback =
-    !item.cachedImageDataUrl && item.view !== "quadrant"
+  const showLiveAggregateFallback = !item.cachedImageDataUrl
 
   const needsDisclaimer =
     showLiveAggregateFallback &&
@@ -144,41 +130,8 @@ export function getResilienceShareCardContent(
   )
   const outcomeChip = buildOutcomeChip(item.outcomeCodes, lookups.outcomeLabel)
   const chips = [hydroChip, scenarioChip, outcomeChip]
-  if (item.view !== "quadrant" && item.showCellNumbers) {
+  if (item.showCellNumbers) {
     chips.push("Cell values on")
-  }
-
-  if (item.view === "quadrant") {
-    const headline =
-      quadrantCached?.tileLabel ?? item.tileLabel ?? "Leverage quadrant"
-
-    const enc = encodingLabel(item.cellEncoding)
-    const scope =
-      item.scenarioIds.length === 0
-        ? "Full library"
-        : item.scenarioIds.length === 1
-          ? "1 scenario in scope"
-          : `${item.scenarioIds.length} scenarios in scope`
-
-    let subtitle: string
-    if (quadrantCached?.xLabel && quadrantCached?.yLabel) {
-      const axisShort = (s: string) => {
-        const i = s.indexOf("(")
-        return i > 0 ? s.slice(0, i).trim() : s
-      }
-      subtitle = `${scope} · ${axisShort(quadrantCached.xLabel)} / ${axisShort(quadrantCached.yLabel)}`
-    } else {
-      subtitle = `${enc} · ${scope}`
-    }
-
-    return {
-      headline,
-      subtitle,
-      chips,
-      showLiveAggregateFallback: false,
-      showThumbnailDisclaimer: false,
-      thumbnailDisclaimer: undefined,
-    }
   }
 
   const tileLabelFromItem = item.tileLabel
@@ -228,11 +181,6 @@ export function getResilienceShareCardContent(
 
   const subtitle = `${enc} · ${scope}`
 
-  // Resolve the scenario definition for single-scenario tile cards
-  // so the resilience card matches the bar chart and radar cards
-  // (longer context line under the headline). Falls back to an
-  // undefined definition when the lookup or the scenario id is
-  // missing; the consumer treats undefined as "no extra line".
   let scenarioDefinition: string | undefined
   if (
     item.tileScope === "scenario" &&

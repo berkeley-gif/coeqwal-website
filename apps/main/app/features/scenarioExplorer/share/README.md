@@ -58,7 +58,7 @@ discriminated union has a variant per chart kind:
 - `barChart` (decile / bar / average view of one scenario)
 - `radar` (single trace or many overlaid traces on one chart)
 - `equity` (distribution view; renders via the snapshot card)
-- `resilience` (heatmap panel + small multiples + leverage scatter)
+- `resilience` (heatmap panel + small multiples)
 
 Every variant captures `cachedSvg` (serialized SVG with computed styles
 inlined) and `cachedImageDataUrl` (rasterized PNG companion) at share
@@ -195,9 +195,8 @@ should follow the same pattern; new flags accumulating one per quirk
 will rot fast.
 
 Snapshot wrappers for the visualizations shipped from `@repo/viz`
-live in `packages/viz/src/components/` (`RadarPlotSnapshot`,
-`ResilienceHeatmapSnapshot`, `TierGridSnapshot`,
-`ResilienceQuadrantSnapshot`). For locally composed views, define
+live in `packages/viz/src/components/` (`RadarPlotSnapshot`, `ResilienceHeatmapSnapshot`,
+`TierGridSnapshot`). For locally composed views, define
 the snapshot inside the feature folder
 (`tools/panels/resilience/ResiliencePanelChartView`,
 `tools/panels/list/grid/BarChartRowSnapshot`). Either pattern is fine; the
@@ -481,7 +480,7 @@ CSV export for the whole tray flows through
 which iterates the items and asks each handler's `exportCsv` for its
 body. Per-variant CSV body builders (`barChartDataToCSV`,
 `radarDataToCSV`, `equityDataToCSV`,
-`resilienceHeatmapDataToCSV`, `resilienceQuadrantDataToCSV`) live in
+`resilienceHeatmapDataToCSV`) live in
 the same file and are imported by the handlers; they are pure
 string-builders so the same code drives single-item and bulk export.
 
@@ -519,8 +518,8 @@ consume). Each rehydrator writes back through
 `useShareDataReady(items)` is the gate the share panel uses on the
 "Download all data" button: it returns `false` while any item with a
 registered `DataRehydrator` still lacks `cachedChartData`. Items
-without a rehydrator (resilience quadrant today) count as ready
-without blocking the user; they're silently skipped from the ZIP.
+without a rehydrator count as ready without blocking the user; they're
+silently skipped from the ZIP.
 
 ### CSV pipeline conventions
 
@@ -610,7 +609,7 @@ existing variants:
 | `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename.         |
 | `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                                    |
 | `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                           |
-| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate` / `quadrant`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it). |
+| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it). |
 
 When in doubt: include scenario identity, the chosen hydroclimate,
 and any boolean toggle that changes the chart content (overlay on/off,
@@ -629,7 +628,7 @@ Do not pull it into share variants.
 `ShareItem["type"]` to one entry in `CAPTURE_DIMENSIONS` via the
 handler's `rasterDimensionsKey`. That's fine for `barChart`, `radar`,
 and `equity`, which capture at one fixed size. It rounds resilience
-panel / single-tile / quadrant captures down to one shared size
+panel / single-tile captures down to one shared size
 (`resiliencePanel`) when PNG fallback rasterization happens — a
 URL-restored resilience tile rasterizes against the panel size, not
 its own size.
@@ -642,7 +641,7 @@ URL-restored resilience tile, which is rare). When that becomes a
 real problem, replace `rasterDimensionsKey` with an item-level
 resolver: `rasterDimensions: (item) => CaptureSize`. The handler
 can then look at `item.tileScope` (panel / scenario / outcome /
-hydroclimate / quadrant) and pick the correct
+hydroclimate) and pick the correct
 `CAPTURE_DIMENSIONS` entry. **Out of scope for now.**
 
 ## Persistence

@@ -1,22 +1,23 @@
 "use client"
 
 /**
- * ScenarioExplorer - Content area for the Explore tab
+ * ScenarioExplorer - Explore tab tool area
  *
- * Navigation (ExploreSubNav) has been lifted to the page shell so it
- * participates in the sticky stacking alongside SmoothTabs. This
- * component only renders the active view content.
+ * Note that tool navigation (ExploreSubNav) has been lifted to the page shell so it
+ * can be part of the sticky stacking alongside SmoothTabs. This
+ * component renders the active view in the tool tab area.
  *
- * All explore modes route through UnifiedToolLayout:
+ * All explore toolmodes route through UnifiedToolLayout:
  *   - List mode: no sidebar, ToolToolbar (because of its grid layout)
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + ChartControlsBar
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Box, useTheme, icons } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
 import { ErrorFallback } from "@repo/ui"
 import GetStartedView from "./getStarted/GetStartedView"
+import { useExploreHoverCoordination } from "./orchestration/useExploreHoverCoordination"
 import UnifiedToolLayout from "./tools/chrome/layout/UnifiedToolLayout"
 import ToolToolbar from "./tools/chrome/toolbar/ToolToolbar"
 import ChartControlsBar from "./tools/chrome/layout/ChartControlsBar"
@@ -24,14 +25,18 @@ import ScenarioSelectionSidebar from "./tools/chrome/sidebar/ScenarioSelectionSi
 import ShareDrawer from "./share/ShareDrawer"
 import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
 import ToolTour from "./tools/chrome/overlays/ToolTour"
+import { InlineToggleChip } from "./tools/chrome/chips/InlineToggleChip"
+import { SaveSnapshotButton } from "./tools/chrome/SaveSnapshotButton"
+import { SimpleButton } from "./tools/chrome/SimpleButton"
+import { RadarTourAnchor } from "./tools/chrome/RadarTourAnchor"
 import {
   TourAnchorProvider,
   useTourAnchor,
 } from "./tools/tour/TourAnchorContext"
+import { BASELINE_SCENARIO_ID } from "./constants"
 import {
   EquityPanel,
   ResiliencePanel,
-  ResilienceQuadrantPanel,
   RadarPanel,
   ListView,
   DataExplorerView,
@@ -43,7 +48,6 @@ import type {
   ResilienceControlsState,
   ResilienceCaptureFn,
   ResilienceTileCaptureFn,
-  ResilienceQuadrantCaptureFn,
   ResilienceScenarioSoloCaptureFn,
 } from "./tools"
 import { captureEquityOffscreen } from "./tools/panels/equity/OffscreenEquityCapture"
@@ -54,47 +58,6 @@ import { useScenarioExplorerStore } from "./store"
 import type { ShareItem } from "./store"
 import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./tools/hooks/usePrefetchTiers"
-
-function SimpleButton({
-  label,
-  onClick,
-}: {
-  label: string
-  onClick: () => void
-}) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        px: 1.25,
-        py: 0.5,
-        border: "none",
-        borderRadius: "12px",
-        cursor: "pointer",
-        fontSize: "0.8125rem",
-        fontWeight: 500,
-        lineHeight: 1.3,
-        whiteSpace: "nowrap",
-        "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-          color: theme.palette.blue.bright,
-        },
-      }}
-    >
-      {label}
-    </Box>
-  )
-}
-
-import { InlineToggleChip } from "./tools/chrome/chips/InlineToggleChip"
 
 export default function ScenarioExplorer() {
   return (
@@ -157,40 +120,16 @@ function ScenarioExplorerInner() {
   // Child elements opt back in with pointer-events:auto as needed.
   const isMapPassThrough = isGetStartedMapMode || isExploreMapMode
 
-  /**
-   * Hover coordination (sidebar ↔ tool panels in non-list modes).
-   * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
-   * Charts must keep `chosenIds` (selected scenarios) visible when this is set -
-   * it adds emphasis for hovered IDs. It does not replace selection visibility.
-   */
-  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
-
-  const [hoveredInteraction, setHoveredInteraction] = useState<{
-    scenarioId: string
-    outcome?: string
-    tierValue?: number
-  } | null>(null)
+  const {
+    highlightedIds,
+    hoveredInteraction,
+    onSidebarRowHover,
+    onChartHover,
+  } = useExploreHoverCoordination()
 
   const [radarScenarioColors, setRadarScenarioColors] = useState<
     Record<string, string>
   >({})
-
-  const handleSidebarRowHover = useCallback((ids: string[] | null) => {
-    setHighlightedIds(ids ? new Set(ids) : null)
-  }, [])
-
-  const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
-    setHoveredInteraction(scenarioId ? { scenarioId } : null)
-  }, [])
-
-  const handleOutcomeHover = useCallback(
-    (
-      info: { scenarioId: string; outcome: string; tierValue: number } | null,
-    ) => {
-      setHoveredInteraction(info)
-    },
-    [],
-  )
 
   const {
     highlightBaseline,
@@ -252,7 +191,7 @@ function ScenarioExplorerInner() {
   // Toolbar "save snapshot" button. Defaults to the baseline when no
   // scenario is in focus to mirror EquityPanel's rendering contract.
   const handleEquitySnapshot = useCallback(() => {
-    const focused = equityFocusScenario ?? "s0020"
+    const focused = equityFocusScenario ?? BASELINE_SCENARIO_ID
     if (!focused) return
     void stageEquityShareItem(focused)
   }, [equityFocusScenario, stageEquityShareItem])
@@ -327,18 +266,12 @@ function ScenarioExplorerInner() {
     [],
   )
 
-  // Resilience capture plumbing. Three separate refs so the toolbar
-  // "save snapshot" button can dispatch to whichever panel is
-  // currently mounted (heatmap vs. quadrant vs. per-tile). Each ref
-  // is populated by the corresponding panel's onCaptureReady
-  // callback on mount, and cleared implicitly on unmount since the
-  // panel instance goes away.
+  // Resilience capture plumbing. Refs let the toolbar "save snapshot"
+  // button and sidebar share actions dispatch to the mounted panel.
   const resilienceCaptureRef = useRef<ResilienceCaptureFn | null>(null)
   const resilienceTileCaptureRef = useRef<ResilienceTileCaptureFn | null>(null)
   const resilienceScenarioSoloCaptureRef =
     useRef<ResilienceScenarioSoloCaptureFn | null>(null)
-  const resilienceQuadrantCaptureRef =
-    useRef<ResilienceQuadrantCaptureFn | null>(null)
 
   const handleResilienceCaptureReady = useCallback(
     (capture: ResilienceCaptureFn) => {
@@ -361,20 +294,13 @@ function ScenarioExplorerInner() {
     [],
   )
 
-  const handleResilienceQuadrantCaptureReady = useCallback(
-    (capture: ResilienceQuadrantCaptureFn) => {
-      resilienceQuadrantCaptureRef.current = capture
-    },
-    [],
-  )
-
   // Resilience heatmap controls (panel-local state, lifted here so the
   // toolbar and panel share one source of truth without store changes).
   // Default view is Aggregate because the sidebar starts empty. The
   // sync effect below flips to "scenario" the moment the sidebar has
   // at least one scenario selected, and back to "aggregate" when the
-  // selection is cleared. Explicit user choices of "outcome" or
-  // "quadrant" are preserved by the effect.
+  // selection is cleared. Explicit user choices of "outcome" are
+  // preserved by the effect.
   const [resilienceControls, setResilienceControls] =
     useState<ResilienceControlsState>({
       view: "aggregate",
@@ -387,8 +313,6 @@ function ScenarioExplorerInner() {
       showAllScenarios: false,
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
       showCellNumbers: false,
-      quadrantUnit: "outcome",
-      quadrantOutcome: "CWS_DEL",
       primaryOutcomeCode: null,
       compareOutcomeCodes: [],
       expandedRegionalOutcomes: [],
@@ -408,16 +332,11 @@ function ScenarioExplorerInner() {
       id: `resilience-${Date.now()}`,
       type: "resilience" as const,
       view: resilienceControls.view,
-      cellEncoding:
-        resilienceControls.view === "quadrant"
-          ? "quadrant"
-          : resilienceControls.cellEncoding,
+      cellEncoding: resilienceControls.cellEncoding,
       scenarioIds: [...selectedScenarios],
       hydroclimates: Array.from(resilienceControls.selectedHydroclimates),
       outcomeCodes: resilienceVisibleOutcomes,
-      ...(resilienceControls.view !== "quadrant"
-        ? { showCellNumbers: resilienceControls.showCellNumbers }
-        : {}),
+      showCellNumbers: resilienceControls.showCellNumbers,
     }
 
     let capture: {
@@ -425,34 +344,19 @@ function ScenarioExplorerInner() {
       dataUrl?: string
       chartData?: Record<string, unknown>
       tileLabel?: string
-      tileScope?: "panel" | "quadrant"
+      tileScope?: "panel"
     } = {}
 
-    if (resilienceControls.view === "quadrant") {
-      const result = await resilienceQuadrantCaptureRef.current?.()
-      if (result) {
-        capture = {
-          svg: result.svg,
-          dataUrl: result.dataUrl,
-          chartData: result.chartData as unknown as Record<string, unknown>,
-          tileLabel: result.chartData.tileLabel,
-          tileScope: "quadrant",
-        }
-      } else {
-        capture = { tileScope: "quadrant" }
+    const result = await resilienceCaptureRef.current?.()
+    if (result) {
+      capture = {
+        svg: result.svg,
+        dataUrl: result.dataUrl,
+        chartData: result.chartData as unknown as Record<string, unknown>,
+        tileScope: "panel",
       }
     } else {
-      const result = await resilienceCaptureRef.current?.()
-      if (result) {
-        capture = {
-          svg: result.svg,
-          dataUrl: result.dataUrl,
-          chartData: result.chartData as unknown as Record<string, unknown>,
-          tileScope: "panel",
-        }
-      } else {
-        capture = { tileScope: "panel" }
-      }
+      capture = { tileScope: "panel" }
     }
 
     const item: ShareItem = {
@@ -603,42 +507,10 @@ function ScenarioExplorerInner() {
             />
           </RadarTourAnchor>
           <RadarTourAnchor anchorId="radar.capture">
-            <Box
-              component="button"
-              type="button"
+            <SaveSnapshotButton
               disabled={!canCaptureRadar}
-              onClick={() => radarCaptureRef.current?.()}
-              aria-label="save snapshot"
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                px: 1.25,
-                py: 0.5,
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                lineHeight: 1.3,
-                whiteSpace: "nowrap",
-                color: theme.palette.grey[800],
-                background: theme.palette.grey[200],
-                cursor: canCaptureRadar ? "pointer" : "default",
-                opacity: canCaptureRadar ? 1 : 0.4,
-                transition: "all 150ms ease",
-                "&:hover": {
-                  background: canCaptureRadar
-                    ? theme.palette.interaction.selectedBackground
-                    : undefined,
-                  color: canCaptureRadar
-                    ? theme.palette.blue.bright
-                    : undefined,
-                },
-              }}
-            >
-              <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-              save snapshot
-            </Box>
+              onClick={() => void radarCaptureRef.current?.()}
+            />
           </RadarTourAnchor>
         </ChartControlsBar>
       )
@@ -667,40 +539,10 @@ function ScenarioExplorerInner() {
             label="Clear Map Selection"
             onClick={() => mapActions.clearLocationHighlights()}
           />
-          <Box
-            component="button"
-            type="button"
+          <SaveSnapshotButton
             disabled={!canSnapshot}
             onClick={handleEquitySnapshot}
-            aria-label="save snapshot"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              px: 1.25,
-              py: 0.5,
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              lineHeight: 1.3,
-              whiteSpace: "nowrap",
-              color: theme.palette.grey[800],
-              background: theme.palette.grey[200],
-              cursor: canSnapshot ? "pointer" : "default",
-              opacity: canSnapshot ? 1 : 0.4,
-              transition: "all 150ms ease",
-              "&:hover": {
-                background: canSnapshot
-                  ? theme.palette.interaction.selectedBackground
-                  : undefined,
-                color: canSnapshot ? theme.palette.blue.bright : undefined,
-              },
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-            save snapshot
-          </Box>
+          />
         </ChartControlsBar>
       )
     }
@@ -789,7 +631,7 @@ function ScenarioExplorerInner() {
                           : undefined
                       }
                       hoveredInteraction={hoveredInteraction}
-                      onRowHover={handleSidebarRowHover}
+                      onRowHover={onSidebarRowHover}
                       singleSelect={exploreMode === "equity"}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
                       onCaptureRadarScenarios={handleCaptureRadarScenarios}
@@ -831,16 +673,11 @@ function ScenarioExplorerInner() {
                     />
                   }
                 >
-                  {isListMode && (
-                    <ListView
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                    />
-                  )}
+                  {isListMode && <ListView highlightedIds={highlightedIds} />}
                   {exploreMode === "radar" && (
                     <RadarPanel
                       highlightedIds={highlightedIds}
-                      onOutcomeHover={handleOutcomeHover}
+                      onChartHover={onChartHover}
                       onScenarioColors={setRadarScenarioColors}
                       onCaptureReady={handleRadarCaptureReady}
                       onSingleCaptureReady={handleRadarSingleCaptureReady}
@@ -851,30 +688,26 @@ function ScenarioExplorerInner() {
                       }
                     />
                   )}
-                  {exploreMode === "equity" && <EquityPanel />}
-                  {exploreMode === "resilience" &&
-                    (resilienceControls.view === "quadrant" ? (
-                      <ResilienceQuadrantPanel
-                        controls={resilienceControls}
-                        onControlsChange={handleResilienceControlsChange}
-                        highlightedIds={highlightedIds}
-                        onScenarioHover={handleToolScenarioHover}
-                        onCaptureReady={handleResilienceQuadrantCaptureReady}
-                      />
-                    ) : (
-                      <ResiliencePanel
-                        controls={resilienceControls}
-                        highlightedIds={highlightedIds}
-                        onScenarioHover={handleToolScenarioHover}
-                        onControlsChange={handleResilienceControlsChange}
-                        onCaptureReady={handleResilienceCaptureReady}
-                        onCaptureTileReady={handleResilienceTileCaptureReady}
-                        onCaptureScenarioSoloReady={
-                          handleResilienceScenarioSoloCaptureReady
-                        }
-                        onTileShare={handleResilienceTileSnapshot}
-                      />
-                    ))}
+                  {exploreMode === "equity" && (
+                    <EquityPanel
+                      highlightedIds={highlightedIds}
+                      onChartHover={onChartHover}
+                    />
+                  )}
+                  {exploreMode === "resilience" && (
+                    <ResiliencePanel
+                      controls={resilienceControls}
+                      highlightedIds={highlightedIds}
+                      onChartHover={onChartHover}
+                      onControlsChange={handleResilienceControlsChange}
+                      onCaptureReady={handleResilienceCaptureReady}
+                      onCaptureTileReady={handleResilienceTileCaptureReady}
+                      onCaptureScenarioSoloReady={
+                        handleResilienceScenarioSoloCaptureReady
+                      }
+                      onTileShare={handleResilienceTileSnapshot}
+                    />
+                  )}
                   {exploreMode === "data" && <DataExplorerView />}
                 </ErrorBoundary>
               </UnifiedToolLayout>
@@ -894,26 +727,6 @@ function ScenarioExplorerInner() {
           <ToolTour />
         </ErrorBoundary>
       )}
-    </Box>
-  )
-}
-
-/**
- * Tiny inline-flex wrapper that registers its child node as a tour
- * anchor by id. Used to attach anchors to the Radar tool's chart
- * controls without restructuring the existing chip layout.
- */
-function RadarTourAnchor({
-  anchorId,
-  children,
-}: {
-  anchorId: string
-  children: React.ReactNode
-}) {
-  const ref = useTourAnchor(anchorId)
-  return (
-    <Box ref={ref} sx={{ display: "inline-flex", alignItems: "center" }}>
-      {children}
     </Box>
   )
 }

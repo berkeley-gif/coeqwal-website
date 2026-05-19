@@ -61,6 +61,14 @@ export interface TierGridProps {
   animate?: boolean
   /** Invoked once after the first paint has committed. Capture hosts await this before serializing the SVG. */
   onReady?: () => void
+  /** Scenario the grid currently represents (Distribution tool focus). */
+  focusScenarioId?: string
+  /** Chart → sidebar hover sync. Emitted when the pointer is over the grid or a dot. */
+  onChartHover?: (info: {
+    scenarioId: string
+    outcome?: string
+    tierValue?: number
+  } | null) => void
 }
 
 // ============================================================================
@@ -637,6 +645,8 @@ export default function TierGrid({
   interactive = true,
   animate = true,
   onReady,
+  focusScenarioId,
+  onChartHover,
 }: TierGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -657,6 +667,10 @@ export default function TierGrid({
   animateRef.current = animate
   const onReadyRef = useRef(onReady)
   onReadyRef.current = onReady
+  const onChartHoverRef = useRef(onChartHover)
+  onChartHoverRef.current = onChartHover
+  const focusScenarioIdRef = useRef(focusScenarioId)
+  focusScenarioIdRef.current = focusScenarioId
   const hasFiredOnReadyRef = useRef(false)
 
   const dimensions = useResizeObserver(
@@ -845,6 +859,18 @@ export default function TierGrid({
             }
           })
           .on("mouseover", function (this: SVGPathElement, event, d) {
+            const sid = focusScenarioIdRef.current
+            if (sid && onChartHoverRef.current) {
+              const tierLevel = parseInt(
+                d.obj.tier.replace(/^Tier\s+/, ""),
+                10,
+              )
+              onChartHoverRef.current({
+                scenarioId: sid,
+                outcome: d.obj.category,
+                tierValue: Number.isFinite(tierLevel) ? tierLevel : undefined,
+              })
+            }
             if (
               showMapView &&
               !selectedOutcomeLocationCodes.has(String(d.id))
@@ -970,6 +996,13 @@ export default function TierGrid({
         height: responsive ? "100%" : currentHeight,
         minHeight: 400,
         position: "relative",
+      }}
+      onMouseEnter={() => {
+        const sid = focusScenarioIdRef.current
+        if (sid) onChartHoverRef.current?.({ scenarioId: sid })
+      }}
+      onMouseLeave={() => {
+        onChartHoverRef.current?.(null)
       }}
     >
       <svg

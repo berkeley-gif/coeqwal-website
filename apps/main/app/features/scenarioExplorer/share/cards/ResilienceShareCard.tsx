@@ -84,9 +84,8 @@ export default function ResilienceShareCard({
   // the aggregate heatmap renders its own internal legend (the panel
   // path does not pass `hideLegend`). Every other capture path
   // explicitly hides the chart-internal legend (single-tile and
-  // scenario-solo set `hideLegend: true`) or has none at all (the
-  // quadrant scatter), so those cards must mount the shared card
-  // legend to stay decodable on their own.
+  // scenario-solo set `hideLegend: true`), so those cards must mount
+  // the shared card legend to stay decodable on their own.
   const showTierLegend = item.tileScope !== "panel"
 
   return (

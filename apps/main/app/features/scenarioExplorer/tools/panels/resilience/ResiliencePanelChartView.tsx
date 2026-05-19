@@ -47,6 +47,9 @@ export type ResiliencePanelChartViewState =
       tiles: ResilienceSmallMultiplesTile[]
       tileAspect: ResilienceSmallMultiplesTileAspect
       columnLabelRotation?: number
+      highlightedRowKeys?: Set<string> | null | undefined
+      highlightedColKeys?: Set<string> | null | undefined
+      highlightedTileIds?: Set<string> | null | undefined
     }
   | {
       kind: "aggregate"
@@ -56,12 +59,19 @@ export type ResiliencePanelChartViewState =
       marginals?: ResilienceHeatmapMarginals | undefined
       showMarginals?: boolean
       highlightedRowKeys?: Set<string> | null | undefined
+      highlightedColKeys?: Set<string> | null | undefined
+      highlightedTileIds?: Set<string> | null | undefined
+      scenarioRowAxisHover?: boolean
+      scenarioColAxisHover?: boolean
       columnLabelRotation?: number
     }
 
 export interface ResiliencePanelChartViewHandlers {
   onCellHover?: (cell: ResilienceHeatmapCell | null) => void
   onCellClick?: (cell: ResilienceHeatmapCell) => void
+  onTileHover?: (tileId: string | null) => void
+  onRowKeyHover?: (rowKey: string | null) => void
+  onColKeyHover?: (colKey: string | null) => void
   onSquareHover?: (
     info: { cell: ResilienceHeatmapCell; entry: ResilienceGlyphEntry } | null,
   ) => void
@@ -246,6 +256,12 @@ export default function ResiliencePanelChartView({
         columnLabelRotation={state.columnLabelRotation}
         captureMode={captureMode}
         onCellHover={handlers?.onCellHover}
+        onTileHover={handlers?.onTileHover}
+        highlightedTileIds={state.highlightedTileIds ?? null}
+        highlightedRowKeys={state.highlightedRowKeys ?? null}
+        highlightedColKeys={state.highlightedColKeys ?? null}
+        onRowKeyHover={handlers?.onRowKeyHover}
+        onColKeyHover={handlers?.onColKeyHover}
         onCellClick={handlers?.onCellClick}
         formatRowTick={formatRowTick}
         distributionMode={distributionMode}
@@ -280,6 +296,13 @@ export default function ResiliencePanelChartView({
       onCellHover={handlers?.onCellHover}
       onCellClick={handlers?.onCellClick}
       highlightedRowKeys={state.highlightedRowKeys ?? null}
+      highlightedColKeys={state.highlightedColKeys ?? null}
+      onRowKeyHover={
+        state.scenarioRowAxisHover ? handlers?.onRowKeyHover : undefined
+      }
+      onColKeyHover={
+        state.scenarioColAxisHover ? handlers?.onColKeyHover : undefined
+      }
       formatRowTick={formatRowTick}
       marginals={state.marginals}
       showMarginals={state.showMarginals}

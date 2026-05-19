@@ -103,9 +103,9 @@ function transformToCSS(
  * `share/variants.ts` to wire its downloads. The registry's
  * `rasterDimensionsKey` indexes into {@link CAPTURE_DIMENSIONS}; this
  * is a one-size-per-variant lookup, which is fine for radar / equity
- * / barChart but currently rounds resilience tile and quadrant
- * captures up to the panel size at PNG-from-cachedSvg time. See the
- * README "RASTER_SIZE per tileScope" follow-up note.
+ * / barChart but currently rounds resilience tile captures up to the
+ * panel size at PNG-from-cachedSvg time. See the README
+ * "RASTER_SIZE per tileScope" follow-up note.
  *
  * `lookups` is forwarded straight into the handler so filenames can
  * use the same scenario short labels users see in the share UI
@@ -763,10 +763,9 @@ export default function SharePanel() {
   ])
 
   // Gate the bulk-data button until every variant's rehydrator has
-  // either populated `cachedChartData` or been classified as
-  // unresolvable (today: resilience quadrant). Without this gate the
-  // ZIP would silently drop items whose async resolver is still
-  // loading on first share-tab open after a URL load.
+  // populated `cachedChartData`. Without this gate the ZIP would
+  // silently drop items whose async resolver is still loading on
+  // first share-tab open after a URL load.
   const bulkItems = useMemo(
     () => (storyItems.length > 0 ? storyItems : shareItems),
     [storyItems, shareItems],

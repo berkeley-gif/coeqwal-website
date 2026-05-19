@@ -22,10 +22,10 @@
  * `useShareDataReady` is the companion hook the share panel uses to
  * gate its "Download all data" button until every item with a
  * registered rehydrator has either resolved its data or been
- * classified as unavailable (resilience quadrant). For variants
- * without a registered `DataRehydrator`, an item with no cached data
- * is treated as ready (it will be silently skipped by the bulk
- * exporter) so the button never blocks indefinitely.
+ * classified as unavailable. For variants without a registered
+ * `DataRehydrator`, an item with no cached data is treated as ready
+ * (it will be silently skipped by the bulk exporter) so the button
+ * never blocks indefinitely.
  *
  * Adding a new variant: implement `DataRehydrator?` on the variant's
  * handler. The host iterates the registry by type, so a new variant
@@ -97,9 +97,7 @@ export default function ShareDataRehydrationHost({
  *     exporter will silently skip it if it has no cached data, but
  *     the user shouldn't be blocked waiting on a resolver that
  *     doesn't exist), OR
- *   - it already has `cachedChartData`, OR
- *   - it's a resilience quadrant capture (no resolver today; the
- *     bulk exporter just skips it).
+ *   - it already has `cachedChartData`.
  *
  * The button is enabled when every item is ready by this definition.
  */
@@ -107,7 +105,6 @@ function isItemRehydrated(item: ShareItem): boolean {
   if (item.cachedChartData) return true
   const handler = handlerForItem(item)
   if (!handler.DataRehydrator) return true
-  if (item.type === "resilience" && item.view === "quadrant") return true
   return false
 }
 

@@ -171,7 +171,17 @@ function getPolygonCentroidNameFromMapbox(
   }
 }
 
-export default function EquityPanel() {
+export default function EquityPanel({
+  highlightedIds = null,
+  onChartHover,
+}: {
+  highlightedIds?: Set<string> | null
+  onChartHover?: (info: {
+    scenarioId: string
+    outcome?: string
+    tierValue?: number
+  } | null) => void
+}) {
   const theme = useTheme()
   const { mapRef, setMotionChildren } = useMap()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -649,6 +659,13 @@ export default function EquityPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const focusScenarioId = equityFocusScenario ?? BASELINE_SCENARIO_ID
+
+  const chartEmphasized = useMemo(() => {
+    if (!highlightedIds || highlightedIds.size === 0) return false
+    return highlightedIds.has(focusScenarioId)
+  }, [highlightedIds, focusScenarioId])
+
   return (
     <Box
       sx={{
@@ -669,12 +686,14 @@ export default function EquityPanel() {
           width: "100%",
           height: "100%",
           minHeight: 0,
+          boxShadow: chartEmphasized
+            ? `inset 0 0 0 2px ${theme.palette.primary.main}`
+            : undefined,
+          borderRadius: 1,
+          transition: "box-shadow 0.12s ease-out",
         }}
       >
-        <HydroclimateGate
-          scenarioId={equityFocusScenario ?? BASELINE_SCENARIO_ID}
-          variant="block"
-        >
+        <HydroclimateGate scenarioId={focusScenarioId} variant="block">
           <TierGrid
             objectives={objectives}
             categories={categories}
@@ -687,6 +706,8 @@ export default function EquityPanel() {
             onTierCategoryClick={handleTierCategoryClick}
             onShowOnMap={handleShowOnMap}
             showMapView={showMap}
+            focusScenarioId={focusScenarioId}
+            onChartHover={onChartHover}
           />
         </HydroclimateGate>
       </Box>

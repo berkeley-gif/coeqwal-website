@@ -28,13 +28,13 @@ import {
   icons,
   useTheme,
 } from "@repo/ui/mui"
+import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
 import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
 import { useScenarioExplorerStore } from "../../../store"
 import type {
   AggregateOver,
-  QuadrantUnit,
   ResilienceControlsState,
   ResilienceView,
 } from "./ResiliencePanel"
@@ -62,25 +62,6 @@ interface ResilienceControlsProps {
    *  Rows row. When omitted the button is not rendered. */
   onSaveSnapshot?: () => void
 }
-
-// Labels for the quadrant toolbar's tab row, which still lets the
-// user switch between the four top-level modes (the three heatmap
-// pivots and the aggregate). The sentence header for the heatmap
-// branch uses the X / Y / Z pills instead.
-const PIVOT_LABEL: Record<ResilienceView, string> = {
-  scenario: "one chart per scenario",
-  outcome: "one chart per outcome",
-  hydroclimate: "one chart per hydroclimate",
-  aggregate: "a single aggregate chart",
-  quadrant: "leverage",
-}
-
-const PIVOT_ORDER: readonly ResilienceView[] = [
-  "scenario",
-  "outcome",
-  "hydroclimate",
-  "aggregate",
-]
 
 // The sentence used to end with a "read as" phrase button that let the
 // user swap between average tier, climate shift, spread of results,
@@ -110,7 +91,7 @@ const PIVOT_ORDER: readonly ResilienceView[] = [
 // from Z via a canonical table plus the `transposed` flip.
 //
 // The mapping from (view, aggregateOver) to (zDim, zMode) is 1:1
-// across every non-quadrant configuration, and the canonical X/Y
+// across every configuration, and the canonical X/Y
 // assignment below matches today's rendering, so this is purely a
 // relabeling at the control surface - no chart geometry changes.
 // ------------------------------------------------------------------
@@ -149,8 +130,7 @@ function deriveZ(
   if (view === "aggregate") {
     return { zDim: AGGREGATE_OVER_TO_ZDIM[aggregateOver], zMode: "aggregate" }
   }
-  // For heatmap views the view id itself is the Z dim. `quadrant`
-  // is handled separately by the caller and never reaches here.
+  // For heatmap views the view id itself is the Z dim.
   return { zDim: view as ZDim, zMode: "facet" }
 }
 
@@ -425,8 +405,6 @@ export default function ResilienceControls({
     cellEncoding,
     deltaMode,
     selectedHydroclimates,
-    quadrantUnit,
-    quadrantOutcome,
     primaryOutcomeCode,
     compareOutcomeCodes,
     aggregateOver,
@@ -503,17 +481,7 @@ export default function ResilienceControls({
   // Handlers
   // --------------------------------------------------------------
 
-  const handleViewChange = useCallback(
-    (next: ResilienceView) => {
-      if (view === next) return
-      onChange({ view: next })
-    },
-    [view, onChange],
-  )
-
   // Derive the current (xDim, yDim, zDim, zMode) from stored state.
-  // Only meaningful for the heatmap views. The quadrant branch
-  // returns early above the sentence header, so it never reads these.
   const { zDim, zMode } = useMemo(
     () => deriveZ(view, aggregateOver),
     [view, aggregateOver],
@@ -633,21 +601,6 @@ export default function ResilienceControls({
     [onChange],
   )
 
-  const handleQuadrantUnitChange = useCallback(
-    (next: QuadrantUnit) => {
-      if (quadrantUnit === next) return
-      onChange({ quadrantUnit: next })
-    },
-    [quadrantUnit, onChange],
-  )
-
-  const handleQuadrantOutcomeChange = useCallback(
-    (e: SelectChangeEvent<string>) => {
-      onChange({ quadrantOutcome: e.target.value })
-    },
-    [onChange],
-  )
-
   const toggleCompareOutcome = useCallback(
     (code: string) => {
       const next = [...compareOutcomeCodes]
@@ -671,8 +624,6 @@ export default function ResilienceControls({
   const [xAnchor, setXAnchor] = useState<HTMLElement | null>(null)
   const [yAnchor, setYAnchor] = useState<HTMLElement | null>(null)
   const [zAnchor, setZAnchor] = useState<HTMLElement | null>(null)
-
-  const isQuadrant = view === "quadrant"
 
   // --------------------------------------------------------------
   // Sentence phrase labels
@@ -723,79 +674,6 @@ export default function ResilienceControls({
       : zPhraseLabel
 
   const cellSize = { fontSize: "0.8125rem" } as const
-
-  // --------------------------------------------------------------
-  // Quadrant / Leverage: keep the compact two-card surface.
-  // --------------------------------------------------------------
-
-  if (isQuadrant) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 1,
-          py: 0.25,
-          flex: 1,
-          minWidth: 0,
-          flexWrap: "wrap",
-          alignItems: "center",
-        }}
-      >
-        <Typography
-          variant="compactCaption"
-          sx={{ fontSize: "0.8125rem", color: theme.palette.grey[800] }}
-        >
-          Showing each point as
-        </Typography>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          <InlineToggleChip
-            label="an outcome"
-            active={quadrantUnit === "outcome"}
-            onClick={() => handleQuadrantUnitChange("outcome")}
-          />
-          <InlineToggleChip
-            label="a location"
-            active={quadrantUnit === "loi"}
-            onClick={() => handleQuadrantUnitChange("loi")}
-          />
-        </Box>
-        {quadrantUnit === "loi" && (
-          <Select
-            size="small"
-            value={quadrantOutcome ?? ""}
-            onChange={handleQuadrantOutcomeChange}
-            displayEmpty
-            sx={{ ...cellSize, ".MuiSelect-select": { py: 0.5 } }}
-          >
-            <MenuItem value="" disabled sx={cellSize}>
-              Pick an outcome
-            </MenuItem>
-            {outcomeItems.map((o) => (
-              <MenuItem
-                key={o.code}
-                value={o.code}
-                sx={{ ...cellSize, pl: o.indent ? 4 : 2 }}
-              >
-                {o.label}
-              </MenuItem>
-            ))}
-          </Select>
-        )}
-        <Box sx={{ flex: 1 }} />
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          {PIVOT_ORDER.map((mode) => (
-            <InlineToggleChip
-              key={mode}
-              label={PIVOT_LABEL[mode]}
-              active={view === mode}
-              onClick={() => handleViewChange(mode)}
-            />
-          ))}
-        </Box>
-      </Box>
-    )
-  }
 
   // --------------------------------------------------------------
   // Sentence header
@@ -1052,37 +930,7 @@ export default function ResilienceControls({
           Switch rows and columns
         </Button>
         {onSaveSnapshot && (
-          <Box
-            component="button"
-            type="button"
-            onClick={onSaveSnapshot}
-            aria-label="save snapshot"
-            sx={{
-              ml: 2,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "5px",
-              px: 1.25,
-              py: 0.5,
-              border: "none",
-              borderRadius: "12px",
-              fontSize: "0.8125rem",
-              fontWeight: 500,
-              lineHeight: 1.3,
-              whiteSpace: "nowrap",
-              color: theme.palette.grey[800],
-              background: theme.palette.grey[200],
-              cursor: "pointer",
-              transition: "all 150ms ease",
-              "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-                color: theme.palette.blue.bright,
-              },
-            }}
-          >
-            <icons.IosShare sx={{ fontSize: "1.25rem", flexShrink: 0 }} />
-            save snapshot
-          </Box>
+          <SaveSnapshotButton onClick={onSaveSnapshot} sx={{ ml: 2 }} />
         )}
       </Box>
 

@@ -1,15 +1,6 @@
 /**
- * Resilience variant handler. URL prefix `q`. Covers every resilience
- * capture surface: panel-wide heatmap, single-tile heatmap, and the
- * leverage quadrant scatter. CSV export branches on
- * `cachedChartData.view === "quadrant"` to pick between the heatmap
- * and quadrant exporters.
- *
- * Raster dimensions key today resolves to `resiliencePanel` for every
- * surface. That's a known limitation: panel, tile, and quadrant
- * captures all use distinct sizes at capture time, but PNG fallback
- * downloads from `cachedSvg` reuse the panel size. See the README
- * "RASTER_SIZE per tileScope" note for the planned fix.
+ * Resilience variant handler. URL prefix `q`. Covers panel-wide heatmap
+ * and single-tile heatmap captures.
  */
 
 import React, { useEffect, useMemo } from "react"
@@ -21,9 +12,7 @@ import {
 import { HYDROCLIMATE_SHORT_LABELS } from "../../../../content/scenarios"
 import {
   resilienceHeatmapDataToCSV,
-  resilienceQuadrantDataToCSV,
   type ResilienceHeatmapChartDataShape,
-  type ResilienceQuadrantChartDataShape,
 } from "../../tools/panels/dataInDepth/utils/exportUtils"
 import { useResilienceAggregate } from "../../tools/panels/resilience/useResilienceAggregate"
 import {
@@ -37,12 +26,6 @@ import type { DataRehydrationContext, VariantHandler } from "../variants"
 
 type ResilienceItem = ShareItemOfType<"resilience">
 
-/**
- * Restrict the captured outcomes to the canonical display order so
- * the rehydrated table reads the same way as the explore heatmap
- * regardless of the order the URL token serialized them in.
- * Mirrors `orderOutcomes` in `ShareResilienceLiveChart`.
- */
 function orderOutcomes(codes: string[]): string[] {
   const known = new Set(codes)
   const ordered: string[] = []
@@ -71,19 +54,6 @@ function hydroclimateLabel(hc: string): string {
   return HYDROCLIMATE_SHORT_LABELS[hc] ?? hc
 }
 
-/**
- * Per-item resilience rehydrator. Quadrant captures have no live
- * resolver today; the parent registry filters those out before
- * mounting this component, and they're silently skipped from the
- * bulk ZIP when their `cachedChartData` is missing.
- *
- * The aggregate is taken across the item's scenario scope (groupBy
- * = "scenarios"), matching the visual summary `ShareResilienceLiveChart`
- * already shows for URL-restored items. The CSV exporter reads
- * `rowLabel`, `colLabel`, `tier`, `value` only, so the resulting
- * 2D table is a faithful representation of what the live thumbnail
- * draws even when the original capture used a small-multiples view.
- */
 const ResilienceItemRehydrator: React.FC<{
   item: ResilienceItem
   context: DataRehydrationContext
@@ -168,7 +138,7 @@ const ResilienceRehydrator: React.FC<{
     React.Fragment,
     null,
     items
-      .filter((item) => item.view !== "quadrant" && !item.cachedChartData)
+      .filter((item) => !item.cachedChartData)
       .map((item) =>
         React.createElement(ResilienceItemRehydrator, {
           key: item.id,
@@ -198,11 +168,7 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
     const ids = item.scenarioIds.join("~")
     const climates = item.hydroclimates.join("~")
     const outcomes = item.outcomeCodes.join("~")
-    // Optional 7th segment "n" when numeric cell values were on at
-    // save. tileScope / tileId / tileLabel and the visual / chart
-    // caches are not encoded; round-tripped items rehydrate with
-    // partial context.
-    const num = item.view !== "quadrant" && item.showCellNumbers ? ".n" : ""
+    const num = item.showCellNumbers ? ".n" : ""
     return `${view}.${encoding}.${ids}.${climates}.${outcomes}${num}`
   },
 
@@ -223,9 +189,6 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
 
   filenameLabel(item, lookups) {
     const scope = item.tileScope ?? "panel"
-    // Per-tile slug: the small-multiples kinds carry a tileId that
-    // resolves to a scenario / outcome / hydroclimate label. Panel
-    // and quadrant captures have nothing to add here.
     const tail =
       scope === "scenario" && item.tileId
         ? slugifyForFilename(lookups.scenarioShortLabelLookup(item.tileId))
@@ -234,11 +197,6 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
           : scope === "hydroclimate" && item.tileId
             ? hydroclimateSlug(item.tileId)
             : ""
-    // For a hydroclimate small multiple `tail` already names the
-    // hydroclimate; appending `hc` again would duplicate it. The
-    // other scopes append the captured hydroclimate(s) so two
-    // captures of the same scope/tile at different climates don't
-    // collide.
     const hc =
       scope === "hydroclimate"
         ? ""
@@ -253,7 +211,6 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
   exportCsv(item, lookups) {
     if (!item.cachedChartData) return null
     const data = item.cachedChartData as Record<string, unknown>
-    const isQuadrant = data.view === "quadrant"
     const scenarios = item.scenarioIds.map((id) => ({
       id,
       label: lookups.scenarioNameLookup(id),
@@ -262,13 +219,6 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
       item.hydroclimates.length === 1 ? item.hydroclimates[0] : undefined
     const extra: Array<[string, string]> = []
     const tileLabel = data.tileLabel as string | undefined
-    // `Sliced by` answers "what dimension is this tile pivoting on?".
-    // For outcome / hydroclimate / quadrant tiles it carries information
-    // the `Scenarios` row doesn't (the outcome name, hydroclimate label,
-    // or LOI code). For a scenario-scoped small multiple the label
-    // collapses to the scenario name and would simply repeat the only
-    // entry in `Scenarios`. Drop it in that case so the header stays
-    // meaningful.
     if (tileLabel) {
       const onlyScenarioLabel =
         scenarios.length === 1 ? scenarios[0]!.label : undefined
@@ -281,29 +231,18 @@ const resilienceHandler: VariantHandler<ResilienceItem> = {
       extra.push(["Encoding", data.cellEncoding])
     }
     const header = {
-      variantTitle: isQuadrant ? "Resilience quadrant" : "Resilience heatmap",
+      variantTitle: "Resilience heatmap",
       scenarios,
       hydroclimate,
       extra,
       includeTierScale: true,
     }
-    return isQuadrant
-      ? resilienceQuadrantDataToCSV(
-          data as unknown as ResilienceQuadrantChartDataShape,
-          header,
-        )
-      : resilienceHeatmapDataToCSV(
-          data as unknown as ResilienceHeatmapChartDataShape,
-          header,
-        )
+    return resilienceHeatmapDataToCSV(
+      data as unknown as ResilienceHeatmapChartDataShape,
+      header,
+    )
   },
 
-  // Quadrant captures have no live resolver today: their CSV shape
-  // (paired x/y leverage scores per scenario) isn't reproducible from
-  // the URL's scenario / outcome / hydroclimate tuple alone. The
-  // bulk exporter silently skips items whose `exportCsv` returns
-  // null. Heatmap items get an inner mount that runs
-  // `useResilienceAggregate` for the captured scope.
   DataRehydrator: ResilienceRehydrator,
 }
 

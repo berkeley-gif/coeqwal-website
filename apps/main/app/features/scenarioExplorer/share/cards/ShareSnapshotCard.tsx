@@ -50,9 +50,9 @@ interface ShareSnapshotCardProps {
    * When true, the card mounts a compact tier-color legend below the
    * thumbnail. Use for variants whose captured chart paints tier
    * colors but does not include its own legend (Distribution /
-   * TierGrid, Resilience quadrant). Skip for charts whose SVG already
-   * carries a tier legend (resilience heatmap and small multiples)
-   * to avoid a duplicated key.
+   * TierGrid). Skip for charts whose SVG already carries a tier
+   * legend (resilience heatmap and small multiples) to avoid a
+   * duplicated key.
    */
   showTierLegend?: boolean
   note?: string

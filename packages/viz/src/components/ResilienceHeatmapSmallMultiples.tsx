@@ -106,6 +106,16 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   captureMode?: boolean
   /** Emitted when the hovered cell in any tile changes. */
   onCellHover?: (cell: ResilienceHeatmapCell | null) => void
+  /** Emitted when the pointer enters or leaves a tile title (tile id = scenario id in by-scenario view). */
+  onTileHover?: (tileId: string | null) => void
+  /** Tile ids to keep at full opacity; other tiles dim when the set is non-empty. */
+  highlightedTileIds?: Set<string> | null
+  /** Row keys to emphasize within each tile heatmap (sidebar → chart). */
+  highlightedRowKeys?: Set<string> | null
+  /** Column keys to emphasize within each tile heatmap (sidebar → chart). */
+  highlightedColKeys?: Set<string> | null
+  onRowKeyHover?: (rowKey: string | null) => void
+  onColKeyHover?: (colKey: string | null) => void
   /** Emitted when a cell is clicked. */
   onCellClick?: (cell: ResilienceHeatmapCell) => void
   /** Formatter passed to each tile. */
@@ -214,6 +224,12 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       maxColumns = 4,
       captureMode = false,
       onCellHover,
+      onTileHover,
+      highlightedTileIds = null,
+      highlightedRowKeys = null,
+      highlightedColKeys = null,
+      onRowKeyHover,
+      onColKeyHover,
       onCellClick,
       formatRowTick,
       distributionMode,
@@ -292,6 +308,10 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
             {tiles.map((tile, tileIdx) => {
               const extraActions = renderTileActions?.(tile)
               const hasActions = extraActions != null
+              const tileDimmed =
+                highlightedTileIds != null &&
+                highlightedTileIds.size > 0 &&
+                !highlightedTileIds.has(tile.id)
               return (
                 <div
                   key={tile.id}
@@ -302,6 +322,8 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                     flexDirection: "column",
                     minWidth: 0,
                     minHeight: tileHeight,
+                    opacity: tileDimmed ? 0.45 : 1,
+                    transition: "opacity 0.12s ease-out",
                   }}
                 >
                   <div
@@ -312,6 +334,12 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       padding: "0 4px 4px",
                       minHeight: 40,
                     }}
+                    onMouseEnter={
+                      onTileHover ? () => onTileHover(tile.id) : undefined
+                    }
+                    onMouseLeave={
+                      onTileHover ? () => onTileHover(null) : undefined
+                    }
                   >
                     {captureMode ? (
                       // Inline SVG so the off-screen SVG composer (which only
@@ -412,6 +440,10 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
                       columnLabelRotation={columnLabelRotation}
                       onCellHover={onCellHover}
                       onCellClick={onCellClick}
+                      highlightedRowKeys={highlightedRowKeys}
+                      highlightedColKeys={highlightedColKeys}
+                      onRowKeyHover={onRowKeyHover}
+                      onColKeyHover={onColKeyHover}
                       formatRowTick={formatRowTick}
                       distributionMode={distributionMode}
                       firstCellRef={tileIdx === 0 ? firstCellRef : undefined}

@@ -14,8 +14,7 @@
  * single compact viz can stand in for every resilience capture. The
  * card header and subtitle still describe what was actually captured,
  * so the thumbnail is a visual summary rather than a pixel-perfect
- * replay. Quadrant captures fall back to the text-only placeholder in
- * the parent card (no live render is attempted here).
+ * replay.
  *
  * Uses `cellRender="tier"` for the thumbnail because alternate
  * encodings (delta, density_opp, leverage, distribution) require

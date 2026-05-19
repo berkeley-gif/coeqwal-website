@@ -155,8 +155,7 @@ function csvQuote(val: string): string {
 export interface CsvHeaderInput {
   /**
    * Human-readable variant name shown in the first row, e.g.
-   * "Distribution", "Radar", "Bar chart", "Resilience heatmap",
-   * "Resilience quadrant".
+   * "Distribution", "Radar", "Bar chart", "Resilience heatmap".
    */
   variantTitle: string
   /**
@@ -382,22 +381,6 @@ export type ResilienceHeatmapChartDataShape = {
   rows: ResilienceHeatmapRow[]
 }
 
-export type ResilienceQuadrantChartDataShape = {
-  view?: "quadrant"
-  tileScope?: "quadrant"
-  tileLabel?: string
-  xLabel?: string
-  yLabel?: string
-  rows: Array<{
-    id: string
-    label: string
-    x: number | null
-    y: number | null
-    tierAtRefHc?: number | null
-    secondary?: string
-  }>
-}
-
 /**
  * Distribution-card chart data persisted by `captureEquityOffscreen`.
  * Mirrors the `EquityChartData` shape from
@@ -494,37 +477,6 @@ export function equityDataToCSV(
       row.push(Number.isFinite(baselineLevel) ? String(baselineLevel) : "")
     }
     lines.push(row.join(","))
-  }
-  return lines.join("\n")
-}
-
-/**
- * Convert a quadrant scatter payload into a CSV table. Uses the
- * payload's xLabel / yLabel as the X and Y column headers so the
- * captured axis metadata rides through the export. Tier is an
- * integer 1-4; the legend rides through the shared header block.
- */
-export function resilienceQuadrantDataToCSV(
-  data: ResilienceQuadrantChartDataShape,
-  header: CsvHeaderInput,
-): string | null {
-  if (!Array.isArray(data.rows) || data.rows.length === 0) return null
-  const xLabel = data.xLabel ?? "X"
-  const yLabel = data.yLabel ?? "Y"
-  const tableHeader = ["Item", csvEscape(xLabel), csvEscape(yLabel), "Tier"]
-  const lines: string[] = []
-  lines.push(...buildCsvHeaderBlock(header))
-  lines.push("")
-  lines.push(tableHeader.join(","))
-  for (const row of data.rows) {
-    lines.push(
-      [
-        csvEscape(row.label),
-        row.x != null ? String(row.x) : "",
-        row.y != null ? String(row.y) : "",
-        row.tierAtRefHc != null ? String(row.tierAtRefHc) : "",
-      ].join(","),
-    )
   }
   return lines.join("\n")
 }
@@ -628,9 +580,9 @@ function makeUniqueFilename(base: string, used: Set<string>): string {
  * null because `cachedChartData` is missing, are silently skipped.
  * The caller is expected to call `useShareDataReady` first to wait
  * for variants with rehydrators (radar / equity / barChart /
- * resilience heatmap) to fill in `cachedChartData`. Items genuinely
- * without a resolver (today: resilience quadrant) just don't appear
- * in the bundle.
+ * resilience heatmap) to fill in `cachedChartData`. Items whose
+ * `exportCsv` returns null because data is missing are silently
+ * skipped from the bundle.
  */
 export async function exportAllShareItemsAsZip(
   items: ShareItem[],

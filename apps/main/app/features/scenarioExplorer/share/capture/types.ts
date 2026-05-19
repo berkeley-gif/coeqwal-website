@@ -16,7 +16,6 @@ import type {
   ResilienceCaptureResult,
   ResilienceHeatmapChartData as _ResilienceHeatmapChartData,
 } from "../../tools/panels/resilience/ResiliencePanel"
-import type { ResilienceQuadrantCaptureResult } from "../../tools/panels/resilience/ResilienceQuadrantPanel"
 
 /**
  * Base shape returned by every off-screen capture host call.
@@ -76,7 +75,3 @@ export type ResilienceTileCaptureFn = (
 export type ResilienceScenarioSoloCaptureFn = (
   scenarioId: string,
 ) => Promise<ResilienceCaptureResult | null>
-
-/** Capture the resilience leverage quadrant. */
-export type ResilienceQuadrantCaptureFn =
-  () => Promise<ResilienceQuadrantCaptureResult | null>

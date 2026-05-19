@@ -1,14 +1,12 @@
 "use client"
 
 /**
- * ListView - Unified scenario grid with all 4 columns.
+ * ListView - Unified scenario grid
  *
+ * Purely grid + data. Controls are in other components.
  * Uses a single CSS Grid (checkbox | scenario | operations | outcomes)
- * with subgrid rows for pixel-perfect column alignment and a single
- * scroll container. No scroll sync or row-height hacks needed.
- *
- * Search and visibility controls live in the shared ToolToolbar (via
- * showListControls), so this component is purely grid + data.
+ * for a single scroll container, 
+ * with subgrid rows for column alignment.
  *
  * Row order and data come from the shared useOrderedScenarios hook.
  */
@@ -25,13 +23,11 @@ import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 interface ListViewProps {
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
   highlightedIds?: Set<string> | null
-  onScenarioHover?: (scenarioId: string | null) => void
 }
 
 export default function ListView({
   onTierClick,
   highlightedIds,
-  onScenarioHover: _onScenarioHover,
 }: ListViewProps) {
   const theme = useTheme()
 

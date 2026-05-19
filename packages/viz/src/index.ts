@@ -132,15 +132,6 @@ export type {
   ResilienceSmallMultiplesTile,
   ResilienceSmallMultiplesTileAspect,
 } from "./components/ResilienceHeatmapSmallMultiples"
-export { default as ResilienceQuadrant } from "./components/ResilienceQuadrant"
-export { default as ResilienceQuadrantSnapshot } from "./components/ResilienceQuadrantSnapshot"
-export type { ResilienceQuadrantSnapshotProps } from "./components/ResilienceQuadrantSnapshot"
-export type {
-  ResilienceQuadrantProps,
-  ResilienceQuadrantDatum,
-  ResilienceQuadrantPalette,
-  ResilienceQuadrantUnit,
-} from "./components/ResilienceQuadrant"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,
