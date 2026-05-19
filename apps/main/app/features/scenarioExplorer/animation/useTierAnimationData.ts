@@ -3,10 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
-import {
-  getTierColorsFromTheme,
-  type TierLevel,
-} from "../../../content/tiers"
+import { getTierColorsFromTheme, type TierLevel } from "../../../content/tiers"
 import { API_BASE } from "../../../lib/constants/api"
 
 const DEMO_SCENARIO_ID = "s0020"

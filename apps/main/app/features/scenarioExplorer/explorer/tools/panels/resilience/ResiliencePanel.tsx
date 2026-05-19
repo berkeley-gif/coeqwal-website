@@ -43,11 +43,7 @@ export type {
   AggregateScope,
   ResilienceControlsState,
 } from "../../../store"
-import type {
-  ResilienceView,
-  CellEncoding,
-  DeltaMode,
-} from "../../../store"
+import type { ResilienceView, CellEncoding, DeltaMode } from "../../../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,

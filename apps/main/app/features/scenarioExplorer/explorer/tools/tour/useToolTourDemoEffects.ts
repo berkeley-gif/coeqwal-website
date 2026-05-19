@@ -1,11 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import {
-  useExplorerStore,
-  useRadarSlice,
-  useWorkspaceSlice,
-} from "../../store"
+import { useExplorerStore, useRadarSlice, useWorkspaceSlice } from "../../store"
 import { mapActions, useMapStore } from "../../../../map/store"
 import type { OutcomeVisualization } from "../../../../map/store"
 import type { TourStep } from "./types"

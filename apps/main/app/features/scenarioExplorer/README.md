@@ -53,21 +53,21 @@ Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures
 
 ### Panel layout convention
 
-| Size / shape | Convention | Example |
-| ------------ | ---------- | ------- |
-| Small tool (≤8 files) | Flat under `panels/<tool>/` | `equity/`, `radar/` |
-| Medium tool with one hot sub-area | Panel root + one subfolder | `list/` + `grid/`, `resilience/` + `controls/` |
-| Large multi-section tool | Mini-module: `components/`, `hooks/`, `config/`, `utils/` + local README | `dataInDepth/` |
+| Size / shape                      | Convention                                                               | Example                                        |
+| --------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- |
+| Small tool (≤8 files)             | Flat under `panels/<tool>/`                                              | `equity/`, `radar/`                            |
+| Medium tool with one hot sub-area | Panel root + one subfolder                                               | `list/` + `grid/`, `resilience/` + `controls/` |
+| Large multi-section tool          | Mini-module: `components/`, `hooks/`, `config/`, `utils/` + local README | `dataInDepth/`                                 |
 
 **Naming alias (data tool):** folder `dataInDepth/`, component `DataExplorerView`, explore mode `"data"`, toolbar label "Data in depth".
 
 ### Import paths
 
-| Caller | Import from |
-| ------ | ----------- |
+| Caller                                | Import from                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Outside the feature (tabs, map hooks) | `scenarioExplorer/store` (shell `mainView`), `scenarioExplorer/explorer/store` (tools store) |
-| Inside `explorer/` | Relative `../../../store` shim or slice hooks (`useWorkspaceSlice`, etc.) |
-| Do not | Import `store/storeInstance` or deep slice files from UI (use the shim) |
+| Inside `explorer/`                    | Relative `../../../store` shim or slice hooks (`useWorkspaceSlice`, etc.)                    |
+| Do not                                | Import `store/storeInstance` or deep slice files from UI (use the shim)                      |
 
 Share tab UI lives in `explorer/share/tab/` (see share README). Prefer `explorer/share/index.ts` for share types and utilities.
 
@@ -311,10 +311,10 @@ New code outside `ResilienceControls` should use flat selectors and named setter
 
 Share buttons live in chart controls and the scenario sidebar, away from the panels that snapshot them. Each tool owns its capture logic:
 
-| Tool       | Hook                                             | Notes                                        |
-| ---------- | ------------------------------------------------ | -------------------------------------------- |
-| Radar      | `panels/radar/useRadarShareCapture.ts`           | Panel registers capture refs on mount        |
-| Equity     | `panels/equity/useEquityShareCapture.ts`         | Offscreen capture in the hook (no panel ref) |
+| Tool       | Hook                                                   | Notes                                        |
+| ---------- | ------------------------------------------------------ | -------------------------------------------- |
+| Radar      | `panels/radar/useRadarShareCapture.ts`                 | Panel registers capture refs on mount        |
+| Equity     | `panels/equity/useEquityShareCapture.ts`               | Offscreen capture in the hook (no panel ref) |
 | Resilience | `panels/resilience/hooks/useResilienceShareCapture.ts` | Panel refs + `buildResilienceShareItem`      |
 
 `useExploreShareCapture` in `explorer/` composes the three hooks and returns `{ radar, equity, resilience }` grouped by consumer (`panelProps`, `sidebarProps`, `chartControlsProps`).

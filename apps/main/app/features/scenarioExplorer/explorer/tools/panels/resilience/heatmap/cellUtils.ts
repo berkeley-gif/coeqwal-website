@@ -18,7 +18,9 @@ export function clampTier(value: number): number {
 }
 
 /** Swap row and column keys + labels on a heatmap cell */
-export function transposeCell(cell: ResilienceHeatmapCell): ResilienceHeatmapCell {
+export function transposeCell(
+  cell: ResilienceHeatmapCell,
+): ResilienceHeatmapCell {
   return {
     ...cell,
     rowKey: cell.colKey,

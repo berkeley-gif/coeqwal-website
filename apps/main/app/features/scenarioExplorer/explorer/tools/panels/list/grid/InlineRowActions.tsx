@@ -1,13 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import {
-  Box,
-  IconButton,
-  Tooltip,
-  icons,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, IconButton, Tooltip, icons, useTheme } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../../../store"
 import type { OutcomeDisplayMode } from "../../../../store"
 

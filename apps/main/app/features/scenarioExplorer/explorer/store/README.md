@@ -2,13 +2,13 @@
 
 One Zustand instance composed from slices. Organizational only at runtime.
 
-| Slice file | Scope |
-| ---------- | ----- |
-| `workspaceStoreSlice.ts` | Selection, share tray, toolbar, hydroclimate, tour |
-| `listStoreSlice.ts` | Filters, sort, pins |
-| `radarStoreSlice.ts` | Radar axes and display toggles |
-| `equityStoreSlice.ts` | Distribution comparison |
-| `resilienceStoreSlice.ts` | Heatmap control fields |
+| Slice file                | Scope                                              |
+| ------------------------- | -------------------------------------------------- |
+| `workspaceStoreSlice.ts`  | Selection, share tray, toolbar, hydroclimate, tour |
+| `listStoreSlice.ts`       | Filters, sort, pins                                |
+| `radarStoreSlice.ts`      | Radar axes and display toggles                     |
+| `equityStoreSlice.ts`     | Distribution comparison                            |
+| `resilienceStoreSlice.ts` | Heatmap control fields                             |
 
 **Hooks:** `useWorkspaceSlice`, `useListSlice`, etc. in `useToolSlices.ts`.
 

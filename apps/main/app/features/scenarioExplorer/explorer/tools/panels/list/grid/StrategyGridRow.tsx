@@ -16,11 +16,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react"
-import {
-  Box,
-  useTheme,
-  Checkbox,
-} from "@repo/ui/mui"
+import { Box, useTheme, Checkbox } from "@repo/ui/mui"
 import {
   OutcomeGlyphItem,
   TierSummaryCell,

@@ -39,10 +39,7 @@ import { useTabNavigation } from "../../../../../hooks/useTabNavigation"
 import ShareItemView from "../ShareItemView"
 import ShareUrlVersionNotice from "../ui/ShareUrlVersionNotice"
 import { CAPTURE_DIMENSIONS } from "../capture/dimensions"
-import {
-  handlerForItem,
-  type CsvLookups,
-} from "../variants"
+import { handlerForItem, type CsvLookups } from "../variants"
 import {
   downloadFromDataUrl,
   downloadSvgString,
@@ -52,10 +49,7 @@ import {
   exportAllShareItemsAsZip,
 } from "../../tools/panels/dataInDepth/utils/exportUtils"
 import { withExt } from "../utils/filename"
-import {
-  downloadCardAsPng,
-  downloadCardAsSvg,
-} from "../cardExport"
+import { downloadCardAsPng, downloadCardAsSvg } from "../cardExport"
 import ShareDataRehydrationHost, {
   useShareDataReady,
 } from "../ShareDataRehydrationHost"

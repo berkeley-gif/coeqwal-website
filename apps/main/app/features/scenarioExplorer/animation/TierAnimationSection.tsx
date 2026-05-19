@@ -49,10 +49,7 @@ import BeatTextOverlay from "./BeatTextOverlay"
 import _PinnedLocationsList from "./PinnedLocationsList"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
-import {
-  OUTCOME_CODE_ORDER,
-  getOutcomeName,
-} from "../../../content/outcomes"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
