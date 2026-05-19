@@ -10,7 +10,7 @@ import {
   useExplorerStore,
   useResilienceSlice,
   useWorkspaceSlice,
-} from "../../../store"
+} from "../../../../store"
 
 export function useResilienceSelectionSync(): void {
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)

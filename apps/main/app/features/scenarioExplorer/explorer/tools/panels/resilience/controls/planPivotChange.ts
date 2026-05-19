@@ -13,7 +13,7 @@ import type {
   AggregateOver,
   ResilienceControlsState,
   ResilienceView,
-} from "../../../../store/resilienceTypes"
+} from "../../../../store"
 
 export type PivotDim = "scenario" | "outcome" | "hydroclimate"
 export type PivotMode = "facet" | "aggregate"

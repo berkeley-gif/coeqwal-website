@@ -33,3 +33,7 @@ export type {
 } from "./panels/resilience/ResiliencePanel"
 
 export { default as DataExplorerView } from "./panels/dataInDepth/DataExplorerView"
+
+export { default as RadarChartControls } from "./panels/radar/RadarChartControls"
+export { default as EquityChartControls } from "./panels/equity/EquityChartControls"
+export { default as ResilienceChartControls } from "./panels/resilience/ResilienceChartControls"

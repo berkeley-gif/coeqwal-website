@@ -1,5 +1,5 @@
-import { hydroclimateOptions } from "../../../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../../../scenarios/hydroclimateConfig"
+import { hydroclimateOptions } from "../../../../../../content/scenarios"
+import { HYDROCLIMATE_CONFIG } from "../../../../../scenarios/hydroclimateConfig"
 
 export function getHydroclimateBadgeDisplay(hydroclimate: string): {
   title: string

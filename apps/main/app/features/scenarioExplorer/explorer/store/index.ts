@@ -20,6 +20,7 @@ export type { ShareItem, ShareItemPatch } from "./types"
 export {
   DEFAULT_RESILIENCE_CONTROLS,
   selectResilienceControls,
+  applyResilienceControlsPatch,
 } from "./resilienceStoreSlice"
 export type {
   ResilienceControlsState,
@@ -28,6 +29,7 @@ export type {
   CellEncoding,
   DeltaMode,
   AggregateScope,
+  ResilienceControlFields,
 } from "./resilienceStoreSlice"
 
 export type { ExplorerStore } from "./storeInstance"

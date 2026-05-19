@@ -5,19 +5,19 @@
  */
 
 import { useCallback, useMemo } from "react"
-import { useCaptureRef } from "../../../share/useCaptureRef"
+import { useCaptureRef } from "../../../../share/useCaptureRef"
 import {
   useExplorerStore,
   useResilienceSlice,
   useWorkspaceSlice,
   selectResilienceControls,
-} from "../../../store"
+} from "../../../../store"
 import type {
   ResilienceCaptureFn,
   ResilienceScenarioSoloCaptureFn,
   ResilienceTileCaptureFn,
-} from "../../../share/capture/types"
-import { buildResilienceShareItem } from "./buildResilienceShareItem"
+} from "../../../../share/capture/types"
+import { buildResilienceShareItem } from "../buildResilienceShareItem"
 
 export type ResilienceShareCapture = {
   panelProps: {

@@ -16,7 +16,6 @@ import {
   Typography,
   useTheme,
   CircularProgress,
-  Checkbox,
   InfoOutlinedIcon,
 } from "@repo/ui/mui"
 import {
@@ -26,7 +25,8 @@ import {
   type RadarAxisLabelDetailChromeOptions,
   type VerticalParallelLineData,
 } from "@repo/viz"
-import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
+import { ChartToast, ClickTooltip } from "@repo/ui"
+import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { useTierChartData } from "../../hooks/useTierChartData"
 import { useRadarPlotTheme } from "./useRadarPlotTheme"
 import { useWorkspaceSlice, useRadarSlice } from "../../../store"
@@ -39,7 +39,6 @@ import {
   getOutcomeCode,
   getOutcomeDefinition,
   OUTCOME_DEFINITIONS,
-  OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
   NOD_SOD_NAMES,
   OUTCOME_REGIONAL_VARIANTS,
@@ -790,53 +789,9 @@ export default function RadarPanel({
       }
     }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
 
-  const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
-
-  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
-  const someKeySelected =
-    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
-
-  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) => axesSet.has(c))
-  const someRegionalSelected =
-    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
-
-  const toggleGroup = useCallback(
-    (codes: readonly string[], allOn: boolean) => {
-      if (allOn) {
-        const remaining = radarVisibleAxes.filter((c) => !codes.includes(c))
-        setRadarVisibleAxes(remaining)
-      } else {
-        const merged = [...radarVisibleAxes]
-        for (const c of codes) {
-          if (!merged.includes(c)) merged.push(c)
-        }
-        setRadarVisibleAxes(merged)
-      }
-    },
-    [radarVisibleAxes, setRadarVisibleAxes],
+  const hasRegionalAxis = NOD_SOD_OUTCOME_CODES.some((c) =>
+    radarVisibleAxes.includes(c),
   )
-
-  const withRegional = useMemo(
-    () =>
-      OUTCOME_CODE_ORDER.filter(
-        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
-      ),
-    [],
-  )
-  const withoutRegional = useMemo(
-    () =>
-      OUTCOME_CODE_ORDER.filter(
-        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
-      ),
-    [],
-  )
-
-  const checkboxSx = useMemo(
-    () => ({ padding: 0, margin: 0, transform: "scale(0.8)" }),
-    [],
-  )
-
-  const hasRegionalAxis = NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
   const [nodSodSnackOpen, setNodSodSnackOpen] = useState(false)
   const prevHydroRef = useRef(hydroclimate)
 
@@ -885,150 +840,16 @@ export default function RadarPanel({
     >
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
-          <Box
+          <OutcomeChooserPanel
             ref={axisChooserPanelAnchorRef}
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: 220,
-              zIndex: 2,
-              display: "flex",
-              flexDirection: "column",
-              minHeight: 0,
-              overflow: "hidden",
-              borderRight: `1px solid ${theme.palette.divider}`,
-              bgcolor: theme.palette.background.paper,
-              py: 1.5,
-              px: 1,
-            }}
-          >
-            <Box sx={{ position: "relative", flexShrink: 0 }}>
-              <TooltipCloseButton
-                onClick={() => setShowAxisSelector(false)}
-                ariaLabel="Close choose outcome axes panel"
-              />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "0.7rem",
-                  letterSpacing: "0.04em",
-                  color: "text.primary",
-                  mb: 1,
-                  display: "block",
-                  pl: 0.5,
-                  pr: 5,
-                }}
-              >
-                Choose outcome axes
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: "auto",
-                overflowX: "hidden",
-                WebkitOverflowScrolling: "touch",
-                scrollbarWidth: "thin",
-                scrollbarColor: (t) =>
-                  `${t.palette.grey[400]} ${t.palette.grey[100]}`,
-                "&::-webkit-scrollbar": { width: 8 },
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor: (t) => t.palette.grey[100],
-                  borderRadius: 4,
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: (t) => t.palette.grey[400],
-                  borderRadius: 4,
-                  border: "2px solid transparent",
-                  backgroundClip: "padding-box",
-                },
-                "&::-webkit-scrollbar-thumb:hover": {
-                  backgroundColor: (t) => t.palette.grey[500],
-                },
-              }}
-            >
-              <AxisRow
-                label="All key outcomes"
-                checked={allKeySelected}
-                indeterminate={someKeySelected}
-                bold
-                onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
-                sx={checkboxSx}
-              />
-              <AxisRow
-                label="All regional outcomes"
-                checked={allRegionalSelected}
-                indeterminate={someRegionalSelected}
-                bold
-                onClick={() =>
-                  toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
-                }
-                sx={checkboxSx}
-              />
-
-              <Box
-                sx={{
-                  borderBottom: `1px solid ${theme.palette.divider}`,
-                  my: 1,
-                }}
-              />
-
-              {/* Outcomes with regional variants */}
-              {withRegional.map((code) => {
-                const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
-                return (
-                  <Box key={code} sx={{ mb: 0.75 }}>
-                    <AxisRow
-                      label={getOutcomeName(code)}
-                      checked={axesSet.has(code)}
-                      bold
-                      onClick={() => toggleRadarAxis(code)}
-                      sx={checkboxSx}
-                    />
-                    {variants.map((vCode) => (
-                      <AxisRow
-                        key={vCode}
-                        label={
-                          vCode.startsWith("NOD")
-                            ? "North of Delta"
-                            : "South of Delta"
-                        }
-                        checked={axesSet.has(vCode)}
-                        indent
-                        onClick={() => toggleRadarAxis(vCode)}
-                        sx={checkboxSx}
-                      />
-                    ))}
-                  </Box>
-                )
-              })}
-
-              <Box
-                sx={{
-                  borderBottom: `1px solid ${theme.palette.divider}`,
-                  my: 1,
-                }}
-              />
-
-              {/* Outcomes without regional variants */}
-              {withoutRegional.map((code) => (
-                <AxisRow
-                  key={code}
-                  label={getOutcomeName(code)}
-                  checked={axesSet.has(code)}
-                  bold
-                  onClick={() => toggleRadarAxis(code)}
-                  sx={checkboxSx}
-                />
-              ))}
-            </Box>
-          </Box>
+            title="Choose outcome axes"
+            closeAriaLabel="Close choose outcome axes panel"
+            selectedCodes={radarVisibleAxes}
+            onToggle={toggleRadarAxis}
+            onSetSelected={setRadarVisibleAxes}
+            onClose={() => setShowAxisSelector(false)}
+          />
         )}
-
         <Box
           sx={{
             position: "absolute",
@@ -1265,65 +1086,6 @@ export default function RadarPanel({
           NOD/SOD alternative hydroclimates not loaded yet
         </Box>
       )}
-    </Box>
-  )
-}
-
-function AxisRow({
-  label,
-  checked,
-  indeterminate,
-  bold,
-  indent,
-  onClick,
-  sx,
-}: {
-  label: string
-  checked: boolean
-  indeterminate?: boolean
-  bold?: boolean
-  indent?: boolean
-  onClick: () => void
-  sx: Record<string, unknown>
-}) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0.75,
-        width: "100%",
-        border: "none",
-        background: "none",
-        cursor: "pointer",
-        py: 0.35,
-        pl: indent ? 2.5 : 0.5,
-        pr: 0.5,
-        borderRadius: 0.5,
-        "&:hover": { bgcolor: "action.hover" },
-      }}
-    >
-      <Checkbox
-        size="small"
-        checked={checked}
-        indeterminate={indeterminate}
-        tabIndex={-1}
-        sx={sx}
-      />
-      <Typography
-        variant="caption"
-        sx={{
-          fontWeight: bold ? 500 : 400,
-          fontSize: "0.72rem",
-          lineHeight: 1.3,
-          textAlign: "left",
-        }}
-      >
-        {label}
-      </Typography>
     </Box>
   )
 }

@@ -18,41 +18,36 @@ import React, {
 } from "react"
 import {
   Box,
-  Checkbox,
   CircularProgress,
   Snackbar,
   Typography,
   icons,
   useTheme,
 } from "@repo/ui/mui"
-import { TooltipCloseButton } from "@repo/ui"
 import { motion, AnimatePresence, useReducedMotion } from "@repo/motion"
 import {
   type ResilienceAxisItem,
   type ResilienceHeatmapCell,
   type ResilienceHeatmapMarginals,
-  type ResilienceCellRender,
   type ResilienceGlyphEntry,
   type ResilienceSmallMultiplesTile,
   hierarchicalRowOrder,
 } from "@repo/viz"
 import { useResilienceSlice, useWorkspaceSlice } from "../../../store"
-import { useResilienceSelectionSync } from "./useResilienceSelectionSync"
+import { useResilienceSelectionSync } from "./hooks/useResilienceSelectionSync"
 
 export type {
   ResilienceView,
-  AggregateOver,
   CellEncoding,
   DeltaMode,
   AggregateScope,
   ResilienceControlsState,
-} from "../../../store/resilienceTypes"
+} from "../../../store"
 import type {
   ResilienceView,
-  AggregateOver,
   CellEncoding,
   DeltaMode,
-} from "../../../store/resilienceTypes"
+} from "../../../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,
@@ -91,6 +86,17 @@ import ResiliencePanelChartView, {
 } from "./ResiliencePanelChartView"
 import type { HoveredInteraction } from "../../../useExploreHoverCoordination"
 import { useResilienceHeatmapTheme } from "./useResilienceHeatmapTheme"
+import {
+  clampTier,
+  transposeCell,
+  transposeTile,
+  resolveCellRender,
+  getMapLinkBlockedMessage,
+  resolveScenarioIdFromCell,
+  hoverPayloadFromCell,
+} from "./heatmap"
+import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
+import { ResiliencePanelTitle } from "./ResiliencePanelTitle"
 
 /**
  * Flat, CSV-friendly row shape for a single captured heatmap cell.
@@ -187,159 +193,6 @@ const HYDROCLIMATE_DESCRIPTIONS = HYDROCLIMATE_DESCRIPTIONS_BY_VALUE
 const HYDROCLIMATE_LABELS = HYDROCLIMATE_LABELS_BY_VALUE
 
 const HISTORICAL_HC: ResilienceHydroclimate = "historical"
-
-function clampTier(value: number): number {
-  return Math.min(4, Math.max(1, Math.round(value)))
-}
-
-/**
- * Transpose a heatmap cell: swap its row and column keys + labels.
- * Used by the panel-level transpose transform so every view path
- * can support a "pivot rows and columns" toggle without the viz
- * components or buildValueFn knowing about it.
- */
-function transposeCell(cell: ResilienceHeatmapCell): ResilienceHeatmapCell {
-  return {
-    ...cell,
-    rowKey: cell.colKey,
-    colKey: cell.rowKey,
-    rowLabel: cell.colLabel,
-    rowLabelFull: cell.colLabelFull,
-    colLabel: cell.rowLabel,
-    colLabelFull: cell.rowLabelFull,
-  }
-}
-
-/**
- * Transpose an entire (rows, columns, cells) triple. Pure and order-
- * preserving: row i of the input becomes column i of the output.
- */
-function _transposeHeatmap(
-  rows: ResilienceAxisItem[],
-  columns: ResilienceAxisItem[],
-  cells: ResilienceHeatmapCell[],
-): {
-  rows: ResilienceAxisItem[]
-  columns: ResilienceAxisItem[]
-  cells: ResilienceHeatmapCell[]
-} {
-  return {
-    rows: columns,
-    columns: rows,
-    cells: cells.map(transposeCell),
-  }
-}
-
-/**
- * Transpose a small-multiples tile: each tile's cells flip their
- * row/col keys. The tile's own rows/columns axes are shared at the
- * parent level and swapped there. This only touches cell data.
- */
-function transposeTile(
-  tile: ResilienceSmallMultiplesTile,
-): ResilienceSmallMultiplesTile {
-  return {
-    ...tile,
-    cells: tile.cells.map(transposeCell),
-  }
-}
-
-/**
- * Resolve the effective viz-level cell renderer from the logical state.
- * Glyph, distribution, and legacy density_opp are aggregate-only. Some
- * encodings become incoherent when the aggregate view reduces over
- * outcomes (mixed units across rows) or hydroclimates (no "historical"
- * reference column):
- *
- *   - `aggregateOver=outcomes`: disable `leverage` and (implicitly)
- *     `delta` - fall back to tier. Distribution still works because it
- *     operates on tier levels which are unit-free.
- *   - `aggregateOver=hydroclimates`: `deltaMode` is forced to `none` in
- *     the value fn, so there's no delta to resolve here. All other
- *     encodings are left alone.
- */
-function resolveCellRender(
-  view: ResilienceView,
-  encoding: CellEncoding,
-  deltaMode: DeltaMode,
-  aggregateOver: AggregateOver = "scenarios",
-): ResilienceCellRender {
-  if (view === "aggregate") {
-    if (encoding === "density_opp") {
-      return encoding
-    }
-    if (encoding === "glyph") return "glyph"
-    if (encoding === "distribution") return "distribution"
-    if (encoding === "leverage") {
-      // Leverage is a per-(outcome, hc) tier-range metric across the
-      // reduced members - only meaningful when rows share units. Fall
-      // back to the tier encoding when aggregating over outcomes.
-      return aggregateOver === "outcomes" ? "tier" : "leverage"
-    }
-    // tier / delta. Delta requires a reference column. Force tier when
-    // the aggregate reduces away the hydroclimate axis.
-    if (aggregateOver === "hydroclimates") return "tier"
-    return deltaMode !== "none" ? "delta" : "tier"
-  }
-  return deltaMode !== "none" ? "delta" : "tier"
-}
-
-/**
- * Compose the Snackbar copy shown when a heatmap cell click cannot
- * drive the map. Each branch explains the specific gating reason so
- * the message never sounds like a global "maps aren't ready" failure.
- * The derived-encoding branch is mostly defensive: the Read-as chooser
- * has been removed and `ResilienceControls` coerces the encoding back
- * to tier, but a stale preset or URL can still deliver a derived value
- * transiently before the coercion effect runs.
- */
-function getMapLinkBlockedMessage(
-  effectiveView: ResilienceView,
-  cellEncoding: CellEncoding,
-  hasOutcome: boolean,
-): string {
-  if (!hasOutcome) {
-    return "This cell isn't tied to a mappable outcome."
-  }
-  if (effectiveView === "aggregate") {
-    return "Overview cells aggregate many scenarios or outcomes, so they don't open a single slice on the map. Switch to Scenarios, Outcomes, or Hydroclimates to link cells to the map."
-  }
-  if (
-    cellEncoding === "delta" ||
-    cellEncoding === "density_opp" ||
-    cellEncoding === "leverage"
-  ) {
-    return "This cell shows a derived metric, not a single scenario tier, so it doesn't drive the map."
-  }
-  return "This cell can't be linked to the map from the current view."
-}
-
-function resolveScenarioIdFromCell(
-  cell: ResilienceHeatmapCell,
-  effectiveView: ResilienceView,
-  aggregateOver: AggregateOver,
-): string | null {
-  if (cell.scenarioId) return cell.scenarioId
-  if (effectiveView === "aggregate") {
-    if (aggregateOver === "outcomes") return cell.rowKey
-    if (aggregateOver === "hydroclimates") return cell.colKey
-  }
-  return null
-}
-
-function hoverPayloadFromCell(
-  cell: ResilienceHeatmapCell,
-  scenarioId: string,
-): HoveredInteraction {
-  const outcome =
-    cell.outcomeCode != null ? getOutcomeName(cell.outcomeCode) : undefined
-  const tierValue = cell.tierLevel ?? cell.continuousValue ?? undefined
-  return {
-    scenarioId,
-    ...(outcome ? { outcome } : {}),
-    ...(tierValue != null ? { tierValue } : {}),
-  }
-}
 
 export default function ResiliencePanel({
   highlightedIds = null,
@@ -2844,11 +2697,17 @@ export default function ResiliencePanel({
         }}
       >
         {showResilienceOutcomeSelector && (
-          <ResilienceOutcomeSelector
-            visible={resilienceVisibleOutcomes}
+          <OutcomeChooserPanel
+            title="Choose outcome rows"
+            closeAriaLabel="Close choose outcome rows panel"
+            selectedCodes={resilienceVisibleOutcomes}
             onToggle={toggleResilienceOutcome}
-            onSetAll={setResilienceVisibleOutcomes}
+            onSetSelected={setResilienceVisibleOutcomes}
             onClose={() => setShowResilienceOutcomeSelector(false)}
+            sx={{
+              left: theme.space.component.lg,
+              bottom: theme.space.component.md,
+            }}
           />
         )}
 
@@ -2912,384 +2771,6 @@ export default function ResiliencePanel({
           },
         }}
       />
-    </Box>
-  )
-}
-
-// Outcome-row picker overlay. Mirrors the radar's "choose axes" panel:
-// 220px wide, anchored to the left of the chart area, with a header,
-// two group toggles ("All key outcomes" / "All regional outcomes"), and
-// per-outcome checkboxes (regional variants indented under their parent
-// key outcome).
-function ResilienceOutcomeSelector({
-  visible,
-  onToggle,
-  onSetAll,
-  onClose,
-}: {
-  visible: readonly string[]
-  onToggle: (code: string) => void
-  onSetAll: (codes: string[]) => void
-  onClose: () => void
-}) {
-  const theme = useTheme()
-  const visibleSet = useMemo(() => new Set(visible), [visible])
-
-  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => visibleSet.has(c))
-  const someKeySelected =
-    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => visibleSet.has(c))
-
-  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
-    visibleSet.has(c),
-  )
-  const someRegionalSelected =
-    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => visibleSet.has(c))
-
-  const toggleGroup = useCallback(
-    (codes: readonly string[], allOn: boolean) => {
-      if (allOn) {
-        onSetAll(visible.filter((c) => !codes.includes(c)))
-      } else {
-        const merged = [...visible]
-        for (const c of codes) {
-          if (!merged.includes(c)) merged.push(c)
-        }
-        onSetAll(merged)
-      }
-    },
-    [visible, onSetAll],
-  )
-
-  const withRegional = useMemo(
-    () =>
-      OUTCOME_CODE_ORDER.filter(
-        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
-      ),
-    [],
-  )
-  const withoutRegional = useMemo(
-    () =>
-      OUTCOME_CODE_ORDER.filter(
-        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
-      ),
-    [],
-  )
-
-  const checkboxSx = useMemo(
-    () => ({ padding: 0, margin: 0, transform: "scale(0.8)" }),
-    [],
-  )
-
-  return (
-    <Box
-      sx={{
-        position: "absolute",
-        top: 0,
-        left: theme.space.component.lg,
-        bottom: theme.space.component.md,
-        width: 220,
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-        overflow: "hidden",
-        borderRight: `1px solid ${theme.palette.divider}`,
-        bgcolor: theme.palette.background.paper,
-        py: 1.5,
-        px: 1,
-      }}
-    >
-      <Box sx={{ position: "relative", flexShrink: 0 }}>
-        <TooltipCloseButton
-          onClick={onClose}
-          ariaLabel="Close choose outcome rows panel"
-        />
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            fontSize: "0.7rem",
-            letterSpacing: "0.04em",
-            color: "text.primary",
-            mb: 1,
-            display: "block",
-            pl: 0.5,
-            pr: 5,
-          }}
-        >
-          Choose outcome rows
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-          scrollbarWidth: "thin",
-          scrollbarColor: (t) =>
-            `${t.palette.grey[400]} ${t.palette.grey[100]}`,
-          "&::-webkit-scrollbar": { width: 8 },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: (t) => t.palette.grey[100],
-            borderRadius: 4,
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: (t) => t.palette.grey[400],
-            borderRadius: 4,
-            border: "2px solid transparent",
-            backgroundClip: "padding-box",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: (t) => t.palette.grey[500],
-          },
-        }}
-      >
-        <OutcomeRow
-          label="All key outcomes"
-          checked={allKeySelected}
-          indeterminate={someKeySelected}
-          bold
-          onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
-          sx={checkboxSx}
-        />
-        <OutcomeRow
-          label="All regional outcomes"
-          checked={allRegionalSelected}
-          indeterminate={someRegionalSelected}
-          bold
-          onClick={() =>
-            toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
-          }
-          sx={checkboxSx}
-        />
-
-        <Box
-          sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
-        />
-
-        {withRegional.map((code) => {
-          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
-          return (
-            <Box key={code} sx={{ mb: 0.75 }}>
-              <OutcomeRow
-                label={getOutcomeName(code)}
-                checked={visibleSet.has(code)}
-                bold
-                onClick={() => onToggle(code)}
-                sx={checkboxSx}
-              />
-              {variants.map((vCode) => (
-                <OutcomeRow
-                  key={vCode}
-                  label={
-                    vCode.startsWith("NOD")
-                      ? "North of Delta"
-                      : "South of Delta"
-                  }
-                  checked={visibleSet.has(vCode)}
-                  indent
-                  onClick={() => onToggle(vCode)}
-                  sx={checkboxSx}
-                />
-              ))}
-            </Box>
-          )
-        })}
-
-        <Box
-          sx={{ borderBottom: `1px solid ${theme.palette.divider}`, my: 1 }}
-        />
-
-        {withoutRegional.map((code) => (
-          <OutcomeRow
-            key={code}
-            label={getOutcomeName(code)}
-            checked={visibleSet.has(code)}
-            bold
-            onClick={() => onToggle(code)}
-            sx={checkboxSx}
-          />
-        ))}
-      </Box>
-    </Box>
-  )
-}
-
-function OutcomeRow({
-  label,
-  checked,
-  indeterminate,
-  bold,
-  indent,
-  onClick,
-  sx,
-}: {
-  label: string
-  checked: boolean
-  indeterminate?: boolean
-  bold?: boolean
-  indent?: boolean
-  onClick: () => void
-  sx: Record<string, unknown>
-}) {
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0.75,
-        width: "100%",
-        border: "none",
-        background: "none",
-        cursor: "pointer",
-        py: 0.35,
-        pl: indent ? 2.5 : 0.5,
-        pr: 0.5,
-        borderRadius: 0.5,
-        "&:hover": { bgcolor: "action.hover" },
-      }}
-    >
-      <Checkbox
-        size="small"
-        checked={checked}
-        indeterminate={indeterminate}
-        tabIndex={-1}
-        sx={sx}
-      />
-      <Typography
-        variant="caption"
-        sx={{
-          fontWeight: bold ? 500 : 400,
-          fontSize: "0.72rem",
-          lineHeight: 1.3,
-          textAlign: "left",
-        }}
-      >
-        {label}
-      </Typography>
-    </Box>
-  )
-}
-
-/**
- * ResiliencePanelTitle - two-line header rendered at the top of the
- * chart area.
- *
- * Line 1 (title) names the chart as a noun phrase anchored on the
- * Third-role dimension ("Scenarios as small multiples", "Averaged
- * across outcomes", etc.). Line 2 (subtitle) spells out the scope
- * of the subject the chart exhibits (how many scenarios / outcomes
- * / hydroclimates). This is orthogonal to the sentence-header
- * control bar above the chart, which narrates the current
- * configuration: title = what the chart IS, sentence = how you are
- * currently looking at it.
- *
- * The title follows the same Z-dim / Z-mode framing that the
- * sentence header uses (see `ResilienceControls`), so the two
- * headers stay in lockstep as the user rotates the permutation.
- */
-function ResiliencePanelTitle({
-  view,
-  aggregateOver,
-  scenarioCount,
-  outcomeCount,
-  climateCount,
-}: {
-  view: ResilienceView
-  aggregateOver: AggregateOver
-  scenarioCount: number
-  outcomeCount: number
-  climateCount: number
-}) {
-  const theme = useTheme()
-
-  // Local copy of the Z-role derivation so the title doesn't have
-  // to import from ResilienceControls. Must stay in sync with the
-  // adapter over there.
-  type ZDim = "scenario" | "outcome" | "hydroclimate"
-  type ZMode = "facet" | "aggregate"
-  const AGGREGATE_OVER_TO_ZDIM: Record<AggregateOver, ZDim> = {
-    scenarios: "scenario",
-    outcomes: "outcome",
-    hydroclimates: "hydroclimate",
-  }
-  const DIM_PLURAL_TITLECASE: Record<ZDim, string> = {
-    scenario: "Scenarios",
-    outcome: "Outcomes",
-    hydroclimate: "Hydroclimates",
-  }
-  const DIM_PLURAL_LOWER: Record<ZDim, string> = {
-    scenario: "scenarios",
-    outcome: "outcomes",
-    hydroclimate: "hydroclimates",
-  }
-
-  const zDim: ZDim =
-    view === "aggregate"
-      ? AGGREGATE_OVER_TO_ZDIM[aggregateOver]
-      : (view as ZDim)
-  const zMode: ZMode = view === "aggregate" ? "aggregate" : "facet"
-
-  // Mirror the sentence header's empty-selection fallback so the
-  // title reads aggregate when the panel is actually showing the
-  // library aggregate.
-  const effectiveMode: ZMode =
-    zMode === "facet" && zDim === "scenario" && scenarioCount === 0
-      ? "aggregate"
-      : zMode
-
-  const title =
-    effectiveMode === "facet"
-      ? `${DIM_PLURAL_TITLECASE[zDim]} as small multiples`
-      : `Averaged across ${DIM_PLURAL_LOWER[zDim]}`
-
-  const scopeBits: string[] = []
-  if (scenarioCount > 0) {
-    scopeBits.push(`${scenarioCount} scenario${scenarioCount === 1 ? "" : "s"}`)
-  } else {
-    scopeBits.push("entire scenario library")
-  }
-  scopeBits.push(`${outcomeCount} outcome${outcomeCount === 1 ? "" : "s"}`)
-  scopeBits.push(`${climateCount} hydroclimate${climateCount === 1 ? "" : "s"}`)
-  const subtitle = scopeBits.join(" · ")
-
-  return (
-    <Box
-      sx={{
-        px: theme.space.component.lg,
-        pt: theme.space.component.sm,
-        pb: theme.space.component.xs,
-      }}
-    >
-      <Typography
-        component="h2"
-        sx={{
-          m: 0,
-          fontSize: "1.0625rem",
-          fontWeight: 600,
-          lineHeight: 1.3,
-          color: theme.palette.text.primary,
-        }}
-      >
-        {title}
-      </Typography>
-      <Typography
-        component="div"
-        sx={{
-          mt: 0.25,
-          fontSize: "0.8125rem",
-          lineHeight: 1.4,
-          color: theme.palette.grey[700],
-        }}
-      >
-        {subtitle}
-      </Typography>
     </Box>
   )
 }

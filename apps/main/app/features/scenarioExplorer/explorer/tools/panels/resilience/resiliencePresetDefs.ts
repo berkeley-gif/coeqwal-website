@@ -3,7 +3,7 @@
  * `ResilienceControls` (single Presets row. `salient` filters that row).
  */
 
-import type { ResilienceControlsState } from "../../../store/resilienceTypes"
+import type { ResilienceControlsState } from "../../../store"
 
 export type ResiliencePresetPatchFn = (
   state: ResilienceControlsState,

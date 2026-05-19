@@ -6,6 +6,7 @@ export {
   useExplorerStore,
   DEFAULT_RESILIENCE_CONTROLS,
   selectResilienceControls,
+  applyResilienceControlsPatch,
   useWorkspaceSlice,
   useListSlice,
   useRadarSlice,
@@ -26,4 +27,5 @@ export type {
   CellEncoding,
   DeltaMode,
   AggregateScope,
+  ResilienceControlFields,
 } from "./store/index"

@@ -16,7 +16,7 @@ import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { useWorkspaceSlice } from "../../../store"
 import { mapActions } from "../../../../../map/store"
-import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
+import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
 
 const SIDEBAR_WIDTH_COLLAPSED = 320

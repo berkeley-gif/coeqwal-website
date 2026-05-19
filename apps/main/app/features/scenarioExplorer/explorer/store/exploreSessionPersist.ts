@@ -58,7 +58,7 @@ import type { TourTool } from "../tools/tour/types"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
-} from "../tools/panels/resilience/useResilienceMatrix"
+} from "../tools/panels/resilience/resilienceHydroclimates"
 
 export const EXPLORE_SESSION_STORAGE_KEY = "coeqwal-explorer-tool-sessions-v2"
 export const EXPLORE_SESSION_STORAGE_VERSION = 2

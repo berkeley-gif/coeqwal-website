@@ -100,11 +100,11 @@ Each handler owns:
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `type`                         | Discriminator value.                                                                                                                                                                                                                                              | Self-documenting; matches the registry key.                                      |
 | `urlPrefix`                    | One-letter token segment (e.g. `b`, `r`, `e`, `q`).                                                                                                                                                                                                               | `url.ts` encode/decode.                                                          |
-| `rasterDimensionsKey`          | Key into `CAPTURE_DIMENSIONS`.                                                                                                                                                                                                                                    | `Share.tsx` PNG fallback when rasterizing `cachedSvg`.                           |
+| `rasterDimensionsKey`          | Key into `CAPTURE_DIMENSIONS`.                                                                                                                                                                                                                                    | `tab/SharePanel.tsx` PNG fallback when rasterizing `cachedSvg`.                           |
 | `renderCard(item, ctx)`        | Returns the card React node.                                                                                                                                                                                                                                      | `ShareItemView.tsx`.                                                             |
 | `encodeUrlToken(item)`         | Body of the URL token (no prefix, no leading dot).                                                                                                                                                                                                                | `url.ts#encodeOne`.                                                              |
 | `decodeUrlToken(parts)`        | Inverse; receives parts after the prefix is stripped.                                                                                                                                                                                                             | `url.ts#decodeOne`.                                                              |
-| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`.                                                                                                                                                                 | `Share.tsx` PNG/SVG/CSV downloads.                                               |
+| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`.                                                                                                                                                                 | `tab/SharePanel.tsx` PNG/SVG/CSV downloads.                                               |
 | `exportCsv(item, lookups)`     | Returns a CSV body string or `null`. Optional.                                                                                                                                                                                                                    | `exportUtils.ts` single + bulk ZIP export.                                       |
 | `DataRehydrator`               | React component mounted by `ShareDataRehydrationHost`. Backfills `cachedChartData` for URL-restored items so the bulk ZIP can include them. Optional; items whose variant ships no rehydrator are silently dropped from the bundle when they have no cached data. | `ShareDataRehydrationHost.tsx`, `useShareDataReady` (gates "Download all data"). |
 
@@ -427,7 +427,7 @@ export const VARIANT_REGISTRY = {
 
 The `satisfies` clause turns a missing handler into a compile error
 right here. Once the row is added, `ShareItemView`, `url.ts`, the
-PNG/SVG/CSV download paths in `Share.tsx`, and `exportUtils.ts` all
+PNG/SVG/CSV download paths in `tab/SharePanel.tsx`, and `exportUtils.ts` all
 pick up the new variant automatically.
 
 ### 7. Wire the capture site via `stageShareItem`
@@ -466,7 +466,7 @@ registry.
 
 ## Bulk download paths
 
-`apps/main/app/components/tabPanels/Share.tsx` exposes
+`explorer/share/tab/SharePanel.tsx` exposes
 `downloadShareItemAsPng` and `downloadShareItemAsSvg`. The PNG path
 prefers `cachedSvg` (rasterized on demand at the per-variant pixel
 size from `CAPTURE_DIMENSIONS`), falls back to a live `html-to-image`
@@ -591,7 +591,7 @@ Use the helpers in [`share/utils/filename.ts`](utils/filename.ts):
   and dedupes consecutive identical slugs so two ids that share a
   short label can't render `current-ops-vs-current-ops`.
 - `withExt(label, ext)` — appends the extension. Called by
-  `Share.tsx`, not the handler.
+  `tab/SharePanel.tsx`, not the handler.
 
 Compose with `[...].filter(Boolean).join("-")` so a missing segment
 (e.g. baseline-off, no scenarios for an aggregate view) doesn't leave
@@ -623,7 +623,7 @@ also used by CategoryView section downloads. Do not pull it into share variants.
 
 ### Known limitation: one raster size per variant type
 
-`shareItemRasterSize` (in `Share.tsx`) currently maps each
+`shareItemRasterSize` (in `tab/SharePanel.tsx`) currently maps each
 `ShareItem["type"]` to one entry in `CAPTURE_DIMENSIONS` via the
 handler's `rasterDimensionsKey`. That's fine for `barChart`, `radar`,
 and `equity`, which capture at one fixed size. It rounds resilience

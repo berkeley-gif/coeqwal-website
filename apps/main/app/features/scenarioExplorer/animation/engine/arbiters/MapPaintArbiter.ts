@@ -32,7 +32,7 @@ import {
 } from "../demandUnitsBaseline"
 import { BEAT1_MID, beat1FillExpr } from "../beat1Palette"
 import { debugLog, logDuState } from "../debug"
-import { BASEMAP_DIM_OPACITY } from "../../../../../map/config/outcomeLayerRegistry"
+import { BASEMAP_DIM_OPACITY } from "../../../../map/config/outcomeLayerRegistry"
 
 /** Progress value at which the `basemap-dim-overlay` finishes fading
  *  in to its peak opacity. Mirrors the legacy listener's

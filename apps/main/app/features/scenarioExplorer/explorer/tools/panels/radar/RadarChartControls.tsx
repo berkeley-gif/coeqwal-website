@@ -2,8 +2,8 @@
 
 import ChartControlsBar from "../../chrome/layout/ChartControlsBar"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
-import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
-import { RadarTourAnchor } from "../../chrome/RadarTourAnchor"
+import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
+import { RadarTourAnchor } from "../../chrome/tour/RadarTourAnchor"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
 import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 import type { ExploreShareCapture } from "../../../useExploreShareCapture"

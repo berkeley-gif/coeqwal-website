@@ -42,18 +42,16 @@ import {
   type NodSodCode,
 } from "../../../../../../content/outcomes"
 import { HYDROCLIMATE_LABELS_BY_VALUE } from "../../../../../../content/scenarios"
+export {
+  RESILIENCE_HYDROCLIMATES,
+  type ResilienceHydroclimate,
+} from "./resilienceHydroclimates"
+import {
+  RESILIENCE_HYDROCLIMATES,
+  type ResilienceHydroclimate,
+} from "./resilienceHydroclimates"
 
-const HC_HISTORICAL = "historical"
-const HC_CC50 = "cc50"
-const HC_CC95 = "cc95"
-
-export const RESILIENCE_HYDROCLIMATES = [
-  HC_HISTORICAL,
-  HC_CC50,
-  HC_CC95,
-] as const
-
-export type ResilienceHydroclimate = (typeof RESILIENCE_HYDROCLIMATES)[number]
+const [HC_HISTORICAL, HC_CC50, HC_CC95] = RESILIENCE_HYDROCLIMATES
 
 /**
  * Rows shown in scenario view (Y axis): 9 aggregate outcomes interleaved

@@ -6,8 +6,8 @@ import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
 import {
   getTierColorsFromTheme,
   type TierLevel,
-} from "../../../../content/tiers"
-import { API_BASE } from "../../../../lib/constants/api"
+} from "../../../content/tiers"
+import { API_BASE } from "../../../lib/constants/api"
 
 const DEMO_SCENARIO_ID = "s0020"
 const TIER_CODE = "AG_REV"

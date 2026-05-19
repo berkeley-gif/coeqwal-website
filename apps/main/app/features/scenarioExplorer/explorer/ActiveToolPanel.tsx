@@ -13,14 +13,14 @@ import { Box } from "@repo/ui/mui"
 import type { ExploreMode } from "./store"
 import {
   DataExplorerView,
+  EquityChartControls,
   EquityPanel,
   ListView,
+  RadarChartControls,
   RadarPanel,
+  ResilienceChartControls,
   ResiliencePanel,
 } from "./tools"
-import RadarChartControls from "./tools/panels/radar/RadarChartControls"
-import EquityChartControls from "./tools/panels/equity/EquityChartControls"
-import ResilienceChartControls from "./tools/panels/resilience/ResilienceChartControls"
 import ToolErrorBoundary from "./ToolErrorBoundary"
 import type { ExploreHover } from "./useExploreHoverCoordination"
 import type { ExploreShareCapture } from "./useExploreShareCapture"

@@ -2,8 +2,8 @@
 
 import ChartControlsBar from "../../chrome/layout/ChartControlsBar"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
-import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
-import { SimpleButton } from "../../chrome/SimpleButton"
+import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
+import { SimpleButton } from "../../chrome/actions/SimpleButton"
 import { mapActions } from "../../../../../map/store"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import type { ExploreShareCapture } from "../../../useExploreShareCapture"

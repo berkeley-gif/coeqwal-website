@@ -1,5 +1,5 @@
 import type { ShareItem } from "../../../store"
-import type { ResilienceControlsState } from "../../../store/resilienceTypes"
+import type { ResilienceControlsState } from "../../../store"
 import type { ResilienceCaptureResult } from "./ResiliencePanel"
 
 export type BuildResilienceShareItemInput = {

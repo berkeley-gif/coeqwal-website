@@ -11,7 +11,7 @@ import React, { useCallback } from "react"
 import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
-import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
+import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
 

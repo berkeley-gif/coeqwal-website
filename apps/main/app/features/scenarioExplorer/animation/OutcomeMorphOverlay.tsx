@@ -23,21 +23,21 @@ import {
   SQUARE_GAP,
   RADAR_TIER_LABELS,
 } from "@repo/viz"
-import { getTierLabel } from "../../../../content/tiers"
+import { getTierLabel } from "../../../content/tiers"
 import { STORYBOARD_VISUAL_LIFT_PX } from "./animationTiming"
 import {
   ENV_FLOWS_NAMES,
   STATION_NAMES,
-} from "../../../map/config/outcomeLocations"
-import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../../map/config/outcomeLayerRegistry"
+} from "../../map/config/outcomeLocations"
+import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
 import {
   isSingleValueTier,
   type ChartDataPoint,
-} from "../../../scenarios/components/shared/types"
+} from "../../scenarios/components/shared/types"
 import {
   getTierLevelForScore,
   computeTierScore,
-} from "../../../scenarios/components/shared/tierScore"
+} from "../../scenarios/components/shared/tierScore"
 
 export interface OutcomeGroup {
   code: string
@@ -62,7 +62,7 @@ interface OutcomeMorphOverlayProps {
    *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
    *  and clears it on unmount. The arbiter reads through the ref on
    *  every tick. See
-   *  `apps/main/app/features/scenarioExplorer/getStarted/animation/engine/arbiters/OverlayMorphArbiter.ts`. */
+   *  `apps/main/app/features/scenarioExplorer/animation/engine/arbiters/OverlayMorphArbiter.ts`. */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
   squaresPerRow: number
   distributionPositionMap: Record<

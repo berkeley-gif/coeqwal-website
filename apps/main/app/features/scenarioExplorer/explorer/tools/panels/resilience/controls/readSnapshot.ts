@@ -11,8 +11,8 @@
 import {
   selectResilienceControls,
   type ResilienceControlFields,
-} from "../../../../store/resilienceStoreSlice"
-import type { ResilienceControlsState } from "../../../../store/resilienceTypes"
+} from "../../../../store"
+import type { ResilienceControlsState } from "../../../../store"
 
 /** Assemble flat resilience store fields into the controls view-model */
 export function readControlsSnapshot(

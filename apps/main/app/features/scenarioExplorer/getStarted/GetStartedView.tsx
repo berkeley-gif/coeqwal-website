@@ -3,7 +3,7 @@
 import { useRef } from "react"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
 import { useMapMode } from "../../map/store"
-import TierAnimationSection from "./animation/TierAnimationSection"
+import TierAnimationSection from "../animation/TierAnimationSection"
 import {
   WelcomePanel,
   WaterIssuesPanel,

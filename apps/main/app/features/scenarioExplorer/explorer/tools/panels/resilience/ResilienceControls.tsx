@@ -29,7 +29,7 @@ import {
   icons,
   useTheme,
 } from "@repo/ui/mui"
-import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
+import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
@@ -46,7 +46,7 @@ import {
   type PivotDim,
   type PivotMode,
 } from "./controls"
-import type { ResilienceControlsState } from "../../../store/resilienceTypes"
+import type { ResilienceControlsState } from "../../../store"
 import {
   type ResilienceHydroclimate,
   RESILIENCE_HYDROCLIMATES,

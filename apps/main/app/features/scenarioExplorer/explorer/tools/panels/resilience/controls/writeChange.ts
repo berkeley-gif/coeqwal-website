@@ -10,8 +10,8 @@
  */
 
 import { useExplorerStore } from "../../../../store"
-import { applyResilienceControlsPatch } from "../../../../store/resilienceStoreSlice"
-import type { ResilienceControlsState } from "../../../../store/resilienceTypes"
+import { applyResilienceControlsPatch } from "../../../../store"
+import type { ResilienceControlsState } from "../../../../store"
 
 /** Apply a planned controls change to the explorer store in one transaction */
 export function writeControlsChange(

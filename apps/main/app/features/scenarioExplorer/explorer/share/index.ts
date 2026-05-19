@@ -3,6 +3,11 @@
  */
 
 export { default as ShareDrawer } from "./ShareDrawer"
+export { default as SharePanel } from "./tab/SharePanel"
+export type {
+  ShareRenderLiveData,
+  ShareRadarHydroKey as ShareTabRadarHydroKey,
+} from "./tab/SharePanel"
 export { default as ShareItemView } from "./ShareItemView"
 export { default as ShareCardShell } from "./ShareCardShell"
 export { default as ShareUrlVersionNotice } from "./ui/ShareUrlVersionNotice"

@@ -24,7 +24,7 @@
  * sessionStorage. See `exploreSessionPersist.ts` for the full persistence story.
  */
 
-import { useShallow } from "zustand/react/shallow"
+import { useShallow } from "@repo/state/zustand"
 import { useExplorerStore } from "./storeInstance"
 import {
   pickEquitySlice,

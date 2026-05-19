@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box } from "@repo/ui/mui"
-import { useTourAnchor } from "../tour/TourAnchorContext"
+import { useTourAnchor } from "../../tour/TourAnchorContext"
 
 type RadarTourAnchorProps = {
   anchorId: string

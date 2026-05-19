@@ -23,16 +23,16 @@ import {
   useActiveOutcomeVisualization,
   useLocationHighlights,
   useMapStore,
-} from "../../../map/store"
+} from "../../map/store"
 import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
-} from "../../../map/config/outcomeLayerRegistry"
-import { resolveOutcomeCamera } from "../../../map/config/resolveOutcomeCamera"
+} from "../../map/config/outcomeLayerRegistry"
+import { resolveOutcomeCamera } from "../../map/config/resolveOutcomeCamera"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
-} from "../../../map/config/outcomeLocations"
+} from "../../map/config/outcomeLocations"
 import { useTierAnimationData } from "./useTierAnimationData"
 import type { OutcomeLocationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
@@ -52,13 +52,13 @@ import _PinnedLocationsList from "./PinnedLocationsList"
 import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
-} from "../../../../content/outcomes"
-import { getTierLabel } from "../../../../content/tiers"
-import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
-import { useScenarioTiers } from "../../../scenarios/hooks/useTierData"
+} from "../../../content/outcomes"
+import { getTierLabel } from "../../../content/tiers"
+import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
+import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { BEATS, FINAL_BEAT_INDEX } from "./animationTiming"
-import { getStartedViewportCardHeightCss } from "../getStartedViewport"
+import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
 import {
   useBeatEngine,
   BEAT_TABLE,
@@ -1435,7 +1435,7 @@ export default function TierAnimationSection() {
     }
 
     // ── Store highlights (drives map Popups -- independent of map style) ──
-    const highlights: import("../../../map/store").LocationHighlight[] = []
+    const highlights: import("../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
     for (const [key, info] of activeLocationSet) {

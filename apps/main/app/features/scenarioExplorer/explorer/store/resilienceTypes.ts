@@ -1,4 +1,4 @@
-import type { ResilienceHydroclimate } from "../tools/panels/resilience/useResilienceMatrix"
+import type { ResilienceHydroclimate } from "../tools/panels/resilience/resilienceHydroclimates"
 
 export type ResilienceView =
   | "scenario"

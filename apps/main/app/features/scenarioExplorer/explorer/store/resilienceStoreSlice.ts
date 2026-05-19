@@ -11,7 +11,7 @@ import { PRIMARY_SCENARIO_BASELINE_ID } from "../../utils/scenarioIdSort"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
-} from "../tools/panels/resilience/useResilienceMatrix"
+} from "../tools/panels/resilience/resilienceHydroclimates"
 import type { ResilienceControlsState } from "./resilienceTypes"
 
 export type { ResilienceControlsState } from "./resilienceTypes"
