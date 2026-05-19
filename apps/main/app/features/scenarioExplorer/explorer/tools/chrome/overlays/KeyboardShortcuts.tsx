@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { MobileModal } from "@repo/ui"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice } from "../../../store"
 
 interface ShortcutItem {
   keys: string[]
@@ -38,7 +38,7 @@ const SHORTCUTS: ShortcutItem[] = [
 export function KeyboardShortcuts() {
   const theme = useTheme()
   const [isHelpOpen, setIsHelpOpen] = useState(false)
-  const { clearScenarios, selectedScenarios } = useExplorerStore()
+  const { clearScenarios, selectedScenarios } = useWorkspaceSlice()
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {

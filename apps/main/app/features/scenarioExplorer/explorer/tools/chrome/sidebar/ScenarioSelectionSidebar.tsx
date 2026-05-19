@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ScenarioSelectionSidebar - Persistent left-hand scenario list panel
+ * ScenarioSelectionSidebar - Scenario list panel
  * used in non-list explore modes (radar, equity, data).
  *
  * 1. "Scenario library" header with key-operations column toggle
@@ -17,7 +17,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useListSlice } from "../../../store"
 import {
   StrategyHeader,
   OperationsIconGroup,
@@ -109,12 +109,10 @@ export default function ScenarioSelectionSidebar({
     highlightedScenario,
     showDefinitions,
     showKeyOperations,
-    showOnlyChosen,
-    groupByTheme,
-    searchQuery,
     outcomeDisplayMode,
     exploreMode,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
+  const { showOnlyChosen, groupByTheme, searchQuery } = useListSlice()
 
   // In single-select mode (Distribution / equity) a click sets the
   // orthogonal `equityFocusScenario` field so the shared multi-select

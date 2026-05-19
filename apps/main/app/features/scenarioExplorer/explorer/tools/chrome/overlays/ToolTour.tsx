@@ -47,7 +47,7 @@ import {
   icons,
   useTheme,
 } from "@repo/ui/mui"
-import { useExplorerStore } from "../../../store"
+import { useExplorerStore, useRadarSlice, useWorkspaceSlice } from "../../../store"
 import { TOUR_STEPS } from "../../tour/content"
 import ListTourBarIllustration from "../../panels/list/ListTourBarIllustration"
 import ListTourMapLegend from "../../panels/list/ListTourMapLegend"
@@ -184,18 +184,18 @@ export default function ToolTour() {
   // Store + step definition
   // ------------------------------------------------------------------
 
-  const tourTool = useExplorerStore((s) => s.tour.tool)
-  const tourStep = useExplorerStore((s) => s.tour.step)
-  const endTour = useExplorerStore((s) => s.endTour)
-  const setTourStep = useExplorerStore((s) => s.setTourStep)
-  const setShowMap = useExplorerStore((s) => s.setShowMap)
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  const tourStep = useWorkspaceSlice((s) => s.tour.step)
+  const endTour = useWorkspaceSlice((s) => s.endTour)
+  const setTourStep = useWorkspaceSlice((s) => s.setTourStep)
+  const setShowMap = useWorkspaceSlice((s) => s.setShowMap)
   // Subscribed for list map demo only. Map viz must run after showMap settles
   // (UnifiedToolView clears outcome viz in its showMap effect cleanup).
-  const showMap = useExplorerStore((s) => s.showMap)
-  const setShowKeyOperations = useExplorerStore((s) => s.setShowKeyOperations)
-  const setShowAxisSelector = useExplorerStore((s) => s.setShowAxisSelector)
-  const setHighlightBaseline = useExplorerStore((s) => s.setHighlightBaseline)
-  const setShowRadarRange = useExplorerStore((s) => s.setShowRadarRange)
+  const showMap = useWorkspaceSlice((s) => s.showMap)
+  const setShowKeyOperations = useWorkspaceSlice((s) => s.setShowKeyOperations)
+  const setHighlightBaseline = useWorkspaceSlice((s) => s.setHighlightBaseline)
+  const setShowAxisSelector = useRadarSlice((s) => s.setShowAxisSelector)
+  const setShowRadarRange = useRadarSlice((s) => s.setShowRadarRange)
 
   const { resolve, version } = useTourAnchorResolver()
 

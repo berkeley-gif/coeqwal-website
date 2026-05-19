@@ -9,7 +9,7 @@
  */
 
 import { useMemo } from "react"
-import { useExplorerStore, useListSlice } from "../../store"
+import { useWorkspaceSlice, useListSlice } from "../../store"
 import { useScenarioList } from "../../../../scenarios/hooks/useScenarioList"
 import {
   useMultipleScenarioTiers,
@@ -188,7 +188,7 @@ export function computeOrderedScenarios({
 export function useScenarioSortScores():
   | Record<string, Record<string, OutcomeScoreData>>
   | undefined {
-  const sortBy = useExplorerStore((s) => s.sortBy)
+  const sortBy = useListSlice((s) => s.sortBy)
   const { idMapping } = useResolvedIdMapping()
   const { allScoreData } = useMultipleScenarioTiers(
     sortBy ? idMapping : ({} as Record<string, string | null>),
@@ -208,7 +208,7 @@ export function useOrderedScenarios(
     selectedIconId,
     showOnlyChosen,
   } = useListSlice()
-  const { showAlternativeBaselines, selectedScenarios } = useExplorerStore()
+  const { showAlternativeBaselines, selectedScenarios } = useWorkspaceSlice()
 
   const {
     siblingGroups,

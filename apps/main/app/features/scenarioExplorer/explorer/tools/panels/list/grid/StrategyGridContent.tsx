@@ -27,7 +27,7 @@ import type { TooltipScenarioContext } from "../../../../../../tooltips/useTierT
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import ThemeGroupHeader from "../../../chrome/sidebar/ThemeGroupHeader"
 import { HydroclimateGate } from "../../../../../../scenarios/components/HydroclimateGate"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { captureBarChartRow } from "./captureBarChartRow"
 import { stageShareItem } from "../../../../share/stage"
 
@@ -241,9 +241,9 @@ export function StrategyGridContent({
     return map
   }, [themeSubheaderMode, pinnedScenarios, themeScenarioIds])
 
-  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
-  const hydroclimate = useExplorerStore((s) => s.hydroclimate)
-  const addShareItem = useExplorerStore((s) => s.addShareItem)
+  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
+  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
 
   // ThemeGroupHeader's "share all" loop. Each scenario's outcome row
   // is captured off-screen at fixed dimensions before its share item

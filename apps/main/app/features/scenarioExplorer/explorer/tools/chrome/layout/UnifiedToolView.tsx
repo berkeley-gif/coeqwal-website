@@ -14,7 +14,7 @@
 import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice } from "../../../store"
 import { mapActions } from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
@@ -35,10 +35,10 @@ export default function UnifiedToolView({
   activeTool,
 }: UnifiedToolViewProps) {
   const theme = useTheme()
-  const showMap = useExplorerStore((s) => s.showMap)
-  const exploreMode = useExplorerStore((s) => s.exploreMode)
-  const showKeyOperations = useExplorerStore((s) => s.showKeyOperations)
-  const hydroclimate = useExplorerStore((s) => s.hydroclimate)
+  const showMap = useWorkspaceSlice((s) => s.showMap)
+  const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
+  const showKeyOperations = useWorkspaceSlice((s) => s.showKeyOperations)
+  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
 
   const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 

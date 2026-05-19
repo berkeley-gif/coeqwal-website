@@ -10,7 +10,7 @@
 import { useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
-import { useExplorerStore } from "./store"
+import { useWorkspaceSlice } from "./store"
 import UnifiedToolView from "./tools/chrome/layout/UnifiedToolView"
 import ToolToolbar from "./tools/chrome/toolbar/ToolToolbar"
 import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
@@ -23,7 +23,7 @@ import { useExploreHoverCoordination } from "./useExploreHoverCoordination"
 import { useExploreShareCapture } from "./useExploreShareCapture"
 
 export default function ExplorerToolView() {
-  const exploreMode = useExplorerStore((s) => s.exploreMode)
+  const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const isListMode = exploreMode === "list"
 
   const hover = useExploreHoverCoordination()

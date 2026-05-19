@@ -11,7 +11,7 @@ import {
 import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
-import { useExplorerStore, type OutcomeDisplayMode } from "../../../store"
+import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
 
 interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme
@@ -57,7 +57,7 @@ export default function ThemeGroupHeader({
     shareItems,
     outcomeDisplayMode,
     hydroclimate,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
   const themeColors = theme.palette.waterThemes[themeKey]

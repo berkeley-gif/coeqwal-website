@@ -9,7 +9,7 @@
  * - Tooltip management for outcome info
  *
  * This is a fully controlled component that accepts all state as props.
- * Parent components are responsible for state management via useExplorerStore()
+ * Parent components are responsible for state management via slice hooks
  * or useExploreUserWorkflowStore().
  *
  * @see StrategyGridHeader for header rendering

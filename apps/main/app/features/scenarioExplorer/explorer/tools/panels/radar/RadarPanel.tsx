@@ -29,7 +29,7 @@ import {
 import { ChartToast, ClickTooltip, TooltipCloseButton } from "@repo/ui"
 import { useTierChartData } from "../../hooks/useTierChartData"
 import { useRadarPlotTheme } from "./useRadarPlotTheme"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 import { useScenarioList } from "../../../../../scenarios/hooks"
 import { useHydroclimateAvailability } from "../../../../../scenarios/hooks/useHydroclimateAvailability"
 import { HydroclimateUnavailablePlaceholder } from "../../../../../scenarios/components/HydroclimateUnavailablePlaceholder"
@@ -203,6 +203,10 @@ export default function RadarPanel({
     selectedScenarios,
     highlightBaseline,
     showTierZones,
+    hydroclimate,
+    addShareItem,
+  } = useWorkspaceSlice()
+  const {
     radarVisibleAxes,
     setRadarVisibleAxes,
     toggleRadarAxis,
@@ -211,10 +215,7 @@ export default function RadarPanel({
     radarShowAll,
     showAxisSelector,
     setShowAxisSelector,
-    hydroclimate,
-  } = useExplorerStore()
-
-  const addShareItem = useExplorerStore((s) => s.addShareItem)
+  } = useRadarSlice()
 
   const { getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
@@ -344,7 +345,7 @@ export default function RadarPanel({
   // open the first axis's info popover so the user sees what the
   // popper is referring to. Close it when the step ends or the tour
   // is dismissed, mirroring the list tour's outcome-info pattern.
-  const radarTourStepId = useExplorerStore((s) => {
+  const radarTourStepId = useWorkspaceSlice((s) => {
     if (s.tour.tool !== "radar") return null
     return TOUR_STEPS.radar[s.tour.step]?.id ?? null
   })

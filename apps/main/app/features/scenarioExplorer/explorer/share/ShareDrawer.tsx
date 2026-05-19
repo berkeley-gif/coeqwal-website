@@ -10,7 +10,7 @@ import {
   useTheme,
   icons,
 } from "@repo/ui/mui"
-import { useExplorerStore } from "../store"
+import { useWorkspaceSlice } from "../store"
 import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTiers"
 import { useTierChartData } from "../tools/hooks/useTierChartData"
 import {
@@ -125,7 +125,7 @@ export default function ShareDrawer() {
     removeShareItem,
     clearShareItems,
     updateShareItem,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()

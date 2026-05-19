@@ -619,8 +619,7 @@ zoom level) — that belongs to the live view, not the file on disk.
 ##### Out of scope
 
 `getTimestampedFilename` (in `tools/panels/dataInDepth/utils/exportUtils.ts`) is
-still used by non-share downloads (`MapView.tsx`, `TableView.tsx`).
-Do not pull it into share variants.
+also used by CategoryView section downloads. Do not pull it into share variants.
 
 ### Known limitation: one raster size per variant type
 

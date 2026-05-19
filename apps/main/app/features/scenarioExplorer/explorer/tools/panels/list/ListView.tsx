@@ -14,7 +14,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, Typography, Snackbar, useTheme, alpha } from "@repo/ui/mui"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useListSlice } from "../../../store"
 import StrategyGrid from "./grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import type { ChartDataPoint } from "../../../../../scenarios/components/shared"
@@ -78,11 +78,13 @@ export default function ListView({
     selectedScenarios,
     toggleScenario,
     selectScenarios,
-    showOnlyChosen,
     showAlternativeBaselines,
     showKeyOperations,
-    setShowOnlyChosen,
     setShowAlternativeBaselines,
+  } = useWorkspaceSlice()
+  const {
+    showOnlyChosen,
+    setShowOnlyChosen,
     searchQuery,
     selectedTheme,
     setSortBy,
@@ -102,7 +104,7 @@ export default function ListView({
     restoreStashedPins,
     pinsTrimmedForMap,
     dismissPinsTrimmedForMap,
-  } = useExplorerStore()
+  } = useListSlice()
 
   const ROW_HEIGHT_ESTIMATE = 80
   const MAX_STICKY_RATIO = 0.35

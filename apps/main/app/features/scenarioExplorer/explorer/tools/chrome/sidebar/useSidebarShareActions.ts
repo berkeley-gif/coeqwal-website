@@ -8,7 +8,7 @@
  */
 
 import { useCallback } from "react"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 import { stageShareItem } from "../../../share/stage"
 
 export type SidebarShareCaptureProps = {
@@ -43,12 +43,10 @@ export function useSidebarShareActions({
     addShareItem,
     outcomeDisplayMode,
     hydroclimate,
-    radarVisibleAxes,
-    showRadarRange,
     showTierZones,
     highlightBaseline,
-    showDotsOnly,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
+  const { radarVisibleAxes, showRadarRange, showDotsOnly } = useRadarSlice()
 
   const shareScenario = useCallback(
     async (scenarioId: string): Promise<void> => {

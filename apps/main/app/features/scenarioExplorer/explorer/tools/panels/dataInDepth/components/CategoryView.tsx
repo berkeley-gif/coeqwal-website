@@ -26,7 +26,7 @@ import { TierGlyphWithTooltip } from "../../../../../../tooltips/TierGlyphWithTo
 const TIER_CHART_SIZE = 90
 import { ExpandMoreIcon, AddIcon } from "@repo/ui/mui"
 import useSWR from "swr"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { useScenarioExplorerStore } from "../../../../../store"
 import {
   isSingleValueTier,
@@ -1105,7 +1105,7 @@ function rekeyByGroup<T>(
  */
 export default function CategoryView() {
   const theme = useTheme()
-  const { selectedScenarios, setExploreMode } = useExplorerStore()
+  const { selectedScenarios, setExploreMode } = useWorkspaceSlice()
   const setMainView = useScenarioExplorerStore((s) => s.setMainView)
   const [expanded, setExpanded] = React.useState<string[]>([])
   const [hasBeenExpanded, setHasBeenExpanded] = React.useState<Set<string>>(

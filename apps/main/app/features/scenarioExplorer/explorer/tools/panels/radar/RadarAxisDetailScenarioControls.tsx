@@ -10,7 +10,7 @@ import {
   ThemeProvider,
 } from "@repo/ui/mui"
 import { InlineRowActions } from "../list/grid"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 
 export type RadarAxisDetailCaptureFn = (scenarioId: string) => Promise<{
   svg: string
@@ -36,16 +36,16 @@ function RadarAxisDetailScenarioControlsInner({
   captureSingle: RadarAxisDetailCaptureFn
 }) {
   const theme = useTheme()
-  const toggleScenario = useExplorerStore((s) => s.toggleScenario)
-  const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
-  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
-  const addShareItem = useExplorerStore((s) => s.addShareItem)
-  const radarVisibleAxes = useExplorerStore((s) => s.radarVisibleAxes)
-  const showRadarRange = useExplorerStore((s) => s.showRadarRange)
-  const showTierZones = useExplorerStore((s) => s.showTierZones)
-  const highlightBaseline = useExplorerStore((s) => s.highlightBaseline)
-  const showDotsOnly = useExplorerStore((s) => s.showDotsOnly)
-  const hydroclimate = useExplorerStore((s) => s.hydroclimate)
+  const toggleScenario = useWorkspaceSlice((s) => s.toggleScenario)
+  const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
+  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
+  const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
+  const showTierZones = useWorkspaceSlice((s) => s.showTierZones)
+  const highlightBaseline = useWorkspaceSlice((s) => s.highlightBaseline)
+  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  const radarVisibleAxes = useRadarSlice((s) => s.radarVisibleAxes)
+  const showRadarRange = useRadarSlice((s) => s.showRadarRange)
+  const showDotsOnly = useRadarSlice((s) => s.showDotsOnly)
 
   const isChosen = selectedScenarios.includes(scenarioId)
 

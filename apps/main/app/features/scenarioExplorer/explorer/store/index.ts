@@ -9,6 +9,10 @@
  *   radarStoreSlice      - radar axes and display toggles
  *   equityStoreSlice     - distribution comparison and share outcome codes
  *   resilienceStoreSlice - heatmap control fields
+ *
+ * Prefer slice hooks (`useWorkspaceSlice`, etc.) for React subscriptions.
+ * Use `useExplorerStore.getState()` / `setState` for imperative paths.
+ * See `useToolSlices.ts` for definitions and examples.
  */
 
 export type { ExploreMode, OutcomeDisplayMode, TourTool } from "./types"

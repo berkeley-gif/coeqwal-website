@@ -6,7 +6,7 @@
 
 import { useCallback, useMemo } from "react"
 import { useCaptureRef } from "../../../share/useCaptureRef"
-import { useExplorerStore, selectResilienceControls } from "../../../store"
+import { useExplorerStore, useResilienceSlice, useWorkspaceSlice, selectResilienceControls } from "../../../store"
 import type {
   ResilienceCaptureFn,
   ResilienceScenarioSoloCaptureFn,
@@ -35,8 +35,8 @@ export type ResilienceShareCapture = {
 }
 
 export function useResilienceShareCapture(): ResilienceShareCapture {
-  const { selectedScenarios, resilienceVisibleOutcomes, addShareItem } =
-    useExplorerStore()
+  const { selectedScenarios, addShareItem } = useWorkspaceSlice()
+  const { resilienceVisibleOutcomes } = useResilienceSlice()
 
   const resilienceCapture = useCaptureRef<ResilienceCaptureFn>()
   const resilienceTileCapture = useCaptureRef<ResilienceTileCaptureFn>()

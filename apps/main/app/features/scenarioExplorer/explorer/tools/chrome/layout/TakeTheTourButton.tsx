@@ -13,7 +13,7 @@
 
 import React from "react"
 import { Box, Typography, useTheme, icons } from "@repo/ui/mui"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice } from "../../../store"
 import type { TourTool } from "../../tour/types"
 
 const TOUR_TOOLS = new Set<TourTool>(["list", "radar"])
@@ -23,8 +23,8 @@ function isTourTool(mode: string): mode is TourTool {
 
 export default function TakeTheTourButton() {
   const theme = useTheme()
-  const exploreMode = useExplorerStore((s) => s.exploreMode)
-  const startToolTour = useExplorerStore((s) => s.startToolTour)
+  const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
+  const startToolTour = useWorkspaceSlice((s) => s.startToolTour)
 
   if (!isTourTool(exploreMode)) return null
 

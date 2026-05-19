@@ -1,26 +1,27 @@
 "use client"
 
+/**
+ * useListTourOutcomeInfoSync - When the list tour is on the Outcome summary step, opens the first-column
+ * outcome info tooltip (same as clicking the i). Closes the tooltip when the
+ * step ends or the tour is dismissed, so the popper and real tooltip move in
+ * lockstep.
+ */
+
 import { useEffect, useRef } from "react"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { useTourAnchorResolver } from "../../../tour/TourAnchorContext"
 import { TOUR_STEPS } from "../../../tour/content"
 
 const LIST_INFO_STEP_ID = "list.step2.info"
 
-/**
- * When the list tour is on the Outcome summary step, opens the first-column
- * outcome info tooltip (same as clicking the i). Closes the tooltip when the
- * step ends or the tour is dismissed, so the popper and real tooltip move in
- * lockstep.
- */
 export function useListTourOutcomeInfoSync(
   activeTooltip: string | null,
   outcomeNames: { shortCode: string }[],
   handleOpenWithAnchor: (shortCode: string, el: HTMLElement) => void,
   forceClose: () => void,
 ) {
-  const tourTool = useExplorerStore((s) => s.tour.tool)
-  const tourStep = useExplorerStore((s) => s.tour.step)
+  const tourTool = useWorkspaceSlice((s) => s.tour.tool)
+  const tourStep = useWorkspaceSlice((s) => s.tour.step)
   const { resolve, version } = useTourAnchorResolver()
   const wasOnListInfoStepRef = useRef(false)
 

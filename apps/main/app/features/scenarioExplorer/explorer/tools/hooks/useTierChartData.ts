@@ -8,7 +8,7 @@ import {
 } from "../../../../scenarios/hooks"
 import { type VerticalParallelLineData, getThemeLineColor } from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
-import { useExplorerStore } from "../../store"
+import { useWorkspaceSlice, useListSlice } from "../../store"
 import {
   NOD_SOD_OUTCOME_CODES,
   ALL_RADAR_AXES_ORDER,
@@ -55,8 +55,8 @@ export function useTierChartData(
 ) {
   const { getDisplayName, getThemeForScenario } = useScenarioList()
 
-  const { showAlternativeBaselines, showOnlyChosen, selectedScenarios } =
-    useExplorerStore()
+  const { showAlternativeBaselines, selectedScenarios } = useWorkspaceSlice()
+  const { showOnlyChosen } = useListSlice()
 
   const { hydroclimate, idMapping } = useResolvedIdMapping(hydroclimateOverride)
 

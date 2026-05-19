@@ -24,14 +24,14 @@
 
 import React from "react"
 import { Box, Typography, IconButton, useTheme, icons } from "@repo/ui/mui"
-import { useExplorerStore } from "../../store"
+import { useWorkspaceSlice } from "../../store"
 
 export default function ShareUrlVersionNotice() {
   const theme = useTheme()
-  const shareUrlVersionMismatch = useExplorerStore(
+  const shareUrlVersionMismatch = useWorkspaceSlice(
     (s) => s.shareUrlVersionMismatch,
   )
-  const dismiss = useExplorerStore((s) => s.dismissShareUrlVersionMismatch)
+  const dismiss = useWorkspaceSlice((s) => s.dismissShareUrlVersionMismatch)
 
   if (!shareUrlVersionMismatch) return null
 

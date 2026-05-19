@@ -35,7 +35,7 @@ import {
   type OutcomeName,
   type ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice, useListSlice } from "../../../../store"
 import type { OutcomeDisplayMode } from "../../../../store"
 import { useOutcomeMapAction } from "../../../../../../map/hooks"
 import { useTourAnchor } from "../../../tour/TourAnchorContext"
@@ -150,12 +150,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onRowHover,
 }: StrategyGridRowProps) {
   const theme = useTheme()
-  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
-  const isListMode = useExplorerStore((s) => s.exploreMode === "list")
-  const showDefinitions = useExplorerStore((s) => s.showDefinitions)
-  const addShareItem = useExplorerStore((s) => s.addShareItem)
-  const hydroclimate = useExplorerStore((s) => s.hydroclimate)
-  const togglePinnedScenario = useExplorerStore((s) => s.togglePinnedScenario)
+  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
+  const isListMode = useWorkspaceSlice((s) => s.exploreMode === "list")
+  const showDefinitions = useWorkspaceSlice((s) => s.showDefinitions)
+  const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
+  const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  const togglePinnedScenario = useListSlice((s) => s.togglePinnedScenario)
 
   const accentColor = scenarioColor || theme.palette.blue.bright
   const outcomeColRef = useRef<HTMLDivElement>(null)
@@ -566,7 +566,7 @@ export function InlineRowActions({
   shareDisabledTooltip?: React.ReactNode
 }) {
   const theme = useTheme()
-  const shareItems = useExplorerStore((s) => s.shareItems)
+  const shareItems = useWorkspaceSlice((s) => s.shareItems)
   const isShared = shareItems.some(
     (s) =>
       s.type === "barChart" &&
@@ -930,8 +930,8 @@ function NonCompactRowContent({
   operationsRowTourRef?: React.RefCallback<HTMLElement | null>
 }) {
   const theme = useTheme()
-  const isListMode = useExplorerStore((s) => s.exploreMode === "list")
-  const outcomeDisplayMode = useExplorerStore((s) => s.outcomeDisplayMode)
+  const isListMode = useWorkspaceSlice((s) => s.exploreMode === "list")
+  const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
 
   const isWrappedMode = layoutMode === "wrapped"
   const isCompactMode = layoutMode === "compact"

@@ -33,7 +33,7 @@ import { SaveSnapshotButton } from "../../chrome/SaveSnapshotButton"
 import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useResilienceSlice } from "../../../store"
 import { useResilienceControlsWriter } from "./useResilienceControlsWriter"
 import {
   ALL_PIVOT_DIMS,
@@ -292,7 +292,7 @@ export default function ResilienceControls({
     writeChange,
   } = useResilienceControlsWriter()
 
-  const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
+  const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
 
   // Pin the sentence to "average tier" end-to-end: any non-tier
   // encoding (legacy density modes, distribution, leverage, glyph)
@@ -307,15 +307,11 @@ export default function ResilienceControls({
     }
   }, [cellEncoding, deltaMode, writeChange])
 
-  const showResilienceOutcomeSelector = useExplorerStore(
-    (s) => s.showResilienceOutcomeSelector,
-  )
-  const setShowResilienceOutcomeSelector = useExplorerStore(
-    (s) => s.setShowResilienceOutcomeSelector,
-  )
-  const resilienceVisibleOutcomes = useExplorerStore(
-    (s) => s.resilienceVisibleOutcomes,
-  )
+  const {
+    showResilienceOutcomeSelector,
+    setShowResilienceOutcomeSelector,
+    resilienceVisibleOutcomes,
+  } = useResilienceSlice()
 
   const scenarioItems = useMemo(() => {
     return siblingGroups.map((s) => ({

@@ -12,7 +12,7 @@ import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../hydroclimateBadgeDisplay"
-import { useExplorerStore, type OutcomeDisplayMode } from "../../../store"
+import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
 import { useTourAnchor } from "../../tour/TourAnchorContext"
 
 interface ToolToolbarProps {
@@ -34,7 +34,7 @@ export default function ToolToolbar({
     setOutcomeDisplayMode,
     showKeyOperations,
     exploreMode,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
 
   const showToolbarHydroclimateChooser = exploreMode !== "resilience"
 

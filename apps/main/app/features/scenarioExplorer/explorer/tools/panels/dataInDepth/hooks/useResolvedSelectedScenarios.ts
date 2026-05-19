@@ -16,7 +16,7 @@
  */
 
 import { useMemo } from "react"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
 
 export interface ResolvedSelectedScenarios {
@@ -56,7 +56,7 @@ export interface ResolvedSelectedScenarios {
  * ```
  */
 export function useResolvedSelectedScenarios(): ResolvedSelectedScenarios {
-  const selectedGroupIds = useExplorerStore((s) => s.selectedScenarios)
+  const selectedGroupIds = useWorkspaceSlice((s) => s.selectedScenarios)
   const { hydroclimate, idMapping } = useResolvedIdMapping()
 
   return useMemo(() => {

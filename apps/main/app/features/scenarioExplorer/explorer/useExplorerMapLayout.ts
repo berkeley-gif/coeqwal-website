@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Map pass-through layout for get-started and explore-with-map modes.
+ * Map pass-through layout for get-started and explore with map mode.
  * When the map is visible, root wrappers use pointer-events:none so
  * clicks fall through to Mapbox. Child tool areas opt back in.
  */
@@ -10,7 +10,7 @@ import { useMemo } from "react"
 import { useTheme, type SxProps, type Theme } from "@repo/ui/mui"
 import { useMapMode } from "../../map/store"
 import { useScenarioExplorerStore } from "../store"
-import { useExplorerStore } from "./store"
+import { useWorkspaceSlice } from "./store"
 
 export type ExplorerMapLayout = {
   rootSx: SxProps<Theme>
@@ -21,7 +21,7 @@ export type ExplorerMapLayout = {
 export function useExplorerMapLayout(): ExplorerMapLayout {
   const theme = useTheme()
   const mainView = useScenarioExplorerStore((s) => s.mainView)
-  const showMap = useExplorerStore((s) => s.showMap)
+  const showMap = useWorkspaceSlice((s) => s.showMap)
   const mapMode = useMapMode()
 
   const isGetStartedMapMode =

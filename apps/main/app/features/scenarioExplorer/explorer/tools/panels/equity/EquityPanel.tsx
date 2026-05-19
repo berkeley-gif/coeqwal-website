@@ -19,7 +19,7 @@ import {
   Divider,
 } from "@repo/ui/mui"
 import { TierGrid, type TierGridProps } from "@repo/viz"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
 import { mapActions, useMapStore } from "../../../../../map/store"
 import { getTierColorsFromTheme } from "../../../../../../content/tiers"
@@ -191,8 +191,8 @@ export default function EquityPanel({
   // The Distribution (equity) tool uses its own focus field rather
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
-  const { equityFocusScenario, showEquityComparison, showMap } =
-    useExplorerStore()
+  const { equityFocusScenario, showMap } = useWorkspaceSlice()
+  const { showEquityComparison } = useEquitySlice()
 
   const { objectives, categories } = useEquityObjectives({
     scenarioId: equityFocusScenario,

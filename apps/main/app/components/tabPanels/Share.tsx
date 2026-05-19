@@ -26,7 +26,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable"
-import { useExplorerStore } from "../../features/scenarioExplorer/explorer/store"
+import { useExplorerStore, useWorkspaceSlice } from "../../features/scenarioExplorer/explorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/explorer/tools/hooks/useResolvedScenarioTiers"
 import { useTierChartData } from "../../features/scenarioExplorer/explorer/tools/hooks/useTierChartData"
@@ -533,7 +533,7 @@ export default function SharePanel() {
     removeFromStory,
     reorderStory,
     updateShareItem,
-  } = useExplorerStore()
+  } = useWorkspaceSlice()
 
   const handleNoteChange = useCallback(
     (id: string, note: string) => {

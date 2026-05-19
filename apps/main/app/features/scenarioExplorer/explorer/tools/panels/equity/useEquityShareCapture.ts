@@ -8,7 +8,7 @@ import { useCallback, useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { BASELINE_SCENARIO_ID } from "../../../../constants"
 import { stageShareItem } from "../../../share/stage"
-import { useExplorerStore } from "../../../store"
+import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import { captureEquityOffscreen } from "./OffscreenEquityCapture"
 
 export type EquityShareCapture = {
@@ -22,13 +22,8 @@ export type EquityShareCapture = {
 
 export function useEquityShareCapture(): EquityShareCapture {
   const theme = useTheme()
-  const {
-    equityFocusScenario,
-    hydroclimate,
-    equityVisibleOutcomes,
-    showEquityComparison,
-    addShareItem,
-  } = useExplorerStore()
+  const { equityFocusScenario, hydroclimate, addShareItem } = useWorkspaceSlice()
+  const { equityVisibleOutcomes, showEquityComparison } = useEquitySlice()
 
   const stageEquityShareItem = useCallback(
     async (scenarioId: string) =>

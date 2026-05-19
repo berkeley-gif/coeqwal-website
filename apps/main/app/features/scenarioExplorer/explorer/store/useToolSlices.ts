@@ -3,8 +3,22 @@
 /**
  * Store slice facade hooks.
  *
- * Each hook reads one slice's fields from the single `useExplorerStore` object
- * (or workspace fields from the same store via `useWorkspaceSlice`).
+ * ## When to use slice hooks vs `useExplorerStore`
+ *
+ * **React subscription** (use a slice hook): a component or hook calls
+ * `useWorkspaceSlice()`, `useRadarSlice()`, etc. Zustand re-renders that
+ * caller when the selected slice fields change. Default for UI that displays
+ * or reacts to store state.
+ *
+ * **Imperative path** (use `useExplorerStore.getState()` or `.setState()`):
+ * one-off reads or writes outside the render cycle. Common in `useEffect`
+ * bodies, handlers that need a snapshot without subscribing, URL
+ * rehydration, share capture at click time, and batch writers like
+ * `writeControlsChange`. No subscription is registered, so these do not
+ * trigger re-renders on their own.
+ *
+ * That is the intended split: slice hooks for React subscriptions,
+ * `useExplorerStore.getState()` / `setState` for imperative paths.
  *
  * Explore session state survives a page reload within the same tab via
  * sessionStorage. See `exploreSessionPersist.ts` for the full persistence story.

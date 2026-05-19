@@ -36,7 +36,7 @@ import {
   type ResilienceSmallMultiplesTile,
   hierarchicalRowOrder,
 } from "@repo/viz"
-import { useExplorerStore } from "../../../store"
+import { useResilienceSlice, useWorkspaceSlice } from "../../../store"
 import { useResilienceSelectionSync } from "./useResilienceSelectionSync"
 
 export type {
@@ -351,56 +351,30 @@ export default function ResiliencePanel({
 }: ResiliencePanelProps) {
   useResilienceSelectionSync()
   const theme = useTheme()
-  const view = useExplorerStore((s) => s.resilienceView)
-  const cellEncoding = useExplorerStore((s) => s.resilienceCellEncoding)
-  const deltaMode = useExplorerStore((s) => s.resilienceDeltaMode)
-  const deltaBaselineScenarioId = useExplorerStore(
-    (s) => s.resilienceDeltaBaselineScenarioId,
-  )
-  const aggregateScope = useExplorerStore((s) => s.resilienceAggregateScope)
-  const reorderBySimilarity = useExplorerStore(
-    (s) => s.resilienceReorderBySimilarity,
-  )
-  const showMarginals = useExplorerStore((s) => s.resilienceShowMarginals)
-  const showAllScenarios = useExplorerStore((s) => s.resilienceShowAllScenarios)
-  const selectedHydroclimates = useExplorerStore(
-    (s) => s.resilienceSelectedHydroclimates,
-  )
-  const showCellNumbers = useExplorerStore((s) => s.resilienceShowCellNumbers)
-  const primaryOutcomeCode = useExplorerStore(
-    (s) => s.resiliencePrimaryOutcomeCode,
-  )
-  const compareOutcomeCodes = useExplorerStore(
-    (s) => s.resilienceCompareOutcomeCodes,
-  )
-  const expandedRegionalOutcomes = useExplorerStore(
-    (s) => s.resilienceExpandedRegionalOutcomes,
-  )
-  const transposed = useExplorerStore((s) => s.resilienceTransposed)
-  const aggregateOver = useExplorerStore((s) => s.resilienceAggregateOver)
-
-  const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
-  const showResilienceOutcomeSelector = useExplorerStore(
-    (s) => s.showResilienceOutcomeSelector,
-  )
-  const setShowResilienceOutcomeSelector = useExplorerStore(
-    (s) => s.setShowResilienceOutcomeSelector,
-  )
-  const resilienceVisibleOutcomes = useExplorerStore(
-    (s) => s.resilienceVisibleOutcomes,
-  )
-  const toggleResilienceOutcome = useExplorerStore(
-    (s) => s.toggleResilienceOutcome,
-  )
-  const setResilienceVisibleOutcomes = useExplorerStore(
-    (s) => s.setResilienceVisibleOutcomes,
-  )
-  const distributionMode = useExplorerStore((s) => s.resilienceDistributionMode)
-  // Map hydroclimate lives on the scenario explorer store. The toolbar
-  // `HydroclimateChooser` writes to the same setter. We call it when the
-  // user clicks a heatmap cell so the map repaints for that cell's
-  // hydroclimate via the existing sibling-group resolution path.
-  const setHydroclimate = useExplorerStore((s) => s.setHydroclimate)
+  const {
+    resilienceView: view,
+    resilienceCellEncoding: cellEncoding,
+    resilienceDeltaMode: deltaMode,
+    resilienceDeltaBaselineScenarioId: deltaBaselineScenarioId,
+    resilienceAggregateScope: aggregateScope,
+    resilienceReorderBySimilarity: reorderBySimilarity,
+    resilienceShowMarginals: showMarginals,
+    resilienceShowAllScenarios: showAllScenarios,
+    resilienceSelectedHydroclimates: selectedHydroclimates,
+    resilienceShowCellNumbers: showCellNumbers,
+    resiliencePrimaryOutcomeCode: primaryOutcomeCode,
+    resilienceCompareOutcomeCodes: compareOutcomeCodes,
+    resilienceExpandedRegionalOutcomes: expandedRegionalOutcomes,
+    resilienceTransposed: transposed,
+    resilienceAggregateOver: aggregateOver,
+    showResilienceOutcomeSelector,
+    setShowResilienceOutcomeSelector,
+    resilienceVisibleOutcomes,
+    toggleResilienceOutcome,
+    setResilienceVisibleOutcomes,
+    resilienceDistributionMode: distributionMode,
+  } = useResilienceSlice()
+  const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
 
   // Legacy walkthrough-open state (unused. Guide lives in ResilienceControls).
   // const [walkthroughOpen, setWalkthroughOpen] = useState(false)

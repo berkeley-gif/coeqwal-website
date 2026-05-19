@@ -25,7 +25,7 @@ import type {
   ReservoirPercentiles as _ReservoirPercentiles,
 } from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
-import { useExplorerStore } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { useScenarioExplorerStore } from "../../../../../store"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
@@ -281,7 +281,7 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
  */
 export default function ReservoirView() {
   const theme = useTheme()
-  const { selectedScenarios, setExploreMode } = useExplorerStore()
+  const { selectedScenarios, setExploreMode } = useWorkspaceSlice()
   const setMainView = useScenarioExplorerStore((s) => s.setMainView)
 
   // Fetch data for all selected scenarios
