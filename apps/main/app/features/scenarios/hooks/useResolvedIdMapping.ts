@@ -15,7 +15,7 @@
 
 import { useMemo } from "react"
 import { useScenarioList, type Scenario } from "./useScenarioList"
-import { useScenarioExplorerStore } from "../../scenarioExplorer/store"
+import { useExplorerStore } from "../../scenarioExplorer/explorer/store"
 import {
   ALL_HYDROCLIMATES,
   HYDROCLIMATE_ID_MAP,
@@ -155,7 +155,7 @@ function maybeLogResolution(r: ResolvedIdMapping): void {
 export function useResolvedIdMapping(
   hydroclimateOverride?: string,
 ): ResolvedIdMapping {
-  const storeHydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
+  const storeHydroclimate = useExplorerStore((s) => s.hydroclimate)
   const hydroclimate = hydroclimateOverride ?? storeHydroclimate
   const { siblingGroups, variantMap } = useScenarioList()
 

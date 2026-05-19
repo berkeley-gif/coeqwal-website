@@ -22,7 +22,7 @@ import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 // Share url -> state rehydration
-import { useShareUrlRehydration } from "../../features/scenarioExplorer/share"
+import { useShareUrlRehydration } from "../../features/scenarioExplorer/explorer/share"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },

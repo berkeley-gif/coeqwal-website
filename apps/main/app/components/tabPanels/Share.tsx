@@ -26,23 +26,23 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable"
-import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
+import { useExplorerStore } from "../../features/scenarioExplorer/explorer/store"
 import type { ShareItem } from "../../features/scenarioExplorer/store"
-import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/tools/hooks/useResolvedScenarioTiers"
-import { useTierChartData } from "../../features/scenarioExplorer/tools/hooks/useTierChartData"
+import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/explorer/tools/hooks/useResolvedScenarioTiers"
+import { useTierChartData } from "../../features/scenarioExplorer/explorer/tools/hooks/useTierChartData"
 import {
   buildShareRadarLiveDataFields,
   type ShareRadarHydroKey,
   type ShareRadarLiveDataFields,
-} from "../../features/scenarioExplorer/share/utils/shareRadarLiveData"
+} from "../../features/scenarioExplorer/explorer/share/utils/shareRadarLiveData"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import ShareItemView from "../../features/scenarioExplorer/share/ShareItemView"
-import ShareUrlVersionNotice from "../../features/scenarioExplorer/share/ui/ShareUrlVersionNotice"
-import { CAPTURE_DIMENSIONS } from "../../features/scenarioExplorer/share/capture/dimensions"
+import ShareItemView from "../../features/scenarioExplorer/explorer/share/ShareItemView"
+import ShareUrlVersionNotice from "../../features/scenarioExplorer/explorer/share/ui/ShareUrlVersionNotice"
+import { CAPTURE_DIMENSIONS } from "../../features/scenarioExplorer/explorer/share/capture/dimensions"
 import {
   handlerForItem,
   type CsvLookups,
-} from "../../features/scenarioExplorer/share/variants"
+} from "../../features/scenarioExplorer/explorer/share/variants"
 import {
   downloadFromDataUrl,
   downloadSvgString,
@@ -50,15 +50,15 @@ import {
   embedFontStylesInSvg,
   exportShareItemAsCSV,
   exportAllShareItemsAsZip,
-} from "../../features/scenarioExplorer/tools/panels/dataInDepth/utils/exportUtils"
-import { withExt } from "../../features/scenarioExplorer/share/utils/filename"
+} from "../../features/scenarioExplorer/explorer/tools/panels/dataInDepth/utils/exportUtils"
+import { withExt } from "../../features/scenarioExplorer/explorer/share/utils/filename"
 import {
   downloadCardAsPng,
   downloadCardAsSvg,
-} from "../../features/scenarioExplorer/share/cardExport"
+} from "../../features/scenarioExplorer/explorer/share/cardExport"
 import ShareDataRehydrationHost, {
   useShareDataReady,
-} from "../../features/scenarioExplorer/share/ShareDataRehydrationHost"
+} from "../../features/scenarioExplorer/explorer/share/ShareDataRehydrationHost"
 
 // ---------------------------------------------------------------------------
 // URL helpers
@@ -68,14 +68,14 @@ import ShareDataRehydrationHost, {
 // (`encodeShareItems` for the "Copy link" button) imports anything
 // here.
 
-import { encodeShareItems } from "../../features/scenarioExplorer/share/url"
+import { encodeShareItems } from "../../features/scenarioExplorer/explorer/share/url"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
  * and `useTierChartData(period, true)` in the share panel and drawer.
  */
 export type ShareRenderLiveData = ShareRadarLiveDataFields
-export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/share/utils/shareRadarLiveData"
+export type { ShareRadarHydroKey } from "../../features/scenarioExplorer/explorer/share/utils/shareRadarLiveData"
 
 // Render dispatch lives in `share/ShareItemView`. Both the tray card
 // and the story card render through that single component so per-
@@ -533,7 +533,7 @@ export default function SharePanel() {
     removeFromStory,
     reorderStory,
     updateShareItem,
-  } = useScenarioExplorerStore()
+  } = useExplorerStore()
 
   const handleNoteChange = useCallback(
     (id: string, note: string) => {
@@ -1027,7 +1027,7 @@ export default function SharePanel() {
                   variant="outlined"
                   size="small"
                   onClick={async () => {
-                    const st = useScenarioExplorerStore.getState()
+                    const st = useExplorerStore.getState()
                     const url = encodeShareItems(
                       st.shareItems,
                       st.hydroclimate,

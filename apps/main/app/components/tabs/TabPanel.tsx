@@ -19,7 +19,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const thisPanelId = `panel-${tabKey}`
 
     // Both learn and explore tabs are transparent so the persistent map
-    // can show through. Child components (ScenarioExplorer, UnifiedToolLayout)
+    // can show through. Child components (ScenarioExplorer, UnifiedToolView)
     // manage their own opaque backgrounds as needed.
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
@@ -28,7 +28,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
     // EXCEPT when in get-started mode which uses page scroll like the learn tab.
-    // The sub-nav (ExploreSubNav) is an additional sticky bar above the panel.
+    // The sub-nav (ExploreSubNav) is an additional sticky bar.
     const headerAndTabsOffset =
       theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
     const subNavHeight = isExploreTab ? theme.layout.collapsedTabHeight : 0
@@ -41,7 +41,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
           }
         : {}
 
-    // Map tabs need pointerEvents: "none" so the persistent map behind them
+    // Panels above the map need pointerEvents: "none" so the persistent map behind them
     // can receive drag/pan events. Child components re-enable pointer events as needed.
     const pointerEvents = isMapTab ? "none" : undefined
 
@@ -57,7 +57,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
           pointerEvents,
           // Minimum height ensures enough page content for sticky tabs to work.
           // Without this, shorter panels cause the browser to clamp scrollY,
-          // pushing the tab row from 40px to ~60px.
+          // pushing the tab row to change height.
           minHeight: `calc(100vh - ${headerAndTabsOffset}px)`,
           ...exploreStyles,
         }}
@@ -67,8 +67,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
             - Share is the last tab, so no footer needed.
             - In the Explore tab, the footer is only shown at the end
               of the Get Started sub-view; the Tools / Data sub-views
-              take the full viewport and scroll internally, so the
-              footer would just get in the way. */}
+              take the full viewport and scroll internally, so there's no place for it. */}
         {tabKey !== "share" &&
           !(tabKey === "explore" && mainView !== "get-started") && (
             <AutoAdvanceFooter />

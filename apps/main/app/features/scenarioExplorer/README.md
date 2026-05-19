@@ -16,55 +16,40 @@ The Explore tab has two surfaces (Get started, Tools). The directory tree mirror
 
 ```
 features/scenarioExplorer/
-├── ScenarioExplorer.tsx          orchestrator. Routes by mainView + exploreMode.
-├── store.ts                      Zustand store. Owns mainView, exploreMode, etc.
+├── ScenarioExplorer.tsx          Routes mainView (get-started vs tools)
+├── store.ts                      useScenarioExplorerStore (mainView only)
 ├── constants.ts                  BASELINE_SCENARIO_ID and other feature-wide constants.
 │
 ├── getStarted/                   Sub-tab 1: onboarding. Self-contained.
-│   ├── GetStartedView.tsx        Thin orchestrator: composes panels + animation.
-│   ├── getStartedViewport.ts     Sizing helper used by both panels and animation.
-│   ├── panels/                   The eight content panels + the shared PanelShell.
-│   └── animation/                Tier animation surface (TierAnimationSection,
-│       │                         BeatText/OutcomeMorph overlays, BeatEngine).
-│       └── engine/               BeatEngine + arbiters + per-beat config.
+│   ├── GetStartedView.tsx
+│   ├── getStartedViewport.ts
+│   ├── panels/
+│   └── animation/                TierAnimationSection, BeatEngine, arbiters
 │
-├── tools/                        Sub-tab 2: the five Explore tools.
-│   ├── index.ts                  Barrel imported by ScenarioExplorer.tsx.
-│   ├── panels/                   The five tool implementations.
-│   │   ├── list/                 List tool. ListView + the StrategyGrid widget.
-│   │   │   ├── ListView.tsx
-│   │   │   ├── grid/             The grid widget (StrategyGrid + headers + rows).
-│   │   │   ├── listTour.ts
-│   │   │   └── ListTour*Illustration.tsx
-│   │   ├── radar/                Radar tool: panel, axis-detail controls, capture, theme hook.
-│   │   ├── equity/               Distribution tool (store key "equity").
-│   │   ├── resilience/           Resilience heatmap + controls + hooks.
-│   │   └── dataInDepth/          "Data in depth". Has its own components/, hooks/, utils/, config/ (outcomeDefinitions metric catalog).
-│   ├── chrome/                   Layout chrome shared by explorer tools (subfolders by role).
-│   │   ├── hydroclimateBadgeDisplay.ts  Helper used by ToolToolbar + UnifiedToolLayout.
-│   │   ├── layout/               Shell, chart-controls slot, tool title strip.
-│   │   │   ├── UnifiedToolLayout.tsx
-│   │   │   ├── ChartControlsBar.tsx, ToolJourneyStrip.tsx, TakeTheTourButton.tsx
-│   │   │   ├── journey.ts        Per-mode purpose / "now try..." nudge config (consumed by ToolJourneyStrip).
-│   │   ├── nav/
-│   │   │   └── ExploreSubNav.tsx Get started / Tools nav + tool sub-tabs (also imported from SmoothTabs).
-│   │   ├── toolbar/
-│   │   │   └── ToolToolbar.tsx
-│   │   ├── sidebar/              Scenario rail + list widgets also reused by the list grid.
-│   │   │   ├── ScenarioSelectionSidebar.tsx
-│   │   │   ├── ThemeGroupHeader.tsx, SearchAndChips.tsx
-│   │   ├── overlays/
-│   │   │   ├── ToolTour.tsx, KeyboardShortcuts.tsx
-│   │   └── chips/
-│   │       └── InlineToggleChip.tsx, ToggleChip.tsx, TogglePair.tsx
-│   ├── tour/                     Cross-cutting tour primitives (anchors, types, content barrel).
-│   └── hooks/                    Cross-cutting data hooks (useResolvedScenarioTiers, etc.).
+├── explorer/                     Sub-tab 2: tools surface + store + share
+│   ├── index.ts                  Entry for ScenarioExplorer (ExplorerToolView, lifecycle)
+│   ├── ExplorerToolView.tsx      Tools surface: hooks, tour, overlays, layout compose
+│   ├── ActiveToolPanel.tsx       exploreMode switch: controls + panel per tool
+│   ├── ExplorerSidebar.tsx       Adapter: hover + share → ScenarioSelectionSidebar
+│   ├── ToolErrorBoundary.tsx
+│   ├── useExploreHoverCoordination.ts
+│   ├── useExploreShareCapture.ts Composes per-tool share hooks (see panels/*/use*ShareCapture)
+│   ├── useExplorerLifecycle.ts
+│   ├── useExplorerMapLayout.ts
+│   ├── store.ts                  Shim → store/index.ts
+│   ├── store/                    Sliced useExplorerStore
+│   ├── share/                    Share drawer, capture pipeline, URL persist, cards
+│   └── tools/
+│       ├── index.ts              Panel barrels
+│       ├── panels/               list, radar, equity, resilience, dataInDepth
+│       ├── chrome/               UnifiedToolView, ToolToolbar, sidebar widgets, overlays
+│       ├── tour/
+│       └── hooks/                useResolvedScenarioTiers, usePrefetchTiers, etc.
 │
-├── share/                        Share drawer + capture pipeline + URL persist + cards.
-└── utils/                        scenarioIdSort, scenarioThemeOrder.
+└── utils/                        scenarioIdSort, scenarioThemeOrder
 ```
 
-Tool-specific code (panel components, offscreen captures, per-tool hooks, per-tool tour content, per-tool metric catalogs) lives inside its `tools/panels/<tool>/` folder. Cross-cutting code used across tools (layout chrome, tour primitives, data hooks) lives under `tools/`. Code shared with the top-level Share tab (the share pipeline) and feature-wide helpers (`utils/`) live at the feature root. Cross-cutting outcome metadata used by every tool lives in `apps/main/app/content/outcomes.ts` (not here).
+Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. The app Share tab imports from `explorer/store` and `explorer/share/`. Outcome metadata lives in `apps/main/app/content/outcomes.ts`.
 
 ### Error boundaries
 
@@ -73,11 +58,34 @@ Tool-specific code (panel components, offscreen captures, per-tool hooks, per-to
 | Boundary     | What it wraps                               | Reset                                | Fallback                                |
 | ------------ | ------------------------------------------- | ------------------------------------ | --------------------------------------- |
 | Get started  | `<GetStartedView />`                        | Auto via mount/unmount on `mainView` | `ErrorFallback` with retry              |
-| Active tool  | tool component inside `<UnifiedToolLayout>` | `key={exploreMode}`                  | `ErrorFallback`, "try a different tool" |
-| Share drawer | `<ShareDrawer />`                           | Auto on leaving explorer             | `null` (drawer disappears)              |
-| Tool tour    | `<ToolTour />`                              | Auto on leaving explorer             | `null` (tour ends)                      |
+| Active tool  | controls + panel in `ActiveToolPanel`       | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
+| Share drawer | `<ShareDrawer />` in `ExplorerToolView`     | Auto on leaving explorer             | `null` (drawer disappears)              |
+| Tool tour    | `<ToolTour />` in `ExplorerToolView`        | Auto on leaving explorer             | `null` (tour ends)                      |
 
-The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these (e.g. `TourAnchorProvider`, prefetch hook, layout-level effects).
+The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these.
+
+### Runtime component tree
+
+```
+ScenarioExplorer                    useExplorerLifecycle, useExplorerMapLayout
+├── GetStartedView                  (error boundary)
+└── ExplorerToolView                useExploreHoverCoordination, useExploreShareCapture
+    ├── TourAnchorProvider
+    ├── UnifiedToolView             sidebar, toolbar, activeTool slot
+    │   ├── ExplorerSidebar → ScenarioSelectionSidebar  (non-list modes)
+    │   ├── ToolToolbar
+    │   └── ActiveToolPanel         one ToolErrorBoundary per exploreMode
+    │       ├── list: ListView
+    │       ├── radar: RadarChartControls + RadarPanel
+    │       ├── equity: EquityChartControls + EquityPanel
+    │       ├── resilience: ResilienceChartControls + ResiliencePanel
+    │       └── data: DataExplorerView
+    ├── KeyboardShortcuts
+    ├── ShareDrawer                 (error boundary, fallback null)
+    └── ToolTour                    (error boundary, fallback null)
+```
+
+Page shell: `ExploreSubNav` (writes `mainView` via feature store, `exploreMode` via explorer store), Mapbox map layer.
 
 ## Architecture
 
@@ -88,7 +96,7 @@ The top-level tab bar has two entries controlled by `mainView` state:
 | View          | Label       | Description                                 |
 | ------------- | ----------- | ------------------------------------------- |
 | `get-started` | Get started | Onboarding / intro view                     |
-| `explorer`    | Go to tools | All exploration tools via UnifiedToolLayout |
+| `explorer`    | Go to tools | All exploration tools via `ExplorerToolView` |
 
 ### Tool modes
 
@@ -102,40 +110,48 @@ When `mainView === "explorer"`, five tool tabs are currently shown in the toolba
 | `resilience` | Resilience    | Resilience analysis tool (placeholder)            |
 | `data`       | Data in depth | Detailed data explorer with per-category sections |
 
-### Layout: UnifiedToolLayout
+### Layout: UnifiedToolView
 
-All tools are rendered inside `UnifiedToolLayout`, which provides a persistent three-panel chrome:
+All tools are rendered inside `UnifiedToolView`, which provides a persistent three-panel chrome:
 
 ```
-[Sidebar (optional, 320-480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
+[Sidebar (optional, 320-480px)] [Toolbar + active tool (flex 1)] [Map panel (optional, 25%)]
 ```
 
-- **Sidebar** (optional): `ScenarioSelectionSidebar`. Scenario checkboxes, theme filter, pinning. Shown in non-list modes. Omitted in list mode.
-- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips (Definitions, Baselines, Key ops, Chosen only), distribution toggle, show-map toggle, location picker, hydroclimate chooser. In list mode, uses CSS Grid aligned with `StrategyGrid` columns. In other modes, uses inline flex layout.
-- **Tool content**: The active tool component (ListView, RadarPanel, EquityPanel, etc.).
-- **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
+- **Sidebar** (optional): `ExplorerSidebar` wraps `ScenarioSelectionSidebar`. Shown in non-list modes. Omitted in list mode.
+- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips, show-map toggle, hydroclimate chooser.
+- **Active tool**: `ActiveToolPanel` — chart controls + panel paired per mode, each inside `ToolErrorBoundary`.
+- **Map panel**: Optional transparent reveal area (25% width). Toggled by the "Show map" switch in the toolbar.
 
 ## Key components
 
-### ScenarioExplorer.tsx (main orchestrator)
+### ScenarioExplorer.tsx
 
-Renders the top-level tab bar and, when `mainView === "explorer"`, wraps everything in `UnifiedToolLayout`. Manages hover coordination between sidebar and tool panels.
+Routes by `mainView`. Runs lifecycle effects (tier prefetch, scroll-on-tab-switch) and map pass-through layout. Delegates the tools surface to `ExplorerToolView`.
 
-**State from Store:** `mainView`, `exploreMode`, `showMap`
+**State from store:** `mainView` (`useScenarioExplorerStore`)
 
-**Routing logic:**
+### ExplorerToolView.tsx
+
+Tools surface. Owns hover/share hooks, `TourAnchorProvider`, `UnifiedToolView`, and overlay siblings (`KeyboardShortcuts`, `ShareDrawer`, `ToolTour`).
+
+### ActiveToolPanel.tsx
+
+Single `exploreMode` switch. Each branch wraps that tool's chart controls and panel in `ToolErrorBoundary`:
 
 ```typescript
-{exploreMode === "list" && <ListView />}
-{exploreMode === "radar" && <RadarPanel />}
-{exploreMode === "equity" && <EquityPanel />}
-{exploreMode === "resilience" && <ResiliencePanel />}
-{exploreMode === "data" && <DataExplorerView />}
+case "radar":
+  return (
+    <ToolErrorBoundary tool="radar">
+      <RadarChartControls ... />
+      <RadarPanel ... />
+    </ToolErrorBoundary>
+  )
 ```
 
-### UnifiedToolLayout.tsx
+### UnifiedToolView.tsx
 
-Shared layout chrome for all explore modes. Receives `sidebar` (optional), `toolbar`, and `children` as props.
+Shared layout chrome. Receives `sidebar` (optional), `toolbar`, and `activeTool` as props.
 
 - Sidebar: omitted in list mode, 320px normally, 480px with key operations visible
 - Map panel: transparent 25% reveal area when `showMap` is true
@@ -147,83 +163,142 @@ Renders scenarios using the `StrategyGrid` system. Supports search filtering, ou
 
 ## State management
 
-### Store (`store.ts`)
+Two Zustand stores (all use Immer via `@repo/state/zustand`):
 
-The Zustand store (with Immer) manages state shared across components.
+| Store | File | Owns |
+| ----- | ---- | ---- |
+| `useScenarioExplorerStore` | [`store.ts`](store.ts) | Shell routing: `mainView` only |
+| `useExplorerStore` | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
 
-#### Navigation
+Get started and explorer **do not share fields**. They coordinate through intentional one-way reads (for example `useExplorerMapLayout` reads shell `mainView` plus explorer `showMap`), not a merged store.
 
-| Property      | Type          | Default         | Description            |
-| ------------- | ------------- | --------------- | ---------------------- |
-| `mainView`    | `MainView`    | `"get-started"` | Current top-level view |
-| `exploreMode` | `ExploreMode` | `"list"`        | Active tool tab        |
+#### Get-started state (no dedicated store)
 
-#### Scenario selection
+Get-started uses component-local React state and the app map store. No third Zustand store today:
 
-| Property              | Type           | Default | Description                             |
-| --------------------- | -------------- | ------- | --------------------------------------- |
-| `selectedScenarios`   | `string[]`     | `[]`    | IDs of selected (checked) scenarios     |
-| `highlightedScenario` | `string\|null` | `null`  | Currently hovered/highlighted scenario  |
-| `pinnedScenarioIds`   | `string[]`     | `[]`    | Pinned scenarios (persist across views) |
+| State today | Owner | Notes |
+| ----------- | ----- | ----- |
+| Animation beat, play, pins, encoding mode | `TierAnimationSection` `useState` | Ephemeral scroll-through UI |
+| Outcome hover in Key outcomes panel | `KeyOutcomesPanel` `useState` | Panel-local |
+| Fetched tier/geojson for animation | `useTierAnimationData` | Data loading, not journey flags |
+| Get-started map visibility | app map store (`useMapMode`) | Shared map layer |
 
-#### Filtering
+Add a `getStarted/store.ts` only when a value must survive get-started panel navigation or hand off to explorer on first tools visit. Do **not** put `mainView` there - that is shell routing.
 
-| Property          | Type                  | Default | Description                    |
-| ----------------- | --------------------- | ------- | ------------------------------ |
-| `searchQuery`     | `string`              | `""`    | Text filter for scenario names |
-| `showOnlyChosen`  | `boolean`             | `false` | Show only selected scenarios   |
-| `selectedTheme`   | `ScenarioTheme\|null` | `null`  | Active theme filter            |
-| `showOnlyTheme`   | `boolean`             | `false` | Strict theme filtering         |
-| `showThemeBadges` | `boolean`             | `false` | Show theme badges on rows      |
-| `selectedIconId`  | `string\|null`        | `null`  | Active icon filter             |
+#### Cross-store coordination (not shared state)
 
-#### Display options
+| Caller | Reads | Purpose |
+| ------ | ----- | ------- |
+| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView` | Mount get-started vs tools surface |
+| `useExplorerMapLayout` | shell `mainView` + explorer `showMap` | Map pass-through styling per surface |
+| `useExplorerLifecycle` | shell `mainView` | Scroll-to-tabs on get-started → tools |
+| Share tab (app) | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards |
+| Get-started panels / animation | map store, local state | No explorer store reads today |
 
-| Property                   | Type                        | Default          | Description                                 |
-| -------------------------- | --------------------------- | ---------------- | ------------------------------------------- |
-| `showAlternativeBaselines` | `boolean`                   | `false`          | Show alternative baseline scenarios         |
-| `showDefinitions`          | `boolean`                   | `false`          | Show outcome definitions                    |
-| `showKeyOperations`        | `boolean`                   | `false`          | Show key operations column (widens sidebar) |
-| `outcomeDisplayMode`       | `"summary"\|"distribution"` | `"distribution"` | How outcomes are rendered                   |
-| `showMap`                  | `boolean`                   | `false`          | Show map panel                              |
+### Three tiers (where new state goes)
 
-#### Comparison panel
+`useExplorerStore` is one Zustand instance composed from colocated slice files under [`explorer/store/`](explorer/store/). Fields belong in one of three tiers:
 
-| Property             | Type      | Default | Description                      |
-| -------------------- | --------- | ------- | -------------------------------- |
-| `relativeToBaseline` | `boolean` | `true`  | Show values relative to baseline |
-| `highlightBaseline`  | `boolean` | `false` | Highlight baseline scenario      |
-| `overlayTiers`       | `boolean` | `false` | Overlay tier zones on chart      |
-| `defineOutcome`      | `boolean` | `false` | Define-an-outcome mode           |
+1. **Workspace** (`workspaceSlice.ts`) - anything multiple tools or chrome read/write
+   - Navigation: `exploreMode`, `tour`
+   - Selection: `selectedScenarios`, `highlightedScenario`, `equityFocusScenario` (Distribution-only single focus, separate from multi-select)
+   - Share tray: `shareItems`, `storyItemIds`, `showShareDrawer`
+   - Toolbar chrome: `showMap`, `outcomeDisplayMode`, `showDefinitions`, `showKeyOperations`, `showAlternativeBaselines`
+   - Shared chart cosmetics: `highlightBaseline`, `showTierZones`, `relativeToBaseline`, etc.
+   - `hydroclimate`
 
-#### Hydroclimate
+2. **Tool session** - persists when switching tools within Explore, consumed by that tool (+ share for that tool)
+   - **listSlice**: pins, stash fields, search, sort, theme/icon filters
+   - **radarSlice**: `radarVisibleAxes`, `showRadarRange`, `radarShowAll`, etc.
+   - **equitySlice**: `showEquityComparison`, `equityVisibleOutcomes`
+   - **resilienceSlice**: all `resilience*` fields, individual setters
 
-| Property       | Type     | Default        | Description                                                    |
-| -------------- | -------- | -------------- | -------------------------------------------------------------- |
-| `hydroclimate` | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"cc50"`, `"cc95"`) |
+3. **Ephemeral** - `useState` in a panel or section (equity objective picks, data-in-depth chart modes, hover, List layout mode)
 
-#### Other
+**Rule of thumb:** If only one panel reads it and it does not need to survive a tool switch, keep it local. If the sidebar, toolbar, or share layer needs it, put it in workspace or the relevant tool slice.
 
-| Property            | Type                        | Default | Description                    |
-| ------------------- | --------------------------- | ------- | ------------------------------ |
-| `isSortActive`      | `boolean`                   | `false` | Whether outcome sort is active |
-| `selectedTier`      | `{strategy, outcome}\|null` | `null`  | Selected tier for map viz      |
-| `sharedScenarioIds` | `string[]`                  | `[]`    | Scenarios staged for sharing   |
-| `showShareDrawer`   | `boolean`                   | `false` | Share drawer open state        |
+**Coordination:** Do not hide one tool's rules inside another tool's actions. Example: resilience view sync with sidebar selection lives in `useResilienceSelectionSync` in the resilience panel folder, not in `toggleScenario`.
+
+### Slice map
+
+```
+explorer/store/
+  index.ts           create() merges slices, re-exports useExplorerStore
+  types.ts           ExploreMode, OutcomeDisplayMode
+  workspaceSlice.ts  exploreMode, selection, hydroclimate, share, chrome
+  listSlice.ts       pins, filters, sort
+  radarSlice.ts      axes, range, dots
+  equitySlice.ts     showEquityComparison, equityVisibleOutcomes
+  resilienceSlice.ts resilience* fields, DEFAULT_RESILIENCE_CONTROLS, selectResilienceControls
+  resilienceTypes.ts ResilienceControlsState and related types
+```
+
+Import `useExplorerStore` from [`explorer/store.ts`](explorer/store.ts) (shim) or [`explorer/store/index.ts`](explorer/store/index.ts).
+
+#### Resilience controls write model
+
+Resilience uses the same flat store as radar, but the sentence control surface changes several fields together:
+
+- **Store (public API):** flat `resilience*` fields and individual setters in `resilienceSlice.ts`
+- **ResilienceControls domain** (`panels/resilience/controls/`): read → plan → write layering
+  - `readSnapshot.ts` — `readControlsSnapshot`: flat store fields → `ResilienceControlsState`
+  - `planPivotChange.ts` — `planPivotPatch`: sentence pivot UI → partial patch (no store write)
+  - `writeChange.ts` — `writeControlsChange`: partial patch → flat store (atomic)
+- **`useResilienceControlsWriter`:** READ (`controlsSnapshot`) + WRITE (`writeChange`) facade used only by `ResilienceControls.tsx`
+- **`ResiliencePanel`:** flat `useExplorerStore` selectors only (like `RadarPanel`)
+- **Share:** `selectResilienceControls(useExplorerStore.getState())` at click time only
+
+New code outside `ResilienceControls` should use flat selectors and named setters, not partial patches.
+
+#### Share capture (per-tool hooks)
+
+Share buttons live in chart controls and the scenario sidebar, away from the panels that snapshot them. Each tool owns its capture logic:
+
+| Tool | Hook | Notes |
+| ---- | ---- | ----- |
+| Radar | `panels/radar/useRadarShareCapture.ts` | Panel registers capture refs on mount |
+| Equity | `panels/equity/useEquityShareCapture.ts` | Offscreen capture in the hook (no panel ref) |
+| Resilience | `panels/resilience/useResilienceShareCapture.ts` | Panel refs + `buildResilienceShareItem` |
+
+`useExploreShareCapture` in `explorer/` composes the three hooks and returns `{ radar, equity, resilience }` grouped by consumer (`panelProps`, `sidebarProps`, `chartControlsProps`).
+
+#### Shell store (`useScenarioExplorerStore`)
+
+| Property   | Type       | Default         | Description            |
+| ---------- | ---------- | --------------- | ---------------------- |
+| `mainView` | `MainView` | `"get-started"` | Get started vs Tools surface |
+
+#### Explorer store (`useExplorerStore`) - selected fields
+
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `exploreMode` | `ExploreMode` | `"list"` | Active tool tab |
+| `selectedScenarios` | `string[]` | `[]` | Checked scenario IDs |
+| `pinnedScenarioIds` | `string[]` | `[]` | List-only: sticky comparison rows at top of grid |
+| `stashedPinnedScenarioIds` | `string[] \| null` | `null` | Pin stash when wrapped List layout caps pins |
+| `pinsTrimmedForMap` | `boolean` | `false` | Snackbar flag after auto-trim |
+| `selectedIconId` | `string \| null` | `null` | Key-ops icon filter (List tool) |
+| `shareItems` | `ShareItem[]` | `[]` | Captured cards in the share tray |
+| `storyItemIds` | `string[]` | `[]` | Ordered IDs for the Share tab story canvas |
+| `resilienceView`, `resilienceCellEncoding`, … | flat fields in resilienceSlice | see `DEFAULT_RESILIENCE_CONTROLS` |
+| `equityVisibleOutcomes` | `string[]` | `OUTCOME_CODE_ORDER` | Outcome codes staged on equity share cards |
+| `hydroclimate` | `string` | `"historical"` | Active hydroclimate |
+
+Sort state uses `sortBy` / `sortDirection` (`sortBy !== null` means sort is active).
 
 ### When to use Zustand vs local state
 
 **Use Zustand for:**
 
-- State shared across multiple components (e.g., `selectedScenarios`, `hydroclimate`)
-- Navigation state (e.g., `mainView`, `exploreMode`)
-- State that must persist across view changes
+- Shell routing (`mainView`) via `useScenarioExplorerStore`
+- Tools domain shared across chrome, panels, and share via `useExplorerStore`
 
 **Use local React state for:**
 
 - UI-specific toggles (e.g., a chart mode, modal open/close)
 - Hover states and ephemeral interactions
 - Component-specific sorting and filtering
+- Get-started animation beat/progress and other scroll-through UI in `TierAnimationSection`
 
 ## Data flow
 
@@ -279,7 +354,7 @@ There are four steps. Each one is a small, isolated change. The shared chrome (s
 
 ### 1. Set up your panel
 
-Path: `apps/main/app/features/scenarioExplorer/tools/panels/<yourTool>/`
+Path: `apps/main/app/features/scenarioExplorer/explorer/tools/panels/<yourTool>/`
 
 Create a folder named after your tool. Tool-specific captures, hooks, and tour content live next to the panel:
 
@@ -415,9 +490,9 @@ Edit three: register the tab. This is the explicit "store" part, and it spans th
      | "yourTool"
    ```
 
-   You do not need to add any new state slice unless your tool stores tool-specific values in the store. If it does, add the fields next to existing ones (look at `equityFocusScenario`, `radarVisibleAxes`, `dimUnpinned`) and add setters to the store actions block.
+   You do not need to add any new state slice unless your tool stores tool-specific values in the store. If it does, add the fields next to existing ones (look at `equityFocusScenario`, `radarVisibleAxes`) and add setters to the store actions block.
 
-2. `apps/main/app/features/scenarioExplorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
+2. `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
 
    ```ts
    {
@@ -428,7 +503,7 @@ Edit three: register the tab. This is the explicit "store" part, and it spans th
    },
    ```
 
-3. `apps/main/app/features/scenarioExplorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
+3. `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
 
    ```ts
    yourTool: {
@@ -447,7 +522,7 @@ Here is how the four steps above play out for the radar chart.
 
 ### Step 1: the panel
 
-Path: `apps/main/app/features/scenarioExplorer/tools/panels/radar/`
+Path: `apps/main/app/features/scenarioExplorer/explorer/tools/panels/radar/`
 
 ```
 tools/panels/radar/
@@ -497,7 +572,7 @@ export default function RadarPanel({ highlightedIds, onChartHover }) {
 
 ### Step 2: the data hook
 
-Path: `apps/main/app/features/scenarioExplorer/tools/hooks/useTierChartData.ts`
+Path: `apps/main/app/features/scenarioExplorer/explorer/tools/hooks/useTierChartData.ts`
 
 This is the panel's data hook. It composes shared building blocks rather than calling fetchers directly:
 
@@ -557,7 +632,7 @@ It uses D3 to draw the polygons and labels, exposes a `ResizeObserver` for respo
 
 ### Step 4: wire it up
 
-In `apps/main/app/features/scenarioExplorer/tools/index.ts`:
+In `apps/main/app/features/scenarioExplorer/explorer/tools/index.ts`:
 
 ```ts
 export { default as RadarPanel } from "./panels/radar/RadarPanel"
@@ -602,19 +677,24 @@ For everything caching-related (cache keys, preloading, `useLocalData` options),
 
 Once your panel exists and reads data, two edits make it visible.
 
-`apps/main/app/features/scenarioExplorer/tools/index.ts`:
+`apps/main/app/features/scenarioExplorer/explorer/tools/index.ts`:
 
 ```ts
 export { default as YourToolPanel } from "./panels/yourTool/YourToolPanel"
 ```
 
-`apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx`, inside the existing active-tool `<ErrorBoundary>`:
+`apps/main/app/features/scenarioExplorer/explorer/ActiveToolPanel.tsx` — add a branch inside `ToolErrorBoundary`:
 
 ```tsx
-{exploreMode === "yourTool" && <YourToolPanel />}
+case "yourTool":
+  return (
+    <ToolErrorBoundary tool="yourTool">
+      <ToolIsland panel={<YourToolPanel />} />
+    </ToolErrorBoundary>
+  )
 ```
 
-That is the whole wire-up for a tool that reuses an existing placeholder mode like `"equity"` or `"resilience"`. The error boundary uses `key={exploreMode}`, so errors in your tool reset cleanly when the user switches tabs. The shared chrome (`UnifiedToolLayout`, `ToolToolbar`, `ScenarioSelectionSidebar`, map reveal) is already rendered around your panel.
+Also add chart controls in the same branch if the tool has a toolbar row. Register the mode in `ExploreSubNav` and `journey.ts` (see below). The shared chrome (`UnifiedToolView`, `ToolToolbar`, `ScenarioSelectionSidebar` via `ExplorerSidebar`, map reveal) is already composed by `ExplorerToolView`.
 
 ## Add a new tab
 
@@ -622,7 +702,7 @@ Skip this section if you are reusing an existing placeholder mode.
 
 Three edits, all in the scenario-explorer feature.
 
-1. `apps/main/app/features/scenarioExplorer/store.ts`. Add to the `ExploreMode` union:
+1. `apps/main/app/features/scenarioExplorer/explorer/store/types.ts`. Add to the `ExploreMode` union:
 
    ```ts
    export type ExploreMode =
@@ -634,7 +714,7 @@ Three edits, all in the scenario-explorer feature.
      | "yourTool"
    ```
 
-2. `apps/main/app/features/scenarioExplorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
+2. `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/nav/ExploreSubNav.tsx`. Append a step to the `FLOW` array:
 
    ```ts
    {
@@ -645,7 +725,7 @@ Three edits, all in the scenario-explorer feature.
    },
    ```
 
-3. `apps/main/app/features/scenarioExplorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
+3. `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/layout/journey.ts`. Append a `JOURNEY` entry:
 
    ```ts
    yourTool: {
@@ -656,22 +736,22 @@ Three edits, all in the scenario-explorer feature.
 
 `ExploreSubNav` calls `setExploreMode(step.mode)` when the user clicks the tab. The store's `setExploreMode` also resets any in-flight tool tour for you. `ToolJourneyStrip` reads `JOURNEY[exploreMode]` to show the purpose line and the next-step nudge.
 
-If your tool needs its own state slice (selected reservoir, focus scenario, axis visibility), add those fields and setters to `store.ts` next to the existing examples (`radarVisibleAxes`, `equityFocusScenario`, `showRadarRange`).
+If your tool needs its own state slice, add fields and setters to the relevant file under `explorer/store/` (see `radarSlice.ts`, `equitySlice.ts`, `resilienceSlice.ts`).
 
 ## Wire to the scenario sidebar
 
-The sidebar (`ScenarioSelectionSidebar`) is mounted by `UnifiedToolLayout` for every non-list tool. It writes scenario selection directly to the Zustand store. Your panel reads that selection from the store.
+The sidebar widget (`ScenarioSelectionSidebar`) is mounted by `UnifiedToolView` via `ExplorerSidebar` for every non-list tool. It writes scenario selection directly to `useExplorerStore`. Your panel reads that selection from the store.
 
 ```ts
 const { selectedScenarios, pinnedScenarioIds, highlightedScenario } =
-  useScenarioExplorerStore()
+  useExplorerStore()
 ```
 
 That is it. You do not import the sidebar component. You do not pass selection through props.
 
 ### Two-way hover
 
-If you want sidebar row hover to highlight chart elements and chart hover to scroll/highlight sidebar rows, route both through `useExploreHoverCoordination` in the orchestrator. `ScenarioExplorer.tsx` already wires this for Radar, Resilience, and Distribution (equity).
+If you want sidebar row hover to highlight chart elements and chart hover to scroll/highlight sidebar rows, pass hover props from `useExploreHoverCoordination` (owned by `ExplorerToolView`) into your panel via `ActiveToolPanel`.
 
 Two state buckets, two directions:
 
@@ -680,40 +760,28 @@ Two state buckets, two directions:
 | `highlightedIds` | Sidebar → chart | Panels emphasize matching scenario ids |
 | `hoveredInteraction` | Chart → sidebar | Sidebar scrolls and shows optional outcome + tier detail |
 
-In `ScenarioExplorer.tsx`:
+`ExplorerToolView` wires hover into `ExplorerSidebar` and `ActiveToolPanel`. Add props to your panel branch in `ActiveToolPanel.tsx`:
 
 ```tsx
-const {
-  highlightedIds,
-  hoveredInteraction,
-  onSidebarRowHover,
-  onChartHover,
-} = useExploreHoverCoordination()
-
-return (
-  <UnifiedToolLayout
-    sidebar={
-      <ScenarioSelectionSidebar
-        onRowHover={onSidebarRowHover}
-        hoveredInteraction={hoveredInteraction}
+case "yourTool":
+  return (
+    <ToolErrorBoundary tool="yourTool">
+      <ToolIsland
+        panel={
+          <YourToolPanel
+            highlightedIds={hover.highlightedIds}
+            onChartHover={hover.onChartHover}
+          />
+        }
       />
-    }
-    toolbar={<ToolToolbar />}
-  >
-    {exploreMode === "yourTool" && (
-      <YourToolPanel
-        highlightedIds={highlightedIds}
-        onChartHover={onChartHover}
-      />
-    )}
-  </UnifiedToolLayout>
-)
+    </ToolErrorBoundary>
+  )
 ```
 
 In your panel:
 
 ```tsx
-import type { HoveredInteraction } from "../orchestration/useExploreHoverCoordination"
+import type { HoveredInteraction } from "../useExploreHoverCoordination"
 
 type YourToolPanelProps = {
   highlightedIds?: Set<string> | null
@@ -758,7 +826,7 @@ const { data } = useBatchStatistics(resolvedIds, { types: ["storage"] })
 
 That is the entire contract. The hydroclimate chooser updates the store, the resolver hooks pick up the change, and your panel re-renders with the new data.
 
-If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/tools/chrome/toolbar/ToolToolbar.tsx`.
+If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/toolbar/ToolToolbar.tsx`.
 
 ## Avoiding hover flicker
 
@@ -972,7 +1040,7 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 
 - Create map layers, sources, or polygons
 - Fetch GeoJSON geometry
-- Handle the "Show map" toggle (the toolbar and `UnifiedToolLayout` manage that)
+- Handle the "Show map" toggle (the toolbar and `UnifiedToolView` manage that)
 
 ### Reference implementations
 

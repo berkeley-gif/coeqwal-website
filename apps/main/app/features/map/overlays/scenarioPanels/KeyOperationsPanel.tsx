@@ -12,7 +12,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { HydroclimateChooser } from "../../../scenarios/components"
 import { OperationsIconGroup } from "../../../scenarios/components/shared"
-import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
+import { useExplorerStore } from "../../../scenarioExplorer/explorer/store"
 
 interface KeyOperationsPanelProps {
   scenarioId?: string
@@ -28,7 +28,7 @@ export function KeyOperationsPanel({
   const theme = useTheme()
   const { getScenario, isLoading } = useScenarioList()
   const scenario = getScenario(scenarioId)
-  const { hydroclimate, setHydroclimate } = useScenarioExplorerStore()
+  const { hydroclimate, setHydroclimate } = useExplorerStore()
 
   if (isLoading) {
     return (

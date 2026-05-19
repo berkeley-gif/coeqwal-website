@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from "react"
 import { preload } from "swr"
-import { useScenarioExplorerStore } from "../../scenarioExplorer/store"
+import { useExplorerStore } from "../../scenarioExplorer/explorer/store"
 import {
   useResolvedIdMapping,
   useResolvedIdMappings,
@@ -33,8 +33,8 @@ const PREFETCHABLE_TIER_CODES: string[] = Object.entries(OUTCOME_LAYER_REGISTRY)
  *   hydroclimate variants so subsequent switches are instant.
  */
 export function useMapVisualizationAction() {
-  const showMap = useScenarioExplorerStore((s) => s.showMap)
-  const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
+  const showMap = useExplorerStore((s) => s.showMap)
+  const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
   const mapMode = useMapMode()
   const isMapVisible =
     showMap || mapMode === "learn" || mapMode === "get-started"

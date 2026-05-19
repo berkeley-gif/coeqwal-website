@@ -40,10 +40,10 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log to console in development
+
     console.error("ErrorBoundary caught an error:", error, errorInfo)
 
-    // Call optional error handler (e.g., for error tracking services)
+    // Call error handler (e.g., for error tracking services)
     this.props.onError?.(error, errorInfo)
   }
 

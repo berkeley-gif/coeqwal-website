@@ -200,12 +200,10 @@ All preload calls live in `apps/main`. The package never preloads (it only defin
 
 #### The big one: `usePrefetchTiers`
 
-The main cache-warming sweep. Lives in `apps/main/app/features/scenarioExplorer/tools/hooks/usePrefetchTiers.ts`. It is called **exactly once**, near the top of the Explore tab tree:
+The main cache-warming sweep. Lives in `apps/main/app/features/scenarioExplorer/explorer/tools/hooks/usePrefetchTiers.ts`. It is called **exactly once**, near the top of the Explore tab tree:
 
 ```tsx
-// apps/main/app/features/scenarioExplorer/ScenarioExplorer.tsx, ~line 129
-  }, [mainView, ensureBaselinePrePin])
-
+// apps/main/app/features/scenarioExplorer/explorer/useExplorerLifecycle.ts
   usePrefetchTiers()
 ```
 

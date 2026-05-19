@@ -15,14 +15,14 @@ Stores in this project use **Zustand with Immer** for immutable updates. Each fe
 
 ### Cross-cutting vs. local state
 
-The Scenario Explorer store (`scenarioExplorer/store.ts`) demonstrates the pattern that all visualization tools should follow.
+The Scenario Explorer uses **two feature stores** (see `apps/main/app/features/scenarioExplorer/README.md`). Tool panels should read **`useExplorerStore`** from `scenarioExplorer/explorer/store.ts`.
 
-**Shared store** holds cross-cutting state that every tool panel needs:
+**Shared explorer store** holds cross-cutting state that every tool panel needs:
 
 - `selectedScenarios` - the sidebar checkboxes write to it; each tool panel reads it
 - `hydroclimate` - the toolbar's `HydroclimateChooser` writes to it; data hooks use it to resolve the right scenario IDs automatically
 - `searchQuery` - the sidebar handles search filtering before scenarios reach the panel
-- `highlightedScenario`, `pinnedScenarioIds` - enable cross-component hover highlighting and pinning
+- `highlightedScenario` - enable cross-component hover highlighting
 - `showMap` - controls the map reveal panel
 
 When a new visualization tool is added, it automatically gets all of these capabilities by reading from the store - no wiring required.
@@ -46,20 +46,20 @@ The table below lists which store properties a new tool panel should read from o
 | `selectedScenarios`   | `string[]`       | Which scenarios to render. The sidebar checkboxes manage this.                                |
 | `hydroclimate`        | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.        |
 | `highlightedScenario` | `string \| null` | Scenario the user is hovering in the sidebar. Visually emphasize it in your visualization.    |
-| `pinnedScenarioIds`   | `string[]`       | Pinned scenarios (persistent across views). Use for side-by-side comparison within your tool. |
 
 #### Write to store (actions)
 
 | Action                               | When to call it                                                                                              |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `setHighlightedScenario(id \| null)` | When the user hovers a scenario in your visualization, so the sidebar and other panels can highlight it too. |
-| `togglePinnedScenario(id)`           | When the user clicks to pin/unpin a scenario for comparison.                                                 |
+
+List pinning (`pinnedScenarioIds`, `togglePinnedScenario`) is owned by ListView only. Other tool panels do not read or write pin state.
 
 For map visualization, use `mapActions.setOutcomeVisualization()` from the **map store** (`features/map/store.ts`), not the explorer store. See the "Map integration" section in `apps/main/app/features/scenarioExplorer/README.md`.
 
 #### Not needed by tool panels
 
-Everything else is managed by the layout chrome (sidebar, toolbar, ScenarioExplorer routing) and transparent to your panel: `mainView`, `exploreMode`, `searchQuery`, `showOnlyChosen`, `selectedTheme`, `showThemeBadges`, `showAlternativeBaselines`, `showDefinitions`, `showKeyOperations`, `outcomeDisplayMode`, `sharedScenarioIds`, `showShareDrawer`, `relativeToBaseline`, `highlightBaseline`, `overlayTiers`, `defineOutcome`, `isSortActive`, `showMap`, `selectedTier`.
+Everything else is managed by the layout chrome (sidebar, toolbar, ScenarioExplorer routing) and transparent to your panel: `mainView`, `exploreMode`, `searchQuery`, `showOnlyChosen`, `selectedTheme`, `showThemeBadges`, `showAlternativeBaselines`, `showDefinitions`, `showKeyOperations`, `outcomeDisplayMode`, `shareItems`, `showShareDrawer`, `relativeToBaseline`, `highlightBaseline`, `overlayTiers`, `defineOutcome`, `showMap`, and flat `resilience*` chart fields.
 
 ### When to use shared store vs. local state
 
