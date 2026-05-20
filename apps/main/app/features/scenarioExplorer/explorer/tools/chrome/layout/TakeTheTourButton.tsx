@@ -7,7 +7,7 @@
  * tour" label read as a single action.
  *
  * Renders nothing for explore modes that do not have a tour
- * (Distribution and other research-only views), so callers can drop
+ * , so callers can drop
  * it in unconditionally.
  */
 

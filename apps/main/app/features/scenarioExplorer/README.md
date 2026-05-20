@@ -13,7 +13,7 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 
 ## Directory layout
 
-The Explore tab has two surfaces (Get started, Tools). The directory tree mirrors that:
+The Explore tab has two surfaces (Get started, Tools). On disk, **get started** and **tools** map to `getStarted/` and `explorer/`. The scrollytelling stack lives in a third top-level folder, `animation/`, because it is large, map-coupled, and imported from `features/map/` as well as from `GetStartedView`.
 
 ```
 features/scenarioExplorer/
@@ -21,11 +21,15 @@ features/scenarioExplorer/
 ├── store.ts                      useScenarioExplorerStore (mainView only)
 ├── constants.ts                  BASELINE_SCENARIO_ID and other feature-wide constants.
 │
-├── getStarted/                   Sub-tab 1: onboarding. Self-contained.
-│   ├── GetStartedView.tsx
+├── getStarted/                   Sub-tab 1: onboarding scroll panels
+│   ├── GetStartedView.tsx        mounts TierAnimationSection from ../animation
 │   ├── getStartedViewport.ts
-│   ├── panels/
-│   └── animation/                TierAnimationSection, BeatEngine, arbiters
+│   └── panels/                   Welcome, Key outcomes, Choose scenarios, etc.
+│
+├── animation/                    Get-started scrollytelling (runtime: get-started only)
+│   ├── TierAnimationSection.tsx  beat-driven tier story + map coordination
+│   ├── BeatTextOverlay.tsx, OutcomeMorphOverlay.tsx, useTierAnimationData.ts
+│   └── engine/                   BeatEngine, beats, arbiters (map paint, camera, popups)
 │
 ├── explorer/                     Sub-tab 2: tools surface + store + share
 │   ├── index.ts                  Entry for ScenarioExplorer (ExplorerToolView, lifecycle)
@@ -50,7 +54,7 @@ features/scenarioExplorer/
 └── utils/                        scenarioIdSort, scenarioThemeOrder
 ```
 
-Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. The app Share tab imports from `explorer/store` and `explorer/share/`. Outcome attribute data lives in `apps/main/app/content/outcomes.ts`.
+Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. Get-started scroll copy lives under `getStarted/panels/`; the beat-driven map story lives under `animation/` (mounted only from `GetStartedView`). The app Share tab imports from `explorer/store` and `explorer/share/`. Outcome attribute data lives in `apps/main/app/content/outcomes.ts`.
 
 ### Panel layout convention
 
@@ -67,6 +71,7 @@ Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures
 | Caller                                | Import from                                                                                  |
 | ------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Outside the feature (tabs, map hooks) | `scenarioExplorer/store` (shell `mainView`), `scenarioExplorer/explorer/store` (tools store) |
+| Map visualization layers              | `scenarioExplorer/animation/engine` (beat-engine helpers shared with get-started storyboard)   |
 | Inside `explorer/`                    | Relative `../../../store` shim or slice hooks (`useWorkspaceSlice`, etc.)                    |
 | Do not                                | Import `store/storeInstance` or deep slice files from UI (use the shim)                      |
 
@@ -90,6 +95,8 @@ The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../com
 ```
 ScenarioExplorer                    useExplorerLifecycle, useExplorerMapLayout
 ├── GetStartedView                  (error boundary)
+│   ├── getStarted/panels/*         scroll sections
+│   └── animation/TierAnimationSection   beat engine, map mode get-started
 └── ExplorerToolView                useExploreHoverCoordination, useExploreShareCapture
     ├── TourAnchorProvider
     ├── UnifiedToolView             sidebar, toolbar, activeTool slot
@@ -145,6 +152,10 @@ All tools are rendered inside `UnifiedToolView`, which provides a persistent thr
 - **Map panel**: Optional transparent reveal area (25% width). Toggled by the "Show map" switch in the toolbar.
 
 ## Key components
+
+### GetStartedView.tsx
+
+Scroll onboarding for the get-started sub-tab. Composes `getStarted/panels/*` and mounts `animation/TierAnimationSection` (the only runtime entry point for the animation folder). Sets map mode to `get-started` while the animation is active.
 
 ### ScenarioExplorer.tsx
 

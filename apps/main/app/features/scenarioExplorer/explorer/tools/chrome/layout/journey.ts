@@ -3,9 +3,8 @@
  *   - a plain-language purpose line shown above the chart
  *   - a suggested next tool with a rationale (used by the "Now try..." nudge)
  *
- * This exists to make the four tools feel like stages of one curation
- * loop without forcing a linear path: users can still click any tab in
- * the sub-nav. The suggestions are opinionated but never gated.
+ * This exists to make the four tools feel like stages without forcing a linear path: users can still click any tab in
+ * the sub-nav. Opinionated but not gated.
  */
 
 import type { ExploreMode } from "../../../store"

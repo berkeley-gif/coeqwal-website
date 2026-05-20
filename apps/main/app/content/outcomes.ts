@@ -1,8 +1,8 @@
 /**
- * Outcome content - single source of truth for outcome codes and display names
+ * Outcome content - outcome definitions and display names
  *
- * Short codes are the canonical identifier.
- * Pass codes through components/state, look up display names only at render time.
+ * Short codes are the identifier.
+ * Pass codes through components/state, look up display names at render time.
  */
 
 // =============================================================================

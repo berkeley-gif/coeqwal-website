@@ -1,5 +1,14 @@
 "use client"
 
+/**
+ * DynamicMap - Dynamic import of the persistent map wrapper for the main app.
+ * This is a client component that dynamically imports the persistent map wrapper.
+ * It does three things:
+ * 1.Lazy-loads PersistentMapWrapper via next/dynamic with ssr: false (Mapbox GL cannot run during SSR/static export).
+ * 2. Wraps that tree in ErrorBoundary so a map crash does not take down the whole page.
+ * 3. On error, calls mapActions.setMapError(true) so other UI (notably the Learn tab) can stop waiting for mapReady.
+ * */
+
 import dynamic from "next/dynamic"
 import { Box, useTheme } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
@@ -49,7 +58,8 @@ function MapErrorFallback() {
 
 /**
  * Handles map error by updating store state.
- * This allows other components (like Learn.tsx) to hide their loading spinners.
+ * 
+ * Tabs change mode via mapActions.setMapMode(...) instead of mounting/unmounting a map per tab.
  */
 function handleMapError(error: Error) {
   console.error("Map error:", error)
