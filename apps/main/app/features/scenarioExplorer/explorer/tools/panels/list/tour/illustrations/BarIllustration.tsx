@@ -2,9 +2,9 @@
 
 import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { OutcomeGlyphItem } from "../../../../../scenarios/components/shared/OutcomeGlyphItem"
-import type { ChartDataPoint } from "../../../../../scenarios/components/shared/types"
-import TourTierLegend from "../../tour/TourTierLegend"
+import { OutcomeGlyphItem } from "../../../../../../../scenarios/components/shared/OutcomeGlyphItem"
+import type { ChartDataPoint } from "../../../../../../../scenarios/components/shared/types"
+import TourTierLegend from "../../../../tour/reusableContent/TourTierLegend"
 
 /**
  * List tour: top visual block for the bar step.
@@ -15,7 +15,7 @@ import TourTierLegend from "../../tour/TourTierLegend"
  * each column on a shared baseline so the two halves align as a unit.
  * The explanatory paragraph is rendered below this block by ToolTour.
  */
-export default function ListTourBarIllustration() {
+export default function BarIllustration() {
   const theme = useTheme()
 
   const chartData = useMemo((): ChartDataPoint[] => {

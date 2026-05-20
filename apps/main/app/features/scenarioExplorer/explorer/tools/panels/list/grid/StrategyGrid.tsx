@@ -25,7 +25,7 @@ import { type StrategyGridProps } from "./types"
 import { StrategyGridHeader } from "./StrategyGridHeader"
 import { StrategyGridContent } from "./StrategyGridContent"
 import { useContainerWidth } from "./useContainerWidth"
-import { useListTourOutcomeInfoSync } from "./useListTourOutcomeInfoSync"
+import { useListInfoTooltipSync } from "../tour"
 
 /**
  * StrategyGrid component - main grid orchestrator
@@ -122,7 +122,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
 
-  useListTourOutcomeInfoSync(
+  useListInfoTooltipSync(
     activeTooltip,
     outcomeNames,
     handleToggleWithAnchor,

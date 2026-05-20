@@ -17,7 +17,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { ExploreMode } from "../../../store"
 import { getExploreModeViewName, getJourneyStage } from "./journey"
-import TakeTheTourButton from "./TakeTheTourButton"
+import { TakeTheTourButton } from "../../tour"
 
 interface ToolJourneyStripProps {
   mode: ExploreMode

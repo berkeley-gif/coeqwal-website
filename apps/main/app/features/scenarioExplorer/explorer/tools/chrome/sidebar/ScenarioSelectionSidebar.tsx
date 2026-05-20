@@ -30,7 +30,7 @@ import {
 } from "../../hooks/useOrderedScenarios"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
-import { useTourAnchor } from "../../tour/TourAnchorContext"
+import { useTourAnchor } from "../../tour"
 import { useSidebarShareActions } from "./useSidebarShareActions"
 import {
   getTierLabel,

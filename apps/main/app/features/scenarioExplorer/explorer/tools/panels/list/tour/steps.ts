@@ -9,7 +9,7 @@
  * shortlist steps close the tour.
  */
 
-import type { TourStep } from "../../tour/types"
+import type { TourStep } from "../../../tour/types"
 
 export const LIST_TOUR: TourStep[] = [
   {

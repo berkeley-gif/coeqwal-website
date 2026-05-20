@@ -1,20 +1,27 @@
 "use client"
 
 /**
- * useListTourOutcomeInfoSync - When the list tour is on the Outcome summary step, opens the first-column
- * outcome info tooltip (same as clicking the i). Closes the tooltip when the
- * step ends or the tour is dismissed, so the popper and real tooltip move in
- * lockstep.
+ * useListInfoTooltipSync - Tour-driven sync for the outcome info tooltip.
+ *
+ * The list outcome info tooltip is component-local state inside
+ * `StrategyGrid` (`useTierTooltipState`), so a top-level effects component
+ * cannot drive it. This small hook lives next to the rest of the list
+ * tour code but is called from `StrategyGrid` directly.
+ *
+ * When the list tour reaches the "Outcome summary" step, it opens the
+ * first-column outcome info tooltip (same as clicking the i). It closes
+ * the tooltip when the step ends or the tour is dismissed so the popper
+ * and the live tooltip move in lockstep.
  */
 
 import { useEffect, useRef } from "react"
 import { useWorkspaceSlice } from "../../../../store"
-import { useTourAnchorResolver } from "../../../tour/TourAnchorContext"
-import { TOUR_STEPS } from "../../../tour/content"
+import { useTourAnchorResolver } from "../../../tour/anchors/TourAnchorContext"
+import { LIST_TOUR } from "./steps"
 
 const LIST_INFO_STEP_ID = "list.step2.info"
 
-export function useListTourOutcomeInfoSync(
+export function useListInfoTooltipSync(
   activeTooltip: string | null,
   outcomeNames: { shortCode: string }[],
   handleOpenWithAnchor: (shortCode: string, el: HTMLElement) => void,
@@ -27,7 +34,7 @@ export function useListTourOutcomeInfoSync(
 
   useEffect(() => {
     const isListInfoStep =
-      tourTool === "list" && TOUR_STEPS.list[tourStep]?.id === LIST_INFO_STEP_ID
+      tourTool === "list" && LIST_TOUR[tourStep]?.id === LIST_INFO_STEP_ID
     if (wasOnListInfoStepRef.current && !isListInfoStep) {
       forceClose()
     }

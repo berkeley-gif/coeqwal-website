@@ -655,10 +655,9 @@ Pass `highlightedIds` and `onChartHover` from `ActiveToolPanel` into your panel.
 
 **Tool tour** (list and radar today)
 
-1. Extend `TourTool` in `explorer/tools/tour/types.ts`
-2. Add `<tool>Tour.ts` and register in `tools/tour/content/index.ts`
-3. Register tour anchors with `useTourAnchor("id")` on target elements
-4. Add demo mutations in `useToolTourDemoEffects.ts` if steps need temporary UI changes
+Each tour-enabled tool owns a `panels/<tool>/tour/` folder exporting a `TourModule` (steps, optional demo effects, optional illustrations). The runner, anchor registry, and entry button live under `tools/tour/`.
+
+Adding a tour to a new tool is one folder plus one line each in `tour/registry.ts` and `tour/toolToTourMap.ts`. Full recipe and conventions: [`tools/tour/README.md`](explorer/tools/tour/README.md).
 
 **Map integration** (list pattern)
 
@@ -703,7 +702,7 @@ tools/panels/radar/
 ├── RadarChartControls.tsx
 ├── OffscreenRadarCapture.tsx
 ├── useRadarPlotTheme.ts
-└── radarTour.ts
+└── tour/                       see explorer/tools/tour/README.md
 ```
 
 Data: `tools/hooks/useTierChartData.ts`. Chart: `packages/viz/src/components/RadarPlot.tsx`. Wiring: `ActiveToolPanel` `case "radar"`.

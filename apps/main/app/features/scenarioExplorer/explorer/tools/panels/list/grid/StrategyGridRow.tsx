@@ -26,7 +26,7 @@ import {
 } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice, useListSlice } from "../../../../store"
 import { useOutcomeMapAction } from "../../../../../../map/hooks"
-import { useTourAnchor } from "../../../tour/TourAnchorContext"
+import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import { captureBarChartRow } from "./captureBarChartRow"

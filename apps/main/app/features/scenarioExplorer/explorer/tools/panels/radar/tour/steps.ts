@@ -1,19 +1,18 @@
 /**
- * Radar tour. Structured to parallel LIST_TOUR so users get a
- * consistent rhythm across tools: a short hero, "get oriented"
- * cards for each region, the controls that live in that region,
- * a "read the chart" section anchored to the plot, and a closing
- * journey card.
+ * Radar tour. Structured to parallel `LIST_TOUR` so users get a
+ * consistent rhythm across tools: a short hero, "get oriented" cards
+ * for each region, the controls that live in that region, a "read the
+ * chart" section anchored to the plot, and a closing journey card.
  *
  * Order follows a spatial "like with like" grouping. Each "get
  * oriented" popper introduces a region, and the detail poppers for
  * that region follow immediately after.
  *
- * Anchor ids resolve into RadarPanel (chart + axes) and into the
- * shared ToolToolbar + radar-only ChartControlsBar (chips + capture).
+ * Anchor ids resolve into `RadarPanel` (chart + axes) and into the
+ * shared `ToolToolbar` + radar-only `ChartControlsBar` (chips + capture).
  */
 
-import type { TourStep } from "../../tour/types"
+import type { TourStep } from "../../../tour/types"
 
 export const RADAR_TOUR: TourStep[] = [
   {
@@ -68,8 +67,8 @@ export const RADAR_TOUR: TourStep[] = [
     // Anchor to the opened panel (not the chip) so the popper lands
     // just past the panel's right edge and the panel stays fully
     // visible while the step is active. The panel is programmatically
-    // opened by ToolTour's axisSelectorDemoRef effect for this step,
-    // so the anchor is guaranteed to be mounted.
+    // opened by RadarTourEffects for this step, so the anchor is
+    // guaranteed to be mounted.
     anchorId: "radar.axisChooserPanel",
     eyebrow: "arrange the radar chart",
     title: "Choose outcome axes",

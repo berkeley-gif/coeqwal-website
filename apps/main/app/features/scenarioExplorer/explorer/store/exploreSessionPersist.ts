@@ -54,7 +54,7 @@ import type { RadarSlice } from "./radarStoreSlice"
 import type { EquitySlice } from "./equityStoreSlice"
 import type { ResilienceSlice } from "./resilienceStoreSlice"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"
-import type { TourTool } from "../tools/tour/types"
+import { hasTourFor, type TourTool } from "../tools/tour/registry"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
@@ -122,8 +122,6 @@ const OUTCOME_DISPLAY_MODES = new Set<OutcomeDisplayMode>([
   "distribution",
 ])
 
-const TOUR_TOOLS = new Set<TourTool>(["list", "radar"])
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }
@@ -172,12 +170,14 @@ function validateOutcomeDisplayMode(
 function validateTour(value: unknown): WorkspaceState["tour"] | undefined {
   if (!isRecord(value)) return undefined
   const toolRaw = value.tool
-  const tool =
-    toolRaw === null
-      ? null
-      : typeof toolRaw === "string" && TOUR_TOOLS.has(toolRaw as TourTool)
-        ? (toolRaw as TourTool)
-        : undefined
+  let tool: TourTool | null | undefined
+  if (toolRaw === null) {
+    tool = null
+  } else if (typeof toolRaw === "string" && hasTourFor(toolRaw)) {
+    tool = toolRaw
+  } else {
+    tool = undefined
+  }
   if (tool === undefined) return undefined
   const step =
     typeof value.step === "number" && value.step >= 0

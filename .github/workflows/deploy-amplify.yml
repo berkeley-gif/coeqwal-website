@@ -162,7 +162,7 @@ jobs:
         run: |
           set -euo pipefail
           # Static map of (branch, app) -> Amplify appId. When wiring a
-          # production app, add its row here AND add `production-<name>` to
+          # production app, add its row here AND add `<app name>` to
           # the `branch:` dropdown above. See README "Production deploys".
           declare -A MAP=(
             ["dev:main"]="d2yqk6im560ffz"

@@ -49,8 +49,8 @@ import { captureRadarOffscreen } from "./OffscreenRadarCapture"
 import { stageShareItem } from "../../../share/stage"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
-import { useTourAnchor } from "../../tour/TourAnchorContext"
-import { TOUR_STEPS } from "../../tour/content"
+import { useTourAnchor } from "../../tour"
+import { useRadarInfoIconSync } from "./tour"
 
 type AxisPosition = {
   axis: string
@@ -340,30 +340,10 @@ export default function RadarPanel({
   const [openInfoAxis, setOpenInfoAxis] = useState<string | null>(null)
   const closeInfoTooltip = useCallback(() => setOpenInfoAxis(null), [])
 
-  // Tour sync: when the radar tour reaches the "Outcome summary" step,
-  // open the first axis's info popover so the user sees what the
-  // popper is referring to. Close it when the step ends or the tour
-  // is dismissed, mirroring the list tour's outcome-info pattern.
-  const radarTourStepId = useWorkspaceSlice((s) => {
-    if (s.tour.tool !== "radar") return null
-    return TOUR_STEPS.radar[s.tour.step]?.id ?? null
-  })
-  const openedByTourRef = useRef(false)
-  useEffect(() => {
-    const isInfoStep = radarTourStepId === "radar.step2.infoIcon"
-    if (isInfoStep) {
-      const firstAxis = axisPositions[0]?.axis
-      if (firstAxis && openInfoAxis !== firstAxis) {
-        setOpenInfoAxis(firstAxis)
-        openedByTourRef.current = true
-      }
-      return
-    }
-    if (openedByTourRef.current) {
-      openedByTourRef.current = false
-      setOpenInfoAxis(null)
-    }
-  }, [radarTourStepId, axisPositions, openInfoAxis])
+  // Tour sync: open the first axis's info popover during the radar
+  // tour's "Outcome summary" step. Lives in panels/radar/tour/ so the
+  // tour subsystem stays self-contained.
+  useRadarInfoIconSync(axisPositions, openInfoAxis, setOpenInfoAxis)
 
   // Map an axis display name back to its outcome code, handling both the
   // aggregate outcomes (OUTCOME_NAMES) and the regional NOD/SOD codes

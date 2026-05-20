@@ -26,7 +26,7 @@ import {
   type OutcomeName,
 } from "../../../../../../scenarios/components/shared"
 import SearchAndChips from "../../../chrome/sidebar/SearchAndChips"
-import { useTourAnchor } from "../../../tour/TourAnchorContext"
+import { useTourAnchor } from "../../../tour"
 
 /**
  * Layout mode for responsive grid behavior (see theme.scenarios.grid.fullBreakpoint).

@@ -13,7 +13,7 @@ import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
-import { useTourAnchor } from "../../tour/TourAnchorContext"
+import { useTourAnchor } from "../../tour"
 
 interface ToolToolbarProps {
   gridAligned?: boolean

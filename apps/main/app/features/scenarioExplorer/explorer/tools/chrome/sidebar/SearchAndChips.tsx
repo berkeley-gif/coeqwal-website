@@ -19,7 +19,7 @@ import {
 } from "@repo/ui/mui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import ToggleChip from "../chips/ToggleChip"
-import { useTourAnchor } from "../../tour/TourAnchorContext"
+import { useTourAnchor } from "../../tour"
 
 interface SearchAndChipsProps {
   /** Show a vertical divider between search and chips (toolbar layout) */

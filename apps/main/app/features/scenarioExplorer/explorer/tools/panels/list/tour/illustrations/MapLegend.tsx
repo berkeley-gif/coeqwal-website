@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box, Switch, Typography, useTheme } from "@repo/ui/mui"
-import TourTierLegend from "../../tour/TourTierLegend"
+import TourTierLegend from "../../../../tour/reusableContent/TourTierLegend"
 
 /**
  * List tour: top visual block for the map step.
@@ -13,13 +13,13 @@ import TourTierLegend from "../../tour/TourTierLegend"
  *   2. The compact tier legend, showing how the map colors map back
  *      to the bar cells.
  *
- * Framing matches `ListTourBarIllustration`: warm off-white panel
- * (same as unhighlighted scenario rows), hairline border, small
- * uppercase eyebrows. The switch here is decorative. Click handlers
- * are omitted so the illustration can't mutate app state (the tour
- * runner already drives the real switch when the step is active).
+ * Framing matches `BarIllustration`: warm off-white panel (same as
+ * unhighlighted scenario rows), hairline border, small uppercase
+ * eyebrows. The switch here is decorative. Click handlers are omitted
+ * so the illustration can't mutate app state (the tour runner already
+ * drives the real switch when the step is active).
  */
-export default function ListTourMapLegend() {
+export default function MapLegend() {
   const theme = useTheme()
 
   const eyebrowSx = {

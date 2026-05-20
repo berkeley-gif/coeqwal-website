@@ -10,7 +10,7 @@
  *   const tourRef = useTourAnchor("list.toolbar.search")
  *   return <Box ref={tourRef}>...</Box>
  *
- * The registry keeps an id -> HTMLElement map in a mutable ref. Writes
+ * The registry keeps an id -> Element map in a mutable ref. Writes
  * (from registering elements) do not trigger re-renders. Only the tour
  * runner's own state changes trigger re-renders when it looks up
  * targets. If two components register the same id, the most recently
@@ -37,7 +37,7 @@ type AnchorMap = Map<string, Element>
 interface TourAnchorContextValue {
   register: (id: string, el: Element | null) => void
   resolve: (id: string) => Element | null
-  /** Monotonically increasing counter that the runner can subscribe to
+  /** Increasing counter that the runner can subscribe to
    *  to re-render when any anchor changes. Exposed through a subscribe
    *  callback so readers can opt in without causing unrelated
    *  re-renders. */

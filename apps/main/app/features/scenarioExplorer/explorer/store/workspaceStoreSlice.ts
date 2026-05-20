@@ -30,7 +30,7 @@
  * focus kept separate from `selectedScenarios` until product merges them.
  */
 
-import type { TourTool } from "../tools/tour/types"
+import type { TourTool } from "../tools/tour/registry"
 import type { ShareItem, ShareItemPatch } from "../share/types"
 import { loadShareState } from "../share/persist"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"

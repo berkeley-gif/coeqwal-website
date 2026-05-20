@@ -11,19 +11,19 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { ToggleSortButton } from "@repo/ui"
-import ToggleChip from "../../chrome/chips/ToggleChip"
-import { HydroclimateChooser } from "../../../../../scenarios/components"
+import ToggleChip from "../../../../chrome/chips/ToggleChip"
+import { HydroclimateChooser } from "../../../../../../../scenarios/components"
 
 /**
- * ListTourControlIllustration. Single illustration component whose
- * `variant` decides which control sample is rendered inside a shared
- * panel frame. Used by the list tour to show the actual chip / button /
- * input referenced in each step's body copy, so the user can recognize
- * the control before scanning for it in the page.
+ * ControlIllustration. Single illustration component whose `variant`
+ * decides which control sample is rendered inside a shared panel frame.
+ * Used by the list tour to show the actual chip / button / input
+ * referenced in each step's body copy, so the user can recognize the
+ * control before scanning for it in the page.
  *
- * Framing matches `ListTourBarIllustration` / `ListTourMapLegend`:
- * warm off-white panel (`#faf8f5`, same as unhighlighted scenario
- * rows), hairline divider border, compact uppercase eyebrow.
+ * Framing matches `BarIllustration` / `MapLegend`: warm off-white panel
+ * (`#faf8f5`, same as unhighlighted scenario rows), hairline divider
+ * border, compact uppercase eyebrow.
  *
  * Samples are visual-only. Click handlers are no-ops so the illustration
  * never mutates app state.
@@ -35,15 +35,15 @@ export type ListTourControlVariant =
   | "checkbox"
   | "hydroclimate"
 
-interface ListTourControlIllustrationProps {
+interface ControlIllustrationProps {
   variant: ListTourControlVariant
 }
 
 const NOOP = () => {}
 
-export default function ListTourControlIllustration({
+export default function ControlIllustration({
   variant,
-}: ListTourControlIllustrationProps) {
+}: ControlIllustrationProps) {
   const theme = useTheme()
 
   const eyebrowSx = {
