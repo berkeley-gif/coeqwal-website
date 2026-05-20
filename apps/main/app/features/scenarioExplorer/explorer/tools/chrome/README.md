@@ -17,4 +17,6 @@ UnifiedToolView
 
 Tour anchor registry: `../tour/TourAnchorContext.tsx`. Tour runner: `overlays/ToolTour.tsx`.
 
+**Registering a new tool tab:** `nav/ExploreSubNav.tsx` (`FLOW`) and `layout/journey.ts` (`JOURNEY`, `EXPLORE_MODE_VIEW_NAME`). See [Developer guide](../../README.md#developer-guide-adding-a-new-visualization-tool).
+
 Full tree: [feature README](../../README.md#runtime-component-tree).

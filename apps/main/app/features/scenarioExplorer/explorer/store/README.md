@@ -16,4 +16,6 @@ One Zustand instance composed from slices. Organizational only at runtime.
 
 **Shell vs tools:** `scenarioExplorer/store.ts` holds `mainView` only. This folder is the tools store (`useExplorerStore`).
 
+**Adding a new tool slice:** see [Developer guide: adding a new visualization tool](../../README.md#developer-guide-adding-a-new-visualization-tool) (State: when to add a store slice).
+
 Full architecture: [feature README](../../README.md#explore-session-persistence-sessionstorage).

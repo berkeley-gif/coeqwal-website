@@ -15,4 +15,4 @@ Heatmap panel + sentence controls.
 
 **Target split:** panel orchestration vs `heatmap/` render modules (see feature backlog).
 
-Full resilience write model: [feature README](../../../README.md#resilience-controls-write-model).
+Full resilience write model: [feature README](../../../README.md#resilience-controls-write-model). Adding a new tool: [Developer guide](../../../README.md#developer-guide-adding-a-new-visualization-tool).

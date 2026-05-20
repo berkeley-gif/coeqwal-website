@@ -13,4 +13,4 @@ Default scenario grid (`ListView`) and shared ordering with the sidebar.
 
 **Store:** list fields via `useListSlice()`; selection/share via `useWorkspaceSlice()`.
 
-Full tool docs: [feature README](../../../README.md).
+Full tool docs: [Developer guide](../../../README.md#developer-guide-adding-a-new-visualization-tool).

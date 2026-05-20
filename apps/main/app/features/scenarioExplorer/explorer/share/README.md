@@ -1,5 +1,7 @@
 # Share system
 
+Start from the [Developer guide: adding a new visualization tool](../../README.md#developer-guide-adding-a-new-visualization-tool) for end-to-end tool wiring. This doc covers share-only steps.
+
 This directory owns everything user-facing for the share feature: the
 drawer, the cards rendered in the tray and story canvas, the off-screen
 capture pipeline, the localStorage envelope, the URL grammar, and the
@@ -460,7 +462,7 @@ await stageShareItem({
 
 If something outside the `share/` folder will mount the card directly
 (rare; usually `ShareItemView` is the only entry point), add it to
-the barrel export. Most variants don't need this step — `ShareItemView`
+the barrel export. Most variants don't need this step - `ShareItemView`
 is the public render entry point and reaches the card through the
 registry.
 
@@ -572,7 +574,7 @@ coeqwal-distribution-current-ops-hist.svg
 coeqwal-distribution-current-ops-hist-data.csv
 ```
 
-The bulk-data download is a ZIP at `coeqwal-share-export.zip` —
+The bulk-data download is a ZIP at `coeqwal-share-export.zip` -
 fixed name, no scenario metadata, since it bundles every share item.
 Per-item CSVs inside the ZIP keep the same per-variant basename plus
 `-data.csv` so they extract next to a sibling `.png` / `.svg` when
@@ -582,15 +584,15 @@ the user re-zips them.
 
 Use the helpers in [`share/utils/filename.ts`](utils/filename.ts):
 
-- `slugifyForFilename(text)` — lowercase, ASCII-only, hyphen-
+- `slugifyForFilename(text)` - lowercase, ASCII-only, hyphen-
   separated. Use this on every user-facing label.
-- `hydroclimateSlug(hc)` — compact form (`hist`, `cc50`, `cc75`,
+- `hydroclimateSlug(hc)` - compact form (`hist`, `cc50`, `cc75`,
   `cc95`); falls back to `slugifyForFilename` for unknown values.
   Add new climates to the `HC_SLUG` map intentionally.
-- `joinScenarioSlugs(ids, shortLabelLookup)` — joins with `-vs-`
+- `joinScenarioSlugs(ids, shortLabelLookup)` - joins with `-vs-`
   and dedupes consecutive identical slugs so two ids that share a
   short label can't render `current-ops-vs-current-ops`.
-- `withExt(label, ext)` — appends the extension. Called by
+- `withExt(label, ext)` - appends the extension. Called by
   `tab/SharePanel.tsx`, not the handler.
 
 Compose with `[...].filter(Boolean).join("-")` so a missing segment
@@ -606,7 +608,7 @@ existing variants:
 
 | Variant      | Encoded segments                                                                                                                                                                                                                                      |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only — the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
+| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only - the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
 | `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                            |
 | `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                   |
 | `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it).      |
@@ -614,7 +616,7 @@ existing variants:
 When in doubt: include scenario identity, the chosen hydroclimate,
 and any boolean toggle that changes the chart content (overlay on/off,
 view mode, compare-to-baseline). Skip ephemeral UI state (sort order,
-zoom level) — that belongs to the live view, not the file on disk.
+zoom level) - that belongs to the live view, not the file on disk.
 
 ##### Out of scope
 
@@ -628,7 +630,7 @@ also used by CategoryView section downloads. Do not pull it into share variants.
 handler's `rasterDimensionsKey`. That's fine for `barChart`, `radar`,
 and `equity`, which capture at one fixed size. It rounds resilience
 panel / single-tile captures down to one shared size
-(`resiliencePanel`) when PNG fallback rasterization happens — a
+(`resiliencePanel`) when PNG fallback rasterization happens - a
 URL-restored resilience tile rasterizes against the panel size, not
 its own size.
 
