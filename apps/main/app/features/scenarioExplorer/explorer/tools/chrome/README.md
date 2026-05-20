@@ -16,7 +16,8 @@ UnifiedToolView
 
 Tour subsystem (runner, anchors, per-tool modules): see
 [`../tour/README.md`](../tour/README.md). `ToolJourneyStrip` mounts the
-"Take the tour" button from `../tour/entry/`.
+"Take the tour" button (`../tour/runner/TakeTheTourButton.tsx`,
+re-exported from `../tour/index.ts`).
 
 **Registering a new tool tab:** `nav/ExploreSubNav.tsx` (`FLOW`) and `layout/journey.ts` (`JOURNEY`, `EXPLORE_MODE_VIEW_NAME`). See [Developer guide](../../README.md#developer-guide-adding-a-new-visualization-tool).
 

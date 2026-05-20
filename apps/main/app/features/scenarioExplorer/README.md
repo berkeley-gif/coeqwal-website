@@ -468,12 +468,12 @@ explorer/tools/panels/yourTool/
 ├── useYourToolData.ts             optional (recommended)
 ├── OffscreenYourToolCapture.tsx   optional (share)
 ├── useYourToolShareCapture.ts     optional (share)
-└── yourToolTour.ts                optional (guided tour)
+└── tour/                          optional (guided tour, see explorer/tools/tour/README.md)
 ```
 
 ### Minimal path checklist
 
-Every new tool needs these seven steps:
+Every new tool needs these seven steps. Step 8 is conditional.
 
 | Step | File | Change |
 | ---- | ---- | ------ |
@@ -484,6 +484,7 @@ Every new tool needs these seven steps:
 | 5 | `explorer/tools/chrome/nav/ExploreSubNav.tsx` | Add `FLOW` step (icon, label, purpose) |
 | 6 | `explorer/tools/chrome/layout/journey.ts` | Add `JOURNEY` entry + `EXPLORE_MODE_VIEW_NAME` |
 | 7 | `explorer/store/exploreSessionPersist.ts` | Add mode to `EXPLORE_MODES` validation set |
+| 8 (conditional) | `explorer/tools/chrome/layout/UnifiedToolView.tsx` | Add a mode branch around `<ToolJourneyStrip />` only if your tool should hide the journey strip (see the `data` exception) |
 
 **Step 1 - panel skeleton**
 
@@ -626,8 +627,9 @@ See [Three tiers](#three-tiers-where-new-state-goes) for the full model:
 | File | Change |
 | ---- | ------ |
 | `explorer/store/<tool>StoreSlice.ts` | State fields + actions (+ optional types file) |
-| `explorer/store/storeInstance.ts` | Compose slice + `merge*InitialState` |
-| `explorer/store/pickSlices.ts` | `*_PERSIST_KEYS`, `pick*Slice`, `pick*PersistedState` |
+| `explorer/store/storeInstance.ts` | Add slice to `ExplorerStore` intersection, compose in `create()` with `merge*InitialState(exploreSession.<tool>)` |
+| `explorer/store/pickSlices.ts` | `<TOOL>_PERSIST_KEYS`, optional `<TOOL>_EPHEMERAL_STATE_KEYS`, `<TOOL>_ACTION_KEYS`, `pick<Tool>Slice`, `pick<Tool>PersistedState`, then add a key to `pickExplorerPersistedSession` |
+| `explorer/store/exploreSessionPersist.ts` | Import `<Tool>State` / `<tool>InitialState`, add `<tool>` to the `ExplorerStore` intersection + `PersistedExploreSession` + `ExploreSessionHydration` + `EMPTY_HYDRATION`, wire `<tool>` through `migrateEnvelope` / `readPersistedEnvelope` / `loadExploreSessionState` / `saveExploreSessionState`, export `merge<Tool>InitialState` |
 | `explorer/store/useToolSlices.ts` | `useYourToolSlice` hook |
 | `explorer/store/index.ts` | Re-export hook and types |
 
@@ -669,8 +671,9 @@ See [Map integration](#map-integration). Panels call `mapActions` from the map c
 | ---- | --------- |
 | `list` | No sidebar (`isListMode` in `ExplorerToolView`) |
 | `resilience` | Hydroclimate chooser hidden in `ToolToolbar` |
+| `data` | Journey strip hidden in `UnifiedToolView` (see step 8 above) |
 
-Adjust `ExplorerToolView`, `ToolToolbar`, or `ExplorerSidebar` when your tool needs similar behavior.
+Adjust `ExplorerToolView`, `ToolToolbar`, `ExplorerSidebar`, or `UnifiedToolView` when your tool needs similar behavior.
 
 ### Manual test checklist
 
@@ -691,8 +694,8 @@ Before opening a PR:
 | **radar** | Medium | Chart + controls + share + tour + slice |
 | **equity** | Medium | Distribution chart + share |
 | **resilience** | High | Complex controls, multi-HC matrix, layered write model |
-| **list** | Special | No sidebar; grid layout; barChart share from rows |
-| **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; no share variant |
+| **list** | Special | No sidebar; grid layout; barChart share from rows; tour with demo effects |
+| **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; no share variant; journey strip hidden |
 
 **Radar file tree** (medium-complexity reference):
 

@@ -82,7 +82,7 @@ explorer/
    `startToolTour(tool)`, `endTour()`, `setTourStep(n)`. The slice
    imports `TourTool` from `tour/registry`, which has no React, so the
    store load tree stays hook-free.
-2. **Entry.** `entry/TakeTheTourButton` checks `hasTourFor(exploreMode)`
+2. **Entry.** `runner/TakeTheTourButton` checks `hasTourFor(exploreMode)`
    from `tour/registry`. It renders nothing for tools without a tour, so
    the same button can sit unconditionally in the journey strip.
 3. **Module lookup.** When `tour.tool` is set, `runner/ToolTour` picks
@@ -144,79 +144,228 @@ informal; pick by region or rhythm of the tour (`hero`, `step0.*`,
   height for left/right). Use to slide a card past its anchor so it
   does not occlude live chart content.
 
+### Title icon
+
+`titleIcon` accepts `"pin"` or `"share"` today and renders the
+matching glyph immediately before the title text in the popper
+(`runner/TourCard`). Use it when the step describes a control whose
+own glyph is the easiest way to identify it (the list tour's pin and
+share row controls do this). New icons require a new branch in
+`TourCard`; do not extend the union just to color text.
+
 ### Bookend steps
 
 Steps without an `anchorId` render as a centered card. Use these for
 the hero ("Welcome to the radar chart") and the journey closer ("What
 to do after this chart").
 
+### Illustration keys
+
+Keys are tool-scoped (each tool's `TourModule.illustrations` is
+looked up independently, so two tools may both define an `infoIcon`
+without colliding). Even so, prefix keys with the tool id when the
+illustration is recognizably about that tool (`listBarTiers`,
+`listMapLegend`, `listSearch`); reserve bare names like `infoIcon`
+for cross-tool conventions. The list tour follows this in
+`panels/list/tour/illustrations/index.tsx`.
+
 ## Adding a tour to a new tool
 
 The recipe assumes the new tool is called `equity`. Replace `equity`
-with your tool id.
+with your tool id throughout.
 
-1. **`panels/equity/tour/steps.ts`** - export
-   `EQUITY_TOUR: TourStep[]` with the ordered steps. Use stable ids.
-2. **Register anchors.** In components inside `panels/equity/` (plus
-   any shared chrome you want to point at), call
-   `useTourAnchor("equity.foo.bar")` and attach the returned ref to
-   the target. HTML and SVG both work. Use `InlineTourAnchor` from
-   `tour/anchors/` when wrapping a child is the simplest path.
-3. **(Optional) `panels/equity/tour/EquityTourEffects.tsx`** - one
-   component that owns store-side demo behavior for steps that need a
-   programmatic preview. Snapshot any store value you change in a
-   `useRef`, restore it in the effect cleanup, and key each effect by
-   the step id you respond to. The runner mounts this component only
-   while the equity tour is active.
-4. **(Optional) `panels/equity/tour/illustrations/`** - one file per
-   visual block plus an `index.tsx` exporting
-   `Record<string, () => ReactNode>`. Reference the keys from
-   `steps.ts` via `illustration: "key"`. Illustrations are visual-only,
-   so do not wire click handlers; the tour runner already drives the
-   live control.
-5. **`panels/equity/tour/index.ts`** - assemble the module:
+Required steps are 1, 2, 5, and 6. Steps 3, 4, and 7 are conditional
+on what the tour needs.
 
-   ```ts
-   import type { TourModule } from "../../../tour/types"
-   import { EQUITY_TOUR } from "./steps"
-   import EquityTourEffects from "./EquityTourEffects"
-   import { EQUITY_TOUR_ILLUSTRATIONS } from "./illustrations"
+### 1. Write the steps - `panels/equity/tour/steps.ts`
 
-   const equityTourModule: TourModule = {
-     steps: EQUITY_TOUR,
-     EffectsComponent: EquityTourEffects,
-     illustrations: EQUITY_TOUR_ILLUSTRATIONS,
-   }
+Export `EQUITY_TOUR: TourStep[]` with the ordered steps. Use stable
+ids (see [Step ids](#step-ids) above). The runner walks the array in
+order; the first and last entries are typically anchorless bookends
+(see [Bookend steps](#bookend-steps)).
 
-   export default equityTourModule
-   ```
+### 2. Register anchors
 
-6. **`tour/registry.ts`** - append `"equity"` to `TOUR_TOOLS`.
-   **`tour/toolToTourMap.ts`** - import the new module and add an
-   `equity:` entry to `TOUR_MODULES`. The `Record<TourTool, TourModule>`
-   typing on `TOUR_MODULES` will fail the build if the two lists go out
-   of sync.
+Call `useTourAnchor("equity.foo.bar")` on every target the steps will
+point at and attach the returned ref to the element. HTML and SVG both
+work. Use `InlineTourAnchor` from `tour/anchors/` when wrapping a
+child is simpler than threading a ref.
 
-That is enough. The "Take the tour" button, the runner, the
+**Anchors live wherever the target lives.** Most are in
+`panels/<tool>/` (chart axes, cells, in-panel buttons), but tour steps
+that point at shared chrome must register anchors there. Examples:
+`SearchAndChips.tsx`, `ToolToolbar.tsx`, and
+`ScenarioSelectionSidebar.tsx` all register anchors that the list
+tour reuses. A `useTourAnchor` call outside of `TourAnchorProvider`
+is a no-op, so chrome can stay tour-agnostic when no tool needs it.
+
+### 3. (Conditional) Store-side demo effects - `panels/equity/tour/EquityTourEffects.tsx`
+
+Add this only if a step needs the store mutated to preview what a
+control does (open the map, flip a chip, focus an axis). One component
+owns all such behavior for the tool. Snapshot any store value you
+change in a `useRef` on enter, restore it in the effect cleanup, and
+key each effect by the step id you respond to. The runner mounts this
+component only while the equity tour is active and re-keys it by tool
+so hook order is stable per file. See [Demo effects](#demo-effects)
+below for the rules of thumb.
+
+### 4. (Conditional) Illustrations - `panels/equity/tour/illustrations/`
+
+Add this only if a step's `illustration` key needs a custom visual.
+One file per visual block plus an `index.tsx` exporting
+`Record<string, () => ReactNode>`. Reference the keys from `steps.ts`
+via `illustration: "key"`. Illustrations are visual-only; do not wire
+click handlers, because the tour runner already drives the matching
+live control. See [Illustrations](#illustrations) for framing and
+naming conventions.
+
+### 5. Assemble the module - `panels/equity/tour/index.ts`
+
+The default export is the `TourModule` the runner consumes. Only
+include the fields the tool actually needs.
+
+Minimal (steps only):
+
+```ts
+import type { TourModule } from "../../../tour/types"
+import { EQUITY_TOUR } from "./steps"
+
+const equityTourModule: TourModule = {
+  steps: EQUITY_TOUR,
+}
+
+export default equityTourModule
+```
+
+With demo effects but no illustrations (radar pattern,
+`panels/radar/tour/index.ts`):
+
+```ts
+import type { TourModule } from "../../../tour/types"
+import { EQUITY_TOUR } from "./steps"
+import EquityTourEffects from "./EquityTourEffects"
+
+const equityTourModule: TourModule = {
+  steps: EQUITY_TOUR,
+  EffectsComponent: EquityTourEffects,
+}
+
+export default equityTourModule
+```
+
+With both effects and illustrations (list pattern,
+`panels/list/tour/index.ts`):
+
+```ts
+import type { TourModule } from "../../../tour/types"
+import { EQUITY_TOUR } from "./steps"
+import EquityTourEffects from "./EquityTourEffects"
+import { EQUITY_TOUR_ILLUSTRATIONS } from "./illustrations"
+
+const equityTourModule: TourModule = {
+  steps: EQUITY_TOUR,
+  EffectsComponent: EquityTourEffects,
+  illustrations: EQUITY_TOUR_ILLUSTRATIONS,
+}
+
+export default equityTourModule
+```
+
+If the tool also needs a colocated sync hook (step 7) or a tool-local
+anchor wrapper, re-export them from this file so panel code has one
+import path:
+
+```ts
+export { useEquityInfoSync } from "./useEquityInfoSync"
+```
+
+### 6. Register the tour - `tour/registry.ts` and `tour/toolToTourMap.ts`
+
+Append `"equity"` to `TOUR_TOOLS` in `tour/registry.ts`. Then in
+`tour/toolToTourMap.ts`, import the module and add an `equity:` entry
+to `TOUR_MODULES`. The `Record<TourTool, TourModule>` typing on
+`TOUR_MODULES` will fail the build if the two lists go out of sync.
+
+Keep React-bearing imports out of `tour/registry.ts`. The workspace
+store imports `TourTool` and `hasTourFor` from that file at module
+load, so anything React-shaped in the import tree pulls hooks into
+the store and breaks Server Components. `tour/toolToTourMap.ts` is
+the React-bearing companion.
+
+### 7. (Conditional) Sync hook for component-local state - `panels/equity/tour/useEquityFooSync.ts`
+
+Add this only if a step needs to drive React state that lives inside
+a panel component (a `useState` for a popover, an open/close flag in
+a chart control). Do not lift that state to a slice for the tour's
+sake. Instead, write a small sync hook next to the rest of the tour
+code and call it from the panel.
+
+Two reference implementations:
+
+- `panels/list/tour/useListInfoTooltipSync.ts` opens
+  `StrategyGrid`'s outcome tooltip when the list info step is active.
+  It uses `useTourAnchorResolver` to wait for the late-mounting
+  outcome row.
+- `panels/radar/tour/useRadarInfoIconSync.ts` opens `RadarPanel`'s
+  `openInfoAxis` popover when the radar info step is active. It does
+  not need the resolver because the axis list is already in panel
+  state.
+
+Authoring shape:
+
+```ts
+"use client"
+
+import { useEffect, useRef } from "react"
+import { useWorkspaceSlice } from "../../../../store"
+import { EQUITY_TOUR } from "./steps"
+
+const EQUITY_INFO_STEP_ID = "equity.step2.info"
+
+export function useEquityInfoSync(
+  openInfo: string | null,
+  setOpenInfo: (id: string | null) => void,
+) {
+  const stepId = useWorkspaceSlice((s) => {
+    if (s.tour.tool !== "equity") return null
+    return EQUITY_TOUR[s.tour.step]?.id ?? null
+  })
+  const openedByTourRef = useRef(false)
+
+  useEffect(() => {
+    const isInfoStep = stepId === EQUITY_INFO_STEP_ID
+    if (isInfoStep) {
+      if (openInfo !== "first") {
+        setOpenInfo("first")
+        openedByTourRef.current = true
+      }
+      return
+    }
+    if (openedByTourRef.current) {
+      openedByTourRef.current = false
+      setOpenInfo(null)
+    }
+  }, [stepId, openInfo, setOpenInfo])
+}
+```
+
+Rules of thumb:
+
+- Read `tour.tool` and `tour.step` from `useWorkspaceSlice` and look
+  the step up in the colocated `steps.ts` so the hook ignores other
+  tools' tours and is silent when no tour is running.
+- Open on entry, close on exit. Track whether the tour opened the
+  state via a `useRef` so user-opened state is not clobbered when the
+  step ends.
+- For late-mounting anchors, pull `resolve` and `version` from
+  `useTourAnchorResolver()` and add them to the effect deps (list
+  pattern).
+
+That is the full recipe. The "Take the tour" button, the runner, the
 tab-switch reset, the sessionStorage persistence, and the
-`workspaceStoreSlice.tour.tool: TourTool` type all extend without
-further edits.
-
-### Side effects that need component-local state
-
-If a tour step needs to drive React state that lives inside a panel
-component (a `useState` for a popover, for example), do not lift the
-state to a slice for the tour's sake. Instead, write a small sync hook
-next to the rest of the tour code and call it from the panel:
-
-- `panels/list/tour/useListInfoTooltipSync.ts` drives
-  `StrategyGrid`'s outcome tooltip during the list info step.
-- `panels/radar/tour/useRadarInfoIconSync.ts` drives `RadarPanel`'s
-  `openInfoAxis` during the radar info step.
-
-These hooks read the tour state from `useWorkspaceSlice` and the
-target id from the colocated `steps.ts`, so the panel only has to know
-to call them.
+`workspaceStoreSlice.tour.tool: TourTool` type all extend
+automatically once steps 1, 2, 5, and 6 are in place.
 
 ## Anchors
 
@@ -282,4 +431,35 @@ Rules of thumb for each `EffectsComponent`:
 - Return illustrations from `illustrations/index.tsx` as
   `() => <Component />`, keyed by the string used in
   `steps.ts:illustration`. Keys are tool-scoped, so two tools can both
-  define `infoIcon` without colliding.
+  define `infoIcon` without colliding (see
+  [Illustration keys](#illustration-keys) for naming guidance).
+
+## Manual test checklist
+
+Before opening a PR that adds or changes a tour:
+
+- [ ] "Take the tour" button appears in the journey strip when the
+      tool is active and is hidden when no module is registered for
+      the tool. (Driven by `hasTourFor` in `runner/TakeTheTourButton`.)
+- [ ] Every step's card resolves to its anchor on first paint, and
+      `HighlightRing` traces the anchor rect. Late-mounting anchors
+      (those revealed by a demo effect) are found after the grace
+      period instead of falling back to a centered card.
+- [ ] Stepping forward and back through every step does not throw,
+      does not leak the highlight ring, and restores any preview state
+      the demo effects mutated.
+- [ ] Switching to another Explore tool while the tour is running
+      ends the tour (`workspaceStoreSlice.setExploreMode` calls
+      `endTour`); switching back does not auto-resume.
+- [ ] Same-tab reload mid-tour restores `tour.tool` and `tour.step`
+      from sessionStorage (`validateTour` in `exploreSessionPersist`)
+      so the same step re-renders.
+- [ ] ESC and the close button both call `endTour`; left and right
+      arrow keys step within the tour (`ToolTour` keydown handler).
+- [ ] For component-local sync hooks: the synced UI opens on entry to
+      the step and closes on exit, and user-opened state outside the
+      tour is not clobbered. Verify by opening the popover manually
+      first and confirming the tour does not steal it away.
+- [ ] No `panels/<other-tool>/` imports leak into the tool you are
+      adding the tour to; the runner reads everything through
+      `TOUR_MODULES` in `tour/toolToTourMap.ts`.

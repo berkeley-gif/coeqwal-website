@@ -523,4 +523,4 @@ Outstanding items, in no particular order:
 
 - (Nice to have) **pnpm catalog.** Adopt `catalog:` in `pnpm-workspace.yaml` to keep shared library versions (`react`, `react-dom`, `next`, `typescript`, `turbo`) in sync across workspaces. Apps can opt out by pinning a specific version in their own `package.json`.
 
-- **Node 24 LTS cadence.** Bump from Node 22 to Node 24 shortly after Node 24 enters Maintenance LTS in April 2028 (see [Node version cadence](#node-version-cadence)).
+- **Node 24 LTS cadence.** Bump from Node 22 to Node 24 shortly after Node 24 enters Maintenance LTS in October 2026 (see [Node version cadence](#node-version-cadence); Node 24 EOL is April 2028 per the [official release schedule](https://github.com/nodejs/Release/blob/master/schedule.json)).
