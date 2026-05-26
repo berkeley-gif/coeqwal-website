@@ -20,8 +20,14 @@ type ChartDataPoint = {
   rawCount?: number
 }
 
-const formatTierLabel = (tier: string) =>
-  tier.charAt(0).toUpperCase() + tier.slice(1)
+/**
+ * Tier keys in 1-to-4 order. The API's multi-value `data` array
+ * is fixed-length and positional, so the entry at index `i` is the
+ * `TIER_KEYS[i]` level. This lookup gives us label and color without
+ * shipping the redundant `"tier1"`/.../`"tier4"` string on every row
+ */
+const TIER_KEYS = ["tier1", "tier2", "tier3", "tier4"] as const
+const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
 
 /**
  * Convert multi-value tier data to chart format.
@@ -39,9 +45,9 @@ export function convertMultiValueToChartData(
   tierData: MultiValueTier,
   tierColors: TierColors,
 ): ChartDataPoint[] {
-  return tierData.data.map((item) => ({
-    label: formatTierLabel(item.tier),
-    color: tierColors[item.tier],
+  return tierData.data.map((item, i) => ({
+    label: TIER_LABELS[i] ?? "",
+    color: tierColors[TIER_KEYS[i] ?? "tier1"],
     value: item.normalized ?? 0,
     tierType: "multi_value" as const,
     totalLocations: tierData.total ?? undefined,

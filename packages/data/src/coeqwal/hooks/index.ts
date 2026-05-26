@@ -32,13 +32,14 @@ export {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
   useDemandUnitsList,
-  useDemandUnitStatistics,
   useDemandUnitsMonthly,
+  useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
 } from "./useCwsStatistics"
 export {
   useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,
+  useAgDemandUnitsShortageMonthly,
   useAgDemandUnitsPeriod,
 } from "./useAgStatistics"
 export {

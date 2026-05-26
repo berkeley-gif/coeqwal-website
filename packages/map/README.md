@@ -297,6 +297,75 @@ function moveTo() {
 }
 ```
 
+## Adding new tile data via Mapbox Tiling Service
+
+### Why MTS
+
+Any geometry the COEQWAL map renders must come from a Mapbox vector tileset, not from the API. Points, lines, and polygons all travel through tiles. The API returns only identifiers (`short_code`, `du_id`, `location_id`, `wba_id`) which the frontend joins to tile features at render time. The rationale lives in the backend [database/README.md](../../../coeqwal-backend/database/README.md) under "API conventions, geometry". Short version: vector tiles are pre-quantized, zoom-aware, CDN-cached, and consumed natively by Mapbox GL. A full demand-unit polygon `FeatureCollection` from the API is multiple MB. The equivalent tile request at zoom 8 is typically tens of KB.
+
+Mapbox Tiling Service (MTS) is the supported pipeline for uploading source GeoJSON or line-delimited GeoJSON, applying a recipe that controls zoom-level behavior, and publishing the result as a tileset under the `coeqwal` Mapbox account.
+
+### Mapbox documentation
+
+These are the authoritative how-tos. Read them first.
+
+- MTS quick start tutorial: [https://docs.mapbox.com/help/tutorials/get-started-mts-and-tilesets-cli/](https://docs.mapbox.com/help/tutorials/get-started-mts-and-tilesets-cli/)
+- Tilesets CLI install and command reference: [https://docs.mapbox.com/mapbox-tiling-service/guides/tilesets-cli/](https://docs.mapbox.com/mapbox-tiling-service/guides/tilesets-cli/)
+- Recipe reference (recipe JSON schema and `layers` semantics): [https://docs.mapbox.com/mapbox-tiling-service/reference/](https://docs.mapbox.com/mapbox-tiling-service/reference/)
+- Mapbox Studio (style editor used to bundle tilesets into a basemap style): [https://docs.mapbox.com/studio-manual/](https://docs.mapbox.com/studio-manual/)
+
+### COEQWAL workflow for a new tileset
+
+1. **Write the recipe.** Place a recipe JSON in `coeqwal-backend/scripts/mapbox_recipes/`. The existing example `calsim_demand_units.json` uses `minzoom: 4` and `maxzoom: 16`. The naming convention is `<dataset_slug>.json` matching the final tileset id.
+2. **Export the source data.** Run `ST_AsGeoJSON` against the entity's `geom` column in Postgres and write to NDGeoJSON (one feature per line). Keep the export script next to the recipe so the source generation is reproducible.
+3. **Upload the source** to Mapbox.
+
+   ```bash
+   tilesets upload-source coeqwal <slug> <file.geojson.ld>
+   ```
+
+4. **Create the tileset** from the recipe.
+
+   ```bash
+   tilesets create coeqwal.<slug> \
+     --recipe coeqwal-backend/scripts/mapbox_recipes/<slug>.json \
+     --name "<Human-readable name>"
+   ```
+
+5. **Publish the tileset.**
+
+   ```bash
+   tilesets publish coeqwal.<slug>
+   ```
+
+6. **Register the tileset on the website side.** Add an entry to `COEQWAL_TILESETS` in [apps/main/app/features/map/config/tilesetSources.ts](../../apps/main/app/features/map/config/tilesetSources.ts).
+
+   ```ts
+   {
+     sourceId: "coeqwal-<slug>",
+     url: "mapbox://coeqwal.<slug>",
+   }
+   ```
+
+   If the layer needs to be available on non-satellite basemaps (Light, Streets), also add an entry to `RUNTIME_LAYERS` so it is created on the fly when those basemaps are active.
+
+7. **Bundle into the satellite basemap (optional).** If the layer should appear on the satellite basemap without runtime injection, add it to the Mapbox Studio satellite style `coeqwal/cmh2f40sm000w01qy8m0gaea8`. It will then be available via the `composite` source.
+
+### Authentication
+
+The `tilesets` CLI uses a `MAPBOX_ACCESS_TOKEN` environment variable with `tilesets:write` scope. The token is owned by the COEQWAL Mapbox account holder. Issuance and rotation happen out of band. Link to the internal credentials doc when one exists, otherwise leave a note in the recipe folder pointing to whoever currently holds the token.
+
+### Existing COEQWAL tilesets
+
+| Source id              | Tileset URL                             | Source layer           | What it carries                                                                                                           |
+| ---------------------- | --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `coeqwal-demand-units` | `mapbox://coeqwal.calsim_demand_units`  | `demand_units`         | CalSim demand-unit polygons (urban + ag), keyed by `DU_ID`                                                                |
+| `coeqwal-wba`          | `mapbox://coeqwal.calsim-wba`           | `geoschem`             | Water budget area polygons, keyed by `WBA_ID`                                                                             |
+| `coeqwal-reservoir`    | `mapbox://coeqwal.california-reservoir` | `california-reservoir` | Reservoir polygons, currently keyed by `gnisidlabel` (TODO: add `calsim_id` property and drop the frontend mapping table) |
+| `coeqwal-delta-water`  | `mapbox://coeqwal.delta-water`          | `delta_water`          | Delta water body context layer                                                                                            |
+
+Anything in this table is consumed by `tilesetSources.ts`. New tilesets should follow the same registration pattern.
+
 ## Advanced Usage
 
 ### When to Use withMap

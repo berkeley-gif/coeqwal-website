@@ -32,9 +32,6 @@ import {
   getTierColorsFromTheme,
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
-// GeoJSON fetch disabled - heavy on bandwidth (full polygon geometry).
-// TODO: replace with lightweight /locations endpoint + hardcoded centroids
-// import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { getOutcomeName } from "../../../../content/outcomes"
 import { useActiveOutcomeVisualization } from "../../store"
 import { resolveSourceForQuery } from "../../config/tilesetSources"

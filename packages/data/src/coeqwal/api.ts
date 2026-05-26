@@ -34,35 +34,19 @@ export const ENDPOINTS = {
     `/tiers/batch?scenarios=${scenarioIds.join(",")}`,
 
   /**
-   * Tier location GeoJSON (includes full polygon geometry, heavy).
-   * Prefer `tierLocationAssignments` for treemap/table use cases.
+   * Lightweight tier assignments per location (no geometry) for one or more
+   * outcomes in a single request. One SQL query server-side regardless of
+   * how many codes are requested.
+   *
+   * Returns `{ results: { [code]: { locations, metadata, ... } }, missing }`.
+   * Order is normalized (sorted+deduped) so cache keys and URLs do not
+   * depend on caller order
    * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param tierCode - Tier short code (e.g., "AG_REV")
-   */
-  tierLocations: (scenarioId: string, tierCode: string) =>
-    `/tier-map/${scenarioId}/${tierCode}`,
-
-  /**
-   * Lightweight tier assignments per location (no geometry).
-   * Returns location_id, location_name, tier_level, tier_value, display_order.
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param tierCode - Tier short code (e.g., "CWS_DEL", "AG_REV")
-   */
-  tierLocationAssignments: (scenarioId: string, tierCode: string) =>
-    `/tier-map/${scenarioId}/${tierCode}/locations`,
-
-  /**
-   * Batch: lightweight tier assignments per location for multiple outcomes in
-   * one request. One SQL query server-side instead of N parallel per-code
-   * calls. Additive. the single-outcome route above still works.
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param codes - Tier short codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"]).
-   *                Order is normalized (sorted+deduped) so cache keys and
-   *                URLs do not depend on caller order.
+   * @param codes - Tier short codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"])
    */
   tierLocationAssignmentsBatch: (scenarioId: string, codes: string[]) => {
     const normalized = Array.from(new Set(codes)).sort().join(",")
-    return `/tier-map/${scenarioId}/locations?codes=${normalized}`
+    return `/tiers/scenarios/${scenarioId}/locations?codes=${normalized}`
   },
 
   // Statistics endpoints (reservoir percentiles)
@@ -71,19 +55,26 @@ export const ENDPOINTS = {
   STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
 
   /**
-   * Percentile data for a single reservoir
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
-   */
-  reservoirPercentiles: (scenarioId: string, reservoirId: string) =>
-    `/statistics/scenarios/${scenarioId}/reservoirs/${reservoirId}/percentiles`,
-
-  /**
    * Percentile data for all reservoirs in a scenario
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   allReservoirPercentiles: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
+
+  /**
+   * Percentile data filtered to a specific set of reservoirs in a scenario.
+   * Order is normalized (sorted+deduped) so cache keys and URLs do not depend
+   * on caller order
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param reservoirIds - Reservoir short_codes (e.g., ["SHSTA"], ["SHSTA", "OROVL"])
+   */
+  reservoirPercentilesFiltered: (
+    scenarioId: string,
+    reservoirIds: string[],
+  ) => {
+    const normalized = Array.from(new Set(reservoirIds)).sort().join(",")
+    return `/statistics/scenarios/${scenarioId}/reservoir-percentiles?reservoirs=${normalized}`
+  },
 
   /**
    * Percentile data for a group of reservoirs in a scenario
@@ -134,14 +125,6 @@ export const ENDPOINTS = {
     `/statistics/demand-units${group ? `?group=${group}` : ""}`,
 
   /**
-   * Statistics for a single demand unit (includes both monthly and period data)
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
-   */
-  demandUnitStatistics: (scenarioId: string, duId: string) =>
-    `/statistics/scenarios/${scenarioId}/demand-units/${duId}/statistics`,
-
-  /**
    * Monthly delivery statistics for urban demand units
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param duId - Optional filter by demand unit ID (e.g., "UD_ACWD")
@@ -152,6 +135,23 @@ export const ENDPOINTS = {
       .filter(Boolean)
       .join("&")
     return `/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Monthly shortage statistics for urban demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duId - Optional filter by demand unit ID
+   * @param group - Optional group filter
+   */
+  demandUnitsShortageMonthly: (
+    scenarioId: string,
+    duId?: string,
+    group?: string,
+  ) => {
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
+      .filter(Boolean)
+      .join("&")
+    return `/statistics/scenarios/${scenarioId}/demand-units/shortage-monthly${params ? `?${params}` : ""}`
   },
 
   /**
@@ -204,6 +204,21 @@ export const ENDPOINTS = {
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+  },
+
+  /**
+   * Monthly GW restriction shortage statistics for AG demand units.
+   * Source: `GW_SHORT_*` variables. Available only for SJR / TULARE DUs.
+   *
+   * Pass `duIds` to restrict the response to specific demand units via the
+   * backend's comma-separated `du_id` filter. The list is sorted so different
+   * call orders produce the same URL (and same SWR cache key)
+   * @param scenarioId - Scenario ID (e.g., "s0025")
+   * @param duIds - Optional list of demand unit IDs to fetch
+   */
+  agDemandUnitsShortageMonthly: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly${qs}`
   },
 
   /**

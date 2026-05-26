@@ -49,23 +49,19 @@ export interface Scenario {
   shortCode: string
   isActive: boolean
 
-  /** Display label (from API name) */
+  /** Display label, from API `name` */
   label: string
-  /** Short summary description (1-2 sentences, from API short_description) */
+  /** Short summary description (1-2 sentences, from API `short_description`) */
   description: string
-  /** Compact label for tight spaces (local shortLabel or API name) */
+  /** Compact label for tight spaces (local `shortLabel` or API `name`) */
   shortLabel: string
-  /** Visual theme (inferred from sibling_group) */
+  /** Visual theme, inferred locally from `siblingGroup` */
   theme: ScenarioTheme
   iconPath: string
 
-  /** Technical run name from API */
-  runName: string
-  /** Hydroclimate variant ID (e.g., 2 = historical, 3 = cc50) */
+  /** Hydroclimate variant ID (e.g. 2 = historical, 3 = cc50) */
   hydroclimateId: number
-  /** Short code of the baseline scenario this derives from, or null */
-  baselineScenario: string | null
-  /** Sibling group - same strategy under different hydroclimates */
+  /** Sibling group, same strategy under different hydroclimates */
   siblingGroup: string
 }
 

@@ -13,16 +13,16 @@ import {
   fetchMiContractorsMonthly,
   fetchMiContractorsPeriod,
   fetchDemandUnitsList,
-  fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
+  fetchDemandUnitsShortageMonthly,
   fetchDemandUnitsPeriod,
 } from "../fetchers"
 import type {
   MiContractorMonthlyResponse,
   MiContractorPeriodResponse,
   DemandUnitsListResponse,
-  DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
+  DemandUnitShortageMonthlyResponse,
   DemandUnitPeriodResponse,
 } from "../types"
 
@@ -305,6 +305,48 @@ export function useDemandUnitsMonthly(
 }
 
 /**
+ * Fetch monthly shortage statistics for urban demand units.
+ *
+ * Companion to `useDemandUnitsMonthly`. The backend splits delivery and
+ * shortage across two routes, so views that need both percentile bands
+ * (e.g. the urban-DU matrix) reach for this hook in parallel
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID
+ * @param group - Optional group filter
+ */
+export function useDemandUnitsShortageMonthly(
+  scenarioId: string | null,
+  duId?: string,
+  group?: string,
+) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<DemandUnitShortageMonthlyResponse>(
+    scenarioId
+      ? CACHE_KEYS.demandUnitsShortageMonthly(scenarioId, duId, group)
+      : null,
+    () => fetchDemandUnitsShortageMonthly(scenarioId!, duId, group),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    demandUnits: data?.demand_units ?? {},
+    isLoading,
+    error,
+    hasData: !!data && Object.keys(data.demand_units).length > 0,
+  }
+}
+
+/**
  * Fetch period-of-record summary for urban demand units
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
@@ -359,62 +401,5 @@ export function useDemandUnitsPeriod(
     isLoading,
     error,
     hasData: !!data && Object.keys(data.demand_units).length > 0,
-  }
-}
-
-/**
- * Fetch complete statistics for a single demand unit
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
- * @returns Complete statistics including monthly delivery/shortage and period summary
- *
- * @example
- * ```typescript
- * function DemandUnitChart({ scenarioId, duId }) {
- *   const { data, isLoading } = useDemandUnitStatistics(scenarioId, duId)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <PercentileChart
- *       label={data.community_agency}
- *       monthlyData={data.monthly_delivery}
- *     />
- *   )
- * }
- * ```
- */
-export function useDemandUnitStatistics(
-  scenarioId: string | null,
-  duId: string | null,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<DemandUnitStatisticsResponse>(
-    scenarioId && duId
-      ? CACHE_KEYS.demandUnitStatistics(scenarioId, duId)
-      : null,
-    () => fetchDemandUnitStatistics(scenarioId!, duId!),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    duId: data?.du_id,
-    label: data?.community_agency,
-    monthlyDelivery: data?.monthly_delivery ?? null,
-    monthlyShortage: data?.monthly_shortage ?? null,
-    periodSummary: data?.period_summary ?? null,
-    isLoading,
-    error,
-    hasData: !!data,
   }
 }

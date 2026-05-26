@@ -20,7 +20,7 @@
  *
  * Usage:
  *
- *   const results = useMultiScenarioSlots(scenarios, useChannelsMonthly)
+ *   const results = useMultiScenarioSlots(scenarios, useReservoirPercentiles)
  *   const results = useMultiScenarioSlots(
  *     scenarios,
  *     (s) => useSpillMonthly(s, "major"),

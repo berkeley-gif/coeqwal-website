@@ -23,7 +23,7 @@ React components
 - **Type safety**: Typed fetchers and responses, i.e. no type assertions at consumer level
 - **Consistent pattern**: All hooks return `{ <data>, isLoading, error }` where the data property name varies by hook
 
-**Active-scenario policy:** All tier and tier-map endpoints filter server-side on `tier_result.is_active = TRUE`. API consumers (hooks, fetchers, prefetch routines) never need to filter retired scenarios on the client. If a scenario is retired, it will simply be absent from list endpoints and 404 from per-scenario endpoints.
+**Active-scenario policy:** All tier endpoints filter server-side on `tier_result.is_active = TRUE`. API consumers (hooks, fetchers, prefetch routines) never need to filter retired scenarios on the client. If a scenario is retired, it will simply be absent from list endpoints and 404 from per-scenario endpoints.
 
 ## Installation (for new apps)
 
@@ -98,10 +98,9 @@ Defined in `packages/data/src/cache/keys.ts`. Static keys are plain strings (mir
 | Tier metadata             | `TIER_LIST`                                                                                                                                                                              | `"/api/tiers/list"`                            |
 | Scenarios                 | `SCENARIOS`                                                                                                                                                                              | `"/api/scenarios"`                             |
 | Tier scores (single)      | `scenarioTiers(id)`                                                                                                                                                                      | `"/api/tiers/scenarios/{id}/tiers"`            |
-| Tier scores (one outcome) | `scenarioTierByCode(id, code)`                                                                                                                                                           | `"/api/tiers/scenarios/{id}/tiers/{code}"`     |
 | Tier scores (batch)       | `allScenarioTiers(ids)`                                                                                                                                                                  | `["all-scenario-tiers", ...sortedIds]`         |
 | Tier scores (lazy batch)  | `lazyScenarioTiers(ids)`                                                                                                                                                                 | `["lazy-scenario-tiers", ...ids]`              |
-| Tier locations (single)   | `tierLocations(id, code)`                                                                                                                                                                | `"/tier-map/{id}/{code}/locations"`            |
+| Tier locations (single)   | `tierLocations(id, code)`                                                                                                                                                                | `["tier-locations", id, code]`                 |
 | Tier locations (batch)    | `tierLocationsBatch(id, codes)`                                                                                                                                                          | `["tier-locations-batch", id, ...sortedCodes]` |
 | Reservoir lists           | `STATISTICS_RESERVOIRS`, `STATISTICS_RESERVOIRS_ALL`, `STATISTICS_SCENARIOS`                                                                                                             | static URLs                                    |
 | Reservoir percentiles     | `reservoirPercentiles(id, resId)`, `allReservoirPercentiles(id)`, `groupedReservoirPercentiles(id, group)`                                                                               | per-scenario URLs                              |
@@ -127,9 +126,8 @@ Exported from `@repo/data/coeqwal/hooks` (and `@repo/data/fetching` for `useLoca
 | Tier metadata        | `useTiers()`                                  | `TIER_LIST`                         | Outcome definitions: short codes, names, tier types, and tier counts for all 9 outcomes                                |
 | Tier metadata        | `useTierMapping()`                            | derived from `useTiers`             | `short_code` -> display-name lookup table, derived in-memory from `useTiers`                                           |
 | Scenarios            | `useScenarios()`                              | `SCENARIOS`                         | Full scenario list: short codes, run names, descriptions, hydroclimate ids, sibling-group ids, and active flags        |
-| Tier scores          | `useScenarioTiers(id)`                        | `scenarioTiers(id)`                 | All 9 outcomes for one scenario: weighted score, normalized score, gini, band bounds, and tier distribution counts     |
-| Tier scores          | `useScenarioTierByCode(id, code)`             | `scenarioTierByCode(id, code)`      | Same as `useScenarioTiers` scoped to one outcome (lighter payload)                                                     |
-| Tier locations       | `useTierLocationAssignments(id, code)`        | `tierLocations(id, code)`           | Per-location `tier_level` for one scenario+outcome pair (e.g. 121 demand units for `CWS_DEL`); no geometry             |
+| Tier scores          | `useScenarioTiers(id)`                        | `scenarioTiers(id)`                 | All 9 outcomes for one scenario: weighted score, normalized score, and tier distribution counts                        |
+| Tier locations       | `useTierLocationAssignments(id, code)`        | `tierLocations(id, code)`           | Per-location `tier_level` for one scenario+outcome pair (e.g. 121 demand units for `CWS_DEL`). No geometry             |
 | Tier locations       | `useTierLocationAssignmentsBatch(id, codes)`  | `tierLocationsBatch(id, codes)`     | Same as above for multiple outcomes in one HTTP request; splays results into the single-outcome cache on success       |
 | Reservoirs           | `useReservoirList()`                          | `STATISTICS_RESERVOIRS`             | Grouped reservoirs that have percentile data available (the default explore list)                                      |
 | Reservoirs           | `useAllReservoirsList()`                      | `STATISTICS_RESERVOIRS_ALL`         | Full reservoir list with statistics, used to populate the "add reservoir" dropdown                                     |
@@ -468,12 +466,10 @@ import { useScenarios } from "@repo/data/coeqwal/hooks"
 const { scenarios, isLoading, error } = useScenarios()
 // scenarios: ScenarioListItem[] - [{
 //   short_code: "s0020",
-//   run_name: "s0020_DCRadjBL_2020LU_wTUCP",
 //   name: "Current operations",
 //   short_description: "Baseline scenario with current Delta regulations",
 //   is_active: true,
 //   hydroclimate_id: 2,
-//   baseline_scenario: null,
 //   sibling_group: "s0020"
 // }, ...]
 ```
@@ -494,18 +490,19 @@ const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
 // scoreData: Record<outcomeCode, OutcomeScoreData>
 // scoreData["CWS_DEL"] -> {
 //   shortCode: "CWS_DEL", type: "multi_value",
-//   weighted_score: 1.8, normalized_score: 0.73,
-//   gini: 0.12, band_upper: 0.85, band_lower: 0.61
+//   weighted_score: 1.8, normalized_score: 0.73
 // }
 
 // rawData: ScenarioTiersResponse
 // rawData.tiers["CWS_DEL"] -> {
 //   name: "Community Water Systems Delivery", type: "multi_value",
-//   weighted_score: 1.8, normalized_score: 0.73, gini: 0.12,
-//   data: [{ tier: "tier1", value: 70, normalized: 0.7 },
-//          { tier: "tier2", value: 20, normalized: 0.2 },
-//          { tier: "tier3", value: 8, normalized: 0.08 },
-//          { tier: "tier4", value: 2, normalized: 0.02 }],
+//   weighted_score: 1.8, normalized_score: 0.73,
+//   data: [
+//     { value: 70, normalized: 0.7 },   // index 0 = tier1 (best)
+//     { value: 20, normalized: 0.2 },   // index 1 = tier2
+//     { value: 8,  normalized: 0.08 },  // index 2 = tier3
+//     { value: 2,  normalized: 0.02 },  // index 3 = tier4 (worst)
+//   ],
 //   total: 100
 // }
 
@@ -602,10 +599,6 @@ const { data, isLoading, error } = useTierLocationAssignmentsBatch(
 const allAssignments = React.useMemo(() => data?.results ?? {}, [data])
 ```
 
-#### `useScenarioTierByCode(scenarioId, tierCode)`
-
-Parallel to `useScenarioTiers` but scoped to one outcome. Returns aggregate tier scores (weighted_score, normalized_score, gini, distribution data) for a single scenario+outcome pair. Use when a component only cares about one outcome and fetching the full scenario payload would be wasteful. Pass `null` for either argument to skip fetching.
-
 ### Fetchers
 
 **Prefer hooks** in React components. They handle caching, deduplication, loading states, and errors automatically.
@@ -616,16 +609,15 @@ Use fetchers when you need to:
 - Build custom hooks with different caching behavior
 - Fetch data outside of React (scripts, tests)
 
-| Fetcher                                          | Description                                                                                                                                                                                                                                                                                                          |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                                                                                                                         |
-| `fetchScenarioList()`                            | All scenario metadata. Includes `hydroclimate_short_code` on recent API deployments (prefer over the numeric `hydroclimate_id`).                                                                                                                                                                                     |
-| `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                                                                                                                                      |
-| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                                                                                                                           |
-| `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.                                                                                                             |
-| `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                                                                                                                      |
-| `fetchTierLocationAssignmentsBatch(id, codes[])` | **Batch** per-location tier assignments for multiple outcomes in one request. Hits `/api/tier-map/{id}/locations?codes=...`. Falls back to parallel per-code requests if the batch endpoint is unavailable.                                                                                                          |
-| `fetchTierLocationData(id, code)`                | **Reserved.** GeoJSON FeatureCollection with full polygon geometry - heavy on bandwidth. No current callers; the app uses Mapbox vector tiles for polygon geometry and pairs them with the lightweight `assignments` endpoint above. Retained for future consumers that need server-rendered GeoJSON (e.g. exports). |
+| Fetcher                                          | Description                                                                                                                                                                                                 |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                |
+| `fetchScenarioList()`                            | Active scenario list. Six fields per row: `short_code`, `name`, `short_description`, `hydroclimate_id`, `sibling_group`, `is_active`.                                                                       |
+| `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                             |
+| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                  |
+| `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.    |
+| `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                             |
+| `fetchTierLocationAssignmentsBatch(id, codes[])` | **Batch** per-location tier assignments for multiple outcomes in one request. Hits `/api/tiers/scenarios/{id}/locations?codes=...`. Falls back to parallel per-code requests if the batch endpoint is unavailable. |
 
 ```tsx
 import {
@@ -673,7 +665,7 @@ CACHE_KEYS.SCENARIOS        // "/api/scenarios"
 // Dynamic keys
 CACHE_KEYS.scenarioTiers("s0020")              // "/api/tiers/scenarios/s0020/tiers"
 CACHE_KEYS.allScenarioTiers(["s0020", ...])    // ["all-scenario-tiers", "s0020", ...]
-CACHE_KEYS.tierLocations("s0020", "CWS_DEL")  // "/tier-map/s0020/CWS_DEL/locations"
+CACHE_KEYS.tierLocations("s0020", "CWS_DEL")  // ["tier-locations", "s0020", "CWS_DEL"]
 ```
 
 ### Types
@@ -682,12 +674,12 @@ CACHE_KEYS.tierLocations("s0020", "CWS_DEL")  // "/tier-map/s0020/CWS_DEL/locati
 import type {
   TierListItem, // Tier metadata from /api/tiers/list
   TierInfo, // Full tier data including scores
-  TierScores, // weighted_score, normalized_score, gini, band_upper, band_lower
+  TierScores, // weighted_score and normalized_score
   ScenarioTiersResponse, // Response from scenario tiers endpoint
   ScenarioListItem, // Scenario metadata
   TierMapping, // Record<string, string> for lookups
   MultiValueTier, // Multi-value tier with name, type, data array, and total
-  MultiValueTierData, // Distribution data for multi-value tiers (tier, value, normalized)
+  MultiValueTierData, // Distribution entry for multi-value tiers (value, normalized; positional)
 } from "@repo/data/coeqwal"
 ```
 
@@ -776,7 +768,7 @@ import { useScenarioExplorerStore } from "../store"
 const {
   allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
-  allScoreData, // Scores per outcome: weighted_score, normalized_score, gini, etc.
+  allScoreData, // Scores per outcome: weighted_score and normalized_score
   outcomeNames, // Display-ordered list of { shortCode, displayName }
   siblingGroups, // Scenario group metadata
   getDisplayName, // (id) => human-readable scenario name
@@ -812,7 +804,7 @@ This means your component code doesn't change when the user switches hydroclimat
 | Data                                                | How to access                                    | What it contains                                                 |
 | --------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
 | Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                            |
-| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | weighted_score, normalized_score, gini, tier distribution counts |
+| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | weighted_score, normalized_score, and tier distribution counts |
 | Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                       |
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
@@ -840,21 +832,20 @@ const tiersB = allScenariosData?.["s0021"]
 
 const cwsA = tiersA?.tiers["CWS_DEL"]
 // cwsA.weighted_score: 2.5      - average tier level (used for sorting scenarios)
-// cwsA.normalized_score: 0.5    - 0-1 normalized (no longer used)
-// cwsA.gini: 0.292              - inequality measure (not sure if team wants to use)
+// cwsA.normalized_score: 0.5    - 0-1 normalized (parallel plot Y-axis)
 // cwsA.total: 76                - total locations
 // cwsA.data: [                  - tier distribution counts (used in bar chart glyphs)
-//   { tier: "tier1", value: 31, normalized: 0.408 },
-//   { tier: "tier2", value: 6, normalized: 0.079 },
-//   { tier: "tier3", value: 9, normalized: 0.118 },
-//   { tier: "tier4", value: 30, normalized: 0.395 },
+//   { value: 31, normalized: 0.408 },  // index 0 = tier1 (best)
+//   { value: 6,  normalized: 0.079 },  // index 1 = tier2
+//   { value: 9,  normalized: 0.118 },  // index 2 = tier3
+//   { value: 30, normalized: 0.395 },  // index 3 = tier4 (worst)
 // ]
 
 // --- Per-location tier values (fetched on first access, then cached by SWR) ---
 
 // One request per scenario+outcome returns all locations at once.
 // Uses the lightweight /locations endpoint (no polygon geometry).
-// Do not use fetchTierLocationData. That returns full GeoJSON and is much heavier.
+// Polygon geometry is served by Mapbox vector tiles. The API never returns geometry.
 // Pass null to skip fetching conditionally.
 const { data: locationsA } = useTierLocationAssignments("s0020", "CWS_DEL")
 const { data: locationsB } = useTierLocationAssignments("s0021", "CWS_DEL")
@@ -916,7 +907,7 @@ The map layer system reads this state, looks up tier colors from the theme, and 
 
 > **TODO:** Incorporate **ENV_FLOWS**, **FW_DELTA_USES**, and **FW_EXP** hardcoded coordinates into Mapbox tilesets as dedicated point layers, then remove the hardcoded coordinates from `TierMarkers.tsx` and `TierLocationLabels.tsx` and use `setOutcomeVisualization()` like the other outcomes.
 
-No outcome should fetch GeoJSON from the API for map rendering. The `fetchTierLocationData` (GeoJSON) fetcher exists in `@repo/data` but is currently not called anywhere in the app.
+No outcome can fetch GeoJSON from the API for map rendering. The API does not serve geometry. Polygon and point geometry comes from Mapbox vector tiles (see [packages/map/README.md](../map/README.md#adding-new-tile-data-via-mapbox-tiling-service)), joined to the lightweight `/locations` assignments by `location_id`.
 
 ## TL;DR: bringing data into a visualization
 
@@ -974,7 +965,7 @@ A grab bag of patterns and pitfalls worth internalizing.
 - **Do not build URLs in components.** Always go through a hook or, when you must, a fetcher. The cache-key file is the only source of truth for URL shapes.
 - **Do not put server data in Zustand.** The store is for UI state (selections, toggles, hovered IDs). SWR is for server data. Crossing these wires creates a race between two caches.
 - **Do not call `useScenarioTiers` for every scenario in a loop.** Use `useMultipleScenarioTiers` (or its app-level wrapper `useResolvedScenarioTiers`), which hits the batch endpoint.
-- **Do not fetch GeoJSON from the API for map rendering.** The map uses Mapbox vector tiles for geometry. The frontend pairs them with the lightweight `assignments` endpoint to color polygons. `fetchTierLocationData` exists but is reserved.
+- **Do not fetch GeoJSON from the API for map rendering.** The API does not serve geometry. The map uses Mapbox vector tiles for geometry and pairs them with the lightweight `assignments` endpoint to color polygons.
 
 ### Loading states
 

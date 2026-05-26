@@ -16,7 +16,7 @@ Persistent Mapbox GL map used across the Learn, Get Started, and Explore tabs.
 
 ## How locations are resolved for the map
 
-The tier API (`/api/tier-map/{scenario}/{tier}/locations`) returns `location_id`, `tier_level`, and `tier_value` -- not coordinates or geometry. The map resolves positions from two separate sources depending on the outcome type.
+The tier API (`/api/tiers/scenarios/{scenario}/locations?codes={tier}`) returns `location_id`, `tier_level`, and `tier_value`. The API does not return coordinates or geometry. The map resolves positions from two separate sources depending on the outcome type.
 
 ### Polygon outcomes (demand units, WBAs, reservoirs, delta)
 

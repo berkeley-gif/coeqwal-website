@@ -49,12 +49,17 @@ export const CACHE_KEYS = {
     ["lazy-scenario-tiers", ...scenarioIds] as const,
 
   /**
-   * Tier location data for map visualization
+   * SWR cache key for per-location tier assignments (no geometry).
+   *
+   * Pure cache identifier, not a URL. The underlying fetcher hits the
+   * batch endpoint with a single code and splays the result into this
+   * slot via `mutate`, so `useTierLocationAssignments` and the batch
+   * hook share one cache entry per scenario+code.
    * @param scenarioId - Scenario ID
    * @param tierCode - Tier code (e.g., "AG_REV")
    */
   tierLocations: (scenarioId: string, tierCode: string) =>
-    `/tier-map/${scenarioId}/${tierCode}/locations`,
+    ["tier-locations", scenarioId, tierCode] as const,
 
   /**
    * Batch key for fetching tier locations across multiple outcomes in one
@@ -77,19 +82,26 @@ export const CACHE_KEYS = {
   STATISTICS_RESERVOIRS_ALL: "/api/statistics/reservoirs/all",
 
   /**
-   * Percentile data for a single reservoir in a scenario
-   * @param scenarioId - Scenario ID
-   * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
-   */
-  reservoirPercentiles: (scenarioId: string, reservoirId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/reservoirs/${reservoirId}/percentiles`,
-
-  /**
    * Percentile data for all reservoirs in a scenario
    * @param scenarioId - Scenario ID
    */
   allReservoirPercentiles: (scenarioId: string) =>
     `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
+
+  /**
+   * Percentile data filtered to a specific set of reservoirs in a scenario.
+   * `reservoirIds` are sorted+deduped before encoding so different call
+   * orders share the same SWR cache entry
+   * @param scenarioId - Scenario ID
+   * @param reservoirIds - Reservoir short_codes (e.g., ["SHSTA"], ["SHSTA", "OROVL"])
+   */
+  reservoirPercentilesFiltered: (
+    scenarioId: string,
+    reservoirIds: string[],
+  ) => {
+    const normalized = Array.from(new Set(reservoirIds)).sort().join(",")
+    return `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles?reservoirs=${normalized}`
+  },
 
   /**
    * Percentile data for a group of reservoirs in a scenario
@@ -138,15 +150,7 @@ export const CACHE_KEYS = {
     `/api/statistics/demand-units${group ? `?group=${group}` : ""}`,
 
   /**
-   * Statistics for a single demand unit
-   * @param scenarioId - Scenario ID
-   * @param duId - Demand unit ID
-   */
-  demandUnitStatistics: (scenarioId: string, duId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/demand-units/${duId}/statistics`,
-
-  /**
-   * Monthly delivery and shortage statistics for urban demand units
+   * Monthly delivery statistics for urban demand units
    * @param scenarioId - Scenario ID
    * @param duId - Optional demand unit ID filter
    * @param group - Optional group filter
@@ -156,6 +160,23 @@ export const CACHE_KEYS = {
       .filter(Boolean)
       .join("&")
     return `/api/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Monthly shortage statistics for urban demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   * @param group - Optional group filter
+   */
+  demandUnitsShortageMonthly: (
+    scenarioId: string,
+    duId?: string,
+    group?: string,
+  ) => {
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
+      .filter(Boolean)
+      .join("&")
+    return `/api/statistics/scenarios/${scenarioId}/demand-units/shortage-monthly${params ? `?${params}` : ""}`
   },
 
   /**
@@ -203,6 +224,18 @@ export const CACHE_KEYS = {
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+  },
+
+  /**
+   * Monthly GW restriction shortage statistics for AG demand units.
+   * SJR / TULARE DUs only. `duIds` are sorted before being encoded so
+   * different call orders share the same SWR cache entry
+   * @param scenarioId - Scenario ID
+   * @param duIds - Optional list of demand unit IDs that scope the response
+   */
+  agDemandUnitsShortageMonthly: (scenarioId: string, duIds?: string[]) => {
+    const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
+    return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly${qs}`
   },
 
   /**
