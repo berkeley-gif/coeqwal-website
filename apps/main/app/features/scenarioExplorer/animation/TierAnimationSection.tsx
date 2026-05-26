@@ -61,8 +61,6 @@ import {
   OverlayMorphArbiter,
   CameraArbiter,
   InteractivePaintArbiter,
-  debugLog,
-  logDuState,
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
   ensureDemandUnitsOutlineLayer,
@@ -437,16 +435,7 @@ export default function TierAnimationSection() {
         setBeatIndex(clamped)
         beatIndexRef.current = clamped
 
-        debugLog(
-          `runTween START fromV=${progress.get().toFixed(4)} targetV=${target.progress} duration=${duration}`,
-        )
-        logDuState("runTween START", mapAPI.mapRef?.current?.getMap?.())
-
         const finalize = () => {
-          debugLog(
-            `runTween FINALIZE clamped=${clamped} v=${progress.get().toFixed(4)}`,
-          )
-          logDuState("runTween FINALIZE", mapAPI.mapRef?.current?.getMap?.())
           if (clamped === FINAL_BEAT_INDEX) {
             settleToFinishedState()
           } else if (clamped === 0) {
@@ -519,8 +508,6 @@ export default function TierAnimationSection() {
   const engineContextRef = useRef<BeatEngineContext | null>(null)
 
   const clearInteractiveState = useCallback(() => {
-    const diagMap = mapAPI.mapRef?.current?.getMap?.()
-    logDuState("clearInteractiveState START", diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     // release interactive paint ownership synchronously,
@@ -535,25 +522,21 @@ export default function TierAnimationSection() {
     if (ctx) interactivePaintArbiterRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
-    logDuState("clearInteractiveState after store clears", diagMap)
     // Force the engine to clear any actors still in-window so a mid-beat
     // nav away doesn't strand the gold polygon ring, the
     // square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
-    logDuState("clearInteractiveState after engine teardown", diagMap)
 
     // Visibility restore runs separately in the selectedOutcomeCode
     // transition effect below. That effect fires after React commits
     // the `OutcomePolygonLayer` unmount triggered by
     // `clearOutcomeVisualization`, guaranteeing the restore wins the
     // race against the unmount's `visibility: "none"` write.
-  }, [mapAPI])
+  }, [])
 
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
-    debugLog(`handleNext START beatIndex=${beatIndexRef.current}`)
     clearInteractiveState()
-    debugLog(`handleNext goTo called`)
     // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
     // (a no-op when already home) before running the beat tween, so a
     // square-click zoom doesn't persist into the next beat.
@@ -976,14 +959,6 @@ export default function TierAnimationSection() {
         const key = locKey(info)
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
-
-        debugLog(
-          `square click outcome=${info.code} sourceId=${info.sourceId} wasSelected=${wasSelected}`,
-        )
-        logDuState(
-          "square click (pre-state-change)",
-          mapAPI.mapRef?.current?.getMap?.(),
-        )
 
         // -- Commented out: previous multi-pin toggle behavior. Re-enable
         //    if we ever want several pinned locations with tethered

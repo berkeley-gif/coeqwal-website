@@ -10,7 +10,6 @@ export { CameraArbiter } from "./arbiters/CameraArbiter"
 export type { CameraHome, FlyHomeOpts } from "./arbiters/CameraArbiter"
 export { InteractivePaintArbiter } from "./arbiters/InteractivePaintArbiter"
 export type { InteractivePaintTransition } from "./arbiters/InteractivePaintArbiter"
-export { STORYBOARD_DEBUG, debugLog, logDuState } from "./debug"
 export {
   DU_CLASS_FILTER,
   DU_AG_ONLY_FILTER,

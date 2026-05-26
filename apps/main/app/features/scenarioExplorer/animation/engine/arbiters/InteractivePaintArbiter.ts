@@ -6,7 +6,6 @@ import type {
   DemandUnitsPaintSpec,
   DemandUnitsOverlayState,
 } from "../types"
-import { debugLog, logDuState } from "../debug"
 import {
   writeDemandUnitsBaseline,
   DU_CLASS_FILTER,
@@ -151,20 +150,15 @@ export class InteractivePaintArbiter {
       this.cancelPendingTeardown()
       this.currentlyOwns = true
       this.currentSpec = spec
-      debugLog(
-        `InteractivePaintArbiter ENTER outcome=${spec.outcomeCode} features=${spec.featureIds.length}`,
-      )
       this.onEnter(ctx, spec)
       return "enter"
     }
 
     // Exit. Had prior claim, now should not own.
     if (!shouldOwn && this.currentlyOwns) {
-      const prev = this.currentSpec?.outcomeCode ?? null
       this.currentlyOwns = false
       this.currentSpec = null
       this.cancelPendingFadeRaf()
-      debugLog(`InteractivePaintArbiter EXIT prevOutcome=${prev}`)
       this.onExit(ctx)
       return "exit"
     }
@@ -177,9 +171,6 @@ export class InteractivePaintArbiter {
     ) {
       const prev = this.currentSpec
       this.currentSpec = spec
-      debugLog(
-        `InteractivePaintArbiter CHANGE prev=${prev?.outcomeCode ?? "null"} new=${spec.outcomeCode}`,
-      )
       this.onChangeSelection(ctx, spec, prev)
       return "change-selection"
     }
@@ -287,8 +278,8 @@ export class InteractivePaintArbiter {
           ZOOM_AWARE_BASE_OPACITY as never,
         )
       }
-    } catch (e) {
-      debugLog(`InteractivePaintArbiter.applyOverlay ERROR`, e)
+    } catch {
+      /* ok */
     }
   }
 
@@ -299,11 +290,9 @@ export class InteractivePaintArbiter {
    */
   release(ctx: BeatEngineContext): void {
     if (!this.currentlyOwns) return
-    const prev = this.currentSpec?.outcomeCode ?? null
     this.currentlyOwns = false
     this.currentSpec = null
     this.cancelPendingFadeRaf()
-    debugLog(`InteractivePaintArbiter RELEASE prev=${prev}`)
     this.onExit(ctx)
   }
 
@@ -333,20 +322,12 @@ export class InteractivePaintArbiter {
    */
   private onEnter(ctx: BeatEngineContext, spec: DemandUnitsPaintSpec): void {
     const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
-    if (!map) {
-      debugLog(`  interactive.onEnter: no map, skipping`)
-      return
-    }
-    if (!map.getLayer("demand-units")) {
-      debugLog(`  interactive.onEnter: no demand-units layer, skipping`)
-      return
-    }
+    if (!map) return
+    if (!map.getLayer("demand-units")) return
 
     this.cancelPendingFadeRaf()
 
     try {
-      logDuState("InteractivePaintArbiter.onEnter PRE", map)
-
       const filter = buildPaintFilter(spec)
       map.setFilter("demand-units", filter as never)
       map.setPaintProperty(
@@ -388,10 +369,7 @@ export class InteractivePaintArbiter {
           OUTLINE_LINE_OFFSET as never,
         )
       }
-
-      logDuState("InteractivePaintArbiter.onEnter POST-sync", map)
-    } catch (e) {
-      debugLog(`InteractivePaintArbiter.onEnter ERROR (pre-RAF)`, e)
+    } catch {
       return
     }
 
@@ -420,9 +398,8 @@ export class InteractivePaintArbiter {
           )
           map.setLayoutProperty("demand-units-outline", "visibility", "visible")
         }
-        logDuState("InteractivePaintArbiter.onEnter POST-RAF", map)
-      } catch (e) {
-        debugLog(`InteractivePaintArbiter.onEnter ERROR (RAF)`, e)
+      } catch {
+        /* ok */
       }
     })
   }
@@ -441,8 +418,6 @@ export class InteractivePaintArbiter {
     this.cancelPendingFadeRaf()
 
     try {
-      logDuState("InteractivePaintArbiter.onChangeSelection PRE", map)
-
       // Must run **before** setFilter: old overlay expressions + new
       // class slice can disagree for a single paint otherwise.
       this.clearOverlayToBaseForCrossfade(map, spec)
@@ -474,10 +449,8 @@ export class InteractivePaintArbiter {
           spec.colorExpression as never,
         )
       }
-
-      logDuState("InteractivePaintArbiter.onChangeSelection POST", map)
-    } catch (e) {
-      debugLog(`InteractivePaintArbiter.onChangeSelection ERROR`, e)
+    } catch {
+      /* ok */
     }
   }
 
@@ -518,18 +491,13 @@ export class InteractivePaintArbiter {
   }
 
   private onExit(ctx: BeatEngineContext): void {
-    debugLog(`  interactive.onExit: scheduling teardown`)
     const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
-    if (!map) {
-      debugLog(`  interactive.onExit: no map, skipping`)
-      return
-    }
+    if (!map) return
 
     this.cancelPendingTeardown()
 
     const runTeardownWrites = (m: MapboxGLMap): void => {
       try {
-        logDuState("InteractivePaintArbiter.onExit PRE-write", m)
         writeDemandUnitsBaseline(m as unknown as BaselineMap, {
           filter: DU_CLASS_FILTER,
           fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
@@ -541,9 +509,8 @@ export class InteractivePaintArbiter {
           lineOffset: -0.25,
           visibility: "visible",
         })
-        logDuState("InteractivePaintArbiter.onExit POST-write", m)
-      } catch (e) {
-        debugLog(`InteractivePaintArbiter.onExit ERROR`, e)
+      } catch {
+        /* ok */
       }
     }
 
@@ -552,20 +519,13 @@ export class InteractivePaintArbiter {
       return
     }
 
-    debugLog(`  interactive.onExit: style busy, deferring to idle`)
     let ran = false
     const onIdle = () => {
       if (ran) return
       ran = true
       this.pendingTeardownCleanup = null
 
-      if (this.currentlyOwns) {
-        debugLog(
-          `  interactive.onExit idle-bail currentlyOwns=true mode=${ctx.getMode()}`,
-        )
-        return
-      }
-      debugLog(`  interactive.onExit: running after idle`)
+      if (this.currentlyOwns) return
       runTeardownWrites(map)
     }
 
