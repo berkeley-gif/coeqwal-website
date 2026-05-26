@@ -77,9 +77,12 @@ export type {
   // AG Demand Unit types
   AgDemandUnitListItem,
   AgDemandUnitsListResponse,
+  AgDemandUnitData,
+  AgDemandUnitMonthlyResponse,
+  AgDemandUnitGwPumpingMonthlyStats,
+  AgDemandUnitShortageMonthlyStats,
   AgDemandUnitDeliveryData,
   AgDemandUnitDeliveryMonthlyResponse,
-  AgDemandUnitShortageMonthlyStats,
   AgDemandUnitShortageData,
   AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodSummary,

@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * RefugeSection.Wildlife Refuge Environmental Water section for the Data Explorer
+ * RefugeSection.tsx - Wildlife Refuge Environmental Water section for the Data Explorer
  *
  * Displays delivery, shortage, and reliability data for 18 wildlife refuge and
  * wetland demand units in the Sacramento and San Joaquin hydrologic regions.
@@ -218,69 +218,71 @@ function cs3TypeLabel(cs3_type: string): string {
   return cs3_type
 }
 
-function deliveryRowsToMonthlyPercentiles(
-  rows: RefugeDeliveryMonthlyStats[],
+function deliveryMonthsToPercentiles(
+  monthlyDelivery: Record<string, RefugeDeliveryMonthlyStats> | undefined,
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
+  if (!monthlyDelivery) return monthly
+  for (const [month, stats] of Object.entries(monthlyDelivery)) {
     // Skip months with any null percentile rather than coercing to zero.
     // A zero floor on the band chart implies a real measured 0 delivery
-    // when in fact we have no row.
+    // when in fact we have no row
     if (
-      row.q0 == null ||
-      row.q10 == null ||
-      row.q30 == null ||
-      row.q50 == null ||
-      row.q70 == null ||
-      row.q90 == null ||
-      row.q100 == null ||
-      row.delivery_avg_taf == null
+      stats.q0 == null ||
+      stats.q10 == null ||
+      stats.q30 == null ||
+      stats.q50 == null ||
+      stats.q70 == null ||
+      stats.q90 == null ||
+      stats.q100 == null ||
+      stats.avg_taf == null
     ) {
       continue
     }
-    monthly[String(row.water_month)] = {
-      q0: row.q0,
-      q10: row.q10,
-      q30: row.q30,
-      q50: row.q50,
-      q70: row.q70,
-      q90: row.q90,
-      q100: row.q100,
-      mean: row.delivery_avg_taf,
+    monthly[month] = {
+      q0: stats.q0,
+      q10: stats.q10,
+      q30: stats.q30,
+      q50: stats.q50,
+      q70: stats.q70,
+      q90: stats.q90,
+      q100: stats.q100,
+      mean: stats.avg_taf,
     }
   }
   return monthly
 }
 
-function shortageRowsToMonthlyPercentiles(
-  rows: RefugeShortageMonthlyStats[],
+function shortageMonthsToPercentiles(
+  monthlyShortage: Record<string, RefugeShortageMonthlyStats> | undefined,
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
-    // Same rationale as `deliveryRowsToMonthlyPercentiles`: prefer a gap
-    // over a fake zero baseline so the chart doesn't suggest "no shortage"
-    // when really we have no data.
+  if (!monthlyShortage) return monthly
+  for (const [month, stats] of Object.entries(monthlyShortage)) {
+    // Same rationale as `deliveryMonthsToPercentiles`: prefer a gap over a
+    // fake zero baseline so the chart doesn't suggest "no shortage" when
+    // really we have no data
     if (
-      row.q0 == null ||
-      row.q10 == null ||
-      row.q30 == null ||
-      row.q50 == null ||
-      row.q70 == null ||
-      row.q90 == null ||
-      row.q100 == null ||
-      row.shortage_avg_taf == null
+      stats.q0 == null ||
+      stats.q10 == null ||
+      stats.q30 == null ||
+      stats.q50 == null ||
+      stats.q70 == null ||
+      stats.q90 == null ||
+      stats.q100 == null ||
+      stats.avg_taf == null
     ) {
       continue
     }
-    monthly[String(row.water_month)] = {
-      q0: row.q0,
-      q10: row.q10,
-      q30: row.q30,
-      q50: row.q50,
-      q70: row.q70,
-      q90: row.q90,
-      q100: row.q100,
-      mean: row.shortage_avg_taf,
+    monthly[month] = {
+      q0: stats.q0,
+      q10: stats.q10,
+      q30: stats.q30,
+      q50: stats.q50,
+      q70: stats.q70,
+      q90: stats.q90,
+      q100: stats.q100,
+      mean: stats.avg_taf,
     }
   }
   return monthly
@@ -301,16 +303,12 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
   const matrixData: MatrixDataType = {}
   results.forEach((result, index) => {
     const scenarioId = scenarios[index]
-    if (!scenarioId || !result.rows.length) return
-
-    const byDu = new Map<string, RefugeDeliveryMonthlyStats[]>()
-    for (const row of result.rows) {
-      if (!byDu.has(row.du_id)) byDu.set(row.du_id, [])
-      byDu.get(row.du_id)!.push(row)
-    }
-    for (const [duId, duRows] of byDu.entries()) {
+    if (!scenarioId) return
+    for (const [duId, entry] of Object.entries(result.demandUnits)) {
       if (!matrixData[duId]) matrixData[duId] = {}
-      matrixData[duId][scenarioId] = deliveryRowsToMonthlyPercentiles(duRows)
+      matrixData[duId][scenarioId] = deliveryMonthsToPercentiles(
+        entry.monthly_delivery,
+      )
     }
   })
 
@@ -328,16 +326,12 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
   const matrixData: MatrixDataType = {}
   results.forEach((result, index) => {
     const scenarioId = scenarios[index]
-    if (!scenarioId || !result.rows.length) return
-
-    const byDu = new Map<string, RefugeShortageMonthlyStats[]>()
-    for (const row of result.rows) {
-      if (!byDu.has(row.du_id)) byDu.set(row.du_id, [])
-      byDu.get(row.du_id)!.push(row)
-    }
-    for (const [duId, duRows] of byDu.entries()) {
+    if (!scenarioId) return
+    for (const [duId, entry] of Object.entries(result.demandUnits)) {
       if (!matrixData[duId]) matrixData[duId] = {}
-      matrixData[duId][scenarioId] = shortageRowsToMonthlyPercentiles(duRows)
+      matrixData[duId][scenarioId] = shortageMonthsToPercentiles(
+        entry.monthly_shortage,
+      )
     }
   })
 
@@ -357,13 +351,14 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
 
   results.forEach((result, index) => {
     const scenarioId = scenarios[index]
-    if (!scenarioId || !result.summaries.length) return
-    for (const summary of result.summaries) {
-      if (!cellStats[summary.du_id]) cellStats[summary.du_id] = {}
-      const duStats = cellStats[summary.du_id]!
+    if (!scenarioId) return
+    for (const [duId, summary] of Object.entries(result.demandUnits)) {
+      if (!cellStats[duId]) cellStats[duId] = {}
+      const duStats = cellStats[duId]!
       duStats[scenarioId] = {
         annualAvgTaf: summary.annual_delivery_avg_taf ?? undefined,
-        // Convert shortage_pct_95 -> fulfillment (higher = better, matches AG/CWS convention)
+        // Convert reliability_pct_95 (95th percentile of shortage %) to
+        // fulfillment (higher = better, matches AG/CWS convention)
         reliabilityPct:
           summary.reliability_pct_95 != null
             ? 100 - summary.reliability_pct_95

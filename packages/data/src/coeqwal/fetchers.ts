@@ -1,5 +1,5 @@
 /**
- * COEQWAL API fetch functions
+ * fetchers.ts - COEQWAL API fetch functions
  *
  * These functions fetch data from the COEQWAL API.
  * They use the shared apiFetcher with retry logic.
@@ -421,7 +421,11 @@ export async function fetchSpillMonthly(
  * @example
  * ```typescript
  * const data = await fetchMiContractorsMonthly("s0020")
- * // { scenario_id: "s0020", contractors: { "mwd_mi": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * // {
+ * //   scenario_id: "s0020",
+ * //   contractors: { "mwd_mi": { label, monthly_delivery: {...}, monthly_shortage: {...} } },
+ * //   count: 30,
+ * // }
  * ```
  */
 export async function fetchMiContractorsMonthly(
@@ -612,19 +616,20 @@ export async function fetchAgDemandUnitsList(filters?: {
 }
 
 /**
- * Fetch monthly surface-water delivery statistics for AG demand units.
+ * Fetch the merged monthly statistics for AG demand units.
  *
- * The backend route is `sw-delivery-monthly` and returns each DU's monthly
- * stats under `monthly_sw_delivery`. We remap that to `monthly_delivery`
- * here so the frontend can reuse `AgDemandUnitDeliveryData` and the same
- * matrix code path as CWS aggregates.
+ * The backend `/monthly` endpoint returns demand, surface-water delivery,
+ * groundwater pumping, and GW restriction shortage in one payload (each DU
+ * entry carries `monthly_demand`, `monthly_sw_delivery`, `monthly_gw_pumping`,
+ * and `monthly_shortage`). Pages that need more than one band cost one HTTP
+ * request thanks to SWR dedup on the shared cache key.
  *
  * Pass `duIds` to scope the response to specific demand units. The list
  * gets serialized to the backend's comma-separated `du_id` filter
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param duIds - Optional list of demand unit IDs to fetch
- * @returns Monthly delivery statistics for the requested AG demand units
+ * @returns Merged AG demand-unit monthly response (delivery + demand + GW + shortage)
  */
 export async function fetchAgDemandUnitsDeliveryMonthly(
   scenarioId: string,
@@ -634,45 +639,13 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
     throw new Error("Scenario ID is required")
   }
 
-  // Backend response shape: { demand_units: { [duId]: { monthly_sw_delivery: {...}, ... } } }
-  // We surface it as `monthly_delivery` for downstream callers
-  type RawDuEntry = {
-    agency: string
-    hydrologic_region: string | null
-    cs3_type: string | null
-    provider: string | null
-    monthly_sw_delivery?: Record<string, unknown>
-    monthly_delivery?: Record<string, unknown>
-  }
-  type RawResponse = {
-    scenario_id: string
-    demand_units: Record<string, RawDuEntry>
-  }
-
-  const raw = await apiFetcher<RawResponse>(
+  return apiFetcher<AgDemandUnitDeliveryMonthlyResponse>(
     ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId, duIds),
     {
       baseUrl: DEFAULT_API_BASE,
       timeout: 30000,
     },
   )
-
-  const remapped: AgDemandUnitDeliveryMonthlyResponse = {
-    scenario_id: raw.scenario_id,
-    demand_units: {},
-  }
-  for (const [duId, entry] of Object.entries(raw.demand_units ?? {})) {
-    const monthly = entry.monthly_sw_delivery ?? entry.monthly_delivery ?? {}
-    remapped.demand_units[duId] = {
-      agency: entry.agency,
-      hydrologic_region: entry.hydrologic_region,
-      cs3_type: entry.cs3_type,
-      provider: entry.provider,
-      monthly_delivery:
-        monthly as AgDemandUnitDeliveryMonthlyResponse["demand_units"][string]["monthly_delivery"],
-    }
-  }
-  return remapped
 }
 
 /**
