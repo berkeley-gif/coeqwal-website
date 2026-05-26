@@ -1,24 +1,6 @@
-/* MapPaintArbiter. The single owner of Mapbox DU paint during Beat 4.
- *
- * Phase 0 scope. Handle the four paint-payload variants Beat 4 needs.
- *
- * `beat5-enter`. Filter swap and seed opacity 0 (one-shot, on enter).
- * `beat5-layer-fade`. Per-tick piecewise opacity ramp (update).
- * `beat5-poly-ring`. Gold-stroke case expression (on enter and on exit).
- * `beat5-exit`. One-shot hand-off back to the beat2 phase.
- *
- * Logic lifts verbatim from TierAnimationSection.tsx lines 2251 to 2407
- * so the spike is a pure structural refactor, not a behavior change.
- * Named constants live on actor payloads in the beat table. No magic
- * numbers in this file.
- *
- * Full-state assertion on beat enter goes through
- * `writeDemandUnitsBaseline` so the set of properties this arbiter
- * writes is locked to the plan's invariant 2 (every ownership
- * handoff asserts the full property set). Adding a new property to
- * the baseline spec propagates to every writer automatically.
- */
+/* MapPaintArbiter. The owner of Mapbox DU paint in the Explorer Get Started animation*/
 
+import type { MapboxGLMap } from "@repo/map"
 import type {
   Arbiter,
   BeatEngineContext,
@@ -29,6 +11,7 @@ import {
   DU_AG_ONLY_FILTER,
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
+  type MapWriteView,
 } from "../demandUnitsBaseline"
 import { BEAT1_MID, beat1FillExpr } from "../beat1Palette"
 import { debugLog, logDuState } from "../debug"
@@ -63,12 +46,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
    *  the reset palette. */
   private frozenColorPhase = 0
 
-  /** [DIAG S4/S5] Which beat5-layer-fade boundaries we've already
-   *  logged for the current pass. Reset on `applyBeat5Enter`. */
   private diagBoundariesLogged = new Set<string>()
 
   onEnter(actor: MapPaintActor, v: number, ctx: BeatEngineContext): void {
-    const map = getStyledMap(ctx)
+    const map = getMapWriteView(ctx)
     if (!map) return
 
     const p = actor.payload
@@ -120,7 +101,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   onUpdate(actor: MapPaintActor, v: number, ctx: BeatEngineContext): void {
-    const map = getStyledMap(ctx)
+    const map = getMapWriteView(ctx)
     if (!map) return
 
     const p = actor.payload
@@ -136,7 +117,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       this.applyBeat1cBlendUpdate(map, p, v, ctx)
       return
     }
-    // `beat1c-tail` is a static hold written once by `onEnter`. No
+    // `Static hold written once by `onEnter`. No
     // per-tick work, matching the legacy listener's `phase !==
     // "beat1c"` guard behavior.
     if (p.kind === "beat2-hide-schedule") {
@@ -172,7 +153,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
         debugLog(
           `MapPaintArbiter beat5-layer-fade stage=${stage} v=${v.toFixed(4)} target=${targetOpacity.toFixed(3)}`,
         )
-        logDuState(`beat5-layer-fade stage=${stage}`, map)
+        logDuState(
+          `beat5-layer-fade stage=${stage}`,
+          map as unknown as MapboxGLMap,
+        )
       }
 
       try {
@@ -196,7 +180,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   onExit(actor: MapPaintActor, _v: number, ctx: BeatEngineContext): void {
-    const map = getStyledMap(ctx)
+    const map = getMapWriteView(ctx)
     if (!map) return
 
     const p = actor.payload
@@ -212,7 +196,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // Force off whatever state we might still be carrying. Called from
     // the engine on unmount and from `clearInteractiveState` on nav.
     if (!this.beat5PolyRingOn) return
-    const map = getStyledMap(ctx)
+    const map = getMapWriteView(ctx)
     if (!map) return
     this.applyBeat5PolyRingOff(map, ctx)
   }
@@ -224,7 +208,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
    *  lines 2173 to 2191. Pure function of `v`, idempotent within a
    *  tick. Safe to call from every beat enter and from the cycle
    *  update without redundant-write flicker. */
-  private applyBasemapDimRamp(map: StyledMap, v: number): void {
+  private applyBasemapDimRamp(map: MapWriteView, v: number): void {
     try {
       if (!map.getLayer("basemap-dim-overlay")) return
       const dimFadeT = Math.min(1, v / BASEMAP_DIM_FADE_END)
@@ -238,7 +222,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     }
   }
 
-  private applyReset(map: StyledMap): void {
+  private applyReset(map: MapWriteView): void {
     // Pre-beat-1 baseline. Mirrors the main-choreography listener's
     // `v < 0.01` branch at TierAnimationSection.tsx lines 2166 to 2210.
     // Full-state assertion via `writeDemandUnitsBaseline` so we do not
@@ -278,7 +262,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     this.diagBoundariesLogged.clear()
   }
 
-  private applyBeat1CycleEnter(map: StyledMap, v: number): void {
+  private applyBeat1CycleEnter(map: MapWriteView, v: number): void {
     // Full-state baseline at cycle start. In the common forward-play
     // case the reset actor just fired, so the layers are already in
     // this exact state. We re-assert anyway so scrubbing forward
@@ -300,7 +284,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1CycleUpdate(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1-cycle" }>,
     v: number,
   ): void {
@@ -340,7 +324,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1HoldEnter(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1-hold" }>,
     v: number,
   ): void {
@@ -362,7 +346,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1HoldUpdate(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1-hold" }>,
   ): void {
     // Re-assert opacity every tick so any stray writer that lands on
@@ -388,7 +372,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1cBlendEnter(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1c-blend" }>,
     v: number,
   ): void {
@@ -411,7 +395,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1cBlendUpdate(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1c-blend" }>,
     v: number,
     ctx: BeatEngineContext,
@@ -451,7 +435,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat1cTailEnter(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1c-tail" }>,
     ctx: BeatEngineContext,
     v: number,
@@ -480,24 +464,12 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat2HideScheduleEnter(
-    map: StyledMap,
+    map: MapWriteView,
     ctx: BeatEngineContext,
     v: number,
   ): void {
     // Restore the full DU class filter and the blended tier fill
-    // expression. The previous actor (`beat1c-tail`) left the layer
-    // on an AG-only filter with a scalar opacity. The baseline helper
-    // preserves opacity here because `applyBeat2HideScheduleUpdate`
-    // fires on the same tick and overwrites `fill-opacity` and
-    // `line-opacity` with the full per-DU case expression. Preserving
-    // in between means the last tick's opacity stays on the layer for
-    // one tick's worth of time, not one frame's worth. Mapbox commits
-    // once per frame and both writes land before the next commit, so
-    // no flicker is observable.
-    //
-    // If `buildBlendedTierExpr` returns null (tier data not loaded),
-    // the baseline helper leaves `fill-color` on its last value, which
-    // matches legacy's `if (expr && ...)` guard.
+    // expression.
     const blendedTier = ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
       | readonly unknown[]
       | null
@@ -514,7 +486,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat2HideScheduleUpdate(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat2-hide-schedule" }>,
     v: number,
     ctx: BeatEngineContext,
@@ -593,30 +565,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat6RestoreEnter(
-    map: StyledMap,
+    map: MapWriteView,
     ctx: BeatEngineContext,
     v: number,
   ): void {
-    // One-shot full-state baseline for the post-Beat 5 tail. Restores
-    // the full DU class filter and the blended AG tier expression
-    // (taking ownership back from the Beat 5 cluster's AG-only
-    // filter), pins the outline line-width at the default 0.5 (the
-    // gold-ring cleanup ran in `beat5-exit.applyBeat5Exit`), and
-    // pins both fill-opacity and line-opacity at scalar 0.
-    //
-    // Mirrors the legacy listener's Beat 6+ branch at
-    // TierAnimationSection.tsx lines 2425 to 2456, which combined
-    // the closure-local `enterBeat2Phase()` (filter + colors +
-    // line-width) with `paintDuHideSchedule()` (per-tick case
-    // expression). At this point in the timeline every tracked DU is
-    // past its `morphStart` and the AG-class fallback is past
-    // `agFadeOutEnd`, so the case expression evaluates to scalar 0
-    // for every feature. We collapse it to a single scalar write
-    // here, behaviorally equivalent and cheaper.
-    //
-    // Reverse scrubs back into Beat 5 are handled by the Beat 5
-    // cluster's own `onEnter`, which performs its own
-    // full-state baseline assertion.
     const blendedTier = ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
       | readonly unknown[]
       | null
@@ -633,24 +585,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyLineFadesUpdate(
-    map: StyledMap,
+    map: MapWriteView,
     v: number,
     ctx: BeatEngineContext,
   ): void {
-    // Per-line-layer fade for the line-geometry outcomes in the hide
-    // schedule. Mirrors the legacy listener's trailing line-fade loop
-    // at TierAnimationSection.tsx lines 2458 to 2481.
-    //
-    // The pre-window guard matters. Without it the tight 0.005 fade
-    // span amplifies any negative `v - fadeStart` into a huge
-    // negative `t`, and `1 - t` overflows Mapbox's clamped
-    // line-opacity range.
-    //
-    // No resource conflict with the polygon arbiters. Line layers
-    // (`cwf-flowline`, `delta-detaw-line`, etc.) are disjoint from
-    // `demand-units` and `demand-units-outline`. The writers audit
-    // does not constrain line layers and the schedule keeps line
-    // and polygon entries on different `geometryType` keys.
     const schedule = ctx.getHideSchedule()
     for (const entry of schedule) {
       if (entry.geometryType !== "line" || !entry.mapboxLayerId) continue
@@ -673,23 +611,14 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat5Enter(
-    map: StyledMap,
+    map: MapWriteView,
     ctx: BeatEngineContext,
     v: number,
   ): void {
-    logDuState("MapPaintArbiter.applyBeat5Enter PRE", map)
-    // The arbiter is the sole authority on the Mapbox state of
-    // `demand-units` and `demand-units-outline` for the duration of
-    // Beat 5. We cannot trust whoever ran before us (OPL unmount,
-    // interactive paint effect, half-completed teardown) to leave
-    // these layers in a clean, renderable state, so we delegate to
-    // `writeDemandUnitsBaseline`, which asserts the full property
-    // set invariant 2 of the hardening plan requires:
-    //   filter, fill/outline color, fill/line opacity, all four
-    //   transitions zeroed, line width, line offset, visibility.
-    // The opacity is seeded to 0. The companion `beat5-layer-fade`
-    // actor then ramps it up to `peakOpacity` across the fade-in
-    // window.
+    logDuState(
+      "MapPaintArbiter.applyBeat5Enter PRE",
+      map as unknown as MapboxGLMap,
+    )
     writeDemandUnitsBaseline(map, {
       filter: DU_AG_ONLY_FILTER,
       fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1),
@@ -702,11 +631,14 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     this.beat5PolyRingOn = false
     this.diagBoundariesLogged.clear()
     this.applyBasemapDimRamp(map, v)
-    logDuState("MapPaintArbiter.applyBeat5Enter POST", map)
+    logDuState(
+      "MapPaintArbiter.applyBeat5Enter POST",
+      map as unknown as MapboxGLMap,
+    )
   }
 
   private applyBeat5PolyRingOn(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat5-poly-ring" }>,
     ctx: BeatEngineContext,
   ): void {
@@ -734,7 +666,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     this.beat5PolyRingOn = true
   }
 
-  private applyBeat5PolyRingOff(map: StyledMap, ctx: BeatEngineContext): void {
+  private applyBeat5PolyRingOff(
+    map: MapWriteView,
+    ctx: BeatEngineContext,
+  ): void {
     try {
       const baseExpr = ctx.buildBlendedTierExpr(BEAT1_MID, 1)
       if (map.getLayer("demand-units-outline") && baseExpr) {
@@ -754,22 +689,11 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBeat5Exit(
-    map: StyledMap,
+    map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat5-exit" }>,
     ctx: BeatEngineContext,
   ): void {
-    // One-shot ring clear at the trailing edge of Beat 5. If the
-    // gold polygon ring is still on (step 4 was active when the
-    // window closed), restore the blended tier expression and
-    // default outline line-width on `demand-units-outline`.
-    //
-    // The full DU filter restore (and blended tier expression on
-    // both `demand-units` and `demand-units-outline`) lives in the
-    // sibling `beat6:mapPaint:restore.onEnter` (Phase 1.g), which
-    // fires on the first tick after `BEAT5_TAIL_END`. The two writes
-    // are sequenced by the engine's per-tick dispatch order
-    // (onExit -> onEnter -> onUpdate), so the ring clear here always
-    // precedes the restore baseline.
+    // Ring clear
     if (p.clearRing && this.beat5PolyRingOn) {
       this.applyBeat5PolyRingOff(map, ctx)
     }
@@ -778,30 +702,14 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
 
 // Helpers
 
-type StyledMap = {
-  isStyleLoaded?: () => boolean
-  getLayer: (id: string) => unknown
-  setFilter: (id: string, f: unknown) => void
-  setPaintProperty: (id: string, prop: string, value: unknown) => void
-  setLayoutProperty: (id: string, prop: string, value: unknown) => void
-}
-
-function getStyledMap(ctx: BeatEngineContext): StyledMap | null {
-  const map = ctx.mapRef?.current?.getMap?.() as StyledMap | null | undefined
+function getMapWriteView(ctx: BeatEngineContext): MapWriteView | null {
+  const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
   if (!map) return null
-  if (!map.isStyleLoaded?.()) return null
-  return map
+  if (!map.isStyleLoaded()) return null
+  return map as unknown as MapWriteView
 }
 
-/** Opacity ramp for the Beat 5 AG demand-units layer.
- *
- * AG polygons enter Beat 4 at opacity 0. The main choreography's
- * `paintDuHideSchedule` fades them out at the tail of Beat 2 and
- * holds them at 0 through Beat 3, so the layer is invisible at the
- * Beat 4 boundary. We ramp them back in across
- * `[fadeInStart, fadeInEnd]`, hold at `peakOpacity` through the whole
- * LOI sequence, then tail-fade to 0 across `[holdUntil, tailEnd]` so
- * Beat 5 starts clean. */
+/** Opacity ramp */
 function computeBeat5LayerOpacity(
   v: number,
   p: Extract<MapPaintPayload, { kind: "beat5-layer-fade" }>,

@@ -436,6 +436,17 @@ The `useMap` hook provides access to:
 - `useMapLayers`: Declarative layer management
 - `useMapSources`: Declarative source management
 
+## Roadmap
+
+Methods that app code currently reaches via `mapRef.current.getMap()` because they are not wrapped by `MapOperationsAPI` yet. Adding helpers for these would let consumers (notably the storyboard animation in `apps/main/app/features/scenarioExplorer/animation/`) drop the remaining raw `getMap()` call sites and route everything through the package:
+
+- `easeTo` - imperative camera move used by `CameraArbiter` ("fly home" for the storyboard) and by `apps/main/app/features/map/MapInstance.tsx` for view transitions. Sibling of `flyTo` with a different easing curve and feel
+- `once("moveend" | "idle")` and `on/off("move" | "idle" | ...)` - event sequencing for imperative work that has to run after a style load, camera arrival, or per-frame map movement
+- `queryRenderedFeatures` and `querySourceFeatures` - hit testing for click/hover, and feature collection for screen-space overlays
+- `project` (and `unproject`) - lng/lat to screen-pixel coordinate math for SVG overlays anchored to map features
+
+Until these land, `withMap(...)` is the documented escape hatch. App code reaching for them should still type the returned instance as `MapboxGLMap` from `@repo/map`. Never duck-type a local `type FooMap = { ... }`, and never `import { ... } from "mapbox-gl"` from app code.
+
 ## TypeScript Support
 
 This package provides full TypeScript definitions. Application code should import map-related types from `@repo/map` (for example `MapRef`, `MapboxGLMap`, `LngLatLike`), not from `mapbox-gl` or `react-map-gl` directly. Those dependencies remain encapsulated inside `@repo/map`.

@@ -14,23 +14,16 @@
  * `cameraArbiter.flyHome(...)` directly. The name is kept to match the
  * architecture diagram and to signal that all camera-home writes go
  * through this one object.
+ *
+ * The map parameter is typed as `MapboxGLMap` from `@repo/map`. `easeTo`
+ * and `once` are not on `MapOperationsAPI` today (see the Roadmap
+ * section of the map package README), so this helper still calls them
+ * on the raw map instance returned by `mapRef.current.getMap()`. When
+ * those land on `MapOperationsAPI`, this helper can be reduced to a
+ * short app-layer wrapper around `mapAPI.easeTo` / `mapAPI.once`.
  */
 
-/** Minimal Mapbox map shape we use here. Mirrors the shape used by
- *  MapPaintArbiter. We avoid importing mapbox-gl types directly to keep
- *  this module framework-agnostic. */
-type CameraMap = {
-  getCenter: () => { lng: number; lat: number }
-  getZoom: () => number
-  once: (event: string, cb: () => void) => void
-  easeTo: (opts: {
-    center: { lng: number; lat: number } | [number, number]
-    zoom: number
-    bearing?: number
-    pitch?: number
-    duration: number
-  }) => void
-}
+import type { MapboxGLMap } from "@repo/map"
 
 export interface CameraHome {
   center: [number, number]
@@ -62,7 +55,7 @@ export class CameraArbiter {
   /** Threshold check against home center+zoom. Thresholds match the
    *  pre-refactor inlined checks exactly: 0.01 deg on lng/lat, 0.05 on
    *  zoom. Does NOT consider bearing or pitch. */
-  isHome(map: CameraMap): boolean {
+  isHome(map: MapboxGLMap): boolean {
     const c = map.getCenter()
     return (
       Math.abs(c.lng - this.home.center[0]) <= 0.01 &&
@@ -75,7 +68,7 @@ export class CameraArbiter {
    *  `onArrive` fires synchronously and no flight runs. Otherwise,
    *  `onStart` fires, an easeTo is dispatched, and `onArrive` is wired
    *  to the next `moveend`. */
-  flyHome(map: CameraMap | null | undefined, opts: FlyHomeOpts = {}): void {
+  flyHome(map: MapboxGLMap | null | undefined, opts: FlyHomeOpts = {}): void {
     const { duration = 800, resetOrientation = false, onStart, onArrive } = opts
 
     if (!map || this.isHome(map)) {

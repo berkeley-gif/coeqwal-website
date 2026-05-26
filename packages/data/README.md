@@ -609,14 +609,14 @@ Use fetchers when you need to:
 - Build custom hooks with different caching behavior
 - Fetch data outside of React (scripts, tests)
 
-| Fetcher                                          | Description                                                                                                                                                                                                 |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                |
-| `fetchScenarioList()`                            | Active scenario list. Six fields per row: `short_code`, `name`, `short_description`, `hydroclimate_id`, `sibling_group`, `is_active`.                                                                       |
-| `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                             |
-| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                  |
-| `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.    |
-| `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                             |
+| Fetcher                                          | Description                                                                                                                                                                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                       |
+| `fetchScenarioList()`                            | Active scenario list. Six fields per row: `short_code`, `name`, `short_description`, `hydroclimate_id`, `sibling_group`, `is_active`.                                                                              |
+| `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                                    |
+| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                         |
+| `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.           |
+| `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                    |
 | `fetchTierLocationAssignmentsBatch(id, codes[])` | **Batch** per-location tier assignments for multiple outcomes in one request. Hits `/api/tiers/scenarios/{id}/locations?codes=...`. Falls back to parallel per-code requests if the batch endpoint is unavailable. |
 
 ```tsx
@@ -801,11 +801,11 @@ This means your component code doesn't change when the user switches hydroclimat
 
 **Pre-cached (available instantly, loaded on Explore tab activation):**
 
-| Data                                                | How to access                                    | What it contains                                                 |
-| --------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
-| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                            |
+| Data                                                | How to access                                    | What it contains                                               |
+| --------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
+| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                          |
 | Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | weighted_score, normalized_score, and tier distribution counts |
-| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                       |
+| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                     |
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
 

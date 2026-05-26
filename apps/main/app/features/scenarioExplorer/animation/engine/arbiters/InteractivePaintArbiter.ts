@@ -1,36 +1,6 @@
-/* InteractivePaintArbiter.
- *
- * Owns `demand-units` and `demand-units-outline` paint while the
- * storyboard is in a non-playing state AND a non-null demand-units
- * outcome is selected. Under the hardening plan's invariant 1 (single
- * writer per resource), this is the one arbiter that writes those
- * layers during interactive exploration. `MapPaintArbiter` owns them
- * during active playback tweens.
- *
- * Phase 3c step 2 (current): all interactive paint is now concentrated
- * here. `onEnter` ports OPL's demand-units fade-in path (filter +
- * color + opacity-0-armed + RAF fade-in). `onChangeSelection` ports
- * OPL's crossfade path (color-transition, filter swap, no opacity
- * reset). `applyOverlay` ports `applyPaintChanges`'s gold-outline +
- * spotlight/pinned fill-opacity branches. `onExit` writes the scalar-0
- * baseline so the layer is reliably invisible on deselect. Combined,
- * OPL's demand-units branch and `applyPaintChanges`'s demand-units
- * writes can be removed (VisualizationLayers skips OPL for DU layers
- * in get-started mode. `applyPaintChanges` early-returns for DU).
- *
- * Ownership policy lives in the call site (`TierAnimationSection`):
- * the sync effect passes `spec !== null` iff it wants the arbiter to
- * own. Broadened from Phase 3b's strict mode=interactive gate so the
- * arbiter also owns during paused-between-beats state (otherwise a
- * mid-storyboard square click would leave orphaned gold outlines on
- * deselect because no writer would clean them up).
- *
- * Despite the name, this is NOT a progress-driven `Arbiter<A>`. It
- * has no actors in the beat table. It is event-driven: React effects
- * in `TierAnimationSection.tsx` call `sync` / `applyOverlay` whenever
- * the relevant inputs change. Same pattern as `CameraArbiter`.
- */
+/* InteractivePaintArbiter */
 
+import type { MapboxGLMap } from "@repo/map"
 import type {
   BeatEngineContext,
   DemandUnitsPaintSpec,
@@ -40,6 +10,7 @@ import { debugLog, logDuState } from "../debug"
 import {
   writeDemandUnitsBaseline,
   DU_CLASS_FILTER,
+  type BaselineMap,
 } from "../demandUnitsBaseline"
 import { BEAT1_MID } from "../beat1Palette"
 
@@ -130,10 +101,6 @@ const OUTLINE_LINE_OFFSET: unknown = [
 // Helpers
 //────
 
-/** Build the compound filter for `demand-units`: class gate AND id
- *  inclusion. Called for both the fill layer and the outline layer.
- *  `classFilter === "N/A"` is a legacy escape hatch (no outcome
- *  currently uses it for DU) and is treated as "no class gate". */
 function buildPaintFilter(spec: DemandUnitsPaintSpec): unknown {
   const conditions: unknown[] = []
   if (spec.classFilter && spec.classFilter !== "N/A") {
@@ -171,20 +138,7 @@ export class InteractivePaintArbiter {
   private pendingTeardownCleanup: (() => void) | null = null
 
   /**
-   * Reconcile arbiter state against the caller's desired paint spec.
-   *
-   * Called from a React effect in `TierAnimationSection.tsx` whenever
-   * the selection, engine mode, or `playState` changes. The caller
-   * passes `spec = null` when the arbiter should NOT own (no
-   * selection, or engine is actively tweening playback, or the
-   * outcome isn't a demand-units layer). The caller passes a non-null
-   * spec when the arbiter SHOULD own.
-   *
-   * Idempotent: unchanged-spec calls return `"no-op"` and perform no
-   * writes. Same-identity calls (same `outcomeCode`) also no-op, even
-   * if the internal expression-building produced a new array (arrays
-   * are not reference-stable across React renders).
-   */
+   * Reconcile arbiter state against the caller's paint spec */
   sync(
     ctx: BeatEngineContext,
     spec: DemandUnitsPaintSpec | null,
@@ -230,38 +184,25 @@ export class InteractivePaintArbiter {
       return "change-selection"
     }
 
-    // No-op. Either still not owning, or still owning the same outcome.
-    // Per-outcome data shape (featureIds, colorExpression) is assumed
-    // stable for the lifetime of a selection. If it isn't, the caller
-    // releases and re-enters rather than mutating under us.
     return "no-op"
   }
 
   /**
-   * Apply the per-selection overlay: gold outline + zoom-aware
-   * fill-opacity with optional spotlight / pinned overrides. Called
-   * from a React effect whenever active / pinned / spotlight state
-   * changes. No-op when the arbiter doesn't currently own.
-   *
-   * Idempotent: re-applying the same overlay produces the same paint.
-   * Idle-style-busy windows are not a concern here because all prior
-   * paint was synchronous in `onEnter` / `onChangeSelection` -- we
-   * expect the style to be loaded by the time overlay ticks arrive.
-   * If it isn't, the writes silently no-op and the next overlay tick
-   * (or a hover/pin toggle) retries.
+   * Apply the selection overlay: gold outline + zoom-aware
+   * fill-opacity
    */
   applyOverlay(ctx: BeatEngineContext, overlay: DemandUnitsOverlayState): void {
     if (!this.currentlyOwns || !this.currentSpec) return
     if (overlay.outcomeCode !== this.currentSpec.outcomeCode) return
 
-    const map = ctx.mapRef?.current?.getMap?.()
+    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
     if (!map) return
 
     const spec = this.currentSpec
     const idProp = spec.idProperty
 
     try {
-      // ── Outline pass: gold case on active features, tier color otherwise.
+      // Outline pass: gold case on active features, tier color otherwise.
       if (map.getLayer("demand-units-outline")) {
         if (overlay.activeFeatureIds.length > 0) {
           const activeMatch: unknown = [
@@ -306,7 +247,7 @@ export class InteractivePaintArbiter {
         }
       }
 
-      // ── Fill pass: spotlight > pinned > zoom-aware base.
+      // Fill pass: spotlight > pinned > zoom-aware base.
       if (!map.getLayer("demand-units")) return
 
       if (overlay.hasSpotlight) {
@@ -389,23 +330,9 @@ export class InteractivePaintArbiter {
 
   /**
    * Take ownership of `demand-units` / `demand-units-outline`.
-   *
-   * Ported from OPL's initial-fade-in branch: step 1 (this tick)
-   * applies color, filter, transition-armed opacity-0, visibility
-   * visible on both fill and outline. Step 2 (next frame, via RAF)
-   * flips opacity to the zoom-aware target, triggering a smooth fade
-   * rather than a pop. Without the RAF split, Mapbox batches the
-   * opacity=0 and opacity=target writes in the same frame and skips
-   * the transition entirely.
-   *
-   * Unlike OPL, the arbiter does NOT create `demand-units-outline`
-   * on demand: `TierAnimationSection`'s session-init block creates it
-   * for the storyboard's lifetime. If the outline is missing for some
-   * reason (basemap switched mid-session) the `getLayer` guards skip
-   * it and the fill-only paint still works.
    */
   private onEnter(ctx: BeatEngineContext, spec: DemandUnitsPaintSpec): void {
-    const map = ctx.mapRef?.current?.getMap?.()
+    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
     if (!map) {
       debugLog(`  interactive.onEnter: no map, skipping`)
       return
@@ -502,28 +429,13 @@ export class InteractivePaintArbiter {
 
   /**
    * Crossfade to a different DU outcome while retaining ownership.
-   *
-   * Ported from OPL's `wasShowingDataRef.current === true` branch:
-   * update the filter for the new feature set, arm
-   * fill-color-transition + line-color-transition (400ms), and write
-   * the new color expressions. Mapbox interpolates the fill color
-   * change natively.
-   *
-   * We first **strip** `applyOverlay` output (case/step on fill
-   * opacity, gold outline, etc.) in `clearOverlayToBaseForCrossfade`
-   * so the new filter is never evaluated for one frame against the
-   * previous outcome's per-feature case expressions. That was the
-   * source of the one-frame cross-outcome flash. The
-   * `applyOverlay` effect in `TierAnimationSection` re-applies
-   * spotlight / pins in the same commit after this hook runs, so
-   * interactive state is restored.
    */
   private onChangeSelection(
     ctx: BeatEngineContext,
     spec: DemandUnitsPaintSpec,
     _prev: DemandUnitsPaintSpec | null,
   ): void {
-    const map = ctx.mapRef?.current?.getMap?.()
+    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
     if (!map || !map.getLayer("demand-units")) return
 
     this.cancelPendingFadeRaf()
@@ -569,14 +481,10 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /** Drop spotlight / pin / active outline overrides to the plain
-   *  tier-colored baseline that matches the **incoming** `spec`, with
-   *  zero-length opacity transitions so the following color crossfade
-   *  does not composite on top of case/step garbage from the prior
-   *  outcome. Mirrors the no-actives / no-spotlight branch of
-   *  `applyOverlay`. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private clearOverlayToBaseForCrossfade(map: any, spec: DemandUnitsPaintSpec) {
+  private clearOverlayToBaseForCrossfade(
+    map: MapboxGLMap,
+    spec: DemandUnitsPaintSpec,
+  ) {
     try {
       map.setPaintProperty("demand-units", "fill-opacity-transition", {
         duration: 0,
@@ -609,21 +517,9 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /** Release ownership: return both layers to the scalar-0 baseline.
-   *  `MapPaintArbiter` picks up from here on the next playback cycle;
-   *  during interactive idle the baseline is the final resting state.
-   *
-   *  Handles style-busy windows via `once("idle", ...)` as a safety
-   *  net (e.g. if a late basemap switch or `removeLayer` elsewhere
-   *  puts the map in a transient loading state). Re-validates on the
-   *  idle tick: if the arbiter has since retaken ownership, bail
-   *  instead of stomping the new paint. `cancelPendingTeardown` is
-   *  public so `TierAnimationSection` can abort the listener when
-   *  `playState` flips to `"playing"` (see call-site comment for why).
-   */
   private onExit(ctx: BeatEngineContext): void {
     debugLog(`  interactive.onExit: scheduling teardown`)
-    const map = ctx.mapRef?.current?.getMap?.()
+    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
     if (!map) {
       debugLog(`  interactive.onExit: no map, skipping`)
       return
@@ -631,11 +527,10 @@ export class InteractivePaintArbiter {
 
     this.cancelPendingTeardown()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const runTeardownWrites = (m: any): void => {
+    const runTeardownWrites = (m: MapboxGLMap): void => {
       try {
         logDuState("InteractivePaintArbiter.onExit PRE-write", m)
-        writeDemandUnitsBaseline(m, {
+        writeDemandUnitsBaseline(m as unknown as BaselineMap, {
           filter: DU_CLASS_FILTER,
           fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
             | readonly unknown[]
@@ -652,7 +547,7 @@ export class InteractivePaintArbiter {
       }
     }
 
-    if (map.isStyleLoaded?.()) {
+    if (map.isStyleLoaded()) {
       runTeardownWrites(map)
       return
     }
@@ -664,11 +559,6 @@ export class InteractivePaintArbiter {
       ran = true
       this.pendingTeardownCleanup = null
 
-      // Re-validate on the idle tick. Only `currentlyOwns` matters:
-      // if we've retaken ownership (user clicked another square
-      // before the style settled), the teardown baseline would
-      // clobber the new enter's paint. Mode / playState flips are
-      // handled externally via `cancelPendingTeardown`.
       if (this.currentlyOwns) {
         debugLog(
           `  interactive.onExit idle-bail currentlyOwns=true mode=${ctx.getMode()}`,
@@ -696,9 +586,6 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /** Cancel any pending fade-in RAF, e.g. when exit happens before
-   *  the step-2 opacity flip fires. Prevents a stale post-enter paint
-   *  from landing after `onExit` and re-making the layer visible. */
   private cancelPendingFadeRaf(): void {
     if (this.pendingFadeRaf === null) return
     try {

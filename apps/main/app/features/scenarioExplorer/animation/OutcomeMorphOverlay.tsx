@@ -280,7 +280,6 @@ function computeOutcomeLayout(
     const group = byTier.get(tier)!
     const tierRow = tier - 1 // 0-indexed position in the fixed 4-row layout
 
-
     const apiVal = chartPoints?.[tier - 1]?.value
     const apiNorm =
       apiVal != null && apiValueSum > 0 ? apiVal / apiValueSum : null
@@ -538,7 +537,7 @@ export default function OutcomeMorphOverlay({
   ])
 
   /* Radar geometry
-*/
+   */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
     const panelLeft = panelWidth * (2 / 3)
@@ -1056,7 +1055,7 @@ export default function OutcomeMorphOverlay({
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
   /* Overlay-morph frame applier
-*/
+   */
   const latestMorphFrameRef = useRef<(v: number) => void>(() => {})
   latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"

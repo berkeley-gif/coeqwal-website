@@ -67,7 +67,7 @@ export async function fetchTierList(): Promise<TierListItem[]> {
  * @example
  * ```typescript
  * const data = await fetchScenarioTiers("s0020")
- * // { scenario: "s0020", tiers: { AG_REV: { ... }, ENV_FLOW: { ... } } }
+ * // { scenario: "s0020", tiers: { AG_REV: { ... }, ENV_FLOWS: { ... } } }
  * ```
  */
 export async function fetchScenarioTiers(

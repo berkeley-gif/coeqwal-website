@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState, useMemo } from "react"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
+import type { MapRef } from "@repo/map"
 import type { LocationHighlight } from "../../map/store"
 
 interface PinnedLocationsListProps {
@@ -10,7 +11,7 @@ interface PinnedLocationsListProps {
   onHoverEnter?: (key: string) => void
   onHoverLeave?: () => void
   hoveredKey?: string | null
-  mapRef?: React.RefObject<{ getMap?: () => unknown } | null>
+  mapRef?: React.RefObject<MapRef | null>
 }
 
 interface LineEndpoints {
@@ -35,14 +36,13 @@ export default function PinnedLocationsList({
   linesRef.current = lines
 
   const computeLines = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = (mapRef?.current as any)?.getMap?.()
+    const map = mapRef?.current?.getMap()
     if (!map || highlights.length === 0) {
       if (linesRef.current.size > 0) setLines(new Map())
       return
     }
 
-    const container = map.getContainer() as HTMLElement | null
+    const container = map.getContainer()
     if (!container) return
     const mapRect = container.getBoundingClientRect()
 
@@ -71,8 +71,7 @@ export default function PinnedLocationsList({
   }, [highlights, mapRef])
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = (mapRef?.current as any)?.getMap?.()
+    const map = mapRef?.current?.getMap()
     if (!map) return
 
     computeLines()

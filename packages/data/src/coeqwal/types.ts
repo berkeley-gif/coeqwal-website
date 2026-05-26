@@ -9,7 +9,7 @@
  * A tier/outcome from the /api/tiers/list endpoint
  */
 export interface TierListItem {
-  /** Short code identifier (e.g., "AG_REV", "ENV_FLOW") */
+  /** Short code identifier (e.g., "AG_REV", "ENV_FLOWS") */
   short_code: string
   /** Full name from API */
   name: string
