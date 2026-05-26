@@ -24,6 +24,7 @@ import {
   type GlyphVariant,
 } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
+import { NoDataAtThisTime } from "./NoDataAtThisTime"
 import { getSingleValueLocationCount } from "../../../../content/outcomes"
 
 /**
@@ -344,29 +345,7 @@ export function OutcomeGlyphItem({
           />
         </Box>
       ) : (
-        <Box
-          sx={{
-            // Fixed size - never scales with viewport
-            width: 60,
-            height: 60,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: theme.palette.grey[100],
-            borderRadius: theme.borderRadius.md,
-            border: theme.border.medium,
-          }}
-        >
-          <Typography
-            variant="outcomeLabel"
-            sx={{
-              color: theme.palette.grey[700],
-              px: theme.space.component.xs,
-            }}
-          >
-            No data at this time
-          </Typography>
-        </Box>
+        <NoDataAtThisTime />
       )}
 
       {/* Label and controls */}

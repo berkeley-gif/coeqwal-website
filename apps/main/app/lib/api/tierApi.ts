@@ -24,7 +24,14 @@ const formatTierLabel = (tier: string) =>
   tier.charAt(0).toUpperCase() + tier.slice(1)
 
 /**
- * Convert multi-value tier data to chart format
+ * Convert multi-value tier data to chart format.
+ *
+ * A null `normalized` for one tier means the API returned no value for
+ * that tier level. The bar renders at 0 height, which is the right visual
+ * for "this tier had no locations" in a stacked distribution. The
+ * fully-missing case (every tier null) is filtered upstream in
+ * `useTierData.processScenarioData`, so this function never sees it.
+ *
  * @param tierData - Tier data from API
  * @param tierColors - Colors from theme (use getTierColorsFromTheme from content/tiers.ts)
  */
@@ -35,9 +42,9 @@ export function convertMultiValueToChartData(
   return tierData.data.map((item) => ({
     label: formatTierLabel(item.tier),
     color: tierColors[item.tier],
-    value: item.normalized,
+    value: item.normalized ?? 0,
     tierType: "multi_value" as const,
-    totalLocations: tierData.total || undefined,
+    totalLocations: tierData.total ?? undefined,
     rawCount: item.value ?? undefined,
   }))
 }

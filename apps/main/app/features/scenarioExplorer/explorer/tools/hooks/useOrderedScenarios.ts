@@ -98,16 +98,19 @@ export function computeOrderedScenarios({
     baseScenarios.sort((a, b) => {
       const aScores = allScoreData[a.scenarioId]
       const bScores = allScoreData[b.scenarioId]
-      if (!aScores?.[sortBy] && !bScores?.[sortBy]) {
+      const aScore = aScores?.[sortBy]?.weighted_score ?? null
+      const bScore = bScores?.[sortBy]?.weighted_score ?? null
+      // Push scenarios with a null weighted score (no tier row for this
+      // outcome, or a degenerate distribution) to the bottom of either
+      // sort direction so they don't slot above real winners or losers.
+      if (aScore == null && bScore == null) {
         return compareScenarioIdsForThemeSubgroupOrder(
           a.scenarioId,
           b.scenarioId,
         )
       }
-      if (!aScores?.[sortBy]) return 1
-      if (!bScores?.[sortBy]) return -1
-      const aScore = aScores[sortBy].weighted_score
-      const bScore = bScores[sortBy].weighted_score
+      if (aScore == null) return 1
+      if (bScore == null) return -1
       const delta = sortDirection === "asc" ? aScore - bScore : bScore - aScore
       if (delta !== 0) return delta
       return compareScenarioIdsForThemeSubgroupOrder(a.scenarioId, b.scenarioId)

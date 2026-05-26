@@ -47,12 +47,18 @@ interface ReservoirPercentilesSectionProps {
 }
 
 /**
- * Helper to convert percentage percentiles to TAF using capacity
+ * Helper to convert percentage percentiles to TAF using capacity.
+ *
+ * If `capacityTaf` is null or 0 we cannot derive a meaningful TAF volume,
+ * so return an empty record. The viz layer renders the cell as empty,
+ * which is the right behavior for a reservoir whose capacity metadata
+ * never made it into `reservoir_entity` (e.g. an out-of-system pond).
  */
 function convertPercentToTaf(
   percentData: MonthlyPercentiles,
-  capacityTaf: number,
+  capacityTaf: number | null,
 ): MonthlyPercentiles {
+  if (capacityTaf == null || capacityTaf === 0) return {}
   const tafData: MonthlyPercentiles = {}
   Object.entries(percentData).forEach(([month, values]) => {
     tafData[month] = {
@@ -87,6 +93,8 @@ function useMultiScenarioReservoirData(
     useGroupedReservoirPercentiles(firstScenarioId, "major")
 
   const deadPoolLookup = useMemo(() => {
+    // viz treats deadPoolTaf === 0 as "do not draw dead-pool marker", which
+    // is the right fallback for a reservoir without seeded dead-pool data.
     const lookup: Record<string, number> = {}
     Object.entries(groupedReservoirs).forEach(([reservoirId, data]) => {
       lookup[reservoirId] = data.dead_pool_taf ?? 0
@@ -112,14 +120,24 @@ function useMultiScenarioReservoirData(
           reservoirMap[reservoirId] = {
             reservoirId,
             reservoirName: data.name ?? reservoirId,
+            // viz treats capacityTaf === 0 as "no reservoir mode" and hides
+            // capacity / dead-pool annotations, so a missing capacity falls
+            // back to stats-only rendering rather than a wrong "0 TAF" label.
             capacityTaf: data.capacity_taf ?? 0,
             deadPoolTaf: deadPoolLookup[reservoirId] ?? 0,
           }
         }
 
+        // In volume mode we drop the cell entirely when capacity is missing,
+        // because the chart would otherwise show a fake zero floor.
         if (!matrix[reservoirId]) matrix[reservoirId] = {}
-        matrix[reservoirId][scenarioId] =
-          displayMode === "volume" ? data.monthly_taf : data.monthly_percent
+        if (displayMode === "volume") {
+          matrix[reservoirId][scenarioId] = data.capacity_taf == null
+            ? undefined
+            : data.monthly_taf
+        } else {
+          matrix[reservoirId][scenarioId] = data.monthly_percent
+        }
       })
     })
 
@@ -161,7 +179,10 @@ function useAdditionalReservoirData(
   if (data) {
     Object.entries(data).forEach(([reservoirId, scenarioData]) => {
       Object.entries(scenarioData).forEach(([scenarioId, percentileData]) => {
-        // Build reservoir info
+        // Build reservoir info. capacity_taf / dead_pool_taf may be null
+        // when the reservoir entity is missing seeded capacity metadata;
+        // viz treats 0 as "no reservoir mode" so this is a safe fallback
+        // for the row label area.
         if (!reservoirMap[reservoirId]) {
           reservoirMap[reservoirId] = {
             reservoirId: reservoirId,
@@ -171,13 +192,13 @@ function useAdditionalReservoirData(
           }
         }
 
-        // Build matrix data
         if (!matrixData[reservoirId]) {
           matrixData[reservoirId] = {}
         }
 
-        // The individual endpoint returns percentage data
-        // For volume mode, convert to TAF using capacity
+        // The individual endpoint returns percentage data. For volume mode,
+        // convert to TAF using capacity, but skip the cell when capacity is
+        // null so we don't draw a misleading zero baseline.
         if (displayMode === "volume" && percentileData.monthly_percentiles) {
           matrixData[reservoirId][scenarioId] = convertPercentToTaf(
             percentileData.monthly_percentiles,

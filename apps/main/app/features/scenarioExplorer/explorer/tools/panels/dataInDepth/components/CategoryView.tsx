@@ -701,6 +701,51 @@ function MonthlyStorageSection({
 // ============================================================================
 
 /**
+ * Convert the data-package `MonthlySpillData` (numeric fields nullable to
+ * reflect ETL gaps) into the viz `MonthlySpillData` shape (numeric fields
+ * required). A month with a null `spill_frequency_pct` is dropped. A month
+ * with a valid frequency but null magnitudes has those magnitudes set to 0
+ * so the chart can still draw the frequency bar without crashing.
+ * TODO: Create a true empty space for null values.
+ *
+ * The CFS magnitude columns are not populated for most reservoirs today,
+ * which is why this guard exists.
+ */
+function toVizMonthlySpill(
+  data: Record<
+    string,
+    {
+      spill_months_count: number | null
+      total_months: number | null
+      spill_frequency_pct: number | null
+      spill_avg_cfs: number | null
+      spill_max_cfs: number | null
+      spill_q50: number | null
+      spill_q90: number | null
+      spill_q100: number | null
+      storage_at_spill_avg_pct: number | null
+    } | null
+  >,
+): MonthlySpillData {
+  const out: MonthlySpillData = {}
+  Object.entries(data).forEach(([month, stats]) => {
+    if (!stats || stats.spill_frequency_pct == null) return
+    out[month] = {
+      spill_months_count: stats.spill_months_count ?? 0,
+      total_months: stats.total_months ?? 0,
+      spill_frequency_pct: stats.spill_frequency_pct,
+      spill_avg_cfs: stats.spill_avg_cfs ?? 0,
+      spill_max_cfs: stats.spill_max_cfs ?? 0,
+      spill_q50: stats.spill_q50 ?? 0,
+      spill_q90: stats.spill_q90 ?? 0,
+      spill_q100: stats.spill_q100 ?? 0,
+      storage_at_spill_avg_pct: stats.storage_at_spill_avg_pct,
+    }
+  })
+  return out
+}
+
+/**
  * Hook to fetch spill data for multiple scenarios
  * Calls useSpillMonthly for each scenario and merges results
  */
@@ -742,6 +787,8 @@ function useMultiScenarioSpillData(scenarios: string[]) {
           matrixData[reservoirId] = {}
         }
         matrixData[reservoirId][scenarioId] = data.monthly
+          ? toVizMonthlySpill(data.monthly)
+          : undefined
       },
     )
   })

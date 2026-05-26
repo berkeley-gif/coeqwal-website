@@ -238,7 +238,10 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
   const isLoading = results.some((r) => r.isLoading)
   const error = results.find((r) => r.error)?.error ?? null
 
-  // Combine data by reservoir
+  // Combine data by reservoir. `capacity_taf` and `dead_pool_taf` are
+  // nullable on the API. Default to 0 here, which the viz layer treats
+  // as "no reservoir mode" and hides the capacity / dead-pool annotations
+  // rather than drawing them at a wrong absolute level.
   const dataByReservoir: Record<
     string,
     {
@@ -262,8 +265,8 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
           reservoirInfo: {
             reservoir_id: data.reservoir_id,
             reservoir_name: data.reservoir_name,
-            capacity_taf: data.capacity_taf,
-            dead_pool_taf: data.dead_pool_taf,
+            capacity_taf: data.capacity_taf ?? 0,
+            dead_pool_taf: data.dead_pool_taf ?? 0,
           },
           scenarioData: {},
         }

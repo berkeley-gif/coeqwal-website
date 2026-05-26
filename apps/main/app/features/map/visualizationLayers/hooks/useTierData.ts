@@ -105,19 +105,25 @@ function convertScenarioTierToLocations(
 ): TierLocationsResponse | null {
   const tierInfo = scenarioData.tiers[outcomeCode]
 
+  // `tierInfo.level` is nullable (a single-value outcome can come back
+  // without a tier level when the underlying metric has no data). Skip
+  // those rather than mapping them to tier 0, which would mis-color the
+  // map cell.
   if (
     !tierInfo ||
     tierInfo.type !== "single_value" ||
-    tierInfo.level === undefined
+    tierInfo.level == null
   ) {
     return null
   }
+
+  const level = tierInfo.level
 
   const location: TierLocation = {
     location_id: outcomeCode,
     location_name: getOutcomeName(outcomeCode),
     location_type: "single_value",
-    tier_level: tierInfo.level,
+    tier_level: level,
     tier_value: null,
     display_order: 0,
   }
@@ -131,7 +137,7 @@ function convertScenarioTierToLocations(
     metadata: {
       total_locations: 1,
       location_types: ["single_value"],
-      tier_counts: { [tierInfo.level]: 1 },
+      tier_counts: { [level]: 1 },
     },
   }
 }

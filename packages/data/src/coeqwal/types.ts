@@ -13,8 +13,8 @@ export interface TierListItem {
   short_code: string
   /** Full name from API */
   name: string
-  /** Description of what this tier measures */
-  description: string
+  /** Description of what this tier measures. Null when no description was seeded. */
+  description: string | null
   /** Whether this tier has a single value or distribution across tiers */
   tier_type: "single_value" | "multi_value"
   /** Number of tier levels (typically 4) */
@@ -24,42 +24,53 @@ export interface TierListItem {
 }
 
 /**
- * Data point for multi-value tiers (distribution across tier levels)
+ * Data point for multi-value tiers (distribution across tier levels).
+ *
+ * `value` and `normalized` are nullable because the backend emits the raw
+ * row values as `safe_int` / `safe_float`. A NULL in the underlying tier
+ * result table flows through as `null` rather than being coerced to 0.
  */
 export interface MultiValueTierData {
   /** Tier level (tier1 = best, tier4 = worst) */
   tier: "tier1" | "tier2" | "tier3" | "tier4"
-  /** Raw count or value */
-  value: number
-  /** Normalized value (0-1) */
-  normalized: number
+  /** Raw count or value, or null if missing */
+  value: number | null
+  /** Normalized value (0-1), or null if missing */
+  normalized: number | null
 }
 
 /**
- * Multi-value tier structure (used in chart conversion)
+ * Multi-value tier structure (used in chart conversion).
+ *
+ * `total` is nullable because the backend now passes through NULL totals
+ * directly instead of coercing them to 0.
  */
 export interface MultiValueTier {
   name: string
   type: "multi_value"
   data: MultiValueTierData[]
-  total: number
+  total: number | null
 }
 
 /**
- * Calculated score fields returned by the API for each tier
- * These enable sorting, parallel plot visualization, and equity analysis
+ * Calculated score fields returned by the API for each tier.
+ *
+ * Every field is nullable. The backend returns `null` for the entire score
+ * bundle when a tier row is missing or its tier distribution is degenerate
+ * (e.g. all four normalized values are zero or NULL). Consumers must treat
+ * `null` as "no data" rather than zero.
  */
 export interface TierScores {
   /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting. */
-  weighted_score: number
+  weighted_score: number | null
   /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis. */
-  normalized_score: number
+  normalized_score: number | null
   /** Gini coefficient (0.0-1.0, lower = more equitable). Use for equity indicator. */
-  gini: number
+  gini: number | null
   /** Spread band top edge (0.0-1.0). Where best locations are. */
-  band_upper: number
+  band_upper: number | null
   /** Spread band bottom edge (0.0-1.0). Where worst locations are. */
-  band_lower: number
+  band_lower: number | null
 }
 
 /**
@@ -68,12 +79,12 @@ export interface TierScores {
 export interface TierInfo extends TierScores {
   name: string
   type: "single_value" | "multi_value"
-  /** Tier level for single_value tiers (1-4) */
-  level?: number
+  /** Tier level for single_value tiers (1-4), or null if no row exists */
+  level?: number | null
   /** Distribution data for multi_value tiers */
   data?: MultiValueTierData[]
   /** Total count for multi_value tiers */
-  total?: number
+  total?: number | null
 }
 
 /**
@@ -240,8 +251,13 @@ export interface StatisticsScenarioInfo {
 }
 
 /**
- * Percentile values for a single month
- * All values are percentage of reservoir capacity (0-100+)
+ * Percentile values for a single month.
+ *
+ * Fields are non-null because the reservoir ETL emits all percentiles
+ * together when a row exists, or omits the month entirely when it does
+ * not. Consumers should treat a missing month key in `MonthlyPercentiles`
+ * as "no data" and skip it; do not assume any month has fewer than 8
+ * populated fields.
  */
 export interface PercentileValues {
   /** Minimum (0th percentile) */
@@ -279,10 +295,10 @@ export interface ReservoirPercentiles {
   scenario_id: string
   /** Unit description */
   unit: string
-  /** Total reservoir capacity in thousand acre-feet */
-  capacity_taf: number
-  /** Dead pool storage in thousand acre-feet */
-  dead_pool_taf: number
+  /** Total reservoir capacity in thousand acre-feet, or null when missing */
+  capacity_taf: number | null
+  /** Dead pool storage in thousand acre-feet, or null when missing */
+  dead_pool_taf: number | null
   /** Monthly percentile data */
   monthly_percentiles: MonthlyPercentiles
 }
@@ -303,10 +319,10 @@ export interface AllReservoirPercentilesResponse {
 export interface GroupedReservoirData {
   /** Human-readable name (e.g., "Folsom") */
   name: string
-  /** Total reservoir capacity in thousand acre-feet */
-  capacity_taf: number
-  /** Dead pool storage in thousand acre-feet */
-  dead_pool_taf: number
+  /** Total reservoir capacity in thousand acre-feet, or null when missing */
+  capacity_taf: number | null
+  /** Dead pool storage in thousand acre-feet, or null when missing */
+  dead_pool_taf: number | null
   /** Monthly percentile data */
   monthly_percentiles: MonthlyPercentiles
 }
@@ -339,8 +355,8 @@ export interface AllReservoirInfo {
   reservoir_id: string
   /** Human-readable name (e.g., "Shasta") */
   name: string
-  /** Total reservoir capacity in thousand acre-feet */
-  capacity_taf: number
+  /** Total reservoir capacity in thousand acre-feet, or null when missing */
+  capacity_taf: number | null
 }
 
 /**
@@ -374,8 +390,8 @@ export interface StatisticsScenariosResponse {
 export interface StorageMonthlyReservoirData {
   /** Human-readable name (e.g., "Shasta") */
   name: string
-  /** Total reservoir capacity in thousand acre-feet */
-  capacity_taf: number
+  /** Total reservoir capacity in thousand acre-feet, or null when missing */
+  capacity_taf: number | null
   /** Monthly percentile data as percentage of capacity (0-100+) */
   monthly_percent: MonthlyPercentiles
   /** Monthly percentile data as volume in TAF */
@@ -399,25 +415,30 @@ export interface StorageMonthlyResponse {
 // ============================================================================
 
 /**
- * Monthly spill statistics for a single month
+ * Monthly spill statistics for a single month.
+ *
+ * All numeric fields are nullable. The reservoir ETL does not populate
+ * `spill_avg_cfs` / `spill_max_cfs` / `spill_q*` for most reservoirs at the
+ * moment, so they ride through as null. `spill_frequency_pct` and the
+ * months counts may also be null when there is no data for that water month.
  */
 export interface SpillMonthlyStats {
   /** Number of months with spill events */
-  spill_months_count: number
+  spill_months_count: number | null
   /** Total months in the record */
-  total_months: number
+  total_months: number | null
   /** Spill frequency as percentage for this month */
-  spill_frequency_pct: number
+  spill_frequency_pct: number | null
   /** Average spill in CFS */
-  spill_avg_cfs: number
+  spill_avg_cfs: number | null
   /** Maximum spill in CFS */
-  spill_max_cfs: number
+  spill_max_cfs: number | null
   /** 50th percentile spill */
-  spill_q50: number
+  spill_q50: number | null
   /** 90th percentile spill */
-  spill_q90: number
+  spill_q90: number | null
   /** 100th percentile (max) spill */
-  spill_q100: number
+  spill_q100: number | null
   /** Average storage at time of spill (percentage), null if no spills */
   storage_at_spill_avg_pct: number | null
 }
@@ -1023,33 +1044,38 @@ export interface AgDemandUnitPeriodResponse {
 // ============================================================================
 
 /**
- * Period-of-record data for a single reservoir
+ * Period-of-record data for a single reservoir.
+ *
+ * Spill volume metrics (mean_cfs, peak_cfs, annual_*) are not populated by
+ * the ETL today for most reservoirs and ride through as null. Storage
+ * exceedance values and thresholds may also be null when the row was not
+ * computed.
  */
 export interface ReservoirPeriodData {
   /** Human-readable name */
   name: string
   /** Total reservoir capacity in TAF */
-  capacity_taf: number
+  capacity_taf: number | null
   /** Storage exceedance values as % of capacity (p5, p10, p25, p50, p75, p90, p95) */
-  storage_exceedance: Record<string, number>
+  storage_exceedance: Record<string, number | null>
   /** Threshold levels */
   thresholds: {
-    dead_pool_taf: number
-    dead_pool_pct: number
+    dead_pool_taf: number | null
+    dead_pool_pct: number | null
     spill_threshold_pct: number | null
   }
   /** Annual spill summary statistics */
   spill: {
-    years_count: number
-    frequency_pct: number
-    mean_cfs: number
-    peak_cfs: number
-    annual_avg_taf: number
-    annual_cv: number
-    annual_max_taf: number
-    annual_max_q50: number
-    annual_max_q90: number
-    annual_max_q100: number
+    years_count: number | null
+    frequency_pct: number | null
+    mean_cfs: number | null
+    peak_cfs: number | null
+    annual_avg_taf: number | null
+    annual_cv: number | null
+    annual_max_taf: number | null
+    annual_max_q50: number | null
+    annual_max_q90: number | null
+    annual_max_q100: number | null
   }
 }
 

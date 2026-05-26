@@ -149,7 +149,12 @@ export function useTierChartData(
         OUTCOME_CODE_ORDER.forEach((code) => {
           const outcomeScore = scenarioScores[code]
           const displayName = getOutcomeName(code)
-          if (outcomeScore?.normalized_score !== undefined) {
+          // `normalized_score` is nullable (null when no tier row
+          // exists or the distribution is degenerate). Use a null guard
+          // rather than `!== undefined`, otherwise a real null would slip
+          // through and produce `null * 2 - 1 = -1`, anchoring the axis
+          // wrong.
+          if (outcomeScore?.normalized_score != null) {
             let v = outcomeScore.normalized_score * 2 - 1
             // Winter-run salmon tier scores sometimes come through above 4
             // on the 1-4 tier scale, which maps to radar values below -1.
@@ -209,7 +214,7 @@ export function useTierChartData(
       if (!scores) continue
       for (const code of OUTCOME_CODE_ORDER) {
         const s = scores[code]
-        if (s?.normalized_score === undefined) continue
+        if (s?.normalized_score == null) continue
         let v = s.normalized_score * 2 - 1
         // Match the salmon clamp in parallelPlotData so axis min/max does
         // not get dragged off the bottom of the radar.
@@ -266,7 +271,7 @@ export function useTierChartData(
       const s = scores[code]
       const name = getOutcomeName(code)
       values[name] =
-        s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
+        s?.normalized_score != null ? s.normalized_score * 2 - 1 : null
     })
     NOD_SOD_OUTCOME_CODES.forEach((code) => {
       const name = getOutcomeName(code)

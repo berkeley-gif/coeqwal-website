@@ -223,15 +223,30 @@ function deliveryRowsToMonthlyPercentiles(
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
+    // Skip months with any null percentile rather than coercing to zero.
+    // A zero floor on the band chart implies a real measured 0 delivery
+    // when in fact we have no row.
+    if (
+      row.q0 == null ||
+      row.q10 == null ||
+      row.q30 == null ||
+      row.q50 == null ||
+      row.q70 == null ||
+      row.q90 == null ||
+      row.q100 == null ||
+      row.delivery_avg_taf == null
+    ) {
+      continue
+    }
     monthly[String(row.water_month)] = {
-      q0: row.q0 ?? 0,
-      q10: row.q10 ?? 0,
-      q30: row.q30 ?? 0,
-      q50: row.q50 ?? 0,
-      q70: row.q70 ?? 0,
-      q90: row.q90 ?? 0,
-      q100: row.q100 ?? 0,
-      mean: row.delivery_avg_taf ?? 0,
+      q0: row.q0,
+      q10: row.q10,
+      q30: row.q30,
+      q50: row.q50,
+      q70: row.q70,
+      q90: row.q90,
+      q100: row.q100,
+      mean: row.delivery_avg_taf,
     }
   }
   return monthly
@@ -242,15 +257,30 @@ function shortageRowsToMonthlyPercentiles(
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
+    // Same rationale as `deliveryRowsToMonthlyPercentiles`: prefer a gap
+    // over a fake zero baseline so the chart doesn't suggest "no shortage"
+    // when really we have no data.
+    if (
+      row.q0 == null ||
+      row.q10 == null ||
+      row.q30 == null ||
+      row.q50 == null ||
+      row.q70 == null ||
+      row.q90 == null ||
+      row.q100 == null ||
+      row.shortage_avg_taf == null
+    ) {
+      continue
+    }
     monthly[String(row.water_month)] = {
-      q0: row.q0 ?? 0,
-      q10: row.q10 ?? 0,
-      q30: row.q30 ?? 0,
-      q50: row.q50 ?? 0,
-      q70: row.q70 ?? 0,
-      q90: row.q90 ?? 0,
-      q100: row.q100 ?? 0,
-      mean: row.shortage_avg_taf ?? 0,
+      q0: row.q0,
+      q10: row.q10,
+      q30: row.q30,
+      q50: row.q50,
+      q70: row.q70,
+      q90: row.q90,
+      q100: row.q100,
+      mean: row.shortage_avg_taf,
     }
   }
   return monthly

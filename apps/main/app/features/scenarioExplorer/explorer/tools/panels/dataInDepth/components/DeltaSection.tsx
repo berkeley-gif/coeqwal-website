@@ -119,15 +119,30 @@ function rowsToMonthlyPercentiles(
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
+    // Skip months whose ETL row is missing percentile data. Zero-filling
+    // would draw a misleading floor on the band chart, so leave a gap
+    // instead and let the viz layer omit that month.
+    if (
+      row.q0 == null ||
+      row.q10 == null ||
+      row.q30 == null ||
+      row.q50 == null ||
+      row.q70 == null ||
+      row.q90 == null ||
+      row.q100 == null ||
+      row.avg == null
+    ) {
+      continue
+    }
     monthly[String(row.water_month)] = {
-      q0: row.q0 ?? 0,
-      q10: row.q10 ?? 0,
-      q30: row.q30 ?? 0,
-      q50: row.q50 ?? 0,
-      q70: row.q70 ?? 0,
-      q90: row.q90 ?? 0,
-      q100: row.q100 ?? 0,
-      mean: row.avg ?? 0,
+      q0: row.q0,
+      q10: row.q10,
+      q30: row.q30,
+      q50: row.q50,
+      q70: row.q70,
+      q90: row.q90,
+      q100: row.q100,
+      mean: row.avg,
     }
   }
   return monthly
@@ -152,15 +167,30 @@ function channelRowsToPercentiles(
 ): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
+    // Same rationale as `rowsToMonthlyPercentiles`. Skip months with any
+    // missing TAF percentile rather than zero-filling, to avoid a fake
+    // floor at the band chart baseline.
+    if (
+      row.flow_q0_taf == null ||
+      row.flow_q10_taf == null ||
+      row.flow_q30_taf == null ||
+      row.flow_q50_taf == null ||
+      row.flow_q70_taf == null ||
+      row.flow_q90_taf == null ||
+      row.flow_q100_taf == null ||
+      row.flow_avg_taf == null
+    ) {
+      continue
+    }
     monthly[String(row.water_month)] = {
-      q0: row.flow_q0_taf ?? 0,
-      q10: row.flow_q10_taf ?? 0,
-      q30: row.flow_q30_taf ?? 0,
-      q50: row.flow_q50_taf ?? 0,
-      q70: row.flow_q70_taf ?? 0,
-      q90: row.flow_q90_taf ?? 0,
-      q100: row.flow_q100_taf ?? 0,
-      mean: row.flow_avg_taf ?? 0,
+      q0: row.flow_q0_taf,
+      q10: row.flow_q10_taf,
+      q30: row.flow_q30_taf,
+      q50: row.flow_q50_taf,
+      q70: row.flow_q70_taf,
+      q90: row.flow_q90_taf,
+      q100: row.flow_q100_taf,
+      mean: row.flow_avg_taf,
     }
   }
   return monthly

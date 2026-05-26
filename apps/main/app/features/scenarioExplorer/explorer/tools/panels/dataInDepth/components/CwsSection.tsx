@@ -127,6 +127,46 @@ const CWS_AGGREGATE_SORT_ORDER: Record<string, number> = {
   cvp_sod: 7,
 }
 
+/**
+ * Type guard: row has all the band edges and mean a `PercentileBandChart`
+ * needs to render. A partial row (any of q10..q100 or avg_taf is null)
+ * is treated as "no data" and skipped, because feeding a nulled band
+ * edge into the chart would either crash d3 or draw a misleading zero
+ * floor.
+ *
+ * q0 is intentionally tolerated as null and coerced to 0 by the caller,
+ * since a CWS contractor that receives 0 delivery in the driest year
+ * still has a valid row.
+ */
+function isFullPercentileRow(stats: {
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  avg_taf: number | null
+}): stats is {
+  q0?: number | null
+  q10: number
+  q30: number
+  q50: number
+  q70: number
+  q90: number
+  q100: number
+  avg_taf: number
+} {
+  return (
+    stats.q10 != null &&
+    stats.q30 != null &&
+    stats.q50 != null &&
+    stats.q70 != null &&
+    stats.q90 != null &&
+    stats.q100 != null &&
+    stats.avg_taf != null
+  )
+}
+
 // ============================================================================
 // Legend Components
 // ============================================================================
@@ -535,10 +575,9 @@ function buildCwsAggregatesData(
 
         if (data.monthly_delivery) {
           Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             deliveryPercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -552,10 +591,9 @@ function buildCwsAggregatesData(
 
         if (data.monthly_shortage) {
           Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             shortagePercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -809,14 +847,13 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
 
         if (data.monthly_delivery) {
           Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             // Detect dry-year months: q0=0 means no allocation in the driest years
             if ((stats.q0 ?? 0) === 0) {
               hasDryYearMonths = true
             }
             deliveryPercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -830,10 +867,9 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
 
         if (data.monthly_shortage) {
           Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             shortagePercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -952,10 +988,9 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
 
         if (data.monthly_delivery) {
           Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             deliveryPercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -969,10 +1004,9 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
 
         if (data.monthly_shortage) {
           Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-            // Skip only if no data at all (q50 is null means no data)
-            if (stats?.q50 == null) return
+            if (!stats || !isFullPercentileRow(stats)) return
             shortagePercentiles[month] = {
-              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q0: stats.q0 ?? 0,
               q10: stats.q10,
               q30: stats.q30,
               q50: stats.q50,
@@ -1103,24 +1137,30 @@ function useIndividualDemandUnitsData(
           shortageFrequencyPct: stats.period_summary?.shortage_frequency_pct,
         }
 
-        // Build per-cell stats
+        // Build per-cell stats. Reliability is reported as P95 delivery as
+        // a fraction of demand, where demand is delivery + shortage. Every
+        // input must be numeric to compute it. Falling back to undefined
+        // when any piece is null is more honest than dividing by an
+        // estimated-but-wrong denominator.
         if (!cellStats[duId]) {
           cellStats[duId] = {}
         }
         const ps = stats.period_summary
-        const psDemand = ps
-          ? (ps.annual_delivery_avg_taf ?? 0) +
-            (ps.annual_shortage_avg_taf ?? 0)
-          : 0
+        const psDelivery = ps?.annual_delivery_avg_taf
+        const psShortage = ps?.annual_shortage_avg_taf
+        const psDemand =
+          psDelivery != null && psShortage != null
+            ? psDelivery + psShortage
+            : null
         const psP95 = ps?.delivery_exceedance?.["p95"]
         const psP95Fulfillment =
-          psP95 !== undefined && psDemand > 0
+          psP95 != null && psDemand != null && psDemand > 0
             ? Math.min(100, (psP95 / psDemand) * 100)
             : undefined
         cellStats[duId][scenarioId] = {
-          annualAvgTaf: ps?.annual_delivery_avg_taf,
+          annualAvgTaf: ps?.annual_delivery_avg_taf ?? undefined,
           reliabilityPct: psP95Fulfillment,
-          shortageFrequencyPct: ps?.shortage_frequency_pct,
+          shortageFrequencyPct: ps?.shortage_frequency_pct ?? undefined,
         }
 
         // Build matrix data
@@ -1134,10 +1174,9 @@ function useIndividualDemandUnitsData(
         if (stats.monthly_delivery) {
           Object.entries(stats.monthly_delivery).forEach(
             ([month, monthStats]) => {
-              // Skip only if no data at all (q50 is null means no data)
-              if (monthStats?.q50 == null) return
+              if (!monthStats || !isFullPercentileRow(monthStats)) return
               deliveryPercentiles[month] = {
-                q0: monthStats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+                q0: monthStats.q0 ?? 0,
                 q10: monthStats.q10,
                 q30: monthStats.q30,
                 q50: monthStats.q50,
@@ -1153,11 +1192,10 @@ function useIndividualDemandUnitsData(
         if (stats.monthly_shortage) {
           Object.entries(stats.monthly_shortage).forEach(
             ([month, monthStats]) => {
-              // Skip only if no data at all (q50 is null means no data)
-              if (monthStats?.q50 == null) return
-              hasShortageData = true // Mark that we found shortage data
+              if (!monthStats || !isFullPercentileRow(monthStats)) return
+              hasShortageData = true
               shortagePercentiles[month] = {
-                q0: monthStats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+                q0: monthStats.q0 ?? 0,
                 q10: monthStats.q10,
                 q30: monthStats.q30,
                 q50: monthStats.q50,

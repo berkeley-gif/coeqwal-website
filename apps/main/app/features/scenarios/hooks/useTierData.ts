@@ -42,18 +42,22 @@ const processScenarioData = (
   const converted: Record<string, Array<ChartDataPoint>> = {}
 
   Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-    // Key directly by short code from API
+    // Key directly by short code from API. When an outcome has no tier
+    // row at all (level is null for single-value, data is missing for
+    // multi-value), skip it. Consumers downstream see an absent entry in
+    // `chartData[shortCode]` and render the "No data at this time"
+    // placeholder rather than a misleading zero bar.
     if (tierInfo.type === "multi_value" && tierInfo.data) {
       converted[shortCode] = convertMultiValueToChartData(
         {
           name: tierInfo.name,
           type: "multi_value",
           data: tierInfo.data,
-          total: tierInfo.total || 0,
+          total: tierInfo.total ?? null,
         },
         themeColors,
       )
-    } else if (tierInfo.type === "single_value" && tierInfo.level) {
+    } else if (tierInfo.type === "single_value" && tierInfo.level != null) {
       converted[shortCode] = convertSingleValueToChartData(
         tierInfo.level,
         themeColors,
@@ -91,6 +95,12 @@ const buildOutcomeNames = (
  * Extract score data from scenario API response.
  * Data is keyed by short code (e.g., "CWS_DEL").
  * Used for sorting, parallel plots, and equity analysis.
+ *
+ * Score fields are passed through as `number | null`. The API now returns
+ * null when an outcome has no tier row or a degenerate (all-zero / all-null)
+ * distribution. Consumers (sort comparators, parallel plot, resilience
+ * matrix) must guard against null rather than treating it as zero, which
+ * would silently rank a missing outcome as "best possible" (1.0 weighted).
  */
 const extractScoreData = (
   scenarioData: ScenarioTiersResponse,
@@ -98,15 +108,14 @@ const extractScoreData = (
   const scores: Record<string, OutcomeScoreData> = {}
 
   Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-    // Key directly by short code from API
     scores[shortCode] = {
       shortCode,
       type: tierInfo.type,
-      weighted_score: tierInfo.weighted_score ?? 0,
-      normalized_score: tierInfo.normalized_score ?? 0,
-      gini: tierInfo.gini ?? 0,
-      band_upper: tierInfo.band_upper ?? 0,
-      band_lower: tierInfo.band_lower ?? 0,
+      weighted_score: tierInfo.weighted_score,
+      normalized_score: tierInfo.normalized_score,
+      gini: tierInfo.gini,
+      band_upper: tierInfo.band_upper,
+      band_lower: tierInfo.band_lower,
     }
   })
 

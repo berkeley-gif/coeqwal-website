@@ -28,34 +28,45 @@ interface SpillFrequencySectionProps {
 }
 
 /**
- * Calculate aggregate spill statistics from monthly data
+ * Calculate aggregate spill statistics from monthly data.
+ *
+ * Returns null when no month in the record has a numeric
+ * `spill_frequency_pct`. That state is distinct from "0% in every month";
+ * a 0% record is still real data and renders the standard "no spill
+ * events" copy.
  */
 function calculateSpillStats(data: SpillMonthlyReservoirData): {
   peakFrequency: number
   peakMonth: number
   avgFrequency: number
   totalMonths: number
-} {
+} | null {
   let peakFrequency = 0
   let peakMonth = 1
   let totalFrequency = 0
   let monthCount = 0
   let totalMonths = 0
+  let sawAnyValue = false
 
   if (data.monthly) {
     Object.entries(data.monthly).forEach(([month, stats]) => {
-      if (stats) {
-        monthCount++
-        totalFrequency += stats.spill_frequency_pct
+      if (!stats) return
+      if (stats.spill_frequency_pct == null) return
+      sawAnyValue = true
+      monthCount++
+      totalFrequency += stats.spill_frequency_pct
+      if (stats.total_months != null) {
         totalMonths = stats.total_months
+      }
 
-        if (stats.spill_frequency_pct > peakFrequency) {
-          peakFrequency = stats.spill_frequency_pct
-          peakMonth = parseInt(month, 10)
-        }
+      if (stats.spill_frequency_pct > peakFrequency) {
+        peakFrequency = stats.spill_frequency_pct
+        peakMonth = parseInt(month, 10)
       }
     })
   }
+
+  if (!sawAnyValue) return null
 
   return {
     peakFrequency,

@@ -56,7 +56,7 @@ const [HC_HISTORICAL, HC_CC50, HC_CC95] = RESILIENCE_HYDROCLIMATES
 /**
  * Rows shown in scenario view (Y axis): 9 aggregate outcomes interleaved
  * with their NOD/SOD variants, matching the radar axis order so the UI
- * reads top-down as: aggregate → North → South → next aggregate.
+ * reads top-down as: aggregate -> North -> South -> next aggregate.
  */
 export const RESILIENCE_ROW_ORDER: string[] = OUTCOME_CODE_ORDER.flatMap(
   (code) => {
@@ -109,7 +109,7 @@ function buildAggregateCell(
     }
   }
 
-  if (tierInfo?.type === "single_value" && tierInfo.level) {
+  if (tierInfo?.type === "single_value" && tierInfo.level != null) {
     return {
       scenarioId,
       outcomeCode,
@@ -118,6 +118,22 @@ function buildAggregateCell(
       continuousValue: tierInfo.level,
       tierLevel: tierInfo.level,
       type: "single_value",
+    }
+  }
+
+  // `weighted_score` is nullable (no tier row or degenerate distribution).
+  // Treat that as unavailable so the heatmap cell renders the empty state
+  // instead of color-filling at tier 1.
+  if (score.weighted_score == null) {
+    return {
+      scenarioId,
+      outcomeCode,
+      hydroclimate,
+      available: false,
+      unavailableReason: "No data for this outcome",
+      continuousValue: null,
+      tierLevel: null,
+      type: "multi_value",
     }
   }
 

@@ -9,6 +9,9 @@
 export { OutcomeGlyphItem, formatOutcomeLabel } from "./OutcomeGlyphItem"
 export type { OutcomeGlyphItemProps } from "./OutcomeGlyphItem"
 
+export { NoDataAtThisTime } from "./NoDataAtThisTime"
+export type { NoDataAtThisTimeProps } from "./NoDataAtThisTime"
+
 export { OutcomeGrid } from "./OutcomeGrid"
 export type { OutcomeGridProps } from "./OutcomeGrid"
 
