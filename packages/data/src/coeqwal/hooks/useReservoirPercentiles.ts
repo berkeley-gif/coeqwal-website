@@ -9,73 +9,19 @@
 import useSWR from "swr"
 import { CACHE_KEYS } from "../../cache/keys"
 import {
-  fetchReservoirList,
   fetchAllReservoirsList,
-  fetchScenariosWithPercentiles,
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
-  fetchStorageMonthly,
   fetchSpillMonthly,
-  fetchReservoirPeriodSummary,
 } from "../fetchers"
 import type {
-  ReservoirListResponse,
   AllReservoirsListResponse,
-  StatisticsScenariosResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
   GroupedReservoirPercentilesResponse,
-  StorageMonthlyResponse,
   SpillMonthlyResponse,
-  ReservoirPeriodSummaryResponse,
 } from "../types"
-
-/**
- * Fetch and cache the list of reservoirs with percentile data
- *
- * @returns Reservoir list with loading and error states
- *
- * @example
- * ```typescript
- * function ReservoirSelector() {
- *   const { reservoirs, isLoading } = useReservoirList()
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <ul>
- *       {reservoirs?.map(r => (
- *         <li key={r.reservoir_id}>{r.reservoir_name}</li>
- *       ))}
- *     </ul>
- *   )
- * }
- * ```
- */
-export function useReservoirList() {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<ReservoirListResponse>(
-    CACHE_KEYS.STATISTICS_RESERVOIRS,
-    fetchReservoirList,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    reservoirs: data?.reservoirs ?? [],
-    isLoading,
-    error,
-  }
-}
 
 /**
  * Fetch and cache the list of ALL reservoirs with statistics data
@@ -129,51 +75,6 @@ export function useAllReservoirsList() {
   return {
     reservoirs,
     majorReservoirIds: data?.major ?? [],
-    total: data?.total ?? 0,
-    isLoading,
-    error,
-  }
-}
-
-/**
- * Fetch and cache scenarios that have percentile data
- *
- * @returns Scenarios with loading and error states
- *
- * @example
- * ```typescript
- * function ScenarioSelector() {
- *   const { scenarios, isLoading } = useScenariosWithPercentiles()
- *
- *   return (
- *     <Select>
- *       {scenarios?.map(s => (
- *         <Option key={s.scenario_id}>{s.scenario_id}</Option>
- *       ))}
- *     </Select>
- *   )
- * }
- * ```
- */
-export function useScenariosWithPercentiles() {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<StatisticsScenariosResponse>(
-    CACHE_KEYS.STATISTICS_SCENARIOS,
-    fetchScenariosWithPercentiles,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    scenarios: data?.scenarios ?? [],
     total: data?.total ?? 0,
     isLoading,
     error,
@@ -312,63 +213,6 @@ export function useGroupedReservoirPercentiles(
       ? CACHE_KEYS.groupedReservoirPercentiles(scenarioId, group)
       : null,
     () => fetchGroupedReservoirPercentiles(scenarioId!, group!),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    group: data?.group,
-    reservoirs: data?.reservoirs ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.reservoirs).length > 0,
-  }
-}
-
-/**
- * Fetch monthly storage data with both percentage and TAF values
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param group - Reservoir group (e.g., "major")
- * @returns Storage data with monthly_percent and monthly_taf for each reservoir
- *
- * @example
- * ```typescript
- * function StorageChart({ scenarioId, displayMode }) {
- *   const { reservoirs, isLoading } = useStorageMonthly(scenarioId, "major")
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Grid>
- *       {Object.entries(reservoirs).map(([id, data]) => (
- *         <PercentileChart
- *           key={id}
- *           name={data.name}
- *           percentiles={displayMode === "taf" ? data.monthly_taf : data.monthly_percent}
- *         />
- *       ))}
- *     </Grid>
- *   )
- * }
- * ```
- */
-export function useStorageMonthly(
-  scenarioId: string | null,
-  group: string | null,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<StorageMonthlyResponse>(
-    scenarioId && group ? CACHE_KEYS.storageMonthly(scenarioId, group) : null,
-    () => fetchStorageMonthly(scenarioId!, group!),
     {
       revalidateOnFocus: false,
     },
@@ -537,37 +381,5 @@ export function useMultipleReservoirPercentiles(
     isLoading,
     error,
     hasData: !!data && Object.keys(data).length > 0,
-  }
-}
-
-/**
- * Fetch period-of-record summary for all reservoirs
- * Returns storage exceedance and annual spill statistics
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @returns Period summary with storage exceedance and spill stats
- */
-export function useReservoirPeriodSummary(scenarioId: string | null) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<ReservoirPeriodSummaryResponse>(
-    scenarioId ? CACHE_KEYS.reservoirPeriodSummary(scenarioId) : null,
-    () => fetchReservoirPeriodSummary(scenarioId!),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    reservoirs: data?.reservoirs ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.reservoirs).length > 0,
   }
 }

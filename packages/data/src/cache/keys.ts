@@ -34,14 +34,6 @@ export const CACHE_KEYS = {
     `/api/tiers/scenarios/${scenarioId}/tiers`,
 
   /**
-   * Tier data for a single outcome within a scenario
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param tierCode - Tier short code (e.g., "ENV_FLOWS")
-   */
-  scenarioTierByCode: (scenarioId: string, tierCode: string) =>
-    `/api/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
-
-  /**
    * Batch key for fetching multiple scenario tiers
    * Uses array format for SWR to track changes in the ID list
    * @param scenarioIds - Array of scenario IDs
@@ -81,14 +73,8 @@ export const CACHE_KEYS = {
 
   // Statistics cache keys (reservoir percentiles)
 
-  /** List of reservoirs with percentile data (grouped) */
-  STATISTICS_RESERVOIRS: "/api/statistics/reservoirs",
-
   /** List of all reservoirs with statistics data */
   STATISTICS_RESERVOIRS_ALL: "/api/statistics/reservoirs/all",
-
-  /** List of scenarios with percentile data */
-  STATISTICS_SCENARIOS: "/api/statistics/scenarios",
 
   /**
    * Percentile data for a single reservoir in a scenario
@@ -114,14 +100,6 @@ export const CACHE_KEYS = {
     `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
 
   /**
-   * Monthly storage data with both percentage and TAF values
-   * @param scenarioId - Scenario ID
-   * @param group - Reservoir group (e.g., "major")
-   */
-  storageMonthly: (scenarioId: string, group: string) =>
-    `/api/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
-
-  /**
    * Monthly spill statistics for reservoirs
    * @param scenarioId - Scenario ID
    * @param group - Reservoir group (e.g., "major")
@@ -129,38 +107,7 @@ export const CACHE_KEYS = {
   spillMonthly: (scenarioId: string, group: string) =>
     `/api/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
 
-  // CWS Aggregate cache keys (M&I delivery/shortage statistics)
-
-  /** List of CWS aggregate entities */
-  CWS_AGGREGATES_LIST: "/api/statistics/cws-aggregates",
-
-  /**
-   * Monthly delivery and shortage statistics for CWS aggregates
-   * @param scenarioId - Scenario ID
-   * @param aggregate - Optional aggregate short_code filter
-   */
-  cwsAggregatesMonthly: (scenarioId: string, aggregate?: string) =>
-    `/api/statistics/scenarios/${scenarioId}/cws-aggregates/monthly${aggregate ? `?aggregate=${aggregate}` : ""}`,
-
-  /**
-   * Period-of-record summary for CWS aggregates
-   * @param scenarioId - Scenario ID
-   * @param aggregate - Optional aggregate short_code filter
-   */
-  cwsAggregatesPeriod: (scenarioId: string, aggregate?: string) =>
-    `/api/statistics/scenarios/${scenarioId}/cws-aggregates/period-summary${aggregate ? `?aggregate=${aggregate}` : ""}`,
-
   // M&I Contractors cache keys (30 SWP water agency contractors)
-
-  /** List of M&I contractors */
-  MI_CONTRACTORS_LIST: "/api/statistics/mi-contractors",
-
-  /**
-   * List of M&I contractors with optional group filter
-   * @param group - Optional group filter (e.g., "swp")
-   */
-  miContractorsList: (group?: string) =>
-    `/api/statistics/mi-contractors${group ? `?group=${group}` : ""}`,
 
   /**
    * Monthly delivery and shortage statistics for M&I contractors
@@ -182,9 +129,6 @@ export const CACHE_KEYS = {
 
   /** List of urban demand units */
   DEMAND_UNITS_LIST: "/api/statistics/demand-units",
-
-  /** List of urban demand units organized by group */
-  DEMAND_UNITS_GROUPS: "/api/statistics/demand-units/groups",
 
   /**
    * List of urban demand units with optional group filter
@@ -227,22 +171,6 @@ export const CACHE_KEYS = {
     return `/api/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
   },
 
-  // AG Aggregate cache keys (Agricultural delivery statistics)
-
-  /**
-   * Monthly delivery statistics for AG aggregates
-   * @param scenarioId - Scenario ID
-   */
-  agAggregatesMonthly: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-aggregates/monthly`,
-
-  /**
-   * Period-of-record summary for AG aggregates
-   * @param scenarioId - Scenario ID
-   */
-  agAggregatesPeriod: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-aggregates/period-summary`,
-
   // AG Demand Units cache keys (150 agricultural demand units)
 
   /**
@@ -276,13 +204,6 @@ export const CACHE_KEYS = {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/api/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
   },
-
-  /**
-   * Monthly shortage statistics for AG demand units
-   * @param scenarioId - Scenario ID
-   */
-  agDemandUnitsShortageMonthly: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
 
   /**
    * Period-of-record summary for AG demand units.
@@ -324,46 +245,10 @@ export const CACHE_KEYS = {
   refugeDusPeriod: (scenarioId: string, duId?: string) =>
     `/api/statistics/scenarios/${scenarioId}/refuge-demand-units/period-summary${duId ? `?du_id=${duId}` : ""}`,
 
-  // Reservoir period summary cache key
-
-  /**
-   * Period-of-record summary for all reservoirs (storage exceedance + spill stats)
-   * @param scenarioId - Scenario ID
-   */
-  reservoirPeriodSummary: (scenarioId: string) =>
-    `/api/statistics/scenarios/${scenarioId}/period-summary`,
-
   // Environmental River Flows cache keys (59 CalSim channel reaches)
 
   /** List of all 59 channel reaches with watershed attributes (static) */
   CHANNELS_LIST: "/api/statistics/channels",
-
-  /** List of all 5 CEFF seasonal definitions (static lookup) */
-  ENV_FLOW_SEASONS: "/api/statistics/env-flow-seasons",
-
-  /**
-   * Monthly % unimpaired flow statistics (Metric 1).all channels in scenario
-   * @param scenarioId - Scenario ID
-   * @param channelId - Optional single channel filter
-   */
-  channelsMonthly: (scenarioId: string, channelId?: string) =>
-    `/api/statistics/scenarios/${scenarioId}/channels/monthly${channelId ? `?channel_id=${channelId}` : ""}`,
-
-  /**
-   * Seasonal flow volumes + % unimpaired + % functional flow (Metrics 1+2)
-   * @param scenarioId - Scenario ID
-   * @param channelId - Optional single channel filter
-   */
-  channelsSeasonal: (scenarioId: string, channelId?: string) =>
-    `/api/statistics/scenarios/${scenarioId}/channels/seasonal${channelId ? `?channel_id=${channelId}` : ""}`,
-
-  /**
-   * Period-of-record Pearson r alteration index (Metric 3) + full-period aggregates
-   * @param scenarioId - Scenario ID
-   * @param channelId - Optional single channel filter
-   */
-  channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
-    `/api/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
 
   // Delta statistics cache keys (X2, salinity, outflow)
 

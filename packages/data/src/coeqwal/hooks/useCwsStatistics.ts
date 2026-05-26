@@ -1,254 +1,34 @@
 "use client"
 
 /**
- * Hooks for fetching CWS aggregate, M&I contractor, and demand unit statistics data
+ * Hooks for fetching M&I contractor and urban demand unit statistics.
  *
- * Used for M&I delivery and shortage charts in the Data Explorer.
+ * Used for M&I delivery and shortage charts in the Data Explorer. CWS aggregate
+ * data is served through the batch endpoint.
  */
 
 import useSWR from "swr"
 import { CACHE_KEYS } from "../../cache/keys"
 import {
-  fetchCwsAggregatesList,
-  fetchCwsAggregatesMonthly,
-  fetchCwsAggregatesPeriod,
-  fetchMiContractorsList,
   fetchMiContractorsMonthly,
   fetchMiContractorsPeriod,
   fetchDemandUnitsList,
-  fetchDemandUnitsGroups,
   fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsPeriod,
 } from "../fetchers"
 import type {
-  CwsAggregatesListResponse,
-  CwsAggregateMonthlyResponse,
-  CwsAggregatePeriodResponse,
-  MiContractorsListResponse,
   MiContractorMonthlyResponse,
   MiContractorPeriodResponse,
   DemandUnitsListResponse,
-  DemandUnitsGroupedResponse,
   DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodResponse,
 } from "../types"
 
-/**
- * Fetch and cache the list of CWS aggregate entities
- *
- * @returns CWS aggregates list with loading and error states
- *
- * @example
- * ```typescript
- * function AggregateSelector() {
- *   const { aggregates, isLoading } = useCwsAggregatesList()
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Select>
- *       {aggregates.map((agg) => (
- *         <Option key={agg.short_code} value={agg.short_code}>
- *           {agg.label}
- *         </Option>
- *       ))}
- *     </Select>
- *   )
- * }
- * ```
- */
-export function useCwsAggregatesList() {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<CwsAggregatesListResponse>(
-    CACHE_KEYS.CWS_AGGREGATES_LIST,
-    fetchCwsAggregatesList,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    aggregates: data?.aggregates ?? [],
-    isLoading,
-    error,
-  }
-}
-
-/**
- * Fetch monthly delivery and shortage statistics for CWS aggregates
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param aggregate - Optional filter by aggregate short_code
- * @returns Monthly statistics for CWS aggregates
- *
- * @example
- * ```typescript
- * function DeliveryChart({ scenarioId }) {
- *   const { aggregates, isLoading } = useCwsAggregatesMonthly(scenarioId)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Grid>
- *       {Object.entries(aggregates).map(([code, data]) => (
- *         <PercentileChart
- *           key={code}
- *           label={data.label}
- *           monthlyData={data.monthly_delivery}
- *         />
- *       ))}
- *     </Grid>
- *   )
- * }
- * ```
- */
-export function useCwsAggregatesMonthly(
-  scenarioId: string | null,
-  aggregate?: string,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<CwsAggregateMonthlyResponse>(
-    scenarioId ? CACHE_KEYS.cwsAggregatesMonthly(scenarioId, aggregate) : null,
-    () => fetchCwsAggregatesMonthly(scenarioId!, aggregate),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    aggregates: data?.aggregates ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.aggregates).length > 0,
-  }
-}
-
-/**
- * Fetch period-of-record summary for CWS aggregates
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param aggregate - Optional filter by aggregate short_code
- * @returns Period summary with annual averages, reliability, and exceedance values
- *
- * @example
- * ```typescript
- * function ReliabilityDashboard({ scenarioId }) {
- *   const { aggregates, isLoading } = useCwsAggregatesPeriod(scenarioId)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Table>
- *       {Object.entries(aggregates).map(([code, summary]) => (
- *         <Row key={code}>
- *           <Cell>{summary.label}</Cell>
- *           <Cell>{summary.reliability_pct}%</Cell>
- *           <Cell>{summary.annual_delivery_avg_taf} TAF</Cell>
- *         </Row>
- *       ))}
- *     </Table>
- *   )
- * }
- * ```
- */
-export function useCwsAggregatesPeriod(
-  scenarioId: string | null,
-  aggregate?: string,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<CwsAggregatePeriodResponse>(
-    scenarioId ? CACHE_KEYS.cwsAggregatesPeriod(scenarioId, aggregate) : null,
-    () => fetchCwsAggregatesPeriod(scenarioId!, aggregate),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    aggregates: data?.aggregates ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.aggregates).length > 0,
-  }
-}
-
 // ============================================================================
 // M&I Contractors Hooks (30 SWP water agency contractors)
 // ============================================================================
-
-/**
- * Fetch and cache the list of M&I contractors
- *
- * @param group - Optional filter by group (e.g., "swp")
- * @returns M&I contractors list with loading and error states
- *
- * @example
- * ```typescript
- * function ContractorSelector() {
- *   const { contractors, isLoading } = useMiContractorsList()
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Select>
- *       {contractors.map((c) => (
- *         <Option key={c.short_code} value={c.short_code}>
- *           {c.label}
- *         </Option>
- *       ))}
- *     </Select>
- *   )
- * }
- * ```
- */
-export function useMiContractorsList(group?: string) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<MiContractorsListResponse>(
-    CACHE_KEYS.miContractorsList(group),
-    () => fetchMiContractorsList(group),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    contractors: data?.contractors ?? [],
-    isLoading,
-    error,
-  }
-}
 
 /**
  * Fetch monthly delivery and shortage statistics for M&I contractors
@@ -461,80 +241,6 @@ export function useDemandUnitsList(group?: string) {
   return {
     data,
     demandUnits,
-    isLoading,
-    error,
-  }
-}
-
-/**
- * Fetch and cache the list of urban demand units organized by group
- *
- * @returns Demand units grouped by category with loading and error states
- *
- * @example
- * ```typescript
- * function GroupedDemandUnitSelector() {
- *   const { groups, isLoading } = useDemandUnitsGroups()
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Select>
- *       {Object.entries(groups).map(([groupName, units]) => (
- *         <OptGroup key={groupName} label={groupName}>
- *           {units.map((du) => (
- *             <Option key={du.du_id} value={du.du_id}>
- *               {du.label}
- *             </Option>
- *           ))}
- *         </OptGroup>
- *       ))}
- *     </Select>
- *   )
- * }
- * ```
- */
-export function useDemandUnitsGroups() {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<DemandUnitsGroupedResponse>(
-    CACHE_KEYS.DEMAND_UNITS_GROUPS,
-    fetchDemandUnitsGroups,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  // Handle both possible API response structures:
-  // 1. { groups: { swp: [...], cvp: [...] } } - wrapped format
-  // 2. { swp: [...], cvp: [...] } - direct format (groups at top level)
-  let groups: Record<string, Array<{ du_id: string; label: string }>> = {}
-
-  if (data) {
-    if (data.groups && typeof data.groups === "object") {
-      // Wrapped format: { groups: { swp: [...], cvp: [...] } }
-      groups = data.groups
-    } else {
-      // Direct format: { swp: [...], cvp: [...] }
-      // Filter out non-array properties (like metadata fields)
-      const directData = data as unknown as Record<string, unknown>
-      Object.entries(directData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          groups[key] = value as Array<{ du_id: string; label: string }>
-        }
-      })
-    }
-  }
-
-  return {
-    data,
-    groups,
     isLoading,
     error,
   }

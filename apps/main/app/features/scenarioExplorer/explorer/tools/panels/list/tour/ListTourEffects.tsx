@@ -17,10 +17,7 @@
  */
 
 import { useEffect, useRef } from "react"
-import {
-  useExplorerStore,
-  useWorkspaceSlice,
-} from "../../../../store"
+import { useExplorerStore, useWorkspaceSlice } from "../../../../store"
 import {
   mapActions,
   useMapStore,

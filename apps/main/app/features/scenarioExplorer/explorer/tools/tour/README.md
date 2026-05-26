@@ -422,7 +422,7 @@ Rules of thumb for each `EffectsComponent`:
 - Keep them visual-only. No click handlers; the runner already drives
   the matching live control when the step is active. If the
   illustration must include a control sample, set `pointerEvents:
-  "none"`.
+"none"`.
 - Frame each block to match the rest: warm off-white panel background
   (`#faf8f5`), `1px solid theme.palette.divider`, `borderRadius: 1.5`,
   small uppercase eyebrow at the top.

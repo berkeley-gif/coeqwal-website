@@ -58,7 +58,7 @@ function MapErrorFallback() {
 
 /**
  * Handles map error by updating store state.
- * 
+ *
  * Tabs change mode via mapActions.setMapMode(...) instead of mounting/unmounting a map per tab.
  */
 function handleMapError(error: Error) {

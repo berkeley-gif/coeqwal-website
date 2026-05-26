@@ -109,11 +109,7 @@ function convertScenarioTierToLocations(
   // without a tier level when the underlying metric has no data). Skip
   // those rather than mapping them to tier 0, which would mis-color the
   // map cell.
-  if (
-    !tierInfo ||
-    tierInfo.type !== "single_value" ||
-    tierInfo.level == null
-  ) {
+  if (!tierInfo || tierInfo.type !== "single_value" || tierInfo.level == null) {
     return null
   }
 

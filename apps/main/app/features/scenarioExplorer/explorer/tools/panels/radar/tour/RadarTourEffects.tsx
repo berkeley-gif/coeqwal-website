@@ -27,9 +27,7 @@ import type { TourEffectsProps } from "../../../tour/types"
 export default function RadarTourEffects({ step }: TourEffectsProps) {
   const setShowAxisSelector = useRadarSlice((s) => s.setShowAxisSelector)
   const setShowRadarRange = useRadarSlice((s) => s.setShowRadarRange)
-  const setHighlightBaseline = useWorkspaceSlice(
-    (s) => s.setHighlightBaseline,
-  )
+  const setHighlightBaseline = useWorkspaceSlice((s) => s.setHighlightBaseline)
 
   // ------------------------------------------------------------------
   // radar.step1.axisChooser: open the axis chooser panel.
@@ -88,9 +86,7 @@ export default function RadarTourEffects({ step }: TourEffectsProps) {
   // radar.step1.libraryRange: overlay the library range band.
   // ------------------------------------------------------------------
 
-  const radarRangeDemoRef = useRef<{ prevShowRadarRange: boolean } | null>(
-    null,
-  )
+  const radarRangeDemoRef = useRef<{ prevShowRadarRange: boolean } | null>(null)
 
   useEffect(() => {
     if (!step) return

@@ -229,28 +229,6 @@ export interface TierLocationAssignmentsBatchResponse {
 // ============================================================================
 
 /**
- * Reservoir info from /api/statistics/reservoirs endpoint
- */
-export interface ReservoirInfo {
-  /** Reservoir ID (e.g., "S_SHSTA") */
-  reservoir_id: string
-  /** Human-readable name (e.g., "Shasta") */
-  reservoir_name: string
-}
-
-/**
- * Scenario with percentile data from /api/statistics/scenarios endpoint
- */
-export interface StatisticsScenarioInfo {
-  /** Scenario ID (e.g., "s0020") */
-  scenario_id: string
-  /** Array of reservoir IDs with data */
-  reservoirs: string[]
-  /** Count of reservoirs */
-  reservoir_count: number
-}
-
-/**
  * Percentile values for a single month.
  *
  * Fields are non-null because the reservoir ETL emits all percentiles
@@ -340,13 +318,6 @@ export interface GroupedReservoirPercentilesResponse {
 }
 
 /**
- * Response from /api/statistics/reservoirs endpoint
- */
-export interface ReservoirListResponse {
-  reservoirs: ReservoirInfo[]
-}
-
-/**
  * Reservoir info from /api/statistics/reservoirs/all endpoint
  * Includes capacity information for all available reservoirs
  */
@@ -369,45 +340,6 @@ export interface AllReservoirsListResponse {
   all: AllReservoirInfo[]
   /** Total count of reservoirs */
   total: number
-}
-
-/**
- * Response from /api/statistics/scenarios endpoint
- */
-export interface StatisticsScenariosResponse {
-  scenarios: StatisticsScenarioInfo[]
-  total: number
-}
-
-// ============================================================================
-// Storage Monthly Types (for dual-unit percentile charts)
-// ============================================================================
-
-/**
- * Reservoir data in storage-monthly response
- * Contains both percentage and TAF values for percentile bands
- */
-export interface StorageMonthlyReservoirData {
-  /** Human-readable name (e.g., "Shasta") */
-  name: string
-  /** Total reservoir capacity in thousand acre-feet, or null when missing */
-  capacity_taf: number | null
-  /** Monthly percentile data as percentage of capacity (0-100+) */
-  monthly_percent: MonthlyPercentiles
-  /** Monthly percentile data as volume in TAF */
-  monthly_taf: MonthlyPercentiles
-}
-
-/**
- * Response from /api/statistics/scenarios/:scenarioId/storage-monthly?group=:group
- * Returns reservoirs with both percentage and TAF percentile data
- */
-export interface StorageMonthlyResponse {
-  scenario_id: string
-  /** Reservoir group (e.g., "major") */
-  group: string
-  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
-  reservoirs: Record<string, StorageMonthlyReservoirData>
 }
 
 // ============================================================================
@@ -471,25 +403,8 @@ export interface SpillMonthlyResponse {
 }
 
 // ============================================================================
-// CWS Aggregate Types (for M&I delivery/shortage statistics)
+// CWS Aggregate Types (for M&I delivery/shortage statistics, served via batch endpoint)
 // ============================================================================
-
-/**
- * CWS aggregate entity from /api/statistics/cws-aggregates endpoint
- */
-export interface CwsAggregate {
-  /** Short code identifier (e.g., "swp_total", "cvp_nod") */
-  short_code: string
-  /** Display label (e.g., "SWP Total M&I", "CVP North") */
-  label: string
-}
-
-/**
- * Response from /api/statistics/cws-aggregates endpoint
- */
-export interface CwsAggregatesListResponse {
-  aggregates: CwsAggregate[]
-}
 
 /**
  * Monthly delivery statistics for a single month
@@ -610,25 +525,6 @@ export interface CwsAggregatePeriodResponse {
 // ============================================================================
 
 /**
- * M&I contractor entity from /api/statistics/mi-contractors endpoint
- */
-export interface MiContractor {
-  /** Short code identifier (e.g., "mwd_mi", "acwd_mi") */
-  short_code: string
-  /** Display label (e.g., "Metropolitan Water District", "Alameda County WD") */
-  label: string
-  /** Group identifier (e.g., "swp") */
-  group?: string
-}
-
-/**
- * Response from /api/statistics/mi-contractors endpoint
- */
-export interface MiContractorsListResponse {
-  contractors: MiContractor[]
-}
-
-/**
  * M&I contractor data with monthly delivery and shortage statistics
  * Same structure as CwsAggregateData
  */
@@ -717,15 +613,6 @@ export interface DemandUnit {
  */
 export interface DemandUnitsListResponse {
   demand_units: DemandUnit[]
-}
-
-/**
- * Response from /api/statistics/demand-units/groups endpoint
- * Returns demand units organized by group (e.g., "swp", "cvp")
- */
-export interface DemandUnitsGroupedResponse {
-  /** Demand units organized by group key */
-  groups: Record<string, DemandUnit[]>
 }
 
 /**
@@ -954,29 +841,6 @@ export interface AgDemandUnitDeliveryMonthlyResponse {
 }
 
 /**
- * AG demand unit shortage data with monthly statistics
- */
-export interface AgDemandUnitShortageData {
-  /** Agency name */
-  agency: string
-  /** Hydrologic region */
-  hydrologic_region: string | null
-  /** CS3 contractor type */
-  cs3_type: string | null
-  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_shortage: Record<string, CwsShortageMonthlyStats>
-}
-
-/**
- * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/shortage-monthly
- */
-export interface AgDemandUnitShortageMonthlyResponse {
-  scenario_id: string
-  /** Demand unit data keyed by DU ID */
-  demand_units: Record<string, AgDemandUnitShortageData>
-}
-
-/**
  * Period summary for an AG demand unit.
  *
  * Shape mirrors the backend's `ag_du_period_summary` table.
@@ -1037,55 +901,6 @@ export interface AgDemandUnitPeriodResponse {
   scenario_id: string
   /** Period summary data keyed by DU ID */
   demand_units: Record<string, AgDemandUnitPeriodSummary>
-}
-
-// ============================================================================
-// Reservoir Period Summary Types
-// ============================================================================
-
-/**
- * Period-of-record data for a single reservoir.
- *
- * Spill volume metrics (mean_cfs, peak_cfs, annual_*) are not populated by
- * the ETL today for most reservoirs and ride through as null. Storage
- * exceedance values and thresholds may also be null when the row was not
- * computed.
- */
-export interface ReservoirPeriodData {
-  /** Human-readable name */
-  name: string
-  /** Total reservoir capacity in TAF */
-  capacity_taf: number | null
-  /** Storage exceedance values as % of capacity (p5, p10, p25, p50, p75, p90, p95) */
-  storage_exceedance: Record<string, number | null>
-  /** Threshold levels */
-  thresholds: {
-    dead_pool_taf: number | null
-    dead_pool_pct: number | null
-    spill_threshold_pct: number | null
-  }
-  /** Annual spill summary statistics */
-  spill: {
-    years_count: number | null
-    frequency_pct: number | null
-    mean_cfs: number | null
-    peak_cfs: number | null
-    annual_avg_taf: number | null
-    annual_cv: number | null
-    annual_max_taf: number | null
-    annual_max_q50: number | null
-    annual_max_q90: number | null
-    annual_max_q100: number | null
-  }
-}
-
-/**
- * Response from /api/statistics/scenarios/:scenarioId/period-summary
- */
-export interface ReservoirPeriodSummaryResponse {
-  scenario_id: string
-  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
-  reservoirs: Record<string, ReservoirPeriodData>
 }
 
 // ============================================================================
@@ -1348,32 +1163,6 @@ export interface ChannelEntity {
 /** Response from /api/statistics/channels */
 export interface ChannelsListResponse {
   channels: ChannelEntity[]
-  total: number
-}
-
-/**
- * One CEFF season definition from /api/statistics/env-flow-seasons.
- * Water months: 1=October ... 12=September.
- */
-export interface EnvFlowSeason {
-  season_id: number
-  short_code:
-    | "wet_peak"
-    | "wet_base"
-    | "spring_recession"
-    | "dry"
-    | "fall_pulse"
-  name: string
-  description: string
-  calendar_months: string
-  /** Water year month numbers in this season (e.g., [3,4,5] for Dec-Feb) */
-  wy_months: number[]
-  sort_order: number
-}
-
-/** Response from /api/statistics/env-flow-seasons */
-export interface EnvFlowSeasonsResponse {
-  seasons: EnvFlowSeason[]
   total: number
 }
 
