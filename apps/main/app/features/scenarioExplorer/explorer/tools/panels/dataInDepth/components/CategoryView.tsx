@@ -25,7 +25,7 @@ import { TierGlyphWithTooltip } from "../../../../../../tooltips/TierGlyphWithTo
 /** Compact chart size for tier distribution (1.5x scenario-explorer size) */
 const TIER_CHART_SIZE = 90
 import { ExpandMoreIcon, AddIcon } from "@repo/ui/mui"
-import useSWR from "swr"
+import useSWR from "@repo/data/swr"
 import { useWorkspaceSlice } from "../../../../store"
 import { useScenarioExplorerStore } from "../../../../../store"
 import {

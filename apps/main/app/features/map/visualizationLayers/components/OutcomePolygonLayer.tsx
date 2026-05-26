@@ -17,14 +17,6 @@ import {
   LAYER_IDS,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../config/outcomeLayerRegistry"
-// Diagnostic helpers live in the storyboard engine module. OPL
-// imports them so all `[DIAG S4/S5]` logs share one STORYBOARD_DEBUG
-// flag. Phase 3 of the hardening plan removes OPL's demand-units
-// writes entirely. At that point these imports go away with them.
-import {
-  debugLog,
-  logDuState,
-} from "../../../scenarioExplorer/animation/engine"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,10 +144,6 @@ const FADE_IN_DURATION = 350
 /** Duration (ms) for the color crossfade when data changes while already visible */
 const COLOR_TRANSITION_DURATION = 400
 
-// `logDuState` and `debugLog` are imported from the storyboard engine
-// at the top of the file. Single source of truth for the storyboard
-// debug flag and layer-state snapshotting.
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -269,13 +257,6 @@ export function OutcomePolygonLayer({
       outlineCreatedRef.current = false
       wasShowingDataRef.current = false
       return
-    }
-
-    if (fillId === "demand-units") {
-      debugLog(
-        `OPL main-effect START fillId=${fillId} visible=${visible} hasTierData=${hasTierData} outlineOnly=${outlineOnly} wasShowing=${wasShowingDataRef.current}`,
-      )
-      logDuState("OPL main-effect PRE", map)
     }
 
     // Cancel any pending deferred fade-in from a previous run
@@ -455,10 +436,6 @@ export function OutcomePolygonLayer({
       }
     }
 
-    if (fillId === "demand-units") {
-      logDuState("OPL main-effect POST-sync (pre-rAF)", map)
-    }
-
     // Step 2 (next frame): now that Mapbox has rendered one frame at opacity 0
     // with the transition spec already armed, changing the opacity triggers the
     // smooth fade-in. Without this RAF split, Mapbox batches the "set to 0" and
@@ -521,14 +498,6 @@ export function OutcomePolygonLayer({
       if (!currentMapRef) return
       const map = currentMapRef.getMap()
 
-      if (fillId === "demand-units") {
-        debugLog(
-          `OPL unmount-cleanup START fillId=${fillId} outlineCreated=${outlineCreatedRef.current}`,
-        )
-        logDuState("OPL unmount-cleanup PRE", map)
-      }
-
-      // Hide layers
       if (map.getLayer(fillId)) {
         map.setLayoutProperty(fillId, "visibility", "none")
         map.setFilter(fillId, ["==", idProperty || "id", ""])
@@ -545,10 +514,6 @@ export function OutcomePolygonLayer({
         } else {
           map.setLayoutProperty(outlineId, "visibility", "none")
         }
-      }
-
-      if (fillId === "demand-units") {
-        logDuState("OPL unmount-cleanup POST", map)
       }
     }
   }, [mapRef, fillId, outlineId, idProperty])

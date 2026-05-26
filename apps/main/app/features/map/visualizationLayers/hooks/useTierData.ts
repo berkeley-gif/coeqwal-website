@@ -22,7 +22,7 @@
 
 import { useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
-import useSWR from "swr"
+import useSWR from "@repo/data/swr"
 import {
   getTierColorsFromTheme,
   type TierLevel,
@@ -89,7 +89,6 @@ function adaptAssignmentsToLegacyShape(
       location_type: l.location_type,
       tier_level: l.tier_level,
       tier_value: l.tier_value,
-      display_order: l.display_order,
     })),
     metadata: {
       total_locations: data.metadata.total_locations,
@@ -121,7 +120,6 @@ function convertScenarioTierToLocations(
     location_type: "single_value",
     tier_level: level,
     tier_value: null,
-    display_order: 0,
   }
 
   return {

@@ -39,7 +39,6 @@ import type {
   BeatTableEntry,
   EngineMode,
 } from "./types"
-import { debugLog } from "./debug"
 
 export interface BeatEngineApi {
   /** Force cleanup. Call `onExit` on every active actor, then
@@ -239,7 +238,6 @@ export function useBeatEngine({
       getMode: () => modeRef.current,
       setMode: (mode) => {
         if (modeRef.current === mode) return
-        debugLog(`engine.setMode ${modeRef.current} -> ${mode}`)
         modeRef.current = mode
       },
     }

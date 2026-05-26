@@ -8,7 +8,7 @@
  */
 
 import { useEffect } from "react"
-import { preload } from "swr"
+import { preload } from "@repo/data/swr"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
 import { fetchScenarioTiers } from "@repo/data/coeqwal"

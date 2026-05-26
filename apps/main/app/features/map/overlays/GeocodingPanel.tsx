@@ -10,9 +10,14 @@
 import { useState, useEffect, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
-import { useMap, useGeocoding, useBasinLookup, BOUNDING_BOXES } from "@repo/map"
+import {
+  useMap,
+  useGeocoding,
+  useBasinLookup,
+  BOUNDING_BOXES,
+  bbox,
+} from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
-import { bbox } from "@turf/turf"
 import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CENTRAL_VALLEY_VIEW } from "../config/cameraPresets"
 

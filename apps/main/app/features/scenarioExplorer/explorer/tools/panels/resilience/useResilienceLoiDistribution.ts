@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { preload } from "swr"
+import { preload } from "@repo/data/swr"
 import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
 import type {
   TierLocationAssignmentsResponse,
@@ -222,7 +222,7 @@ export function useResilienceLoiDistribution({
               loiOrder.push(loc.location_id)
               loiMeta.set(loc.location_id, {
                 label: loc.location_name,
-                order: loc.display_order ?? loiOrder.length,
+                order: loiOrder.length,
               })
             }
           }
@@ -323,7 +323,7 @@ export function useResilienceLoiDistribution({
             loiOrder.push(loc.location_id)
             loiMeta.set(loc.location_id, {
               label: loc.location_name,
-              order: loc.display_order ?? loiOrder.length,
+              order: loiOrder.length,
             })
           }
         }

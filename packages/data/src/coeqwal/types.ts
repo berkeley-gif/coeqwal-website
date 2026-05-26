@@ -1,5 +1,5 @@
 /**
- * Shared types for COEQWAL API responses
+ * types.ts - Shared types for COEQWAL API responses
  *
  * These types are the source of truth for API response shapes.
  * Import from "@repo/data/coeqwal" instead of defining locally.
@@ -137,7 +137,6 @@ export interface TierLocationAssignment {
   location_type: string
   tier_level: number
   tier_value: number | null
-  display_order: number
 }
 
 export interface TierLocationAssignmentsResponse {
@@ -420,34 +419,24 @@ export interface CwsAggregateMonthlyResponse {
 export interface CwsAggregatePeriodSummary {
   /** Display label */
   label: string
-  /** First year of simulation */
-  simulation_start_year: number
-  /** Last year of simulation */
-  simulation_end_year: number
-  /** Total years in record */
-  total_years: number
   /** Annual average delivery in TAF */
   annual_delivery_avg_taf: number
   /** Coefficient of variation for annual delivery */
   annual_delivery_cv: number
-  /** Minimum annual delivery in TAF */
-  annual_delivery_min_taf: number
-  /** Maximum annual delivery in TAF */
-  annual_delivery_max_taf: number
   /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   delivery_exceedance: Record<string, number>
   /** Annual average shortage in TAF */
   annual_shortage_avg_taf: number
-  /** Number of years with shortage > 0 */
-  shortage_years_count: number
   /** Percentage of years with shortage > 0 */
   shortage_frequency_pct: number
   /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   shortage_exceedance: Record<string, number>
+  /** Annual average demand in TAF */
+  annual_demand_avg_taf: number
   /** Percentage of months meeting full demand (shortage = 0) */
   reliability_pct: number
   /** Average (delivery / demand) × 100 across all months */
-  avg_pct_allocation_met: number
+  avg_pct_demand_met: number
 }
 
 /**
@@ -487,7 +476,6 @@ export interface MiContractorMonthlyResponse {
 
 /**
  * Period summary for an M&I contractor
- * Same structure as CwsAggregatePeriodSummary
  */
 export interface MiContractorPeriodSummary {
   /** Display label */
@@ -502,10 +490,6 @@ export interface MiContractorPeriodSummary {
   annual_delivery_avg_taf: number
   /** Coefficient of variation for annual delivery */
   annual_delivery_cv: number
-  /** Minimum annual delivery in TAF */
-  annual_delivery_min_taf: number
-  /** Maximum annual delivery in TAF */
-  annual_delivery_max_taf: number
   /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   delivery_exceedance: Record<string, number>
   /** Annual average shortage in TAF */
@@ -516,10 +500,12 @@ export interface MiContractorPeriodSummary {
   shortage_frequency_pct: number
   /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   shortage_exceedance: Record<string, number>
+  /** Annual average demand in TAF */
+  annual_demand_avg_taf: number
   /** Percentage of months meeting full demand (shortage = 0) */
   reliability_pct: number
   /** Average (delivery / demand) × 100 across all months */
-  avg_pct_allocation_met: number
+  avg_pct_demand_met: number
 }
 
 /**
@@ -581,8 +567,10 @@ export interface DemandUnitMonthlyResponse {
  * Period summary for an urban demand unit
  */
 export interface DemandUnitPeriodSummary {
-  /** Display label */
-  label: string
+  /** Entity display name. Falls back to `du_id` upstream when null */
+  community_agency: string | null
+  /** Hydrologic region (e.g., "SJR", "SAC"), or null when unknown */
+  hydrologic_region: string | null
   /** First year of simulation */
   simulation_start_year: number
   /** Last year of simulation */
@@ -593,10 +581,6 @@ export interface DemandUnitPeriodSummary {
   annual_delivery_avg_taf: number
   /** Coefficient of variation for annual delivery */
   annual_delivery_cv: number
-  /** Minimum annual delivery in TAF */
-  annual_delivery_min_taf: number
-  /** Maximum annual delivery in TAF */
-  annual_delivery_max_taf: number
   /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   delivery_exceedance: Record<string, number>
   /** Annual average shortage in TAF */
@@ -607,10 +591,12 @@ export interface DemandUnitPeriodSummary {
   shortage_frequency_pct: number
   /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
   shortage_exceedance: Record<string, number>
+  /** Annual average demand in TAF */
+  annual_demand_avg_taf: number
   /** Percentage of months meeting full demand (shortage = 0) */
   reliability_pct: number
   /** Average (delivery / demand) × 100 across all months */
-  avg_pct_allocation_met: number
+  avg_pct_demand_met: number
 }
 
 /**

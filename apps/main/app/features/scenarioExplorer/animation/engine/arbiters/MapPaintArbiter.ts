@@ -14,7 +14,6 @@ import {
   type MapWriteView,
 } from "../demandUnitsBaseline"
 import { BEAT1_MID, beat1FillExpr } from "../beat1Palette"
-import { debugLog, logDuState } from "../debug"
 import { BASEMAP_DIM_OPACITY } from "../../../../map/config/outcomeLayerRegistry"
 
 /** Progress value at which the `basemap-dim-overlay` finishes fading
@@ -45,8 +44,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
    *  at 0 so a fresh playback hold (before any cycle has run) uses
    *  the reset palette. */
   private frozenColorPhase = 0
-
-  private diagBoundariesLogged = new Set<string>()
 
   onEnter(actor: MapPaintActor, v: number, ctx: BeatEngineContext): void {
     const map = getMapWriteView(ctx)
@@ -133,31 +130,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // the layer, so `onUpdate` is a no-op.
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
-
-      // [DIAG S4/S5] Log at boundary crossings (first-tick, start, end,
-      // peak, tail-start, tail-end) so we can correlate the per-frame
-      // opacity the arbiter intends vs. what Mapbox actually carries.
-      const stage =
-        v < p.fadeInStart
-          ? "pre-fade-in"
-          : v < p.fadeInEnd
-            ? "during-fade-in"
-            : v < p.holdUntil
-              ? "peak-hold"
-              : v < p.tailEnd
-                ? "during-tail-fade"
-                : "post-tail"
-      const key = stage
-      if (!this.diagBoundariesLogged.has(key)) {
-        this.diagBoundariesLogged.add(key)
-        debugLog(
-          `MapPaintArbiter beat5-layer-fade stage=${stage} v=${v.toFixed(4)} target=${targetOpacity.toFixed(3)}`,
-        )
-        logDuState(
-          `beat5-layer-fade stage=${stage}`,
-          map as unknown as MapboxGLMap,
-        )
-      }
 
       try {
         if (map.getLayer("demand-units")) {
@@ -259,7 +231,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // here a second time is idempotent and keeps the invariant local.
     this.beat5PolyRingOn = false
     this.frozenColorPhase = 0
-    this.diagBoundariesLogged.clear()
   }
 
   private applyBeat1CycleEnter(map: MapWriteView, v: number): void {
@@ -615,10 +586,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     ctx: BeatEngineContext,
     v: number,
   ): void {
-    logDuState(
-      "MapPaintArbiter.applyBeat5Enter PRE",
-      map as unknown as MapboxGLMap,
-    )
     writeDemandUnitsBaseline(map, {
       filter: DU_AG_ONLY_FILTER,
       fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1),
@@ -629,12 +596,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
       visibility: "visible",
     })
     this.beat5PolyRingOn = false
-    this.diagBoundariesLogged.clear()
     this.applyBasemapDimRamp(map, v)
-    logDuState(
-      "MapPaintArbiter.applyBeat5Enter POST",
-      map as unknown as MapboxGLMap,
-    )
   }
 
   private applyBeat5PolyRingOn(

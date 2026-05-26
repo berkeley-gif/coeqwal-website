@@ -7,7 +7,7 @@
  * using an interactive tier-based grid visualization.
  */
 
-import { useMemo, useState, useCallback, useEffect } from "react"
+import { useMemo, useState, useCallback, useEffect, useRef } from "react"
 import {
   Box,
   useTheme,
@@ -191,7 +191,7 @@ export default function EquityPanel({
   // The Distribution (equity) tool uses its own focus field rather
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
-  const { equityFocusScenario, showMap } = useWorkspaceSlice()
+  const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
   const { showEquityComparison } = useEquitySlice()
 
   const { objectives, categories } = useEquityObjectives({
@@ -211,66 +211,78 @@ export default function EquityPanel({
     tier: string
   } | null>(null)
 
-  // Watch for map location highlights being cleared to deselect all objectives
+  // Deselect grid cells when the user clears map highlights (e.g. animation
+  // overlay), not merely because highlights are empty by default.
   const locationHighlights = useMapStore((state) => state.locationHighlights)
+  const prevLocationHighlightsRef = useRef(locationHighlights)
 
   useEffect(() => {
-    // When location highlights are cleared (empty array), clear selections
-    if (locationHighlights.length === 0) {
+    const prev = prevLocationHighlightsRef.current
+    prevLocationHighlightsRef.current = locationHighlights
+    if (prev.length > 0 && locationHighlights.length === 0) {
       setSelectedObjectives([])
     }
   }, [locationHighlights])
 
-  const handleObjectiveClick = (objective: TierGridProps["objectives"][0]) => {
-    setSelectedObjectives((prev) => {
-      const isSelected = prev.some(
-        (obj) =>
-          obj.locationId === objective.locationId &&
-          obj.tierCode === objective.tierCode,
-      )
-      if (isSelected) {
-        return prev.filter(
+  // Memoized so TierGrid's d3 redraw callback keeps a stable identity. Plain
+  // functions here re-bind every parent render and force TierGrid to rerun
+  // a 1000ms enter/update transition on every SWR revalidation, which
+  // intermittently swallows clicks on the small (4-16px) dot targets.
+  const handleObjectiveClick = useCallback(
+    (objective: TierGridProps["objectives"][0]) => {
+      setSelectedObjectives((prev) => {
+        const isSelected = prev.some(
           (obj) =>
-            !(
-              obj.locationId === objective.locationId &&
-              obj.tierCode === objective.tierCode
-            ),
+            obj.locationId === objective.locationId &&
+            obj.tierCode === objective.tierCode,
         )
-      } else {
-        return [...prev, objective]
-      }
-    })
-  }
-
-  const handleCategoryClick = (categoryName: string) => {
-    const categoryObjectives = objectives.filter(
-      (obj) => obj.category === categoryName,
-    )
-    setSelectedObjectives(categoryObjectives)
-  }
-
-  const handleTierCategoryClick = (
-    categoryName: string,
-    tier: string,
-    event: MouseEvent,
-  ) => {
-    event.preventDefault()
-    if (showEquityComparison) {
-      // Show context menu for filtering
-      setContextMenu({
-        mouseX: event.clientX,
-        mouseY: event.clientY,
-        category: categoryName,
-        tier: tier,
+        if (isSelected) {
+          return prev.filter(
+            (obj) =>
+              !(
+                obj.locationId === objective.locationId &&
+                obj.tierCode === objective.tierCode
+              ),
+          )
+        } else {
+          return [...prev, objective]
+        }
       })
-    } else {
-      // Direct selection in non-comparison mode
-      const tierCategoryObjectives = objectives.filter(
-        (obj) => obj.category === categoryName && obj.tier === tier,
+    },
+    [],
+  )
+
+  const handleCategoryClick = useCallback(
+    (categoryName: string) => {
+      const categoryObjectives = objectives.filter(
+        (obj) => obj.category === categoryName,
       )
-      setSelectedObjectives(tierCategoryObjectives)
-    }
-  }
+      setSelectedObjectives(categoryObjectives)
+    },
+    [objectives],
+  )
+
+  const handleTierCategoryClick = useCallback(
+    (categoryName: string, tier: string, event: MouseEvent) => {
+      event.preventDefault()
+      if (showEquityComparison) {
+        // Show context menu for filtering
+        setContextMenu({
+          mouseX: event.clientX,
+          mouseY: event.clientY,
+          category: categoryName,
+          tier: tier,
+        })
+      } else {
+        // Direct selection in non-comparison mode
+        const tierCategoryObjectives = objectives.filter(
+          (obj) => obj.category === categoryName && obj.tier === tier,
+        )
+        setSelectedObjectives(tierCategoryObjectives)
+      }
+    },
+    [objectives, showEquityComparison],
+  )
 
   const handleContextMenuSelect = (
     filter: "all" | "improved" | "nochange" | "worsened",
@@ -304,6 +316,8 @@ export default function EquityPanel({
 
   const handleShowOnMap = useCallback(
     (outcomeLocationCodes: string[]) => {
+      setShowMap(true)
+
       // Get the Mapbox map instance
       const map = mapRef?.current?.getMap()
 
@@ -609,7 +623,14 @@ export default function EquityPanel({
       // Switch to explore mode to show the map
       mapActions.setMapMode("explore")
     },
-    [objectives, showEquityComparison, tierColors, mapRef, setMotionChildren],
+    [
+      objectives,
+      showEquityComparison,
+      tierColors,
+      mapRef,
+      setMotionChildren,
+      setShowMap,
+    ],
   )
 
   // Update selectedObjectives with fresh data when scenario or comparison mode changes
@@ -628,20 +649,19 @@ export default function EquityPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [equityFocusScenario, showEquityComparison, objectives])
 
-  // Update highlights when selected objectives changes
+  // Paint map markers when the user selects grid cells. Selection turns the
+  // map panel on if it was off; handleShowOnMap also sets mapMode explore.
   useEffect(() => {
-    if (selectedObjectives.length > 0 && showMap) {
-      // const locationIds = selectedObjectives.map((obj) => obj.locationId)
+    if (selectedObjectives.length > 0) {
       const selectedTierLocationCodes = selectedObjectives.map(
         (obj) => `${obj.tierCode}:${obj.locationId}`,
       )
       handleShowOnMap(selectedTierLocationCodes)
     } else if (setMotionChildren) {
-      // Clear markers when no objectives selected or map hidden
       setMotionChildren(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObjectives, showMap])
+  }, [selectedObjectives, handleShowOnMap])
 
   useEffect(() => {
     if (showMap && !hasShownMapHint) {
@@ -707,7 +727,7 @@ export default function EquityPanel({
             onCategoryClick={handleCategoryClick}
             onTierCategoryClick={handleTierCategoryClick}
             onShowOnMap={handleShowOnMap}
-            showMapView={showMap}
+            showMapView
             focusScenarioId={focusScenarioId}
             onChartHover={onChartHover}
           />

@@ -860,9 +860,9 @@ const { data: locationsB } = useTierLocationAssignments("s0021", "CWS_DEL")
 //   tier_type: "multi_value",
 //   locations: [
 //     { location_id: "02_NU", location_name: "02_NU",
-//       location_type: "demand_unit", tier_level: 1, tier_value: null, display_order: 1 },
+//       location_type: "demand_unit", tier_level: 1, tier_value: null },
 //     { location_id: "03_PU1", location_name: "03_PU1",
-//       location_type: "demand_unit", tier_level: 2, tier_value: 1, display_order: 80 },
+//       location_type: "demand_unit", tier_level: 2, tier_value: 1 },
 //     ...121 locations total
 //   ],
 //   metadata: {

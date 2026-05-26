@@ -24,6 +24,11 @@ export type {
   Map as MapboxGLMap,
 } from "mapbox-gl"
 
+// Geo primitives re-exported so apps go through @repo/map instead of
+// declaring @turf/* dependencies themselves. Add more turf functions
+// here as app needs grow.
+export { default as bbox } from "@turf/bbox"
+
 // Export core types from our types file
 export type {
   ViewState,

@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useRef } from "react"
-import { preload } from "swr"
+import { preload } from "@repo/data/swr"
 import {
   fetchAllScenarioTiers,
   fetchTierLocationAssignmentsBatch,
