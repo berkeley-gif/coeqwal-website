@@ -52,7 +52,7 @@ export const ENDPOINTS = {
   // Statistics endpoints (reservoir percentiles)
 
   /** List of all reservoirs with statistics data */
-  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
+  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs",
 
   /**
    * Percentile data for all reservoirs in a scenario
@@ -100,7 +100,7 @@ export const ENDPOINTS = {
    * @param contractor - Optional filter by contractor short_code
    */
   miContractorsMonthly: (scenarioId: string, contractor?: string) =>
-    `/statistics/scenarios/${scenarioId}/mi-contractors/delivery-monthly${contractor ? `?contractor=${contractor}` : ""}`,
+    `/statistics/scenarios/${scenarioId}/mi-contractors/monthly${contractor ? `?contractor=${contractor}` : ""}`,
 
   /**
    * Period-of-record summary for M&I contractors
@@ -134,11 +134,12 @@ export const ENDPOINTS = {
     const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
-    return `/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+    return `/statistics/scenarios/${scenarioId}/demand-units/monthly${params ? `?${params}` : ""}`
   },
 
   /**
-   * Monthly shortage statistics for urban demand units
+   * Monthly shortage for urban demand units. Hits the same merged `/monthly`
+   * URL as `demandUnitsMonthly`. SWR dedupes the underlying fetch
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param duId - Optional filter by demand unit ID
    * @param group - Optional group filter
@@ -151,7 +152,7 @@ export const ENDPOINTS = {
     const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
-    return `/statistics/scenarios/${scenarioId}/demand-units/shortage-monthly${params ? `?${params}` : ""}`
+    return `/statistics/scenarios/${scenarioId}/demand-units/monthly${params ? `?${params}` : ""}`
   },
 
   /**
@@ -190,35 +191,31 @@ export const ENDPOINTS = {
   },
 
   /**
-   * Monthly surface-water delivery statistics for AG demand units.
-   * Backend route is `sw-delivery-monthly`. The frontend remaps the
-   * response's `monthly_sw_delivery` field to `monthly_delivery` so the
-   * matrix code can reuse the same shape as CWS aggregates.
+   * Monthly delivery, demand, GW pumping, and shortage for AG demand units.
+   * Hits the merged `/monthly` route. The fetcher reads `monthly_sw_delivery`
+   * off each DU entry. `monthly_demand`, `monthly_gw_pumping`, and
+   * `monthly_shortage` are also present on the same payload.
    *
-   * Pass `duIds` to restrict the response to specific demand units via
-   * the backend's comma-separated `du_id` filter. The list is sorted so
-   * different call orders produce the same URL (and same SWR cache key)
+   * `duIds` are sorted before being encoded so different call orders share
+   * the same SWR cache entry
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
-    return `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/monthly${qs}`
   },
 
   /**
-   * Monthly GW restriction shortage statistics for AG demand units.
-   * Source: `GW_SHORT_*` variables. Available only for SJR / TULARE DUs.
-   *
-   * Pass `duIds` to restrict the response to specific demand units via the
-   * backend's comma-separated `du_id` filter. The list is sorted so different
-   * call orders produce the same URL (and same SWR cache key)
+   * Monthly GW restriction shortage for AG demand units. Hits the same merged
+   * `/monthly` URL as `agDemandUnitsDeliveryMonthly`. SWR dedupes the fetch.
+   * Source: `GW_SHORT_*`. Available only for SJR / TULARE DUs
    * @param scenarioId - Scenario ID (e.g., "s0025")
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsShortageMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
-    return `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly${qs}`
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/monthly${qs}`
   },
 
   /**
@@ -240,18 +237,19 @@ export const ENDPOINTS = {
   refugeDemandUnitsList: () => `/statistics/refuge-demand-units`,
 
   /**
-   * Monthly delivery statistics for refuge demand units
+   * Monthly delivery + shortage for refuge demand units (merged response)
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   refugeDusDeliveryMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/refuge-demand-units/delivery-monthly`,
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/monthly`,
 
   /**
-   * Monthly shortage statistics for refuge demand units
+   * Monthly shortage for refuge demand units. Hits the same merged `/monthly`
+   * URL as `refugeDusDeliveryMonthly`. SWR dedupes the fetch
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   refugeDusShortageMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/refuge-demand-units/shortage-monthly`,
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/monthly`,
 
   /**
    * Period-of-record summary for refuge demand units

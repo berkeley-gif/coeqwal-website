@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Hooks for fetching reservoir percentile data
+ * useReservoirPercentiles.ts - Hooks for fetching reservoir percentile data
  *
  * Used for reservoir storage charts in the Data Explorer.
  */
@@ -75,7 +75,7 @@ export function useAllReservoirsList() {
   return {
     reservoirs,
     majorReservoirIds: data?.major ?? [],
-    total: data?.total ?? 0,
+    count: data?.count ?? 0,
     isLoading,
     error,
   }

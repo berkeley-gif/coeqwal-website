@@ -233,7 +233,9 @@ export interface AllReservoirPercentilesResponse {
  * Uses shorter reservoir IDs (e.g., "FOLSM" instead of "S_FOLSM")
  */
 export interface GroupedReservoirData {
-  /** Human-readable name (e.g., "Folsom") */
+  /** Uniform display label. Falls back to short_code upstream when missing */
+  label: string
+  /** Human-readable name. Preserved alongside `label` */
   name: string
   /** Total reservoir capacity in thousand acre-feet, or null when missing */
   capacity_taf: number | null
@@ -256,28 +258,30 @@ export interface GroupedReservoirPercentilesResponse {
 }
 
 /**
- * Reservoir info from /api/statistics/reservoirs/all endpoint
+ * Reservoir info from /api/statistics/reservoirs endpoint
  * Includes capacity information for all available reservoirs
  */
 export interface AllReservoirInfo {
   /** Reservoir ID (e.g., "SHSTA") */
   reservoir_id: string
-  /** Human-readable name (e.g., "Shasta") */
+  /** Uniform display label. Falls back to reservoir_id upstream when missing */
+  label: string
+  /** Human-readable name. Preserved alongside `label` */
   name: string
   /** Total reservoir capacity in thousand acre-feet, or null when missing */
   capacity_taf: number | null
 }
 
 /**
- * Response from /api/statistics/reservoirs/all endpoint
+ * Response from /api/statistics/reservoirs endpoint
  */
 export interface AllReservoirsListResponse {
   /** Array of major reservoir IDs */
   major: string[]
   /** Array of all reservoir info */
   all: AllReservoirInfo[]
-  /** Total count of reservoirs */
-  total: number
+  /** Number of reservoirs in `all` */
+  count: number
 }
 
 // ============================================================================
@@ -411,6 +415,8 @@ export interface CwsAggregateMonthlyResponse {
   scenario_id: string
   /** Aggregate data keyed by short_code (e.g., "swp_total", "cvp_nod") */
   aggregates: Record<string, CwsAggregateData>
+  /** Number of aggregates in the response */
+  count: number
 }
 
 /**
@@ -446,6 +452,8 @@ export interface CwsAggregatePeriodResponse {
   scenario_id: string
   /** Period summary data keyed by short_code */
   aggregates: Record<string, CwsAggregatePeriodSummary>
+  /** Number of aggregates in the response */
+  count: number
 }
 
 // ============================================================================
@@ -466,12 +474,15 @@ export interface MiContractorData {
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/mi-contractors/delivery-monthly
+ * Response from /api/statistics/scenarios/:scenarioId/mi-contractors/monthly
+ * Each contractor entry carries both monthly_delivery and monthly_shortage
  */
 export interface MiContractorMonthlyResponse {
   scenario_id: string
   /** Contractor data keyed by short_code */
   contractors: Record<string, MiContractorData>
+  /** Number of contractors in the response */
+  count: number
 }
 
 /**
@@ -515,6 +526,8 @@ export interface MiContractorPeriodResponse {
   scenario_id: string
   /** Period summary data keyed by short_code */
   contractors: Record<string, MiContractorPeriodSummary>
+  /** Number of contractors in the response */
+  count: number
 }
 
 // ============================================================================
@@ -538,36 +551,47 @@ export interface DemandUnit {
  */
 export interface DemandUnitsListResponse {
   demand_units: DemandUnit[]
+  /** Number of demand units in the response */
+  count: number
 }
 
 /**
  * Per-DU payload returned by
- * `/api/statistics/scenarios/:scenarioId/demand-units/delivery-monthly`.
- * Carries metadata plus the monthly delivery rows
+ * `/api/statistics/scenarios/:scenarioId/demand-units/monthly`.
+ * Carries metadata plus monthly delivery and shortage rows
  */
 export interface DemandUnitData {
-  /** Entity display name. Falls back to `du_id` upstream when null */
+  /** Uniform display label. Already falls back to du_id upstream when needed */
+  label: string
+  /** Entity display name. Preserved alongside `label` for backward compat */
   community_agency: string | null
   /** Hydrologic region (e.g., "SJR", "SAC"), or null when unknown */
   hydrologic_region: string | null
   /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
   monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/demand-units/delivery-monthly
+ * Response from /api/statistics/scenarios/:scenarioId/demand-units/monthly
+ * Each DU entry carries both monthly_delivery and monthly_shortage
  */
 export interface DemandUnitMonthlyResponse {
   scenario_id: string
   /** Demand unit data keyed by du_id */
   demand_units: Record<string, DemandUnitData>
+  /** Number of demand units in the response */
+  count: number
 }
 
 /**
  * Period summary for an urban demand unit
  */
 export interface DemandUnitPeriodSummary {
-  /** Entity display name. Falls back to `du_id` upstream when null */
+  /** Uniform display label. Already falls back to du_id upstream when needed */
+  label: string
+  /** Entity display name. Preserved alongside `label` for backward compat */
   community_agency: string | null
   /** Hydrologic region (e.g., "SJR", "SAC"), or null when unknown */
   hydrologic_region: string | null
@@ -606,6 +630,8 @@ export interface DemandUnitPeriodResponse {
   scenario_id: string
   /** Period summary data keyed by du_id */
   demand_units: Record<string, DemandUnitPeriodSummary>
+  /** Number of demand units in the response */
+  count: number
 }
 
 /**
@@ -625,26 +651,17 @@ export interface DemandUnitMonthlyStats {
 }
 
 /**
- * Per-DU payload returned by
- * `/api/statistics/scenarios/:scenarioId/demand-units/shortage-monthly`.
- * Mirrors `DemandUnitData` but only carries the shortage half
+ * Per-DU shortage payload. The merged `/monthly` route returns the same
+ * `DemandUnitData` shape for both halves, so this type is a structural alias.
+ * Kept as a separate name so the shortage-only hook signature stays explicit
  */
-export interface DemandUnitShortageData {
-  community_agency: string | null
-  hydrologic_region: string | null
-  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_shortage: Record<string, CwsShortageMonthlyStats>
-}
+export type DemandUnitShortageData = DemandUnitData
 
 /**
- * Response from
- * `/api/statistics/scenarios/:scenarioId/demand-units/shortage-monthly`
+ * Response from the shortage-monthly hook, which now hits the same merged
+ * `/api/statistics/scenarios/:scenarioId/demand-units/monthly` URL
  */
-export interface DemandUnitShortageMonthlyResponse {
-  scenario_id: string
-  /** Demand unit data keyed by du_id */
-  demand_units: Record<string, DemandUnitShortageData>
-}
+export type DemandUnitShortageMonthlyResponse = DemandUnitMonthlyResponse
 
 // ============================================================================
 // AG Aggregate Types (Agricultural delivery statistics)
@@ -672,6 +689,8 @@ export interface AgAggregateMonthlyResponse {
   scenario_id: string
   /** Aggregate data keyed by short_code (e.g., "swp_pag", "cvp_pag_n") */
   aggregates: Record<string, AgAggregateData>
+  /** Number of aggregates in the response */
+  count: number
 }
 
 /**
@@ -705,6 +724,8 @@ export interface AgAggregatePeriodResponse {
   scenario_id: string
   /** Period summary data keyed by short_code */
   aggregates: Record<string, AgAggregatePeriodSummary>
+  /** Number of aggregates in the response */
+  count: number
 }
 
 // ============================================================================
@@ -748,31 +769,6 @@ export interface AgDemandUnitsListResponse {
 }
 
 /**
- * AG demand unit delivery data with monthly statistics
- */
-export interface AgDemandUnitDeliveryData {
-  /** Agency name */
-  agency: string
-  /** Hydrologic region ("SAC", "SJR", "TULARE", or null) */
-  hydrologic_region: string | null
-  /** CS3 contractor type ("PA", "SA", "XA", or null) */
-  cs3_type: string | null
-  /** Water provider ("CVP", "SWP", or null) */
-  provider: string | null
-  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
-}
-
-/**
- * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/delivery-monthly
- */
-export interface AgDemandUnitDeliveryMonthlyResponse {
-  scenario_id: string
-  /** Demand unit data keyed by DU ID (e.g., "02_NA", "50_PA1") */
-  demand_units: Record<string, AgDemandUnitDeliveryData>
-}
-
-/**
  * Monthly GW restriction shortage statistics for a single AG demand unit, for one water month.
  *
  * Source variable: `GW_SHORT_*`. Available only for SJR and TULARE region DUs.
@@ -808,32 +804,83 @@ export interface AgDemandUnitShortageMonthlyStats {
 }
 
 /**
- * AG demand unit GW restriction shortage data with monthly statistics
+ * Monthly groundwater pumping statistics for a single AG demand unit, for one water month.
+ *
+ * `is_calculated` flags rows that the ETL derived (rather than read directly from
+ * a `GW_PUMP_*` variable). Useful when distinguishing modeled vs synthesized data
  */
-export interface AgDemandUnitShortageData {
+export interface AgDemandUnitGwPumpingMonthlyStats {
+  /** Mean GW pumping in TAF */
+  avg_taf: number | null
+  /** Coefficient of variation */
+  cv: number | null
+  /** True when the ETL filled this row from a derived source rather than a raw DV variable */
+  is_calculated: boolean | null
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+  /** Number of water years in the sample */
+  sample_count: number | null
+}
+
+/**
+ * Merged AG demand-unit payload returned by
+ * `/api/statistics/scenarios/:scenarioId/ag-demand-units/monthly`.
+ * Each DU entry carries all four monthly metrics in one payload so a page that
+ * needs more than one band costs a single HTTP request
+ */
+export interface AgDemandUnitData {
+  /** Uniform display label, falls back to agency or du_id upstream */
+  label: string
   /** Agency name */
-  agency: string
-  /** Hydrologic region ("SJR" or "TULARE"; Sacramento DUs are not present) */
+  agency: string | null
+  /** Hydrologic region ("SAC", "SJR", "TULARE", or null) */
   hydrologic_region: string | null
   /** CS3 contractor type ("PA", "SA", "XA", or null) */
   cs3_type: string | null
   /** Water provider ("CVP", "SWP", or null) */
   provider: string | null
-  /** Monthly GW restriction shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  /** Monthly applied-water demand keyed by water month (1=Oct, 12=Sep) */
+  monthly_demand: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly surface-water delivery keyed by water month */
+  monthly_sw_delivery: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly groundwater pumping keyed by water month */
+  monthly_gw_pumping: Record<string, AgDemandUnitGwPumpingMonthlyStats>
+  /** Monthly GW restriction shortage keyed by water month. Empty `{}` for DUs without shortage data */
   monthly_shortage: Record<string, AgDemandUnitShortageMonthlyStats>
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/shortage-monthly
- *
- * Returns GW restriction shortage statistics for SJR and TULARE region DUs.
- * Sacramento region DUs are not included in the response.
+ * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/monthly
  */
-export interface AgDemandUnitShortageMonthlyResponse {
+export interface AgDemandUnitMonthlyResponse {
   scenario_id: string
-  /** Demand unit data keyed by DU ID (e.g., "64_PA1") */
-  demand_units: Record<string, AgDemandUnitShortageData>
+  /** Demand unit data keyed by DU ID (e.g., "02_NA", "50_PA1") */
+  demand_units: Record<string, AgDemandUnitData>
+  /** Number of demand units in the response */
+  count: number
 }
+
+/** Back-compat alias for the delivery hook. The merged `/monthly` URL returns
+ *  the same payload for both delivery and shortage hooks */
+export type AgDemandUnitDeliveryData = AgDemandUnitData
+/** Back-compat alias for the shortage hook */
+export type AgDemandUnitShortageData = AgDemandUnitData
+/** Back-compat alias for the delivery monthly response */
+export type AgDemandUnitDeliveryMonthlyResponse = AgDemandUnitMonthlyResponse
+/** Back-compat alias for the shortage monthly response */
+export type AgDemandUnitShortageMonthlyResponse = AgDemandUnitMonthlyResponse
 
 /**
  * Period summary for an AG demand unit.
@@ -844,8 +891,10 @@ export interface AgDemandUnitShortageMonthlyResponse {
  * pumping or counted as shortage
  */
 export interface AgDemandUnitPeriodSummary {
+  /** Uniform display label, falls back to agency or du_id upstream */
+  label: string
   /** Agency name */
-  agency: string
+  agency: string | null
   /** Hydrologic region */
   hydrologic_region: string | null
   /** CS3 contractor type */
@@ -896,6 +945,8 @@ export interface AgDemandUnitPeriodResponse {
   scenario_id: string
   /** Period summary data keyed by DU ID */
   demand_units: Record<string, AgDemandUnitPeriodSummary>
+  /** Number of demand units in the response */
+  count: number
 }
 
 // ============================================================================
@@ -978,13 +1029,15 @@ export interface BatchStatisticsResponse {
 export interface RefugeDemandUnitData {
   /** Demand unit ID (e.g., "08N_PR1"), references du_refuge_entity.du_id */
   du_id: string
+  /** Uniform display label. Already falls back to du_id upstream when needed */
+  label: string
   /** Water balance area ID */
   wba_id: string
   /** Hydrologic region ("SAC", "SJR", "TULARE") */
   hydrologic_region: string
   /** CS3 contractor type ("PR" = Priority Refuge, "NR" = Non-priority Refuge) */
   cs3_type: string
-  /** Refuge or wildlife area name */
+  /** Refuge or wildlife area name. Preserved alongside `label` */
   refuge_or_wildlife_area: string | null
   /** Managing agency (e.g., "USFWS") */
   managed_by: string | null
@@ -999,21 +1052,18 @@ export interface RefugeDemandUnitData {
  */
 export interface RefugeDemandUnitsListResponse {
   demand_units: RefugeDemandUnitData[]
-  total: number
+  /** Number of demand units in the response */
+  count: number
 }
 
 /**
  * Monthly delivery statistics for one (du_id × water_month) combination
  */
 export interface RefugeDeliveryMonthlyStats {
-  /** Demand unit ID */
-  du_id: string
-  /** Water month (1=Oct, 12=Sep) */
-  water_month: number
   /** Mean delivery for this water month across all simulated years (TAF) */
-  delivery_avg_taf: number | null
+  avg_taf: number | null
   /** Coefficient of variation of monthly delivery */
-  delivery_cv: number | null
+  cv: number | null
   /** 0th percentile delivery (TAF) */
   q0: number | null
   q10: number | null
@@ -1034,27 +1084,14 @@ export interface RefugeDeliveryMonthlyStats {
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/delivery-monthly
- */
-export interface RefugeDeliveryMonthlyResponse {
-  scenario_id: string
-  data: RefugeDeliveryMonthlyStats[]
-  count: number
-}
-
-/**
  * Monthly shortage statistics for one (du_id × water_month) combination.
  * Shortage = max(demand - delivery, 0). No native CalSim shortage variable exists.
  */
 export interface RefugeShortageMonthlyStats {
-  /** Demand unit ID */
-  du_id: string
-  /** Water month (1=Oct, 12=Sep) */
-  water_month: number
   /** Mean shortage for this water month (TAF) */
-  shortage_avg_taf: number | null
+  avg_taf: number | null
   /** CV of monthly shortage (TAF) */
-  shortage_cv: number | null
+  cv: number | null
   /** Mean shortage as % of demand */
   shortage_pct_avg: number | null
   /** CV of monthly shortage % */
@@ -1081,20 +1118,48 @@ export interface RefugeShortageMonthlyStats {
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/shortage-monthly
+ * Per-DU payload returned by
+ * `/api/statistics/scenarios/:scenarioId/refuge-demand-units/monthly`.
+ * Each DU carries both monthly_delivery and monthly_shortage keyed by
+ * water_month (1=Oct ... 12=Sep)
  */
-export interface RefugeShortageMonthlyResponse {
+export interface RefugeMonthlyData {
+  /** Uniform display label */
+  label: string
+  /** Refuge or wildlife area name. Preserved alongside `label` */
+  refuge_or_wildlife_area: string | null
+  /** Monthly delivery percentile bands keyed by water_month string */
+  monthly_delivery: Record<string, RefugeDeliveryMonthlyStats>
+  /** Monthly shortage percentile bands keyed by water_month string */
+  monthly_shortage: Record<string, RefugeShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/monthly
+ * Each DU entry carries both monthly_delivery and monthly_shortage
+ */
+export interface RefugeMonthlyResponse {
   scenario_id: string
-  data: RefugeShortageMonthlyStats[]
+  /** Refuge DU data keyed by du_id */
+  demand_units: Record<string, RefugeMonthlyData>
+  /** Number of demand units in the response */
   count: number
 }
+
+/** Back-compat aliases for the delivery / shortage hooks. The merged
+ *  `/monthly` URL returns the same payload for both; the hooks read
+ *  `monthly_delivery` or `monthly_shortage` off each DU entry */
+export type RefugeDeliveryMonthlyResponse = RefugeMonthlyResponse
+export type RefugeShortageMonthlyResponse = RefugeMonthlyResponse
 
 /**
  * Period-of-record summary for one (scenario × du_id) pair
  */
 export interface RefugePeriodSummary {
-  /** Demand unit ID */
-  du_id: string
+  /** Uniform display label */
+  label: string
+  /** Refuge or wildlife area name. Preserved alongside `label` */
+  refuge_or_wildlife_area: string | null
   simulation_start_year: number | null
   simulation_end_year: number | null
   total_years: number | null
@@ -1128,7 +1193,9 @@ export interface RefugePeriodSummary {
  */
 export interface RefugePeriodResponse {
   scenario_id: string
-  data: RefugePeriodSummary[]
+  /** Period summary keyed by du_id */
+  demand_units: Record<string, RefugePeriodSummary>
+  /** Number of demand units in the response */
   count: number
 }
 
@@ -1158,7 +1225,7 @@ export interface ChannelEntity {
 /** Response from /api/statistics/channels */
 export interface ChannelsListResponse {
   channels: ChannelEntity[]
-  total: number
+  count: number
 }
 
 /**

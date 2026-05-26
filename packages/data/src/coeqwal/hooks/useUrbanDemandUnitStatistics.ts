@@ -1,150 +1,33 @@
 "use client"
 
 /**
- * Hooks for fetching M&I contractor and urban demand unit statistics.
+ * useUrbanDemandUnitStatistics.ts - Hooks for fetching urban demand-unit statistics (46 urban demand units).
  *
- * Used for M&I delivery and shortage charts in the Data Explorer. CWS aggregate
- * data is served through the batch endpoint.
+ * "Demand units" without a qualifier means urban in this API (the unqualified
+ * `/demand-units` URL pattern is urban-only by convention). Agricultural DUs
+ * live in `useAgStatistics.ts` and hit `/ag-demand-units/*`. Refuge DUs live
+ * in `useRefugeStatistics.ts` and hit `/refuge-demand-units/*`.
+ *
+ * The merged `/demand-units/monthly` endpoint returns both delivery and
+ * shortage percentile bands.`useDemandUnitsMonthly` and
+ * `useDemandUnitsShortageMonthly` both hit that URL and rely on SWR dedup, so
+ * a page that needs both bands costs one HTTP request.
  */
 
 import useSWR from "swr"
 import { CACHE_KEYS } from "../../cache/keys"
 import {
-  fetchMiContractorsMonthly,
-  fetchMiContractorsPeriod,
   fetchDemandUnitsList,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsShortageMonthly,
   fetchDemandUnitsPeriod,
 } from "../fetchers"
 import type {
-  MiContractorMonthlyResponse,
-  MiContractorPeriodResponse,
   DemandUnitsListResponse,
   DemandUnitMonthlyResponse,
   DemandUnitShortageMonthlyResponse,
   DemandUnitPeriodResponse,
 } from "../types"
-
-// ============================================================================
-// M&I Contractors Hooks (30 SWP water agency contractors)
-// ============================================================================
-
-/**
- * Fetch monthly delivery and shortage statistics for M&I contractors
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param contractor - Optional filter by contractor short_code
- * @returns Monthly statistics for M&I contractors
- *
- * @example
- * ```typescript
- * function ContractorDeliveryChart({ scenarioId }) {
- *   const { contractors, isLoading } = useMiContractorsMonthly(scenarioId)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Grid>
- *       {Object.entries(contractors).map(([code, data]) => (
- *         <PercentileChart
- *           key={code}
- *           label={data.label}
- *           monthlyData={data.monthly_delivery}
- *         />
- *       ))}
- *     </Grid>
- *   )
- * }
- * ```
- */
-export function useMiContractorsMonthly(
-  scenarioId: string | null,
-  contractor?: string,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<MiContractorMonthlyResponse>(
-    scenarioId ? CACHE_KEYS.miContractorsMonthly(scenarioId, contractor) : null,
-    () => fetchMiContractorsMonthly(scenarioId!, contractor),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    contractors: data?.contractors ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.contractors).length > 0,
-  }
-}
-
-/**
- * Fetch period-of-record summary for M&I contractors
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param contractor - Optional filter by contractor short_code
- * @returns Period summary with annual averages, reliability, and exceedance values
- *
- * @example
- * ```typescript
- * function ContractorReliability({ scenarioId }) {
- *   const { contractors, isLoading } = useMiContractorsPeriod(scenarioId)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Table>
- *       {Object.entries(contractors).map(([code, summary]) => (
- *         <Row key={code}>
- *           <Cell>{summary.label}</Cell>
- *           <Cell>{summary.reliability_pct}%</Cell>
- *           <Cell>{summary.annual_delivery_avg_taf} TAF</Cell>
- *         </Row>
- *       ))}
- *     </Table>
- *   )
- * }
- * ```
- */
-export function useMiContractorsPeriod(
-  scenarioId: string | null,
-  contractor?: string,
-) {
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<MiContractorPeriodResponse>(
-    scenarioId ? CACHE_KEYS.miContractorsPeriod(scenarioId, contractor) : null,
-    () => fetchMiContractorsPeriod(scenarioId!, contractor),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data,
-    scenarioId: data?.scenario_id,
-    contractors: data?.contractors ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data.contractors).length > 0,
-  }
-}
-
-// ============================================================================
-// Urban Demand Units Hooks (46 demand units)
-// ============================================================================
 
 /**
  * Map hydrologic region codes to display groups
@@ -307,9 +190,9 @@ export function useDemandUnitsMonthly(
 /**
  * Fetch monthly shortage statistics for urban demand units.
  *
- * Companion to `useDemandUnitsMonthly`. The backend splits delivery and
- * shortage across two routes, so views that need both percentile bands
- * (e.g. the urban-DU matrix) reach for this hook in parallel
+ * Companion to `useDemandUnitsMonthly`. Both hooks hit the merged
+ * `/demand-units/monthly` endpoint, which returns delivery and shortage in a
+ * single payload. SWR dedup means a page using both costs one request
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param duId - Optional filter by demand unit ID

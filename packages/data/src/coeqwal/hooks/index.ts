@@ -31,11 +31,13 @@ export {
 export {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
+} from "./useMiContractorStatistics"
+export {
   useDemandUnitsList,
   useDemandUnitsMonthly,
   useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
-} from "./useCwsStatistics"
+} from "./useUrbanDemandUnitStatistics"
 export {
   useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,

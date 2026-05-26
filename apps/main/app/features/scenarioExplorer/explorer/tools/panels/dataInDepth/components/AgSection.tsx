@@ -578,7 +578,7 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
         if (!entityMap[duId]) {
           entityMap[duId] = {
             shortCode: duId,
-            label: summary.agency,
+            label: summary.label || summary.agency || duId,
             annualDeliveryAvg: swDeliveryAvg,
             reliabilityPct,
             hydrologicRegion: summary.hydrologic_region,
@@ -607,7 +607,7 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
         if (!entityMap[duId]) {
           entityMap[duId] = {
             shortCode: duId,
-            label: data.agency,
+            label: data.label || data.agency || duId,
             hydrologicRegion: data.hydrologic_region,
           }
         }
@@ -615,8 +615,8 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
           matrixData[duId] = {}
         }
 
-        matrixData[duId][scenarioId] = data.monthly_delivery
-          ? deliveryStatsToPercentiles(data.monthly_delivery)
+        matrixData[duId][scenarioId] = data.monthly_sw_delivery
+          ? deliveryStatsToPercentiles(data.monthly_sw_delivery)
           : {}
       },
     )
