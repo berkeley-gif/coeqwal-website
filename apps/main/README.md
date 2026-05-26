@@ -32,7 +32,6 @@ Notable third-party packages in this app's `package.json`:
 | `@emotion/react`, `@emotion/styled` | MUI's CSS-in-JS engine                                                    |
 | `swr`                               | API caching layer (typed hooks live in `@repo/data`)                      |
 | `react-scrollama`                   | Step-based scrollytelling in the Learn tab                                |
-| `@turf/turf`, `@turf/bbox`          | GeoJSON math (camera bbox calculations, point-in-polygon tooltip queries) |
 | `@dnd-kit/*`                        | Share tab: drag-and-drop reordering of share-story items                  |
 | `html-to-image`                     | Share tab: exporting share cards as PNG                                   |
 | `jszip`                             | Share tab: bundling exported share cards into a ZIP for download          |

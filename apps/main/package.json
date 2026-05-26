@@ -27,8 +27,6 @@
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@repo/viz": "workspace:*",
-    "@turf/bbox": "^7.2.0",
-    "@turf/turf": "^7.2.0",
     "@types/geojson": "^7946.0.14",
     "html-to-image": "^1.11.13",
     "jszip": "^3.10.1",

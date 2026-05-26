@@ -34,7 +34,7 @@ import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
-import useSWR from "swr"
+import useSWR from "@repo/data/swr"
 import {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
@@ -971,7 +971,7 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
         if (!entityMap[duId]) {
           entityMap[duId] = {
             shortCode: duId,
-            label: summary.label,
+            label: summary.community_agency ?? duId,
             annualDeliveryAvg: summary.annual_delivery_avg_taf,
             reliabilityPct: summary.reliability_pct,
             shortageFrequencyPct: summary.shortage_frequency_pct,

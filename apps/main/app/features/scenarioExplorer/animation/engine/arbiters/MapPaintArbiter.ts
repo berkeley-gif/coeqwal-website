@@ -133,10 +133,6 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // the layer, so `onUpdate` is a no-op.
     if (p.kind === "beat5-layer-fade") {
       const targetOpacity = computeBeat5LayerOpacity(v, p)
-
-      // [DIAG S4/S5] Log at boundary crossings (first-tick, start, end,
-      // peak, tail-start, tail-end) so we can correlate the per-frame
-      // opacity the arbiter intends vs. what Mapbox actually carries.
       const stage =
         v < p.fadeInStart
           ? "pre-fade-in"

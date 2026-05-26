@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect } from "react"
-import { preload } from "swr"
+import { preload } from "@repo/data/swr"
 import { useExplorerStore } from "../../scenarioExplorer/explorer/store"
 import {
   useResolvedIdMapping,

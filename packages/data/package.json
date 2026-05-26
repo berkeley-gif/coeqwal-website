@@ -10,7 +10,8 @@
     "./cache": "./src/cache/index.ts",
     "./providers": "./src/providers/index.ts",
     "./coeqwal": "./src/coeqwal/index.ts",
-    "./coeqwal/hooks": "./src/coeqwal/hooks/index.ts"
+    "./coeqwal/hooks": "./src/coeqwal/hooks/index.ts",
+    "./swr": "./src/swr/index.ts"
   },
   "scripts": {
     "lint": "echo \"No linting for data package\"",

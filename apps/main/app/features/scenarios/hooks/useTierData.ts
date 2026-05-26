@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
-import useSWR, { useSWRConfig } from "swr"
+import useSWR, { useSWRConfig } from "@repo/data/swr"
 import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
 import { fetchAllScenarioTiers, fetchScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
@@ -96,11 +96,9 @@ const buildOutcomeNames = (
  * Data is keyed by short code (e.g., "CWS_DEL").
  * Used for sorting, parallel plots, and equity analysis.
  *
- * Score fields are passed through as `number | null`. The API now returns
+ * Score fields are passed through as `number | null`. The API returns
  * null when an outcome has no tier row or a degenerate (all-zero / all-null)
- * distribution. Consumers (sort comparators, parallel plot, resilience
- * matrix) must guard against null rather than treating it as zero, which
- * would silently rank a missing outcome as "best possible" (1.0 weighted).
+ * distribution.
  */
 const extractScoreData = (
   scenarioData: ScenarioTiersResponse,

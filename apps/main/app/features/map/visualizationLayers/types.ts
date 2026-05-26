@@ -16,7 +16,6 @@ export interface TierLocation {
   location_type: string
   tier_level: number
   tier_value: number | null
-  display_order: number
 }
 
 /** API response for tier locations */
