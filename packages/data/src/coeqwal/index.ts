@@ -36,29 +36,20 @@ export type {
   TierLocationAssignmentsResponse,
   TierLocationAssignmentsBatchResponse,
   // Statistics types
-  ReservoirInfo,
   AllReservoirInfo,
-  StatisticsScenarioInfo,
   PercentileValues,
   MonthlyPercentiles,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
   GroupedReservoirData,
   GroupedReservoirPercentilesResponse,
-  ReservoirListResponse,
   AllReservoirsListResponse,
-  StatisticsScenariosResponse,
-  // Storage monthly types (dual-unit)
-  StorageMonthlyReservoirData,
-  StorageMonthlyResponse,
   // Spill monthly types
   SpillMonthlyStats,
   MonthlySpillData,
   SpillMonthlyReservoirData,
   SpillMonthlyResponse,
-  // CWS Aggregate types (M&I delivery/shortage)
-  CwsAggregate,
-  CwsAggregatesListResponse,
+  // CWS Aggregate types (M&I delivery/shortage, served via batch endpoint)
   CwsDeliveryMonthlyStats,
   CwsShortageMonthlyStats,
   CwsAggregateData,
@@ -66,8 +57,6 @@ export type {
   CwsAggregatePeriodSummary,
   CwsAggregatePeriodResponse,
   // M&I Contractors types
-  MiContractor,
-  MiContractorsListResponse,
   MiContractorData,
   MiContractorMonthlyResponse,
   MiContractorPeriodSummary,
@@ -75,14 +64,13 @@ export type {
   // Urban Demand Units types
   DemandUnit,
   DemandUnitsListResponse,
-  DemandUnitsGroupedResponse,
   DemandUnitData,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodSummary,
   DemandUnitPeriodResponse,
   DemandUnitMonthlyStats,
   DemandUnitStatisticsResponse,
-  // AG Aggregate types
+  // AG Aggregate types (served via batch endpoint)
   AgAggregateData,
   AgAggregateMonthlyResponse,
   AgAggregatePeriodSummary,
@@ -92,13 +80,8 @@ export type {
   AgDemandUnitsListResponse,
   AgDemandUnitDeliveryData,
   AgDemandUnitDeliveryMonthlyResponse,
-  AgDemandUnitShortageData,
-  AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodSummary,
   AgDemandUnitPeriodResponse,
-  // Reservoir period summary types
-  ReservoirPeriodData,
-  ReservoirPeriodSummaryResponse,
   // Batch statistics types
   BatchStorageData,
   BatchCwsData,
@@ -117,8 +100,6 @@ export type {
   // Environmental flow types
   ChannelEntity,
   ChannelsListResponse,
-  EnvFlowSeason,
-  EnvFlowSeasonsResponse,
   ChannelMonthlyStats,
   ChannelsMonthlyResponse,
   ChannelSeasonalStats,
@@ -137,52 +118,33 @@ export { DEFAULT_API_BASE, ENDPOINTS } from "./api"
 export {
   fetchTierList,
   fetchScenarioTiers,
-  fetchScenarioTierByCode,
   fetchScenarioList,
   fetchAllScenarioTiers,
   fetchTierLocationData,
   fetchTierLocationAssignments,
   fetchTierLocationAssignmentsBatch,
   // Statistics fetchers
-  fetchReservoirList,
   fetchAllReservoirsList,
-  fetchScenariosWithPercentiles,
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
-  fetchStorageMonthly,
   fetchSpillMonthly,
-  // CWS Aggregate fetchers
-  fetchCwsAggregatesList,
-  fetchCwsAggregatesMonthly,
-  fetchCwsAggregatesPeriod,
   // M&I Contractors fetchers
-  fetchMiContractorsList,
   fetchMiContractorsMonthly,
   fetchMiContractorsPeriod,
   // Urban Demand Units fetchers
   fetchDemandUnitsList,
-  fetchDemandUnitsGroups,
   fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsPeriod,
   // AG fetchers
-  fetchAgAggregatesMonthly,
-  fetchAgAggregatesPeriod,
   fetchAgDemandUnitsList,
   fetchAgDemandUnitsDeliveryMonthly,
-  fetchAgDemandUnitsShortageMonthly,
   fetchAgDemandUnitsPeriod,
-  // Reservoir period summary fetcher
-  fetchReservoirPeriodSummary,
   // Batch statistics fetcher
   fetchBatchStatistics,
-  // Environmental flow fetchers
+  // Environmental flow fetcher
   fetchChannelsList,
-  fetchEnvFlowSeasons,
-  fetchChannelsMonthly,
-  fetchChannelsSeasonal,
-  fetchChannelsPeriodSummary,
   // Delta fetchers
   fetchDeltaMonthly,
 } from "./fetchers"

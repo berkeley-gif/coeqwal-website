@@ -71,7 +71,7 @@ Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures
 | Caller                                | Import from                                                                                  |
 | ------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Outside the feature (tabs, map hooks) | `scenarioExplorer/store` (shell `mainView`), `scenarioExplorer/explorer/store` (tools store) |
-| Map visualization layers              | `scenarioExplorer/animation/engine` (beat-engine helpers shared with get-started storyboard)   |
+| Map visualization layers              | `scenarioExplorer/animation/engine` (beat-engine helpers shared with get-started storyboard) |
 | Inside `explorer/`                    | Relative `../../../store` shim or slice hooks (`useWorkspaceSlice`, etc.)                    |
 | Do not                                | Import `store/storeInstance` or deep slice files from UI (use the shim)                      |
 
@@ -425,10 +425,10 @@ This is the checklist for wiring a new tool into the Explore tools. Other README
 
 **Two surfaces, two stores**
 
-| Surface | Store | Key field | Renders |
-| ------- | ----- | --------- | ------- |
-| Get started | `useScenarioExplorerStore` | `mainView: "get-started"` | `GetStartedView` |
-| Tools | `useExplorerStore` (slice hooks) | `exploreMode` | `ActiveToolPanel` |
+| Surface     | Store                            | Key field                 | Renders           |
+| ----------- | -------------------------------- | ------------------------- | ----------------- |
+| Get started | `useScenarioExplorerStore`       | `mainView: "get-started"` | `GetStartedView`  |
+| Tools       | `useExplorerStore` (slice hooks) | `exploreMode`             | `ActiveToolPanel` |
 
 When `mainView === "explorer"`, shared chrome is already mounted around your panel:
 
@@ -446,17 +446,14 @@ The sidebar, hydroclimate chooser, and map model/reveal are set up for all tools
 - Charts belong in `@repo/viz` and take plain data props only (no store reads).
 - Explorer-specific wiring (theme colors, share capture, sidebar hover) stays in the panel.
 
-
-
-
 ### Make your directory
 
 Reuse the [panel layout convention](#panel-layout-convention) above:
 
-| Size | Convention | Example |
-| ---- | ---------- | ------- |
-| Small (≤8 files) | Flat under `panels/<tool>/` | `equity/`, `radar/` |
-| Medium | Panel root + one subfolder | `list/grid/`, `resilience/controls/` |
+| Size                | Convention                    | Example                                                       |
+| ------------------- | ----------------------------- | ------------------------------------------------------------- |
+| Small (≤8 files)    | Flat under `panels/<tool>/`   | `equity/`, `radar/`                                           |
+| Medium              | Panel root + one subfolder    | `list/grid/`, `resilience/controls/`                          |
 | Large multi-section | Mini-module with local README | [`dataInDepth/`](explorer/tools/panels/dataInDepth/README.md) |
 
 Typical new-tool folder:
@@ -475,15 +472,15 @@ explorer/tools/panels/yourTool/
 
 Every new tool needs these seven steps. Step 8 is conditional.
 
-| Step | File | Change |
-| ---- | ---- | ------ |
-| 1 | `explorer/tools/panels/<tool>/YourToolPanel.tsx` | Panel (+ optional data hook, chart controls) |
-| 2 | `explorer/tools/index.ts` | Export panel and controls |
-| 3 | `explorer/ActiveToolPanel.tsx` | New `case` with `ToolErrorBoundary` + `ToolIsland` |
-| 4 | `explorer/store/types.ts` | Extend `ExploreMode` union |
-| 5 | `explorer/tools/chrome/nav/ExploreSubNav.tsx` | Add `FLOW` step (icon, label, purpose) |
-| 6 | `explorer/tools/chrome/layout/journey.ts` | Add `JOURNEY` entry + `EXPLORE_MODE_VIEW_NAME` |
-| 7 | `explorer/store/exploreSessionPersist.ts` | Add mode to `EXPLORE_MODES` validation set |
+| Step            | File                                               | Change                                                                                                                     |
+| --------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 1               | `explorer/tools/panels/<tool>/YourToolPanel.tsx`   | Panel (+ optional data hook, chart controls)                                                                               |
+| 2               | `explorer/tools/index.ts`                          | Export panel and controls                                                                                                  |
+| 3               | `explorer/ActiveToolPanel.tsx`                     | New `case` with `ToolErrorBoundary` + `ToolIsland`                                                                         |
+| 4               | `explorer/store/types.ts`                          | Extend `ExploreMode` union                                                                                                 |
+| 5               | `explorer/tools/chrome/nav/ExploreSubNav.tsx`      | Add `FLOW` step (icon, label, purpose)                                                                                     |
+| 6               | `explorer/tools/chrome/layout/journey.ts`          | Add `JOURNEY` entry + `EXPLORE_MODE_VIEW_NAME`                                                                             |
+| 7               | `explorer/store/exploreSessionPersist.ts`          | Add mode to `EXPLORE_MODES` validation set                                                                                 |
 | 8 (conditional) | `explorer/tools/chrome/layout/UnifiedToolView.tsx` | Add a mode branch around `<ToolJourneyStrip />` only if your tool should hide the journey strip (see the `data` exception) |
 
 **Step 1 - panel skeleton**
@@ -535,12 +532,17 @@ case "yourTool":
   )
 ```
 
-
 **Steps 4-7 - register the tab**
 
 ```ts
 // explorer/store/types.ts
-export type ExploreMode = "list" | "radar" | "equity" | "resilience" | "data" | "yourTool"
+export type ExploreMode =
+  | "list"
+  | "radar"
+  | "equity"
+  | "resilience"
+  | "data"
+  | "yourTool"
 ```
 
 ```ts
@@ -616,22 +618,22 @@ Short rules:
 
 See [Three tiers](#three-tiers-where-new-state-goes) for the full model:
 
-| State kind | Where |
-| ---------- | ----- |
-| Selection, hydroclimate, explore mode, share tray | `workspaceStoreSlice` (already there) |
-| Tool settings that survive tab switch + same-tab reload | New `<tool>StoreSlice.ts` |
-| View-only UI (expanded row, local hover) | Local `useState` in panel |
+| State kind                                              | Where                                 |
+| ------------------------------------------------------- | ------------------------------------- |
+| Selection, hydroclimate, explore mode, share tray       | `workspaceStoreSlice` (already there) |
+| Tool settings that survive tab switch + same-tab reload | New `<tool>StoreSlice.ts`             |
+| View-only UI (expanded row, local hover)                | Local `useState` in panel             |
 
 **Slice wiring checklist** (when your tool needs persisted settings):
 
-| File | Change |
-| ---- | ------ |
-| `explorer/store/<tool>StoreSlice.ts` | State fields + actions (+ optional types file) |
-| `explorer/store/storeInstance.ts` | Add slice to `ExplorerStore` intersection, compose in `create()` with `merge*InitialState(exploreSession.<tool>)` |
-| `explorer/store/pickSlices.ts` | `<TOOL>_PERSIST_KEYS`, optional `<TOOL>_EPHEMERAL_STATE_KEYS`, `<TOOL>_ACTION_KEYS`, `pick<Tool>Slice`, `pick<Tool>PersistedState`, then add a key to `pickExplorerPersistedSession` |
+| File                                      | Change                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `explorer/store/<tool>StoreSlice.ts`      | State fields + actions (+ optional types file)                                                                                                                                                                                                                                                                                         |
+| `explorer/store/storeInstance.ts`         | Add slice to `ExplorerStore` intersection, compose in `create()` with `merge*InitialState(exploreSession.<tool>)`                                                                                                                                                                                                                      |
+| `explorer/store/pickSlices.ts`            | `<TOOL>_PERSIST_KEYS`, optional `<TOOL>_EPHEMERAL_STATE_KEYS`, `<TOOL>_ACTION_KEYS`, `pick<Tool>Slice`, `pick<Tool>PersistedState`, then add a key to `pickExplorerPersistedSession`                                                                                                                                                   |
 | `explorer/store/exploreSessionPersist.ts` | Import `<Tool>State` / `<tool>InitialState`, add `<tool>` to the `ExplorerStore` intersection + `PersistedExploreSession` + `ExploreSessionHydration` + `EMPTY_HYDRATION`, wire `<tool>` through `migrateEnvelope` / `readPersistedEnvelope` / `loadExploreSessionState` / `saveExploreSessionState`, export `merge<Tool>InitialState` |
-| `explorer/store/useToolSlices.ts` | `useYourToolSlice` hook |
-| `explorer/store/index.ts` | Re-export hook and types |
+| `explorer/store/useToolSlices.ts`         | `useYourToolSlice` hook                                                                                                                                                                                                                                                                                                                |
+| `explorer/store/index.ts`                 | Re-export hook and types                                                                                                                                                                                                                                                                                                               |
 
 **Store init constraint:** slice files must not import React hook modules (e.g. do not import constants from `useResilienceMatrix.ts`). Extract shared constants into a hook-free module (see `resilienceHydroclimates.ts`). Details: [explorer/store/README.md](explorer/store/README.md).
 
@@ -667,11 +669,11 @@ See [Map integration](#map-integration). Panels call `mapActions` from the map c
 
 **Toolbar exceptions**
 
-| Tool | Exception |
-| ---- | --------- |
-| `list` | No sidebar (`isListMode` in `ExplorerToolView`) |
-| `resilience` | Hydroclimate chooser hidden in `ToolToolbar` |
-| `data` | Journey strip hidden in `UnifiedToolView` (see step 8 above) |
+| Tool         | Exception                                                    |
+| ------------ | ------------------------------------------------------------ |
+| `list`       | No sidebar (`isListMode` in `ExplorerToolView`)              |
+| `resilience` | Hydroclimate chooser hidden in `ToolToolbar`                 |
+| `data`       | Journey strip hidden in `UnifiedToolView` (see step 8 above) |
 
 Adjust `ExplorerToolView`, `ToolToolbar`, `ExplorerSidebar`, or `UnifiedToolView` when your tool needs similar behavior.
 
@@ -689,12 +691,12 @@ Before opening a PR:
 
 ### Reference implementations
 
-| Tool | Complexity | Copy for |
-| ---- | ---------- | -------- |
-| **radar** | Medium | Chart + controls + share + tour + slice |
-| **equity** | Medium | Distribution chart + share |
-| **resilience** | High | Complex controls, multi-HC matrix, layered write model |
-| **list** | Special | No sidebar; grid layout; barChart share from rows; tour with demo effects |
+| Tool            | Complexity   | Copy for                                                                       |
+| --------------- | ------------ | ------------------------------------------------------------------------------ |
+| **radar**       | Medium       | Chart + controls + share + tour + slice                                        |
+| **equity**      | Medium       | Distribution chart + share                                                     |
+| **resilience**  | High         | Complex controls, multi-HC matrix, layered write model                         |
+| **list**        | Special      | No sidebar; grid layout; barChart share from rows; tour with demo effects      |
 | **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; no share variant; journey strip hidden |
 
 **Radar file tree** (medium-complexity reference):

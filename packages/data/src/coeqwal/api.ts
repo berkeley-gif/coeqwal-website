@@ -27,14 +27,6 @@ export const ENDPOINTS = {
   scenarioTiers: (scenarioId: string) => `/tiers/scenarios/${scenarioId}/tiers`,
 
   /**
-   * Tier data for a single outcome within a scenario
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param tierCode - Tier short code (e.g., "ENV_FLOWS", "AG_REV")
-   */
-  scenarioTierByCode: (scenarioId: string, tierCode: string) =>
-    `/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
-
-  /**
    * Batch tier data for multiple scenarios in one request
    * @param scenarioIds - Array of scenario IDs
    */
@@ -75,14 +67,8 @@ export const ENDPOINTS = {
 
   // Statistics endpoints (reservoir percentiles)
 
-  /** List of reservoirs with percentile data (grouped) */
-  STATISTICS_RESERVOIRS: "/statistics/reservoirs",
-
   /** List of all reservoirs with statistics data */
   STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
-
-  /** List of scenarios with percentile data */
-  STATISTICS_SCENARIOS: "/statistics/scenarios",
 
   /**
    * Percentile data for a single reservoir
@@ -108,14 +94,6 @@ export const ENDPOINTS = {
     `/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
 
   /**
-   * Monthly storage data with both percentage and TAF values
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param group - Reservoir group (e.g., "major")
-   */
-  storageMonthly: (scenarioId: string, group: string) =>
-    `/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
-
-  /**
    * Monthly spill statistics for reservoirs
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param group - Reservoir group (e.g., "major")
@@ -123,41 +101,7 @@ export const ENDPOINTS = {
   spillMonthly: (scenarioId: string, group: string) =>
     `/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
 
-  // CWS Aggregate endpoints (M&I delivery/shortage statistics)
-
-  /** List of CWS aggregate entities */
-  CWS_AGGREGATES_LIST: "/statistics/cws-aggregates",
-
-  /**
-   * Monthly delivery and shortage statistics for CWS aggregates
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param aggregate - Optional filter by aggregate short_code (e.g., "swp_total")
-   */
-  cwsAggregatesMonthly: (scenarioId: string, aggregate?: string) =>
-    `/statistics/scenarios/${scenarioId}/cws-aggregates/monthly${aggregate ? `?aggregate=${aggregate}` : ""}`,
-
-  /**
-   * Period-of-record summary for CWS aggregates
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param aggregate - Optional filter by aggregate short_code
-   */
-  cwsAggregatesPeriod: (scenarioId: string, aggregate?: string) =>
-    `/statistics/scenarios/${scenarioId}/cws-aggregates/period-summary${aggregate ? `?aggregate=${aggregate}` : ""}`,
-
   // M&I Contractors endpoints (30 SWP water agency contractors)
-
-  /**
-   * List of M&I contractors
-   * @param group - Optional filter by group (e.g., "swp")
-   */
-  MI_CONTRACTORS_LIST: "/statistics/mi-contractors",
-
-  /**
-   * List of M&I contractors with optional group filter
-   * @param group - Optional group filter (e.g., "swp")
-   */
-  miContractorsList: (group?: string) =>
-    `/statistics/mi-contractors${group ? `?group=${group}` : ""}`,
 
   /**
    * Monthly delivery statistics for M&I contractors
@@ -181,12 +125,6 @@ export const ENDPOINTS = {
    * List of urban demand units
    */
   DEMAND_UNITS_LIST: "/statistics/demand-units",
-
-  /**
-   * List of urban demand units organized by group
-   * Returns units grouped by "swp", "cvp", etc.
-   */
-  DEMAND_UNITS_GROUPS: "/statistics/demand-units/groups",
 
   /**
    * List of urban demand units with optional group filter
@@ -229,22 +167,6 @@ export const ENDPOINTS = {
     return `/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
   },
 
-  // AG Aggregate endpoints (Agricultural delivery statistics)
-
-  /**
-   * Monthly delivery statistics for AG aggregates
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   */
-  agAggregatesMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-aggregates/monthly`,
-
-  /**
-   * Period-of-record summary for AG aggregates
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   */
-  agAggregatesPeriod: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-aggregates/period-summary`,
-
   // AG Demand Units endpoints (150 agricultural demand units)
 
   /**
@@ -285,13 +207,6 @@ export const ENDPOINTS = {
   },
 
   /**
-   * Monthly shortage statistics for AG demand units
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   */
-  agDemandUnitsShortageMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
-
-  /**
    * Period-of-record summary for AG demand units.
    * Pass `duIds` to restrict the response to specific demand units via
    * the backend's comma-separated `du_id` filter. The list is sorted
@@ -303,15 +218,6 @@ export const ENDPOINTS = {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
     return `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary${qs}`
   },
-
-  // Reservoir period summary endpoint
-
-  /**
-   * Period-of-record summary for all reservoirs (storage exceedance + spill stats)
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   */
-  reservoirPeriodSummary: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/period-summary`,
 
   // Wildlife Refuge demand unit endpoints
 
@@ -358,33 +264,6 @@ export const ENDPOINTS = {
     return `/statistics/channels${params ? `?${params}` : ""}`
   },
 
-  /** List of all 5 CEFF seasonal definitions (static lookup) */
-  ENV_FLOW_SEASONS: "/statistics/env-flow-seasons",
-
-  /**
-   * Monthly % unimpaired flow statistics (Metric 1)
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param channelId - Optional single channel filter (e.g., "C_SAC049")
-   */
-  channelsMonthly: (scenarioId: string, channelId?: string) =>
-    `/statistics/scenarios/${scenarioId}/channels/monthly${channelId ? `?channel_id=${channelId}` : ""}`,
-
-  /**
-   * Seasonal flow volumes + % unimpaired + % functional flow (Metrics 1+2)
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param channelId - Optional single channel filter
-   */
-  channelsSeasonal: (scenarioId: string, channelId?: string) =>
-    `/statistics/scenarios/${scenarioId}/channels/seasonal${channelId ? `?channel_id=${channelId}` : ""}`,
-
-  /**
-   * Period-of-record flow alteration index (Metric 3) + full-period aggregates
-   * @param scenarioId - Scenario ID (e.g., "s0020")
-   * @param channelId - Optional single channel filter
-   */
-  channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
-    `/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
-
   // Delta statistics endpoints (X2, salinity, outflow)
 
   /**
@@ -407,11 +286,4 @@ export const ENDPOINTS = {
     types: string[] = ["storage", "cws", "ag"],
   ) =>
     `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
-
-  // Verification status endpoints
-
-  VERIFICATION_STATUS: "/verification/status",
-
-  verificationScenario: (scenarioId: string) =>
-    `/verification/status/${scenarioId}`,
 } as const

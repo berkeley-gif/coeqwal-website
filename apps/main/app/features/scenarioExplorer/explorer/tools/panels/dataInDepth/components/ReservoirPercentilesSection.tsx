@@ -132,9 +132,8 @@ function useMultiScenarioReservoirData(
         // because the chart would otherwise show a fake zero floor.
         if (!matrix[reservoirId]) matrix[reservoirId] = {}
         if (displayMode === "volume") {
-          matrix[reservoirId][scenarioId] = data.capacity_taf == null
-            ? undefined
-            : data.monthly_taf
+          matrix[reservoirId][scenarioId] =
+            data.capacity_taf == null ? undefined : data.monthly_taf
         } else {
           matrix[reservoirId][scenarioId] = data.monthly_percent
         }

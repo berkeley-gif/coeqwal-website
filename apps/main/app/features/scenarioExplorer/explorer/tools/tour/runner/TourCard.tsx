@@ -8,14 +8,7 @@
  */
 
 import React, { type ReactNode } from "react"
-import {
-  Box,
-  Button,
-  Paper,
-  Typography,
-  icons,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, Button, Paper, Typography, icons, useTheme } from "@repo/ui/mui"
 import type { TourStep } from "../types"
 import { TourBodyContent } from "./TourBodyContent"
 
