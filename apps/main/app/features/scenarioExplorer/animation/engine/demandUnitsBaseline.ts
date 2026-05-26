@@ -23,6 +23,24 @@
  * of its inputs.
  */
 
+/** Not a parallel "Map type": it is intentionally narrower
+ *  than `MapboxGLMap` (from `@repo/map`) because Mapbox GL's strict
+ *  `keyof PaintSpecification` / `FilterSpecification` overloads reject
+ *  the `readonly unknown[]` expressions carried on our spec/payload
+ *  types. The package boundary is still honored upstream: callers
+ *  obtain the map via `mapRef.current.getMap()` (typed `MapboxGLMap`
+ *  from `@repo/map`) and then pass it into helpers that consume this
+ *  write view. See the Roadmap section of packages/map/README.md for
+ *  the long-term replacement (value-permissive setters on
+ *  `MapOperationsAPI`), after which this type goes away. */
+export type MapWriteView = {
+  getLayer: (id: string) => unknown
+  setFilter: (id: string, f: unknown) => void
+  setPaintProperty: (id: string, prop: string, value: unknown) => void
+  setLayoutProperty: (id: string, prop: string, value: unknown) => void
+  addLayer: (spec: unknown) => void
+}
+
 /** Filter for normal choreography. Shows Agriculture, Urban, and
  *  Refuge demand-units, which correspond to tracked outcomes.
  *  Excludes "N/A" and other untracked classes. */
@@ -40,23 +58,14 @@ export const DU_AG_ONLY_FILTER: readonly unknown[] = [
   "Agriculture",
 ] as const
 
-/** Narrow structural type for the Mapbox map methods the baseline
- *  writer calls. Kept permissive so this module does not import
- *  `@repo/map` types. */
-export type BaselineMap = {
-  getLayer: (id: string) => unknown
-  setFilter: (id: string, f: unknown) => void
-  setPaintProperty: (id: string, prop: string, value: unknown) => void
-  setLayoutProperty: (id: string, prop: string, value: unknown) => void
-}
+/** Permissive write view consumed by `writeDemandUnitsBaseline`. See
+ *  `MapWriteView` above for the rationale and the roadmap entry that
+ *  retires it. */
+export type BaselineMap = MapWriteView
 
-/** Extended map surface for the session-init helper, which also
- *  creates the `demand-units-outline` layer. `addLayer` takes a
- *  `LayerSpecification`-shaped object in `@repo/map`. We keep the
- *  structural type permissive. */
-export type SessionInitMap = BaselineMap & {
-  addLayer: (spec: unknown) => void
-}
+/** Permissive write view consumed by `ensureDemandUnitsOutlineLayer`.
+ *  Same shape as `BaselineMap`; aliased for call-site clarity. */
+export type SessionInitMap = MapWriteView
 
 /** Complete specification of the demand-units baseline state.
  *

@@ -58,7 +58,7 @@ function isRetryableStatus(status: number): boolean {
  *   ENDPOINTS.scenarioTiers("s0020"),
  *  { baseUrl: DEFAULT_API_BASE }
  * )
- * // { scenario: "s0020", tiers: { AG_REV: {...}, ENV_FLOW: {...} } }
+ * // { scenario: "s0020", tiers: { AG_REV: {...}, ENV_FLOWS: {...} } }
  * ```
  */
 

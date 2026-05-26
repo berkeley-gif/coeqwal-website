@@ -391,7 +391,7 @@ import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTier
 const {
   allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
-  allScoreData, // Scores per outcome: weighted_score, normalized_score, gini, etc.
+  allScoreData, // Scores per outcome: weighted_score and normalized_score
   outcomeNames, // Display-ordered list of { shortCode, displayName }
   siblingGroups, // Scenario group metadata
   getDisplayName, // (id) -> human-readable scenario name

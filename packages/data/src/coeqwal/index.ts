@@ -30,8 +30,6 @@ export type {
   ScenarioTiersResponse,
   ScenarioListItem,
   TierMapping,
-  TierFeature,
-  TierLocationResponse,
   TierLocationAssignment,
   TierLocationAssignmentsResponse,
   TierLocationAssignmentsBatchResponse,
@@ -66,10 +64,11 @@ export type {
   DemandUnitsListResponse,
   DemandUnitData,
   DemandUnitMonthlyResponse,
+  DemandUnitShortageData,
+  DemandUnitShortageMonthlyResponse,
   DemandUnitPeriodSummary,
   DemandUnitPeriodResponse,
   DemandUnitMonthlyStats,
-  DemandUnitStatisticsResponse,
   // AG Aggregate types (served via batch endpoint)
   AgAggregateData,
   AgAggregateMonthlyResponse,
@@ -80,6 +79,9 @@ export type {
   AgDemandUnitsListResponse,
   AgDemandUnitDeliveryData,
   AgDemandUnitDeliveryMonthlyResponse,
+  AgDemandUnitShortageMonthlyStats,
+  AgDemandUnitShortageData,
+  AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodSummary,
   AgDemandUnitPeriodResponse,
   // Batch statistics types
@@ -120,7 +122,6 @@ export {
   fetchScenarioTiers,
   fetchScenarioList,
   fetchAllScenarioTiers,
-  fetchTierLocationData,
   fetchTierLocationAssignments,
   fetchTierLocationAssignmentsBatch,
   // Statistics fetchers
@@ -134,12 +135,13 @@ export {
   fetchMiContractorsPeriod,
   // Urban Demand Units fetchers
   fetchDemandUnitsList,
-  fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
+  fetchDemandUnitsShortageMonthly,
   fetchDemandUnitsPeriod,
   // AG fetchers
   fetchAgDemandUnitsList,
   fetchAgDemandUnitsDeliveryMonthly,
+  fetchAgDemandUnitsShortageMonthly,
   fetchAgDemandUnitsPeriod,
   // Batch statistics fetcher
   fetchBatchStatistics,

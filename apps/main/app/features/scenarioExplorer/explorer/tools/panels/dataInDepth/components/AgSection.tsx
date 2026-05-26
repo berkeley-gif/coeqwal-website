@@ -35,6 +35,7 @@ import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 import {
   useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,
+  useAgDemandUnitsShortageMonthly,
   useAgDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
 import type {
@@ -43,6 +44,8 @@ import type {
   AgDemandUnitDeliveryData,
   AgDemandUnitListItem,
   AgDemandUnitPeriodSummary,
+  AgDemandUnitShortageData,
+  AgDemandUnitShortageMonthlyStats,
   CwsDeliveryMonthlyStats,
   BatchStatisticsResponse,
   BatchAgData,
@@ -365,6 +368,51 @@ interface CellStats {
 type CellStatsMap = Record<string, Record<string, CellStats>>
 
 /**
+ * Convert an AG GW restriction shortage monthly row into the
+ * `MonthlyPercentiles` shape the matrix renderer expects.
+ *
+ * The shortage row has a few extras (`shortage_frequency_pct`,
+ * `shortage_pct_of_demand_avg`) that the matrix doesn't consume, so we
+ * project down to the q0..q100 + mean fields. Rows are skipped when any
+ * of q10..q100 or `avg_taf` is null, since feeding a partial band into
+ * the chart would draw a misleading floor (matches the `isFullPercentileRow`
+ * guard used for CWS data).
+ *
+ * `q0` is tolerated as null and coerced to 0 - a DU with zero shortage
+ * in the driest year is a valid row
+ */
+function shortageStatsToPercentiles(
+  monthlyData: Record<string, AgDemandUnitShortageMonthlyStats>,
+): MonthlyPercentiles {
+  const result: MonthlyPercentiles = {}
+  Object.entries(monthlyData).forEach(([month, stats]) => {
+    if (!stats) return
+    if (
+      stats.q10 == null ||
+      stats.q30 == null ||
+      stats.q50 == null ||
+      stats.q70 == null ||
+      stats.q90 == null ||
+      stats.q100 == null ||
+      stats.avg_taf == null
+    ) {
+      return
+    }
+    result[month] = {
+      q0: stats.q0 ?? 0,
+      q10: stats.q10,
+      q30: stats.q30,
+      q50: stats.q50,
+      q70: stats.q70,
+      q90: stats.q90,
+      q100: stats.q100,
+      mean: stats.avg_taf,
+    }
+  })
+  return result
+}
+
+/**
  * Helper: convert CwsDeliveryMonthlyStats to MonthlyPercentiles
  */
 function deliveryStatsToPercentiles(
@@ -463,21 +511,34 @@ function buildAgAggregatesData(
 }
 
 /**
- * Hook to fetch AG demand-unit delivery and period data for multiple
- * scenarios, scoped to a specific list of demand-unit ids.
+ * Hook to fetch AG demand-unit delivery, GW restriction shortage, and
+ * period data for multiple scenarios, scoped to a specific list of
+ * demand-unit ids.
  *
  * The underlying hooks self-gate on `duIds.length > 0`. When the list is
  * empty (no DUs added yet) no network requests fire. Each fetch returns
  * only the requested rows via the backend's `du_id` filter, so adding
  * one DU pulls one DU per scenario instead of all 150.
  *
- * AG shortage is not surfaced here because CalSim assumes AG demand
- * units make up any shortage with groundwater pumping
+ * Returns:
+ * - `matrixData` (monthly delivery percentiles) - the current visible band
+ * - `shortageMatrixData` (monthly GW restriction shortage percentiles) -
+ *   fetched alongside delivery so it's hot in the SWR cache for the
+ *   forthcoming delivery/shortage toggle. Populated only for SJR / TULARE
+ *   DUs (Sacramento DUs have no shortage data and 404s are tolerated)
+ *
+ * `error` and `isLoading` track the delivery + period fetches only. Shortage
+ * failures are not surfaced here because the visible matrix still renders
+ * correctly without shortage data
  */
 function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
   const deliveryResults = useMultiScenarioSlots(scenarios, (id) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsDeliveryMonthly(id, duIds),
+  )
+  const shortageResults = useMultiScenarioSlots(scenarios, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
+    useAgDemandUnitsShortageMonthly(id, duIds),
   )
   const periodResults = useMultiScenarioSlots(scenarios, (id) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
@@ -494,6 +555,7 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
 
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
+  const shortageMatrixData: MatrixDataType = {}
   const cellStats: CellStatsMap = {}
 
   // Process period summaries for all scenarios to build cell stats
@@ -560,6 +622,30 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
     )
   })
 
+  // Process GW restriction shortage monthly data for each scenario. Shortage
+  // is available only for SJR / TULARE DUs. The fetch fires alongside delivery
+  // so the data is hot in the SWR cache when a delivery/shortage toggle ships.
+  // Sacramento DUs are absent from the response (and the endpoint 404s when
+  // none of the requested DUs have shortage data) so we treat both as empty
+  // rather than surfacing as a section-level error
+  shortageResults.forEach((result, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !result.demandUnits) return
+
+    Object.entries(result.demandUnits).forEach(
+      ([duId, data]: [string, AgDemandUnitShortageData]) => {
+        if (!data) return
+        if (!shortageMatrixData[duId]) {
+          shortageMatrixData[duId] = {}
+        }
+
+        shortageMatrixData[duId][scenarioId] = data.monthly_shortage
+          ? shortageStatsToPercentiles(data.monthly_shortage)
+          : {}
+      },
+    )
+  })
+
   // Track which scenarios are still loading
   const loadingScenarios = scenarios.filter(
     (_, index) => deliveryResults[index]?.isLoading ?? false,
@@ -569,7 +655,15 @@ function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
     .filter((e) => e && e.label)
     .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 
-  return { entities, matrixData, cellStats, isLoading, error, loadingScenarios }
+  return {
+    entities,
+    matrixData,
+    shortageMatrixData,
+    cellStats,
+    isLoading,
+    error,
+    loadingScenarios,
+  }
 }
 
 /**
@@ -628,9 +722,13 @@ function useMultiScenarioAgData(
   ])
 
   if (!hasAddedDus) {
+    // Aggregates have no shortage data (it's a per-DU SGMA-style concept).
+    // Expose an empty shortage matrix so downstream callers don't have to
+    // probe for the field
     return {
       entities: aggregatesData.entities,
       matrixData: aggregatesData.matrixData,
+      shortageMatrixData: {} as MatrixDataType,
       cellStats: aggregatesData.cellStats,
       isLoading: isBatchLoading,
       error: null,
@@ -641,6 +739,8 @@ function useMultiScenarioAgData(
   return {
     entities: [...addedEntities, ...aggregatesData.entities],
     matrixData: { ...aggregatesData.matrixData, ...demandUnitsData.matrixData },
+    // Aggregates contribute no shortage rows. Only the per-DU fetch does
+    shortageMatrixData: demandUnitsData.shortageMatrixData,
     cellStats: { ...aggregatesData.cellStats, ...demandUnitsData.cellStats },
     isLoading: isBatchLoading || demandUnitsData.isLoading,
     error: demandUnitsData.error,

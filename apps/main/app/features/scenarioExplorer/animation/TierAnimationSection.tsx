@@ -43,12 +43,7 @@ import OutcomeMorphOverlay, {
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
-// Retired in favor of the anchored upper-left map popup rendered by
-// `VisualizationLayers`. Kept imported (prefixed to silence the unused-var
-// lint) so un-commenting the card-list mount below is a one-line change.
 import _PinnedLocationsList from "./PinnedLocationsList"
-// TODO(beat3): restore ResearcherIllustrations import
-// import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
@@ -83,17 +78,6 @@ import {
 
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
-
-/** Pixels the tier storyboard's root panel extends below the fold
- *  beyond the strict viewport-fit baseline. The left text column and
- *  right overlay composition are taller than one viewport by design:
- *  the user scrolls so the title + Play button park at the top of
- *  the visible area, and this overflow holds the remaining intro
- *  paragraphs, tier legend, Beat 1C reveals, Beat 3+ narration, and
- *  the radar/heatmap composition without crowding. Morph landing
- *  coordinates in `BeatTextOverlay` are measured from the DOM via
- *  ResizeObserver so the right-column geometry adapts automatically
- *  to the taller panel. */
 const STORYBOARD_CONTENT_OVERFLOW_PX = 320
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
@@ -197,18 +181,8 @@ const ANIM_POLYGON_LAYERS = [
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
 
-// `logDuState`, `debugLog`, and `DU_CLASS_FILTER` all live in
-// `./engine` now and are imported at the top of the file.
-// `DU_AG_ONLY_FILTER` is no longer referenced from this file. Its only
-// caller, the legacy Beat 5 paint branch, moved to the engine's
-// `MapPaintArbiter` in Phase 1.f, so the import was dropped. The
-// constant itself still lives in `engine/index.ts` for use by the
-// arbiter. Single source of truth for demand-units filters and
-// storyboard diagnostics. See `engine/debug.ts` and
-// `engine/demandUnitsBaseline.ts`.
-
 /** Curated list of well-known agricultural water districts used to
- *  illustrate what a single polygon represents during Beat 1C. Each popup
+ *  illustrate what a single polygon represents. Each popup
  *  reuses the standard LocationHighlight styling from the rest of the app
  *  so the visual language is consistent. The list is intentionally small
  *  and geographically diverse (Sac Valley, San Joaquin/Delta, Westside,
@@ -235,9 +209,9 @@ const ACTIVE_OUTCOMES = new Set([
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 
-/* ── Beat 5 (loi-highlight) identity ──
+/* loi-highlight
  *
- * Beat 5 choreographs a single AG_REV LOI (Glenn Colusa I.D., DU_ID
+ * Choreographs a single AG_REV LOI (Glenn Colusa I.D., DU_ID
  * `08N_SA2`). All Beat 5 timing thresholds and the choreography that
  * uses them now live in the declarative beat engine
  * (`engine/beats.ts`, `engine/arbiters/MapPaintArbiter.ts`,
@@ -307,7 +281,7 @@ export default function TierAnimationSection() {
   // Stable as long as the map hasn't panned/zoomed.
   const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
   const [panelInView, setPanelInView] = useState(false)
-  /** Storyboard cursor: index into `BEATS`. Driven by Next / Back. */
+  /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref mirror of `beatIndex` so navigation callbacks can read the
    *  latest cursor without needing to be re-created on every change. */
@@ -323,7 +297,7 @@ export default function TierAnimationSection() {
   const [hasPlayed, setHasPlayed] = useState(false)
   const hasPlayedRef = useRef(false)
   /** Derived state describing where the user is in the storyboard.
-   *  - `idle`: at B0, no advance yet
+   *  - `idle`: no advance yet
    *  - `playing`: actively animating between two beats
    *  - `paused`: settled on a non-final beat, waiting for user input
    *  - `finished`: settled on the final beat (interactive UI lights up) */
@@ -340,7 +314,7 @@ export default function TierAnimationSection() {
   const polygonsAllowedRef = useRef(false)
   const resolvedScenarioIdRef = useRef("s0020")
 
-  /* ── Left-panel text visibility.
+  /* Left-panel text visibility.
    *
    * The zoom-based fade-out was retired (see the reprojection effect
    * further down) to keep the bottom navigation controls accessible
@@ -350,10 +324,10 @@ export default function TierAnimationSection() {
   const [textVisible, _setTextVisible] = useState(true)
   const _textVisibleRef = useRef(true)
 
-  /* ── Time-based progress (0 -> 1) ── */
+  /* Time-based progress (0 -> 1) */
   const progress = useMotionValue(0)
 
-  /* ── Back-out opacity for the left-panel text ──
+  /* Back-out opacity for the left-panel text
    *
    * Normally 1 (no-op). When the user presses Back from beat 1/N we
    * animate it to 0 while `progress` is parked at 0.45 - so the entire
@@ -365,9 +339,9 @@ export default function TierAnimationSection() {
   const backOutOpacity = useMotionValue(1)
 
   // Map visibility: stays visible through beat 2
-  // TODO(beat3): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
+  // TODO(?): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
   const mapOpacity = useTransform(progress, [0, 1], [1, 1])
-  // TODO(beat3): restore fade-out: useTransform(progress, [0.73, 0.78], [1, 0])
+  // TODO(?): restore fade-out: useTransform(progress, [0.73, 0.78], [1, 0])
   const overlayOpacity = useTransform(progress, [0, 1], [1, 1])
   const headingOpacity = useTransform(progress, [0, 1], [1, 1])
 
@@ -380,7 +354,7 @@ export default function TierAnimationSection() {
    *  the reduced-motion fast-forward path below. */
   const settleToFinishedState = useCallback(() => {
     setPlayState("finished")
-    // Phase 3a: signal to the engine that the storyboard has settled
+    // signal to the engine that the storyboard has settled
     // and the user can now click squares. Signal only - no arbiter
     // keys on this mode yet (Phase 3b wires InteractivePaintArbiter).
     engineApiRef.current?.setMode("interactive")
@@ -414,7 +388,7 @@ export default function TierAnimationSection() {
     }
   }, [mapAPI.mapRef])
 
-  /* ── Storyboard navigation ──
+  /* Storyboard navigation
    *
    * `goTo(targetIndex)` animates `progress` from its current value to
    * `BEATS[targetIndex].progress`. Forward navigation uses the
@@ -441,7 +415,7 @@ export default function TierAnimationSection() {
       const fromIndex = beatIndexRef.current
       if (controlsRef.current) controlsRef.current.stop()
 
-      // Phase 3a: mode signal. Any goTo (forward or backward) puts the
+      // mode signal. Any goTo (forward or backward) puts the
       // storyboard into playback mode. If the user was in interactive
       // (post-settle) and pressed Back, this correctly restores
       // playback so the staggered reveals read as scripted again.
@@ -522,7 +496,7 @@ export default function TierAnimationSection() {
     [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
   )
 
-  /* ── Clear any interactive overlay/map state tied to a sticky pin.
+  /* Clear any interactive overlay/map state tied to a sticky pin.
    *
    * Called when the user navigates between beats so that a previously
    * clicked square (and its pinned popups + outcome map layer) doesn't
@@ -549,7 +523,7 @@ export default function TierAnimationSection() {
     logDuState("clearInteractiveState START", diagMap)
     setHoveredLocation(null)
     setPinnedLocations(new Map())
-    // Phase 3d: release interactive paint ownership synchronously,
+    // release interactive paint ownership synchronously,
     // BEFORE clearing the selection store. The `sync` effect driven by
     // `selectedOutcomeCode -> null` still fires on React commit, but
     // by the time it runs the arbiter has already shed ownership and
@@ -563,7 +537,7 @@ export default function TierAnimationSection() {
     mapActions.clearOutcomeVisualization()
     logDuState("clearInteractiveState after store clears", diagMap)
     // Force the engine to clear any actors still in-window so a mid-beat
-    // nav away from Beat 4 doesn't strand the gold polygon ring, the
+    // nav away doesn't strand the gold polygon ring, the
     // square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
     logDuState("clearInteractiveState after engine teardown", diagMap)
@@ -586,7 +560,7 @@ export default function TierAnimationSection() {
     goTo(beatIndexRef.current + 1, { viaCamera: true })
   }, [goTo, clearInteractiveState])
 
-  /* ── Intro tween (Play button entry point) ──
+  /* Intro tween (Play button entry point)
    *
    * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
    * tweens the first beat's window (0 -> `BEATS[0].progress`) while
@@ -618,7 +592,7 @@ export default function TierAnimationSection() {
     backOutOpacity.set(1)
     setHasPlayed(true)
     hasPlayedRef.current = true
-    // Phase 3a: mode signal - storyboard is now in playback. Set
+    // mode signal - storyboard is now in playback. Set
     // before `playArrival()` so any downstream effect observing the
     // mode sees the transition before the first progress tick lands.
     engineApiRef.current?.setMode("playback")
@@ -626,7 +600,7 @@ export default function TierAnimationSection() {
     playArrival()
   }, [playArrival, backOutOpacity])
 
-  /* ── Back ──
+  /* Back
    *
    * On beat index > 0: snap `progress` directly to the previous beat's
    * checkpoint. All `progress.on("change")` listeners are pure functions
@@ -708,7 +682,7 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     setHoveredLocation(null)
     setPinnedLocations(new Map())
-    // Phase 3d: release the interactive arbiter before clearing the
+    // release the interactive arbiter before clearing the
     // store so the DU teardown runs while the selection (and its
     // spec) is still valid. See `clearInteractiveState` for the
     // ordering rationale. The DU baseline written a few lines below
@@ -745,7 +719,7 @@ export default function TierAnimationSection() {
             map.setPaintProperty(lineLayer, "line-opacity", 0)
           }
         }
-        // Phase 3d: consolidated DU reset. `ANIM_POLYGON_LAYERS` loop
+        // consolidated DU reset. `ANIM_POLYGON_LAYERS` loop
         // above already zeroed fill/line opacity via dynamic ids. The
         // baseline helper re-asserts the full state (filter, color
         // expressions, transitions, visibility) so we return to the
@@ -804,7 +778,7 @@ export default function TierAnimationSection() {
     computePolygonDataRef.current()
   }, [progress, backOutOpacity, mapAPI.mapRef])
 
-  /* ── Arrival behaviour ──
+  /* Arrival behaviour
    *
    * Normal motion: park in the pre-play gate. The user must click Play
    * explicitly to start the storyboard (they see the title, the Play
@@ -822,7 +796,7 @@ export default function TierAnimationSection() {
     // Normal motion: nothing to do here. We wait for the user to click Play.
   }, [panelInView, prefersReducedMotion, goTo])
 
-  /* ── Keyboard shortcuts ──
+  /* Keyboard shortcuts
    *
    * Gated on `panelInView` so shortcuts don't steal keys when the user
    * has scrolled past. We only intercept ArrowRight / ArrowLeft / Home
@@ -865,28 +839,12 @@ export default function TierAnimationSection() {
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
-  // Interactive-UI gate. "finished" lights up after navigating all beats
-  // (the canonical finish state, set by `settleToFinishedState`). We also
-  // treat "paused" as interactive so clicks work whenever the storyboard
-  // is parked between beats -- important because the 8-beat structure now
-  // ends at the Beat 8 heatmap stub, so requiring the animation to run all
-  // the way through would otherwise lock out the manual pipeline during
-  // iteration on any mid-storyboard beat.
+  // Interactive-UI gate. "finished" lights up
   const isInteractive = playState === "finished" || playState === "paused"
 
-  /* ── Encoding mode: distribution | bar | average ── */
+  /* Encoding mode: distribution | bar | average */
   const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
   const [spotlightedTier, setSpotlightedTier] = useState<number | null>(null)
-  // The Get Started storyboard is permanently pinned to the s0020 baseline
-  // under the historical hydroclimate. The narrative is calibrated to that
-  // single combination (Beat 8's heatmap is a single-column placeholder for
-  // future multi-hydroclimate columns), so we deliberately ignore the global
-  // `useScenarioExplorerStore.hydroclimate` value and do not expose an
-  // in-storyboard hydroclimate chooser. If multi-hydroclimate playback is
-  // ever desired, reintroduce the store read here, a `useResolvedIdMapping`
-  // call to translate the sibling-group id, the `useOutcomeTierOverrides`
-  // call below, and the `hydroclimate` / `onHydroclimateChange` props on
-  // `BeatTextOverlay`.
   const resolvedScenarioId = "s0020"
   const { chartData: tierChartData } = useScenarioTiers(resolvedScenarioId)
   // No per-location tier overrides are applied. Kept as an empty record so
@@ -901,15 +859,7 @@ export default function TierAnimationSection() {
     [scenarios],
   )
 
-  /* ── Beat 8 extra-hydroclimate columns ──
-   *
-   * The Beat 8 heatmap shows three columns: the primary (historical)
-   * `s0020` run plus the cc50 and cc95 climate-variant siblings. Resolve
-   * the variant short_codes by matching on `sibling_group` (same
-   * strategy, different climate) and fetch tier data for each so the
-   * columns can fade in with accurate per-outcome colors. Falls back
-   * gracefully (`null` scenarioId -> `useScenarioTiers` returns empty
-   * chartData) while the scenarios list is still loading. */
+  /* extra-hydroclimate columns */
   const s0020SiblingGroup = s0020Scenario?.sibling_group
   const { cc50VariantId, cc95VariantId } = useMemo(() => {
     if (!scenarios || !s0020SiblingGroup) {
@@ -918,10 +868,10 @@ export default function TierAnimationSection() {
     const siblings = scenarios.filter(
       (s) => s.sibling_group === s0020SiblingGroup,
     )
-    // Hydroclimate IDs from `HYDROCLIMATE_ID_MAP`: cc50=3, cc95=4. Use
-    // numeric `hydroclimate_id` (stable across deployments) rather than
-    // the newer `hydroclimate_short_code`, which may be null/absent on
-    // older API deployments.
+    // Hydroclimate IDs from `HYDROCLIMATE_ID_MAP`: cc50=3, cc95=4. The
+    // API returns the numeric `hydroclimate_id` and the local map carries
+    // the short-code mapping until the cutover described in the database
+    // README ("Hydroclimate metadata" roadmap item).
     return {
       cc50VariantId:
         siblings.find((s) => s.hydroclimate_id === 3)?.short_code ?? null,
@@ -960,48 +910,7 @@ export default function TierAnimationSection() {
     setSpotlightedTier(null)
   }, [selectedOutcomeCode])
 
-  /* ── Post-interactive teardown on outcome deselect.
-   *
-   * As of Phase 3c step 1 the `demand-units` / `demand-units-outline`
-   * teardown (filter reset, opacity 0, visibility visible, blended
-   * tier color, default outline width, plus the deferred-to-idle
-   * handling for post-`removeLayer` style-busy windows) is owned by
-   * `InteractivePaintArbiter.onExit`. That is driven from the sync
-   * effect further below. Nothing here has to replicate it.
-   *
-   * What remains here is the NON-demand-units half of the old
-   * teardown: flip visibility back to `"visible"` on the animation
-   * polygon layers the storyboard doesn't own (`calsim-wba`,
-   * `california-reservoir`, `delta-detaw`, plus their outlines).
-   * `OutcomePolygonLayer`'s unmount cleanup set those to `"none"` when
-   * the user deselected a non-DU outcome. Leaving them hidden means a
-   * subsequent click on the same layer -- or any other code that
-   * assumes the base style's default visibility -- has to discover
-   * the layer is hidden and flip it back. Cheap and idempotent to do
-   * it once on deselect instead. */
-  /* Restore non-DU layer visibility AND zero their opacity on deselect.
-   *
-   * Two things need to be undone when an interactive non-DU selection
-   * ends (truthy -> null `selectedOutcomeCode`):
-   *
-   *   1. `OutcomePolygonLayer`'s unmount flipped the fill + outline
-   *      layout `visibility` to `"none"`. A subsequent storyboard
-   *      Restart would then try to render Beat 5's non-DU polygons
-   *      through a `visibility: "none"` layer and silently show
-   *      nothing. We must put `visibility` back to `"visible"`.
-   *
-   *   2. The `applyPaintChanges` effect (below) writes `["case", ...]`
-   *      expressions to `fill-opacity` / `line-opacity` (and a gold
-   *      `line-color` expression) while a selection is active. OPL's
-   *      unmount does NOT reset those paint properties -- it only
-   *      toggles `visibility`. So if we restore `visibility` without
-   *      also zeroing the opacities, the stale case expressions
-   *      render (e.g. a gold-outlined `delta-detaw` stuck on the map
-   *      after the user switched from DELTA_ECO to a marker outcome
-   *      and then pressed Next). Writing scalar 0 for both opacities
-   *      is enough: the next OPL mount for that outcome will raise
-   *      them back to 1 as part of its fade-in path, and the
-   *      in-between storyboard beats don't read these layers. */
+  /* Post-interactive teardown */
   const prevSelectedOutcomeCodeRef = useRef<string | null>(null)
   useEffect(() => {
     const prev = prevSelectedOutcomeCodeRef.current
@@ -1027,7 +936,7 @@ export default function TierAnimationSection() {
     })
   }, [selectedOutcomeCode, mapAPI])
 
-  /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
+  /* Multi-pin hover state (shared by overlay squares and map polygons) */
   const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(
     null,
   )
@@ -1118,24 +1027,6 @@ export default function TierAnimationSection() {
           mapActions.setOutcomeVisualization(info.code, resolvedScenarioId)
         }
 
-        // Fly the camera to the new outcome whenever the selection
-        // enters a new outcome (first click or cross-outcome swap) so
-        // the user can see the polygon that just became active.
-        // Same-outcome swaps keep the camera still (both polygons are
-        // already in view). De-select clicks skip this branch too.
-        //
-        // Routed through `mapAPI.withMap` + `mapRef.fitBounds` /
-        // `mapRef.getMap().easeTo` to mirror the canonical pattern in
-        // `useOutcomeVisualization.ts` (the learn/explore outcome-click
-        // camera handler). Previously this block used a mix of
-        // `mapAPI.mapRef?.current?.fitBounds(...)` and raw
-        // `map.easeTo(...)`, and silently dropped `action.padding` on
-        // the `easeTo` branch - so outcomes resolved via
-        // `cameraPreset` centered without the 24px top/bottom padding
-        // the `fitBounds` branch got from `resolveOutcomeCamera`.
-        // Unifying through `withMap` + passing padding on both
-        // branches removes that drift between the get-started and
-        // explore/learn camera paths.
         if (isNewOutcomeSelection) {
           const action = resolveOutcomeCamera(info.code, "get-started")
           mapAPI.withMap((mapRef) => {
@@ -1169,29 +1060,7 @@ export default function TierAnimationSection() {
     return set
   }, [pinnedLocations, hoveredLocation, locKey])
 
-  /* ── Beat 5 demo-LOI highlight state ──
-   *
-   * During Beat 5 (`loi-highlight`) the storyboard choreographs a single
-   * AG_REV LOI through five sub-steps (map layer fade-in, square ring,
-   * square popup, polygon ring, polygon popup). Two pieces of state back
-   * this choreography:
-   *   - `demoLocation` drives the square's gold ring via
-   *     `OutcomeMorphOverlay`'s `demoHighlightedLocationKey` prop, and
-   *   - `demoHoveredLocation` drives the square's foreignObject popup via
-   *     the same `hoveredLocation` prop used in interactive hover mode.
-   * The map-side gold polygon stroke and map popup are driven directly
-   * from the Beat 5 driver effect via Mapbox paint properties and
-   * `mapActions.setLocationHighlights` respectively. */
-  const [demoLocation, setDemoLocation] = useState<LocationInfo | null>(null)
-  const demoLocationKey = demoLocation ? locKey(demoLocation) : null
-  const [demoHoveredLocation, setDemoHoveredLocation] =
-    useState<LocationInfo | null>(null)
-
-  /* Source IDs that must survive `OutcomeMorphOverlay`'s stride subsample.
-   * When an outcome has more polygons than `MAX_POLYGONS_PER_OUTCOME` the
-   * overlay drops a roughly uniform subset, which can silently cull any
-   * specific DU the storyboard references. Pin the Beat 5 LOI and the Beat
-   * 1C popup IDs here so their squares are guaranteed to render. */
+  /* demo-LOI highlight state */
   const overlayMustIncludeSourceIds = useMemo(
     () => new Set<string>([BEAT5_LOI_ID, ...BEAT1C_POPUP_DU_IDS]),
     [],
@@ -1247,20 +1116,12 @@ export default function TierAnimationSection() {
     )
   }, [centroids])
 
-  /* ── Apply map highlight for all active locations ── */
+  /* Apply map highlight for all active locations */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const origLineColorRef = useRef<any>(null)
   const origLineWidthRef = useRef<number | null>(null)
 
   useEffect(() => {
-    // Fully inert during storyboard playback. The main choreography
-    // listener owns every `demand-units` paint and filter write during
-    // playback, and the beat engine owns Beat 4. Running this effect
-    // while `playState !== "finished" / "paused"` races them: a hover
-    // during Beat 0 flips `hoveredLocation`, `activeLocationSet` grows,
-    // this effect reruns, and because no outcome is selected yet its
-    // reset branch sets `demand-units` fill-opacity to 0 and wipes the
-    // blue cycle that the Beat 0 listener just painted.
     if (!isInteractive) return
 
     const config = selectedOutcomeCode
@@ -1268,27 +1129,11 @@ export default function TierAnimationSection() {
       : null
 
     if (!config) {
-      // No outcome selected. Only `clearLocationHighlights` remains
-      // here: `demand-units` teardown is now owned by
-      // `InteractivePaintArbiter.onExit` (driven by the sync effect
-      // below). `playState !== "finished"` is still the guard,
-      // because `playState` briefly flips to `"paused"` at every beat
-      // settle mid-run and we don't want to clobber highlights during
-      // intermediate beats.
       if (playState !== "finished") return
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
       return
     }
 
-    // Demand-units interactive paint (both the base fill/outline AND
-    // the gold-outline / spotlight / pinned overrides) moved to
-    // `InteractivePaintArbiter` in Phase 3c step 2. The highlights
-    // computation below runs for every outcome. The inner
-    // `applyPaintChanges` function no-ops for DU layers.
-
-    // ── Polygon-specific Mapbox paint changes ──
-    // OutcomePolygonLayer handles filter, fill-color, and base opacity.
-    // This effect only handles gold outlines + spotlight/pinned opacity overrides.
     const map = mapAPI.mapRef?.current?.getMap?.()
 
     origLineColorRef.current = null
@@ -1296,10 +1141,7 @@ export default function TierAnimationSection() {
 
     const applyPaintChanges = () => {
       if (!map || config.geometryType !== "polygon") return
-      // Demand-units paint is owned exclusively by
-      // `InteractivePaintArbiter` (Phase 3c step 2). Bail so we don't
-      // double-write. Non-DU polygon outcomes (WBA, delta, reservoir)
-      // still flow through this path.
+
       if (config.layerType === "demand-units") return
       const fillId = config.mapboxLayerId
       const outlineId = `${config.mapboxLayerId}-outline`
@@ -1431,7 +1273,7 @@ export default function TierAnimationSection() {
       map.once("idle", applyPaintChanges)
     }
 
-    // ── Store highlights (drives map Popups -- independent of map style) ──
+    // Store highlights (drives map Popups -- independent of map style)
     const highlights: import("../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
@@ -1515,9 +1357,6 @@ export default function TierAnimationSection() {
     [storeHighlights, pinnedLocations],
   )
 
-  // Prefixed with `_` so the unused-var lint stays silent while the retired
-  // `PinnedLocationsList` mount sits commented out. Still functional. Just
-  // re-wire (and rename) when restoring the card-list UI.
   const _handlePinnedHoverEnter = useCallback(
     (key: string) => {
       setCardHoveredKey(key)
@@ -1649,7 +1488,7 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* ── Map hover/click -> shared multi-pin state for visible outcome polygons ── */
+  /* Map hover/click -> shared multi-pin state for visible outcome polygons */
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
@@ -1746,7 +1585,7 @@ export default function TierAnimationSection() {
     }
   }, [isInteractive, selectedOutcomeCode, mapAPI.mapRef])
 
-  /* ── Activate persistent map (no visualization set until interactive mode) ── */
+  /* Activate persistent map (no visualization set until interactive mode) */
   useEffect(() => {
     mapActions.setMapMode("get-started")
 
@@ -1786,7 +1625,7 @@ export default function TierAnimationSection() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Keep outcome visualization scenario in sync with hydroclimate ── */
+  /* Keep outcome visualization scenario in sync with hydroclimate */
   useEffect(() => {
     resolvedScenarioIdRef.current = resolvedScenarioId
     const activeViz = useMapStore.getState().activeOutcomeVisualization
@@ -1798,7 +1637,7 @@ export default function TierAnimationSection() {
     }
   }, [resolvedScenarioId])
 
-  /* ── Detect when panel scrolls into view ── */
+  /* Detect when panel scrolls into view */
   useEffect(() => {
     const el = panelRef.current
     if (!el) return
@@ -1812,7 +1651,7 @@ export default function TierAnimationSection() {
     return () => observer.disconnect()
   }, [])
 
-  /* ── Fly camera once panel is visible ── */
+  /* Fly camera once panel is visible */
   useEffect(() => {
     if (!panelInView || isLoading || !mapAPI.mapRef?.current) return
     if (cameraSetRef.current) return
@@ -1843,7 +1682,7 @@ export default function TierAnimationSection() {
               map.setLayoutProperty(outline, "visibility", "visible")
           }
 
-          // Phase 3d: consolidated session-init. `ensureDemandUnitsOutlineLayer`
+          // consolidated session-init. `ensureDemandUnitsOutlineLayer`
           // creates the `demand-units-outline` line layer once per session
           // (idempotent - no-op if it already exists from another map mode).
           // `writeDemandUnitsBaseline` then asserts the full beat-1 palette
@@ -1911,7 +1750,7 @@ export default function TierAnimationSection() {
     return () => clearTimeout(timer)
   }, [panelInView, isLoading, mapAPI.mapRef])
 
-  /* ── Build a Mapbox fill-color expression that assigns tier colors ── */
+  /* Build a Mapbox fill-color expression that assigns tier colors */
   const outcomeLocationsRef = useRef(outcomeLocations)
   outcomeLocationsRef.current = outcomeLocations
 
@@ -1969,7 +1808,7 @@ export default function TierAnimationSection() {
     ]
   }
 
-  /* ── InteractivePaintArbiter (Phase 3b: lifecycle tracker only) ──
+  /* InteractivePaintArbiter
    *
    * Event-driven arbiter (same shape as `CameraArbiter`, not in the
    * progress-dispatch `arbitersRef` list). Will eventually be the
@@ -2019,6 +1858,15 @@ export default function TierAnimationSection() {
     [centroids],
   )
 
+  // Demo-mode state. The animation engine writes to these setters via
+  // BeatEngineContext (see engine/types.ts) and the overlay reads the
+  // derived key and hovered-location values to drive the gold-ring
+  // highlight and the square-side popup during the scripted demo path
+  const [demoLocation, setDemoLocation] = useState<LocationInfo | null>(null)
+  const demoLocationKey = demoLocation ? locKey(demoLocation) : null
+  const [demoHoveredLocation, setDemoHoveredLocation] =
+    useState<LocationInfo | null>(null)
+
   const engineContext: BeatEngineContext = useMemo(
     () => ({
       mapRef: mapAPI.mapRef ?? null,
@@ -2059,7 +1907,7 @@ export default function TierAnimationSection() {
   })
   engineApiRef.current = engineApi
 
-  /* ── InteractivePaintArbiter sync ──
+  /* InteractivePaintArbiter sync
    *
    * Reconcile the arbiter's ownership of `demand-units` /
    * `demand-units-outline` whenever selection, engine mode, or
@@ -2135,7 +1983,7 @@ export default function TierAnimationSection() {
     // the re-sync when tier data hydrates for the current outcome.
   }, [engineContext, selectedOutcomeCode, playState, theme, outcomeLocations])
 
-  /* ── InteractivePaintArbiter overlay ──
+  /* InteractivePaintArbiter overlay
    *
    * Apply the per-selection overlay (gold outline + zoom-aware
    * fill-opacity with optional spotlight / pinned overrides) whenever
@@ -2162,7 +2010,7 @@ export default function TierAnimationSection() {
       if (pinnedLocations.has(key)) pinnedFeatureIds.push(info.sourceId)
     }
 
-    // Beat 5 spotlight: only meaningful for AG_REV + matching tier.
+    // Spotlight: only meaningful for AG_REV + matching tier.
     const locData = outcomeLocationsRef.current[selectedOutcomeCode]
     const spotlightFeatureIds: string[] = []
     if (spotlightedTier != null && locData) {
@@ -2188,7 +2036,7 @@ export default function TierAnimationSection() {
     outcomeLocations,
   ])
 
-  /* ── InteractivePaintArbiter teardown cancellation ──
+  /* InteractivePaintArbiter teardown cancellation
    *
    * When `playState` flips to `"playing"` the storyboard is tweening
    * and `MapPaintArbiter`'s beat actors are writing `demand-units`
@@ -2202,25 +2050,7 @@ export default function TierAnimationSection() {
     interactivePaintArbiterRef.current?.cancelPendingTeardown()
   }, [playState])
 
-  /* ── Storyboard map-layer unmount cleanup ──
-   *
-   * Phase 1 (Storyboard Engine Hardening Plan v2) deleted the main
-   * per-frame paint listener. All `demand-units` and
-   * `demand-units-outline` paint writes during playback now flow
-   * through `MapPaintArbiter` (see `engine/arbiters/MapPaintArbiter.ts`
-   * and `engine/beats.ts`), and the `basemap-dim-overlay` ramp moved
-   * with them.
-   *
-   * The legacy listener also did one job that the engine teardown
-   * does not cover: when the storyboard component unmounts (the user
-   * navigates away from the scenarioExplorer page or switches tabs),
-   * reset the animated polygon and line layers to their neutral
-   * resting state so the storyboard does not leak its paint into
-   * other scenarioExplorer views. The arbiter's `teardown` only
-   * clears arbiter-owned state (the gold LOI ring), not the broader
-   * fill / line opacities for `ANIM_POLYGON_LAYERS` and
-   * `ANIM_LINE_LAYERS`. We keep that work here as a tiny dedicated
-   * unmount effect. */
+  /* Storyboard map-layer unmount cleanup */
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
@@ -2243,15 +2073,7 @@ export default function TierAnimationSection() {
     }
   }, [mapAPI.mapRef, isLoading])
 
-  /* ── InteractivePaintArbiter unmount release ──
-   *
-   * Phase 3d: if the storyboard unmounts while the arbiter is
-   * mid-selection (user closed the page with a DU outcome pinned),
-   * explicitly release ownership so the deferred-idle listener on
-   * `map.once("idle", ...)` is cleaned up and no stale write lands on
-   * a disposed map. `release` invokes `onExit` which writes the
-   * scalar-0 baseline - a safe resting state for any future
-   * scenarioExplorer view. Idempotent when not owning. */
+  /* InteractivePaintArbiter unmount release */
   useEffect(() => {
     return () => {
       const ctx = engineContextRef.current
@@ -2259,25 +2081,7 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* Beat 1C demo popups removed. The five curated AG district popups
-   * (Glenn Colusa, Turlock, Westlands, Madera, Modesto) read as noise
-   * during playback and also shared the `locationHighlights` store slot
-   * with the hover-driven paint effect, causing popups to reappear on
-   * hover. Removed entirely. The `BEAT1C_POPUP_DU_IDS` constant is kept
-   * because `overlayMustIncludeSourceIds` still pins those DU sourceIds
-   * in the overlay so their distribution squares render deterministically
-   * in the morph. */
-
-  /* Beat 5 demo-LOI driver removed in Phase 1.h. The engine's
-   * `OverlayPopupArbiter` and `MapPopupArbiter` (see
-   * `engine/arbiters/`) now drive `demoLocation`,
-   * `demoHoveredLocation`, and `mapActions.setLocationHighlights` for
-   * the Glenn Colusa I.D. (`AG_REV` / `08N_SA2`) LOI sequence. The
-   * legacy effect was already inert behind the `ENGINE_OWNS_BEAT4`
-   * flag. This commit deletes both. See Storyboard Engine Hardening
-   * Plan v2, Phase 1.h. */
-
-  /* ── Measure panel for SVG coordinate mapping ── */
+  /* Measure panel for SVG coordinate mapping */
   const measurePanel = useCallback(() => {
     if (!panelRef.current) return
     const rect = panelRef.current.getBoundingClientRect()
@@ -2295,7 +2099,7 @@ export default function TierAnimationSection() {
     }
   }, [isLoading, measurePanel])
 
-  /* ── Collect screen shapes from Mapbox layers + coordinate lookups ── */
+  /* Collect screen shapes from Mapbox layers + coordinate lookups */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
   const reprojectRef = useRef<() => void>(() => {})
@@ -2307,11 +2111,6 @@ export default function TierAnimationSection() {
     >
   >(new Map())
 
-  /**
-   * Cheap: subtract the current panel viewport position from the stable
-   * viewport-space data stored in viewportDataRef. Safe to call frequently
-   * (scroll, resize, before play) without re-querying Mapbox.
-   */
   const applyPanelOffset = useCallback(() => {
     if (!panelRef.current || viewportDataRef.current.size === 0) return
 
@@ -2333,11 +2132,6 @@ export default function TierAnimationSection() {
 
   applyPanelOffsetRef.current = applyPanelOffset
 
-  /**
-   * Expensive: query Mapbox source features, project to viewport-space
-   * coordinates, and store in viewportDataRef. Then apply the panel offset
-   * to produce panel-relative screen coordinates.
-   */
   const collectOutcomeShapes = useCallback(() => {
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
@@ -2355,7 +2149,7 @@ export default function TierAnimationSection() {
     const vpMap = new Map<string, ScreenPolygon>()
     const geoCentroids = new Map<string, { lng: number; lat: number }>()
 
-    // ── 1. Query polygon-based Mapbox layers per the registry ──
+    // 1. Query polygon-based Mapbox layers per the registry
     const layersToQuery = new Map<
       string,
       { idProperty: string; sourceLayerName?: string }
@@ -2462,7 +2256,7 @@ export default function TierAnimationSection() {
       }
     }
 
-    // ── 2. React-marker outcomes: project coordinates to viewport shapes ──
+    // 2. React-marker outcomes: project coordinates to viewport shapes
     for (const { code } of OUTCOME_DISPLAY_ORDER) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "react-marker") continue
@@ -2492,7 +2286,7 @@ export default function TierAnimationSection() {
       }
     }
 
-    // ── 3. Line outcomes: representative shape at centroid ──
+    // 3. Line outcomes: representative shape at centroid
     for (const { code } of OUTCOME_DISPLAY_ORDER) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "line") continue
@@ -2674,17 +2468,8 @@ export default function TierAnimationSection() {
     }
   }, [panelInView])
 
-  // Re-project cached shapes when the map pans/zooms (no Mapbox re-query).
-  //
-  // NOTE: an earlier version of this effect also faded the text column out
-  // when the map zoom exceeded `TEXT_FADE_ZOOM = 7`, on the theory that
-  // the text would otherwise overlap a zoomed-in polygon during the
-  // storytelling phase. It was disabled because (a) under the interactive
-  // sticky single-select flow, clicking a square legitimately zooms past
-  // that threshold, and (b) hiding the text column also hides the bottom
-  // Back / step / Next controls, which the user needs to navigate beats.
-  // `textVisible` and `textVisibleRef` are kept around as a hook in case
-  // we want to wire up a different visibility trigger later.
+  // Re-project cached shapes when the map pans/zooms.
+
   useEffect(() => {
     if (!panelInView) return
     const map = mapAPI.mapRef?.current?.getMap?.()
@@ -2706,7 +2491,7 @@ export default function TierAnimationSection() {
     }
   }, [panelInView, mapAPI.mapRef])
 
-  /* ── Build per-outcome shape groups for the morph overlay ── */
+  /* Build per-outcome shape groups for the morph overlay */
   const outcomeGroups: OutcomeGroup[] = useMemo(() => {
     if (allScreenPolygons.size === 0) return []
     return OUTCOME_DISPLAY_ORDER.map(({ code, label }) => {
@@ -2767,10 +2552,7 @@ export default function TierAnimationSection() {
     [outcomeGroups],
   )
 
-  /** Map of outcome code - Beat 2 morph window `{start, end}`.
-   *  BeatTextOverlay uses `start` to fade in each outcome's title just
-   *  before its own morph slice begins, and `end` to fade in the "X
-   *  locations" caption once the polygons have settled as squares. */
+  /** Map of outcome code */
   const outcomeMorphWindows = useMemo(() => {
     const map: Record<string, { start: number; end: number }> = {}
     if (activeOutcomeGroups.length === 0) return map
@@ -2786,22 +2568,13 @@ export default function TierAnimationSection() {
     const schedule: HideScheduleEntry[] = []
     const activeCodes = activeOutcomeGroups.map((g) => g.code)
     for (const group of activeOutcomeGroups) {
-      // AG_REV is excluded from the map-side hide schedule. The overlay
-      // morph in OutcomeMorphOverlay still fades its SVG polygons into
-      // distribution squares on its own 0.01-wide slice, but the map's
-      // `demand-units` polygons stay painted at 0.65 through Beat 2 and
-      // Beat 3 so the user keeps visual anchoring to the AG districts
-      // while the other outcomes morph in.
+      // AG_REV is excluded
       if (group.code === "AG_REV") continue
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
       if (!config) continue
       const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
-      // Beat 2 slices are tight (0.08 span across 8 outcomes + AG_REV's
-      // 0.01 slice in the compressed progress domain). Use a short fade
-      // lead so the DU fade doesn't bleed into the previous outcome's
-      // morph.
       const fadeStart = morphStart - 0.005
 
       // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
@@ -2831,13 +2604,6 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
-  /* Shared layout for Beat 2 text + distribution alignment (2 columns)
-   *
-   * The right-column layout lives in CSS document flow inside `BeatTextOverlay`.
-   * This memo only describes *what* each outcome needs (column, label, glyph
-   * height, caption). Actual x/y positions are measured from the DOM via
-   * `onGlyphLayoutChange` and flow back through `glyphLayout` state. The SVG
-   * morph overlay uses those measured rects as landing coordinates. */
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
   const describeLocations = useCallback(
@@ -2926,15 +2692,6 @@ export default function TierAnimationSection() {
           const distributionHeight =
             locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
           lockedHeightsRef.current.set(code, distributionHeight)
-
-          // Hug the squares: use the squares' visual bottom as the
-          // placeholder height, so the caption sits just under the last
-          // row with an identical gap across every outcome.
-          // `distributionHeight` = totalRows * (SQUARE_SIZE + SQUARE_GAP)
-          // includes a trailing SQUARE_GAP (6px) of empty space below the
-          // last row. Subtract it. No bar-height floor - bar/average
-          // mode centers on slotHeight and may overflow small slots,
-          // which we accept as a separate encoding-mode concern.
           const SQUARE_GAP_PX = 6
           targetHeight = Math.max(0, distributionHeight - SQUARE_GAP_PX)
         }
@@ -3019,7 +2776,7 @@ export default function TierAnimationSection() {
     return map
   }, [outcomeLayout, glyphLayout])
 
-  /* ── Error state ── */
+  /* Error state */
   if (error) {
     return (
       <Box
@@ -3132,16 +2889,6 @@ export default function TierAnimationSection() {
             </motion.div>
           )}
 
-          {/* TODO(beat3): restore ResearcherIllustrations
-          {panelSize && (
-            <ResearcherIllustrations
-              progress={progress}
-              panelWidth={panelSize.width}
-              panelHeight={panelSize.height}
-            />
-          )}
-          */}
-
           <BeatTextOverlay
             progress={progress}
             narrationTickRef={narrationTickRef}
@@ -3172,28 +2919,6 @@ export default function TierAnimationSection() {
             hideControls={prefersReducedMotion}
             heatmapExtraColumnCount={heatmapExtraColumns.length}
           />
-
-          {/* Retired: right-side pinned-location cards with dashed leader
-           * lines. Pinned highlights now render as a simple anchored popup
-           * to the upper-left of the polygon, via the lightweight popup in
-           * `VisualizationLayers`. Left commented out so we can revive the
-           * card-list layout if the design calls for it again.
-           *
-           * {isInteractive &&
-           *   pinnedHighlights.length > 0 &&
-           *   selectedOutcomeCode !== "RES_STOR" &&
-           *   selectedOutcomeCode !== "FW_EXP" &&
-           *   selectedOutcomeCode !== "FW_DELTA_USES" && (
-           *     <PinnedLocationsList
-           *       highlights={pinnedHighlights}
-           *       onUnpin={handleTooltipToggle}
-           *       onHoverEnter={handlePinnedHoverEnter}
-           *       onHoverLeave={handlePinnedHoverLeave}
-           *       hoveredKey={cardHoveredKey}
-           *       mapRef={mapAPI.mapRef}
-           *     />
-           *   )}
-           */}
         </>
       )}
     </Box>

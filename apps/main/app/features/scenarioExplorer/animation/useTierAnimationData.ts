@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"
 import { getTierColorsFromTheme, type TierLevel } from "../../../content/tiers"
-import { API_BASE } from "../../../lib/constants/api"
+import { AG_REV_COORDINATES } from "../../map/config/outcomeLocations"
 
 const DEMO_SCENARIO_ID = "s0020"
 const TIER_CODE = "AG_REV"
@@ -67,52 +67,6 @@ export interface TierAnimationData {
   error: string | null
 }
 
-interface GeoJSONFeature {
-  type: "Feature"
-  geometry: {
-    type: string
-    coordinates: number[] | number[][][] | number[][][][]
-  }
-  properties: {
-    location_id: string
-    tier_level: number
-  }
-}
-
-interface GeoJSONResponse {
-  type: "FeatureCollection"
-  features: GeoJSONFeature[]
-}
-
-function computeCentroid(
-  geometry: GeoJSONFeature["geometry"],
-): [number, number] | null {
-  if (geometry.type === "Point") {
-    const coords = geometry.coordinates as number[]
-    if (coords[0] == null || coords[1] == null) return null
-    return [coords[0], coords[1]]
-  }
-
-  let sumLng = 0
-  let sumLat = 0
-  let count = 0
-
-  function walkCoords(arr: unknown) {
-    if (!Array.isArray(arr)) return
-    if (typeof arr[0] === "number") {
-      sumLng += arr[0] as number
-      sumLat += arr[1] as number
-      count++
-    } else {
-      for (const sub of arr) walkCoords(sub)
-    }
-  }
-
-  walkCoords(geometry.coordinates)
-  if (count === 0) return null
-  return [sumLng / count, sumLat / count]
-}
-
 export function useTierAnimationData(): TierAnimationData {
   const theme = useTheme()
   // Stabilize the tier-color lookup against render-identity churn. `theme`
@@ -140,7 +94,6 @@ export function useTierAnimationData(): TierAnimationData {
   )
 
   const [locations, setLocations] = useState<TierLocationsResponse | null>(null)
-  const [geojson, setGeojson] = useState<GeoJSONResponse | null>(null)
   const [outcomeLocationResponses, setOutcomeLocationResponses] = useState<
     Record<string, TierLocationsResponse>
   >({})
@@ -152,24 +105,16 @@ export function useTierAnimationData(): TierAnimationData {
 
     async function fetchData() {
       try {
-        // One batch call covers all N outcomes (including AG_REV, which we
-        // reuse below for tierColorMap / tierDistribution). The GeoJSON
-        // endpoint is still the sole source of polygon centroids for the
-        // animation; no batch equivalent exists, so it stays as a direct
-        // fetch. All other per-outcome calls are consolidated.
-        const [batch, geoRes] = await Promise.all([
-          fetchTierLocationAssignmentsBatch(
-            DEMO_SCENARIO_ID,
-            OUTCOME_CODES_ARR,
-          ),
-          fetch(`${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}`),
-        ])
-
-        if (!geoRes.ok) {
-          throw new Error(`API error: geojson=${geoRes.status}`)
-        }
-
-        const geoData: GeoJSONResponse = await geoRes.json()
+        // One batched request covers all N outcomes. AG_REV is reused
+        // below for tierColorMap / tierDistribution. Polygon centroids
+        // for the animation come from the hardcoded `AG_REV_COORDINATES`
+        // table (geometry policy: no geometry through the API; see
+        // coeqwal-backend/database/README.md and packages/map/README.md
+        // MTS section)
+        const batch = await fetchTierLocationAssignmentsBatch(
+          DEMO_SCENARIO_ID,
+          OUTCOME_CODES_ARR,
+        )
 
         const outcomeMap: Record<string, TierLocationsResponse> = {}
         for (const [code, resp] of Object.entries(batch.results)) {
@@ -191,7 +136,6 @@ export function useTierAnimationData(): TierAnimationData {
 
         if (!cancelled) {
           setLocations(locData)
-          setGeojson(geoData)
           setOutcomeLocationResponses(outcomeMap)
           setIsLoading(false)
         }
@@ -220,22 +164,22 @@ export function useTierAnimationData(): TierAnimationData {
   }, [locations, tierColors])
 
   const centroids = useMemo(() => {
-    if (!geojson) return []
+    if (!locations) return []
     const result: Centroid[] = []
-    for (const feature of geojson.features) {
-      const center = computeCentroid(feature.geometry)
-      if (!center) continue
-      const level = feature.properties.tier_level as TierLevel
+    for (const loc of locations.locations) {
+      const coord = AG_REV_COORDINATES[loc.location_id]
+      if (!coord) continue
+      const level = loc.tier_level as TierLevel
       result.push({
-        id: feature.properties.location_id,
-        lng: center[0],
-        lat: center[1],
+        id: loc.location_id,
+        lng: coord[0],
+        lat: coord[1],
         tier: level,
         color: tierColors[level] || "#888888",
       })
     }
     return result
-  }, [geojson, tierColors])
+  }, [locations, tierColors])
 
   const tierDistribution = useMemo((): [number, number, number, number] => {
     if (!locations) return [0, 0, 0, 0]

@@ -39,9 +39,7 @@ export function useScenarioList() {
         shortLabel: metadata.shortLabel ?? apiScenario.name,
         theme: metadata.theme,
         iconPath: metadata.iconPath,
-        runName: apiScenario.run_name,
         hydroclimateId: apiScenario.hydroclimate_id,
-        baselineScenario: apiScenario.baseline_scenario,
         siblingGroup: apiScenario.sibling_group,
       }
     })

@@ -91,24 +91,8 @@ interface OutcomeMorphOverlayProps {
   tierChartData?: Record<string, ChartDataPoint[]>
   spotlightedTier?: number | null
   onBarClick?: (code: string, tier: number) => void
-  /** Beat-driven highlight (Beat 5): a single `${code}:${sourceId}` whose
-   *  distribution square gets the same gold ring as an interactive hover.
-   *  Rendered regardless of `interactive` so the storyboard can drive it
-   *  during non-interactive playback. */
   demoHighlightedLocationKey?: string | null
-  /** Source IDs that must survive the per-outcome subsample. Any polygon
-   *  whose `sourceId` is in this set is kept verbatim. The remaining quota
-   *  is filled with a uniform stride over the untouched polygons. Used by
-   *  the storyboard to guarantee that beat-specific LOIs (e.g. the Beat 5
-   *  Glenn Colusa spotlight, the Beat 1C popup DUs) always have a square
-   *  to highlight, even when `outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME`. */
   mustIncludeSourceIds?: ReadonlySet<string>
-  /** Additional hydroclimate columns for the Beat 8 heatmap, rendered to
-   *  the right of the primary (historical) column and faded in one by one
-   *  after the primary column's chrome settles. Each entry provides the
-   *  column header label plus the scenario-variant tier chart data (keyed
-   *  by outcome short_code) used to resolve each cell's tier color. Pass
-   *  an empty array (or omit) to render the legacy single-column heatmap. */
   extraHydroclimateColumns?: Array<{
     label: string
     tierChartData?: Record<string, ChartDataPoint[]>
@@ -296,26 +280,6 @@ function computeOutcomeLayout(
     const group = byTier.get(tier)!
     const tierRow = tier - 1 // 0-indexed position in the fixed 4-row layout
 
-    // Bar widths derived from the same `ChartDataPoint.value` the list view
-    // feeds into `OutcomeGlyphItem`, normalized by the row total exactly
-    // the way `BarOnly` in `MorphableDistributionGlyph` does it (each bar
-    // is a fraction of `sum(values)`, not the raw normalized value). This
-    // is what makes the storyboard and list view draw identical tier
-    // distributions for a given (scenario, outcome). The 2px minimum is
-    // only applied when the value is positive, again matching `BarOnly`,
-    // so a truly empty tier renders an empty bar rather than a sliver.
-    //
-    // For multi-value outcomes the count of on-screen squares is NOT
-    // interchangeable with the API's normalized value: the aggregate
-    // endpoint (`/tiers/scenarios/:id/tiers`) and the per-location
-    // endpoint (`/tier-map/:id/locations`) can disagree on totals
-    // (e.g. CWS_DEL on s0020 is 75 vs 124 locations across the two
-    // endpoints), so the count-ratio fallback would render a width that
-    // does not match the list view. We therefore only fall back to the
-    // count ratio for single-value outcomes (which have no
-    // `chartPoints`-derived bar to begin with). For multi-value
-    // outcomes, if `chartPoints` is missing we render an empty bar. The
-    // memo re-runs the moment `tierChartData` arrives.
     const apiVal = chartPoints?.[tier - 1]?.value
     const apiNorm =
       apiVal != null && apiValueSum > 0 ? apiVal / apiValueSum : null
@@ -387,15 +351,9 @@ function computeOutcomeLayout(
   return {
     shapes: results,
     isSingleValue,
-    /** Continuous API-weighted tier score (e.g. 2.3). Used by the Beat
-     *  7 radar to place each outcome's vertex at its exact
-     *  weighted-mean radius, not just a rounded tier level. `null` when
-     *  `chartPoints` is missing and there are no on-screen polygons to
-     *  fall back on. */
+
     weightedScore,
-    /** Rounded weighted tier (1..4) of the outcome. Drives the
-     *  averaged-dot fill color (Beat 6 onward) and the Beat 8 heatmap
-     *  cell fill. `null` when no data is available. */
+
     avgTierLevel,
     glyphMeta: {
       glyphLeft,
@@ -414,31 +372,10 @@ function computeOutcomeLayout(
   }
 }
 
-/**
- * Progress ranges for each outcome within Beat 2 (global progress 0.78-1.0).
- * Each outcome gets a slice for its polygon morph animation.
- * Morphing begins at 0.78, after the Beat 1C tier-color blend, example
- * text, and map popups have all played.
- */
-/** Beat 2 is split so AG_REV morphs first (solo), then the overlay narrates
- *  "All other key outcomes...", then the remaining outcomes morph in their
- *  existing order. AG_REV gets a dedicated early window. The rest divide the
- *  tail of the progress track equally.
- *
- *  Returns the [start, end] progress window (in `progress` space, 0..1) for
- *  the morph of a given outcome. `activeCodes` lets us size the tail slice
- *  based on how many outcomes actually ended up with polygons to morph. */
 export function getOutcomeProgressRange(
   code: string,
   activeCodes: readonly string[],
 ): [number, number] {
-  // All 9 morph windows share the same width so each outcome morphs at
-  // the same perceived speed. AG_REV runs first in a dedicated slot
-  // ([0.38, 0.39]) after the "The colors correspond..." narrative fully
-  // fades in (ending at 0.365) plus a short reading beat. A second text
-  // beat ("All other key outcomes...") then plays before the remaining 8
-  // morphs run back-to-back across [0.42, 0.50], each occupying a
-  // 0.01-wide slice matching AG_REV's width.
   const WINDOW = 0.01
   if (code === "AG_REV") return [0.38, 0.38 + WINDOW]
   const others = activeCodes.filter((c) => c !== "AG_REV")
@@ -482,10 +419,6 @@ export default function OutcomeMorphOverlay({
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
   const radarChromeRef = useRef<SVGGElement | null>(null)
   const heatmapChromeRef = useRef<SVGGElement | null>(null)
-  /** One `<g>` per extra hydroclimate column (cc50, cc95). Each is faded
-   *  in sequentially by its own entry in `columnBlends` during Beat 8 so
-   *  the two additional hydroclimates reveal "one by one" to the right of
-   *  the primary (historical) column. */
   const heatmapExtraColumnRefs = useRef<Array<SVGGElement | null>>([])
 
   const outcomeShapes = useMemo(() => {
@@ -496,12 +429,6 @@ export default function OutcomeMorphOverlay({
       const sampled =
         outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME
           ? (() => {
-              // Seed the kept set with any explicitly required source IDs so
-              // beat-driven highlights (Beat 5 LOI, Beat 1C popup DUs) never
-              // get silently culled by the stride sampler. Then fill the
-              // remaining quota with a uniform stride over the polygons that
-              // weren't already pinned, preserving the roughly even visual
-              // distribution the uniform sampler was providing.
               const keptIndices = new Set<number>()
               const pinned: ShapeMorphData[] = []
               if (mustIncludeSourceIds && mustIncludeSourceIds.size > 0) {
@@ -609,41 +536,13 @@ export default function OutcomeMorphOverlay({
     mustIncludeSourceIds,
   ])
 
-  /* ── Radar geometry (Beat 7) ──
-   *
-   * Each outcome's representative shapes converge to a single vertex on
-   * a radar chart during Beat 7. The center sits in the middle of the
-   * right third of the panel (where the distribution glyphs live). rMax
-   * is sized to leave room for HTML labels at the edge.
-   *
-   * Matches `@repo/viz` RadarPlot's tier-to-radius mapping so the
-   * storyboard's final-step chart reads as the same chart form the user
-   * encounters in `RadarPanel`: the tier scale maps `[4.5, 0.5] -> [0,
-   * rMax]`, so tier 1 (Optimal) lives near the outermost ring and tier
-   * 4 (Critical) near the center. The four grid rings drawn below sit
-   * exactly at `tierR(1..4)`, and the radial axes extend to `tierR(0.5)
-   * = rMax` (the same `outerR = rScale(0.5)` RadarPlot uses).
-   *
-   * Per-outcome vertex:
-   *   angle   = (2π * i) / N - π/2   (first outcome at top)
-   *   radius  = tierR(tier) = rMax * (4.5 - tier) / 4
-   *
-   * All shapes in an outcome share the same `radarTarget`, so the
-   * converging "dot" in average mode migrates as one to its vertex.
-   * Non-representative shapes are invisible in average mode, so only
-   * one dot per outcome is actually drawn at the vertex. */
+  /* Radar geometry
+   */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
     const panelLeft = panelWidth * (2 / 3)
     const rightWidth = panelWidth - panelLeft
     const cx = panelLeft + rightWidth / 2
-    // Pushed slightly above center (0.42 rather than 0.50) so the radar
-    // reads higher on the panel, leaving room beneath it for Beat 7's
-    // narration + eventual heatmap slot. The extra
-    // `STORYBOARD_VISUAL_LIFT_PX` pull matches the label anchor in
-    // `BeatTextOverlay` (also `panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX`)
-    // so the SVG chrome and the HTML axis labels stay in lockstep
-    // around the same center.
     const cy = panelHeight * 0.42 - STORYBOARD_VISUAL_LIFT_PX
     const rMax = Math.min(rightWidth / 2, panelHeight / 2) * 0.6
     const tierR = (tier: number) => (rMax * (4.5 - tier)) / 4
@@ -657,12 +556,6 @@ export default function OutcomeMorphOverlay({
     }> = []
     for (let i = 0; i < N; i++) {
       const group = outcomeShapes[i]!
-      // Prefer the API-derived continuous weighted score so the vertex
-      // lands at the exact weighted-mean radius (e.g. 2.3 sits between
-      // the tier-2 and tier-3 rings). This matches `RadarPlot` in
-      // `RadarPanel`, which uses the same continuous mapping. Falls
-      // back to the representative polygon's tier when chart data is
-      // still loading.
       const rep =
         group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
       const score = group.weightedScore ?? rep?.tier ?? 2
@@ -679,9 +572,6 @@ export default function OutcomeMorphOverlay({
     return { cx, cy, rMax, tierR, vertices }
   }, [outcomeShapes, panelWidth, panelHeight])
 
-  /** Per-shape `radarTarget`: every shape in an outcome shares the
-   *  outcome's vertex position. Used only in the [0.75, 0.82] window
-   *  during Beat 7. */
   const radarTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
     for (const v of radarGeometry.vertices) {
@@ -690,7 +580,7 @@ export default function OutcomeMorphOverlay({
     return map
   }, [radarGeometry])
 
-  /* ── Heatmap geometry (Beat 8) ──
+  /* Heatmap geometry
    *
    * A grid of `numColumns` hydroclimate columns (primary column +
    * `extraHydroclimateColumns.length` extras) by `N` outcome rows. The
@@ -711,32 +601,11 @@ export default function OutcomeMorphOverlay({
     const numColumns = 1 + numExtras
     const panelLeft = panelWidth * (2 / 3)
     const rightWidth = panelWidth - panelLeft
-    // Layout inside the right third:
-    //   [sidePad] [labelColW] [labelGap] [heatmap columns ...] [sidePad]
-    // `HEAT_SIDE_PAD` matches the `px: 3` horizontal padding on the
-    // scenario header / view-mode headers / two-column flex in
-    // `BeatTextOverlay`, so the label column's left edge lines up
-    // with those headers. `HEAT_LABEL_COL_W` is the reserved width
-    // for wrapped y-axis labels on the left. The heatmap columns
-    // occupy the remaining width, left-aligned immediately to the
-    // right of the label column.
-    //
-    // Geometry constants MUST stay in sync with
-    // `BeatTextOverlay.measure()` heatmap branch.
     const HEAT_SIDE_PAD = 24
     const HEAT_LABEL_COL_W = 110
     const HEAT_LABEL_GAP = 12
     const HEAT_COL_GAP_FRACTION = 0.18
-    // Cap set high enough that on typical panels (~1200-2000px wide)
-    // cells grow to consume the full heatmap region, so the
-    // labels+heatmap block visually fills, and therefore centers
-    // inside, the overlay's right third (minus `HEAT_SIDE_PAD` on
-    // each edge). Ultra-wide panels still clamp here to avoid
-    // oversized swatches.
     const HEAT_MAX_CELL_W = 150
-    // Horizontal nudge applied to the entire labels+heatmap block.
-    // Shifts both edges equally so the block translates without
-    // changing width or cell sizes.
     const HEAT_BLOCK_SHIFT_X = -10
 
     const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
@@ -753,35 +622,19 @@ export default function OutcomeMorphOverlay({
     const cellH = Math.min(44, availableH / Math.max(N, 1))
     const totalH = N * cellH
     const columnTop = panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
-    // `ResilienceHeatmap` uses d3's `scaleBand().padding(0.08)`, which
-    // reserves ~8% of bandwidth between cells. Mirror that by shrinking
-    // each cell target by an inset on both width and height so rows
-    // visually separate the way they do in the real tool.
     const CELL_PAD_FRACTION = 0.08
     const cellInsetX = cellW * CELL_PAD_FRACTION * 0.5
     const cellInsetY = cellH * CELL_PAD_FRACTION * 0.5
     const innerW = Math.max(1, cellW - cellInsetX * 2)
     const innerH = Math.max(1, cellH - cellInsetY * 2)
-
-    // Left-align columns inside the heatmap region: leftmost column's
-    // `cx` sits at `heatmapLeft + cellW / 2`. Subsequent columns step
-    // by `stride = cellW + columnGap`.
     const stride = cellW + columnGap
     const columnCx: number[] = []
     for (let c = 0; c < numColumns; c++) {
       columnCx.push(heatmapLeft + cellW / 2 + c * stride)
     }
     const groupW = numColumns * cellW + (numColumns - 1) * columnGap
-    // Kept for consumers that want a "center of the heatmap column
-    // group" coordinate. No longer equals `panelLeft + rightWidth/2`
-    // now that the heatmap is left-aligned rather than centered in the
-    // right third.
     const heatCx = heatmapLeft + groupW / 2
 
-    // `cells` (primary column only) is the legacy single-column cell list
-    // and remains the morph target for each outcome's representative
-    // shape. `extraCells` holds the additional columns for the
-    // decorative fade-in layer.
     const cells: Array<{
       code: string
       cx: number
@@ -801,9 +654,6 @@ export default function OutcomeMorphOverlay({
       })
     }
 
-    // Per-extra-column cell list, keyed by column index (0 = first
-    // extra, i.e. cc50). Cell fills are resolved below from each
-    // column's `tierChartData` so they mirror the real heatmap's colors.
     const extraColumns: Array<{
       label: string
       cx: number
@@ -846,11 +696,6 @@ export default function OutcomeMorphOverlay({
     }
   }, [outcomeShapes, panelWidth, panelHeight, extraHydroclimateColumns, theme])
 
-  /** Per-shape `heatmapTarget`: a rectangle sized to the outcome's
-   *  heatmap cell (inset for the inter-cell gap). All shapes in an
-   *  outcome share the same target (only the representative shape is
-   *  visible in average/radar/heatmap modes, so non-reps collapse onto
-   *  the same cell invisibly). */
   const heatmapTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
     for (const cell of heatmapGeometry.cells) {
@@ -937,7 +782,7 @@ export default function OutcomeMorphOverlay({
     [],
   )
 
-  // --- Hydroclimate tier-change transition (distribution mode only) ---
+  // Hydroclimate tier-change transition (distribution mode)
   useLayoutEffect(() => {
     // Snapshot current state for distribution mode
     const snapshot = new Map<string, Map<string, ShapeSnapshot>>()
@@ -1074,7 +919,7 @@ export default function OutcomeMorphOverlay({
     }
   }, [outcomeShapes, encodingMode, progress])
 
-  // --- Encoding-mode transition ---
+  // Encoding-mode transition
   useLayoutEffect(() => {
     if (prevEncodingRef.current !== encodingMode && progress.get() >= 1) {
       // Cancel any tier-change animation so encoding takes over
@@ -1209,53 +1054,12 @@ export default function OutcomeMorphOverlay({
     }
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
-  /* ── Overlay-morph frame applier (beat-engine bridge) ──
-   *
-   * Replaces the previous `progress.on("change")` subscriber with a
-   * latest-callback ref invoked by the engine's `OverlayMorphArbiter`
-   * every tick. See `engine/arbiters/OverlayMorphArbiter.ts` for the
-   * bridge rationale. Per StorybookEngineHardeningPlanV2 invariant 4,
-   * the engine is the only `progress.on("change")` subscriber in
-   * the storyboard.
-   *
-   * `latestMorphFrameRef` is updated on every render via the
-   * assignment below so closures over `outcomeShapes`, `encodingMode`,
-   * `getTargetForMode`, etc. always reflect the latest render. The
-   * bridge-register effect further down writes a stable dispatcher
-   * into `overlayMorphTickRef.current`. A separate dep-driven
-   * re-sync effect preserves the legacy `useLayoutEffect`'s eager
-   * `handler(progress.get())` on each data change (needed so shape
-   * and encoding-mode updates between progress ticks visually
-   * apply immediately). */
+  /* Overlay-morph frame applier
+   */
   const latestMorphFrameRef = useRef<(v: number) => void>(() => {})
   latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
-
-    // Beat 6+ morph chain driven by progress, applied once all outcomes
-    // have settled as squares (post-Beat 2 morphEnd):
-    //   [0.62, 0.68] squareTarget -> barTarget     (barBlend, easeOutCubic)
-    //   [0.68, 0.72] bars hold at final pose       (settled plateau)
-    //   [0.72, 0.75] barTarget    -> dotTarget     (avgBlend)
-    //   [0.75, 0.82] dotTarget    -> radarTarget   (radarBlend)
-    //   [0.82, 0.87] radar chrome fades in         (radarChromeIn)
-    //   [0.87, 0.90] radar chrome fades out        (radarChromeOut)
-    //   [0.87, 0.95] radarTarget  -> heatmapTarget (heatmapBlend)
-    //   [0.95, 0.97] primary column chrome fades in (column0Blend)
-    //   [0.97, 0.985] extra column 1 fades in       (column1Blend)
-    //   [0.985, 1.00] extra column 2 fades in       (column2Blend)
-    // Columns come up sequentially so the two additional hydroclimates
-    // (cc50, cc95) reveal "one by one" to the right of the primary
-    // (historical) column, mirroring the real Resilience heatmap.
-    // The bar morph uses a tightened window and a front-loaded easeOutCubic
-    // so it feels snappy under both auto-play and scroll, recovering the
-    // perceived tempo of the legacy switcher-driven 500ms RAF morph while
-    // preserving v-deterministic scrubbing. The remaining blends keep the
-    // shared easeInOut for continuity with the rest of the chain.
-    // Runs regardless of the `encodingMode` prop (which defaults to
-    // "distribution" during non-interactive playback), so the storyboard
-    // can drive the transforms independently of the post-settle user
-    // toggle that still animates via the 500ms encoding-mode RAF above.
     const BEAT6_START = 0.62
     const BEAT6_BAR_END = 0.68
     const BEAT6_END = 0.72
@@ -1388,7 +1192,7 @@ export default function OutcomeMorphOverlay({
           el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
         }
 
-        // Beats 6/7: once this outcome has settled as squares, drive the
+        // Once this as settled as squares, drive the
         // chained morph (square -> bar -> dot -> radar vertex) directly
         // from progress. Overrides the post-morph resting state above
         // when any of the beat blends are non-zero. Skipped when the
@@ -1473,7 +1277,7 @@ export default function OutcomeMorphOverlay({
             chromeEl.style.opacity = String(easeInOut(morphT))
           }
         } else if (encodingMode === "distribution" && v >= morphEnd) {
-          // Beat 6 chrome fade-in rides barBlend once the outcome has
+          // Fade-in rides barBlend once the outcome has
           // settled. Before morphEnd the chrome stays hidden (the
           // squares are still morphing into place). Once `avgBlend`
           // starts the bar-track chrome fades back out so the dot/
@@ -1487,7 +1291,7 @@ export default function OutcomeMorphOverlay({
     }
   }
 
-  /* ── Bridge registration ──
+  /* Bridge registration
    *
    * Writes a stable dispatcher into `overlayMorphTickRef.current` so
    * the engine's `OverlayMorphArbiter` invokes the latest morph
@@ -1513,18 +1317,7 @@ export default function OutcomeMorphOverlay({
     }
   }, [overlayMorphTickRef, progress])
 
-  /* ── Dep-driven re-sync ──
-   *
-   * The legacy `useLayoutEffect` re-ran its entire body (closure
-   * rebuild + `progress.on("change")` resubscribe + eager
-   * `handler(progress.get())`) whenever any of its deps changed.
-   * The bridge-register effect above only eager-syncs once on mount,
-   * so we need a companion `useLayoutEffect` to re-sync the DOM when
-   * `outcomeShapes`, `encodingMode`, `interactive`, etc. change
-   * between progress ticks (e.g. user toggles encoding mode while
-   * progress is paused at v=1). The latest-ref closure is already
-   * current at this point because it was reassigned during the same
-   * render that invalidated these deps. */
+  /* Re-sync */
   useLayoutEffect(() => {
     if (tierChangeRafRef.current == null) {
       latestMorphFrameRef.current(progress.get())
@@ -1554,31 +1347,10 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
     >
-      {/* Radar chrome (Beat 7): concentric tier rings, radial axes,
+      {/* Radar chrome: concentric tier rings, radial axes,
           tier labels along the top spoke, and a connecting trace
           through the per-outcome vertices. Visual spec mirrors the
-          `@repo/viz` RadarPlot rendering seen in `RadarPanel`:
-            - grid color: `theme.palette.brand.panelDark` (the brand
-              navy RadarPanel uses for axis-title text via
-              `axisTitleFill`), at low opacity so the rings + spokes
-              read as a quiet scaffold rather than dominant ink.
-              Stronger than RadarPlot's default grid stroke (grey 300)
-              so the grid actually reads against the storyboard's
-              white backdrop.
-            - rings: 4 concentric circles at `tierR(1..4)`, solid
-              stroke, width 1 (no dash)
-            - axes: same stroke / width 1, extending from center to
-              `rScale(0.5) = rMax` (one axis endpoint past the
-              outermost ring, matching RadarPlot's `outerR`)
-            - tier labels: Optimal / Acceptable / At-risk / Critical
-              placed on the top spoke using the same (x = cx + 6,
-              y = cy - r - 3) offsets RadarPlot uses, so the chart
-              reads with the same labeling the user sees in
-              `RadarPanel`.
-            - trace: open polygon through the averaged-outcome
-              vertices, stroked like a RadarPlot scenario line
-              (no fill, `strokeWidth: 2`, `strokeOpacity: 0.55`,
-              rounded joins).
+          `@repo/viz` RadarPlot rendering seen in `RadarPanel`.
           Opacity is driven by `radarChromeBlend` in the main progress
           handler. */}
       <g
@@ -1644,15 +1416,7 @@ export default function OutcomeMorphOverlay({
           />
         )}
       </g>
-      {/* Heatmap chrome (Beat 8): rounded-rect overlays that match
-          `ResilienceHeatmap`'s visual style (`rx=2`, tier-colored
-          fill, small inset for the inter-row gap), plus a single
-          column header. Row labels live in `BeatTextOverlay` as
-          migrated HTML `axisLabel` titles, so this group intentionally
-          renders no row text. Opacity driven by `heatmapChromeBlend`
-          in the main progress handler. At blend=1 each rect is opaque
-          and covers the sharp-cornered morph polygon underneath, so
-          the cells resolve to rounded rectangles in the rest frame. */}
+      {/* Heatmap chrome */}
       <g
         ref={(el) => {
           heatmapChromeRef.current = el
@@ -1690,14 +1454,7 @@ export default function OutcomeMorphOverlay({
           </text>
         )}
       </g>
-      {/* Extra hydroclimate columns (Beat 8): each column is a `<g>`
-          with its own opacity ref so it can fade in sequentially after
-          the primary column's chrome settles. Same rounded-rect cell
-          style + column header treatment. Cell fills come from each
-          column's `tierChartData` resolved against the theme tier
-          palette. No morph lands here, so there is no underlying
-          polygon to cover. Cells render directly as the final heatmap
-          appearance. */}
+      {/* Extra hydroclimate columns */}
       {heatmapGeometry.extraColumns.map((column, colIdx) => (
         <g
           key={`heat-extra-col-${colIdx}`}
@@ -1826,10 +1583,7 @@ export default function OutcomeMorphOverlay({
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
               // Squares are clickable whenever the overlay is interactive
-              // and we're not in average mode. The `isSelected` gate was
-              // dropped because outcome-title clicks no longer precede
-              // square clicks. Clicking a square is now the sole entry
-              // point for activating an outcome's map layer.
+              // and we're not in average mode.
               const isClickable = interactive && !isAvgMode
               return (
                 <path

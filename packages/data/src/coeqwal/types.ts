@@ -9,7 +9,7 @@
  * A tier/outcome from the /api/tiers/list endpoint
  */
 export interface TierListItem {
-  /** Short code identifier (e.g., "AG_REV", "ENV_FLOW") */
+  /** Short code identifier (e.g., "AG_REV", "ENV_FLOWS") */
   short_code: string
   /** Full name from API */
   name: string
@@ -24,15 +24,16 @@ export interface TierListItem {
 }
 
 /**
- * Data point for multi-value tiers (distribution across tier levels).
+ * One tier-level entry in a multi-value tier's `data` array.
+ *
+ * The array is length 4 and positional: index 0 is tier1 (best),
+ * index 3 is tier4 (worst). Derive the tier label from the index rather
+ * than expecting it on the entry.
  *
  * `value` and `normalized` are nullable because the backend emits the raw
- * row values as `safe_int` / `safe_float`. A NULL in the underlying tier
- * result table flows through as `null` rather than being coerced to 0.
+ * row values as `safe_int` / `safe_float`.
  */
 export interface MultiValueTierData {
-  /** Tier level (tier1 = best, tier4 = worst) */
-  tier: "tier1" | "tier2" | "tier3" | "tier4"
   /** Raw count or value, or null if missing */
   value: number | null
   /** Normalized value (0-1), or null if missing */
@@ -42,8 +43,6 @@ export interface MultiValueTierData {
 /**
  * Multi-value tier structure (used in chart conversion).
  *
- * `total` is nullable because the backend now passes through NULL totals
- * directly instead of coercing them to 0.
  */
 export interface MultiValueTier {
   name: string
@@ -55,22 +54,12 @@ export interface MultiValueTier {
 /**
  * Calculated score fields returned by the API for each tier.
  *
- * Every field is nullable. The backend returns `null` for the entire score
- * bundle when a tier row is missing or its tier distribution is degenerate
- * (e.g. all four normalized values are zero or NULL). Consumers must treat
- * `null` as "no data" rather than zero.
  */
 export interface TierScores {
-  /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting. */
+  /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting */
   weighted_score: number | null
-  /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis. */
+  /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis */
   normalized_score: number | null
-  /** Gini coefficient (0.0-1.0, lower = more equitable). Use for equity indicator. */
-  gini: number | null
-  /** Spread band top edge (0.0-1.0). Where best locations are. */
-  band_upper: number | null
-  /** Spread band bottom edge (0.0-1.0). Where worst locations are. */
-  band_lower: number | null
 }
 
 /**
@@ -98,32 +87,32 @@ export interface ScenarioTiersResponse {
 }
 
 /**
- * Scenario metadata from /api/scenarios endpoint
+ * Scenario metadata from `GET /api/scenarios` and `GET /api/scenarios/{id}`.
+ *
+ * The API currently ships only the fields the explorer consumes (cards,
+ * sort, search, hydroclimate resolution). The frontend's theme assignment
+ * and operation icons currently come from local maps keyed by
+ * `sibling_group` (see `apps/main/app/content/scenarios.ts` and
+ * `opsIcons.tsx`). The database README roadmap tracks the cutover that
+ * would move that content into the DB and bring per-scenario themes,
+ * assumptions, and operations back onto this payload.
  */
 export interface ScenarioListItem {
   /** Unique scenario identifier (e.g., "s0020") */
   short_code: string
-  /** Technical run name (e.g., "s0020_DCRadjBL_2020LU_wTUCP") */
-  run_name: string
-  /** Full scenario name */
+  /** Full scenario name from the sibling-group prose */
   name: string
-  /** Short summary description (1-2 sentences) */
+  /** Short summary description, 1-2 sentences */
   short_description: string | null
   /** Whether this scenario is active/visible */
   is_active: boolean
-  /** Hydroclimate variant numeric id (internal). Prefer hydroclimate_short_code. */
+  /** Hydroclimate variant numeric id */
   hydroclimate_id: number
   /**
-   * Hydroclimate short code, e.g. "historical", "cc50", "cc95".
-   * Prefer this over `hydroclimate_id` when resolving sibling groups to
-   * concrete scenario runs; it removes the need for a hardcoded numeric map
-   * on the client. Present on recent API deployments; may be null/absent on
-   * older deployments, in which case fall back to `hydroclimate_id`.
+   * Sibling group short code. Same strategy under different hydroclimates
+   * share this value, so `siblingGroup -> hydroclimate_id -> short_code`
+   * is the canonical variant lookup
    */
-  hydroclimate_short_code?: string | null
-  /** Short code of the baseline scenario this derives from, or null for baselines */
-  baseline_scenario: string | null
-  /** Sibling group ID.same scenario under different hydroclimates share this value */
   sibling_group: string
 }
 
@@ -133,63 +122,13 @@ export interface ScenarioListItem {
 export type TierMapping = Record<string, string>
 
 // ============================================================================
-// Tier Location Types (for map visualization)
-// ============================================================================
-
-/**
- * A single feature in the tier location GeoJSON response
- */
-export interface TierFeature {
-  type: "Feature"
-  geometry: {
-    type: "Point" | "Polygon" | "MultiPolygon"
-    coordinates: number[] | number[][][] | number[][][][]
-  }
-  properties: {
-    /** Location identifier (e.g., demand unit ID) */
-    location_id: string
-    /** Human-readable location name */
-    location_name: string
-    /** Type of location (e.g., "demand_unit", "river_reach") */
-    location_type: string
-    /** Display-friendly location type */
-    location_type_display: string
-    /** Tier level (1-4, where 1 is best, 4 is worst) */
-    tier_level: number
-    /** Raw tier value */
-    tier_value: number
-    /** Order for display purposes */
-    display_order: number
-    /** CSS class for tier color styling */
-    tier_color_class: string
-  }
-}
-
-/**
- * Response from /api/tier-map/:scenarioId/:tierCode endpoint
- * Returns GeoJSON FeatureCollection of tier locations
- */
-export interface TierLocationResponse {
-  type: "FeatureCollection"
-  features: TierFeature[]
-  metadata: {
-    /** Scenario ID */
-    scenario: string
-    /** Tier short code (e.g., "AG_REV") */
-    tier_code: string
-    /** Tier display name */
-    tier_name: string
-    /** Whether tier has single or multiple values */
-    tier_type: "multi_value" | "single_value"
-    /** Number of features in response */
-    feature_count: number
-    /** Types of locations included */
-    location_types: string[]
-  }
-}
-
-// ============================================================================
 // Tier Location Assignment Types (lightweight, no geometry)
+//
+// Note: the API does not serve geometry. Polygon and point geometry for map
+// rendering comes from Mapbox vector tilesets joined to these assignments by
+// `location_id` (or `du_id` / `wba_id` / station code, depending on the
+// outcome). See packages/map/README.md "Adding new tile data via Mapbox
+// Tiling Service" and the geometry policy in the backend database README.
 // ============================================================================
 
 export interface TierLocationAssignment {
@@ -234,7 +173,7 @@ export interface TierLocationAssignmentsBatchResponse {
  * Fields are non-null because the reservoir ETL emits all percentiles
  * together when a row exists, or omits the month entirely when it does
  * not. Consumers should treat a missing month key in `MonthlyPercentiles`
- * as "no data" and skip it; do not assume any month has fewer than 8
+ * as "no data" and skip it. Do not assume any month has fewer than 8
  * populated fields.
  */
 export interface PercentileValues {
@@ -616,15 +555,17 @@ export interface DemandUnitsListResponse {
 }
 
 /**
- * Urban demand unit data with monthly delivery and shortage statistics
+ * Per-DU payload returned by
+ * `/api/statistics/scenarios/:scenarioId/demand-units/delivery-monthly`.
+ * Carries metadata plus the monthly delivery rows
  */
 export interface DemandUnitData {
-  /** Display label */
-  label: string
+  /** Entity display name. Falls back to `du_id` upstream when null */
+  community_agency: string | null
+  /** Hydrologic region (e.g., "SJR", "SAC"), or null when unknown */
+  hydrologic_region: string | null
   /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
   monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
-  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_shortage: Record<string, CwsShortageMonthlyStats>
 }
 
 /**
@@ -698,20 +639,25 @@ export interface DemandUnitMonthlyStats {
 }
 
 /**
- * Response from /api/statistics/scenarios/:scenarioId/demand-units/:duId/statistics
- * Returns complete statistics for a single demand unit
+ * Per-DU payload returned by
+ * `/api/statistics/scenarios/:scenarioId/demand-units/shortage-monthly`.
+ * Mirrors `DemandUnitData` but only carries the shortage half
  */
-export interface DemandUnitStatisticsResponse {
-  scenario_id: string
-  du_id: string
-  community_agency: string
-  hydrologic_region: string
-  /** Period summary with annual averages and exceedance values */
-  period_summary: DemandUnitPeriodSummary
-  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_delivery: Record<string, DemandUnitMonthlyStats> | null
+export interface DemandUnitShortageData {
+  community_agency: string | null
+  hydrologic_region: string | null
   /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
-  monthly_shortage: Record<string, DemandUnitMonthlyStats> | null
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
+}
+
+/**
+ * Response from
+ * `/api/statistics/scenarios/:scenarioId/demand-units/shortage-monthly`
+ */
+export interface DemandUnitShortageMonthlyResponse {
+  scenario_id: string
+  /** Demand unit data keyed by du_id */
+  demand_units: Record<string, DemandUnitShortageData>
 }
 
 // ============================================================================
@@ -838,6 +784,69 @@ export interface AgDemandUnitDeliveryMonthlyResponse {
   scenario_id: string
   /** Demand unit data keyed by DU ID (e.g., "02_NA", "50_PA1") */
   demand_units: Record<string, AgDemandUnitDeliveryData>
+}
+
+/**
+ * Monthly GW restriction shortage statistics for a single AG demand unit, for one water month.
+ *
+ * Source variable: `GW_SHORT_*`. Available only for SJR and TULARE region DUs.
+ * Represents the demand that would have gone unmet if SGMA-style pumping
+ * limits had been enforced. Distinct from CalSim's built-in shortage concept,
+ * which is always zero for AG DUs (CalSim assumes demand is fully met).
+ */
+export interface AgDemandUnitShortageMonthlyStats {
+  /** Mean shortage in TAF */
+  avg_taf: number | null
+  /** Coefficient of variation */
+  cv: number | null
+  /** Percentage of years with shortage > 0 for this month */
+  shortage_frequency_pct: number | null
+  /** Average shortage as percentage of demand */
+  shortage_pct_of_demand_avg: number | null
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+  /** Number of water years in the sample */
+  sample_count: number | null
+}
+
+/**
+ * AG demand unit GW restriction shortage data with monthly statistics
+ */
+export interface AgDemandUnitShortageData {
+  /** Agency name */
+  agency: string
+  /** Hydrologic region ("SJR" or "TULARE"; Sacramento DUs are not present) */
+  hydrologic_region: string | null
+  /** CS3 contractor type ("PA", "SA", "XA", or null) */
+  cs3_type: string | null
+  /** Water provider ("CVP", "SWP", or null) */
+  provider: string | null
+  /** Monthly GW restriction shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, AgDemandUnitShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/shortage-monthly
+ *
+ * Returns GW restriction shortage statistics for SJR and TULARE region DUs.
+ * Sacramento region DUs are not included in the response.
+ */
+export interface AgDemandUnitShortageMonthlyResponse {
+  scenario_id: string
+  /** Demand unit data keyed by DU ID (e.g., "64_PA1") */
+  demand_units: Record<string, AgDemandUnitShortageData>
 }
 
 /**

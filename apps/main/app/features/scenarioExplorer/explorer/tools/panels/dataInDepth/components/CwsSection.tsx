@@ -40,20 +40,39 @@ import {
   useMiContractorsPeriod,
   useDemandUnitsList,
   useDemandUnitsMonthly,
+  useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
-import { fetchDemandUnitStatistics } from "@repo/data/coeqwal"
+import {
+  fetchDemandUnitsMonthly,
+  fetchDemandUnitsShortageMonthly,
+  fetchDemandUnitsPeriod,
+} from "@repo/data/coeqwal"
 import type {
   CwsAggregateData,
   CwsAggregatePeriodSummary,
+  CwsDeliveryMonthlyStats,
+  CwsShortageMonthlyStats,
   MiContractorData,
   MiContractorPeriodSummary,
   DemandUnitData,
   DemandUnitPeriodSummary,
-  DemandUnitStatisticsResponse,
   BatchStatisticsResponse,
   BatchCwsData,
 } from "@repo/data/coeqwal"
+
+/**
+ * Shape returned by `useIndividualDemandUnitsData` per (duId, scenarioId).
+ * Stitches the decomposed urban DU endpoints into the same surface that the
+ * matrix-builder downstream expects (`community_agency`, `period_summary`,
+ * and per-month delivery / shortage rows)
+ */
+type StitchedDemandUnitStats = {
+  community_agency: string | null
+  period_summary: DemandUnitPeriodSummary | null
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats> | null
+  monthly_shortage: Record<string, CwsShortageMonthlyStats> | null
+}
 import {
   outcomeCategories,
   getOutcomeCategoryColor,
@@ -913,17 +932,28 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
 }
 
 /**
- * Hook to fetch urban demand unit data for multiple scenarios
+ * Hook to fetch urban demand unit data for multiple scenarios.
+ *
+ * Fans out three per-scenario calls (delivery-monthly, shortage-monthly,
+ * period-summary) and stitches them into the matrix shape the renderer
+ * expects. Delivery and shortage live on separate backend routes, so this
+ * hook keeps a parallel results array for each
  */
 function useMultiScenarioDemandUnits(scenarios: string[]) {
   const monthlyResults = useMultiScenarioSlots(scenarios, useDemandUnitsMonthly)
+  const shortageResults = useMultiScenarioSlots(
+    scenarios,
+    useDemandUnitsShortageMonthly,
+  )
   const periodResults = useMultiScenarioSlots(scenarios, useDemandUnitsPeriod)
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||
+    shortageResults.some((r) => r.isLoading) ||
     periodResults.some((r) => r.isLoading)
   const error =
     monthlyResults.find((r) => r.error)?.error ??
+    shortageResults.find((r) => r.error)?.error ??
     periodResults.find((r) => r.error)?.error ??
     null
 
@@ -968,7 +998,20 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
     )
   })
 
-  // Process monthly data for each scenario
+  // Helper that ensures a matrix cell exists before either the delivery or
+  // shortage loop populates its half. Cells default to empty band maps so a
+  // missing half still renders cleanly.
+  const ensureMatrixCell = (duId: string, scenarioId: string) => {
+    if (!matrixData[duId]) {
+      matrixData[duId] = {}
+    }
+    if (!matrixData[duId][scenarioId]) {
+      matrixData[duId][scenarioId] = { delivery: {}, shortage: {} }
+    }
+    return matrixData[duId][scenarioId]
+  }
+
+  // Delivery half of the matrix (one row per water month per DU).
   monthlyResults.forEach((result, index) => {
     const scenarioId = scenarios[index]
     if (!scenarioId || !result.demandUnits) return
@@ -977,14 +1020,14 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
       ([duId, data]: [string, DemandUnitData]) => {
         if (!data) return // Skip if data is null/undefined
         if (!entityMap[duId]) {
-          entityMap[duId] = { shortCode: duId, label: data.label }
-        }
-        if (!matrixData[duId]) {
-          matrixData[duId] = {}
+          entityMap[duId] = {
+            shortCode: duId,
+            label: data.community_agency ?? duId,
+          }
         }
 
+        const cell = ensureMatrixCell(duId, scenarioId)
         const deliveryPercentiles: MonthlyPercentiles = {}
-        const shortagePercentiles: MonthlyPercentiles = {}
 
         if (data.monthly_delivery) {
           Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
@@ -1002,33 +1045,58 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
           })
         }
 
-        if (data.monthly_shortage) {
-          Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-            if (!stats || !isFullPercentileRow(stats)) return
-            shortagePercentiles[month] = {
-              q0: stats.q0 ?? 0,
-              q10: stats.q10,
-              q30: stats.q30,
-              q50: stats.q50,
-              q70: stats.q70,
-              q90: stats.q90,
-              q100: stats.q100,
-              mean: stats.avg_taf,
-            }
-          })
-        }
-
-        matrixData[duId][scenarioId] = {
-          delivery: deliveryPercentiles,
-          shortage: shortagePercentiles,
-        }
+        cell.delivery = deliveryPercentiles
       },
     )
   })
 
-  // Track which scenarios are still loading
+  // Shortage half of the matrix. Backend serves these on a separate route
+  // (`/demand-units/shortage-monthly`), so we hydrate it independently from
+  // the delivery loop above.
+  shortageResults.forEach((result, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !result.demandUnits) return
+
+    Object.entries(result.demandUnits).forEach(([duId, data]) => {
+      if (!data) return
+      if (!entityMap[duId]) {
+        entityMap[duId] = {
+          shortCode: duId,
+          label: data.community_agency ?? duId,
+        }
+      }
+
+      const cell = ensureMatrixCell(duId, scenarioId)
+      const shortagePercentiles: MonthlyPercentiles = {}
+
+      if (data.monthly_shortage) {
+        Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
+          if (!stats || !isFullPercentileRow(stats)) return
+          shortagePercentiles[month] = {
+            q0: stats.q0 ?? 0,
+            q10: stats.q10,
+            q30: stats.q30,
+            q50: stats.q50,
+            q70: stats.q70,
+            q90: stats.q90,
+            q100: stats.q100,
+            mean: stats.avg_taf,
+          }
+        })
+      }
+
+      cell.shortage = shortagePercentiles
+    })
+  })
+
+  // Track which scenarios are still loading. A scenario is "loading" if any
+  // of its three slot fetches is in flight, so the table doesn't flash a
+  // half-populated row while one half is still resolving.
   const loadingScenarios = scenarios.filter(
-    (_, index) => monthlyResults[index]?.isLoading ?? false,
+    (_, index) =>
+      (monthlyResults[index]?.isLoading ?? false) ||
+      (shortageResults[index]?.isLoading ?? false) ||
+      (periodResults[index]?.isLoading ?? false),
   )
 
   const entities = Object.values(entityMap)
@@ -1057,18 +1125,41 @@ function useIndividualDemandUnitsData(
     return ["individual-demand-units", ...scenarios, ...demandUnitIds].join("|")
   }, [scenarios, demandUnitIds])
 
-  // Create a stable fetcher function that SWR can reliably call
+  // Create a stable fetcher function that SWR can reliably call.
+  // Fans out per (duId, scenarioId) to the three decomposed urban-DU endpoints
+  // (delivery-monthly, shortage-monthly, period-summary) with `?du_id=X` and
+  // stitches the results back into the per-DU shape the matrix builder
+  // expects. Shortage 404s are tolerated. some DUs have no shortage data
   const fetcher = useCallback(async () => {
-    // Fetch all combinations in parallel
-    const results: Record<
-      string,
-      Record<string, DemandUnitStatisticsResponse>
-    > = {}
+    const results: Record<string, Record<string, StitchedDemandUnitStats>> = {}
 
     const fetchPromises = demandUnitIds.flatMap((duId) =>
       scenarios.map(async (scenarioId) => {
         try {
-          const data = await fetchDemandUnitStatistics(scenarioId, duId)
+          const [monthlyResp, shortageResp, periodResp] = await Promise.all([
+            fetchDemandUnitsMonthly(scenarioId, duId).catch(() => null),
+            fetchDemandUnitsShortageMonthly(scenarioId, duId).catch(() => null),
+            fetchDemandUnitsPeriod(scenarioId, duId).catch(() => null),
+          ])
+
+          const monthlyEntry = monthlyResp?.demand_units?.[duId] ?? null
+          const shortageEntry = shortageResp?.demand_units?.[duId] ?? null
+          const periodEntry = periodResp?.demand_units?.[duId] ?? null
+
+          if (!monthlyEntry && !shortageEntry && !periodEntry) {
+            return { duId, scenarioId, data: null }
+          }
+
+          const data: StitchedDemandUnitStats = {
+            community_agency:
+              monthlyEntry?.community_agency ??
+              shortageEntry?.community_agency ??
+              null,
+            period_summary: periodEntry,
+            monthly_delivery: monthlyEntry?.monthly_delivery ?? null,
+            monthly_shortage: shortageEntry?.monthly_shortage ?? null,
+          }
+
           return { duId, scenarioId, data }
         } catch (err) {
           console.warn(`Failed to fetch stats for ${duId}/${scenarioId}:`, err)
@@ -1095,7 +1186,7 @@ function useIndividualDemandUnitsData(
     data,
     error: swrError,
     isLoading,
-  } = useSWR<Record<string, Record<string, DemandUnitStatisticsResponse>>>(
+  } = useSWR<Record<string, Record<string, StitchedDemandUnitStats>>>(
     cacheKey,
     fetcher,
     {
@@ -1128,10 +1219,12 @@ function useIndividualDemandUnitsData(
   if (data) {
     Object.entries(data).forEach(([duId, scenarioData]) => {
       Object.entries(scenarioData).forEach(([scenarioId, stats]) => {
-        // Update entity info with actual data (overwrite placeholder)
+        // Update entity info with actual data (overwrite placeholder).
+        // community_agency can be null when the entity row has no display
+        // name. Fall back to duId so the matrix still renders a label
         entityMap[duId] = {
           shortCode: duId,
-          label: stats.community_agency,
+          label: stats.community_agency ?? duId,
           annualDeliveryAvg: stats.period_summary?.annual_delivery_avg_taf,
           reliabilityPct: stats.period_summary?.reliability_pct,
           shortageFrequencyPct: stats.period_summary?.shortage_frequency_pct,

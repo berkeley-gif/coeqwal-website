@@ -110,7 +110,7 @@ export function useReservoirPercentiles(
     isLoading,
   } = useSWR<ReservoirPercentiles>(
     scenarioId && reservoirId
-      ? CACHE_KEYS.reservoirPercentiles(scenarioId, reservoirId)
+      ? CACHE_KEYS.reservoirPercentilesFiltered(scenarioId, [reservoirId])
       : null,
     () => fetchReservoirPercentiles(scenarioId!, reservoirId!),
     {

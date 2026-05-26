@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Hook for fetching tier scores for a specific scenario
+ * Hook for fetching tier values for a specific scenario
  */
 
 import useSWR from "swr"
@@ -10,10 +10,10 @@ import { fetchScenarioTiers } from "../fetchers"
 import type { ScenarioTiersResponse } from "../types"
 
 /**
- * Fetch and cache tier scores for a specific scenario
+ * Fetch and cache tier values for a specific scenario
  *
  * Returns the full tier data including weighted_score, normalized_score,
- * gini, and distribution data for multi-value tiers.
+ * and distribution data for multi-value tiers.
  *
  * @param scenarioId - Scenario ID (e.g., "s0020"), or null to skip fetching
  * @returns Scenario tier data with loading and error states

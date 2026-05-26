@@ -15,7 +15,6 @@ import type {
   TierListItem,
   ScenarioTiersResponse,
   ScenarioListItem,
-  TierLocationResponse,
   AllReservoirsListResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
@@ -24,11 +23,12 @@ import type {
   MiContractorMonthlyResponse,
   MiContractorPeriodResponse,
   DemandUnitsListResponse,
-  DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
+  DemandUnitShortageMonthlyResponse,
   DemandUnitPeriodResponse,
   AgDemandUnitsListResponse,
   AgDemandUnitDeliveryMonthlyResponse,
+  AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodResponse,
   BatchStatisticsResponse,
   RefugeDemandUnitsListResponse,
@@ -67,7 +67,7 @@ export async function fetchTierList(): Promise<TierListItem[]> {
  * @example
  * ```typescript
  * const data = await fetchScenarioTiers("s0020")
- * // { scenario: "s0020", tiers: { AG_REV: { ... }, ENV_FLOW: { ... } } }
+ * // { scenario: "s0020", tiers: { AG_REV: { ... }, ENV_FLOWS: { ... } } }
  * ```
  */
 export async function fetchScenarioTiers(
@@ -152,50 +152,20 @@ export async function fetchAllScenarioTiers(
 }
 
 /**
- * Fetch tier location data for map visualization
- *
- * Returns GeoJSON FeatureCollection with location geometries and tier levels.
- * Used for rendering tier-colored polygons and markers on the map.
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param tierCode - Tier short code (e.g., "AG_REV", "CWS_DEL")
- * @returns GeoJSON FeatureCollection with tier location data
- *
- * @example
- * ```typescript
- * const locations = await fetchTierLocationData("s0020", "CWS_DEL")
- * const tier4Features = locations.features.filter(f => f.properties.tier_level === 4)
- * ```
- */
-export async function fetchTierLocationData(
-  scenarioId: string,
-  tierCode: string,
-): Promise<TierLocationResponse> {
-  if (!scenarioId) {
-    throw new Error("Scenario ID is required")
-  }
-  if (!tierCode) {
-    throw new Error("Tier code is required")
-  }
-
-  return apiFetcher<TierLocationResponse>(
-    ENDPOINTS.tierLocations(scenarioId, tierCode),
-    {
-      baseUrl: DEFAULT_API_BASE,
-    },
-  )
-}
-
-/**
  * Fetch lightweight tier assignments per location (no geometry).
  *
- * Use this for treemaps, data tables, or any non-map visualization that needs
- * to know which locations fall into which tier. Much lighter than
- * fetchTierLocationData, which returns full GeoJSON with polygon coordinates.
+ * Use this for treemaps, data tables, and map visualizations. Geometry for
+ * map rendering comes from Mapbox vector tilesets, not from the API. The
+ * frontend joins these assignments to tile features by `location_id` (or
+ * `du_id` / `wba_id` / station code, depending on the outcome).
+ *
+ * Calls the batch endpoint with a one-element `codes` filter and unwraps the
+ * single result so consumers continue to see a flat
+ * `TierLocationAssignmentsResponse` shape. Throws if the server reports the
+ * code as missing for the scenario (mirrors the old single-tier 404).
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param tierCode - Tier short code (e.g., "CWS_DEL", "AG_REV")
- * @returns Tier assignments with location metadata (no geometry)
  *
  * @example
  * ```typescript
@@ -214,30 +184,32 @@ export async function fetchTierLocationAssignments(
     throw new Error("Tier code is required")
   }
 
-  return apiFetcher<TierLocationAssignmentsResponse>(
-    ENDPOINTS.tierLocationAssignments(scenarioId, tierCode),
-    {
-      baseUrl: DEFAULT_API_BASE,
-    },
+  const batch = await apiFetcher<TierLocationAssignmentsBatchResponse>(
+    ENDPOINTS.tierLocationAssignmentsBatch(scenarioId, [tierCode]),
+    { baseUrl: DEFAULT_API_BASE },
   )
+
+  const entry = batch.results?.[tierCode]
+  if (!entry) {
+    throw new Error(
+      `No tier data found for scenario '${scenarioId}' and tier '${tierCode}'`,
+    )
+  }
+  return entry
 }
 
 /**
  * Fetch tier-location assignments for multiple outcomes in a single batched
  * request.
  *
- * Uses the `/api/tier-map/{scenario}/locations?codes=...` endpoint which runs
+ * Uses the `/api/tiers/scenarios/{scenario}/locations?codes=...` endpoint which runs
  * one SQL query for all requested outcomes instead of N parallel requests.
- * Falls back to parallel per-code requests if the batch endpoint is
- * unavailable (older API deployment), mirroring `fetchAllScenarioTiers`.
  *
  * Codes are normalized (deduplicated and sorted) before being used in the
  * URL, so cache keys do not depend on caller ordering.
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param tierCodes - Tier short codes (e.g., ["CWS_DEL", "AG_REV", "ENV_FLOWS"])
- * @returns Batch response with per-code results and a `missing` list of codes
- *          that have no active rows for this scenario
  *
  * @example
  * ```typescript
@@ -261,30 +233,10 @@ export async function fetchTierLocationAssignmentsBatch(
     return { scenario: scenarioId, results: {}, missing: [] }
   }
 
-  try {
-    return await apiFetcher<TierLocationAssignmentsBatchResponse>(
-      ENDPOINTS.tierLocationAssignmentsBatch(scenarioId, normalized),
-      { baseUrl: DEFAULT_API_BASE, timeout: 20000 },
-    )
-  } catch {
-    // Fallback for older deployments without the batch endpoint. allSettled
-    // so a single 404 (e.g. WRC_SALMON_AB on s0065) does not fail the whole
-    // batch; any absent codes populate `missing` just like the server would.
-    const settled = await Promise.allSettled(
-      normalized.map((code) => fetchTierLocationAssignments(scenarioId, code)),
-    )
-    const results: Record<string, TierLocationAssignmentsResponse> = {}
-    const missing: string[] = []
-    normalized.forEach((code, i) => {
-      const r = settled[i]
-      if (r?.status === "fulfilled") {
-        results[code] = r.value
-      } else {
-        missing.push(code)
-      }
-    })
-    return { scenario: scenarioId, results, missing }
-  }
+  return apiFetcher<TierLocationAssignmentsBatchResponse>(
+    ENDPOINTS.tierLocationAssignmentsBatch(scenarioId, normalized),
+    { baseUrl: DEFAULT_API_BASE, timeout: 20000 },
+  )
 }
 
 // ============================================================================
@@ -313,16 +265,19 @@ export async function fetchAllReservoirsList(): Promise<AllReservoirsListRespons
 }
 
 /**
- * Fetch percentile data for a single reservoir in a scenario
+ * Fetch percentile data for a single reservoir in a scenario.
+ *
+ * Calls the multi-reservoir endpoint with a one-element `reservoirs` filter
+ * and unwraps the single entry, so consumers continue to see a flat
+ * `ReservoirPercentiles` shape.
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
- * @returns Reservoir percentile data with monthly distributions
+ * @param reservoirId - Reservoir short_code (e.g., "SHSTA")
  *
  * @example
  * ```typescript
- * const data = await fetchReservoirPercentiles("s0020", "S_SHSTA")
- * // { reservoir_id: "S_SHSTA", monthly_percentiles: { "1": { q10: 45.2, q50: 70.1, ... } } }
+ * const data = await fetchReservoirPercentiles("s0020", "SHSTA")
+ * // { reservoir_id: "SHSTA", monthly_percentiles: { "1": { q10: 45.2, q50: 70.1, ... } } }
  * ```
  */
 export async function fetchReservoirPercentiles(
@@ -336,12 +291,29 @@ export async function fetchReservoirPercentiles(
     throw new Error("Reservoir ID is required")
   }
 
-  return apiFetcher<ReservoirPercentiles>(
-    ENDPOINTS.reservoirPercentiles(scenarioId, reservoirId),
+  const response = await apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.reservoirPercentilesFiltered(scenarioId, [reservoirId]),
     {
       baseUrl: DEFAULT_API_BASE,
     },
   )
+
+  const entry = response.reservoirs?.[reservoirId]
+  if (!entry) {
+    throw new Error(
+      `No percentile data found for reservoir ${reservoirId} in scenario ${scenarioId}`,
+    )
+  }
+
+  return {
+    reservoir_id: reservoirId,
+    reservoir_name: entry.name,
+    scenario_id: scenarioId,
+    unit: "percent_capacity",
+    capacity_taf: entry.capacity_taf,
+    dead_pool_taf: entry.dead_pool_taf,
+    monthly_percentiles: entry.monthly_percentiles,
+  }
 }
 
 /**
@@ -522,49 +494,16 @@ export async function fetchDemandUnitsList(
 }
 
 /**
- * Fetch complete statistics for a single demand unit
- *
- * @param scenarioId - Scenario ID (e.g., "s0020")
- * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
- * @returns Complete statistics including monthly delivery/shortage and period summary
- *
- * @example
- * ```typescript
- * const data = await fetchDemandUnitStatistics("s0020", "MWD")
- * // { scenario_id: "s0020", du_id: "MWD", monthly_delivery: {...}, period_summary: {...} }
- * ```
- */
-export async function fetchDemandUnitStatistics(
-  scenarioId: string,
-  duId: string,
-): Promise<DemandUnitStatisticsResponse> {
-  if (!scenarioId) {
-    throw new Error("Scenario ID is required")
-  }
-  if (!duId) {
-    throw new Error("Demand unit ID is required")
-  }
-
-  return apiFetcher<DemandUnitStatisticsResponse>(
-    ENDPOINTS.demandUnitStatistics(scenarioId, duId),
-    {
-      baseUrl: DEFAULT_API_BASE,
-    },
-  )
-}
-
-/**
- * Fetch monthly delivery and shortage statistics for urban demand units
+ * Fetch monthly delivery statistics for urban demand units
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param duId - Optional filter by demand unit ID (e.g., "UD_ACWD")
  * @param group - Optional group filter (e.g., "swp")
- * @returns Monthly statistics for urban demand units
  *
  * @example
  * ```typescript
  * const data = await fetchDemandUnitsMonthly("s0020")
- * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { monthly_delivery: {...} } } }
  * ```
  */
 export async function fetchDemandUnitsMonthly(
@@ -578,6 +517,36 @@ export async function fetchDemandUnitsMonthly(
 
   return apiFetcher<DemandUnitMonthlyResponse>(
     ENDPOINTS.demandUnitsMonthly(scenarioId, duId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly shortage statistics for urban demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID
+ * @param group - Optional group filter
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitsShortageMonthly("s0020", "MWD")
+ * // { scenario_id: "s0020", demand_units: { "MWD": { monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchDemandUnitsShortageMonthly(
+  scenarioId: string,
+  duId?: string,
+  group?: string,
+): Promise<DemandUnitShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<DemandUnitShortageMonthlyResponse>(
+    ENDPOINTS.demandUnitsShortageMonthly(scenarioId, duId, group),
     {
       baseUrl: DEFAULT_API_BASE,
     },
@@ -704,6 +673,39 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
     }
   }
   return remapped
+}
+
+/**
+ * Fetch monthly GW restriction shortage statistics for AG demand units.
+ *
+ * Source variable: `GW_SHORT_*`. Available only for SJR and TULARE region
+ * DUs. Sacramento DUs are not present in the response. A 404 from the
+ * backend means none of the requested DUs have shortage data; the fetcher
+ * surfaces the error rather than swallowing it so callers can distinguish
+ * "no data" from a real failure.
+ *
+ * Pass `duIds` to scope the response to specific demand units via the
+ * backend's comma-separated `du_id` filter
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0025")
+ * @param duIds - Optional list of demand unit IDs to fetch
+ * @returns Monthly shortage statistics for the requested AG demand units
+ */
+export async function fetchAgDemandUnitsShortageMonthly(
+  scenarioId: string,
+  duIds?: string[],
+): Promise<AgDemandUnitShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitShortageMonthlyResponse>(
+    ENDPOINTS.agDemandUnitsShortageMonthly(scenarioId, duIds),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000,
+    },
+  )
 }
 
 /**

@@ -113,9 +113,6 @@ const extractScoreData = (
       type: tierInfo.type,
       weighted_score: tierInfo.weighted_score,
       normalized_score: tierInfo.normalized_score,
-      gini: tierInfo.gini,
-      band_upper: tierInfo.band_upper,
-      band_lower: tierInfo.band_lower,
     }
   })
 
@@ -181,7 +178,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 
   return {
     chartData, // Keyed by short code (e.g., chartData["CWS_DEL"])
-    scoreData, // Keyed by short code, contains weighted_score, normalized_score, gini, band_upper, band_lower
+    scoreData, // Keyed by short code, contains weighted_score and normalized_score
     rawData: scenarioData,
     outcomeNames,
     isLoading: scenarioLoading || tiersLoading,
