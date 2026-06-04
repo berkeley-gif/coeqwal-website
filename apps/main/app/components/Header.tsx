@@ -26,12 +26,23 @@ export function Header() {
 
   const { isPastHero: rawIsPastHero } = useTabs()
 
+  // On any route other than "/", there's no hero to scroll past.
+  // Default to the "past hero" appearance (solid nav) immediately.
+  const isHomePage = pathname === "/"
+  const isTabsPage = (pathname === "/learn") || (pathname === "/explore") || (pathname === "/share")
+
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real
   // scroll-based value takes over.
   const [hasMounted, setHasMounted] = useState(false)
   useEffect(() => setHasMounted(true), [])
-  const isPastHero = hasMounted && rawIsPastHero
+  const isPastHero = hasMounted && (isHomePage ? rawIsPastHero : true)
+  const shrinkOnScroll = !isTabsPage
+
+  console.log(
+    'shrinkOnScroll: ',
+    shrinkOnScroll
+  )
 
   const handleLogoClick = () => {
     if (typeof window === "undefined") return
@@ -93,7 +104,8 @@ export function Header() {
       }
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}
-      shrinkOnScroll
+      shrinkOnScroll={shrinkOnScroll}
+      forceShrunk={isTabsPage}
     />
   )
 }

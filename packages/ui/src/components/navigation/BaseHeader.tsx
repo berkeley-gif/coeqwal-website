@@ -157,6 +157,7 @@ export interface BaseHeaderProps {
   /* --- Optional features --- */
   shrinkOnScroll?: boolean // default: true
   showLanguageSwitcher?: boolean // default: false
+  forceShrunk?: boolean // force the header to load in it's shrunk state
 
   /* --- Action handlers (optional overrides) --- */
   onLogoClick?: () => void
@@ -249,6 +250,7 @@ export function BaseHeader({
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
   navTextShadow = "none",
+  forceShrunk = false,
   zIndex,
   backgroundColorScrolled,
   backgroundScrollThreshold = 200,
@@ -397,11 +399,13 @@ export function BaseHeader({
   const logoScale = useTransform(shrinkProgress, [0, 1], [1, 0.85])
 
   // Static fallbacks when shrinkOnScroll is disabled or user prefers reduced motion
-  const staticHeaderH = `${expandedHeight}px`
-  const staticPadY = "8px"
+  const staticHeaderH = forceShrunk
+    ? `${collapsedHeight}px`
+    : `${expandedHeight}px`
+  const staticPadY = forceShrunk ? "4px" : "8px"
 
   // WCAG 2.3.3: Disable animations if user prefers reduced motion
-  const shouldAnimate = shrinkOnScroll && !prefersReducedMotion
+  const shouldAnimate = !forceShrunk && shrinkOnScroll && !prefersReducedMotion
 
   /* ========================================
    * BUTTON STYLING (theme.typography.nav)
@@ -518,7 +522,7 @@ export function BaseHeader({
             }}
             style={{
               // WCAG 2.3.3: Only animate if user hasn't requested reduced motion
-              scale: shouldAnimate ? logoScale : 1,
+              scale: shouldAnimate ? logoScale : forceShrunk ? 0.85 : 1,
               originX: 0,
               originY: 0.5,
               willChange: shouldAnimate ? "transform" : "auto",

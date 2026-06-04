@@ -48,22 +48,13 @@ function TabPanelsErrorFallback() {
 
 export default function Home() {
   return (
-    <MapProvider>
-      {/* DynamicMap - renders once, stays mounted across tab switches */}
-      <DynamicMap />
-
+    <>
       <FloatingGlossary />
 
       {/* WCAG 2.4.1: SkipLink target lives on the <main> element below */}
       <MainContent>
         <IntroSection />
-        <SmoothTabs />
-        <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
-          <Suspense fallback={null}>
-            <TabPanels />
-          </Suspense>
-        </ErrorBoundary>
       </MainContent>
-    </MapProvider>
+    </>
   )
 }
