@@ -559,9 +559,19 @@ export function BaseHeader({
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center">
-                {/* 1. Water stories dropdown */}
+                {/* Getting Started */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={onGetDataClick ? onGetDataClick : undefined}
+                  sx={buttonStyle}
+                >
+                  Get Started
+                </Button>
+
+                {/* Water stories dropdown */}
                 <NavDropdown
-                  label={t.buttons.waterStories}
+                  label="Water Stories"
                   menuDescription={t.dropdownIntros.guides}
                   disableRipple
                   options={[
@@ -580,13 +590,13 @@ export function BaseHeader({
                     {
                       key: "managed",
                       label: t.waterStories.managed,
-                      onClick: () => {},
+                      onClick: () => { },
                       disabled: true,
                     },
                     {
                       key: "equity",
                       label: t.waterStories.equity,
-                      onClick: () => {},
+                      onClick: () => { },
                       disabled: true,
                     },
                   ]}
@@ -597,7 +607,7 @@ export function BaseHeader({
                 {/* 2. Water themes dropdown (rendered when options are provided) */}
                 {waterThemesOptions && waterThemesOptions.length > 0 && (
                   <NavDropdown
-                    label={t.buttons.waterThemes}
+                    label="Water Issues"
                     menuDescription={t.dropdownIntros.waterThemes}
                     disableRipple
                     options={waterThemesOptions}
@@ -606,6 +616,16 @@ export function BaseHeader({
                   />
                 )}
 
+                {/* Scenario explorer */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={onGetDataClick ? onGetDataClick : undefined}
+                  sx={buttonStyle}
+                >
+                  Tools
+                </Button>
+
                 {/* 3. Get data */}
                 <Button
                   variant="text"
@@ -613,7 +633,7 @@ export function BaseHeader({
                   onClick={onGetDataClick ? onGetDataClick : undefined}
                   sx={buttonStyle}
                 >
-                  {t.buttons.getData}
+                  Data
                 </Button>
 
                 {/* 4. About COEQWAL */}
@@ -623,7 +643,7 @@ export function BaseHeader({
                   onClick={onAboutClick ? onAboutClick : undefined}
                   sx={buttonStyle}
                 >
-                  {t.buttons.about}
+                  About Us
                 </Button>
 
                 {/* Language switcher (OPTIONAL) */}
