@@ -62,6 +62,7 @@ import {
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
   ensureDemandUnitsOutlineLayer,
+  beat1FillExpr,
   type BaselineMap,
   type SessionInitMap,
   type BeatEngineApi,
@@ -88,53 +89,6 @@ const CAMERA_ARBITER = new CameraArbiter({
   center: CAM_CENTER,
   zoom: CAM_ZOOM,
 })
-
-const BEAT1_COLORS = ["#BDE1E4", "#92C1D5", "#186b88"] as const
-const BEAT1_CYCLE = 90
-const BEAT1_MID = BEAT1_COLORS[1] // convergence target
-
-function blendHex(a: string, b: string, t: number): string {
-  const [r1, g1, b1] = parseHex(a)
-  const [r2, g2, b2] = parseHex(b)
-  const r = Math.round(r1 + (r2 - r1) * t)
-    .toString(16)
-    .padStart(2, "0")
-  const g = Math.round(g1 + (g2 - g1) * t)
-    .toString(16)
-    .padStart(2, "0")
-  const bl = Math.round(b1 + (b2 - b1) * t)
-    .toString(16)
-    .padStart(2, "0")
-  return `#${r}${g}${bl}`
-}
-
-/** Mapbox fill-color expression that smoothly cycles each polygon through the
- *  three beat-1 blues. `convergence` (0-1) shrinks the palette toward a single
- *  blue so all polygons end up the same color before the tier-color blend. */
-function beat1FillExpr(phase: number, convergence = 0): unknown[] {
-  const c0 =
-    convergence > 0
-      ? blendHex(BEAT1_COLORS[0], BEAT1_MID, convergence)
-      : BEAT1_COLORS[0]
-  const c1 = BEAT1_MID
-  const c2 =
-    convergence > 0
-      ? blendHex(BEAT1_COLORS[2], BEAT1_MID, convergence)
-      : BEAT1_COLORS[2]
-  return [
-    "interpolate-hcl",
-    ["linear"],
-    ["%", ["+", ["coalesce", ["id"], 0], Math.round(phase)], BEAT1_CYCLE],
-    0,
-    c0,
-    30,
-    c1,
-    60,
-    c2,
-    89,
-    c0,
-  ]
-}
 
 function parseHex(hex: string): [number, number, number] {
   const h = hex.replace("#", "")
