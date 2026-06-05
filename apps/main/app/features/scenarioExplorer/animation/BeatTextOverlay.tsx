@@ -1212,14 +1212,6 @@ export default function BeatTextOverlay({
   const textColor = theme.palette.undertone.warm
   const shadow = theme.textShadow.displayBody
 
-  const _beat1PanelWidth = {
-    xs: "100%",
-    sm: "340px",
-    md: "380px",
-    lg: "420px",
-    xl: "460px",
-  }
-
   return (
     <Box
       ref={panelRootRef}
@@ -2094,24 +2086,6 @@ export default function BeatTextOverlay({
           </Box>
         )}
       </Box>
-
-      {/* TODO(beat3): restore beat 3 text
-      <Box
-        sx={{
-          position: "absolute",
-          top: "25%",
-          left: 0,
-          p: padding,
-          opacity: 0,
-          width: _beat1PanelWidth,
-        }}
-      >
-        <Typography variant="body1" component="p">
-          Each outcome has a group of researchers behind it. Click here to
-          learn more about their methodologies.
-        </Typography>
-      </Box>
-      */}
     </Box>
   )
 }

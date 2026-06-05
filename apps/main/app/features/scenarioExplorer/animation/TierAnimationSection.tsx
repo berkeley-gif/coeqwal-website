@@ -21,7 +21,6 @@ import {
 import {
   mapActions,
   useActiveOutcomeVisualization,
-  useLocationHighlights,
   useMapStore,
 } from "../../map/store"
 import {
@@ -43,7 +42,6 @@ import OutcomeMorphOverlay, {
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
-import _PinnedLocationsList from "./PinnedLocationsList"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
@@ -317,10 +315,8 @@ export default function TierAnimationSection() {
    * The zoom-based fade-out was retired (see the reprojection effect
    * further down) to keep the bottom navigation controls accessible
    * while the map is zoomed into a clicked square. The state is kept
-   * so a future visibility trigger can set it without a wider refactor.
-   * Setter and ref are underscored to keep the unused-var lint quiet. */
-  const [textVisible, _setTextVisible] = useState(true)
-  const _textVisibleRef = useRef(true)
+   * so a future visibility trigger can set it without a wider refactor. */
+  const [textVisible] = useState(true)
 
   /* Time-based progress (0 -> 1) */
   const progress = useMotionValue(0)
@@ -926,10 +922,6 @@ export default function TierAnimationSection() {
   const [pinnedLocations, setPinnedLocations] = useState<
     Map<string, LocationInfo>
   >(new Map())
-  // `cardHoveredKey` was read only by `PinnedLocationsList` (now retired).
-  // The setter is still invoked by the hover-enter/leave handlers below, so
-  // the state is harmless to keep as a no-op bridge for any future card UI.
-  const [_cardHoveredKey, setCardHoveredKey] = useState<string | null>(null)
 
   const locKey = useCallback(
     (info: LocationInfo) => `${info.code}:${info.sourceId}`,
@@ -1323,29 +1315,6 @@ export default function TierAnimationSection() {
     spotlightedTier,
   ])
 
-  const storeHighlights = useLocationHighlights()
-  // Kept (prefixed with `_` to silence the unused-var lint) only so that
-  // re-enabling the retired `PinnedLocationsList` mount below is a one-line
-  // change. Currently no consumer reads this memo.
-  const _pinnedHighlights = useMemo(
-    () => storeHighlights.filter((h) => pinnedLocations.has(h.key)),
-    [storeHighlights, pinnedLocations],
-  )
-
-  const _handlePinnedHoverEnter = useCallback(
-    (key: string) => {
-      setCardHoveredKey(key)
-      const info = pinnedLocations.get(key)
-      if (info) setHoveredLocation(info)
-    },
-    [pinnedLocations],
-  )
-
-  const _handlePinnedHoverLeave = useCallback(() => {
-    setCardHoveredKey(null)
-    setHoveredLocation(null)
-  }, [])
-
   // Register store callbacks so map tooltips and TierMarkers can interact
   const handleTooltipToggle = useCallback((key: string) => {
     setPinnedLocations((prev) => {
@@ -1378,88 +1347,9 @@ export default function TierAnimationSection() {
     }
   }, [isInteractive, handleTooltipToggle, locHandlers])
 
-  const fadeOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Kept defined (prefixed with `_` to silence the unused-var lint) but no
-  // longer wired up: outcome titles are display-only and layer visibility is
-  // now driven by `locHandlers.onClick` (sticky square selection). Restore by
-  // passing this back into OutcomeMorphOverlay / BeatTextOverlay if we ever
-  // want outcome-title clicks back.
-  const _handleOutcomeClick = useCallback(
-    (code: string, force?: boolean) => {
-      const isToggleOff = selectedOutcomeCode === code
-
-      if (isToggleOff && pinnedLocations.size > 0 && !force) return
-
-      mapActions.clearMapTooltips()
-      setHoveredLocation(null)
-
-      if (fadeOutTimerRef.current) {
-        clearTimeout(fadeOutTimerRef.current)
-        fadeOutTimerRef.current = null
-      }
-
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      const isSwitching =
-        !isToggleOff &&
-        selectedOutcomeCode != null &&
-        selectedOutcomeCode !== code
-
-      if (isSwitching && map) {
-        const prevConfig = getOutcomeConfig(selectedOutcomeCode!)
-        if (
-          prevConfig?.geometryType === "polygon" &&
-          prevConfig.mapboxLayerId
-        ) {
-          const fillId = prevConfig.mapboxLayerId
-          if (map.getLayer(fillId)) {
-            map.setPaintProperty(fillId, "fill-opacity-transition", {
-              duration: 200,
-              delay: 0,
-            })
-            map.setPaintProperty(fillId, "fill-opacity", 0)
-          }
-        }
-        fadeOutTimerRef.current = setTimeout(() => {
-          fadeOutTimerRef.current = null
-          mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
-        }, 220)
-      } else {
-        mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
-      }
-
-      if (!map) return
-
-      if (isToggleOff) {
-        map.easeTo({
-          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-          zoom: CAM_ZOOM,
-          duration: 1000,
-        })
-      } else {
-        const action = resolveOutcomeCamera(code, "get-started")
-        if (action.type === "fitBounds") {
-          mapAPI.mapRef?.current?.fitBounds(action.bounds, {
-            padding: action.padding,
-            maxZoom: action.maxZoom,
-            duration: action.duration,
-          })
-        } else {
-          map.easeTo({
-            center: action.center,
-            zoom: action.zoom,
-            duration: action.duration,
-          })
-        }
-      }
-    },
-    [selectedOutcomeCode, mapAPI.mapRef, pinnedLocations, resolvedScenarioId],
-  )
-
   useEffect(() => {
     return () => {
       controlsRef.current?.stop()
-      if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current)
     }
   }, [])
 
