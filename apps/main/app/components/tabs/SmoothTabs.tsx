@@ -173,8 +173,25 @@ export default function SmoothTabs() {
           )
         })}
       </div>
+      <Box
+        role="tabPanelHeader"
+        sx={{
+          flexShrink: 0,
+          pointerEvents: "auto",
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          height: theme.layout.collapsedTabHeight,
+          background: theme.palette.tabPanels[activeTab],
+          lineHeight: 1,
+          color: theme.palette.common.white,
+          justifyContent: "center",
+          gap: 1,
+        }}
+      />
 
-      <ExploreSubNav />
+
+     <ExploreSubNav />
     </div>
   )
 }

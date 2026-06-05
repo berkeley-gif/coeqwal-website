@@ -24,7 +24,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
     const backgroundColor = isMapTab ? "transparent" : undefined
-    const padding = isMapTab ? "0" : `2rem ${theme.space.panel.padding}`
+    const padding = `2rem ${theme.space.panel.padding}`
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
     // EXCEPT when in get-started mode which uses page scroll like the learn tab.

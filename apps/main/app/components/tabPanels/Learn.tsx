@@ -130,6 +130,7 @@ export default function LearnPanel() {
                 flexDirection: "column",
                 gap: theme.space.gap.lg,
                 pointerEvents: "none", // Don't block map panning while loading
+                
               }}
             >
               <Box
