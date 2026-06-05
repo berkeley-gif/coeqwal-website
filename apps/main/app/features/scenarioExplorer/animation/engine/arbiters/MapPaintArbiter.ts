@@ -175,11 +175,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
 
   // Paint sequences
 
-  /** Write the `basemap-dim-overlay` fill-opacity for the current `v`.
-   *  Mirrors the legacy main-listener ramp at TierAnimationSection.tsx
-   *  lines 2173 to 2191. Pure function of `v`, idempotent within a
-   *  tick. Safe to call from every beat enter and from the cycle
-   *  update without redundant-write flicker. */
+  /** Write the `basemap-dim-overlay` fill-opacity for the current `v`. */
   private applyBasemapDimRamp(map: MapWriteView, v: number): void {
     try {
       if (!map.getLayer("basemap-dim-overlay")) return
@@ -195,11 +191,8 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyReset(map: MapWriteView): void {
-    // Pre-beat-1 baseline. Mirrors the main-choreography listener's
-    // `v < 0.01` branch at TierAnimationSection.tsx lines 2166 to 2210.
-    // Full-state assertion via `writeDemandUnitsBaseline` so we do not
-    // inherit a partial paint from whatever was on the layer before
-    // (a previous Beat 4 tail, an interactive OPL teardown, etc.).
+    // Pre-beat-1 baseline. Full-state assertion via
+    // `writeDemandUnitsBaseline`.
     //
     // Opacity is seeded to 0 here. Beat 1's fade-in ramp then takes
     // over and brings the layer up from 0 as `v` moves past the reset
@@ -320,12 +313,8 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     map: MapWriteView,
     p: Extract<MapPaintPayload, { kind: "beat1-hold" }>,
   ): void {
-    // Re-assert opacity every tick so any stray writer that lands on
-    // the layer during the hold is self-healing. The legacy listener
-    // did the same (lines 2257 and 2267 wrote 0.65 every tick inside
-    // the frozen and Beat 1B sub-branches). Color expression is not
-    // rewritten every tick, which matches the legacy listener's
-    // `phase !== "beat1"` guard.
+    // Re-assert opacity every tick. The color expression is not
+    // rewritten every tick.
     try {
       if (map.getLayer("demand-units")) {
         map.setPaintProperty("demand-units", "fill-opacity", p.peakOpacity)
@@ -463,8 +452,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     ctx: BeatEngineContext,
   ): void {
     // Build the per-DU opacity case expression from the live hide
-    // schedule. Matches the legacy `paintDuHideSchedule` closure at
-    // TierAnimationSection.tsx lines 2333 to 2397.
+    // schedule:
     //
     //   Tracked DU, pre-fade (v < fadeStart)       peakOpacity
     //   Tracked DU, in-fade (fadeStart .. morphStart) peakOpacity * (1 - t)

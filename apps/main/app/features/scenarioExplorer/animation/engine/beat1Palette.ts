@@ -1,15 +1,10 @@
 /* Beat 1 palette primitives.
  *
- * These constants and the `beat1FillExpr` helper mirror the component-local
- * definitions in `TierAnimationSection.tsx` lines 112 to 157. Kept in
- * the engine package so arbiters can build the same expression without
- * importing from the component (which would create an upward dependency
- * from engine to feature, breaking the layering that Phase 0's
- * `beats.ts` header calls out).
- *
- * If the component-side values ever change, these must track them.
- * The writers audit does not cover expression equality, so this is a
- * manual invariant for now.
+ * `beat1FillExpr` and its color constants live here in the engine
+ * package so the storyboard component and the map-paint arbiters all
+ * build the exact same Mapbox fill expression from one source. The
+ * component imports from here, never the reverse, which keeps the
+ * engine free of an upward dependency on the feature layer.
  */
 
 export const BEAT1_COLORS = ["#BDE1E4", "#92C1D5", "#186b88"] as const
@@ -42,10 +37,7 @@ function parseHex(hex: string): [number, number, number] {
 
 /** Mapbox fill-color expression that cycles each polygon through the three
  *  beat-1 blues. `convergence` (0 to 1) shrinks the palette toward a single
- *  blue so all polygons end up the same color before the tier-color blend.
- *
- *  Verbatim port of the component-local `beat1FillExpr` at
- *  `TierAnimationSection.tsx` line 134. */
+ *  blue so all polygons end up the same color before the tier-color blend. */
 export function beat1FillExpr(
   phase: number,
   convergence = 0,

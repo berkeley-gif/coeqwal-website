@@ -1,6 +1,6 @@
 export { useBeatEngine } from "./BeatEngine"
 export type { BeatEngineApi, UseBeatEngineArgs } from "./BeatEngine"
-export { BEAT_TABLE } from "./beats"
+export { ACTOR_GROUPS } from "./actorGroups"
 export { MapPaintArbiter } from "./arbiters/MapPaintArbiter"
 export { MapPopupArbiter } from "./arbiters/MapPopupArbiter"
 export { OverlayPopupArbiter } from "./arbiters/OverlayPopupArbiter"
@@ -34,7 +34,7 @@ export type {
   ActorBase,
   Arbiter,
   BeatEngineContext,
-  BeatTableEntry,
+  ActorGroup,
   DemandUnitsOverlayState,
   DemandUnitsPaintSpec,
   EngineMode,

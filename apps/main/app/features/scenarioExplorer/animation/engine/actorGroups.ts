@@ -1,36 +1,20 @@
-/* Beat table (Phase 0 spike, Beat 4 only).
+/* Actor groups: the actors that play under each timing beat
  *
- * The ground truth for what happens in each beat. Phase 0 ships Beat 4
- * fully. Every other beat has an empty `actors` array and its
- * choreography continues to live in the legacy per-effect code paths.
- * Phase 1 fills in map-paint actors for beats 0 to 3 and 5 to 7.
- * Phase 2 fills in narration, map popups, overlay popups, and camera
- * actors.
- *
- * Beat 4 comment map (progress domain, compressed).
- *
- *   BEAT5_ENTER               0.500  main-choreography filter swap
- *   BEAT5_S1_LAYER_IN_START   0.500  AG layer begins fading in
- *   BEAT5_S1_LAYER_IN_END     0.520  AG layer at full opacity
- *   BEAT5_S2_SQUARE_RING_AT   0.580  gold ring on distribution square
- *   BEAT5_S3_SQUARE_POPUP_AT  0.590  overlay popup near square
- *   BEAT5_S4_POLYGON_RING_AT  0.600  gold stroke on map polygon
- *   BEAT5_S5_POLYGON_POPUP_AT 0.605  map popup near polygon
- *   BEAT5_SETTLE              0.620  beat settles, demo clears
- *   BEAT5_TAIL_END            0.630  AG layer faded back out
- *
- * These thresholds match the const declarations at
- * `TierAnimationSection.tsx` lines 233 to 244 exactly.
+ * Each group pairs a timing-beat id (see animationTiming.ts) with the
+ * actors active during that beat. The engine flattens these and hands
+ * each actor to the arbiter that owns its kind. Groups with an empty
+ * `actors` array still drive their choreography from component effects
+ * and the overlay bridges. See the animation README for the full
+ * story.
  */
 
-import type { BeatTableEntry } from "./types"
+import type { ActorGroup } from "./types"
 import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
 import { getTierLabel } from "../../../../content/tiers"
 
 // Beat 4 thresholds. Kept here rather than imported from
 // `TierAnimationSection.tsx` so the engine package has no upward
-// dependency on the component. Must stay in sync with those
-// declarations (there is a check in the spec doc's H3).
+// dependency on the component.
 const BEAT5_ENTER = 0.5
 const BEAT5_S1_LAYER_IN_START = 0.5
 const BEAT5_S1_LAYER_IN_END = 0.52
@@ -87,7 +71,7 @@ function resolveBeat5LoiData(ctx: {
   }
 }
 
-const BEAT4_ENTRY: BeatTableEntry = {
+const BEAT4_ACTORS: ActorGroup = {
   id: "loi-highlight",
   actors: [
     // Map paint. One-shot filter swap at window entry.
@@ -147,8 +131,7 @@ const BEAT4_ENTRY: BeatTableEntry = {
       kind: "mapPopup",
       id: "beat4:mapPopup:loi",
       // Runs through `BEAT5_TAIL_END` (not just `BEAT5_SETTLE`) so the
-      // popup stays readable during the ~0.01-wide tail. Matches the
-      // old Beat 5 driver's `wantPopup` window at lines 2646 and 2647.
+      // popup stays readable during the ~0.01-wide tail.
       window: [BEAT5_S5_POLYGON_POPUP_AT, BEAT5_TAIL_END],
       buildHighlight: (ctx) => {
         const data = resolveBeat5LoiData(ctx)
@@ -165,16 +148,8 @@ const BEAT4_ENTRY: BeatTableEntry = {
         }
       },
     },
-    // Map paint. One-shot exit restores the base tier expression. Owns
-    // only the gold-ring cleanup. The full beat2-phase restore is left
-    // to the main-choreography listener on the first tick after the
-    // window closes.
-    //
-    // The exit actor's window is
-    // `[BEAT5_TAIL_END - epsilon, BEAT5_TAIL_END)` so its `onEnter`
-    // fires on the last tick of Beat 5 rather than the first tick of
-    // Beat 6 (avoiding a race with the main listener's
-    // `phase !== "beat2"` branch, which also runs that tick).
+    // Map paint. Exit actor that clears the gold ring on the last
+    // tick of Beat 5.
     {
       kind: "mapPaint",
       id: "beat4:mapPaint:exit",
@@ -186,54 +161,36 @@ const BEAT4_ENTRY: BeatTableEntry = {
 
 // Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
 
-// Reset window. Half-open `[0, RESET_END)`. Mirrors the
-// main-choreography listener's `v < 0.01` branch at
-// TierAnimationSection.tsx line 2166. The arbiter's `onEnter` hook
-// does a full-state baseline assertion on `demand-units` and
-// `demand-units-outline`. `onExit` is unused. Hosted under the
-// "legend" beat (the first beat, whose window starts at 0) because
-// actor windows are independent of beat checkpoints. Beats are just
-// a grouping key for the table.
+// Reset window `[0, RESET_END)`. On enter, asserts the full baseline
+// state for `demand-units` and `demand-units-outline`.
 const RESET_END = 0.01
 
-// Beat 1 thresholds. Mirror the inline `FREEZE_AT`, `BEAT1B_START`,
-// `BEAT1C_BLEND_START`, `BEAT1C_BLEND_END`, and `BEAT2_START`
-// declarations at TierAnimationSection.tsx lines 2145 to 2158.
-// Must stay in sync.
+// Beat 1 thresholds. Also defined inline in TierAnimationSection;
+// keep both in sync.
 const FREEZE_AT = 0.09
 const BEAT1C_BLEND_START = 0.26
-// Sub-window divider inside Beat 1C blend. `[BEAT1C_BLEND_START,
-// BEAT1C_CONVERGE_END)` shrinks the 3-blue palette to BEAT1_MID.
-// `[BEAT1C_CONVERGE_END, BEAT1C_BLEND_END)` blends BEAT1_MID to AG
-// tier colors. Matches the inline `CONVERGE_END = 0.27` at
-// TierAnimationSection.tsx line 2243.
+// Sub-window divider in the Beat 1C blend. `[BEAT1C_BLEND_START,
+// BEAT1C_CONVERGE_END)` shrinks the 3-blue palette to BEAT1_MID;
+// `[BEAT1C_CONVERGE_END, BEAT1C_BLEND_END)` blends BEAT1_MID to the
+// AG tier colors.
 const BEAT1C_CONVERGE_END = 0.27
 const BEAT1C_BLEND_END = 0.28
 const BEAT2_START = 0.38
 
-// Beat 2 hide-schedule thresholds. Mirror the inline
-// `BEAT2_AG_FADE_OUT_START`, `BEAT2_AG_FADE_OUT_END` declarations at
-// TierAnimationSection.tsx lines 2330 and 2331. The AG fade-out
-// window straddles `BEAT2_START` so the map layer finishes fading
-// out just as the SVG distribution-square morph begins its shape
-// deformation. `BEAT5_ENTER` is declared above at line 34 (mirror of
-// the module-level constant at TierAnimationSection.tsx line 261).
+// Beat 2 hide-schedule thresholds. The AG fade-out window straddles
+// `BEAT2_START`.
 const BEAT2_AG_FADE_OUT_START = 0.378
 const BEAT2_AG_FADE_OUT_END = 0.383
-// Reference point for `cycleRotations`. The legacy cycling expression
-// was `beat1T * BEAT1_CYCLE` where `beat1T = v / FREEZE_AT`, so the
-// full cycle window runs one rotation of `BEAT1_CYCLE = 90` phase
-// units across `[0, FREEZE_AT)`. We pass that rotation count to the
-// arbiter as a payload number rather than importing `BEAT1_CYCLE`
-// so the beat table stays free of palette internals.
+// Color-cycle rotations passed to the arbiter as a payload. 90 phase
+// units is one full cycle across `[0, FREEZE_AT)`.
 const BEAT1_CYCLE_ROTATIONS = 90
-// `beat1T / 0.33` is the legacy fade-in ramp, i.e. the first third
-// of the cycle window is fade-in, the rest is hold with breath.
+// First third of the cycle window is fade-in; the rest holds with a
+// breathing oscillation.
 const BEAT1_FADE_IN_FRAC = 0.33
 const BEAT1_PEAK_OPACITY = 0.65
 const BEAT1_BREATH_AMPLITUDE = 0.05
 
-const BEAT0_ENTRY: BeatTableEntry = {
+const BEAT0_ACTORS: ActorGroup = {
   id: "legend",
   actors: [
     // Narration bridge. Fires every tick across the full progress
@@ -299,7 +256,7 @@ const BEAT0_ENTRY: BeatTableEntry = {
 // `BEAT2_START` = 0.38), but actor windows are independent of beat
 // checkpoints so hosting under `collapse-and-colors` stays
 // consistent with this beat's semantic role.
-const BEAT1_ENTRY: BeatTableEntry = {
+const BEAT1_ACTORS: ActorGroup = {
   id: "collapse-and-colors",
   actors: [
     {
@@ -344,7 +301,7 @@ const BEAT1_ENTRY: BeatTableEntry = {
 // Line layers are disjoint from `demand-units` and
 // `demand-units-outline`, so coexisting with the Beat 5 cluster and
 // `beat6:mapPaint:restore` is conflict-free.
-const BEAT2_ENTRY: BeatTableEntry = {
+const BEAT2_ACTORS: ActorGroup = {
   id: "ag-rev-morph",
   actors: [
     {
@@ -376,7 +333,7 @@ const BEAT2_ENTRY: BeatTableEntry = {
 // opacities at scalar 0 for the rest of the storyboard. Reverse
 // scrubs back into Beat 5 are handled by the Beat 5 cluster's own
 // `onEnter`.
-const BEAT6_ENTRY: BeatTableEntry = {
+const BEAT6_ACTORS: ActorGroup = {
   id: "list-bar",
   actors: [
     {
@@ -388,15 +345,13 @@ const BEAT6_ENTRY: BeatTableEntry = {
   ],
 }
 
-// The table
-
-export const BEAT_TABLE: readonly BeatTableEntry[] = [
-  BEAT0_ENTRY,
-  BEAT1_ENTRY,
-  BEAT2_ENTRY,
+export const ACTOR_GROUPS: readonly ActorGroup[] = [
+  BEAT0_ACTORS,
+  BEAT1_ACTORS,
+  BEAT2_ACTORS,
   { id: "all-other-morphs", actors: [] },
-  BEAT4_ENTRY,
-  BEAT6_ENTRY,
+  BEAT4_ACTORS,
+  BEAT6_ACTORS,
   { id: "radar", actors: [] },
   { id: "heatmap", actors: [] },
 ]

@@ -25,7 +25,7 @@
  */
 
 import type { RefObject } from "react"
-import type { BeatDef } from "../animationTiming"
+import type { TimingBeat } from "../animationTiming"
 import type { LocationInfo } from "../OutcomeMorphOverlay"
 import type { LocationHighlight } from "../../../map/store"
 import type { MapRef } from "@repo/map"
@@ -382,21 +382,11 @@ export type MapPaintPayload =
     }
   | {
       /** Per-line-layer fade-out for outcomes whose geometries are
-       * lines rather than polygons. Window `[0, 1]`. The arbiter
-       * iterates `ctx.getHideSchedule()` every tick, picks entries
-       * with `geometryType === "line"`, and writes their
-       * `line-opacity` per a three-state piecewise function:
-       *   v < fadeStart                 -> opacity = 1
-       *   fadeStart <= v <= morphStart  -> opacity = 1 - t
-       *   v > morphStart                -> opacity = 0
-       * Mirrors the legacy listener's trailing line-fade loop at
-       * TierAnimationSection.tsx lines 2458 to 2481. The actor's
-       * window is the full progress range so reverse scrubs (back
-       * past a morphStart, then forward) re-establish the correct
-       * opacity. There is no resource conflict with the polygon
-       * arbiters because line layers (e.g. `cwf-flowline`,
-       * `delta-detaw-line`) are disjoint from `demand-units` and
-       * `demand-units-outline`. */
+       * lines rather than polygons. Window `[0, 1]`. Every tick the
+       * arbiter picks `ctx.getHideSchedule()` entries with
+       * `geometryType === "line"` and sets `line-opacity`: full before
+       * `fadeStart`, ramping to 0 between `fadeStart` and `morphStart`,
+       * then 0 after. */
       kind: "beat-line-fades"
     }
 
@@ -504,12 +494,10 @@ export type Actor =
   | OverlayMorphActor
   | CameraActor
 
-// Beat-table row
-
-export interface BeatTableEntry {
-  /** Matches `BeatDef.id` in `animationTiming.ts`. */
-  id: BeatDef["id"]
-  /** Actors this beat owns. Phase 0: only Beat 4's entry is populated. */
+export interface ActorGroup {
+  /** Matches `TimingBeat.id` in `animationTiming.ts`. */
+  id: TimingBeat["id"]
+  /** Actors this beat owns. */
   actors: readonly Actor[]
 }
 

@@ -19,7 +19,7 @@
  * "paragraph reveal" always feels ~1.1s regardless of which beat it lives
  * in. */
 
-export interface BeatDef {
+export interface TimingBeat {
   /** Stable identifier (debug only). */
   id: string
   /** Target value of `progress` at the end of this beat. */
@@ -35,7 +35,7 @@ export interface BeatDef {
  *  is half of its pre-compression value. Durations are unchanged, so each
  *  beat's per-second rate doubled. Seconds-based fades still feel the same
  *  because they flow through `secondsToProgress`. */
-export const BEATS: readonly BeatDef[] = [
+export const TIMING_BEATS: readonly TimingBeat[] = [
   // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
   //      Played automatically on arrival.
   { id: "legend", progress: 0.225, duration: 12 },
@@ -130,7 +130,7 @@ export const BEATS: readonly BeatDef[] = [
   { id: "heatmap", progress: 1.0, duration: 5 },
 ] as const
 
-export const FINAL_BEAT_INDEX = BEATS.length - 1
+export const FINAL_TIMING_BEAT_INDEX = TIMING_BEATS.length - 1
 
 /** Pixels the storyboard's radar, heatmap, and HTML axis labels are
  *  shifted up so the right-column visualization and Beat 3+ narration
@@ -162,8 +162,8 @@ export const BLOCK_EXIT_SEC = 0.45
 
 /** Progress-per-second for beat[i]. */
 function beatRate(i: number): number {
-  const prev = i === 0 ? 0 : BEATS[i - 1]!.progress
-  return (BEATS[i]!.progress - prev) / BEATS[i]!.duration
+  const prev = i === 0 ? 0 : TIMING_BEATS[i - 1]!.progress
+  return (TIMING_BEATS[i]!.progress - prev) / TIMING_BEATS[i]!.duration
 }
 
 /** Convert a duration in seconds to a progress-fraction width, scaled to

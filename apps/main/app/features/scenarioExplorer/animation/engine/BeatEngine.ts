@@ -36,7 +36,7 @@ import type {
   ActorKind,
   Arbiter,
   BeatEngineContext,
-  BeatTableEntry,
+  ActorGroup,
   EngineMode,
 } from "./types"
 
@@ -60,7 +60,7 @@ export interface BeatEngineApi {
 
 export interface UseBeatEngineArgs {
   progress: MotionValue<number>
-  beatTable: readonly BeatTableEntry[]
+  actorGroups: readonly ActorGroup[]
   context: BeatEngineContext
   /** Collection of arbiters keyed by their `kind`. Missing kinds are
    *  tolerated. Actors of an unhandled kind are silently skipped so
@@ -71,13 +71,13 @@ export interface UseBeatEngineArgs {
    *  Used to keep the engine and the legacy per-effect code paths
    *  mutually exclusive while Phase 0 ships. Flipping to `true`
    *  activates dispatch for beats whose `actors` array is non-empty
-   *  in `beatTable`. */
+   *  in `actorGroups`. */
   enabled: boolean
 }
 
 export function useBeatEngine({
   progress,
-  beatTable,
+  actorGroups,
   context,
   arbiters,
   enabled,
@@ -100,11 +100,11 @@ export function useBeatEngine({
   // parallel `active` array the dispatcher owns.
   const flatActors = useMemo<readonly Actor[]>(() => {
     const out: Actor[] = []
-    for (const entry of beatTable) {
-      for (const actor of entry.actors) out.push(actor)
+    for (const group of actorGroups) {
+      for (const actor of group.actors) out.push(actor)
     }
     return out
-  }, [beatTable])
+  }, [actorGroups])
   flatActorsRef.current = flatActors
 
   // Arbiter lookup, rebuilt whenever the arbiters array identity changes.

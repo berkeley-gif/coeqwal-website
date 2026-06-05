@@ -47,11 +47,11 @@ import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
-import { BEATS, FINAL_BEAT_INDEX } from "./animationTiming"
+import { TIMING_BEATS, FINAL_TIMING_BEAT_INDEX } from "./animationTiming"
 import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
 import {
   useBeatEngine,
-  BEAT_TABLE,
+  ACTOR_GROUPS,
   MapPaintArbiter,
   MapPopupArbiter,
   OverlayPopupArbiter,
@@ -339,7 +339,7 @@ export default function TierAnimationSection() {
   /* Storyboard navigation
    *
    * `goTo(targetIndex)` animates `progress` from its current value to
-   * `BEATS[targetIndex].progress`. Forward navigation uses the
+   * `TIMING_BEATS[targetIndex].progress`. Forward navigation uses the
    * destination beat's `duration`. Backward navigation (only reachable
    * today via `handleRestart`, which masks the reverse tween behind a
    * camera fly) uses `BACK_DURATION_FACTOR` of the source beat's
@@ -359,7 +359,7 @@ export default function TierAnimationSection() {
    * value, so no per-beat branching is needed inside those listeners. */
   const goTo = useCallback(
     (targetIndex: number, opts?: { viaCamera?: boolean }) => {
-      const clamped = Math.max(0, Math.min(FINAL_BEAT_INDEX, targetIndex))
+      const clamped = Math.max(0, Math.min(FINAL_TIMING_BEAT_INDEX, targetIndex))
       const fromIndex = beatIndexRef.current
       if (controlsRef.current) controlsRef.current.stop()
 
@@ -371,8 +371,8 @@ export default function TierAnimationSection() {
       // final-beat finalize path.
       engineApiRef.current?.setMode("playback")
 
-      const target = BEATS[clamped]!
-      const source = BEATS[fromIndex]!
+      const target = TIMING_BEATS[clamped]!
+      const source = TIMING_BEATS[fromIndex]!
       const forward = clamped > fromIndex
       const rawDuration = forward
         ? target.duration
@@ -386,7 +386,7 @@ export default function TierAnimationSection() {
         beatIndexRef.current = clamped
 
         const finalize = () => {
-          if (clamped === FINAL_BEAT_INDEX) {
+          if (clamped === FINAL_TIMING_BEAT_INDEX) {
             settleToFinishedState()
           } else if (clamped === 0) {
             setPlayState("idle")
@@ -485,7 +485,7 @@ export default function TierAnimationSection() {
   }, [])
 
   const handleNext = useCallback(() => {
-    if (beatIndexRef.current >= FINAL_BEAT_INDEX) return
+    if (beatIndexRef.current >= FINAL_TIMING_BEAT_INDEX) return
     clearInteractiveState()
     // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
     // (a no-op when already home) before running the beat tween, so a
@@ -496,7 +496,7 @@ export default function TierAnimationSection() {
   /* Intro tween (Play button entry point)
    *
    * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
-   * tweens the first beat's window (0 -> `BEATS[0].progress`) while
+   * tweens the first beat's window (0 -> `TIMING_BEATS[0].progress`) while
    * keeping `beatIndex` at 0 - so the storyboard indicator reads "1 / N"
    * the entire time. Under `prefers-reduced-motion`, the tween collapses
    * to an instant snap. */
@@ -504,7 +504,7 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     setBeatIndex(0)
     beatIndexRef.current = 0
-    const target = BEATS[0]!
+    const target = TIMING_BEATS[0]!
     if (prefersReducedMotion) {
       progress.set(target.progress)
       setPlayState("paused")
@@ -552,7 +552,7 @@ export default function TierAnimationSection() {
       clearInteractiveState()
       if (controlsRef.current) controlsRef.current.stop()
       const targetIndex = i - 1
-      const target = BEATS[targetIndex]!
+      const target = TIMING_BEATS[targetIndex]!
 
       const applyBeat = () => {
         progress.set(target.progress)
@@ -724,7 +724,7 @@ export default function TierAnimationSection() {
     if (hasAutoAdvancedRef.current) return
     hasAutoAdvancedRef.current = true
     if (prefersReducedMotion) {
-      goTo(FINAL_BEAT_INDEX)
+      goTo(FINAL_TIMING_BEAT_INDEX)
     }
     // Normal motion: nothing to do here. We wait for the user to click Play.
   }, [panelInView, prefersReducedMotion, goTo])
@@ -1719,7 +1719,7 @@ export default function TierAnimationSection() {
 
   const engineApi = useBeatEngine({
     progress,
-    beatTable: BEAT_TABLE,
+    actorGroups: ACTOR_GROUPS,
     context: engineContext,
     arbiters: arbitersRef.current,
     enabled: !isLoading,
@@ -2715,7 +2715,7 @@ export default function TierAnimationSection() {
             backOutOpacity={backOutOpacity}
             playState={playState}
             beatIndex={beatIndex}
-            totalBeats={BEATS.length}
+            totalBeats={TIMING_BEATS.length}
             hasPlayed={hasPlayed}
             onPlay={handlePlay}
             onNext={handleNext}
