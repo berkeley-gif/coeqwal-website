@@ -1,4 +1,10 @@
-/* MapPaintArbiter owns the Mapbox DU paint in the Explorer Get Started animation */
+/* MapPaintArbiter: the storyboard's map painter
+ *
+ * The playback arbiter that writes the `demand-units` layers and the
+ * basemap dim overlay from progress-keyed actors during playback. Owns
+ * the demand-units layers while a beat is tweening. See "Who paints the
+ * map" in README.md.
+ */
 
 import type { MapboxGLMap } from "@repo/map"
 import type {

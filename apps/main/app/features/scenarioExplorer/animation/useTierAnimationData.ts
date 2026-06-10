@@ -1,5 +1,13 @@
 "use client"
 
+/* Tier data for the storyboard
+ *
+ * Fetches per-location tier assignments for the demo scenario and shapes
+ * them into the centroids, colors, and per-outcome location sets the
+ * animation reads. `useOutcomeTierOverrides` does the same for a
+ * non-base hydroclimate variant.
+ */
+
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { fetchTierLocationAssignmentsBatch } from "@repo/data/coeqwal"

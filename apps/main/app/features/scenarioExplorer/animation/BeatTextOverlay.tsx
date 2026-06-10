@@ -27,10 +27,14 @@ import {
   alpha,
   ArrowForwardIcon,
 } from "@repo/ui/mui"
-import { motion, AnimatePresence } from "@repo/motion"
+import { motion, AnimatePresence, useTransform } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import type { EncodingMode } from "./OutcomeMorphOverlay"
-import { PARAGRAPH_FADE_SEC } from "./animationTiming"
+import {
+  PARAGRAPH_FADE_SEC,
+  BACKDROP_FADE_IN_PROGRESS,
+  BACKDROP_FADE_IN_WIDTH,
+} from "./animationTiming"
 import type { Beat2Layout, GlyphRect } from "./overlayTypes"
 import { useOutcomeLabelGeometry } from "./useOutcomeLabelGeometry"
 import Narration from "./Narration"
@@ -128,6 +132,14 @@ export default function BeatTextOverlay({
     ? `${scenarioName} scenario`
     : "Current operations scenario"
 
+  // Scenario-name header fades in on the same progress ramp as the white
+  // right-panel backdrop so the text and the panel appear together.
+  const scenarioHeaderOpacity = useTransform(
+    progress,
+    [BACKDROP_FADE_IN_PROGRESS, BACKDROP_FADE_IN_PROGRESS + BACKDROP_FADE_IN_WIDTH],
+    [0, 1],
+  )
+
   // All per-frame label math + the DOM refs the right column attaches.
   const {
     panelRootRef,
@@ -217,13 +229,14 @@ export default function BeatTextOverlay({
           },
         }}
       >
-        {/* Scenario-name header. Fades in once the scenario's outcomes
-            appear (beat 2) and holds for the rest of the storyboard. */}
+        {/* Scenario-name header. Fades in with the right-panel backdrop
+            and holds for the rest of the storyboard. */}
         <motion.div
-          initial={false}
-          animate={{ opacity: beatIndex >= 2 ? 1 : 0 }}
-          transition={{ duration: PARAGRAPH_FADE_SEC }}
-          style={{ flexShrink: 0, pointerEvents: "none" }}
+          style={{
+            opacity: scenarioHeaderOpacity,
+            flexShrink: 0,
+            pointerEvents: "none",
+          }}
         >
           <Box sx={{ px: 3, pb: 0.75, minHeight: 20 }}>
             <Typography

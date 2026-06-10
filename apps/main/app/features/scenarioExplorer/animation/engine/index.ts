@@ -1,3 +1,9 @@
+/* Public surface of the beat engine
+ *
+ * Re-exports the engine, actor groups, arbiters, and shared types so the
+ * rest of the animation imports from one place.
+ */
+
 export { useBeatEngine } from "./BeatEngine"
 export type { BeatEngineApi, UseBeatEngineArgs } from "./BeatEngine"
 export { ACTOR_GROUPS } from "./actorGroups"

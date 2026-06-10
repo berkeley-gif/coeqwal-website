@@ -1,5 +1,13 @@
 "use client"
 
+/* TierAnimationSection: the storyboard orchestrator
+ *
+ * Owns the shared `progress` clock and wires every piece together. It
+ * does not animate anything directly. The body reads top to bottom as
+ * state, navigation, selection, engine, then render. See the mental
+ * model and the "TierAnimationSection" section in README.md.
+ */
+
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import {
@@ -9,15 +17,7 @@ import {
   animate,
   useReducedMotion,
 } from "@repo/motion"
-import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
-import {
-  type ShapeMorphData,
-  diamondPoints,
-  circlePoints,
-  lineSegmentPoints,
-  POINTS_PER_SHAPE,
-} from "@repo/viz"
 import {
   mapActions,
   useActiveOutcomeVisualization,
@@ -28,30 +28,23 @@ import {
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
 import { resolveOutcomeCamera } from "../../map/config/resolveOutcomeCamera"
-import {
-  getOutcomeLocationCoordinates,
-  SALMON_RIVER_CENTROID,
-} from "../../map/config/outcomeLocations"
+import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
 import { useTierAnimationData } from "./useTierAnimationData"
 import type { OutcomeLocationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
-  type OutcomeGroup,
   type LocationInfo,
   type EncodingMode,
-  getOutcomeProgressRange,
-  computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
+import { useScreenPolygonProjection } from "./hooks/useScreenPolygonProjection"
+import { useStoryboardLayout } from "./hooks/useStoryboardLayout"
+import { useStoryboardCamera } from "./hooks/useStoryboardCamera"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
-import {
-  TIMING_BEATS,
-  FINAL_TIMING_BEAT_INDEX,
-  BACKDROP_FADE_IN_PROGRESS,
-} from "./animationTiming"
+import { TIMING_BEATS, FINAL_TIMING_BEAT_INDEX } from "./animationTiming"
 import { LOI_DU_ID } from "./demandUnitsPaint"
 import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
 import {
@@ -68,10 +61,8 @@ import {
   type OutlinePaintTarget,
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
-  ensureDemandUnitsOutlineLayer,
   blueFillExpr,
   type BaselineMap,
-  type SessionInitMap,
   type BeatEngineApi,
   type BeatEngineContext,
   type Arbiter,
@@ -104,23 +95,6 @@ function parseHex(hex: string): [number, number, number] {
     parseInt(h.slice(2, 4), 16),
     parseInt(h.slice(4, 6), 16),
   ]
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractOuterRing(geometry: any): [number, number][] | null {
-  if (!geometry) return null
-  if (geometry.type === "Polygon") {
-    return geometry.coordinates?.[0] as [number, number][] | null
-  }
-  if (geometry.type === "MultiPolygon") {
-    let largest: [number, number][] = []
-    for (const polygon of geometry.coordinates ?? []) {
-      const ring = polygon?.[0] as [number, number][] | undefined
-      if (ring && ring.length > largest.length) largest = ring
-    }
-    return largest.length > 0 ? largest : null
-  }
-  return null
 }
 
 const OUTCOME_DISPLAY_ORDER = OUTCOME_CODE_ORDER.map((code) => ({
@@ -164,33 +138,6 @@ const ACTIVE_OUTCOMES = new Set([
   "WRC_SALMON_AB",
 ])
 
-interface OutcomeLayoutItem {
-  code: string
-  label: string
-  column: 0 | 1
-  columnWidth: number
-  isActive: boolean
-  locationCount: number
-  /** Pixel height of the glyph placeholder (0 when not active / no polygons).
-   *  BeatTextOverlay renders a transparent Box of this height to reserve
-   *  space in document flow. The SVG morph lands inside that rect. */
-  targetHeight: number
-  /** Caption text rendered in DOM below the glyph (e.g. "12 locations"). */
-  locationDescription: string
-}
-
-interface GlyphRect {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-interface ScreenPolygon {
-  screenPoly: [number, number][]
-  centroidScreen: [number, number]
-}
-
 export default function TierAnimationSection() {
   const theme = useTheme()
   const mapAPI = useMap()
@@ -198,19 +145,7 @@ export default function TierAnimationSection() {
     useTierAnimationData()
 
   const panelRef = useRef<HTMLDivElement>(null)
-  const cameraSetRef = useRef(false)
 
-  const [panelSize, setPanelSize] = useState<{
-    width: number
-    height: number
-  } | null>(null)
-  const [allScreenPolygons, setAllScreenPolygons] = useState<
-    Map<string, ScreenPolygon>
-  >(new Map())
-
-  // Viewport-space polygon data (raw map.project() output, no panel offset).
-  // Stable as long as the map hasn't panned/zoomed.
-  const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
   const [panelInView, setPanelInView] = useState(false)
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
@@ -269,7 +204,6 @@ export default function TierAnimationSection() {
 
   // Map, overlay, and heading stay fully visible for the whole
   // storyboard (no fade-out).
-  const mapOpacity = useTransform(progress, [0, 1], [1, 1])
   const overlayOpacity = useTransform(progress, [0, 1], [1, 1])
   const headingOpacity = useTransform(progress, [0, 1], [1, 1])
 
@@ -1303,120 +1237,6 @@ export default function TierAnimationSection() {
     }
   }, [resolvedScenarioId])
 
-  /* Detect when panel scrolls into view */
-  useEffect(() => {
-    const el = panelRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setPanelInView(true)
-      },
-      { threshold: 0.05 },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  /* Fly camera once panel is visible */
-  useEffect(() => {
-    if (!panelInView || isLoading || !mapAPI.mapRef?.current) return
-    if (cameraSetRef.current) return
-
-    const timer = setTimeout(() => {
-      if (!mapAPI.mapRef?.current) return
-      const map = mapAPI.mapRef.current.getMap?.()
-
-      const onMoveEnd = () => {
-        if (!map) return
-        computePolygonDataRef.current()
-        polygonsAllowedRef.current = true
-
-        // The panel may still be settling to its final scroll position
-        // after the camera fly. Schedule cheap offset re-applications to
-        // catch any drift without re-querying Mapbox.
-        setTimeout(() => applyPanelOffsetRef.current(), 200)
-        setTimeout(() => applyPanelOffsetRef.current(), 500)
-
-        try {
-          // Ensure all animation layers have visibility "visible" at the
-          // layout level - OutcomePolygonLayer may have set them to "none"
-          // if it was previously mounted in another map mode.
-          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (map.getLayer(fill))
-              map.setLayoutProperty(fill, "visibility", "visible")
-            if (map.getLayer(outline))
-              map.setLayoutProperty(outline, "visibility", "visible")
-          }
-
-          // consolidated session-init. `ensureDemandUnitsOutlineLayer`
-          // creates the `demand-units-outline` line layer once per session
-          // (safe to call repeatedly: no-op if it already exists from
-          // another map mode).
-          // `writeDemandUnitsBaseline` then asserts the full beat-1 palette
-          // state on both fill and outline layers, including zeroed
-          // transitions so the per-frame color cycling in the progress
-          // handler below writes cleanly without smear. Casts via
-          // `unknown` because Mapbox's method signatures are stricter
-          // than the helpers' permissive structural types.
-          ensureDemandUnitsOutlineLayer(map as unknown as SessionInitMap, {
-            filter: DU_CLASS_FILTER,
-            lineColor: blueFillExpr(0) as readonly unknown[],
-            lineWidth: 0.5,
-            lineOpacity: 0,
-            lineOffset: -0.25,
-          })
-          writeDemandUnitsBaseline(map as unknown as BaselineMap, {
-            filter: DU_CLASS_FILTER,
-            fillExpr: blueFillExpr(0) as readonly unknown[],
-            fillOpacity: { kind: "scalar", value: 0 },
-            lineOpacity: { kind: "scalar", value: 0 },
-            lineWidth: 0.5,
-            lineOffset: -0.25,
-            visibility: "visible",
-          })
-          // Suppress all other polygon layers until their beat-2 turn
-          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (fill === "demand-units") continue // already handled above
-            if (map.getLayer(fill))
-              map.setPaintProperty(fill, "fill-opacity", 0)
-            if (map.getLayer(outline))
-              map.setPaintProperty(outline, "line-opacity", 0)
-          }
-          // Prep the shared `basemap-dim-overlay` (added by VisualizationLayers
-          // and pinned to opacity 0 in get-started mode) for progress-driven
-          // updates from this component. Override the 800ms transition
-          // VisualizationLayers configures for the Explore path. Otherwise
-          // every per-frame setPaintProperty call below would smear and
-          // look broken.
-          if (map.getLayer("basemap-dim-overlay")) {
-            map.setPaintProperty(
-              "basemap-dim-overlay",
-              "fill-opacity-transition",
-              { duration: 0, delay: 0 },
-            )
-            map.setPaintProperty("basemap-dim-overlay", "fill-opacity", 0)
-          }
-        } catch {
-          /* ok */
-        }
-      }
-      map?.once("moveend", onMoveEnd)
-
-      mapAPI.mapRef.current.easeTo({
-        center: CAM_CENTER,
-        zoom: CAM_ZOOM,
-        bearing: 0,
-        pitch: 0,
-        duration: 1500,
-        easing: (t: number) => t * (2 - t),
-        padding: { top: 0, bottom: 0, left: 0, right: 0 },
-      })
-      cameraSetRef.current = true
-    }, 200)
-
-    return () => clearTimeout(timer)
-  }, [panelInView, isLoading, mapAPI.mapRef])
-
   /* Build a Mapbox fill-color expression that assigns tier colors */
   const outcomeLocationsRef = useRef(outcomeLocations)
   outcomeLocationsRef.current = outcomeLocations
@@ -1820,700 +1640,62 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* Measure panel for SVG coordinate mapping */
-  const measurePanel = useCallback(() => {
-    if (!panelRef.current) return
-    const rect = panelRef.current.getBoundingClientRect()
-    if (rect.width === 0) return
-    setPanelSize({ width: rect.width, height: rect.height })
-  }, [])
-
-  useEffect(() => {
-    if (isLoading) return
-    const raf = requestAnimationFrame(measurePanel)
-    window.addEventListener("resize", measurePanel)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener("resize", measurePanel)
-    }
-  }, [isLoading, measurePanel])
-
-  /* Collect screen shapes from Mapbox layers + coordinate lookups */
-  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const computePolygonDataRef = useRef<() => void>(() => {})
-  const reprojectRef = useRef<() => void>(() => {})
-  const applyPanelOffsetRef = useRef<() => void>(() => {})
-  const cachedGeoRingsRef = useRef<
-    Map<
-      string,
-      { ring: [number, number][]; centroidLng?: number; centroidLat?: number }
-    >
-  >(new Map())
-
-  const applyPanelOffset = useCallback(() => {
-    if (!panelRef.current || viewportDataRef.current.size === 0) return
-
-    const panelRect = panelRef.current.getBoundingClientRect()
-    const ox = panelRect.left + panelRef.current.clientLeft
-    const oy = panelRect.top + panelRef.current.clientTop
-
-    const screenMap = new Map<string, ScreenPolygon>()
-    for (const [id, vp] of viewportDataRef.current) {
-      screenMap.set(id, {
-        screenPoly: vp.screenPoly.map(
-          ([x, y]) => [x - ox, y - oy] as [number, number],
-        ),
-        centroidScreen: [vp.centroidScreen[0] - ox, vp.centroidScreen[1] - oy],
-      })
-    }
-    setAllScreenPolygons(screenMap)
-  }, [])
-
-  applyPanelOffsetRef.current = applyPanelOffset
-
-  const collectOutcomeShapes = useCallback(() => {
-    if (retryTimerRef.current) {
-      clearTimeout(retryTimerRef.current)
-      retryTimerRef.current = null
-    }
-    cachedGeoRingsRef.current = new Map()
-
-    if (!mapAPI.mapRef?.current || !panelRef.current) return
-    if (centroids.length === 0 && allLocationIds.size === 0) return
-
-    const map = mapAPI.mapRef.current.getMap?.()
-    if (!map || !map.isStyleLoaded?.()) return
-
-    const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
-    const vpMap = new Map<string, ScreenPolygon>()
-    const geoCentroids = new Map<string, { lng: number; lat: number }>()
-
-    // 1. Query polygon-based Mapbox layers per the registry
-    const layersToQuery = new Map<
-      string,
-      { idProperty: string; sourceLayerName?: string }
-    >()
-
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const config = getOutcomeConfig(code)
-      if (!config || config.geometryType !== "polygon") continue
-      if (!config.mapboxLayerId || layersToQuery.has(config.mapboxLayerId))
-        continue
-      layersToQuery.set(config.mapboxLayerId, {
-        idProperty: config.idProperty ?? "DU_ID",
-        sourceLayerName: config.sourceLayer,
-      })
-    }
-
-    let anyPolygonsFound = false
-    for (const [layerId, { idProperty, sourceLayerName }] of layersToQuery) {
-      if (!map.getLayer(layerId)) continue
-
-      // querySourceFeatures ignores layer filters, returning ALL features
-      // from loaded tiles (unlike queryRenderedFeatures which respects them).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let features: any[] = []
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const layer = map.getLayer(layerId) as any
-        const sourceId: string | undefined = layer?.source
-        const srcLayer: string | undefined =
-          layer?.sourceLayer ?? layer?.["source-layer"] ?? sourceLayerName
-        if (sourceId && srcLayer) {
-          features = map.querySourceFeatures(sourceId, {
-            sourceLayer: srcLayer,
-          })
-        }
-      } catch {
-        /* ok */
-      }
-
-      if (features.length > 0) anyPolygonsFound = true
-
-      const bestRings = new Map<string, [number, number][]>()
-      for (const f of features) {
-        const featureId: string | undefined = f.properties?.[idProperty]
-        if (!featureId) continue
-        const ring = extractOuterRing(f.geometry)
-        if (!ring || ring.length < 3) continue
-        const existing = bestRings.get(featureId)
-        if (!existing || ring.length > existing.length) {
-          bestRings.set(featureId, ring)
-        }
-      }
-
-      for (const [featureId, ring] of bestRings) {
-        let geoLng = 0,
-          geoLat = 0
-        for (const [lng, lat] of ring) {
-          geoLng += lng
-          geoLat += lat
-        }
-        geoLng /= ring.length
-        geoLat /= ring.length
-        geoCentroids.set(featureId, { lng: geoLng, lat: geoLat })
-
-        const cData = centroidLookup.get(featureId)
-        cachedGeoRingsRef.current.set(featureId, {
-          ring,
-          centroidLng: cData?.lng,
-          centroidLat: cData?.lat,
-        })
-
-        const vpPoly: [number, number][] = []
-        for (const [lng, lat] of ring) {
-          try {
-            const pt = map.project([lng, lat])
-            vpPoly.push([pt.x, pt.y])
-          } catch {
-            /* vertex outside projection bounds */
-          }
-        }
-        if (vpPoly.length < 3) continue
-
-        let cx = 0,
-          cy = 0
-        for (const [x, y] of vpPoly) {
-          cx += x
-          cy += y
-        }
-        cx /= vpPoly.length
-        cy /= vpPoly.length
-        const centroid: [number, number] = [cx, cy]
-
-        if (cData) {
-          try {
-            const pt = map.project([cData.lng, cData.lat])
-            centroid[0] = pt.x
-            centroid[1] = pt.y
-          } catch {
-            /* keep computed centroid */
-          }
-        }
-
-        vpMap.set(featureId, { screenPoly: vpPoly, centroidScreen: centroid })
-      }
-    }
-
-    // 2. React-marker outcomes: project coordinates to viewport shapes
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const config = getOutcomeConfig(code)
-      if (!config || config.geometryType !== "react-marker") continue
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-
-      for (const locId of locData.ids) {
-        if (vpMap.has(locId)) continue
-        const coords = getOutcomeLocationCoordinates(code, locId)
-        if (!coords) continue
-
-        try {
-          const pt = map.project(coords)
-          const sx = pt.x
-          const sy = pt.y
-
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
-          vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
-        } catch {
-          /* outside projection bounds */
-        }
-      }
-    }
-
-    // 3. Line outcomes: representative shape at centroid
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const config = getOutcomeConfig(code)
-      if (!config || config.geometryType !== "line") continue
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-
-      const syntheticId = [...locData.ids][0] ?? code
-      if (vpMap.has(syntheticId)) continue
-
-      try {
-        const pt = map.project(SALMON_RIVER_CENTROID)
-        const sx = pt.x
-        const sy = pt.y
-        const vpPoly = lineSegmentPoints(
-          sx - 15,
-          sy,
-          sx + 15,
-          sy,
-          8,
-          POINTS_PER_SHAPE,
-        )
-        vpMap.set(syntheticId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
-      } catch {
-        /* outside projection bounds */
-      }
-    }
-
-    if (!anyPolygonsFound && layersToQuery.size > 0) {
-      retryTimerRef.current = setTimeout(collectOutcomeShapes, 1000)
-      return
-    }
-
-    geoCentroidsRef.current = geoCentroids
-    viewportDataRef.current = vpMap
-    applyPanelOffset()
-  }, [centroids, allLocationIds, outcomeLocations, mapAPI, applyPanelOffset])
-
-  /**
-   * Re-project cached geographic data to screen without re-querying Mapbox.
-   * Safe to call on every map move/zoom: feature count stays stable.
-   */
-  const reprojectShapes = useCallback(() => {
-    if (!mapAPI.mapRef?.current || !panelRef.current) return
-    const map = mapAPI.mapRef.current.getMap?.()
-    if (!map) return
-    if (
-      cachedGeoRingsRef.current.size === 0 &&
-      viewportDataRef.current.size === 0
-    )
-      return
-
-    const vpMap = new Map(viewportDataRef.current)
-
-    for (const [featureId, data] of cachedGeoRingsRef.current) {
-      const vpPoly: [number, number][] = []
-      for (const [lng, lat] of data.ring) {
-        try {
-          const pt = map.project([lng, lat])
-          vpPoly.push([pt.x, pt.y])
-        } catch {
-          /* vertex outside projection bounds */
-        }
-      }
-      if (vpPoly.length < 3) continue
-
-      let cx = 0,
-        cy = 0
-      for (const [x, y] of vpPoly) {
-        cx += x
-        cy += y
-      }
-      cx /= vpPoly.length
-      cy /= vpPoly.length
-      const centroid: [number, number] = [cx, cy]
-
-      if (data.centroidLng != null && data.centroidLat != null) {
-        try {
-          const pt = map.project([data.centroidLng, data.centroidLat])
-          centroid[0] = pt.x
-          centroid[1] = pt.y
-        } catch {
-          /* keep computed centroid */
-        }
-      }
-
-      vpMap.set(featureId, { screenPoly: vpPoly, centroidScreen: centroid })
-    }
-
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const config = getOutcomeConfig(code)
-      if (!config || config.geometryType !== "react-marker") continue
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-
-      for (const locId of locData.ids) {
-        if (vpMap.has(locId)) continue
-        const coords = getOutcomeLocationCoordinates(code, locId)
-        if (!coords) continue
-        try {
-          const pt = map.project(coords)
-          const sx = pt.x
-          const sy = pt.y
-          let vpPoly: [number, number][]
-          if (code === "ENV_FLOWS") {
-            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
-          } else {
-            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
-          }
-          vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
-        } catch {
-          /* outside projection bounds */
-        }
-      }
-    }
-
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const config = getOutcomeConfig(code)
-      if (!config || config.geometryType !== "line") continue
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-      const syntheticId = [...locData.ids][0] ?? code
-      if (vpMap.has(syntheticId)) continue
-      try {
-        const pt = map.project(SALMON_RIVER_CENTROID)
-        const sx = pt.x
-        const sy = pt.y
-        const vpPoly = lineSegmentPoints(
-          sx - 15,
-          sy,
-          sx + 15,
-          sy,
-          8,
-          POINTS_PER_SHAPE,
-        )
-        vpMap.set(syntheticId, {
-          screenPoly: vpPoly,
-          centroidScreen: [sx, sy],
-        })
-      } catch {
-        /* outside projection bounds */
-      }
-    }
-
-    viewportDataRef.current = vpMap
-    applyPanelOffset()
-  }, [mapAPI, outcomeLocations, applyPanelOffset])
-
-  computePolygonDataRef.current = collectOutcomeShapes
-  reprojectRef.current = reprojectShapes
-
-  useEffect(() => {
-    const onResize = () => {
-      if (viewportDataRef.current.size > 0) {
-        reprojectShapes()
-      }
-    }
-    window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
-  }, [reprojectShapes])
-
-  // Re-apply offset on scroll (cheap: no Mapbox queries).
-  // With page-level scrolling, listen on window instead of a parent scroll container.
-  useEffect(() => {
-    if (!panelInView) return
-
-    let rafId: number | null = null
-    const onScroll = () => {
-      if (rafId !== null) cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        applyPanelOffsetRef.current()
-        rafId = null
-      })
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId)
-      window.removeEventListener("scroll", onScroll)
-    }
-  }, [panelInView])
-
-  // Re-project cached shapes when the map pans/zooms.
-
-  useEffect(() => {
-    if (!panelInView) return
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (!map) return
-
-    let rafId: number | null = null
-    const onMove = () => {
-      if (rafId !== null) return
-      rafId = requestAnimationFrame(() => {
-        reprojectRef.current()
-        rafId = null
-      })
-    }
-
-    map.on("move", onMove)
-    return () => {
-      map.off("move", onMove)
-      if (rafId !== null) cancelAnimationFrame(rafId)
-    }
-  }, [panelInView, mapAPI.mapRef])
-
-  /* Build per-outcome shape groups for the morph overlay */
-  const outcomeGroups: OutcomeGroup[] = useMemo(() => {
-    if (allScreenPolygons.size === 0) return []
-    return OUTCOME_DISPLAY_ORDER.map(({ code, label }) => {
-      const locData = outcomeLocations[code]
-      if (!locData) return { code, label, polygons: [] }
-      const override = tierOverrides[code]
-      const polygons: ShapeMorphData[] = []
-      for (const locId of locData.ids) {
-        // RES_STOR: API returns CalSim IDs. Screen map uses gnisidlabel
-        let screenKey = locId
-        if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
-          const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
-          if (gnisName) screenKey = gnisName
-        }
-        const screen = allScreenPolygons.get(screenKey)
-        if (!screen) continue
-        polygons.push({
-          screenShape: screen.screenPoly,
-          centroidScreen: screen.centroidScreen,
-          color:
-            override?.colorMap[locId] ?? locData.colorMap[locId] ?? "#888888",
-          tier: override?.tierMap[locId] ?? locData.tierMap[locId] ?? 1,
-          sourceId: locId,
-        })
-      }
-      return { code, label, polygons }
-    }).filter((g) => g.polygons.length > 0)
-  }, [allScreenPolygons, outcomeLocations, tierOverrides])
-
-  const locationNameMap = useMemo(() => {
-    const names: Record<string, string> = {}
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-      for (const locId of locData.ids) {
-        const key = `${code}:${locId}`
-        const apiName = locData.nameMap[locId]
-        if (apiName && apiName !== locId) {
-          names[key] = apiName
-          continue
-        }
-        if (code === "AG_REV" || code === "CWS_DEL") {
-          const duName = getDemandUnitDisplayName(locId)
-          if (duName !== locId) {
-            names[key] = duName
-          }
-        }
-      }
-    }
-    return names
-  }, [outcomeLocations])
-
-  const locationNameMapRef = useRef(locationNameMap)
-  locationNameMapRef.current = locationNameMap
-
-  const activeOutcomeGroups = useMemo(
-    () => outcomeGroups.filter((g) => ACTIVE_OUTCOMES.has(g.code)),
-    [outcomeGroups],
-  )
-
-  /** Map of outcome code */
-  const outcomeMorphWindows = useMemo(() => {
-    const map: Record<string, { start: number; end: number }> = {}
-    if (activeOutcomeGroups.length === 0) return map
-    const activeCodes = activeOutcomeGroups.map((g) => g.code)
-    for (const group of activeOutcomeGroups) {
-      const [start, end] = getOutcomeProgressRange(group.code, activeCodes)
-      map[group.code] = { start, end }
-    }
-    return map
-  }, [activeOutcomeGroups])
-
-  useEffect(() => {
-    const schedule: HideScheduleEntry[] = []
-    const activeCodes = activeOutcomeGroups.map((g) => g.code)
-    for (const group of activeOutcomeGroups) {
-      // AG_REV is excluded
-      if (group.code === "AG_REV") continue
-      const locData = outcomeLocations[group.code]
-      if (!locData || locData.ids.size === 0) continue
-      const config = getOutcomeConfig(group.code)
-      if (!config) continue
-      const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
-      const fadeStart = morphStart - 0.005
-
-      // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
-      let locationIds = [...locData.ids]
-      if (group.code === "RES_STOR") {
-        const mapped = new Set<string>()
-        for (const id of locationIds) {
-          const gnis = RESERVOIR_CALSIM_TO_GNISIDLABEL[id]
-          if (gnis) mapped.add(gnis)
-        }
-        locationIds = [...mapped]
-      }
-
-      schedule.push({
-        code: group.code,
-        geometryType: config.geometryType as
-          | "polygon"
-          | "line"
-          | "react-marker",
-        mapboxLayerId: config.mapboxLayerId,
-        idProperty: config.idProperty ?? "",
-        fadeStart,
-        morphStart,
-        locationIds,
-      })
-    }
-    hideScheduleRef.current = schedule
-  }, [activeOutcomeGroups, outcomeLocations])
-
-  const lockedHeightsRef = useRef<Map<string, number>>(new Map())
-
-  const describeLocations = useCallback(
-    (code: string, count: number): string => {
-      switch (code) {
-        case "ENV_FLOWS":
-          return `${count} river & tributary reaches`
-        case "RES_STOR":
-          return `${count} major California reservoirs`
-        case "DELTA_ECO":
-          return "Sacramento-San Joaquin Delta"
-        case "FW_EXP":
-          return "Banks & Jones Pumping Plants"
-        case "FW_DELTA_USES":
-          return "Emmaton & Jersey Point"
-        case "WRC_SALMON_AB":
-          return "population health along the Sacramento"
-        default:
-          return `${count} locations`
-      }
-    },
-    [],
-  )
-
-  const outcomeLayout = useMemo(() => {
-    if (!panelSize) return null
-    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
-    // Estimate the per-column inner width so the distribution height
-    // heuristic uses a realistic number of columns. The precise width is
-    // measured from the DOM later. This is only used to decide row count.
-    const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
-
-    // Left column renders in this explicit order (AG_REV before CWS_DEL).
-    // Don't touch OUTCOME_CODE_ORDER globally, since radar axes and
-    // NOD/SOD helpers depend on that list. So we just prepend the
-    // left-column codes in their desired order and iterate the rest of
-    // OUTCOME_CODE_ORDER after.
-    const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
-    const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
-    const orderedCodes: string[] = [
-      ...LEFT_COLUMN_ORDER,
-      ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
-    ]
-
-    // Eyebrow labels fade in alongside the right-panel backdrop, sharing
-    // its onset. The fade width is applied by the narration frame handler.
-    const EYEBROW_FADE_IN = BACKDROP_FADE_IN_PROGRESS
-    const eyebrows = [
-      {
-        label: "Consumptive uses",
-        x: 0,
-        y: 0,
-        columnWidth: approxColWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-      {
-        label: "Non-consumptive uses",
-        x: 0,
-        y: 0,
-        columnWidth: approxColWidth,
-        animationStart: EYEBROW_FADE_IN,
-      },
-    ]
-
-    const items: OutcomeLayoutItem[] = []
-
-    for (let idx = 0; idx < orderedCodes.length; idx++) {
-      const code = orderedCodes[idx]! as (typeof OUTCOME_CODE_ORDER)[number]
-      const label = getOutcomeName(code)
-      const isActive = ACTIVE_OUTCOMES.has(code)
-      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
-
-      let locationCount = 0
-      let targetHeight = 0
-
-      if (isActive) {
-        const group = outcomeGroups.find((g) => g.code === code)
-        if (group && group.polygons.length > 0) {
-          locationCount = group.polygons.length
-          const freshHeight = computeDistributionHeight(
-            group.polygons,
-            sqPerRow,
-            approxColWidth,
-          )
-          const locked = lockedHeightsRef.current.get(code)
-          const distributionHeight =
-            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
-          lockedHeightsRef.current.set(code, distributionHeight)
-          const SQUARE_GAP_PX = 6
-          targetHeight = Math.max(0, distributionHeight - SQUARE_GAP_PX)
-        }
-      }
-
-      items.push({
-        code,
-        label,
-        column: col,
-        columnWidth: approxColWidth,
-        isActive,
-        locationCount,
-        targetHeight,
-        locationDescription: describeLocations(code, locationCount),
-      })
-    }
-
-    return { items, eyebrows }
-  }, [
+  /* Project outcome geometry into panel-relative screen polygons.
+   * Owns panelSize and the screen-polygon map. Nav and the camera fly
+   * trigger a fresh collect through `computePolygonDataRef`. */
+  const {
     panelSize,
-    outcomeGroups,
-    theme.scenarios.tierGrid.squaresPerRow,
-    describeLocations,
-  ])
+    allScreenPolygons,
+    computePolygonDataRef,
+    applyPanelOffsetRef,
+  } = useScreenPolygonProjection({
+    panelRef,
+    isLoading,
+    panelInView,
+    centroids,
+    allLocationIds,
+    outcomeLocations,
+    outcomeDisplayOrder: OUTCOME_DISPLAY_ORDER,
+    mapAPI,
+    geoCentroidsRef,
+  })
 
-  /** DOM-measured glyph placeholder rects (relative to the right-column root
-   *  in BeatTextOverlay, which is absolutely positioned at `right: 0` with
-   *  `width: 33.33%`, i.e. its left edge aligns with `panelWidth * 2/3`).
-   *  Populated via `onGlyphLayoutChange` from BeatTextOverlay's
-   *  ResizeObserver. Empty on first render (outcomes are invisible in Beat 1
-   *  anyway, so the missing positions only become visible once measured). */
-  const [glyphLayout, setGlyphLayout] = useState<Record<string, GlyphRect>>({})
+  /* Detect panel visibility and fly the camera home on first arrival,
+   * then prime the map session (collect polygons, baseline the
+   * demand-units palette). */
+  useStoryboardCamera({
+    panelRef,
+    panelInView,
+    setPanelInView,
+    isLoading,
+    mapAPI,
+    home: { center: CAM_CENTER, zoom: CAM_ZOOM },
+    computePolygonDataRef,
+    applyPanelOffsetRef,
+    polygonsAllowedRef,
+    animPolygonLayers: ANIM_POLYGON_LAYERS,
+  })
 
-  const handleGlyphLayoutChange = useCallback(
-    (layout: Record<string, GlyphRect>) => {
-      setGlyphLayout((prev) => {
-        // Shallow-compare to avoid redundant state updates (ResizeObserver
-        // can fire frequently, and identical rects should skip re-render).
-        const prevKeys = Object.keys(prev)
-        const nextKeys = Object.keys(layout)
-        if (prevKeys.length === nextKeys.length) {
-          let same = true
-          for (const k of nextKeys) {
-            const a = prev[k]
-            const b = layout[k]!
-            if (
-              !a ||
-              a.x !== b.x ||
-              a.y !== b.y ||
-              a.width !== b.width ||
-              a.height !== b.height
-            ) {
-              same = false
-              break
-            }
-          }
-          if (same) return prev
-        }
-        return layout
-      })
-    },
-    [],
-  )
-
-  const distributionPositionMap = useMemo(() => {
-    const map: Record<
-      string,
-      { x: number; y: number; maxWidth: number; slotHeight: number }
-    > = {}
-    if (!outcomeLayout) return map
-    for (const item of outcomeLayout.items) {
-      if (!item.isActive || item.targetHeight <= 0) continue
-      const g = glyphLayout[item.code]
-      if (!g) continue
-      map[item.code] = {
-        x: g.x,
-        y: g.y,
-        maxWidth: g.width,
-        slotHeight: g.height,
-      }
-    }
-    return map
-  }, [outcomeLayout, glyphLayout])
+  /* Build the Beat 2 grid layout from the screen polygons.
+   * Owns the morph windows, two-column glyph layout, and the feature
+   * hide schedule the engine reads via `hideScheduleRef`. */
+  const {
+    activeOutcomeGroups,
+    locationNameMap,
+    locationNameMapRef,
+    outcomeMorphWindows,
+    outcomeLayout,
+    handleGlyphLayoutChange,
+    distributionPositionMap,
+  } = useStoryboardLayout({
+    allScreenPolygons,
+    outcomeLocations,
+    tierOverrides,
+    panelSize,
+    outcomeDisplayOrder: OUTCOME_DISPLAY_ORDER,
+    activeOutcomes: ACTIVE_OUTCOMES,
+    hideScheduleRef,
+  })
 
   /* Error state */
   if (error) {
@@ -2533,8 +1715,6 @@ export default function TierAnimationSection() {
       </Box>
     )
   }
-
-  const forestBg = theme.palette.nature.forest
 
   return (
     <Box
@@ -2563,9 +1743,6 @@ export default function TierAnimationSection() {
         </Box>
       ) : (
         <>
-          {/* Background cover */}
-          <MapFade opacity={mapOpacity} color={forestBg} />
-
           {/* Outcome polygon morph overlay: active during Beat 2 */}
           {activeOutcomeGroups.length > 0 && panelSize && (
             <motion.div
@@ -2660,28 +1837,5 @@ export default function TierAnimationSection() {
         </>
       )}
     </Box>
-  )
-}
-
-function MapFade({
-  opacity,
-  color,
-}: {
-  opacity: MotionValue<number>
-  color: string
-}) {
-  const fadeOpacity = useTransform(opacity, (v) => 1 - v)
-
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        inset: 0,
-        backgroundColor: color,
-        opacity: fadeOpacity,
-        pointerEvents: "none",
-        zIndex: 1,
-      }}
-    />
   )
 }

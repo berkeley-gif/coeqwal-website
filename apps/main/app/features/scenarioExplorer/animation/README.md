@@ -8,7 +8,7 @@ The "Visualizing key outcomes" click-through animation on the Get-started tab. I
 
 ## Mental model
 
-There is one shared clock, a `progress` value that runs from 0 to 1 across the whole animation. Clicking Next or Back animates that clock toward the next or previous checkpoint in [0, 1]. An engine (`BeatEngine`, in `engine/BeatEngine.ts`) watches the clock and, on every frame, decides which small units of choreography (actors) are currently active and tells the corresponding handler (arbiter) to do its work. The handlers paint the map and drive the overlays. The `TierAnimationSection` component does not animate anything directly. It builds what the data the engine needs and composes the pieces.
+There is one shared clock, a `progress` value that runs from 0 to 1 across the whole animation (a Framer `MotionValue` created in `TierAnimationSection`). Clicking Next or Back animates that clock toward the next or previous checkpoint in [0, 1]. An engine (`BeatEngine`, in `engine/BeatEngine.ts`) watches the clock and, on every frame, decides which small units of choreography (actors, for example "fade in this region's fill" or "show this popup") are currently active and tells the corresponding handler (arbiter, for example `MapPaintArbiter`, `MapPopupArbiter`, `CameraArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`) to do its thing. The handlers paint the map and drive the overlays. The `TierAnimationSection` component does not animate anything directly. It builds the data the engine needs and composes the pieces.
 
 ## Architecture
 
@@ -85,6 +85,24 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      Mapbox layers                    shared app map via @repo/map
 ```
 
+## TierAnimationSection
+
+The component is long because it wires many pieces together, but it reads top to bottom in this order:
+
+**state → navigation → selection → engine → render**
+
+- **state**: the `progress` clock, the beat cursor, play state, and the loaded tier data.
+- **navigation**: the Play / Next / Back / Restart handlers and keyboard shortcuts that move the `progress` clock between beats.
+- **selection**: interactive hover, pinning, and spotlighting once the storyboard has settled on the final beat.
+- **engine**: the `BeatEngineContext`, the arbiters array, and the `useBeatEngine` call that subscribes to `progress`.
+- **render**: the overlays (`BeatTextOverlay`, `OutcomeMorphOverlay`) over the shared map.
+
+Related code is pulled into `hooks/`:
+
+- `useScreenPolygonProjection` projects outcome geometry from Mapbox into panel-relative screen polygons and keeps them in sync on map move, scroll, and resize.
+- `useStoryboardLayout` turns those screen polygons into the Beat 2 grid layout, the morph windows, and the per-outcome feature hide schedule the engine reads.
+- `useStoryboardCamera` detects when the panel scrolls into view, flies the camera home, and primes the map session.
+
 ## What is an actor?
 
 An actor is the smallest unit of the storyboard. It is plain data, not code. It describes one thing that should happen over one slice of the timeline. Every actor has four parts.
@@ -144,6 +162,9 @@ If you want to change the storyboard, these are the files to start from.
 | How an effect is carried out | the arbiter for that `kind` | [engine/arbiters/](engine/arbiters/) |
 | The dispatch loop (enter, update, exit) | `BeatEngine` | [engine/BeatEngine.ts](engine/BeatEngine.ts) |
 | Wiring, navigation, and engine context | `TierAnimationSection` | [TierAnimationSection.tsx](TierAnimationSection.tsx) |
+| Projecting outcome geometry to screen polygons | `useScreenPolygonProjection` | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
+| The Beat 2 grid layout and feature hide schedule | `useStoryboardLayout` | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts) |
+| Panel-in-view detection and camera fly-home | `useStoryboardCamera` | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts) |
 | Narration copy and intro timing | `NARRATION_BY_BEAT`, intro constants | [Narration.tsx](Narration.tsx) |
 | Storyboard navigation buttons | `StoryboardControls` | [StoryboardControls.tsx](StoryboardControls.tsx) |
 | Per-frame label geometry (titles, captions, radar and heatmap labels) | `useOutcomeLabelGeometry` | [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts) |

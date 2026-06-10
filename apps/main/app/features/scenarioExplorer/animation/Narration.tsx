@@ -1,5 +1,11 @@
 "use client"
 
+/* Narration: the storyboard's left column
+ *
+ * The page title, pre-play gate, per-beat prose, and the control row.
+ * Edit narration copy and intro timing here. Rendered by BeatTextOverlay.
+ */
+
 import { useRef, useEffect } from "react"
 import {
   Box,

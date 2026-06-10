@@ -1,5 +1,12 @@
 "use client"
 
+/* OutcomeMorphOverlay: the SVG morph layer
+ *
+ * The SVG over the map that morphs outcome polygons into distribution
+ * squares, then bars, dots, and heatmap cells. Runs per frame through
+ * the overlay-morph bridge. See "The bridge actors" in README.md.
+ */
+
 import {
   useRef,
   useEffect,

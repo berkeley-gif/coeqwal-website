@@ -1,5 +1,11 @@
 "use client"
 
+/* StoryboardControls: the Back, count, Next, Restart row
+ *
+ * The navigation buttons under the narration. Calls the handlers
+ * TierAnimationSection passes down. Hidden under reduced motion.
+ */
+
 import {
   Typography,
   useTheme,

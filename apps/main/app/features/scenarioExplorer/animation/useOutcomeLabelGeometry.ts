@@ -1,5 +1,13 @@
 "use client"
 
+/* Per-frame label geometry for the right column
+ *
+ * The narration-side math BeatTextOverlay mounts: it positions outcome
+ * titles, captions, the radar and heatmap axis labels, and the column
+ * eyebrows as `progress` advances, and syncs the white backdrop height.
+ * Runs through the narration bridge. See "The bridge actors" in README.md.
+ */
+
 import { useRef, useEffect, useLayoutEffect, type RefObject } from "react"
 import { useTheme } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
