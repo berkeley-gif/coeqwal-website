@@ -353,7 +353,6 @@ export default function Narration({
                   rowGap: 1,
                   alignItems: "center",
                   "& .MuiTypography-root": {
-                    fontSize: theme.typography.body2.fontSize,
                     lineHeight: 1.25,
                   },
                 }}
@@ -419,10 +418,10 @@ export default function Narration({
                       }}
                     >
                       <Typography
-                        variant="body2"
+                        variant="subtitle2"
                         component="span"
                         sx={{
-                          fontWeight: 500,
+                          fontWeight: 400,
                           textShadow: "none",
                           whiteSpace: "nowrap",
                         }}
@@ -430,7 +429,11 @@ export default function Narration({
                         {label}
                       </Typography>
                     </Box>
-                    <Typography variant="body2" component="span">
+                    <Typography
+                      variant="subtitle2"
+                      component="span"
+                      sx={{ fontWeight: 400 }}
+                    >
                       {description}
                     </Typography>
                   </Box>

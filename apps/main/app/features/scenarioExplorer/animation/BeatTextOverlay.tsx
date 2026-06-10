@@ -79,7 +79,6 @@ interface BeatTextOverlayProps {
    *  narration body scroll so the end-state content stays reachable. */
   hideControls?: boolean
   beat2Layout?: Beat2Layout | null
-  onOutcomeClick?: (code: string, force?: boolean) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
   textHidden?: boolean
@@ -113,7 +112,6 @@ export default function BeatTextOverlay({
   onBack,
   onRestart,
   beat2Layout,
-  onOutcomeClick,
   selectedOutcomeCode,
   interactive,
   textHidden = false,
@@ -205,7 +203,10 @@ export default function BeatTextOverlay({
           backgroundColor: alpha(theme.palette.common.white, 0.75),
           borderRadius: 2,
           opacity: 0,
-          pointerEvents: "none",
+          // Solid to pointer events while interactive so that, when the
+          // storyboard region lets events fall through to the map, dragging
+          // on the panel doesn't pan the map behind it.
+          pointerEvents: interactive ? "auto" : "none",
         }}
       />
 
@@ -343,15 +344,9 @@ export default function BeatTextOverlay({
                             ref={(el: HTMLDivElement | null) => {
                               titleRefsMap.current.set(item.code, el)
                             }}
-                            onClick={
-                              interactive
-                                ? () => onOutcomeClick?.(item.code, true)
-                                : undefined
-                            }
                             sx={{
                               opacity: 0,
-                              pointerEvents: interactive ? "auto" : "none",
-                              cursor: interactive ? "pointer" : "default",
+                              pointerEvents: "none",
                               borderRadius: 1,
                               px: 0.5,
                               mx: -0.5,
@@ -360,11 +355,6 @@ export default function BeatTextOverlay({
                               boxSizing: "border-box",
                               overflow: "hidden",
                               transition: "color 0.15s",
-                              ...(interactive && {
-                                "&:hover .MuiTypography-root": {
-                                  color: theme.palette.blue.bright,
-                                },
-                              }),
                             }}
                           >
                             <Typography

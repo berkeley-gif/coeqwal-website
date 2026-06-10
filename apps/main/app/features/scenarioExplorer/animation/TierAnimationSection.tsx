@@ -29,7 +29,10 @@ import {
 } from "../../map/config/outcomeLayerRegistry"
 import { resolveOutcomeCamera } from "../../map/config/resolveOutcomeCamera"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
-import { useTierAnimationData } from "./useTierAnimationData"
+import {
+  useTierAnimationData,
+  useOutcomeTierOverrides,
+} from "./useTierAnimationData"
 import type { OutcomeLocationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type LocationInfo,
@@ -70,6 +73,16 @@ import {
 
 const STORYBOARD_CONTENT_OVERFLOW_PX = 320
 
+/* Beats where the distribution squares are settled in the panel as a grid,
+ * so hovering or clicking an individual square is meaningful. The other
+ * settled beats (list-bar, radar, heatmap) display the squares as a different
+ * tool and have their own interactions, and the earlier beats still have the
+ * squares on the map, in flight, or just finishing their morph, so
+ * distribution-square hover stays off for all of those. Interactivity begins
+ * once the grid has fully settled at loi-highlight. Keyed by beat id so
+ * retuning the beat order is safe. */
+const GRID_INTERACTIVE_BEAT_IDS: readonly string[] = ["loi-highlight"]
+
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
@@ -103,8 +116,6 @@ const ANIM_POLYGON_LAYERS = [
   { fill: "california-reservoir", outline: "california-reservoir-outline" },
   { fill: "delta-detaw", outline: "delta-detaw-outline" },
 ] as const
-
-const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
 
 /** Curated list of well-known agricultural water districts used to
  *  illustrate what a single polygon represents. Each popup
@@ -219,9 +230,76 @@ export default function TierAnimationSection() {
 
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
+  // The climate scenario backing the current selection. Bar and radar clicks
+  // select the base scenario (s0020). Heatmap cells can select a climate
+  // variant column (cc50/cc95), which paints that climate's tiers on the map.
+  const selectedScenarioId = activeVisualization?.scenarioId ?? "s0020"
 
-  // Interactive-UI gate. "finished" lights up
-  const isInteractive = playState === "finished" || playState === "paused"
+  // General interactive gate for the location-highlight pipeline, the map
+  // hover/click wiring, and the overlay structure. Active on the final settled
+  // beat and on the grid beats. Off on the other paused beats and during
+  // playback so nothing responds while the storyboard is still moving.
+  const onGridBeat = GRID_INTERACTIVE_BEAT_IDS.includes(
+    TIMING_BEATS[beatIndex]?.id ?? "",
+  )
+  const isInteractive =
+    playState === "finished" || (playState === "paused" && onGridBeat)
+
+  // Per-square hover/click is only meaningful on the grid beats, where the
+  // squares are settled as a distribution grid. On the final beat and the
+  // bar/radar/heatmap beats the same shapes are reshaped into a chart, so
+  // square hover would fire stray popups over the chart area.
+  const squareHoverEnabled = playState === "paused" && onGridBeat
+
+  // Map-polygon hover mirrors square hover on the grid beats. The
+  // demand-units layer is only painted on the loi-highlight beat, so that is
+  // the only grid beat with polygons on the map to hover. Attribute those
+  // hovers to AG_REV (the demand-units outcome) when nothing is explicitly
+  // selected, so they flow through the same shared hover state as squares.
+  const onLoiBeat = TIMING_BEATS[beatIndex]?.id === "loi-highlight"
+  // The hydroclimate matrix is a tool view: clicking a cell paints the map,
+  // but map-polygon hover stays off so the matrix reads as the only control.
+  const onHeatmapBeat = TIMING_BEATS[beatIndex]?.id === "heatmap"
+  const mapHoverCode = onHeatmapBeat
+    ? null
+    : (selectedOutcomeCode ?? (onLoiBeat ? "AG_REV" : null))
+
+  // On the bar-chart beat, clicking an outcome's chart glyph paints that
+  // outcome's layer on the map. This is a separate gate from the grid hover
+  // because the bars are not per-square hit targets, the whole glyph selects
+  // its outcome. Off everywhere else so the glyphs stay display-only.
+  const onBarBeat = TIMING_BEATS[beatIndex]?.id === "list-bar"
+  const outcomeGlyphClickEnabled = playState === "paused" && onBarBeat
+
+  // On the radar beat, clicking an outcome's vertex dot paints that outcome's
+  // layer on the map, same destination as the bar glyph. The radar collapses
+  // every outcome into one shared chart, so the hit targets are the per-vertex
+  // dots rather than the per-outcome bounds rects.
+  const onRadarBeat = TIMING_BEATS[beatIndex]?.id === "radar"
+  const radarDotClickEnabled = playState === "paused" && onRadarBeat
+
+  // On the heatmap beat (the final, settled beat), clicking a matrix cell
+  // paints its outcome under that cell's climate-column scenario.
+  const heatmapCellClickEnabled = playState === "finished" && onHeatmapBeat
+
+  // Any chart selection path is active (bar glyph, radar dot, or heatmap
+  // cell). All paint an outcome layer on the map. The heatmap routes through
+  // its own handler because it also carries the column's climate scenario.
+  const outcomeSelectEnabled =
+    outcomeGlyphClickEnabled || radarDotClickEnabled || heatmapCellClickEnabled
+
+  // On the settled-grid beats, let unpinned (hover) highlights render as map
+  // popups and let pointer events reach the map behind the storyboard, so the
+  // user can pan, zoom, and hover map polygons. Both are off elsewhere so
+  // hover stays quiet and the storyboard keeps its scripted camera.
+  useEffect(() => {
+    mapActions.setShowHoverHighlightsOnMap(squareHoverEnabled)
+    mapActions.setStoryboardMapInteractive(squareHoverEnabled)
+    return () => {
+      mapActions.setShowHoverHighlightsOnMap(false)
+      mapActions.setStoryboardMapInteractive(false)
+    }
+  }, [squareHoverEnabled])
 
   /* Encoding mode: distribution | bar | average */
   const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
@@ -272,16 +350,30 @@ export default function TierAnimationSection() {
   const heatmapExtraColumns = useMemo(() => {
     const cols: Array<{
       label: string
+      scenarioId: string
       tierChartData?: typeof cc50ChartData
     }> = []
     if (cc50VariantId) {
-      cols.push({ label: "Moderate risk", tierChartData: cc50ChartData })
+      cols.push({
+        label: "Moderate risk",
+        scenarioId: cc50VariantId,
+        tierChartData: cc50ChartData,
+      })
     }
     if (cc95VariantId) {
-      cols.push({ label: "High risk", tierChartData: cc95ChartData })
+      cols.push({
+        label: "High risk",
+        scenarioId: cc95VariantId,
+        tierChartData: cc95ChartData,
+      })
     }
     return cols
   }, [cc50VariantId, cc95VariantId, cc50ChartData, cc95ChartData])
+
+  // Per-location tier levels for the selected climate variant. Returns {} on
+  // the base scenario (s0020), so the painter falls through to the base
+  // `outcomeLocations` everywhere except a selected cc50/cc95 heatmap cell.
+  const climateOverrides = useOutcomeTierOverrides(selectedScenarioId)
 
   useEffect(() => {
     if (encodingMode !== "bar") setSpotlightedTier(null)
@@ -354,16 +446,6 @@ export default function TierAnimationSection() {
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
 
-        // Commented out: previous multi-pin toggle behavior. Re-enable
-        // if we ever want several pinned locations with tethered
-        // popups again.
-        // setPinnedLocations((prev) => {
-        //   const next = new Map(prev)
-        //   if (next.has(key)) next.delete(key)
-        //   else next.set(key, info)
-        //   return next
-        // })
-
         // Determine the current outcome of the pinned selection (if any)
         // so we can detect cross-outcome switches. We look at the first
         // entry because sticky single-select holds at most one pin.
@@ -420,6 +502,65 @@ export default function TierAnimationSection() {
     [locKey, resolvedScenarioId, mapAPI],
   )
 
+  // Fly the camera to an outcome's region, matching the square-click camera
+  // (see `locHandlers.onClick`). Shared by the bar-glyph click below.
+  const flyToOutcome = useCallback(
+    (code: string) => {
+      const action = resolveOutcomeCamera(code, "get-started")
+      mapAPI.withMap((mapRef) => {
+        if (action.type === "fitBounds") {
+          mapRef.fitBounds(action.bounds, {
+            padding: action.padding,
+            maxZoom: action.maxZoom,
+            duration: action.duration,
+          })
+        } else {
+          mapRef.getMap().easeTo({
+            center: action.center,
+            zoom: action.zoom,
+            padding: action.padding,
+            duration: action.duration,
+          })
+        }
+      })
+    },
+    [mapAPI],
+  )
+
+  // Clicking an outcome's bar glyph paints that outcome's layer on the map
+  // and flies the camera to its region. Clicking the same outcome again
+  // clears the layer. The painter (InteractivePaintArbiter via
+  // useInteractivePaint) owns the demand-units layer whenever an outcome is
+  // selected and the storyboard is paused, so this works on the bar beat
+  // without flipping the broader interactive gate.
+  const handleOutcomeGlyphClick = useCallback(
+    (code: string) => {
+      if (selectedOutcomeCode === code) {
+        mapActions.clearOutcomeVisualization()
+        return
+      }
+      mapActions.setOutcomeVisualization(code, resolvedScenarioId)
+      flyToOutcome(code)
+    },
+    [selectedOutcomeCode, resolvedScenarioId, flyToOutcome],
+  )
+
+  // Clicking a heatmap matrix cell paints that outcome under the cell's
+  // climate-column scenario and flies to its region. The selected scenario
+  // drives `climateOverrides`, so the map shows that climate's tiers. Clicking
+  // the same outcome + column again clears the layer.
+  const handleHeatmapCellClick = useCallback(
+    (code: string, scenarioId: string) => {
+      if (selectedOutcomeCode === code && selectedScenarioId === scenarioId) {
+        mapActions.clearOutcomeVisualization()
+        return
+      }
+      mapActions.setOutcomeVisualization(code, scenarioId)
+      flyToOutcome(code)
+    },
+    [selectedOutcomeCode, selectedScenarioId, flyToOutcome],
+  )
+
   const activeLocationSet = useMemo(() => {
     const set = new Map(pinnedLocations)
     if (hoveredLocation) {
@@ -460,11 +601,6 @@ export default function TierAnimationSection() {
     // hover tooltip (from the previous outcome) surviving into the new
     // outcome's view.
     setHoveredLocation(null)
-
-    // NOTE: pinnedCacheRef (stash/restore per-outcome pins) was used by
-    // the older multi-pin + outcome-title-click flow. It is intentionally
-    // not read or written here any more. A cross-outcome click replaces
-    // the pin outright rather than reviving a cached selection.
   }, [selectedOutcomeCode])
 
   const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
@@ -492,6 +628,17 @@ export default function TierAnimationSection() {
     interactiveOutlineArbiterRef.current = new InteractiveOutlineArbiter()
   }
 
+  // Tracks whether the interactive hover (square or map polygon) wrote the
+  // current map popups. On the loi-highlight beat the engine places the
+  // scripted Glenn Colusa popup on arrival, so we only clear popups we placed
+  // and leave the scripted one untouched until the user actually hovers.
+  const wroteInteractiveHighlightsRef = useRef(false)
+  useEffect(() => {
+    // Reset on every beat change so a stale flag from a prior visit can't make
+    // us wipe the scripted popup the moment we land on the beat.
+    wroteInteractiveHighlightsRef.current = false
+  }, [beatIndex])
+
   /* Location highlights (popup data, not paint)
    *
    * Builds the `LocationHighlight[]` the map popups read from coordinates,
@@ -500,13 +647,14 @@ export default function TierAnimationSection() {
   useEffect(() => {
     if (!isInteractive) return
 
-    const config = selectedOutcomeCode
-      ? getOutcomeConfig(selectedOutcomeCode)
-      : null
-
-    if (!config) {
-      if (playState !== "finished") return
-      if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
+    if (activeLocationSet.size === 0) {
+      // Nothing hovered or pinned. Clear our interactive popups, but only the
+      // ones we wrote, so the scripted loi-highlight popup survives until the
+      // user hovers something.
+      if (playState === "finished" || wroteInteractiveHighlightsRef.current) {
+        mapActions.clearLocationHighlights()
+        wroteInteractiveHighlightsRef.current = false
+      }
       return
     }
 
@@ -566,6 +714,7 @@ export default function TierAnimationSection() {
     })
 
     mapActions.setLocationHighlights(highlights)
+    if (playState !== "finished") wroteInteractiveHighlightsRef.current = true
   }, [
     isInteractive,
     playState,
@@ -613,19 +762,19 @@ export default function TierAnimationSection() {
   locHandlersRef.current = locHandlers
 
   useEffect(() => {
-    if (!isInteractive || !selectedOutcomeCode) return
+    if (!isInteractive || !mapHoverCode) return
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (!map) return
 
-    const config = getOutcomeConfig(selectedOutcomeCode)
+    const config = getOutcomeConfig(mapHoverCode)
     if (!config) return
 
-    const locData = outcomeLocationsRef.current[selectedOutcomeCode]
+    const locData = outcomeLocationsRef.current[mapHoverCode]
     if (!locData) return
 
     const layerId = config.mapboxLayerId
     const idProp = config.idProperty ?? "DU_ID"
-    const code = selectedOutcomeCode
+    const code = mapHoverCode
 
     const resolveLocId = (featureId: string): string | null => {
       let lid = featureId
@@ -703,7 +852,7 @@ export default function TierAnimationSection() {
       canvas.removeEventListener("mouseleave", onMouseLeave)
       map.getCanvas().style.cursor = ""
     }
-  }, [isInteractive, selectedOutcomeCode, mapAPI.mapRef])
+  }, [isInteractive, mapHoverCode, mapAPI.mapRef])
 
   /* Activate persistent map (no visualization set until interactive mode) */
   useEffect(() => {
@@ -760,6 +909,20 @@ export default function TierAnimationSection() {
   /* Build a Mapbox fill-color expression that assigns tier colors */
   const outcomeLocationsRef = useRef(outcomeLocations)
   outcomeLocationsRef.current = outcomeLocations
+
+  // Tier data the interactive painter uses. Same as `outcomeLocations` on the
+  // base scenario, but overlaid with the selected climate variant's tiers so
+  // a heatmap cc50/cc95 cell paints that climate's colors. Kept separate from
+  // `outcomeLocations` so the morph glyphs keep their base-scenario colors.
+  const painterOutcomeLocations = useMemo(
+    () =>
+      Object.keys(climateOverrides).length > 0
+        ? { ...outcomeLocations, ...climateOverrides }
+        : outcomeLocations,
+    [outcomeLocations, climateOverrides],
+  )
+  const painterOutcomeLocationsRef = useRef(painterOutcomeLocations)
+  painterOutcomeLocationsRef.current = painterOutcomeLocations
 
   /** Pre-compute per-DU tier color lookup (first outcome wins). */
   const tierColorLookupRef = useRef<Map<string, string>>(new Map())
@@ -918,8 +1081,8 @@ export default function TierAnimationSection() {
     selectedOutcomeCode,
     playState,
     theme,
-    outcomeLocations,
-    outcomeLocationsRef,
+    outcomeLocations: painterOutcomeLocations,
+    outcomeLocationsRef: painterOutcomeLocationsRef,
     activeLocationSet,
     pinnedLocations,
     spotlightedTier,
@@ -937,7 +1100,7 @@ export default function TierAnimationSection() {
     if (!arbiter) return
 
     const config =
-      isInteractive && selectedOutcomeCode
+      (isInteractive || outcomeSelectEnabled) && selectedOutcomeCode
         ? getOutcomeConfig(selectedOutcomeCode)
         : null
     const isNonDuPolygon =
@@ -1001,6 +1164,7 @@ export default function TierAnimationSection() {
   }, [
     engineContext,
     isInteractive,
+    outcomeSelectEnabled,
     selectedOutcomeCode,
     activeLocationSet,
     pinnedLocations,
@@ -1019,10 +1183,6 @@ export default function TierAnimationSection() {
           if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
           if (map.getLayer(outline))
             map.setPaintProperty(outline, "line-opacity", 0)
-        }
-        for (const lineLayer of ANIM_LINE_LAYERS) {
-          if (map.getLayer(lineLayer))
-            map.setPaintProperty(lineLayer, "line-opacity", 1)
         }
       } catch {
         /* ok */
@@ -1056,6 +1216,11 @@ export default function TierAnimationSection() {
     outcomeDisplayOrder: OUTCOME_DISPLAY_ORDER,
     mapAPI,
     geoCentroidsRef,
+    // Squares track the map only during active playback (where they may be
+    // mid-morph) or before the morph settles. Once paused or finished on the
+    // settled grid and chart beats, they sit at fixed panel positions, so the
+    // camera can fly on a glyph click without a per-frame overlay re-render.
+    reprojectOnMove: playState === "playing" || beatIndex < 3,
   })
 
   /* Detect panel visibility and fly the camera home on first arrival,
@@ -1110,7 +1275,6 @@ export default function TierAnimationSection() {
       mapAPI,
       cameraArbiter: CAMERA_ARBITER,
       animPolygonLayers: ANIM_POLYGON_LAYERS,
-      animLineLayers: ANIM_LINE_LAYERS,
       controlsRef,
       setBeatIndex,
       beatIndexRef,
@@ -1190,14 +1354,32 @@ export default function TierAnimationSection() {
                 overlayMorphTickRef={overlayMorphTickRef}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
                 distributionPositionMap={distributionPositionMap}
-                // Click-to-show-outcome-layer is intentionally disabled: the
-                // layer is now driven by clicking a distribution square
-                // (see `locHandlers.onClick`), so outcome titles are
-                // display-only. `handleOutcomeClick` is still defined but no
-                // longer wired up here.
-                onOutcomeClick={undefined}
-                selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
+                // On the bar and radar beats, clicking an outcome's glyph or
+                // vertex dot paints its layer on the map (see
+                // `handleOutcomeGlyphClick`). On the grid and final beats the
+                // layer is driven by clicking a distribution square instead
+                // (see `locHandlers.onClick`), so chart selection stays off
+                // there.
+                onOutcomeClick={
+                  outcomeGlyphClickEnabled || radarDotClickEnabled
+                    ? handleOutcomeGlyphClick
+                    : undefined
+                }
+                outcomeGlyphClickEnabled={outcomeGlyphClickEnabled}
+                radarDotClickEnabled={radarDotClickEnabled}
+                heatmapCellClickEnabled={heatmapCellClickEnabled}
+                heatmapPrimaryScenarioId={resolvedScenarioId}
+                selectedScenarioId={selectedScenarioId}
+                onHeatmapCellClick={
+                  heatmapCellClickEnabled ? handleHeatmapCellClick : undefined
+                }
+                selectedOutcomeCode={
+                  isInteractive || outcomeSelectEnabled
+                    ? selectedOutcomeCode
+                    : null
+                }
                 interactive={isInteractive}
+                squareHoverEnabled={squareHoverEnabled}
                 activeLocationSet={
                   isInteractive ? activeLocationSet : undefined
                 }
@@ -1246,9 +1428,6 @@ export default function TierAnimationSection() {
             onBack={handleBack}
             onRestart={handleRestart}
             beat2Layout={outcomeLayout}
-            // Outcome-title clicks no longer drive layer visibility. See the
-            // matching comment above on OutcomeMorphOverlay.
-            onOutcomeClick={undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
             interactive={isInteractive}
             textHidden={!textVisible}

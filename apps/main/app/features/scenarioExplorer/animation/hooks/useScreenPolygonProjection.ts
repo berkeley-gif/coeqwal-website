@@ -57,6 +57,12 @@ interface ProjectionParams {
   /** Geographic centroids per feature, written here and read by the
    *  interactive-selection code in the parent (popup lookups). */
   geoCentroidsRef: React.RefObject<Map<string, { lng: number; lat: number }>>
+  /** Re-project the squares on every map move frame. Needed only while the
+   *  squares track the map (active playback, or before the morph settles).
+   *  Once the storyboard is paused or finished on a settled grid or chart
+   *  beat, the squares sit at fixed panel-relative positions, so the camera
+   *  can fly without forcing a per-frame projection and overlay re-render. */
+  reprojectOnMove: boolean
 }
 
 interface ProjectionResult {
@@ -84,6 +90,7 @@ export function useScreenPolygonProjection({
   outcomeDisplayOrder,
   mapAPI,
   geoCentroidsRef,
+  reprojectOnMove,
 }: ProjectionParams): ProjectionResult {
   const [panelSize, setPanelSize] = useState<{
     width: number
@@ -502,6 +509,8 @@ export function useScreenPolygonProjection({
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (!map) return
 
+    if (!reprojectOnMove) return
+
     let rafId: number | null = null
     const onMove = () => {
       if (rafId !== null) return
@@ -516,7 +525,7 @@ export function useScreenPolygonProjection({
       map.off("move", onMove)
       if (rafId !== null) cancelAnimationFrame(rafId)
     }
-  }, [panelInView, mapAPI.mapRef])
+  }, [panelInView, mapAPI.mapRef, reprojectOnMove])
 
   return {
     panelSize,

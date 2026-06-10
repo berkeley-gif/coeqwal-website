@@ -6,7 +6,6 @@
  * back when the selection clears.
  */
 
-import type { MapboxGLMap } from "@repo/map"
 import type {
   BeatEngineContext,
   DemandUnitsPaintSpec,
@@ -15,11 +14,14 @@ import type {
 import {
   writeDemandUnitsBaseline,
   DU_CLASS_FILTER,
-  type BaselineMap,
+  type MapWriteView,
 } from "../demandUnitsBaseline"
 import { BLUE_MID } from "../bluePalette"
 import {
   ZOOM_AWARE_BASE_OPACITY,
+  OUTCOME_FILL_OPACITY,
+  OUTCOME_OUTLINE_WIDTH,
+  OUTCOME_OUTLINE_OFFSET,
   buildActiveOutlineExpr,
   buildFillOpacityExpr,
 } from "../../demandUnitsPaint"
@@ -41,49 +43,13 @@ const FADE_IN_DURATION = 350
 /** Crossfade duration (ms) when swapping between DU outcomes. */
 const COLOR_TRANSITION_DURATION = 400
 
-/** Fill-opacity the initial fade-in lands on, matching the outcome
- *  polygon layer. Interpolated across zoom 5 to 10. */
-const FADE_IN_FILL_OPACITY: unknown = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  5,
-  0.75,
-  8,
-  0.55,
-  10,
-  0.35,
-]
-
-/** Outline width during fade-in, matching the outcome polygon layer. */
-const OUTLINE_LINE_WIDTH: unknown = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  5,
-  0.5,
-  7,
-  1,
-  9,
-  2,
-  11,
-  3,
-]
-
-/** Outline offset during fade-in, matching the outcome polygon layer. */
-const OUTLINE_LINE_OFFSET: unknown = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  5,
-  -0.25,
-  7,
-  -0.5,
-  9,
-  -1,
-  11,
-  -1.5,
-]
+/** The exit teardown also needs Mapbox's style-load probe and one-shot
+ *  idle listener, which the permissive write view omits. */
+type InteractiveExitMap = MapWriteView & {
+  isStyleLoaded: () => boolean
+  once: (event: string, cb: () => void) => void
+  off?: (event: string, cb: () => void) => void
+}
 
 //────
 // Helpers
@@ -172,7 +138,7 @@ export class InteractivePaintArbiter {
     if (!this.currentlyOwns || !this.currentSpec) return
     if (overlay.outcomeCode !== this.currentSpec.outcomeCode) return
 
-    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
+    const map = this.getWriteMap(ctx)
     if (!map) return
 
     const spec = this.currentSpec
@@ -187,37 +153,25 @@ export class InteractivePaintArbiter {
             idProp,
             spec.colorExpression,
           )
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-color",
-            lineColor as never,
-          )
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-width",
-            lineWidth as never,
-          )
+          map.setPaintProperty("demand-units-outline", "line-color", lineColor)
+          map.setPaintProperty("demand-units-outline", "line-width", lineWidth)
           map.setPaintProperty(
             "demand-units-outline",
             "line-opacity",
-            lineOpacity as never,
+            lineOpacity,
           )
         } else {
           map.setPaintProperty(
             "demand-units-outline",
             "line-color",
-            spec.colorExpression as never,
+            spec.colorExpression,
           )
           map.setPaintProperty(
             "demand-units-outline",
             "line-width",
-            OUTLINE_LINE_WIDTH as never,
+            OUTCOME_OUTLINE_WIDTH,
           )
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-opacity",
-            1 as never,
-          )
+          map.setPaintProperty("demand-units-outline", "line-opacity", 1)
         }
       }
 
@@ -227,7 +181,7 @@ export class InteractivePaintArbiter {
       map.setPaintProperty(
         "demand-units",
         "fill-opacity",
-        buildFillOpacityExpr(overlay, idProp) as never,
+        buildFillOpacityExpr(overlay, idProp),
       )
     } catch {
       /* ok */
@@ -264,10 +218,19 @@ export class InteractivePaintArbiter {
   // Lifecycle hooks
   //────
 
+  /** The live Mapbox handle viewed through the permissive write surface.
+   *  Its setters accept `unknown`, so the dynamic Mapbox expressions this
+   *  arbiter builds type-check without per-call casts. */
+  private getWriteMap(ctx: BeatEngineContext): MapWriteView | undefined {
+    return ctx.mapRef?.current?.getMap?.() as unknown as
+      | MapWriteView
+      | undefined
+  }
+
   /** Take ownership of the `demand-units` and `demand-units-outline`
    *  layers. */
   private onEnter(ctx: BeatEngineContext, spec: DemandUnitsPaintSpec): void {
-    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
+    const map = this.getWriteMap(ctx)
     if (!map) return
     if (!map.getLayer("demand-units")) return
 
@@ -275,44 +238,36 @@ export class InteractivePaintArbiter {
 
     try {
       const filter = buildPaintFilter(spec)
-      map.setFilter("demand-units", filter as never)
-      map.setPaintProperty(
-        "demand-units",
-        "fill-color",
-        spec.colorExpression as never,
-      )
+      map.setFilter("demand-units", filter)
+      map.setPaintProperty("demand-units", "fill-color", spec.colorExpression)
       map.setPaintProperty("demand-units", "fill-opacity-transition", {
         duration: FADE_IN_DURATION,
         delay: 0,
-      } as never)
-      map.setPaintProperty("demand-units", "fill-opacity", 0 as never)
+      })
+      map.setPaintProperty("demand-units", "fill-opacity", 0)
       map.setLayoutProperty("demand-units", "visibility", "visible")
 
       if (map.getLayer("demand-units-outline")) {
-        map.setFilter("demand-units-outline", filter as never)
+        map.setFilter("demand-units-outline", filter)
         map.setPaintProperty(
           "demand-units-outline",
           "line-color",
-          spec.colorExpression as never,
+          spec.colorExpression,
         )
-        map.setPaintProperty(
-          "demand-units-outline",
-          "line-opacity-transition",
-          {
-            duration: FADE_IN_DURATION,
-            delay: 0,
-          } as never,
-        )
-        map.setPaintProperty("demand-units-outline", "line-opacity", 0 as never)
+        map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
+          duration: FADE_IN_DURATION,
+          delay: 0,
+        })
+        map.setPaintProperty("demand-units-outline", "line-opacity", 0)
         map.setPaintProperty(
           "demand-units-outline",
           "line-width",
-          OUTLINE_LINE_WIDTH as never,
+          OUTCOME_OUTLINE_WIDTH,
         )
         map.setPaintProperty(
           "demand-units-outline",
           "line-offset",
-          OUTLINE_LINE_OFFSET as never,
+          OUTCOME_OUTLINE_OFFSET,
         )
       }
     } catch {
@@ -334,14 +289,10 @@ export class InteractivePaintArbiter {
         map.setPaintProperty(
           "demand-units",
           "fill-opacity",
-          FADE_IN_FILL_OPACITY as never,
+          OUTCOME_FILL_OPACITY,
         )
         if (map.getLayer("demand-units-outline")) {
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-opacity",
-            1 as never,
-          )
+          map.setPaintProperty("demand-units-outline", "line-opacity", 1)
           map.setLayoutProperty("demand-units-outline", "visibility", "visible")
         }
       } catch {
@@ -356,7 +307,7 @@ export class InteractivePaintArbiter {
     spec: DemandUnitsPaintSpec,
     _prev: DemandUnitsPaintSpec | null,
   ): void {
-    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
+    const map = this.getWriteMap(ctx)
     if (!map || !map.getLayer("demand-units")) return
 
     this.cancelPendingFadeRaf()
@@ -367,30 +318,26 @@ export class InteractivePaintArbiter {
       this.clearOverlayToBaseForCrossfade(map, spec)
 
       const filter = buildPaintFilter(spec)
-      map.setFilter("demand-units", filter as never)
+      map.setFilter("demand-units", filter)
       if (map.getLayer("demand-units-outline")) {
-        map.setFilter("demand-units-outline", filter as never)
+        map.setFilter("demand-units-outline", filter)
       }
 
       map.setPaintProperty("demand-units", "fill-color-transition", {
         duration: COLOR_TRANSITION_DURATION,
         delay: 0,
-      } as never)
-      map.setPaintProperty(
-        "demand-units",
-        "fill-color",
-        spec.colorExpression as never,
-      )
+      })
+      map.setPaintProperty("demand-units", "fill-color", spec.colorExpression)
 
       if (map.getLayer("demand-units-outline")) {
         map.setPaintProperty("demand-units-outline", "line-color-transition", {
           duration: COLOR_TRANSITION_DURATION,
           delay: 0,
-        } as never)
+        })
         map.setPaintProperty(
           "demand-units-outline",
           "line-color",
-          spec.colorExpression as never,
+          spec.colorExpression,
         )
       }
     } catch {
@@ -399,35 +346,35 @@ export class InteractivePaintArbiter {
   }
 
   private clearOverlayToBaseForCrossfade(
-    map: MapboxGLMap,
+    map: MapWriteView,
     spec: DemandUnitsPaintSpec,
   ) {
     try {
       map.setPaintProperty("demand-units", "fill-opacity-transition", {
         duration: 0,
         delay: 0,
-      } as never)
+      })
       map.setPaintProperty(
         "demand-units",
         "fill-opacity",
-        ZOOM_AWARE_BASE_OPACITY as never,
+        ZOOM_AWARE_BASE_OPACITY,
       )
       if (map.getLayer("demand-units-outline")) {
         map.setPaintProperty("demand-units-outline", "line-color-transition", {
           duration: 0,
           delay: 0,
-        } as never)
+        })
         map.setPaintProperty(
           "demand-units-outline",
           "line-color",
-          spec.colorExpression as never,
+          spec.colorExpression,
         )
         map.setPaintProperty(
           "demand-units-outline",
           "line-width",
-          OUTLINE_LINE_WIDTH as never,
+          OUTCOME_OUTLINE_WIDTH,
         )
-        map.setPaintProperty("demand-units-outline", "line-opacity", 1 as never)
+        map.setPaintProperty("demand-units-outline", "line-opacity", 1)
       }
     } catch {
       /* ok */
@@ -435,14 +382,22 @@ export class InteractivePaintArbiter {
   }
 
   private onExit(ctx: BeatEngineContext): void {
-    const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
+    const map = ctx.mapRef?.current?.getMap?.() as unknown as
+      | InteractiveExitMap
+      | undefined
     if (!map) return
 
     this.cancelPendingTeardown()
 
-    const runTeardownWrites = (m: MapboxGLMap): void => {
+    // Hide the layers immediately, even when the style isn't fully loaded
+    // (mid camera-fly). The full baseline reset below may be deferred to
+    // `idle`, but the hide must land now so demand-units is gone before the
+    // next outcome's layer fades in, rather than lingering under it.
+    this.hideImmediately(map)
+
+    const runTeardownWrites = (m: InteractiveExitMap): void => {
       try {
-        writeDemandUnitsBaseline(m as unknown as BaselineMap, {
+        writeDemandUnitsBaseline(m, {
           filter: DU_CLASS_FILTER,
           fillExpr: ctx.buildBlendedTierExpr(BLUE_MID, 1) as
             | readonly unknown[]
@@ -487,6 +442,30 @@ export class InteractivePaintArbiter {
       } catch {
         /* ok */
       }
+    }
+  }
+
+  /** Snap both layers to opacity 0 with no transition. Best-effort: works
+   *  on existing layers even while the style is mid-load, so the layer
+   *  disappears at once instead of waiting for the deferred baseline. */
+  private hideImmediately(map: MapWriteView): void {
+    try {
+      if (map.getLayer("demand-units")) {
+        map.setPaintProperty("demand-units", "fill-opacity-transition", {
+          duration: 0,
+          delay: 0,
+        })
+        map.setPaintProperty("demand-units", "fill-opacity", 0)
+      }
+      if (map.getLayer("demand-units-outline")) {
+        map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
+          duration: 0,
+          delay: 0,
+        })
+        map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+      }
+    } catch {
+      /* ok */
     }
   }
 

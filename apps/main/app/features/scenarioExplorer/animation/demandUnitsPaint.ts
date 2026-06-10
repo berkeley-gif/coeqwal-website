@@ -33,6 +33,61 @@ export const ZOOM_AWARE_BASE_OPACITY: unknown = [
   ZOOMED_IN_OPACITY,
 ]
 
+/* Shared outcome-polygon look
+ *
+ * These three expressions define how every outcome polygon fill and outline
+ * looks once settled: the fill recedes as you zoom in, and the stroke widens
+ * and tucks inside the boundary. `OutcomePolygonLayer` applies them to the
+ * WBA, reservoir, and demand-units layers, and `InteractivePaintArbiter`
+ * lands its demand-units fade-in on the same values, so the interactive view
+ * matches the declarative one. Typed `unknown` so callers cast to the
+ * expression type their Mapbox API expects. */
+
+/** Fill opacity interpolated across zoom (5 to 10), so dense low-zoom fills
+ *  stay legible and high-zoom fills recede. */
+export const OUTCOME_FILL_OPACITY: unknown = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  5,
+  0.75,
+  8,
+  0.55,
+  10,
+  0.35,
+]
+
+/** Outline width interpolated across zoom (5 to 11). */
+export const OUTCOME_OUTLINE_WIDTH: unknown = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  5,
+  0.5,
+  7,
+  1,
+  9,
+  2,
+  11,
+  3,
+]
+
+/** Outline offset interpolated across zoom (5 to 11), keeping the stroke
+ *  just inside the polygon boundary. */
+export const OUTCOME_OUTLINE_OFFSET: unknown = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  5,
+  -0.25,
+  7,
+  -0.5,
+  9,
+  -1,
+  11,
+  -1.5,
+]
+
 /** Demand unit highlighted in the loi-highlight beat (Glenn Colusa I.D.,
  *  Sacramento Valley). Read by the storyboard choreography and by the
  *  overlay must-include pin set so the square renders deterministically. */

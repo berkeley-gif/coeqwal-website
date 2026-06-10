@@ -15,6 +15,7 @@ import {
   useCallback,
   type RefObject,
 } from "react"
+import { createPortal } from "react-dom"
 import { useTheme, alpha } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import {
@@ -90,8 +91,29 @@ interface OutcomeMorphOverlayProps {
     }
   >
   onOutcomeClick?: (code: string) => void
+  /** Gate for clicking a whole outcome glyph to select it (the bar beat).
+   *  Separate from `interactive` because the bars are not per-square hit
+   *  targets, the whole glyph region selects its outcome. When true, each
+   *  outcome's bounds rect becomes clickable and calls `onOutcomeClick`. */
+  outcomeGlyphClickEnabled?: boolean
+  /** Gate for clicking a radar vertex dot to select its outcome (the radar
+   *  beat). When true, a hit target is drawn over each vertex and calls
+   *  `onOutcomeClick` with that vertex's outcome code. */
+  radarDotClickEnabled?: boolean
+  /** Gate for clicking a hydroclimate matrix cell (the heatmap beat). When
+   *  true, a hit target is drawn over every cell and calls `onHeatmapCellClick`
+   *  with the cell's outcome code and its column's climate scenario. */
+  heatmapCellClickEnabled?: boolean
+  /** Scenario for the primary heatmap column (historical hydroclimate). */
+  heatmapPrimaryScenarioId?: string
+  /** Scenario backing the current map selection, used to outline the active
+   *  matrix cell. */
+  selectedScenarioId?: string
+  onHeatmapCellClick?: (code: string, scenarioId: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
+  /** Gate for the per-square hover and click on the distribution grid. */
+  squareHoverEnabled?: boolean
   /** All active (hovered + pinned) locations driven by the parent */
   activeLocationSet?: Map<string, LocationInfo>
   /** Currently hovered location (for ephemeral overlay tooltip) */
@@ -110,6 +132,7 @@ interface OutcomeMorphOverlayProps {
   mustIncludeSourceIds?: ReadonlySet<string>
   extraHydroclimateColumns?: Array<{
     label: string
+    scenarioId?: string
     tierChartData?: Record<string, ChartDataPoint[]>
   }>
 }
@@ -412,8 +435,15 @@ export default function OutcomeMorphOverlay({
   squaresPerRow,
   distributionPositionMap,
   onOutcomeClick,
+  outcomeGlyphClickEnabled = false,
+  radarDotClickEnabled = false,
+  heatmapCellClickEnabled = false,
+  heatmapPrimaryScenarioId,
+  selectedScenarioId,
+  onHeatmapCellClick,
   selectedOutcomeCode,
   interactive,
+  squareHoverEnabled = false,
   activeLocationSet,
   hoveredLocation,
   onLocationEnter,
@@ -551,6 +581,27 @@ export default function OutcomeMorphOverlay({
     mustIncludeSourceIds,
   ])
 
+  /* Union bounding box of all distribution groups
+   *
+   * A transparent backdrop over this region captures pointer events in
+   * the gaps between squares so the map-polygon hover underneath does
+   * not fire while the user mouses around the grid. Map hover still
+   * works on the open map outside this box. */
+  const gridHitBounds = useMemo(() => {
+    if (outcomeShapes.length === 0) return null
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const group of outcomeShapes) {
+      minX = Math.min(minX, group.bounds.x)
+      minY = Math.min(minY, group.bounds.y)
+      maxX = Math.max(maxX, group.bounds.x + group.bounds.width)
+      maxY = Math.max(maxY, group.bounds.y + group.bounds.height)
+    }
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  }, [outcomeShapes])
+
   /* Radar geometry
    */
   const radarGeometry = useMemo(() => {
@@ -658,6 +709,7 @@ export default function OutcomeMorphOverlay({
 
     const extraColumns: Array<{
       label: string
+      scenarioId?: string
       cx: number
       cells: Array<{
         code: string
@@ -684,7 +736,12 @@ export default function OutcomeMorphOverlay({
             : "transparent"
         return { code: group.code, cx: colCx, cy, w: innerW, h: innerH, fill }
       })
-      extraColumns.push({ label: col.label, cx: colCx, cells: colCells })
+      extraColumns.push({
+        label: col.label,
+        scenarioId: col.scenarioId,
+        cx: colCx,
+        cells: colCells,
+      })
     }
 
     return {
@@ -710,12 +767,19 @@ export default function OutcomeMorphOverlay({
   }, [heatmapGeometry])
 
   const hoverTooltip = useMemo(() => {
-    if (!hoveredLocation) return null
-    const group = outcomeShapes.find((g) => g.code === hoveredLocation.code)
+    // Show the square popup for the hovered location. When nothing is hovered,
+    // fall back to the pinned selection (sticky single-select holds at most
+    // one) so clicking a square or its map polygon keeps the popup on the
+    // square instead of dropping it.
+    const loc =
+      hoveredLocation ??
+      (activeLocationSet && activeLocationSet.size > 0
+        ? (activeLocationSet.values().next().value as LocationInfo)
+        : null)
+    if (!loc) return null
+    const group = outcomeShapes.find((g) => g.code === loc.code)
     if (!group) return null
-    const shape = group.shapes.find(
-      (s) => s.sourceId === hoveredLocation.sourceId,
-    )
+    const shape = group.shapes.find((s) => s.sourceId === loc.sourceId)
     if (!shape) return null
 
     let cx = 0,
@@ -731,14 +795,13 @@ export default function OutcomeMorphOverlay({
       x: cx,
       y: cy - SQUARE_SIZE / 2 - 4,
       name:
-        locationNameMap?.[
-          `${hoveredLocation.code}:${hoveredLocation.sourceId}`
-        ] ?? getLocationName(hoveredLocation.code, hoveredLocation.sourceId),
-      tierLevel: hoveredLocation.tier,
-      tier: getTierLabel(hoveredLocation.tier),
+        locationNameMap?.[`${loc.code}:${loc.sourceId}`] ??
+        getLocationName(loc.code, loc.sourceId),
+      tierLevel: loc.tier,
+      tier: getTierLabel(loc.tier),
       color: shape.color,
     }
-  }, [hoveredLocation, outcomeShapes, locationNameMap])
+  }, [hoveredLocation, activeLocationSet, outcomeShapes, locationNameMap])
 
   const prevEncodingRef = useRef<EncodingMode>("distribution")
   const encodingMorphRef = useRef(1)
@@ -1409,6 +1472,23 @@ export default function OutcomeMorphOverlay({
           />
         )}
       </g>
+      {/* Radar vertex hit targets: a transparent circle over each outcome's
+          dot, present only on the settled radar beat. The morphed shapes and
+          per-outcome bounds rect are pointer-inert there, so these receive the
+          click and select that outcome on the map (see `onOutcomeClick`). */}
+      {radarDotClickEnabled &&
+        radarGeometry.vertices.map((v) => (
+          <circle
+            key={`radar-hit-${v.code}`}
+            cx={v.cx}
+            cy={v.cy}
+            r={DOT_RADIUS + 6}
+            fill="transparent"
+            pointerEvents="all"
+            style={{ cursor: "pointer" }}
+            onClick={() => onOutcomeClick?.(v.code)}
+          />
+        ))}
       {/* Heatmap chrome */}
       <g
         ref={(el) => {
@@ -1484,20 +1564,36 @@ export default function OutcomeMorphOverlay({
           )}
         </g>
       ))}
+      {/* Grid hit backdrop: swallows pointer events in the gaps between
+          squares so the map-polygon hover underneath does not pop up
+          while the user mouses around the distribution grid. Squares
+          render on top and keep their own hover. Interactive only. */}
+      {interactive && gridHitBounds && (
+        <rect
+          x={gridHitBounds.x}
+          y={gridHitBounds.y}
+          width={gridHitBounds.width}
+          height={gridHitBounds.height}
+          fill="transparent"
+          pointerEvents="all"
+          onMouseLeave={() => onLocationLeave?.()}
+        />
+      )}
       {outcomeShapes.map((group) => {
         if (!pathRefsMap.current.has(group.code)) {
           pathRefsMap.current.set(group.code, [])
         }
         const refs = pathRefsMap.current.get(group.code)!
         const isSelected = selectedOutcomeCode === group.code
+        const glyphClickable = interactive || outcomeGlyphClickEnabled
 
         return (
           <g
             key={group.code}
             onClick={
-              interactive ? () => onOutcomeClick?.(group.code) : undefined
+              glyphClickable ? () => onOutcomeClick?.(group.code) : undefined
             }
-            style={{ cursor: interactive ? "pointer" : "default" }}
+            style={{ cursor: glyphClickable ? "pointer" : "default" }}
           >
             <rect
               x={group.bounds.x}
@@ -1505,7 +1601,7 @@ export default function OutcomeMorphOverlay({
               width={group.bounds.width}
               height={group.bounds.height}
               fill="transparent"
-              pointerEvents={interactive ? "all" : "none"}
+              pointerEvents={glyphClickable ? "all" : "none"}
             />
             <g
               ref={(el) => {
@@ -1575,9 +1671,9 @@ export default function OutcomeMorphOverlay({
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
-              // Squares are clickable whenever the overlay is interactive
-              // and we're not in average mode.
-              const isClickable = interactive && !isAvgMode
+              // Squares are clickable only on the grid beats (square hover
+              // enabled) and never in average mode.
+              const isClickable = squareHoverEnabled && !isAvgMode
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -1630,7 +1726,7 @@ export default function OutcomeMorphOverlay({
                   }}
                   pointerEvents={isClickable ? "all" : "none"}
                   onMouseEnter={
-                    interactive && !isBarOrAvg
+                    squareHoverEnabled && !isBarOrAvg
                       ? () =>
                           onLocationEnter?.({
                             code: group.code,
@@ -1640,12 +1736,12 @@ export default function OutcomeMorphOverlay({
                       : undefined
                   }
                   onMouseLeave={
-                    interactive && !isBarOrAvg
+                    squareHoverEnabled && !isBarOrAvg
                       ? () => onLocationLeave?.()
                       : undefined
                   }
                   onClick={
-                    interactive
+                    squareHoverEnabled
                       ? (e) => {
                           e.stopPropagation()
                           if (isBarMode && onBarClick) {
@@ -1683,65 +1779,126 @@ export default function OutcomeMorphOverlay({
         )
       })}
 
-      {hoverTooltip && (
-        <foreignObject
-          x={hoverTooltip.x - 100}
-          y={hoverTooltip.y - 40}
-          width={200}
-          height={40}
-          style={{ pointerEvents: "none", overflow: "visible" }}
-        >
-          <div
-            style={{
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-              margin: "0 auto",
-              padding: "3px 8px",
-              borderRadius: 4,
-              background: alpha(theme.palette.common.white, 0.92),
-              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-              fontFamily: "inherit",
-              fontSize: 11,
-              lineHeight: 1.3,
-              textAlign: "center",
-              color: "#333",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 600,
-                maxWidth: 200,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+      {/* Matrix cell hit targets: a transparent rect over every cell (primary
+          + climate columns), present only on the settled heatmap beat. Drawn
+          last so it sits above the per-outcome bounds rects and the grid
+          backdrop and reliably receives the click. Each cell carries its
+          column's climate scenario, so clicking it paints that outcome under
+          that climate (see `onHeatmapCellClick`). The active cell gets a gold
+          outline. */}
+      {heatmapCellClickEnabled &&
+        [
+          ...heatmapGeometry.cells.map((cell) => ({
+            ...cell,
+            scenarioId: heatmapPrimaryScenarioId,
+          })),
+          ...heatmapGeometry.extraColumns.flatMap((column) =>
+            column.cells.map((cell) => ({
+              ...cell,
+              scenarioId: column.scenarioId,
+            })),
+          ),
+        ].map((cell, i) => {
+          const isActive =
+            selectedOutcomeCode === cell.code &&
+            selectedScenarioId != null &&
+            selectedScenarioId === cell.scenarioId
+          return (
+            <rect
+              key={`heat-hit-${i}-${cell.code}`}
+              x={cell.cx - cell.w / 2}
+              y={cell.cy - cell.h / 2}
+              width={cell.w}
+              height={cell.h}
+              rx={2}
+              ry={2}
+              fill="transparent"
+              stroke={isActive ? theme.palette.accent.glossary : "none"}
+              strokeWidth={isActive ? 2 : 0}
+              pointerEvents="all"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                if (cell.scenarioId) {
+                  onHeatmapCellClick?.(cell.code, cell.scenarioId)
+                }
               }}
-            >
-              {hoverTooltip.name}
-            </span>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                fontWeight: 500,
-                color: hoverTooltip.color,
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
-                  backgroundColor: hoverTooltip.color,
-                  flexShrink: 0,
-                }}
-              />
-              Tier {hoverTooltip.tierLevel}: {hoverTooltip.tier}
-            </span>
-          </div>
-        </foreignObject>
-      )}
+            />
+          )
+        })}
+
+      {hoverTooltip && renderHoverTooltipPortal(hoverTooltip)}
     </svg>
   )
+
+  /* Render the square hover tooltip through a portal to the document body.
+   * The morph overlay sits in a `zIndex: 4` stacking context, below the
+   * right-column outcome labels (`zIndex: 5`), so an in-SVG tooltip would be
+   * occluded by those headers. Portaling to the body escapes that context.
+   * The tooltip's x and y are SVG viewBox units, which equal panel pixels
+   * (the SVG fills the panel at 100%), so we offset by the SVG's position to
+   * place it in document space. */
+  function renderHoverTooltipPortal(tip: NonNullable<typeof hoverTooltip>) {
+    const svgEl = svgRef.current
+    if (!svgEl || typeof document === "undefined") return null
+    const rect = svgEl.getBoundingClientRect()
+    const left = window.scrollX + rect.left + tip.x
+    const top = window.scrollY + rect.top + tip.y
+    return createPortal(
+      <div
+        style={{
+          position: "absolute",
+          left,
+          top,
+          transform: "translate(-50%, -100%)",
+          zIndex: theme.zIndex.tooltip,
+          pointerEvents: "none",
+          display: "inline-flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "3px 8px",
+          borderRadius: 4,
+          background: alpha(theme.palette.common.white, 0.92),
+          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          fontFamily: "inherit",
+          fontSize: 11,
+          lineHeight: 1.3,
+          textAlign: "center",
+          color: "#333",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 600,
+            maxWidth: 200,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {tip.name}
+        </span>
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontWeight: 500,
+            color: tip.color,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 2,
+              backgroundColor: tip.color,
+              flexShrink: 0,
+            }}
+          />
+          Tier {tip.tierLevel}: {tip.tier}
+        </span>
+      </div>,
+      document.body,
+    )
+  }
 }

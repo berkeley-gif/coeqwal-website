@@ -155,6 +155,13 @@ export function useStoryboardLayout({
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
       if (!config) continue
+      // Line outcomes (winter-run salmon, on sacramento-river-body) are owned
+      // by RiversLayer, which keeps them hidden until the outcome is selected.
+      // They are never visible during the intro morph, so the storyboard must
+      // not imperatively fade their opacity. Doing so pins the layer to 0 in a
+      // way react-map-gl never restores, leaving the tier-colored river
+      // invisible on selection. Skip them so RiversLayer is the sole owner.
+      if (config.geometryType === "line") continue
       const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
       const fadeStart = morphStart - 0.005
 

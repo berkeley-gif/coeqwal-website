@@ -1,8 +1,8 @@
 "use client"
 
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
-import { useMapMode } from "../../map/store"
+import { useMapMode, useStoryboardMapInteractive } from "../../map/store"
 import TierAnimationSection from "../animation/TierAnimationSection"
 import {
   WelcomePanel,
@@ -25,7 +25,30 @@ export default function GetStartedView() {
   const theme = useTheme()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const mapMode = useMapMode()
+
+  // Turn off browser scroll anchoring while this view is mounted. The tier
+  // animation pins its distribution squares to the fixed map and re-offsets
+  // them on scroll. When a square's hover tooltip mounts near the bottom of
+  // the page, the browser's scroll anchoring nudges the scroll position to
+  // "keep content stable", which shifts the square out from under the cursor,
+  // unmounts the tooltip, and nudges back, looping forever. Disabling
+  // anchoring on the document scroller breaks that loop.
+  useEffect(() => {
+    const root = document.documentElement
+    const previous = root.style.overflowAnchor
+    root.style.overflowAnchor = "none"
+    return () => {
+      root.style.overflowAnchor = previous
+    }
+  }, [])
+
   const mapActive = mapMode === "get-started"
+  // On the storyboard's interactive grid beats, let pointer events fall
+  // through this region to the map behind so the user can pan, zoom, and
+  // hover polygons. The storyboard's own controls, panel backdrop, and
+  // squares opt back into pointer events, so only the exposed map area is
+  // click-through.
+  const storyboardMapInteractive = useStoryboardMapInteractive()
 
   const exploreBg = theme.palette.tabPanels.explore
 
@@ -67,7 +90,7 @@ export default function GetStartedView() {
           tier animation's own 100vh geometry is preserved. */}
       <Box
         sx={{
-          pointerEvents: "auto",
+          pointerEvents: storyboardMapInteractive ? "none" : "auto",
           px: theme.layout.panel.insetX,
           py: theme.layout.panel.insetY,
         }}

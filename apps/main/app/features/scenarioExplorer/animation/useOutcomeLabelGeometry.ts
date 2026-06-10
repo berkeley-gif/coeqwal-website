@@ -36,6 +36,31 @@ const B6_EXIT = secondsToProgress(6, BLOCK_EXIT_SEC)
 const ALL_OTHER_OUTCOMES_OUT = 0.5
 const BEAT6_OUT = 0.72
 
+/* Radar / heatmap label phase boundaries, in `progress`.
+ *
+ * As the storyboard moves from the radar beat to the heatmap beat, each
+ * outcome title slides onto its radar axis, holds, fades out, then snaps
+ * (invisibly) to its heatmap row and fades back in. These constants mark
+ * that sequence so the slide, the fade, and the wrap flip stay in step.
+ *
+ *   RADAR_SLIDE_START .. RADAR_SLIDE_END  title glides onto its radar axis
+ *   RADAR_SETTLE                          radar beat's resting value
+ *   RADAR_LABEL_FADE_START .. _FADE_END   radar labels fade out
+ *   HEATMAP_TAKEOVER                      heatmap labels replace radar labels
+ */
+const RADAR_SLIDE_START = 0.75
+const RADAR_SLIDE_END = 0.82
+/** Radar beat's resting progress. The fade-out must begin after this or the
+ *  labels settle dimmed on the radar beat. */
+const RADAR_SETTLE = 0.87
+const RADAR_LABEL_FADE_START = RADAR_SETTLE + 0.01
+const RADAR_LABEL_FADE_END = 0.92
+const HEATMAP_TAKEOVER = 0.95
+/** Ramp width of the radar slide (RADAR_SLIDE_END - RADAR_SLIDE_START). */
+const RADAR_SLIDE_WIDTH = RADAR_SLIDE_END - RADAR_SLIDE_START
+/** Ramp width shared by the radar-out and heatmap-in opacity fades. */
+const LABEL_FADE_WIDTH = 0.04
+
 function clamp01(v: number) {
   return Math.min(1, Math.max(0, v))
 }
@@ -123,6 +148,13 @@ export function useOutcomeLabelGeometry({
   const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
     new Map(),
   )
+  /** Per-outcome offset from the single-line rest center to the wrapped
+   *  (radar) rest center. The wrap flip moves the title's box instantly. We
+   *  cancel that shift at the start of the radar slide so the label glides
+   *  from where it sat rather than jumping to its wrapped spot first. */
+  const radarReflowShiftRef = useRef<Map<string, { dx: number; dy: number }>>(
+    new Map(),
+  )
   /** Per-outcome translate to move a title to its heatmap y-axis row. */
   const heatmapLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
     new Map(),
@@ -169,25 +201,10 @@ export function useOutcomeLabelGeometry({
     const windows = outcomeMorphWindowsRef.current
     const TITLE_LEAD = 0.004
     const TITLE_FADE = 0.009
-    // Wrap-flip opacity dip: the single-line to wrapped flip is instant
-    // (line breaks can't tween), so we dip opacity to 0 at the flip and
-    // raise it back, hiding the re-flow while the label is invisible. One
-    // dip masks the radar wrap (0.76), one the heatmap layout (0.95).
-    const WRAP_DIP_OUT_CENTER = 0.76
-    const WRAP_DIP_OUT_HALF = 0.01
-    const HEATMAP_WRAP_DIP_CENTER = 0.95
+    const HEATMAP_WRAP_DIP_CENTER = HEATMAP_TAKEOVER
     const HEATMAP_WRAP_DIP_HALF = 0.01
     let wrapDip = 1
     if (
-      v >= WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF &&
-      v <= WRAP_DIP_OUT_CENTER + WRAP_DIP_OUT_HALF
-    ) {
-      wrapDip =
-        v < WRAP_DIP_OUT_CENTER
-          ? 1 -
-            (v - (WRAP_DIP_OUT_CENTER - WRAP_DIP_OUT_HALF)) / WRAP_DIP_OUT_HALF
-          : (v - WRAP_DIP_OUT_CENTER) / WRAP_DIP_OUT_HALF
-    } else if (
       v >= HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF &&
       v <= HEATMAP_WRAP_DIP_CENTER + HEATMAP_WRAP_DIP_HALF
     ) {
@@ -198,16 +215,17 @@ export function useOutcomeLabelGeometry({
               HEATMAP_WRAP_DIP_HALF
           : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
-    // Fade labels out on the radar ring, hold invisible while the morph
-    // runs, then fade in at the heatmap y-axis (no position tween).
+    // Hold the radar labels fully opaque through the radar beat's resting
+    // value (RADAR_SETTLE), then fade them out, hold invisible while the
+    // layout snaps to the heatmap, and fade the heatmap labels in.
     const pathOpacity =
-      v < 0.86
+      v < RADAR_LABEL_FADE_START
         ? 1
-        : v < 0.9
-          ? 1 - (v - 0.86) / 0.04
-          : v < 0.95
+        : v < RADAR_LABEL_FADE_END
+          ? 1 - (v - RADAR_LABEL_FADE_START) / LABEL_FADE_WIDTH
+          : v < HEATMAP_TAKEOVER
             ? 0
-            : Math.min(1, (v - 0.95) / 0.04)
+            : Math.min(1, (v - HEATMAP_TAKEOVER) / LABEL_FADE_WIDTH)
     // CAPTION_LEAD == CAPTION_FADE so the caption is fully opaque exactly
     // when the squares lock in.
     const CAPTION_FADE = 0.006
@@ -258,8 +276,13 @@ export function useOutcomeLabelGeometry({
 
     // Radar wraps and centers titles. Heatmap wraps and right-aligns them.
     // The two modes are mutually exclusive. Toggle styles only when the mode changes.
-    const wantHeatmapText = v >= 0.95
-    const wantRadarAxisWrap = v >= 0.76 && v < 0.9 && !wantHeatmapText
+    const wantHeatmapText = v >= HEATMAP_TAKEOVER
+    // Wrap the moment the slide to the radar starts (RADAR_SLIDE_START) so the
+    // line-break reflow lands while the label is already moving, not as a
+    // separate dip. Stay wrapped until the heatmap mode takes over at
+    // HEATMAP_TAKEOVER so the label doesn't un-wrap (reflow back to one line)
+    // while it is fading out.
+    const wantRadarAxisWrap = v >= RADAR_SLIDE_START && !wantHeatmapText
     if (wantHeatmapText && !heatmapTextActiveRef.current) {
       heatmapTextActiveRef.current = true
       radarWrapActiveRef.current = false
@@ -325,22 +348,42 @@ export function useOutcomeLabelGeometry({
         }
       })
     }
-    // Slide titles to the radar [0.75-0.82], hold, then snap to the
-    // heatmap axis at 0.95+ (no slide between the two).
+    // Slide titles to the radar [RADAR_SLIDE_START-RADAR_SLIDE_END], hold while
+    // they fade out, then snap to the heatmap axis at HEATMAP_TAKEOVER+ (no
+    // slide between the two; the snap is hidden because the labels are
+    // invisible there).
     const radarDeltas = radarLabelDeltaRef.current
     const heatmapDeltas = heatmapLabelDeltaRef.current
+    const reflowShift = radarReflowShiftRef.current
     if (radarDeltas.size > 0 || heatmapDeltas.size > 0) {
-      const radarIn = clamp01((v - 0.75) / 0.07)
-      const radarPosBlend = v < 0.75 ? 0 : v < 0.82 ? radarIn : v < 0.9 ? 1 : 0
-      const heatmapPosBlend = v < 0.95 ? 0 : 1
+      const radarIn = clamp01((v - RADAR_SLIDE_START) / RADAR_SLIDE_WIDTH)
+      const radarPosBlend =
+        v < RADAR_SLIDE_START
+          ? 0
+          : v < RADAR_SLIDE_END
+            ? radarIn
+            : v < RADAR_LABEL_FADE_END
+              ? 1
+              : 0
+      const heatmapPosBlend = v < HEATMAP_TAKEOVER ? 0 : 1
+      // Once wrapped, the title's box jumps to its centered rest spot. Cancel
+      // that jump at blend 0 (slide start) by translating back by the reflow
+      // shift, then glide from there to the radar vertex. While single-line
+      // (before RADAR_SLIDE_START) there is no shift to cancel.
+      const radarActive = radarWrapActiveRef.current
       titleRefsMap.current.forEach((el, code) => {
         if (!el) return
         const rd = radarDeltas.get(code)
         const hd = heatmapDeltas.get(code)
-        const dx =
-          (rd ? rd.dx * radarPosBlend : 0) + (hd ? hd.dx * heatmapPosBlend : 0)
-        const dy =
-          (rd ? rd.dy * radarPosBlend : 0) + (hd ? hd.dy * heatmapPosBlend : 0)
+        const shift = radarActive ? reflowShift.get(code) : undefined
+        const radarDx = rd
+          ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) + rd.dx * radarPosBlend
+          : 0
+        const radarDy = rd
+          ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) + rd.dy * radarPosBlend
+          : 0
+        const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
+        const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)
         if (dx !== 0 || dy !== 0) {
           el.style.transform = `translate(${dx}px, ${dy}px)`
         } else if (el.style.transform) {
@@ -516,11 +559,12 @@ export function useOutcomeLabelGeometry({
       )
       const atRestGeom = new Map<
         string,
-        { textCenterY: number; textRightX: number }
+        { textCenterX: number; textCenterY: number; textRightX: number }
       >()
       wrapStateByCode.forEach(({ textEl }, code) => {
         const r = textEl.getBoundingClientRect()
         atRestGeom.set(code, {
+          textCenterX: (r.left + r.right) / 2 - panelRect.left,
           textCenterY: (r.top + r.bottom) / 2 - panelRect.top,
           textRightX: r.right - panelRect.left,
         })
@@ -528,6 +572,20 @@ export function useOutcomeLabelGeometry({
       // Restore transforms so the next frame resumes from its position.
       wrapStateByCode.forEach(({ boxEl, prevBoxTransform }) => {
         boxEl.style.transform = prevBoxTransform
+      })
+
+      // Reflow shift: how far the wrap flip moves each title's center from its
+      // single-line rest spot to its wrapped (centered) rest spot. Used to keep
+      // the radar slide continuous through the flip (no jump at the start).
+      const reflowShift = radarReflowShiftRef.current
+      reflowShift.clear()
+      wrapGeom.forEach((wrapped, code) => {
+        const rest = atRestGeom.get(code)
+        if (!rest) return
+        reflowShift.set(code, {
+          dx: wrapped.textCenterX - rest.textCenterX,
+          dy: wrapped.textCenterY - rest.textCenterY,
+        })
       })
 
       // Radar axis label positions, each on the `labelR` ring. The angle
