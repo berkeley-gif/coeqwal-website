@@ -1,14 +1,13 @@
-/* OverlayMorphArbiter. Bridges the beat engine to the progress-driven
+/* OverlayMorphArbiter bridges the beat engine to the progress-driven
  * SVG transform pipeline owned by `OutcomeMorphOverlay`.
  *
- * Bridge design. See the doc comment on `OverlayMorphActor` in
- * `engine/types.ts` for the rationale (same shape as
- * `NarrationArbiter`). The component writes its
+ * See `OverlayMorphActor` in `engine/types.ts` for why it uses a bridge
+ * (same shape as `NarrationArbiter`). The component writes its
  * `applyOverlayMorphFrame(v)` callback into
- * `ctx.overlayMorphTickRef.current` on mount and clears it on
- * unmount. The beat table holds a single overlay-morph actor with
- * window `[0, 1]` (see `beats.ts`), so this arbiter's `onUpdate`
- * fires every tick and dispatches to the registered callback.
+ * `ctx.overlayMorphTickRef.current` on mount and clears it on unmount.
+ * A single overlay-morph actor with window `[0, 1]` (see
+ * `actorGroups.ts`) makes this arbiter's `onUpdate` fire every frame
+ * and dispatch to the callback.
  */
 
 import type { Arbiter, BeatEngineContext, OverlayMorphActor } from "../types"
@@ -16,13 +15,10 @@ import type { Arbiter, BeatEngineContext, OverlayMorphActor } from "../types"
 export class OverlayMorphArbiter implements Arbiter<OverlayMorphActor> {
   readonly kind = "overlayMorph" as const
 
+  // Only `onUpdate` is needed, same as `NarrationArbiter`. The actor
+  // spans the whole storyboard and this arbiter holds no state. The
+  // component clears its own ref on unmount.
   onUpdate(_actor: OverlayMorphActor, v: number, ctx: BeatEngineContext): void {
     ctx.overlayMorphTickRef.current?.(v)
   }
-
-  // Rationale for no `onEnter` / `onExit` / `teardown`: identical to
-  // `NarrationArbiter`. The actor's window spans the full progress
-  // range, so enter is covered by the first `onUpdate` and exit only
-  // fires on unmount. The component owns its DOM refs and cleans
-  // them up via its own unmount effect.
 }

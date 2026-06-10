@@ -1,8 +1,8 @@
-/* OverlayPopupArbiter. Owns the `demoLocation` and
+/* OverlayPopupArbiter owns the `demoLocation` and
  * `demoHoveredLocation` state that `OutcomeMorphOverlay` consumes as
  * `demoHighlightedLocationKey` (gold ring on the distribution square)
  * and `hoveredLocation` (overlay popup near the square) during the
- * Beat 5 demo.
+ * loi-highlight beat.
  *
  * These are React state in `TierAnimationSection`, not refs, because
  * the overlay must re-render when they change. The setters arrive via
@@ -14,8 +14,8 @@ import type { Arbiter, BeatEngineContext, OverlayPopupActor } from "../types"
 export class OverlayPopupArbiter implements Arbiter<OverlayPopupActor> {
   readonly kind = "overlayPopup" as const
 
-  /** Track which target we wrote last so `teardown()` can clear the
-   *  correct slot without clobbering state it did not own. */
+  /** Remember which slots we wrote, so `teardown()` only clears what
+   *  we set. */
   private writtenRing = false
   private writtenHover = false
 

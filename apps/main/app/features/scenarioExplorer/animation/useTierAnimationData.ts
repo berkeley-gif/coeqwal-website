@@ -9,10 +9,6 @@ import { AG_REV_COORDINATES } from "../../map/config/outcomeLocations"
 const DEMO_SCENARIO_ID = "s0020"
 const TIER_CODE = "AG_REV"
 
-// Keep as readonly literal for autocomplete in the component, but normalize
-// once here so both the batch-fetcher call and the outcome bookkeeping use the
-// same ordered list. Also export the mutable copy passed to the batch fetcher
-// so callers of useOutcomeTierOverrides stay in sync.
 const OUTCOME_CODES_FOR_ANIMATION = [
   "CWS_DEL",
   "AG_REV",
@@ -69,17 +65,6 @@ export interface TierAnimationData {
 
 export function useTierAnimationData(): TierAnimationData {
   const theme = useTheme()
-  // Stabilize the tier-color lookup against render-identity churn. `theme`
-  // itself is a stable MUI object across renders, but
-  // `getTierColorsFromTheme(theme)` returns a fresh `{1,2,3,4}` object on
-  // every call. Without this memo, every render produces a new `tierColors`
-  // identity, which in turn invalidates every downstream memo that lists
-  // `tierColors` as a dep (centroids, outcomeLocations, tierColorMap). That
-  // cascade caused consumer effects keyed on those memos (most notably the
-  // Beat 5 driver in TierAnimationSection, which has `outcomeLocations` in
-  // its deps) to tear down and remount on every parent render, clearing
-  // local `ringActive`/`hoverActive`/`popupActive` flags and preventing the
-  // Beat 5 choreography from ever settling into its visible state.
   const t1 = theme.palette.tiers.tier1
   const t2 = theme.palette.tiers.tier2
   const t3 = theme.palette.tiers.tier3
@@ -108,7 +93,7 @@ export function useTierAnimationData(): TierAnimationData {
         // One batched request covers all N outcomes. AG_REV is reused
         // below for tierColorMap / tierDistribution. Polygon centroids
         // for the animation come from the hardcoded `AG_REV_COORDINATES`
-        // table (geometry policy: no geometry through the API; see
+        // table (geometry policy: no geometry through the API. See
         // coeqwal-backend/database/README.md and packages/map/README.md
         // MTS section)
         const batch = await fetchTierLocationAssignmentsBatch(
@@ -237,7 +222,7 @@ export function useTierAnimationData(): TierAnimationData {
  * tier levels for a non-base hydroclimate variant. Returns {} when on the base
  * scenario so the caller falls through to useTierAnimationData's data.
  *
- * Designed to never trigger a loading flash - old overrides stay visible until
+ * Designed to never trigger a loading flash. Old overrides stay visible until
  * the new fetch completes. Failures per-outcome are silently skipped so outcomes
  * without data for a given hydroclimate fall back to the base (s0020) tiers.
  */

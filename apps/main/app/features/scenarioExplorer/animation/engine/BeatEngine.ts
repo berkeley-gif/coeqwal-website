@@ -1,30 +1,26 @@
-/* Beat engine. Single progress subscriber and actor dispatch.
+/* Beat engine: progress subscriber and actor dispatch
  *
- * Phase 0 spike. Owns the one `progress.on("change")` subscription the
- * refactor is trying to reach (H6 in the spec). The engine walks a flat
- * list of actors derived from the beat table, computes which actors
- * transitioned into or out of their window on this tick, and dispatches
- * the appropriate hook on the arbiter that owns each kind.
+ * Owns the one `progress.on("change")` subscription. Each frame it walks
+ * a list of actors from the actor groups, works out which
+ * actors moved into or out of their window, and calls the matching hook
+ * on the arbiter that owns each kind.
  *
- * Dispatch order per tick.
+ * Dispatch order per frame:
  *
- * 1. For each actor currently active last tick but no longer in window,
+ * 1. For each actor active last frame but no longer in window,
  *    call `arbiter.onExit(actor, v, ctx)` and clear the active flag.
- * 2. For each actor now in window but not last tick, call
+ * 2. For each actor now in window but not last frame, call
  *    `arbiter.onEnter(actor, v, ctx)` and set the active flag.
  * 3. For each actor now in window, call `arbiter.onUpdate(actor, v, ctx)`.
  * 4. For each arbiter with a `commit` hook, call it once.
  *
  * On unmount the engine calls `onExit` for every still-active actor
- * followed by each arbiter's `teardown`. Navigation handlers can force
- * the same cleanup via `clearInteractiveState`, which calls
- * `api.teardown()`.
+ * followed by each arbiter's `teardown`. Consumers can force the same
+ * cleanup at any time by calling `api.teardown()` (for example when
+ * navigating between beats).
  *
- * Live-context invariant. The engine holds a `ref` to the latest
- * `BeatEngineContext` so consumers can replace it every render without
- * re-subscribing or re-initializing. Reading `ctxRef.current` inside
- * the progress callback is safe because React guarantees the ref is up
- * to date by the time any effect-driven code path reads it.
+ * The engine holds a `ref` to the latest `BeatEngineContext` so
+ * consumers can replace it every render without re-subscribing.
  */
 
 "use client"
@@ -41,20 +37,17 @@ import type {
 } from "./types"
 
 export interface BeatEngineApi {
-  /** Force cleanup. Call `onExit` on every active actor, then
-   *  `teardown` on every arbiter. Used by navigation handlers
-   *  (`handleNext`, `handleBack`, `handleRestart` via the existing
-   *  `clearInteractiveState`). Idempotent. */
+  /** Force cleanup. Calls `onExit` on every active actor, then
+   *  `teardown` on every arbiter. Consumers call this to reset the
+   *  engine without unmounting, such as on a beat change. Safe to call
+   *  repeatedly. */
   teardown: () => void
 
-  /** Read the current engine mode. See `EngineMode` for semantics.
-   *  Phase 3a: signal only, no arbiter keys on it yet. */
+  /** Read the current engine mode. */
   getMode: () => EngineMode
 
-  /** Set the engine mode. Callers: nav handlers (`handlePlay` ->
-   *  "playback", `settleToFinishedState` -> "interactive",
-   *  `handleRestart` -> "idle") and the square-click handler.
-   *  Idempotent - setting the current mode again is a no-op. */
+  /** Set the engine mode. See `EngineMode` for the values and when each
+   *  one applies. Setting the current mode again is safe. */
   setMode: (mode: EngineMode) => void
 }
 
@@ -62,16 +55,15 @@ export interface UseBeatEngineArgs {
   progress: MotionValue<number>
   actorGroups: readonly ActorGroup[]
   context: BeatEngineContext
-  /** Collection of arbiters keyed by their `kind`. Missing kinds are
-   *  tolerated. Actors of an unhandled kind are silently skipped so
-   *  the engine can ship Phase 0 without narration or camera
-   *  arbiters. */
+  /** The arbiters, one per `kind` (such as `mapPaint`, `narration`, or
+   *  `overlayMorph`). The engine indexes them by `kind` internally.
+   *  Missing kinds are tolerated, so actors of an unhandled kind are
+   *  silently skipped. */
   arbiters: readonly Arbiter[]
-  /** When false, the engine is inert. No subscription, no dispatch.
-   *  Used to keep the engine and the legacy per-effect code paths
-   *  mutually exclusive while Phase 0 ships. Flipping to `true`
-   *  activates dispatch for beats whose `actors` array is non-empty
-   *  in `actorGroups`. */
+  /** When false, the engine does nothing. The subscription stays in
+   *  place but its callback returns early, so no actors are dispatched.
+   *  When true, each actor is dispatched as `progress` moves through its
+   *  window. */
   enabled: boolean
 }
 
@@ -82,12 +74,11 @@ export function useBeatEngine({
   arbiters,
   enabled,
 }: UseBeatEngineArgs): BeatEngineApi {
-  // Stable refs for the hot-path callback.
+  // Stable refs for the per-frame callback
   //
-  // The `progress.on("change")` callback captures these refs once and
-  // reads `.current` on every tick. Swapping the ref contents on each
-  // render keeps the callback free of React state closures without
-  // needing to re-subscribe.
+  // The progress callback captures these refs once and reads `.current`
+  // every frame. Updating the refs each render keeps the callback
+  // current without re-subscribing.
 
   const ctxRef = useRef(context)
   ctxRef.current = context
@@ -95,9 +86,9 @@ export function useBeatEngine({
   const flatActorsRef = useRef<readonly Actor[]>([])
   const arbiterByKindRef = useRef<Map<ActorKind, Arbiter>>(new Map())
 
-  // Memoize the flattened actor list so we only rebuild when the table
-  // identity changes. Each (beat, actor-index) pair is one entry in a
-  // parallel `active` array the dispatcher owns.
+  // Flatten all actor groups into one list, rebuilt only when the
+  // groups change. A parallel `active` array (below) tracks which ones
+  // are inside their window.
   const flatActors = useMemo<readonly Actor[]>(() => {
     const out: Actor[] = []
     for (const group of actorGroups) {
@@ -115,30 +106,23 @@ export function useBeatEngine({
   }, [arbiters])
   arbiterByKindRef.current = arbiterByKind
 
-  // `activeRef[i]` is true iff flatActors[i] is currently inside its
-  // window (i.e. received `onEnter` without a matching `onExit` yet).
-  // Reset whenever the actor list identity changes, since indices are
-  // no longer stable.
+  // `activeRef[i]` is true while `flatActors[i]` is inside its window
+  // (got `onEnter` but not yet `onExit`). Reset when the actor list
+  // changes, since the indices shift.
   const activeRef = useRef<boolean[]>([])
   useEffect(() => {
     activeRef.current = new Array(flatActors.length).fill(false)
   }, [flatActors])
 
-  // The one progress subscription.
-  //
-  // Lives for the lifetime of the component (given stable deps below).
-  // `enabled` is captured by identity, not value, to avoid
-  // re-subscribing as a cheap disable toggle. Instead the callback
-  // early-returns when `enabled` is false.
+  // The one progress subscription, set up once for the life of the
+  // component. We read `enabled` through a ref so toggling it doesn't
+  // re-subscribe. The callback just early-returns when it's false.
 
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
 
-  // Engine mode signal (Phase 3a). Held in a ref so reads/writes from
-  // nav handlers don't trigger re-renders. Phase 3a ships this as a
-  // pure signal - no arbiter keys on it yet - so a mis-set mode is
-  // observationally a no-op. Phase 3b/3c then route interactive-paint
-  // ownership through `modeRef.current === "interactive"`.
+  // Engine mode signal. Held in a ref so reads/writes from nav
+  // handlers don't trigger re-renders.
   const modeRef = useRef<EngineMode>("idle")
 
   useEffect(() => {
@@ -150,9 +134,8 @@ export function useBeatEngine({
       const active = activeRef.current
       const byKind = arbiterByKindRef.current
 
-      // Phase 1, exits. Walk the active-flag array and find actors
-      // that were in-window but no longer are, so we can clear their
-      // state before any new enters fire this tick.
+      // Exits. Actors in-window last frame but no longer in window.
+      // Cleared before any enters fire this frame.
       for (let i = 0; i < actors.length; i++) {
         if (!active[i]) continue
         const actor = actors[i]!
@@ -164,8 +147,7 @@ export function useBeatEngine({
         }
       }
 
-      // Phase 2, enters. Actors now inside their window that weren't
-      // last tick.
+      // Enters. Actors now inside their window that weren't last frame.
       for (let i = 0; i < actors.length; i++) {
         if (active[i]) continue
         const actor = actors[i]!
@@ -177,8 +159,8 @@ export function useBeatEngine({
         }
       }
 
-      // Phase 3, updates. Every actor still in-window after the above
-      // receives an update (including those just entered this tick).
+      // Updates. Every actor still in-window, including those that just
+      // entered this frame.
       for (let i = 0; i < actors.length; i++) {
         if (!active[i]) continue
         const actor = actors[i]!
@@ -186,9 +168,9 @@ export function useBeatEngine({
         arbiter?.onUpdate?.(actor as never, v, ctx)
       }
 
-      // Phase 4, commit. One-shot per arbiter, after all actor
-      // dispatches this tick have resolved. Lets batching arbiters
-      // coalesce writes.
+      // Commit. One-shot per arbiter, after all actor dispatches this
+      // frame. Lets batching arbiters combine their writes into one
+      // update.
       for (const arbiter of byKind.values()) {
         arbiter.commit?.(ctx)
       }

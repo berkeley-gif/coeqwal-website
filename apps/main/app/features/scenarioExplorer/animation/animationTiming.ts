@@ -1,23 +1,18 @@
-/* ── Storyboard beats + timing primitives ──
+/* Storyboard beats + timing primitives
  *
- * The Get-Started "Visualizing key outcomes" visualization is divided into
- * discrete beats the user advances through with Next / Back. Each beat is a
- * checkpoint on the shared `progress` MotionValue (0-1). Clicking Next
- * animates `progress` from the current beat's checkpoint to the next one
- * over the next beat's `duration` seconds. Listeners in BeatTextOverlay,
- * OutcomeMorphOverlay, and TierAnimationSection all interpolate smoothly
- * between any two progress values, so beat navigation drops in without
- * changing any of them.
+ * The Get-Started "Visualizing key outcomes" visualization is split into
+ * beats the user steps through with Next / Back. Each beat is a
+ * checkpoint on the shared `progress` MotionValue (0 to 1). Next animates
+ * `progress` from the current checkpoint to the next over the next beat's
+ * `duration` seconds. Listeners in BeatTextOverlay, OutcomeMorphOverlay,
+ * and TierAnimationSection interpolate smoothly between any two progress
+ * values, so navigation works.
  *
- * Reading pauses happen naturally between Next clicks. Tuning a beat's
- * duration tunes only that beat's perceived speed.
- *
- * Because each beat covers a different progress span over a different
- * duration, the same progress-fraction width maps to very different wall-
- * clock seconds in different beats. We therefore author fade widths in
- * seconds and convert to progress fractions via `secondsToProgress`, so a
- * "paragraph reveal" always feels ~1.1s regardless of which beat it lives
- * in. */
+ * Each beat covers a different progress span over a different duration,
+ * so the same progress width maps to different wall-clock seconds in
+ * different beats. We author fade widths in seconds and convert with
+ * `secondsToProgress`, so a "paragraph reveal" always feels ~1.1s no
+ * matter which beat it's in. */
 
 export interface TimingBeat {
   /** Stable identifier (debug only). */
@@ -28,123 +23,40 @@ export interface TimingBeat {
   duration: number
 }
 
-/* Progress thresholds were compressed from [0, 1.0] into [0, 0.5] to make
- *  room for Beats 5-8 (loi-highlight, list-bar, radar, heatmap) in the
- *  remaining [0.5, 1.0]. Every threshold below (and in BeatTextOverlay,
- *  TierAnimationSection, and OutcomeMorphOverlay.getOutcomeProgressRange)
- *  is half of its pre-compression value. Durations are unchanged, so each
- *  beat's per-second rate doubled. Seconds-based fades still feel the same
- *  because they flow through `secondsToProgress`. */
+/* `progress` is an abstract 0-to-1 clock. These targets are authored
+ *  checkpoints with no intrinsic meaning. Only their order and relative
+ *  spacing matter. Beats 0-3 occupy [0, 0.5] and beats 4-7 occupy
+ *  [0.5, 1.0]. Fade timing is decoupled from this coordinate. Author
+ *  fade widths in seconds with `secondsToProgress` so they stay
+ *  consistent if you retune a beat.
+ *
+ *  See the animation README for the full per-beat choreography. */
+
 export const TIMING_BEATS: readonly TimingBeat[] = [
-  // B0 (1/4) - intro paragraphs fade, tier legend fully revealed.
-  //      Played automatically on arrival.
-  { id: "legend", progress: 0.225, duration: 12 },
-  // B1 (2/4) - Merged transition + narrative. 9s over 0.14 progress.
-  //      Sub-windows (all in the compressed progress domain):
-  //      1. Intro text collapses, tier legend floats to top of the
-  //         left panel (0.23 -> 0.245).
-  //      2. As soon as the legend parks (no settle pause):
-  //         (0.245 -> 0.26, ~1s) the demand-units layer cross-fades
-  //         OUT 0.65 -> 0 while still wearing its frozen 3-blue
-  //         palette. At 0.26, while invisible, the filter swaps to
-  //         Agriculture-only and the fill-color is set directly to
-  //         the AG_REV tier expression. (0.26 -> 0.28, ~1.3s) the
-  //         layer fades back IN 0 -> 0.65, appearing already in its
-  //         final tier colors.
-  //      3. Beat 1C narration paces for reading: "For example, each
-  //         colored location..." fades in at 0.245 -> 0.26
-  //         (concurrent with the map cross-fade out, so text + tier
-  //         colors arrive together by 0.28). Then "The colors
-  //         correspond to different water delivery outcome
-  //         levels..." fades in at 0.325 -> 0.34, leaving a ~1.6s
-  //         reading pause before the beat settles at 0.365.
-  { id: "collapse-and-colors", progress: 0.365, duration: 9 },
-  // B2 (3/4) - Text swap + AG_REV morph + post-morph caption. 10s
-  //      over 0.035 progress. Beat 1C paragraphs fade out
-  //      0.365 -> 0.3675 and collapse. The Beat 3 "before" paragraph
-  //      fades in 0.3675 -> 0.3725 into the same slot, giving a
-  //      reading beat before AG_REV morphs to its distribution
-  //      squares over [0.38, 0.39]. Once the morph completes the
-  //      "before" paragraph fades out 0.39 -> 0.3925 and the "after"
-  //      paragraph fades in 0.3925 -> 0.3975, landing as the beat
-  //      settles at 0.40.
-  { id: "ag-rev-morph", progress: 0.4, duration: 5 },
-  // B3 (4/8) - "Remaining outcomes" beat. 14s over 0.10 progress
-  //      (same per-progress velocity as AG_REV's morph). The Beat 3
-  //      "after" paragraph fades out 0.40 -> 0.41. "For each
-  //      scenario, outcome levels..." fades in in its place
-  //      0.41 -> 0.42, and the remaining 8 outcome morphs play
-  //      back-to-back across [0.42, 0.50] (each a 0.01-wide slice,
-  //      ~1.4s each, matching AG_REV's speed).
-  { id: "all-other-morphs", progress: 0.5, duration: 14 },
-  // B4 (5/8) - Distribution view + LOI highlight. 9s over 0.12
-  //      progress. "For each scenario..." fades out 0.50 -> 0.51;
-  //      sentence 1 of the Beat 5 narration ("Outcomes can be
-  //      displayed in different ways...") fades in 0.51 -> 0.53;
-  //      sentence 2 ("Locations of interest can be selected on
-  //      the map or from the chart") fades in 0.545 -> 0.560.
-  //      Five-step LOI choreography plays across the second half
-  //      of the beat on a single AG_REV LOI (Glenn Colusa I.D.):
-  //        [0.555, 0.575] AG demand-unit layer fades in on the map
-  //        [0.580, 0.590] gold ring on the distribution square
-  //        [0.590, 0.600] popup near the square
-  //        [0.600, 0.610] gold stroke on the map polygon
-  //        [0.610, 0.620] popup near the polygon
-  //      Beat settles at 0.62. Tail [0.62, 0.63] clears all demo
-  //      state so Beat 6 starts clean.
-  { id: "loi-highlight", progress: 0.62, duration: 9 },
-  // B5 (6/8) - List view. 5s over 0.10 progress. The Beat 5
-  //      narration fades out 0.62 -> 0.63. "The list view
-  //      summarizes key outcomes as bar charts." fades in
-  //      0.63 -> 0.65. Simultaneously, all 9 distribution grids
-  //      morph into their per-outcome bar glyphs across
-  //      [0.62, 0.72] (OutcomeMorphOverlay applies `barBlend`
-  //      on top of the settled square targets) and the bar
-  //      track + guide chrome fades in. Beat settles at 0.72.
-  { id: "list-bar", progress: 0.72, duration: 5 },
-  // B6 (7/8) - Radar chart. 7s over 0.15 progress. The Beat 6
-  //      narration fades out 0.72 -> 0.73. "The radar chart displays
-  //      the average values of key outcomes..." fades in
-  //      0.73 -> 0.75. In parallel: the per-outcome bars collapse
-  //      into single dots at each grid center across [0.72, 0.75]
-  //      (`avgBlend`). The dots then glide from their grid columns
-  //      out to their polar-vertex positions across [0.75, 0.82]
-  //      (`radarBlend`). Finally the radar chrome (axes, rings,
-  //      connecting polygon) fades in across [0.82, 0.87]
-  //      (`radarChromeBlend`). Beat settles at 0.87.
-  { id: "radar", progress: 0.87, duration: 7 },
-  // B7 (8/8) - Heat map. 5s over 0.13 progress. Radar chrome (rings,
-  //      axes, connecting polygon) fades out 0.87 -> 0.90. In the
-  //      same window the Beat 7 narration fades out and the Beat 8
-  //      narration ("The heat map displays how key outcomes change
-  //      under different hydroclimate futures.") fades in
-  //      0.88 -> 0.90. Representative dots migrate from their polar
-  //      vertices into a single stacked column of tier-colored cells
-  //      across [0.87, 0.95] (`heatmapBlend`), then the heatmap
-  //      chrome (outcome labels on the side) fades in over
-  //      [0.95, 1.0] (`heatmapChromeBlend`). Because the demo is
-  //      scoped to a single hydroclimate (`s0020`), the heatmap is a
-  //      single column. The layout generalizes trivially to multiple
-  //      columns when additional hydroclimates are added. Beat
-  //      settles at 1.0.
-  { id: "heatmap", progress: 1.0, duration: 5 },
+  { id: "legend", progress: 0.225, duration: 12 }, // [0]
+  { id: "collapse-and-colors", progress: 0.365, duration: 9 }, // [1]
+  { id: "ag-rev-morph", progress: 0.4, duration: 5 }, // [2]
+  { id: "all-other-morphs", progress: 0.5, duration: 14 }, // [3]
+  { id: "loi-highlight", progress: 0.62, duration: 9 }, // [4]
+  { id: "list-bar", progress: 0.72, duration: 5 }, // [5]
+  { id: "radar", progress: 0.87, duration: 7 }, // [6]
+  { id: "heatmap", progress: 1.0, duration: 5 }, // [7]
 ] as const
 
 export const FINAL_TIMING_BEAT_INDEX = TIMING_BEATS.length - 1
 
 /** Pixels the storyboard's radar, heatmap, and HTML axis labels are
- *  shifted up so the right-column visualization and Beat 3+ narration
- *  read as a single block. Kept in sync across `OutcomeMorphOverlay` and
- *  `BeatTextOverlay` measurement. */
+ *  shifted up so the right-column visualization and the narration beside
+ *  it read as a single block. Kept in sync across `OutcomeMorphOverlay`
+ *  and `BeatTextOverlay` measurement. */
 export const STORYBOARD_VISUAL_LIFT_PX = 110
 
-/* ── Reveal pace primitives (seconds) ──
+/* Pace primitives (seconds)
  *
- * Reference point: step 1 (Beat 0), where the intro paragraph and subtitle
- * reveal over ~1.1s and the tier-legend rows stagger ~1.3s apart. These
- * constants codify that rhythm so every reveal in the visualization sits on
- * one of a handful of shared cadences instead of a grab-bag of magic
- * progress-fraction widths.
+ * Reference point: Beat 0, where the intro paragraph reveals over ~1.1s
+ * and the tier-legend rows stagger ~1.3s apart. These constants capture
+ * that rhythm so every reveal shares a few cadences instead of scattered
+ * magic numbers.
  *
  * PARAGRAPH_FADE_SEC - A full sentence or paragraph block faded in as one
  *     piece.
@@ -159,6 +71,14 @@ export const PARAGRAPH_FADE_SEC = 1.1
 export const ITEM_FADE_SEC = 0.55
 export const ITEM_STAGGER_SEC = 1.3
 export const BLOCK_EXIT_SEC = 0.45
+
+/* Right-panel backdrop fade (progress units, not seconds)
+ *
+ * The white right-panel backdrop and its column eyebrow labels fade in
+ * together, starting at this progress point and over this width, so both
+ * are present by the time the ag-rev-morph beat settles. */
+export const BACKDROP_FADE_IN_PROGRESS = 0.3775
+export const BACKDROP_FADE_IN_WIDTH = 0.01
 
 /** Progress-per-second for beat[i]. */
 function beatRate(i: number): number {

@@ -1,15 +1,8 @@
-/* MapPopupArbiter. Batches LocationHighlights for the map-popup layer.
+/* MapPopupArbiter
  *
- * Phase 0 scope. Owns the single LOI highlight the Beat 5 driver used
- * to write directly to `mapActions.setLocationHighlights`. Built as a
- * commit-phase arbiter so Phase 2's Beat 1C progressive popups (five
- * staggered actors) can coexist on the same arbiter without racing on
- * the store.
- *
- * Each `MapPopupActor` resolves to at most one `LocationHighlight` per
- * tick. Active highlights for all in-window actors are collected in a
- * buffer populated during `onEnter` and `onUpdate` and flushed in
- * `commit()` with one `setLocationHighlights` call per tick.
+ * Collects all the map popups that should show on the current frame and
+ * writes them to the store in one update, so several popups don't fight
+ * over the store.
  */
 
 import { mapActions } from "../../../../map/store"
@@ -19,16 +12,12 @@ import type { Arbiter, BeatEngineContext, MapPopupActor } from "../types"
 export class MapPopupArbiter implements Arbiter<MapPopupActor> {
   readonly kind = "mapPopup" as const
 
-  /** Per-tick highlight buffer. Keyed by `actor.id` so duplicate enter
-   *  and update calls within a tick stay idempotent. */
+  /** The popups to show this frame, keyed by actor id so repeat enter
+   *  and update calls in the same frame don't double up. */
   private buffer = new Map<string, LocationHighlight>()
 
-  /** Signature of the last committed highlight set. Format is
-   *  `"<actorId>#<key>|<actorId>#<key>|..."`. Used to skip redundant
-   *  store writes when the buffer contents have not changed since last
-   *  tick. Matches the latch-style behavior of the legacy Beat 5
-   *  driver, which only wrote on window entry and exit, not every
-   *  frame. */
+  /** Fingerprint of the last write, so we skip the store update when
+   *  nothing has changed since the previous frame. */
   private lastSig = ""
 
   onEnter(actor: MapPopupActor, _v: number, ctx: BeatEngineContext): void {
@@ -37,10 +26,9 @@ export class MapPopupArbiter implements Arbiter<MapPopupActor> {
   }
 
   onUpdate(actor: MapPopupActor, _v: number, ctx: BeatEngineContext): void {
-    // Re-evaluate each tick so late-arriving centroid or tier data
-    // lands without needing a dedicated "data ready" signal. If
-    // `buildHighlight` returns null (data not ready yet), drop the
-    // buffer slot and try again next tick.
+    // Rebuild each frame so late-arriving centroid or tier data shows
+    // up on its own. If the data isn't ready yet (`buildHighlight`
+    // returns null), drop this popup and try again next frame.
     const hi = actor.buildHighlight(ctx)
     if (hi) this.buffer.set(actor.id, hi)
     else this.buffer.delete(actor.id)
@@ -69,13 +57,9 @@ export class MapPopupArbiter implements Arbiter<MapPopupActor> {
     }
   }
 
-  /** Cheap structural signature of the current buffer.
-   *  Order-insensitive by sorting actor ids. `highlight.key` is the
-   *  most-changing part of each entry. Longitude, latitude, or tier
-   *  data would only change if the `buildHighlight` thunk re-resolves
-   *  to a different target, which is rare. Including the actor id
-   *  together with the highlight key catches both actor-set changes
-   *  and target-identity changes. */
+  /** Builds the fingerprint used to detect changes. Sorts actor ids so
+   *  order doesn't matter, and pairs each id with its highlight key
+   *  (the part most likely to change). */
   private computeSig(): string {
     if (this.buffer.size === 0) return ""
     const ids = Array.from(this.buffer.keys()).sort()

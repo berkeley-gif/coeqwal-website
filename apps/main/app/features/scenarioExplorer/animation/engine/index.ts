@@ -23,11 +23,11 @@ export type {
   DemandUnitsOutlineInitSpec,
 } from "./demandUnitsBaseline"
 export {
-  BEAT1_COLORS,
-  BEAT1_CYCLE,
-  BEAT1_MID,
-  beat1FillExpr,
-} from "./beat1Palette"
+  BLUE_COLORS,
+  BLUE_CYCLE,
+  BLUE_MID,
+  blueFillExpr,
+} from "./bluePalette"
 export type {
   Actor,
   ActorKind,
@@ -45,5 +45,4 @@ export type {
   OverlayPopupActor,
   NarrationActor,
   OverlayMorphActor,
-  CameraActor,
 } from "./types"

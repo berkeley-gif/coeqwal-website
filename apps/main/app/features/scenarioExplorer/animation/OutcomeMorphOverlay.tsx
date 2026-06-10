@@ -24,7 +24,15 @@ import {
   RADAR_TIER_LABELS,
 } from "@repo/viz"
 import { getTierLabel } from "../../../content/tiers"
-import { STORYBOARD_VISUAL_LIFT_PX } from "./animationTiming"
+import {
+  computeRadarFrame,
+  radarVertexAngle,
+  radarTierRadius,
+  computeHeatmapColumnFrame,
+  heatmapCellCenterY,
+  HEAT_SIDE_PAD,
+  HEAT_BLOCK_SHIFT_X,
+} from "./storyboardGeometry"
 import {
   ENV_FLOWS_NAMES,
   STATION_NAMES,
@@ -61,7 +69,7 @@ interface OutcomeMorphOverlayProps {
   /** Bridge into `OverlayMorphArbiter`. The component writes its
    *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
    *  and clears it on unmount. The arbiter reads through the ref on
-   *  every tick. See
+   *  every frame. See
    *  `apps/main/app/features/scenarioExplorer/animation/engine/arbiters/OverlayMorphArbiter.ts`. */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
   squaresPerRow: number
@@ -85,7 +93,7 @@ interface OutcomeMorphOverlayProps {
   onLocationEnter?: (info: LocationInfo) => void
   onLocationLeave?: () => void
   onLocationClick?: (info: LocationInfo) => void
-  /** Maps "outcomeCode:sourceId" → human-readable name from Mapbox features */
+  /** Maps "outcomeCode:sourceId" to a human-readable name from Mapbox features */
   locationNameMap?: Record<string, string>
   encodingMode?: EncodingMode
   tierChartData?: Record<string, ChartDataPoint[]>
@@ -540,12 +548,8 @@ export default function OutcomeMorphOverlay({
    */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
-    const panelLeft = panelWidth * (2 / 3)
-    const rightWidth = panelWidth - panelLeft
-    const cx = panelLeft + rightWidth / 2
-    const cy = panelHeight * 0.42 - STORYBOARD_VISUAL_LIFT_PX
-    const rMax = Math.min(rightWidth / 2, panelHeight / 2) * 0.6
-    const tierR = (tier: number) => (rMax * (4.5 - tier)) / 4
+    const { cx, cy, rMax } = computeRadarFrame(panelWidth, panelHeight)
+    const tierR = (tier: number) => radarTierRadius(rMax, tier)
 
     const vertices: Array<{
       code: string
@@ -559,7 +563,7 @@ export default function OutcomeMorphOverlay({
       const rep =
         group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
       const score = group.weightedScore ?? rep?.tier ?? 2
-      const angle = (2 * Math.PI * i) / Math.max(N, 1) - Math.PI / 2
+      const angle = radarVertexAngle(i, N)
       const radius = tierR(score)
       vertices.push({
         code: group.code,
@@ -599,29 +603,20 @@ export default function OutcomeMorphOverlay({
     const N = outcomeShapes.length
     const numExtras = extraHydroclimateColumns?.length ?? 0
     const numColumns = 1 + numExtras
-    const panelLeft = panelWidth * (2 / 3)
+    const { panelLeft, heatmapLeft, cellH, columnTop } =
+      computeHeatmapColumnFrame(panelWidth, panelHeight, N)
     const rightWidth = panelWidth - panelLeft
-    const HEAT_SIDE_PAD = 24
-    const HEAT_LABEL_COL_W = 110
-    const HEAT_LABEL_GAP = 12
     const HEAT_COL_GAP_FRACTION = 0.18
     const HEAT_MAX_CELL_W = 150
-    const HEAT_BLOCK_SHIFT_X = -10
 
-    const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
     const rightColRight =
       panelLeft + rightWidth - HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
-    const heatmapLeft = rightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
     const heatmapAvailW = Math.max(1, rightColRight - heatmapLeft)
     const cellW = Math.min(
       HEAT_MAX_CELL_W,
       heatmapAvailW / (numColumns + (numColumns - 1) * HEAT_COL_GAP_FRACTION),
     )
     const columnGap = cellW * HEAT_COL_GAP_FRACTION
-    const availableH = panelHeight * 0.8
-    const cellH = Math.min(44, availableH / Math.max(N, 1))
-    const totalH = N * cellH
-    const columnTop = panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
     const CELL_PAD_FRACTION = 0.08
     const cellInsetX = cellW * CELL_PAD_FRACTION * 0.5
     const cellInsetY = cellH * CELL_PAD_FRACTION * 0.5
@@ -644,7 +639,7 @@ export default function OutcomeMorphOverlay({
     }> = []
     for (let i = 0; i < N; i++) {
       const group = outcomeShapes[i]!
-      const cy = columnTop + (i + 0.5) * cellH
+      const cy = heatmapCellCenterY(columnTop, cellH, i)
       cells.push({
         code: group.code,
         cx: columnCx[0]!,
@@ -671,7 +666,7 @@ export default function OutcomeMorphOverlay({
       const col = extraHydroclimateColumns![c]!
       const colCx = columnCx[c + 1]!
       const colCells = outcomeShapes.map((group, i) => {
-        const cy = columnTop + (i + 0.5) * cellH
+        const cy = heatmapCellCenterY(columnTop, cellH, i)
         const points = col.tierChartData?.[group.code]
         const score = computeTierScore(points)
         const level = score != null ? getTierLevelForScore(score) : null
@@ -1110,8 +1105,8 @@ export default function OutcomeMorphOverlay({
       extraColumnBlends,
     } = computeBlends(v)
 
-    // Update radar chrome opacity once per tick. (Rises in Beat 7,
-    // falls at the start of Beat 8.)
+    // Update radar chrome opacity once per frame. (Rises in the radar
+    // beat, falls at the start of the heatmap beat.)
     const radarChromeEl = radarChromeRef.current
     if (radarChromeEl) {
       radarChromeEl.style.opacity = String(radarChromeBlend)
@@ -1192,12 +1187,12 @@ export default function OutcomeMorphOverlay({
           el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
         }
 
-        // Once this as settled as squares, drive the
-        // chained morph (square -> bar -> dot -> radar vertex) directly
-        // from progress. Overrides the post-morph resting state above
-        // when any of the beat blends are non-zero. Skipped when the
-        // parent has already toggled `encodingMode` to bar/avg (the
-        // existing isBarOrAvg branches already handle that case).
+        // Once the squares have settled, drive the chained morph
+        // (square, bar, dot, radar vertex, heatmap cell) straight from
+        // progress. This overrides the resting state above whenever a
+        // beat blend is active. Skipped when the parent already switched
+        // `encodingMode` to bar or average, since the branches above
+        // handle that.
         const chainActive =
           v >= morphEnd &&
           encodingMode === "distribution" &&
@@ -1208,24 +1203,23 @@ export default function OutcomeMorphOverlay({
           const heatmapTarget =
             heatmapTargetsByCode.get(group.code) ?? radarTarget
 
-          // Compose the blended target: lerp through square -> bar ->
-          // dot -> radar -> heatmap cell in sequence. Each blend is
-          // clamped to its own window so the chain progresses smoothly
-          // without abrupt handoffs.
+          // Build the blended target by lerping through square, bar,
+          // dot, radar, then heatmap cell in order. Each blend has its
+          // own window so the chain flows without jumps.
           let pts = shape.squareTarget
           if (barBlend > 0) {
             pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
           }
           if (avgBlend > 0) {
-            // From settled bar position -> dot (grid-center).
+            // From the settled bar to the dot (grid center).
             pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
           }
           if (radarBlend > 0) {
-            // From dot position -> radar vertex (per-outcome polar).
+            // From the dot to the radar vertex (per-outcome polar).
             pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
           }
           if (heatmapBlend > 0) {
-            // From radar vertex -> heatmap cell rectangle.
+            // From the radar vertex to the heatmap cell rectangle.
             pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
           }
           el.setAttribute("d", pointsToD(pts))
@@ -1293,17 +1287,11 @@ export default function OutcomeMorphOverlay({
 
   /* Bridge registration
    *
-   * Writes a stable dispatcher into `overlayMorphTickRef.current` so
-   * the engine's `OverlayMorphArbiter` invokes the latest morph
-   * frame every tick. Runs once per mount. The eager sync on mount
-   * matches the legacy `useLayoutEffect`'s initial
-   * `handler(progress.get())` call. Gated on
-   * `tierChangeRafRef.current == null` because the tier-change RAF
-   * (declared earlier) takes exclusive control of the SVG transforms
-   * while running and the latest frame's own internal guards
-   * (`if (tierChangeRafRef.current != null) return`) already handle
-   * the overlap, but we still want to avoid triggering a visual
-   * snap on mount. */
+   * Writes a stable dispatcher into `overlayMorphTickRef.current` so the
+   * engine's `OverlayMorphArbiter` runs the latest morph frame every
+   * frame. Runs once per mount, and applies the current frame right
+   * away. We skip that initial apply while the tier-change animation is
+   * running, so it doesn't cause a visual snap. */
   useEffect(() => {
     const dispatch = (v: number) => latestMorphFrameRef.current(v)
     overlayMorphTickRef.current = dispatch
@@ -1347,12 +1335,10 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
     >
-      {/* Radar chrome: concentric tier rings, radial axes,
-          tier labels along the top spoke, and a connecting trace
-          through the per-outcome vertices. Visual spec mirrors the
-          `@repo/viz` RadarPlot rendering seen in `RadarPanel`.
-          Opacity is driven by `radarChromeBlend` in the main progress
-          handler. */}
+      {/* Radar chrome: tier rings, radial axes, tier labels along the
+          top spoke, and a trace connecting the per-outcome vertices.
+          Matches the `@repo/viz` RadarPlot used in `RadarPanel`. Opacity
+          is driven by `radarChromeBlend` in the main progress handler. */}
       <g
         ref={(el) => {
           radarChromeRef.current = el

@@ -47,7 +47,19 @@ import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
-import { TIMING_BEATS, FINAL_TIMING_BEAT_INDEX } from "./animationTiming"
+import {
+  TIMING_BEATS,
+  FINAL_TIMING_BEAT_INDEX,
+  BACKDROP_FADE_IN_PROGRESS,
+} from "./animationTiming"
+import {
+  HIGHLIGHT_GOLD,
+  BASE_FILL_OPACITY,
+  ZOOM_THRESHOLD,
+  ZOOMED_IN_OPACITY,
+  ZOOM_AWARE_BASE_OPACITY,
+  LOI_DU_ID,
+} from "./demandUnitsPaint"
 import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
 import {
   useBeatEngine,
@@ -62,7 +74,7 @@ import {
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
   ensureDemandUnitsOutlineLayer,
-  beat1FillExpr,
+  blueFillExpr,
   type BaselineMap,
   type SessionInitMap,
   type BeatEngineApi,
@@ -137,7 +149,7 @@ const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
  *  so the visual language is consistent. The list is intentionally small
  *  and geographically diverse (Sac Valley, San Joaquin/Delta, Westside,
  *  Eastside), spanning multiple tier levels of AG_REV deliveries. */
-const BEAT1C_POPUP_DU_IDS: readonly string[] = [
+const TIER_BLEND_POPUP_DU_IDS: readonly string[] = [
   "08N_SA2", // Glenn Colusa I.D. (Sacramento Valley)
   "62_NA3", // Turlock I.D. (San Joaquin, Eastside)
   "90_PA1", // Westlands W.D. East (San Joaquin, Westside)
@@ -156,32 +168,6 @@ const ACTIVE_OUTCOMES = new Set([
   "FW_EXP",
   "WRC_SALMON_AB",
 ])
-
-const HIGHLIGHT_GOLD = "#ffd87e"
-
-/* loi-highlight
- *
- * Choreographs a single AG_REV LOI (Glenn Colusa I.D., DU_ID
- * `08N_SA2`). All Beat 5 timing thresholds and the choreography that
- * uses them now live in the declarative beat engine
- * (`engine/beats.ts`, `engine/arbiters/MapPaintArbiter.ts`,
- * `engine/arbiters/OverlayPopupArbiter.ts`,
- * `engine/arbiters/MapPopupArbiter.ts`). The only Beat 5 fact still
- * referenced from this file is the LOI's DU_ID, used by the overlay
- * "must-include" pin set so the LOI's distribution square renders
- * deterministically across the morph. */
-const BEAT5_LOI_ID = "08N_SA2"
-
-const BASE_FILL_OPACITY = 0.75
-const ZOOM_THRESHOLD = 8
-const ZOOMED_IN_OPACITY = 0.75
-const ZOOM_AWARE_BASE_OPACITY = [
-  "step",
-  ["zoom"],
-  BASE_FILL_OPACITY,
-  ZOOM_THRESHOLD,
-  ZOOMED_IN_OPACITY,
-]
 
 interface OutcomeLayoutItem {
   code: string
@@ -233,17 +219,17 @@ export default function TierAnimationSection() {
   const [panelInView, setPanelInView] = useState(false)
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
-  /** Ref mirror of `beatIndex` so navigation callbacks can read the
+  /** Ref copy of `beatIndex` so navigation callbacks can read the
    *  latest cursor without needing to be re-created on every change. */
   const beatIndexRef = useRef(0)
   /** `true` once the user has clicked Play at least since the last reset.
-   *  Gates which control affordances the BeatTextOverlay renders:
-   *    - `false` -> pre-play gate: inline Play button beside the title,
-   *                 subtitle only. No bottom Back/Next row.
-   *    - `true`  -> bottom control row (Back / N-of-T / Next) visible.
-   *                 Play button hidden.
-   *  All animation math keys off `progress` + `beatIndex`, so `hasPlayed`
-   *  purely governs the visibility of chrome. */
+   *  Gates which controls the BeatTextOverlay renders:
+   *    - `false`: pre-play gate. Inline Play button beside the title,
+   *               subtitle only. No bottom Back/Next row.
+   *    - `true`: bottom control row (Back / N-of-T / Next) visible,
+   *              Play button hidden.
+   *  All animation math keys off `progress` and `beatIndex`, so
+   *  `hasPlayed` only governs which chrome is shown. */
   const [hasPlayed, setHasPlayed] = useState(false)
   const hasPlayedRef = useRef(false)
   /** Derived state describing where the user is in the storyboard.
@@ -264,7 +250,7 @@ export default function TierAnimationSection() {
   const polygonsAllowedRef = useRef(false)
   const resolvedScenarioIdRef = useRef("s0020")
 
-  /* Left-panel text visibility.
+  /* Left-panel text visibility
    *
    * The zoom-based fade-out was retired (see the reprojection effect
    * further down) to keep the bottom navigation controls accessible
@@ -272,13 +258,13 @@ export default function TierAnimationSection() {
    * so a future visibility trigger can set it without a wider refactor. */
   const [textVisible] = useState(true)
 
-  /* Time-based progress (0 -> 1) */
+  /* Time-based progress (0 to 1) */
   const progress = useMotionValue(0)
 
   /* Back-out opacity for the left-panel text
    *
    * Normally 1 (no-op). When the user presses Back from beat 1/N we
-   * animate it to 0 while `progress` is parked at 0.45 - so the entire
+   * animate it to 0 while `progress` is parked at 0.45, so the entire
    * text block (intro paragraphs, tier legend, bottom controls) fades
    * out together in one motion instead of reverse-tweening progress,
    * which would unwind every staggered reveal in reverse. On fade
@@ -286,10 +272,9 @@ export default function TierAnimationSection() {
    * the pre-play gate re-renders from a clean slate. */
   const backOutOpacity = useMotionValue(1)
 
-  // Map visibility: stays visible through beat 2
-  // TODO(?): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
+  // Map, overlay, and heading stay fully visible for the whole
+  // storyboard (no fade-out).
   const mapOpacity = useTransform(progress, [0, 1], [1, 1])
-  // TODO(?): restore fade-out: useTransform(progress, [0.73, 0.78], [1, 0])
   const overlayOpacity = useTransform(progress, [0, 1], [1, 1])
   const headingOpacity = useTransform(progress, [0, 1], [1, 1])
 
@@ -302,9 +287,8 @@ export default function TierAnimationSection() {
    *  the reduced-motion fast-forward path below. */
   const settleToFinishedState = useCallback(() => {
     setPlayState("finished")
-    // signal to the engine that the storyboard has settled
-    // and the user can now click squares. Signal only - no arbiter
-    // keys on this mode yet (Phase 3b wires InteractivePaintArbiter).
+    // Signal to the engine that the storyboard has settled and the
+    // user can now click squares.
     engineApiRef.current?.setMode("interactive")
     mapActions.clearOutcomeVisualization()
     mapActions.clearLocationHighlights()
@@ -350,9 +334,9 @@ export default function TierAnimationSection() {
    *
    * `playState` updates:
    *   - "playing" during the tween
-   *   - "finished" iff we landed on the final beat (enables interactive UI)
+   *   - "finished" when we landed on the final beat (enables interactive UI)
    *   - "paused" for any non-final landing
-   *   - "idle" iff we landed on beat 0 (restart or Back from B1)
+   *   - "idle" when we landed on beat 0 (restart or Back from B1)
    *
    * While animating between two beats, listeners on `progress` in
    * BeatTextOverlay / OutcomeMorphOverlay already handle any intermediate
@@ -374,6 +358,15 @@ export default function TierAnimationSection() {
       const target = TIMING_BEATS[clamped]!
       const source = TIMING_BEATS[fromIndex]!
       const forward = clamped > fromIndex
+
+      // Rule: every tween starts from a settled beat. If the user clicks
+      // while a beat is still animating, finish it first by snapping
+      // `progress` to its checkpoint. Each beat's morphs play across a
+      // fixed slice of `progress`, so a tween that started mid-slice would
+      // cross the leftover slice at the wrong speed and the squares would
+      // rush to their places. When the beat is already settled, `progress`
+      // is already on `source.progress`, so this does nothing.
+      progress.set(source.progress)
       const rawDuration = forward
         ? target.duration
         : source.duration * BACK_DURATION_FACTOR
@@ -414,9 +407,9 @@ export default function TierAnimationSection() {
       if (forward) computePolygonDataRef.current()
 
       // Optionally fly the camera home first (used by Next/viaCamera).
-      // `CAMERA_ARBITER.flyHome` always calls `onArrive` exactly once -
-      // synchronously when already home or `map` is null, async via
-      // `moveend` otherwise - so we can hand off `runTween` without the
+      // `CAMERA_ARBITER.flyHome` always calls `onArrive` exactly once:
+      // synchronously when already home or `map` is null, and via
+      // `moveend` otherwise. So we can hand off `runTween` without the
       // caller-side branching this block used to carry.
       if (opts?.viaCamera) {
         CAMERA_ARBITER.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
@@ -435,21 +428,21 @@ export default function TierAnimationSection() {
     [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
   )
 
-  /* Clear any interactive overlay/map state tied to a sticky pin.
+  /* Clear any interactive overlay/map state tied to a sticky pin
    *
    * Called when the user navigates between beats so that a previously
    * clicked square (and its pinned popups + outcome map layer) doesn't
    * carry over into the next beat, where the layer and overlay content
-   * will generally belong to a different outcome. Mirrors the clearing
+   * will generally belong to a different outcome. Matches the clearing
    * block in `handleRestart`. */
-  /** Ref mirror of the beat engine's api so `clearInteractiveState`
+  /** Ref copy of the beat engine's api so `clearInteractiveState`
    *  (declared before the engine setup to match the existing
    *  nav-handler ordering) can call `teardown()` without depending on
    *  the memoized `engineApi` identity. The ref is assigned right
    *  after `useBeatEngine` runs later in this component body. */
   const engineApiRef = useRef<BeatEngineApi | null>(null)
 
-  /** Ref mirror of the memoized `engineContext`. Populated right after
+  /** Ref copy of the memoized `engineContext`. Populated right after
    *  `useMemo(engineContext, ...)` runs later in this component body.
    *  Exists so pre-declared nav handlers (`clearInteractiveState`,
    *  `handleRestart`) and the unmount effect can pass a live context
@@ -462,12 +455,12 @@ export default function TierAnimationSection() {
     setPinnedLocations(new Map())
     // release interactive paint ownership synchronously,
     // BEFORE clearing the selection store. The `sync` effect driven by
-    // `selectedOutcomeCode -> null` still fires on React commit, but
+    // `selectedOutcomeCode` going null still fires on React commit, but
     // by the time it runs the arbiter has already shed ownership and
-    // `sync` no-ops. Explicit release here guarantees the exit write
-    // lands while the selection is still valid, independent of
-    // commit-scheduling interleaving with `goTo`'s mode flip to
-    // "playback". Idempotent: release is a no-op when not owning.
+    // `sync` does nothing. Releasing here guarantees the exit write
+    // lands while the selection is still valid, no matter how commit
+    // scheduling interleaves with `goTo`'s mode flip to "playback".
+    // Safe to call when not owning: release is then a no-op.
     const ctx = engineContextRef.current
     if (ctx) interactivePaintArbiterRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
@@ -496,10 +489,10 @@ export default function TierAnimationSection() {
   /* Intro tween (Play button entry point)
    *
    * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
-   * tweens the first beat's window (0 -> `TIMING_BEATS[0].progress`) while
-   * keeping `beatIndex` at 0 - so the storyboard indicator reads "1 / N"
-   * the entire time. Under `prefers-reduced-motion`, the tween collapses
-   * to an instant snap. */
+   * tweens the first beat's window (0 to `TIMING_BEATS[0].progress`)
+   * while keeping `beatIndex` at 0, so the storyboard indicator reads
+   * "1 / N" the entire time. Under `prefers-reduced-motion`, the tween
+   * collapses to an instant snap. */
   const playArrival = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
     setBeatIndex(0)
@@ -525,9 +518,9 @@ export default function TierAnimationSection() {
     backOutOpacity.set(1)
     setHasPlayed(true)
     hasPlayedRef.current = true
-    // mode signal - storyboard is now in playback. Set
-    // before `playArrival()` so any downstream effect observing the
-    // mode sees the transition before the first progress tick lands.
+    // Mode signal: storyboard is now in playback. Set before
+    // `playArrival()` so any downstream effect observing the mode sees
+    // the transition before the first progress frame lands.
     engineApiRef.current?.setMode("playback")
     computePolygonDataRef.current()
     playArrival()
@@ -541,7 +534,7 @@ export default function TierAnimationSection() {
    * without winding the UI backward through every staggered reveal.
    * On beat index === 0: do not reverse-tween `progress` (that would
    * unwind every staggered reveal). Instead, park `progress` at 0.45
-   * and animate `backOutOpacity` 1 -> 0 so the whole text block fades
+   * and animate `backOutOpacity` 1 to 0 so the whole text block fades
    * out together. On completion, snap `progress` to 0 and
    * `backOutOpacity` back to 1, and flip `hasPlayed` off so the
    * pre-play gate (title + subtitle + Play button) re-renders from a
@@ -589,7 +582,7 @@ export default function TierAnimationSection() {
       setHasPlayed(false)
       hasPlayedRef.current = false
       setPlayState("idle")
-      // Phase 3a: storyboard is back in the pre-play gate.
+      // Storyboard is back in the pre-play gate.
       engineApiRef.current?.setMode("idle")
     }
     const duration = prefersReducedMotion ? 0 : 0.6
@@ -654,7 +647,7 @@ export default function TierAnimationSection() {
         }
         // consolidated DU reset. `ANIM_POLYGON_LAYERS` loop
         // above already zeroed fill/line opacity via dynamic ids. The
-        // baseline helper re-asserts the full state (filter, color
+        // baseline helper re-applies the full state (filter, color
         // expressions, transitions, visibility) so we return to the
         // pre-play beat-1 palette consistently. Idempotent with the
         // loop's opacity writes above. Cast via `unknown` because
@@ -663,14 +656,14 @@ export default function TierAnimationSection() {
         // as `getStyledMap` in `MapPaintArbiter`).
         writeDemandUnitsBaseline(map as unknown as BaselineMap, {
           filter: DU_CLASS_FILTER,
-          fillExpr: beat1FillExpr(0) as readonly unknown[],
+          fillExpr: blueFillExpr(0) as readonly unknown[],
           fillOpacity: { kind: "scalar", value: 0 },
           lineOpacity: { kind: "scalar", value: 0 },
           lineWidth: 0.5,
           lineOffset: -0.25,
           visibility: "visible",
         })
-        // Reset shared `basemap-dim-overlay` to 0 here too, mirroring the
+        // Reset shared `basemap-dim-overlay` to 0 here too, matching the
         // styled-layer setup path. See the comment at the demand-units
         // setup block below for why we override the transition.
         if (map.getLayer("basemap-dim-overlay")) {
@@ -705,8 +698,8 @@ export default function TierAnimationSection() {
     setHasPlayed(false)
     hasPlayedRef.current = false
     setPlayState("idle")
-    // Phase 3a: mode signal. Restart returns the engine to the same
-    // pre-play regime it was in at first mount.
+    // Restart returns the engine to the same pre-play state it was in
+    // at first mount.
     engineApiRef.current?.setMode("idle")
     computePolygonDataRef.current()
   }, [progress, backOutOpacity, mapAPI.mapRef])
@@ -901,14 +894,14 @@ export default function TierAnimationSection() {
         // layer. Clicking the same square again deselects and hides the
         // layer. Clicking a square in a different outcome swaps both the
         // pin and the map layer and flies the camera to the new outcome
-        // (mirroring the old outcome-title-click camera behavior).
+        // (matching the old outcome-title-click camera behavior).
         const key = locKey(info)
         const prevPins = pinnedLocationsRef.current
         const wasSelected = prevPins.has(key)
 
-        // -- Commented out: previous multi-pin toggle behavior. Re-enable
-        //    if we ever want several pinned locations with tethered
-        //    popups again.
+        // Commented out: previous multi-pin toggle behavior. Re-enable
+        // if we ever want several pinned locations with tethered
+        // popups again.
         // setPinnedLocations((prev) => {
         //   const next = new Map(prev)
         //   if (next.has(key)) next.delete(key)
@@ -924,9 +917,9 @@ export default function TierAnimationSection() {
           | undefined
         const prevOutcomeCode = prevEntry?.code ?? null
         // Fly the camera whenever the selection enters a new outcome:
-        //   - first click (prevOutcomeCode null -> info.code): fly
-        //   - swap to a different outcome (A -> B): fly
-        //   - swap within the same outcome (A square 1 -> A square 2): no fly
+        //   - first click (no previous outcome, now info.code): fly
+        //   - swap to a different outcome (A then B): fly
+        //   - swap within the same outcome (A square 1 then square 2): no fly
         //   - de-select (wasSelected): no fly (handled below)
         const isNewOutcomeSelection =
           !wasSelected && prevOutcomeCode !== info.code
@@ -983,7 +976,7 @@ export default function TierAnimationSection() {
 
   /* demo-LOI highlight state */
   const overlayMustIncludeSourceIds = useMemo(
-    () => new Set<string>([BEAT5_LOI_ID, ...BEAT1C_POPUP_DU_IDS]),
+    () => new Set<string>([LOI_DU_ID, ...TIER_BLEND_POPUP_DU_IDS]),
     [],
   )
 
@@ -1194,7 +1187,7 @@ export default function TierAnimationSection() {
       map.once("idle", applyPaintChanges)
     }
 
-    // Store highlights (drives map Popups -- independent of map style)
+    // Store highlights (drives map Popups, independent of map style)
     const highlights: import("../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
@@ -1282,7 +1275,7 @@ export default function TierAnimationSection() {
   useEffect(() => {
     // Only wire map hover and click dispatchers while interactive. During
     // storyboard playback the map must be read-only. Any `TierMarkers` /
-    // `TierLocationLabels` that render mid-beat (e.g. the first tick an
+    // `TierLocationLabels` that render mid-beat (e.g. the first frame an
     // outcome briefly becomes visualization-active during a preview)
     // would otherwise hand hover events into `locHandlers`, which flips
     // `hoveredLocation` state, invalidates `activeLocationSet`, and
@@ -1307,7 +1300,7 @@ export default function TierAnimationSection() {
     }
   }, [])
 
-  /* Map hover/click -> shared multi-pin state for visible outcome polygons */
+  /* Map hover/click to shared multi-pin state for visible outcome polygons */
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
@@ -1503,7 +1496,8 @@ export default function TierAnimationSection() {
 
           // consolidated session-init. `ensureDemandUnitsOutlineLayer`
           // creates the `demand-units-outline` line layer once per session
-          // (idempotent - no-op if it already exists from another map mode).
+          // (safe to call repeatedly: no-op if it already exists from
+          // another map mode).
           // `writeDemandUnitsBaseline` then asserts the full beat-1 palette
           // state on both fill and outline layers, including zeroed
           // transitions so the per-frame color cycling in the progress
@@ -1512,14 +1506,14 @@ export default function TierAnimationSection() {
           // than the helpers' permissive structural types.
           ensureDemandUnitsOutlineLayer(map as unknown as SessionInitMap, {
             filter: DU_CLASS_FILTER,
-            lineColor: beat1FillExpr(0) as readonly unknown[],
+            lineColor: blueFillExpr(0) as readonly unknown[],
             lineWidth: 0.5,
             lineOpacity: 0,
             lineOffset: -0.25,
           })
           writeDemandUnitsBaseline(map as unknown as BaselineMap, {
             filter: DU_CLASS_FILTER,
-            fillExpr: beat1FillExpr(0) as readonly unknown[],
+            fillExpr: blueFillExpr(0) as readonly unknown[],
             fillOpacity: { kind: "scalar", value: 0 },
             lineOpacity: { kind: "scalar", value: 0 },
             lineWidth: 0.5,
@@ -1593,8 +1587,7 @@ export default function TierAnimationSection() {
   /* Per-outcome schedule for hiding map features as the SVG morph
    * takes over. See `HideScheduleEntry` in `engine/types.ts` for the
    * field contract. Populated by the outcome-schedule effect below
-   * and read by both the legacy listener and the engine's
-   * `MapPaintArbiter` via `ctx.getHideSchedule()`. */
+   * and read by the `MapPaintArbiter` via `ctx.getHideSchedule()`. */
   const hideScheduleRef = useRef<HideScheduleEntry[]>([])
 
   /** Build a Mapbox match expression blending from `fromHex` to each DU's
@@ -1630,16 +1623,11 @@ export default function TierAnimationSection() {
   /* InteractivePaintArbiter
    *
    * Event-driven arbiter (same shape as `CameraArbiter`, not in the
-   * progress-dispatch `arbitersRef` list). Will eventually be the
-   * sole writer for `demand-units` / `demand-units-outline` during
-   * interactive mode. In Phase 3b its `onEnter` / `onExit` /
-   * `onChangeSelection` hooks are logging stubs. Legacy writers
-   * (`applyPaintChanges` effect + `OutcomePolygonLayer` + the
-   * `selectedOutcomeCode` transition effect) still drive actual
-   * paint. The React effect below calls `sync` on every
-   * (mode, selection) change so we can verify lifecycle correctness
-   * via console before Phase 3c flips on the writes and deletes the
-   * legacy paths. */
+   * progress-dispatch `arbitersRef` list). Sole writer for
+   * `demand-units` / `demand-units-outline` during interactive mode.
+   * The effects below call `sync` on every (mode, selection) change,
+   * `applyOverlay` on spotlight/pin changes, and `release` to hand the
+   * layers back on teardown. */
   const interactivePaintArbiterRef = useRef<InteractivePaintArbiter | null>(
     null,
   )
@@ -1651,24 +1639,21 @@ export default function TierAnimationSection() {
   // component-owned callbacks. Each child component writes its
   // `applyXxxFrame(v)` callback into `.current` on mount and clears
   // it on unmount. The arbiter reads through the ref on each
-  // `onUpdate`, which is how we satisfy invariant 4 ("one
-  // `progress.on('change')` subscriber") without lifting the
-  // components' large per-frame DOM-mutation bodies into declarative
-  // actor payloads.
+  // `onUpdate`, keeping the engine the single `progress.on('change')`
+  // subscriber without lifting the components' large per-frame
+  // DOM-mutation bodies into declarative actor payloads.
   const narrationTickRef = useRef<((v: number) => void) | null>(null)
   const overlayMorphTickRef = useRef<((v: number) => void) | null>(null)
 
   // Engine context. Rebuilt every render, but the engine reads via a
-  // ref so no re-subscription happens. Every actor thunk (e.g.
+  // ref so no re-subscription happens. Every actor function (e.g.
   // `buildHighlight`) closes over whatever `ctx` was current at
   // dispatch time, so the latest React-state snapshot flows through.
-  // Fresh Map per `centroids` change so `buildHighlight` thunks that
-  // read `ctx.centroidLookup` never pick up a stale empty Map. An earlier
-  // version of this memo read `centroidLookupRef.current` once at memo
-  // time and cached it. The ref body later swapped to the real Map when
-  // data loaded, but the memoized context still held the initial empty
-  // Map, so Beat 4 step 5's map popup thunk always returned null (no
-  // coord) and the popup never wrote to the store.
+  // We build a fresh Map on every `centroids` change so the
+  // `buildHighlight` functions that read `ctx.centroidLookup` never see
+  // a stale empty Map. (Caching the lookup once would leave the context
+  // holding the initial empty Map after data loads, and the loi-highlight
+  // beat's step-5 map popup would return null and never write to the store.)
   const engineCentroidLookup = useMemo(
     () =>
       new Map<string, { lng: number; lat: number }>(
@@ -1730,26 +1715,25 @@ export default function TierAnimationSection() {
    *
    * Reconcile the arbiter's ownership of `demand-units` /
    * `demand-units-outline` whenever selection, engine mode, or
-   * `playState` changes. The arbiter owns (and paints) iff all of:
+   * `playState` changes. The arbiter owns (and paints) only when all of:
    *
    *   1. A DU outcome (`layerType === "demand-units"`) is selected.
    *   2. Engine mode is not `"idle"` (we're in or past the storyboard).
-   *   3. `playState !== "playing"` (no active tween --
+   *   3. `playState !== "playing"` (no active tween, since
    *      `MapPaintArbiter` owns during tweens).
    *   4. Tier data for that outcome has hydrated
    *      (`outcomeLocationsRef` has the colorMap).
    *
    * When all four hold, we build a `DemandUnitsPaintSpec` and pass it
    * to `sync`. When any fail, we pass `null` and the arbiter tears
-   * down. Condition (3) is the "broadened" gate promised by Phase 3c
-   * step 2: the arbiter now also owns during paused-between-beats
-   * state, so a mid-storyboard square click's gold outline is
-   * guaranteed to be cleaned up on deselect.
+   * down. Condition (3) lets the arbiter also own during the
+   * paused-between-beats state, so a mid-storyboard square click's
+   * gold outline is cleaned up on deselect.
    *
    * Mode isn't reactive (it lives on a ref inside `BeatEngine`), so
    * we depend on `playState` as a proxy: every `setMode(...)` call in
    * this file happens alongside a `setPlayState(...)` call, so the
-   * effect fires on the same tick the mode transitioned. */
+   * effect fires on the same frame the mode transitioned. */
   useEffect(() => {
     const arbiter = interactivePaintArbiterRef.current
     if (!arbiter) return
@@ -1806,7 +1790,7 @@ export default function TierAnimationSection() {
    *
    * Apply the per-selection overlay (gold outline + zoom-aware
    * fill-opacity with optional spotlight / pinned overrides) whenever
-   * active locations, pinned locations, or Beat 5's spotlighted tier
+   * active locations, pinned locations, or the loi-highlight beat's spotlighted tier
    * change. Separated from `sync` because overlay state changes much
    * more frequently (hover, pin toggle, tier step) and can be written
    * as a pure overlay pass without re-running the full enter /
@@ -1861,9 +1845,9 @@ export default function TierAnimationSection() {
    * and `MapPaintArbiter`'s beat actors are writing `demand-units`
    * every frame. If the arbiter has a deferred-idle teardown pending
    * from a just-prior deselect, it would land after the tween settles
-   * and stomp whatever beat paint `MapPaintArbiter` left on the
+   * and overwrite whatever beat paint `MapPaintArbiter` left on the
    * layer. Cancel it here so the pending listener detaches cleanly.
-   * Safe to call when no teardown is pending (idempotent). */
+   * Safe to call when no teardown is pending. */
   useEffect(() => {
     if (playState !== "playing") return
     interactivePaintArbiterRef.current?.cancelPendingTeardown()
@@ -2145,7 +2129,7 @@ export default function TierAnimationSection() {
 
   /**
    * Re-project cached geographic data to screen without re-querying Mapbox.
-   * Safe to call on every map move/zoom - feature count stays stable.
+   * Safe to call on every map move/zoom: feature count stays stable.
    */
   const reprojectShapes = useCallback(() => {
     if (!mapAPI.mapRef?.current || !panelRef.current) return
@@ -2266,7 +2250,7 @@ export default function TierAnimationSection() {
     return () => window.removeEventListener("resize", onResize)
   }, [reprojectShapes])
 
-  // Re-apply offset on scroll (cheap - no Mapbox queries).
+  // Re-apply offset on scroll (cheap: no Mapbox queries).
   // With page-level scrolling, listen on window instead of a parent scroll container.
   useEffect(() => {
     if (!panelInView) return
@@ -2456,9 +2440,10 @@ export default function TierAnimationSection() {
     const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
 
     // Left column renders in this explicit order (AG_REV before CWS_DEL).
-    // We don't touch OUTCOME_CODE_ORDER globally - radar axes + NOD/SOD
-    // helpers depend on that list - so we just prepend the left-column codes
-    // in their desired order and iterate the rest of OUTCOME_CODE_ORDER after.
+    // Don't touch OUTCOME_CODE_ORDER globally, since radar axes and
+    // NOD/SOD helpers depend on that list. So we just prepend the
+    // left-column codes in their desired order and iterate the rest of
+    // OUTCOME_CODE_ORDER after.
     const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
     const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
     const orderedCodes: string[] = [
@@ -2466,10 +2451,9 @@ export default function TierAnimationSection() {
       ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
     ]
 
-    // Eyebrow labels fade in alongside the right-panel backdrop so they're
-    // fully present by the time beat 3 (AG_REV morph) settles at 0.39. The
-    // 0.01 fade width is applied by BeatTextOverlay's progress handler.
-    const EYEBROW_FADE_IN = 0.3775
+    // Eyebrow labels fade in alongside the right-panel backdrop, sharing
+    // its onset. The fade width is applied by the narration frame handler.
+    const EYEBROW_FADE_IN = BACKDROP_FADE_IN_PROGRESS
     const eyebrows = [
       {
         label: "Consumptive uses",
@@ -2547,8 +2531,8 @@ export default function TierAnimationSection() {
   const handleGlyphLayoutChange = useCallback(
     (layout: Record<string, GlyphRect>) => {
       setGlyphLayout((prev) => {
-        // Shallow-compare to avoid redundant state updates (ResizeObserver can
-        // fire frequently. Same rects -> skip re-render).
+        // Shallow-compare to avoid redundant state updates (ResizeObserver
+        // can fire frequently, and identical rects should skip re-render).
         const prevKeys = Object.keys(prev)
         const nextKeys = Object.keys(layout)
         if (prevKeys.length === nextKeys.length) {
@@ -2646,7 +2630,7 @@ export default function TierAnimationSection() {
           {/* Background cover */}
           <MapFade opacity={mapOpacity} color={forestBg} />
 
-          {/* Outcome polygon morph overlay - active during Beat 2 */}
+          {/* Outcome polygon morph overlay: active during Beat 2 */}
           {activeOutcomeGroups.length > 0 && panelSize && (
             <motion.div
               style={{
@@ -2713,7 +2697,6 @@ export default function TierAnimationSection() {
             narrationTickRef={narrationTickRef}
             headingOpacity={headingOpacity}
             backOutOpacity={backOutOpacity}
-            playState={playState}
             beatIndex={beatIndex}
             totalBeats={TIMING_BEATS.length}
             hasPlayed={hasPlayed}

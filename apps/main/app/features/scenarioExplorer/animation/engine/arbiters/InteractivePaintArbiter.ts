@@ -1,4 +1,10 @@
-/* InteractivePaintArbiter */
+/* InteractivePaintArbiter
+ *
+ * Paints the demand-units layers while the user clicks around in
+ * interactive mode (after the storyboard has finished). It takes over
+ * the layers when a demand-units outcome is selected and hands them
+ * back when the selection clears.
+ */
 
 import type { MapboxGLMap } from "@repo/map"
 import type {
@@ -11,49 +17,34 @@ import {
   DU_CLASS_FILTER,
   type BaselineMap,
 } from "../demandUnitsBaseline"
-import { BEAT1_MID } from "../beat1Palette"
+import { BLUE_MID } from "../bluePalette"
+import {
+  HIGHLIGHT_GOLD,
+  BASE_FILL_OPACITY,
+  ZOOM_THRESHOLD,
+  ZOOMED_IN_OPACITY,
+  ZOOM_AWARE_BASE_OPACITY,
+} from "../../demandUnitsPaint"
 
-/** Transition observed by the most recent `sync` call. Used for tests
- *  and log correlation. No control flow depends on it. */
+/** What the last `sync` call did. For tests and logging only; nothing
+ *  branches on it. */
 export type InteractivePaintTransition =
   | "enter"
   | "exit"
   | "change-selection"
   | "no-op"
 
-//────
-// Constants (duplicated from TierAnimationSection to avoid React
-// file-level coupling). If any of these diverge here and there the
-// gold-outline overlay will look different from the non-DU outcomes,
-// so keep them in sync.
-//────
+// Gold outline and zoom-aware opacities are shared with the scripted
+// storyboard. They live in `demandUnitsPaint.ts` so the interactive view
+// matches the beats. The durations below are interactive-only.
 
 /** Fade-in duration (ms) for the initial enter transition. */
 const FADE_IN_DURATION = 350
 /** Crossfade duration (ms) when swapping between DU outcomes. */
 const COLOR_TRANSITION_DURATION = 400
-/** Gold highlight color applied to active outlines (hover + pin). */
-const HIGHLIGHT_GOLD = "#ffd87e"
-/** Base fill opacity below the zoom threshold (zoomed-out view). */
-const BASE_FILL_OPACITY = 0.75
-/** Zoom level at which the step expression switches branches. */
-const ZOOM_THRESHOLD = 8
-/** Fill opacity at and above the zoom threshold. */
-const ZOOMED_IN_OPACITY = 0.75
 
-/** Zoom-aware fill-opacity for the demand-units layer when no
- *  spotlight / pin overlay is applied. Mirrors the non-outlineOnly
- *  default in `applyPaintChanges`. */
-const ZOOM_AWARE_BASE_OPACITY: unknown = [
-  "step",
-  ["zoom"],
-  BASE_FILL_OPACITY,
-  ZOOM_THRESHOLD,
-  ZOOMED_IN_OPACITY,
-]
-
-/** Zoom-aware fill-opacity used during initial fade-in (matches OPL's
- *  default-path final value). Interpolates between zoom 5 and 10. */
+/** Fill-opacity the initial fade-in lands on, matching the outcome
+ *  polygon layer. Interpolated across zoom 5 to 10. */
 const FADE_IN_FILL_OPACITY: unknown = [
   "interpolate",
   ["linear"],
@@ -66,7 +57,7 @@ const FADE_IN_FILL_OPACITY: unknown = [
   0.35,
 ]
 
-/** Zoom-aware outline line-width used in fade-in. Mirrors OPL. */
+/** Outline width during fade-in, matching the outcome polygon layer. */
 const OUTLINE_LINE_WIDTH: unknown = [
   "interpolate",
   ["linear"],
@@ -81,7 +72,7 @@ const OUTLINE_LINE_WIDTH: unknown = [
   3,
 ]
 
-/** Zoom-aware outline line-offset used in fade-in. Mirrors OPL. */
+/** Outline offset during fade-in, matching the outcome polygon layer. */
 const OUTLINE_LINE_OFFSET: unknown = [
   "interpolate",
   ["linear"],
@@ -121,23 +112,20 @@ export class InteractivePaintArbiter {
   /** True while this arbiter holds the interactive paint claim. */
   private currentlyOwns = false
 
-  /** Spec for the currently-painted outcome. Null iff `currentlyOwns`
-   *  is false. Used by `onChangeSelection` to decide crossfade vs no-op
-   *  and by `applyOverlay` as the "base" paint to fall back to when the
-   *  overlay clears. */
+  /** The outcome currently being painted, or null when we don't own
+   *  the layers. Used to decide whether a new selection is a crossfade,
+   *  and as the base paint to restore when an overlay clears. */
   private currentSpec: DemandUnitsPaintSpec | null = null
 
-  /** Whether we armed the fade-in transition and flipped opacity to 0
-   *  awaiting the RAF follow-up. Guards the RAF handle and reset-on-
-   *  re-enter semantics. */
+  /** Handle for the queued fade-in frame, or null when none is
+   *  pending. */
   private pendingFadeRaf: number | null = null
 
-  /** Pending deferred-teardown cleanup fn, or null if no teardown is
-   *  waiting on `idle`. */
+  /** A teardown waiting for the engine to go idle, or null if none. */
   private pendingTeardownCleanup: (() => void) | null = null
 
-  /**
-   * Reconcile arbiter state against the caller's paint spec */
+  /** Bring our state in line with the caller's paint spec (pass null
+   *  to release the layers). */
   sync(
     ctx: BeatEngineContext,
     spec: DemandUnitsPaintSpec | null,
@@ -146,7 +134,7 @@ export class InteractivePaintArbiter {
 
     // Enter. No prior claim, now should own.
     if (shouldOwn && !this.currentlyOwns) {
-      // Supersede any stale deferred teardown from a previous exit.
+      // Cancel any teardown left over from a previous exit.
       this.cancelPendingTeardown()
       this.currentlyOwns = true
       this.currentSpec = spec
@@ -163,7 +151,7 @@ export class InteractivePaintArbiter {
       return "exit"
     }
 
-    // Change selection. Still owning, outcome identity changed.
+    // Selection changed. Still owning, but a different outcome.
     if (
       shouldOwn &&
       this.currentlyOwns &&
@@ -238,7 +226,7 @@ export class InteractivePaintArbiter {
         }
       }
 
-      // Fill pass: spotlight > pinned > zoom-aware base.
+      // Fill pass, in priority order: spotlight, then pinned, then base.
       if (!map.getLayer("demand-units")) return
 
       if (overlay.hasSpotlight) {
@@ -255,7 +243,7 @@ export class InteractivePaintArbiter {
             0.12,
           ] as never)
         } else {
-          // Spotlight requested but no matching DUs -- dim all.
+          // Spotlight requested but nothing matches, so dim everything.
           map.setPaintProperty("demand-units", "fill-opacity", 0.12 as never)
         }
       } else if (overlay.pinnedFeatureIds.length > 0) {
@@ -283,11 +271,8 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /**
-   * Unconditionally release ownership. Called on engine unmount or
-   * when a nav handler wants to force-clear interactive state without
-   * driving through `sync`.
-   */
+  /** Release the layers no matter what. Called on unmount or when a
+   *  nav handler force-clears without going through `sync`. */
   release(ctx: BeatEngineContext): void {
     if (!this.currentlyOwns) return
     this.currentlyOwns = false
@@ -296,16 +281,15 @@ export class InteractivePaintArbiter {
     this.onExit(ctx)
   }
 
-  /** True iff the arbiter is currently the active writer. */
+  /** True when this arbiter is currently the active writer. */
   owns(): boolean {
     return this.currentlyOwns
   }
 
-  /** Cancel any pending deferred-teardown `idle` listener. Public so
-   *  `TierAnimationSection` can abort a teardown when `playState`
-   *  transitions to `"playing"` -- at that point `MapPaintArbiter` is
-   *  about to take the wheel and the pending teardown would stomp
-   *  whatever beat it writes. Idempotent. */
+  /** Cancel a teardown that's waiting for idle. `TierAnimationSection`
+   *  calls this when playback starts: `MapPaintArbiter` is about to
+   *  take over, and a late teardown would overwrite its paint. Safe to
+   *  call when nothing is pending. */
   cancelPendingTeardown(): void {
     if (!this.pendingTeardownCleanup) return
     const cleanup = this.pendingTeardownCleanup
@@ -317,9 +301,8 @@ export class InteractivePaintArbiter {
   // Lifecycle hooks
   //────
 
-  /**
-   * Take ownership of `demand-units` / `demand-units-outline`.
-   */
+  /** Take ownership of the `demand-units` and `demand-units-outline`
+   *  layers. */
   private onEnter(ctx: BeatEngineContext, spec: DemandUnitsPaintSpec): void {
     const map: MapboxGLMap | undefined = ctx.mapRef?.current?.getMap?.()
     if (!map) return
@@ -373,13 +356,13 @@ export class InteractivePaintArbiter {
       return
     }
 
-    // Step 2: next frame, flip opacity to target so the armed
-    // transition actually animates instead of snapping.
+    // Next frame, set opacity to the target so the transition animates
+    // instead of snapping.
     this.pendingFadeRaf = requestAnimationFrame(() => {
       this.pendingFadeRaf = null
-      // Bail if we lost ownership while the RAF was in flight (rapid
-      // click/deselect). The post-enter paint would otherwise land
-      // after `onExit`'s baseline write and re-make the layer visible.
+      // Bail if we lost ownership while the frame was queued (rapid
+      // click then deselect). Otherwise this paint would land after
+      // `onExit` and make the layer visible again.
       if (!this.currentlyOwns) return
       if (this.currentSpec?.outcomeCode !== spec.outcomeCode) return
       if (!map.getLayer("demand-units")) return
@@ -404,9 +387,7 @@ export class InteractivePaintArbiter {
     })
   }
 
-  /**
-   * Crossfade to a different DU outcome while retaining ownership.
-   */
+  /** Crossfade to a different outcome while keeping ownership. */
   private onChangeSelection(
     ctx: BeatEngineContext,
     spec: DemandUnitsPaintSpec,
@@ -418,8 +399,8 @@ export class InteractivePaintArbiter {
     this.cancelPendingFadeRaf()
 
     try {
-      // Must run **before** setFilter: old overlay expressions + new
-      // class slice can disagree for a single paint otherwise.
+      // Run before `setFilter`: otherwise the old overlay expression
+      // and the new class filter can disagree for one frame.
       this.clearOverlayToBaseForCrossfade(map, spec)
 
       const filter = buildPaintFilter(spec)
@@ -500,7 +481,7 @@ export class InteractivePaintArbiter {
       try {
         writeDemandUnitsBaseline(m as unknown as BaselineMap, {
           filter: DU_CLASS_FILTER,
-          fillExpr: ctx.buildBlendedTierExpr(BEAT1_MID, 1) as
+          fillExpr: ctx.buildBlendedTierExpr(BLUE_MID, 1) as
             | readonly unknown[]
             | null,
           fillOpacity: { kind: "scalar", value: 0 },
