@@ -434,7 +434,23 @@ export interface BeatEngineContext {
 // Arbiter interface
 
 /**
- * Each arbiter handles one `ActorKind`. The engine calls its hooks:
+ * There are two families of arbiter in this feature.
+ *
+ * Playback arbiters implement this interface. The engine dispatches them
+ * from the `progress` clock: `MapPaintArbiter`, `MapPopupArbiter`,
+ * `OverlayPopupArbiter`, `NarrationArbiter`, and `OverlayMorphArbiter`.
+ *
+ * Event-driven arbiters do not implement this interface and are not in the
+ * engine dispatch list. They are held in refs and called directly from
+ * effects or nav handlers, because their work is driven by React state or
+ * user events, not by `progress`: `CameraArbiter` (fly home),
+ * `InteractivePaintArbiter` (the demand-units layer after the storyboard
+ * settles), and `InteractiveOutlineArbiter` (the other polygon outcomes).
+ * The `getMode()` signal on the context is an input to these decisions, not
+ * an engine-wide gate.
+ *
+ * Each playback arbiter handles one `ActorKind`. The engine calls its
+ * hooks:
  *
  * - `onEnter(actor, v, ctx)` once when `v` first enters the actor's
  *   window.

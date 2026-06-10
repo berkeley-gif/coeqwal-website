@@ -19,11 +19,9 @@ import {
 } from "../demandUnitsBaseline"
 import { BLUE_MID } from "../bluePalette"
 import {
-  HIGHLIGHT_GOLD,
-  BASE_FILL_OPACITY,
-  ZOOM_THRESHOLD,
-  ZOOMED_IN_OPACITY,
   ZOOM_AWARE_BASE_OPACITY,
+  buildActiveOutlineExpr,
+  buildFillOpacityExpr,
 } from "../../demandUnitsPaint"
 
 /** What the last `sync` call did. For tests and logging only; nothing
@@ -184,29 +182,26 @@ export class InteractivePaintArbiter {
       // Outline pass: gold case on active features, tier color otherwise.
       if (map.getLayer("demand-units-outline")) {
         if (overlay.activeFeatureIds.length > 0) {
-          const activeMatch: unknown = [
-            "in",
-            ["get", idProp],
-            ["literal", [...overlay.activeFeatureIds]],
-          ]
-          map.setPaintProperty("demand-units-outline", "line-color", [
-            "case",
-            activeMatch,
-            HIGHLIGHT_GOLD,
+          const { lineColor, lineWidth, lineOpacity } = buildActiveOutlineExpr(
+            overlay.activeFeatureIds,
+            idProp,
             spec.colorExpression,
-          ] as never)
-          map.setPaintProperty("demand-units-outline", "line-width", [
-            "case",
-            activeMatch,
-            2,
-            1,
-          ] as never)
-          map.setPaintProperty("demand-units-outline", "line-opacity", [
-            "case",
-            activeMatch,
-            1,
-            0,
-          ] as never)
+          )
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-color",
+            lineColor as never,
+          )
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-width",
+            lineWidth as never,
+          )
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-opacity",
+            lineOpacity as never,
+          )
         } else {
           map.setPaintProperty(
             "demand-units-outline",
@@ -229,43 +224,11 @@ export class InteractivePaintArbiter {
       // Fill pass, in priority order: spotlight, then pinned, then base.
       if (!map.getLayer("demand-units")) return
 
-      if (overlay.hasSpotlight) {
-        if (overlay.spotlightFeatureIds.length > 0) {
-          const spotlightMatch: unknown = [
-            "in",
-            ["get", idProp],
-            ["literal", [...overlay.spotlightFeatureIds]],
-          ]
-          map.setPaintProperty("demand-units", "fill-opacity", [
-            "case",
-            spotlightMatch,
-            0.9,
-            0.12,
-          ] as never)
-        } else {
-          // Spotlight requested but nothing matches, so dim everything.
-          map.setPaintProperty("demand-units", "fill-opacity", 0.12 as never)
-        }
-      } else if (overlay.pinnedFeatureIds.length > 0) {
-        const pinnedMatch: unknown = [
-          "in",
-          ["get", idProp],
-          ["literal", [...overlay.pinnedFeatureIds]],
-        ]
-        map.setPaintProperty("demand-units", "fill-opacity", [
-          "step",
-          ["zoom"],
-          ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
-          ZOOM_THRESHOLD,
-          ZOOMED_IN_OPACITY,
-        ] as never)
-      } else {
-        map.setPaintProperty(
-          "demand-units",
-          "fill-opacity",
-          ZOOM_AWARE_BASE_OPACITY as never,
-        )
-      }
+      map.setPaintProperty(
+        "demand-units",
+        "fill-opacity",
+        buildFillOpacityExpr(overlay, idProp) as never,
+      )
     } catch {
       /* ok */
     }

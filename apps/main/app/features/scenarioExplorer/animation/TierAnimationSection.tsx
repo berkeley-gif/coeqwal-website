@@ -52,14 +52,7 @@ import {
   FINAL_TIMING_BEAT_INDEX,
   BACKDROP_FADE_IN_PROGRESS,
 } from "./animationTiming"
-import {
-  HIGHLIGHT_GOLD,
-  BASE_FILL_OPACITY,
-  ZOOM_THRESHOLD,
-  ZOOMED_IN_OPACITY,
-  ZOOM_AWARE_BASE_OPACITY,
-  LOI_DU_ID,
-} from "./demandUnitsPaint"
+import { LOI_DU_ID } from "./demandUnitsPaint"
 import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
 import {
   useBeatEngine,
@@ -71,6 +64,8 @@ import {
   OverlayMorphArbiter,
   CameraArbiter,
   InteractivePaintArbiter,
+  InteractiveOutlineArbiter,
+  type OutlinePaintTarget,
   DU_CLASS_FILTER,
   writeDemandUnitsBaseline,
   ensureDemandUnitsOutlineLayer,
@@ -1006,12 +1001,6 @@ export default function TierAnimationSection() {
     // outcome's view.
     setHoveredLocation(null)
 
-    // The interactive paint effect caches original line-color / line-width
-    // values per layer. Invalidate them so the new outcome's layer starts
-    // from a clean baseline.
-    origLineColorRef.current = null
-    origLineWidthRef.current = null
-
     // NOTE: pinnedCacheRef (stash/restore per-outcome pins) was used by
     // the older multi-pin + outcome-title-click flow. It is intentionally
     // not read or written here any more. A cross-outcome click replaces
@@ -1030,11 +1019,24 @@ export default function TierAnimationSection() {
     )
   }, [centroids])
 
-  /* Apply map highlight for all active locations */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const origLineColorRef = useRef<any>(null)
-  const origLineWidthRef = useRef<number | null>(null)
+  /* InteractiveOutlineArbiter
+   *
+   * Sibling of `InteractivePaintArbiter`. Paints the non-demand-unit
+   * polygon outcomes (reservoirs and the other outcome layers) while the
+   * user clicks around in interactive mode. Event-driven, held in a ref
+   * like `CameraArbiter`, not in the engine dispatch list. */
+  const interactiveOutlineArbiterRef = useRef<InteractiveOutlineArbiter | null>(
+    null,
+  )
+  if (interactiveOutlineArbiterRef.current === null) {
+    interactiveOutlineArbiterRef.current = new InteractiveOutlineArbiter()
+  }
 
+  /* Location highlights (popup data, not paint)
+   *
+   * Builds the `LocationHighlight[]` the map popups read from coordinates,
+   * names, and tier colors for every active location. Runs for all outcome
+   * types and is independent of which arbiter paints the map. */
   useEffect(() => {
     if (!isInteractive) return
 
@@ -1048,146 +1050,6 @@ export default function TierAnimationSection() {
       return
     }
 
-    const map = mapAPI.mapRef?.current?.getMap?.()
-
-    origLineColorRef.current = null
-    origLineWidthRef.current = null
-
-    const applyPaintChanges = () => {
-      if (!map || config.geometryType !== "polygon") return
-
-      if (config.layerType === "demand-units") return
-      const fillId = config.mapboxLayerId
-      const outlineId = `${config.mapboxLayerId}-outline`
-      const idProp = config.idProperty ?? "DU_ID"
-
-      if (!map.getLayer(fillId)) return
-
-      const activeFeatureIds: string[] = []
-      const pinnedFeatureIds: string[] = []
-      for (const [key, info] of activeLocationSet) {
-        let fid = info.sourceId
-        if (info.code === "RES_STOR") {
-          fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
-        }
-        activeFeatureIds.push(fid)
-        if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
-      }
-
-      try {
-        if (map.getLayer(outlineId)) {
-          if (!origLineColorRef.current) {
-            origLineColorRef.current =
-              map.getPaintProperty(outlineId, "line-color") ?? "#888"
-          }
-          if (origLineWidthRef.current == null) {
-            origLineWidthRef.current = (map.getPaintProperty(
-              outlineId,
-              "line-width",
-            ) ?? 1) as never
-          }
-
-          if (activeFeatureIds.length > 0) {
-            const activeMatch = [
-              "in",
-              ["get", idProp],
-              ["literal", activeFeatureIds],
-            ]
-            map.setPaintProperty(outlineId, "line-color", [
-              "case",
-              activeMatch,
-              HIGHLIGHT_GOLD,
-              origLineColorRef.current,
-            ] as never)
-            map.setPaintProperty(outlineId, "line-width", [
-              "case",
-              activeMatch,
-              2,
-              1,
-            ] as never)
-            map.setPaintProperty(outlineId, "line-opacity", [
-              "case",
-              activeMatch,
-              1,
-              0,
-            ] as never)
-          } else {
-            map.setPaintProperty(
-              outlineId,
-              "line-color",
-              origLineColorRef.current as never,
-            )
-            map.setPaintProperty(
-              outlineId,
-              "line-width",
-              origLineWidthRef.current as never,
-            )
-          }
-        }
-
-        if (!config.outlineOnly) {
-          if (spotlightedTier != null) {
-            const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
-            if (locData) {
-              const spotlightIds: string[] = []
-              for (const [locId, tier] of Object.entries(locData.tierMap)) {
-                if (tier === spotlightedTier) {
-                  const fid =
-                    selectedOutcomeCode === "RES_STOR"
-                      ? (RESERVOIR_CALSIM_TO_GNISIDLABEL[locId] ?? locId)
-                      : locId
-                  spotlightIds.push(fid)
-                }
-              }
-              if (spotlightIds.length > 0) {
-                const spotlightMatch = [
-                  "in",
-                  ["get", idProp],
-                  ["literal", spotlightIds],
-                ]
-                map.setPaintProperty(fillId, "fill-opacity", [
-                  "case",
-                  spotlightMatch,
-                  0.9,
-                  0.12,
-                ] as never)
-              }
-            }
-          } else if (pinnedFeatureIds.length > 0) {
-            const pinnedMatch = [
-              "in",
-              ["get", idProp],
-              ["literal", pinnedFeatureIds],
-            ]
-            map.setPaintProperty(fillId, "fill-opacity", [
-              "step",
-              ["zoom"],
-              ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
-              ZOOM_THRESHOLD,
-              ZOOMED_IN_OPACITY,
-            ] as never)
-          } else {
-            map.setPaintProperty(
-              fillId,
-              "fill-opacity",
-              ZOOM_AWARE_BASE_OPACITY as never,
-            )
-          }
-        }
-      } catch {
-        /* ok */
-      }
-    }
-
-    let pendingIdle = false
-    if (map?.isStyleLoaded?.()) {
-      applyPaintChanges()
-    } else if (map) {
-      pendingIdle = true
-      map.once("idle", applyPaintChanges)
-    }
-
-    // Store highlights (drives map Popups, independent of map style)
     const highlights: import("../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
@@ -1244,12 +1106,6 @@ export default function TierAnimationSection() {
     })
 
     mapActions.setLocationHighlights(highlights)
-
-    return () => {
-      if (pendingIdle && map) {
-        map.off("idle", applyPaintChanges)
-      }
-    }
   }, [
     isInteractive,
     playState,
@@ -1257,9 +1113,7 @@ export default function TierAnimationSection() {
     hoveredLocation,
     pinnedLocations,
     selectedOutcomeCode,
-    mapAPI.mapRef,
     locKey,
-    spotlightedTier,
   ])
 
   // Register store callbacks so map tooltips and TierMarkers can interact
@@ -1785,6 +1639,88 @@ export default function TierAnimationSection() {
     // `theme` dep covers the grey fallback. `outcomeLocations` fires
     // the re-sync when tier data hydrates for the current outcome.
   }, [engineContext, selectedOutcomeCode, playState, theme, outcomeLocations])
+
+  /* Non-DU polygon paint
+   *
+   * Hands the sibling arbiter the target layers and the current overlay
+   * (active, pinned, and spotlight feature ids, reservoir-translated)
+   * whenever the selection changes. Passes null to release when the
+   * selection is not a non-DU polygon outcome. The demand-units layers are
+   * owned by `InteractivePaintArbiter`, not here. */
+  useEffect(() => {
+    const arbiter = interactiveOutlineArbiterRef.current
+    if (!arbiter) return
+
+    const config =
+      isInteractive && selectedOutcomeCode
+        ? getOutcomeConfig(selectedOutcomeCode)
+        : null
+    const isNonDuPolygon =
+      !!config &&
+      config.geometryType === "polygon" &&
+      config.layerType !== "demand-units"
+
+    if (!isNonDuPolygon || !config) {
+      arbiter.sync(engineContext, null, null)
+      return
+    }
+
+    const idProperty = config.idProperty ?? "DU_ID"
+
+    const activeFeatureIds: string[] = []
+    const pinnedFeatureIds: string[] = []
+    for (const [key, info] of activeLocationSet) {
+      let fid = info.sourceId
+      if (info.code === "RES_STOR") {
+        fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+      }
+      activeFeatureIds.push(fid)
+      if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
+    }
+
+    const spotlightFeatureIds: string[] = []
+    if (spotlightedTier != null) {
+      const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
+      if (locData) {
+        for (const [locId, tier] of Object.entries(locData.tierMap)) {
+          if (tier === spotlightedTier) {
+            const fid =
+              selectedOutcomeCode === "RES_STOR"
+                ? (RESERVOIR_CALSIM_TO_GNISIDLABEL[locId] ?? locId)
+                : locId
+            spotlightFeatureIds.push(fid)
+          }
+        }
+      }
+    }
+
+    const overlay: DemandUnitsOverlayState = {
+      outcomeCode: selectedOutcomeCode!,
+      activeFeatureIds,
+      pinnedFeatureIds,
+      spotlightFeatureIds,
+      hasSpotlight: spotlightedTier != null,
+    }
+
+    const target: OutlinePaintTarget = {
+      outcomeCode: selectedOutcomeCode!,
+      fillId: config.mapboxLayerId,
+      outlineId: `${config.mapboxLayerId}-outline`,
+      idProperty,
+      outlineOnly: !!config.outlineOnly,
+    }
+
+    arbiter.sync(engineContext, target, overlay)
+
+    return () => arbiter.cancelPendingTeardown()
+  }, [
+    engineContext,
+    isInteractive,
+    selectedOutcomeCode,
+    activeLocationSet,
+    pinnedLocations,
+    spotlightedTier,
+  ])
 
   /* InteractivePaintArbiter overlay
    *

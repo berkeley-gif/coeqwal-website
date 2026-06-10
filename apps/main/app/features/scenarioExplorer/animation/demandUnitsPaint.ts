@@ -8,6 +8,8 @@
  * hand-copied across files.
  */
 
+import type { DemandUnitsOverlayState } from "./engine/types"
+
 /** Gold highlight color for active demand-unit outlines (hover and pin). */
 export const HIGHLIGHT_GOLD = "#ffd87e"
 
@@ -35,3 +37,61 @@ export const ZOOM_AWARE_BASE_OPACITY: unknown = [
  *  Sacramento Valley). Read by the storyboard choreography and by the
  *  overlay must-include pin set so the square renders deterministically. */
 export const LOI_DU_ID = "08N_SA2"
+
+/* Shared overlay-expression builders
+ *
+ * Both interactive painters (the demand-units arbiter and the non-DU
+ * polygon arbiter) draw the same highlight-color-on-active (gold) outline and the same
+ * spotlight / pinned / base fill-opacity. These pure helpers build the
+ * Mapbox expressions so the two painters can never drift. They only
+ * construct expressions, they don't touch the map.
+ */
+
+/** Outline paint for the "some features active" case: a highlight `case` over
+ *  the base color, a wider stroke on active features, and opacity that
+ *  hides non-active outlines. `baseColor` is what non-active features use
+ *  (the arbiter's tier-color expression, or a layer's original color). */
+export function buildActiveOutlineExpr(
+  activeIds: readonly string[],
+  idProperty: string,
+  baseColor: unknown,
+): { lineColor: unknown; lineWidth: unknown; lineOpacity: unknown } {
+  const activeMatch = ["in", ["get", idProperty], ["literal", [...activeIds]]]
+  return {
+    lineColor: ["case", activeMatch, HIGHLIGHT_GOLD, baseColor],
+    lineWidth: ["case", activeMatch, 2, 1],
+    lineOpacity: ["case", activeMatch, 1, 0],
+  }
+}
+
+/** Fill-opacity in priority order: spotlight, then pinned, then base. When
+ *  a spotlight is on but nothing matches, everything dims to 0.12. */
+export function buildFillOpacityExpr(
+  overlay: DemandUnitsOverlayState,
+  idProperty: string,
+): unknown {
+  if (overlay.hasSpotlight) {
+    if (overlay.spotlightFeatureIds.length === 0) return 0.12
+    const spotlightMatch = [
+      "in",
+      ["get", idProperty],
+      ["literal", [...overlay.spotlightFeatureIds]],
+    ]
+    return ["case", spotlightMatch, 0.9, 0.12]
+  }
+  if (overlay.pinnedFeatureIds.length > 0) {
+    const pinnedMatch = [
+      "in",
+      ["get", idProperty],
+      ["literal", [...overlay.pinnedFeatureIds]],
+    ]
+    return [
+      "step",
+      ["zoom"],
+      ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
+      ZOOM_THRESHOLD,
+      ZOOMED_IN_OPACITY,
+    ]
+  }
+  return ZOOM_AWARE_BASE_OPACITY
+}

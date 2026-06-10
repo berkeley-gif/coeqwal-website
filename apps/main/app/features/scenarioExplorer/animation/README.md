@@ -33,12 +33,12 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
                      |                      |
                      v                      v
         +----------------------+   +-------------------------+
-        |  Playback arbiters   |   | Interactive paint       |
+        |  Playback arbiters   |   | Interactive arbiters    |
         |  ------------------  |   | ----------------------- |
         |  MapPaint            |   | InteractivePaintArbiter |
-        |  MapPopup            |   | (demand-units), plus    |
-        |  OverlayPopup        |   | non-DU paint and        |
-        |  Narration           |   | location highlights     |
+        |  MapPopup            |   | (demand-units)          |
+        |  OverlayPopup        |   | InteractiveOutline-     |
+        |  Narration           |   | Arbiter (other polygons)|
         |  OverlayMorph        |   +-------------------------+
         +----------------------+              |
               |           |                   |
@@ -58,14 +58,15 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      owns its kind (mapPaint, mapPopup, overlayPopup, narration,
      overlayMorph). Once the storyboard reaches the last beat and
      stops, the clock is no longer moving and the user can click
-     demand-unit squares. Those clicks change React state, which
-     fires an effect that calls `InteractivePaintArbiter`. So the
-     left column is driven by the clock, the right column by clicks,
-     and only the left is dispatched by the engine.
+     demand-unit squares. Those clicks change React state, which fires
+     an effect that calls the interactive arbiters (InteractivePaintArbiter
+     for demand-units, InteractiveOutlineArbiter for the other polygon
+     outcomes). So the left column is driven by the clock, the right column
+     by clicks, and only the left is dispatched by the engine.
 
-   A third arbiter, CameraArbiter, is also event-driven rather than
-   engine-dispatched. Nav handlers call it directly to fly the map back
-   to its home view. See engine/arbiters/CameraArbiter.ts.
+   CameraArbiter is event-driven in the same way. Nav handlers call it
+   directly to fly the map back to its home view. See the "Two families of
+   arbiter" section below and engine/arbiters/CameraArbiter.ts.
 
    Files (for each box above):
      progress clock, engine context  TierAnimationSection.tsx
@@ -74,7 +75,8 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      Playback arbiters                engine/arbiters/{MapPaint, MapPopup,
                                         OverlayPopup, Narration,
                                         OverlayMorph}Arbiter.ts
-     Interactive paint                engine/arbiters/InteractivePaintArbiter.ts
+     Interactive arbiters             engine/arbiters/InteractivePaintArbiter.ts
+                                        engine/arbiters/InteractiveOutlineArbiter.ts
      Overlays (text, morph)           BeatTextOverlay.tsx (panel shell),
                                         Narration.tsx (left-column copy),
                                         StoryboardControls.tsx (controls),
@@ -172,9 +174,18 @@ Exactly one owner writes the `demand-units` layers at any time. Ownership follow
 | ---- | ---- | --------------------- |
 | `idle` | Before Play, or after Restart | No one. The layer sits at its invisible baseline. |
 | `playback` | A beat is tweening (`playState` is `playing`) | `MapPaintArbiter`, driven by progress-keyed actors. |
-| `interactive` | The storyboard has settled on the final beat and the user can click | `InteractivePaintArbiter` for the demand-units layers. Non-demand-unit polygon paint and location highlights are driven by the interactive layer. |
+| `interactive` | The storyboard has settled on the final beat and the user can click | `InteractivePaintArbiter` for the demand-units layers. |
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).
+
+The other (non-demand-unit) polygon outcomes, like reservoirs, are painted in interactive mode by `InteractiveOutlineArbiter`. It borrows the existing outcome layer rather than owning a baseline, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
+
+## Two families of arbiter
+
+Not every arbiter is dispatched by the engine.
+
+- **Playback arbiters** run from the `progress` clock through the engine's dispatch loop: `MapPaintArbiter`, `MapPopupArbiter`, `OverlayPopupArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`. These are the ones in the `ACTOR_GROUPS` table and the arbiters array.
+- **Event-driven arbiters** are held in refs and called directly from effects or nav handlers, because their work is driven by React state or user events, not by `progress`: `CameraArbiter`, `InteractivePaintArbiter`, and `InteractiveOutlineArbiter`. They are not in the engine dispatch list. The `getMode()` value is an input to their decisions, not an engine-wide gate.
 
 ## The bridge actors (narration and overlay morph)
 
