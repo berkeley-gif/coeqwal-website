@@ -60,10 +60,16 @@ function resolveLoiData(ctx: {
   if (tier == null) return null
   const coord = ctx.centroidLookup.get(LOI_DU_ID) ?? null
   const tierColor = agData.colorMap[LOI_DU_ID] ?? "#888888"
+  // Match the interactive popup's name precedence: prefer a meaningful
+  // API name, but treat an API value that is just the raw id as missing
+  // and fall back to the friendly demand-unit display name. Without this
+  // the animated popup could show the raw id while a click on the same
+  // unit shows the friendly name.
+  const apiName = agData.nameMap[LOI_DU_ID]
   const name =
-    agData.nameMap[LOI_DU_ID] ??
-    getDemandUnitDisplayName(LOI_DU_ID) ??
-    LOI_DU_ID
+    apiName && apiName !== LOI_DU_ID
+      ? apiName
+      : (getDemandUnitDisplayName(LOI_DU_ID) ?? LOI_DU_ID)
   return {
     info: { code: LOI_CODE, sourceId: LOI_DU_ID, tier },
     coord,

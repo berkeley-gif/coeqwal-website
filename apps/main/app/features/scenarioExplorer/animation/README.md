@@ -99,9 +99,13 @@ The component is long because it wires many pieces together, but it reads top to
 
 Related code is pulled into `hooks/`:
 
+- `useStoryboardNavigation` owns the Play / Next / Back / Restart handlers, the keyboard shortcuts, and the reduced-motion auto-arrival. The cursor state stays in the component and is passed in via setters.
+- `useInteractivePaint` wires the `InteractivePaintArbiter` that owns the `demand-units` layers during interactive mode.
 - `useScreenPolygonProjection` projects outcome geometry from Mapbox into panel-relative screen polygons and keeps them in sync on map move, scroll, and resize.
 - `useStoryboardLayout` turns those screen polygons into the Beat 2 grid layout, the morph windows, and the per-outcome feature hide schedule the engine reads.
 - `useStoryboardCamera` detects when the panel scrolls into view, flies the camera home, and primes the map session.
+
+These hooks share a few refs created in the component (the engine api, the engine context, the interactive paint arbiter, and the polygon recompute) so the handlers and effects can reach the engine without depending on its memoized identity.
 
 ## What is an actor?
 
@@ -161,7 +165,9 @@ If you want to change the storyboard, these are the files to start from.
 | Actor and payload shapes | `Actor`, `ActorKind`, payload types | [engine/types.ts](engine/types.ts) |
 | How an effect is carried out | the arbiter for that `kind` | [engine/arbiters/](engine/arbiters/) |
 | The dispatch loop (enter, update, exit) | `BeatEngine` | [engine/BeatEngine.ts](engine/BeatEngine.ts) |
-| Wiring, navigation, and engine context | `TierAnimationSection` | [TierAnimationSection.tsx](TierAnimationSection.tsx) |
+| Wiring and engine context | `TierAnimationSection` | [TierAnimationSection.tsx](TierAnimationSection.tsx) |
+| Play / Next / Back / Restart and keyboard shortcuts | `useStoryboardNavigation` | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts) |
+| Interactive demand-units paint | `useInteractivePaint` | [hooks/useInteractivePaint.ts](hooks/useInteractivePaint.ts) |
 | Projecting outcome geometry to screen polygons | `useScreenPolygonProjection` | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
 | The Beat 2 grid layout and feature hide schedule | `useStoryboardLayout` | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts) |
 | Panel-in-view detection and camera fly-home | `useStoryboardCamera` | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts) |

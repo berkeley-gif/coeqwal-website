@@ -51,10 +51,10 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
 
 /* Beat 0 opening reveal (seconds). The two intro paragraphs and the
  * tier legend each start at a staggered delay. */
-const INTRO_FADE_SEC = 5.5
+const INTRO_FADE_SEC = 4.0
 const INTRO_P1_DELAY = 0.4
-const INTRO_P2_DELAY = 2.2
-const INTRO_LEGEND_DELAY = 4.0
+const INTRO_P2_DELAY = 1.8
+const INTRO_LEGEND_DELAY = 3.2
 
 /* Beat 0 to 1 hand-off (seconds), two ordered phases: the intro text
  * fades out, then the block collapses so the legend slides to the top.
