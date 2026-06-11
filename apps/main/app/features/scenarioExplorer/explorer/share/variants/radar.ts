@@ -1,5 +1,5 @@
 /**
- * Radar variant handler. Drives the parallel-plot share card produced
+ * Radar variant handler. Drives the radar share card produced
  * by the radar tool toolbar and the scenario-selection sidebar's
  * theme-header overlay path. URL prefix `r`.
  *

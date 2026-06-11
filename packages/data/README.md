@@ -333,7 +333,7 @@ The fan-out pattern looks chatty (N hooks, potentially N requests), but in pract
 
 ### Tier glyphs share the Explore tab's cache
 
-The thumbnail tier-distribution charts at the top of each category (the `CwsTierCharts`, `StorageTierCharts`, etc. components) do **not** call the statistics endpoints. They use `useMetricData`, which under the hood calls the same `useMultipleScenarioTiers(idMapping)` that the radar and parallel plot use. That cache slot was populated by `usePrefetchTiers` the moment the user landed on Explore. So those glyphs render instantly when Data in Depth opens, with no additional request, regardless of whether the batch is still in flight.
+The bar charts do **not** call the statistics endpoints. They use `useMetricData`, which under the hood calls the same `useMultipleScenarioTiers(idMapping)` that the radar uses. That cache slot was populated by `usePrefetchTiers` the moment the user landed on Explore. So those glyphs render instantly when Data in Depth opens, with no additional request, regardless of whether the batch is still in flight.
 
 ### No preload, by design
 
@@ -734,6 +734,27 @@ Do not use it for:
 
 The browser's HTTP cache already handles caching for static files. The value `useLocalData` adds is the React-level `{ data, isLoading, error }` shape and the in-process dedup. If you do not need those, a plain `fetch` is fine.
 
+## Tier scores: `weighted_score` vs `normalized_score`
+
+Every multi-value tier row carries two scores. They hold the same information in two presentations, not two different measurements. The choice between them comes down to what encoding each chart needs.
+
+Both are derived from the four normalized tier proportions (`n1..n4`, the share of a scenario's locations in each tier) by `calculate_tier_scores` in the API (`api/coeqwal-api/routes/tier_endpoints.py`):
+
+- **`weighted_score`** - the count-weighted mean tier level, `1.0` (best) to `4.0` (worst):
+  `(1·n1 + 2·n2 + 3·n3 + 4·n4) / Σn`. It stays on the native 1-4 tier scale, so **lower is better**.
+- **`normalized_score`** - `weighted_score` rescaled to `0.0` (worst) to `1.0` (best) via `(4 - weighted_score) / 3`. The direction is flipped so **higher is better**. No new information, just a uniform axis for visualizations like the radar chart.
+
+Single-value outcomes carry the same pair, derived from the tier level directly.
+
+### Which visualization uses which, and why
+
+| Score | Used by | Why |
+| ----- | ------- | --- |
+| `weighted_score` | Scenario **sort / comparison**, and the **resilience heatmap** | The heatmap paints each cell one of four tier colors, so it rounds the value into a tier band and looks up the tier palette. It needs the value on the native 1-4 tier scale. |
+| `normalized_score` | The **radar plot** axes | The radar plots every outcome on one shared axis where outward = better. It maps the score to `[-1, 1]` via `normalized_score * 2 - 1`, so it needs the 0-1, higher-is-better orientation. `weighted_score` would render inverted and need rescaling. |
+
+The bar chart glyph on the List tab and the per-location map coloring use neither aggregate score. They read the raw tier proportions (`data[].normalized`) and the per-location `tier_level` respectively.
+
 ## How to get data for a tier visualization tool
 
 This section walks through the data-fetching flow for a new tool in the Scenario Explorer.
@@ -815,7 +836,7 @@ const tiersB = allScenariosData?.["s0021"]
 
 const cwsA = tiersA?.tiers["CWS_DEL"]
 // cwsA.weighted_score: 2.5      - average tier level (used for sorting scenarios)
-// cwsA.normalized_score: 0.5    - 0-1 normalized (parallel plot Y-axis)
+// cwsA.normalized_score: 0.5    - 0-1 normalized (radar plot Y-axis)
 // cwsA.total: 76                - total locations
 // cwsA.data: [                  - tier distribution counts (used in bar chart glyphs)
 //   { value: 31, normalized: 0.408 },  // index 0 = tier1 (best)

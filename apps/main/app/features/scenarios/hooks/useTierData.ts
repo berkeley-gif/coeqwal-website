@@ -94,7 +94,7 @@ const buildOutcomeNames = (
 /**
  * Extract score data from scenario API response.
  * Data is keyed by short code (e.g., "CWS_DEL").
- * Used for sorting, parallel plots, and equity analysis.
+ * Used for sorting, the radar plot, and equity analysis.
  *
  * Score fields are passed through as `number | null`. The API returns
  * null when an outcome has no tier row or a degenerate (all-zero / all-null)
@@ -157,7 +157,7 @@ export function useScenarioTiers(scenarioId: string | null) {
     return processScenarioData(scenarioData, getThemeColorsForApi(theme))
   }, [scenarioData, theme])
 
-  // Extract score data for sorting and parallel plots
+  // Extract score data for sorting and the radar plot
   // Data is keyed by short code (e.g., "CWS_DEL")
   const scoreData = useMemo(() => {
     if (!scenarioData) return {}
