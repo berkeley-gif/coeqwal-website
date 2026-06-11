@@ -21,7 +21,8 @@ export function useSalmonRiverColor(): string | undefined {
 
   // Only fetch tier data for Salmon abundance (code: WRC_SALMON_AB)
   const isSalmonAbundance = outcomeCode === "WRC_SALMON_AB"
-  const isMapVisible = mapMode === "learn" || mapMode === "explore"
+  const isMapVisible =
+    mapMode === "learn" || mapMode === "explore" || mapMode === "get-started"
 
   // Fetch tier data only when Salmon abundance is active (using outcomeCode)
   const { tierColorMap } = useTierData(

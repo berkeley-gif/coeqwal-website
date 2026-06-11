@@ -1,6 +1,12 @@
+/* Public surface of the beat engine
+ *
+ * Re-exports the engine, actor groups, arbiters, and shared types so the
+ * rest of the animation imports from one place.
+ */
+
 export { useBeatEngine } from "./BeatEngine"
 export type { BeatEngineApi, UseBeatEngineArgs } from "./BeatEngine"
-export { BEAT_TABLE } from "./beats"
+export { ACTOR_GROUPS } from "./actorGroups"
 export { MapPaintArbiter } from "./arbiters/MapPaintArbiter"
 export { MapPopupArbiter } from "./arbiters/MapPopupArbiter"
 export { OverlayPopupArbiter } from "./arbiters/OverlayPopupArbiter"
@@ -10,6 +16,8 @@ export { CameraArbiter } from "./arbiters/CameraArbiter"
 export type { CameraHome, FlyHomeOpts } from "./arbiters/CameraArbiter"
 export { InteractivePaintArbiter } from "./arbiters/InteractivePaintArbiter"
 export type { InteractivePaintTransition } from "./arbiters/InteractivePaintArbiter"
+export { InteractiveOutlineArbiter } from "./arbiters/InteractiveOutlineArbiter"
+export type { OutlinePaintTarget } from "./arbiters/InteractiveOutlineArbiter"
 export {
   DU_CLASS_FILTER,
   DU_AG_ONLY_FILTER,
@@ -22,19 +30,14 @@ export type {
   DemandUnitsBaselineSpec,
   DemandUnitsOutlineInitSpec,
 } from "./demandUnitsBaseline"
-export {
-  BEAT1_COLORS,
-  BEAT1_CYCLE,
-  BEAT1_MID,
-  beat1FillExpr,
-} from "./beat1Palette"
+export { BLUE_COLORS, BLUE_CYCLE, BLUE_MID, blueFillExpr } from "./bluePalette"
 export type {
   Actor,
   ActorKind,
   ActorBase,
   Arbiter,
   BeatEngineContext,
-  BeatTableEntry,
+  ActorGroup,
   DemandUnitsOverlayState,
   DemandUnitsPaintSpec,
   EngineMode,
@@ -45,5 +48,4 @@ export type {
   OverlayPopupActor,
   NarrationActor,
   OverlayMorphActor,
-  CameraActor,
 } from "./types"

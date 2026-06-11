@@ -44,6 +44,7 @@ import {
   useGeocoderMarker,
   useClearTooltipsSignal,
   useLocationHighlights,
+  useShowHoverHighlightsOnMap,
   getOnLocationToggle,
   getOnLocationClick,
   getOnLocationHover,
@@ -84,6 +85,7 @@ export default function VisualizationLayers({
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
   const locationHighlights = useLocationHighlights()
+  const showHoverHighlightsOnMap = useShowHoverHighlightsOnMap()
 
   // Get outcome visualization data
   const {
@@ -409,7 +411,9 @@ export default function VisualizationLayers({
           {locationHighlights
             .filter((hl) => {
               if (!isGetStartedMode) return true
-              if (!hl.pinned) return false
+              // Hover (unpinned) highlights stay quiet on the map unless the
+              // storyboard opted in for the settled-grid beats.
+              if (!hl.pinned && !showHoverHighlightsOnMap) return false
               const code = hl.key.split(":")[0]
               return (
                 code !== "RES_STOR" &&

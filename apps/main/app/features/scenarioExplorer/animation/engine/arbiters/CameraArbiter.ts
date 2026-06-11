@@ -1,26 +1,16 @@
 /* CameraArbiter
  *
- * Owns the "return map to the storyboard home view" invariant shared by
- * `goTo({ viaCamera: true })`, `handleBack`, and `handleRestart`. Before
- * this arbiter existed, all three sites inlined the same easeTo +
- * threshold-check + moveend-continuation pattern, which made small
- * behavioral drift (different durations, missing reset of bearing/pitch,
- * missing guards) very easy to introduce.
+ * Returns the map to the storyboard home view. Shared by
+ * `goTo({ viaCamera: true })`, `handleBack`, and `handleRestart` so the
+ * easeTo, threshold check, and moveend continuation stay consistent.
  *
- * Note: despite the "Arbiter" name (from the hardening plan), this
- * module is not a progress-driven `Arbiter<A>`. It has no actors and is
- * never called during engine dispatch. It is an imperative helper held
- * in a ref on the storyboard container. Nav handlers call
- * `cameraArbiter.flyHome(...)` directly. The name is kept to match the
- * architecture diagram and to signal that all camera-home writes go
- * through this one object.
+ * Despite the name, this is not a progress-driven `Arbiter<A>`. It has
+ * no actors and is never called during engine dispatch. Nav handlers
+ * hold it in a ref and call `flyHome(...)` directly.
  *
- * The map parameter is typed as `MapboxGLMap` from `@repo/map`. `easeTo`
- * and `once` are not on `MapOperationsAPI` today (see the Roadmap
- * section of the map package README), so this helper still calls them
- * on the raw map instance returned by `mapRef.current.getMap()`. When
- * those land on `MapOperationsAPI`, this helper can be reduced to a
- * short app-layer wrapper around `mapAPI.easeTo` / `mapAPI.once`.
+ * It works on the raw Mapbox map because `easeTo` and `once` aren't on
+ * `MapOperationsAPI` in the map package yet. Once they are, this can become a
+ * thin wrapper over the app API.
  */
 
 import type { MapboxGLMap } from "@repo/map"
@@ -33,11 +23,10 @@ export interface CameraHome {
 export interface FlyHomeOpts {
   /** Duration (ms) of the easeTo. Default 800. */
   duration?: number
-  /** When true, the easeTo also sets bearing=0 and pitch=0. Used by
-   *  Restart. Does not affect the "already home" threshold check - if
-   *  center+zoom are already home, no flight runs and the current
-   *  bearing/pitch are preserved. This mirrors the pre-refactor
-   *  behavior of `handleRestart`. */
+  /** When true, the flight also resets bearing and pitch to 0 (used by
+   *  Restart). Doesn't affect the "already home" check, which is: if center and
+   *  zoom are already home, no flight runs and bearing/pitch stay as
+   *  they are. */
   resetOrientation?: boolean
   /** Fires when a flight actually starts (not called when the map is
    *  already home or `map` is null). Use this to flip play-state into
@@ -52,9 +41,8 @@ export interface FlyHomeOpts {
 export class CameraArbiter {
   constructor(private readonly home: CameraHome) {}
 
-  /** Threshold check against home center+zoom. Thresholds match the
-   *  pre-refactor inlined checks exactly: 0.01 deg on lng/lat, 0.05 on
-   *  zoom. Does NOT consider bearing or pitch. */
+  /** True when the map is at the home center and zoom (within 0.01
+   *  degrees and 0.05 zoom). Ignores bearing and pitch. */
   isHome(map: MapboxGLMap): boolean {
     const c = map.getCenter()
     return (
