@@ -128,7 +128,7 @@ export function useStoryboardNavigation({
         /* ok */
       }
     }
-  }, [mapAPI.mapRef])
+  }, [mapAPI.mapRef, animPolygonLayers, engineApiRef, setPlayState])
 
   /* Storyboard navigation
    *
@@ -153,7 +153,10 @@ export function useStoryboardNavigation({
    * value, so no per-beat branching is needed inside those listeners. */
   const goTo = useCallback(
     (targetIndex: number, opts?: { viaCamera?: boolean }) => {
-      const clamped = Math.max(0, Math.min(FINAL_TIMING_BEAT_INDEX, targetIndex))
+      const clamped = Math.max(
+        0,
+        Math.min(FINAL_TIMING_BEAT_INDEX, targetIndex),
+      )
       const fromIndex = beatIndexRef.current
       if (controlsRef.current) controlsRef.current.stop()
 
@@ -235,7 +238,19 @@ export function useStoryboardNavigation({
 
       runTween()
     },
-    [progress, prefersReducedMotion, mapAPI.mapRef, settleToFinishedState],
+    [
+      progress,
+      prefersReducedMotion,
+      mapAPI.mapRef,
+      settleToFinishedState,
+      beatIndexRef,
+      cameraArbiter,
+      computePolygonDataRef,
+      controlsRef,
+      engineApiRef,
+      setBeatIndex,
+      setPlayState,
+    ],
   )
 
   /* Clear any interactive overlay/map state tied to a sticky pin
@@ -270,7 +285,13 @@ export function useStoryboardNavigation({
     // commits the `OutcomePolygonLayer` unmount triggered by
     // `clearOutcomeVisualization`, guaranteeing the restore wins the
     // race against the unmount's `visibility: "none"` write.
-  }, [])
+  }, [
+    engineApiRef,
+    engineContextRef,
+    interactivePaintArbiterRef,
+    setHoveredLocation,
+    setPinnedLocations,
+  ])
 
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_TIMING_BEAT_INDEX) return
@@ -279,7 +300,7 @@ export function useStoryboardNavigation({
     // (a no-op when already home) before running the beat tween, so a
     // square-click zoom doesn't persist into the next beat.
     goTo(beatIndexRef.current + 1, { viaCamera: true })
-  }, [goTo, clearInteractiveState])
+  }, [goTo, clearInteractiveState, beatIndexRef])
 
   /* Intro tween (Play button entry point)
    *
@@ -304,7 +325,14 @@ export function useStoryboardNavigation({
       ease: "linear",
       onComplete: () => setPlayState("paused"),
     })
-  }, [progress, prefersReducedMotion])
+  }, [
+    progress,
+    prefersReducedMotion,
+    beatIndexRef,
+    controlsRef,
+    setBeatIndex,
+    setPlayState,
+  ])
 
   const handlePlay = useCallback(() => {
     // Clear any lingering back-out fade before starting the arrival
@@ -319,7 +347,15 @@ export function useStoryboardNavigation({
     engineApiRef.current?.setMode("playback")
     computePolygonDataRef.current()
     playArrival()
-  }, [playArrival, backOutOpacity])
+  }, [
+    playArrival,
+    backOutOpacity,
+    computePolygonDataRef,
+    controlsRef,
+    engineApiRef,
+    hasPlayedRef,
+    setHasPlayed,
+  ])
 
   /* Back
    *
@@ -397,6 +433,14 @@ export function useStoryboardNavigation({
     prefersReducedMotion,
     clearInteractiveState,
     mapAPI.mapRef,
+    beatIndexRef,
+    cameraArbiter,
+    controlsRef,
+    engineApiRef,
+    hasPlayedRef,
+    setBeatIndex,
+    setHasPlayed,
+    setPlayState,
   ])
 
   const handleRestart = useCallback(() => {
@@ -492,7 +536,25 @@ export function useStoryboardNavigation({
     // at first mount.
     engineApiRef.current?.setMode("idle")
     computePolygonDataRef.current()
-  }, [progress, backOutOpacity, mapAPI.mapRef])
+  }, [
+    progress,
+    backOutOpacity,
+    mapAPI.mapRef,
+    animPolygonLayers,
+    beatIndexRef,
+    cameraArbiter,
+    computePolygonDataRef,
+    controlsRef,
+    engineApiRef,
+    engineContextRef,
+    hasPlayedRef,
+    interactivePaintArbiterRef,
+    setBeatIndex,
+    setHasPlayed,
+    setHoveredLocation,
+    setPinnedLocations,
+    setPlayState,
+  ])
 
   /* Arrival behaviour
    *
@@ -550,14 +612,21 @@ export function useStoryboardNavigation({
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [panelInView, handleNext, handleBack, handleRestart, handlePlay])
+  }, [
+    panelInView,
+    handleNext,
+    handleBack,
+    handleRestart,
+    handlePlay,
+    hasPlayedRef,
+  ])
 
   // Stop any in-flight tween when the storyboard unmounts.
   useEffect(() => {
     return () => {
       controlsRef.current?.stop()
     }
-  }, [])
+  }, [controlsRef])
 
   return { goTo, handlePlay, handleNext, handleBack, handleRestart }
 }

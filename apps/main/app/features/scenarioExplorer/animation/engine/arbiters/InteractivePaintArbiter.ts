@@ -254,10 +254,14 @@ export class InteractivePaintArbiter {
           "line-color",
           spec.colorExpression,
         )
-        map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
-          duration: FADE_IN_DURATION,
-          delay: 0,
-        })
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity-transition",
+          {
+            duration: FADE_IN_DURATION,
+            delay: 0,
+          },
+        )
         map.setPaintProperty("demand-units-outline", "line-opacity", 0)
         map.setPaintProperty(
           "demand-units-outline",
@@ -458,10 +462,14 @@ export class InteractivePaintArbiter {
         map.setPaintProperty("demand-units", "fill-opacity", 0)
       }
       if (map.getLayer("demand-units-outline")) {
-        map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
-          duration: 0,
-          delay: 0,
-        })
+        map.setPaintProperty(
+          "demand-units-outline",
+          "line-opacity-transition",
+          {
+            duration: 0,
+            delay: 0,
+          },
+        )
         map.setPaintProperty("demand-units-outline", "line-opacity", 0)
       }
     } catch {

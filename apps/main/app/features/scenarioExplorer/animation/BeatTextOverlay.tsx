@@ -134,7 +134,10 @@ export default function BeatTextOverlay({
   // right-panel backdrop so the text and the panel appear together.
   const scenarioHeaderOpacity = useTransform(
     progress,
-    [BACKDROP_FADE_IN_PROGRESS, BACKDROP_FADE_IN_PROGRESS + BACKDROP_FADE_IN_WIDTH],
+    [
+      BACKDROP_FADE_IN_PROGRESS,
+      BACKDROP_FADE_IN_PROGRESS + BACKDROP_FADE_IN_WIDTH,
+    ],
     [0, 1],
   )
 

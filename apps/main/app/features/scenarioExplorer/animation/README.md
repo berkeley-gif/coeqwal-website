@@ -158,49 +158,50 @@ Defined by `ActorGroup` in [engine/actorGroups.ts](engine/actorGroups.ts). An ac
 
 If you want to change the storyboard, these are the files to start from.
 
-| To change | Edit | File |
-| --------- | ---- | ---- |
-| Beat timing (progress targets, durations) | `TIMING_BEATS` | [animationTiming.ts](animationTiming.ts) |
-| What plays during a beat (the actors) | `ACTOR_GROUPS` | [engine/actorGroups.ts](engine/actorGroups.ts) |
-| Actor and payload shapes | `Actor`, `ActorKind`, payload types | [engine/types.ts](engine/types.ts) |
-| How an effect is carried out | the arbiter for that `kind` | [engine/arbiters/](engine/arbiters/) |
-| The dispatch loop (enter, update, exit) | `BeatEngine` | [engine/BeatEngine.ts](engine/BeatEngine.ts) |
-| Wiring and engine context | `TierAnimationSection` | [TierAnimationSection.tsx](TierAnimationSection.tsx) |
-| Play / Next / Back / Restart and keyboard shortcuts | `useStoryboardNavigation` | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts) |
-| Interactive demand-units paint | `useInteractivePaint` | [hooks/useInteractivePaint.ts](hooks/useInteractivePaint.ts) |
-| Projecting outcome geometry to screen polygons | `useScreenPolygonProjection` | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
-| The Beat 2 grid layout and feature hide schedule | `useStoryboardLayout` | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts) |
-| Panel-in-view detection and camera fly-home | `useStoryboardCamera` | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts) |
-| Narration copy and intro timing | `NARRATION_BY_BEAT`, intro constants | [Narration.tsx](Narration.tsx) |
-| Storyboard navigation buttons | `StoryboardControls` | [StoryboardControls.tsx](StoryboardControls.tsx) |
-| Per-frame label geometry (titles, captions, radar and heatmap labels) | `useOutcomeLabelGeometry` | [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts) |
-| The overlay panel shell and right-column grid | `BeatTextOverlay` | [BeatTextOverlay.tsx](BeatTextOverlay.tsx) |
-| The SVG morph overlay | `OutcomeMorphOverlay` | [OutcomeMorphOverlay.tsx](OutcomeMorphOverlay.tsx) |
+| To change                                                             | Edit                                 | File                                                                       |
+| --------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------- |
+| Beat timing (progress targets, durations)                             | `TIMING_BEATS`                       | [animationTiming.ts](animationTiming.ts)                                   |
+| What plays during a beat (the actors)                                 | `ACTOR_GROUPS`                       | [engine/actorGroups.ts](engine/actorGroups.ts)                             |
+| Actor and payload shapes                                              | `Actor`, `ActorKind`, payload types  | [engine/types.ts](engine/types.ts)                                         |
+| How an effect is carried out                                          | the arbiter for that `kind`          | [engine/arbiters/](engine/arbiters/)                                       |
+| The dispatch loop (enter, update, exit)                               | `BeatEngine`                         | [engine/BeatEngine.ts](engine/BeatEngine.ts)                               |
+| Wiring and engine context                                             | `TierAnimationSection`               | [TierAnimationSection.tsx](TierAnimationSection.tsx)                       |
+| Play / Next / Back / Restart and keyboard shortcuts                   | `useStoryboardNavigation`            | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts)       |
+| Interactive demand-units paint                                        | `useInteractivePaint`                | [hooks/useInteractivePaint.ts](hooks/useInteractivePaint.ts)               |
+| Projecting outcome geometry to screen polygons                        | `useScreenPolygonProjection`         | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
+| The Beat 2 grid layout and feature hide schedule                      | `useStoryboardLayout`                | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts)               |
+| Panel-in-view detection and camera fly-home                           | `useStoryboardCamera`                | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts)               |
+| Narration copy and intro timing                                       | `NARRATION_BY_BEAT`, intro constants | [Narration.tsx](Narration.tsx)                                             |
+| Storyboard navigation buttons                                         | `StoryboardControls`                 | [StoryboardControls.tsx](StoryboardControls.tsx)                           |
+| Per-frame label geometry (titles, captions, radar and heatmap labels) | `useOutcomeLabelGeometry`            | [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts)                   |
+| The overlay panel shell and right-column grid                         | `BeatTextOverlay`                    | [BeatTextOverlay.tsx](BeatTextOverlay.tsx)                                 |
+| The SVG morph overlay                                                 | `OutcomeMorphOverlay`                | [OutcomeMorphOverlay.tsx](OutcomeMorphOverlay.tsx)                         |
 
 ## The storyboard, beat by beat
 
 Eight timing beats run from `progress` 0 to 1. Full per-beat timing lives in [animationTiming.ts](animationTiming.ts).
 
-| Index | Id | Ends at progress | What the user sees |
-| ----- | -- | ---------------- | ------------------ |
-| 0 | `legend` | 0.225 | Intro paragraphs fade in and the tier legend is revealed. Plays automatically on arrival. |
-| 1 | `collapse-and-colors` | 0.365 | Intro text collapses, the legend floats to the top, and the demand-unit layer cross-fades from a blue palette into agriculture tier colors while narration explains the colors. |
-| 2 | `ag-rev-morph` | 0.40 | The agriculture revenue polygons morph into distribution squares, with a before and after caption. |
-| 3 | `all-other-morphs` | 0.50 | The remaining eight outcomes morph into distribution squares back to back. |
-| 4 | `loi-highlight` | 0.62 | A single location of interest is highlighted in five steps: layer fade in, gold ring on the square, popup near the square, gold stroke on the map polygon, popup near the polygon. |
-| 5 | `list-bar` | 0.72 | The distribution grids morph into per-outcome bar glyphs (the list view). |
-| 6 | `radar` | 0.87 | The bars collapse into dots that glide out to polar vertices, then the radar chrome fades in. |
-| 7 | `heatmap` | 1.0 | The dots migrate into a stacked column of tier-colored cells, then the heatmap chrome fades in. |
+| Index | Id                    | Ends at progress | What the user sees                                                                                                                                                                 |
+| ----- | --------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | `legend`              | 0.225            | Intro paragraphs fade in and the tier legend is revealed. Plays automatically on arrival.                                                                                          |
+| 1     | `collapse-and-colors` | 0.365            | Intro text collapses, the legend floats to the top, and the demand-unit layer cross-fades from a blue palette into agriculture tier colors while narration explains the colors.    |
+| 2     | `ag-rev-morph`        | 0.40             | The agriculture revenue polygons morph into distribution squares, with a before and after caption.                                                                                 |
+| 3     | `all-other-morphs`    | 0.50             | The remaining eight outcomes morph into distribution squares back to back.                                                                                                         |
+| 4     | `loi-highlight`       | 0.62             | A single location of interest is highlighted in five steps: layer fade in, gold ring on the square, popup near the square, gold stroke on the map polygon, popup near the polygon. |
+| 5     | `list-bar`            | 0.72             | The distribution grids morph into per-outcome bar glyphs (the list view).                                                                                                          |
+| 6     | `radar`               | 0.87             | The bars collapse into dots that glide out to polar vertices, then the radar chrome fades in.                                                                                      |
+| 7     | `heatmap`             | 1.0              | The dots migrate into a stacked column of tier-colored cells, then the heatmap chrome fades in.                                                                                    |
+
 Beats 3, 6, and 7 have empty actor arrays in the table. That is intentional, not a gap. Their visuals come entirely from the SVG overlays, which the engine drives through always-on bridge actors (see below). The map work for the rest of the storyboard has already finished by then.
 
 ## Who paints the map
 
 Exactly one owner writes the `demand-units` layers at any time. Ownership follows the engine mode and the play state.
 
-| Mode | When | Owner of demand-units |
-| ---- | ---- | --------------------- |
-| `idle` | Before Play, or after Restart | No one. The layer sits at its invisible baseline. |
-| `playback` | A beat is tweening (`playState` is `playing`) | `MapPaintArbiter`, driven by progress-keyed actors. |
+| Mode          | When                                                                | Owner of demand-units                                  |
+| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `idle`        | Before Play, or after Restart                                       | No one. The layer sits at its invisible baseline.      |
+| `playback`    | A beat is tweening (`playState` is `playing`)                       | `MapPaintArbiter`, driven by progress-keyed actors.    |
 | `interactive` | The storyboard has settled on the final beat and the user can click | `InteractivePaintArbiter` for the demand-units layers. |
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).

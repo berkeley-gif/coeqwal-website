@@ -20,16 +20,15 @@ import {
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../../map/config/outcomeLayerRegistry"
 import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
-import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../../content/outcomes"
+import {
+  OUTCOME_CODE_ORDER,
+  getOutcomeName,
+} from "../../../../content/outcomes"
 import { BACKDROP_FADE_IN_PROGRESS } from "../animationTiming"
 import type { HideScheduleEntry } from "../engine"
 import type { OutcomeLocationData } from "../useTierAnimationData"
 import type { ScreenPolygon } from "./useScreenPolygonProjection"
-import type {
-  Beat2Layout,
-  Beat2LayoutItem,
-  GlyphRect,
-} from "../overlayTypes"
+import type { Beat2Layout, Beat2LayoutItem, GlyphRect } from "../overlayTypes"
 
 interface LayoutParams {
   allScreenPolygons: Map<string, ScreenPolygon>
@@ -91,9 +90,7 @@ export function useStoryboardLayout({
             screenShape: screen.screenPoly,
             centroidScreen: screen.centroidScreen,
             color:
-              override?.colorMap[locId] ??
-              locData.colorMap[locId] ??
-              "#888888",
+              override?.colorMap[locId] ?? locData.colorMap[locId] ?? "#888888",
             tier: override?.tierMap[locId] ?? locData.tierMap[locId] ?? 1,
             sourceId: locId,
           })

@@ -438,7 +438,11 @@ export function OutcomePolygonLayer({
       } else if (layerType === "delta") {
         map.setPaintProperty(fillId, "fill-opacity", 0.9)
       } else {
-        map.setPaintProperty(fillId, "fill-opacity", OUTCOME_FILL_OPACITY as never)
+        map.setPaintProperty(
+          fillId,
+          "fill-opacity",
+          OUTCOME_FILL_OPACITY as never,
+        )
       }
 
       if (map.getLayer(outlineId)) {

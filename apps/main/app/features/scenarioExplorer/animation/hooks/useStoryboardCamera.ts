@@ -169,6 +169,15 @@ export function useStoryboardCamera({
     }, 200)
 
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelInView, isLoading, mapAPI.mapRef])
+  }, [
+    panelInView,
+    isLoading,
+    mapAPI.mapRef,
+    home.center,
+    home.zoom,
+    animPolygonLayers,
+    applyPanelOffsetRef,
+    computePolygonDataRef,
+    polygonsAllowedRef,
+  ])
 }

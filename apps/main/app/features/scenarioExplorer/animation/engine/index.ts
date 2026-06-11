@@ -30,12 +30,7 @@ export type {
   DemandUnitsBaselineSpec,
   DemandUnitsOutlineInitSpec,
 } from "./demandUnitsBaseline"
-export {
-  BLUE_COLORS,
-  BLUE_CYCLE,
-  BLUE_MID,
-  blueFillExpr,
-} from "./bluePalette"
+export { BLUE_COLORS, BLUE_CYCLE, BLUE_MID, blueFillExpr } from "./bluePalette"
 export type {
   Actor,
   ActorKind,

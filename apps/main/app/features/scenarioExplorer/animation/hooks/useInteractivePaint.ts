@@ -55,7 +55,7 @@ export function useInteractivePaint({
   pinnedLocations,
   spotlightedTier,
 }: InteractivePaintParams): void {
-  /* 
+  /*
    *
    * Reconcile the arbiter's ownership of `demand-units` /
    * `demand-units-outline` whenever selection, engine mode, or
@@ -127,8 +127,18 @@ export function useInteractivePaint({
 
     arbiter.sync(engineContext, spec)
     // `theme` dep covers the grey fallback. `outcomeLocations` fires
-    // the re-sync when tier data hydrates for the current outcome.
-  }, [engineContext, selectedOutcomeCode, playState, theme, outcomeLocations])
+    // the re-sync when tier data hydrates for the current outcome. The
+    // refs are stable, so listing them adds no re-runs.
+  }, [
+    engineContext,
+    selectedOutcomeCode,
+    playState,
+    theme,
+    outcomeLocations,
+    interactivePaintArbiterRef,
+    engineApiRef,
+    outcomeLocationsRef,
+  ])
 
   /* Overlay
    *
@@ -181,6 +191,8 @@ export function useInteractivePaint({
     pinnedLocations,
     spotlightedTier,
     outcomeLocations,
+    interactivePaintArbiterRef,
+    outcomeLocationsRef,
   ])
 
   /* Teardown cancellation
@@ -195,5 +207,5 @@ export function useInteractivePaint({
   useEffect(() => {
     if (playState !== "playing") return
     interactivePaintArbiterRef.current?.cancelPendingTeardown()
-  }, [playState])
+  }, [playState, interactivePaintArbiterRef])
 }

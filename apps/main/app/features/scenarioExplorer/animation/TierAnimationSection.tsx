@@ -715,6 +715,11 @@ export default function TierAnimationSection() {
 
     mapActions.setLocationHighlights(highlights)
     if (playState !== "finished") wroteInteractiveHighlightsRef.current = true
+    // `locationNameMapRef` is read via `.current` but comes from
+    // `useStoryboardLayout`, which is called further down this component,
+    // so it can't be listed here without a temporal-dead-zone error. It is
+    // a stable ref, so omitting it does not skip any needed re-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isInteractive,
     playState,
@@ -892,7 +897,7 @@ export default function TierAnimationSection() {
         }
       }
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mapAPI.mapRef])
 
   /* Keep outcome visualization scenario in sync with hydroclimate */
   useEffect(() => {

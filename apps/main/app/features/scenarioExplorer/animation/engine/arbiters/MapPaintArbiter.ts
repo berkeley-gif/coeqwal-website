@@ -595,10 +595,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     this.loiGoldRingOn = true
   }
 
-  private applyLoiGoldRingOff(
-    map: MapWriteView,
-    ctx: BeatEngineContext,
-  ): void {
+  private applyLoiGoldRingOff(map: MapWriteView, ctx: BeatEngineContext): void {
     try {
       const baseExpr = ctx.buildBlendedTierExpr(BLUE_MID, 1)
       if (map.getLayer("demand-units-outline") && baseExpr) {

@@ -377,10 +377,12 @@ export function useOutcomeLabelGeometry({
         const hd = heatmapDeltas.get(code)
         const shift = radarActive ? reflowShift.get(code) : undefined
         const radarDx = rd
-          ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) + rd.dx * radarPosBlend
+          ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) +
+            rd.dx * radarPosBlend
           : 0
         const radarDy = rd
-          ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) + rd.dy * radarPosBlend
+          ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) +
+            rd.dy * radarPosBlend
           : 0
         const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
         const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)
