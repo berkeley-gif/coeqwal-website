@@ -14,6 +14,10 @@ import {
   type RadarAxisLabelDetailPointerBridge,
   radarAxisDetailBottomModeForIndex,
 } from "./radarAxisLabelDetail"
+import {
+  TIER_LEVELS as TIER_POSITIONS,
+  radarValueToTier as toTier,
+} from "../utils/tierScale"
 
 export type { RadarPlotAxisLabelDetailStyle } from "./radarAxisLabelDetail"
 export type { RadarAxisLabelDetailChromeOptions } from "./radarAxisLabelDetail"
@@ -119,12 +123,6 @@ export interface RadarPlotProps {
    */
   onReady?: () => void
 }
-
-function toTier(v: number): number {
-  return 4 - (v + 1) * 1.5
-}
-
-const TIER_POSITIONS = [1, 2, 3, 4] as const
 
 /**
  * Chart-chrome palette for `RadarPlot`. Every field has a default that

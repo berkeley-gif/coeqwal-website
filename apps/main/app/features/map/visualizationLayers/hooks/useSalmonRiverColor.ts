@@ -17,7 +17,7 @@ export function useSalmonRiverColor(): string | undefined {
   const activeVisualization = useActiveOutcomeVisualization()
 
   const outcomeCode = activeVisualization?.outcomeCode ?? null
-  const scenarioId = activeVisualization?.scenarioId ?? "s0020"
+  const scenarioId = activeVisualization?.scenarioId ?? null
 
   // Only fetch tier data for Salmon abundance (code: WRC_SALMON_AB)
   const isSalmonAbundance = outcomeCode === "WRC_SALMON_AB"

@@ -16,7 +16,7 @@ packages/viz/src/
 ## Usage
 
 ```tsx
-import { PercentileMatrix, DumbbellChart } from "@repo/viz"
+import { PercentileMatrix, RadarPlot } from "@repo/viz"
 ```
 
 All components are default-exported from their files and re-exported as named exports from the barrel.

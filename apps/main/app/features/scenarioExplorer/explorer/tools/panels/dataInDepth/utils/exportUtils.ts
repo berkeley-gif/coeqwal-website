@@ -1,5 +1,6 @@
 import JSZip from "jszip"
 import { themeValues } from "@repo/ui/themes/theme"
+import { radarValueToTier } from "@repo/viz"
 import type { ShareItem } from "../../../../share/types"
 import { handlerForItem, type CsvLookups } from "../../../../share/variants"
 import { withExt } from "../../../../share/utils/filename"
@@ -14,7 +15,7 @@ import { withExt } from "../../../../share/utils/filename"
  *   1 = Optimal, 2 = Acceptable, 3 = At-risk, 4 = Critical
  */
 function radarValueToTierScore(v: number): number {
-  return Math.round((4 - (v + 1) * 1.5) * 100) / 100
+  return Math.round(radarValueToTier(v) * 100) / 100
 }
 
 function csvEscape(val: string): string {

@@ -157,7 +157,7 @@ export interface UseTierDataResult {
  */
 export function useTierData(
   outcomeCode: string | null,
-  scenarioId: string,
+  scenarioId: string | null,
 ): UseTierDataResult {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -176,7 +176,7 @@ export function useTierData(
     isLoading: singleValueLoading,
   } = useSWR<ScenarioTiersResponse>(
     isSingleValue && scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null,
-    () => fetchScenarioTiers(scenarioId),
+    () => fetchScenarioTiers(scenarioId!),
     { keepPreviousData: true },
   )
 
@@ -190,7 +190,7 @@ export function useTierData(
     !isSingleValue && scenarioId && config
       ? CACHE_KEYS.tierLocations(scenarioId, config.tierCode)
       : null,
-    () => fetchTierLocationAssignments(scenarioId, config!.tierCode),
+    () => fetchTierLocationAssignments(scenarioId!, config!.tierCode),
     { keepPreviousData: true },
   )
 
@@ -202,7 +202,7 @@ export function useTierData(
     if (!assignments || !config) return null
     return adaptAssignmentsToLegacyShape(
       assignments,
-      scenarioId,
+      scenarioId!,
       config.tierCode,
     )
   }, [
