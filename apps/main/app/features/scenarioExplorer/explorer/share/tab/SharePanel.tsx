@@ -47,7 +47,7 @@ import {
   embedFontStylesInSvg,
   exportShareItemAsCSV,
   exportAllShareItemsAsZip,
-} from "../../tools/panels/dataInDepth/utils/exportUtils"
+} from "../exportUtils"
 import { withExt } from "../utils/filename"
 import { downloadCardAsPng, downloadCardAsSvg } from "../cardExport"
 import ShareDataRehydrationHost, {

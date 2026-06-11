@@ -30,10 +30,7 @@
  */
 
 import { getFontEmbedCSS, toPng, toSvg } from "html-to-image"
-import {
-  downloadFromDataUrl,
-  downloadSvgString,
-} from "../tools/panels/dataInDepth/utils/exportUtils"
+import { downloadFromDataUrl, downloadSvgString } from "./exportUtils"
 
 /**
  * html-to-image filter callback. Returning `false` drops the node

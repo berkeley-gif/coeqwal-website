@@ -1,21 +1,16 @@
 /**
- * Comprehensive outcome definitions for Data Explorer
- * Organized by category with full metadata
+ * Comprehensive outcome definitions for Data Explorer (pure config).
+ * Organized by category with full metadata.
+ *
+ * This module is intentionally JSX-free so it can be imported anywhere
+ * without pulling in React or the icon set. Category icons live alongside
+ * `outcomeCategoryMeta` in `outcomeCategories.tsx`.
  *
  * Colors are defined in theme.palette.outcomes and referenced here by category ID.
  * Use getOutcomeCategoryColor(theme, categoryId) to get the themed color.
  */
 
-import React from "react"
-import {
-  HomeIcon,
-  AgricultureIcon,
-  ScienceIcon,
-  WaterDropIcon,
-  WavesIcon,
-  type Theme,
-} from "@repo/ui/mui"
-import { Salmon, EnvironmentalRefuge } from "@repo/ui"
+import type { Theme } from "@repo/ui/mui"
 
 export type TemporalScale = "monthly" | "annual" | "period-of-record"
 export type AggregationType =
@@ -73,47 +68,26 @@ export const getOutcomeCategoryColor = (
   return colorMap[categoryId] || theme.palette.grey[500]
 }
 
-export const outcomeCategories = [
-  {
-    id: "community-water",
-    name: "Community water systems",
-    icon: <HomeIcon fontSize="small" />,
-  },
-  {
-    id: "agricultural-water",
-    name: "Agricultural water",
-    icon: <AgricultureIcon fontSize="small" />,
-  },
-  {
-    id: "env-flow-statistics",
-    name: "Environmental river flows",
-    icon: <WavesIcon fontSize="small" />,
-  },
-  {
-    id: "environmental-water",
-    name: "Environmental water - refuges",
-    icon: <EnvironmentalRefuge />,
-  },
-  {
-    id: "delta-salinity",
-    name: "Delta",
-    icon: <ScienceIcon fontSize="small" />,
-  },
-  {
-    id: "reservoir-storage",
-    name: "Reservoir storage",
-    icon: <WaterDropIcon fontSize="small" />,
-  },
-  {
-    id: "groundwater-storage",
-    name: "Groundwater storage",
-    icon: <WaterDropIcon fontSize="small" />,
-  },
-  {
-    id: "salmon-abundance",
-    name: "Winter-run salmon",
-    icon: <Salmon />,
-  },
+/** Id + display name for an outcome category (icon-free). */
+export interface OutcomeCategoryMeta {
+  id: string
+  name: string
+}
+
+/**
+ * Ordered category metadata, free of any icon/JSX. The accordion UI pairs
+ * these with their icons in `outcomeCategories.tsx`. Keep this as the single
+ * source of truth for category ids and display names.
+ */
+export const outcomeCategoryMeta: OutcomeCategoryMeta[] = [
+  { id: "community-water", name: "Community water systems" },
+  { id: "agricultural-water", name: "Agricultural water" },
+  { id: "env-flow-statistics", name: "Environmental river flows" },
+  { id: "environmental-water", name: "Environmental water - refuges" },
+  { id: "delta-salinity", name: "Delta" },
+  { id: "reservoir-storage", name: "Reservoir storage" },
+  { id: "groundwater-storage", name: "Groundwater storage" },
+  { id: "salmon-abundance", name: "Winter-run salmon" },
 ]
 
 export const outcomeMetrics: OutcomeMetric[] = [
@@ -729,6 +703,16 @@ export function getMetricById(id: string): OutcomeMetric | undefined {
 export function getTierMetrics(): OutcomeMetric[] {
   return outcomeMetrics.filter((m) => m.isTier)
 }
+
+// ----------------------------------------------------------------------------
+// Planned: map integration
+//
+// The `showOnMap`, `spatialType`, and `spatialLocation` fields and the two
+// helpers below back a planned Data Explorer to map integration (drop a metric
+// onto the map by spatial type / location). They are intentionally retained
+// even though no caller wires them up yet. Do not delete them when pruning
+// unused exports. The map feature is expected to consume them.
+// ----------------------------------------------------------------------------
 
 export function getMapMetrics(): OutcomeMetric[] {
   return outcomeMetrics.filter((m) => m.showOnMap)
