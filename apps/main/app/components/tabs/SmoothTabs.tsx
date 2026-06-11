@@ -174,6 +174,7 @@ export default function SmoothTabs() {
         })}
       </div>
       <Box
+        id="tabPanelHeader"
         role="tabPanelHeader"
         sx={{
           flexShrink: 0,
@@ -191,7 +192,7 @@ export default function SmoothTabs() {
       />
 
 
-     <ExploreSubNav />
+      <ExploreSubNav />
     </div>
   )
 }
