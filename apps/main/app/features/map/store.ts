@@ -77,6 +77,18 @@ interface MapState {
 
   // Lightweight highlight tooltips driven by the tier animation overlay
   locationHighlights: LocationHighlight[]
+
+  // When true, unpinned (hover) highlights also render as map popups in
+  // get-started mode. The storyboard turns this on for the beats where the
+  // distribution grid is settled, so hovering a square or a map polygon shows
+  // a map popup. Off elsewhere so hover stays quiet on the map by default.
+  showHoverHighlightsOnMap: boolean
+
+  // When true, the get-started storyboard region lets pointer events through
+  // to the map behind it, so the user can pan, zoom, and hover map polygons.
+  // The storyboard turns this on only for the settled-grid beats. Off
+  // elsewhere keeps the storyboard a solid card with a scripted camera.
+  storyboardMapInteractive: boolean
 }
 
 const initialState: MapState = {
@@ -93,6 +105,8 @@ const initialState: MapState = {
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
   locationHighlights: [],
+  showHoverHighlightsOnMap: false,
+  storyboardMapInteractive: false,
 }
 
 // ============================================================================
@@ -217,6 +231,10 @@ export const mapActions = {
   clearLocationHighlights: () => {
     useMapStore.setState({ locationHighlights: [] })
   },
+  setShowHoverHighlightsOnMap: (value: boolean) =>
+    useMapStore.setState({ showHoverHighlightsOnMap: value }),
+  setStoryboardMapInteractive: (value: boolean) =>
+    useMapStore.setState({ storyboardMapInteractive: value }),
   setOnLocationToggle: (fn: ((key: string) => void) | null) => {
     _onLocationToggle = fn
   },
@@ -295,6 +313,10 @@ export const useClearTooltipsSignal = () =>
 // Location highlights
 export const useLocationHighlights = () =>
   useMapStore((s) => s.locationHighlights)
+export const useShowHoverHighlightsOnMap = () =>
+  useMapStore((s) => s.showHoverHighlightsOnMap)
+export const useStoryboardMapInteractive = () =>
+  useMapStore((s) => s.storyboardMapInteractive)
 export const getOnLocationToggle = () => _onLocationToggle
 export const getOnLocationClick = () => _onLocationClick
 export const getOnLocationHover = () => _onLocationHover

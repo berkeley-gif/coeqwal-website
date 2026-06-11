@@ -75,41 +75,6 @@ const FONT_PRESETS = {
   //   display: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
   //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   // },
-  // // Larsseit: local .woff files in apps/main/public/fonts/
-  // larsseit: {
-  //   text: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
-  //   display: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
-  //   cssImport: `
-  //     @font-face {
-  //       font-family: "Larsseit";
-  //       src: url("/fonts/Larsseit-Light.woff") format("woff");
-  //       font-weight: 300;
-  //       font-style: normal;
-  //       font-display: swap;
-  //     }
-  //     @font-face {
-  //       font-family: "Larsseit";
-  //       src: url("/fonts/Larsseit.woff") format("woff");
-  //       font-weight: 400;
-  //       font-style: normal;
-  //       font-display: swap;
-  //     }
-  //     @font-face {
-  //       font-family: "Larsseit";
-  //       src: url("/fonts/Larsseit-Medium.woff") format("woff");
-  //       font-weight: 500;
-  //       font-style: normal;
-  //       font-display: swap;
-  //     }
-  //     @font-face {
-  //       font-family: "Larsseit";
-  //       src: url("/fonts/Larsseit-Bold.woff") format("woff");
-  //       font-weight: 700;
-  //       font-style: normal;
-  //       font-display: swap;
-  //     }
-  //   `,
-  // },
   // realPro: {
   //   text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
   //   display:

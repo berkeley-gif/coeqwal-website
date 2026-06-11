@@ -1,16 +1,12 @@
-/* OverlayPopupArbiter. Owns `demoLocation` and `demoHoveredLocation`
- * state.
+/* OverlayPopupArbiter owns the `demoLocation` and
+ * `demoHoveredLocation` state that `OutcomeMorphOverlay` consumes as
+ * `demoHighlightedLocationKey` (gold ring on the distribution square)
+ * and `hoveredLocation` (overlay popup near the square) during the
+ * loi-highlight beat.
  *
- * Phase 0 scope. Drives the two React-state slots that
- * `OutcomeMorphOverlay` consumes as `demoHighlightedLocationKey` (gold
- * ring on the distribution square) and `hoveredLocation` (overlay
- * popup near the square) during the Beat 5 demo.
- *
- * These slots are React state (lines 971 and 974 of
- * `TierAnimationSection`) rather than refs because the overlay
- * component needs to re-render when they change. We receive the
- * setters via `ctx` and call them directly on window transitions.
- * There is no commit batching to do.
+ * These are React state in `TierAnimationSection`, not refs, because
+ * the overlay must re-render when they change. The setters arrive via
+ * `ctx` and are called on window transitions.
  */
 
 import type { Arbiter, BeatEngineContext, OverlayPopupActor } from "../types"
@@ -18,8 +14,8 @@ import type { Arbiter, BeatEngineContext, OverlayPopupActor } from "../types"
 export class OverlayPopupArbiter implements Arbiter<OverlayPopupActor> {
   readonly kind = "overlayPopup" as const
 
-  /** Track which target we wrote last so `teardown()` can clear the
-   *  correct slot without clobbering state it did not own. */
+  /** Remember which slots we wrote, so `teardown()` only clears what
+   *  we set. */
   private writtenRing = false
   private writtenHover = false
 

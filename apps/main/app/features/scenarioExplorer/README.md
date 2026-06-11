@@ -401,7 +401,7 @@ const {
   error,
 } = useResolvedScenarioTiers()
 
-// Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, parallel plot transforms)
+// Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, radar plot transforms)
 import { useTierChartData } from "../tools/hooks/useTierChartData"
 const { data, axes, lineColors, baselineScenario, isLoading } =
   useTierChartData()
@@ -712,6 +712,15 @@ tools/panels/radar/
 
 Data: `tools/hooks/useTierChartData.ts`. Chart: `packages/viz/src/components/RadarPlot.tsx`. Wiring: `ActiveToolPanel` `case "radar"`.
 
+## Tier score encoding: heatmap vs radar
+
+The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
+
+- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
+- The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
+
+They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
+
 ## Where the data comes from
 
 Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
@@ -719,7 +728,7 @@ Pick a hook by the shape of data you need. None of these require manual hydrocli
 | You need...                                                | Hook                                         | What you get back                                                      |
 | ---------------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
 | All 9 outcomes for every scenario, hydroclimate-resolved   | `useResolvedScenarioTiers()`                 | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`       |
-| Same, plus radar and parallel transforms                   | `useTierChartData()`                         | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`          |
+| Same, plus radar transforms                                | `useTierChartData()`                         | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`          |
 | Per-location tier assignments for one outcome              | `useTierLocationAssignments(id, code)`       | `locations[]` with `tier_level`                                        |
 | Many outcomes' locations at once for a single scenario     | `useTierLocationAssignmentsBatch(id, codes)` | batched response, splays into the single-outcome cache                 |
 | Reservoir, CWS, AG, env-flow, or Delta statistics          | the matching domain hook in `@repo/data`     | see the "Every hook in the package" table in `packages/data/README.md` |
