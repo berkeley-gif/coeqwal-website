@@ -12,7 +12,7 @@ import {
 import {
   equityDataToCSV,
   type EquityChartDataShape,
-} from "../../tools/panels/dataInDepth/utils/exportUtils"
+} from "../export/csv/equityCsv"
 import { useEquityObjectives } from "../../tools/panels/equity/useEquityObjectives"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
 import ShareEquityLiveChart from "../live/ShareEquityLiveChart"
@@ -26,15 +26,6 @@ function outcomeCodesToLabels(codes: string[]): string[] {
   return codes.map((code) => OUTCOME_NAMES[code as OutcomeCode] ?? code)
 }
 
-/**
- * Per-item rehydration mount. Each missing equity item gets its own
- * inner component so `useEquityObjectives` can be called once per
- * scenario / baseline pair without violating the rules of hooks.
- *
- * Persists `cachedChartData` in the same shape `OffscreenEquityCapture`
- * writes at capture time so the CSV exporter sees identical input
- * whether the item was captured live or rehydrated from a URL.
- */
 const EquityItemRehydrator: React.FC<{
   item: EquityItem
   context: DataRehydrationContext
@@ -90,7 +81,7 @@ const EquityRehydrator: React.FC<{
 
 const equityHandler: VariantHandler<EquityItem> = {
   type: "equity",
-  urlPrefix: "e",
+  urlPrefix: "e", // "e"quity; unique across the registry
   rasterDimensionsKey: "equity",
 
   renderCard(item, ctx) {
@@ -177,7 +168,7 @@ const equityHandler: VariantHandler<EquityItem> = {
   // Mount one inner component per missing item so `useEquityObjectives`
   // is called per (scenarioId, compareToBaseline) pair. SWR shares
   // the underlying tier queries with the live panel, so the typical
-  // case is a warm-cache hit with no extra network.
+  // case is a warm-cache hit.
   DataRehydrator: EquityRehydrator,
 }
 

@@ -9,7 +9,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme, HistoryIcon } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
 import {
   hydroclimateOptions,
@@ -103,7 +103,10 @@ export function HydroclimateChooser({
         {hydroclimateOptions.map(
           (option: { value: string; label: string; description: string }) => {
             const config = HYDROCLIMATE_CONFIG[option.value]
-            const IconComponent = config?.icon || HistoryIcon
+            // A climate without a config entry renders a plain circle: no
+            // icon and a neutral fill. Add an entry in hydroclimateConfig.ts
+            // to give it a themed icon and color.
+            const IconComponent = config?.icon
             const isSelected = value === option.value
             const noData = !AVAILABLE_HYDROCLIMATES.has(option.value)
             const isDisabled =
@@ -156,7 +159,7 @@ export function HydroclimateChooser({
                       borderRadius: theme.borderRadius.circle,
                       backgroundColor: isDisabled
                         ? theme.palette.grey[400]
-                        : config?.bgColor || theme.palette.blue.bright,
+                        : config?.bgColor || theme.palette.grey[500],
                       border: isSelected
                         ? `3px solid ${theme.palette.common.white}`
                         : "3px solid transparent",
@@ -182,12 +185,14 @@ export function HydroclimateChooser({
                       },
                     }}
                   >
-                    <IconComponent
-                      sx={{
-                        color: theme.palette.common.white,
-                        fontSize: iconFontSize,
-                      }}
-                    />
+                    {IconComponent && (
+                      <IconComponent
+                        sx={{
+                          color: theme.palette.common.white,
+                          fontSize: iconFontSize,
+                        }}
+                      />
+                    )}
                   </Box>
                   {showLabels && (
                     <Typography

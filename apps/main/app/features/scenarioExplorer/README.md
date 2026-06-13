@@ -373,7 +373,7 @@ Sort state uses `sortBy` / `sortDirection` (`sortBy !== null` means sort is acti
 
 ### Hydroclimate resolution
 
-There is no separate hydroclimate API endpoint. The flow is:
+There is no separate hydroclimate API endpoint. The supported set is the canonical `HYDROCLIMATES` const in `content/scenarios.ts`, which `HYDROCLIMATE_ID_MAP` and every other hydroclimate constant derive from. The resolution flow is:
 
 1. User picks a hydroclimate in `HydroclimateChooser` -> store's `hydroclimate` (e.g., `"historical"`)
 2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (e.g., `"historical"` -> `2`)
@@ -832,6 +832,45 @@ const { data } = useBatchStatistics(resolvedIds, { types: ["storage"] })
 That is the entire contract. The hydroclimate chooser updates the store, the resolver hooks pick up the change, and your panel re-renders with the new data.
 
 If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/toolbar/ToolToolbar.tsx`.
+
+## Add a hydroclimate
+
+This walks through adding a new hydroclimate to the main app. You register it app-wide once, the chooser and every tool pick it up, and then a few tools need a small amount of local wiring.
+
+### Before you start
+
+The new climate's scenarios must already exist in the database and come back from `GET /api/scenarios` with a numeric `hydroclimate_id`. That is backend work (see the data-platform repo and `packages/data/README.md`). You need that id for step 1. If the data is not there yet, the chooser entry renders but no scenarios resolve.
+
+### 1. Register it app-wide in `content/scenarios.ts`
+
+`HYDROCLIMATES` is the single source of truth. Every other hydroclimate constant and the `Hydroclimate` type derive from it. Each constant below is keyed by the hydroclimate string value (ask the backend dev or check the API). Add the new value to each:
+
+- `HYDROCLIMATES` adds the value. This widens the `Hydroclimate` type, `ALL_HYDROCLIMATES`, the resilience alias, and share's `ShareRadarHydroKey` automatically.
+- `HYDROCLIMATE_ID_MAP` maps the value to its API `hydroclimate_id`.
+- `HYDROCLIMATE_LABEL_MAP` maps that id back to the value.
+- `hydroclimateOptions` adds `{ value, label, description }`. This is what the toolbar `HydroclimateChooser` renders, and it feeds the derived label and description maps.
+- `hydroclimateLabels` adds the display label for the discrete slider. It is a parallel array, so keep it in the same order as `hydroclimateOptions`.
+- `HYDROCLIMATE_SHORT_LABELS` adds a compact label for tight UI.
+
+You do not edit `ALL_HYDROCLIMATES`, `HYDROCLIMATE_LABELS_BY_VALUE`, or `HYDROCLIMATE_DESCRIPTIONS_BY_VALUE`. They derive from the constants above.
+
+### 2. Give it an icon and color
+
+Add an entry to `HYDROCLIMATE_CONFIG` in `features/scenarios/hydroclimateConfig.ts`, keyed by the same string value:
+
+```ts
+cc_new: { icon: SomeMuiIcon, bgColor: "#6a1b9a" },
+```
+
+This sets the icon and accent color used by the chooser, the badges, and the icon strips. It is not required to ship. A climate with no entry still works, the chooser just draws a plain neutral circle with no icon for it, so add an entry when you want it themed.
+
+### 3. The chooser and tools pick it up
+
+The toolbar chooser reads `hydroclimateOptions`, and the resolver hooks read `HYDROCLIMATE_ID_MAP`, so most tools need no further changes. The resilience matrix and any tool that goes through `useResolvedScenarioTiers()` or `useResolvedIdMapping()` get the new value for free. See [Wire to the hydroclimate chooser](#wire-to-the-hydroclimate-chooser).
+
+### 4. Per-tool wiring
+
+A few tools keep per-hydroclimate code that must be extended by hand. Today that is share, which needs one unrolled data fetch and a filename token. See the [share README](explorer/share/README.md#add-a-hydroclimate) for those two steps. Add other tools here as they gain hydroclimate-specific code.
 
 ## Avoiding hover flicker
 

@@ -17,6 +17,9 @@ export interface HydroclimateVisualConfig {
   bgColor: string
 }
 
+// One entry per hydroclimate. A hydroclimate without an entry still works:
+// the chooser renders a plain circle for it and badges fall back gracefully.
+// Add an entry to give a new climate its own icon and accent color.
 export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
   historical: {
     icon: HistoryIcon,

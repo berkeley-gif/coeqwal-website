@@ -789,7 +789,7 @@ Do not call `useMultipleScenarioTiers`, `fetchAllScenarioTiers`, or `fetchScenar
 
 **How hydroclimates work (behind the scenes):**
 
-The app has three hydroclimates currently. Each hydroclimate has its own set of ~24 scenario IDs. These are different model runs but share "sibling group" IDs (e.g., sibling group `s0020` has scenario `s0020` in historical, `s0028` in another, and `s0052` in another hydroclimate).
+The hydroclimates the app supports are listed in the canonical `HYDROCLIMATES` const in `apps/main/app/content/scenarios.ts` (every other hydroclimate constant and type derives from it). Each hydroclimate has its own set of scenario IDs. These are different model runs but share "sibling group" IDs (e.g., sibling group `s0020` has scenario `s0020` in historical, and other scenario IDs in the other hydroclimates).
 
 When the user switches hydroclimates via the toolbar `HydroclimateChooser`, `useResolvedScenarioTiers()` automatically:
 
@@ -799,7 +799,7 @@ When the user switches hydroclimates via the toolbar `HydroclimateChooser`, `use
 
 This means your component code doesn't change when the user switches hydroclimates. `allScenariosData["s0020"]` always returns data for the _active_ hydroclimate's version of that scenario. The hook handles the resolution transparently.
 
-> **Future:** The hydroclimate options and `HYDROCLIMATE_ID_MAP` are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will replace this with database-driven metadata (once the team decides it). This won't affect this code. `useResolvedScenarioTiers()` will be updated internally.
+> **Future:** The canonical list (`HYDROCLIMATES`), its string-to-id map (`HYDROCLIMATE_ID_MAP`), and the chooser options are all currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will replace these with database-driven metadata (once the team decides it). This won't affect this code. `useResolvedScenarioTiers()` will be updated internally.
 
 ### Step 2: Use the data
 

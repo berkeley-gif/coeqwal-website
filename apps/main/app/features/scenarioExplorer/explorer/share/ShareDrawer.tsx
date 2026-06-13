@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback } from "react"
 import {
   Box,
   Drawer,
@@ -11,15 +11,9 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../store"
-import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTiers"
-import { useTierChartData } from "../tools/hooks/useTierChartData"
-import {
-  buildShareRadarLiveDataFields,
-  type ShareRadarHydroKey,
-  type ShareRadarLiveDataFields,
-} from "./utils/shareRadarLiveData"
 import { useTabNavigation } from "../../../../hooks/useTabNavigation"
 import ShareItemView from "./ShareItemView"
+import { useShareRenderContext } from "./hooks/useShareRenderContext"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
@@ -127,43 +121,8 @@ export default function ShareDrawer() {
     updateShareItem,
   } = useWorkspaceSlice()
 
-  const { siblingGroups, allChartData, outcomeNames } =
-    useResolvedScenarioTiers()
-
-  const compHistorical = useTierChartData("historical", true)
-  const compCc50 = useTierChartData("cc50", true)
-  const compCc95 = useTierChartData("cc95", true)
-
-  const radarLiveByHydro = useMemo(
-    () =>
-      ({
-        historical: buildShareRadarLiveDataFields(compHistorical),
-        cc50: buildShareRadarLiveDataFields(compCc50),
-        cc95: buildShareRadarLiveDataFields(compCc95),
-      }) satisfies Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
-    [compHistorical, compCc50, compCc95],
-  )
-
-  const scenarioLookup = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        name: string
-        description: string
-        definition: string
-        shortLabel: string
-      }
-    >()
-    siblingGroups.forEach((s) => {
-      map.set(s.scenarioId, {
-        name: s.shortLabel,
-        description: s.label,
-        definition: s.description,
-        shortLabel: s.shortLabel,
-      })
-    })
-    return map
-  }, [siblingGroups])
+  const { scenarioLookup, radarLiveByHydro, outcomeNames, allChartData } =
+    useShareRenderContext()
 
   const handleNoteChange = useCallback(
     (id: string, note: string) => {
@@ -312,12 +271,7 @@ export default function ShareDrawer() {
                 onNoteChange={handleNoteChange}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
-                allChartData={
-                  allChartData as Record<
-                    string,
-                    Record<string, unknown> | undefined
-                  >
-                }
+                allChartData={allChartData}
                 radarLiveByHydro={radarLiveByHydro}
               />
             ))

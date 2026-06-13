@@ -16,10 +16,6 @@
  * post-paint frame insurance, the SVG clone + style inlining, and
  * the optional PNG rasterization. Per-variant capture functions
  * live in `share/capture/captureRegistry.ts` and call this host.
- *
- * P2.4 will add `captureDoctor` warnings on slow / failed
- * captures; the hooks are wired into this host so chart-specific
- * code never has to think about diagnostics.
  */
 
 import { createRoot } from "react-dom/client"
@@ -29,7 +25,7 @@ import {
   rasterizeSvgClone,
   composeLiveSvgsToString,
   rasterizeSvgString,
-} from "../../tools/panels/dataInDepth/utils/exportUtils"
+} from "../export/svgRasterize"
 import { captureDoctor } from "./captureDoctor"
 
 const DEFAULT_CAPTURE_SIZE = 600

@@ -171,8 +171,12 @@ export function useTierChartData(
 
         // Radar pulls NOD/SOD means only under the historical hydroclimate
         // today so it stays comparable to the current axis reference. The
-        // underlying data package now carries cc50 and cc95 too, so opening
-        // this up later is a matter of removing the guard.
+        // underlying data package carries cc50 and cc95 too, but that
+        // regional data is provisional and in transition (see the header in
+        // packages/data src/coeqwal/regional/index.ts). We do not substitute
+        // historical for the other climates, we return null, so non-historical
+        // NOD/SOD axes render empty until the data is trusted and this guard
+        // is opened up.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
           const raw =

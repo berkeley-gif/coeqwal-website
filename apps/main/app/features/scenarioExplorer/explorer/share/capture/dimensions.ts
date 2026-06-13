@@ -10,8 +10,10 @@
  *   1. Add an entry below.
  *   2. Use `CAPTURE_DIMENSIONS["yourKey"]` in the
  *      `Offscreen<Variant>Capture.tsx` adapter.
- *   3. Update the `ShareItem["type"] → key` mapping in
- *      `share/Share.tsx` so PNG downloads pick up the new size.
+ *   3. Set the handler's `rasterDimensionsKey` (in
+ *      `share/variants/<variant>.ts`) to that key so the PNG fallback
+ *      picks up the new size. Provide `rasterSizeFor(item)` instead if
+ *      the size depends on the item.
  */
 
 export interface CaptureSize {

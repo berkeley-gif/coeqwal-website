@@ -72,7 +72,19 @@ export interface HydroclimateOption {
 }
 
 /**
- * Maps frontend hydroclimate string values to API hydroclimate_id numbers.
+ * List of hydroclimates the app supports, in display order.
+ * Single source of truth: every other hydroclimate constant and type
+ * should derive from this. To add one, add it here and give it an API id in
+ * HYDROCLIMATE_ID_MAP below, then follow the per-feature steps in the
+ * relevant READMEs.
+ */
+export const HYDROCLIMATES = ["historical", "cc50", "cc95"] as const
+
+/** A supported hydroclimate value, for example "historical". */
+export type Hydroclimate = (typeof HYDROCLIMATES)[number]
+
+/**
+ * Maps frontend hydroclimate values to API hydroclimate_id numbers.
  * Only hydroclimates with actual data in the database are included.
  */
 export const HYDROCLIMATE_ID_MAP: Record<string, number> = {
@@ -81,16 +93,15 @@ export const HYDROCLIMATE_ID_MAP: Record<string, number> = {
   cc95: 4,
 }
 
-/** Reverse lookup: API hydroclimate_id -> frontend string value */
+/** Reverse lookup: API hydroclimate_id to frontend string value */
 export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
   2: "historical",
   3: "cc50",
   4: "cc95",
 }
 
-/** The hydroclimate values the app supports so far: `"historical"`, `"cc50"`, `"cc95"` */
-export const ALL_HYDROCLIMATES: readonly string[] =
-  Object.keys(HYDROCLIMATE_ID_MAP)
+/** All supported hydroclimate values. Alias of HYDROCLIMATES. */
+export const ALL_HYDROCLIMATES: readonly string[] = HYDROCLIMATES
 
 export interface OperationIcon {
   path: string
