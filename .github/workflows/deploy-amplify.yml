@@ -24,12 +24,11 @@ on:
           - main
           - storyline-flow
           - storyline-climate
-          - all-three
+          - all
       branch:
         # Only `dev` is offered today. Production branches will be added to
         # this list, the MAP block in the deploy job, and the README "Apps and
         # Amplify ids" table when the production Amplify apps are created
-        # (see README "Production deploys" for the playbook).
         description: "Amplify branch to deploy"
         required: true
         type: choice
@@ -126,7 +125,7 @@ jobs:
               main)               APPS='["main"]' ;;
               storyline-flow)     APPS='["storyline-flow"]' ;;
               storyline-climate)  APPS='["storyline-climate"]' ;;
-              all-three)          APPS='["main","storyline-flow","storyline-climate"]' ;;
+              all)                APPS='["main","storyline-flow","storyline-climate"]' ;;
               *) echo "::error::Unknown selection $SELECTION"; exit 1 ;;
             esac
           else
@@ -163,7 +162,7 @@ jobs:
           set -euo pipefail
           # Static map of (branch, app) -> Amplify appId. When wiring a
           # production app, add its row here AND add `<app name>` to
-          # the `branch:` dropdown above. See README "Production deploys".
+          # the `branch:` dropdown above.
           declare -A MAP=(
             ["dev:main"]="d2yqk6im560ffz"
             ["dev:storyline-flow"]="d11fk80jyl948s"

@@ -11,6 +11,9 @@ name: Notify package changes
 # same comment in place rather than stacking.
 #
 # pnpm-lock.yaml is deliberately excluded from the trigger paths.
+#
+# Markdown-only edits (READMEs etc.) under any watched path are excluded, so a
+# docs-only change inside packages/ does not ping app owners.
 
 on:
   pull_request:
@@ -20,6 +23,8 @@ on:
       - "pnpm-workspace.yaml"
       - "turbo.json"
       - "package.json"
+      - "!**/*.md"
+      - "!**/*.mdx"
 
 permissions:
   contents: read
