@@ -8,8 +8,7 @@ import {
  * The hydroclimate keys the share radar fetches live. Derived from the
  * {@link HYDROCLIMATES} list in content/scenarios so there is
  * one place to edit when the supported set changes. See the
- * "Hydroclimates" section of the share README for the add-a-hydroclimate
- * steps and the rules-of-hooks constraint on `useShareRenderContext`.
+ * "Add a hydroclimate" section of the share README.
  */
 export type ShareRadarHydroKey = Hydroclimate
 

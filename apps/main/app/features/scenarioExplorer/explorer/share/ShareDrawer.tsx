@@ -14,6 +14,7 @@ import { useWorkspaceSlice } from "../store"
 import { useTabNavigation } from "../../../../hooks/useTabNavigation"
 import ShareItemView from "./ShareItemView"
 import { useShareRenderContext } from "./hooks/useShareRenderContext"
+import { ShareRadarLiveProvider } from "./ShareRadarLiveProvider"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
@@ -108,7 +109,20 @@ function ShareTab({
   )
 }
 
+/**
+ * Explore-tab share drawer. The default export wraps the content in
+ * `ShareRadarLiveProvider` so `useShareRenderContext` can read live
+ * radar data for every hydroclimate.
+ */
 export default function ShareDrawer() {
+  return (
+    <ShareRadarLiveProvider>
+      <ShareDrawerContent />
+    </ShareRadarLiveProvider>
+  )
+}
+
+function ShareDrawerContent() {
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
 

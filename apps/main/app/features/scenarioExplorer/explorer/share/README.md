@@ -21,6 +21,7 @@ share/
   capture/
     dimensions.ts      CAPTURE_DIMENSIONS (fixed capture size per variant)
     adapters/index.ts  re-exports the per-tool capture functions
+  ShareRadarLiveProvider.tsx  fetches live radar data for every hydroclimate
   hooks/
     useShareRenderContext.ts  data the cards and exporters need
   utils/
@@ -123,23 +124,25 @@ is the only entry point and reaches the card through the registry.
 
 Two spots in this folder are shaped a certain way only because of the
 rules of hooks (a hook must be called the same number of times, in the
-same order, on every render).
+same order, on every render). Both use the same trick: render one
+component per item, so each component calls its hooks once.
 
-**Hydroclimate fetches in `useShareRenderContext`.** A saved or
-URL-loaded item can belong to any hydroclimate, so the hook needs
-comparison data for all of them. It makes one
-`useTierChartData(period, true)` call per hydroclimate, written out by
-hand instead of generated in a loop. A loop would break the rules of
-hooks, because the number of calls would change whenever the list of
-hydroclimates changed:
+**Hydroclimate fetches in `ShareRadarLiveProvider`.** A saved or
+URL-loaded item can belong to any hydroclimate, so share needs
+comparison data for all of them. The fetch is `useTierChartData`, a
+hook, so it cannot run in a loop over the list:
 
 ```typescript
 // Don't do this: the hook count changes when HYDROCLIMATES changes.
 HYDROCLIMATES.map((hc) => useTierChartData(hc, true))
 ```
 
-The "Add a hydroclimate" section below shows how to add one of these
-calls safely as the list grows.
+Instead the provider renders one invisible `RadarLiveFetcher` per
+`HYDROCLIMATES` entry. Each fetcher calls `useTierChartData` once and
+lifts its shaped fields up to the provider, which exposes the whole map
+through `useShareRadarLive`. Mapping over the list to render components
+is allowed, so the share radar data scales with the canonical list and
+needs no hand edits when a hydroclimate is added.
 
 **`DataRehydrator` is a component, not a hook.** A variant may need to
 re-fetch data for several URL restored items at once. Looping and
@@ -151,45 +154,27 @@ item. It writes the resolved data back with
 
 ## Add a hydroclimate
 
-First register the new hydroclimate (called `cc_new` here as a
-placeholder, use the real value) app-wide. That is the
-single source of truth and covers the chooser and most tools. See
+Register the new hydroclimate app-wide (called `cc_new` here as a
+placeholder, use the real value). That is the single source of truth and
+covers the chooser, the resilience matrix, and share. See
 [Add a hydroclimate](../../README.md#add-a-hydroclimate) in the scenario
-explorer README. Share derives its key from that app-wide list.
+explorer README. Share derives its key from that app-wide list:
 
 ```typescript
 // utils/shareRadarLiveData.ts
 export type ShareRadarHydroKey = Hydroclimate // from app/content/scenarios.ts
 ```
 
-Once it is registered, share needs the two steps below.
+Share fetches every hydroclimate through `ShareRadarLiveProvider`, which
+renders one fetcher per `HYDROCLIMATES` entry (see React
+rules of hooks"). So once the climate is registered app-wide, share
+picks it up with no code change.
 
-### 1. Add the share radar fetch in `useShareRenderContext`
-
-Add one unrolled call and the matching map entry:
-
-```typescript
-const compCcNew = useTierChartData("cc_new", true)
-
-const radarLiveByHydro = useMemo(
-  () =>
-    ({
-      // ...existing entries...
-      cc_new: buildShareRadarLiveDataFields(compCcNew),
-    }) satisfies Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
-  [/* ...existing deps... */ compCcNew],
-)
-```
-
-The calls are written out one per hydroclimate on purpose (see "A note
-on the React rules of hooks"). Because `ShareRadarHydroKey` widened when
-you registered the hydroclimate app-wide, the
-`satisfies Record<ShareRadarHydroKey, ...>` will not compile until you
-add the entry. That failure is your reminder.
-
-### 2. Add a download filename token
+### Add a download filename token (optional)
 
 In `utils/filename.ts`, add a short token to the `HC_SLUG` map, for
 example `cc_new: "ccnew"`. This keeps download filenames compact and
-readable.
+readable. It is optional. Without an entry, `hydroclimateSlug` falls
+back to a generic slug of the value, so `cc_new` becomes `cc-new` in the
+filename and the download still works, just less compact.
 

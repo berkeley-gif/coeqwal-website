@@ -71,34 +71,87 @@ export interface HydroclimateOption {
   description: string
 }
 
+/** Per-hydroclimate definition. One object per supported hydroclimate. */
+export interface HydroclimateDef {
+  /** Frontend string key used across the app and in share URLs, e.g. "historical" */
+  value: string
+  /** API hydroclimate_id returned for this climate's scenarios */
+  apiId: number
+  /** Full display label */
+  label: string
+  /** Compact label for tight UI (chips, toggle buttons, axis ticks) */
+  shortLabel: string
+  /** Long-form description for tooltips and info panels */
+  description: string
+}
+
 /**
- * List of hydroclimates the app supports, in display order.
- * Single source of truth: every other hydroclimate constant and type
- * should derive from this. To add one, add it here and give it an API id in
- * HYDROCLIMATE_ID_MAP below, then follow the per-feature steps in the
- * relevant READMEs.
+ * Source of truth for the hydroclimates the app supports, in
+ * display order. To add a hydroclimate, add one entry here. The list,
+ * the Hydroclimate type, the API id maps, and the label structures
+ * below all derive from this, so there is one place to edit.
+ *
+ * apiId must match the numeric hydroclimate_id the API returns for this
+ * climate's scenarios. See the "Add a hydroclimate" guide in the
+ * scenario explorer README.
  */
-export const HYDROCLIMATES = ["historical", "cc50", "cc95"] as const
+export const HYDROCLIMATE_DEFS = [
+  {
+    value: "historical",
+    apiId: 2,
+    label: "Historical",
+    shortLabel: "Historical",
+    description:
+      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+  },
+  {
+    value: "cc50",
+    apiId: 3,
+    label: "Moderate-dry climate risk",
+    shortLabel: "Moderate risk",
+    description:
+      "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
+  },
+  {
+    value: "cc95",
+    apiId: 4,
+    label: "High climate risk",
+    shortLabel: "High risk",
+    description:
+      "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
+  },
+] as const satisfies readonly HydroclimateDef[]
 
 /** A supported hydroclimate value, for example "historical". */
-export type Hydroclimate = (typeof HYDROCLIMATES)[number]
+export type Hydroclimate = (typeof HYDROCLIMATE_DEFS)[number]["value"]
+
+/**
+ * Maps a tuple of definition objects to the tuple of their `value`
+ * fields, preserving length and order. The generic array constraint is
+ * what makes this map element-wise into a fixed-length tuple rather
+ * than a plain array, so `HYDROCLIMATES` can be destructured
+ * positionally.
+ */
+type ValuesOf<T extends readonly { value: string }[]> = {
+  readonly [K in keyof T]: T[K]["value"]
+}
+
+/** List of supported hydroclimate values, in display order. */
+export const HYDROCLIMATES = HYDROCLIMATE_DEFS.map(
+  (d) => d.value,
+) as unknown as ValuesOf<typeof HYDROCLIMATE_DEFS>
 
 /**
  * Maps frontend hydroclimate values to API hydroclimate_id numbers.
- * Only hydroclimates with actual data in the database are included.
+ * Derived from HYDROCLIMATE_DEFS.
  */
-export const HYDROCLIMATE_ID_MAP: Record<string, number> = {
-  historical: 2,
-  cc50: 3,
-  cc95: 4,
-}
+export const HYDROCLIMATE_ID_MAP: Record<string, number> = Object.fromEntries(
+  HYDROCLIMATE_DEFS.map((d) => [d.value, d.apiId] as const),
+)
 
 /** Reverse lookup: API hydroclimate_id to frontend string value */
-export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
-  2: "historical",
-  3: "cc50",
-  4: "cc95",
-}
+export const HYDROCLIMATE_LABEL_MAP: Record<number, string> =
+  Object.fromEntries(HYDROCLIMATE_DEFS.map((d) => [d.apiId, d.value] as const))
 
 /** All supported hydroclimate values. Alias of HYDROCLIMATES. */
 export const ALL_HYDROCLIMATES: readonly string[] = HYDROCLIMATES
@@ -367,44 +420,26 @@ export const CURRENT_OPERATIONS_ICONS: OperationIcon[] = [
 // Hydroclimate options
 // =============================================================================
 
-export const hydroclimateOptions: HydroclimateOption[] = [
-  {
-    value: "historical",
-    label: "Historical",
-    description:
-      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
-  },
-  {
-    value: "cc50",
-    label: "Moderate-dry climate risk",
-    description:
-      "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
-  },
-  {
-    value: "cc95",
-    label: "High climate risk",
-    description:
-      "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
-  },
-]
+export const hydroclimateOptions: HydroclimateOption[] = HYDROCLIMATE_DEFS.map(
+  ({ value, label, description }) => ({ value, label, description }),
+)
 
-/** Hydroclimate labels for the discrete slider */
-export const hydroclimateLabels = [
-  "Historical",
-  "Moderate-dry climate risk",
-  "High climate risk",
-]
+/**
+ * Hydroclimate labels for the discrete slider. Parallel array to
+ * hydroclimateOptions, derived from HYDROCLIMATE_DEFS so it stays in
+ * the same order.
+ */
+export const hydroclimateLabels = HYDROCLIMATE_DEFS.map((d) => d.label)
 
 /**
  * Compact labels for hydroclimates, keyed by value. Use in tight UI like
  * chips, toggle buttons, and heatmap axis ticks where the full
  * `hydroclimateOptions[].label` is too long.
  */
-export const HYDROCLIMATE_SHORT_LABELS: Record<string, string> = {
-  historical: "Historical",
-  cc50: "Moderate risk",
-  cc95: "High risk",
-}
+export const HYDROCLIMATE_SHORT_LABELS: Record<string, string> =
+  Object.fromEntries(
+    HYDROCLIMATE_DEFS.map((d) => [d.value, d.shortLabel] as const),
+  )
 
 /** Full display label keyed by hydroclimate value (e.g. `"historical"` -> `"Historical"`) */
 export const HYDROCLIMATE_LABELS_BY_VALUE: Record<string, string> =

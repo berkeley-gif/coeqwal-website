@@ -2,12 +2,7 @@
 
 import { useMemo } from "react"
 import { useResolvedScenarioTiers } from "../../tools/hooks/useResolvedScenarioTiers"
-import { useTierChartData } from "../../tools/hooks/useTierChartData"
-import {
-  buildShareRadarLiveDataFields,
-  type ShareRadarHydroKey,
-  type ShareRadarLiveDataFields,
-} from "../utils/shareRadarLiveData"
+import { useShareRadarLive } from "../ShareRadarLiveProvider"
 
 /**
  * Display info a share card needs about one scenario. Built from the
@@ -30,38 +25,17 @@ export type ShareScenarioLookup = Map<string, ShareScenarioInfo>
  * same three things: a scenario id to display-label lookup, the live
  * radar data per hydroclimate, and the outcome name list. This hook
  * builds all of them once so the two surfaces stay in sync.
+ *
+ * The live radar data comes from `useShareRadarLive`, supplied by the
+ * `ShareRadarLiveProvider` that wraps each share surface. That provider
+ * fetches every hydroclimate and scales with the 
+ * `HYDROCLIMATES` list, so nothing here changes when a climate is added.
  */
 export function useShareRenderContext() {
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
 
-  // One `useTierChartData(period, true)` per supported hydroclimate so
-  // share items can resolve `item.hydroclimate` to full parallel rows
-  // (not showOnlyChosen-filtered) for URL / mixed-tray rehydration.
-  //
-  // These calls are unrolled on purpose. `useTierChartData` is a hook,
-  // so the Rules of Hooks forbid calling it in a variable-length loop.
-  // Calling it inside a `HYDROCLIMATES.map(...)` over the list would
-  // change the number of hook calls per render. Each hydroclimate
-  // therefore gets its own static call, and the `satisfies Record<
-  // ShareRadarHydroKey, ...>` below turns a forgotten entry into a
-  // compile error. To add a hydroclimate: extend HYDROCLIMATES in
-  // content/scenarios (the single source of truth), add a
-  // `useTierChartData` line here, and add the matching record entry.
-  // See the share README "Hydroclimates" section.
-  const compHistorical = useTierChartData("historical", true)
-  const compCc50 = useTierChartData("cc50", true)
-  const compCc95 = useTierChartData("cc95", true)
-
-  const radarLiveByHydro = useMemo(
-    () =>
-      ({
-        historical: buildShareRadarLiveDataFields(compHistorical),
-        cc50: buildShareRadarLiveDataFields(compCc50),
-        cc95: buildShareRadarLiveDataFields(compCc95),
-      }) satisfies Record<ShareRadarHydroKey, ShareRadarLiveDataFields>,
-    [compHistorical, compCc50, compCc95],
-  )
+  const radarLiveByHydro = useShareRadarLive()
 
   const scenarioLookup = useMemo<ShareScenarioLookup>(() => {
     const map: ShareScenarioLookup = new Map()

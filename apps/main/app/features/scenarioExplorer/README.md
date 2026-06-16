@@ -2,24 +2,48 @@
 
 The Scenario Explorer is the main interface for exploring water allocation scenarios in the COEQWAL website. It provides multiple tools for viewing, comparing, and analyzing scenario data.
 
-## Overview
+## Table of contents
 
-- **Purpose**: Water allocation scenario exploration interface
-- **Adding a tool**: [Developer guide: adding a new visualization tool](#developer-guide-adding-a-new-visualization-tool)
-- **Framework**: Next.js 15 (App Router) with React 19
-- **State Management**: Zustand with Immer (`@repo/state`)
-- **Styling**: MUI v7 (`@repo/ui/mui`)
-- **Location**: `apps/main/app/features/scenarioExplorer/`
+- [Directory layout](#directory-layout)
+- [Architecture](#architecture)
+  - [Main app navigation](#main-app-navigation)
+  - [Tool modes](#tool-modes)
+  - [Layout: UnifiedToolView](#layout-unifiedtoolview)
+  - [Error boundaries](#error-boundaries)
+  - [Runtime component tree](#runtime-component-tree)
+- [Key components](#key-components)
+  - [GetStartedView.tsx](#getstartedviewtsx)
+  - [ScenarioExplorer.tsx](#scenarioexplorertsx)
+  - [ExplorerToolView.tsx](#explorertoolviewtsx)
+  - [ActiveToolPanel.tsx](#activetoolpaneltsx)
+  - [UnifiedToolView.tsx](#unifiedtoolviewtsx)
+  - [ListView.tsx](#listviewtsx)
+- [State management](#state-management)
+  - [Three tiers (where new state goes)](#three-tiers-where-new-state-goes)
+  - [Slice map](#slice-map)
+  - [When to use Zustand vs local state](#when-to-use-zustand-vs-local-state)
+- [Data flow](#data-flow)
+  - [Hydroclimate resolution](#hydroclimate-resolution)
+  - [Data hooks](#data-hooks)
+- **Developer guide/how-tos**
+  - [Adding a new visualization tool](#developer-guide-adding-a-new-visualization-tool)
+  - [Where the data comes from](#where-the-data-comes-from)
+  - [Tier score encoding: heatmap vs radar](#tier-score-encoding-heatmap-vs-radar)
+  - [Wire to the scenario sidebar](#wire-to-the-scenario-sidebar)
+  - [Wire to the hydroclimate chooser](#wire-to-the-hydroclimate-chooser)
+  - [Avoiding hover flicker](#avoiding-hover-flicker)
+  - [Map integration](#map-integration)
+  - [Add a hydroclimate](#add-a-hydroclimate)
 
 ## Directory layout
 
-The Explore tab has two surfaces (Get started, Tools). On disk, **get started** and **tools** map to `getStarted/` and `explorer/`. The scrollytelling stack lives in a third top-level folder, `animation/`, because it is large, map-coupled, and imported from `features/map/` as well as from `GetStartedView`.
+The Explore tab has two divisions (Get started, Tools). These map to `getStarted/` and `explorer/`. The animation lives in a third top-level folder, `animation/`, because it is large, map-coupled, and imported from `features/map/` as well as from `GetStartedView`.
 
 ```
 features/scenarioExplorer/
 ├── ScenarioExplorer.tsx          Routes mainView (get-started vs tools)
 ├── store.ts                      useScenarioExplorerStore (mainView only)
-├── constants.ts                  BASELINE_SCENARIO_ID and other feature-wide constants.
+├── constants.ts                  BASELINE_SCENARIO_ID (Current Operations baseline)
 │
 ├── getStarted/                   Sub-tab 1: onboarding scroll panels
 │   ├── GetStartedView.tsx        mounts TierAnimationSection from ../animation
@@ -29,7 +53,8 @@ features/scenarioExplorer/
 ├── animation/                    Get-started scrollytelling (runtime: get-started only)
 │   ├── TierAnimationSection.tsx  beat-driven tier story + map coordination
 │   ├── BeatTextOverlay.tsx, OutcomeMorphOverlay.tsx, useTierAnimationData.ts
-│   └── engine/                   BeatEngine, beats, arbiters (map paint, camera, popups)
+│   ├── engine/                   BeatEngine, beats, arbiters (map paint, camera, popups)
+│   └── hooks/                    scrollytelling hooks (useInteractiveLayerDirector, etc.)
 │
 ├── explorer/                     Sub-tab 2: tools surface + store + share
 │   ├── index.ts                  Entry for ScenarioExplorer (ExplorerToolView, lifecycle)
@@ -48,72 +73,14 @@ features/scenarioExplorer/
 │       ├── index.ts              Panel barrels
 │       ├── panels/               list, radar, equity, resilience, dataInDepth
 │       ├── chrome/               UnifiedToolView, ToolToolbar, sidebar widgets, overlays
+│       ├── components/           shared cross-tool components (OutcomeChooserPanel)
 │       ├── tour/
 │       └── hooks/                useResolvedScenarioTiers, usePrefetchTiers, etc.
 │
 └── utils/                        scenarioIdSort, scenarioThemeOrder
 ```
 
-Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. Get-started scroll copy lives under `getStarted/panels/`; the beat-driven map story lives under `animation/` (mounted only from `GetStartedView`). The app Share tab imports from `explorer/store` and `explorer/share/`. Outcome attribute data lives in `apps/main/app/content/outcomes.ts`.
-
-### Panel layout convention
-
-| Size / shape                      | Convention                                                               | Example                                        |
-| --------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- |
-| Small tool (≤8 files)             | Flat under `panels/<tool>/`                                              | `equity/`, `radar/`                            |
-| Medium tool with one hot sub-area | Panel root + one subfolder                                               | `list/` + `grid/`, `resilience/` + `controls/` |
-| Large multi-section tool          | Mini-module: `components/`, `hooks/`, `config/`, `utils/` + local README | `dataInDepth/`                                 |
-
-**Naming alias (data tool):** folder `dataInDepth/`, component `DataExplorerView`, explore mode `"data"`, toolbar label "Data in depth".
-
-### Import paths
-
-| Caller                                | Import from                                                                                  |
-| ------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Outside the feature (tabs, map hooks) | `scenarioExplorer/store` (shell `mainView`), `scenarioExplorer/explorer/store` (tools store) |
-| Map visualization layers              | `scenarioExplorer/animation/engine` (beat-engine helpers shared with get-started storyboard) |
-| Inside `explorer/`                    | Relative `../../../store` shim or slice hooks (`useWorkspaceSlice`, etc.)                    |
-| Do not                                | Import `store/storeInstance` or deep slice files from UI (use the shim)                      |
-
-Share tab UI lives in `explorer/share/tab/` (see share README). Prefer `explorer/share/index.ts` for share types and utilities.
-
-### Error boundaries
-
-`ScenarioExplorer.tsx` wraps each surface in its own `<ErrorBoundary>` (from `@repo/utils`):
-
-| Boundary     | What it wraps                           | Reset                                       | Fallback                                |
-| ------------ | --------------------------------------- | ------------------------------------------- | --------------------------------------- |
-| Get started  | `<GetStartedView />`                    | Auto via mount/unmount on `mainView`        | `ErrorFallback` with retry              |
-| Active tool  | controls + panel in `ActiveToolPanel`   | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
-| Share drawer | `<ShareDrawer />` in `ExplorerToolView` | Auto on leaving explorer                    | `null` (drawer disappears)              |
-| Tool tour    | `<ToolTour />` in `ExplorerToolView`    | Auto on leaving explorer                    | `null` (tour ends)                      |
-
-The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these.
-
-### Runtime component tree
-
-```
-ScenarioExplorer                    useExplorerLifecycle, useExplorerMapLayout
-├── GetStartedView                  (error boundary)
-│   ├── getStarted/panels/*         scroll sections
-│   └── animation/TierAnimationSection   beat engine, map mode get-started
-└── ExplorerToolView                useExploreHoverCoordination, useExploreShareCapture
-    ├── TourAnchorProvider
-    ├── UnifiedToolView             sidebar, toolbar, activeTool slot
-    │   ├── ExplorerSidebar → ScenarioSelectionSidebar  (non-list modes)
-    │   ├── ToolToolbar
-    │   └── ActiveToolPanel         one ToolErrorBoundary per exploreMode
-    │       ├── list: ListView
-    │       ├── radar: RadarChartControls + RadarPanel
-    │       ├── equity: EquityChartControls + EquityPanel
-    │       ├── resilience: ResilienceChartControls + ResiliencePanel
-    │       └── data: DataExplorerView
-    ├── KeyboardShortcuts
-    ├── ShareDrawer                 (error boundary, fallback null)
-    └── ToolTour                    (error boundary, fallback null)
-```
-
-Page shell: `ExploreSubNav` (writes `mainView` via feature store, `exploreMode` via explorer store), Mapbox map layer.
+Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. Get-started panel copy lives under `getStarted/panels/`. The beat-driven animated map story lives under `animation/` (mounted only from `GetStartedView`). The app Share tab is included here because it imports from `explorer/store` and `explorer/share/`. Key outcome (tiers) attribute data lives in `apps/main/app/content/outcomes.ts`.
 
 ## Architecture
 
@@ -147,9 +114,22 @@ All tools are rendered inside `UnifiedToolView`, which provides a persistent thr
 ```
 
 - **Sidebar** (optional): `ExplorerSidebar` wraps `ScenarioSelectionSidebar`. Shown in non-list modes. Omitted in list mode.
-- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips, show-map toggle, hydroclimate chooser.
+- **Toolbar**: `ToolToolbar`. Show-map toggle and hydroclimate chooser ("View by climate"). Search and visibility chips live in the sidebar (`SearchAndChips`), not here.
 - **Active tool**: `ActiveToolPanel` - chart controls + panel paired per mode, each inside `ToolErrorBoundary`.
 - **Map panel**: Optional transparent reveal area (25% width). Toggled by the "Show map" switch in the toolbar.
+
+### Error boundaries
+
+`ScenarioExplorer.tsx` wraps each surface in its own `<ErrorBoundary>` (from `@repo/utils`):
+
+| Boundary     | What it wraps                           | Reset                                       | Fallback                                |
+| ------------ | --------------------------------------- | ------------------------------------------- | --------------------------------------- |
+| Get started  | `<GetStartedView />`                    | Auto via mount/unmount on `mainView`        | `ErrorFallback` with retry              |
+| Active tool  | controls + panel in `ActiveToolPanel`   | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
+| Share drawer | `<ShareDrawer />` in `ExplorerToolView` | Auto on leaving explorer                    | `null` (drawer disappears)              |
+| Tool tour    | `<ToolTour />` in `ExplorerToolView`    | Auto on leaving explorer                    | `null` (tour ends)                      |
+
+The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these.
 
 ## Key components
 
@@ -712,15 +692,6 @@ tools/panels/radar/
 
 Data: `tools/hooks/useTierChartData.ts`. Chart: `packages/viz/src/components/RadarPlot.tsx`. Wiring: `ActiveToolPanel` `case "radar"`.
 
-## Tier score encoding: heatmap vs radar
-
-The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
-
-- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
-- The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
-
-They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
-
 ## Where the data comes from
 
 Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
@@ -742,6 +713,15 @@ Hard rules:
 - If you need resolved scenario codes to hand to a non-tier domain hook, call `useResolvedIdMapping()` and pass the resulting `resolvedIds` through.
 
 For everything caching-related (cache keys, preloading, `useLocalData` options), see `packages/data/README.md`.
+
+## Tier score encoding: heatmap vs radar
+
+The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
+
+- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
+- The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
+
+They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
 
 ## Wire to the scenario sidebar
 
@@ -832,45 +812,6 @@ const { data } = useBatchStatistics(resolvedIds, { types: ["storage"] })
 That is the entire contract. The hydroclimate chooser updates the store, the resolver hooks pick up the change, and your panel re-renders with the new data.
 
 If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/toolbar/ToolToolbar.tsx`.
-
-## Add a hydroclimate
-
-This walks through adding a new hydroclimate to the main app. You register it app-wide once, the chooser and every tool pick it up, and then a few tools need a small amount of local wiring.
-
-### Before you start
-
-The new climate's scenarios must already exist in the database and come back from `GET /api/scenarios` with a numeric `hydroclimate_id`. That is backend work (see the data-platform repo and `packages/data/README.md`). You need that id for step 1. If the data is not there yet, the chooser entry renders but no scenarios resolve.
-
-### 1. Register it app-wide in `content/scenarios.ts`
-
-`HYDROCLIMATES` is the single source of truth. Every other hydroclimate constant and the `Hydroclimate` type derive from it. Each constant below is keyed by the hydroclimate string value (ask the backend dev or check the API). Add the new value to each:
-
-- `HYDROCLIMATES` adds the value. This widens the `Hydroclimate` type, `ALL_HYDROCLIMATES`, the resilience alias, and share's `ShareRadarHydroKey` automatically.
-- `HYDROCLIMATE_ID_MAP` maps the value to its API `hydroclimate_id`.
-- `HYDROCLIMATE_LABEL_MAP` maps that id back to the value.
-- `hydroclimateOptions` adds `{ value, label, description }`. This is what the toolbar `HydroclimateChooser` renders, and it feeds the derived label and description maps.
-- `hydroclimateLabels` adds the display label for the discrete slider. It is a parallel array, so keep it in the same order as `hydroclimateOptions`.
-- `HYDROCLIMATE_SHORT_LABELS` adds a compact label for tight UI.
-
-You do not edit `ALL_HYDROCLIMATES`, `HYDROCLIMATE_LABELS_BY_VALUE`, or `HYDROCLIMATE_DESCRIPTIONS_BY_VALUE`. They derive from the constants above.
-
-### 2. Give it an icon and color
-
-Add an entry to `HYDROCLIMATE_CONFIG` in `features/scenarios/hydroclimateConfig.ts`, keyed by the same string value:
-
-```ts
-cc_new: { icon: SomeMuiIcon, bgColor: "#6a1b9a" },
-```
-
-This sets the icon and accent color used by the chooser, the badges, and the icon strips. It is not required to ship. A climate with no entry still works, the chooser just draws a plain neutral circle with no icon for it, so add an entry when you want it themed.
-
-### 3. The chooser and tools pick it up
-
-The toolbar chooser reads `hydroclimateOptions`, and the resolver hooks read `HYDROCLIMATE_ID_MAP`, so most tools need no further changes. The resilience matrix and any tool that goes through `useResolvedScenarioTiers()` or `useResolvedIdMapping()` get the new value for free. See [Wire to the hydroclimate chooser](#wire-to-the-hydroclimate-chooser).
-
-### 4. Per-tool wiring
-
-A few tools keep per-hydroclimate code that must be extended by hand. Today that is share, which needs one unrolled data fetch and a filename token. See the [share README](explorer/share/README.md#add-a-hydroclimate) for those two steps. Add other tools here as they gain hydroclimate-specific code.
 
 ## Avoiding hover flicker
 
@@ -1089,3 +1030,68 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 - **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/animation/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
 
 For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.
+
+## Add a hydroclimate
+
+This walks through adding a new hydroclimate to the main app. The main idea is to:
+- register it app-wide once, 
+- the chooser and every tool pick it up, 
+- and then a few tools need a small amount of local wiring.
+
+### Before you start
+
+The new climate's scenarios should already exist in the database and come back from the `GET /api/scenarios` endpoint with a numeric `hydroclimate_id`. The app does not call that endpoint directly. It reads scenarios through the `@repo/data` package (the `useScenarios` hook), which is where the `hydroclimate_id` field is found.
+
+### 1. Register the new hydroclimate app-wide in `content/scenarios.ts`
+
+```ts
+// content/scenarios.ts
+export const HYDROCLIMATE_DEFS = [
+  // ...existing entries...
+  {
+    value: "cc_new",
+    apiId: 5,
+    label: "New climate risk",
+    shortLabel: "New risk",
+    description: "...",
+  },
+] as const satisfies readonly HydroclimateDef[]
+```
+
+The fields are:
+
+- `value`: the frontend string key, for example `cc_new`. Used across the app and in share URLs.
+- `apiId`: the numeric `hydroclimate_id` the API returns for this climate's scenarios.
+- `label`: the full display label.
+- `shortLabel`: a compact label for tight UI (chips, axis ticks).
+- `description`: the long-form text for tooltips and info panels.
+
+Note: the values for these fields could be sourced from the database/API instead of exist on the frontend. That would be nice. You could collaborate with the backend developers to maintain the `hydroclimate` table in the database and create and api endpoint to implement through the data package.
+
+### 2. Give the new hydroclimate an icon and color
+
+Add an entry to `HYDROCLIMATE_CONFIG` in `features/scenarios/hydroclimateConfig.ts`, keyed by the same string value:
+
+```ts
+cc_new: { icon: SomeMuiIcon, bgColor: "#6a1b9a" },
+```
+
+Not having this is not a blocker. A climate with no entry here still works. The chooser draws a plain neutral circle with no icon, and the chrome, map, and share-card badges fall back to a neutral grey accent (`HYDROCLIMATE_FALLBACK_ACCENT`) while still showing the label.
+
+### 3. Per-tool wiring
+
+Most tools need nothing here, including the two that hold data for every climate at once rather than the one selected in the toolbar. The resilience matrix loops `ALL_HYDROCLIMATES`, and share fetches every climate through `ShareRadarLiveProvider`, which renders one fetcher per `HYDROCLIMATES` entry. Both pick up a new climate from step 1 with no code change.
+
+A couple of spots still need a hand-edit, because the centralized list cannot generate them:
+
+- Optional: add a short token to the `HC_SLUG` map in `share/utils/filename.ts`, for example `cc_new: "ccnew"`. This is the compact hydroclimate string used in download filenames. If you skip it, `hydroclimateSlug` falls back to `slugifyForFilename(value)`, so `cc_new` becomes `cc-new` in the filename and the download still works.
+- By design: the get-started animation in `animation/TierAnimationSection.tsx` hard-codes the moderate (`cc50`) and high (`cc95`) climate columns with hand-written labels. It is a curated teaching sequence, not a general tool, so it does not auto-scale. Add a column there by hand only if you want the new climate in that animation.
+
+### 4. The chooser and tools pick it up
+
+Once the entry is in `HYDROCLIMATE_DEFS`, the derived constants update automatically. The toolbar chooser in `ToolToolbar` reads `hydroclimateOptions`, so the new climate appears in the UI. The resolver hooks read `HYDROCLIMATE_ID_MAP` to translate the store's hydroclimate string into the numeric `hydroclimate_id` and then into the correct variant `short_code` for each sibling group.
+
+Most tools need no further changes. Any panel that fetches tier data through `useResolvedScenarioTiers()` or resolves ids through `useResolvedIdMapping()` picks up the new climate when the user selects it in the chooser. You do not import the chooser or resolve scenario ids by hand in those tools.
+
+
+

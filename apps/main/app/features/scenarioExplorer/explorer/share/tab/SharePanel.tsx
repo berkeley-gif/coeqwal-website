@@ -13,25 +13,38 @@ import ShareUrlVersionNotice from "../ui/ShareUrlVersionNotice"
 import ShareDataRehydrationHost, {
   useShareDataReady,
 } from "../ShareDataRehydrationHost"
+import { ShareRadarLiveProvider } from "../ShareRadarLiveProvider"
 import TrayCard, { TRAY_CARD_WIDTH } from "../components/TrayCard"
 import StoryCanvas from "../components/StoryCanvas"
 import ShareExportBar from "../components/ShareExportBar"
 
 /**
  * Per-hydroclimate radar fields for share. See `buildShareRadarLiveDataFields`
- * and `useTierChartData(period, true)` in `useShareRenderContext`.
+ * and the per-climate `useTierChartData` fetchers in `ShareRadarLiveProvider`.
  */
 export type ShareRenderLiveData = ShareRadarLiveDataFields
 export type { ShareRadarHydroKey } from "../utils/shareRadarLiveData"
 
 /**
  * Share tab: a left tray of every staged card and a right "story"
- * canvas the user arranges and exports. This component wires the
- * pieces together. The data setup, label lookups, downloads, card
- * rendering, and export bar each live in their own module under
- * `share/hooks/` and `share/components/`.
+ * canvas the user arranges and exports. The default export wraps the
+ * content in `ShareRadarLiveProvider` so `useShareRenderContext` can
+ * read live radar data for every hydroclimate.
  */
 export default function SharePanel() {
+  return (
+    <ShareRadarLiveProvider>
+      <SharePanelContent />
+    </ShareRadarLiveProvider>
+  )
+}
+
+/**
+ * Wires the share-tab pieces together. The data setup, label lookups,
+ * downloads, card rendering, and export bar each live in their own
+ * module under `share/hooks/` and `share/components/`.
+ */
+function SharePanelContent() {
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
 
