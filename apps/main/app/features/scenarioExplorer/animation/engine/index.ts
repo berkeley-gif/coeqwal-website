@@ -1,8 +1,5 @@
-/* Public surface of the beat engine
- *
- * Re-exports the engine, actor groups, arbiters, and shared types so the
- * rest of the animation imports from one place.
- */
+/* Public surface of the beat engine. Re-exports engine, actor groups,
+ * arbiters, and shared types from one place. */
 
 export { useBeatEngine } from "./BeatEngine"
 export type { BeatEngineApi, UseBeatEngineArgs } from "./BeatEngine"
@@ -16,8 +13,14 @@ export { CameraArbiter } from "./arbiters/CameraArbiter"
 export type { CameraHome, FlyHomeOpts } from "./arbiters/CameraArbiter"
 export { InteractivePaintArbiter } from "./arbiters/InteractivePaintArbiter"
 export type { InteractivePaintTransition } from "./arbiters/InteractivePaintArbiter"
-export { InteractiveOutlineArbiter } from "./arbiters/InteractiveOutlineArbiter"
-export type { OutlinePaintTarget } from "./arbiters/InteractiveOutlineArbiter"
+export { PolygonLayerDriver } from "./arbiters/PolygonLayerDriver"
+export type { PolygonPaintSpec } from "./arbiters/PolygonLayerDriver"
+export { InteractiveLayerDirector } from "./InteractiveLayerDirector"
+export type { SelectRequest } from "./InteractiveLayerDirector"
+export type {
+  InteractiveLayerDriver,
+  InteractiveLayerFamily,
+} from "./interactiveLayerDriver"
 export {
   DU_CLASS_FILTER,
   DU_AG_ONLY_FILTER,

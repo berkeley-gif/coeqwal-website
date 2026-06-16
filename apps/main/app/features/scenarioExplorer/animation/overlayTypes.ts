@@ -1,7 +1,6 @@
-/* Shared types for the storyboard text overlay and its label-geometry
- * hook. Kept in their own file so `BeatTextOverlay`, `Narration`, and
- * `useOutcomeLabelGeometry` can all import them without a circular
- * dependency. */
+/* Shared types for the storyboard text overlay and its label-geometry hook.
+ * Kept separate so `BeatTextOverlay`, `Narration`, and
+ * `useOutcomeLabelGeometry` import them without a circular dependency. */
 
 /** A column heading ("Consumptive uses" / "Non-consumptive uses") shown
  *  above the Beat 2 outcome grid. */

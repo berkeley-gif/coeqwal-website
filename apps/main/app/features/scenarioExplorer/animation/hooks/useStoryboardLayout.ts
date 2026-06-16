@@ -1,10 +1,8 @@
 "use client"
 
-/* useStoryboardLayout: the Beat 2 grid layout
- *
- * Turns screen polygons into the two-column outcome grid, the morph
- * windows, and the per-outcome feature hide schedule the engine reads.
- * One of the TierAnimationSection hooks (see README.md).
+/* useStoryboardLayout: turns screen polygons into the Beat 2 two-column outcome
+ * grid, the morph windows, and the per-outcome feature hide schedule the engine
+ * reads. One of the TierAnimationSection hooks (see README.md).
  */
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
@@ -37,8 +35,8 @@ interface LayoutParams {
   panelSize: { width: number; height: number } | null
   outcomeDisplayOrder: readonly { code: string; label: string }[]
   activeOutcomes: ReadonlySet<string>
-  /** Per-outcome map-feature hide schedule, written here and read by the
-   *  engine context in the parent (`getHideSchedule`). */
+  /** Per-outcome hide schedule, written here and read by the parent's engine
+   *  context (`getHideSchedule`). */
   hideScheduleRef: React.RefObject<HideScheduleEntry[]>
 }
 
@@ -55,9 +53,7 @@ interface LayoutResult {
   >
 }
 
-/** Turns screen polygons and outcome data into the Beat 2 grid layout: the
- *  active outcome shape groups, the morph windows, the two-column glyph
- *  layout, and the per-outcome feature hide schedule the engine reads. */
+/** See the file header. */
 export function useStoryboardLayout({
   allScreenPolygons,
   outcomeLocations,
@@ -78,7 +74,7 @@ export function useStoryboardLayout({
         const override = tierOverrides[code]
         const polygons: ShapeMorphData[] = []
         for (const locId of locData.ids) {
-          // RES_STOR: API returns CalSim IDs. Screen map uses gnisidlabel
+          // RES_STOR: API returns CalSim IDs. Screen map uses gnisidlabel.
           let screenKey = locId
           if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
             const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
@@ -146,23 +142,21 @@ export function useStoryboardLayout({
     const schedule: HideScheduleEntry[] = []
     const activeCodes = activeOutcomeGroups.map((g) => g.code)
     for (const group of activeOutcomeGroups) {
-      // AG_REV is excluded
+      // AG_REV excluded.
       if (group.code === "AG_REV") continue
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const config = getOutcomeConfig(group.code)
       if (!config) continue
-      // Line outcomes (winter-run salmon, on sacramento-river-body) are owned
-      // by RiversLayer, which keeps them hidden until the outcome is selected.
-      // They are never visible during the intro morph, so the storyboard must
-      // not imperatively fade their opacity. Doing so pins the layer to 0 in a
-      // way react-map-gl never restores, leaving the tier-colored river
-      // invisible on selection. Skip them so RiversLayer is the sole owner.
+      // Line outcomes are owned by RiversLayer and hidden until selected, so
+      // they never show during the intro morph. Imperatively fading them pins
+      // the layer to 0 in a way react-map-gl never restores. Skip so
+      // RiversLayer stays the sole owner.
       if (config.geometryType === "line") continue
       const [morphStart] = getOutcomeProgressRange(group.code, activeCodes)
       const fadeStart = morphStart - 0.005
 
-      // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
+      // RES_STOR: translate CalSim IDs to gnisidlabel for Mapbox matching.
       let locationIds = [...locData.ids]
       if (group.code === "RES_STOR") {
         const mapped = new Set<string>()
@@ -216,16 +210,13 @@ export function useStoryboardLayout({
   const outcomeLayout = useMemo<Beat2Layout | null>(() => {
     if (!panelSize) return null
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
-    // Estimate the per-column inner width so the distribution height
-    // heuristic uses a realistic number of columns. The precise width is
-    // measured from the DOM later. This is only used to decide row count.
+    // Estimated per-column inner width, used only to decide row count. The
+    // precise width is measured from the DOM later.
     const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
 
-    // Left column renders in this explicit order (AG_REV before CWS_DEL).
-    // Don't touch OUTCOME_CODE_ORDER globally, since radar axes and
-    // NOD/SOD helpers depend on that list. So we just prepend the
-    // left-column codes in their desired order and iterate the rest of
-    // OUTCOME_CODE_ORDER after.
+    // Left column order (AG_REV before CWS_DEL). Don't reorder
+    // OUTCOME_CODE_ORDER globally (radar axes and NOD/SOD helpers depend on
+    // it). Prepend the left-column codes and append the rest.
     const LEFT_COLUMN_ORDER = ["AG_REV", "CWS_DEL"] as const
     const LEFT_COLUMN_CODES = new Set<string>(LEFT_COLUMN_ORDER)
     const orderedCodes: string[] = [
@@ -233,8 +224,8 @@ export function useStoryboardLayout({
       ...OUTCOME_CODE_ORDER.filter((c) => !LEFT_COLUMN_CODES.has(c)),
     ]
 
-    // Eyebrow labels fade in alongside the right-panel backdrop, sharing
-    // its onset. The fade width is applied by the narration frame handler.
+    // Eyebrow labels share the right-panel backdrop's fade-in onset. The fade
+    // width is applied by the narration frame handler.
     const EYEBROW_FADE_IN = BACKDROP_FADE_IN_PROGRESS
     const eyebrows = [
       {
@@ -308,8 +299,8 @@ export function useStoryboardLayout({
   const handleGlyphLayoutChange = useCallback(
     (layout: Record<string, GlyphRect>) => {
       setGlyphLayout((prev) => {
-        // Shallow-compare to avoid redundant state updates (ResizeObserver
-        // can fire frequently, and identical rects should skip re-render).
+        // Shallow-compare to skip redundant updates: ResizeObserver fires
+        // often and identical rects should not re-render.
         const prevKeys = Object.keys(prev)
         const nextKeys = Object.keys(layout)
         if (prevKeys.length === nextKeys.length) {

@@ -1,27 +1,22 @@
-/* Actor groups: the actors that play under each timing beat
- *
- * Each group pairs a timing-beat id (see animationTiming.ts) with the
- * actors active during that beat. The engine flattens these and hands
- * each actor to the arbiter that owns its kind. Groups with an empty
- * `actors` array still drive their choreography from component effects
- * and the overlay bridges. See the animation README for the full
- * story.
- */
+/* Actor groups: the actors that play under each timing beat. Each group
+ * pairs a timing-beat id (see animationTiming.ts) with its active
+ * actors. The engine flattens these and routes each actor to the arbiter
+ * for its kind. Empty `actors` groups still drive choreography from
+ * component effects and the overlay bridges. See the animation README. */
 
 import type { ActorGroup } from "./types"
 import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
 import { getTierLabel } from "../../../../content/tiers"
 import { LOI_DU_ID, HIGHLIGHT_GOLD } from "../demandUnitsPaint"
 
-// loi-highlight (beat index 4) thresholds, kept here rather than
-// imported from `TierAnimationSection.tsx` so the engine package has
-// no upward dependency on the component.
+// loi-highlight (beat index 4) thresholds, defined here rather than
+// imported from `TierAnimationSection.tsx` so the engine package has no
+// upward dependency on the component.
 const LOI_ENTER = 0.5
 const LOI_LAYER_IN_START = 0.5
 const LOI_LAYER_IN_END = 0.52
-// The four highlight steps run right after the layer settles so the
-// gold ring does not sit on a long pause. They keep their original
-// spacing and finish well before LOI_SETTLE.
+// The four highlight steps run right after the layer settles so the gold
+// ring does not sit on a long pause, finishing well before LOI_SETTLE.
 const LOI_SQUARE_RING_AT = 0.54
 const LOI_SQUARE_POPUP_AT = 0.55
 const LOI_POLYGON_RING_AT = 0.56
@@ -34,9 +29,8 @@ const LOI_LAYER_OPACITY = 0.65
 
 const LOI_CODE = "AG_REV"
 
-/** Resolve the `info`, `coord`, `name`, and `tierColor` for
- *  `LOI_DU_ID`. Returns null if data is not ready yet. The engine
- *  will retry next frame. */
+/** Resolve `info`, `coord`, `name`, and `tierColor` for `LOI_DU_ID`.
+ *  Returns null if data isn't ready. The engine retries next frame. */
 function resolveLoiData(ctx: {
   outcomeLocations: Record<
     string,
@@ -61,10 +55,9 @@ function resolveLoiData(ctx: {
   const coord = ctx.centroidLookup.get(LOI_DU_ID) ?? null
   const tierColor = agData.colorMap[LOI_DU_ID] ?? "#888888"
   // Match the interactive popup's name precedence: prefer a meaningful
-  // API name, but treat an API value that is just the raw id as missing
-  // and fall back to the friendly demand-unit display name. Without this
-  // the animated popup could show the raw id while a click on the same
-  // unit shows the friendly name.
+  // API name, but treat an API value equal to the raw id as missing and
+  // fall back to the friendly display name. Otherwise the animated popup
+  // could show the raw id while a click shows the friendly name.
   const apiName = agData.nameMap[LOI_DU_ID]
   const name =
     apiName && apiName !== LOI_DU_ID
@@ -85,8 +78,8 @@ const BEAT4_ACTORS: ActorGroup = {
     {
       kind: "mapPaint",
       id: "loi-highlight:mapPaint:enter",
-      // One-shot on enter at `LOI_ENTER`. Window is a hair wider than
-      // the layer-fade so enter runs before the first opacity write.
+      // Window is a hair wider than the layer-fade so enter runs before
+      // the first opacity write.
       window: [LOI_ENTER, LOI_TAIL_END],
       payload: { kind: "loi-enter", loiDuId: LOI_DU_ID },
     },
@@ -131,13 +124,12 @@ const BEAT4_ACTORS: ActorGroup = {
         goldHex: HIGHLIGHT_GOLD,
       },
     },
-    // Map popup. `LocationHighlight` anchored to the LOI polygon at
-    // step 5.
+    // Map popup. `LocationHighlight` anchored to the LOI polygon at step 5.
     {
       kind: "mapPopup",
       id: "loi-highlight:mapPopup:loi",
-      // Runs through `LOI_TAIL_END` (not just `LOI_SETTLE`) so the
-      // popup stays readable during the ~0.01-wide tail.
+      // Runs through `LOI_TAIL_END` (not just `LOI_SETTLE`) so the popup
+      // stays readable during the ~0.01-wide tail.
       window: [LOI_POLYGON_POPUP_AT, LOI_TAIL_END],
       buildHighlight: (ctx) => {
         const data = resolveLoiData(ctx)
@@ -154,8 +146,7 @@ const BEAT4_ACTORS: ActorGroup = {
         }
       },
     },
-    // Map paint. Exit actor that clears the gold ring on the last
-    // frame of the loi-highlight beat.
+    // Map paint. Clears the gold ring on the last frame of the beat.
     {
       kind: "mapPaint",
       id: "loi-highlight:mapPaint:exit",
@@ -167,30 +158,28 @@ const BEAT4_ACTORS: ActorGroup = {
 
 // Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
 
-// Reset window `[0, RESET_END)`. On enter, asserts the full baseline
-// state for `demand-units` and `demand-units-outline`.
+// Reset window `[0, RESET_END)`. Enter asserts the full baseline for
+// `demand-units` and `demand-units-outline`.
 const RESET_END = 0.01
 
-// Blue hold and tier-color blend thresholds
+// Blue hold and tier-color blend thresholds.
 const FREEZE_AT = 0.09
 const TIER_BLEND_START = 0.26
-// Splits the tier-color blend: the first part collapses the three
-// blues to BLUE_MID, the second blends BLUE_MID into the AG tier
-// colors.
+// Splits the tier-color blend: first collapse the three blues to
+// BLUE_MID, then blend BLUE_MID into the AG tier colors.
 const TIER_CONVERGE_END = 0.27
 const TIER_BLEND_END = 0.28
 const BEAT2_START = 0.38
 
-// Beat 2 hide-schedule thresholds, whose AG fade-out window straddles
+// Beat 2 hide-schedule thresholds. The AG fade-out window straddles
 // `BEAT2_START`.
 const BEAT2_AG_FADE_OUT_START = 0.378
 const BEAT2_AG_FADE_OUT_END = 0.383
-// How many color-cycle rotations the arbiter runs. 90 is one full
-// cycle across `[0, FREEZE_AT)`.
+// Color-cycle rotations. 90 is one full cycle across `[0, FREEZE_AT)`.
 const BLUE_CYCLE_ROTATIONS = 90
 // Fraction of the cycle window spent fading the colored locations in.
-// Most of the window so the layer eases in gradually rather than
-// snapping on. The remainder holds with a breathing oscillation.
+// Most of the window so the layer eases in rather than snapping on. The
+// remainder holds with a breathing oscillation.
 const BLUE_FADE_IN_FRAC = 0.85
 const LAYER_PEAK_OPACITY = 0.65
 const BLUE_BREATH_AMPLITUDE = 0.05
@@ -198,20 +187,18 @@ const BLUE_BREATH_AMPLITUDE = 0.05
 const BEAT0_ACTORS: ActorGroup = {
   id: "legend",
   actors: [
-    // Narration bridge. Runs every frame across the whole storyboard,
-    // calling the callback `BeatTextOverlay` registers via
-    // `ctx.narrationTickRef`. It lives under the first beat only because
-    // it has no natural home beat. Actor windows don't have to line up
-    // with beats.
+    // Narration bridge. Runs every frame across the storyboard, calling
+    // the callback `BeatTextOverlay` registers via `ctx.narrationTickRef`.
+    // Lives under the first beat only because it has no natural home.
+    // Actor windows don't have to line up with beats.
     {
       kind: "narration",
       id: "legend:narration:tick",
       window: [0, 1],
     },
-    // Overlay-morph bridge. Same shape and rationale as the
-    // narration bridge above. `OutcomeMorphOverlay` registers its
-    // per-frame SVG-transform callback via
-    // `ctx.overlayMorphTickRef`. See
+    // Overlay-morph bridge. Same shape and rationale as the narration
+    // bridge. `OutcomeMorphOverlay` registers its per-frame SVG-transform
+    // callback via `ctx.overlayMorphTickRef`. See
     // `engine/arbiters/OverlayMorphArbiter.ts`.
     {
       kind: "overlayMorph",
@@ -250,11 +237,10 @@ const BEAT0_ACTORS: ActorGroup = {
   ],
 }
 
-// Beat 1 (collapse-and-colors) actors. The two-stage color morph from
-// the three blues to AG tier colors (`tier-color-blend`), then an AG-only
-// hold (`tier-color-hold`). The tail's window runs a little past this beat
-// into `ag-rev-morph`, which is fine since actor windows don't have to
-// match beat boundaries.
+// Beat 1 (collapse-and-colors) actors. Two-stage color morph from the
+// three blues to AG tier colors (`tier-color-blend`), then an AG-only
+// hold (`tier-color-hold`). The tail's window runs slightly past this
+// beat into `ag-rev-morph`, fine since windows needn't match beats.
 const BEAT1_ACTORS: ActorGroup = {
   id: "collapse-and-colors",
   actors: [
@@ -283,16 +269,14 @@ const BEAT1_ACTORS: ActorGroup = {
 }
 
 // Beat 2 (ag-rev-morph) actors. Fades each outcome's polygons off the
-// map as the SVG distribution-square morph takes over. The arbiter
-// reads `ctx.getHideSchedule()` every frame because the schedule is
-// built after tier data loads and can rebuild. The window ends at
-// `LOI_ENTER`, where the loi-highlight actors take over.
+// map as the SVG morph takes over. The arbiter reads
+// `ctx.getHideSchedule()` every frame because the schedule is built
+// after tier data loads and can rebuild. Window ends at `LOI_ENTER`.
 //
 // The `lineFades` companion handles the line layers in the same
-// schedule. Its window runs to the end so the lines stay hidden for
-// the rest of the storyboard and reverse scrubs restore the right
-// opacity. Line layers don't overlap `demand-units`, so this never
-// conflicts with the loi-highlight or list-bar actors.
+// schedule. Its window runs to the end so lines stay hidden and reverse
+// scrubs restore the right opacity. Line layers don't overlap
+// `demand-units`, so this never conflicts with later actors.
 const BEAT2_ACTORS: ActorGroup = {
   id: "ag-rev-morph",
   actors: [
@@ -317,11 +301,10 @@ const BEAT2_ACTORS: ActorGroup = {
 }
 
 // list-bar actors. A one-shot DU restore at `LOI_TAIL_END` that takes
-// the layers back from the loi-highlight actors and pins both
-// opacities at 0 for the rest of the storyboard. It lives under
-// `list-bar`, the first beat at or after `LOI_TAIL_END`. Scrubbing
-// back into loi-highlight is handled by the loi-highlight actors' own
-// enter.
+// the layers back from the loi-highlight actors and pins both opacities
+// at 0 for the rest of the storyboard. Lives under `list-bar`, the first
+// beat at or after `LOI_TAIL_END`. Scrubbing back into loi-highlight is
+// handled by its own enter.
 const BEAT5_ACTORS: ActorGroup = {
   id: "list-bar",
   actors: [

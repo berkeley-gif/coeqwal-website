@@ -33,12 +33,13 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
                      |                      |
                      v                      v
         +----------------------+   +-------------------------+
-        |  Playback arbiters   |   | Interactive arbiters    |
+        |  Playback arbiters   |   | Interactive drivers     |
         |  ------------------  |   | ----------------------- |
-        |  MapPaint            |   | InteractivePaintArbiter |
-        |  MapPopup            |   | (demand-units)          |
-        |  OverlayPopup        |   | InteractiveOutline-     |
-        |  Narration           |   | Arbiter (other polygons)|
+        |  MapPaint            |   | InteractiveLayerDirector|
+        |  MapPopup            |   |  - InteractivePaint-     |
+        |  OverlayPopup        |   |    Arbiter (demand-units)|
+        |  Narration           |   |  - PolygonLayerDriver    |
+        |                      |   |    (other polygons)      |
         |  OverlayMorph        |   +-------------------------+
         +----------------------+              |
               |           |                   |
@@ -59,10 +60,11 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      overlayMorph). Once the storyboard reaches the last beat and
      stops, the clock is no longer moving and the user can click
      demand-unit squares. Those clicks change React state, which fires
-     an effect that calls the interactive arbiters (InteractivePaintArbiter
-     for demand-units, InteractiveOutlineArbiter for the other polygon
-     outcomes). So the left column is driven by the clock, the right column
-     by clicks, and only the left is dispatched by the engine.
+     an effect that calls the InteractiveLayerDirector. The director owns
+     the InteractivePaintArbiter (demand-units) and the PolygonLayerDriver
+     (the other polygon outcomes) and sequences the handoff between them.
+     So the left column is driven by the clock, the right column by clicks,
+     and only the left is dispatched by the engine.
 
    CameraArbiter is event-driven in the same way. Nav handlers call it
    directly to fly the map back to its home view. See the "Two families of
@@ -75,8 +77,10 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      Playback arbiters                engine/arbiters/{MapPaint, MapPopup,
                                         OverlayPopup, Narration,
                                         OverlayMorph}Arbiter.ts
-     Interactive arbiters             engine/arbiters/InteractivePaintArbiter.ts
-                                        engine/arbiters/InteractiveOutlineArbiter.ts
+     Interactive layer director       engine/InteractiveLayerDirector.ts
+                                        engine/arbiters/InteractivePaintArbiter.ts
+                                        engine/arbiters/PolygonLayerDriver.ts
+                                        interactiveLayerSchema.ts
      Overlays (text, morph)           BeatTextOverlay.tsx (panel shell),
                                         Narration.tsx (left-column copy),
                                         StoryboardControls.tsx (controls),
@@ -100,7 +104,7 @@ The component is long because it wires many pieces together, but it reads top to
 Related code is pulled into `hooks/`:
 
 - `useStoryboardNavigation` owns the Play / Next / Back / Restart handlers, the keyboard shortcuts, and the reduced-motion auto-arrival. The cursor state stays in the component and is passed in via setters.
-- `useInteractivePaint` wires the `InteractivePaintArbiter` that owns the `demand-units` layers during interactive mode.
+- `useInteractiveLayerDirector` wires the `InteractiveLayerDirector`, which owns the `InteractivePaintArbiter` (demand-units) and the `PolygonLayerDriver` (non-DU polygons) and sequences cross-family handoffs during interactive mode.
 - `useScreenPolygonProjection` projects outcome geometry from Mapbox into panel-relative screen polygons and keeps them in sync on map move, scroll, and resize.
 - `useStoryboardLayout` turns those screen polygons into the Beat 2 grid layout, the morph windows, and the per-outcome feature hide schedule the engine reads.
 - `useStoryboardCamera` detects when the panel scrolls into view, flies the camera home, and primes the map session.
@@ -167,7 +171,7 @@ If you want to change the storyboard, these are the files to start from.
 | The dispatch loop (enter, update, exit)                               | `BeatEngine`                         | [engine/BeatEngine.ts](engine/BeatEngine.ts)                               |
 | Wiring and engine context                                             | `TierAnimationSection`               | [TierAnimationSection.tsx](TierAnimationSection.tsx)                       |
 | Play / Next / Back / Restart and keyboard shortcuts                   | `useStoryboardNavigation`            | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts)       |
-| Interactive demand-units paint                                        | `useInteractivePaint`                | [hooks/useInteractivePaint.ts](hooks/useInteractivePaint.ts)               |
+| Interactive layer ownership + handoff                                 | `useInteractiveLayerDirector`        | [hooks/useInteractiveLayerDirector.ts](hooks/useInteractiveLayerDirector.ts) |
 | Projecting outcome geometry to screen polygons                        | `useScreenPolygonProjection`         | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
 | The Beat 2 grid layout and feature hide schedule                      | `useStoryboardLayout`                | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts)               |
 | Panel-in-view detection and camera fly-home                           | `useStoryboardCamera`                | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts)               |
@@ -196,24 +200,24 @@ Beats 3, 6, and 7 have empty actor arrays in the table. That is intentional, not
 
 ## Who paints the map
 
-Exactly one owner writes the `demand-units` layers at any time. Ownership follows the engine mode and the play state.
+Exactly one owner writes each interactive map layer at any time. The `interactiveLayerSchema.ts` lookup (derived from `OUTCOME_LAYER_REGISTRY`) maps each outcome to its layer family (`demand-units`, `polygon`, `river`, `marker`), the fill/outline ids, and the transition timings. The `InteractiveLayerDirector` reads that schema to pick the driver for a selection and to sequence the handoff: a same-layer change recolors in place, while a cross-family change fades the outgoing driver out and fades the incoming one in once the camera goes idle (a selection almost always flies the camera, so gating the fade-in on `idle` keeps the new layer from painting mid-flight). Ownership follows the engine mode and the play state.
 
 | Mode          | When                                                                | Owner of demand-units                                  |
 | ------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
 | `idle`        | Before Play, or after Restart                                       | No one. The layer sits at its invisible baseline.      |
 | `playback`    | A beat is tweening (`playState` is `playing`)                       | `MapPaintArbiter`, driven by progress-keyed actors.    |
-| `interactive` | The storyboard has settled on the final beat and the user can click | `InteractivePaintArbiter` for the demand-units layers. |
+| `interactive` | The storyboard has settled on the final beat and the user can click | `InteractiveLayerDirector`, routing to the driver for the selected family. |
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).
 
-The other (non-demand-unit) polygon outcomes, like reservoirs, are painted in interactive mode by `InteractiveOutlineArbiter`. It borrows the existing outcome layer rather than owning a baseline, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
+The other (non-demand-unit) polygon outcomes, like reservoirs and the delta, are painted in interactive mode by `PolygonLayerDriver`. It is the single imperative writer for those fills and outlines (the `OutcomePolygonLayer` React component still owns them in Explore and Learn modes, but is skipped in get-started), folds the gold highlight into its own `applyOverlay` pass, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
 
 ## Two families of arbiter
 
 Not every arbiter is dispatched by the engine.
 
 - **Playback arbiters** run from the `progress` clock through the engine's dispatch loop: `MapPaintArbiter`, `MapPopupArbiter`, `OverlayPopupArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`. These are the ones in the `ACTOR_GROUPS` table and the arbiters array.
-- **Event-driven arbiters** are held in refs and called directly from effects or nav handlers, because their work is driven by React state or user events, not by `progress`: `CameraArbiter`, `InteractivePaintArbiter`, and `InteractiveOutlineArbiter`. They are not in the engine dispatch list. The `getMode()` value is an input to their decisions, not an engine-wide gate.
+- **Event-driven arbiters/drivers** are held in refs and called directly from effects or nav handlers, because their work is driven by React state or user events, not by `progress`: `CameraArbiter`, the `InteractiveLayerDirector`, and the two drivers it holds (`InteractivePaintArbiter` and `PolygonLayerDriver`). They are not in the engine dispatch list. The `getMode()` value is an input to their decisions, not an engine-wide gate.
 
 ## The bridge actors (narration and overlay morph)
 

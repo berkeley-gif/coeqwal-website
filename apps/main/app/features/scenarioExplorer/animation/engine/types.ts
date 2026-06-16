@@ -1,18 +1,10 @@
-/* Beat engine type definitions
+/* Beat engine type definitions.
  *
- * Actors are plain data.
- * Everything an actor needs to do its job is either in its payload or
- * reachable from the `BeatEngineContext` passed in at dispatch time.
- *
- * An actor's `window` is a half-open progress interval `[start, end)`.
- * The engine calls `enter` once when `v` first enters the window,
- * `update` every frame while inside (including the enter frame), and
- * `exit` once when `v` leaves. Arbiters tolerate repeated
- * `update` calls.
- *
- * Every actor declares which arbiter owns it via its `kind`.
- * The engine routes dispatches to the right arbiter. An actor never
- * reaches into another arbiter's state.
+ * Actors are plain data. Everything they need is in their payload or the
+ * `BeatEngineContext` passed at dispatch. An actor's `window` is a
+ * half-open progress interval `[start, end)`: `enter` once on entry,
+ * `update` every frame inside (including the enter frame), `exit` once on
+ * leave. Each actor's `kind` declares which arbiter owns it.
  */
 
 import type { RefObject } from "react"
@@ -22,57 +14,46 @@ import type { LocationHighlight } from "../../../map/store"
 import type { MapRef } from "@repo/map"
 
 /**
- * Tells the engine when and where to fade out a set of Mapbox features
- * as their SVG distribution-square morph takes over. One entry per
- * (outcome, layer).
+ * When and where to fade out a set of Mapbox features as their SVG
+ * distribution-square morph takes over. One entry per (outcome, layer).
  */
 export interface HideScheduleEntry {
   /** Outcome this entry belongs to (`"AG_REV"`, `"DS"`). For debugging. */
   code: string
-  /** Which shape the feature is. Only `"polygon"` entries on the
-   *  `demand-units` layer drive the Beat 2 fill fade. `"line"` entries
-   *  fade a line layer. `"react-marker"` entries have no Mapbox layer
-   *  and just mark which units the outcome tracks. */
+  /** Feature shape. `"polygon"` on `demand-units` drives the Beat 2 fill
+   *  fade. `"line"` fades a line layer. `"react-marker"` has no Mapbox
+   *  layer and just marks which units the outcome tracks. */
   geometryType: "polygon" | "line" | "react-marker"
-  /** The Mapbox layer id to fade. Empty for `"react-marker"`. */
+  /** Mapbox layer id to fade. Empty for `"react-marker"`. */
   mapboxLayerId: string
   /** Feature property used to match features (`"DU_ID"` for demand-units). */
   idProperty: string
-  /** Opacity is 1 before `fadeStart`, fades to 0 across the window, and
-   *  stays 0 after `morphStart`. */
+  /** Opacity is 1 before `fadeStart`, fades to 0 across the window, stays
+   *  0 after `morphStart`. */
   fadeStart: number
   morphStart: number
-  /** The feature ids this entry fades. */
+  /** Feature ids this entry fades. */
   locationIds: string[]
 }
 
 /**
- * Engine-level mode signal
+ * Engine-level mode signal. Ensures each map resource (above all
+ * `demand-units`) is owned by exactly one arbiter at a time, since both
+ * `MapPaintArbiter` and `InteractivePaintArbiter` paint `demand-units`
+ * and a sloppy handoff would leak a stale color or opacity.
  *
- * Tracks which stage the storyboard is in so each map resource (above
- * all `demand-units`) is owned by exactly one arbiter at a time.
- *
- * `demand-units` matters most because more than one arbiter paints it.
- * `MapPaintArbiter` owns it during playback and `InteractivePaintArbiter`
- * owns it while interactive. If both wrote at once, or one handed off
- * without setting every property, a stale color or opacity from the
- * previous owner would leak through. The mode keeps that ownership
- * clear.
- *
- * - `"idle"`: pre-play gate (before Play) or post-Restart. No arbiter
- *   writes `demand-units`. The layer is at its baseline (Beat 0 state).
- * - `"playback"`: storyboard beats are tweening. `MapPaintArbiter` owns
- *   `demand-units` and drives it via progress-keyed actors.
- * - `"interactive"`: storyboard has settled and the user can click
- *   squares. `InteractivePaintArbiter` owns `demand-units` in this mode.
+ * - `"idle"`: pre-play (before Play) or post-Restart. No arbiter writes
+ *   `demand-units`. It sits at its Beat 0 baseline.
+ * - `"playback"`: beats tweening. `MapPaintArbiter` owns `demand-units`.
+ * - `"interactive"`: storyboard settled, user can click squares.
+ *   `InteractivePaintArbiter` owns `demand-units`.
  */
 export type EngineMode = "idle" | "playback" | "interactive"
 
 /**
- * Everything `InteractivePaintArbiter` needs to paint one demand-units'
- * outcome. `TierAnimationSection` builds it from the selected outcome's
- * config and the loaded tier data. Then pass it to `sync` to paint, or pass
- * null to release the layers.
+ * Everything `InteractivePaintArbiter` needs to paint one demand-units
+ * outcome. Built by `TierAnimationSection` from the outcome config and
+ * tier data. Pass to `sync` to paint, or null to release the layers.
  */
 export interface DemandUnitsPaintSpec {
   /** Outcome code (`"AG_REV"`, `"CWS_DEL"`). Identity for crossfade. */
@@ -88,17 +69,15 @@ export interface DemandUnitsPaintSpec {
 }
 
 /**
- * The per-selection overlay on top of the base paint: gold outline plus
+ * Per-selection overlay on top of the base paint: gold outline plus
  * spotlight / pinned fill-opacity. Sent to
- * `InteractivePaintArbiter.applyOverlay` whenever the selection's
- * active, pinned, or spotlight state changes.
- *
- * Kept separate from `DemandUnitsPaintSpec` because it changes far more
- * often (hover, pin, tier step) and can be applied on top of the
- * current paint without re-running the full enter or crossfade.
+ * `InteractivePaintArbiter.applyOverlay` on active/pinned/spotlight
+ * changes. Separate from `DemandUnitsPaintSpec` because it changes far
+ * more often (hover, pin, tier step) and applies without re-running the
+ * full enter or crossfade.
  */
 export interface DemandUnitsOverlayState {
-  /** Which outcome this overlay is for */
+  /** Which outcome this overlay is for. */
   outcomeCode: string
   /** Active (hovered or pinned) feature ids. Gold outline, opacity 1. */
   activeFeatureIds: readonly string[]
@@ -132,31 +111,29 @@ export interface ActorBase {
 // mapPaint actors
 
 /**
- * A map-paint actor instructs the `MapPaintArbiter` to run one of a
- * fixed set of paint sequences over the actor's window. Each `payload`
- * variant names one paint sequence.
+ * Instructs `MapPaintArbiter` to run one of a fixed set of paint
+ * sequences over the actor's window. Each `payload` variant names one.
  */
 export type MapPaintPayload =
   | {
       /**
        * Pre-Beat-1 reset. Fires once when `progress` snaps back to 0
-       * (Restart, or Back from Beat 0). Puts the DU layers back to
-       * their starting state: full class filter, blue-cycle colors,
-       * opacity 0, and the basemap dim overlay cleared.
+       * (Restart, or Back from Beat 0). Restores DU layers to their start
+       * state: full class filter, blue-cycle colors, opacity 0, basemap
+       * dim overlay cleared.
        */
       kind: "reset"
     }
   | {
       /**
-       * Blue cycle. Window `[RESET_END, FREEZE_AT)`. Fades the
-       * layers in while cycling through the blues. The arbiter saves
-       * the final color step so the following `blue-hold` can freeze
-       * on it.
+       * Blue cycle. Window `[RESET_END, FREEZE_AT)`. Fades the layers in
+       * while cycling the blues, saving the final color step so the
+       * following `blue-hold` freezes on it.
        *
-       * `cycleRotations` sets how many times the blues turn over the
-       * window. `peakOpacity` is the opacity the fade lands on (`0.65`).
-       * `fadeInFrac` is how much of the window is spent fading in.
-       * `breathAmplitude` (~`0.05`) is a gentle breath after that.
+       * `cycleRotations`: how many times the blues turn over the window.
+       * `peakOpacity`: opacity the fade lands on (`0.65`).
+       * `fadeInFrac`: fraction of window spent fading in.
+       * `breathAmplitude` (~`0.05`): gentle breath after that.
        */
       kind: "blue-cycle"
       cycleStart: number
@@ -168,25 +145,22 @@ export type MapPaintPayload =
     }
   | {
       /**
-       * Blue hold. Window `[FREEZE_AT, TIER_BLEND_START)`. Holds
-       * the frozen blue palette at full filter and `peakOpacity`. On
-       * enter it re-applies the baseline from the saved
-       * `frozenColorPhase`. Each update re-applies opacity so a stray
-       * write gets corrected.
+       * Blue hold. Window `[FREEZE_AT, TIER_BLEND_START)`. Holds the
+       * frozen blue palette at full filter and `peakOpacity`. Enter
+       * re-applies the baseline from the saved `frozenColorPhase`. Each
+       * update re-applies opacity to correct stray writes.
        */
       kind: "blue-hold"
       peakOpacity: number
     }
   | {
       /**
-       * Tier-color blend. Window `[blendStart, blendEnd)`. Morphs color in
-       * two stages. First, `[blendStart, convergeEnd)` collapses the
-       * three blues toward `BLUE_MID`. Then `[convergeEnd, blendEnd)`
-       * blends `BLUE_MID` into each AG unit's tier color.
-       *
-       * The class filter stays full so Urban and Refuge keep painting.
-       * `tier-color-hold` is what switches to AG-only. `peakOpacity` is the
-       * opacity held throughout (usually 0.65, same as the hold).
+       * Tier-color blend. Window `[blendStart, blendEnd)`. Two stages:
+       * `[blendStart, convergeEnd)` collapses the three blues toward
+       * `BLUE_MID`, then `[convergeEnd, blendEnd)` blends `BLUE_MID` into
+       * each AG unit's tier color. Class filter stays full so Urban and
+       * Refuge keep painting (`tier-color-hold` switches to AG-only).
+       * `peakOpacity` held throughout (usually 0.65).
        */
       kind: "tier-color-blend"
       blendStart: number
@@ -198,25 +172,24 @@ export type MapPaintPayload =
       /**
        * Tier-color hold. Window `[blendEnd, beat2Start)`. Static hold:
        * AG-only filter, fully blended tier colors, opacity at
-       * `peakOpacity`. Written once on enter, nothing per frame.
+       * `peakOpacity`. Written once on enter.
        */
       kind: "tier-color-hold"
       peakOpacity: number
     }
   | {
       /**
-       * Polygon hide-schedule. Window `[BEAT2_START, LOI_ENTER)`.
-       * Fades each outcome's polygons off the map as the SVG
-       * distribution-square morph takes over.
+       * Polygon hide-schedule. Window `[BEAT2_START, LOI_ENTER)`. Fades
+       * each outcome's polygons off the map as the SVG morph takes over.
        *
-       * On enter it re-applies the baseline (full filter, blended tier
-       * colors, opacity preserved). Each update rebuilds a per-unit
-       * Mapbox `case` expression from `ctx.getHideSchedule()`. A tracked
-       * unit holds at `peakOpacity` until its `fadeStart`, then fades to
-       * 0 by its `morphStart`. An Agriculture fallback covers AG_REV and
-       * untracked AG units, fading across `[agFadeOutStart, agFadeOutEnd)`.
-       * Everything else is 0. The same expression goes to both fill and
-       * line opacity so outlines fade with fills.
+       * Enter re-applies the baseline (full filter, blended tier colors,
+       * opacity preserved). Each update rebuilds a per-unit Mapbox `case`
+       * expression from `ctx.getHideSchedule()`: a tracked unit holds at
+       * `peakOpacity` until its `fadeStart`, then fades to 0 by its
+       * `morphStart`. An Agriculture fallback covers AG_REV and untracked
+       * AG units across `[agFadeOutStart, agFadeOutEnd)`. Everything else
+       * is 0. Same expression drives fill and line opacity so outlines
+       * fade with fills.
        */
       kind: "polygon-hide-schedule"
       agFadeOutStart: number
@@ -254,19 +227,15 @@ export type MapPaintPayload =
     }
   | {
       /** DU restore for the list-bar beat. Window `[LOI_TAIL_END, 1]`.
-       * Runs once on enter to take the layers back from the
-       * loi-highlight actors: full class filter, blended tier colors,
-       * default outline width, and both fill and line opacity pinned
-       * at 0.
-       *
-       * No update or exit work. Scrubbing back into loi-highlight is
-       * handled by the loi-highlight actors' own enter. */
+       * Enter takes the layers back from the loi-highlight actors: full
+       * class filter, blended tier colors, default outline width, both
+       * fill and line opacity pinned at 0. No update or exit. Scrubbing
+       * back into loi-highlight is handled by its own enter. */
       kind: "du-clear-hold"
     }
   | {
-      /** Per-line-layer fade-out for outcomes whose geometries are
-       * lines rather than polygons. Window `[0, 1]`. Every frame the
-       * arbiter picks `ctx.getHideSchedule()` entries with
+      /** Per-line-layer fade-out for line-geometry outcomes. Window
+       * `[0, 1]`. Each frame picks `ctx.getHideSchedule()` entries with
        * `geometryType === "line"` and sets `line-opacity`: full before
        * `fadeStart`, ramping to 0 between `fadeStart` and `morphStart`,
        * then 0 after. */
@@ -281,14 +250,11 @@ export interface MapPaintActor extends ActorBase {
 // mapPopup actors
 
 /**
- * Shows one map popup (`LocationHighlight`) for the length of its
- * window. The arbiter combines popups from all map-popup actors into
- * one store update per frame.
- *
- * `buildHighlight` is a function because the popup needs
- * centroid and tier data from the engine context that isn't known when
- * the actor groups are written. Returning `null` means the data isn't
- * ready, so skip this frame and try again next frame.
+ * Shows one map popup (`LocationHighlight`) for its window. The arbiter
+ * combines popups from all map-popup actors into one store update per
+ * frame. `buildHighlight` is a function because the popup needs centroid
+ * and tier data from the context, unknown when actor groups are written.
+ * Returning `null` means data isn't ready, so retry next frame.
  */
 export interface MapPopupActor extends ActorBase {
   kind: "mapPopup"
@@ -298,17 +264,11 @@ export interface MapPopupActor extends ActorBase {
 // overlayPopup actors
 
 /**
- * An overlay-popup actor drives the `demoLocation` and
- * `demoHoveredLocation` React state that `OutcomeMorphOverlay` reads
- * via its `demoHighlightedLocationKey` and `hoveredLocation` props.
- *
- * `target` picks which state slot the actor writes.
- *
- * `"ring"` sets `demoLocation` (gold ring around the square).
- * `"hover"` sets `demoHoveredLocation` (square-side popup).
- *
- * `buildInfo` is a function for the same reason as `buildHighlight`...
- * it needs engine-context data.
+ * Drives the `demoLocation` and `demoHoveredLocation` React state that
+ * `OutcomeMorphOverlay` reads. `target` picks the slot: `"ring"` sets
+ * `demoLocation` (gold ring around the square), `"hover"` sets
+ * `demoHoveredLocation` (square-side popup). `buildInfo` is a function
+ * for the same reason as `buildHighlight`: it needs context data.
  */
 export interface OverlayPopupActor extends ActorBase {
   kind: "overlayPopup"
@@ -320,12 +280,10 @@ export interface OverlayPopupActor extends ActorBase {
 
 /**
  * Bridges the engine to a per-frame callback registered by the
- * `useOutcomeLabelGeometry` hook, which `BeatTextOverlay` mounts. No
- * payload. Each `onUpdate`, the `NarrationArbiter` calls the latest
- * callback from `ctx.narrationTickRef` with the current `v`.
- *
- * This lets the overlay keep its own opacity curves and refs while the
- * engine stays the only progress subscriber.
+ * `useOutcomeLabelGeometry` hook (mounted by `BeatTextOverlay`). Each
+ * `onUpdate`, `NarrationArbiter` calls the latest `ctx.narrationTickRef`
+ * with the current `v`, letting the overlay keep its own curves and refs
+ * while the engine stays the only progress subscriber.
  */
 export interface NarrationActor extends ActorBase {
   kind: "narration"
@@ -335,12 +293,9 @@ export interface NarrationActor extends ActorBase {
 
 /**
  * Bridges the engine to the per-frame SVG transform pipeline owned by
- * `OutcomeMorphOverlay`. No payload. Each `onUpdate`, the
- * `OverlayMorphArbiter` calls the latest callback from
- * `ctx.overlayMorphTickRef` with the current `v`.
- *
- * Same bridge as `NarrationActor`. The component keeps its pipeline and
- * refs while the engine stays the only progress subscriber.
+ * `OutcomeMorphOverlay`. Each `onUpdate`, `OverlayMorphArbiter` calls the
+ * latest `ctx.overlayMorphTickRef` with the current `v`. Same bridge as
+ * `NarrationActor`.
  */
 export interface OverlayMorphActor extends ActorBase {
   kind: "overlayMorph"
@@ -365,14 +320,14 @@ export interface ActorGroup {
 // Engine context
 
 /**
- * What the engine hands to arbiters and actor functions on every
- * frame. It's refs and read-only values, not React state, so dispatch
- * stays synchronous and in order.
+ * What the engine hands to arbiters and actor functions every frame.
+ * Refs and read-only values, not React state, so dispatch stays
+ * synchronous and ordered.
  */
 export interface BeatEngineContext {
-  /** Live Mapbox map ref (the `mapRef` yielded by `useMap()`).
-   *  Nullable because the context may mount before Mapbox finishes
-   *  attaching its ref. Arbiters guard on `current?.getMap?.()`. */
+  /** Live Mapbox map ref (`mapRef` from `useMap()`). Nullable because the
+   *  context may mount before Mapbox attaches its ref. Arbiters guard on
+   *  `current?.getMap?.()`. */
   mapRef: RefObject<MapRef | null> | null
   /** `outcomeLocations["AG_REV"]`-style accessor for current tier data. */
   outcomeLocations: Record<
@@ -392,41 +347,36 @@ export interface BeatEngineContext {
   setDemoHoveredLocation: (info: LocationInfo | null) => void
   /**
    * Builds a Mapbox `match` expression blending from `fromHex` toward
-   * each unit's tier color by ratio `t`. Lives on the context because
-   * it depends on the component's current tier-color lookup.
+   * each unit's tier color by ratio `t`. On the context because it
+   * depends on the component's current tier-color lookup.
    */
   buildBlendedTierExpr: (fromHex: string, t: number) => unknown[] | null
   /**
-   * Display-name resolver. Reads tier data's `nameMap`, falling back to
-   * the static DU name table, falling back to the raw id.
+   * Display-name resolver. Tier data `nameMap`, then the static DU name
+   * table, then the raw id.
    */
   resolveDuName: (duId: string) => string
   /** Tier-label resolver (1 becomes "Optimal", etc.). */
   resolveTierLabel: (tier: number) => string
   /**
-   * Returns the current hide schedule so arbiters always read the
-   * latest entries. The array is replaced when the schedule rebuilds,
-   * so don't hold the reference across frames or mutate it.
+   * Current hide schedule. The array is replaced when the schedule
+   * rebuilds, so don't hold the reference across frames or mutate it.
    */
   getHideSchedule: () => readonly HideScheduleEntry[]
   /**
    * Bridge slot for `NarrationArbiter`. The `useOutcomeLabelGeometry`
-   * hook that `BeatTextOverlay` mounts writes its per-frame callback
-   * here on mount and clears it on unmount. `null` means nothing is
-   * mounted, and the arbiter does nothing.
+   * hook (mounted by `BeatTextOverlay`) writes its per-frame callback
+   * here on mount, clears on unmount. `null` means nothing is mounted.
    */
   narrationTickRef: RefObject<((v: number) => void) | null>
   /**
-   * Bridge slot for `OverlayMorphArbiter`. `OutcomeMorphOverlay`
-   * writes its per-frame SVG-transform callback into `.current` on
-   * mount and clears it on unmount. Same semantics as
-   * `narrationTickRef`.
+   * Bridge slot for `OverlayMorphArbiter`. `OutcomeMorphOverlay` writes
+   * its per-frame SVG-transform callback here. Same as `narrationTickRef`.
    */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
   /**
-   * Read the current engine mode. Arbiters that only act in a certain
-   * mode (like `InteractivePaintArbiter` in `interactive`) check this
-   * in their hooks.
+   * Current engine mode. Arbiters that only act in a certain mode (like
+   * `InteractivePaintArbiter` in `interactive`) check this.
    */
   getMode: () => EngineMode
 }
@@ -434,48 +384,38 @@ export interface BeatEngineContext {
 // Arbiter interface
 
 /**
- * There are two families of arbiter in this feature.
+ * Two families of arbiter exist.
  *
- * Playback arbiters implement this interface. The engine dispatches them
- * from the `progress` clock: `MapPaintArbiter`, `MapPopupArbiter`,
- * `OverlayPopupArbiter`, `NarrationArbiter`, and `OverlayMorphArbiter`.
+ * Playback arbiters implement this interface and are dispatched from the
+ * `progress` clock: `MapPaintArbiter`, `MapPopupArbiter`,
+ * `OverlayPopupArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`.
  *
- * Event-driven arbiters do not implement this interface and are not in the
- * engine dispatch list. They are held in refs and called directly from
- * effects or nav handlers, because their work is driven by React state or
- * user events, not by `progress`: `CameraArbiter` (fly home),
- * `InteractivePaintArbiter` (the demand-units layer after the storyboard
- * settles), and `InteractiveOutlineArbiter` (the other polygon outcomes).
- * The `getMode()` signal on the context is an input to these decisions, not
- * an engine-wide gate.
+ * Event-driven arbiters do not implement this interface and are not in
+ * the dispatch list. Held in refs and called from effects or nav
+ * handlers because their work is driven by React state or user events,
+ * not `progress`: `CameraArbiter` (fly home), `InteractivePaintArbiter`
+ * (demand-units after settle), `InteractiveOutlineArbiter` (other polygon
+ * outcomes). `getMode()` is an input to those decisions, not a gate.
  *
- * Each playback arbiter handles one `ActorKind`. The engine calls its
- * hooks:
+ * Each playback arbiter handles one `ActorKind`:
+ * - `onEnter(actor, v, ctx)` once when `v` enters the window.
+ * - `onUpdate(actor, v, ctx)` every frame inside, including the enter frame.
+ * - `onExit(actor, v, ctx)` once when `v` leaves, or on unmount/nav if
+ *   still active.
  *
- * - `onEnter(actor, v, ctx)` once when `v` first enters the actor's
- *   window.
- * - `onUpdate(actor, v, ctx)` every frame while inside, starting with
- *   the enter frame.
- * - `onExit(actor, v, ctx)` once when `v` leaves the window, or on
- *   unmount/navigation if still active.
- *
- * An arbiter can also do an end-of-frame `commit(ctx)`, called once per
- * frame after all actors are dispatched. That's where batching arbiters
- * (like `MapPopupArbiter`) write.
+ * An arbiter can also do an end-of-frame `commit(ctx)`, once per frame
+ * after all dispatches. That's where batching arbiters (like
+ * `MapPopupArbiter`) write.
  */
 export interface Arbiter<A extends Actor = Actor> {
   readonly kind: A["kind"]
   onEnter?(actor: A, v: number, ctx: BeatEngineContext): void
   onUpdate?(actor: A, v: number, ctx: BeatEngineContext): void
   onExit?(actor: A, v: number, ctx: BeatEngineContext): void
-  /**
-   * Optional end-of-frame hook. Called once per frame after all
-   * enter/update/exit calls.
-   */
+  /** Optional end-of-frame hook, once per frame after all
+   *  enter/update/exit calls. */
   commit?(ctx: BeatEngineContext): void
-  /**
-   * Clear any state the arbiter still owns. Called on unmount and
-   * navigation. Must be safe to call more than once.
-   */
+  /** Clear any state the arbiter still owns. Called on unmount and
+   *  navigation. Must be safe to call more than once. */
   teardown?(ctx: BeatEngineContext): void
 }

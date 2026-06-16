@@ -1,26 +1,19 @@
-/* Beat engine: progress subscriber and actor dispatch
+/* Beat engine: progress subscriber and actor dispatch.
  *
  * Owns the one `progress.on("change")` subscription. Each frame it walks
- * a list of actors from the actor groups, works out which
- * actors moved into or out of their window, and calls the matching hook
- * on the arbiter that owns each kind.
+ * the flattened actor list, finds which actors moved into or out of
+ * their window, and calls the matching hook on the owning arbiter.
  *
  * Dispatch order per frame:
+ * 1. Exits: actors active last frame but no longer in window.
+ * 2. Enters: actors now in window but not last frame.
+ * 3. Updates: every actor now in window.
+ * 4. `commit` on each arbiter that has one.
  *
- * 1. For each actor active last frame but no longer in window,
- *    call `arbiter.onExit(actor, v, ctx)` and clear the active flag.
- * 2. For each actor now in window but not last frame, call
- *    `arbiter.onEnter(actor, v, ctx)` and set the active flag.
- * 3. For each actor now in window, call `arbiter.onUpdate(actor, v, ctx)`.
- * 4. For each arbiter with a `commit` hook, call it once.
- *
- * On unmount the engine calls `onExit` for every still-active actor
- * followed by each arbiter's `teardown`. Consumers can force the same
- * cleanup at any time by calling `api.teardown()` (for example when
- * navigating between beats).
- *
- * The engine holds a `ref` to the latest `BeatEngineContext` so
- * consumers can replace it every render without re-subscribing.
+ * On unmount, `onExit` runs for every still-active actor, then each
+ * arbiter's `teardown`. `api.teardown()` forces the same cleanup (e.g.
+ * navigating between beats). The latest `BeatEngineContext` is held in a
+ * ref so consumers can replace it each render without re-subscribing.
  */
 
 "use client"
@@ -37,17 +30,16 @@ import type {
 } from "./types"
 
 export interface BeatEngineApi {
-  /** Force cleanup. Calls `onExit` on every active actor, then
-   *  `teardown` on every arbiter. Consumers call this to reset the
-   *  engine without unmounting, such as on a beat change. Safe to call
-   *  repeatedly. */
+  /** Force cleanup: `onExit` on every active actor, then `teardown` on
+   *  every arbiter. Resets the engine without unmounting (e.g. beat
+   *  change). Safe to call repeatedly. */
   teardown: () => void
 
   /** Read the current engine mode. */
   getMode: () => EngineMode
 
-  /** Set the engine mode. See `EngineMode` for the values and when each
-   *  one applies. Setting the current mode again is safe. */
+  /** Set the engine mode. See `EngineMode`. Setting the current mode
+   *  again is safe. */
   setMode: (mode: EngineMode) => void
 }
 
@@ -55,15 +47,12 @@ export interface UseBeatEngineArgs {
   progress: MotionValue<number>
   actorGroups: readonly ActorGroup[]
   context: BeatEngineContext
-  /** The arbiters, one per `kind` (such as `mapPaint`, `narration`, or
-   *  `overlayMorph`). The engine indexes them by `kind` internally.
-   *  Missing kinds are tolerated, so actors of an unhandled kind are
-   *  silently skipped. */
+  /** The arbiters, one per `kind`. Indexed by `kind` internally. Missing
+   *  kinds are tolerated. Actors of an unhandled kind are skipped. */
   arbiters: readonly Arbiter[]
-  /** When false, the engine does nothing. The subscription stays in
-   *  place but its callback returns early, so no actors are dispatched.
-   *  When true, each actor is dispatched as `progress` moves through its
-   *  window. */
+  /** When false the subscription stays but its callback returns early, so
+   *  no actors are dispatched. When true, each actor is dispatched as
+   *  `progress` moves through its window. */
   enabled: boolean
 }
 
@@ -74,21 +63,17 @@ export function useBeatEngine({
   arbiters,
   enabled,
 }: UseBeatEngineArgs): BeatEngineApi {
-  // Stable refs for the per-frame callback
-  //
-  // The progress callback captures these refs once and reads `.current`
-  // every frame. Updating the refs each render keeps the callback
-  // current without re-subscribing.
-
+  // Stable refs for the per-frame callback. The progress callback
+  // captures these once and reads `.current` every frame. Updating them
+  // each render keeps the callback current without re-subscribing.
   const ctxRef = useRef(context)
   ctxRef.current = context
 
   const flatActorsRef = useRef<readonly Actor[]>([])
   const arbiterByKindRef = useRef<Map<ActorKind, Arbiter>>(new Map())
 
-  // Flatten all actor groups into one list, rebuilt only when the
-  // groups change. A parallel `active` array (below) tracks which ones
-  // are inside their window.
+  // Flatten all actor groups into one list, rebuilt only when the groups
+  // change. A parallel `active` array (below) tracks which are in window.
   const flatActors = useMemo<readonly Actor[]>(() => {
     const out: Actor[] = []
     for (const group of actorGroups) {
@@ -106,23 +91,22 @@ export function useBeatEngine({
   }, [arbiters])
   arbiterByKindRef.current = arbiterByKind
 
-  // `activeRef[i]` is true while `flatActors[i]` is inside its window
-  // (got `onEnter` but not yet `onExit`). Reset when the actor list
-  // changes, since the indices shift.
+  // `activeRef[i]` is true while `flatActors[i]` is in window (got
+  // `onEnter` but not yet `onExit`). Reset when the actor list changes
+  // because the indices shift.
   const activeRef = useRef<boolean[]>([])
   useEffect(() => {
     activeRef.current = new Array(flatActors.length).fill(false)
   }, [flatActors])
 
-  // The one progress subscription, set up once for the life of the
-  // component. We read `enabled` through a ref so toggling it doesn't
-  // re-subscribe. The callback just early-returns when it's false.
-
+  // The one progress subscription, set up once for the component's life.
+  // `enabled` is read through a ref so toggling it doesn't re-subscribe.
+  // The callback early-returns when false.
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
 
-  // Engine mode signal. Held in a ref so reads/writes from nav
-  // handlers don't trigger re-renders.
+  // Engine mode signal. In a ref so nav-handler reads/writes don't
+  // trigger re-renders.
   const modeRef = useRef<EngineMode>("idle")
 
   useEffect(() => {
@@ -134,8 +118,7 @@ export function useBeatEngine({
       const active = activeRef.current
       const byKind = arbiterByKindRef.current
 
-      // Exits. Actors in-window last frame but no longer in window.
-      // Cleared before any enters fire this frame.
+      // Exits. Cleared before any enters fire this frame.
       for (let i = 0; i < actors.length; i++) {
         if (!active[i]) continue
         const actor = actors[i]!
@@ -147,7 +130,7 @@ export function useBeatEngine({
         }
       }
 
-      // Enters. Actors now inside their window that weren't last frame.
+      // Enters. Now in window but not last frame.
       for (let i = 0; i < actors.length; i++) {
         if (active[i]) continue
         const actor = actors[i]!
@@ -159,8 +142,7 @@ export function useBeatEngine({
         }
       }
 
-      // Updates. Every actor still in-window, including those that just
-      // entered this frame.
+      // Updates. Every actor in window, including those just entered.
       for (let i = 0; i < actors.length; i++) {
         if (!active[i]) continue
         const actor = actors[i]!
@@ -168,9 +150,8 @@ export function useBeatEngine({
         arbiter?.onUpdate?.(actor as never, v, ctx)
       }
 
-      // Commit. One-shot per arbiter, after all actor dispatches this
-      // frame. Lets batching arbiters combine their writes into one
-      // update.
+      // Commit. Once per arbiter after all dispatches, letting batching
+      // arbiters combine their writes into one update.
       for (const arbiter of byKind.values()) {
         arbiter.commit?.(ctx)
       }
@@ -178,8 +159,8 @@ export function useBeatEngine({
 
     return () => {
       unsub()
-      // Force cleanup of any still-active actors so stopping the
-      // subscription doesn't leak state into the next mount.
+      // Force cleanup of still-active actors so stopping the subscription
+      // doesn't leak state into the next mount.
       const ctx = ctxRef.current
       const actors = flatActorsRef.current
       const active = activeRef.current
@@ -197,8 +178,7 @@ export function useBeatEngine({
     }
   }, [progress])
 
-  // Stable api for callers (nav handlers call `api.teardown()`,
-  // navigation/selection sites call `api.setMode()`).
+  // Stable api for callers (`api.teardown()`, `api.setMode()`).
   const api = useMemo<BeatEngineApi>(() => {
     return {
       teardown: () => {

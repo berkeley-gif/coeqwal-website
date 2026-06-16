@@ -1,14 +1,9 @@
 "use client"
 
-/* useStoryboardNavigation: the Play, Next, Back, and Restart handlers
- *
- * Owns every action that moves the shared `progress` clock: the intro
- * Play tween, beat-to-beat navigation, the Back fade-out, and the full
- * Restart reset. Also registers the keyboard shortcuts and the
- * reduced-motion auto-arrival. The cursor state itself (`beatIndex`,
- * `playState`, `hasPlayed`) stays in the parent and is passed in via
- * setters so the parent's many effects keep reading it in place. One of
- * the TierAnimationSection hooks (see README.md).
+/* useStoryboardNavigation: Play, Next, Back, Restart handlers plus keyboard
+ * shortcuts. Owns every action that moves the shared `progress` clock. Cursor
+ * state (`beatIndex`, `playState`, `hasPlayed`) lives in the parent and is
+ * passed in via setters. One of the TierAnimationSection hooks (see README.md).
  */
 
 import { useCallback, useEffect, useRef } from "react"
@@ -26,14 +21,11 @@ import {
   type BeatEngineApi,
   type BeatEngineContext,
   type CameraArbiter,
-  type InteractivePaintArbiter,
+  type InteractiveLayerDirector,
 } from "../engine"
 
 type PlayState = "idle" | "playing" | "paused" | "finished"
 
-// Backward navigation feels snappier than forward, so rewinds run at a
-// fraction of the source beat's duration. Every tween is also clamped to
-// a floor so the very short beats don't feel instant.
 const BACK_DURATION_FACTOR = 0.6
 const MIN_NAV_DURATION = 0.4
 
@@ -43,10 +35,9 @@ interface StoryboardNavigationParams {
   prefersReducedMotion: boolean
   panelInView: boolean
   mapAPI: ReturnType<typeof useMap>
-  /** Shared camera helper that eases the map back to the home view. */
+  /** Camera helper that eases the map back to the home view. */
   cameraArbiter: CameraArbiter
-  /** Map layers reset on settle and Restart. Passed in because the parent
-   *  also touches them in its own cleanup effects. */
+  /** Map layers reset on settle and Restart. */
   animPolygonLayers: readonly { fill: string; outline: string }[]
   controlsRef: React.RefObject<ReturnType<typeof animate> | null>
   setBeatIndex: React.Dispatch<React.SetStateAction<number>>
@@ -58,10 +49,10 @@ interface StoryboardNavigationParams {
   setPinnedLocations: React.Dispatch<
     React.SetStateAction<Map<string, LocationInfo>>
   >
-  // Shared-ref seam: created in the parent, read here at call time.
+  // Shared refs: created in the parent, read here at call time.
   engineApiRef: React.RefObject<BeatEngineApi | null>
   engineContextRef: React.RefObject<BeatEngineContext | null>
-  interactivePaintArbiterRef: React.RefObject<InteractivePaintArbiter | null>
+  interactiveLayerDirectorRef: React.RefObject<InteractiveLayerDirector | null>
   computePolygonDataRef: React.RefObject<() => void>
 }
 
@@ -92,18 +83,15 @@ export function useStoryboardNavigation({
   setPinnedLocations,
   engineApiRef,
   engineContextRef,
-  interactivePaintArbiterRef,
+  interactiveLayerDirectorRef,
   computePolygonDataRef,
 }: StoryboardNavigationParams): StoryboardNavigation {
-  /** Settle the animation to its resting end-state: clear visualization +
-   *  highlights, hide all animation polygon/line layers, and flip
-   *  `playState` into "finished" so the interactive UI lights up. Shared
-   *  between the normal `animate(progress, 1, { onComplete })` finish and
-   *  the reduced-motion fast-forward path below. */
+  /** Settle to the resting end-state: clear visualization and highlights, hide
+   *  animation polygon/line layers, flip `playState` to "finished". Shared by
+   *  the normal tween finish and the reduced-motion fast-forward path. */
   const settleToFinishedState = useCallback(() => {
     setPlayState("finished")
-    // Signal to the engine that the storyboard has settled and the
-    // user can now click squares.
+    // Engine now interactive: user can click squares.
     engineApiRef.current?.setMode("interactive")
     mapActions.clearOutcomeVisualization()
     mapActions.clearLocationHighlights()
@@ -130,27 +118,14 @@ export function useStoryboardNavigation({
     }
   }, [mapAPI.mapRef, animPolygonLayers, engineApiRef, setPlayState])
 
-  /* Storyboard navigation
+  /* goTo(targetIndex): animate `progress` to `TIMING_BEATS[targetIndex]`.
+   * Forward uses the destination beat's `duration`. Backward (only via
+   * `handleRestart`) uses `BACK_DURATION_FACTOR` of the source beat's. The
+   * regular Back button snaps instead (see `handleBack`). Under
+   * reduced-motion every tween collapses to an instant `progress.set` + settle.
    *
-   * `goTo(targetIndex)` animates `progress` from its current value to
-   * `TIMING_BEATS[targetIndex].progress`. Forward navigation uses the
-   * destination beat's `duration`. Backward navigation (only reachable
-   * today via `handleRestart`, which masks the reverse tween behind a
-   * camera fly) uses `BACK_DURATION_FACTOR` of the source beat's
-   * `duration` so the rewind feels snappier than Next. The regular Back
-   * button bypasses `goTo` entirely and snaps instead. See `handleBack`.
-   * Under `prefers-reduced-motion`, every tween collapses to an
-   * instantaneous `progress.set` + settle.
-   *
-   * `playState` updates:
-   *   - "playing" during the tween
-   *   - "finished" when we landed on the final beat (enables interactive UI)
-   *   - "paused" for any non-final landing
-   *   - "idle" when we landed on beat 0 (restart or Back from B1)
-   *
-   * While animating between two beats, listeners on `progress` in
-   * BeatTextOverlay / OutcomeMorphOverlay already handle any intermediate
-   * value, so no per-beat branching is needed inside those listeners. */
+   * `playState`: "playing" during the tween, "finished" on the final beat,
+   * "idle" on beat 0, "paused" otherwise. */
   const goTo = useCallback(
     (targetIndex: number, opts?: { viaCamera?: boolean }) => {
       const clamped = Math.max(
@@ -160,25 +135,18 @@ export function useStoryboardNavigation({
       const fromIndex = beatIndexRef.current
       if (controlsRef.current) controlsRef.current.stop()
 
-      // mode signal. Any goTo (forward or backward) puts the
-      // storyboard into playback mode. If the user was in interactive
-      // (post-settle) and pressed Back, this correctly restores
-      // playback so the staggered reveals read as scripted again.
-      // settleToFinishedState below flips to "interactive" on the
-      // final-beat finalize path.
+      // Any goTo puts the storyboard into playback mode (restores playback if
+      // the user was interactive and pressed Back). settleToFinishedState
+      // flips back to "interactive" on the final beat.
       engineApiRef.current?.setMode("playback")
 
       const target = TIMING_BEATS[clamped]!
       const source = TIMING_BEATS[fromIndex]!
       const forward = clamped > fromIndex
 
-      // Rule: every tween starts from a settled beat. If the user clicks
-      // while a beat is still animating, finish it first by snapping
-      // `progress` to its checkpoint. Each beat's morphs play across a
-      // fixed slice of `progress`, so a tween that started mid-slice would
-      // cross the leftover slice at the wrong speed and the squares would
-      // rush to their places. When the beat is already settled, `progress`
-      // is already on `source.progress`, so this does nothing.
+      // Every tween must start from a settled beat. Snap `progress` to the
+      // source checkpoint first: starting mid-slice would cross the leftover
+      // slice at the wrong speed. No-op when the beat is already settled.
       progress.set(source.progress)
       const rawDuration = forward
         ? target.duration
@@ -215,15 +183,13 @@ export function useStoryboardNavigation({
         })
       }
 
-      // Ensure polygon coords are fresh before any forward tween that
-      // crosses into the morph region (the map may have been panned).
+      // Refresh polygon coords before a forward tween crosses into the morph
+      // region (the map may have been panned).
       if (forward) computePolygonDataRef.current()
 
-      // Optionally fly the camera home first (used by Next/viaCamera).
-      // `cameraArbiter.flyHome` always calls `onArrive` exactly once:
-      // synchronously when already home or `map` is null, and via
-      // `moveend` otherwise. So we can hand off `runTween` without the
-      // caller-side branching this block used to carry.
+      // Optionally fly the camera home first (Next/viaCamera). `flyHome`
+      // calls `onArrive` exactly once: synchronously when already home or
+      // `map` is null, via `moveend` otherwise.
       if (opts?.viaCamera) {
         cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
           duration: 800,
@@ -253,42 +219,31 @@ export function useStoryboardNavigation({
     ],
   )
 
-  /* Clear any interactive overlay/map state tied to a sticky pin
-   *
-   * Called when the user navigates between beats so that a previously
-   * clicked square (and its pinned popups + outcome map layer) doesn't
-   * carry over into the next beat, where the layer and overlay content
-   * will generally belong to a different outcome. Matches the clearing
-   * block in `handleRestart`. */
+  /* Clear interactive overlay/map state tied to a sticky pin, so a previously
+   * clicked square and its pinned popups + outcome layer don't carry into the
+   * next beat. Matches the clearing block in `handleRestart`. */
   const clearInteractiveState = useCallback(() => {
     setHoveredLocation(null)
     setPinnedLocations(new Map())
-    // release interactive paint ownership synchronously,
-    // BEFORE clearing the selection store. The `sync` effect driven by
-    // `selectedOutcomeCode` going null still fires on React commit, but
-    // by the time it runs the arbiter has already shed ownership and
-    // `sync` does nothing. Releasing here guarantees the exit write
-    // lands while the selection is still valid, no matter how commit
-    // scheduling interleaves with `goTo`'s mode flip to "playback".
-    // Safe to call when not owning: release is then a no-op.
+    // Release interactive paint ownership synchronously, BEFORE clearing the
+    // selection store, so the exit write lands while the selection is still
+    // valid regardless of how commit scheduling interleaves with `goTo`'s mode
+    // flip. The later `sync` effect then no-ops. Safe when not owning.
     const ctx = engineContextRef.current
-    if (ctx) interactivePaintArbiterRef.current?.release(ctx)
+    if (ctx) interactiveLayerDirectorRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
-    // Force the engine to clear any actors still in-window so a mid-beat
-    // nav away doesn't strand the gold polygon ring, the
-    // square popup, or the LOI highlight.
+    // Clear any engine actors still in-window so a mid-beat nav away doesn't
+    // strand the gold polygon ring, the square popup, or the LOI highlight.
     engineApiRef.current?.teardown()
 
-    // Visibility restore runs separately in the selectedOutcomeCode
-    // transition effect in the parent. That effect fires after React
-    // commits the `OutcomePolygonLayer` unmount triggered by
-    // `clearOutcomeVisualization`, guaranteeing the restore wins the
-    // race against the unmount's `visibility: "none"` write.
+    // Visibility restore runs in the parent's selectedOutcomeCode transition
+    // effect, after React commits the OutcomePolygonLayer unmount, so it wins
+    // the race against the unmount's `visibility: "none"` write.
   }, [
     engineApiRef,
     engineContextRef,
-    interactivePaintArbiterRef,
+    interactiveLayerDirectorRef,
     setHoveredLocation,
     setPinnedLocations,
   ])
@@ -296,19 +251,14 @@ export function useStoryboardNavigation({
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_TIMING_BEAT_INDEX) return
     clearInteractiveState()
-    // `viaCamera: true` eases the map back to CAM_CENTER/CAM_ZOOM first
-    // (a no-op when already home) before running the beat tween, so a
+    // `viaCamera` eases back to home first (no-op when already home) so a
     // square-click zoom doesn't persist into the next beat.
     goTo(beatIndexRef.current + 1, { viaCamera: true })
   }, [goTo, clearInteractiveState, beatIndexRef])
 
-  /* Intro tween (Play button entry point)
-   *
-   * `progress` starts at 0 (empty map, nothing revealed). Clicking Play
-   * tweens the first beat's window (0 to `TIMING_BEATS[0].progress`)
-   * while keeping `beatIndex` at 0, so the storyboard indicator reads
-   * "1 / N" the entire time. Under `prefers-reduced-motion`, the tween
-   * collapses to an instant snap. */
+  /* Intro tween (Play). Tweens the first beat's window (0 to
+   * `TIMING_BEATS[0].progress`) while keeping `beatIndex` at 0 so the indicator
+   * reads "1 / N". Reduced-motion collapses to an instant snap. */
   const playArrival = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
     setBeatIndex(0)
@@ -335,15 +285,13 @@ export function useStoryboardNavigation({
   ])
 
   const handlePlay = useCallback(() => {
-    // Clear any lingering back-out fade before starting the arrival
-    // tween, in case Play is triggered mid-fade-out.
+    // Clear any lingering back-out fade in case Play is triggered mid-fade-out.
     if (controlsRef.current) controlsRef.current.stop()
     backOutOpacity.set(1)
     setHasPlayed(true)
     hasPlayedRef.current = true
-    // Mode signal: storyboard is now in playback. Set before
-    // `playArrival()` so any downstream effect observing the mode sees
-    // the transition before the first progress frame lands.
+    // Set playback mode before `playArrival()` so downstream effects see the
+    // transition before the first progress frame lands.
     engineApiRef.current?.setMode("playback")
     computePolygonDataRef.current()
     playArrival()
@@ -357,19 +305,12 @@ export function useStoryboardNavigation({
     setHasPlayed,
   ])
 
-  /* Back
-   *
-   * On beat index > 0: snap `progress` directly to the previous beat's
-   * checkpoint. All `progress.on("change")` listeners are pure functions
-   * of `v`, so the next frame recomputes the correct state for that beat
-   * without winding the UI backward through every staggered reveal.
-   * On beat index === 0: do not reverse-tween `progress` (that would
-   * unwind every staggered reveal). Instead, park `progress` at 0.45
-   * and animate `backOutOpacity` 1 to 0 so the whole text block fades
-   * out together. On completion, snap `progress` to 0 and
-   * `backOutOpacity` back to 1, and flip `hasPlayed` off so the
-   * pre-play gate (title + subtitle + Play button) re-renders from a
-   * clean slate. */
+  /* Back. On beat > 0, snap `progress` to the previous checkpoint; the pure
+   * `progress` listeners recompute that beat without winding the UI backward.
+   * On beat 0, do not reverse-tween (that unwinds every staggered reveal):
+   * fade `backOutOpacity` 1 to 0 so the text block fades out together, then
+   * snap `progress` to 0, reset `backOutOpacity`, and flip `hasPlayed` off so
+   * the pre-play gate re-renders clean. */
   const handleBack = useCallback(() => {
     const i = beatIndexRef.current
     if (i > 0) {
@@ -385,12 +326,9 @@ export function useStoryboardNavigation({
         setPlayState("paused")
       }
 
-      // Fly the map back to the default home view first if a square-click
-      // (or any other interaction) pushed the camera elsewhere. Back
-      // snaps the beat `progress` in `applyBeat` rather than tweening,
-      // so we route through `cameraArbiter.flyHome` (which fires
-      // `onArrive` synchronously when the map is already home, and
-      // otherwise waits for `moveend` before applying the snap).
+      // Fly home first if an interaction pushed the camera elsewhere. `flyHome`
+      // fires `onArrive` synchronously when already home, otherwise on
+      // `moveend`, then `applyBeat` snaps the beat.
       cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
         duration: 800,
         onStart: () => setPlayState("playing"),
@@ -403,17 +341,14 @@ export function useStoryboardNavigation({
     clearInteractiveState()
     if (controlsRef.current) controlsRef.current.stop()
     const finish = () => {
-      // Snap underlying animation state back to pre-play in one frame
-      // while the text is already faded out. The pre-play render takes
-      // over with `backOutOpacity` reset to 1 (a no-op for the fresh
-      // state since `progress` is 0 and the text block's progress-driven
-      // opacity is already 0 at that value).
+      // Snap state back to pre-play in one frame while the text is faded out.
+      // Resetting `backOutOpacity` to 1 is a no-op for the fresh state since
+      // `progress` is 0 and the text opacity is already 0 there.
       progress.set(0)
       backOutOpacity.set(1)
       setHasPlayed(false)
       hasPlayedRef.current = false
       setPlayState("idle")
-      // Storyboard is back in the pre-play gate.
       engineApiRef.current?.setMode("idle")
     }
     const duration = prefersReducedMotion ? 0 : 0.6
@@ -447,20 +382,17 @@ export function useStoryboardNavigation({
     if (controlsRef.current) controlsRef.current.stop()
     setHoveredLocation(null)
     setPinnedLocations(new Map())
-    // release the interactive arbiter before clearing the
-    // store so the DU teardown runs while the selection (and its
-    // spec) is still valid. See `clearInteractiveState` for the
-    // ordering rationale. The DU baseline written a few lines below
-    // is the final resting state either way, but the explicit release
-    // cancels any pending deferred-idle teardown from a prior exit.
+    // Release the interactive arbiter before clearing the store so DU teardown
+    // runs while the selection is still valid (see `clearInteractiveState`).
+    // Also cancels any pending deferred-idle teardown from a prior exit.
     const ctx = engineContextRef.current
-    if (ctx) interactivePaintArbiterRef.current?.release(ctx)
+    if (ctx) interactiveLayerDirectorRef.current?.release(ctx)
     mapActions.clearLocationHighlights()
     mapActions.clearOutcomeVisualization()
     mapActions.clearMapTooltips()
 
-    // Reset all animation polygon/line layers explicitly so the map-phase
-    // effect's `v < 0.01` branch has a clean slate to rebuild from.
+    // Reset animation polygon/line layers so the map-phase effect's `v < 0.01`
+    // branch has a clean slate to rebuild from.
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (map?.isStyleLoaded?.()) {
       try {
@@ -479,15 +411,11 @@ export function useStoryboardNavigation({
             map.setPaintProperty(outline, "line-opacity", 0)
           }
         }
-        // consolidated DU reset. `animPolygonLayers` loop
-        // above already zeroed fill/line opacity via dynamic ids. The
-        // baseline helper re-applies the full state (filter, color
-        // expressions, transitions, visibility) so we return to the
-        // pre-play beat-1 palette consistently. Idempotent with the
-        // loop's opacity writes above. Cast via `unknown` because
-        // Mapbox's method signatures are stricter than the helper's
-        // intentionally permissive structural type (same cast pattern
-        // as `getStyledMap` in `MapPaintArbiter`).
+        // Consolidated DU reset. The baseline helper re-applies the full
+        // beat-1 palette state (filter, color expressions, transitions,
+        // visibility). Idempotent with the loop's opacity writes above. Cast
+        // via `unknown` because Mapbox's signatures are stricter than the
+        // helper's permissive structural type (as in `MapPaintArbiter`).
         writeDemandUnitsBaseline(map as unknown as BaselineMap, {
           filter: DU_CLASS_FILTER,
           fillExpr: blueFillExpr(0) as readonly unknown[],
@@ -497,9 +425,8 @@ export function useStoryboardNavigation({
           lineOffset: -0.25,
           visibility: "visible",
         })
-        // Reset shared `basemap-dim-overlay` to 0 here too, matching the
-        // styled-layer setup path. See the comment at the demand-units
-        // setup block below for why we override the transition.
+        // Reset shared `basemap-dim-overlay` to 0, overriding its transition
+        // (see the demand-units setup block for why).
         if (map.getLayer("basemap-dim-overlay")) {
           map.setPaintProperty(
             "basemap-dim-overlay",
@@ -512,12 +439,9 @@ export function useStoryboardNavigation({
         /* ok */
       }
 
-      // Fly the camera home so the polygon coordinates the SVG overlay
-      // computes on the next forward tween are anchored correctly.
-      // Fire-and-forget: Restart parks in the pre-play gate immediately
-      // regardless of whether a flight runs, so no `onArrive` is needed.
-      // `resetOrientation: true` restores bearing/pitch to 0 when a
-      // flight actually runs (matches pre-refactor behavior).
+      // Fly home so the next forward tween's polygon coords anchor correctly.
+      // Fire-and-forget: Restart parks in the pre-play gate immediately, so no
+      // `onArrive`. `resetOrientation` restores bearing/pitch to 0 on flight.
       cameraArbiter.flyHome(map, {
         duration: 800,
         resetOrientation: true,
@@ -532,8 +456,7 @@ export function useStoryboardNavigation({
     setHasPlayed(false)
     hasPlayedRef.current = false
     setPlayState("idle")
-    // Restart returns the engine to the same pre-play state it was in
-    // at first mount.
+    // Return the engine to its first-mount pre-play state.
     engineApiRef.current?.setMode("idle")
     computePolygonDataRef.current()
   }, [
@@ -548,7 +471,7 @@ export function useStoryboardNavigation({
     engineApiRef,
     engineContextRef,
     hasPlayedRef,
-    interactivePaintArbiterRef,
+    interactiveLayerDirectorRef,
     setBeatIndex,
     setHasPlayed,
     setHoveredLocation,
@@ -556,13 +479,8 @@ export function useStoryboardNavigation({
     setPlayState,
   ])
 
-  /* Arrival behaviour
-   *
-   * Normal motion: park in the pre-play gate. The user must click Play
-   * explicitly to start the storyboard (they see the title, the Play
-   * button, and the subtitle).
-   * Reduced motion: jump straight to the final beat so the full settled
-   * end-state is visible without any animation. */
+  /* Arrival. Normal motion parks in the pre-play gate (user clicks Play).
+   * Reduced motion jumps straight to the final settled beat. */
   const hasAutoAdvancedRef = useRef(false)
   useEffect(() => {
     if (!panelInView) return
@@ -571,14 +489,12 @@ export function useStoryboardNavigation({
     if (prefersReducedMotion) {
       goTo(FINAL_TIMING_BEAT_INDEX)
     }
-    // Normal motion: nothing to do here. We wait for the user to click Play.
+    // Normal motion: wait for the user to click Play.
   }, [panelInView, prefersReducedMotion, goTo])
 
-  /* Keyboard shortcuts
-   *
-   * Gated on `panelInView` so shortcuts don't steal keys when the user
-   * has scrolled past. We only intercept ArrowRight / ArrowLeft / Home
-   * when no modifier keys are held and no text input is focused. */
+  /* Keyboard shortcuts. Gated on `panelInView` so they don't steal keys after
+   * scroll. Intercept ArrowRight/ArrowLeft/Home only with no modifiers and no
+   * text input focused. */
   useEffect(() => {
     if (!panelInView) return
     const isEditable = (el: EventTarget | null) => {
@@ -596,7 +512,7 @@ export function useStoryboardNavigation({
       if (isEditable(e.target)) return
       if (e.key === "ArrowRight") {
         e.preventDefault()
-        // Pre-play: ArrowRight acts as Play. Post-play: it advances.
+        // Pre-play: ArrowRight plays. Post-play: it advances.
         if (!hasPlayedRef.current) {
           handlePlay()
         } else {

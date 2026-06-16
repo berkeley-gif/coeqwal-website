@@ -4,13 +4,12 @@
  * `goTo({ viaCamera: true })`, `handleBack`, and `handleRestart` so the
  * easeTo, threshold check, and moveend continuation stay consistent.
  *
- * Despite the name, this is not a progress-driven `Arbiter<A>`. It has
- * no actors and is never called during engine dispatch. Nav handlers
- * hold it in a ref and call `flyHome(...)` directly.
+ * Despite the name, not a progress-driven `Arbiter<A>`: no actors, never
+ * called during dispatch. Nav handlers hold it in a ref and call
+ * `flyHome(...)` directly.
  *
- * It works on the raw Mapbox map because `easeTo` and `once` aren't on
- * `MapOperationsAPI` in the map package yet. Once they are, this can become a
- * thin wrapper over the app API.
+ * Works on the raw Mapbox map because `easeTo` and `once` aren't on
+ * `MapOperationsAPI` yet. Once they are, this can wrap the app API.
  */
 
 import type { MapboxGLMap } from "@repo/map"
@@ -23,18 +22,15 @@ export interface CameraHome {
 export interface FlyHomeOpts {
   /** Duration (ms) of the easeTo. Default 800. */
   duration?: number
-  /** When true, the flight also resets bearing and pitch to 0 (used by
-   *  Restart). Doesn't affect the "already home" check, which is: if center and
-   *  zoom are already home, no flight runs and bearing/pitch stay as
-   *  they are. */
+  /** When true, the flight also resets bearing and pitch to 0 (Restart).
+   *  Doesn't affect the "already home" check, which is center and zoom
+   *  only. If already home, no flight runs and bearing/pitch are kept. */
   resetOrientation?: boolean
-  /** Fires when a flight actually starts (not called when the map is
-   *  already home or `map` is null). Use this to flip play-state into
-   *  "playing" for the duration of the flight. */
+  /** Fires when a flight actually starts (not when already home or `map`
+   *  is null). Use to flip play-state to "playing" for the flight. */
   onStart?: () => void
   /** Fires after the flight's `moveend`, or synchronously if no flight
-   *  was needed (already home, or map is null). Callers can rely on
-   *  this firing exactly once per `flyHome` call. */
+   *  was needed. Fires exactly once per `flyHome` call. */
   onArrive?: () => void
 }
 

@@ -1,11 +1,8 @@
 "use client"
 
-/* OutcomeMorphOverlay: the SVG morph layer
- *
- * The SVG over the map that morphs outcome polygons into distribution
- * squares, then bars, dots, and heatmap cells. Runs per frame through
- * the overlay-morph bridge. See "The bridge actors" in README.md.
- */
+/* OutcomeMorphOverlay: SVG over the map that morphs outcome polygons into
+ * distribution squares, then bars, dots, and heatmap cells. Runs per frame
+ * through the overlay-morph bridge. See "The bridge actors" in README.md. */
 
 import {
   useRef,
@@ -75,10 +72,8 @@ interface OutcomeMorphOverlayProps {
   panelHeight: number
   progress: MotionValue<number>
   /** Bridge into `OverlayMorphArbiter`. The component writes its
-   *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
-   *  and clears it on unmount. The arbiter reads through the ref on
-   *  every frame. See
-   *  `apps/main/app/features/scenarioExplorer/animation/engine/arbiters/OverlayMorphArbiter.ts`. */
+   *  dispatcher into `.current` on mount and clears it on unmount. The
+   *  arbiter reads through the ref every frame. */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
   squaresPerRow: number
   distributionPositionMap: Record<
@@ -91,38 +86,35 @@ interface OutcomeMorphOverlayProps {
     }
   >
   onOutcomeClick?: (code: string) => void
-  /** Gate for clicking a whole outcome glyph to select it (the bar beat).
-   *  Separate from `interactive` because the bars are not per-square hit
-   *  targets, the whole glyph region selects its outcome. When true, each
-   *  outcome's bounds rect becomes clickable and calls `onOutcomeClick`. */
+  /** Gate for clicking a whole outcome glyph (the bar beat). Separate from
+   *  `interactive` because bars are not per-square hit targets. When true,
+   *  each outcome's bounds rect is clickable and calls `onOutcomeClick`. */
   outcomeGlyphClickEnabled?: boolean
-  /** Gate for clicking a radar vertex dot to select its outcome (the radar
-   *  beat). When true, a hit target is drawn over each vertex and calls
-   *  `onOutcomeClick` with that vertex's outcome code. */
+  /** Gate for clicking a radar vertex dot (the radar beat). When true, a
+   *  hit target over each vertex calls `onOutcomeClick`. */
   radarDotClickEnabled?: boolean
   /** Gate for clicking a hydroclimate matrix cell (the heatmap beat). When
-   *  true, a hit target is drawn over every cell and calls `onHeatmapCellClick`
-   *  with the cell's outcome code and its column's climate scenario. */
+   *  true, a hit target over every cell calls `onHeatmapCellClick` with the
+   *  cell's outcome code and its column's climate scenario. */
   heatmapCellClickEnabled?: boolean
   /** Scenario for the primary heatmap column (historical hydroclimate). */
   heatmapPrimaryScenarioId?: string
-  /** Scenario backing the current map selection, used to outline the active
-   *  matrix cell. */
+  /** Scenario backing the current map selection; outlines the active cell. */
   selectedScenarioId?: string
   onHeatmapCellClick?: (code: string, scenarioId: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
-  /** Gate for the per-square hover and click on the distribution grid. */
+  /** Gate for per-square hover and click on the distribution grid. */
   squareHoverEnabled?: boolean
-  /** All active (hovered + pinned) locations driven by the parent */
+  /** All active (hovered + pinned) locations driven by the parent. */
   activeLocationSet?: Map<string, LocationInfo>
-  /** Currently hovered location (for ephemeral overlay tooltip) */
+  /** Currently hovered location (for ephemeral overlay tooltip). */
   hoveredLocation?: LocationInfo | null
-  /** Callbacks into the shared hover/pin state machine in the parent */
+  /** Callbacks into the shared hover/pin state machine in the parent. */
   onLocationEnter?: (info: LocationInfo) => void
   onLocationLeave?: () => void
   onLocationClick?: (info: LocationInfo) => void
-  /** Maps "outcomeCode:sourceId" to a human-readable name from Mapbox features */
+  /** Maps "outcomeCode:sourceId" to a human-readable name. */
   locationNameMap?: Record<string, string>
   encodingMode?: EncodingMode
   tierChartData?: Record<string, ChartDataPoint[]>
@@ -243,22 +235,17 @@ function computeOutcomeLayout(
   const isSingleValue = isSingleValueTier(chartPoints)
   const totalPolygons = polygons.length
 
-  // Sum of the API normalized values across the four tiers. Used below to
-  // express each tier's bar as a fraction of the row total, matching
-  // `BarOnly` in `MorphableDistributionGlyph` (the renderer the list view
-  // uses). Without this row-total normalization the storyboard bars look
+  // Sum of API normalized values across the four tiers. Expresses each
+  // tier's bar as a fraction of the row total, matching `BarOnly` in
+  // `MorphableDistributionGlyph`. Without this the storyboard bars look
   // narrower than the list view's whenever `sum(values) < 1`.
   const apiValueSum = chartPoints
     ? chartPoints.reduce((s, p) => s + (p?.value ?? 0), 0)
     : 0
 
-  // Weighted-mean tier score. Primary source is the same
-  // `computeTierScore(chartPoints)` helper the list view uses in
-  // `TierSummaryCell`, which operates on the API's normalized tier values
-  // returned by `useScenarioTiers`. Falls back to a count-based mean over
-  // the on-screen squares only when `chartPoints` is missing (network
-  // failure or still loading) so the glyph always renders something
-  // sensible.
+  // Weighted-mean tier score from `computeTierScore(chartPoints)` (same as
+  // the list view's `TierSummaryCell`). Falls back to a count-based mean
+  // over on-screen squares when `chartPoints` is missing.
   const apiWeightedScore = computeTierScore(chartPoints)
   const countWeightedScore =
     totalPolygons > 0
@@ -281,7 +268,7 @@ function computeOutcomeLayout(
   const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
   const gridCenterX = targetX + GRID_PAD + gridWidth / 2
 
-  // Bar chart and average dot are centered within the slot, not the grid
+  // Bar chart and average dot centered within the slot, not the grid.
   const slotCenterY = targetY + slotHeight / 2
 
   const numTiers = 4
@@ -559,13 +546,11 @@ export default function OutcomeMorphOverlay({
         isSingleValue: layout.isSingleValue,
         hasData,
         glyphMeta: layout.glyphMeta,
-        /** Continuous API-weighted tier score (e.g. 2.3), from
-         *  `useScenarioTiers(s0020)`. Used by the radar to place each
-         *  outcome's vertex at its exact weighted-mean radius. */
+        /** Continuous API-weighted tier score (e.g. 2.3). Places each
+         *  radar vertex at its weighted-mean radius. */
         weightedScore: layout.weightedScore,
-        /** Rounded weighted tier (1..4). Used to recolor the average dot
-         *  + heatmap cell so both reflect the scenario's actual average
-         *  for that outcome. */
+        /** Rounded weighted tier (1..4). Recolors the average dot and
+         *  heatmap cell to the scenario's average for that outcome. */
         avgTierLevel: layout.avgTierLevel,
         bounds,
         progressRange: getOutcomeProgressRange(outcome.code, activeCodes),
@@ -581,12 +566,10 @@ export default function OutcomeMorphOverlay({
     mustIncludeSourceIds,
   ])
 
-  /* Union bounding box of all distribution groups
-   *
-   * A transparent backdrop over this region captures pointer events in
-   * the gaps between squares so the map-polygon hover underneath does
-   * not fire while the user mouses around the grid. Map hover still
-   * works on the open map outside this box. */
+  /* Union bounding box of all distribution groups. A transparent backdrop
+   * over this region captures pointer events in the gaps between squares so
+   * map-polygon hover underneath does not fire. Map hover still works
+   * outside this box. */
   const gridHitBounds = useMemo(() => {
     if (outcomeShapes.length === 0) return null
     let minX = Infinity
@@ -602,8 +585,7 @@ export default function OutcomeMorphOverlay({
     return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
   }, [outcomeShapes])
 
-  /* Radar geometry
-   */
+  /* Radar geometry */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
     const { cx, cy, rMax } = computeRadarFrame(panelWidth, panelHeight)
@@ -642,21 +624,13 @@ export default function OutcomeMorphOverlay({
     return map
   }, [radarGeometry])
 
-  /* Heatmap geometry
-   *
-   * A grid of `numColumns` hydroclimate columns (primary column +
-   * `extraHydroclimateColumns.length` extras) by `N` outcome rows. The
-   * primary column (column index 0) is where each outcome's
-   * representative morph polygon lands via `heatmapTargetsByCode`. The
-   * extra columns are purely decorative fade-ins (no morph). All
-   * columns share the same inter-cell padding so rows read as a single
-   * stacked heatmap the way `ResilienceHeatmap` does.
-   *
-   * Each cell is a rect of size `innerW x innerH`, centered on
-   * `(columnCx[c], cellCy_r)`. The full column group is horizontally
-   * centered inside the right third of the panel. Inter-column gap is
-   * ~12% of `cellW`, matching the visual rhythm of d3's `scaleBand()`
-   * gutter between the other axis's bands. */
+  /* Heatmap geometry. A grid of `numColumns` hydroclimate columns (primary
+   * + `extraHydroclimateColumns.length` extras) by `N` outcome rows. Column
+   * 0 is where each outcome's representative morph polygon lands via
+   * `heatmapTargetsByCode`. Extra columns are decorative fade-ins (no
+   * morph). Each cell is an `innerW x innerH` rect centered on
+   * `(columnCx[c], cellCy_r)`. The column group is centered in the right
+   * third. Inter-column gap is ~12% of `cellW`. */
   const heatmapGeometry = useMemo(() => {
     const N = outcomeShapes.length
     const numExtras = extraHydroclimateColumns?.length ?? 0
@@ -767,10 +741,9 @@ export default function OutcomeMorphOverlay({
   }, [heatmapGeometry])
 
   const hoverTooltip = useMemo(() => {
-    // Show the square popup for the hovered location. When nothing is hovered,
-    // fall back to the pinned selection (sticky single-select holds at most
-    // one) so clicking a square or its map polygon keeps the popup on the
-    // square instead of dropping it.
+    // Square popup for the hovered location. When nothing is hovered, fall
+    // back to the pinned selection (at most one) so clicking a square or its
+    // map polygon keeps the popup on the square.
     const loc =
       hoveredLocation ??
       (activeLocationSet && activeLocationSet.size > 0
@@ -849,7 +822,7 @@ export default function OutcomeMorphOverlay({
 
   // Hydroclimate tier-change transition (distribution mode)
   useLayoutEffect(() => {
-    // Snapshot current state for distribution mode
+    // Snapshot current distribution-mode state.
     const snapshot = new Map<string, Map<string, ShapeSnapshot>>()
     for (const group of outcomeShapes) {
       const m = new Map<string, ShapeSnapshot>()
@@ -873,7 +846,6 @@ export default function OutcomeMorphOverlay({
     )
       return
 
-    // Check if anything changed
     let changed = false
     outer: for (const group of outcomeShapes) {
       const oldGroup = prevSnapshot.get(group.code)
@@ -892,15 +864,15 @@ export default function OutcomeMorphOverlay({
       cancelAnimationFrame(tierChangeRafRef.current)
     }
 
-    // Step 1: Color change in place (changed squares fade to new tier color)
-    // Step 2: All squares glide from old position to new position
+    // Step 1: changed squares fade to new tier color in place.
+    // Step 2: all squares glide from old to new position.
     const COLOR_FADE = 600
     const PAUSE_END = COLOR_FADE + 300
     const SLIDE_DURATION = 600
     const SLIDE_END = PAUSE_END + SLIDE_DURATION
     const TOTAL = SLIDE_END
 
-    // Pin all shapes to old positions
+    // Pin all shapes to old positions.
     for (const group of outcomeShapes) {
       const refs = pathRefsMap.current.get(group.code)
       if (!refs) continue
@@ -940,12 +912,12 @@ export default function OutcomeMorphOverlay({
 
           const tierChanged = old.tier !== shape.tier
 
-          // Step 1: color fade (only changed squares)
+          // Step 1: color fade (changed squares only).
           if (tierChanged && old.color !== shape.color) {
             el.setAttribute("fill", lerpColor(old.color, shape.color, colorT))
           }
 
-          // Step 2: all squares glide to new position
+          // Step 2: glide to new position.
           if (slideT > 0) {
             const pts = old.target.map((a, pi) =>
               lerp(a, shape.squareTarget[pi]!, slideT),
@@ -987,7 +959,7 @@ export default function OutcomeMorphOverlay({
   // Encoding-mode transition
   useLayoutEffect(() => {
     if (prevEncodingRef.current !== encodingMode && progress.get() >= 1) {
-      // Cancel any tier-change animation so encoding takes over
+      // Cancel any tier-change animation so encoding takes over.
       if (tierChangeRafRef.current != null) {
         cancelAnimationFrame(tierChangeRafRef.current)
         tierChangeRafRef.current = null
@@ -1119,8 +1091,7 @@ export default function OutcomeMorphOverlay({
     }
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
-  /* Overlay-morph frame applier
-   */
+  /* Overlay-morph frame applier */
   const latestMorphFrameRef = useRef<(v: number) => void>(() => {})
   latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
@@ -1133,9 +1104,8 @@ export default function OutcomeMorphOverlay({
     const BEAT7_CHROME_END = 0.87
     const BEAT8_CHROME_OUT_END = 0.9
     const BEAT8_CELL_END = 0.95
-    // Primary column chrome settles first, then each extra hydroclimate
-    // column fades in sequentially. Evenly split the post-morph window
-    // [0.95, 1.00] into three slices.
+    // Primary column chrome settles first, then each extra column fades in
+    // sequentially. Splits the post-morph window [0.95, 1.00] into thirds.
     const BEAT8_COL0_END = 0.97
     const BEAT8_COL1_END = 0.985
     const BEAT8_COL2_END = 1.0
@@ -1175,23 +1145,22 @@ export default function OutcomeMorphOverlay({
       extraColumnBlends,
     } = computeBlends(v)
 
-    // Update radar chrome opacity once per frame. (Rises in the radar
-    // beat, falls at the start of the heatmap beat.)
+    // Radar chrome opacity. Rises in the radar beat, falls at the start of
+    // the heatmap beat.
     const radarChromeEl = radarChromeRef.current
     if (radarChromeEl) {
       radarChromeEl.style.opacity = String(radarChromeBlend)
     }
 
-    // Update heatmap chrome opacity (primary column's rounded-rect
-    // overlays + "Current hydroclimate" header).
+    // Heatmap chrome opacity (primary column's rounded-rect overlays +
+    // header).
     const heatmapChromeEl = heatmapChromeRef.current
     if (heatmapChromeEl) {
       heatmapChromeEl.style.opacity = String(heatmapChromeBlend)
     }
 
-    // Update each extra hydroclimate column's opacity. Each column's
-    // `<g>` is hidden at rest and fades up on its own slice of the
-    // post-morph window, producing the "one by one" reveal.
+    // Each extra column's `<g>` is hidden at rest and fades up on its own
+    // slice of the post-morph window, producing the "one by one" reveal.
     const extraColumnEls = heatmapExtraColumnRefs.current
     for (let c = 0; c < extraColumnEls.length; c++) {
       const el = extraColumnEls[c]
@@ -1257,12 +1226,10 @@ export default function OutcomeMorphOverlay({
           el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
         }
 
-        // Once the squares have settled, drive the chained morph
-        // (square, bar, dot, radar vertex, heatmap cell) straight from
-        // progress. This overrides the resting state above whenever a
-        // beat blend is active. Skipped when the parent already switched
-        // `encodingMode` to bar or average, since the branches above
-        // handle that.
+        // Once squares settle, drive the chained morph (square, bar, dot,
+        // radar vertex, heatmap cell) straight from progress. Overrides the
+        // resting state above when a beat blend is active. Skipped when the
+        // parent already switched `encodingMode` to bar or average.
         const chainActive =
           v >= morphEnd &&
           encodingMode === "distribution" &&
@@ -1273,9 +1240,8 @@ export default function OutcomeMorphOverlay({
           const heatmapTarget =
             heatmapTargetsByCode.get(group.code) ?? radarTarget
 
-          // Build the blended target by lerping through square, bar,
-          // dot, radar, then heatmap cell in order. Each blend has its
-          // own window so the chain flows without jumps.
+          // Blend the target by lerping through square, bar, dot, radar,
+          // then heatmap cell in order. Each blend has its own window.
           let pts = shape.squareTarget
           if (barBlend > 0) {
             pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
@@ -1295,15 +1261,14 @@ export default function OutcomeMorphOverlay({
           el.setAttribute("d", pointsToD(pts))
 
           // Non-representative shapes fade to 0 once we leave pure-bar
-          // territory (same as average-mode behavior).
+          // territory.
           if (!shape.isRepresentative) {
             const repFade = Math.max(barBlend, avgBlend, radarBlend)
             el.style.opacity = String(baseOpacity * (1 - repFade))
           } else {
             el.style.opacity = String(baseOpacity)
-            // In pure bar, use bar-mode fill-opacity. Once we start
-            // collapsing into dot/radar, flip back to full opacity
-            // (matches average-mode styling).
+            // Pure bar uses bar-mode fill-opacity. Collapsing into
+            // dot/radar flips back to full opacity.
             const barOnlyFraction =
               barBlend * (1 - Math.max(avgBlend, radarBlend))
             el.setAttribute(
@@ -1311,10 +1276,9 @@ export default function OutcomeMorphOverlay({
               String(0.9 + (0.8 - 0.9) * barOnlyFraction),
             )
 
-            // Swap representative fill color to averageColor as we
-            // cross into dot/radar/heatmap territory. All of
-            // avgBlend/radarBlend/heatmapBlend imply "show average
-            // color", so use max of them.
+            // Swap representative fill to averageColor crossing into
+            // dot/radar/heatmap. All three blends imply "show average
+            // color", so use their max.
             const avgMix = Math.max(avgBlend, radarBlend, heatmapBlend)
             if (avgMix > 0 && shape.averageColor) {
               el.setAttribute(
@@ -1341,11 +1305,9 @@ export default function OutcomeMorphOverlay({
             chromeEl.style.opacity = String(easeInOut(morphT))
           }
         } else if (encodingMode === "distribution" && v >= morphEnd) {
-          // Fade-in rides barBlend once the outcome has
-          // settled. Before morphEnd the chrome stays hidden (the
-          // squares are still morphing into place). Once `avgBlend`
-          // starts the bar-track chrome fades back out so the dot/
-          // radar view isn't cluttered by bar tracks.
+          // Fade-in rides barBlend once the outcome settles. Hidden before
+          // morphEnd (squares still morphing). Once `avgBlend` starts, the
+          // bar-track chrome fades back out for the dot/radar view.
           const chromeOpacity = barBlend * (1 - avgBlend)
           chromeEl.style.opacity = String(chromeOpacity)
         } else {
@@ -1355,13 +1317,10 @@ export default function OutcomeMorphOverlay({
     }
   }
 
-  /* Bridge registration
-   *
-   * Writes a stable dispatcher into `overlayMorphTickRef.current` so the
-   * engine's `OverlayMorphArbiter` runs the latest morph frame every
-   * frame. Runs once per mount, and applies the current frame right
-   * away. We skip that initial apply while the tier-change animation is
-   * running, so it doesn't cause a visual snap. */
+  /* Bridge registration. Writes a stable dispatcher into
+   * `overlayMorphTickRef.current` so `OverlayMorphArbiter` runs the latest
+   * morph frame every frame. Applies the current frame on mount, but skips
+   * that initial apply during the tier-change animation to avoid a snap. */
   useEffect(() => {
     const dispatch = (v: number) => latestMorphFrameRef.current(v)
     overlayMorphTickRef.current = dispatch
@@ -1405,10 +1364,9 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
     >
-      {/* Radar chrome: tier rings, radial axes, tier labels along the
-          top spoke, and a trace connecting the per-outcome vertices.
-          Matches the `@repo/viz` RadarPlot used in `RadarPanel`. Opacity
-          is driven by `radarChromeBlend` in the main progress handler. */}
+      {/* Radar chrome: tier rings, radial axes, tier labels, and a trace
+          connecting the per-outcome vertices. Opacity driven by
+          `radarChromeBlend` in the main progress handler. */}
       <g
         ref={(el) => {
           radarChromeRef.current = el
@@ -1472,10 +1430,9 @@ export default function OutcomeMorphOverlay({
           />
         )}
       </g>
-      {/* Radar vertex hit targets: a transparent circle over each outcome's
-          dot, present only on the settled radar beat. The morphed shapes and
-          per-outcome bounds rect are pointer-inert there, so these receive the
-          click and select that outcome on the map (see `onOutcomeClick`). */}
+      {/* Radar vertex hit targets: a transparent circle over each dot, only
+          on the settled radar beat. The morphed shapes and bounds rect are
+          pointer-inert there, so these receive the click (`onOutcomeClick`). */}
       {radarDotClickEnabled &&
         radarGeometry.vertices.map((v) => (
           <circle
@@ -1565,8 +1522,7 @@ export default function OutcomeMorphOverlay({
         </g>
       ))}
       {/* Grid hit backdrop: swallows pointer events in the gaps between
-          squares so the map-polygon hover underneath does not pop up
-          while the user mouses around the distribution grid. Squares
+          squares so map-polygon hover underneath does not pop up. Squares
           render on top and keep their own hover. Interactive only. */}
       {interactive && gridHitBounds && (
         <rect
@@ -1610,7 +1566,7 @@ export default function OutcomeMorphOverlay({
               style={{ opacity: 0 }}
             >
               {group.isSingleValue ? null : (
-                /* Multi-value: horizontal bar tracks with grid lines */
+                /* Multi-value: horizontal bar tracks with grid lines. */
                 <>
                   {Array.from({ length: group.glyphMeta.numTiers }, (_, ti) => {
                     const y =
@@ -1671,8 +1627,8 @@ export default function OutcomeMorphOverlay({
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
-              // Squares are clickable only on the grid beats (square hover
-              // enabled) and never in average mode.
+              // Squares are clickable only on grid beats, never in average
+              // mode.
               const isClickable = squareHoverEnabled && !isAvgMode
               return (
                 <path
@@ -1779,13 +1735,11 @@ export default function OutcomeMorphOverlay({
         )
       })}
 
-      {/* Matrix cell hit targets: a transparent rect over every cell (primary
-          + climate columns), present only on the settled heatmap beat. Drawn
-          last so it sits above the per-outcome bounds rects and the grid
-          backdrop and reliably receives the click. Each cell carries its
-          column's climate scenario, so clicking it paints that outcome under
-          that climate (see `onHeatmapCellClick`). The active cell gets a gold
-          outline. */}
+      {/* Matrix cell hit targets: a transparent rect over every cell, only
+          on the settled heatmap beat. Drawn last so it sits above the bounds
+          rects and grid backdrop and receives the click. Each cell carries
+          its column's climate scenario (see `onHeatmapCellClick`). The active
+          cell gets a gold outline. */}
       {heatmapCellClickEnabled &&
         [
           ...heatmapGeometry.cells.map((cell) => ({
@@ -1831,12 +1785,10 @@ export default function OutcomeMorphOverlay({
   )
 
   /* Render the square hover tooltip through a portal to the document body.
-   * The morph overlay sits in a `zIndex: 4` stacking context, below the
-   * right-column outcome labels (`zIndex: 5`), so an in-SVG tooltip would be
-   * occluded by those headers. Portaling to the body escapes that context.
-   * The tooltip's x and y are SVG viewBox units, which equal panel pixels
-   * (the SVG fills the panel at 100%), so we offset by the SVG's position to
-   * place it in document space. */
+   * The overlay's `zIndex: 4` sits below the outcome labels (`zIndex: 5`),
+   * so an in-SVG tooltip would be occluded. The portal escapes that context.
+   * Tooltip x/y are SVG viewBox units (equal to panel pixels), offset by the
+   * SVG's position to place it in document space. */
   function renderHoverTooltipPortal(tip: NonNullable<typeof hoverTooltip>) {
     const svgEl = svgRef.current
     if (!svgEl || typeof document === "undefined") return null
