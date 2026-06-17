@@ -58,6 +58,8 @@ export { LinedList } from "./common/LinedList"
 export type { LinedListProps, LinedListItem } from "./common/LinedList"
 export { InfoCard } from "./common/InfoCard"
 export type { InfoCardProps } from "./common/InfoCard"
+export { InfoCardGrid } from "./common/InfoCardGrid"
+export type { InfoCardGridProps } from "./common/InfoCardGrid"
 export { BarredColumns } from "./common/BarredColumns"
 export type {
   BarredColumnsProps,

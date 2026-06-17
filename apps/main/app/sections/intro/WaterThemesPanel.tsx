@@ -10,6 +10,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
   NavArrow,
   InfoCard,
+  InfoCardGrid,
   ScrollToButton,
   resolveRadius,
   resolveInset,
@@ -470,13 +471,9 @@ function WaterThemesPanelContent({
         </motion.div>
 
         {/* Five theme cards - horizontal grid */}
-        <Box
+        <InfoCardGrid
+          columns={5}
           sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, 1fr)",
-            alignItems: "stretch",
-            columnGap: theme.space.section.sm,
-            rowGap: theme.space.component.lg,
             // Short-viewport layout: the text block above is anchored
             // to the headline's top instead of being vertically
             // centered, which removes the natural breathing room
@@ -518,7 +515,7 @@ function WaterThemesPanelContent({
               </InfoCard>
             )
           })}
-        </Box>
+        </InfoCardGrid>
       </Box>
 
       {/* Scroll-down arrow, matches the VideoHero and About panels.
