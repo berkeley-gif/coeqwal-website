@@ -1,10 +1,12 @@
 # Animation (Get-started storyboard)
 
-The "Visualizing key outcomes" click-through animation on the Get-started tab. It walks a visitor through how scenario outcomes are read, using a sequence of beats that paint the Mapbox map and animate SVG overlays together.
+The "Visualizing key outcomes" click-through animation on the Get-started tab walks a visitor through how scenario key outcomes are read, using a sequence of beats that paint the Mapbox map and animate SVG overlays together.
 
 - **Mounted by**: `GetStartedView`
 - **Map**: shared app Mapbox map via `@repo/map`
 - **Animation**: `@repo/motion` (Framer Motion)
+
+> Planning to make this scroll-driven instead of click-through? See [SCROLL_MIGRATION.md](SCROLL_MIGRATION.md) for a handoff note on converting the storyboard to a scroll-driven storyline with `@repo/scrollytelling`.
 
 ## Mental model
 
@@ -50,16 +52,16 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
      +--------------+
 
    TierAnimationSection: builds the engine context and composes
-   the hooks and overlays. It does not subscribe to progress itself.
+   the hooks and overlays. It does not subscribe to `progress` itself.
 
-   * Two paths, triggered differently. Think of it like a movie player.
+   * Two paths, triggered differently.
      While the storyboard is playing (the `playback` mode, driven by
      Play / Next / Back), the `progress` clock is moving and the engine
      repaints on every frame, routing each actor to the arbiter that
      owns its kind (mapPaint, mapPopup, overlayPopup, narration,
      overlayMorph). Once the storyboard reaches the last beat and
      stops, the clock is no longer moving and the user can click
-     demand-unit squares. Those clicks change React state, which fires
+     demand-unit/location squares. Those clicks change React state, which fires
      an effect that calls the InteractiveLayerDirector. The director owns
      the InteractivePaintArbiter (demand-units) and the PolygonLayerDriver
      (the other polygon outcomes) and sequences the handoff between them.
@@ -69,29 +71,23 @@ There is one shared clock, a `progress` value that runs from 0 to 1 across the w
    CameraArbiter is event-driven in the same way. Nav handlers call it
    directly to fly the map back to its home view. See the "Two families of
    arbiter" section below and engine/arbiters/CameraArbiter.ts.
-
-   Files (for each box above):
-     progress clock, engine context  TierAnimationSection.tsx
-     ACTOR_GROUPS                     engine/actorGroups.ts
-     BeatEngine                       engine/BeatEngine.ts
-     Playback arbiters                engine/arbiters/{MapPaint, MapPopup,
-                                        OverlayPopup, Narration,
-                                        OverlayMorph}Arbiter.ts
-     Interactive layer director       engine/InteractiveLayerDirector.ts
-                                        engine/arbiters/InteractivePaintArbiter.ts
-                                        engine/arbiters/PolygonLayerDriver.ts
-                                        interactiveLayerSchema.ts
-     Overlays (text, morph)           BeatTextOverlay.tsx (panel shell),
-                                        Narration.tsx (left-column copy),
-                                        StoryboardControls.tsx (controls),
-                                        useOutcomeLabelGeometry.ts (label math),
-                                        OutcomeMorphOverlay.tsx (SVG morph)
-     Mapbox layers                    shared app map via @repo/map
 ```
+
+### Files for each box above
+
+| Box | File |
+| --- | --- |
+| progress clock, engine context | `TierAnimationSection.tsx` |
+| ACTOR_GROUPS | `engine/actorGroups.ts` |
+| BeatEngine | `engine/BeatEngine.ts` |
+| Playback arbiters | `engine/arbiters/{MapPaint, MapPopup, OverlayPopup, Narration, OverlayMorph}Arbiter.ts` |
+| Interactive layer director | `engine/InteractiveLayerDirector.ts`, `engine/arbiters/InteractivePaintArbiter.ts`, `engine/arbiters/PolygonLayerDriver.ts`, `interactiveLayerSchema.ts` |
+| Overlays (text, morph) | `BeatTextOverlay.tsx` (panel shell), `Narration.tsx` (left-column copy), `StoryboardControls.tsx` (controls), `useOutcomeLabelGeometry.ts` (label math), `OutcomeMorphOverlay.tsx` (SVG morph) |
+| Mapbox layers | shared app map via `@repo/map` |
 
 ## TierAnimationSection
 
-The component is long because it wires many pieces together, but it reads top to bottom in this order:
+This component is long because it wires many pieces together, but it reads top to bottom in this order:
 
 **state → navigation → selection → engine → render**
 
@@ -109,7 +105,12 @@ Related code is pulled into `hooks/`:
 - `useStoryboardLayout` turns those screen polygons into the Beat 2 grid layout, the morph windows, and the per-outcome feature hide schedule the engine reads.
 - `useStoryboardCamera` detects when the panel scrolls into view, flies the camera home, and primes the map session.
 
-These hooks share a few refs created in the component (the engine api, the engine context, the interactive paint arbiter, and the polygon recompute) so the handlers and effects can reach the engine without depending on its memoized identity.
+These hooks share a few refs so the handlers and effects can reach the engine without depending on its memoized identity:
+
+- `engineApiRef`: the `BeatEngineApi` (dispatch a frame, `setMode`, teardown).
+- `engineContextRef`: the current `BeatEngineContext` handed to arbiters.
+- `interactiveLayerDirectorRef`: the `InteractiveLayerDirector` and its two drivers.
+- `computePolygonDataRef`: the screen-polygon recompute callback (created in `useScreenPolygonProjection` and threaded through the component).
 
 ## What is an actor?
 
@@ -210,7 +211,7 @@ Exactly one owner writes each interactive map layer at any time. The `interactiv
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).
 
-The other (non-demand-unit) polygon outcomes, like reservoirs and the delta, are painted in interactive mode by `PolygonLayerDriver`. It is the single imperative writer for those fills and outlines (the `OutcomePolygonLayer` React component still owns them in Explore and Learn modes, but is skipped in get-started), folds the gold highlight into its own `applyOverlay` pass, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
+The other (non-demand-unit) polygon outcomes, like reservoirs and the Delta, are painted in interactive mode by `PolygonLayerDriver`. It is the single imperative writer for those fills and outlines (the `OutcomePolygonLayer` React component still owns them in Explore and Learn modes, but is skipped in get-started), folds the gold highlight into its own `applyOverlay` pass, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
 
 ## Two families of arbiter
 

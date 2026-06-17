@@ -393,9 +393,11 @@ export interface BeatEngineContext {
  * Event-driven arbiters do not implement this interface and are not in
  * the dispatch list. Held in refs and called from effects or nav
  * handlers because their work is driven by React state or user events,
- * not `progress`: `CameraArbiter` (fly home), `InteractivePaintArbiter`
- * (demand-units after settle), `InteractiveOutlineArbiter` (other polygon
- * outcomes). `getMode()` is an input to those decisions, not a gate.
+ * not `progress`: `CameraArbiter` (fly home) and the
+ * `InteractiveLayerDirector`, which holds the two interactive drivers,
+ * `InteractivePaintArbiter` (demand-units after settle) and
+ * `PolygonLayerDriver` (other polygon outcomes). `getMode()` is an input
+ * to those decisions.
  *
  * Each playback arbiter handles one `ActorKind`:
  * - `onEnter(actor, v, ctx)` once when `v` enters the window.
@@ -403,9 +405,9 @@ export interface BeatEngineContext {
  * - `onExit(actor, v, ctx)` once when `v` leaves, or on unmount/nav if
  *   still active.
  *
- * An arbiter can also do an end-of-frame `commit(ctx)`, once per frame
- * after all dispatches. That's where batching arbiters (like
- * `MapPopupArbiter`) write.
+ * Once per frame, after every actor has been dispatched, the engine calls
+ * each arbiter's optional `commit(ctx)`. An arbiter that gathers up changes
+ * during the frame (like `MapPopupArbiter`) makes its single write here.
  */
 export interface Arbiter<A extends Actor = Actor> {
   readonly kind: A["kind"]
