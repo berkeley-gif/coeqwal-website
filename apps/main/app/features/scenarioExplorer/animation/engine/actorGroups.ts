@@ -3,7 +3,11 @@
  * actors. The engine flattens these and routes each actor to the arbiter
  * for its kind (`mapPaint`, `mapPopup`, `overlayPopup`, `narration`,
  * `overlayMorph`). Empty `actors` groups still drive choreography from
- * component effects and the overlay bridges. See the animation README. */
+ * component effects and the overlay bridges.
+ *
+ * For the beat-by-beat timeline that lists these actors alongside what is on
+ * screen, see BEATS.md. For the concepts (beat, actor, window, arbiter) see
+ * the animation README. */
 
 import type { ActorGroup } from "./types"
 import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"

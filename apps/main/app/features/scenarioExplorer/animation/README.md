@@ -12,6 +12,20 @@ The "Visualizing key outcomes" click-through animation on the Get-started tab wa
 
 There is one shared clock, a `progress` value that runs from 0 to 1 across the whole animation (a Framer `MotionValue` created in `TierAnimationSection`). Clicking Next or Back animates that clock toward the next or previous checkpoint in [0, 1]. An engine (`BeatEngine`, in `engine/BeatEngine.ts`) watches the clock and, on every frame, decides which small units of choreography (actors, for example "fade in this region's fill" or "show this popup") are currently active and tells the corresponding handler (arbiter, for example `MapPaintArbiter`, `MapPopupArbiter`, `CameraArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`) to do its thing. The handlers paint the map and drive the overlays. The `TierAnimationSection` component does not animate anything directly. It builds the data the engine needs and composes the pieces.
 
+Vocab:
+
+- **`progress`**: the shared clock, one number from 0 to 1. Everything visible is a function of it.
+- **beat**: one step of the storyboard, and the main organizing principle. Each beat is a chunk of the narrative with its own intent, narration, and actors (the `legend` beat, the `radar` beat, and so on), and it is what the visitor advances through one step at a time with Play, Next, and Back. In code a beat is encoded as a `TimingBeat` (an id, a target `progress`, and a `duration`). The target `progress` is just the checkpoint the clock rests on at the end of the step. The narrative meaning is the larger part.
+- **actor**: the smallest unit of choreography. Plain data: an `id`, a `kind`, a `window`, and a `payload` or a `build(ctx)` function. It says what should happen and when, never how.
+- **window**: the progress interval `[start, end)` during which an actor is active. This is the actor's "when," and it is independent of the beats.
+- **arbiter**: the handler that owns one `kind` and does the actual work (paint, popup, narration, morph).
+
+Two principles tie these together.
+
+**Beats organize the narrative and navigation. Actors and windows are for execution.** The per-frame dispatch loop never looks at beats. It walks the flat list of actors and asks only whether `progress` is inside each actor's window. Beats conceptually group actors for authoring and drive the Play, Next, and Back tweens, but at dispatch time they do not exist. That is why an actor's window can start or end partway through a neighboring beat.
+
+**The SVG morph and the left-column narration are actors.** Each is an ordinary actor, of `kind` `overlayMorph` or `narration`, with a `[0, 1]` window.
+
 ## Architecture
 
 ```
@@ -121,15 +135,17 @@ An actor is the smallest unit of the storyboard. It is plain data, not code. It 
 3. `kind`: which handler owns it. One of `mapPaint`, `mapPopup`, `overlayPopup`, `narration`, or `overlayMorph`.
 4. The work description: either a `payload` of parameters (for example a fade window and a peak opacity) or a `build...(ctx)` function that reads live data from the engine context when the actor runs.
 
-An actor holds no logic of its own. It only says what should happen and when. The arbiter that owns its `kind` does the actual work.
+An actor holds no logic of its own. It only says what should happen and when. The arbiter that owns its `kind` does the actual work. Two kinds, `narration` and `overlayMorph`, are bridge actors whose work is a per-frame callback the overlay component registers rather than a payload. See "The bridge actors" below. The morph and the narration are actors, not a separate mechanism.
 
-The engine drives every actor through the same lifecycle:
+The engine drives every actor through the same lifecycle, evaluated fresh every frame against the actor's window:
 
-- `onEnter` runs once, on the first frame that `progress` enters the window.
+- `onEnter` runs on the frame the actor becomes active, when `progress` crosses into the window. It fires in either direction, so scrubbing backward into a window enters it again. It means "I just became active," not "the beat started."
 - `onUpdate` runs on every frame while inside the window, including the entry frame.
-- `onExit` runs once, on the first frame that `progress` leaves the window.
+- `onExit` runs on the frame the actor leaves the window, in either direction (`progress` moving past `end`, or back below `start`). It also runs on teardown and unmount for any still-active actor, so nothing is left stranded.
 
-Because `onUpdate` can fire many times, arbiters are written to be safe to call repeatedly with the same value. The clearest example is `MapPopupArbiter.commit()` in [engine/arbiters/MapPopupArbiter.ts](engine/arbiters/MapPopupArbiter.ts). It compares a fingerprint of the current frame against the last write and skips the store update when nothing changed.
+Each frame the engine runs all exits first, then all enters, then all updates, then one `commit` per arbiter. Exits before enters means an outgoing actor releases a layer or popup before an incoming one claims it.
+
+Because `onUpdate` can fire many times, and `onEnter` can fire more than once across reverse scrubs, arbiters are written to be safe to call repeatedly with the same value. The clearest example is `MapPopupArbiter.commit()` in [engine/arbiters/MapPopupArbiter.ts](engine/arbiters/MapPopupArbiter.ts). It compares the current frame against the last write and skips the store update when nothing changed.
 
 Actors and their arbiters live in `engine/`. The current actor groups are in [engine/actorGroups.ts](engine/actorGroups.ts).
 
@@ -184,11 +200,11 @@ If you want to change the storyboard, these are the files to start from.
 
 ## The storyboard, beat by beat
 
-Eight timing beats run from `progress` 0 to 1. Full per-beat timing lives in [animationTiming.ts](animationTiming.ts).
+Eight timing beats run from `progress` 0 to 1. Full per-beat timing lives in [animationTiming.ts](animationTiming.ts). For a per-beat breakdown of the progress span, the actors and arbiters that fire, and the SVG morph stage, see [BEATS.md](BEATS.md). To follow the beats and actors live while the animation plays, open the browser console in development, where [useStoryboardDebugLog.ts](useStoryboardDebugLog.ts) prints one labeled line per event.
 
 | Index | Id                    | Ends at progress | What the user sees                                                                                                                                                                 |
 | ----- | --------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0     | `legend`              | 0.225            | Intro paragraphs fade in and the tier legend is revealed. Plays automatically on arrival.                                                                                          |
+| 0     | `legend`              | 0.225            | Intro paragraphs fade in and the tier legend is revealed. Starts when the visitor clicks Play, reduced motion jumps straight to the final beat.                                     |
 | 1     | `collapse-and-colors` | 0.365            | Intro text collapses, the legend floats to the top, and the demand-unit layer cross-fades from a blue palette into agriculture tier colors while narration explains the colors.    |
 | 2     | `ag-rev-morph`        | 0.40             | The agriculture revenue polygons morph into distribution squares, with a before and after caption.                                                                                 |
 | 3     | `all-other-morphs`    | 0.50             | The remaining eight outcomes morph into distribution squares back to back.                                                                                                         |
@@ -222,7 +238,7 @@ Not every arbiter is dispatched by the engine.
 
 ## The bridge actors (narration and overlay morph)
 
-A bridge actor does no work of its own. It is a pass-through that connects the engine's per-frame loop to a React component that owns the real animation.
+The SVG morph and the narration are ordinary actors, not a separate concept. Each is one actor in `actorGroups.ts` (`kind: "overlayMorph"` and `kind: "narration"`) with a `[0, 1]` window, so the engine drives it through the same enter, update, exit lifecycle as every other actor. The only difference is the work description. A bridge actor does no work of its own. It is a pass-through that connects the engine's per-frame loop to a React component that owns the real animation.
 
 **Why they exist:** the narration overlay and the SVG morph are per-frame opacity and transform math. The narration math lives in `useOutcomeLabelGeometry.ts`, the hook that `BeatTextOverlay` mounts for its side panel. The SVG morph lives in `OutcomeMorphOverlay`, the SVG layer over the map. That logic is too stateful to express as a declarative actor payload, and it belongs with the component that owns the DOM and SVG refs.
 

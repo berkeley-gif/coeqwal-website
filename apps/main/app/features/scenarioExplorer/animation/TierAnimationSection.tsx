@@ -36,6 +36,7 @@ import OutcomeMorphOverlay, {
   type EncodingMode,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
+import { useStoryboardDebugLog } from "./useStoryboardDebugLog"
 import { useScreenPolygonProjection } from "./hooks/useScreenPolygonProjection"
 import { useStoryboardLayout } from "./hooks/useStoryboardLayout"
 import { useStoryboardCamera } from "./hooks/useStoryboardCamera"
@@ -1143,6 +1144,8 @@ export default function TierAnimationSection() {
       interactiveLayerDirectorRef,
       computePolygonDataRef,
     })
+
+  useStoryboardDebugLog({ progress, beatIndex, playState })
 
   /* Error state */
   if (error) {

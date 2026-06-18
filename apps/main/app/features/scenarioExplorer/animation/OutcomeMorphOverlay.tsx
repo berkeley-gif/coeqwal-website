@@ -1100,6 +1100,8 @@ export default function OutcomeMorphOverlay({
     // they belong to. Boundaries come from TIMING_BEATS: list-bar [5] ends
     // 0.72, radar [6] ends 0.87, heatmap [7] ends 1.0. Some stage ends fall
     // inside the next beat because the morph phases overlap beat boundaries.
+    // See the per-beat morph stages in BEATS.md and the beat ids in
+    // animationTiming.ts.
     const LIST_BAR_START = 0.62
     const LIST_BAR_BARS_END = 0.68
     const LIST_BAR_END = 0.72

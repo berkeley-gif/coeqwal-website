@@ -9,7 +9,12 @@
  * Each beat covers a different progress span over a different duration, so
  * the same progress width maps to different wall-clock seconds. Author fade
  * widths in seconds and convert with `secondsToProgress` so a reveal feels
- * the same pace in any beat. */
+ * the same pace in any beat.
+ *
+ * This file holds the beat ids and their rest points. For the full
+ * beat-by-beat timeline (what is on screen, which actors fire, what the morph
+ * is doing) see BEATS.md. The actors per beat live in engine/actorGroups.ts,
+ * and the morph-stage thresholds live in OutcomeMorphOverlay.tsx. */
 
 export interface TimingBeat {
   /** Stable identifier (debug only). */
