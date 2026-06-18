@@ -1,26 +1,30 @@
 # Converting the storyboard to a scroll-driven storyline
 
-This is a handoff note for turning the Get-started "Visualizing key outcomes" storyboard into a scroll-driven storyline using the `@repo/scrollytelling` package (`packages/scrollytelling`). Read [README.md](README.md) first for the architecture this note builds on.
+This is a handoff note for turning the Get-started "Visualizing key outcomes" storyboard into a scroll-driven storyline and merging it with the Learn map, using scrollama. Read [README.md](README.md) first for the architecture this note builds on.
 
-The current storyboard is a click-through. The visitor clicks Play, then Next and Back, and an `animate()` tween moves the shared `progress` clock between beat checkpoints. It is built on three assumptions: forward playback, a clean "play to the end, settle, then interact" lifecycle, and beats that change only on deliberate Next/Back clicks. The goal is to replace those controls with scroll position, so scrolling the page scrubs the same `progress` clock.
+The current storyboard is a click-through. The visitor clicks Play, then Next and Back, and an `animate()` tween moves the shared `progress` clock between beat checkpoints. It is built on three assumptions: forward playback, a clean "play to the end, settle, then interact" lifecycle, and beats that change only on deliberate Next/Back clicks. The goal would be to replace those controls with scroll position, so that scrolling the page would scrub the same `progress` clock.
 
 ## Context for the handoff
 
 - There is an open branch and PR, `animation/improve map layer loading & unloading` (branch `animation/map-layer-loading-unloading`). Merge it before starting the scroll work. It simplifies the map layer load and unload that scroll scrubbing will rely on. This note describes the code as it stands after that PR lands.
 
-## Why the scrollytelling package approach and not react-scrollama
+## Using scrollama
 
-This codebase has two scrollytelling approaches. `@repo/scrollytelling` is built on Framer's `useScroll`. `useScrollProgress` returns a continuous `MotionValue<number>` from 0 to 1, with `useScrollValue` for remapping and `useScrollPhase` for discrete phase reads on top. `react-scrollama` (used by the Learn map in `useLearnScrollama`, and by `storyline-flow` and `storyline-climate` through `useScrollamaSection`) is built on discrete step detection: `onStepEnter` and `onStepExit` set a section in a Zustand store, and an optional `onStepProgress` hands a clamped 0 to 1 number through a React callback.
+The plan would be to use scrollama for the whole flow, the same library the Learn map uses. Steps would detect sections and drive the camera and layers the way Learn already does. Inside the outcomes steps, `onStepProgress` would write the existing `progress` `MotionValue` with `progress.set(v)`, so the engine, actors, and SVG morph would keep working unchanged. The driver would change, the engine would not.
 
-For this task `@repo/scrollytelling` is the right one, for three reasons:
+It would make sense to drive the heavy SVG morphing through a `MotionValue`, not React or store state. The morph reshapes roughly 140 polygons per frame, so a per-frame `setState` would not work well. The rivers animation in `useLearnScrollama` is the precedent for the `onStepProgress` channel, except it writes a store value and the morph would need a `MotionValue` instead.
 
-- The storyboard is already a single continuous `progress` `MotionValue`. `BeatEngine` holds one `progress.on("change")` subscription and the SVG morph renders as a pure function of `v`. `useScrollProgress` returns the same `MotionValue<number>` type, so the conversion is a driver swap rather than a re-architecture.
-- The same `@repo/scrollytelling` technique we are choosing here is already used in `apps/main` for continuous, per-frame, scroll-driven animation. The intro `MorphingHeadline` (`useMorphingHeadlineChoreography`) imports from `@repo/scrollytelling`, reads `useScrollProgress`, and subscribes with `scrollProgress.on("change")` to crossfade headline text and glide it as scroll position moves, which is the same continuous `MotionValue` and `.on("change")` model the `BeatEngine` uses. That is a text-and-position crossfade rather than an SVG-path morph, so it is not identical work, but it confirms the package drives continuous per-frame animation off a scroll `MotionValue`.
 
-  If you look at this code, emulate the hook (`useMorphingHeadlineChoreography`), which exposes its scroll-driven outputs as `MotionValue`s so binding them to style causes no per-frame re-render. That is the model the SVG morph needs. Do not copy the one spot in the `MorphingHeadline` component that calls `setOpacities(...)` and `setActiveIndex(...)` inside `scrollYProgress.on("change")`, which re-renders on every scroll frame. That is fine for a handful of headline text states, but it is the per-frame `setState` pattern isn't going to work for the roughly 140-polygon morph, where you want values to stay on `MotionValue`s and never trigger React renders.
-- `react-scrollama` would be the wrong primary driver. Its continuous channel (`onStepProgress`) is a React-state callback, not a `MotionValue`, so driving a roughly 140-polygon-per-frame morph through it means writing React or store state every frame and discarding the batched `MotionValue` pipeline the engine is built on. It would also mean hand-rolling the continuous scroll-to-progress remap that `useScrollValue` already provides.
+## Two systems over one map
 
-`react-scrollama` is still the better model for discrete section-to-camera-preset coordination, as in the Learn map.
+There is only one map. `app/page.tsx` mounts a single persistent `MapInstance` shared across tabs, and both the Learn map and the outcomes storyboard already use the same `features/map/store`. So merging the maps means merging two controllers over one map, not combining two map instances.
+
+The two controllers differ in how they track position:
+
+- The Learn map is discrete. `onStepEnter` sets an `activeSection` in the store, and `useMapLayers` plus the section camera preset follow from it. Updates are coarse and fire at section boundaries.
+- The outcomes storyboard is continuous. One `progress` `MotionValue` drives `BeatEngine`, and the arbiters (`MapPaintArbiter`, the popups, `narration`, `overlayMorph`, `CameraArbiter`, `InteractiveLayerDirector`) run per frame off actor windows.
+
+The merge could keep both. Section steps would own the coarse camera and layer changes, and the continuous `progress` value would own the per-frame morph inside the outcomes steps.
 
 ## Different types of morphing
 
@@ -32,7 +36,7 @@ For this task `@repo/scrollytelling` is the right one, for three reasons:
 
 The whole storyboard is driven by one shared clock, a Framer `MotionValue` named `progress` created near the top of `TierAnimationSection.tsx` with `const progress = useMotionValue(0)`. Most of what is downstream reads that value as a pure function of `v` (the current progress):
 
-- `useBeatEngine` holds the one `progress.on("change")` subscription,
+- `useBeatEngine` holds the one driving `progress.on("change")` subscription (a dev-only debug logger in `useStoryboardDebugLog.ts` adds a second, read-only one),
 - `OutcomeMorphOverlay` and `BeatTextOverlay` take `progress` as a prop, 
 - and the SVG morph frame applier (`latestMorphFrameRef.current = (v) => {...}` in `OutcomeMorphOverlay.tsx`) recomputes its SVG paths from `v`. 
 
@@ -44,9 +48,9 @@ Two parts are not pure functions of `v`:
 
 One caveat on top of that: the storyboard doesn't reverse animate. It snaps Back, so continuous reverse scrubbing isn't guaranteed, and the imperative pieces in item 4 below do not scrub backward cleanly. Those pieces are the camera flights (`CameraArbiter.flyHome` and the auto fly-home in `useStoryboardCamera`), the `InteractiveLayerDirector` cross-family handoff that fades the next layer in only after the map fires `idle`, and the two end-state transitions inside `OutcomeMorphOverlay` (the encoding-mode crossfade and the tier-change recolor).
 
-The scrollytelling package hands back the same type the storyboard already consumes. `useScrollProgress` in `packages/scrollytelling/src/hooks/useScrollProgress.ts` returns a `MotionValue<number>` that runs 0 to 1 (it wraps Framer's `useScroll` and hands back its `scrollYProgress`), which is exactly what `progress` is today. So you pass it to `useBeatEngine` and the overlay props in place of `useMotionValue(0)`, and the rendering code does not change. This is a driver swap, not a rewrite.
+The `progress` clock would stay the same type the storyboard already consumes, a `MotionValue<number>` that runs 0 to 1. What would change is who writes it. The engine and overlay wiring would not change at all, so this would be a driver swap, not a rewrite.
 
-Concretely, the translation is one line. Today the clock is created and written inside the component:
+Today the clock is created and written by tweens inside the component:
 
 ```tsx
 const progress = useMotionValue(0)
@@ -55,13 +59,18 @@ animate(progress, target, { duration })
 progress.set(1)
 ```
 
-After the swap, `progress` is still a `MotionValue<number>`, the same kind of clock as before. The clock does not disappear, only its source changes. Instead of being created locally with `useMotionValue(0)` and then advanced by tweens, it is produced by the scroll region and read with `useScrollProgress()`. Nothing in this component writes to it anymore, scroll position drives it:
+After the swap, `progress` would still be created with `useMotionValue(0)`, but scrollama would write it instead of the tweens. As the visitor scrolls through the outcomes steps, `onStepProgress` would set it:
 
 ```tsx
-const progress = useScrollProgress() // 0 to 1 across the ScrollSection
+const progress = useMotionValue(0)
+
+// scrollama, inside the outcomes step:
+const onStepProgress = ({ progress: stepProgress }) => {
+  progress.set(toStoryboardProgress(stepProgress))
+}
 ```
 
-That same `progress` object then flows into its three consumers exactly as before: the engine (`useBeatEngine`), the SVG morph overlay (`OutcomeMorphOverlay`), and the text overlay (`BeatTextOverlay`). Only the `progress` argument is new, everything else is the existing wiring from `TierAnimationSection`:
+That same `progress` object would then flow into its three consumers exactly as before: the engine (`useBeatEngine`), the SVG morph overlay (`OutcomeMorphOverlay`), and the text overlay (`BeatTextOverlay`). Only the writer would be new, everything else is the existing wiring from `TierAnimationSection`:
 
 ```tsx
 // 1. the engine
@@ -84,15 +93,15 @@ useBeatEngine({
 <BeatTextOverlay progress={progress} /* ...other existing props... */ />
 ```
 
-What you remove is the writer side: the `goTo` helper, `handlePlay`, `handleNext`, `handleBack`, `handleRestart`, the keyboard `useEffect`, and the `controlsRef` tween storage in `useStoryboardNavigation` (all returned from or held inside that hook), which exist only to push values into the old `useMotionValue(0)` clock. Scroll position now supplies those values instead.
+What you would remove is the writer side: the `goTo` helper, `handlePlay`, `handleNext`, `handleBack`, `handleRestart`, the keyboard `useEffect`, and the `controlsRef` tween storage in `useStoryboardNavigation` (all returned from or held inside that hook), which exist only to push values into the old `useMotionValue(0)` clock. Scroll position would supply those values instead.
 
 ## The core change
 
-1. Wrap the overlay stage in a tall `ScrollSection` with a `StickyElement` so it pins on screen while the visitor scrolls through the beats. Note that the Mapbox map is the shared, persistent app map (`useMap()` from `@repo/map`), not something this component mounts. `TierAnimationSection` renders only the overlay stage (the `panelRef` Box holding the SVG morph and text overlays, absolutely positioned over the map) and drives the map by ref for camera and layer paint. So you do not wrap the map itself. You wrap and pin the overlay stage, and you give the `ScrollSection` enough height to act as the scroll runway. The persistent map stays where it is behind the pinned stage, and the camera and paint continue targeting it by ref exactly as it is now.
-2. Read the scroll clock with `useScrollProgress` from inside the section (see the starter skeleton below).
-3. Feed that value into `useBeatEngine({ progress })` and into the `progress` prop of `OutcomeMorphOverlay` and `BeatTextOverlay`, in place of the `useMotionValue(0)` clock.
+1. Pin the overlay stage as a sticky graphic while the visitor scrolls through step elements, the same shell the Learn map uses. Note that the Mapbox map is the shared, persistent app map (`useMap()` from `@repo/map`), not something this component mounts. `TierAnimationSection` renders only the overlay stage (the `panelRef` Box holding the SVG morph and text overlays, absolutely positioned over the map) and drives the map by ref for camera and layer paint. So you do not pin the map itself. You pin the overlay stage, and you give the steps enough height to act as the scroll runway. The persistent map stays where it is behind the pinned stage, and the camera and paint continue targeting it by ref exactly as it is now.
+2. Write `progress` from `onStepProgress` as the visitor scrolls the outcomes steps (see the starter skeleton below).
+3. Feed that `progress` into `useBeatEngine({ progress })` and into the `progress` prop of `OutcomeMorphOverlay` and `BeatTextOverlay`, in place of the tween-driven clock.
 
-The bridge that connects the engine to the SVG morph (`overlayMorphTickRef`, see "The bridge actors" in [README.md](README.md)) keeps working unchanged, because it only ever forwards `v`.
+The bridge that connects the engine to the SVG morph (`overlayMorphTickRef`, see "The bridge actors" in [README.md](README.md)) would keep working unchanged, because it only ever forwards `v`.
 
 ## Starter skeleton
 
@@ -102,34 +111,14 @@ This is the shape to start from, not a literal drop-in. The real `TierAnimationS
 - `arbitersRef` is the stable `useRef` list of the five progress arbiters: `MapPaintArbiter`, `MapPopupArbiter`, `OverlayPopupArbiter`, `NarrationArbiter`, `OverlayMorphArbiter`.
 - the bridge refs are `narrationTickRef` and `overlayMorphTickRef`, the two `useRef<((v: number) => void) | null>` slots each overlay writes its per-frame applier into.
 
-The only change that matters is where `progress` comes from: today it is `const progress = useMotionValue(0)` driven by tweens, here it is the scroll clock.
-
-Note the split into two components. `useScrollProgress()` with no argument reads progress from the nearest `ScrollSection` through context, so the component that consumes `progress` has to be a child of `ScrollSection`. That is the one gotcha worth knowing up front, and it is why the stage is pulled out into its own component.
+The only change that matters is where `progress` comes from: today it is driven by tweens, and here it would be driven by scroll. The pattern to copy is `useLearnScrollama`, which wires `react-scrollama` step callbacks into the same shared map. The shape below keeps the `MotionValue` you already have and writes it from `onStepProgress`:
 
 ```tsx
 "use client"
-import {
-  ScrollSection,
-  StickyElement,
-  useScrollProgress,
-} from "@repo/scrollytelling"
+import { Scrollama, Step } from "react-scrollama"
 
-// Outer: owns the scroll runway and pins the stage.
 function ScrollStoryboard() {
-  return (
-    // `height` is the scroll distance. Start linear, tune per beat later (item 3).
-    // `debug` shows a live 0 to 1 readout in the corner.
-    <ScrollSection height="800vh" debug>
-      <StickyElement top={0} style={{ height: "100vh" }}>
-        <StoryboardStage />
-      </StickyElement>
-    </ScrollSection>
-  )
-}
-
-// Inner: reads the scroll clock and drives the engine and overlays.
-function StoryboardStage() {
-  const progress = useScrollProgress() // replaces useMotionValue(0)
+  const progress = useMotionValue(0) // same clock as today, written by scroll
 
   useBeatEngine({
     progress,
@@ -139,17 +128,32 @@ function StoryboardStage() {
     enabled: !isLoading,
   })
 
+  // Map step index plus intra-step progress onto the global 0 to 1 axis.
+  // Allocate height per beat so dense beats get more room (item 3).
+  const onStepProgress = ({ data, progress: stepProgress }) => {
+    progress.set(toStoryboardProgress(data, stepProgress))
+  }
+
   return (
     <>
-      <OutcomeMorphOverlay
-        progress={progress}
-        overlayMorphTickRef={overlayMorphTickRef}
-        /* ...all other props, unchanged... */
-      />
-      <BeatTextOverlay
-        progress={progress}
-        /* ...other props... */
-      />
+      {/* Sticky graphic: the pinned overlay stage over the persistent map. */}
+      <StickyStage>
+        <OutcomeMorphOverlay
+          progress={progress}
+          overlayMorphTickRef={overlayMorphTickRef}
+          /* ...all other props, unchanged... */
+        />
+        <BeatTextOverlay progress={progress} /* ...other props... */ />
+      </StickyStage>
+
+      {/* Scroll runway: one Step per beat, each a tall spacer. */}
+      <Scrollama onStepProgress={onStepProgress}>
+        {BEAT_STEPS.map((step) => (
+          <Step key={step.id} data={step}>
+            <div style={{ height: "100vh" }} />
+          </Step>
+        ))}
+      </Scrollama>
     </>
   )
 }
@@ -170,7 +174,7 @@ The exceptions are what you mount these inside and which `progress` they receive
 
 Everything you change lives in `TierAnimationSection.tsx` and its hooks. The renderer, the engine, and the arbiters stay as they are. The pieces you will actually edit:
 
-- `TierAnimationSection.tsx` swaps the `useMotionValue(0)` clock for the scroll clock, wraps the stage in `ScrollSection` and `StickyElement`, and decides where the engine mode is set.
+- `TierAnimationSection.tsx` keeps the `useMotionValue(0)` clock but writes it from scroll instead of tweens, pins the stage as a sticky graphic with steps, and decides where the engine mode is set.
 - `hooks/useStoryboardNavigation.ts` is the click transport. Most of it goes away under scroll (item 1).
 - `hooks/useStoryboardCamera.ts` does the scroll-into-view detection and the one-time fly-home. Reconcile its trigger with the scroll section (item 4).
 - `hooks/useScreenPolygonProjection.ts` is the panel-relative projection that positions the SVG morph squares. Verify it stays in sync inside a sticky container (item 7).
@@ -180,10 +184,10 @@ Everything you change lives in `TierAnimationSection.tsx` and its hooks. The ren
 
 ### 1. One MotionValue can have only one writer
 
-`useStoryboardNavigation` owns `progress` today. It calls `animate(progress, target.progress)` and `progress.set(...)` from the `goTo` helper, the `handlePlay`, `handleNext`, `handleBack`, and `handleRestart` actions, the keyboard-shortcut effect, the reduced-motion auto-arrival, and the running tween it stores in `controlsRef`. A scroll-bound value is attached to `useScroll`, so any imperative write fights the scroll position. That means the whole transport model (the Play gate, Next and Back, `beatIndex`, `playState`) has to be removed or rethought, not adapted. Scroll becomes the only control. Two follow-on questions to answer:
+`useStoryboardNavigation` owns `progress` today. It calls `animate(progress, target.progress)` and `progress.set(...)` from the `goTo` helper, the `handlePlay`, `handleNext`, `handleBack`, and `handleRestart` actions, the keyboard-shortcut effect, the reduced-motion auto-arrival, and the running tween it stores in `controlsRef`. Once `onStepProgress` writes `progress`, any leftover imperative write would fight the scroll position. That means the whole transport model (the Play gate, Next and Back, `beatIndex`, `playState`) has to be removed or rethought, not adapted. Scroll becomes the only control. Two follow-on questions to answer:
 
 - What is the Play button now? Likely it goes away, or it becomes a "scroll to start" affordance.
-- What does the beat counter read from? Derive the current beat by finding which `TIMING_BEATS` span contains the live progress. `useScrollPhase` is built for this.
+- What does the beat counter read from? Derive the current beat by finding which `TIMING_BEATS` span contains the live progress.
 
 ### 2. Time-based authoring stops meaning anything
 
@@ -191,7 +195,7 @@ Everything you change lives in `TierAnimationSection.tsx` and its hooks. The ren
 
 ### 3. Mapping scroll distance to beats
 
-A linear scroll-to-progress map would make the dense beats race past. The SVG morph chain from progress 0.62 to 1.0 packs the bar, dot, radar, and heatmap stages into a small span for example (see the `LIST_BAR_*`, `RADAR_*`, and `HEATMAP_*` constants inside the SVG morph frame applier in `OutcomeMorphOverlay.tsx`), while earlier beats are sparse. Choose a `ScrollSection` height (for example `800vh`) and remap raw scroll into storyboard progress with `useScrollValue(scroll, inputRange, outputRange)` so heavy beats get more vertical room. Allocate scroll height by narrative density, not by the old seconds `duration`.
+A linear scroll-to-progress map would make the dense beats race past. The SVG morph chain from progress 0.62 to 1.0 packs the bar, dot, radar, and heatmap stages into a small span for example (see the `LIST_BAR_*`, `RADAR_*`, and `HEATMAP_*` constants inside the SVG morph frame applier in `OutcomeMorphOverlay.tsx`), while earlier beats are sparse. Give each step enough height and map step progress into storyboard progress (the `toStoryboardProgress` helper in the skeleton) so heavy beats get more vertical room. Allocate scroll height by narrative density, not by the old seconds `duration`.
 
 ### 4. Audit every arbiter for bidirectional, any-speed safety
 
@@ -203,7 +207,7 @@ Several arbiters and drivers are imperative and assume forward playback with set
 
 Two things about our map package are worth knowing before you reach for a per-frame `map.jumpTo(...)`. First, the camera is a good fit for this in principle, because the shared app map (`MapInstance.tsx`, a single persistent `react-map-gl` instance) is uncontrolled, i.e. it takes an `initialViewState` only and is already driven imperatively through `mapRef.getMap()`, so there is no React `viewState` for per-frame writes to fight. It also sets `scrollZoom={false}`, so wheel scroll never moves the map out from under you. Second, there are two real costs. The map stays interactive (`dragPan`, `touchZoom`, `doubleClickZoom`, plus the navigation and geolocate controls), so a per-frame `jumpTo` will fight any user gesture, which means you should lock camera interaction for the pinned section if scroll is going to own the camera. And every `jumpTo` fires the map `move` event, which `useScreenPolygonProjection` listens on to reproject the SVG morph squares, so a camera that moves every frame also reprojects the overlay every frame. Given all that, prefer the first approach above (ease to home once on entry, then leave the camera fixed for the rest of the scroll) unless a beat genuinely needs camera motion.
 
-- `useStoryboardCamera` flies the camera home the first time the panel scrolls into view (an `IntersectionObserver`, then a one-time `easeTo`), and on `moveend` it primes the map session and runs the projection hook's first collect, `computePolygonDataRef.current()`, which queries Mapbox for each outcome's on-screen geometry (the `collectOutcomeShapes` step in `useScreenPolygonProjection`). Under a tall `ScrollSection` the panel stays in view for the whole scroll, so make sure this collect still fires once on arrival and is neither re-triggered nor left stranded as the visitor scrubs.
+- `useStoryboardCamera` flies the camera home the first time the panel scrolls into view (an `IntersectionObserver`, then a one-time `easeTo`), and on `moveend` it primes the map session and runs the projection hook's first collect, `computePolygonDataRef.current()`, which queries Mapbox for each outcome's on-screen geometry (the `collectOutcomeShapes` step in `useScreenPolygonProjection`). While the overlay stage is pinned as the sticky graphic, the panel stays in view for the whole scroll, so make sure this collect still fires once on arrival and is neither re-triggered nor left stranded as the visitor scrubs.
 
 - `MapPaintArbiter` is the progress-driven playback painter, and it is already written largely as a function of `v`. Each actor owns a progress window, meaning the `[start, end]` span of `v` over which it is active (for example the blue cycle might own roughly `0.1` to `0.2`). The engine fires `onEnter` when `v` crosses into that span, `onUpdate` each frame inside it, and `onExit` when `v` leaves it. On enter, the arbiter re-asserts the full layer state through `writeDemandUnitsBaseline` (filter, fill expression, opacities), with explicit handling so that scrubbing back from a later beat self-heals instead of inheriting stale paint, and the per-frame updates recompute opacity and color from `v`. The two parts to check under continuous scrubbing are its small bits of internal state: `frozenColorPhase` (written each frame by the blue cycle and read by the blue hold) and `loiGoldRingOn` (a one-shot on or off guard managed across enter, exit, and teardown). Both assume you pass through the normal enter sequence, so confirm they still settle correctly when a fast scrub jumps `v` past a window without ever landing a frame inside it, which can skip the `onEnter` that would have set that state.
 
@@ -219,33 +223,33 @@ The SVG path elements get written by two code paths: the per-frame progress appl
 
 ### 5. Decide the interactive end-state
 
-Today the storyboard settles at `progress = 1` and flips into interactive mode (clickable squares, hover, heatmap cell clicks). Under scroll, `v = 1` is just the bottom of the section. Keep the visualization pinned with `StickyElement` and define a deliberate rule for when interactivity turns on, most likely a short hold band near `v = 1` while still pinned, or a handoff once the section unpins into a normal interactive panel. Do not let interactivity flicker on and off as the visitor scrubs across the threshold.
+Today the storyboard settles at `progress = 1` and flips into interactive mode (clickable squares, hover, heatmap cell clicks). Under scroll, `v = 1` is just the bottom of the section. Keep the visualization pinned and define a deliberate rule for when interactivity turns on, most likely a short hold band near `v = 1` while still pinned, or a handoff once the stage unpins into a normal interactive panel. Do not let interactivity flicker on and off as the visitor scrubs across the threshold.
 
 The mode flip itself is one call, `engineApiRef.current.setMode(...)`. Today `useStoryboardNavigation` sets `playback` on Play and on every `goTo`, `interactive` in `settleToFinishedState`, and `idle` on Restart. Under scroll you make those same calls from progress thresholds instead, for example `playback` while the visitor is scrubbing and `interactive` once progress holds in the band near 1.
 
 ### 6. Reduced motion
 
-Today the navigation handles `prefers-reduced-motion` by snapping `goTo` to a 0-second set and jumping the auto-arrival to the settled end-state (see "Reduced motion and accessibility" in [README.md](README.md)). The package primitives auto-render the final state for `ScrollElement`, but the custom SVG morph in `OutcomeMorphOverlay` will not. Decide explicitly: either render the settled end-state and let the visitor scroll past a short section, or snap between beat checkpoints instead of continuously morphing. This is currently supported.
+Today the navigation handles `prefers-reduced-motion` by snapping `goTo` to a 0-second set and jumping the auto-arrival to the settled end-state (see "Reduced motion and accessibility" in [README.md](README.md)). Scroll has no automatic final-state render, so decide explicitly to either render the settled end-state and let the visitor scroll past a short section, or snap between beat checkpoints instead of continuously morphing.
 
 ### 7. Keep the SVG morph squares aligned inside the sticky container
 
-The SVG morph squares are not drawn in map coordinates. `useScreenPolygonProjection` projects each outcome's geometry from Mapbox into panel-relative screen space, and `OutcomeMorphOverlay` draws into that space. The hook keeps the projection current with two refs, `computePolygonDataRef` to re-collect everything from Mapbox and `applyPanelOffsetRef` to cheaply re-apply the panel offset and catch scroll drift, plus a `reprojectOnMove` flag that is on only during active playback and before the SVG morph settles. A `StickyElement` shifts the panel relative to the viewport throughout the scroll, so confirm the offset stays correct while pinned and across the pin and unpin transitions, and decide what drives `reprojectOnMove` now that scrubbing is continuous rather than a one-time play. If the squares drift off their map features as you scroll, this is the first place to look.
+The SVG morph squares are not drawn in map coordinates. `useScreenPolygonProjection` projects each outcome's geometry from Mapbox into panel-relative screen space, and `OutcomeMorphOverlay` draws into that space. The hook keeps the projection current with two refs, `computePolygonDataRef` to re-collect everything from Mapbox and `applyPanelOffsetRef` to cheaply re-apply the panel offset and catch scroll drift, plus a `reprojectOnMove` flag that is on only during active playback and before the SVG morph settles. A pinned sticky graphic shifts the panel relative to the viewport throughout the scroll, so confirm the offset stays correct while pinned and across the pin and unpin transitions, and decide what drives `reprojectOnMove` now that scrubbing is continuous rather than a one-time play. If the squares drift off their map features as you scroll, this is the first place to look.
 
-## Recommended sequence
+## Possible approach
 
-1. Build the shell first. The Mapbox map is the shared, persistent app map (`useMap()` from `@repo/map`), so you do not wrap it. Put a tall `ScrollSection` and a `StickyElement` around the overlay stage only (the `panelRef` Box with `OutcomeMorphOverlay` and `BeatTextOverlay`), leave the persistent map behind it driven by ref as today, and pipe `useScrollProgress()` straight into `OutcomeMorphOverlay` and `useBeatEngine`.
-2. Remove `useStoryboardNavigation` and the `playState` and `beatIndex` machinery. Replace the beat indicator with a scroll-derived read using `useScrollPhase`. Done when: there is no Play, Next, or Back, and the beat indicator updates from scroll position alone.
-3. Insert the scroll-to-progress remap with `useScrollValue` and tune the per-beat scroll allocation. Done when: every beat gets enough scroll distance to read, with none racing past or dragging.
+1. Build the shell first. The Mapbox map is the shared, persistent app map (`useMap()` from `@repo/map`), so you do not pin it. Pin the overlay stage only (the `panelRef` Box with `OutcomeMorphOverlay` and `BeatTextOverlay`) as the sticky graphic, lay out one step per beat behind it, leave the persistent map driven by ref as today, and write `progress` from `onStepProgress` into `OutcomeMorphOverlay` and `useBeatEngine`.
+2. Remove `useStoryboardNavigation` and the `playState` and `beatIndex` machinery. Replace the beat indicator with a scroll-derived read from the live progress. Done when: there is no Play, Next, or Back, and the beat indicator updates from scroll position alone.
+3. Tune the per-step scroll allocation and the step-progress to storyboard-progress remap. Done when: every beat gets enough scroll distance to read, with none racing past or dragging.
 4. Re-author the `animationTiming.ts` fade windows from seconds into progress units. Done when: reveals look right at a normal scroll speed and nothing is still keyed to seconds.
 5. Work arbiter by arbiter to make the side effects scrub-safe, starting with the camera, since it is the worst offender, and coordinating with the map layer loading branch. Done when: scrubbing fast in both directions and reversing mid-beat leaves no stuck camera, layer, or popup.
 6. Re-add reduced motion and the interactive handoff.
 
-## Package reference
+## Library reference
 
-The primitives live in `packages/scrollytelling`. The package README has a "Migration from existing patterns" table that maps common scroll patterns onto the package equivalents, for example manual `useScroll` plus `useTransform` becomes a `<ScrollElement>`, `useScrollOpacity` becomes `useScrollProgress` plus `useScrollValue`, and `react-scrollama` step detection becomes `useScrollPhase`. You will reach for:
+The flow would use `react-scrollama`. The working example in this codebase is `useLearnScrollama` (`app/features/map/hooks/useLearnScrollama.ts`), which wires the step callbacks into the same persistent map, and `useScrollamaSection` in the storyline apps. The pieces you could reach for:
 
-- `ScrollSection` for the tall scroll region that tracks progress
-- `StickyElement` for pinning the overlay stage over the persistent map
-- `useScrollProgress` for the 0 to 1 clock
-- `useScrollValue` for the non-linear scroll-to-progress remap
-- `useScrollPhase` for reading the current beat
+- `Scrollama` and `Step` for the scroll runway, one `Step` per beat
+- `onStepEnter` and `onStepExit` for the discrete section, camera, and layer changes
+- `onStepProgress` for the continuous 0 to 1 value, written into the `progress` `MotionValue`
+- a step-progress to storyboard-progress helper for the non-linear remap (allocating more scroll to dense beats)
+- a scan of `TIMING_BEATS` for reading the current beat from the live progress

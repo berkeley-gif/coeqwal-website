@@ -6,7 +6,7 @@ The "Visualizing key outcomes" click-through animation on the Get-started tab wa
 - **Map**: shared app Mapbox map via `@repo/map`
 - **Animation**: `@repo/motion` (Framer Motion)
 
-> Planning to make this scroll-driven instead of click-through? See [SCROLL_MIGRATION.md](SCROLL_MIGRATION.md) for a handoff note on converting the storyboard to a scroll-driven storyline with `@repo/scrollytelling`.
+> Planning to make this scroll-driven instead of click-through? See [SCROLL_MIGRATION.md](SCROLL_MIGRATION.md) for a handoff note on converting the storyboard to a scroll-driven storyline and merging it with the Learn map.
 
 ## Mental model
 
