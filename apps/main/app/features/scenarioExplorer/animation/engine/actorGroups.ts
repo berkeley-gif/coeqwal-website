@@ -1,7 +1,8 @@
 /* Actor groups: the actors that play under each timing beat. Each group
  * pairs a timing-beat id (see animationTiming.ts) with its active
  * actors. The engine flattens these and routes each actor to the arbiter
- * for its kind. Empty `actors` groups still drive choreography from
+ * for its kind (`mapPaint`, `mapPopup`, `overlayPopup`, `narration`,
+ * `overlayMorph`). Empty `actors` groups still drive choreography from
  * component effects and the overlay bridges. See the animation README. */
 
 import type { ActorGroup } from "./types"
@@ -9,9 +10,31 @@ import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
 import { getTierLabel } from "../../../../content/tiers"
 import { LOI_DU_ID, HIGHLIGHT_GOLD } from "../demandUnitsPaint"
 
-// loi-highlight (beat index 4) thresholds, defined here rather than
-// imported from `TierAnimationSection.tsx` so the engine package has no
-// upward dependency on the component.
+/* Progress thresholds, ordered along the shared 0-to-1 progress axis so the
+ * file reads top to bottom as the storyboard plays forward. Each is tagged
+ * with the beat it drives (see animationTiming.ts for beat ids and indices).
+ */
+
+// legend [0]
+// Reset window `[0, RESET_END)`. Enter asserts the full baseline for
+// `demand-units` and `demand-units-outline`.
+const RESET_END = 0.01
+// Blue color-cycle ends and the blue hold begins.
+const FREEZE_AT = 0.09
+
+// collapse-and-colors [1]
+const TIER_BLEND_START = 0.26
+// Splits the tier-color blend: first collapse the three blues to
+// BLUE_MID, then blend BLUE_MID into the AG tier colors.
+const TIER_CONVERGE_END = 0.27
+const TIER_BLEND_END = 0.28
+
+// ag-rev-morph [2]. The AG fade-out window straddles `BEAT2_START`.
+const BEAT2_AG_FADE_OUT_START = 0.378
+const BEAT2_START = 0.38
+const BEAT2_AG_FADE_OUT_END = 0.383
+
+// loi-highlight [4]
 const LOI_ENTER = 0.5
 const LOI_LAYER_IN_START = 0.5
 const LOI_LAYER_IN_END = 0.52
@@ -22,10 +45,140 @@ const LOI_SQUARE_POPUP_AT = 0.55
 const LOI_POLYGON_RING_AT = 0.56
 const LOI_POLYGON_POPUP_AT = 0.565
 const LOI_SETTLE = 0.62
+// list-bar [5] keys its one-shot DU restore off this same value.
 const LOI_TAIL_END = 0.63
+
+/* Tuning constants (amplitudes and opacities, not positions on the
+ * progress axis). */
+// Color-cycle rotations. 90 is one full cycle across `[0, FREEZE_AT)`.
+const BLUE_CYCLE_ROTATIONS = 90
+// Fraction of the cycle window spent fading the colored locations in.
+// Most of the window so the layer eases in rather than snapping on. The
+// remainder holds with a breathing oscillation.
+const BLUE_FADE_IN_FRAC = 0.85
+const LAYER_PEAK_OPACITY = 0.65
+const BLUE_BREATH_AMPLITUDE = 0.05
+// Peak opacity of the AG demand-unit layer during loi-highlight.
 const LOI_LAYER_OPACITY = 0.65
 
-// Beat 4 (loi-highlight) actors
+// legend [0] actors
+const BEAT0_ACTORS: ActorGroup = {
+  id: "legend",
+  actors: [
+    // Narration bridge. Runs every frame across the storyboard, calling
+    // the callback `BeatTextOverlay` registers via `ctx.narrationTickRef`.
+    // Lives under the first beat only.
+    // (Actor windows don't have to line up with beats.)
+    {
+      kind: "narration",
+      id: "legend:narration:tick",
+      window: [0, 1],
+    },
+    // Overlay-morph bridge. Same shape and rationale as the narration
+    // bridge. `OutcomeMorphOverlay` registers its per-frame SVG-transform
+    // callback via `ctx.overlayMorphTickRef`. See
+    // `engine/arbiters/OverlayMorphArbiter.ts`.
+    {
+      kind: "overlayMorph",
+      id: "legend:overlayMorph:tick",
+      window: [0, 1],
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:reset",
+      window: [0, RESET_END],
+      payload: { kind: "reset" },
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:cycle",
+      window: [RESET_END, FREEZE_AT],
+      payload: {
+        kind: "blue-cycle",
+        cycleStart: 0,
+        cycleEnd: FREEZE_AT,
+        cycleRotations: BLUE_CYCLE_ROTATIONS,
+        peakOpacity: LAYER_PEAK_OPACITY,
+        fadeInFrac: BLUE_FADE_IN_FRAC,
+        breathAmplitude: BLUE_BREATH_AMPLITUDE,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:hold",
+      window: [FREEZE_AT, TIER_BLEND_START],
+      payload: {
+        kind: "blue-hold",
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// collapse-and-colors [1] actors. Two-stage color morph from the
+// three blues to AG tier colors (`tier-color-blend`), then an AG-only
+// hold (`tier-color-hold`). The tail's window runs slightly past this
+// beat into `ag-rev-morph`, fine since windows needn't match beats.
+const BEAT1_ACTORS: ActorGroup = {
+  id: "collapse-and-colors",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "collapse-and-colors:mapPaint:blend",
+      window: [TIER_BLEND_START, TIER_BLEND_END],
+      payload: {
+        kind: "tier-color-blend",
+        blendStart: TIER_BLEND_START,
+        convergeEnd: TIER_CONVERGE_END,
+        blendEnd: TIER_BLEND_END,
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "collapse-and-colors:mapPaint:tail",
+      window: [TIER_BLEND_END, BEAT2_START],
+      payload: {
+        kind: "tier-color-hold",
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// ag-rev-morph [2] actors. Fades each outcome's polygons off the
+// map as the SVG morph takes over. The arbiter reads
+// `ctx.getHideSchedule()` every frame because the schedule is built
+// after tier data loads and can rebuild. Window ends at `LOI_ENTER`.
+//
+// The `lineFades` companion handles the line layers in the same
+// schedule. Its window runs to the end so lines stay hidden and reverse
+// scrubs restore the right opacity. Line layers don't overlap
+// `demand-units`, so this never conflicts with later actors.
+const BEAT2_ACTORS: ActorGroup = {
+  id: "ag-rev-morph",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "ag-rev-morph:mapPaint:hideSchedule",
+      window: [BEAT2_START, LOI_ENTER],
+      payload: {
+        kind: "polygon-hide-schedule",
+        agFadeOutStart: BEAT2_AG_FADE_OUT_START,
+        agFadeOutEnd: BEAT2_AG_FADE_OUT_END,
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "ag-rev-morph:mapPaint:lineFades",
+      window: [BEAT2_START, 1],
+      payload: { kind: "line-hide-schedule" },
+    },
+  ],
+}
+
+// loi-highlight [4] helper and actors.
 
 const LOI_CODE = "AG_REV"
 
@@ -156,151 +309,7 @@ const BEAT4_ACTORS: ActorGroup = {
   ],
 }
 
-// Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
-
-// Reset window `[0, RESET_END)`. Enter asserts the full baseline for
-// `demand-units` and `demand-units-outline`.
-const RESET_END = 0.01
-
-// Blue hold and tier-color blend thresholds.
-const FREEZE_AT = 0.09
-const TIER_BLEND_START = 0.26
-// Splits the tier-color blend: first collapse the three blues to
-// BLUE_MID, then blend BLUE_MID into the AG tier colors.
-const TIER_CONVERGE_END = 0.27
-const TIER_BLEND_END = 0.28
-const BEAT2_START = 0.38
-
-// Beat 2 hide-schedule thresholds. The AG fade-out window straddles
-// `BEAT2_START`.
-const BEAT2_AG_FADE_OUT_START = 0.378
-const BEAT2_AG_FADE_OUT_END = 0.383
-// Color-cycle rotations. 90 is one full cycle across `[0, FREEZE_AT)`.
-const BLUE_CYCLE_ROTATIONS = 90
-// Fraction of the cycle window spent fading the colored locations in.
-// Most of the window so the layer eases in rather than snapping on. The
-// remainder holds with a breathing oscillation.
-const BLUE_FADE_IN_FRAC = 0.85
-const LAYER_PEAK_OPACITY = 0.65
-const BLUE_BREATH_AMPLITUDE = 0.05
-
-const BEAT0_ACTORS: ActorGroup = {
-  id: "legend",
-  actors: [
-    // Narration bridge. Runs every frame across the storyboard, calling
-    // the callback `BeatTextOverlay` registers via `ctx.narrationTickRef`.
-    // Lives under the first beat only because it has no natural home.
-    // Actor windows don't have to line up with beats.
-    {
-      kind: "narration",
-      id: "legend:narration:tick",
-      window: [0, 1],
-    },
-    // Overlay-morph bridge. Same shape and rationale as the narration
-    // bridge. `OutcomeMorphOverlay` registers its per-frame SVG-transform
-    // callback via `ctx.overlayMorphTickRef`. See
-    // `engine/arbiters/OverlayMorphArbiter.ts`.
-    {
-      kind: "overlayMorph",
-      id: "legend:overlayMorph:tick",
-      window: [0, 1],
-    },
-    {
-      kind: "mapPaint",
-      id: "legend:mapPaint:reset",
-      window: [0, RESET_END],
-      payload: { kind: "reset" },
-    },
-    {
-      kind: "mapPaint",
-      id: "legend:mapPaint:cycle",
-      window: [RESET_END, FREEZE_AT],
-      payload: {
-        kind: "blue-cycle",
-        cycleStart: 0,
-        cycleEnd: FREEZE_AT,
-        cycleRotations: BLUE_CYCLE_ROTATIONS,
-        peakOpacity: LAYER_PEAK_OPACITY,
-        fadeInFrac: BLUE_FADE_IN_FRAC,
-        breathAmplitude: BLUE_BREATH_AMPLITUDE,
-      },
-    },
-    {
-      kind: "mapPaint",
-      id: "legend:mapPaint:hold",
-      window: [FREEZE_AT, TIER_BLEND_START],
-      payload: {
-        kind: "blue-hold",
-        peakOpacity: LAYER_PEAK_OPACITY,
-      },
-    },
-  ],
-}
-
-// Beat 1 (collapse-and-colors) actors. Two-stage color morph from the
-// three blues to AG tier colors (`tier-color-blend`), then an AG-only
-// hold (`tier-color-hold`). The tail's window runs slightly past this
-// beat into `ag-rev-morph`, fine since windows needn't match beats.
-const BEAT1_ACTORS: ActorGroup = {
-  id: "collapse-and-colors",
-  actors: [
-    {
-      kind: "mapPaint",
-      id: "collapse-and-colors:mapPaint:blend",
-      window: [TIER_BLEND_START, TIER_BLEND_END],
-      payload: {
-        kind: "tier-color-blend",
-        blendStart: TIER_BLEND_START,
-        convergeEnd: TIER_CONVERGE_END,
-        blendEnd: TIER_BLEND_END,
-        peakOpacity: LAYER_PEAK_OPACITY,
-      },
-    },
-    {
-      kind: "mapPaint",
-      id: "collapse-and-colors:mapPaint:tail",
-      window: [TIER_BLEND_END, BEAT2_START],
-      payload: {
-        kind: "tier-color-hold",
-        peakOpacity: LAYER_PEAK_OPACITY,
-      },
-    },
-  ],
-}
-
-// Beat 2 (ag-rev-morph) actors. Fades each outcome's polygons off the
-// map as the SVG morph takes over. The arbiter reads
-// `ctx.getHideSchedule()` every frame because the schedule is built
-// after tier data loads and can rebuild. Window ends at `LOI_ENTER`.
-//
-// The `lineFades` companion handles the line layers in the same
-// schedule. Its window runs to the end so lines stay hidden and reverse
-// scrubs restore the right opacity. Line layers don't overlap
-// `demand-units`, so this never conflicts with later actors.
-const BEAT2_ACTORS: ActorGroup = {
-  id: "ag-rev-morph",
-  actors: [
-    {
-      kind: "mapPaint",
-      id: "ag-rev-morph:mapPaint:hideSchedule",
-      window: [BEAT2_START, LOI_ENTER],
-      payload: {
-        kind: "polygon-hide-schedule",
-        agFadeOutStart: BEAT2_AG_FADE_OUT_START,
-        agFadeOutEnd: BEAT2_AG_FADE_OUT_END,
-        peakOpacity: LAYER_PEAK_OPACITY,
-      },
-    },
-    {
-      kind: "mapPaint",
-      id: "ag-rev-morph:mapPaint:lineFades",
-      window: [BEAT2_START, 1],
-      payload: { kind: "line-hide-schedule" },
-    },
-  ],
-}
-
-// list-bar actors. A one-shot DU restore at `LOI_TAIL_END` that takes
+// list-bar [5] actors. A one-shot DU restore at `LOI_TAIL_END` that takes
 // the layers back from the loi-highlight actors and pins both opacities
 // at 0 for the rest of the storyboard. Lives under `list-bar`, the first
 // beat at or after `LOI_TAIL_END`. Scrubbing back into loi-highlight is
