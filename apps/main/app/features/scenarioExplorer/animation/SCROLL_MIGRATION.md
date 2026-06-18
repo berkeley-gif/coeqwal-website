@@ -191,7 +191,7 @@ Everything you change lives in `TierAnimationSection.tsx` and its hooks. The ren
 
 ### 3. Mapping scroll distance to beats
 
-A linear scroll-to-progress map would make the dense beats race past. The SVG morph chain from progress 0.62 to 1.0 packs the bar, dot, radar, and heatmap stages into a small span for example (see the `BEAT6_START`, `BEAT7_RADAR_END`, and `BEAT8_*` constants inside the SVG morph frame applier in `OutcomeMorphOverlay.tsx`), while earlier beats are sparse. Choose a `ScrollSection` height (for example `800vh`) and remap raw scroll into storyboard progress with `useScrollValue(scroll, inputRange, outputRange)` so heavy beats get more vertical room. Allocate scroll height by narrative density, not by the old seconds `duration`.
+A linear scroll-to-progress map would make the dense beats race past. The SVG morph chain from progress 0.62 to 1.0 packs the bar, dot, radar, and heatmap stages into a small span for example (see the `LIST_BAR_*`, `RADAR_*`, and `HEATMAP_*` constants inside the SVG morph frame applier in `OutcomeMorphOverlay.tsx`), while earlier beats are sparse. Choose a `ScrollSection` height (for example `800vh`) and remap raw scroll into storyboard progress with `useScrollValue(scroll, inputRange, outputRange)` so heavy beats get more vertical room. Allocate scroll height by narrative density, not by the old seconds `duration`.
 
 ### 4. Audit every arbiter for bidirectional, any-speed safety
 

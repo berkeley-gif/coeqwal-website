@@ -28,12 +28,12 @@ import type { Beat2Layout, ColumnEyebrow, GlyphRect } from "./overlayTypes"
 
 // Eyebrow / caption fade-out widths (`progress`), authored in seconds so
 // they hold their pace if a beat is retuned.
-const B4_EXIT = secondsToProgress(4, BLOCK_EXIT_SEC)
-const B6_EXIT = secondsToProgress(6, BLOCK_EXIT_SEC)
+const LOI_HIGHLIGHT_EXIT = secondsToProgress(4, BLOCK_EXIT_SEC)
+const RADAR_EXIT = secondsToProgress(6, BLOCK_EXIT_SEC)
 
 // Progress points where the eyebrows / captions start fading out.
 const ALL_OTHER_OUTCOMES_OUT = 0.5
-const BEAT6_OUT = 0.72
+const RADAR_CAPTION_OUT = 0.72
 
 /* Radar / heatmap label phase boundaries, in `progress`.
  *
@@ -254,9 +254,10 @@ export function useOutcomeLabelGeometry({
           const captionFadeEnd = Math.min(rawFadeEnd, CAPTION_FADE_END_CEILING)
           const captionFadeStart = captionFadeEnd - CAPTION_FADE
           const captionFadeIn = clamp01((v - captionFadeStart) / CAPTION_FADE)
-          // Captions hold through beats 4-5, fade out at beat 6 (radar) to
-          // clear the right third. Monotonic on `v`, so Back reverses it.
-          const captionFadeOut = clamp01((v - BEAT6_OUT) / B6_EXIT)
+          // Captions hold through loi-highlight [4] and list-bar [5], then
+          // fade out as the radar beat [6] begins to clear the right third.
+          // Monotonic on `v`, so Back reverses it.
+          const captionFadeOut = clamp01((v - RADAR_CAPTION_OUT) / RADAR_EXIT)
           captionEl.style.opacity = String(captionFadeIn * (1 - captionFadeOut))
         }
       }
@@ -388,7 +389,7 @@ export function useOutcomeLabelGeometry({
         const fadeIn = clamp01(
           (v - eyebrows[i]!.animationStart) / BACKDROP_FADE_IN_WIDTH,
         )
-        const fadeOut = clamp01((v - ALL_OTHER_OUTCOMES_OUT) / B4_EXIT)
+        const fadeOut = clamp01((v - ALL_OTHER_OUTCOMES_OUT) / LOI_HIGHLIGHT_EXIT)
         el.style.opacity = String(fadeIn * (1 - fadeOut))
       }
     }

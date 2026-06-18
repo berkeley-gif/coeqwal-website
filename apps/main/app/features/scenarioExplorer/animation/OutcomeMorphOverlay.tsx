@@ -1096,19 +1096,23 @@ export default function OutcomeMorphOverlay({
   latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
-    const BEAT6_START = 0.62
-    const BEAT6_BAR_END = 0.68
-    const BEAT6_END = 0.72
-    const BEAT7_AVG_END = 0.75
-    const BEAT7_RADAR_END = 0.82
-    const BEAT7_CHROME_END = 0.87
-    const BEAT8_CHROME_OUT_END = 0.9
-    const BEAT8_CELL_END = 0.95
+    // Morph-stage thresholds on the shared progress axis, named for the beat
+    // they belong to. Boundaries come from TIMING_BEATS: list-bar [5] ends
+    // 0.72, radar [6] ends 0.87, heatmap [7] ends 1.0. Some stage ends fall
+    // inside the next beat because the morph phases overlap beat boundaries.
+    const LIST_BAR_START = 0.62
+    const LIST_BAR_BARS_END = 0.68
+    const LIST_BAR_END = 0.72
+    const RADAR_AVG_END = 0.75
+    const RADAR_SHAPE_END = 0.82
+    const RADAR_CHROME_END = 0.87
+    const HEATMAP_CHROME_OUT_END = 0.9
+    const HEATMAP_CELL_END = 0.95
     // Primary column chrome settles first, then each extra column fades in
     // sequentially. Splits the post-morph window [0.95, 1.00] into thirds.
-    const BEAT8_COL0_END = 0.97
-    const BEAT8_COL1_END = 0.985
-    const BEAT8_COL2_END = 1.0
+    const HEATMAP_COL0_END = 0.97
+    const HEATMAP_COL1_END = 0.985
+    const HEATMAP_COL2_END = 1.0
 
     const computeBlends = (v: number) => {
       const clampRange = (lo: number, hi: number) =>
@@ -1116,18 +1120,18 @@ export default function OutcomeMorphOverlay({
       const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
       const clampRangeEaseOut = (lo: number, hi: number) =>
         v <= lo ? 0 : v >= hi ? 1 : easeOutCubic((v - lo) / (hi - lo))
-      const radarChromeIn = clampRange(BEAT7_RADAR_END, BEAT7_CHROME_END)
-      const radarChromeOut = clampRange(BEAT7_CHROME_END, BEAT8_CHROME_OUT_END)
+      const radarChromeIn = clampRange(RADAR_SHAPE_END, RADAR_CHROME_END)
+      const radarChromeOut = clampRange(RADAR_CHROME_END, HEATMAP_CHROME_OUT_END)
       return {
-        barBlend: clampRangeEaseOut(BEAT6_START, BEAT6_BAR_END),
-        avgBlend: clampRange(BEAT6_END, BEAT7_AVG_END),
-        radarBlend: clampRange(BEAT7_AVG_END, BEAT7_RADAR_END),
+        barBlend: clampRangeEaseOut(LIST_BAR_START, LIST_BAR_BARS_END),
+        avgBlend: clampRange(LIST_BAR_END, RADAR_AVG_END),
+        radarBlend: clampRange(RADAR_AVG_END, RADAR_SHAPE_END),
         radarChromeBlend: radarChromeIn * (1 - radarChromeOut),
-        heatmapBlend: clampRange(BEAT7_CHROME_END, BEAT8_CELL_END),
-        heatmapChromeBlend: clampRange(BEAT8_CELL_END, BEAT8_COL0_END),
+        heatmapBlend: clampRange(RADAR_CHROME_END, HEATMAP_CELL_END),
+        heatmapChromeBlend: clampRange(HEATMAP_CELL_END, HEATMAP_COL0_END),
         extraColumnBlends: [
-          clampRange(BEAT8_COL0_END, BEAT8_COL1_END),
-          clampRange(BEAT8_COL1_END, BEAT8_COL2_END),
+          clampRange(HEATMAP_COL0_END, HEATMAP_COL1_END),
+          clampRange(HEATMAP_COL1_END, HEATMAP_COL2_END),
         ] as [number, number],
       }
     }
