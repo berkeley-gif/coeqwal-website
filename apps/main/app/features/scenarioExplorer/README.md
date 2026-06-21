@@ -4,13 +4,11 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 
 ## Table of contents
 
-- [Directory layout](#directory-layout)
 - [Architecture](#architecture)
   - [Main app navigation](#main-app-navigation)
   - [Tool modes](#tool-modes)
   - [Layout: UnifiedToolView](#layout-unifiedtoolview)
   - [Error boundaries](#error-boundaries)
-  - [Runtime component tree](#runtime-component-tree)
 - [Key components](#key-components)
   - [GetStartedView.tsx](#getstartedviewtsx)
   - [ScenarioExplorer.tsx](#scenarioexplorertsx)
@@ -25,62 +23,24 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 - [Data flow](#data-flow)
   - [Hydroclimate resolution](#hydroclimate-resolution)
   - [Data hooks](#data-hooks)
-- **Developer guide/how-tos**
-  - [Adding a new visualization tool](#developer-guide-adding-a-new-visualization-tool)
   - [Where the data comes from](#where-the-data-comes-from)
   - [Tier score encoding: heatmap vs radar](#tier-score-encoding-heatmap-vs-radar)
+- [Developer guide: adding a new visualization tool](#developer-guide-adding-a-new-visualization-tool)
+  - [Prerequisites](#prerequisites)
+  - [Make your directory](#make-your-directory)
+  - [Minimal path checklist](#minimal-path-checklist)
+  - [Hook up your data](#hook-up-your-data)
+  - [Chart controls bar](#chart-controls-bar)
+  - [Write your visualization](#write-your-visualization-repoviz)
+  - [State: when to add a store slice](#state-when-to-add-a-store-slice)
+  - [Optional subsystems](#optional-subsystems)
+  - [Manual test checklist](#manual-test-checklist)
+  - [Reference implementations](#reference-implementations)
   - [Wire to the scenario sidebar](#wire-to-the-scenario-sidebar)
   - [Wire to the hydroclimate chooser](#wire-to-the-hydroclimate-chooser)
   - [Avoiding hover flicker](#avoiding-hover-flicker)
   - [Map integration](#map-integration)
-  - [Add a hydroclimate](#add-a-hydroclimate)
-
-## Directory layout
-
-The Explore tab has two divisions (Get started, Tools). These map to `getStarted/` and `explorer/`. The animation lives in a third top-level folder, `animation/`, because it is large, map-coupled, and imported from `features/map/` as well as from `GetStartedView`.
-
-```
-features/scenarioExplorer/
-├── ScenarioExplorer.tsx          Routes mainView (get-started vs tools)
-├── store.ts                      useScenarioExplorerStore (mainView only)
-├── constants.ts                  BASELINE_SCENARIO_ID (Current Operations baseline)
-│
-├── getStarted/                   Sub-tab 1: onboarding scroll panels
-│   ├── GetStartedView.tsx        mounts TierAnimationSection from ../animation
-│   ├── getStartedViewport.ts
-│   └── panels/                   Welcome, Key outcomes, Choose scenarios, etc.
-│
-├── animation/                    Get-started scrollytelling (runtime: get-started only)
-│   ├── TierAnimationSection.tsx  beat-driven tier story + map coordination
-│   ├── BeatTextOverlay.tsx, OutcomeMorphOverlay.tsx, useTierAnimationData.ts
-│   ├── engine/                   BeatEngine, beats, arbiters (map paint, camera, popups)
-│   └── hooks/                    scrollytelling hooks (useInteractiveLayerDirector, etc.)
-│
-├── explorer/                     Sub-tab 2: tools surface + store + share
-│   ├── index.ts                  Entry for ScenarioExplorer (ExplorerToolView, lifecycle)
-│   ├── ExplorerToolView.tsx      Tools surface: hooks, tour, overlays, layout compose
-│   ├── ActiveToolPanel.tsx       exploreMode switch: controls + panel per tool
-│   ├── ExplorerSidebar.tsx       Adapter: hover + share → ScenarioSelectionSidebar
-│   ├── ToolErrorBoundary.tsx
-│   ├── useExploreHoverCoordination.ts
-│   ├── useExploreShareCapture.ts Composes per-tool share hooks (see panels/*/use*ShareCapture)
-│   ├── useExplorerLifecycle.ts
-│   ├── useExplorerMapLayout.ts
-│   ├── store.ts                  Shim → store/index.ts
-│   ├── store/                    Sliced useExplorerStore
-│   ├── share/                    Share drawer, capture pipeline, URL persist, cards
-│   └── tools/
-│       ├── index.ts              Panel barrels
-│       ├── panels/               list, radar, equity, resilience, dataInDepth
-│       ├── chrome/               UnifiedToolView, ToolToolbar, sidebar widgets, overlays
-│       ├── components/           shared cross-tool components (OutcomeChooserPanel)
-│       ├── tour/
-│       └── hooks/                useResolvedScenarioTiers, usePrefetchTiers, etc.
-│
-└── utils/                        scenarioIdSort, scenarioThemeOrder
-```
-
-Tool-specific code lives under `explorer/tools/panels/<tool>/` (panels, captures, per-tool share hooks, tour content). Cross-cutting chrome lives under `explorer/tools/chrome/`. Get-started panel copy lives under `getStarted/panels/`. The beat-driven animated map story lives under `animation/` (mounted only from `GetStartedView`). The app Share tab is included here because it imports from `explorer/store` and `explorer/share/`. Key outcome (tiers) attribute data lives in `apps/main/app/content/outcomes.ts`.
+- [Add a hydroclimate](#add-a-hydroclimate)
 
 ## Architecture
 
@@ -397,6 +357,37 @@ const { idMapping, resolvedIds, missingScenarioIds, reverseMap } =
   useResolvedIdMapping()
 ```
 
+### Where the data comes from
+
+Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
+
+| You need...                                                | Hook                                         | What you get back                                                      |
+| ---------------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| All 9 outcomes for every scenario, hydroclimate-resolved   | `useResolvedScenarioTiers()`                 | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`       |
+| Same, plus radar transforms                                | `useTierChartData()`                         | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`          |
+| Per-location tier assignments for one outcome              | `useTierLocationAssignments(id, code)`       | `locations[]` with `tier_level`                                        |
+| Many outcomes' locations at once for a single scenario     | `useTierLocationAssignmentsBatch(id, codes)` | batched response, splays into the single-outcome cache                 |
+| Reservoir, CWS, AG, env-flow, or Delta statistics          | the matching domain hook in `@repo/data`     | see the "Every hook in the package" table in `packages/data/README.md` |
+| Storage, CWS, AG, and env-flow in one call (Data in Depth) | `useBatchStatistics(scenarios, types?)`      | one bundle keyed by scenario                                           |
+| A static local JSON or GeoJSON file from `public/`         | `useLocalData(url)`                          | parsed body                                                            |
+
+Hard rules:
+
+- Never call `fetch()` or a raw fetcher from inside a panel.
+- Never read `hydroclimate` from the store and resolve scenario ids yourself. The hooks above do it.
+- If you need resolved scenario codes to hand to a non-tier domain hook, call `useResolvedIdMapping()` and pass the resulting `resolvedIds` through.
+
+For everything caching-related (cache keys, preloading, `useLocalData` options), see `packages/data/README.md`.
+
+### Tier score encoding: heatmap vs radar
+
+The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
+
+- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
+- The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
+
+They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
+
 ## Developer guide: adding a new visualization tool
 
 This is the checklist for wiring a new tool into the Explore tools. Other READMEs ([store](explorer/store/README.md), [share](explorer/share/README.md), [chrome](explorer/tools/chrome/README.md)) cover deep dives if you need them. Start here.
@@ -428,7 +419,7 @@ The sidebar, hydroclimate chooser, and map model/reveal are set up for all tools
 
 ### Make your directory
 
-Reuse the [panel layout convention](#panel-layout-convention) above:
+Follow the panel layout convention by size:
 
 | Size                | Convention                    | Example                                                       |
 | ------------------- | ----------------------------- | ------------------------------------------------------------- |
@@ -692,38 +683,7 @@ tools/panels/radar/
 
 Data: `tools/hooks/useTierChartData.ts`. Chart: `packages/viz/src/components/RadarPlot.tsx`. Wiring: `ActiveToolPanel` `case "radar"`.
 
-## Where the data comes from
-
-Pick a hook by the shape of data you need. None of these require manual hydroclimate handling.
-
-| You need...                                                | Hook                                         | What you get back                                                      |
-| ---------------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
-| All 9 outcomes for every scenario, hydroclimate-resolved   | `useResolvedScenarioTiers()`                 | `allScoreData`, `allChartData`, `outcomeNames`, `getDisplayName`       |
-| Same, plus radar transforms                                | `useTierChartData()`                         | `data`, `axes`, `axisRange`, `lineColors`, `baselineScenario`          |
-| Per-location tier assignments for one outcome              | `useTierLocationAssignments(id, code)`       | `locations[]` with `tier_level`                                        |
-| Many outcomes' locations at once for a single scenario     | `useTierLocationAssignmentsBatch(id, codes)` | batched response, splays into the single-outcome cache                 |
-| Reservoir, CWS, AG, env-flow, or Delta statistics          | the matching domain hook in `@repo/data`     | see the "Every hook in the package" table in `packages/data/README.md` |
-| Storage, CWS, AG, and env-flow in one call (Data in Depth) | `useBatchStatistics(scenarios, types?)`      | one bundle keyed by scenario                                           |
-| A static local JSON or GeoJSON file from `public/`         | `useLocalData(url)`                          | parsed body                                                            |
-
-Hard rules:
-
-- Never call `fetch()` or a raw fetcher from inside a panel.
-- Never read `hydroclimate` from the store and resolve scenario ids yourself. The hooks above do it.
-- If you need resolved scenario codes to hand to a non-tier domain hook, call `useResolvedIdMapping()` and pass the resulting `resolvedIds` through.
-
-For everything caching-related (cache keys, preloading, `useLocalData` options), see `packages/data/README.md`.
-
-## Tier score encoding: heatmap vs radar
-
-The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
-
-- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
-- The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
-
-They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
-
-## Wire to the scenario sidebar
+### Wire to the scenario sidebar
 
 The sidebar widget (`ScenarioSelectionSidebar`) is mounted by `UnifiedToolView` via `ExplorerSidebar` for every non-list tool. It writes scenario selection directly to `useExplorerStore`. Your panel reads that selection from the store.
 
@@ -734,7 +694,7 @@ const { selectedScenarios, pinnedScenarioIds, highlightedScenario } =
 
 That is it. You do not import the sidebar component. You do not pass selection through props.
 
-### Two-way hover
+#### Two-way hover
 
 If you want sidebar row hover to highlight chart elements and chart hover to scroll/highlight sidebar rows, pass hover props from `useExploreHoverCoordination` (owned by `ExplorerToolView`) into your panel via `ActiveToolPanel`.
 
@@ -785,7 +745,7 @@ export default function YourToolPanel({
 
 Wrapping the hook's state updates in `startTransition` keeps sidebar reflows low priority so chart hover visuals paint first. See "Avoiding hover flicker" below for D3-specific rules.
 
-## Wire to the hydroclimate chooser
+### Wire to the hydroclimate chooser
 
 The chooser lives in `ToolToolbar` and is controlled by `hydroclimate` and `setHydroclimate` in the store. It is visible in every mode except `"resilience"`.
 
@@ -813,127 +773,19 @@ That is the entire contract. The hydroclimate chooser updates the store, the res
 
 If your tool should hide the hydroclimate chooser (Resilience is the only one today), add your mode to the `showToolbarHydroclimateChooser` check in `apps/main/app/features/scenarioExplorer/explorer/tools/chrome/toolbar/ToolToolbar.tsx`.
 
-## Avoiding hover flicker
+### Avoiding hover flicker
 
-D3 imperative charts are sensitive to unnecessary React re-renders. Each render of the `updateChart` callback triggers `svg.selectAll("*").remove()`, which is a full tear-down and rebuild. Even with `hasAnimatedRef` guards that skip entrance animations on subsequent draws, the remove-and-rebuild cycle causes visible flicker.
+D3 imperative charts re-render on every hover unless you follow a strict set of rules: tooltips via a `ref` (never React state), debounced and deduplicated parent notifications, default prop values hoisted to module scope, primitive `useMemo` dependencies, guarded entrance animations, and minimal `updateChart` dependency arrays. None of this is explorer-specific. The full explanation, code samples, and checklist live in `packages/viz/README.md` under "Avoiding hover flicker in D3 charts".
 
-Follow all of these rules for any chart that has hover or tooltip interactions.
+Explorer-specific note: the callback your panel debounces is `onChartHover` (payload typed `HoveredInteraction`), owned by `useExploreHoverCoordination` and threaded through `ActiveToolPanel`. Wrap the resulting sidebar state updates in `startTransition` (see [Two-way hover](#two-way-hover) above).
 
-### 1. Never use React state for tooltips
-
-`useState<TooltipState>` inside a chart component causes a React re-render on every mouseenter and mouseleave. Even if `updateChart` does not re-fire, React still reconciles the JSX tree, and the conditional `{tooltip && <div>...</div>}` causes DOM churn.
-
-Mount a permanent tooltip `<div>` with `display: none` and a `ref`. Toggle it imperatively from the D3 event handlers.
-
-```tsx
-const tooltipRef = useRef<HTMLDivElement>(null)
-
-// In D3 mouseenter handler:
-tooltipRef.current!.style.display = "block"
-tooltipRef.current!.style.left = `${x}px`
-tooltipRef.current!.innerHTML = "..."
-
-// In D3 mouseleave handler:
-tooltipRef.current!.style.display = "none"
-```
-
-### 2. Debounce parent notifications
-
-When a chart calls `onChartHover?.(info)`, that typically triggers `setState` in the orchestrator, which re-renders the entire tree. Even if `React.memo` prevents the chart from re-rendering, the parent reconciliation can block the main thread and delay paint of the D3 hover visuals.
-
-- Debounce the notify (80 ms works well) so rapid dot-to-dot movement fires at most one callback.
-- Deduplicate. Track the last notified id in a ref. Skip the callback if hovering a different dot of the same scenario.
-- Use `startTransition` in the parent's handler so the sidebar update is low priority.
-
-```tsx
-// In the chart:
-const lastNotifiedIdRef = useRef<string | null>(null)
-
-if (lastNotifiedIdRef.current !== scenario.id) {
-  hoverTimer = setTimeout(() => {
-    lastNotifiedIdRef.current = scenario.id
-    onChartHoverRef.current?.({
-      scenarioId: scenario.id,
-      outcome: axis,
-      tierValue,
-    })
-  }, 80)
-}
-
-// In the parent:
-import { startTransition } from "react"
-startTransition(() => setHighlightedIds([id]))
-```
-
-### 3. Hoist default prop values to module scope
-
-Default values in destructuring (`colors = { default: "#666" }`) create new object references every render. That defeats `React.memo` and recreates the `updateChart` callback.
-
-```tsx
-// Bad. New object identity every render.
-({ colors = { default: "#666", highlighted: "#1a3a5c" } }) => { ... }
-
-// Good. Stable reference.
-const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c" }
-({ colors = DEFAULT_COLORS }) => { ... }
-```
-
-### 4. Use primitive `useMemo` dependencies for theme colors
-
-MUI's `useTheme()` returns objects (`theme.palette.grey`, `theme.palette.waterThemes`) with new identity on every render even though the values inside have not changed. If you pass these through `useMemo`, the memo recomputes every render.
-
-```tsx
-// Bad. theme.palette.grey is a new object ref each render.
-const chartColors = useMemo(
-  () => ({ default: theme.palette.grey[600] }),
-  [theme.palette.grey],
-)
-
-// Good. Extract primitive strings first.
-const grey600 = theme.palette.grey[600]
-const chartColors = useMemo(() => ({ default: grey600 }), [grey600])
-```
-
-### 5. Guard entrance animations
-
-Use a `hasAnimatedRef` so entrance transitions only play once. Subsequent `updateChart` calls should use `duration(0)`.
-
-```tsx
-const hasAnimatedRef = useRef(false)
-// inside updateChart:
-const T_DUR = hasAnimatedRef.current ? 0 : 500
-hasAnimatedRef.current = true
-```
-
-### 6. Keep `updateChart` deps minimal
-
-Every value in `updateChart`'s `useCallback` dependency array is a potential re-render trigger. For callbacks like `onChartHover` and `onScenarioClick`, use refs instead of putting them in the dep array.
-
-```tsx
-const onChartHoverRef = useRef(onChartHover)
-useEffect(() => {
-  onChartHoverRef.current = onChartHover
-}, [onChartHover])
-
-// Inside updateChart, use onChartHoverRef.current, not onChartHover.
-```
-
-### Quick checklist for new D3 charts
-
-- [ ] Tooltip via ref, not `useState`
-- [ ] `onChartHover` and `onScenarioClick` stored in refs, not in `updateChart` deps
-- [ ] Default prop values hoisted to module constants
-- [ ] Parent uses `startTransition` for hover state updates
-- [ ] `hasAnimatedRef` guards entrance animations
-- [ ] All `useMemo` deps are primitives (strings, numbers, booleans), not theme objects
-
-## Map integration
+### Map integration
 
 The app has a single persistent Mapbox map that lives behind the UI. When the user toggles "Show map" in the toolbar, a transparent 25% reveal area opens on the right side of the layout. The tools don't create or manage the map. Instead, they communicate with the map through the **map store** (`apps/main/app/features/map/store.ts`).
 
 The pattern: user clicks an element in the visualization -> write to the map store -> the `VisualizationLayers` component (which is always mounted on the map) reads that state and renders the appropriate polygons, markers, or line layers.
 
-### How to show a tier outcome on the map
+#### How to show a tier outcome on the map
 
 ```typescript
 import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
@@ -960,7 +812,7 @@ That's it. The `VisualizationLayers` component handles the rest:
 - Colors the polygons/markers by tier level
 - Shows tooltips on hover/click
 
-### Custom dot markers
+#### Custom dot markers
 
 The existing map markers (diamonds in `TierMarkers.tsx`, labels in `TierLocationLabels.tsx`) are used by other parts of the app. If your visualization needs its own marker style (e.g., large colored dots), use `setMotionChildren` from `useMap()` to inject your own `<Marker>` components onto the shared map without touching the existing marker components.
 
@@ -1010,7 +862,7 @@ useEffect(() => {
 
 Clean up by calling `setMotionChildren(null)` when your component unmounts or when the markers should be removed.
 
-### What your component should do
+#### What your component should do
 
 1. **Toggle the visualization**: call `mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element. This single call handles both set and clear (if the same outcome is already active, it clears it. Otherwise it sets the new one).
 2. **Clear tooltips**: call `mapActions.clearMapTooltips()` before toggling to dismiss any pinned map tooltips from a previous selection.
@@ -1018,13 +870,13 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 4. **Clear on navigate**: call `mapActions.clearOutcomeVisualization()` when the user navigates away from the view.
 5. **Render custom markers** (optional): use `setMotionChildren` from `useMap()` to show your own dot markers on the map (see above).
 
-### What you do not need to do
+#### What you do not need to do
 
 - Create map layers, sources, or polygons
 - Fetch GeoJSON geometry
 - Handle the "Show map" toggle (the toolbar and `UnifiedToolView` manage that)
 
-### Reference implementations
+#### Reference implementations
 
 - **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) - Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
 - **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/animation/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
