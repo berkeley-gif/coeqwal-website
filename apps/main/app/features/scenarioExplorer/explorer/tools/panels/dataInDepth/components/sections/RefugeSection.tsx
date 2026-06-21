@@ -23,11 +23,17 @@ import type {
   VolumeScaleMode,
   CellStatsMap,
 } from "@repo/viz"
-import { GridScenarioHeader } from "./AlignedScenarioGrid"
-import { ChartGridProvider } from "./ChartGridContext"
-import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
-import { SectionHeader } from "./SectionHeader"
-import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { GridScenarioHeader } from "../shared/AlignedScenarioGrid"
+import { ChartGridProvider } from "../shared/ChartGridContext"
+import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
+import { SectionHeader } from "../shared/SectionHeader"
+import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
+import { BandLegend } from "../shared/BandsLegend"
+import {
+  DELIVERY_BAND_COLORS,
+  SHORTAGE_BAND_COLORS,
+} from "../../config/bandColors"
+import type { FanoutSectionProps } from "../shared/sectionTypes"
 import {
   useRefugeDemandUnitsList,
   useRefugeDusDeliveryMonthly,
@@ -70,142 +76,6 @@ const REGION_OPTIONS = [
   { value: "SJR" as const, label: "San Joaquin" },
   { value: "TULARE" as const, label: "Tulare" },
 ]
-
-/** Delivery band colors.blue, matching COLORS in PercentileMatrix */
-const DELIVERY_BAND_COLORS = {
-  range: "#d9eafb", // q0-q100 (lightest)
-  outer: "#c5dbf3", // q10-q90
-  inner: "#a2bee1", // q30-q70
-  median: "#2c5aa0", // q50 (darkest)
-}
-
-/** Shortage band colors.orange/amber, matching COLORS_SHORTAGE in PercentileMatrix */
-const SHORTAGE_BAND_COLORS = {
-  range: "#fef3e2",
-  outer: "#fdd49e",
-  inner: "#fdae6b",
-  median: "#e6550d",
-}
-
-// ============================================================================
-// Legend Components
-// ============================================================================
-
-function DeliveryBandsLegend() {
-  return (
-    <>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: DELIVERY_BAND_COLORS.range,
-          borderRadius: "2px",
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Min–max range
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: DELIVERY_BAND_COLORS.outer,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        10–90th percentile
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: DELIVERY_BAND_COLORS.inner,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        30–70th percentile
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 3,
-          backgroundColor: DELIVERY_BAND_COLORS.median,
-          borderRadius: "1px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Median
-      </Box>
-    </>
-  )
-}
-
-function ShortageBandsLegend() {
-  return (
-    <>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: SHORTAGE_BAND_COLORS.range,
-          borderRadius: "2px",
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Min–max range
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: SHORTAGE_BAND_COLORS.outer,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        10–90th percentile
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: SHORTAGE_BAND_COLORS.inner,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        30–70th percentile
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 3,
-          backgroundColor: SHORTAGE_BAND_COLORS.median,
-          borderRadius: "1px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Median
-      </Box>
-    </>
-  )
-}
 
 // ============================================================================
 // Helpers
@@ -340,7 +210,7 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
 
 /**
  * Fetch period-of-record summaries for all selected scenarios.
- * Builds a CellStatsMap (duId -> scenarioId -> {annualAvgTaf, reliabilityPct})
+ * Builds a CellStatsMap (duId to scenarioId to {annualAvgTaf, reliabilityPct})
  * so PercentileMatrix can render per-cell stats below each chart.
  */
 function useMultiScenarioRefugePeriod(scenarios: string[]) {
@@ -374,15 +244,10 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
 // Main component
 // ============================================================================
 
-interface RefugeSectionProps {
-  scenarios: string[]
-  scenarioNames: Record<string, string>
-}
-
 export default function RefugeSection({
   scenarios,
   scenarioNames,
-}: RefugeSectionProps) {
+}: FanoutSectionProps) {
   const theme = useTheme()
 
   const [scaleMode, setScaleMode] = useState<"absolute" | "relative">(
@@ -460,7 +325,8 @@ export default function RefugeSection({
 
   return (
     <>
-      {/* Sticky scenario header */}
+      {/* Sticky scenario header. Soft drop shadow matches the List view's
+          pinned block so content reads as scrolling under a fixed header. */}
       <Box
         sx={{
           position: "sticky",
@@ -470,6 +336,7 @@ export default function RefugeSection({
           py: theme.space.component.sm,
           mx: -theme.space.component.xl,
           px: theme.space.component.xl,
+          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
         }}
       >
         <ChartGridProvider scenarios={scenarios}>
@@ -568,7 +435,7 @@ export default function RefugeSection({
                         >
                           Overlapping percentile bands:
                         </Box>
-                        <DeliveryBandsLegend />
+                        <BandLegend colors={DELIVERY_BAND_COLORS} />
                       </Box>
                       <Box
                         component="span"
@@ -617,7 +484,7 @@ export default function RefugeSection({
                         >
                           Overlapping percentile bands:
                         </Box>
-                        <ShortageBandsLegend />
+                        <BandLegend colors={SHORTAGE_BAND_COLORS} />
                       </Box>
                       <Box
                         component="span"

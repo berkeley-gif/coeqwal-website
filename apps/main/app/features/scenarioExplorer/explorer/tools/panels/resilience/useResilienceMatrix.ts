@@ -23,6 +23,7 @@ import {
 } from "../../../../../scenarios/hooks/useScenarioList"
 import { useResolvedIdMappings } from "../../../../../scenarios/hooks/useResolvedIdMapping"
 import { useMultipleScenarioTiers } from "../../../../../scenarios/hooks/useTierData"
+import { clampTier } from "@repo/viz"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import type { OutcomeScoreData } from "../../../../../scenarios/hooks/useTierData"
 import {
