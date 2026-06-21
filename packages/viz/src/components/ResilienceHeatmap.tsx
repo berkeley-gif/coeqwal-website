@@ -21,6 +21,7 @@
 import React, { useRef, useEffect, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { scaleBand, interpolateRgb, select } from "d3"
+import { clampTier } from "../utils/tierScale"
 
 export type ResilienceCellRender =
   | "tier"
@@ -325,10 +326,6 @@ function truncateResilienceYAxisTick(
     }
     rest = rest.slice(0, -1)
   }
-}
-
-function clampTier(value: number): 1 | 2 | 3 | 4 {
-  return Math.min(4, Math.max(1, Math.round(value))) as 1 | 2 | 3 | 4
 }
 
 function defaultRowTick(row: ResilienceAxisItem): string {

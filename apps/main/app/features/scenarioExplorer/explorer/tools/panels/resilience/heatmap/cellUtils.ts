@@ -13,9 +13,7 @@ import type {
 import { getOutcomeName } from "../../../../../../../content/outcomes"
 import type { HoveredInteraction } from "../../../../useExploreHoverCoordination"
 
-export function clampTier(value: number): number {
-  return Math.min(4, Math.max(1, Math.round(value)))
-}
+export { clampTier } from "@repo/viz"
 
 /** Swap row and column keys + labels on a heatmap cell */
 export function transposeCell(

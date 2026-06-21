@@ -68,23 +68,6 @@ export type {
 export { default as PackedDots } from "./components/PackedDots"
 export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
-export { default as ParityPlot } from "./components/ParityPlot"
-export type { ParityPlotProps } from "./components/ParityPlot"
-export { default as DeviationPlot } from "./components/DeviationPlot"
-export type { DeviationPlotProps } from "./components/DeviationPlot"
-export { default as ResilienceDeviationPlot } from "./components/ResilienceDeviationPlot"
-export type { ResilienceDeviationPlotProps } from "./components/ResilienceDeviationPlot"
-export { default as DotStripPlot } from "./components/DotStripPlot"
-export type { DotStripPlotProps } from "./components/DotStripPlot"
-export { default as DivergingLollipop } from "./components/DivergingLollipop"
-export type { DivergingLollipopProps } from "./components/DivergingLollipop"
-export { default as DumbbellChart } from "./components/DumbbellChart"
-export type { DumbbellChartProps } from "./components/DumbbellChart"
-export { default as PairedParallelPlot } from "./components/PairedParallelPlot"
-export type { PairedParallelPlotProps } from "./components/PairedParallelPlot"
-export { default as ArrowFieldPlot } from "./components/ArrowFieldPlot"
-export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
-
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps, RadarPlotPalette } from "./components/RadarPlot"
 export { default as RadarPlotSnapshot } from "./components/RadarPlotSnapshot"
@@ -158,6 +141,14 @@ export {
 } from "./utils/d3-utils"
 
 export { isFullOpacityDuringSidebarHighlight } from "./utils/sidebarHighlightPolicy"
+
+export {
+  TIER_COUNT,
+  TIER_LEVELS,
+  normalizedToRadar,
+  radarValueToTier,
+  clampTier,
+} from "./utils/tierScale"
 
 export {
   THEME_LINE_PALETTES,

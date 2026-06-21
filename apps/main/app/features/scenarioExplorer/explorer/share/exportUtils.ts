@@ -1,8 +1,10 @@
 import JSZip from "jszip"
 import { themeValues } from "@repo/ui/themes/theme"
-import type { ShareItem } from "./types"
-import { handlerForItem, type CsvLookups } from "./variants"
-import { withExt } from "./utils/filename"
+import { radarValueToTier } from "@repo/viz"
+import type { ShareItem } from "../../../../share/types"
+import { handlerForItem, type CsvLookups } from "../../../../share/variants"
+import { withExt } from "../../../../share/utils/filename"
+
 
 /**
  * Export utilities for Data Explorer
@@ -14,7 +16,7 @@ import { withExt } from "./utils/filename"
  *   1 = Optimal, 2 = Acceptable, 3 = At-risk, 4 = Critical
  */
 function radarValueToTierScore(v: number): number {
-  return Math.round((4 - (v + 1) * 1.5) * 100) / 100
+  return Math.round(radarValueToTier(v) * 100) / 100
 }
 
 function csvEscape(val: string): string {

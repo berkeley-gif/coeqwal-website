@@ -27,6 +27,7 @@ import {
 } from "../../../../../scenarios/hooks/useScenarioList"
 import { useResolvedIdMappings } from "../../../../../scenarios/hooks/useResolvedIdMapping"
 import { useMultipleScenarioTiers } from "../../../../../scenarios/hooks/useTierData"
+import { clampTier } from "@repo/viz"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import type { OutcomeScoreData } from "../../../../../scenarios/hooks/useTierData"
 import {
@@ -81,10 +82,6 @@ export interface ResilienceCell {
   tierLevel: number | null
   /** Distinguishes aggregate outcome cells from NOD/SOD-derived cells. */
   type?: ResilienceCellType
-}
-
-function clampTier(value: number): number {
-  return Math.min(4, Math.max(1, Math.round(value)))
 }
 
 function buildAggregateCell(
