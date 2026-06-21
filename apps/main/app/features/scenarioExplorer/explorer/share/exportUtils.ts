@@ -1,9 +1,9 @@
 import JSZip from "jszip"
 import { themeValues } from "@repo/ui/themes/theme"
 import { radarValueToTier } from "@repo/viz"
-import type { ShareItem } from "../../../../share/types"
-import { handlerForItem, type CsvLookups } from "../../../../share/variants"
-import { withExt } from "../../../../share/utils/filename"
+import type { ShareItem } from "./types"
+import { handlerForItem, type CsvLookups } from "./variants"
+import { withExt } from "./utils/filename"
 
 
 /**

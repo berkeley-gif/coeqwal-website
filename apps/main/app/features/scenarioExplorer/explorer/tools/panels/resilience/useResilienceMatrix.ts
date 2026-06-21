@@ -77,10 +77,6 @@ export interface ResilienceCell {
   type?: ResilienceCellType
 }
 
-function clampTier(value: number): number {
-  return Math.min(4, Math.max(1, Math.round(value)))
-}
-
 /**
  * Re-key the shared short_code-keyed tier dataset back to sibling-group
  * ids for one hydroclimate, using that climate's idMapping
