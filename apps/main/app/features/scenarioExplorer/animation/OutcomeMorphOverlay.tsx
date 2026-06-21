@@ -1,5 +1,12 @@
 "use client"
 
+/* OutcomeMorphOverlay: the SVG morph layer
+ *
+ * The SVG over the map that morphs outcome polygons into distribution
+ * squares, then bars, dots, and heatmap cells. Runs per frame through
+ * the overlay-morph bridge. See "The bridge actors" in README.md.
+ */
+
 import {
   useRef,
   useEffect,
@@ -8,6 +15,7 @@ import {
   useCallback,
   type RefObject,
 } from "react"
+import { createPortal } from "react-dom"
 import { useTheme, alpha } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import {
@@ -24,7 +32,15 @@ import {
   RADAR_TIER_LABELS,
 } from "@repo/viz"
 import { getTierLabel } from "../../../content/tiers"
-import { STORYBOARD_VISUAL_LIFT_PX } from "./animationTiming"
+import {
+  computeRadarFrame,
+  radarVertexAngle,
+  radarTierRadius,
+  computeHeatmapColumnFrame,
+  heatmapCellCenterY,
+  HEAT_SIDE_PAD,
+  HEAT_BLOCK_SHIFT_X,
+} from "./storyboardGeometry"
 import {
   ENV_FLOWS_NAMES,
   STATION_NAMES,
@@ -61,7 +77,7 @@ interface OutcomeMorphOverlayProps {
   /** Bridge into `OverlayMorphArbiter`. The component writes its
    *  `applyOverlayMorphFrame(v)` dispatcher into `.current` on mount
    *  and clears it on unmount. The arbiter reads through the ref on
-   *  every tick. See
+   *  every frame. See
    *  `apps/main/app/features/scenarioExplorer/animation/engine/arbiters/OverlayMorphArbiter.ts`. */
   overlayMorphTickRef: RefObject<((v: number) => void) | null>
   squaresPerRow: number
@@ -75,8 +91,29 @@ interface OutcomeMorphOverlayProps {
     }
   >
   onOutcomeClick?: (code: string) => void
+  /** Gate for clicking a whole outcome glyph to select it (the bar beat).
+   *  Separate from `interactive` because the bars are not per-square hit
+   *  targets, the whole glyph region selects its outcome. When true, each
+   *  outcome's bounds rect becomes clickable and calls `onOutcomeClick`. */
+  outcomeGlyphClickEnabled?: boolean
+  /** Gate for clicking a radar vertex dot to select its outcome (the radar
+   *  beat). When true, a hit target is drawn over each vertex and calls
+   *  `onOutcomeClick` with that vertex's outcome code. */
+  radarDotClickEnabled?: boolean
+  /** Gate for clicking a hydroclimate matrix cell (the heatmap beat). When
+   *  true, a hit target is drawn over every cell and calls `onHeatmapCellClick`
+   *  with the cell's outcome code and its column's climate scenario. */
+  heatmapCellClickEnabled?: boolean
+  /** Scenario for the primary heatmap column (historical hydroclimate). */
+  heatmapPrimaryScenarioId?: string
+  /** Scenario backing the current map selection, used to outline the active
+   *  matrix cell. */
+  selectedScenarioId?: string
+  onHeatmapCellClick?: (code: string, scenarioId: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
+  /** Gate for the per-square hover and click on the distribution grid. */
+  squareHoverEnabled?: boolean
   /** All active (hovered + pinned) locations driven by the parent */
   activeLocationSet?: Map<string, LocationInfo>
   /** Currently hovered location (for ephemeral overlay tooltip) */
@@ -85,7 +122,7 @@ interface OutcomeMorphOverlayProps {
   onLocationEnter?: (info: LocationInfo) => void
   onLocationLeave?: () => void
   onLocationClick?: (info: LocationInfo) => void
-  /** Maps "outcomeCode:sourceId" → human-readable name from Mapbox features */
+  /** Maps "outcomeCode:sourceId" to a human-readable name from Mapbox features */
   locationNameMap?: Record<string, string>
   encodingMode?: EncodingMode
   tierChartData?: Record<string, ChartDataPoint[]>
@@ -95,6 +132,7 @@ interface OutcomeMorphOverlayProps {
   mustIncludeSourceIds?: ReadonlySet<string>
   extraHydroclimateColumns?: Array<{
     label: string
+    scenarioId?: string
     tierChartData?: Record<string, ChartDataPoint[]>
   }>
 }
@@ -397,8 +435,15 @@ export default function OutcomeMorphOverlay({
   squaresPerRow,
   distributionPositionMap,
   onOutcomeClick,
+  outcomeGlyphClickEnabled = false,
+  radarDotClickEnabled = false,
+  heatmapCellClickEnabled = false,
+  heatmapPrimaryScenarioId,
+  selectedScenarioId,
+  onHeatmapCellClick,
   selectedOutcomeCode,
   interactive,
+  squareHoverEnabled = false,
   activeLocationSet,
   hoveredLocation,
   onLocationEnter,
@@ -536,16 +581,33 @@ export default function OutcomeMorphOverlay({
     mustIncludeSourceIds,
   ])
 
+  /* Union bounding box of all distribution groups
+   *
+   * A transparent backdrop over this region captures pointer events in
+   * the gaps between squares so the map-polygon hover underneath does
+   * not fire while the user mouses around the grid. Map hover still
+   * works on the open map outside this box. */
+  const gridHitBounds = useMemo(() => {
+    if (outcomeShapes.length === 0) return null
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const group of outcomeShapes) {
+      minX = Math.min(minX, group.bounds.x)
+      minY = Math.min(minY, group.bounds.y)
+      maxX = Math.max(maxX, group.bounds.x + group.bounds.width)
+      maxY = Math.max(maxY, group.bounds.y + group.bounds.height)
+    }
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  }, [outcomeShapes])
+
   /* Radar geometry
    */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
-    const panelLeft = panelWidth * (2 / 3)
-    const rightWidth = panelWidth - panelLeft
-    const cx = panelLeft + rightWidth / 2
-    const cy = panelHeight * 0.42 - STORYBOARD_VISUAL_LIFT_PX
-    const rMax = Math.min(rightWidth / 2, panelHeight / 2) * 0.6
-    const tierR = (tier: number) => (rMax * (4.5 - tier)) / 4
+    const { cx, cy, rMax } = computeRadarFrame(panelWidth, panelHeight)
+    const tierR = (tier: number) => radarTierRadius(rMax, tier)
 
     const vertices: Array<{
       code: string
@@ -559,7 +621,7 @@ export default function OutcomeMorphOverlay({
       const rep =
         group.shapes.find((s) => s.isRepresentative) ?? group.shapes[0]
       const score = group.weightedScore ?? rep?.tier ?? 2
-      const angle = (2 * Math.PI * i) / Math.max(N, 1) - Math.PI / 2
+      const angle = radarVertexAngle(i, N)
       const radius = tierR(score)
       vertices.push({
         code: group.code,
@@ -599,29 +661,20 @@ export default function OutcomeMorphOverlay({
     const N = outcomeShapes.length
     const numExtras = extraHydroclimateColumns?.length ?? 0
     const numColumns = 1 + numExtras
-    const panelLeft = panelWidth * (2 / 3)
+    const { panelLeft, heatmapLeft, cellH, columnTop } =
+      computeHeatmapColumnFrame(panelWidth, panelHeight, N)
     const rightWidth = panelWidth - panelLeft
-    const HEAT_SIDE_PAD = 24
-    const HEAT_LABEL_COL_W = 110
-    const HEAT_LABEL_GAP = 12
     const HEAT_COL_GAP_FRACTION = 0.18
     const HEAT_MAX_CELL_W = 150
-    const HEAT_BLOCK_SHIFT_X = -10
 
-    const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
     const rightColRight =
       panelLeft + rightWidth - HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
-    const heatmapLeft = rightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
     const heatmapAvailW = Math.max(1, rightColRight - heatmapLeft)
     const cellW = Math.min(
       HEAT_MAX_CELL_W,
       heatmapAvailW / (numColumns + (numColumns - 1) * HEAT_COL_GAP_FRACTION),
     )
     const columnGap = cellW * HEAT_COL_GAP_FRACTION
-    const availableH = panelHeight * 0.8
-    const cellH = Math.min(44, availableH / Math.max(N, 1))
-    const totalH = N * cellH
-    const columnTop = panelHeight / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
     const CELL_PAD_FRACTION = 0.08
     const cellInsetX = cellW * CELL_PAD_FRACTION * 0.5
     const cellInsetY = cellH * CELL_PAD_FRACTION * 0.5
@@ -644,7 +697,7 @@ export default function OutcomeMorphOverlay({
     }> = []
     for (let i = 0; i < N; i++) {
       const group = outcomeShapes[i]!
-      const cy = columnTop + (i + 0.5) * cellH
+      const cy = heatmapCellCenterY(columnTop, cellH, i)
       cells.push({
         code: group.code,
         cx: columnCx[0]!,
@@ -656,6 +709,7 @@ export default function OutcomeMorphOverlay({
 
     const extraColumns: Array<{
       label: string
+      scenarioId?: string
       cx: number
       cells: Array<{
         code: string
@@ -671,7 +725,7 @@ export default function OutcomeMorphOverlay({
       const col = extraHydroclimateColumns![c]!
       const colCx = columnCx[c + 1]!
       const colCells = outcomeShapes.map((group, i) => {
-        const cy = columnTop + (i + 0.5) * cellH
+        const cy = heatmapCellCenterY(columnTop, cellH, i)
         const points = col.tierChartData?.[group.code]
         const score = computeTierScore(points)
         const level = score != null ? getTierLevelForScore(score) : null
@@ -682,7 +736,12 @@ export default function OutcomeMorphOverlay({
             : "transparent"
         return { code: group.code, cx: colCx, cy, w: innerW, h: innerH, fill }
       })
-      extraColumns.push({ label: col.label, cx: colCx, cells: colCells })
+      extraColumns.push({
+        label: col.label,
+        scenarioId: col.scenarioId,
+        cx: colCx,
+        cells: colCells,
+      })
     }
 
     return {
@@ -708,12 +767,19 @@ export default function OutcomeMorphOverlay({
   }, [heatmapGeometry])
 
   const hoverTooltip = useMemo(() => {
-    if (!hoveredLocation) return null
-    const group = outcomeShapes.find((g) => g.code === hoveredLocation.code)
+    // Show the square popup for the hovered location. When nothing is hovered,
+    // fall back to the pinned selection (sticky single-select holds at most
+    // one) so clicking a square or its map polygon keeps the popup on the
+    // square instead of dropping it.
+    const loc =
+      hoveredLocation ??
+      (activeLocationSet && activeLocationSet.size > 0
+        ? (activeLocationSet.values().next().value as LocationInfo)
+        : null)
+    if (!loc) return null
+    const group = outcomeShapes.find((g) => g.code === loc.code)
     if (!group) return null
-    const shape = group.shapes.find(
-      (s) => s.sourceId === hoveredLocation.sourceId,
-    )
+    const shape = group.shapes.find((s) => s.sourceId === loc.sourceId)
     if (!shape) return null
 
     let cx = 0,
@@ -729,14 +795,13 @@ export default function OutcomeMorphOverlay({
       x: cx,
       y: cy - SQUARE_SIZE / 2 - 4,
       name:
-        locationNameMap?.[
-          `${hoveredLocation.code}:${hoveredLocation.sourceId}`
-        ] ?? getLocationName(hoveredLocation.code, hoveredLocation.sourceId),
-      tierLevel: hoveredLocation.tier,
-      tier: getTierLabel(hoveredLocation.tier),
+        locationNameMap?.[`${loc.code}:${loc.sourceId}`] ??
+        getLocationName(loc.code, loc.sourceId),
+      tierLevel: loc.tier,
+      tier: getTierLabel(loc.tier),
       color: shape.color,
     }
-  }, [hoveredLocation, outcomeShapes, locationNameMap])
+  }, [hoveredLocation, activeLocationSet, outcomeShapes, locationNameMap])
 
   const prevEncodingRef = useRef<EncodingMode>("distribution")
   const encodingMorphRef = useRef(1)
@@ -1110,8 +1175,8 @@ export default function OutcomeMorphOverlay({
       extraColumnBlends,
     } = computeBlends(v)
 
-    // Update radar chrome opacity once per tick. (Rises in Beat 7,
-    // falls at the start of Beat 8.)
+    // Update radar chrome opacity once per frame. (Rises in the radar
+    // beat, falls at the start of the heatmap beat.)
     const radarChromeEl = radarChromeRef.current
     if (radarChromeEl) {
       radarChromeEl.style.opacity = String(radarChromeBlend)
@@ -1192,12 +1257,12 @@ export default function OutcomeMorphOverlay({
           el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
         }
 
-        // Once this as settled as squares, drive the
-        // chained morph (square -> bar -> dot -> radar vertex) directly
-        // from progress. Overrides the post-morph resting state above
-        // when any of the beat blends are non-zero. Skipped when the
-        // parent has already toggled `encodingMode` to bar/avg (the
-        // existing isBarOrAvg branches already handle that case).
+        // Once the squares have settled, drive the chained morph
+        // (square, bar, dot, radar vertex, heatmap cell) straight from
+        // progress. This overrides the resting state above whenever a
+        // beat blend is active. Skipped when the parent already switched
+        // `encodingMode` to bar or average, since the branches above
+        // handle that.
         const chainActive =
           v >= morphEnd &&
           encodingMode === "distribution" &&
@@ -1208,24 +1273,23 @@ export default function OutcomeMorphOverlay({
           const heatmapTarget =
             heatmapTargetsByCode.get(group.code) ?? radarTarget
 
-          // Compose the blended target: lerp through square -> bar ->
-          // dot -> radar -> heatmap cell in sequence. Each blend is
-          // clamped to its own window so the chain progresses smoothly
-          // without abrupt handoffs.
+          // Build the blended target by lerping through square, bar,
+          // dot, radar, then heatmap cell in order. Each blend has its
+          // own window so the chain flows without jumps.
           let pts = shape.squareTarget
           if (barBlend > 0) {
             pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
           }
           if (avgBlend > 0) {
-            // From settled bar position -> dot (grid-center).
+            // From the settled bar to the dot (grid center).
             pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
           }
           if (radarBlend > 0) {
-            // From dot position -> radar vertex (per-outcome polar).
+            // From the dot to the radar vertex (per-outcome polar).
             pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
           }
           if (heatmapBlend > 0) {
-            // From radar vertex -> heatmap cell rectangle.
+            // From the radar vertex to the heatmap cell rectangle.
             pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
           }
           el.setAttribute("d", pointsToD(pts))
@@ -1293,17 +1357,11 @@ export default function OutcomeMorphOverlay({
 
   /* Bridge registration
    *
-   * Writes a stable dispatcher into `overlayMorphTickRef.current` so
-   * the engine's `OverlayMorphArbiter` invokes the latest morph
-   * frame every tick. Runs once per mount. The eager sync on mount
-   * matches the legacy `useLayoutEffect`'s initial
-   * `handler(progress.get())` call. Gated on
-   * `tierChangeRafRef.current == null` because the tier-change RAF
-   * (declared earlier) takes exclusive control of the SVG transforms
-   * while running and the latest frame's own internal guards
-   * (`if (tierChangeRafRef.current != null) return`) already handle
-   * the overlap, but we still want to avoid triggering a visual
-   * snap on mount. */
+   * Writes a stable dispatcher into `overlayMorphTickRef.current` so the
+   * engine's `OverlayMorphArbiter` runs the latest morph frame every
+   * frame. Runs once per mount, and applies the current frame right
+   * away. We skip that initial apply while the tier-change animation is
+   * running, so it doesn't cause a visual snap. */
   useEffect(() => {
     const dispatch = (v: number) => latestMorphFrameRef.current(v)
     overlayMorphTickRef.current = dispatch
@@ -1347,12 +1405,10 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
     >
-      {/* Radar chrome: concentric tier rings, radial axes,
-          tier labels along the top spoke, and a connecting trace
-          through the per-outcome vertices. Visual spec mirrors the
-          `@repo/viz` RadarPlot rendering seen in `RadarPanel`.
-          Opacity is driven by `radarChromeBlend` in the main progress
-          handler. */}
+      {/* Radar chrome: tier rings, radial axes, tier labels along the
+          top spoke, and a trace connecting the per-outcome vertices.
+          Matches the `@repo/viz` RadarPlot used in `RadarPanel`. Opacity
+          is driven by `radarChromeBlend` in the main progress handler. */}
       <g
         ref={(el) => {
           radarChromeRef.current = el
@@ -1416,6 +1472,23 @@ export default function OutcomeMorphOverlay({
           />
         )}
       </g>
+      {/* Radar vertex hit targets: a transparent circle over each outcome's
+          dot, present only on the settled radar beat. The morphed shapes and
+          per-outcome bounds rect are pointer-inert there, so these receive the
+          click and select that outcome on the map (see `onOutcomeClick`). */}
+      {radarDotClickEnabled &&
+        radarGeometry.vertices.map((v) => (
+          <circle
+            key={`radar-hit-${v.code}`}
+            cx={v.cx}
+            cy={v.cy}
+            r={DOT_RADIUS + 6}
+            fill="transparent"
+            pointerEvents="all"
+            style={{ cursor: "pointer" }}
+            onClick={() => onOutcomeClick?.(v.code)}
+          />
+        ))}
       {/* Heatmap chrome */}
       <g
         ref={(el) => {
@@ -1491,20 +1564,36 @@ export default function OutcomeMorphOverlay({
           )}
         </g>
       ))}
+      {/* Grid hit backdrop: swallows pointer events in the gaps between
+          squares so the map-polygon hover underneath does not pop up
+          while the user mouses around the distribution grid. Squares
+          render on top and keep their own hover. Interactive only. */}
+      {interactive && gridHitBounds && (
+        <rect
+          x={gridHitBounds.x}
+          y={gridHitBounds.y}
+          width={gridHitBounds.width}
+          height={gridHitBounds.height}
+          fill="transparent"
+          pointerEvents="all"
+          onMouseLeave={() => onLocationLeave?.()}
+        />
+      )}
       {outcomeShapes.map((group) => {
         if (!pathRefsMap.current.has(group.code)) {
           pathRefsMap.current.set(group.code, [])
         }
         const refs = pathRefsMap.current.get(group.code)!
         const isSelected = selectedOutcomeCode === group.code
+        const glyphClickable = interactive || outcomeGlyphClickEnabled
 
         return (
           <g
             key={group.code}
             onClick={
-              interactive ? () => onOutcomeClick?.(group.code) : undefined
+              glyphClickable ? () => onOutcomeClick?.(group.code) : undefined
             }
-            style={{ cursor: interactive ? "pointer" : "default" }}
+            style={{ cursor: glyphClickable ? "pointer" : "default" }}
           >
             <rect
               x={group.bounds.x}
@@ -1512,7 +1601,7 @@ export default function OutcomeMorphOverlay({
               width={group.bounds.width}
               height={group.bounds.height}
               fill="transparent"
-              pointerEvents={interactive ? "all" : "none"}
+              pointerEvents={glyphClickable ? "all" : "none"}
             />
             <g
               ref={(el) => {
@@ -1582,9 +1671,9 @@ export default function OutcomeMorphOverlay({
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
-              // Squares are clickable whenever the overlay is interactive
-              // and we're not in average mode.
-              const isClickable = interactive && !isAvgMode
+              // Squares are clickable only on the grid beats (square hover
+              // enabled) and never in average mode.
+              const isClickable = squareHoverEnabled && !isAvgMode
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -1637,7 +1726,7 @@ export default function OutcomeMorphOverlay({
                   }}
                   pointerEvents={isClickable ? "all" : "none"}
                   onMouseEnter={
-                    interactive && !isBarOrAvg
+                    squareHoverEnabled && !isBarOrAvg
                       ? () =>
                           onLocationEnter?.({
                             code: group.code,
@@ -1647,12 +1736,12 @@ export default function OutcomeMorphOverlay({
                       : undefined
                   }
                   onMouseLeave={
-                    interactive && !isBarOrAvg
+                    squareHoverEnabled && !isBarOrAvg
                       ? () => onLocationLeave?.()
                       : undefined
                   }
                   onClick={
-                    interactive
+                    squareHoverEnabled
                       ? (e) => {
                           e.stopPropagation()
                           if (isBarMode && onBarClick) {
@@ -1690,65 +1779,126 @@ export default function OutcomeMorphOverlay({
         )
       })}
 
-      {hoverTooltip && (
-        <foreignObject
-          x={hoverTooltip.x - 100}
-          y={hoverTooltip.y - 40}
-          width={200}
-          height={40}
-          style={{ pointerEvents: "none", overflow: "visible" }}
-        >
-          <div
-            style={{
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-              margin: "0 auto",
-              padding: "3px 8px",
-              borderRadius: 4,
-              background: alpha(theme.palette.common.white, 0.92),
-              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-              fontFamily: "inherit",
-              fontSize: 11,
-              lineHeight: 1.3,
-              textAlign: "center",
-              color: "#333",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 600,
-                maxWidth: 200,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+      {/* Matrix cell hit targets: a transparent rect over every cell (primary
+          + climate columns), present only on the settled heatmap beat. Drawn
+          last so it sits above the per-outcome bounds rects and the grid
+          backdrop and reliably receives the click. Each cell carries its
+          column's climate scenario, so clicking it paints that outcome under
+          that climate (see `onHeatmapCellClick`). The active cell gets a gold
+          outline. */}
+      {heatmapCellClickEnabled &&
+        [
+          ...heatmapGeometry.cells.map((cell) => ({
+            ...cell,
+            scenarioId: heatmapPrimaryScenarioId,
+          })),
+          ...heatmapGeometry.extraColumns.flatMap((column) =>
+            column.cells.map((cell) => ({
+              ...cell,
+              scenarioId: column.scenarioId,
+            })),
+          ),
+        ].map((cell, i) => {
+          const isActive =
+            selectedOutcomeCode === cell.code &&
+            selectedScenarioId != null &&
+            selectedScenarioId === cell.scenarioId
+          return (
+            <rect
+              key={`heat-hit-${i}-${cell.code}`}
+              x={cell.cx - cell.w / 2}
+              y={cell.cy - cell.h / 2}
+              width={cell.w}
+              height={cell.h}
+              rx={2}
+              ry={2}
+              fill="transparent"
+              stroke={isActive ? theme.palette.accent.glossary : "none"}
+              strokeWidth={isActive ? 2 : 0}
+              pointerEvents="all"
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                if (cell.scenarioId) {
+                  onHeatmapCellClick?.(cell.code, cell.scenarioId)
+                }
               }}
-            >
-              {hoverTooltip.name}
-            </span>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                fontWeight: 500,
-                color: hoverTooltip.color,
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
-                  backgroundColor: hoverTooltip.color,
-                  flexShrink: 0,
-                }}
-              />
-              Tier {hoverTooltip.tierLevel}: {hoverTooltip.tier}
-            </span>
-          </div>
-        </foreignObject>
-      )}
+            />
+          )
+        })}
+
+      {hoverTooltip && renderHoverTooltipPortal(hoverTooltip)}
     </svg>
   )
+
+  /* Render the square hover tooltip through a portal to the document body.
+   * The morph overlay sits in a `zIndex: 4` stacking context, below the
+   * right-column outcome labels (`zIndex: 5`), so an in-SVG tooltip would be
+   * occluded by those headers. Portaling to the body escapes that context.
+   * The tooltip's x and y are SVG viewBox units, which equal panel pixels
+   * (the SVG fills the panel at 100%), so we offset by the SVG's position to
+   * place it in document space. */
+  function renderHoverTooltipPortal(tip: NonNullable<typeof hoverTooltip>) {
+    const svgEl = svgRef.current
+    if (!svgEl || typeof document === "undefined") return null
+    const rect = svgEl.getBoundingClientRect()
+    const left = window.scrollX + rect.left + tip.x
+    const top = window.scrollY + rect.top + tip.y
+    return createPortal(
+      <div
+        style={{
+          position: "absolute",
+          left,
+          top,
+          transform: "translate(-50%, -100%)",
+          zIndex: theme.zIndex.tooltip,
+          pointerEvents: "none",
+          display: "inline-flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "3px 8px",
+          borderRadius: 4,
+          background: alpha(theme.palette.common.white, 0.92),
+          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          fontFamily: "inherit",
+          fontSize: 11,
+          lineHeight: 1.3,
+          textAlign: "center",
+          color: "#333",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 600,
+            maxWidth: 200,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {tip.name}
+        </span>
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontWeight: 500,
+            color: tip.color,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 2,
+              backgroundColor: tip.color,
+              flexShrink: 0,
+            }}
+          />
+          Tier {tip.tierLevel}: {tip.tier}
+        </span>
+      </div>,
+      document.body,
+    )
+  }
 }

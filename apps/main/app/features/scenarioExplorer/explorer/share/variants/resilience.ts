@@ -13,7 +13,7 @@ import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
 import {
   resilienceHeatmapDataToCSV,
   type ResilienceHeatmapChartDataShape,
-} from "../../tools/panels/dataInDepth/utils/exportUtils"
+} from "../exportUtils"
 import { useResilienceAggregate } from "../../tools/panels/resilience/useResilienceAggregate"
 import {
   RESILIENCE_HYDROCLIMATES,

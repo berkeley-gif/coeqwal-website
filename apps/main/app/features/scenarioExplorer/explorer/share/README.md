@@ -478,7 +478,7 @@ an `@import` for the Neue Haas font family so renderers that honor
 web fonts match the on-screen typography.
 
 CSV export for the whole tray flows through
-`exportAllShareItemsAsZip` (in `tools/panels/dataInDepth/utils/exportUtils.ts`),
+`exportAllShareItemsAsZip` (in `share/exportUtils.ts`),
 which iterates the items and asks each handler's `exportCsv` for its
 body. Per-variant CSV body builders (`barChartDataToCSV`,
 `radarDataToCSV`, `equityDataToCSV`,
@@ -620,7 +620,7 @@ zoom level) - that belongs to the live view, not the file on disk.
 
 ##### Out of scope
 
-`getTimestampedFilename` (in `tools/panels/dataInDepth/utils/exportUtils.ts`) is
+`getTimestampedFilename` (in `share/exportUtils.ts`) is
 also used by CategoryView section downloads. Do not pull it into share variants.
 
 ### Known limitation: one raster size per variant type

@@ -1,38 +1,21 @@
-/* Baseline writer for the `demand-units` and `demand-units-outline`
+/* Writer for the `demand-units` and `demand-units-outline`
  * Mapbox layers.
  *
- * Invariant 2 of the Storyboard Engine Hardening Plan v2 states that
- * every writer that takes ownership of these layers must assert the
- * full set of properties the next consumer depends on. Partial writes
- * cause bugs like the Step 4 to Step 5 "semi-transparent AG layer"
- * regression, where one writer set filter and opacity correctly but
- * inherited a stale `fill-color` from a previous writer. See the
- * plan at `.cursor/plans/storyboard_engine_hardening_plan_v2_*.plan.md`
- * for the full invariant list.
+ * Any code that takes over these layers must set every property the
+ * next consumer reads, or a stale value (like `fill-color`) leaks in
+ * from the previous writer. This helper writes the full set in one
+ * place, so every caller goes through it.
  *
- * This module centralizes the full-state write so all callers
- * (MapPaintArbiter beat enters, the interactive teardown effect, any
- * future arbiter that needs to reset these layers) go through one
- * function. Properties are listed exhaustively, not merged from
- * whatever was there, so it is impossible to accidentally leak state
- * from the previous writer.
- *
- * The helper does not know about storyboard beats or interactive
- * modes. Callers pass a `DemandUnitsBaselineSpec` describing the
- * state they need. That keeps the helper a pure, testable function
- * of its inputs.
+ * It knows nothing about beats or modes: callers pass a
+ * `DemandUnitsBaselineSpec` describing the exact state they want.
  */
 
-/** Not a parallel "Map type": it is intentionally narrower
- *  than `MapboxGLMap` (from `@repo/map`) because Mapbox GL's strict
- *  `keyof PaintSpecification` / `FilterSpecification` overloads reject
- *  the `readonly unknown[]` expressions carried on our spec/payload
- *  types. The package boundary is still honored upstream: callers
- *  obtain the map via `mapRef.current.getMap()` (typed `MapboxGLMap`
- *  from `@repo/map`) and then pass it into helpers that consume this
- *  write view. See the Roadmap section of packages/map/README.md for
- *  the long-term replacement (value-permissive setters on
- *  `MapOperationsAPI`), after which this type goes away. */
+/** A narrower view of the Mapbox map than `MapboxGLMap`. Mapbox GL's
+ *  strict paint/filter types reject the `readonly unknown[]`
+ *  expressions our specs carry, so this view loosens those setters.
+ *  Callers still get the real map from `mapRef.current.getMap()` and
+ *  pass it in. See the Roadmap in packages/map/README.md for the
+ *  eventual replacement. */
 export type MapWriteView = {
   getLayer: (id: string) => unknown
   setFilter: (id: string, f: unknown) => void
@@ -50,8 +33,8 @@ export const DU_CLASS_FILTER: readonly unknown[] = [
   ["literal", ["Agriculture", "Urban", "Refuge"]],
 ] as const
 
-/** Filter used when the storyboard isolates Agriculture (Beat 1C tail
- *  and Beat 5). */
+/** Filter used when the storyboard isolates Agriculture (tier-color
+ *  hold and loi-highlight). */
 export const DU_AG_ONLY_FILTER: readonly unknown[] = [
   "==",
   ["get", "Class"],
@@ -64,29 +47,12 @@ export const DU_AG_ONLY_FILTER: readonly unknown[] = [
 export type BaselineMap = MapWriteView
 
 /** Permissive write view consumed by `ensureDemandUnitsOutlineLayer`.
- *  Same shape as `BaselineMap`; aliased for call-site clarity. */
+ *  Same shape as `BaselineMap`, aliased for clarity */
 export type SessionInitMap = MapWriteView
 
-/** Complete specification of the demand-units baseline state.
- *
- *  Every field is required. If you find yourself wanting to make
- *  something optional, think first about whether "inherit from the
- *  previous writer" is really what you want. The whole point of this
- *  helper is that the answer is no.
- *
- *  `fillExpr` is the result of `ctx.buildBlendedTierExpr(fromHex, t)`
- *  or equivalent. Callers that do not have a tier expression ready
- *  can pass `null` and fill-color / fill-outline-color will be left
- *  in place. That path is for the initial pre-playback setup when
- *  the tier table has not loaded yet. All playback and teardown
- *  callers should supply a non-null expression.
- *
- *  Opacity is a tagged union so the interactive-to-playback handoff
- *  can opt out of writing opacity explicitly. The teardown path
- *  deliberately preserves whatever opacity expression the next
- *  writer (the main choreography listener's per-tick branch) is
- *  about to set. Playback entries that need a definite opacity
- *  seeding the ramp pass `{ kind: "scalar", value }`. */
+/** The full demand-units baseline state. Every field is required on
+ *  purpose: making one optional would mean "inherit from the previous
+ *  writer", which is exactly what this helper avoids. */
 export type DemandUnitsOpacity =
   | { kind: "scalar"; value: number }
   | { kind: "preserve" }
@@ -95,25 +61,18 @@ export interface DemandUnitsBaselineSpec {
   /** Mapbox filter applied to both fill and outline layers. Typical
    *  values: `DU_CLASS_FILTER` or `DU_AG_ONLY_FILTER`. */
   filter: readonly unknown[]
-  /** Tier color expression for fill, fill-outline, and outline line
-   *  color. Pass `null` only in pre-playback setup when the tier data
-   *  is not yet loaded. */
+  /** Tier color expression for fill, fill-outline, and outline color.
+   *  Pass `null` only in pre-playback setup before tier data loads. */
   fillExpr: readonly unknown[] | null
-  /** Fill-layer opacity directive. `{ kind: "scalar", value }` writes
-   *  a scalar opacity (callers seeding a fade-in write 0, callers
-   *  landing at peak write the peak value, typically 0.65).
-   *  `{ kind: "preserve" }` leaves fill-opacity alone so an
-   *  immediately following writer can set it without a spurious
-   *  intermediate value landing on the layer. */
+  /** Fill opacity. `scalar` writes a fixed value (0 to seed a fade-in,
+   *  ~0.65 at peak). `preserve` leaves opacity alone so the next writer
+   *  can set it without a flicker. */
   fillOpacity: DemandUnitsOpacity
-  /** Outline-layer opacity directive. Same semantics as
-   *  `fillOpacity`. Usually matches so fill and stroke move in
-   *  lockstep. */
+  /** Outline opacity. Same as `fillOpacity`. Usually matches it so fill
+   *  and stroke move together. */
   lineOpacity: DemandUnitsOpacity
-  /** Outline line width. Default baseline is `0.5`. Callers styling a
-   *  gold LOI ring temporarily bump it via `setPaintProperty`
-   *  directly in their own code path. This helper stays with the
-   *  baseline value. */
+  /** Outline width. Baseline is `0.5`. The gold LOI ring is set
+   *  separately by its own code. */
   lineWidth: number
   /** Outline line offset. Baseline is `-0.25` to keep strokes inside
    *  polygon boundaries. */
@@ -124,17 +83,11 @@ export interface DemandUnitsBaselineSpec {
   visibility: "visible" | "none"
 }
 
-/** Apply a complete baseline spec to `demand-units` and
- *  `demand-units-outline`. Idempotent: calling it twice in a row
- *  yields the same final Mapbox state.
- *
- *  Always clears fill-opacity-transition, fill-color-transition,
- *  line-opacity-transition, and line-color-transition to zero first
- *  so that subsequent opacity or color writes by per-frame ramps are
- *  not smoothed away by a stale 350 ms or 400 ms transition
- *  inherited from `OutcomePolygonLayer`. This is the single most
- *  important thing this helper does and it was the root cause of
- *  multiple Step 4 to Step 5 regressions. */
+/** Apply a full baseline spec to the two layers. Safe to call
+ *  repeatedly. First it zeroes the paint transitions, so a per-frame
+ *  ramp isn't smoothed away by a leftover 350/400 ms transition from
+ *  `OutcomePolygonLayer`. That transition reset is the most important
+ *  thing this helper does. */
 export function writeDemandUnitsBaseline(
   map: BaselineMap,
   spec: DemandUnitsBaselineSpec,
@@ -205,7 +158,7 @@ export function writeDemandUnitsBaseline(
     }
   } catch {
     /* Mapbox can throw transiently during style reloads. The caller
-     *  re-asserts on the next valid tick, so swallowing here is safe. */
+     *  re-applies on the next valid frame, so swallowing here is safe. */
   }
 }
 
@@ -221,17 +174,13 @@ export interface DemandUnitsOutlineInitSpec {
   lineOffset: number
 }
 
-/** Ensure the `demand-units-outline` line layer exists. In regular
- *  map modes `OutcomePolygonLayer` creates it on demand, but in
- *  get-started mode OPL is skipped for demand-units and the storyboard
- *  owns the session lifecycle. This helper is idempotent: if the
- *  layer already exists it returns without writes, so callers can
- *  call it on every mount cycle without worrying about double-adds.
+/** Create the `demand-units-outline` layer if it's missing. In normal
+ *  map modes `OutcomePolygonLayer` makes it, but get-started mode skips
+ *  that and the storyboard owns it. Safe to call every mount: it
+ *  returns early if the layer already exists.
  *
- *  The outline layer inherits `source` and `source-layer` from the
- *  `demand-units` fill layer. If the fill doesn't exist yet the
- *  helper bails silently (caller should retry when the style is
- *  loaded). */
+ *  The outline copies its `source` and `source-layer` from the fill
+ *  layer, and bails if the fill isn't there yet. */
 export function ensureDemandUnitsOutlineLayer(
   map: SessionInitMap,
   spec: DemandUnitsOutlineInitSpec,
@@ -259,6 +208,6 @@ export function ensureDemandUnitsOutlineLayer(
     })
   } catch {
     /* layer may already exist from another map mode, or style not
-     *  loaded yet. Swallow: the next mount cycle retries. */
+     *  loaded yet. */
   }
 }

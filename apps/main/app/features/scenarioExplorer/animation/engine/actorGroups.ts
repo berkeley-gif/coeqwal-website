@@ -1,0 +1,346 @@
+/* Actor groups: the actors that play under each timing beat
+ *
+ * Each group pairs a timing-beat id (see animationTiming.ts) with the
+ * actors active during that beat. The engine flattens these and hands
+ * each actor to the arbiter that owns its kind. Groups with an empty
+ * `actors` array still drive their choreography from component effects
+ * and the overlay bridges. See the animation README for the full
+ * story.
+ */
+
+import type { ActorGroup } from "./types"
+import { getDemandUnitDisplayName } from "../../../map/config/demandUnitNames"
+import { getTierLabel } from "../../../../content/tiers"
+import { LOI_DU_ID, HIGHLIGHT_GOLD } from "../demandUnitsPaint"
+
+// loi-highlight (beat index 4) thresholds, kept here rather than
+// imported from `TierAnimationSection.tsx` so the engine package has
+// no upward dependency on the component.
+const LOI_ENTER = 0.5
+const LOI_LAYER_IN_START = 0.5
+const LOI_LAYER_IN_END = 0.52
+// The four highlight steps run right after the layer settles so the
+// gold ring does not sit on a long pause. They keep their original
+// spacing and finish well before LOI_SETTLE.
+const LOI_SQUARE_RING_AT = 0.54
+const LOI_SQUARE_POPUP_AT = 0.55
+const LOI_POLYGON_RING_AT = 0.56
+const LOI_POLYGON_POPUP_AT = 0.565
+const LOI_SETTLE = 0.62
+const LOI_TAIL_END = 0.63
+const LOI_LAYER_OPACITY = 0.65
+
+// Beat 4 (loi-highlight) actors
+
+const LOI_CODE = "AG_REV"
+
+/** Resolve the `info`, `coord`, `name`, and `tierColor` for
+ *  `LOI_DU_ID`. Returns null if data is not ready yet. The engine
+ *  will retry next frame. */
+function resolveLoiData(ctx: {
+  outcomeLocations: Record<
+    string,
+    {
+      ids: Set<string>
+      tierMap: Record<string, number>
+      colorMap: Record<string, string>
+      nameMap: Record<string, string>
+    }
+  >
+  centroidLookup: Map<string, { lng: number; lat: number }>
+}): {
+  info: { code: string; sourceId: string; tier: number }
+  coord: { lng: number; lat: number } | null
+  tierColor: string
+  name: string
+} | null {
+  const agData = ctx.outcomeLocations[LOI_CODE]
+  if (!agData || agData.ids.size === 0) return null
+  const tier = agData.tierMap[LOI_DU_ID]
+  if (tier == null) return null
+  const coord = ctx.centroidLookup.get(LOI_DU_ID) ?? null
+  const tierColor = agData.colorMap[LOI_DU_ID] ?? "#888888"
+  // Match the interactive popup's name precedence: prefer a meaningful
+  // API name, but treat an API value that is just the raw id as missing
+  // and fall back to the friendly demand-unit display name. Without this
+  // the animated popup could show the raw id while a click on the same
+  // unit shows the friendly name.
+  const apiName = agData.nameMap[LOI_DU_ID]
+  const name =
+    apiName && apiName !== LOI_DU_ID
+      ? apiName
+      : (getDemandUnitDisplayName(LOI_DU_ID) ?? LOI_DU_ID)
+  return {
+    info: { code: LOI_CODE, sourceId: LOI_DU_ID, tier },
+    coord,
+    tierColor,
+    name,
+  }
+}
+
+const BEAT4_ACTORS: ActorGroup = {
+  id: "loi-highlight",
+  actors: [
+    // Map paint. One-shot filter swap at window entry.
+    {
+      kind: "mapPaint",
+      id: "loi-highlight:mapPaint:enter",
+      // One-shot on enter at `LOI_ENTER`. Window is a hair wider than
+      // the layer-fade so enter runs before the first opacity write.
+      window: [LOI_ENTER, LOI_TAIL_END],
+      payload: { kind: "loi-enter", loiDuId: LOI_DU_ID },
+    },
+    // Map paint. Per-frame opacity ramp for the AG demand-unit layer.
+    {
+      kind: "mapPaint",
+      id: "loi-highlight:mapPaint:layerFade",
+      window: [LOI_ENTER, LOI_TAIL_END],
+      payload: {
+        kind: "loi-layer-fade",
+        fadeInStart: LOI_LAYER_IN_START,
+        fadeInEnd: LOI_LAYER_IN_END,
+        holdUntil: LOI_SETTLE,
+        tailEnd: LOI_TAIL_END,
+        peakOpacity: LOI_LAYER_OPACITY,
+      },
+    },
+    // Overlay popup. Gold ring on the distribution square at step 2.
+    {
+      kind: "overlayPopup",
+      id: "loi-highlight:overlayPopup:ring",
+      window: [LOI_SQUARE_RING_AT, LOI_SETTLE],
+      target: "ring",
+      buildInfo: (ctx) => resolveLoiData(ctx)?.info ?? null,
+    },
+    // Overlay popup. Square-side popup at step 3.
+    {
+      kind: "overlayPopup",
+      id: "loi-highlight:overlayPopup:hover",
+      window: [LOI_SQUARE_POPUP_AT, LOI_SETTLE],
+      target: "hover",
+      buildInfo: (ctx) => resolveLoiData(ctx)?.info ?? null,
+    },
+    // Map paint. Gold stroke on the LOI polygon at step 4.
+    {
+      kind: "mapPaint",
+      id: "loi-highlight:mapPaint:polyRing",
+      window: [LOI_POLYGON_RING_AT, LOI_SETTLE],
+      payload: {
+        kind: "loi-gold-ring",
+        loiDuId: LOI_DU_ID,
+        goldHex: HIGHLIGHT_GOLD,
+      },
+    },
+    // Map popup. `LocationHighlight` anchored to the LOI polygon at
+    // step 5.
+    {
+      kind: "mapPopup",
+      id: "loi-highlight:mapPopup:loi",
+      // Runs through `LOI_TAIL_END` (not just `LOI_SETTLE`) so the
+      // popup stays readable during the ~0.01-wide tail.
+      window: [LOI_POLYGON_POPUP_AT, LOI_TAIL_END],
+      buildHighlight: (ctx) => {
+        const data = resolveLoiData(ctx)
+        if (!data || !data.coord) return null
+        return {
+          key: `loi-highlight:${data.info.code}:${data.info.sourceId}`,
+          longitude: data.coord.lng,
+          latitude: data.coord.lat,
+          name: data.name,
+          tierLevel: data.info.tier,
+          tierLabel: getTierLabel(data.info.tier),
+          tierColor: data.tierColor,
+          pinned: true,
+        }
+      },
+    },
+    // Map paint. Exit actor that clears the gold ring on the last
+    // frame of the loi-highlight beat.
+    {
+      kind: "mapPaint",
+      id: "loi-highlight:mapPaint:exit",
+      window: [LOI_TAIL_END - 0.0005, LOI_TAIL_END],
+      payload: { kind: "loi-exit", clearRing: true },
+    },
+  ],
+}
+
+// Beat 0 (legend) and Beat 1 (collapse-and-colors) actors
+
+// Reset window `[0, RESET_END)`. On enter, asserts the full baseline
+// state for `demand-units` and `demand-units-outline`.
+const RESET_END = 0.01
+
+// Blue hold and tier-color blend thresholds
+const FREEZE_AT = 0.09
+const TIER_BLEND_START = 0.26
+// Splits the tier-color blend: the first part collapses the three
+// blues to BLUE_MID, the second blends BLUE_MID into the AG tier
+// colors.
+const TIER_CONVERGE_END = 0.27
+const TIER_BLEND_END = 0.28
+const BEAT2_START = 0.38
+
+// Beat 2 hide-schedule thresholds, whose AG fade-out window straddles
+// `BEAT2_START`.
+const BEAT2_AG_FADE_OUT_START = 0.378
+const BEAT2_AG_FADE_OUT_END = 0.383
+// How many color-cycle rotations the arbiter runs. 90 is one full
+// cycle across `[0, FREEZE_AT)`.
+const BLUE_CYCLE_ROTATIONS = 90
+// Fraction of the cycle window spent fading the colored locations in.
+// Most of the window so the layer eases in gradually rather than
+// snapping on. The remainder holds with a breathing oscillation.
+const BLUE_FADE_IN_FRAC = 0.85
+const LAYER_PEAK_OPACITY = 0.65
+const BLUE_BREATH_AMPLITUDE = 0.05
+
+const BEAT0_ACTORS: ActorGroup = {
+  id: "legend",
+  actors: [
+    // Narration bridge. Runs every frame across the whole storyboard,
+    // calling the callback `BeatTextOverlay` registers via
+    // `ctx.narrationTickRef`. It lives under the first beat only because
+    // it has no natural home beat. Actor windows don't have to line up
+    // with beats.
+    {
+      kind: "narration",
+      id: "legend:narration:tick",
+      window: [0, 1],
+    },
+    // Overlay-morph bridge. Same shape and rationale as the
+    // narration bridge above. `OutcomeMorphOverlay` registers its
+    // per-frame SVG-transform callback via
+    // `ctx.overlayMorphTickRef`. See
+    // `engine/arbiters/OverlayMorphArbiter.ts`.
+    {
+      kind: "overlayMorph",
+      id: "legend:overlayMorph:tick",
+      window: [0, 1],
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:reset",
+      window: [0, RESET_END],
+      payload: { kind: "reset" },
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:cycle",
+      window: [RESET_END, FREEZE_AT],
+      payload: {
+        kind: "blue-cycle",
+        cycleStart: 0,
+        cycleEnd: FREEZE_AT,
+        cycleRotations: BLUE_CYCLE_ROTATIONS,
+        peakOpacity: LAYER_PEAK_OPACITY,
+        fadeInFrac: BLUE_FADE_IN_FRAC,
+        breathAmplitude: BLUE_BREATH_AMPLITUDE,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "legend:mapPaint:hold",
+      window: [FREEZE_AT, TIER_BLEND_START],
+      payload: {
+        kind: "blue-hold",
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// Beat 1 (collapse-and-colors) actors. The two-stage color morph from
+// the three blues to AG tier colors (`tier-color-blend`), then an AG-only
+// hold (`tier-color-hold`). The tail's window runs a little past this beat
+// into `ag-rev-morph`, which is fine since actor windows don't have to
+// match beat boundaries.
+const BEAT1_ACTORS: ActorGroup = {
+  id: "collapse-and-colors",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "collapse-and-colors:mapPaint:blend",
+      window: [TIER_BLEND_START, TIER_BLEND_END],
+      payload: {
+        kind: "tier-color-blend",
+        blendStart: TIER_BLEND_START,
+        convergeEnd: TIER_CONVERGE_END,
+        blendEnd: TIER_BLEND_END,
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "collapse-and-colors:mapPaint:tail",
+      window: [TIER_BLEND_END, BEAT2_START],
+      payload: {
+        kind: "tier-color-hold",
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+  ],
+}
+
+// Beat 2 (ag-rev-morph) actors. Fades each outcome's polygons off the
+// map as the SVG distribution-square morph takes over. The arbiter
+// reads `ctx.getHideSchedule()` every frame because the schedule is
+// built after tier data loads and can rebuild. The window ends at
+// `LOI_ENTER`, where the loi-highlight actors take over.
+//
+// The `lineFades` companion handles the line layers in the same
+// schedule. Its window runs to the end so the lines stay hidden for
+// the rest of the storyboard and reverse scrubs restore the right
+// opacity. Line layers don't overlap `demand-units`, so this never
+// conflicts with the loi-highlight or list-bar actors.
+const BEAT2_ACTORS: ActorGroup = {
+  id: "ag-rev-morph",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "ag-rev-morph:mapPaint:hideSchedule",
+      window: [BEAT2_START, LOI_ENTER],
+      payload: {
+        kind: "polygon-hide-schedule",
+        agFadeOutStart: BEAT2_AG_FADE_OUT_START,
+        agFadeOutEnd: BEAT2_AG_FADE_OUT_END,
+        peakOpacity: LAYER_PEAK_OPACITY,
+      },
+    },
+    {
+      kind: "mapPaint",
+      id: "ag-rev-morph:mapPaint:lineFades",
+      window: [BEAT2_START, 1],
+      payload: { kind: "line-hide-schedule" },
+    },
+  ],
+}
+
+// list-bar actors. A one-shot DU restore at `LOI_TAIL_END` that takes
+// the layers back from the loi-highlight actors and pins both
+// opacities at 0 for the rest of the storyboard. It lives under
+// `list-bar`, the first beat at or after `LOI_TAIL_END`. Scrubbing
+// back into loi-highlight is handled by the loi-highlight actors' own
+// enter.
+const BEAT5_ACTORS: ActorGroup = {
+  id: "list-bar",
+  actors: [
+    {
+      kind: "mapPaint",
+      id: "list-bar:mapPaint:restore",
+      window: [LOI_TAIL_END, 1],
+      payload: { kind: "du-clear-hold" },
+    },
+  ],
+}
+
+export const ACTOR_GROUPS: readonly ActorGroup[] = [
+  BEAT0_ACTORS,
+  BEAT1_ACTORS,
+  BEAT2_ACTORS,
+  { id: "all-other-morphs", actors: [] },
+  BEAT4_ACTORS,
+  BEAT5_ACTORS,
+  { id: "radar", actors: [] },
+  { id: "heatmap", actors: [] },
+]

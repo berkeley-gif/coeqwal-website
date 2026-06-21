@@ -1,5 +1,5 @@
 /**
- * Radar variant handler. Drives the parallel-plot share card produced
+ * Radar variant handler. Drives the radar share card produced
  * by the radar tool toolbar and the scenario-selection sidebar's
  * theme-header overlay path. URL prefix `r`.
  *
@@ -12,7 +12,7 @@
 import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../../content/outcomes"
-import { radarDataToCSV } from "../../tools/panels/dataInDepth/utils/exportUtils"
+import { radarDataToCSV } from "../exportUtils"
 import ShareRadarCard from "../cards/ShareRadarCard"
 import ShareRadarLiveChart from "../live/ShareRadarLiveChart"
 import {

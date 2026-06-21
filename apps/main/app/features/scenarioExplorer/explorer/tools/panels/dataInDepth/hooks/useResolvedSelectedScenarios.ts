@@ -18,6 +18,7 @@
 import { useMemo } from "react"
 import { useWorkspaceSlice } from "../../../../store"
 import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
+import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 
 export interface ResolvedSelectedScenarios {
   /** The hydroclimate this mapping was resolved for (e.g. `"historical"`) */
@@ -29,9 +30,9 @@ export interface ResolvedSelectedScenarios {
    * Pass directly into `useBatchStatistics` / `useMultipleScenarioTiers`
    */
   resolvedIds: string[]
-  /** sibling-group id -> resolved short_code, or `null` if no variant */
+  /** Maps sibling-group id to resolved short_code, or `null` if no variant */
   groupToResolved: Record<string, string | null>
-  /** Resolved short_code -> sibling-group id, for re-keying API responses */
+  /** Maps resolved short_code to sibling-group id, for re-keying API responses */
   resolvedToGroup: Map<string, string>
   /** Selected sibling-group ids with no variant for this hydroclimate */
   missingGroupIds: string[]
@@ -56,8 +57,16 @@ export interface ResolvedSelectedScenarios {
  * ```
  */
 export function useResolvedSelectedScenarios(): ResolvedSelectedScenarios {
-  const selectedGroupIds = useWorkspaceSlice((s) => s.selectedScenarios)
+  const allSelectedGroupIds = useWorkspaceSlice((s) => s.selectedScenarios)
   const { hydroclimate, idMapping } = useResolvedIdMapping()
+
+  // Data in Depth only compares up to MAX_DATA_IN_DEPTH_SCENARIOS at once.
+  // Capping here keeps the batch fetch, re-keying, and column rendering all in
+  // step. Other tools read selectedScenarios directly and are unaffected.
+  const selectedGroupIds = useMemo(
+    () => allSelectedGroupIds.slice(0, MAX_DATA_IN_DEPTH_SCENARIOS),
+    [allSelectedGroupIds],
+  )
 
   return useMemo(() => {
     const groupToResolved: Record<string, string | null> = {}

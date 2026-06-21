@@ -58,7 +58,7 @@ export interface MultiValueTier {
 export interface TierScores {
   /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting */
   weighted_score: number | null
-  /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis */
+  /** Normalized score (0.0-1.0, higher = better). Use for radar plot Y-axis */
   normalized_score: number | null
 }
 
