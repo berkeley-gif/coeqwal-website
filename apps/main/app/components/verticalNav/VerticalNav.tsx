@@ -383,9 +383,10 @@ export default function VerticalNav({
                                         display: "flex",
                                         flexDirection: "column",
                                         // Small gap between sub-items; tighter than first-level
-                                        gap: "2px",
+                                        gap: "4px",
                                         mt: "4px",
                                         mb: theme.space.component.xs,
+                                        ml: theme.space.component.md,
                                     }}
                                 >
                                     {section.subSections.map((sub) => (

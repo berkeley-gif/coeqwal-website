@@ -39,8 +39,8 @@ export interface NavSection {
 export const NAV_SECTIONS: NavSection[] = [
   {
     // FLAG: update id to match the map route/mapMode value (e.g. "learn", "get-started")
-    id: "map-journey",
-    label: "Map Journey",
+    id: "get-started",
+    label: "Get Started",
     subSections: [
       // Learn map sections (from MapOverlayPanels / SectionId)
       // FLAG: confirm with coworkers whether these Learn scroll steps should

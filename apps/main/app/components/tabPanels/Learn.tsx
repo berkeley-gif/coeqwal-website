@@ -78,7 +78,7 @@ export default function LearnPanel() {
 
   return (
     <>
-      <VerticalNav activeSectionId="map-journey" />
+      <VerticalNav activeSectionId="get-started" />
       <div
         style={{
           position: "relative",
