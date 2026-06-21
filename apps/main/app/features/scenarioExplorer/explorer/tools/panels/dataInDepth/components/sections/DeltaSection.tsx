@@ -19,28 +19,27 @@
 import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
-import type { ReservoirData, MonthlyPercentiles } from "@repo/viz"
-import { GridScenarioHeader, GridRow } from "./AlignedScenarioGrid"
-import { ChartGridProvider } from "./ChartGridContext"
-import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
-import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
-import { useDeltaMonthly } from "@repo/data/coeqwal/hooks"
-import type {
-  DeltaMonthlyStats,
-  ChannelMonthlyStats,
-  BatchStatisticsResponse,
-  BatchEnvFlowData,
-} from "@repo/data/coeqwal"
-import { SectionHeader } from "./SectionHeader"
+import type { ReservoirData } from "@repo/viz"
+import { GridScenarioHeader, GridRow } from "../shared/AlignedScenarioGrid"
+import { ChartGridProvider } from "../shared/ChartGridContext"
+import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
+import { SectionHeader } from "../shared/SectionHeader"
+import type { BatchSectionProps } from "../shared/sectionTypes"
+import {
+  useDeltaData,
+  buildChannelMatrix,
+  buildMatrixForVariables,
+} from "../../hooks/useDeltaData"
+import {
+  SALINITY_BAND_COLORS,
+  OUTFLOW_BAND_COLORS,
+  INFLOW_BAND_COLORS,
+  EXPORT_BAND_COLORS,
+} from "../../config/bandColors"
 
 // ============================================================================
 // Constants
 // ============================================================================
-
-type MatrixDataType = Record<
-  string,
-  Record<string, MonthlyPercentiles | undefined>
->
 
 const VARIABLE_LABELS: Record<string, string> = {
   x2: "X2 (2 ppt isohaline)",
@@ -78,75 +77,9 @@ const DELTA_EXPORT_CHANNELS = [
   { id: "C_DMC000", label: "CVP exports (Tracy)" },
 ] as const
 
-/** Salinity band colors - teal/green, distinct from delivery blue and shortage orange */
-const SALINITY_BAND_COLORS = {
-  range: "#e0f2f1",
-  outer: "#b2dfdb",
-  inner: "#80cbc4",
-  median: "#00695c",
-}
-
-/** Outflow band colors - blue, matching reservoir/flow conventions */
-const OUTFLOW_BAND_COLORS = {
-  range: "#e3f2fd",
-  outer: "#90caf9",
-  inner: "#42a5f5",
-  median: "#1565c0",
-}
-
-/** Inflow band colors - indigo */
-const INFLOW_BAND_COLORS = {
-  range: "#e8eaf6",
-  outer: "#9fa8da",
-  inner: "#5c6bc0",
-  median: "#283593",
-}
-
-/** Export band colors - amber/orange */
-const EXPORT_BAND_COLORS = {
-  range: "#fff8e1",
-  outer: "#ffe082",
-  inner: "#ffb300",
-  median: "#e65100",
-}
-
 // ============================================================================
-// Helpers
+// Entity-label builders
 // ============================================================================
-
-function rowsToMonthlyPercentiles(
-  rows: DeltaMonthlyStats[],
-): MonthlyPercentiles {
-  const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
-    // Skip months whose ETL row is missing percentile data. Zero-filling
-    // would draw a misleading floor on the band chart, so leave a gap
-    // instead and let the viz layer omit that month.
-    if (
-      row.q0 == null ||
-      row.q10 == null ||
-      row.q30 == null ||
-      row.q50 == null ||
-      row.q70 == null ||
-      row.q90 == null ||
-      row.q100 == null ||
-      row.avg == null
-    ) {
-      continue
-    }
-    monthly[String(row.water_month)] = {
-      q0: row.q0,
-      q10: row.q10,
-      q30: row.q30,
-      q50: row.q50,
-      q70: row.q70,
-      q90: row.q90,
-      q100: row.q100,
-      mean: row.avg,
-    }
-  }
-  return monthly
-}
 
 function buildReservoirData(variableCodes: string[]): ReservoirData[] {
   return variableCodes.map((code) => ({
@@ -156,44 +89,6 @@ function buildReservoirData(variableCodes: string[]): ReservoirData[] {
     deadPoolTaf: 0,
     labelSubtitle: VARIABLE_UNITS[code] ?? "",
   }))
-}
-
-// ============================================================================
-// Channel flow helpers
-// ============================================================================
-
-function channelRowsToPercentiles(
-  rows: ChannelMonthlyStats[],
-): MonthlyPercentiles {
-  const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
-    // Same rationale as `rowsToMonthlyPercentiles`. Skip months with any
-    // missing TAF percentile rather than zero-filling, to avoid a fake
-    // floor at the band chart baseline.
-    if (
-      row.flow_q0_taf == null ||
-      row.flow_q10_taf == null ||
-      row.flow_q30_taf == null ||
-      row.flow_q50_taf == null ||
-      row.flow_q70_taf == null ||
-      row.flow_q90_taf == null ||
-      row.flow_q100_taf == null ||
-      row.flow_avg_taf == null
-    ) {
-      continue
-    }
-    monthly[String(row.water_month)] = {
-      q0: row.flow_q0_taf,
-      q10: row.flow_q10_taf,
-      q30: row.flow_q30_taf,
-      q50: row.flow_q50_taf,
-      q70: row.flow_q70_taf,
-      q90: row.flow_q90_taf,
-      q100: row.flow_q100_taf,
-      mean: row.flow_avg_taf,
-    }
-  }
-  return monthly
 }
 
 function buildChannelEntities(
@@ -206,104 +101,6 @@ function buildChannelEntities(
     deadPoolTaf: 0,
     labelSubtitle: "TAF",
   }))
-}
-
-// ============================================================================
-// Multi-scenario data hooks
-// ============================================================================
-
-/**
- * Pull each scenario's monthly channel rows out of the batched env_flow
- * response. The DeltaSection only consumes a fixed subset of channels
- * (Sacramento at Hood, SJR at Vernalis, Banks, Tracy), so we keep the
- * full row list and let `buildChannelMatrix` filter at use time.
- */
-function deriveChannelData(
-  scenarios: string[],
-  envFlowBatch: Record<string, BatchEnvFlowData> | undefined,
-  isBatchLoading: boolean,
-) {
-  const allData: Record<string, ChannelMonthlyStats[]> = {}
-  scenarios.forEach((scenarioId) => {
-    const rows = envFlowBatch?.[scenarioId]?.monthly?.data
-    if (!rows?.length) return
-    allData[scenarioId] = rows
-  })
-
-  return {
-    allData,
-    isLoading: isBatchLoading,
-    loadingScenarios: isBatchLoading ? scenarios : [],
-  }
-}
-
-function buildChannelMatrix(
-  allData: Record<string, ChannelMonthlyStats[]>,
-  channelIds: readonly string[],
-): MatrixDataType {
-  const matrix: MatrixDataType = {}
-  for (const id of channelIds) {
-    matrix[id] = {}
-  }
-
-  for (const [scenarioId, rows] of Object.entries(allData)) {
-    const byChannel = new Map<string, ChannelMonthlyStats[]>()
-    for (const row of rows) {
-      if (!channelIds.includes(row.network_arc_id)) continue
-      if (!byChannel.has(row.network_arc_id))
-        byChannel.set(row.network_arc_id, [])
-      byChannel.get(row.network_arc_id)!.push(row)
-    }
-    for (const [channelId, channelRows] of byChannel.entries()) {
-      if (!matrix[channelId]) matrix[channelId] = {}
-      matrix[channelId][scenarioId] = channelRowsToPercentiles(channelRows)
-    }
-  }
-
-  return matrix
-}
-
-function useMultiScenarioDelta(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useDeltaMonthly)
-
-  const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter(
-    (_, i) => results[i]?.isLoading ?? false,
-  )
-
-  const allData: Record<string, DeltaMonthlyStats[]> = {}
-  results.forEach((result, index) => {
-    const scenarioId = scenarios[index]
-    if (!scenarioId || !result.rows.length) return
-    allData[scenarioId] = result.rows
-  })
-
-  return { allData, isLoading, loadingScenarios }
-}
-
-function buildMatrixForVariables(
-  allData: Record<string, DeltaMonthlyStats[]>,
-  variableCodes: string[],
-): MatrixDataType {
-  const matrix: MatrixDataType = {}
-  for (const varCode of variableCodes) {
-    matrix[varCode] = {}
-  }
-
-  for (const [scenarioId, rows] of Object.entries(allData)) {
-    const byVar = new Map<string, DeltaMonthlyStats[]>()
-    for (const row of rows) {
-      if (!variableCodes.includes(row.variable_code)) continue
-      if (!byVar.has(row.variable_code)) byVar.set(row.variable_code, [])
-      byVar.get(row.variable_code)!.push(row)
-    }
-    for (const [varCode, varRows] of byVar.entries()) {
-      if (!matrix[varCode]) matrix[varCode] = {}
-      matrix[varCode][scenarioId] = rowsToMonthlyPercentiles(varRows)
-    }
-  }
-
-  return matrix
 }
 
 // ============================================================================
@@ -422,34 +219,22 @@ function X2StatCell({ avg, cv }: { avg: number | null; cv: number | null }) {
 // Main component
 // ============================================================================
 
-interface DeltaSectionProps {
-  scenarios: string[]
-  scenarioNames: Record<string, string>
-  /** Pre-fetched batch response (storage/cws/ag/env_flow keyed by scenario) */
-  batchData: BatchStatisticsResponse | undefined
-  /** Whether the batched fetch is still in flight */
-  isBatchLoading: boolean
-}
-
 export default function DeltaSection({
   scenarios,
   scenarioNames,
   batchData,
   isBatchLoading,
-}: DeltaSectionProps) {
+}: BatchSectionProps) {
   const theme = useTheme()
 
-  const { allData, isLoading, loadingScenarios } =
-    useMultiScenarioDelta(scenarios)
-
   const {
-    allData: channelData,
-    isLoading: channelsLoading,
-    loadingScenarios: channelLoadingScenarios,
-  } = useMemo(
-    () => deriveChannelData(scenarios, batchData?.env_flow, isBatchLoading),
-    [scenarios, batchData, isBatchLoading],
-  )
+    deltaData: allData,
+    deltaLoading: isLoading,
+    deltaLoadingScenarios: loadingScenarios,
+    channelData,
+    channelsLoading,
+    channelLoadingScenarios,
+  } = useDeltaData(scenarios, batchData?.env_flow, isBatchLoading)
 
   const hasData = !isLoading && Object.keys(allData).length > 0
   const hasChannelData = !channelsLoading && Object.keys(channelData).length > 0
@@ -544,7 +329,8 @@ export default function DeltaSection({
 
   return (
     <>
-      {/* Sticky scenario header */}
+      {/* Sticky scenario header. Soft drop shadow matches the List view's
+          pinned block so content reads as scrolling under a fixed header. */}
       <Box
         sx={{
           position: "sticky",
@@ -554,6 +340,7 @@ export default function DeltaSection({
           py: theme.space.component.sm,
           mx: -theme.space.component.xl,
           px: theme.space.component.xl,
+          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
         }}
       >
         <ChartGridProvider scenarios={scenarios}>

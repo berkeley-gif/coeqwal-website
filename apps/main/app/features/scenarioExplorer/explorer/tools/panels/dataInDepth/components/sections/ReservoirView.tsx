@@ -25,9 +25,9 @@ import type {
   ReservoirPercentiles as _ReservoirPercentiles,
 } from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
-import { useWorkspaceSlice } from "../../../../store"
-import { useScenarioExplorerStore } from "../../../../../store"
-import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { useWorkspaceSlice } from "../../../../../store"
+import { useScenarioExplorerStore } from "../../../../../../store"
+import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
 
 /**
  * ScenarioCard - Individual scenario display with chart for one reservoir

@@ -9,10 +9,7 @@ import {
   OUTCOME_NAMES,
   type OutcomeCode,
 } from "../../../../../content/outcomes"
-import {
-  equityDataToCSV,
-  type EquityChartDataShape,
-} from "../../tools/panels/dataInDepth/utils/exportUtils"
+import { equityDataToCSV, type EquityChartDataShape } from "../exportUtils"
 import { useEquityObjectives } from "../../tools/panels/equity/useEquityObjectives"
 import ShareSnapshotCard from "../cards/ShareSnapshotCard"
 import ShareEquityLiveChart from "../live/ShareEquityLiveChart"

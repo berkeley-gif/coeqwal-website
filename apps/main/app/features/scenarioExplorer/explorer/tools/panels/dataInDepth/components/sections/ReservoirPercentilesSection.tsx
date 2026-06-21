@@ -11,7 +11,7 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
-import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
+import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
 import type { ReservoirData } from "@repo/viz"
 import type {
   MonthlyPercentiles,
@@ -32,7 +32,7 @@ interface ReservoirPercentilesSectionProps {
   labelColumnWidth?: number
   /** Whether to show scenario headers (set false if parent shows them) */
   showScenarioHeaders?: boolean
-  /** Map of scenarioId -> reservoirId -> tier color (for coloring individual cells) */
+  /** Map of scenarioId to reservoirId to tier color (for coloring individual cells) */
   cellColors?: Record<string, Record<string, string>>
   /** Display mode: percentage of capacity or volume in TAF */
   displayMode?: StorageDisplayMode

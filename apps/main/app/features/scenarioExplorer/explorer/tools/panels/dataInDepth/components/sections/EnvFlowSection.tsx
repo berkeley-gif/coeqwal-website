@@ -22,19 +22,16 @@ import type {
   ReservoirData,
   MonthlyPercentiles,
   VolumeScaleMode,
-  CellStatsMap,
 } from "@repo/viz"
-import { GridScenarioHeader } from "./AlignedScenarioGrid"
-import { ChartGridProvider } from "./ChartGridContext"
-import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
-import { SectionHeader } from "./SectionHeader"
+import { GridScenarioHeader } from "../shared/AlignedScenarioGrid"
+import { ChartGridProvider } from "../shared/ChartGridContext"
+import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
+import { SectionHeader } from "../shared/SectionHeader"
+import { BandLegend, COMPACT_BAND_LABELS } from "../shared/BandsLegend"
+import { DELIVERY_BAND_COLORS, PCT_BAND_COLORS } from "../../config/bandColors"
+import type { BatchSectionProps } from "../shared/sectionTypes"
 import { useChannelsList } from "@repo/data/coeqwal/hooks"
-import type {
-  ChannelMonthlyStats,
-  ChannelPeriodSummary,
-  BatchStatisticsResponse,
-  BatchEnvFlowData,
-} from "@repo/data/coeqwal"
+import { useEnvFlowData, type FlowUnit } from "../../hooks/useEnvFlowData"
 
 // ============================================================================
 // Types
@@ -45,7 +42,6 @@ type MatrixDataType = Record<
   Record<string, MonthlyPercentiles | undefined>
 >
 type ChannelFilter = "all" | "streams" | "eflows_only" | "mif_only"
-type FlowUnit = "taf" | "cfs"
 type ChartMode = "volume" | "pct_unimpaired"
 
 // ============================================================================
@@ -63,7 +59,7 @@ const CHART_MODE_OPTIONS = [
 
 /**
  * Channel filter groups for the dropdown.
- * Counts are approximate (from channel_entity seed data); live counts
+ * Counts are approximate (from channel_entity seed data). Live counts
  * are computed dynamically inside the component and used for display labels.
  */
 const CHANNEL_FILTER_GROUPS = [
@@ -101,82 +97,6 @@ const UNIT_OPTIONS = [
   { value: "cfs" as const, label: "CFS" },
 ]
 
-const DELIVERY_BAND_COLORS = {
-  range: "#d9eafb",
-  outer: "#c5dbf3",
-  inner: "#a2bee1",
-  median: "#2c5aa0",
-}
-
-const PCT_BAND_COLORS = {
-  range: "#d5f0e2",
-  outer: "#a8dcbe",
-  inner: "#6ec297",
-  median: "#1d7a45",
-}
-
-// ============================================================================
-// Legend
-// ============================================================================
-
-function BandLegend({ colors }: { colors: typeof DELIVERY_BAND_COLORS }) {
-  return (
-    <>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: colors.range,
-          borderRadius: "2px",
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Min–max
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: colors.outer,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        10–90th pct
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 14,
-          backgroundColor: colors.inner,
-          borderRadius: "2px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        30–70th pct
-      </Box>
-      <Box
-        component="span"
-        sx={{
-          width: 14,
-          height: 3,
-          backgroundColor: colors.median,
-          borderRadius: "1px",
-          ml: 0.75,
-        }}
-      />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
-        Median
-      </Box>
-    </>
-  )
-}
-
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -188,195 +108,16 @@ function channelClassLabel(cls: string | null): string {
   return cls ?? "Unknown"
 }
 
-/**
- * Flow volume percentile bands (CFS or TAF) from migration-28 columns.
- * Skips months where the median is null/undefined (missing or old API).
- */
-function rowsToVolumePercentiles(
-  rows: ChannelMonthlyStats[],
-  unit: FlowUnit,
-): MonthlyPercentiles {
-  const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
-    if (unit === "taf") {
-      if (row.flow_q50_taf == null) continue
-      monthly[String(row.water_month)] = {
-        q0: row.flow_q0_taf ?? 0,
-        q10: row.flow_q10_taf ?? 0,
-        q30: row.flow_q30_taf ?? 0,
-        q50: row.flow_q50_taf,
-        q70: row.flow_q70_taf ?? 0,
-        q90: row.flow_q90_taf ?? 0,
-        q100: row.flow_q100_taf ?? 0,
-        mean: row.flow_avg_taf ?? 0,
-      }
-    } else {
-      if (row.flow_q50_cfs == null) continue
-      monthly[String(row.water_month)] = {
-        q0: row.flow_q0_cfs ?? 0,
-        q10: row.flow_q10_cfs ?? 0,
-        q30: row.flow_q30_cfs ?? 0,
-        q50: row.flow_q50_cfs,
-        q70: row.flow_q70_cfs ?? 0,
-        q90: row.flow_q90_cfs ?? 0,
-        q100: row.flow_q100_cfs ?? 0,
-        mean: row.flow_avg_cfs ?? 0,
-      }
-    }
-  }
-  return monthly
-}
-
-/**
- * % Unimpaired percentile bands from the q0-q100 / pct_unimpaired columns.
- * NULL where no unimpaired reference exists (Mokelumne, some canals).
- * Values are percentages (0-infinity); highly regulated reaches can exceed 100%.
- */
-function rowsToPctUnimpairedPercentiles(
-  rows: ChannelMonthlyStats[],
-): MonthlyPercentiles {
-  const monthly: MonthlyPercentiles = {}
-  for (const row of rows) {
-    if (row.q50 == null) continue
-    monthly[String(row.water_month)] = {
-      q0: row.q0 ?? 0,
-      q10: row.q10 ?? 0,
-      q30: row.q30 ?? 0,
-      q50: row.q50,
-      q70: row.q70 ?? 0,
-      q90: row.q90 ?? 0,
-      q100: row.q100 ?? 0,
-      mean: row.pct_unimpaired_avg ?? 0,
-    }
-  }
-  return monthly
-}
-
-/**
- * Annual average flow in TAF/yr = sum of 12 monthly flow_avg_taf values.
- * Returns null if any monthly value is missing (no data for that channel).
- */
-function computeAnnualAvgTaf(rows: ChannelMonthlyStats[]): number | null {
-  if (!rows.length) return null
-  let total = 0
-  let count = 0
-  for (const row of rows) {
-    if (row.flow_avg_taf != null) {
-      total += row.flow_avg_taf
-      count++
-    }
-  }
-  return count === 12 ? total : count > 0 ? total * (12 / count) : null
-}
-
-/**
- * Annual average flow in CFS = mean of 12 monthly flow_avg_cfs values.
- */
-function computeAnnualAvgCfs(rows: ChannelMonthlyStats[]): number | null {
-  const vals = rows
-    .map((r) => r.flow_avg_cfs)
-    .filter((v): v is number => v != null)
-  return vals.length === 12 ? vals.reduce((a, b) => a + b, 0) / 12 : null
-}
-
-// ============================================================================
-// Multi-scenario data hooks
-// ============================================================================
-
-/**
- * Fetches monthly data for all scenarios and derives:
- *   - volumeMatrix .flow volume percentiles (TAF or CFS)
- *   - pctMatrix    .% unimpaired percentiles
- *   - annualCellStats.per-cell annual avg flow (TAF/yr) + annual avg CFS
- *
- * A single fetch powers both chart modes.
- */
-/**
- * Build the monthly volume / % unimpaired matrices and annual per-cell
- * stats from the batched env_flow response.
- */
-function buildMonthlyMatrices(
-  scenarios: string[],
-  envFlowBatch: Record<string, BatchEnvFlowData> | undefined,
-  unit: FlowUnit,
-) {
-  const volumeMatrix: MatrixDataType = {}
-  const pctMatrix: MatrixDataType = {}
-  const annualCellStats: CellStatsMap = {}
-
-  scenarios.forEach((scenarioId) => {
-    const rows = envFlowBatch?.[scenarioId]?.monthly?.data
-    if (!rows?.length) return
-
-    const byChannel = new Map<string, ChannelMonthlyStats[]>()
-    for (const row of rows) {
-      if (!byChannel.has(row.network_arc_id))
-        byChannel.set(row.network_arc_id, [])
-      byChannel.get(row.network_arc_id)!.push(row)
-    }
-
-    for (const [arcId, arcRows] of byChannel.entries()) {
-      if (!volumeMatrix[arcId]) volumeMatrix[arcId] = {}
-      volumeMatrix[arcId][scenarioId] = rowsToVolumePercentiles(arcRows, unit)
-
-      if (!pctMatrix[arcId]) pctMatrix[arcId] = {}
-      pctMatrix[arcId][scenarioId] = rowsToPctUnimpairedPercentiles(arcRows)
-
-      // Annual avg flow for per-cell stats. PercentileMatrix has two slots,
-      // so we show TAF/yr in the primary slot when unit is taf, otherwise
-      // CFS avg.
-      const annualTaf = computeAnnualAvgTaf(arcRows)
-      const annualCfs = computeAnnualAvgCfs(arcRows)
-      if (!annualCellStats[arcId]) annualCellStats[arcId] = {}
-      annualCellStats[arcId]![scenarioId] = {
-        annualAvgTaf:
-          unit === "taf" ? (annualTaf ?? undefined) : (annualCfs ?? undefined),
-      }
-    }
-  })
-
-  return { volumeMatrix, pctMatrix, annualCellStats }
-}
-
-/** MIF compliance % from period-of-record summaries in the batch response. */
-function buildMifStats(
-  scenarios: string[],
-  envFlowBatch: Record<string, BatchEnvFlowData> | undefined,
-): CellStatsMap {
-  const mifStats: CellStatsMap = {}
-  scenarios.forEach((scenarioId) => {
-    const summaries = envFlowBatch?.[scenarioId]?.period?.data
-    if (!summaries?.length) return
-    for (const summary of summaries as ChannelPeriodSummary[]) {
-      if (!mifStats[summary.network_arc_id])
-        mifStats[summary.network_arc_id] = {}
-      mifStats[summary.network_arc_id]![scenarioId] = {
-        reliabilityPct: summary.mif_met_pct ?? undefined,
-      }
-    }
-  })
-  return mifStats
-}
-
 // ============================================================================
 // Main component
 // ============================================================================
-
-interface EnvFlowSectionProps {
-  scenarios: string[]
-  scenarioNames: Record<string, string>
-  /** Pre-fetched batch response (storage/cws/ag/env_flow keyed by scenario) */
-  batchData: BatchStatisticsResponse | undefined
-  /** Whether the batched fetch is still in flight */
-  isBatchLoading: boolean
-}
 
 export default function EnvFlowSection({
   scenarios,
   scenarioNames,
   batchData,
   isBatchLoading,
-}: EnvFlowSectionProps) {
+}: BatchSectionProps) {
   const theme = useTheme()
   const envFlowBatch = batchData?.env_flow
 
@@ -460,37 +201,10 @@ export default function EnvFlowSection({
     [filteredChannels],
   )
 
-  const { volumeMatrix, pctMatrix, annualCellStats } = useMemo(
-    () => buildMonthlyMatrices(scenarios, envFlowBatch, flowUnit),
-    [scenarios, envFlowBatch, flowUnit],
-  )
-
-  const mifStats = useMemo(
-    () => buildMifStats(scenarios, envFlowBatch),
-    [scenarios, envFlowBatch],
-  )
+  const { volumeMatrix, pctMatrix, cellStats, loadingScenarios } =
+    useEnvFlowData(scenarios, envFlowBatch, flowUnit, isBatchLoading)
 
   const isLoadingMonthly = isBatchLoading
-  const loadingScenarios = isBatchLoading ? scenarios : []
-
-  // Merge annual avg flow + MIF compliance into one CellStatsMap
-  const cellStats: CellStatsMap = useMemo(() => {
-    const merged: CellStatsMap = {}
-    const arcIds = new Set([
-      ...Object.keys(annualCellStats),
-      ...Object.keys(mifStats),
-    ])
-    for (const arcId of arcIds) {
-      merged[arcId] = {}
-      for (const scenarioId of scenarios) {
-        merged[arcId]![scenarioId] = {
-          annualAvgTaf: annualCellStats[arcId]?.[scenarioId]?.annualAvgTaf,
-          reliabilityPct: mifStats[arcId]?.[scenarioId]?.reliabilityPct,
-        }
-      }
-    }
-    return merged
-  }, [annualCellStats, mifStats, scenarios])
 
   // Filter matrices to the visible channel subset
   const activeMatrix: MatrixDataType = useMemo(() => {
@@ -521,7 +235,8 @@ export default function EnvFlowSection({
 
   return (
     <>
-      {/* Sticky scenario header */}
+      {/* Sticky scenario header. Soft drop shadow matches the List view's
+          pinned block so content reads as scrolling under a fixed header. */}
       <Box
         sx={{
           position: "sticky",
@@ -531,6 +246,7 @@ export default function EnvFlowSection({
           py: theme.space.component.sm,
           mx: -theme.space.component.xl,
           px: theme.space.component.xl,
+          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
         }}
       >
         <ChartGridProvider scenarios={scenarios}>
@@ -685,7 +401,10 @@ export default function EnvFlowSection({
                     >
                       Bands:
                     </Box>
-                    <BandLegend colors={DELIVERY_BAND_COLORS} />
+                    <BandLegend
+                      colors={DELIVERY_BAND_COLORS}
+                      labels={COMPACT_BAND_LABELS}
+                    />
                   </Box>
                   <Box
                     component="span"
@@ -733,7 +452,10 @@ export default function EnvFlowSection({
                     >
                       Bands:
                     </Box>
-                    <BandLegend colors={PCT_BAND_COLORS} />
+                    <BandLegend
+                      colors={PCT_BAND_COLORS}
+                      labels={COMPACT_BAND_LABELS}
+                    />
                   </Box>
                   <Box
                     component="span"

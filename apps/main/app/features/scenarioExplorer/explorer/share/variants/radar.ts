@@ -12,7 +12,7 @@
 import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../../content/outcomes"
-import { radarDataToCSV } from "../../tools/panels/dataInDepth/utils/exportUtils"
+import { radarDataToCSV } from "../exportUtils"
 import ShareRadarCard from "../cards/ShareRadarCard"
 import ShareRadarLiveChart from "../live/ShareRadarLiveChart"
 import {
