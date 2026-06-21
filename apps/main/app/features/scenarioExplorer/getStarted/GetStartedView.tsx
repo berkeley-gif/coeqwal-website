@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import { Box, useTheme, alpha } from "@repo/ui/mui"
 import { useMapMode, useStoryboardMapInteractive } from "../../map/store"
 import TierAnimationSection from "../animation/TierAnimationSection"
+import PanelFrame from "./panels/PanelFrame"
 import {
   WelcomePanel,
   WaterIssuesPanel,
@@ -88,22 +89,13 @@ export default function GetStartedView() {
       {/* Map panel (TierAnimationSection): thin outer frame + rounded shell.
           Radius applied around (not inside) the pinned map overlay so the
           tier animation's own 100vh geometry is preserved. */}
-      <Box
-        sx={{
+      <PanelFrame
+        outerSx={{
           pointerEvents: storyboardMapInteractive ? "none" : "auto",
-          px: theme.layout.panel.insetX,
-          py: theme.layout.panel.insetY,
         }}
       >
-        <Box
-          sx={{
-            borderRadius: theme.layout.panel.radius,
-            overflow: "hidden",
-          }}
-        >
-          <TierAnimationSection />
-        </Box>
-      </Box>
+        <TierAnimationSection />
+      </PanelFrame>
 
       {/* Post-map dark wash: modal-style black backdrop (opacity from
           theme.background.modalBackdropOpacity) behind panels 6-9 that
