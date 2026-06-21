@@ -6,10 +6,11 @@ React visualization components for the COEQWAL scenario explorer, built with D3.
 
 ```
 packages/viz/src/
-├── components/       # All chart and glyph components
+├── components/       # Chart and glyph components
 ├── hooks/            # useResizeObserver
-├── utils/            # D3 helpers, color palettes
+├── utils/            # D3 helpers, color palettes, tier-scale math, shape morphing, clustering
 ├── types.ts          # Shared interfaces (ChartConfig, DecileData, etc.)
+├── types/            # Ambient module declarations (e.g. mapbox-gl-compare)
 └── index.ts          # Barrel exports
 ```
 
@@ -280,10 +281,14 @@ useEffect(() => {
 
 ## Exports
 
-The barrel file (`src/index.ts`) re-exports every component as a named export alongside its
-props type. It also exports:
+The barrel file (`src/index.ts`) is the authoritative export list. It re-exports each public
+component as a named export, usually alongside its props type, plus:
 
-- **D3 (curated)** - `curveBasis`, `timeFormat`, `interpolateRgb`, `range`, `max`, `scaleLinear`, `area`, `line`, `mean`, `extent`, `ticks`, `scaleBand`, `select`, and types `ScaleLinear`, `Area`
+- **Curated D3 re-exports** - a hand-picked set of D3 functions and types so consumers import them from `@repo/viz` rather than adding `d3` themselves. Currently includes the scales (`scaleLinear`, `scaleBand`, `scalePoint`, `scaleTime`), shape generators (`line`, `area`, the `curve*` family), selection (`select`), array/stat helpers (`extent`, `max`, `min`, `mean`, `range`, `ticks`, `bisector`), formatting (`format`, `timeFormat`, `interpolateRgb`), CSV helpers (`csv`, `csvParse`, `autoType`), and the types `Area`, `ScaleLinear`, `ScalePoint`, `ScaleTime`. Add to this list in `src/index.ts` when a consumer needs a new symbol.
 - **`useResizeObserver`** - shared responsive sizing hook
-- **D3 utilities** - `parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
-- **Color palettes** - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light→dark for chart indices), `getThemeLineColor` from `utils/themeLineColors.ts`
+- **D3 utilities** (`utils/d3-utils.ts`) - `parseDecileData`, `createDecileColorScale`, `createCategoricalColorScale`, `formatValue`, `calculateChartDimensions`, `getNestedValue`
+- **Tier-scale helpers** (`utils/tierScale.ts`) - `TIER_COUNT`, `TIER_LEVELS`, `normalizedToRadar`, `radarValueToTier`, `clampTier`
+- **Color palettes** (`utils/themeLineColors.ts`) - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light-to-dark for chart indices), `getThemeLineColor`, and the `ThemeKey` type
+- **Shape morphing** (`utils/shape-morph.ts`) - `resampleClosedPath`, `rectPoints`, `diamondPoints`, `circlePoints`, `lineSegmentPoints`, `pointsToD`, `easeInOut`, `lerp`, the `POINTS_PER_SHAPE` / `SQUARE_SIZE` / `SQUARE_GAP` constants, and the `ShapeMorphData` type
+- **Clustering** (`utils/clustering.ts`) - `hierarchicalRowOrder`
+- **Sidebar-highlight policy** (`utils/sidebarHighlightPolicy.ts`) - `isFullOpacityDuringSidebarHighlight`
