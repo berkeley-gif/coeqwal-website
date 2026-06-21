@@ -38,7 +38,7 @@ export const CENTRAL_VALLEY_VIEW: CameraView = {
 }
 
 export const DELTA_VIEW: CameraView = {
-  longitude: -121.4,
+  longitude: -122.05,
   latitude: 38.2,
   zoom: 8.8,
   bearing: 0,

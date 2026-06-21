@@ -6,19 +6,17 @@ import {
   CameraView,
   CALIFORNIA_VIEW,
   CENTRAL_VALLEY_VIEW,
-  CALIFORNIA_CENTERED_VIEW,
+  DELTA_VIEW,
 } from "./cameraPresets"
 
 /** Section IDs for Learn mode scrollytelling */
 export type SectionId =
+  | "intro"
   | "california"
   | "central-valley"
   | "rivers"
   | "distribution"
   | "calsim"
-  | "coeqwal"
-  | "scenario-intro"
-  | "scenario-conclusion"
 
 /**
  * Layer visibility configuration for a section.
@@ -65,6 +63,11 @@ const BASINS_AND_RIVERS: SectionLayerConfig = {
 
 export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   // === Introduction ===
+  intro: {
+    camera: CALIFORNIA_VIEW,
+  },
+
+  // === California intro === 
   california: {
     californiaLabel: true,
     camera: CALIFORNIA_VIEW,
@@ -77,13 +80,10 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   },
 
   // === Rivers onwards - basins + rivers stay visible ===
-  rivers: BASINS_AND_RIVERS,
-  distribution: BASINS_AND_RIVERS,
-  calsim: BASINS_AND_RIVERS,
-  coeqwal: BASINS_AND_RIVERS,
-  "scenario-intro": { ...BASINS_AND_RIVERS, camera: CALIFORNIA_CENTERED_VIEW },
-  "scenario-conclusion": {
+  rivers: { ...BASINS_AND_RIVERS, camera: DELTA_VIEW },
+  distribution: { ...BASINS_AND_RIVERS, arrows: true },
+  calsim: {
     ...BASINS_AND_RIVERS,
-    camera: CALIFORNIA_CENTERED_VIEW,
+    camera: CENTRAL_VALLEY_VIEW,
   },
 }

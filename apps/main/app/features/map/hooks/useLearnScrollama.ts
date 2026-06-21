@@ -26,11 +26,7 @@ export function useLearnScrollama() {
       const effectiveSection = data === "california" ? "central-valley" : data
       mapActions.setActiveSection(effectiveSection)
 
-      // Clear outcome visualization when entering any section other than scenario-intro
-      // This handles cases where user scrolls quickly past the exit trigger
-      if (data !== "scenario-intro") {
-        mapActions.clearOutcomeVisualization()
-      }
+      mapActions.clearOutcomeVisualization()
 
       // When naturally scrolling into the central-valley step, ease the content
       // to the viewport center using the same animation as the "Scroll to Explore"
@@ -48,9 +44,7 @@ export function useLearnScrollama() {
    */
   const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
     // Clear outcome visualization when leaving scenario-intro section
-    if (data === "scenario-intro") {
-      mapActions.clearOutcomeVisualization()
-    }
+    mapActions.clearOutcomeVisualization()
   }, [])
 
   /**

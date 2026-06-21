@@ -46,17 +46,18 @@ export const NAV_SECTIONS: NavSection[] = [
       // FLAG: confirm with coworkers whether these Learn scroll steps should
       // appear as 2nd-level nav items or be grouped under one item.
       // For now they are listed individually so the wiring is ready either way.
+      { id: "intro", label: "Introduction" },
       { id: "california", label: "California overview" },
       { id: "central-valley", label: "Central Valley" },
       { id: "rivers", label: "Rivers" },
       { id: "distribution", label: "Water distribution" },
       { id: "calsim", label: "CalSim model" },
-      { id: "coeqwal", label: "COEQWAL scenarios" },
+      
       // Get Started panel sections
       // FLAG: these ids must match the `id` props added to PanelShell
       // (or its inner card Box) in each panel component. They do not exist
       // yet — add them as part of the PanelShell wiring task.
-      { id: "welcome", label: "Welcome" },
+/*       { id: "welcome", label: "Welcome" },
       { id: "water-issues", label: "Water issues" },
       { id: "hydroclimate-futures", label: "Hydroclimate futures" },
       { id: "key-outcomes", label: "Key outcomes" },
@@ -64,7 +65,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: "data-in-depth", label: "Data in depth" },
       { id: "interpreting-outcomes", label: "Interpreting outcomes" },
       { id: "choose-scenarios", label: "Choose your scenarios" },
-      { id: "before-you-begin", label: "Before you begin" },
+      { id: "before-you-begin", label: "Before you begin" }, */
     ],
   },
   {

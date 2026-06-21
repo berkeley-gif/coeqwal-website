@@ -215,7 +215,7 @@ export default function VerticalNav({
     activeSectionId,
 }: VerticalNavProps) {
     const theme = useTheme()
-    const [isExpanded, setIsExpanded] = useState(true)
+    const [isExpanded, setIsExpanded] = useState(false)
 
     // How far from the top the nav sits. Should clear your sticky header stack.
     // FLAG: replace with theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
