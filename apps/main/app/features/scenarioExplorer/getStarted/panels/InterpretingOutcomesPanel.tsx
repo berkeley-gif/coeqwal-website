@@ -4,39 +4,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { LinedList } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
-
-const VIZ_TOOLS: ReadonlyArray<{
-  title: string
-  description: string
-  dimmed?: boolean
-}> = [
-  {
-    title: "Map view",
-    description:
-      "Displays how outcomes vary across locations of interest and reveals spatial patterns in outcomes.",
-  },
-  {
-    title: "Distribution viewer",
-    description:
-      "Highlights how outcomes vary across key outcomes and among different locations of interest and communities, revealing who benefits and who is most impacted.",
-  },
-  {
-    title: "Radar chart",
-    description:
-      "Shows how outcomes vary within a scenario and enables comparisons across scenarios, highlighting commonalities, differences, and trade-offs.",
-  },
-  {
-    title: "Scatterplot",
-    description:
-      "Compares scenarios at the system level to reveal the relative effects of operational decisions and climate change on outcomes.",
-    dimmed: true,
-  },
-  {
-    title: "Heatmaps",
-    description:
-      "Show how scenarios perform across increasing levels of climate stress, highlighting which management strategies are most resilient or vulnerable to climate impacts.",
-  },
-]
+import { INTERPRETING_LENSES, VIZ_TOOLS } from "../content"
 
 export default function InterpretingOutcomesPanel() {
   const theme = useTheme()
@@ -65,23 +33,10 @@ export default function InterpretingOutcomesPanel() {
             strategies and hydroclimate conditions affect:
           </Typography>
           <LinedList
-            items={[
-              {
-                label: "Trade-offs",
-                description:
-                  "How outcomes improve or decline together across scenarios",
-              },
-              {
-                label: "Equity",
-                description:
-                  "How benefits and impacts are distributed across outcomes and locations of interest",
-              },
-              {
-                label: "Resilience",
-                description:
-                  "How outcomes change under increasing levels of climate stress",
-              },
-            ]}
+            items={INTERPRETING_LENSES.map(({ label, description }) => ({
+              label,
+              description,
+            }))}
             color={theme.palette.common.white}
             arrows={false}
             labelVariant="body2"

@@ -17,6 +17,16 @@ export interface HydroclimateVisualConfig {
   bgColor: string
 }
 
+/**
+ * Neutral accent used when a hydroclimate has no entry below. Lets badges
+ * render with a plain grey accent instead of disappearing, so a climate
+ * registered without a visual config still shows its label.
+ */
+export const HYDROCLIMATE_FALLBACK_ACCENT = "#9e9e9e"
+
+// One entry per hydroclimate. A hydroclimate without an entry still works:
+// the chooser renders a plain circle for it and badges fall back gracefully.
+// Add an entry to give a new climate its own icon and accent color.
 export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
   historical: {
     icon: HistoryIcon,

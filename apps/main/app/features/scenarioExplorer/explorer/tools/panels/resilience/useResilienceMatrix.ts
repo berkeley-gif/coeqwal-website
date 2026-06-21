@@ -3,21 +3,17 @@
 /**
  * useResilienceMatrix
  *
- * Composite hook for the resilience heatmap. Reads pre-cached tier data
- * for available hydroclimates via useMultipleScenarioTiers
- * These calls hit the SWR cache populated
- * by usePrefetchTiers(), so no extra network traffic.
- *
+ * Composite hook for the resilience heatmap. Fetches tier data for every
+ * active scenario in one batch via useMultipleScenarioTiers,
+ * then derives each hydroclimate's view by re-keying that shared dataset
+ * through the climate's idMapping. This hits the SWR cache warmed by
+ * usePrefetchTiers(), so no extra network traffic.
+ * 
  * Produces a flat matrix of per-(scenario, outcome, hydroclimate) cells:
  *   - Aggregate outcomes use the API's weighted_score (multi-value) or
- *     level (single-value). The continuous value is the arithmetic mean
- *     of LOI tier levels, matching V3's tiers_df[cols].mean(axis=1).
- *   - NOD/SOD rows read the dashboard-derived regional tier means from
- *     @repo/data/coeqwal. Coverage spans all three website hydroclimates
- *     (historical, cc50, cc95). Cells fall back to `available: false`
- *     only when the dataset lacks a specific (scenario, outcome, HC).
+ *     level (single-value).
+ *   - NOD/SOD rows read the WAM team dashboard-derived regional tier means.
  *
- * Panels build their scenario-view / outcome-view pivots from this matrix.
  */
 
 import { useMemo } from "react"
@@ -27,6 +23,7 @@ import {
 } from "../../../../../scenarios/hooks/useScenarioList"
 import { useResolvedIdMappings } from "../../../../../scenarios/hooks/useResolvedIdMapping"
 import { useMultipleScenarioTiers } from "../../../../../scenarios/hooks/useTierData"
+import { clampTier } from "@repo/viz"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import type { OutcomeScoreData } from "../../../../../scenarios/hooks/useTierData"
 import {
@@ -51,12 +48,9 @@ import {
   type ResilienceHydroclimate,
 } from "./resilienceHydroclimates"
 
-const [HC_HISTORICAL, HC_CC50, HC_CC95] = RESILIENCE_HYDROCLIMATES
-
 /**
  * Rows shown in scenario view (Y axis): 9 aggregate outcomes interleaved
- * with their NOD/SOD variants, matching the radar axis order so the UI
- * reads top-down as: aggregate -> North -> South -> next aggregate.
+ * with their NOD/SOD variants
  */
 export const RESILIENCE_ROW_ORDER: string[] = OUTCOME_CODE_ORDER.flatMap(
   (code) => {
@@ -83,8 +77,31 @@ export interface ResilienceCell {
   type?: ResilienceCellType
 }
 
-function clampTier(value: number): number {
-  return Math.min(4, Math.max(1, Math.round(value)))
+/**
+ * Re-key the shared short_code-keyed tier dataset back to sibling-group
+ * ids for one hydroclimate, using that climate's idMapping
+ * (groupId to short_code). This reproduces what a per-climate
+ * useMultipleScenarioTiers(idMapping) call returned, but from the single
+ * all-scenario fetch, so the matrix needs no per-climate hooks.
+ */
+function rekeyByGroup(
+  scores: Record<string, Record<string, OutcomeScoreData>> | undefined,
+  raw: Record<string, ScenarioTiersResponse> | undefined,
+  idMapping: Record<string, string | null>,
+): {
+  scores: Record<string, Record<string, OutcomeScoreData>>
+  raw: Record<string, ScenarioTiersResponse>
+} {
+  const s: Record<string, Record<string, OutcomeScoreData>> = {}
+  const r: Record<string, ScenarioTiersResponse> = {}
+  for (const [groupId, shortCode] of Object.entries(idMapping)) {
+    if (!shortCode) continue
+    const sc = scores?.[shortCode]
+    if (sc) s[groupId] = sc
+    const rw = raw?.[shortCode]
+    if (rw) r[groupId] = rw
+  }
+  return { scores: s, raw: r }
 }
 
 function buildAggregateCell(
@@ -230,11 +247,9 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
 
   const mappings = useResolvedIdMappings()
 
-  const historicalTiers = useMultipleScenarioTiers(
-    mappings[HC_HISTORICAL]?.idMapping,
-  )
-  const cc50Tiers = useMultipleScenarioTiers(mappings[HC_CC50]?.idMapping)
-  const cc95Tiers = useMultipleScenarioTiers(mappings[HC_CC95]?.idMapping)
+  // One fetch for every active scenario across all climates, keyed by
+  // variant short_code. Each climate's view is derived below.
+  const allTiers = useMultipleScenarioTiers()
 
   const scenarioIds = useMemo(
     () => siblingGroups.map((s) => s.scenarioId),
@@ -252,36 +267,26 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
       Record<string, Record<ResilienceHydroclimate, ResilienceCell>>
     > = {}
 
-    const hcSources: Record<
+    // Derive each climate's tier data from the single shared fetch, and
+    // its set of scenarios with no variant for that climate. Looping the
+    // list keeps both maps complete as HYDROCLIMATES grows.
+    // NOD/SOD cells are currently sourced from a separate dataset and have their
+    // own path.
+    const hcSources = {} as Record<
       ResilienceHydroclimate,
       {
-        scores: Record<string, Record<string, OutcomeScoreData>> | undefined
-        raw: Record<string, ScenarioTiersResponse> | undefined
+        scores: Record<string, Record<string, OutcomeScoreData>>
+        raw: Record<string, ScenarioTiersResponse>
       }
-    > = {
-      [HC_HISTORICAL]: {
-        scores: historicalTiers.allScoreData,
-        raw: historicalTiers.allScenariosData,
-      },
-      [HC_CC50]: {
-        scores: cc50Tiers.allScoreData,
-        raw: cc50Tiers.allScenariosData,
-      },
-      [HC_CC95]: {
-        scores: cc95Tiers.allScoreData,
-        raw: cc95Tiers.allScenariosData,
-      },
-    }
-
-    // Per-hc set of scenarios with no variant for that hydroclimate.
-    // Used to mark aggregate cells with a specific tooltip reason so the
-    // hatch pattern doesn't read as a generic "no data" gap.
-    // NOD/SOD cells are sourced from a separate dataset and have their
-    // own availability path.
-    const missingByHc: Record<ResilienceHydroclimate, Set<string>> = {
-      [HC_HISTORICAL]: new Set(mappings[HC_HISTORICAL]?.missingScenarioIds),
-      [HC_CC50]: new Set(mappings[HC_CC50]?.missingScenarioIds),
-      [HC_CC95]: new Set(mappings[HC_CC95]?.missingScenarioIds),
+    >
+    const missingByHc = {} as Record<ResilienceHydroclimate, Set<string>>
+    for (const hc of RESILIENCE_HYDROCLIMATES) {
+      hcSources[hc] = rekeyByGroup(
+        allTiers.allScoreData,
+        allTiers.allScenariosData,
+        mappings[hc]?.idMapping ?? {},
+      )
+      missingByHc[hc] = new Set(mappings[hc]?.missingScenarioIds)
     }
 
     for (const scenarioId of scenarioIds) {
@@ -328,16 +333,7 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
       result[scenarioId] = perOutcome
     }
     return result
-  }, [
-    scenarioIds,
-    mappings,
-    historicalTiers.allScoreData,
-    historicalTiers.allScenariosData,
-    cc50Tiers.allScoreData,
-    cc50Tiers.allScenariosData,
-    cc95Tiers.allScoreData,
-    cc95Tiers.allScenariosData,
-  ])
+  }, [scenarioIds, mappings, allTiers.allScoreData, allTiers.allScenariosData])
 
   const getCell = useMemo(() => {
     return (
@@ -349,21 +345,11 @@ export function useResilienceMatrix(): UseResilienceMatrixResult {
     }
   }, [cells])
 
-  const isLoading =
-    scenariosLoading ||
-    historicalTiers.isLoading ||
-    cc50Tiers.isLoading ||
-    cc95Tiers.isLoading
+  const isLoading = scenariosLoading || allTiers.isLoading
 
   const error = useMemo(() => {
-    return (
-      scenariosError ??
-      historicalTiers.error ??
-      cc50Tiers.error ??
-      cc95Tiers.error ??
-      null
-    )
-  }, [scenariosError, historicalTiers.error, cc50Tiers.error, cc95Tiers.error])
+    return scenariosError ?? allTiers.error ?? null
+  }, [scenariosError, allTiers.error])
 
   return {
     scenarioIds,

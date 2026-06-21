@@ -5,10 +5,9 @@
  * used in non-list explore modes (radar, equity, data).
  *
  * 1. "Scenario library" header with key-operations column toggle
- * 2. Scrollable scenario rows (`StrategyHeader` per scenario: short code,
+ * 2. Search and visibility chips (`SearchAndChips`)
+ * 3. Scrollable scenario rows (`StrategyHeader` per scenario: short code,
  *    optional theme badge, scenario title, description)
- *
- * Search and visibility controls live in ToolToolbar.
  *
  * Row order comes from `useOrderedScenarios` so it stays in lockstep with ListView.
  * Share dispatch lives in `useSidebarShareActions`.

@@ -1,15 +1,31 @@
 import type { VerticalParallelLineData } from "@repo/viz"
+import {
+  HYDROCLIMATES,
+  type Hydroclimate,
+} from "../../../../../content/scenarios"
 
-export type ShareRadarHydroKey = "historical" | "cc50" | "cc95"
+/**
+ * The hydroclimate keys the share radar fetches live. Derived from the
+ * {@link HYDROCLIMATES} list in content/scenarios so there is
+ * one place to edit when the supported set changes. See the
+ * "Add a hydroclimate" section of the share README.
+ */
+export type ShareRadarHydroKey = Hydroclimate
+
+/** First entry is the fallback for unknown or missing hydroclimates. */
+const DEFAULT_SHARE_RADAR_HYDRO: ShareRadarHydroKey = HYDROCLIMATES[0]
+const SHARE_RADAR_HYDRO_SET = new Set<string>(HYDROCLIMATES)
 
 /**
  * Map a share item hydroclimate (from capture or URL) to one of the
- * three live tier-fetch buckets used in Share panel and drawer.
+ * live tier-fetch buckets used in the Share panel and drawer. Unknown
+ * values fall back to the default so an old or malformed URL still
+ * resolves to a real bucket.
  */
 export function normalizeShareRadarHydro(hc: string): ShareRadarHydroKey {
-  if (hc === "cc50") return "cc50"
-  if (hc === "cc95") return "cc95"
-  return "historical"
+  return SHARE_RADAR_HYDRO_SET.has(hc)
+    ? (hc as ShareRadarHydroKey)
+    : DEFAULT_SHARE_RADAR_HYDRO
 }
 
 /**

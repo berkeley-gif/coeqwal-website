@@ -1,676 +1,180 @@
 # Share system
 
-Start from the [Developer guide: adding a new visualization tool](../../README.md#developer-guide-adding-a-new-visualization-tool) for end-to-end tool wiring. This doc covers share-only steps.
+This folder lets a user save a chart as a card, collect cards into a
+story, and share or download them. Each kind of chart is a "variant"
+(barChart, radar, equity, resilience).
 
-This directory owns everything user-facing for the share feature: the
-drawer, the cards rendered in the tray and story canvas, the off-screen
-capture pipeline, the localStorage envelope, the URL grammar, and the
-per-variant registry that ties them together. Adding a new
-visualization to the share system means writing four implementation
-files and adding one row to the registry; the dispatchers (card render,
-URL encode/decode, filename, raster size, CSV) all read from the
-registry, so a missing arm is a compile error in `variants.ts` rather
-than a silent `return null` somewhere downstream.
+The key idea: every variant is described by one `VariantHandler` row in
+`variants.ts`. The dispatchers (card render, URL encode and decode,
+filename, raster size, CSV) all read from that registry, so a missing
+variant is a compile error in `variants.ts` instead of a silent failure
+somewhere downstream.
+
+## Files you will touch most
 
 ```
 share/
-  index.ts                        Barrel; the only stable public surface.
-  types.ts                        ShareItem, ShareItemPatch, PersistedShareItem.
-  variants.ts                     Per-variant registry + RenderContext / CsvLookups types.
-  variants/
-    barChart.ts                   barChart variant handler.
-    radar.ts                      radar variant handler (with live-fallback builder).
-    equity.ts                     equity / Distribution variant handler.
-    resilience.ts                 resilience variant handler.
-  persist.ts                      loadShareState / saveShareState + storage key.
-  url.ts                          encodeShareItems / parseShareUrl + SHARE_URL_VERSION.
-                                  Dispatches per-item to the registry by URL prefix.
-  stage.ts                        stageShareItem: build -> capture -> add.
-  ShareItemView.tsx               Variant -> card dispatcher (registry lookup).
-  ShareCardShell.tsx              Common card chrome (border, remove button, note).
-  ShareDrawer.tsx                 The right-edge tray.
+  types.ts            ShareItem union (one arm per variant)
+  variants.ts         VariantHandler interface + VARIANT_REGISTRY
+  variants/*.ts        one handler file per variant
+  cards/*.tsx          the card UI for each variant
   capture/
-    OffscreenCaptureHost.tsx      Mounts a snapshot in a hidden div, returns SVG + PNG.
-    dimensions.ts                 CAPTURE_DIMENSIONS: per-variant fixed size.
-    types.ts                      CapturedVisual + capture function signatures.
-    captureRegistry.ts            Re-export barrel for capture primitives.
-  cards/
-    ShareScenarioCard.tsx         barChart variant (header + chips only).
-    ShareRadarCard.tsx            radar variant.
-    ShareSnapshotCard.tsx         equity variant + resilience tile snapshot.
-    ResilienceShareCard.tsx       resilience panel variant; delegates to ShareSnapshotCard.
-    ChartThumbnail.tsx            cachedSvg -> cachedImageDataUrl -> liveChart -> placeholder.
-    HydroclimateBadge.tsx         Shared hydroclimate chip used by every card.
-    SvgThumbnail.tsx              Inline-SVG renderer.
-  live/
-    ShareRadarLiveChart.tsx       Live radar fallback when no cachedSvg.
-    ShareResilienceLiveChart.tsx  Live heatmap fallback.
-  note/
-    ShareItemNoteBlock.tsx        Inline annotation editor.
+    dimensions.ts      CAPTURE_DIMENSIONS (fixed capture size per variant)
+    adapters/index.ts  re-exports the per-tool capture functions
+  ShareRadarLiveProvider.tsx  fetches live radar data for every hydroclimate
+  hooks/
+    useShareRenderContext.ts  data the cards and exporters need
   utils/
-    shareRadarLiveData.ts         Fields the radar card needs from comparison hooks.
-    getResilienceShareCardContent.ts
+    shareRadarLiveData.ts     ShareRadarHydroKey + radar live data
+  stage.ts            stageShareItem (run capture, then add the card)
 ```
 
-## Mental model
+## Add a variant
 
-A `ShareItem` is the runtime record for one user-saved card. The
-discriminated union has a variant per chart kind:
+There are five files to write and one registry row to add. The radar
+variant is the cleanest end to end example to copy from.
 
-- `barChart` (decile / bar / average view of one scenario)
-- `radar` (single trace or many overlaid traces on one chart)
-- `equity` (distribution view; renders via the snapshot card)
-- `resilience` (heatmap panel + small multiples)
+1. **Add an arm to `types.ts`.** Extend the `ShareItem` union with only
+   the fields a reader actually needs. Anything you can rebuild from
+   live data does not belong in `ShareItem`.
 
-Every variant captures `cachedSvg` (serialized SVG with computed styles
-inlined) and `cachedImageDataUrl` (rasterized PNG companion) at share
-time. Cards render the thumbnail via `ChartThumbnail`, which prefers
-the SVG, falls back to the PNG, then to a live re-render from
-`cachedChartData`, then to a placeholder.
+   ```typescript
+   | (ShareItemBaseFields & {
+       type: "myChart"
+       scenarioIds: string[]
+     })
+   ```
 
-Every variant captures off-screen. The chart is mounted in a hidden
-div by `OffscreenCaptureHost` with `interactive=false` and
-`animate=false`, awaits `onReady`, and the host serializes the DOM
-SVG. Variants that draw many small SVGs (the bar-chart row of glyphs,
-the resilience small-multiples panel) pass `mode: "compose"` to the
-host, which stitches every descendant `<svg>` into one composite at
-the snapshot's fixed dimensions. There is no live-DOM cloning in any
-capture path.
+2. **Add a `CAPTURE_DIMENSIONS` entry** in `capture/dimensions.ts`. This
+   is the only place the capture size is declared, so the saved SVG and
+   the downloaded PNG cannot drift apart.
 
-`PersistedShareItem` is the on-disk shape. `persist.ts#toPersisted`
-preserves `cachedSvg`, `cachedImageDataUrl`, AND `cachedChartData`
-so reload restores the same thumbnail, the PNG / SVG download paths
-keep working without a fresh capture, and the data-download icons
-stay enabled for radar / equity / resilience items (only the bar
-chart variant has a live recompute path through
-`useResolvedScenarioTiers`; the rest would otherwise lose their
-data on every reload). `saveShareState` already swallows
-quota-exceeded errors, so an oversized tray simply skips the persist
-and in-memory state takes over for the rest of the session.
+   ```typescript
+   myChart: { width: 600, height: 400 },
+   ```
 
-## The variant registry
+3. **Build a snapshot wrapper.** A thin component that renders the chart
+   at a fixed size with no interactivity. It must accept `interactive`,
+   `animate`, and `onReady`. `onReady` has to fire on every render path,
+   including empty data bail outs, because the capture host waits for it
+   before serializing. Copy `RadarPlotSnapshot` in `@repo/viz`.
 
-`variants.ts` exports one `VariantHandler<T>` per `ShareItem["type"]`,
-keyed in `VARIANT_REGISTRY` by that literal type. The registry is
-typed with `satisfies Record<ShareItem["type"], …>`, so adding a new
-arm to the `ShareItem` union without registering its handler is a
-compile error in this file.
+4. **Build an `OffscreenMyChartCapture` adapter** next to the tool it
+   captures (under `tools/panels/<tool>/`), then re-export it from
+   `capture/adapters/index.ts`. It mounts the snapshot through
+   `offscreenCapture` and returns `{ svg, dataUrl }`. It must never read
+   from the live on screen chart.
 
-Each handler owns:
+5. **Build a `ShareMyChartCard`** in `cards/`. Wrap the body in
+   `ShareCardShell` and render the image with `ChartThumbnail`. The
+   shell already handles the remove button and the note editor.
 
-| Field                          | Purpose                                                                                                                                                                                                                                                           | Used by                                                                          |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `type`                         | Discriminator value.                                                                                                                                                                                                                                              | Self-documenting; matches the registry key.                                      |
-| `urlPrefix`                    | One-letter token segment (e.g. `b`, `r`, `e`, `q`).                                                                                                                                                                                                               | `url.ts` encode/decode.                                                          |
-| `rasterDimensionsKey`          | Key into `CAPTURE_DIMENSIONS`.                                                                                                                                                                                                                                    | `tab/SharePanel.tsx` PNG fallback when rasterizing `cachedSvg`.                  |
-| `renderCard(item, ctx)`        | Returns the card React node.                                                                                                                                                                                                                                      | `ShareItemView.tsx`.                                                             |
-| `encodeUrlToken(item)`         | Body of the URL token (no prefix, no leading dot).                                                                                                                                                                                                                | `url.ts#encodeOne`.                                                              |
-| `decodeUrlToken(parts)`        | Inverse; receives parts after the prefix is stripped.                                                                                                                                                                                                             | `url.ts#decodeOne`.                                                              |
-| `filenameLabel(item, lookups)` | Basename (no extension) for PNG / SVG / per-item CSV. Use helpers from `share/utils/filename.ts`.                                                                                                                                                                 | `tab/SharePanel.tsx` PNG/SVG/CSV downloads.                                      |
-| `exportCsv(item, lookups)`     | Returns a CSV body string or `null`. Optional.                                                                                                                                                                                                                    | `exportUtils.ts` single + bulk ZIP export.                                       |
-| `DataRehydrator`               | React component mounted by `ShareDataRehydrationHost`. Backfills `cachedChartData` for URL-restored items so the bulk ZIP can include them. Optional; items whose variant ships no rehydrator are silently dropped from the bundle when they have no cached data. | `ShareDataRehydrationHost.tsx`, `useShareDataReady` (gates "Download all data"). |
+6. **Register the variant** in `variants.ts`. Add a handler file in
+   `variants/` and one row to `VARIANT_REGISTRY`.
 
-Dispatchers do not branch on `item.type`. They look up the handler
-once and delegate, so a new variant only has to fill in the registry
-row to wire all four download paths and the URL grammar.
+   ```typescript
+   const myChartHandler: VariantHandler<MyChartItem> = {
+     type: "myChart",
+     urlPrefix: "m", // one unused letter, unique across the registry
+     rasterDimensionsKey: "myChart",
+     renderCard(item, ctx) { /* return <ShareMyChartCard ... /> */ },
+     encodeUrlToken(item) { /* token body, no prefix */ },
+     decodeUrlToken(parts) { /* reverse of encodeUrlToken */ },
+     filenameLabel(item, lookups) { /* download basename, no extension */ },
+     exportCsv(item, lookups) { /* optional CSV body or null */ },
+     DataRehydrator: ({ items, context }) => null, // optional, see below
+   }
+   ```
 
-## Adding share to a new visualization
+   ```typescript
+   export const VARIANT_REGISTRY = {
+     barChart: barChartHandler,
+     radar: radarHandler,
+     equity: equityHandler,
+     resilience: resilienceHandler,
+     myChart: myChartHandler, // new
+   } as const satisfies ShareVariantRegistry
+   ```
 
-There are five files to write and one registry row to add. Use the
-existing variants as references; the radar pipeline is the cleanest
-end-to-end example.
+7. **Wire the capture site** through `stageShareItem` in `stage.ts`. It
+   runs the capture in a try and catch, builds the item, and always
+   adds the card so it still renders (from the live chart) if capture
+   fails.
 
-### 1. Add a variant arm to `share/types.ts`
+   ```typescript
+   await stageShareItem({
+     capture: () => captureMyChartOffscreen({ theme }),
+     buildItem: (captured) => ({
+       type: "myChart",
+       id: makeId(),
+       scenarioIds: [scenarioId],
+       cachedSvg: captured?.svg,
+       cachedImageDataUrl: captured?.dataUrl,
+     }),
+     addItem: addShareItem,
+     errorLabel: "myChart:share",
+   })
+   ```
 
-Extend the discriminated union with the metadata the card or download
-path needs. Be conservative: only fields a downstream reader will
-read. Anything reconstructable from the live data should not land in
-`ShareItem`.
+Optional last step: if something outside this folder mounts the card
+directly (rare), re-export it from `index.ts`. Normally `ShareItemView`
+is the only entry point and reaches the card through the registry.
+
+## A note on the React rules of hooks
+
+Two spots in this folder are shaped a certain way only because of the
+rules of hooks (a hook must be called the same number of times, in the
+same order, on every render). Both use the same trick: render one
+component per item, so each component calls its hooks once.
+
+**Hydroclimate fetches in `ShareRadarLiveProvider`.** A saved or
+URL-loaded item can belong to any hydroclimate, so share needs
+comparison data for all of them. The fetch is `useTierChartData`, a
+hook, so it cannot run in a loop over the list:
 
 ```typescript
-export type ShareItem =
-  | (ShareItemBaseFields & { type: "barChart" /* ... */ })
-  // ...
-  | (ShareItemBaseFields & {
-      type: "myNewChart"
-      scenarioIds: string[]
-      myFeatureFlag?: boolean
-    })
+// Don't do this: the hook count changes when HYDROCLIMATES changes.
+HYDROCLIMATES.map((hc) => useTierChartData(hc, true))
 ```
 
-`PersistedShareItem` is currently `ShareItem` itself (the alias is
-kept so a future strip-on-save policy can reintroduce an
-`Omit<...>` without rewriting every caller), so a new variant is
-automatically covered.
+Instead the provider renders one invisible `RadarLiveFetcher` per
+`HYDROCLIMATES` entry. Each fetcher calls `useTierChartData` once and
+lifts its shaped fields up to the provider, which exposes the whole map
+through `useShareRadarLive`. Mapping over the list to render components
+is allowed, so the share radar data scales with the canonical list and
+needs no hand edits when a hydroclimate is added.
 
-### 2. Add a `CAPTURE_DIMENSIONS` entry
+**`DataRehydrator` is a component, not a hook.** A variant may need to
+re-fetch data for several URL restored items at once. Looping and
+calling hooks per item would break the rule above, so the handler
+exposes a component instead. The host renders one inner component per
+item, and that inner component is free to call hooks scoped to its own
+item. It writes the resolved data back with
+`context.updateShareItem(id, patch)`.
+
+## Add a hydroclimate
+
+Register the new hydroclimate app-wide (called `cc_new` here as a
+placeholder, use the real value). That is the single source of truth and
+covers the chooser, the resilience matrix, and share. See
+[Add a hydroclimate](../../README.md#add-a-hydroclimate) in the scenario
+explorer README. Share derives its key from that app-wide list:
 
 ```typescript
-// share/capture/dimensions.ts
-export const CAPTURE_DIMENSIONS = {
-  // ...
-  myNewChart: { width: 600, height: 400 },
-} as const satisfies Record<string, CaptureSize>
+// utils/shareRadarLiveData.ts
+export type ShareRadarHydroKey = Hydroclimate // from app/content/scenarios.ts
 ```
 
-This is the only place dimensions are declared. The off-screen
-adapter, the PNG download fallback, and any compose-mode backdrop all
-read from here so the captured SVG and the downloaded PNG cannot
-drift.
+Share fetches every hydroclimate through `ShareRadarLiveProvider`, which
+renders one fetcher per `HYDROCLIMATES` entry (see React
+rules of hooks"). So once the climate is registered app-wide, share
+picks it up with no code change.
+
+### Add a download filename token (optional)
+
+In `utils/filename.ts`, add a short token to the `HC_SLUG` map, for
+example `cc_new: "ccnew"`. This keeps download filenames compact and
+readable. It is optional. Without an entry, `hydroclimateSlug` falls
+back to a generic slug of the value, so `cc_new` becomes `cc-new` in the
+filename and the download still works, just less compact.
 
-### 3. Build a snapshot wrapper (with the `onReady` contract)
-
-The snapshot is a thin React component that renders the chart with
-capture-mode props pre-bound. It must accept three props:
-
-- `interactive?: boolean` (default `true`). When `false`, the chart
-  must skip mouse handlers, hover state, click pinning, cursor
-  styling, and any DOM that exists only for interactivity (ghost
-  rows, hidden tooltips, axis-detail placeholders).
-- `animate?: boolean` (default `true`). When `false`, transitions
-  should run with duration 0 so the chart settles in one frame and
-  the capture is not racing the animation.
-- `onReady?: () => void`. **Contract:** must fire on **every**
-  render path, including empty-data and zero-dimension bail-outs.
-  The capture host waits on this signal before serializing; a missed
-  fire surfaces as `onReady did not fire within timeout` after a 4 s
-  deadlock. Empty data is the caller's job to filter (bail before
-  invoking the capture adapter); the chart's job is just to honor
-  the render-attempt handshake. See `ResilienceHeatmap.tsx` and
-  `RadarPlot.tsx` for the canonical pattern: every early return
-  fires `onReady` first.
-
-#### Capture-mode visual tweaks: bundle them under one `captureMode` prop
-
-A handful of charts need small layout differences during capture
-(don't clip an `overflowY: auto` container, force a fixed column
-count instead of responsive auto-fit, render an HTML title as inline
-SVG `<text>` so it survives the SVG composer). Bundle every such
-tweak under one `captureMode?: boolean` prop on the chart component
-and have the snapshot wrapper / capture host opt in via
-`captureMode={true}`.
-
-`ResilienceHeatmapSmallMultiples` is the canonical example: it
-collapses what used to be three separate flags (`forceColumns`,
-`noScroll`, `titleAsSvg`) into one `captureMode` prop. New charts
-should follow the same pattern; new flags accumulating one per quirk
-will rot fast.
-
-Snapshot wrappers for the visualizations shipped from `@repo/viz`
-live in `packages/viz/src/components/` (`RadarPlotSnapshot`, `ResilienceHeatmapSnapshot`,
-`TierGridSnapshot`). For locally composed views, define
-the snapshot inside the feature folder
-(`tools/panels/resilience/ResiliencePanelChartView`,
-`tools/panels/list/grid/BarChartRowSnapshot`). Either pattern is fine; the
-snapshot's only job is to render at fixed dimensions without any
-live-mount side effects.
-
-### 4. Build an `Offscreen<Variant>Capture` adapter
-
-The adapter mounts the snapshot in `OffscreenCaptureHost` at the
-declared dimensions and returns `CapturedVisual` (`{ svg, dataUrl }`)
-plus any per-variant extras. It MUST NOT read from the live, on-screen
-chart, even as a fallback; that is where dot-loss and scaling bugs
-come from.
-
-```typescript
-"use client"
-
-import React from "react"
-import { type Theme } from "@repo/ui/mui"
-import { MyChartSnapshot } from "@repo/viz"
-import { offscreenCapture } from "../share/capture/OffscreenCaptureHost"
-import { CAPTURE_DIMENSIONS } from "../share/capture/dimensions"
-import type { CapturedVisual } from "../share/capture/types"
-
-export interface CaptureMyChartOffscreenInput {
-  // ...the data the chart needs
-  theme: Theme
-}
-
-export async function captureMyChartOffscreen(
-  input: CaptureMyChartOffscreenInput,
-): Promise<CapturedVisual> {
-  const { width, height } = CAPTURE_DIMENSIONS.myNewChart
-  return offscreenCapture({
-    theme: input.theme,
-    width,
-    height,
-    captureKind: "myChart:offscreen",
-    render: (onReady) => (
-      <MyChartSnapshot
-        // ...chart props...
-        width={width}
-        height={height}
-        onReady={onReady}
-      />
-    ),
-  })
-}
-```
-
-For variants that draw many small SVGs (a row of glyphs, a grid of
-small multiples), pass `mode: "compose"` to `offscreenCapture`. The
-host stitches every descendant `<svg>` of the rendered snapshot into
-one composite at the same fixed dimensions. See
-`OffscreenBarChartRowCapture.tsx` and
-`OffscreenResiliencePanelCapture.tsx` for reference compose-mode
-adapters.
-
-### 5. Build a `Share<Variant>Card` component
-
-Add `cards/ShareMyChartCard.tsx`. Wrap content in `<ShareCardShell>`
-and render the thumbnail via `<ChartThumbnail>`; the shell handles
-the close button and note block, so the card body should only be the
-header (title, badges, scenario list) and the thumbnail.
-
-```typescript
-"use client"
-
-import React from "react"
-import { Box, useTheme } from "@repo/ui/mui"
-import ShareCardShell from "../ShareCardShell"
-import ChartThumbnail from "./ChartThumbnail"
-
-export interface ShareMyChartCardProps {
-  id: string
-  title: string
-  cachedSvg?: string
-  cachedImageDataUrl?: string
-  liveChart?: React.ReactNode
-  note?: string
-  onNoteChange?: (note: string) => void
-  onRemove?: (id: string) => void
-}
-
-export default function ShareMyChartCard({
-  id,
-  title,
-  cachedSvg,
-  cachedImageDataUrl,
-  liveChart,
-  note,
-  onNoteChange,
-  onRemove,
-}: ShareMyChartCardProps) {
-  const theme = useTheme()
-  return (
-    <ShareCardShell
-      note={note}
-      onNoteChange={onNoteChange}
-      onRemove={onRemove ? () => onRemove(id) : undefined}
-    >
-      <Box sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-        {title}
-      </Box>
-      <ChartThumbnail
-        cachedSvg={cachedSvg}
-        cachedImageDataUrl={cachedImageDataUrl}
-        liveChart={liveChart}
-        ariaLabel={title}
-        variant="bordered"
-      />
-    </ShareCardShell>
-  )
-}
-```
-
-### 6. Register the variant in `share/variants.ts`
-
-Create `share/variants/myNewChart.ts` and register it in the table:
-
-```typescript
-// share/variants/myNewChart.ts
-import React from "react"
-import ShareMyChartCard from "../cards/ShareMyChartCard"
-import type { ShareItemOfType } from "../types"
-import type { VariantHandler } from "../variants"
-
-type MyChartItem = ShareItemOfType<"myNewChart">
-
-const myNewChartHandler: VariantHandler<MyChartItem> = {
-  type: "myNewChart",
-  urlPrefix: "m",                  // pick an unused letter
-  rasterDimensionsKey: "myNewChart",
-
-  renderCard(item, ctx) {
-    return React.createElement(ShareMyChartCard, {
-      id: item.id,
-      title: ctx.scenarioLookup.get(item.scenarioIds[0]!)?.name ?? "Chart",
-      cachedSvg: item.cachedSvg,
-      cachedImageDataUrl: item.cachedImageDataUrl,
-      note: item.note,
-      onNoteChange: ctx.onNoteChange,
-      onRemove: ctx.onRemove,
-    })
-  },
-
-  encodeUrlToken(item) {
-    const ids = item.scenarioIds.join("~")
-    const flag = item.myFeatureFlag ? "1" : ""
-    return `${ids}.${flag}`
-  },
-
-  decodeUrlToken(parts) {
-    if (parts.length < 1) return null
-    return {
-      id: crypto.randomUUID(),
-      type: "myNewChart",
-      scenarioIds: (parts[0] ?? "").split("~").filter(Boolean),
-      myFeatureFlag: (parts[1] ?? "") === "1",
-    }
-  },
-
-  // Build the download basename from helpers in `share/utils/filename.ts`.
-  // Use `slugifyForFilename` on user-facing text, `hydroclimateSlug` for
-  // the hydroclimate (compact form: `hist`, `cc50`, ...), and
-  // `joinScenarioSlugs` for multi-scenario items (it dedupes
-  // consecutive duplicate slugs). The caller appends the extension.
-  filenameLabel(item, lookups) {
-    const ids = joinScenarioSlugs(
-      item.scenarioIds,
-      lookups.scenarioShortLabelLookup,
-    )
-    return ["coeqwal-mychart", ids].filter(Boolean).join("-")
-  },
-
-  // Optional. Implement if cachedChartData carries a meaningful payload
-  // and downstream tools should be able to download it as a table.
-  // Always start the section with `buildCsvHeaderBlock` so the
-  // preamble (variant title, scenario(s), hydroclimate, tier legend)
-  // matches every other variant. If your data has tier columns, set
-  // `includeTierScale: true` and emit tier values as integers 1-4 -
-  // see "CSV pipeline" below for the full convention.
-  exportCsv(item, lookups) {
-    if (!item.cachedChartData) return null
-    const scenarios = item.scenarioIds.map((id) => ({
-      id,
-      label: lookups.scenarioNameLookup(id),
-    }))
-    const header = buildCsvHeaderBlock({
-      variantTitle: "My new chart",
-      scenarios,
-      includeTierScale: true, // drop if your data has no tier column
-    })
-    const rows = /* build data rows from item.cachedChartData */
-    return [...header, "", ...rows].join("\n")
-  },
-
-  // Optional but strongly recommended. Mounted by
-  // `ShareDataRehydrationHost` while the share tab is open so a
-  // URL-restored item (no `cachedSvg` / `cachedImageDataUrl` /
-  // `cachedChartData`) ends up with `cachedChartData` populated
-  // before the user clicks "Download all data". Items without a
-  // rehydrator are silently skipped from the bulk ZIP when they
-  // have no cached data.
-  //
-  // Pattern: define one inner component per item that calls the same
-  // hooks the live capture / fallback uses, then write through
-  // `context.updateShareItem(item.id, { cachedChartData })` when the
-  // hooks are ready. See `equity.ts` for an SWR-backed example.
-  DataRehydrator: ({ items, context }) => null, // implement me
-}
-
-export default myNewChartHandler
-```
-
-```typescript
-// share/variants.ts
-import myNewChartHandler from "./variants/myNewChart"
-
-export const VARIANT_REGISTRY = {
-  barChart: barChartHandler,
-  radar: radarHandler,
-  equity: equityHandler,
-  resilience: resilienceHandler,
-  myNewChart: myNewChartHandler, // <- new
-} as const satisfies ShareVariantRegistry
-```
-
-The `satisfies` clause turns a missing handler into a compile error
-right here. Once the row is added, `ShareItemView`, `url.ts`, the
-PNG/SVG/CSV download paths in `tab/SharePanel.tsx`, and `exportUtils.ts` all
-pick up the new variant automatically.
-
-### 7. Wire the capture site via `stageShareItem`
-
-Every call site funnels through `share/stage.ts#stageShareItem`, which
-runs the capture inside a try/catch, hands the result (or `null`) to
-the `buildItem` function, and always calls `addItem` so the share
-card still renders if capture fails (the card falls back to the live
-chart).
-
-```typescript
-import { stageShareItem } from "../share/stage"
-
-await stageShareItem({
-  capture: () => captureMyChartOffscreen({ theme /* ... */ }),
-  buildItem: (captured) => ({
-    type: "myNewChart",
-    id: makeId(),
-    scenarioIds: [scenarioId],
-    cachedSvg: captured?.svg,
-    cachedImageDataUrl: captured?.dataUrl,
-    cachedChartData: liveChartData,
-  }),
-  addItem: addShareItem,
-  errorLabel: "myNewChart:share",
-})
-```
-
-### 8. (Optional) Re-export the new card from `share/index.ts`
-
-If something outside the `share/` folder will mount the card directly
-(rare; usually `ShareItemView` is the only entry point), add it to
-the barrel export. Most variants don't need this step - `ShareItemView`
-is the public render entry point and reaches the card through the
-registry.
-
-## Bulk download paths
-
-`explorer/share/tab/SharePanel.tsx` exposes
-`downloadShareItemAsPng` and `downloadShareItemAsSvg`. The PNG path
-prefers `cachedSvg` (rasterized on demand at the per-variant pixel
-size from `CAPTURE_DIMENSIONS`), falls back to a live `html-to-image`
-capture of the rendered card body, and finally to the legacy PNG.
-The SVG button is shown whenever `cachedSvg` is present and embeds
-an `@import` for the Neue Haas font family so renderers that honor
-web fonts match the on-screen typography.
-
-CSV export for the whole tray flows through
-`exportAllShareItemsAsZip` (in `tools/panels/dataInDepth/utils/exportUtils.ts`),
-which iterates the items and asks each handler's `exportCsv` for its
-body. Per-variant CSV body builders (`barChartDataToCSV`,
-`radarDataToCSV`, `equityDataToCSV`,
-`resilienceHeatmapDataToCSV`) live in
-the same file and are imported by the handlers; they are pure
-string-builders so the same code drives single-item and bulk export.
-
-The bulk export emits a ZIP (`coeqwal-share-export.zip`) shaped like:
-
-```
-coeqwal-share-export.zip
-├── coeqwal-bar-chart-current-ops-bars-hist-data.csv
-├── coeqwal-radar-current-ops-vs-managed-flows-hist-data.csv
-├── coeqwal-distribution-current-ops-vs-baseline-cc50-data.csv
-└── ...
-```
-
-Each per-item CSV uses `handler.filenameLabel(item, lookups) + "-data.csv"`
-so the names line up with the per-card CSV download. Items whose
-variant has no `exportCsv`, or whose `exportCsv` returns null because
-`cachedChartData` is missing, are silently skipped. The exporter
-produces no download at all when every item is skipped, rather than
-handing the user an empty ZIP. Two share items with identical capture
-metadata (and therefore the same filename) are disambiguated with a
-`-2`, `-3`, ... suffix.
-
-### `ShareDataRehydrationHost`
-
-URL-restored items don't carry visual or chart-data caches (URLs
-can't fit them). So that radar / equity / resilience heatmap items
-loaded from a URL still appear in the bulk export, every variant
-declares a `DataRehydrator` React component on its handler.
-`ShareDataRehydrationHost` mounts each variant's rehydrator once
-with the items of that type plus a shared `DataRehydrationContext`
-(the same `allChartData` and `radarLiveByHydro` the live cards
-consume). Each rehydrator writes back through
-`context.updateShareItem` once its hooks resolve.
-
-`useShareDataReady(items)` is the gate the share panel uses on the
-"Download all data" button: it returns `false` while any item with a
-registered `DataRehydrator` still lacks `cachedChartData`. Items
-without a rehydrator count as ready without blocking the user; they're
-silently skipped from the ZIP.
-
-### CSV pipeline conventions
-
-Every variant CSV section, single-card or bulk, uses the same shape:
-
-```
-Coeqwal export,<variant title>
-Scenario,<label>                   (or Scenarios,<a>; <b>; <c>)
-Hydroclimate,<hc>                  (when present)
-Compared to baseline,yes|no        (when applicable)
-<extra key,value rows>             (e.g. Subject / View / Encoding for resilience)
-Tier scale,1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical
-                                   (blank line)
-<table header row>
-<data rows...>
-```
-
-The header block is emitted by `buildCsvHeaderBlock(input)` in
-`exportUtils.ts`. New variant CSV writers MUST call it; do not roll
-your own `Scenario,…` / `Compared to baseline,…` rows. The variant
-handler is the right place to populate `CsvHeaderInput`: it has the
-share item, the scenario-name lookup, and the per-variant context.
-
-#### Tier representation
-
-Wherever a tier value appears as a data cell, emit it as an integer
-1-4 (decimal sub-tier scores are allowed when the chart axis is
-continuous, e.g. radar). Set `includeTierScale: true` so the legend
-ships in the header block. Bar chart's pivoted layout keeps tier
-**labels** as column headers (those are bin labels, not values); it
-still passes `includeTierScale: true` for consistency.
-
-For comparison columns (e.g. `Tier` vs `Baseline tier`) both columns
-must use the same representation. The equity payload now carries
-`tierLevel: number` and `baselineTierLevel: number` (added in
-`useEquityObjectives`); use those rather than the legacy formatted
-`"Tier N"` strings.
-
-#### Filename convention
-
-PNG, SVG, and CSV downloads all derive their filename from
-`handler.filenameLabel(item, lookups)`, with the extension added by
-`withExt` (no timestamp). The per-item CSV path additionally appends
-a `-data` suffix so a user with all three downloads from the same
-card can sort them next to each other:
-
-```
-coeqwal-distribution-current-ops-hist.png
-coeqwal-distribution-current-ops-hist.svg
-coeqwal-distribution-current-ops-hist-data.csv
-```
-
-The bulk-data download is a ZIP at `coeqwal-share-export.zip` -
-fixed name, no scenario metadata, since it bundles every share item.
-Per-item CSVs inside the ZIP keep the same per-variant basename plus
-`-data.csv` so they extract next to a sibling `.png` / `.svg` when
-the user re-zips them.
-
-##### Building the basename
-
-Use the helpers in [`share/utils/filename.ts`](utils/filename.ts):
-
-- `slugifyForFilename(text)` - lowercase, ASCII-only, hyphen-
-  separated. Use this on every user-facing label.
-- `hydroclimateSlug(hc)` - compact form (`hist`, `cc50`, `cc75`,
-  `cc95`); falls back to `slugifyForFilename` for unknown values.
-  Add new climates to the `HC_SLUG` map intentionally.
-- `joinScenarioSlugs(ids, shortLabelLookup)` - joins with `-vs-`
-  and dedupes consecutive identical slugs so two ids that share a
-  short label can't render `current-ops-vs-current-ops`.
-- `withExt(label, ext)` - appends the extension. Called by
-  `tab/SharePanel.tsx`, not the handler.
-
-Compose with `[...].filter(Boolean).join("-")` so a missing segment
-(e.g. baseline-off, no scenarios for an aggregate view) doesn't leave
-a stray `--` in the name.
-
-##### Disambiguators every variant should encode
-
-`filenameLabel` should encode every choice that meaningfully changes
-the captured content. Otherwise two captures of the "same" card at
-different settings collide and the OS quietly suffixes `(1)`. For the
-existing variants:
-
-| Variant      | Encoded segments                                                                                                                                                                                                                                      |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `barChart`   | scenario short label, view mode (`bars` / `avg` / `bar`), hydroclimate. View mode is intentionally renamed in filenames only - the runtime `viewMode === "distribution"` token would visually collide with the equity tool's `distribution` filename. |
-| `radar`      | every scenario short label joined by `-vs-`, hydroclimate.                                                                                                                                                                                            |
-| `equity`     | scenario short label, `vs-baseline` when `compareToBaseline` is true, hydroclimate.                                                                                                                                                                   |
-| `resilience` | tile scope (`panel` / `scenario` / `outcome` / `hydroclimate`), tile id slug for small-multiples scopes, hydroclimate (`multi-hc` when more than one is captured; suppressed when scope is `hydroclimate` because the tile id already names it).      |
-
-When in doubt: include scenario identity, the chosen hydroclimate,
-and any boolean toggle that changes the chart content (overlay on/off,
-view mode, compare-to-baseline). Skip ephemeral UI state (sort order,
-zoom level) - that belongs to the live view, not the file on disk.
-
-##### Out of scope
-
-`getTimestampedFilename` (in `tools/panels/dataInDepth/utils/exportUtils.ts`) is
-also used by CategoryView section downloads. Do not pull it into share variants.
-
-### Known limitation: one raster size per variant type
-
-`shareItemRasterSize` (in `tab/SharePanel.tsx`) currently maps each
-`ShareItem["type"]` to one entry in `CAPTURE_DIMENSIONS` via the
-handler's `rasterDimensionsKey`. That's fine for `barChart`, `radar`,
-and `equity`, which capture at one fixed size. It rounds resilience
-panel / single-tile captures down to one shared size
-(`resiliencePanel`) when PNG fallback rasterization happens - a
-URL-restored resilience tile rasterizes against the panel size, not
-its own size.
-
-Live behavior is unaffected today because `cachedSvg` carries the
-correct viewBox and the live card path uses `html-to-image` against
-the rendered card. The only path that hits the wrong size is
-PNG-from-cachedSvg with no live element mounted (a tray-only
-URL-restored resilience tile, which is rare). When that becomes a
-real problem, replace `rasterDimensionsKey` with an item-level
-resolver: `rasterDimensions: (item) => CaptureSize`. The handler
-can then look at `item.tileScope` (panel / scenario / outcome /
-hydroclimate) and pick the correct
-`CAPTURE_DIMENSIONS` entry. **Out of scope for now.**
-
-## Persistence
-
-`share/persist.ts` is the single owner of the localStorage envelope.
-Every change to `shareItems` or `storyItemIds` flows through
-`saveShareState` via the store subscription, and the store hydrates
-once at startup with `loadShareState`. The storage key is
-`SHARE_STORAGE_KEY` and the on-disk shape is `PersistedShareItem`.
-
-Two layers of versioning, used independently:
-
-- `SHARE_STORAGE_KEY` is the localStorage key. Bumping it silently
-  discards every prior version's items. Use when no migration can
-  express the change ("start fresh" is the right user-facing
-  behavior).
-- `SHARE_STORAGE_VERSION` is the envelope schema version, walked
-  forward by `migrateEnvelope`. Use when the new build CAN read old
-  data with a transformation.
-
-## URL versioning
-
-Share URLs always include `v=<SHARE_URL_VERSION>`. `parseShareUrl`
-returns `versionMismatch: true` when the URL declares a version
-different from the current build. The store has a
-`shareUrlVersionMismatch` flag and a `dismiss…` action; the Share
-tab renders a notice so the recipient understands why their view may
-differ from the sender's.
-
-Bump `SHARE_URL_VERSION` for any backward-incompatible grammar
-change. Adding a new variant prefix is not a breaking change.

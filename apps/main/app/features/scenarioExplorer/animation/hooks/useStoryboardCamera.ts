@@ -1,9 +1,7 @@
 "use client"
 
-/* useStoryboardCamera: panel-in-view and camera fly-home
- *
- * Detects when the storyboard panel scrolls into view, flies the camera
- * to its home view, and primes the map session on arrival. One of the
+/* useStoryboardCamera: detects when the storyboard panel scrolls into view,
+ * flies the camera home, and primes the map session on arrival. One of the
  * TierAnimationSection hooks (see README.md).
  */
 
@@ -26,23 +24,18 @@ interface CameraParams {
   mapAPI: ReturnType<typeof useMap>
   /** Home camera the storyboard flies to once the panel is visible. */
   home: { center: [number, number]; zoom: number }
-  /** Trigger a polygon collect once the fly settles (from the projection
-   *  hook). */
+  /** Collect polygons once the fly settles (from the projection hook). */
   computePolygonDataRef: React.RefObject<() => void>
-  /** Re-apply the panel offset as the panel settles (from the projection
-   *  hook). */
+  /** Re-apply the panel offset as the panel settles (from the projection hook). */
   applyPanelOffsetRef: React.RefObject<() => void>
-  /** Gate that lets the rest of the component start painting polygons once
-   *  the camera has arrived. */
+  /** Gate that lets the component start painting polygons once the camera
+   *  arrives. */
   polygonsAllowedRef: React.RefObject<boolean>
-  /** Polygon fill/outline layer ids that get suppressed until their beat. */
+  /** Polygon fill/outline layer ids suppressed until their beat. */
   animPolygonLayers: readonly { fill: string; outline: string }[]
 }
 
-/** Detects when the storyboard panel scrolls into view and flies the camera
- *  home on first arrival. On the fly's moveend it primes the map session:
- *  collects polygons, makes the animation layers visible, and writes the
- *  demand-units baseline so the per-frame palette cycling starts clean. */
+/** See the file header. */
 export function useStoryboardCamera({
   panelRef,
   panelInView,
@@ -57,7 +50,7 @@ export function useStoryboardCamera({
 }: CameraParams): void {
   const cameraSetRef = useRef(false)
 
-  /* Detect when panel scrolls into view */
+  /* Detect when panel scrolls into view. */
   useEffect(() => {
     const el = panelRef.current
     if (!el) return
@@ -71,7 +64,7 @@ export function useStoryboardCamera({
     return () => observer.disconnect()
   }, [panelRef, setPanelInView])
 
-  /* Fly camera once panel is visible */
+  /* Fly camera once panel is visible. */
   useEffect(() => {
     if (!panelInView || isLoading || !mapAPI.mapRef?.current) return
     if (cameraSetRef.current) return
@@ -85,16 +78,15 @@ export function useStoryboardCamera({
         computePolygonDataRef.current()
         polygonsAllowedRef.current = true
 
-        // The panel may still be settling to its final scroll position
-        // after the camera fly. Schedule cheap offset re-applications to
-        // catch any drift without re-querying Mapbox.
+        // Panel may still be settling its scroll position after the fly.
+        // Schedule cheap offset re-applications to catch drift without
+        // re-querying Mapbox.
         setTimeout(() => applyPanelOffsetRef.current(), 200)
         setTimeout(() => applyPanelOffsetRef.current(), 500)
 
         try {
-          // Ensure all animation layers have visibility "visible" at the
-          // layout level - OutcomePolygonLayer may have set them to "none"
-          // if it was previously mounted in another map mode.
+          // Force all animation layers visible: OutcomePolygonLayer may have
+          // set them to "none" when mounted in another map mode.
           for (const { fill, outline } of animPolygonLayers) {
             if (map.getLayer(fill))
               map.setLayoutProperty(fill, "visibility", "visible")
@@ -102,16 +94,12 @@ export function useStoryboardCamera({
               map.setLayoutProperty(outline, "visibility", "visible")
           }
 
-          // consolidated session-init. `ensureDemandUnitsOutlineLayer`
-          // creates the `demand-units-outline` line layer once per session
-          // (safe to call repeatedly: no-op if it already exists from
-          // another map mode).
-          // `writeDemandUnitsBaseline` then asserts the full beat-1 palette
-          // state on both fill and outline layers, including zeroed
-          // transitions so the per-frame color cycling in the progress
-          // handler below writes cleanly without smear. Casts via
-          // `unknown` because Mapbox's method signatures are stricter
-          // than the helpers' permissive structural types.
+          // Session-init. `ensureDemandUnitsOutlineLayer` creates the
+          // `demand-units-outline` layer once (no-op if it already exists).
+          // `writeDemandUnitsBaseline` then asserts the full beat-1 palette on
+          // fill and outline, with zeroed transitions so the per-frame color
+          // cycling writes without smear. Casts via `unknown` because Mapbox's
+          // signatures are stricter than the helpers' structural types.
           ensureDemandUnitsOutlineLayer(map as unknown as SessionInitMap, {
             filter: DU_CLASS_FILTER,
             lineColor: blueFillExpr(0) as readonly unknown[],
@@ -128,20 +116,17 @@ export function useStoryboardCamera({
             lineOffset: -0.25,
             visibility: "visible",
           })
-          // Suppress all other polygon layers until their beat-2 turn
+          // Suppress all other polygon layers until their beat-2 turn.
           for (const { fill, outline } of animPolygonLayers) {
-            if (fill === "demand-units") continue // already handled above
+            if (fill === "demand-units") continue // handled above
             if (map.getLayer(fill))
               map.setPaintProperty(fill, "fill-opacity", 0)
             if (map.getLayer(outline))
               map.setPaintProperty(outline, "line-opacity", 0)
           }
-          // Prep the shared `basemap-dim-overlay` (added by VisualizationLayers
-          // and pinned to opacity 0 in get-started mode) for progress-driven
-          // updates from this component. Override the 800ms transition
-          // VisualizationLayers configures for the Explore path. Otherwise
-          // every per-frame setPaintProperty call below would smear and
-          // look broken.
+          // Prep shared `basemap-dim-overlay` for progress-driven updates.
+          // Override the 800ms transition VisualizationLayers sets for the
+          // Explore path, else every per-frame setPaintProperty smears.
           if (map.getLayer("basemap-dim-overlay")) {
             map.setPaintProperty(
               "basemap-dim-overlay",

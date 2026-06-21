@@ -1,14 +1,11 @@
-/* Shared storyboard geometry
+/* Shared storyboard geometry.
  *
- * The radar and heatmap visuals are drawn in two places that must agree.
- * `OutcomeMorphOverlay` draws the SVG dots and cells, and
- * `useOutcomeLabelGeometry` positions the HTML axis labels that ring or
- * sit beside them. When the two computed different frames, the labels
- * drifted off their dots and cells. These helpers are the one source of
- * truth for the frame both sides share.
+ * One source of truth for the radar/heatmap frame shared by
+ * `OutcomeMorphOverlay` (SVG dots and cells) and `useOutcomeLabelGeometry`
+ * (HTML axis labels), so labels don't drift off their dots and cells.
  *
- * All values are in panel coordinates (the right third of the panel,
- * lifted by `STORYBOARD_VISUAL_LIFT_PX`).
+ * All values are in panel coordinates (the right third, lifted by
+ * `STORYBOARD_VISUAL_LIFT_PX`).
  */
 
 import { STORYBOARD_VISUAL_LIFT_PX } from "./animationTiming"
@@ -32,9 +29,8 @@ export function computeRadarFrame(panelW: number, panelH: number): RadarFrame {
   return { cx, cy, rMax }
 }
 
-/** Angle in radians of vertex `i` of `n`, starting at the top and going
- *  clockwise. Both the dots and the axis labels walk vertices in the
- *  same order, so they land on the same angle. */
+/** Angle (radians) of vertex `i` of `n`, from the top, clockwise. Dots and
+ *  axis labels walk vertices in this same order so they land on one angle. */
 export function radarVertexAngle(i: number, n: number): number {
   return (2 * Math.PI * i) / Math.max(n, 1) - Math.PI / 2
 }
@@ -67,9 +63,9 @@ export interface HeatmapColumnFrame {
   labelRightX: number
 }
 
-/** The parts of the heatmap layout that the SVG cells and the HTML row
- *  labels both depend on. The overlay computes its own cell widths on
- *  top of this. The labels only need the left edge, row height, and top. */
+/** Heatmap layout parts shared by the SVG cells and HTML row labels. The
+ *  overlay computes its own cell widths on top of this. The labels need only
+ *  the left edge, row height, and top. */
 export function computeHeatmapColumnFrame(
   panelW: number,
   panelH: number,

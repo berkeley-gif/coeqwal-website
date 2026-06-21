@@ -1,10 +1,7 @@
 "use client"
 
-/* StoryboardControls: the Back, count, Next, Restart row
- *
- * The navigation buttons under the narration. Calls the handlers
- * TierAnimationSection passes down. Hidden under reduced motion.
- */
+/* StoryboardControls: Back, count, Next, Restart row.
+ * Calls handlers from TierAnimationSection. Hidden under reduced motion. */
 
 import {
   Typography,
@@ -27,11 +24,9 @@ interface StoryboardControlsProps {
   onRestart?: () => void
 }
 
-/* Bottom control row: Back | N-of-T | Next, plus Restart past beat 0
- *
- * Buttons are never disabled mid-tween (a click stops the running tween
- * and jumps, see `goTo` in `TierAnimationSection`). The only disabled
- * case is Next on the final beat. */
+/* Buttons are never disabled mid-tween (a click stops the running tween
+ * and jumps, see `goTo` in `TierAnimationSection`). Only Next on the
+ * final beat is disabled. */
 export default function StoryboardControls({
   beatIndex,
   totalBeats,

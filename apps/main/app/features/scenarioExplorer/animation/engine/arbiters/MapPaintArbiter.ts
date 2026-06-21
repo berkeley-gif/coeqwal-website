@@ -1,9 +1,8 @@
 /* MapPaintArbiter: the storyboard's map painter
  *
- * The playback arbiter that writes the `demand-units` layers and the
- * basemap dim overlay from progress-keyed actors during playback. Owns
- * the demand-units layers while a beat is tweening. See "Who paints the
- * map" in README.md.
+ * Writes the `demand-units` layers and basemap dim overlay from
+ * progress-keyed actors during playback. See "Who paints the map" in
+ * README.md.
  */
 
 import type { MapboxGLMap } from "@repo/map"
@@ -22,12 +21,11 @@ import {
 import { BLUE_MID, blueFillExpr } from "../bluePalette"
 import { BASEMAP_DIM_OPACITY } from "../../../../map/config/outcomeLayerRegistry"
 
-/** Progress window for fading in the dark basemap overlay. It holds at 0
- *  until the reset window ends, then ramps to `BASEMAP_DIM_OPACITY` and
- *  holds for the rest of the storyboard. Each beat re-applies the peak so
- *  scrubbing backward doesn't leave it half-faded. The start matches
- *  `RESET_END` in `actorGroups.ts`. Without that offset the ramp would
- *  begin partway up at the reset-to-cycle hand-off and pop in. */
+/** Progress window for fading in the dark basemap overlay. Holds at 0
+ *  through the reset window, ramps to `BASEMAP_DIM_OPACITY`, then holds.
+ *  Re-applied each beat so scrubbing back doesn't leave it half-faded.
+ *  Start matches `RESET_END` in `actorGroups.ts`. Without that offset the
+ *  ramp begins partway up at the hand-off and pops in. */
 const BASEMAP_DIM_FADE_START = 0.01
 const BASEMAP_DIM_FADE_END = 0.07
 
@@ -186,12 +184,9 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyReset(map: MapWriteView): void {
-    // Pre-cycle baseline. Full-state assertion via
-    // `writeDemandUnitsBaseline`.
-    //
-    // Opacity is seeded to 0 here. The blue cycle's fade-in ramp then
-    // takes over and brings the layer up from 0 as `v` moves past the
-    // reset window into the cycle.
+    // Pre-cycle baseline, full-state assertion via
+    // `writeDemandUnitsBaseline`. Opacity seeded to 0. The blue cycle's
+    // fade-in ramp brings the layer up as `v` passes into the cycle.
     const resetExpr = blueFillExpr(0)
     writeDemandUnitsBaseline(map, {
       filter: DU_CLASS_FILTER,
@@ -218,11 +213,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
   }
 
   private applyBlueCycleEnter(map: MapWriteView, v: number): void {
-    // Reset the layers to a clean baseline at cycle start. Forward play
-    // already has them here, but re-applying means scrubbing back from
-    // a later beat doesn't inherit a stale filter or color. The color is
-    // seeded with the first cycle step. The first update frame overwrites
-    // it with the real cycling color.
+    // Clean baseline at cycle start. Forward play already has this, but
+    // re-applying means scrubbing back from a later beat doesn't inherit
+    // a stale filter or color. The first update frame overwrites the
+    // seeded color with the real cycling color.
     writeDemandUnitsBaseline(map, {
       filter: DU_CLASS_FILTER,
       fillExpr: blueFillExpr(0),
@@ -321,11 +315,10 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     p: Extract<MapPaintPayload, { kind: "tier-color-blend" }>,
     v: number,
   ): void {
-    // Reset for the convergence sub-window. The first update frame
-    // writes the real ramping color. Opacity starts at `peakOpacity`,
-    // not 0, so the hand-off from the blue hold doesn't flash
-    // invisible. The filter stays full through the blend.
-    // `tier-color-hold` is what switches to AG-only.
+    // Reset for the convergence sub-window. The first update frame writes
+    // the real ramping color. Opacity starts at `peakOpacity`, not 0, so
+    // the hand-off from the blue hold doesn't flash invisible. The filter
+    // stays full through the blend. `tier-color-hold` switches to AG-only.
     writeDemandUnitsBaseline(map, {
       filter: DU_CLASS_FILTER,
       fillExpr: blueFillExpr(this.frozenColorPhase, 0),
@@ -386,8 +379,7 @@ export class MapPaintArbiter implements Arbiter<MapPaintActor> {
     // Static hold: AG-only filter, fully blended tier colors, pinned
     // opacity. Writing the full state means scrubbing back from
     // ag-rev-morph self-heals. If the tier table hasn't loaded,
-    // `buildBlendedTierExpr`
-    // returns null and we keep the layer's current colors.
+    // `buildBlendedTierExpr` returns null and we keep current colors.
     const blendedTier = ctx.buildBlendedTierExpr(BLUE_MID, 1) as
       | readonly unknown[]
       | null

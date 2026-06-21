@@ -1,5 +1,5 @@
 /**
- * Filename helpers for share-system downloads.
+ * Filename helpers for share-system downloads
  *
  * The share variant handlers compose download filenames from
  * scenario short labels, hydroclimate slugs, and view-mode tokens.
@@ -28,6 +28,25 @@ export function withExt(label: string, ext: string): string {
 }
 
 /**
+ * Make an extension-less base label unique within a set, appending
+ * -2, -3, and so on when it collides. The export ZIP builders call
+ * this so two cards that resolve to the same label do not overwrite
+ * each other in the archive. The caller adds the extension afterward,
+ * which keeps the .png and .svg for one card on the same base.
+ */
+export function dedupeLabel(base: string, used: Set<string>): string {
+  if (!used.has(base)) {
+    used.add(base)
+    return base
+  }
+  let n = 2
+  while (used.has(`${base}-${n}`)) n++
+  const out = `${base}-${n}`
+  used.add(out)
+  return out
+}
+
+/**
  * Compact hydroclimate token used in filenames. Keeps the explicit
  * map small so additions (e.g. cc25) are intentional, and falls back
  * to a generic slug for anything we forgot to wire up.
@@ -35,7 +54,6 @@ export function withExt(label: string, ext: string): string {
 const HC_SLUG: Record<string, string> = {
   historical: "hist",
   cc50: "cc50",
-  cc75: "cc75",
   cc95: "cc95",
 }
 

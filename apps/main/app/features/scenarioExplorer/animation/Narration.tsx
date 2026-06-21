@@ -1,10 +1,7 @@
 "use client"
 
-/* Narration: the storyboard's left column
- *
- * The page title, pre-play gate, per-beat prose, and the control row.
- * Edit narration copy and intro timing here. Rendered by BeatTextOverlay.
- */
+/* Narration: the storyboard's left column (title, pre-play gate, per-beat
+ * prose, control row). Edit narration copy and intro timing here. */
 
 import { useRef, useEffect } from "react"
 import {
@@ -20,10 +17,8 @@ import type { MotionValue } from "@repo/motion"
 import { PARAGRAPH_FADE_SEC } from "./animationTiming"
 import StoryboardControls from "./StoryboardControls"
 
-/* Narration copy, one entry per beat (0-based). Edit wording here. Each
- * beat's paragraphs cross-fade to the next beat's. `{scenario}` is
- * filled in at render. Beat 0 is empty because its intro + tier legend
- * are rendered separately below. */
+/* Narration copy, one entry per beat (0-based). `{scenario}` is filled in
+ * at render. Beat 0 is empty: its intro + tier legend render separately. */
 const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
   [], // [0] intro + tier legend, rendered separately
   [
@@ -49,23 +44,23 @@ const NARRATION_BY_BEAT: readonly (readonly string[])[] = [
   ],
 ] as const
 
-/* Beat 0 opening reveal (seconds). The two intro paragraphs and the
- * tier legend each start at a staggered delay. */
+/* Beat 0 opening reveal (seconds). Intro paragraphs and tier legend
+ * stagger in. */
 const INTRO_FADE_SEC = 4.0
 const INTRO_P1_DELAY = 0.4
 const INTRO_P2_DELAY = 1.8
 const INTRO_LEGEND_DELAY = 3.2
 
-/* Beat 0 to 1 hand-off (seconds), two ordered phases: the intro text
- * fades out, then the block collapses so the legend slides to the top.
- * The return reverses it. The beat 1 prose waits for both phases. */
+/* Beat 0 to 1 hand-off (seconds), two ordered phases: intro text fades
+ * out, then the block collapses so the legend slides up. Return reverses
+ * it. Beat 1 prose waits for both phases. */
 const INTRO_EXIT_FADE_SEC = PARAGRAPH_FADE_SEC
 const INTRO_COLLAPSE_SEC = 0.9
 
 interface NarrationProps {
   headingOpacity: MotionValue<number>
-  /** Opacity of the body block. The parent fades it 1 to 0 on
-   *  Back-from-first-beat. Defaults to 1. */
+  /** Body block opacity. Parent fades 1 to 0 on Back-from-first-beat.
+   *  Defaults to 1. */
   backOutOpacity?: MotionValue<number>
   /** 0-based storyboard cursor. */
   beatIndex: number
@@ -74,7 +69,7 @@ interface NarrationProps {
   /** False shows the pre-play Play gate. True shows the controls and body. */
   hasPlayed: boolean
   /** When true (e.g. reduced motion), hide controls and let the body
-   *  scroll so the end-state content stays reachable. */
+   *  scroll so end-state content stays reachable. */
   hideControls: boolean
   textHidden: boolean
   /** The "<name> scenario" label, used in the Beat 2 narration. */
@@ -85,11 +80,8 @@ interface NarrationProps {
   onRestart?: () => void
 }
 
-/* Left column of the storyboard panel: page title, pre-play gate,
- * subtitle, the per-beat narration body (intro + tier legend on beat 0,
- * then prose), and the bottom control row. Everything here is driven by
- * `beatIndex` (a per-beat cross-fade), not by the continuous progress
- * clock. */
+/* Driven by `beatIndex` (per-beat cross-fade), not the continuous
+ * progress clock. */
 export default function Narration({
   headingOpacity,
   backOutOpacity,
@@ -109,9 +101,9 @@ export default function Narration({
   const textColor = theme.palette.undertone.warm
   const shadow = theme.textShadow.displayBody
 
-  // True once the user has advanced past beat 0 this play, so the intro
-  // can distinguish its first reveal (instant) from a return (animated
-  // reverse). Reset on leaving playback so a replay starts fresh.
+  // True once the user advanced past beat 0 this play, so the intro can
+  // distinguish its first reveal (instant) from a return (animated
+  // reverse). Reset on leaving playback.
   const hasAdvancedRef = useRef(false)
   useEffect(() => {
     if (!hasPlayed) {
@@ -137,7 +129,7 @@ export default function Narration({
         pb: padding,
       }}
     >
-      {/* Heading + pre-play gate (matches the ContentPanel heading). */}
+      {/* Heading + pre-play gate. */}
       <motion.div
         style={{
           opacity: headingOpacity,
@@ -157,9 +149,8 @@ export default function Narration({
           Visualizing key outcomes
         </Typography>
         {!hideControls && !hasPlayed && (
-          /* Pre-play gate: the inline Play button beside the title. The
-           *  rest of the storyboard chrome (Back | N-of-T | Next) appears
-           *  once the user clicks Play. */
+          /* Pre-play gate: inline Play button beside the title. The rest
+           *  of the chrome (Back | N-of-T | Next) appears after Play. */
           <Box
             sx={{
               display: "flex",
@@ -189,8 +180,8 @@ export default function Narration({
       </motion.div>
 
       <motion.div style={{ opacity: headingOpacity, flexShrink: 0 }}>
-        {/* Subtitle shows during the intro (beat 0) and fades out once
-            the storyboard advances, leaving just the page title. */}
+        {/* Subtitle shows on beat 0, fades out once the storyboard
+            advances. */}
         <AnimatePresence>
           {beatIndex === 0 && (
             <motion.div
@@ -212,9 +203,8 @@ export default function Narration({
         </AnimatePresence>
       </motion.div>
 
-      {/* Body: intro + tier legend (beat 0) and the per-beat prose, all
-       *  keyed to `beatIndex`. Shown once the user starts (or always, in
-       *  reduced motion). */}
+      {/* Body: intro + tier legend (beat 0) and per-beat prose, keyed to
+       *  `beatIndex`. Shown after start (or always, in reduced motion). */}
       {(hasPlayed || hideControls) && !textHidden && (
         <motion.div
           style={{
@@ -248,13 +238,11 @@ export default function Narration({
               },
             }}
           >
-            {/* Intro paragraphs (beat 0 only). In normal flow above the
-                legend, so animating its height reflows the legend smoothly.
-                `hidden` = text fades out then height collapses (legend up);
-                `visible` reverses it after waiting for the beat 1 prose to
-                clear. First reveal mounts straight to `visible`
-                (`initial={false}`); `hasAdvancedRef` enables the animated
-                entrance only on a return from beat 1. */}
+            {/* Intro paragraphs (beat 0 only), in normal flow above the
+                legend so animating height reflows it. `hidden`: text fades
+                then height collapses (legend up). `visible` reverses it
+                after beat 1 prose clears. First reveal mounts to `visible`;
+                `hasAdvancedRef` animates only on a return from beat 1. */}
             <AnimatePresence>
               {beatIndex === 0 && (
                 <motion.div
@@ -297,9 +285,8 @@ export default function Narration({
                   }}
                   style={{ overflow: "hidden" }}
                 >
-                  {/* Paragraphs stagger-fade only on the first reveal. On a
-                      return they mount opaque and the outer block handles
-                      the fade. */}
+                  {/* Paragraphs stagger-fade only on first reveal. On a
+                      return they mount opaque; the outer block fades. */}
                   <Box sx={{ pb: 2.5 }}>
                     <motion.div
                       initial={hasAdvancedRef.current ? false : { opacity: 0 }}
@@ -334,8 +321,8 @@ export default function Narration({
               )}
             </AnimatePresence>
 
-            {/* Tier legend. Fades in on start and persists. Each row is a
-                subgrid row so swatch | badge | description stay aligned. */}
+            {/* Tier legend. Fades in on start and persists. Subgrid rows
+                keep swatch | badge | description aligned. */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -441,11 +428,11 @@ export default function Narration({
               </Box>
             </motion.div>
 
-            {/* Per-beat prose below the legend. Entering beat 1, the
-                fade-in waits for the intro's exit (fade + collapse) so it
-                appears only once the legend settles; other beats fade in
-                at once. Exit always fades out immediately, so Back clears
-                the prose before the intro expands the legend back down. */}
+            {/* Per-beat prose below the legend. Entering beat 1, fade-in
+                waits for the intro's exit (fade + collapse) so it appears
+                after the legend settles. Other beats fade in at once. Exit
+                fades immediately, so Back clears prose before the intro
+                expands the legend back down. */}
             <AnimatePresence mode="wait">
               {(NARRATION_BY_BEAT[beatIndex]?.length ?? 0) > 0 && (
                 <motion.div

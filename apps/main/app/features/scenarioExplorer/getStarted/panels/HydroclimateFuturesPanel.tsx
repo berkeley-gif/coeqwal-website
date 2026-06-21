@@ -1,37 +1,10 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoCard } from "@repo/ui"
+import { InfoCard, InfoCardGrid } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
-
-const HYDROCLIMATES = [
-  {
-    title: "Historical hydroclimate (baseline)",
-    description:
-      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
-  },
-  {
-    title: "Moderate-dry climate risk",
-    description:
-      "Warmer and slightly drier conditions (\u22121% runoff change) - 50th percentile level of concern",
-  },
-  {
-    title: "Moderate-wet climate risk",
-    description:
-      "Warmer and wetter conditions (+7% runoff change) - 44th percentile level of concern",
-  },
-  {
-    title: "High climate risk",
-    description:
-      "Warmer and much drier conditions (\u22127% runoff change) - 95th percentile level of concern",
-  },
-  {
-    title: "Extreme climate risk",
-    description:
-      "Much warmer and extremely drier conditions (\u221221% runoff change) - 99th percentile level of concern",
-  },
-] as const
+import { HYDROCLIMATES } from "../content"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
@@ -65,25 +38,17 @@ export default function HydroclimateFuturesPanel() {
         </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          alignItems: "stretch",
-          columnGap: theme.space.section.sm,
-          rowGap: sp.lg,
-        }}
-      >
-        {HYDROCLIMATES.map(({ title, description }, i) => (
+      <InfoCardGrid columns={5}>
+        {HYDROCLIMATES.map(({ title, description, dimmed }) => (
           <InfoCard
             key={title}
             title={title}
             description={description}
-            dimmed={i === 2 || i === 4}
+            dimmed={dimmed}
             variant="onDark"
           />
         ))}
-      </Box>
+      </InfoCardGrid>
     </PanelShell>
   )
 }

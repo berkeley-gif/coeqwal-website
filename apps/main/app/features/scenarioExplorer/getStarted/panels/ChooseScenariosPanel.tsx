@@ -4,6 +4,7 @@ import { Typography, useTheme } from "@repo/ui/mui"
 import { BarredColumns } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
+import { SCENARIO_QUESTIONS } from "../content"
 
 export default function ChooseScenariosPanel() {
   const theme = useTheme()
@@ -17,23 +18,10 @@ export default function ChooseScenariosPanel() {
       />
 
       <BarredColumns
-        items={[
-          {
-            title: "How is my water interest doing now?",
-            description:
-              "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
-          },
-          {
-            title: "How could alternative strategies impact my water interest?",
-            description:
-              "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
-          },
-          {
-            title: "How does climate change shift the picture?",
-            description:
-              "Select scenarios that represent how current operations and alternative strategies perform under alternative hydroclimates.",
-          },
-        ]}
+        items={SCENARIO_QUESTIONS.map(({ title, description }) => ({
+          title,
+          description,
+        }))}
         color={theme.palette.common.white}
         columnGap={theme.space.section.xl}
         sx={{ mb: theme.space.section.lg }}
