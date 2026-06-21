@@ -10,6 +10,7 @@ Persistent Mapbox GL map used across the Learn, Get Started, and Explore tabs.
 - **`store.ts`** Zustand store for map mode, active outcome visualization, camera padding, and tier animation highlights.
 - **`config/outcomeLayerRegistry.ts`** single source of truth for all outcome layer configs (geometry type, Mapbox layer IDs, tooltip fields, camera presets/bounds).
 - **`config/cameraPresets.ts`** named `CameraView` (center + zoom) and `cameraBounds` (`[[sw], [ne]]`) constants.
+- **`config/resolveOutcomeCamera.ts`** pure resolver that turns an outcome + map mode into a camera action: `fitBounds` for `cameraBounds`, `easeTo` for `cameraPreset`, mode-specific default otherwise. Shared by the Learn/Explore reactive camera and the Get Started inline camera so the priority logic lives in one place.
 - **`visualizationLayers/hooks/useOutcomeVisualization.ts`** activates/deactivates a layer, fetches tier data, drives camera on outcome click.
 
 ---
@@ -165,6 +166,13 @@ Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry e
 
 ## Existing camera bounds
 
-| Outcome   | Constant         | Coverage                                                                                                                                             |
-| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CWS_DEL` | `CWS_DEL_BOUNDS` | `[[-122.525, 35.995], [-119.803, 40.745]]` - Urban demand units (167 features), measured from `demand_units` tileset with `Class === "Urban"` filter |
+All bounds constants live in `config/cameraPresets.ts` and are wired to outcomes in `config/outcomeLayerRegistry.ts`. `AG_REV` and `GW_STOR` reuse `CWS_DEL_BOUNDS`, so the constant name covers more than just CWS.
+
+| Outcome(s)                     | Constant               | Value                                      | Coverage                                                                                                    |
+| ------------------------------ | ---------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `CWS_DEL`, `AG_REV`, `GW_STOR` | `CWS_DEL_BOUNDS`       | `[[-123.525, 34.995], [-118.803, 41.745]]` | Urban demand units (167 features), measured from the `demand_units` tileset filtered to `Class === "Urban"` |
+| `DELTA_ECO`                    | `DELTA_ECO_BOUNDS`     | `[[-122.0, 37.7], [-121.1, 38.85]]`        | Legal Delta (DETAW polygon), measured from the `geoschem` tileset (`WBA_ID === "DETAW"`)                    |
+| `RES_STOR`                     | `RES_STOR_BOUNDS`      | `[[-123.68, 36.26], [-117.66, 42.8]]`      | 7 reservoir markers, with extra vertical padding for the label stack above Trinity Lake                     |
+| `ENV_FLOWS`                    | `ENV_FLOWS_BOUNDS`     | `[[-123.804, 36.295], [-119.897, 41.72]]`  | 17 environmental-flow monitoring stations                                                                   |
+| `FW_DELTA_USES`                | `FW_DELTA_USES_BOUNDS` | `[[-121.82, 37.95], [-121.47, 38.2]]`      | 2 Delta salinity compliance stations (Emmaton + Jersey Point), `maxZoom: 9`                                 |
+| `FW_EXP`                       | `FW_EXP_BOUNDS`        | `[[-121.72, 37.75], [-121.49, 37.95]]`     | 2 export pumping plants (Banks + Jones), `maxZoom: 9`                                                        |
