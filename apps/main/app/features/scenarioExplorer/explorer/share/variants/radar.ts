@@ -12,7 +12,7 @@
 import React, { useEffect } from "react"
 import type { VerticalParallelLineData } from "@repo/viz"
 import { getOutcomeName } from "../../../../../content/outcomes"
-import { radarDataToCSV } from "../exportUtils"
+import { radarDataToCSV } from "../export/csv/radarCsv"
 import ShareRadarCard from "../cards/ShareRadarCard"
 import ShareRadarLiveChart from "../live/ShareRadarLiveChart"
 import {
@@ -62,7 +62,7 @@ function renderRadarLiveChart(
 
 const radarHandler: VariantHandler<RadarItem> = {
   type: "radar",
-  urlPrefix: "r",
+  urlPrefix: "r", // "r"adar; unique across the registry
   rasterDimensionsKey: "radar",
 
   renderCard(item, ctx) {
@@ -161,13 +161,6 @@ const radarHandler: VariantHandler<RadarItem> = {
     )
   },
 
-  // Radar's bulk-rehydration source is `context.radarLiveByHydro`,
-  // the per-hydroclimate live data the share panel already builds
-  // for live fallback rendering. The shape RadarPanel persists at
-  // capture time is `{ [scenarioId]: values }` (see
-  // `buildRadarCaptureSlice`), so reproduce that here from the
-  // already-resolved `VerticalParallelLineData[]` for the item's
-  // hydroclimate. No async work required.
   DataRehydrator({ items, context }) {
     useEffect(() => {
       for (const item of items) {

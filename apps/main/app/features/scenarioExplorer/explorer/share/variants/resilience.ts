@@ -13,13 +13,14 @@ import { HYDROCLIMATE_SHORT_LABELS } from "../../../../../content/scenarios"
 import {
   resilienceHeatmapDataToCSV,
   type ResilienceHeatmapChartDataShape,
-} from "../exportUtils"
+} from "../export/csv/resilienceCsv"
 import { useResilienceAggregate } from "../../tools/panels/resilience/useResilienceAggregate"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
 } from "../../tools/panels/resilience/useResilienceMatrix"
 import ResilienceShareCard from "../cards/ResilienceShareCard"
+import { CAPTURE_DIMENSIONS, type CaptureSize } from "../capture/dimensions"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import type { ShareItemOfType } from "../types"
 import type { DataRehydrationContext, VariantHandler } from "../variants"
@@ -150,8 +151,19 @@ const ResilienceRehydrator: React.FC<{
 
 const resilienceHandler: VariantHandler<ResilienceItem> = {
   type: "resilience",
-  urlPrefix: "q",
+  urlPrefix: "q", // resilience; "r" is taken by radar, so use "q"
   rasterDimensionsKey: "resiliencePanel",
+
+  // A non-panel tileScope is a single heatmap tile, which captures at
+  // the smaller tile size. Only the full "panel" scope uses the panel
+  // dimensions. Defaulting everything to the panel size would round a
+  // tile PNG up and stretch it.
+  rasterSizeFor(item): CaptureSize {
+    const scope = item.tileScope ?? "panel"
+    return scope === "panel"
+      ? CAPTURE_DIMENSIONS.resiliencePanel
+      : CAPTURE_DIMENSIONS.resilienceTile
+  },
 
   renderCard(item, ctx) {
     return React.createElement(ResilienceShareCard, {

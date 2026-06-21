@@ -117,15 +117,6 @@ export function useResilienceLoiDistribution({
     setIsLoading(true)
     setError(null)
 
-    const mappings: Record<
-      ResilienceHydroclimate,
-      Record<string, string | null>
-    > = {
-      historical: allMappings.historical?.idMapping ?? {},
-      cc50: allMappings.cc50?.idMapping ?? {},
-      cc95: allMappings.cc95?.idMapping ?? {},
-    }
-
     // Batch per (scenario, hc): one HTTP call covers every outcomeCode
     // instead of one call per outcome. For 24 scenarios × 3 hcs × 9 outcomes
     // this reduces 648 requests to 72. Preload with a stable batch key so
@@ -142,8 +133,12 @@ export function useResilienceLoiDistribution({
     > = []
 
     for (const hc of hydroclimates) {
+      // allMappings is keyed by every ALL_HYDROCLIMATES value, so this
+      // resolves any climate without a per-climate literal here.
+      const idMapping = allMappings[hc]?.idMapping
+      if (!idMapping) continue
       for (const sid of scopeIds) {
-        const mapped = mappings[hc][sid]
+        const mapped = idMapping[sid]
         if (!mapped) continue
         const cacheKey = CACHE_KEYS.tierLocationsBatch(mapped, outcomeCodesArr)
         const p = preload(cacheKey, () =>

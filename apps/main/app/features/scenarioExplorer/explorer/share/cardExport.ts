@@ -1,23 +1,24 @@
 "use client"
 
 /**
- * Live-card export pipeline. Every "Download as PNG" / "Download as
- * SVG" button on a share card funnels through here so PNG and SVG
- * stay visually consistent (both carry the styled card chrome:
- * tool label, title, definition, hydroclimate badge, chart, chips,
- * note text, etc.) and so the same set of in-card controls is
- * filtered out of every export.
+ * Live-card capture pipeline. Capture a mounted share card to a PNG
+ * data URL or an SVG string. These are the produce half of image
+ * export, consumed by the per-item download and bulk image ZIP paths
+ * in `export/shareItemDownload`. Both keep PNG and SVG visually
+ * consistent (both carry the styled card chrome: tool label, title,
+ * definition, hydroclimate badge, chart, chips, note text, etc.) and
+ * filter out the same set of in-card controls.
  *
  * Implementation notes:
  *
  *   - Both PNG and SVG render the live DOM via `html-to-image`. The
  *     SVG file uses html-to-image's foreignObject embedding so the
- *     vector retains the same layout; this opens cleanly in modern
+ *     vector retains the same layout. This opens cleanly in modern
  *     browsers and most vector tools, with the documented caveat
  *     that legacy renderers without foreignObject support fall
  *     through to the embedded raster.
  *
- *   - `cardElementFilter` is the single source of truth for what
+ *   - `cardElementFilter` is the source of truth for what
  *     the export skips. Any element marked
  *     `data-share-export-ignore` is dropped, plus the
  *     `[data-share-note]` block when its only content is the
@@ -30,7 +31,6 @@
  */
 
 import { getFontEmbedCSS, toPng, toSvg } from "html-to-image"
-import { downloadFromDataUrl, downloadSvgString } from "./exportUtils"
 
 /**
  * html-to-image filter callback. Returning `false` drops the node
@@ -103,7 +103,7 @@ const HTML_TO_IMAGE_FONT_NOISE_PATTERNS = [
  * Result of the bootstrap call to `getFontEmbedCSS`.
  *
  *   - `string`: precomputed font CSS, possibly empty (the page has
- *     no `@font-face` rules to embed; legitimate, not a failure).
+ *     no `@font-face` rules to embed, which is legitimate, not a failure).
  *   - `null`: warm-up rejected. Callers should fall back to
  *     `skipFonts: true` and the user has already seen one warning.
  */
@@ -152,7 +152,7 @@ function getCachedFontEmbedCSS(): Promise<FontEmbedResult> {
  *
  *   - `{ fontEmbedCSS: "..." }`: use the precomputed (possibly empty)
  *     CSS. Library skips the stylesheet walk.
- *   - `{ skipFonts: true }`: warm-up failed; force the library off
+ *   - `{ skipFonts: true }`: warm-up failed. Force the library off
  *     the noisy path. Web fonts in the export render in system-font
  *     fallbacks but the export still completes.
  */
@@ -164,45 +164,39 @@ async function fontEmbedOptions(): Promise<
 }
 
 /**
- * Capture a live share-card element to PNG and trigger a browser
- * download. Returns true on success so callers can chain a fallback
- * path when the live element is missing or html-to-image rejects
- * (cross-origin embedded images, taint, etc.).
+ * Capture a live share-card element to a PNG data URL, or null when
+ * html-to-image rejects. This is the produce half of PNG export.
+ * Download paths and the bulk image ZIP both build on it.
  */
-export async function downloadCardAsPng(
+export async function captureCardPngDataUrl(
   liveEl: HTMLElement,
-  filename: string,
   options: ExportOptions,
-): Promise<boolean> {
+): Promise<string | null> {
   try {
     const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
     const fontOpts = await fontEmbedOptions()
-    const dataUrl = await toPng(liveEl, {
+    return await toPng(liveEl, {
       pixelRatio: dpr * (options.rasterScale ?? DEFAULT_RASTER_SCALE),
       backgroundColor: options.backgroundColor,
       filter: cardElementFilter,
       cacheBust: true,
       ...fontOpts,
     })
-    await downloadFromDataUrl(dataUrl, filename)
-    return true
   } catch (err) {
-    console.warn("[Share] card PNG export failed:", err)
-    return false
+    console.warn("[Share] card PNG capture failed:", err)
+    return null
   }
 }
 
 /**
- * Capture a live share-card element to SVG (foreignObject layout)
- * and trigger a browser download. The SVG is decoded from
- * html-to-image's data URL into a string so the file is written
- * with the canonical SVG mime type rather than a base64 blob.
+ * Capture a live share-card element to an SVG string (foreignObject
+ * layout), or null when html-to-image rejects or the data URL cannot
+ * be decoded. This is the produce half of SVG export.
  */
-export async function downloadCardAsSvg(
+export async function captureCardSvgString(
   liveEl: HTMLElement,
-  filename: string,
   options: Pick<ExportOptions, "backgroundColor">,
-): Promise<boolean> {
+): Promise<string | null> {
   try {
     const fontOpts = await fontEmbedOptions()
     const dataUrl = await toSvg(liveEl, {
@@ -211,13 +205,10 @@ export async function downloadCardAsSvg(
       cacheBust: true,
       ...fontOpts,
     })
-    const svg = decodeSvgDataUrl(dataUrl)
-    if (!svg) return false
-    downloadSvgString(svg, filename)
-    return true
+    return decodeSvgDataUrl(dataUrl)
   } catch (err) {
-    console.warn("[Share] card SVG export failed:", err)
-    return false
+    console.warn("[Share] card SVG capture failed:", err)
+    return null
   }
 }
 
