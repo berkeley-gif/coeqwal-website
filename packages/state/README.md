@@ -1,78 +1,70 @@
 # `@repo/state`
 
-Shared state management utilities for the COEQWAL monorepo. Re-exports Zustand and Immer so that all apps use the same version, and provides shared stores (e.g., the drawer store).
+Shared state-management primitives for the COEQWAL monorepo. Re-exports Zustand and Immer so every app pins the same version, and ships shared stores.
+
+Feature stores (the Scenario Explorer store, the map store, etc.) live in `apps/main` and are built on top of these primitives. This package only provides the shared pieces. See [Feature stores](#feature-stores) for where those are documented.
 
 ## Exports
 
+### `@repo/state/zustand`
+
+The Zustand/Immer building blocks every store in the repo composes from. Importing these here (instead of depending on `zustand`/`immer` directly in each app) keeps every package on one version.
+
+| Export       | Re-exported from              | Reach for it when                                                       |
+| ------------ | ----------------------------- | ----------------------------------------------------------------------- |
+| `create`     | `zustand`                     | Creating a store                                                        |
+| `immer`      | `zustand/middleware/immer`    | You want mutable-looking `set((state) => { ... })` immutable updates    |
+| `persist`    | `zustand/middleware`          | A store should survive reloads (localStorage / sessionStorage)          |
+| `useShallow` | `zustand/react/shallow`       | A selector returns an object/array and you want to skip equal re-renders |
+
 ```typescript
-import { create, immer } from "@repo/state/zustand"
-import { useDrawerStore } from "@repo/state/drawer"
+import { create, immer, persist, useShallow } from "@repo/state/zustand"
 ```
 
-## Store architecture
+### `@repo/state/drawer`
 
-Stores in this project use **Zustand with Immer** for immutable updates. Each feature owns its own store file; `@repo/state` provides the shared primitives.
+A ready-made Zustand store for the global side drawer (glossary and other panels). Shared so any app or feature can open or close the drawer without owning its state.
 
-### Cross-cutting vs. local state
+```typescript
+import { useDrawerStore } from "@repo/state/drawer"
 
-The Scenario Explorer uses **two feature stores** (see `apps/main/app/features/scenarioExplorer/README.md`). Tool panels should read **`useExplorerStore`** from `scenarioExplorer/explorer/store.ts`.
+const { isOpen, activeTab, openGlossaryPanel, closeDrawer } = useDrawerStore()
+```
 
-**Shared explorer store** holds cross-cutting state that every tool panel needs:
+State:
 
-- `selectedScenarios` - the sidebar checkboxes write to it; each tool panel reads it
-- `hydroclimate` - the toolbar's `HydroclimateChooser` writes to it; data hooks use it to resolve the right scenario IDs automatically
-- `searchQuery` - the sidebar handles search filtering before scenarios reach the panel
-- `highlightedScenario` - enable cross-component hover highlighting
-- `showMap` - controls the map reveal panel
+| Field         | Type                       | Notes                          |
+| ------------- | -------------------------- | ------------------------------ |
+| `isOpen`      | `boolean`                  | Whether the drawer is open     |
+| `activeTab`   | `TabKey \| null`           | The open tab, `null` if closed |
+| `drawerWidth` | `number`                   | Pixel width, defaults to `360` |
+| `content`     | `Record<string, unknown>`  | Per-tab content payload        |
 
-When a new visualization tool is added, it automatically gets all of these capabilities by reading from the store - no wiring required.
+Actions: `openDrawer(tab, width?)`, `closeDrawer()`, `setActiveTab(tab | null)`, `setDrawerWidth(width)`, `setDrawerContent(content)`, and the convenience `openGlossaryPanel()`.
 
-**Local component state** (`useState`) holds tool-specific settings:
+## Conventions
 
-- Chart mode (radar, parallel, parity, etc.)
-- Per-chart toggle options (e.g., `radarShowPath`, `deviationShowStaircase`)
-- Internal search or filter state within the visualization
+Stores in this repo use **Zustand with Immer** for immutable updates. Each feature owns its own store file and builds it from the primitives above; `@repo/state` does not hold feature state itself.
 
-This split keeps the store lean and avoids coupling between unrelated tools.
+For React subscriptions, prefer narrow selector or slice hooks over reading a whole store object, so components only re-render when the fields they use change.
 
-### Store properties for visualization tool developers
+### Shared store vs. local component state
 
-The table below lists which store properties a new tool panel should read from or write to.
+A recurring decision when building a feature: does a value belong in a shared store, or in `useState` next to the component?
 
-#### Read from store
-
-| Property              | Type             | Why your panel needs it                                                                    |
-| --------------------- | ---------------- | ------------------------------------------------------------------------------------------ |
-| `selectedScenarios`   | `string[]`       | Which scenarios to render. The sidebar checkboxes manage this.                             |
-| `hydroclimate`        | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.     |
-| `highlightedScenario` | `string \| null` | Scenario the user is hovering in the sidebar. Visually emphasize it in your visualization. |
-
-#### Write to store (actions)
-
-| Action                               | When to call it                                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `setHighlightedScenario(id \| null)` | When the user hovers a scenario in your visualization, so the sidebar and other panels can highlight it too. |
-
-List pinning (`pinnedScenarioIds`, `togglePinnedScenario`) is owned by ListView only. Other tool panels do not read or write pin state.
-
-For map visualization, use `mapActions.setOutcomeVisualization()` from the **map store** (`features/map/store.ts`), not the explorer store. See the "Map integration" section in `apps/main/app/features/scenarioExplorer/README.md`.
-
-#### Not needed by tool panels
-
-Everything else is managed by the layout chrome (sidebar, toolbar, ScenarioExplorer routing) and transparent to your panel: `mainView`, `exploreMode`, `searchQuery`, `showOnlyChosen`, `selectedTheme`, `showThemeBadges`, `showAlternativeBaselines`, `showDefinitions`, `showKeyOperations`, `outcomeDisplayMode`, `shareItems`, `showShareDrawer`, `relativeToBaseline`, `highlightBaseline`, `overlayTiers`, `defineOutcome`, `showMap`, and flat `resilience*` chart fields.
-
-### When to use shared store vs. local state
-
-| Use shared store when...                            | Use local state when...                         |
+| Use a shared store when...                          | Use local state when...                         |
 | --------------------------------------------------- | ----------------------------------------------- |
 | Multiple components need the same value             | Only one component cares about the value        |
 | State must persist across tool-tab switches         | State can reset when the user switches views    |
-| Sidebar/toolbar and tool panel need to stay in sync | It's a UI-only toggle (modal open, hover, etc.) |
+| Sidebar/toolbar and a panel need to stay in sync    | It's a UI-only toggle (modal open, hover, etc.) |
 
-### Adding a new visualization tool
+Keeping tool-specific settings (chart mode, per-chart toggles, in-view search) as local state keeps shared stores lean and avoids coupling unrelated features.
 
-1. Read `selectedScenarios` and `hydroclimate` from the store
-2. Use `useResolvedScenarioTiers()` to fetch tier data (handles hydroclimate resolution automatically). See `packages/data/README.md` for the full data-fetching walkthrough.
-3. Keep all visualization-specific state (view mode, color mode, search within the viz) as local component state
-4. Optionally write to `highlightedScenario` or call `togglePinnedScenario` for cross-panel coordination
-5. To show data on the map, use `mapActions.setOutcomeVisualization()`. For custom dot markers, use `setMotionChildren` from `useMap()`. See the "Map integration" section in `apps/main/app/features/scenarioExplorer/README.md` for the full pattern and code examples.
+## Feature stores
+
+The biggest consumer is the Scenario Explorer, which composes a sliced Zustand store from these primitives. That store, the fields a tool panel reads and writes, and the steps for adding a new tool are documented where the code lives, not here:
+
+- **Explorer store overview and slices**: `apps/main/app/features/scenarioExplorer/explorer/store/README.md`
+- **Which store fields a tool panel uses, and how to add a visualization tool**: the store sections and ["Developer guide: adding a new visualization tool"](../../apps/main/app/features/scenarioExplorer/README.md) in the Scenario Explorer feature README
+- **Fetching data for a panel** (`useResolvedScenarioTiers`, etc.): [`packages/data/README.md`](../data/README.md)
+- **Map visualization** (`mapActions.setOutcomeVisualization`, etc.): the map store at `apps/main/app/features/map/store.ts`, plus the "Map integration" section of the Scenario Explorer feature README
