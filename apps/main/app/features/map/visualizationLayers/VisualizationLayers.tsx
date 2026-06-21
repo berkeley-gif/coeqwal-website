@@ -265,18 +265,19 @@ export default function VisualizationLayers({
           )}
 
           {/* Polygon layer (demand-units, WBA, delta, reservoir)
-              In get-started mode this only renders after the user clicks a category
-              (activeOutcomeVisualization is null during the animation).
-              Demand-units in get-started mode is owned by
-              `InteractivePaintArbiter` (see
-              `apps/main/app/features/scenarioExplorer/animation/engine/arbiters/InteractivePaintArbiter.ts`)
+              In get-started mode every polygon family is owned imperatively by
+              `InteractiveLayerDirector` (the demand-units arbiter and the
+              polygon driver, see
+              `apps/main/app/features/scenarioExplorer/animation/engine/InteractiveLayerDirector.ts`)
               to enforce the storyboard's single-writer-per-resource
-              invariant. Skip the OPL mount in that case so both
-              writers don't race for the layer. */}
+              invariant and to sequence cross-family handoffs. Skip the OPL
+              mount entirely in get-started so the two writers don't race for
+              the layer. Explore and Learn modes still use the declarative
+              OPL here. */}
           {isVisualizationActive &&
             geometryType === "polygon" &&
             config &&
-            !(isGetStartedMode && layerType === "demand-units") && (
+            !isGetStartedMode && (
               <OutcomePolygonLayer
                 tierColorMap={tierColorMap}
                 layerType={layerType!}

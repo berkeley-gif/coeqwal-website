@@ -1,10 +1,8 @@
 "use client"
 
-/* useScreenPolygonProjection: outcome geometry to screen polygons
- *
- * Projects outcome geometry from Mapbox into panel-relative screen
- * polygons for the morph overlay, and keeps them current on map move,
- * scroll, and resize. One of the TierAnimationSection hooks (see README.md).
+/* useScreenPolygonProjection: projects outcome geometry from Mapbox into
+ * panel-relative screen polygons for the morph overlay, kept current on map
+ * move, scroll, and resize. One of the TierAnimationSection hooks (see README.md).
  */
 
 import { useRef, useState, useEffect, useCallback } from "react"
@@ -54,32 +52,28 @@ interface ProjectionParams {
   outcomeLocations: Record<string, OutcomeLocationData>
   outcomeDisplayOrder: readonly { code: string; label: string }[]
   mapAPI: ReturnType<typeof useMap>
-  /** Geographic centroids per feature, written here and read by the
-   *  interactive-selection code in the parent (popup lookups). */
+  /** Geographic centroids per feature, written here and read by the parent's
+   *  interactive-selection code (popup lookups). */
   geoCentroidsRef: React.RefObject<Map<string, { lng: number; lat: number }>>
-  /** Re-project the squares on every map move frame. Needed only while the
-   *  squares track the map (active playback, or before the morph settles).
-   *  Once the storyboard is paused or finished on a settled grid or chart
-   *  beat, the squares sit at fixed panel-relative positions, so the camera
-   *  can fly without forcing a per-frame projection and overlay re-render. */
+  /** Re-project squares every map move frame. Needed only while the squares
+   *  track the map (active playback, or before the morph settles). On a
+   *  settled paused/finished beat the squares are fixed, so the camera can fly
+   *  without a per-frame re-render. */
   reprojectOnMove: boolean
 }
 
 interface ProjectionResult {
   panelSize: { width: number; height: number } | null
   allScreenPolygons: Map<string, ScreenPolygon>
-  /** Trigger a fresh collect from Mapbox. Navigation and the camera fly
-   *  call this through the ref so they don't depend on the changing
-   *  identity of the collect callback. */
+  /** Trigger a fresh collect from Mapbox. Called via ref so callers don't
+   *  depend on the changing collect-callback identity. */
   computePolygonDataRef: React.RefObject<() => void>
-  /** Re-apply the panel offset without re-querying Mapbox. The camera fly
-   *  calls this to catch scroll drift after the panel settles. */
+  /** Re-apply the panel offset without re-querying Mapbox (catches scroll
+   *  drift after the panel settles). */
   applyPanelOffsetRef: React.RefObject<() => void>
 }
 
-/** Projects outcome geometry from Mapbox into panel-relative screen
- *  polygons for the morph overlay. Collects rings on demand, re-projects
- *  cheaply on map move, and re-offsets on scroll. */
+/** See the file header. */
 export function useScreenPolygonProjection({
   panelRef,
   isLoading,
@@ -101,7 +95,7 @@ export function useScreenPolygonProjection({
   >(new Map())
   const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
 
-  /* Measure panel for SVG coordinate mapping */
+  /* Measure panel for SVG coordinate mapping. */
   const measurePanel = useCallback(() => {
     if (!panelRef.current) return
     const rect = panelRef.current.getBoundingClientRect()
@@ -119,7 +113,7 @@ export function useScreenPolygonProjection({
     }
   }, [isLoading, measurePanel])
 
-  /* Collect screen shapes from Mapbox layers + coordinate lookups */
+  /* Collect screen shapes from Mapbox layers + coordinate lookups. */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
   const reprojectRef = useRef<() => void>(() => {})
@@ -169,7 +163,7 @@ export function useScreenPolygonProjection({
     const vpMap = new Map<string, ScreenPolygon>()
     const geoCentroids = new Map<string, { lng: number; lat: number }>()
 
-    // 1. Query polygon-based Mapbox layers per the registry
+    // 1. Query polygon-based Mapbox layers per the registry.
     const layersToQuery = new Map<
       string,
       { idProperty: string; sourceLayerName?: string }
@@ -190,8 +184,8 @@ export function useScreenPolygonProjection({
     for (const [layerId, { idProperty, sourceLayerName }] of layersToQuery) {
       if (!map.getLayer(layerId)) continue
 
-      // querySourceFeatures ignores layer filters, returning ALL features
-      // from loaded tiles (unlike queryRenderedFeatures which respects them).
+      // querySourceFeatures ignores layer filters, returning ALL features from
+      // loaded tiles (unlike queryRenderedFeatures).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let features: any[] = []
       try {
@@ -276,7 +270,7 @@ export function useScreenPolygonProjection({
       }
     }
 
-    // 2. React-marker outcomes: project coordinates to viewport shapes
+    // 2. React-marker outcomes: project coordinates to viewport shapes.
     for (const { code } of outcomeDisplayOrder) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "react-marker") continue
@@ -306,7 +300,7 @@ export function useScreenPolygonProjection({
       }
     }
 
-    // 3. Line outcomes: representative shape at centroid
+    // 3. Line outcomes: representative shape at centroid.
     for (const { code } of outcomeDisplayOrder) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "line") continue
@@ -353,10 +347,8 @@ export function useScreenPolygonProjection({
     panelRef,
   ])
 
-  /**
-   * Re-project cached geographic data to screen without re-querying Mapbox.
-   * Safe to call on every map move/zoom: feature count stays stable.
-   */
+  /** Re-project cached geographic data to screen without re-querying Mapbox.
+   *  Safe on every map move/zoom: feature count stays stable. */
   const reprojectShapes = useCallback(() => {
     if (!mapAPI.mapRef?.current || !panelRef.current) return
     const map = mapAPI.mapRef.current.getMap?.()
@@ -482,8 +474,8 @@ export function useScreenPolygonProjection({
     return () => window.removeEventListener("resize", onResize)
   }, [reprojectShapes])
 
-  // Re-apply offset on scroll (cheap: no Mapbox queries).
-  // With page-level scrolling, listen on window instead of a parent scroll container.
+  // Re-apply offset on scroll (cheap: no Mapbox queries). Page-level scrolling,
+  // so listen on window not a parent scroll container.
   useEffect(() => {
     if (!panelInView) return
 
@@ -503,7 +495,7 @@ export function useScreenPolygonProjection({
     }
   }, [panelInView])
 
-  // Re-project cached shapes when the map pans/zooms.
+  // Re-project cached shapes on map pan/zoom.
   useEffect(() => {
     if (!panelInView) return
     const map = mapAPI.mapRef?.current?.getMap?.()

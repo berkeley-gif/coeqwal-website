@@ -1,9 +1,7 @@
 /* InteractivePaintArbiter
  *
- * Paints the demand-units layers while the user clicks around in
- * interactive mode (after the storyboard has finished). It takes over
- * the layers when a demand-units outcome is selected and hands them
- * back when the selection clears.
+ * Paints the demand-units layers in interactive mode. Takes over when a
+ * demand-units outcome is selected, releases when the selection clears.
  */
 
 import type {
@@ -11,6 +9,10 @@ import type {
   DemandUnitsPaintSpec,
   DemandUnitsOverlayState,
 } from "../types"
+import type {
+  InteractiveLayerDriver,
+  InteractiveLayerFamily,
+} from "../interactiveLayerDriver"
 import {
   writeDemandUnitsBaseline,
   DU_CLASS_FILTER,
@@ -26,25 +28,24 @@ import {
   buildFillOpacityExpr,
 } from "../../demandUnitsPaint"
 
-/** What the last `sync` call did. For tests and logging only; nothing
- *  branches on it. */
+/** What the last `sync` call did. For tests and logging only. */
 export type InteractivePaintTransition =
   | "enter"
   | "exit"
   | "change-selection"
   | "no-op"
 
-// Gold outline and zoom-aware opacities are shared with the scripted
-// storyboard. They live in `demandUnitsPaint.ts` so the interactive view
-// matches the beats. The durations below are interactive-only.
+// Gold outline and zoom-aware opacities live in `demandUnitsPaint.ts`,
+// shared with the storyboard so the interactive view matches the beats.
+// The durations below are interactive-only.
 
 /** Fade-in duration (ms) for the initial enter transition. */
 const FADE_IN_DURATION = 350
 /** Crossfade duration (ms) when swapping between DU outcomes. */
 const COLOR_TRANSITION_DURATION = 400
 
-/** The exit teardown also needs Mapbox's style-load probe and one-shot
- *  idle listener, which the permissive write view omits. */
+/** Exit teardown also needs Mapbox's style-load probe and one-shot idle
+ *  listener, which the permissive write view omits. */
 type InteractiveExitMap = MapWriteView & {
   isStyleLoaded: () => boolean
   once: (event: string, cb: () => void) => void
@@ -72,33 +73,34 @@ function buildPaintFilter(spec: DemandUnitsPaintSpec): unknown {
   return ["all", ...conditions]
 }
 
-export class InteractivePaintArbiter {
+export class InteractivePaintArbiter implements InteractiveLayerDriver {
+  /** This arbiter owns the `demand-units` family. */
+  readonly family: InteractiveLayerFamily = "demand-units"
+
   /** True while this arbiter holds the interactive paint claim. */
   private currentlyOwns = false
 
-  /** The outcome currently being painted, or null when we don't own
-   *  the layers. Used to decide whether a new selection is a crossfade,
-   *  and as the base paint to restore when an overlay clears. */
+  /** Outcome currently being painted, or null when we don't own the
+   *  layers. Decides crossfade vs enter, and is the base to restore when
+   *  an overlay clears. */
   private currentSpec: DemandUnitsPaintSpec | null = null
 
-  /** Handle for the queued fade-in frame, or null when none is
-   *  pending. */
+  /** Queued fade-in frame, or null when none is pending. */
   private pendingFadeRaf: number | null = null
 
   /** A teardown waiting for the engine to go idle, or null if none. */
   private pendingTeardownCleanup: (() => void) | null = null
 
-  /** Bring our state in line with the caller's paint spec (pass null
-   *  to release the layers). */
+  /** Sync to the caller's paint spec (null releases the layers). */
   sync(
     ctx: BeatEngineContext,
     spec: DemandUnitsPaintSpec | null,
   ): InteractivePaintTransition {
     const shouldOwn = spec !== null
 
-    // Enter. No prior claim, now should own.
+    // Enter.
     if (shouldOwn && !this.currentlyOwns) {
-      // Cancel any teardown left over from a previous exit.
+      // Cancel any teardown left from a previous exit.
       this.cancelPendingTeardown()
       this.currentlyOwns = true
       this.currentSpec = spec
@@ -106,7 +108,7 @@ export class InteractivePaintArbiter {
       return "enter"
     }
 
-    // Exit. Had prior claim, now should not own.
+    // Exit.
     if (!shouldOwn && this.currentlyOwns) {
       this.currentlyOwns = false
       this.currentSpec = null
@@ -115,7 +117,7 @@ export class InteractivePaintArbiter {
       return "exit"
     }
 
-    // Selection changed. Still owning, but a different outcome.
+    // Selection changed.
     if (
       shouldOwn &&
       this.currentlyOwns &&
@@ -130,10 +132,7 @@ export class InteractivePaintArbiter {
     return "no-op"
   }
 
-  /**
-   * Apply the selection overlay: gold outline + zoom-aware
-   * fill-opacity
-   */
+  /** Apply the selection overlay: gold outline + zoom-aware fill-opacity. */
   applyOverlay(ctx: BeatEngineContext, overlay: DemandUnitsOverlayState): void {
     if (!this.currentlyOwns || !this.currentSpec) return
     if (overlay.outcomeCode !== this.currentSpec.outcomeCode) return
@@ -188,8 +187,8 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /** Release the layers no matter what. Called on unmount or when a
-   *  nav handler force-clears without going through `sync`. */
+  /** Release the layers unconditionally. Called on unmount or when a nav
+   *  handler force-clears without going through `sync`. */
   release(ctx: BeatEngineContext): void {
     if (!this.currentlyOwns) return
     this.currentlyOwns = false
@@ -203,10 +202,15 @@ export class InteractivePaintArbiter {
     return this.currentlyOwns
   }
 
-  /** Cancel a teardown that's waiting for idle. `TierAnimationSection`
-   *  calls this when playback starts: `MapPaintArbiter` is about to
-   *  take over, and a late teardown would overwrite its paint. Safe to
-   *  call when nothing is pending. */
+  /** The fill-layer id we own, or null. Always `demand-units` here. */
+  ownedLayerId(): string | null {
+    return this.currentlyOwns ? "demand-units" : null
+  }
+
+  /** Cancel a teardown waiting for idle. `TierAnimationSection` calls
+   *  this when playback starts: `MapPaintArbiter` is about to take over,
+   *  and a late teardown would overwrite its paint. Safe when nothing is
+   *  pending. */
   cancelPendingTeardown(): void {
     if (!this.pendingTeardownCleanup) return
     const cleanup = this.pendingTeardownCleanup
@@ -218,17 +222,16 @@ export class InteractivePaintArbiter {
   // Lifecycle hooks
   //────
 
-  /** The live Mapbox handle viewed through the permissive write surface.
-   *  Its setters accept `unknown`, so the dynamic Mapbox expressions this
-   *  arbiter builds type-check without per-call casts. */
+  /** Mapbox handle through the permissive write surface. Its setters
+   *  accept `unknown`, so dynamic expressions type-check without per-call
+   *  casts. */
   private getWriteMap(ctx: BeatEngineContext): MapWriteView | undefined {
     return ctx.mapRef?.current?.getMap?.() as unknown as
       | MapWriteView
       | undefined
   }
 
-  /** Take ownership of the `demand-units` and `demand-units-outline`
-   *  layers. */
+  /** Take ownership of the demand-units layers. */
   private onEnter(ctx: BeatEngineContext, spec: DemandUnitsPaintSpec): void {
     const map = this.getWriteMap(ctx)
     if (!map) return
@@ -278,13 +281,13 @@ export class InteractivePaintArbiter {
       return
     }
 
-    // Next frame, set opacity to the target so the transition animates
-    // instead of snapping.
+    // Next frame: set opacity to target so the transition animates instead
+    // of snapping.
     this.pendingFadeRaf = requestAnimationFrame(() => {
       this.pendingFadeRaf = null
-      // Bail if we lost ownership while the frame was queued (rapid
-      // click then deselect). Otherwise this paint would land after
-      // `onExit` and make the layer visible again.
+      // Bail if we lost ownership while the frame was queued (rapid click
+      // then deselect). Otherwise this paint lands after `onExit` and
+      // shows the layer again.
       if (!this.currentlyOwns) return
       if (this.currentSpec?.outcomeCode !== spec.outcomeCode) return
       if (!map.getLayer("demand-units")) return
@@ -317,8 +320,8 @@ export class InteractivePaintArbiter {
     this.cancelPendingFadeRaf()
 
     try {
-      // Run before `setFilter`: otherwise the old overlay expression
-      // and the new class filter can disagree for one frame.
+      // Before `setFilter`: otherwise the old overlay expression and the
+      // new class filter disagree for one frame.
       this.clearOverlayToBaseForCrossfade(map, spec)
 
       const filter = buildPaintFilter(spec)
@@ -393,10 +396,10 @@ export class InteractivePaintArbiter {
 
     this.cancelPendingTeardown()
 
-    // Hide the layers immediately, even when the style isn't fully loaded
-    // (mid camera-fly). The full baseline reset below may be deferred to
-    // `idle`, but the hide must land now so demand-units is gone before the
-    // next outcome's layer fades in, rather than lingering under it.
+    // Hide immediately, even when the style isn't fully loaded (mid
+    // camera-fly). The baseline reset below may defer to `idle`, but the
+    // hide must land now so demand-units is gone before the next outcome
+    // fades in instead of lingering under it.
     this.hideImmediately(map)
 
     const runTeardownWrites = (m: InteractiveExitMap): void => {
@@ -435,7 +438,7 @@ export class InteractivePaintArbiter {
     try {
       map.once("idle", onIdle)
     } catch {
-      /* ok - Mapbox can throw if disposed mid-flight */
+      /* ok, Mapbox can throw if disposed mid-flight */
     }
 
     this.pendingTeardownCleanup = () => {
@@ -449,9 +452,9 @@ export class InteractivePaintArbiter {
     }
   }
 
-  /** Snap both layers to opacity 0 with no transition. Best-effort: works
-   *  on existing layers even while the style is mid-load, so the layer
-   *  disappears at once instead of waiting for the deferred baseline. */
+  /** Snap both layers to opacity 0 with no transition. Works even while
+   *  the style is mid-load, so the layer disappears at once instead of
+   *  waiting for the deferred baseline. */
   private hideImmediately(map: MapWriteView): void {
     try {
       if (map.getLayer("demand-units")) {

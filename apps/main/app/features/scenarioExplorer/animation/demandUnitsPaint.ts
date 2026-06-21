@@ -1,11 +1,9 @@
-/* Shared demand-units paint constants
+/* Shared demand-units paint constants.
  *
- * The interactive demand-units layer (`InteractivePaintArbiter`) and the
- * scripted storyboard (`TierAnimationSection` and `engine/actorGroups`)
- * paint the same gold outline and the same zoom-aware opacities. If they
- * drift apart, the interactive view stops matching the scripted beats.
- * These live here so there is one source of truth instead of values
- * hand-copied across files.
+ * One source of truth for the gold outline and zoom-aware opacities painted
+ * by both the interactive layer (`InteractivePaintArbiter`) and the scripted
+ * storyboard (`TierAnimationSection`, `engine/actorGroups`), so the two views
+ * don't drift apart.
  */
 
 import type { DemandUnitsOverlayState } from "./engine/types"
@@ -22,9 +20,9 @@ export const ZOOM_THRESHOLD = 8
 /** Demand-units fill opacity at and above the zoom threshold. */
 export const ZOOMED_IN_OPACITY = 0.75
 
-/** Default demand-units fill-opacity (no spotlight or pin) as a Mapbox
- *  step expression keyed on zoom. Typed `unknown` so callers cast it to
- *  the expression type their API expects. */
+/** Default demand-units fill-opacity (no spotlight or pin) as a zoom-keyed
+ *  Mapbox step expression. Typed `unknown` so callers cast to their API's
+ *  expression type. */
 export const ZOOM_AWARE_BASE_OPACITY: unknown = [
   "step",
   ["zoom"],
@@ -33,18 +31,16 @@ export const ZOOM_AWARE_BASE_OPACITY: unknown = [
   ZOOMED_IN_OPACITY,
 ]
 
-/* Shared outcome-polygon look
+/* Shared outcome-polygon look.
  *
- * These three expressions define how every outcome polygon fill and outline
- * looks once settled: the fill recedes as you zoom in, and the stroke widens
- * and tucks inside the boundary. `OutcomePolygonLayer` applies them to the
- * WBA, reservoir, and demand-units layers, and `InteractivePaintArbiter`
- * lands its demand-units fade-in on the same values, so the interactive view
- * matches the declarative one. Typed `unknown` so callers cast to the
- * expression type their Mapbox API expects. */
+ * Three expressions for the settled outcome polygon: fill recedes on zoom-in,
+ * stroke widens and tucks inside the boundary. Applied by
+ * `OutcomePolygonLayer` (WBA, reservoir, demand-units) and matched by
+ * `InteractivePaintArbiter` so the interactive view matches the declarative
+ * one. Typed `unknown` so callers cast to their Mapbox expression type. */
 
-/** Fill opacity interpolated across zoom (5 to 10), so dense low-zoom fills
- *  stay legible and high-zoom fills recede. */
+/** Fill opacity interpolated across zoom (5 to 10): dense low-zoom fills
+ *  stay legible, high-zoom fills recede. */
 export const OUTCOME_FILL_OPACITY: unknown = [
   "interpolate",
   ["linear"],
@@ -89,23 +85,22 @@ export const OUTCOME_OUTLINE_OFFSET: unknown = [
 ]
 
 /** Demand unit highlighted in the loi-highlight beat (Glenn Colusa I.D.,
- *  Sacramento Valley). Read by the storyboard choreography and by the
- *  overlay must-include pin set so the square renders deterministically. */
+ *  Sacramento Valley). In the overlay must-include pin set so the square
+ *  renders deterministically. */
 export const LOI_DU_ID = "08N_SA2"
 
-/* Shared overlay-expression builders
+/* Shared overlay-expression builders.
  *
- * Both interactive painters (the demand-units arbiter and the non-DU
- * polygon arbiter) draw the same highlight-color-on-active (gold) outline and the same
- * spotlight / pinned / base fill-opacity. These pure helpers build the
- * Mapbox expressions so the two painters can never drift. They only
- * construct expressions, they don't touch the map.
+ * Pure helpers that build the gold-on-active outline and the spotlight /
+ * pinned / base fill-opacity expressions, so the two interactive painters
+ * (demand-units and non-DU polygon arbiters) can't drift. They construct
+ * expressions only, they don't touch the map.
  */
 
-/** Outline paint for the "some features active" case: a highlight `case` over
- *  the base color, a wider stroke on active features, and opacity that
- *  hides non-active outlines. `baseColor` is what non-active features use
- *  (the arbiter's tier-color expression, or a layer's original color). */
+/** Outline paint for the "some features active" case: gold over `baseColor`,
+ *  a wider stroke on active features, and opacity that hides non-active
+ *  outlines. `baseColor` is what non-active features use (the arbiter's
+ *  tier-color expression, or a layer's original color). */
 export function buildActiveOutlineExpr(
   activeIds: readonly string[],
   idProperty: string,
@@ -119,8 +114,8 @@ export function buildActiveOutlineExpr(
   }
 }
 
-/** Fill-opacity in priority order: spotlight, then pinned, then base. When
- *  a spotlight is on but nothing matches, everything dims to 0.12. */
+/** Fill-opacity in priority order: spotlight, pinned, base. With a spotlight
+ *  on but nothing matched, everything dims to 0.12. */
 export function buildFillOpacityExpr(
   overlay: DemandUnitsOverlayState,
   idProperty: string,

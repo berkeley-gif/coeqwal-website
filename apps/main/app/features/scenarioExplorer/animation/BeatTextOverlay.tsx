@@ -1,23 +1,10 @@
 "use client"
 
-/* ──────────────────────────────────────────────────────────────
- * BeatTextOverlay: the storyboard panel that floats over the map
- *
- * This file owns the panel shell and the
- * right-column graphics. The heavy lifting lives in three siblings:
- *
- *   - Narration.tsx, the whole left column (page title,
- *       pre-play gate, subtitle, per-beat prose, control row). Edit
- *       narration COPY and intro TIMING there.
- *   - StoryboardControls.tsx, the Back | N-of-T | Next | Restart row.
- *   - useOutcomeLabelGeometry, all the per-frame label math for the
- *       right column (outcome titles, captions, radar/heatmap label
- *       positions, column eyebrows). Edit GEOMETRY there.
- *
- * What is here: the absolutely-positioned panel, the right-third
- * backdrop, the scenario-name header, the view-mode header, and the
- * two-column outcome grid whose DOM the geometry hook measures.
- * ────────────────────────────────────────────────────────────── */
+/* BeatTextOverlay: storyboard panel floating over the map. Owns the panel
+ * shell, right-third backdrop, scenario-name and view-mode headers, and
+ * the two-column outcome grid the geometry hook measures. Heavy lifting is
+ * in Narration.tsx (left column copy/timing), StoryboardControls.tsx, and
+ * useOutcomeLabelGeometry (right-column per-frame label math). */
 
 import { useRef, type RefObject } from "react"
 import {
@@ -41,8 +28,7 @@ import Narration from "./Narration"
 
 export type { GlyphRect } from "./overlayTypes"
 
-/* Right-panel view-mode header shown for beats 4-7 (distribution, list,
- * radar, heat map). Earlier beats have no view-mode header. */
+/* Right-panel view-mode header for beats 4-7. Earlier beats have none. */
 const VIEW_MODE_HEADER_BY_BEAT: Record<number, string> = {
   4: "Distribution view",
   5: "List view",
@@ -50,24 +36,21 @@ const VIEW_MODE_HEADER_BY_BEAT: Record<number, string> = {
   7: "Heat map",
 }
 
-/** Pixels the right column is lifted above the panel's top padding, so
- *  it and the SVG (lifted by `STORYBOARD_VISUAL_LIFT_PX`) read as one
- *  block and fit vertically. */
+/** Pixels the right column is lifted above the panel's top padding, so it
+ *  and the SVG read as one block and fit vertically. */
 const OVERLAY_TOP_LIFT_PX = 30
 
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
-  /** Bridge into `NarrationArbiter`, handed straight to the geometry
-   *  hook, which writes its per-frame dispatcher into `.current`. See
-   *  `engine/arbiters/NarrationArbiter.ts`. */
+  /** Bridge into `NarrationArbiter`, handed to the geometry hook, which
+   *  writes its per-frame dispatcher into `.current`. */
   narrationTickRef: RefObject<((v: number) => void) | null>
   headingOpacity: MotionValue<number>
-  /** Opacity of the whole left-panel narration block. The parent fades it
-   *  1 to 0 on Back-from-first-beat. Defaults to 1. */
+  /** Left-panel narration block opacity. Parent fades 1 to 0 on
+   *  Back-from-first-beat. Defaults to 1. */
   backOutOpacity?: MotionValue<number>
-  /** Storyboard navigation. `beatIndex` is a 0-based cursor and `totalBeats`
-   *  is the length. When `hasPlayed` is false the pre-play Play gate shows,
-   *  when true the bottom control row shows. */
+  /** `beatIndex` is a 0-based cursor, `totalBeats` the length. `hasPlayed`
+   *  false shows the pre-play gate, true shows the control row. */
   beatIndex?: number
   totalBeats?: number
   hasPlayed?: boolean
@@ -75,8 +58,8 @@ interface BeatTextOverlayProps {
   onNext?: () => void
   onBack?: () => void
   onRestart?: () => void
-  /** When true (e.g. reduced motion), hide the controls and let the
-   *  narration body scroll so the end-state content stays reachable. */
+  /** When true (e.g. reduced motion), hide controls and let the narration
+   *  body scroll so end-state content stays reachable. */
   hideControls?: boolean
   beat2Layout?: Beat2Layout | null
   selectedOutcomeCode?: string | null
@@ -89,13 +72,12 @@ interface BeatTextOverlayProps {
   onEncodingChange?: (mode: EncodingMode) => void
   onAddLocation?: () => void
   /** Per-outcome Beat 2 morph window: `start` drives the title fade-in,
-   *  `end` the caption. Forwarded to the geometry hook. */
+   *  `end` the caption. */
   outcomeMorphWindows?: Record<string, { start: number; end: number }>
   /** Forwarded to the geometry hook, which reports glyph landing rects
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
-  /** Extra heatmap columns beyond the primary one (so labels
-   *  anchor to the leftmost column). Defaults to 0. */
+  /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
 
@@ -124,14 +106,14 @@ export default function BeatTextOverlay({
 }: BeatTextOverlayProps) {
   const theme = useTheme()
 
-  // "<name> scenario" label, shared by the right-column header and the
-  // Beat 2 narration. Falls back before the scenarios query resolves.
+  // "<name> scenario" label, shared by the right-column header and Beat 2
+  // narration. Falls back before the scenarios query resolves.
   const displayScenarioLabel = scenarioName
     ? `${scenarioName} scenario`
     : "Current operations scenario"
 
-  // Scenario-name header fades in on the same progress ramp as the white
-  // right-panel backdrop so the text and the panel appear together.
+  // Fades in on the same progress ramp as the white backdrop so text and
+  // panel appear together.
   const scenarioHeaderOpacity = useTransform(
     progress,
     [
@@ -159,8 +141,8 @@ export default function BeatTextOverlay({
     heatmapExtraColumnCount,
   })
 
-  // Kept live because its JSX (the "Add a location to track" CTA) is
-  // preserved behind a `{false && ...}` guard below for future reuse.
+  // Kept live: its JSX ("Add a location to track" CTA) is preserved behind
+  // a `{false && ...}` guard below for future reuse.
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
 
   const padding = theme.space.panel.padding
@@ -174,7 +156,7 @@ export default function BeatTextOverlay({
         pointerEvents: "none",
       }}
     >
-      {/* Left column: page title, narration body, and control row. */}
+      {/* Left column. */}
       <Narration
         headingOpacity={headingOpacity}
         backOutOpacity={backOutOpacity}
@@ -190,10 +172,9 @@ export default function BeatTextOverlay({
         onRestart={onRestart}
       />
 
-      {/* White backdrop on the right third. Its height is synced to the
-       * content column by the geometry hook. Sits at `zIndex: 3` (below
-       * the SVG overlay) so the squares render on top of it, not washed
-       * out beneath the semi-opaque white. */}
+      {/* White backdrop on the right third. Height synced to the content
+       * column by the geometry hook. `zIndex: 3` (below the SVG overlay)
+       * so squares render on top, not washed out beneath the white. */}
       <Box
         ref={beat2PanelRef}
         sx={{
@@ -206,16 +187,14 @@ export default function BeatTextOverlay({
           backgroundColor: alpha(theme.palette.common.white, 0.75),
           borderRadius: 2,
           opacity: 0,
-          // Solid to pointer events while interactive so that, when the
-          // storyboard region lets events fall through to the map, dragging
-          // on the panel doesn't pan the map behind it.
+          // Solid to pointer events while interactive so dragging on the
+          // panel doesn't pan the map behind it when events fall through.
           pointerEvents: interactive ? "auto" : "none",
         }}
       />
 
       {/* Right-third content column. Left edge at `panelWidth * 2/3`,
-       * matching the SVG overlay's `pos.x` origin. Auto-sizes to its
-       * content (the grid rows have explicit heights). */}
+       * matching the SVG overlay's `pos.x` origin. Auto-sizes to content. */}
       <Box
         ref={rightColumnRootRef}
         sx={{
@@ -233,8 +212,7 @@ export default function BeatTextOverlay({
           },
         }}
       >
-        {/* Scenario-name header. Fades in with the right-panel backdrop
-            and holds for the rest of the storyboard. */}
+        {/* Scenario-name header. Fades in with the backdrop and holds. */}
         <motion.div
           style={{
             opacity: scenarioHeaderOpacity,
@@ -255,12 +233,11 @@ export default function BeatTextOverlay({
         </motion.div>
 
         {/* Two-column outcome grid. Each row stacks Title, glyph
-         *  placeholder, Caption. The geometry hook measures and animates
-         *  these via the refs attached below. */}
+         *  placeholder, Caption, measured/animated by the geometry hook. */}
         {beat2Layout && (
           <Box sx={{ position: "relative" }}>
-            {/* View-mode header (beats 4-7), absolutely positioned over
-             *  the eyebrow slot so it doesn't shift the glyph layout. */}
+            {/* View-mode header (beats 4-7), absolutely positioned over the
+             *  eyebrow slot so it doesn't shift the glyph layout. */}
             <Box
               aria-hidden
               sx={{
@@ -376,8 +353,7 @@ export default function BeatTextOverlay({
                           {hasGlyph && (
                             <>
                               {/* Transparent placeholder reserving the SVG
-                               *  morph landing rect (measured by the
-                               *  geometry hook). */}
+                               *  morph landing rect. */}
                               <Box
                                 ref={(el: HTMLDivElement | null) => {
                                   placeholderRefsMap.current.set(item.code, el)
@@ -414,8 +390,8 @@ export default function BeatTextOverlay({
                     })}
                   {/* eslint-disable-next-line no-constant-binary-expression */}
                   {col === 0 && false && (
-                    /* "Add a location to track" CTA. Disabled per design
-                     *  direction, kept in-source for future reuse. */
+                    /* "Add a location to track" CTA. Disabled, kept for
+                     *  future reuse. */
                     <Box
                       ref={addLocationCtaRef}
                       sx={{

@@ -1,21 +1,15 @@
-/* Writer for the `demand-units` and `demand-units-outline`
- * Mapbox layers.
- *
- * Any code that takes over these layers must set every property the
- * next consumer reads, or a stale value (like `fill-color`) leaks in
- * from the previous writer. This helper writes the full set in one
- * place, so every caller goes through it.
- *
- * It knows nothing about beats or modes: callers pass a
- * `DemandUnitsBaselineSpec` describing the exact state they want.
+/* Writer for the `demand-units` and `demand-units-outline` Mapbox
+ * layers. Whoever takes over these layers must set every property the
+ * next consumer reads, or a stale value (like `fill-color`) leaks from
+ * the previous writer. This helper writes the full set in one place.
+ * Callers pass a `DemandUnitsBaselineSpec`. It knows nothing of beats
+ * or modes.
  */
 
-/** A narrower view of the Mapbox map than `MapboxGLMap`. Mapbox GL's
- *  strict paint/filter types reject the `readonly unknown[]`
- *  expressions our specs carry, so this view loosens those setters.
- *  Callers still get the real map from `mapRef.current.getMap()` and
- *  pass it in. See the Roadmap in packages/map/README.md for the
- *  eventual replacement. */
+/** Narrower view of the Mapbox map than `MapboxGLMap`. Mapbox GL's
+ *  strict paint/filter types reject the `readonly unknown[]` expressions
+ *  our specs carry, so this loosens those setters. See the Roadmap in
+ *  packages/map/README.md for the eventual replacement. */
 export type MapWriteView = {
   getLayer: (id: string) => unknown
   setFilter: (id: string, f: unknown) => void
@@ -24,9 +18,8 @@ export type MapWriteView = {
   addLayer: (spec: unknown) => void
 }
 
-/** Filter for normal choreography. Shows Agriculture, Urban, and
- *  Refuge demand-units, which correspond to tracked outcomes.
- *  Excludes "N/A" and other untracked classes. */
+/** Filter for normal choreography. Shows Agriculture, Urban, and Refuge
+ *  demand-units (tracked outcomes), excluding "N/A" and other classes. */
 export const DU_CLASS_FILTER: readonly unknown[] = [
   "in",
   ["get", "Class"],
@@ -42,52 +35,47 @@ export const DU_AG_ONLY_FILTER: readonly unknown[] = [
 ] as const
 
 /** Permissive write view consumed by `writeDemandUnitsBaseline`. See
- *  `MapWriteView` above for the rationale and the roadmap entry that
- *  retires it. */
+ *  `MapWriteView` above. */
 export type BaselineMap = MapWriteView
 
 /** Permissive write view consumed by `ensureDemandUnitsOutlineLayer`.
- *  Same shape as `BaselineMap`, aliased for clarity */
+ *  Same shape as `BaselineMap`, aliased for clarity. */
 export type SessionInitMap = MapWriteView
 
-/** The full demand-units baseline state. Every field is required on
- *  purpose: making one optional would mean "inherit from the previous
- *  writer", which is exactly what this helper avoids. */
+/** Full demand-units baseline state. Every field is required on purpose:
+ *  an optional one would mean "inherit from the previous writer", which
+ *  is exactly what this helper avoids. */
 export type DemandUnitsOpacity =
   | { kind: "scalar"; value: number }
   | { kind: "preserve" }
 
 export interface DemandUnitsBaselineSpec {
-  /** Mapbox filter applied to both fill and outline layers. Typical
-   *  values: `DU_CLASS_FILTER` or `DU_AG_ONLY_FILTER`. */
+  /** Mapbox filter for both fill and outline layers. Typically
+   *  `DU_CLASS_FILTER` or `DU_AG_ONLY_FILTER`. */
   filter: readonly unknown[]
   /** Tier color expression for fill, fill-outline, and outline color.
-   *  Pass `null` only in pre-playback setup before tier data loads. */
+   *  `null` only in pre-playback setup before tier data loads. */
   fillExpr: readonly unknown[] | null
   /** Fill opacity. `scalar` writes a fixed value (0 to seed a fade-in,
-   *  ~0.65 at peak). `preserve` leaves opacity alone so the next writer
-   *  can set it without a flicker. */
+   *  ~0.65 at peak). `preserve` leaves opacity alone to avoid a flicker. */
   fillOpacity: DemandUnitsOpacity
-  /** Outline opacity. Same as `fillOpacity`. Usually matches it so fill
-   *  and stroke move together. */
+  /** Outline opacity. Usually matches `fillOpacity` so fill and stroke
+   *  move together. */
   lineOpacity: DemandUnitsOpacity
-  /** Outline width. Baseline is `0.5`. The gold LOI ring is set
-   *  separately by its own code. */
+  /** Outline width. Baseline `0.5`. The gold LOI ring is set separately. */
   lineWidth: number
-  /** Outline line offset. Baseline is `-0.25` to keep strokes inside
-   *  polygon boundaries. */
+  /** Outline line offset. Baseline `-0.25` to keep strokes inside polygon
+   *  boundaries. */
   lineOffset: number
-  /** Layout visibility. Always `"visible"` during active playback or
-   *  interactive modes. `"none"` is only appropriate when the map is
-   *  being torn down. */
+  /** Layout visibility. `"visible"` during playback or interactive modes;
+   *  `"none"` only when the map is being torn down. */
   visibility: "visible" | "none"
 }
 
 /** Apply a full baseline spec to the two layers. Safe to call
- *  repeatedly. First it zeroes the paint transitions, so a per-frame
- *  ramp isn't smoothed away by a leftover 350/400 ms transition from
- *  `OutcomePolygonLayer`. That transition reset is the most important
- *  thing this helper does. */
+ *  repeatedly. Zeroes the paint transitions first, so a per-frame ramp
+ *  isn't smoothed away by a leftover 350/400 ms transition from
+ *  `OutcomePolygonLayer`. That transition reset is the key job here. */
 export function writeDemandUnitsBaseline(
   map: BaselineMap,
   spec: DemandUnitsBaselineSpec,
@@ -158,14 +146,13 @@ export function writeDemandUnitsBaseline(
     }
   } catch {
     /* Mapbox can throw transiently during style reloads. The caller
-     *  re-applies on the next valid frame, so swallowing here is safe. */
+     *  re-applies on the next valid frame, so swallowing is safe. */
   }
 }
 
-/** Specification for the outline-layer creation helper. All fields
- *  describe the layer's initial Mapbox paint. Visibility is always
- *  "visible" at creation. Callers that want it hidden should flip it
- *  via `setLayoutProperty` immediately after. */
+/** Spec for the outline-layer creation helper. Visibility is always
+ *  "visible" at creation. Callers wanting it hidden flip it via
+ *  `setLayoutProperty` immediately after. */
 export interface DemandUnitsOutlineInitSpec {
   filter: readonly unknown[]
   lineColor: readonly unknown[] | string
@@ -174,13 +161,11 @@ export interface DemandUnitsOutlineInitSpec {
   lineOffset: number
 }
 
-/** Create the `demand-units-outline` layer if it's missing. In normal
- *  map modes `OutcomePolygonLayer` makes it, but get-started mode skips
- *  that and the storyboard owns it. Safe to call every mount: it
- *  returns early if the layer already exists.
- *
- *  The outline copies its `source` and `source-layer` from the fill
- *  layer, and bails if the fill isn't there yet. */
+/** Create the `demand-units-outline` layer if missing. Normally
+ *  `OutcomePolygonLayer` makes it, but get-started mode skips that and
+ *  the storyboard owns it. Safe to call every mount (returns early if it
+ *  exists). Copies `source` and `source-layer` from the fill layer, and
+ *  bails if the fill isn't there yet. */
 export function ensureDemandUnitsOutlineLayer(
   map: SessionInitMap,
   spec: DemandUnitsOutlineInitSpec,
@@ -207,7 +192,7 @@ export function ensureDemandUnitsOutlineLayer(
       layout: { visibility: "visible" },
     })
   } catch {
-    /* layer may already exist from another map mode, or style not
-     *  loaded yet. */
+    /* layer may already exist from another map mode, or style not loaded
+     *  yet. */
   }
 }

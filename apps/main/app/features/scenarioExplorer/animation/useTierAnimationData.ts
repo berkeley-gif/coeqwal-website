@@ -1,10 +1,9 @@
 "use client"
 
-/* Tier data for the storyboard
+/* Tier data for the storyboard.
  *
- * Fetches per-location tier assignments for the demo scenario and shapes
- * them into the centroids, colors, and per-outcome location sets the
- * animation reads. `useOutcomeTierOverrides` does the same for a
+ * Shapes per-location tier assignments into centroids, colors, and
+ * per-outcome location sets. `useOutcomeTierOverrides` does the same for a
  * non-base hydroclimate variant.
  */
 
@@ -98,12 +97,11 @@ export function useTierAnimationData(): TierAnimationData {
 
     async function fetchData() {
       try {
-        // One batched request covers all N outcomes. AG_REV is reused
-        // below for tierColorMap / tierDistribution. Polygon centroids
-        // for the animation come from the hardcoded `AG_REV_COORDINATES`
-        // table (geometry policy: no geometry through the API. See
-        // coeqwal-backend/database/README.md and packages/map/README.md
-        // MTS section)
+        // One batched request covers all outcomes. AG_REV is reused below
+        // for tierColorMap / tierDistribution. Centroids come from the
+        // hardcoded `AG_REV_COORDINATES` table (geometry policy: no geometry
+        // through the API. See coeqwal-backend/database/README.md and
+        // packages/map/README.md MTS section).
         const batch = await fetchTierLocationAssignmentsBatch(
           DEMO_SCENARIO_ID,
           OUTCOME_CODES_ARR,
@@ -226,13 +224,12 @@ export function useTierAnimationData(): TierAnimationData {
 }
 
 /**
- * Lightweight companion to useTierAnimationData that fetches only per-location
- * tier levels for a non-base hydroclimate variant. Returns {} when on the base
- * scenario so the caller falls through to useTierAnimationData's data.
+ * Per-location tier levels for a non-base hydroclimate variant. Returns {}
+ * on the base scenario so the caller falls through to useTierAnimationData.
  *
- * Designed to never trigger a loading flash. Old overrides stay visible until
- * the new fetch completes. Failures per-outcome are silently skipped so outcomes
- * without data for a given hydroclimate fall back to the base (s0020) tiers.
+ * Never flashes loading: old overrides stay visible until the new fetch
+ * completes. Per-outcome failures are skipped so outcomes without data for a
+ * hydroclimate fall back to the base (s0020) tiers.
  */
 export function useOutcomeTierOverrides(scenarioId: string) {
   const theme = useTheme()
@@ -255,10 +252,8 @@ export function useOutcomeTierOverrides(scenarioId: string) {
     const colors = tierColorsRef.current
 
     async function fetchOverrides() {
-      // One batched request (server-side ANY($codes)) instead of N parallel
-      // per-outcome fetches. Outcomes absent for this scenario land in
-      // batch.missing and are silently skipped, matching the previous
-      // per-outcome try/catch behavior.
+      // One batched request (server-side ANY($codes)). Outcomes absent for
+      // this scenario land in batch.missing and are skipped.
       let batch
       try {
         batch = await fetchTierLocationAssignmentsBatch(

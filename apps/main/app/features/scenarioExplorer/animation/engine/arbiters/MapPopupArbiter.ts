@@ -1,8 +1,7 @@
 /* MapPopupArbiter
  *
- * Collects all the map popups that should show on the current frame and
- * writes them to the store in one update, so several popups don't fight
- * over the store.
+ * Collects the map popups for the current frame and writes them to the
+ * store in one update, so several popups don't fight over the store.
  */
 
 import { mapActions } from "../../../../map/store"
