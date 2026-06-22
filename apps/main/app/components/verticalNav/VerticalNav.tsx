@@ -31,10 +31,8 @@ import { NAV_SECTIONS, type NavSection } from "./VerticalNavSections"
 // Constants
 // ============================================================================
 
-const NAV_WIDTH_EXPANDED = 240
+const NAV_WIDTH_EXPANDED = 200
 const NAV_WIDTH_COLLAPSED = 40
-
-
 
 // ============================================================================
 // Sub-types
@@ -230,10 +228,6 @@ export default function VerticalNav({
     // Derive the active first-level section object
     const activeSection =
         NAV_SECTIONS.find((s) => s.id === activeSectionId) ?? NAV_SECTIONS[0]
-
-    // Sub-section ids for the currently active first-level section.
-    // Only pass ids that exist — the hook skips missing DOM elements gracefully.
-    const subSectionIds = activeSection?.subSections.map((s) => s.id) ?? []
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 

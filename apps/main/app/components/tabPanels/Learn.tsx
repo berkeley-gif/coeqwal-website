@@ -17,7 +17,7 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import { useMapReady, useMapError, mapActions, useActiveSection } from "../../features/map/store"
@@ -29,8 +29,8 @@ export default function LearnPanel() {
   const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
-  const activeSection = useActiveSection()
-
+  const activeSubSection = useActiveSection()
+  const [activeSection, setActiveSection] = useState("get-started")
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -68,6 +68,15 @@ export default function LearnPanel() {
     }
   }, [])
 
+  const handleNavigate = useCallback((sectionId: string) => {
+    setActiveSection(sectionId)
+    if (sectionId !== "get-started") {
+      mapActions.setMapMode("hidden")
+    } else {
+      mapActions.setMapMode("learn")
+    }
+  }, [])
+
   // Set up scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -81,85 +90,98 @@ export default function LearnPanel() {
 
   return (
     <>
-      <VerticalNav activeSectionId="get-started" activeSubSectionId={activeSection} />
-      <div
-        style={{
-          position: "relative",
-          pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
-        }}
-      >
-        {/* 
+      <VerticalNav activeSectionId={activeSection} activeSubSectionId={activeSubSection} onNavigate={handleNavigate} />
+      {activeSection === "get-started" && (
+        <div
+          style={{
+            position: "relative",
+            pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
+          }}
+        >
+          {/* 
         Scrollytelling Container
         The persistent map is positioned fixed at page level.
         When this container's bottom scrolls above the viewport,
         the map "releases" and scrolls up with the content.
       */}
-        <Box
-          ref={scrollytellingRef}
-          sx={{
-            position: "relative",
-            minHeight: "100vh",
-            // Transparent background - map shows through
-            backgroundColor: "transparent",
-            pointerEvents: "none", // Allow map panning
-          }}
-        >
-          {/* Spacer for the initial map view - transparent, allows map panning */}
           <Box
-            sx={{
-              height: "100vh",
-              backgroundColor: "transparent",
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* Overlay content - scrolls over the fixed persistent map */}
-          <Box
+            ref={scrollytellingRef}
             sx={{
               position: "relative",
-              marginTop: "-100vh", // Pull up to overlap the map area
-              zIndex: 1,
-              pointerEvents: "none", // Let map interactions through
+              minHeight: "100vh",
+              // Transparent background - map shows through
               backgroundColor: "transparent",
+              pointerEvents: "none", // Allow map panning
             }}
           >
-            {mapReady || mapError ? (
-              <MapOverlayPanels />
-            ) : (
-              <Box
-                sx={{
-                  height: "200vh",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: theme.palette.common.white,
-                  flexDirection: "column",
-                  gap: theme.space.gap.lg,
-                  pointerEvents: "none", // Don't block map panning while loading
+            {/* Spacer for the initial map view - transparent, allows map panning */}
+            <Box
+              sx={{
+                height: "100vh",
+                backgroundColor: "transparent",
+                pointerEvents: "none",
+              }}
+            />
 
-                }}
-              >
+            {/* Overlay content - scrolls over the fixed persistent map */}
+            <Box
+              sx={{
+                position: "relative",
+                marginTop: "-100vh", // Pull up to overlap the map area
+                zIndex: 1,
+                pointerEvents: "none", // Let map interactions through
+                backgroundColor: "transparent",
+              }}
+            >
+              {mapReady || mapError ? (
+                <MapOverlayPanels />
+              ) : (
                 <Box
                   sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: theme.borderRadius.circle,
-                    border: "3px solid",
-                    borderColor: "grey.300",
-                    borderTopColor: "primary.main",
-                    animation: "spin 1s linear infinite",
-                    "@keyframes spin": {
-                      "0%": { transform: "rotate(0deg)" },
-                      "100%": { transform: "rotate(360deg)" },
-                    },
+                    height: "200vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: theme.palette.common.white,
+                    flexDirection: "column",
+                    gap: theme.space.gap.lg,
+                    pointerEvents: "none", // Don't block map panning while loading
+
                   }}
-                />
-                Loading map...
-              </Box>
-            )}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: theme.borderRadius.circle,
+                      border: "3px solid",
+                      borderColor: "grey.300",
+                      borderTopColor: "primary.main",
+                      animation: "spin 1s linear infinite",
+                      "@keyframes spin": {
+                        "0%": { transform: "rotate(0deg)" },
+                        "100%": { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
+                  Loading map...
+                </Box>
+              )}
+            </Box>
           </Box>
+        </div>
+      )}
+      {activeSection === "water-issues" && (
+        <Box sx={{ p: 4, color: "black", backgroundColor: "white", minHeight: "100vh" }}>
+          Water Issues — content coming soon
         </Box>
-      </div>
+      )}
+
+      {activeSection === "water-stories" && (
+        <Box sx={{ p: 4, color: "black", backgroundColor: "white", minHeight: "100vh" }}>
+          Water Stories — content coming soon
+        </Box>
+      )}
     </>
 
   )
