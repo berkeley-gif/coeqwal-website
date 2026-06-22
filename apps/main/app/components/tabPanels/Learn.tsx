@@ -20,7 +20,8 @@
 import { useEffect, useRef, useCallback } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, useMapError, mapActions } from "../../features/map/store"
+import { useMapReady, useMapError, mapActions, useActiveSection } from "../../features/map/store"
+
 import VerticalNav from "../verticalNav/VerticalNav"
 
 export default function LearnPanel() {
@@ -28,6 +29,8 @@ export default function LearnPanel() {
   const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
+  const activeSection = useActiveSection()
+
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -78,7 +81,7 @@ export default function LearnPanel() {
 
   return (
     <>
-      <VerticalNav activeSectionId="get-started" />
+      <VerticalNav activeSectionId="get-started" activeSubSectionId={activeSection} />
       <div
         style={{
           position: "relative",

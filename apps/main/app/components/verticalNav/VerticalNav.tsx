@@ -26,7 +26,6 @@ import {
 } from "@repo/ui/mui"
 import { MenuIcon, ChevronLeftIcon } from "@repo/ui/mui"
 import { NAV_SECTIONS, type NavSection } from "./VerticalNavSections"
-import { useVerticalNavScroll } from "./../../hooks/useVerticalNavScroll"
 
 // ============================================================================
 // Constants
@@ -54,6 +53,9 @@ interface VerticalNavProps {
      * FLAG: drive this from your router or mapMode store.
      */
     activeSectionId?: string
+    /** If provided, overrides internal scroll detection. Used when the parent
+ *  already tracks scroll position (e.g. via Scrollama + map store). */
+    activeSubSectionId: string
 }
 
 /**
@@ -213,6 +215,7 @@ function SubSectionItem({
 export default function VerticalNav({
     onNavigate,
     activeSectionId,
+    activeSubSectionId
 }: VerticalNavProps) {
     const theme = useTheme()
     const [isExpanded, setIsExpanded] = useState(false)
@@ -231,10 +234,6 @@ export default function VerticalNav({
     // Sub-section ids for the currently active first-level section.
     // Only pass ids that exist — the hook skips missing DOM elements gracefully.
     const subSectionIds = activeSection?.subSections.map((s) => s.id) ?? []
-
-    // Track scroll position to highlight the current sub-section.
-    // Null when no sub-section is intersecting (e.g. between sections).
-    const activeSubSectionId = useVerticalNavScroll(subSectionIds)
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 

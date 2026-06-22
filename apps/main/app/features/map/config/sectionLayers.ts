@@ -36,6 +36,9 @@ export interface SectionLayerConfig {
 
   // Camera position
   camera?: CameraView
+
+  // Whether it's hidden from the vertical nav
+  isHiddenFromVerticalNav?: boolean
 }
 
 /**
@@ -71,6 +74,7 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   california: {
     californiaLabel: true,
     camera: CALIFORNIA_VIEW,
+    isHiddenFromVerticalNav: true,
   },
 
   // === Central Valley ===
@@ -86,4 +90,13 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     ...BASINS_AND_RIVERS,
     camera: CENTRAL_VALLEY_VIEW,
   },
+}
+
+export const SECTION_LABELS: Record<SectionId, string> = {
+  intro: "Introduction",
+  california: "California overview",
+  "central-valley": "Central Valley",
+  rivers: "Rivers",
+  distribution: "Water distribution",
+  calsim: "CalSim Model",
 }
