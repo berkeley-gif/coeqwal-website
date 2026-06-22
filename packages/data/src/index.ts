@@ -34,8 +34,11 @@
 
 // Export GIS data
 export { default as centralValleyBasins } from "./gis/central_valley_basins_4326.geojson"
+export { default as dams } from "./gis/dams.geojson"
+export { default as sacramentoRiverHeadwaters } from "./gis/sacramento_river_headwaters.geojson"
 export { default as sacramentoRiverMainstem } from "./gis/sacramento_river_mainstem.geojson"
 export { default as sanJoaquinRiverMainstem } from "./gis/san_joaquin_river_mainstem.geojson"
+export { default as mcCloudRiver } from "./gis/mccloud_river.geojson"
 export { default as centralValleyBoundary } from "./gis/central_valley_boundary.geojson"
 export { default as deltaLegalBoundary } from "./gis/delta_legal_boundary.geojson"
 export { default as flowDrinkingRivers } from "./gis/owens_toulumne_colorado_rivers.geojson"

@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
-import "./globals.css"
+import { TranslationProvider } from "@repo/i18n"
+import { FontLoader } from "./components/helpers/FontLoader"
+import { ClientProvider } from "./components/ClientProvider"
 
 export const metadata: Metadata = {
   title: "How equity shapes California water",
@@ -15,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <FontLoader kitId="rxm7kha" />
+        <TranslationProvider initialLocale="en">
+          <ThemeRegistry>
+            <ClientProvider>{children}</ClientProvider>
+          </ThemeRegistry>
+        </TranslationProvider>
       </body>
     </html>
   )

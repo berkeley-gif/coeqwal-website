@@ -4,24 +4,30 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
-    "dev:webpack": "next dev",
+    "dev": "node ./scripts/clean-next-dev-cache.cjs && next dev --turbo",
+    "dev:webpack": "node ./scripts/clean-next-dev-cache.cjs && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0"
   },
   "dependencies": {
     "@mui/system": "^7.3.2",
+    "@repo/data": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
     "@repo/scrollytelling": "workspace:*",
+    "@repo/state": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "next": "^15.2.1",
     "react": "^19.0.0",
-    "react-scrollama": "^2.4.2",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-scrollama": "^2.4.2"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@svgr/webpack": "^8.1.0"
   }
 }
