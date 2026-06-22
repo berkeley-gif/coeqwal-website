@@ -36,11 +36,11 @@ export default function MapOverlayPanels() {
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
 
   const ACCENT_TEXT_SX = {
-  fontFamily: themeValues.fontFamily.accent,
-  fontStyle: "italic",
-  fontWeight: 500,
-  fontSize: "1.4rem",
-} as const
+    fontFamily: themeValues.fontFamily.accent,
+    fontStyle: "italic",
+    fontWeight: 500,
+    fontSize: "1.4rem",
+  } as const
 
   return (
     <Box
@@ -61,6 +61,7 @@ export default function MapOverlayPanels() {
         { /* ==================== Intro =========================== */}
         <Step data={"intro" as SectionId}>
           <Box
+            id="intro"
             sx={{
               minHeight: "80vh",
               display: "flex",
@@ -94,6 +95,7 @@ export default function MapOverlayPanels() {
         {/* ==================== Central Valley ==================== */}
         <Step data={"central-valley" as SectionId}>
           <Box
+            id="central-valley"
             sx={{
               minHeight: "80vh",
               display: "flex",
@@ -135,6 +137,7 @@ export default function MapOverlayPanels() {
         {/* ==================== Rivers (sticky with progress) ==================== */}
         <Step data={"rivers" as SectionId} progress>
           <Box
+            id="rivers"
             sx={{
               minHeight: "150vh",
               position: "relative",
@@ -184,6 +187,7 @@ export default function MapOverlayPanels() {
         {/* ==================== Water Distribution ==================== */}
         <Step data={"distribution" as SectionId}>
           <Box
+            id="distribution"
             sx={{
               minHeight: "80vh",
               display: "flex",
@@ -209,6 +213,7 @@ export default function MapOverlayPanels() {
         {/* ==================== CalSim ==================== */}
         <Step data={"calsim" as SectionId}>
           <Box
+            id="calsim"
             sx={{
               minHeight: "80vh",
               display: "flex",
