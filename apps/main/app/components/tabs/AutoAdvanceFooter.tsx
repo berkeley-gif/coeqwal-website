@@ -4,12 +4,13 @@
 
 import React from "react"
 import { ScrollToButton } from "@repo/ui"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Button, Typography, useTheme, Box } from "@repo/ui/mui"
 
 import { useTabs, nextTab } from "../../context/Tabs"
 import { TABS, TAB_ORDER } from "../../types/tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
+import { ButtonCta } from "@repo/ui"
 
 export default function AutoAdvanceFooter() {
   const { state } = useTabs()
@@ -42,15 +43,16 @@ export default function AutoAdvanceFooter() {
   const footerText = tab?.footerText ?? ""
   return (
     <div
-      data-auto-advance-sentinel
       style={{
         position: "relative",
         backgroundColor: tab?.panelColor ?? theme.palette.blue.darkest,
         color: theme.palette.common.white,
         pointerEvents: "auto",
+        minHeight: "100px",
+        padding: `${theme.spacing(theme.space.section.lg)} 0`
       }}
     >
-      <button
+      {/*       <button
         type="button"
         onClick={onAdvance}
         aria-label={footerText}
@@ -83,7 +85,27 @@ export default function AutoAdvanceFooter() {
           size={60}
           color={theme.palette.common.white}
         />
-      </button>
+      </button> */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <ButtonCta
+          href=""
+        >
+          Learn more about Water Issues
+        </ButtonCta>
+
+        <ButtonCta
+          href=""
+        >
+          Explore water allocation scenarios
+        </ButtonCta>
+      </Box>
     </div>
   )
 }

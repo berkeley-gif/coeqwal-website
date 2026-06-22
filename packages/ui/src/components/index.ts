@@ -148,6 +148,9 @@ export type {
 export { ChartToast } from "./common/ChartToast"
 export type { ChartToastProps } from "./common/ChartToast"
 
+// Button Cta
+export { ButtonCta } from "./common/ButtonCta"
+
 // Modal components
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"
