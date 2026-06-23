@@ -369,12 +369,15 @@ automatically once steps 1, 2, 5, and 6 are in place.
 
 ## Anchors
 
-`useTourAnchor("id")` returns a ref callback. Attach it to any
-element. The provider keeps an `id -> Element` map in a mutable ref;
-writes do not trigger re-renders. Two registrations of the same id
-let the most recently mounted one win. Calling `useTourAnchor` outside
-of a `TourAnchorProvider` is a no-op, so view code can render with the
-tour subsystem disabled.
+`useTourAnchor("id")` returns a ref callback. Attach it to any element
+to register it under that id; the runner calls `resolve(id)` to find the
+live element. The registry is kept in a ref (not state) so controls can
+add and remove themselves without re-rendering the tree; changes notify
+the runner instead (see the `TourAnchorContext.tsx` header for the full
+picture).
+Two registrations of the same id let the most recently mounted one win.
+Calling `useTourAnchor` outside of a `TourAnchorProvider` is a no-op, so
+view code can render with the tour subsystem disabled.
 
 `useTourAnchorResolver()` is the runner / effects side. It returns
 `{ resolve, version }` and re-renders the caller when the registry
@@ -393,8 +396,8 @@ or where wrapping is the path of least resistance, wrap them in
 ```
 
 SVG elements work too: the `resolve` return type is `Element`, and
-the `HighlightRing` only needs `getBoundingClientRect`. This is how
-the resilience prototype tour can target heatmap cells.
+the `HighlightRing` only needs `getBoundingClientRect`, so a future
+tour (e.g. resilience) could anchor directly to heatmap cells.
 
 ## Demo effects
 
@@ -449,8 +452,9 @@ Before opening a PR that adds or changes a tour:
       does not leak the highlight ring, and restores any preview state
       the demo effects mutated.
 - [ ] Switching to another Explore tool while the tour is running
-      ends the tour (`workspaceStoreSlice.setExploreMode` calls
-      `endTour`); switching back does not auto-resume.
+      ends the tour (`workspaceStoreSlice.setExploreMode` resets
+      `tour` to `{ tool: null, step: 0 }`); switching back does not
+      auto-resume.
 - [ ] Same-tab reload mid-tour restores `tour.tool` and `tour.step`
       from sessionStorage (`validateTour` in `exploreSessionPersist`)
       so the same step re-renders.

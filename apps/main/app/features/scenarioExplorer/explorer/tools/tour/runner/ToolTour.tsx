@@ -20,10 +20,10 @@
  * of tour-enabled tools is declared in `tour/registry.ts` (hook-free,
  * so the explorer store can import it without dragging React in).
  *
- * ## File sections
+ * ## Runner files (this folder)
  *
- *   ToolTour            Runner: resolve anchor, render card, a11y
- *   TourCard            Render-only card (in this folder)
+ *   ToolTour            This file. Runner: resolve anchor, render card, a11y
+ *   TourCard            Render-only popper card
  *   HighlightRing       Portal overlay ring, RAF-tracked to anchor bounds
  *   TourBodyContent     Renders step body text; replaces `{{infoIcon}}` placeholder
  *
@@ -273,6 +273,26 @@ export default function ToolTour() {
   /** Popper when anchor resolves; otherwise fixed card at bottom center */
   const useCentered = !step.anchorId || fallbackToCentered || anchorEl === null
 
+  // Same card for both layouts; only its positioning wrapper differs.
+  const card = (
+    <TourCard
+      step={step}
+      steps={steps}
+      tourStep={tourStep}
+      isFirst={isFirst}
+      isLast={isLast}
+      illustration={illustration}
+      onBack={handleBack}
+      onNext={handleNext}
+      onSkip={endTour}
+      titleId={titleId}
+      eyebrowId={eyebrowId}
+      bodyId={bodyId}
+      nextBtnRef={nextBtnRef}
+      cardRef={cardRef}
+    />
+  )
+
   return (
     <>
       {effectsNode}
@@ -299,22 +319,7 @@ export default function ToolTour() {
               zIndex: theme.zIndex.modal,
             }}
           >
-            <TourCard
-              step={step}
-              steps={steps}
-              tourStep={tourStep}
-              isFirst={isFirst}
-              isLast={isLast}
-              illustration={illustration}
-              onBack={handleBack}
-              onNext={handleNext}
-              onSkip={endTour}
-              titleId={titleId}
-              eyebrowId={eyebrowId}
-              bodyId={bodyId}
-              nextBtnRef={nextBtnRef}
-              cardRef={cardRef}
-            />
+            {card}
           </Box>
         ) : (
           <Popper
@@ -355,22 +360,7 @@ export default function ToolTour() {
             ]}
             sx={{ zIndex: theme.zIndex.modal }}
           >
-            <TourCard
-              step={step}
-              steps={steps}
-              tourStep={tourStep}
-              isFirst={isFirst}
-              isLast={isLast}
-              illustration={illustration}
-              onBack={handleBack}
-              onNext={handleNext}
-              onSkip={endTour}
-              titleId={titleId}
-              eyebrowId={eyebrowId}
-              bodyId={bodyId}
-              nextBtnRef={nextBtnRef}
-              cardRef={cardRef}
-            />
+            {card}
           </Popper>
         )}
       </Portal>
