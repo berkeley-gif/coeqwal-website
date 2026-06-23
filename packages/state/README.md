@@ -64,7 +64,7 @@ Keeping tool-specific settings (chart mode, per-chart toggles, in-view search) a
 
 The biggest consumer is the Scenario Explorer, which composes a sliced Zustand store from these primitives. That store, the fields a tool panel reads and writes, and the steps for adding a new tool are documented where the code lives, not here:
 
-- **Explorer store overview and slices**: `apps/main/app/features/scenarioExplorer/explorer/store/README.md`
-- **Which store fields a tool panel uses, and how to add a visualization tool**: the store sections and ["Developer guide: adding a new visualization tool"](../../apps/main/app/features/scenarioExplorer/README.md) in the Scenario Explorer feature README
+- **Explorer store overview and slices**: the ["State management"](../../apps/main/app/features/scenarioExplorer/README.md#state-management) section of the Scenario Explorer feature README
+- **Which store fields a tool panel uses, and how to add a visualization tool**: the store sections and ["How to add a visualization tool"](../../apps/main/app/features/scenarioExplorer/README.md#how-to-add-a-visualization-tool) in the Scenario Explorer feature README
 - **Fetching data for a panel** (`useResolvedScenarioTiers`, etc.): [`packages/data/README.md`](../data/README.md)
 - **Map visualization** (`mapActions.setOutcomeVisualization`, etc.): the map store at `apps/main/app/features/map/store.ts`, plus the "Map integration" section of the Scenario Explorer feature README
