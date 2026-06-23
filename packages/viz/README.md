@@ -131,6 +131,21 @@ They still follow the same definition/export/props conventions but skip the
 `useResizeObserver` + `useCallback` + `useEffect` pattern since there is no imperative DOM
 manipulation.
 
+### A complete worked example
+
+The skeleton above is intentionally minimal. `RadarPlot` (`src/components/RadarPlot.tsx`) is the fullest real example. Open it alongside this map of where each convention shows up:
+
+- **Definition and export** - `const RadarPlot: React.FC<RadarPlotProps> = React.memo(...)`, then `RadarPlot.displayName = "RadarPlot"` and `export default RadarPlot`.
+- **Plain props, events out** - inputs are data plus callbacks (`onLineHover`, `onLineClick`, `onDotClick`, `onPinnedToggle`, `onAxisPositions`, `onReady`). It reads no store and fetches nothing.
+- **Callbacks held in refs** - `onLineHoverRef` and `onDotHoverRef` mirror the incoming callbacks so the D3 draw code calls the latest version without listing it as a `useCallback` dependency.
+- **Debounced, deduped hover notifications** - the dot `mouseenter` handler compares against `lastNotifiedIdRef` and only fires after `HOVER_NOTIFY_MS` (80 ms), so sweeping across one scenario's dots notifies the parent at most once.
+- **Guarded entrance animation** - `hasAnimatedRef` plays the fly-in once, then later redraws run at duration 0.
+- **Hoisted constants** - sizing and color defaults (`RADAR_DOT_R`, `RADAR_DIM_OPACITY`, and friends) live at module scope rather than in destructuring defaults, so they keep a stable identity across renders.
+
+The last three bullets are the [Avoiding hover flicker](#avoiding-hover-flicker-in-d3-charts) rules in practice. `RadarPlotSnapshot` is the capture sibling: it pre-binds `interactive={false}` and `animate={false}` so an offscreen host can paint a single static frame for share thumbnails, which only works because `RadarPlot` reads no store.
+
+For how a consuming app wires one of these charts (store-driven data, memoized props, hover and share callbacks), see ["Write your visualization"](../../apps/main/app/features/scenarioExplorer/README.md#write-your-visualization-repoviz) in the Scenario Explorer README.
+
 ## Avoiding hover flicker in D3 charts
 
 D3 imperative charts are sensitive to unnecessary React re-renders because each render of the
@@ -166,7 +181,7 @@ tooltipRef.current!.style.display = "none"
 ### 2. Debounce parent notifications
 
 When a chart calls `onLineHover?.(scenario)`, this typically triggers `setState` in the parent
-(e.g. ComparisonPanel), which re-renders the entire parent tree. Even if `React.memo` prevents
+(e.g. RadarPanel), which re-renders the entire parent tree. Even if `React.memo` prevents
 the chart from re-rendering, the parent reconciliation can block the main thread and delay paint
 of the D3 hover visuals.
 
