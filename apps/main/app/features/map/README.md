@@ -50,7 +50,7 @@ Each map marker component imports the specific table it needs directly.
 
 `outcomeLocations.ts` also exports a unified helper, `getOutcomeLocationCoordinates(outcomeCode, locationId)`, plus `CWS_DEL_COORDINATES`, `AG_REV_COORDINATES`, and `SALMON_RIVER_CENTROID`. These are not used by the persistent map. They feed the Get Started animation (`scenarioExplorer/animation/`), which projects outcome locations to screen space and needs coordinates for the polygon outcomes too. On the map, `CWS_DEL`/`AG_REV` render as demand-unit polygons and salmon renders as a highlighted river line, so none of them resolve through this helper here.
 
-### Adding a new point outcome to the map
+### How to add a new point outcome to the map
 
 1. Get `location_id` values from the tier API response
 2. Add `[lng, lat]` coordinates to the appropriate table in `config/outcomeLocations.ts` (or create a new table), keyed by `location_id`
@@ -74,7 +74,7 @@ Point/marker path:
 
 ---
 
-## Adding a camera zoom for an outcome
+## How to add a camera zoom for an outcome
 
 When a user clicks a glyph or radar dot for an outcome, the map zooms to a view defined in `outcomeLayerRegistry.ts`. Two options:
 
@@ -111,7 +111,7 @@ MY_OUTCOME: {
 
 ---
 
-## Measuring the extent of a Mapbox layer
+## How to measure the extent of a Mapbox layer
 
 The demand-unit (and other tileset) polygon geometries live only in Mapbox - not in the repo. To measure the actual bounding box of a layer:
 

@@ -169,7 +169,7 @@ illustration is recognizably about that tool (`listBarTiers`,
 for cross-tool conventions. The list tour follows this in
 `panels/list/tour/illustrations/index.tsx`.
 
-## Adding a tour to a new tool
+## How to add a tour to a new tool
 
 The recipe assumes the new tool is called `equity`. Replace `equity`
 with your tool id throughout.

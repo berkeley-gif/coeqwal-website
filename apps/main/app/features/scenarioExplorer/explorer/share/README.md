@@ -215,7 +215,7 @@ Instead the provider renders one invisible `RadarLiveFetcher` per `HYDROCLIMATES
 
 **`DataRehydrator` is a component, not a hook:** A variant may need to re-fetch data for several URL restored items at once. Looping and calling hooks per item would break the rule above, so the handler exposes a component instead. [`ShareDataRehydrationHost.tsx`](ShareDataRehydrationHost.tsx) iterates `VARIANT_REGISTRY` and mounts each variant's `DataRehydrator` with the items that need backfill. Implement `DataRehydrator` on your handler only - no host edit. Each inner component calls hooks scoped to its own item and writes resolved data back with `context.updateShareItem(id, patch)`.
 
-## Add a hydroclimate
+## How the share system handles a new hydroclimate
 
 Register the new hydroclimate app-wide (called `cc_new` here as a placeholder, use the real value). That is the single source of truth and covers the chooser, the resilience matrix, and share. See [How to add a hydroclimate](../../README.md#how-to-add-a-hydroclimate) in the scenario explorer README. Share derives its key from that app-wide list:
 
