@@ -24,11 +24,11 @@ import {
   Popover,
   Select,
   type SelectChangeEvent,
-  Tooltip,
   Typography,
   icons,
   useTheme,
 } from "@repo/ui/mui"
+import { HoverTip } from "@repo/ui"
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
@@ -660,7 +660,7 @@ export default function ResilienceControls({
           Presets
         </Typography>
         {RESILIENCE_SALIENT_PRESETS.map((preset) => (
-          <Tooltip key={preset.id} title={preset.description} placement="top">
+          <HoverTip key={preset.id} content={preset.description} compact placement="top">
             <Button
               type="button"
               size="small"
@@ -688,7 +688,7 @@ export default function ResilienceControls({
             >
               {preset.label}
             </Button>
-          </Tooltip>
+          </HoverTip>
         ))}
       </Box>
 

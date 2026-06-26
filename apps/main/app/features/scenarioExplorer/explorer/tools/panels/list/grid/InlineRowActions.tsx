@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Box, IconButton, Tooltip, icons, useTheme } from "@repo/ui/mui"
+import { Box, IconButton, icons, useTheme } from "@repo/ui/mui"
+import { HoverTip } from "@repo/ui"
 import { useWorkspaceSlice } from "../../../../store"
 import type { OutcomeDisplayMode } from "../../../../store"
 
@@ -120,23 +121,7 @@ export function InlineRowActions({
           ref={pinTourRef}
           sx={{ display: "inline-flex", alignItems: "center" }}
         >
-          <Tooltip
-            title={pinTooltip}
-            arrow
-            placement="top-start"
-            slotProps={{
-              popper: {
-                modifiers: [
-                  { name: "flip", enabled: true },
-                  {
-                    name: "preventOverflow",
-                    enabled: true,
-                    options: { boundary: "viewport", padding: 8 },
-                  },
-                ],
-              },
-            }}
-          >
+          <HoverTip content={pinTooltip} compact placement="top-start">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -159,7 +144,7 @@ export function InlineRowActions({
                 }}
               />
             </IconButton>
-          </Tooltip>
+          </HoverTip>
         </Box>
       )}
       <Box
@@ -167,26 +152,14 @@ export function InlineRowActions({
         ref={shareTourRef}
         sx={{ display: "inline-flex", alignItems: "center" }}
       >
-        <Tooltip
-          title={
+        <HoverTip
+          content={
             shareDisabled
               ? (shareDisabledTooltip ?? shareTooltip)
               : shareTooltip
           }
-          arrow
+          compact
           placement="top-start"
-          slotProps={{
-            popper: {
-              modifiers: [
-                { name: "flip", enabled: true },
-                {
-                  name: "preventOverflow",
-                  enabled: true,
-                  options: { boundary: "viewport", padding: 8 },
-                },
-              ],
-            },
-          }}
         >
           {/* span wrapper keeps the tooltip working when the button
               is disabled; MUI suppresses pointer events on a
@@ -224,7 +197,7 @@ export function InlineRowActions({
               <icons.IosShare sx={{ fontSize: iconSize }} />
             </IconButton>
           </span>
-        </Tooltip>
+        </HoverTip>
       </Box>
     </Box>
   )

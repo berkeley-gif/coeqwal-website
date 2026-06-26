@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useCallback, useRef } from "react"
-import { Box, Tooltip, IconButton, useTheme, icons } from "@repo/ui/mui"
+import { Box, IconButton, useTheme, icons } from "@repo/ui/mui"
+import { HoverTip } from "@repo/ui"
 import { useSortable } from "@dnd-kit/sortable"
 import type { ShareItem } from "../types"
 import type { CsvLookups } from "../variants"
@@ -150,7 +151,7 @@ export default function StoryCard({
             alignItems: "center",
           }}
         >
-          <Tooltip title="Download as PNG" arrow>
+          <HoverTip content="Download as PNG" compact>
             <IconButton
               size="small"
               onClick={handleDownloadPng}
@@ -158,8 +159,8 @@ export default function StoryCard({
             >
               <icons.Image sx={{ fontSize: "1.25rem" }} />
             </IconButton>
-          </Tooltip>
-          <Tooltip title="Download as SVG" arrow>
+          </HoverTip>
+          <HoverTip content="Download as SVG" compact>
             <IconButton
               size="small"
               onClick={handleDownloadSvg}
@@ -167,12 +168,12 @@ export default function StoryCard({
             >
               <icons.Code sx={{ fontSize: "1.25rem" }} />
             </IconButton>
-          </Tooltip>
-          <Tooltip
-            title={
+          </HoverTip>
+          <HoverTip
+            content={
               hasData ? "Download data" : "No data available. Try re-sharing."
             }
-            arrow
+            compact
           >
             <span>
               <IconButton
@@ -189,9 +190,9 @@ export default function StoryCard({
                 <icons.DataObject sx={{ fontSize: "1.25rem" }} />
               </IconButton>
             </span>
-          </Tooltip>
+          </HoverTip>
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Remove from story" arrow>
+          <HoverTip content="Remove from story" compact>
             <IconButton
               size="small"
               onClick={() => onRemoveFromStory(item.id)}
@@ -199,8 +200,8 @@ export default function StoryCard({
             >
               <icons.RemoveCircleOutline sx={{ fontSize: "1.25rem" }} />
             </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete card" arrow>
+          </HoverTip>
+          <HoverTip content="Delete card" compact>
             <IconButton
               size="small"
               onClick={() => onDelete(item.id)}
@@ -208,7 +209,7 @@ export default function StoryCard({
             >
               <icons.Delete sx={{ fontSize: "1.25rem" }} />
             </IconButton>
-          </Tooltip>
+          </HoverTip>
         </Box>
       </Box>
     </Box>

@@ -1,14 +1,7 @@
 "use client"
 
-import {
-  Box,
-  Checkbox,
-  IconButton,
-  Tooltip,
-  useTheme,
-  icons,
-} from "@repo/ui/mui"
-import { InfoIconButton } from "@repo/ui"
+import { Box, Checkbox, IconButton, useTheme, icons } from "@repo/ui/mui"
+import { HoverTip, InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
@@ -190,8 +183,8 @@ export default function ThemeGroupHeader({
           </Box>
         )}
 
-        <Tooltip
-          title={
+        <HoverTip
+          content={
             shareDisabled
               ? (shareDisabledTooltip ??
                 `Share all ${themeConfig.label} scenarios`)
@@ -199,7 +192,7 @@ export default function ThemeGroupHeader({
                 ? "All shared"
                 : `Share all ${themeConfig.label} scenarios`
           }
-          arrow
+          compact
         >
           {/* span wrapper preserves tooltip hover when the button is
               disabled - MUI suppresses pointer events on disabled
@@ -230,7 +223,7 @@ export default function ThemeGroupHeader({
               <icons.IosShare sx={{ fontSize: "0.8rem" }} />
             </IconButton>
           </span>
-        </Tooltip>
+        </HoverTip>
       </Box>
     </Box>
   )

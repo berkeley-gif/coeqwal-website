@@ -16,7 +16,10 @@ import { themeValues } from "../../../themes/theme"
 import { tooltipSurface } from "./tooltipSurface"
 
 const DEFAULT_WIDTH = "280px"
-const MAX_WIDTH = themeValues.layout.maxWidth.md
+const DEFAULT_MAX_WIDTH = themeValues.layout.maxWidth.md
+// Short labels hug their text instead of filling a fixed-width box.
+const COMPACT_WIDTH = "auto"
+const COMPACT_MAX_WIDTH = themeValues.layout.maxWidth.sm
 
 export interface HoverTipProps {
   /** The content to display in the hint */
@@ -25,9 +28,11 @@ export interface HoverTipProps {
   children: React.ReactElement
   /** Placement relative to the trigger (default: "top") */
   placement?: TooltipProps["placement"]
-  /** Surface width */
+  /** Tighter padding and auto width, for short single-line labels */
+  compact?: boolean
+  /** Surface width override */
   width?: string
-  /** Surface max width */
+  /** Surface max width override */
   maxWidth?: string
   /** Delay before showing, in ms (default: 200) */
   enterDelay?: number
@@ -39,12 +44,16 @@ export function HoverTip({
   content,
   children,
   placement = "top",
-  width = DEFAULT_WIDTH,
-  maxWidth = MAX_WIDTH,
+  compact = false,
+  width,
+  maxWidth,
   enterDelay = 200,
   leaveDelay = 100,
 }: HoverTipProps) {
   const theme = useTheme()
+  const resolvedWidth = width ?? (compact ? COMPACT_WIDTH : DEFAULT_WIDTH)
+  const resolvedMaxWidth =
+    maxWidth ?? (compact ? COMPACT_MAX_WIDTH : DEFAULT_MAX_WIDTH)
 
   return (
     <Tooltip
@@ -59,7 +68,11 @@ export function HoverTip({
           sx: { zIndex: theme.zIndex.tooltipAboveModal },
         },
         tooltip: {
-          sx: (t: Theme) => ({ ...tooltipSurface(t), width, maxWidth }),
+          sx: (t: Theme) => ({
+            ...tooltipSurface(t, { compact }),
+            width: resolvedWidth,
+            maxWidth: resolvedMaxWidth,
+          }),
         },
         arrow: {
           sx: (t: Theme) => ({ color: t.palette.background.paper }),
