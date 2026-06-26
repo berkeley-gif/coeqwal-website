@@ -22,10 +22,14 @@
  *
  * ## Runner files (this folder)
  *
- *   ToolTour            This file. Runner: resolve anchor, render card, a11y
- *   TourCard            Render-only popper card
- *   HighlightRing       Portal overlay ring, RAF-tracked to anchor bounds
- *   TourBodyContent     Renders step body text; replaces `{{infoIcon}}` placeholder
+ *   ToolTour                 This file. Orchestrates: read store, pick the
+ *                            step, render scrim + card + ring, call the hooks
+ *   TourCard                 Render-only popper card
+ *   HighlightRing            Portal overlay ring, RAF-tracked to anchor bounds
+ *   TourBodyContent          Renders step body; replaces `{{infoIcon}}`
+ *   useTourAnchorElement     Resolve step anchor id to an element (+ late mounts)
+ *   useTourKeyboardNav       Esc / arrow-key navigation while active
+ *   useTourFocusManagement   Focus restore, autofocus, and Tab trap
  *
  * ## Demo effects
  *
@@ -37,15 +41,16 @@
  * `useListInfoTooltipSync`, `useRadarInfoIconSync`).
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo } from "react"
 import { Box, Popper, Portal, useTheme } from "@repo/ui/mui"
 import { useExplorerStore, useWorkspaceSlice } from "../../../store"
 import { TOUR_MODULES } from "../toolToTourMap"
 import { useTourAnchorResolver } from "../anchors/TourAnchorContext"
 import { HighlightRing } from "./HighlightRing"
 import { TourCard } from "./TourCard"
-
-const HIGHLIGHT_DATA_ATTR = "data-tour-highlight"
+import { useTourAnchorElement } from "./useTourAnchorElement"
+import { useTourKeyboardNav } from "./useTourKeyboardNav"
+import { useTourFocusManagement } from "./useTourFocusManagement"
 
 export default function ToolTour() {
   const theme = useTheme()
@@ -66,68 +71,19 @@ export default function ToolTour() {
   const step = steps[tourStep] ?? null
   const EffectsComponent = activeModule?.EffectsComponent ?? null
 
-  const stepId = step?.id
-  const anchorId = step?.anchorId
-  /** Stable deps key for anchor resolution (fixed length for Fast Refresh) */
-  const tourStepAnchorKey = useMemo(
-    () =>
-      [tourTool ?? "", String(tourStep), stepId ?? "", anchorId ?? ""].join(
-        "\u0000",
-      ),
-    [tourTool, tourStep, stepId, anchorId],
-  )
-
   // ------------------------------------------------------------------
-  // Anchor resolution (TourAnchorProvider registry)
+  // Anchor resolution (find the highlighted element, cope with late mounts)
   // ------------------------------------------------------------------
 
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  /** True when anchor id exists but no element registered after grace period */
-  const [fallbackToCentered, setFallbackToCentered] = useState(false)
-
-  useEffect(() => {
-    if (!stepId) {
-      setAnchorEl((prev) => (prev == null ? prev : null))
-      setFallbackToCentered((prev) => (prev === false ? prev : false))
-      return
-    }
-    if (!anchorId) {
-      setAnchorEl((prev) => (prev == null ? prev : null))
-      setFallbackToCentered((prev) => (prev === false ? prev : false))
-      return
-    }
-    const el = resolve(anchorId)
-    setAnchorEl((prev) => (prev === el ? prev : el))
-    if (el) {
-      setFallbackToCentered((prev) => (prev === false ? prev : false))
-      return
-    }
-    setFallbackToCentered((prev) => (prev === false ? prev : false))
-    const timer = window.setTimeout(() => {
-      const retry = resolve(anchorId)
-      if (retry) {
-        setAnchorEl((prev) => (prev === retry ? prev : retry))
-      } else {
-        setFallbackToCentered((prev) => (prev === true ? prev : true))
-      }
-    }, 250)
-    return () => window.clearTimeout(timer)
-    // stepId and anchorId are encoded in tourStepAnchorKey
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourStepAnchorKey, version, resolve])
-
-  // Scroll anchor into view and set data-tour-highlight for optional CSS hooks
-  useEffect(() => {
-    if (!anchorEl) return
-    anchorEl.scrollIntoView({ behavior: "smooth", block: "nearest" })
-    anchorEl.setAttribute(HIGHLIGHT_DATA_ATTR, "true")
-    return () => {
-      anchorEl.removeAttribute(HIGHLIGHT_DATA_ATTR)
-    }
-  }, [anchorEl])
+  const anchorEl = useTourAnchorElement({
+    stepId: step?.id,
+    anchorId: step?.anchorId,
+    resolve,
+    version,
+  })
 
   // ------------------------------------------------------------------
-  // Navigation + accessibility
+  // Navigation
   // ------------------------------------------------------------------
 
   const isFirst = tourStep === 0
@@ -145,43 +101,18 @@ export default function ToolTour() {
     if (!isFirst) setTourStep(tourStep - 1)
   }, [isFirst, setTourStep, tourStep])
 
-  // ESC / arrow keys (skipped when focus is in an input)
-  useEffect(() => {
-    if (!tourTool) return
-    const handler = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null
-      if (
-        t &&
-        (t.tagName === "INPUT" ||
-          t.tagName === "TEXTAREA" ||
-          t.isContentEditable)
-      ) {
-        return
-      }
-      if (e.key === "Escape") {
-        e.preventDefault()
-        endTour()
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault()
-        handleNext()
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault()
-        handleBack()
-      }
-    }
-    document.addEventListener("keydown", handler)
-    return () => document.removeEventListener("keydown", handler)
-  }, [tourTool, endTour, handleNext, handleBack])
+  // ------------------------------------------------------------------
+  // Keyboard + focus (accessibility): mounted while a tour is active
+  // ------------------------------------------------------------------
 
-  // Restore focus to the element that had focus when the tour opened
-  const triggerElRef = useRef<HTMLElement | null>(null)
-  useEffect(() => {
-    if (!tourTool) return
-    triggerElRef.current = document.activeElement as HTMLElement | null
-    return () => {
-      triggerElRef.current?.focus?.()
-    }
-  }, [tourTool])
+  useTourKeyboardNav({
+    tourTool,
+    onNext: handleNext,
+    onBack: handleBack,
+    onClose: endTour,
+  })
+
+  const { cardRef, nextBtnRef } = useTourFocusManagement(tourTool, tourStep)
 
   // Clear tour state on unmount so a later mount does not resume mid-flow
   useEffect(() => {
@@ -192,47 +123,6 @@ export default function ToolTour() {
       }
     }
   }, [])
-
-  const nextBtnRef = useRef<HTMLButtonElement | null>(null)
-  const cardRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => {
-    if (!tourTool) return
-    const timer = window.setTimeout(() => {
-      nextBtnRef.current?.focus({ preventScroll: true })
-    }, 50)
-    return () => window.clearTimeout(timer)
-  }, [tourTool, tourStep])
-
-  // Tab cycles within the dialog only
-  useEffect(() => {
-    if (!tourTool) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return
-      const card = cardRef.current
-      if (!card) return
-      const focusables = card.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-      )
-      if (focusables.length === 0) return
-      const first = focusables.item(0)
-      const last = focusables.item(focusables.length - 1)
-      if (first == null || last == null) return
-      const active = document.activeElement as HTMLElement | null
-      if (e.shiftKey) {
-        if (active === first || !card.contains(active)) {
-          e.preventDefault()
-          last.focus()
-        }
-      } else {
-        if (active === last || !card.contains(active)) {
-          e.preventDefault()
-          first.focus()
-        }
-      }
-    }
-    document.addEventListener("keydown", handler)
-    return () => document.removeEventListener("keydown", handler)
-  }, [tourTool])
 
   const titleId = useMemo(
     () => (step ? `tour-title-${step.id}` : undefined),
@@ -271,7 +161,7 @@ export default function ToolTour() {
   if (!tourTool || !step) return effectsNode
 
   /** Popper when anchor resolves; otherwise fixed card at bottom center */
-  const useCentered = !step.anchorId || fallbackToCentered || anchorEl === null
+  const useCentered = !step.anchorId || anchorEl === null
 
   // Same card for both layouts; only its positioning wrapper differs.
   const card = (
