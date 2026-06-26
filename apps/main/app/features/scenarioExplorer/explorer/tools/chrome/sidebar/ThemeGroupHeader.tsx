@@ -192,7 +192,7 @@ export default function ThemeGroupHeader({
                 ? "All shared"
                 : `Share all ${themeConfig.label} scenarios`
           }
-          compact
+          density="compact"
         >
           {/* span wrapper preserves tooltip hover when the button is
               disabled - MUI suppresses pointer events on disabled

@@ -660,7 +660,12 @@ export default function ResilienceControls({
           Presets
         </Typography>
         {RESILIENCE_SALIENT_PRESETS.map((preset) => (
-          <HoverTip key={preset.id} content={preset.description} compact placement="top">
+          <HoverTip
+            key={preset.id}
+            content={preset.description}
+            density="compact"
+            placement="top"
+          >
             <Button
               type="button"
               size="small"

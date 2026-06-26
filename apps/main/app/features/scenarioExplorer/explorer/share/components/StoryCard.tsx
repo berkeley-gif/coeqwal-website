@@ -151,7 +151,7 @@ export default function StoryCard({
             alignItems: "center",
           }}
         >
-          <HoverTip content="Download as PNG" compact>
+          <HoverTip content="Download as PNG" density="compact">
             <IconButton
               size="small"
               onClick={handleDownloadPng}
@@ -160,7 +160,7 @@ export default function StoryCard({
               <icons.Image sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </HoverTip>
-          <HoverTip content="Download as SVG" compact>
+          <HoverTip content="Download as SVG" density="compact">
             <IconButton
               size="small"
               onClick={handleDownloadSvg}
@@ -173,7 +173,7 @@ export default function StoryCard({
             content={
               hasData ? "Download data" : "No data available. Try re-sharing."
             }
-            compact
+            density="compact"
           >
             <span>
               <IconButton
@@ -192,7 +192,7 @@ export default function StoryCard({
             </span>
           </HoverTip>
           <Box sx={{ flex: 1 }} />
-          <HoverTip content="Remove from story" compact>
+          <HoverTip content="Remove from story" density="compact">
             <IconButton
               size="small"
               onClick={() => onRemoveFromStory(item.id)}
@@ -201,7 +201,7 @@ export default function StoryCard({
               <icons.RemoveCircleOutline sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </HoverTip>
-          <HoverTip content="Delete card" compact>
+          <HoverTip content="Delete card" density="compact">
             <IconButton
               size="small"
               onClick={() => onDelete(item.id)}

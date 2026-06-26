@@ -121,7 +121,11 @@ export function InlineRowActions({
           ref={pinTourRef}
           sx={{ display: "inline-flex", alignItems: "center" }}
         >
-          <HoverTip content={pinTooltip} compact placement="top-start">
+          <HoverTip
+            content={pinTooltip}
+            density="compact"
+            placement="top-start"
+          >
             <IconButton
               size="small"
               onClick={(e) => {
@@ -158,7 +162,7 @@ export function InlineRowActions({
               ? (shareDisabledTooltip ?? shareTooltip)
               : shareTooltip
           }
-          compact
+          density="compact"
           placement="top-start"
         >
           {/* span wrapper keeps the tooltip working when the button

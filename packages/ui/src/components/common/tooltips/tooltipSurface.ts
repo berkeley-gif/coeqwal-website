@@ -10,16 +10,24 @@
 
 import { Theme } from "@mui/material/styles"
 
+/**
+ * Padding density:
+ * - "compact" (8px): short single-line labels
+ * - "default" (16px): standard hover hints
+ * - "spacious" (24px): rich descriptions such as tier definitions
+ */
+export type TooltipDensity = "compact" | "default" | "spacious"
+
 export interface TooltipSurfaceOptions {
   /** Use the larger shadow (for free-floating overlays rather than anchored tooltips) */
   elevated?: boolean
-  /** Tighter padding and smaller text, for short single-line labels */
-  compact?: boolean
+  /** Padding and text scale (default: "default") */
+  density?: TooltipDensity
 }
 
 export function tooltipSurface(
   theme: Theme,
-  { elevated = false, compact = false }: TooltipSurfaceOptions = {},
+  { elevated = false, density = "default" }: TooltipSurfaceOptions = {},
 ) {
   const base = {
     backgroundColor: theme.palette.background.paper,
@@ -29,7 +37,7 @@ export function tooltipSurface(
     boxShadow: elevated ? theme.shadow.lg : theme.shadow.md,
   }
 
-  if (compact) {
+  if (density === "compact") {
     return {
       ...base,
       // padding (not the `p` shorthand) so this object is valid in both sx and theme styleOverrides
@@ -38,9 +46,11 @@ export function tooltipSurface(
     }
   }
 
+  const padding =
+    density === "spacious" ? theme.space.component.xl : theme.space.component.lg
   return {
     ...base,
-    padding: theme.spacing(theme.space.component.lg),
+    padding: theme.spacing(padding),
     ...theme.typography.compactSubtitle,
   }
 }

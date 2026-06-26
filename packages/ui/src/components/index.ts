@@ -31,7 +31,10 @@ export { TooltipCloseButton } from "./common/tooltips/TooltipCloseButton"
 export type { TooltipCloseButtonProps } from "./common/tooltips/TooltipCloseButton"
 // Tooltip foundations (shared surface, disclosure state, anchored positioning)
 export { tooltipSurface } from "./common/tooltips/tooltipSurface"
-export type { TooltipSurfaceOptions } from "./common/tooltips/tooltipSurface"
+export type {
+  TooltipSurfaceOptions,
+  TooltipDensity,
+} from "./common/tooltips/tooltipSurface"
 export { useDisclosure } from "./common/tooltips/useDisclosure"
 export type {
   UseDisclosureOptions,

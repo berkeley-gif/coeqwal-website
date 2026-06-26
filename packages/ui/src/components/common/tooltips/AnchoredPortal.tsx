@@ -19,7 +19,7 @@ import {
 } from "../../.."
 import type { PopperProps } from "../../.."
 import { MobileModal } from "../MobileModal"
-import { tooltipSurface } from "./tooltipSurface"
+import { tooltipSurface, type TooltipDensity } from "./tooltipSurface"
 
 const ARROW_SIZE = 12
 // Caps the mobile modal width. Sits between the theme's md (400) and lg (600)
@@ -49,6 +49,8 @@ export interface AnchoredPortalProps {
   zIndex?: number
   /** Show the pointing arrow on desktop (default: true) */
   showArrow?: boolean
+  /** Padding/text density; anchored popovers default to "spacious" rich content */
+  density?: TooltipDensity
   /** Mobile modal max width (default: 450) */
   mobileMaxWidth?: number | string
   /** Mobile modal max height */
@@ -123,6 +125,7 @@ function DesktopPortal({
   maxWidth,
   zIndex,
   showArrow = true,
+  density = "spacious",
 }: AnchoredPortalProps) {
   const theme = useTheme()
   // Callback ref via state so modifiers recompute once the arrow mounts.
@@ -176,7 +179,7 @@ function DesktopPortal({
           <Box
             sx={{
               position: "relative",
-              ...tooltipSurface(theme),
+              ...tooltipSurface(theme, { density }),
               ...(width !== undefined && { width }),
               ...(maxWidth !== undefined && { maxWidth }),
             }}

@@ -29,7 +29,11 @@ export default function ShareExportBar({
 
   const handleCopyLink = async () => {
     const st = useExplorerStore.getState()
-    const url = encodeShareItems(st.shareItems, st.hydroclimate, st.storyItemIds)
+    const url = encodeShareItems(
+      st.shareItems,
+      st.hydroclimate,
+      st.storyItemIds,
+    )
     try {
       await navigator.clipboard.writeText(url)
     } catch {
@@ -57,7 +61,7 @@ export default function ShareExportBar({
     >
       <HoverTip
         content={copied ? "Copied!" : "Copy shareable URL to clipboard"}
-        compact
+        density="compact"
       >
         <Button
           variant="outlined"
@@ -79,7 +83,10 @@ export default function ShareExportBar({
           {copied ? "Copied!" : "Copy link"}
         </Button>
       </HoverTip>
-      <HoverTip content="Download a ZIP with a PNG and an SVG per card" compact>
+      <HoverTip
+        content="Download a ZIP with a PNG and an SVG per card"
+        density="compact"
+      >
         <Button
           variant="outlined"
           size="small"
@@ -100,7 +107,7 @@ export default function ShareExportBar({
             ? "Download a ZIP with one CSV per card"
             : "Preparing data..."
         }
-        compact
+        density="compact"
       >
         <span>
           <Button

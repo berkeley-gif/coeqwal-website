@@ -14,6 +14,7 @@ import { themeValues } from "../../../themes/theme"
 import { AnchoredPortal } from "./AnchoredPortal"
 import { TooltipCloseButton } from "./TooltipCloseButton"
 import { useDisclosure } from "./useDisclosure"
+import type { TooltipDensity } from "./tooltipSurface"
 
 const DEFAULT_WIDTH = "280px"
 const MAX_WIDTH = themeValues.layout.maxWidth.md
@@ -47,6 +48,8 @@ export interface InfoPopoverProps {
   closeOnScroll?: boolean
   /** Show the pointing arrow (default: true) */
   showArrow?: boolean
+  /** Padding/text density (default: "spacious" for rich click-to-open content) */
+  density?: TooltipDensity
 }
 
 export function InfoPopover({
@@ -64,6 +67,7 @@ export function InfoPopover({
   hideCloseButton = false,
   closeOnScroll = false,
   showArrow = true,
+  density = "spacious",
 }: InfoPopoverProps) {
   const isControlled = open !== undefined
   const anchorRef = useRef<HTMLSpanElement>(null)
@@ -101,6 +105,7 @@ export function InfoPopover({
         maxWidth={maxWidth}
         zIndex={zIndex}
         showArrow={showArrow}
+        density={density}
       >
         {!hideCloseButton && (
           <TooltipCloseButton onClick={close} offset={{ top: 8, right: 8 }} />

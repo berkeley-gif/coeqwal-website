@@ -58,7 +58,10 @@ export function TierTooltipPortal({
       mobileMaxWidth={TIER_TOOLTIP_WIDTH}
       zIndex={zIndex}
     >
-      <TooltipCloseButton onClick={onForceClose} offset={{ top: 8, right: 8 }} />
+      <TooltipCloseButton
+        onClick={onForceClose}
+        offset={{ top: 8, right: 8 }}
+      />
       <TierTooltipContent
         outcomeCode={outcomeCode!}
         showTitle={true}

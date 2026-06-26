@@ -49,7 +49,7 @@ export function InfoTooltip({
   )
 
   return (
-    <HybridTooltip content={content} placement={placement}>
+    <HybridTooltip content={content} placement={placement} density="spacious">
       {children}
     </HybridTooltip>
   )

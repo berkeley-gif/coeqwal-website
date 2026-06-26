@@ -13,6 +13,7 @@ import { useMediaQuery } from "../../.."
 import type { TooltipProps } from "@mui/material"
 import { HoverTip } from "./HoverTip"
 import { InfoPopover } from "./InfoPopover"
+import type { TooltipDensity } from "./tooltipSurface"
 
 export interface HybridTooltipProps {
   /** The content to display in the tooltip */
@@ -25,6 +26,8 @@ export interface HybridTooltipProps {
   width?: string
   /** Custom max width override */
   maxWidth?: string
+  /** Padding/text density, applied to both the desktop and touch renderings */
+  density?: TooltipDensity
 }
 
 export function HybridTooltip({
@@ -33,6 +36,7 @@ export function HybridTooltip({
   placement = "top",
   width,
   maxWidth,
+  density = "default",
 }: HybridTooltipProps) {
   const isTouchDevice = useMediaQuery("(pointer: coarse)")
 
@@ -43,6 +47,7 @@ export function HybridTooltip({
         placement={placement}
         width={width}
         maxWidth={maxWidth}
+        density={density}
       >
         {children}
       </InfoPopover>
@@ -55,6 +60,7 @@ export function HybridTooltip({
       placement={placement}
       width={width}
       maxWidth={maxWidth}
+      density={density}
     >
       {children}
     </HoverTip>

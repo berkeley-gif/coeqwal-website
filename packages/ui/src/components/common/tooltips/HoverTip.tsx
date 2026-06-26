@@ -13,7 +13,7 @@ import { Tooltip, useTheme } from "../../.."
 import { Theme } from "@mui/material/styles"
 import type { TooltipProps } from "@mui/material"
 import { themeValues } from "../../../themes/theme"
-import { tooltipSurface } from "./tooltipSurface"
+import { tooltipSurface, type TooltipDensity } from "./tooltipSurface"
 
 const DEFAULT_WIDTH = "280px"
 const DEFAULT_MAX_WIDTH = themeValues.layout.maxWidth.md
@@ -28,8 +28,8 @@ export interface HoverTipProps {
   children: React.ReactElement
   /** Placement relative to the trigger (default: "top") */
   placement?: TooltipProps["placement"]
-  /** Tighter padding and auto width, for short single-line labels */
-  compact?: boolean
+  /** Padding/text density: "compact" also hugs the label width (default: "default") */
+  density?: TooltipDensity
   /** Surface width override */
   width?: string
   /** Surface max width override */
@@ -44,16 +44,17 @@ export function HoverTip({
   content,
   children,
   placement = "top",
-  compact = false,
+  density = "default",
   width,
   maxWidth,
   enterDelay = 200,
   leaveDelay = 100,
 }: HoverTipProps) {
   const theme = useTheme()
-  const resolvedWidth = width ?? (compact ? COMPACT_WIDTH : DEFAULT_WIDTH)
+  const isCompact = density === "compact"
+  const resolvedWidth = width ?? (isCompact ? COMPACT_WIDTH : DEFAULT_WIDTH)
   const resolvedMaxWidth =
-    maxWidth ?? (compact ? COMPACT_MAX_WIDTH : DEFAULT_MAX_WIDTH)
+    maxWidth ?? (isCompact ? COMPACT_MAX_WIDTH : DEFAULT_MAX_WIDTH)
 
   return (
     <Tooltip
@@ -68,11 +69,11 @@ export function HoverTip({
           sx: { zIndex: theme.zIndex.tooltipAboveModal },
         },
         tooltip: {
-          // The base look (background, border, radius, shadow, padding) comes
-          // from the theme's MuiTooltip override. Only layer on what differs:
-          // compact density and the width overrides.
+          // The "default" look (background, border, radius, shadow, padding)
+          // comes from the theme's MuiTooltip override. Only layer on a surface
+          // when the density differs, plus the width overrides.
           sx: (t: Theme) => ({
-            ...(compact ? tooltipSurface(t, { compact: true }) : {}),
+            ...(density !== "default" ? tooltipSurface(t, { density }) : {}),
             width: resolvedWidth,
             maxWidth: resolvedMaxWidth,
           }),
