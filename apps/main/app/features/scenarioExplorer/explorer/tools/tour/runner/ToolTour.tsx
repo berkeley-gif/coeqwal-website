@@ -30,6 +30,7 @@
  *   TourCardActions          Skip / Back / Next buttons
  *   HighlightRing            Portal overlay ring, RAF-tracked to anchor bounds
  *   TourBodyContent          Renders step body; replaces `{{infoIcon}}`
+ *   tourPopperModifiers      Builds the anchored card's Popper.js modifiers
  *   useTourAnchorElement     Resolve step anchor id to an element (+ late mounts)
  *   useTourKeyboardNav       Esc / arrow-key navigation while active
  *   useTourFocusManagement   Focus restore, autofocus, and Tab trap
@@ -54,6 +55,7 @@ import { TourCard } from "./TourCard"
 import { useTourAnchorElement } from "./useTourAnchorElement"
 import { useTourKeyboardNav } from "./useTourKeyboardNav"
 import { useTourFocusManagement } from "./useTourFocusManagement"
+import { buildTourPopperModifiers } from "./tourPopperModifiers"
 
 export default function ToolTour() {
   const theme = useTheme()
@@ -219,38 +221,7 @@ export default function ToolTour() {
             open
             anchorEl={anchorEl}
             placement={step.placement ?? "bottom"}
-            modifiers={[
-              {
-                name: "offset",
-                options: {
-                  // Function form so we can push the popper past the
-                  // anchor on the cross axis using a multiple of the
-                  // anchor's own size (see `anchorSkidMultiplier`).
-                  offset: ({
-                    placement: p,
-                    reference,
-                  }: {
-                    placement: string
-                    reference: { width: number; height: number }
-                  }) => {
-                    const mult = step.anchorSkidMultiplier ?? 0
-                    const isVertical =
-                      p.startsWith("top") || p.startsWith("bottom")
-                    const skid = isVertical
-                      ? reference.width * mult
-                      : reference.height * mult
-                    return [skid, 12]
-                  },
-                },
-              },
-              {
-                name: "preventOverflow",
-                options: { padding: 12, altAxis: true, tether: false },
-              },
-              step.disableFlip
-                ? { name: "flip", enabled: false }
-                : { name: "flip", options: { padding: 12 } },
-            ]}
+            modifiers={buildTourPopperModifiers(step)}
             sx={{ zIndex: theme.zIndex.modal }}
           >
             {card}
