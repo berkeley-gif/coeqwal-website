@@ -34,7 +34,7 @@ export function TourCardHeader({
       <Typography
         id={eyebrowId}
         variant="outcomeHeader"
-        sx={{ color: theme.palette.text.primary }}
+        sx={{ color: theme.palette.blue.bright }}
       >
         {eyebrow}
       </Typography>
