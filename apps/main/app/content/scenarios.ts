@@ -105,10 +105,18 @@ export const HYDROCLIMATE_DEFS = [
       "Temperature, precipitation, and streamflow patterns reflect historical conditions",
   },
   {
+    value: "ecv",
+    apiId: 7,
+    label: "Moderate-wet climate risk",
+    shortLabel: "Moderate risk",
+    description:
+      "44th percentile level of concern: warmer and wetter conditions (\u002b6.7% runoff change)",
+  },
+  {
     value: "cc50",
     apiId: 3,
     label: "Moderate-dry climate risk",
-    shortLabel: "Moderate risk",
+    shortLabel: "Moderate-high risk",
     description:
       "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
   },
@@ -119,6 +127,14 @@ export const HYDROCLIMATE_DEFS = [
     shortLabel: "High risk",
     description:
       "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
+  },
+  {
+    value: "tai",
+    apiId: 5,
+    label: "Extreme climate risk",
+    shortLabel: "Extreme risk",
+    description:
+      ">99th percentile level of concern: warmer and considerably drier conditions (\u221221% runoff change)",
   },
 ] as const satisfies readonly HydroclimateDef[]
 
