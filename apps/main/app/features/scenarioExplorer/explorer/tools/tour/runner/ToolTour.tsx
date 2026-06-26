@@ -24,7 +24,10 @@
  *
  *   ToolTour                 This file. Orchestrates: read store, pick the
  *                            step, render scrim + card + ring, call the hooks
- *   TourCard                 Render-only popper card
+ *   TourCard                 Card shell; composes the header/dots/actions
+ *   TourCardHeader           Eyebrow + step counter + close
+ *   TourStepDots             Progress dots
+ *   TourCardActions          Skip / Back / Next buttons
  *   HighlightRing            Portal overlay ring, RAF-tracked to anchor bounds
  *   TourBodyContent          Renders step body; replaces `{{infoIcon}}`
  *   useTourAnchorElement     Resolve step anchor id to an element (+ late mounts)
