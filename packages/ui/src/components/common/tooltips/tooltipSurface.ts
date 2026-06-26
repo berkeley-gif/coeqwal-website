@@ -21,15 +21,25 @@ export function tooltipSurface(
   theme: Theme,
   { elevated = false, compact = false }: TooltipSurfaceOptions = {},
 ) {
-  return {
+  const base = {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     border: theme.border.light,
     borderRadius: theme.borderRadius.md,
     boxShadow: elevated ? theme.shadow.lg : theme.shadow.md,
-    p: compact ? theme.space.component.sm : theme.space.component.xl,
-    ...(compact
-      ? theme.typography.compactCaption
-      : theme.typography.compactSubtitle),
+  }
+
+  if (compact) {
+    return {
+      ...base,
+      p: theme.space.component.sm,
+      ...theme.typography.compactCaption,
+    }
+  }
+
+  return {
+    ...base,
+    p: theme.space.component.lg,
+    ...theme.typography.compactSubtitle,
   }
 }

@@ -21,10 +21,10 @@
  *
  * This is not a general-purpose tooltip. For standard tooltips use:
  * - HybridTooltip: Hover on desktop, click on touch
- * - ClickTooltip: Always click-to-open with close button
+ * - InfoPopover: Always click-to-open with close button
  *
  * @see HybridTooltip - Device-adaptive hover/click behavior
- * @see ClickTooltip - Always click-to-open with close button
+ * @see InfoPopover - Always click-to-open with close button
  */
 
 import { RefObject, useEffect, useState, ReactNode } from "react"

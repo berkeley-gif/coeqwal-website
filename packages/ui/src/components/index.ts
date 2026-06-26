@@ -21,12 +21,10 @@ export type { RoundedRightArrowProps } from "./icons/RoundedRightArrow"
 export { NavArrow } from "./common/NavArrow"
 export type { NavArrowProps, NavArrowDirection } from "./common/NavArrow"
 export { CircularArrowButton } from "./common/CircularArrowButton"
-// Tooltip components (all use HybridTooltip internally for device-adaptive behavior)
+// InfoTooltip: description + optional actions, built on HybridTooltip
 export { InfoTooltip } from "./common/InfoTooltip"
 export type { InfoTooltipProps } from "./common/InfoTooltip"
-// Core tooltip system
-export { ClickTooltip } from "./common/tooltips/ClickTooltip"
-export type { ClickTooltipProps } from "./common/tooltips/ClickTooltip"
+// Device-adaptive hover/click tooltip
 export { HybridTooltip } from "./common/tooltips/HybridTooltip"
 export type { HybridTooltipProps } from "./common/tooltips/HybridTooltip"
 export { TooltipCloseButton } from "./common/tooltips/TooltipCloseButton"
