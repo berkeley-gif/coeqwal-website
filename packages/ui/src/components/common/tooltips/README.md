@@ -6,13 +6,13 @@ The goal is a small set of pieces so you do not have to reinvent positioning or 
 
 ## Which one do I use?
 
-| Need | Use |
-| --- | --- |
+| Need                                                 | Use                       |
+| ---------------------------------------------------- | ------------------------- |
 | A short hint on hover (button labels, icon meanings) | `HoverTip` with `compact` |
-| A longer hover hint (a sentence or two) | `HoverTip` |
-| Click to open rich content with a close button | `InfoPopover` |
-| Hover on desktop, tap to open on touch screens | `HybridTooltip` |
-| A description with optional action buttons | `InfoTooltip` |
+| A longer hover hint (a sentence or two)              | `HoverTip`                |
+| Click to open rich content with a close button       | `InfoPopover`             |
+| Hover on desktop, tap to open on touch screens       | `HybridTooltip`           |
+| A description with optional action buttons           | `InfoTooltip`             |
 
 ## Components
 

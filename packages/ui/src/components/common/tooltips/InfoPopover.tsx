@@ -68,7 +68,11 @@ export function InfoPopover({
   const isControlled = open !== undefined
   const anchorRef = useRef<HTMLSpanElement>(null)
 
-  const { isOpen, onClose: close, onToggle } = useDisclosure({
+  const {
+    isOpen,
+    onClose: close,
+    onToggle,
+  } = useDisclosure({
     open,
     defaultOpen,
     onOpenChange: (next) => (next ? onOpen?.() : onClose?.()),
