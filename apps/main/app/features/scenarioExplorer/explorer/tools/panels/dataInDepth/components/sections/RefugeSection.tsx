@@ -418,7 +418,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            typography: "dashboardLabel",
+                            typography: "dashboardBold",
                           }}
                         >
                           Overlapping percentile bands:
@@ -466,7 +466,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            typography: "dashboardLabel",
+                            typography: "dashboardBold",
                           }}
                         >
                           Overlapping percentile bands:

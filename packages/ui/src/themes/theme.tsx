@@ -19,7 +19,7 @@ import { createTheme, Theme, alpha } from "@mui/material/styles"
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
  *                       Typography variants: h1, h2-h6, body1, body2,
- *                       nav (tracked uppercase text), tabLabel, tabLabelDocked, storyBody, displayBody,
+ *                       nav (tracked uppercase text), tabLabel, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline,
  *                       compactTitle-micro, axisLabel, scenarioTitle, …
  *
@@ -1008,12 +1008,6 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.75,
     },
-    body1Medium: {
-      fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.25rem", // 20px - same as body1
-      fontWeight: 500,
-      lineHeight: 1.6,
-    },
     body2: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.1rem", // 17.6px - secondary body text (DisplayBlock mobile)
@@ -1078,15 +1072,6 @@ const theme = createTheme({
       letterSpacing: "0.01rem",
       textTransform: "capitalize" as const,
     },
-    // Tab labels - docked state (with header)
-    tabLabelDocked: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "1rem",
-      fontWeight: 500,
-      lineHeight: 1.1,
-      letterSpacing: "0.01em",
-      textTransform: "none" as const,
-    },
     dashboard: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem", // 14px
@@ -1094,21 +1079,15 @@ const theme = createTheme({
       lineHeight: 1.5,
       letterSpacing: "normal",
     },
-    // Emphasized 14px label that pairs with `dashboard` body text (e.g. chart legend labels)
-    dashboardLabel: {
+    // 600-weight sibling of `dashboard` (14px), e.g. chart legend labels
+    dashboardBold: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem", // 14px
       fontWeight: 600,
       lineHeight: 1.3,
     },
-    // Data in Depth section title (sits in the sticky section header)
-    sectionTitle: {
-      fontFamily: themeValues.fontFamily.text,
-      fontSize: "0.9375rem", // 15px
-      fontWeight: 600,
-      lineHeight: 1.3,
-    },
-    smallSectionLabel: {
+    // 500-weight sibling of `compactCaption` (12px) for small section labels
+    compactCaptionMedium: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
       fontWeight: 500,
@@ -1596,8 +1575,7 @@ const theme = createTheme({
           // Map custom variants to semantic HTML elements
           // Block variants (render as <p> or <div>)
           dashboard: "p",
-          sectionTitle: "h3",
-          smallSectionLabel: "p",
+          compactCaptionMedium: "p",
           outcomeLabel: "div",
           outcomeHeader: "p",
           scenarioTitle: "h3",
@@ -1610,7 +1588,7 @@ const theme = createTheme({
           axisLabel: "span",
           compactCaption: "span",
           compactMicro: "span",
-          dashboardLabel: "span",
+          dashboardBold: "span",
         },
       },
       variants: [
@@ -1862,6 +1840,7 @@ theme.textShadow = themeValues.textShadow
 theme.transition = themeValues.transition
 theme.scenarios = themeValues.scenarios
 theme.space = themeValues.spacing
+theme.fontFamily = themeValues.fontFamily
 
 export default theme
 
@@ -1962,6 +1941,8 @@ declare module "@mui/material/styles" {
     scenarios: typeof themeValues.scenarios
     // Semantic spacing tokens
     space: typeof themeValues.spacing
+    // Font families (text + display)
+    fontFamily: typeof themeValues.fontFamily
   }
 
   // ThemeOptions interface - optional versions for createTheme()
@@ -1984,15 +1965,12 @@ declare module "@mui/material/styles" {
   interface TypographyVariants {
     fontWeightSemiBold: number
     h2Main: React.CSSProperties
-    body1Medium: React.CSSProperties
     nav: React.CSSProperties
     tabLabel: React.CSSProperties
-    tabLabelDocked: React.CSSProperties
     dashboard: React.CSSProperties
-    dashboardLabel: React.CSSProperties
-    sectionTitle: React.CSSProperties
+    dashboardBold: React.CSSProperties
     displayBody: React.CSSProperties
-    smallSectionLabel: React.CSSProperties
+    compactCaptionMedium: React.CSSProperties
     outcomeLabel: React.CSSProperties
     outcomeHeader: React.CSSProperties
     compactTitle: React.CSSProperties
@@ -2007,15 +1985,12 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
     h2Main?: React.CSSProperties
-    body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
     tabLabel?: React.CSSProperties
-    tabLabelDocked?: React.CSSProperties
     dashboard?: React.CSSProperties
-    dashboardLabel?: React.CSSProperties
-    sectionTitle?: React.CSSProperties
+    dashboardBold?: React.CSSProperties
     displayBody?: React.CSSProperties
-    smallSectionLabel?: React.CSSProperties
+    compactCaptionMedium?: React.CSSProperties
     outcomeLabel?: React.CSSProperties
     outcomeHeader?: React.CSSProperties
     compactTitle?: React.CSSProperties
@@ -2041,15 +2016,12 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     h2Main: true
-    body1Medium: true
     nav: true
     tabLabel: true
-    tabLabelDocked: true
     dashboard: true
-    dashboardLabel: true
-    sectionTitle: true
+    dashboardBold: true
     displayBody: true
-    smallSectionLabel: true
+    compactCaptionMedium: true
     outcomeLabel: true
     outcomeHeader: true
     compactTitle: true

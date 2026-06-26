@@ -243,7 +243,7 @@ export default function CategoryView() {
                   {tierMetrics.length > 0 && (
                     <Box sx={{ mb: theme.space.section.sm }}>
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         sx={{
                           display: "block",
                           mb: theme.space.component.lg,
@@ -274,7 +274,7 @@ export default function CategoryView() {
                   <Box>
                     {tierMetrics.length > 0 && (
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         sx={{
                           display: "block",
                           mb: theme.space.component.lg,

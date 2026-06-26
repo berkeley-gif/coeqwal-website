@@ -466,7 +466,7 @@ function MonthlyStorageSection({
                     component="span"
                     sx={{
                       color: "grey.500",
-                      typography: "dashboardLabel",
+                      typography: "dashboardBold",
                     }}
                   >
                     Overlapping percentile bands:

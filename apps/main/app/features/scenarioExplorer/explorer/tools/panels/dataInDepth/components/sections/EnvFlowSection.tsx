@@ -384,7 +384,7 @@ export default function EnvFlowSection({
                       component="span"
                       sx={{
                         color: "grey.500",
-                        typography: "dashboardLabel",
+                        typography: "dashboardBold",
                       }}
                     >
                       Bands:
@@ -434,7 +434,7 @@ export default function EnvFlowSection({
                       component="span"
                       sx={{
                         color: "grey.500",
-                        typography: "dashboardLabel",
+                        typography: "dashboardBold",
                       }}
                     >
                       Bands:
