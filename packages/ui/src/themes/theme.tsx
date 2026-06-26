@@ -229,6 +229,9 @@ const typeScale = {
   h5: "1.84rem", // 29.4px - Explorer titles
   h6: "1.38rem", // 22.1px - Category labels
 
+  // Dense UI controls: buttons, tabs, toggles, form labels
+  uiControl: "0.95rem", // 15.2px
+
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
     title: "0.9rem", // 14.4px
@@ -1227,7 +1230,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "3px",
+          borderRadius: themeValues.borderRadius.sm,
           textDecoration: "none",
           boxShadow: themeValues.shadow.md,
         },
@@ -1238,7 +1241,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           // keep MUI's focus ring behavior sane
-          borderRadius: "3px",
+          borderRadius: themeValues.borderRadius.sm,
         },
       },
     },
@@ -1314,7 +1317,7 @@ const theme = createTheme({
             boxShadow: "none",
             border: "none",
             padding: "16px",
-            fontSize: "0.95rem",
+            fontSize: typeScale.uiControl,
             fontWeight: 400,
             textAlign: "center",
             transition: themeValues.transition.default,
@@ -1506,7 +1509,7 @@ const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
-          fontSize: "0.95rem",
+          fontSize: typeScale.uiControl,
           fontWeight: 500,
           backgroundColor: "transparent",
           color: theme.palette.text.primary,
@@ -1713,7 +1716,7 @@ const theme = createTheme({
           margin: 0, // Remove default margins for condensed spacing
           alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
-            fontSize: "0.95rem",
+            fontSize: typeScale.uiControl,
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
@@ -1735,7 +1738,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary,
-          fontSize: "0.95rem",
+          fontSize: typeScale.uiControl,
           fontWeight: 400,
           textTransform: "none",
           minWidth: "auto",
@@ -1771,7 +1774,7 @@ const theme = createTheme({
           fontSize: "0.875rem",
           fontWeight: 400,
           lineHeight: 1.4,
-          padding: "16px",
+          padding: theme.spacing(themeValues.spacing.component.lg),
           maxWidth: themeValues.layout.maxWidth.sm,
           // Add pointer events so tooltip can be hovered
           pointerEvents: "auto",
