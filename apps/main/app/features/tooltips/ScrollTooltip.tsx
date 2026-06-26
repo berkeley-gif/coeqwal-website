@@ -238,8 +238,6 @@ export default function ScrollTooltip({
         sx={{
           position: "relative",
           ...tooltipSurface(theme),
-          // Keep the tutorial card's tighter padding
-          p: theme.space.component.lg,
           maxWidth: theme.layout.maxWidth.sm,
         }}
       >

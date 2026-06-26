@@ -68,14 +68,14 @@ export function HoverTip({
           sx: { zIndex: theme.zIndex.tooltipAboveModal },
         },
         tooltip: {
+          // The base look (background, border, radius, shadow, padding) comes
+          // from the theme's MuiTooltip override. Only layer on what differs:
+          // compact density and the width overrides.
           sx: (t: Theme) => ({
-            ...tooltipSurface(t, { compact }),
+            ...(compact ? tooltipSurface(t, { compact: true }) : {}),
             width: resolvedWidth,
             maxWidth: resolvedMaxWidth,
           }),
-        },
-        arrow: {
-          sx: (t: Theme) => ({ color: t.palette.background.paper }),
         },
       }}
     >

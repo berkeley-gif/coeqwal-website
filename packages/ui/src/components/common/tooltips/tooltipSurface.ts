@@ -32,14 +32,15 @@ export function tooltipSurface(
   if (compact) {
     return {
       ...base,
-      p: theme.space.component.sm,
+      // padding (not the `p` shorthand) so this object is valid in both sx and theme styleOverrides
+      padding: theme.spacing(theme.space.component.sm),
       ...theme.typography.compactCaption,
     }
   }
 
   return {
     ...base,
-    p: theme.space.component.lg,
+    padding: theme.spacing(theme.space.component.lg),
     ...theme.typography.compactSubtitle,
   }
 }
