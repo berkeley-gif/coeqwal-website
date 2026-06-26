@@ -41,9 +41,17 @@ explorer/
     │   ├── runner/
     │   │   ├── ToolTour.tsx            runner: resolves anchor, mounts
     │   │   │                           card + scrim + HighlightRing
-    │   │   ├── TourCard.tsx            render-only popper card
+    │   │   ├── TourCard.tsx            card shell; composes header/dots/actions
+    │   │   ├── TourCardHeader.tsx      eyebrow + step counter + close button
+    │   │   ├── TourStepDots.tsx        progress dots
+    │   │   ├── TourCardActions.tsx     Skip / Back / Next buttons
     │   │   ├── TourBodyContent.tsx     {{infoIcon}} placeholder support
     │   │   ├── HighlightRing.tsx       portal ring tracking anchor rect
+    │   │   ├── tourPopperModifiers.ts  builds the anchored card's Popper modifiers
+    │   │   ├── useTourAnchorElement.ts resolves a step's anchorId to an element
+    │   │   ├── useTourKeyboardNav.ts   Esc / arrow-key navigation
+    │   │   ├── useTourFocusManagement.ts
+    │   │   │                           focus restore, autofocus, Tab trap
     │   │   └── TakeTheTourButton.tsx   starts the tour for the active tool
     │   └── reusableContent/
     │       └── TourTierLegend.tsx      tier swatch legend reused across
@@ -89,11 +97,12 @@ explorer/
    `TOUR_MODULES[tour.tool]` from `tour/toolToTourMap.ts` and resolves
    the current step from `module.steps[tour.step]`.
 4. **Anchor resolve.** If the step has `anchorId`, the runner asks the
-   `TourAnchorProvider` registry for the matching DOM element via
-   `useTourAnchorResolver`. The registry watches the DOM through a
-   subscribe callback so a target that mounts after the runner is still
-   found on the next paint. After a short grace period without a match,
-   the runner falls back to a centered card.
+   `TourAnchorProvider` registry for the matching DOM element (see
+   `runner/useTourAnchorElement`). The registry pings the runner through
+   a subscribe callback (bumping a `version` counter) whenever anchors
+   register, so a target that mounts after the runner is found and the
+   card pops to it on the next paint. Until an anchor resolves (or for
+   anchorless bookend steps), the card renders centered.
 5. **Card + ring + scrim.** The runner renders a `TourCard` either
    inside a `Popper` (anchored) or fixed near the bottom center
    (bookend / fallback), a `HighlightRing` portal that tracks the
@@ -381,8 +390,9 @@ view code can render with the tour subsystem disabled.
 
 `useTourAnchorResolver()` is the runner / effects side. It returns
 `{ resolve, version }` and re-renders the caller when the registry
-changes. The runner debounces resolution with a small grace period so
-late-mounting targets are still found.
+changes. `version` bumps on every registration change, so callers that
+list it as a dependency re-resolve late-mounting targets on the next
+render. No timers or polling.
 
 For elements that already accept a ref (most MUI components, any
 styled `Box`), call `useTourAnchor` directly. For elements that do not,
@@ -430,7 +440,7 @@ Rules of thumb for each `EffectsComponent`:
   (`#faf8f5`), `1px solid theme.palette.divider`, `borderRadius: 1.5`,
   small uppercase eyebrow at the top.
 - Compose `TourTierLegend` from `tour/reusableContent/` for tier swatches
-  so list, radar, and resilience all read identically.
+  so list, radar, and any future tour all read identically.
 - Return illustrations from `illustrations/index.tsx` as
   `() => <Component />`, keyed by the string used in
   `steps.ts:illustration`. Keys are tool-scoped, so two tools can both
@@ -446,8 +456,9 @@ Before opening a PR that adds or changes a tour:
       the tool. (Driven by `hasTourFor` in `runner/TakeTheTourButton`.)
 - [ ] Every step's card resolves to its anchor on first paint, and
       `HighlightRing` traces the anchor rect. Late-mounting anchors
-      (those revealed by a demo effect) are found after the grace
-      period instead of falling back to a centered card.
+      (those revealed by a demo effect) are found reactively when they
+      register: the card starts centered and pops to the anchor once it
+      mounts.
 - [ ] Stepping forward and back through every step does not throw,
       does not leak the highlight ring, and restores any preview state
       the demo effects mutated.
@@ -459,7 +470,7 @@ Before opening a PR that adds or changes a tour:
       from sessionStorage (`validateTour` in `exploreSessionPersist`)
       so the same step re-renders.
 - [ ] ESC and the close button both call `endTour`; left and right
-      arrow keys step within the tour (`ToolTour` keydown handler).
+      arrow keys step within the tour (`runner/useTourKeyboardNav`).
 - [ ] For component-local sync hooks: the synced UI opens on entry to
       the step and closes on exit, and user-opened state outside the
       tour is not clobbered. Verify by opening the popover manually
