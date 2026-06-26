@@ -332,16 +332,7 @@ export default function DeltaSection({
       {/* Sticky scenario header. Soft drop shadow matches the List view's
           pinned block so content reads as scrolling under a fixed header. */}
       <Box
-        sx={{
-          position: "sticky",
-          top: 64,
-          zIndex: 9,
-          backgroundColor: theme.palette.background.paper,
-          py: theme.space.component.sm,
-          mx: -theme.space.component.xl,
-          px: theme.space.component.xl,
-          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
-        }}
+        sx={theme.scenarios.stickyScenarioHeader}
       >
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader

@@ -416,6 +416,10 @@ const shadow = {
   sm: "0 2px 4px rgba(0,0,0,0.10)", // Elevated cards, panels
   md: "0 4px 8px rgba(0,0,0,0.12)", // Dropdowns, tooltips, overlays
   lg: "0 8px 16px rgba(0,0,0,0.15)", // Modals, large panels
+  // Soft raised shadow for sticky section/grid headers (negative spread keeps the edge tight)
+  stickyHeader: "0 4px 8px -2px rgba(0,0,0,0.1)",
+  // Small ambient shadow for floating map markers and labels
+  marker: "0 1px 4px rgba(0,0,0,0.12)",
   // Focus rings (accessibility) - 3:1+ contrast against their target background
   focusOnLight: "0 0 0 3px rgba(25, 118, 210, 0.7)", // #1976D2 at 70% - 4.5:1 vs white
   focusOnDark: "0 0 0 3px rgba(100, 181, 246, 0.85)", // #64B5F6 at 85% - 5:1 vs dark
@@ -805,6 +809,21 @@ export const themeValues = {
         transformOrigin: "100% 50%",
       } as const,
     },
+
+    // Sticky header for Data in Depth scenario sections: pins below the tool's
+    // fixed top bar (64px) so chart content scrolls under a soft-shadowed band.
+    // Spacing multipliers mirror space.component.sm (py) and space.component.xl (mx/px).
+    // Usage: <Box sx={theme.scenarios.stickyScenarioHeader}>
+    stickyScenarioHeader: {
+      position: "sticky",
+      top: 64,
+      zIndex: 9,
+      backgroundColor: palette.common.white,
+      py: 1,
+      mx: -3,
+      px: 3,
+      boxShadow: shadow.stickyHeader,
+    } as const,
   },
 }
 
