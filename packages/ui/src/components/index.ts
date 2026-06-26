@@ -31,6 +31,21 @@ export { HybridTooltip } from "./common/tooltips/HybridTooltip"
 export type { HybridTooltipProps } from "./common/tooltips/HybridTooltip"
 export { TooltipCloseButton } from "./common/tooltips/TooltipCloseButton"
 export type { TooltipCloseButtonProps } from "./common/tooltips/TooltipCloseButton"
+// Tooltip foundations (shared surface, disclosure state, anchored positioning)
+export { tooltipSurface } from "./common/tooltips/tooltipSurface"
+export type { TooltipSurfaceOptions } from "./common/tooltips/tooltipSurface"
+export { useDisclosure } from "./common/tooltips/useDisclosure"
+export type {
+  UseDisclosureOptions,
+  UseDisclosureResult,
+} from "./common/tooltips/useDisclosure"
+export { AnchoredPortal } from "./common/tooltips/AnchoredPortal"
+export type { AnchoredPortalProps } from "./common/tooltips/AnchoredPortal"
+// Standard tooltip surfaces (hover hint + click/anchored popover)
+export { HoverTip } from "./common/tooltips/HoverTip"
+export type { HoverTipProps } from "./common/tooltips/HoverTip"
+export { InfoPopover } from "./common/tooltips/InfoPopover"
+export type { InfoPopoverProps } from "./common/tooltips/InfoPopover"
 export { InfoIconButton } from "./common/InfoIconButton"
 export type { InfoIconButtonProps } from "./common/InfoIconButton"
 export { SortButton } from "./common/SortButton"
