@@ -79,7 +79,7 @@ export function TourCard({
         minWidth: 0,
         boxSizing: "border-box",
         p: 2.25,
-        borderRadius: 2,
+        borderRadius: theme.borderRadius.xl,
         border: `1px solid ${theme.palette.divider}`,
         display: "flex",
         flexDirection: "column",
@@ -172,10 +172,7 @@ export function TourCard({
           minWidth: 0,
         }}
       >
-        <TourStepDots
-          stepIds={steps.map((s) => s.id)}
-          activeIndex={tourStep}
-        />
+        <TourStepDots stepIds={steps.map((s) => s.id)} activeIndex={tourStep} />
         <TourCardActions
           isFirst={isFirst}
           isLast={isLast}
