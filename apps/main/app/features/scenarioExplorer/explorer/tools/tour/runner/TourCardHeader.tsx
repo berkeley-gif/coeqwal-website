@@ -33,25 +33,15 @@ export function TourCardHeader({
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Typography
         id={eyebrowId}
-        variant="caption"
-        sx={{
-          color: theme.palette.text.primary,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          fontWeight: 700,
-          fontSize: "0.6875rem",
-        }}
+        variant="outcomeHeader"
+        sx={{ color: theme.palette.text.primary }}
       >
         {eyebrow}
       </Typography>
       <Box sx={{ flex: 1 }} />
       <Typography
-        variant="caption"
-        sx={{
-          color: theme.palette.grey[700],
-          fontSize: "0.6875rem",
-          fontWeight: 500,
-        }}
+        variant="compactMicro"
+        sx={{ color: theme.palette.grey[700] }}
       >
         {stepNumber} / {stepCount}
       </Typography>

@@ -100,14 +100,12 @@ export function TourCard({
           id={titleId}
           component="h2"
           sx={{
+            ...theme.typography.tooltipHeader,
             display: "flex",
             alignItems: "center",
             gap: 0.75,
             m: 0,
-            fontWeight: 600,
-            fontSize: "1rem",
             color: theme.palette.text.primary,
-            lineHeight: 1.3,
           }}
         >
           {step.titleIcon === "pin" && (
@@ -148,13 +146,12 @@ export function TourCard({
           {illustration}
           {hasBody ? (
             <Typography
+              variant="dashboard"
+              component="div"
               sx={{
-                fontSize: "0.875rem",
                 color: theme.palette.text.primary,
-                lineHeight: 1.55,
                 whiteSpace: "pre-line",
               }}
-              component="div"
             >
               <TourBodyContent
                 body={step.body ?? ""}

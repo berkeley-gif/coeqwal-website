@@ -29,13 +29,13 @@ export function TourCardActions({
 }: TourCardActionsProps) {
   const theme = useTheme()
 
-  // Shared shape for the Skip / Back / Next buttons.
+  // Shared shape for the Skip / Back / Next buttons. Font size comes
+  // from the Button `size="small"` default and the corner radius from
+  // the theme's pill button variant, so neither is set here.
   const actionShape = {
     textTransform: "none" as const,
-    fontSize: "0.8125rem",
     minWidth: 88,
     flexShrink: 0,
-    borderRadius: 1.5,
   }
 
   const secondaryButtonSx = {
