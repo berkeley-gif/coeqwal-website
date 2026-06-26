@@ -29,7 +29,7 @@
 
 import { RefObject, useEffect, useState, ReactNode } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { TooltipCloseButton } from "@repo/ui"
+import { TooltipCloseButton, tooltipSurface } from "@repo/ui"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
@@ -237,12 +237,8 @@ export default function ScrollTooltip({
       <Box
         sx={{
           position: "relative",
-          // Match MUI Tooltip theme styling
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          border: theme.border.light,
-          borderRadius: theme.borderRadius.md,
-          boxShadow: theme.shadow.md,
+          ...tooltipSurface(theme),
+          // Keep the tutorial card's tighter padding
           p: theme.space.component.lg,
           maxWidth: theme.layout.maxWidth.sm,
         }}
