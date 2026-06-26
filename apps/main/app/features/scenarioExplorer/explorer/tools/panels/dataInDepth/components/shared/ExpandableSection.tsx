@@ -56,9 +56,7 @@ export function ExpandableSection({
       {/* Sticky scenario header row. The soft drop shadow below mirrors the
           List view's pinned block, so it reads as a fixed header that content
           scrolls under. */}
-      <Box
-        sx={theme.scenarios.stickyScenarioHeader}
-      >
+      <Box sx={theme.scenarios.stickyScenarioHeader}>
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader
             scenarios={scenarios}

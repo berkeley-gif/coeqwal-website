@@ -61,7 +61,7 @@ function LegendSwatch({
           ...(first ? {} : { ml: 0.75 }),
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         {label}
       </Box>
     </>

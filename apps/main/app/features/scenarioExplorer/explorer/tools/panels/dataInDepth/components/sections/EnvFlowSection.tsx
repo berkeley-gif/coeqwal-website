@@ -237,9 +237,7 @@ export default function EnvFlowSection({
     <>
       {/* Sticky scenario header. Soft drop shadow matches the List view's
           pinned block so content reads as scrolling under a fixed header. */}
-      <Box
-        sx={theme.scenarios.stickyScenarioHeader}
-      >
+      <Box sx={theme.scenarios.stickyScenarioHeader}>
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader
             scenarios={scenarios}
@@ -275,7 +273,7 @@ export default function EnvFlowSection({
           />
           <Tooltip
             title={
-              <Box sx={{ maxWidth: 300, fontSize: "0.8rem", lineHeight: 1.5 }}>
+              <Box sx={{ maxWidth: 300, typography: "compactSubtitle" }}>
                 <Box sx={{ fontWeight: 600, mb: 0.5 }}>Channel subsets</Box>
                 <Box sx={{ mb: 0.75 }}>
                   <Box component="span" sx={{ fontWeight: 600 }}>
@@ -386,8 +384,7 @@ export default function EnvFlowSection({
                       component="span"
                       sx={{
                         color: "grey.500",
-                        fontSize: "0.875rem",
-                        fontWeight: 600,
+                        typography: "dashboardLabel",
                       }}
                     >
                       Bands:
@@ -402,7 +399,7 @@ export default function EnvFlowSection({
                     sx={{
                       display: "block",
                       color: "grey.400",
-                      fontSize: "0.8rem",
+                      typography: "compactSubtitle",
                       mt: 0.75,
                     }}
                   >
@@ -437,8 +434,7 @@ export default function EnvFlowSection({
                       component="span"
                       sx={{
                         color: "grey.500",
-                        fontSize: "0.875rem",
-                        fontWeight: 600,
+                        typography: "dashboardLabel",
                       }}
                     >
                       Bands:
@@ -453,7 +449,7 @@ export default function EnvFlowSection({
                     sx={{
                       display: "block",
                       color: "grey.400",
-                      fontSize: "0.8rem",
+                      typography: "compactSubtitle",
                       mt: 0.75,
                     }}
                   >

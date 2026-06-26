@@ -1094,6 +1094,20 @@ const theme = createTheme({
       lineHeight: 1.5,
       letterSpacing: "normal",
     },
+    // Emphasized 14px label that pairs with `dashboard` body text (e.g. chart legend labels)
+    dashboardLabel: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.875rem", // 14px
+      fontWeight: 600,
+      lineHeight: 1.3,
+    },
+    // Data in Depth section title (sits in the sticky section header)
+    sectionTitle: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.9375rem", // 15px
+      fontWeight: 600,
+      lineHeight: 1.3,
+    },
     smallSectionLabel: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
@@ -1582,6 +1596,7 @@ const theme = createTheme({
           // Map custom variants to semantic HTML elements
           // Block variants (render as <p> or <div>)
           dashboard: "p",
+          sectionTitle: "h3",
           smallSectionLabel: "p",
           outcomeLabel: "div",
           outcomeHeader: "p",
@@ -1595,6 +1610,7 @@ const theme = createTheme({
           axisLabel: "span",
           compactCaption: "span",
           compactMicro: "span",
+          dashboardLabel: "span",
         },
       },
       variants: [
@@ -1973,6 +1989,8 @@ declare module "@mui/material/styles" {
     tabLabel: React.CSSProperties
     tabLabelDocked: React.CSSProperties
     dashboard: React.CSSProperties
+    dashboardLabel: React.CSSProperties
+    sectionTitle: React.CSSProperties
     displayBody: React.CSSProperties
     smallSectionLabel: React.CSSProperties
     outcomeLabel: React.CSSProperties
@@ -1994,6 +2012,8 @@ declare module "@mui/material/styles" {
     tabLabel?: React.CSSProperties
     tabLabelDocked?: React.CSSProperties
     dashboard?: React.CSSProperties
+    dashboardLabel?: React.CSSProperties
+    sectionTitle?: React.CSSProperties
     displayBody?: React.CSSProperties
     smallSectionLabel?: React.CSSProperties
     outcomeLabel?: React.CSSProperties
@@ -2026,6 +2046,8 @@ declare module "@mui/material/Typography" {
     tabLabel: true
     tabLabelDocked: true
     dashboard: true
+    dashboardLabel: true
+    sectionTitle: true
     displayBody: true
     smallSectionLabel: true
     outcomeLabel: true

@@ -327,9 +327,7 @@ export default function RefugeSection({
     <>
       {/* Sticky scenario header. Soft drop shadow matches the List view's
           pinned block so content reads as scrolling under a fixed header. */}
-      <Box
-        sx={theme.scenarios.stickyScenarioHeader}
-      >
+      <Box sx={theme.scenarios.stickyScenarioHeader}>
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader
             scenarios={scenarios}
@@ -420,8 +418,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            fontSize: "0.875rem",
-                            fontWeight: 600,
+                            typography: "dashboardLabel",
                           }}
                         >
                           Overlapping percentile bands:
@@ -432,7 +429,7 @@ export default function RefugeSection({
                         component="span"
                         sx={{
                           color: "grey.400",
-                          fontSize: "0.8rem",
+                          typography: "compactSubtitle",
                           fontStyle: "italic",
                         }}
                       >
@@ -469,8 +466,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            fontSize: "0.875rem",
-                            fontWeight: 600,
+                            typography: "dashboardLabel",
                           }}
                         >
                           Overlapping percentile bands:
@@ -481,7 +477,7 @@ export default function RefugeSection({
                         component="span"
                         sx={{
                           color: "grey.400",
-                          fontSize: "0.8rem",
+                          typography: "compactSubtitle",
                           fontStyle: "italic",
                         }}
                       >

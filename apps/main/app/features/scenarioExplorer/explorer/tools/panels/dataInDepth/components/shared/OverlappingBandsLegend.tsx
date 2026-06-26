@@ -39,7 +39,7 @@ export function OverlappingBandsLegend({
       >
         <Box
           component="span"
-          sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}
+          sx={{ color: "grey.500", typography: "dashboardLabel" }}
         >
           Overlapping percentile bands:
         </Box>
@@ -47,7 +47,11 @@ export function OverlappingBandsLegend({
       </Box>
       <Box
         component="span"
-        sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}
+        sx={{
+          color: "grey.400",
+          typography: "compactSubtitle",
+          fontStyle: "italic",
+        }}
       >
         {caption}
       </Box>
