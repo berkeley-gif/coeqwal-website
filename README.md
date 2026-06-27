@@ -330,9 +330,13 @@ The repo uses [knip](https://knip.dev/) to find unused files, exports, and depen
 pnpm dead-code
 ```
 
-Knip never deletes anything. It creates a report with four sections: unused files, unused exports, unused dependencies, and unused devDependencies. Because it scans all apps and packages together, a file or symbol that is only used by another app (or a shared `@repo/*` package consumed by an app) will not be reported as unused.
+Knip prints its findings straight to the terminal and exits with a non-zero status when it finds anything, so the command could look "failed" (red) even though nothing is wrong. If it is too long to read in the console, you can pipe the output, or pipe to read just a slice of it, for example `pnpm dead-code | grep apps/main`.
+
+The terminal output is grouped into sections, which vary with what is found. A full run currently shows: unused files, unused dependencies, unused devDependencies, unresolved imports, unused exports, unused exported types, and duplicate exports. Because knip scans all apps and packages together, a file or symbol that is only used by another app (or a shared `@repo/*` package consumed by an app) will not be reported as unused.
 
 Always review findings before removing anything. The sections below describe what the tool can and cannot tell you. Don't over-trust the report.
+
+The export-related sections in particular are large and mostly not dead code. Two categories dominate the noise: **duplicate exports** (the repo's convention of exporting both a named and a `default` symbol from the same file) and the **public API of `@repo/*` packages** (exports with no in-repo importer, which does not make them dead). Treat both as expected noise rather than removal candidates.
 
 ### What knip cannot detect
 
