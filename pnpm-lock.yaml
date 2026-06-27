@@ -529,9 +529,6 @@ importers:
       '@mui/system':
         specifier: ^7.3.2
         version: 7.3.2(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0)
-      '@re-dev/react-truncate':
-        specifier: ^0.5.2
-        version: 0.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@repo/i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -1589,12 +1586,6 @@ packages:
 
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
-
-  '@re-dev/react-truncate@0.5.2':
-    resolution: {integrity: sha512-OmmS/qA4d5ofnAiw7jjGh5eRpil+AQkUX0AD9XYTJ5TuI9Fu0ezXaggv3M2ZxTTNsGkaP1O48Tw2VDBtKlor2g==}
-    peerDependencies:
-      react: '>=19.0.0 || >=18.0.0 || >=17.0.0 || >=16.0.0'
-      react-dom: '>=19.0.0 || >=18.0.0 || >=17.0.0 || >=16.0.0'
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -5032,11 +5023,6 @@ snapshots:
     optional: true
 
   '@popperjs/core@2.11.8': {}
-
-  '@re-dev/react-truncate@0.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
 
   '@swc/helpers@0.5.15':
     dependencies:
