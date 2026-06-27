@@ -60,8 +60,8 @@ variant is the cleanest end to end example to copy from.
    before serializing. Copy `RadarPlotSnapshot` in `@repo/viz`.
 
 4. **Build an `OffscreenMyChartCapture` adapter** next to the tool it
-   captures (under `tools/panels/<tool>/`), then re-export it from
-   `capture/adapters/index.ts`. It mounts the snapshot through
+   captures (under `tools/panels/<tool>/`), and import it directly where
+   you wire the capture button. It mounts the snapshot through
    `offscreenCapture` and returns `{ svg, dataUrl }`. It must never read
    from the live on screen chart.
 
