@@ -426,6 +426,7 @@ export default function DeltaSection({
               scenarios={scenarios}
               scenarioNames={scenarioNames}
               data={complianceMatrix}
+              bandColors={SALINITY_BAND_COLORS}
               responsive
               labelColumnWidth={160}
               showScenarioHeaders={false}
@@ -471,6 +472,7 @@ export default function DeltaSection({
               scenarios={scenarios}
               scenarioNames={scenarioNames}
               data={pumpsMatrix}
+              bandColors={SALINITY_BAND_COLORS}
               responsive
               labelColumnWidth={160}
               showScenarioHeaders={false}
@@ -517,6 +519,7 @@ export default function DeltaSection({
               scenarios={scenarios}
               scenarioNames={scenarioNames}
               data={inflowMatrix}
+              bandColors={INFLOW_BAND_COLORS}
               responsive
               labelColumnWidth={200}
               showScenarioHeaders={false}
@@ -563,6 +566,7 @@ export default function DeltaSection({
               scenarios={scenarios}
               scenarioNames={scenarioNames}
               data={exportMatrix}
+              bandColors={EXPORT_BAND_COLORS}
               responsive
               labelColumnWidth={200}
               showScenarioHeaders={false}
@@ -608,6 +612,7 @@ export default function DeltaSection({
               scenarios={scenarios}
               scenarioNames={scenarioNames}
               data={outflowMatrix}
+              bandColors={OUTFLOW_BAND_COLORS}
               responsive
               labelColumnWidth={160}
               showScenarioHeaders={false}

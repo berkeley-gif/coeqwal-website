@@ -497,7 +497,7 @@ export default function EnvFlowSection({
                 showScenarioHeaders={false}
                 displayMode="volume"
                 volumeScaleMode={scaleMode as VolumeScaleMode}
-                colorScheme="delivery"
+                bandColors={isVolume ? DELIVERY_BAND_COLORS : PCT_BAND_COLORS}
                 loadingScenarios={loadingScenarios}
                 cellStats={cellStats}
                 minYMaxTaf={isVolume ? 0 : 100}

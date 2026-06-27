@@ -49,7 +49,7 @@ export const SHORTAGE_BAND_COLORS: BandColors = {
 
 /** Percent-of-unimpaired percentile bands (green). */
 export const PCT_BAND_COLORS: BandColors = {
-  range: "#d5f0e2",
+  range: "#66bb6a", // q0/q100 min-max dashed line
   outer: "#a8dcbe",
   inner: "#6ec297",
   median: "#1d7a45",
@@ -57,7 +57,7 @@ export const PCT_BAND_COLORS: BandColors = {
 
 /** Delta salinity bands (teal), distinct from delivery blue and shortage orange. */
 export const SALINITY_BAND_COLORS: BandColors = {
-  range: "#e0f2f1",
+  range: "#4db6ac", // q0/q100 min-max dashed line
   outer: "#b2dfdb",
   inner: "#80cbc4",
   median: "#00695c",
@@ -65,7 +65,7 @@ export const SALINITY_BAND_COLORS: BandColors = {
 
 /** Delta inflow bands (indigo). */
 export const INFLOW_BAND_COLORS: BandColors = {
-  range: "#e8eaf6",
+  range: "#7986cb", // q0/q100 min-max dashed line
   outer: "#9fa8da",
   inner: "#5c6bc0",
   median: "#283593",
@@ -73,7 +73,7 @@ export const INFLOW_BAND_COLORS: BandColors = {
 
 /** Delta export bands (amber/orange). */
 export const EXPORT_BAND_COLORS: BandColors = {
-  range: "#fff8e1",
+  range: "#ffca28", // q0/q100 min-max dashed line
   outer: "#ffe082",
   inner: "#ffb300",
   median: "#e65100",
@@ -84,7 +84,7 @@ export const EXPORT_BAND_COLORS: BandColors = {
  * ramp today. Reconcile the two at finalization if they should match.
  */
 export const OUTFLOW_BAND_COLORS: BandColors = {
-  range: "#e3f2fd",
+  range: "#64b5f6", // q0/q100 min-max dashed line
   outer: "#90caf9",
   inner: "#42a5f5",
   median: "#1565c0",

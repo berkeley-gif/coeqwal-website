@@ -178,6 +178,19 @@ export interface PercentileMatrixProps {
    * and "%" for percentage mode. Override for non-TAF data (e.g. " µmhos/cm").
    */
   tooltipUnit?: string
+  /**
+   * Optional band color override. When provided it supersedes `colorScheme`
+   * for the default (non-tier) cells, letting each section render in its own
+   * hue. `range` is the q0/q100 dashed min-max line color; `outer` (q10-q90)
+   * and `inner` (q30-q70) are the fill colors; `median` is the q50 line.
+   * Cells with an explicit tier color in `cellColors` are unaffected.
+   */
+  bandColors?: {
+    range: string
+    outer: string
+    inner: string
+    median: string
+  }
 }
 
 // X-axis tick labels: only quarter-start months keep small cells legible.
@@ -257,6 +270,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
     displayMode = "percentage",
     volumeScaleMode = "absolute",
     colorScheme = "delivery",
+    bandColors,
     cellStats,
     breakdownData,
     breakdownComponents,
@@ -958,7 +972,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             .attr("stroke-width", 1)
         }
 
-        // Vertical dividers
+        // Vertical dividers between scenario columns. Kept light (grid, not
+        // gridStrong) and thin so columns are separated without boxing each
+        // chart in. Row dividers above stay stronger to separate entities.
         scenarios.forEach((_, colIndex) => {
           const leftEdge = getCellX(colIndex) // Left edge of chart cell
           const rightEdge = getCellX(colIndex) + cellWidth // Right edge of chart cell
@@ -969,8 +985,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             .attr("x2", leftEdge)
             .attr("y1", colHeaderHeight)
             .attr("y2", innerHeight)
-            .attr("stroke", COLORS.gridStrong)
-            .attr("stroke-width", 1)
+            .attr("stroke", COLORS.grid)
+            .attr("stroke-width", 0.5)
 
           // Right edge line
           g.append("line")
@@ -978,8 +994,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             .attr("x2", rightEdge)
             .attr("y1", colHeaderHeight)
             .attr("y2", innerHeight)
-            .attr("stroke", COLORS.gridStrong)
-            .attr("stroke-width", 1)
+            .attr("stroke", COLORS.grid)
+            .attr("stroke-width", 0.5)
         })
 
         // x-axis labels for each individual chart cell. Only the quarter-start
@@ -1016,7 +1032,14 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
         }
 
         // Select base color scheme based on colorScheme prop
-        const baseColors = colorScheme === "shortage" ? COLORS_SHORTAGE : COLORS
+        // A caller-supplied bandColors override wins; otherwise fall back to
+        // the built-in delivery/shortage schemes. text/grid/etc are always
+        // inherited from COLORS so only the band stops change.
+        const baseColors = bandColors
+          ? { ...COLORS, ...bandColors }
+          : colorScheme === "shortage"
+            ? COLORS_SHORTAGE
+            : COLORS
 
         // Helper to get colors for a specific cell (scenario + reservoir)
         const getCellColors = (scenarioId: string, reservoirId: string) => {
@@ -1409,6 +1432,17 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                 .attr("stroke-linecap", "round")
                 .attr("stroke-linejoin", "round")
                 .attr("d", medianLine)
+              // Subtle median markers anchor the eye to monthly values
+              cellG
+                .selectAll("circle.median-marker")
+                .data(processedData)
+                .enter()
+                .append("circle")
+                .attr("class", "median-marker")
+                .attr("cx", (d) => xScale(d.monthIndex))
+                .attr("cy", (d) => cellYScale(d.q50))
+                .attr("r", 1.5)
+                .attr("fill", colors.median)
             }
           })
         })
@@ -1947,6 +1981,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
         displayMode,
         volumeScaleMode,
         colorScheme,
+        bandColors,
         cellStats,
         breakdownData,
         breakdownComponents,
