@@ -51,7 +51,7 @@ export interface OffscreenCaptureInput {
   height?: number
   /**
    * Tag the host div with a data attribute so dev-mode tooling
-   * (P2.4 captureDoctor) can identify which capture each
+   * (captureDoctor) can identify which capture each
    * outstanding host belongs to. Free-form, e.g.
    * "radar:single-scenario", "resilience:panel".
    */

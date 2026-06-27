@@ -115,7 +115,7 @@ export const ENV_FLOWS_BOUNDS: [[number, number], [number, number]] = [
   [-119.897, 41.72], // NE corner [lng, lat]
 ]
 
-/** Bounding box enclosing RES_STOR reservoir markers (7 reservoirs).
+/** Bounding box enclosing RES_STOR reservoir markers.
  *  Computed from RESERVOIR_CONFIGS in outcomeLocations.ts.
  *  Extra vertical padding for marker labels - the northernmost
  *  reservoir (Trinity Lake at lat 40.98) renders its label ~95 px above
