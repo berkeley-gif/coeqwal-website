@@ -17,6 +17,7 @@ Dependencies and configurations set at the root level are overriden by local dep
 - [Key architecture patterns](#key-architecture-patterns)
 - [Installation](#installation)
 - [How to run](#how-to-run)
+- [Finding dead code](#finding-dead-code)
 - [How to deploy](#how-to-deploy)
   - [Deployment rules](#deployment-rules)
   - [Apps and Amplify ids](#apps-and-amplify-ids)
@@ -215,6 +216,22 @@ pnpm format --filter=main
 pnpm lint --filter=main
 pnpm build --filter=main
 ```
+
+## Finding dead code
+
+The repo uses [knip](https://knip.dev/) to find unused files, exports, and dependencies across the workspaces.
+```sh
+pnpm dead-code
+```
+
+Knip never deletes anything. It creates a report with four sections: unused files, unused exports, unused dependencies, and unused devDependencies. Because it scans all apps and packages together, a file or symbol that is only used by another app (or a shared `@repo/*` package consumed by an app) will not be reported as unused.
+
+Always review findings before removing anything. Knip reports the static import graph, so it cannot see references that are built from strings or wired in at build time. Known false positives in this repo include:
+
+- **Build-time loaders referenced by string**, such as `apps/main/geojson-loader.cjs` (named in `next.config.js`). This is not dead code.
+- **Framework and tooling dependencies that are not imported directly**, such as `sass` (compiled by Next), the Emotion packages (used through MUI), and `@types/*` packages.
+
+When a finding is found to be a false positive of the first kind above (a real entry point the static graph misses), record it in [`knip.json`](knip.json) so future runs stay accurate. For example, `geojson-loader.cjs` is declared there as an entry for `apps/main`.
 
 ## How to deploy
 
