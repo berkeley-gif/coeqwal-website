@@ -8,7 +8,7 @@
  */
 
 import type { ElementType } from "react"
-import { HistoryIcon, WbSunnyIcon, LocalFireDepartmentIcon } from "@repo/ui/mui"
+import { HistoryIcon, WaterDropIcon, WbSunnyIcon, LocalFireDepartmentIcon } from "@repo/ui/mui"
 
 export interface HydroclimateVisualConfig {
   /** MUI icon component rendered inside the colored circle */
@@ -32,11 +32,19 @@ export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
     icon: HistoryIcon,
     bgColor: "#2d89b7",
   },
+  ecv: {
+    icon: WaterDropIcon,
+    bgColor: "#30e8ae",
+  },
   cc50: {
+    icon: WbSunnyIcon,
+    bgColor: "#e8d930",
+  },
+  cc95: {
     icon: WbSunnyIcon,
     bgColor: "#e89830",
   },
-  cc95: {
+  tai: {
     icon: LocalFireDepartmentIcon,
     bgColor: "#c62828",
   },
