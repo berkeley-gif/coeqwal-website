@@ -1,7 +1,7 @@
 /**
  * Shared types for scenario components
  *
- * Used by OutcomeGlyphItem, OutcomeGrid, OperationsIconGroup, etc.
+ * Used by OutcomeGlyphItem, OperationsIconGroup, etc.
  */
 
 import type { ScenarioTheme } from "../../../../content/scenarios"
