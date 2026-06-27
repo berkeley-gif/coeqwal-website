@@ -6,6 +6,9 @@
  * Shared component for rendering outcome tier visualizations.
  * Used by both Learn mode (KeyOutcomesPanel) and Explore mode (StrategyGrid).
  *
+ * The icon work throughout is provisional, until someone has time to make real 
+ * icons.
+ * 
  * Renders:
  * - ScenarioGlyph (bars or dots based on tier type)
  * - Outcome label
@@ -23,6 +26,7 @@ import {
   SQUARE_GAP,
   type GlyphVariant,
 } from "@repo/viz"
+import { themeValues } from "@repo/ui/themes/theme"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 import { NoDataAtThisTime } from "./NoDataAtThisTime"
 import { getSingleValueLocationCount } from "../../../../content/outcomes"
@@ -129,6 +133,178 @@ export interface OutcomeGlyphItemProps {
   onSortToggle?: (newState: "asc" | "desc" | null) => void
 }
 
+type TierTuple = [number, number, number, number]
+type TierColorTuple = [string, string, string, string]
+
+/**
+ * Derive fixed-length value, color, and location-count tuples from chartData.
+ *
+ * These are memoized on the underlying primitive fields rather than on the
+ * chartData array, whose identity can churn even when the four tier values are
+ * unchanged. Depending on the array directly would recompute these tuples (and
+ * re-render the glyph) on every parent render.
+ */
+function useStableTierTuples(chartData: ChartDataPoint[] | undefined): {
+  values: TierTuple
+  tierColors: TierColorTuple
+  locationCounts: TierTuple | undefined
+} {
+  const theme = useTheme()
+
+  const v0 = chartData?.[0]?.value
+  const v1 = chartData?.[1]?.value
+  const v2 = chartData?.[2]?.value
+  const v3 = chartData?.[3]?.value
+  const values = useMemo<TierTuple>(() => {
+    if (!chartData) return [0, 0, 0, 0]
+    return chartData.map((tier) => tier.value).slice(0, 4) as TierTuple
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v0, v1, v2, v3])
+
+  const c0 = chartData?.[0]?.color
+  const c1 = chartData?.[1]?.color
+  const c2 = chartData?.[2]?.color
+  const c3 = chartData?.[3]?.color
+  const fallbackTier1 = theme.palette.tiers.tier1
+  const fallbackTier2 = theme.palette.tiers.tier2
+  const fallbackTier3 = theme.palette.tiers.tier3
+  const fallbackTier4 = theme.palette.tiers.tier4
+  const tierColors = useMemo<TierColorTuple>(() => {
+    if (!chartData) {
+      return [fallbackTier1, fallbackTier2, fallbackTier3, fallbackTier4]
+    }
+    return chartData.map((tier) => tier.color).slice(0, 4) as TierColorTuple
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    c0,
+    c1,
+    c2,
+    c3,
+    fallbackTier1,
+    fallbackTier2,
+    fallbackTier3,
+    fallbackTier4,
+  ])
+
+  const r0 = chartData?.[0]?.rawCount
+  const r1 = chartData?.[1]?.rawCount
+  const r2 = chartData?.[2]?.rawCount
+  const r3 = chartData?.[3]?.rawCount
+  const locationCounts = useMemo<TierTuple | undefined>(() => {
+    if (
+      r0 == null ||
+      r1 == null ||
+      r2 == null ||
+      r3 == null ||
+      !chartData ||
+      chartData.length < 4
+    ) {
+      return undefined
+    }
+    return [r0, r1, r2, r3]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [r0, r1, r2, r3])
+
+  return { values, tierColors, locationCounts }
+}
+
+interface GlyphVisualProps {
+  isActive: boolean
+  displayName: string
+  chartData: ChartDataPoint[] | undefined
+  outcomeCode?: string
+  isSingleValueDistribution: boolean
+  useMorphable: boolean
+  variant: GlyphVariant
+  morphMode: "bars" | "distribution"
+  compact: boolean
+  size: number
+  values: TierTuple
+  tierColors: TierColorTuple
+  locationCounts: TierTuple | undefined
+}
+
+/**
+ * Renders the glyph itself, picking the representation that matches the data:
+ * a single-value square strip, an animated morphable distribution, a static
+ * bars/dots glyph, or the no-data placeholder.
+ */
+function GlyphVisual({
+  isActive,
+  displayName,
+  chartData,
+  outcomeCode,
+  isSingleValueDistribution,
+  useMorphable,
+  variant,
+  morphMode,
+  compact,
+  size,
+  values,
+  tierColors,
+  locationCounts,
+}: GlyphVisualProps) {
+  const theme = useTheme()
+
+  if (!isActive) return <NoDataAtThisTime />
+
+  const ariaLabel = generateChartAriaLabel(displayName, chartData)
+
+  if (isSingleValueDistribution) {
+    const activeTier = chartData?.find((t) => t.value > 0)
+    const color = activeTier?.color ?? theme.palette.grey[400]
+    const count = outcomeCode ? getSingleValueLocationCount(outcomeCode) : 1
+    const cell = SQUARE_SIZE + SQUARE_GAP
+    const w = count * cell - SQUARE_GAP
+    return (
+      <Box role="img" aria-label={ariaLabel}>
+        <svg width={w} height={SQUARE_SIZE}>
+          {Array.from({ length: count }, (_, i) => (
+            <rect
+              key={i}
+              x={i * cell}
+              y={0}
+              width={SQUARE_SIZE}
+              height={SQUARE_SIZE}
+              rx={2}
+              fill={color}
+              stroke={color}
+              strokeWidth={0.5}
+              strokeOpacity={0.4}
+            />
+          ))}
+        </svg>
+      </Box>
+    )
+  }
+
+  if (useMorphable) {
+    return (
+      <Box role="img" aria-label={ariaLabel}>
+        <MorphableDistributionGlyph
+          values={values}
+          tierColors={tierColors}
+          mode={morphMode}
+          locationCounts={locationCounts}
+          compact={compact}
+          size={compact ? size : undefined}
+        />
+      </Box>
+    )
+  }
+
+  return (
+    <Box role="img" aria-label={ariaLabel}>
+      <ScenarioGlyph
+        variant={variant}
+        values={values}
+        size={size}
+        tierColors={tierColors}
+      />
+    </Box>
+  )
+}
+
 export function OutcomeGlyphItem({
   displayName,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -157,76 +333,7 @@ export function OutcomeGlyphItem({
   const responsiveSize = isMdUp ? 60 : 50
   const actualSize = size ?? responsiveSize
 
-  // Glyph value / color / location-count tuples, memoized on the
-  // primitive fields they read from `chartData` (and the theme tier
-  // fallback colors for the no-data case)
-  const v0 = chartData?.[0]?.value
-  const v1 = chartData?.[1]?.value
-  const v2 = chartData?.[2]?.value
-  const v3 = chartData?.[3]?.value
-  const values = useMemo<[number, number, number, number]>(() => {
-    if (!chartData) return [0, 0, 0, 0]
-    return chartData.map((tier) => tier.value).slice(0, 4) as [
-      number,
-      number,
-      number,
-      number,
-    ]
-    // chartData itself is intentionally not a dep: identity may churn
-    // even when the four primitive values do not.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [v0, v1, v2, v3])
-
-  const c0 = chartData?.[0]?.color
-  const c1 = chartData?.[1]?.color
-  const c2 = chartData?.[2]?.color
-  const c3 = chartData?.[3]?.color
-  const fallbackTier1 = theme.palette.tiers.tier1
-  const fallbackTier2 = theme.palette.tiers.tier2
-  const fallbackTier3 = theme.palette.tiers.tier3
-  const fallbackTier4 = theme.palette.tiers.tier4
-  const tierColors = useMemo<[string, string, string, string]>(() => {
-    if (!chartData) {
-      return [fallbackTier1, fallbackTier2, fallbackTier3, fallbackTier4]
-    }
-    return chartData.map((tier) => tier.color).slice(0, 4) as [
-      string,
-      string,
-      string,
-      string,
-    ]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    c0,
-    c1,
-    c2,
-    c3,
-    fallbackTier1,
-    fallbackTier2,
-    fallbackTier3,
-    fallbackTier4,
-  ])
-
-  const r0 = chartData?.[0]?.rawCount
-  const r1 = chartData?.[1]?.rawCount
-  const r2 = chartData?.[2]?.rawCount
-  const r3 = chartData?.[3]?.rawCount
-  const locationCounts = useMemo<
-    [number, number, number, number] | undefined
-  >(() => {
-    if (
-      r0 == null ||
-      r1 == null ||
-      r2 == null ||
-      r3 == null ||
-      !chartData ||
-      chartData.length < 4
-    ) {
-      return undefined
-    }
-    return [r0, r1, r2, r3]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [r0, r1, r2, r3])
+  const { values, tierColors, locationCounts } = useStableTierTuples(chartData)
 
   const isSingleValue = isSingleValueTier(chartData)
   const autoVariant = isSingleValue ? "dots" : "bars"
@@ -285,68 +392,21 @@ export function OutcomeGlyphItem({
       }
     >
       {/* Glyph or placeholder */}
-      {isActive && isSingleValueDistribution ? (
-        (() => {
-          const activeTier = chartData?.find((t) => t.value > 0)
-          const color = activeTier?.color ?? theme.palette.grey[400]
-          const count = outcomeCode
-            ? getSingleValueLocationCount(outcomeCode)
-            : 1
-          const cell = SQUARE_SIZE + SQUARE_GAP
-          const w = count * cell - SQUARE_GAP
-          return (
-            <Box
-              role="img"
-              aria-label={generateChartAriaLabel(displayName, chartData)}
-            >
-              <svg width={w} height={SQUARE_SIZE}>
-                {Array.from({ length: count }, (_, i) => (
-                  <rect
-                    key={i}
-                    x={i * cell}
-                    y={0}
-                    width={SQUARE_SIZE}
-                    height={SQUARE_SIZE}
-                    rx={2}
-                    fill={color}
-                    stroke={color}
-                    strokeWidth={0.5}
-                    strokeOpacity={0.4}
-                  />
-                ))}
-              </svg>
-            </Box>
-          )
-        })()
-      ) : isActive && useMorphable ? (
-        <Box
-          role="img"
-          aria-label={generateChartAriaLabel(displayName, chartData)}
-        >
-          <MorphableDistributionGlyph
-            values={values}
-            tierColors={tierColors}
-            mode={morphMode}
-            locationCounts={locationCounts}
-            compact={compact}
-            size={compact ? actualSize : undefined}
-          />
-        </Box>
-      ) : isActive ? (
-        <Box
-          role="img"
-          aria-label={generateChartAriaLabel(displayName, chartData)}
-        >
-          <ScenarioGlyph
-            variant={variant}
-            values={values}
-            size={actualSize}
-            tierColors={tierColors}
-          />
-        </Box>
-      ) : (
-        <NoDataAtThisTime />
-      )}
+      <GlyphVisual
+        isActive={isActive}
+        displayName={displayName}
+        chartData={chartData}
+        outcomeCode={outcomeCode}
+        isSingleValueDistribution={isSingleValueDistribution}
+        useMorphable={useMorphable}
+        variant={variant}
+        morphMode={morphMode}
+        compact={compact}
+        size={actualSize}
+        values={values}
+        tierColors={tierColors}
+        locationCounts={locationCounts}
+      />
 
       {/* Label and controls */}
       {(showLabel || showInfoButton || showSortButton) && (
@@ -365,7 +425,7 @@ export function OutcomeGlyphItem({
             <Typography
               component="div"
               sx={{
-                fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                fontFamily: themeValues.fontFamily.display,
                 fontSize: "0.8125rem",
                 fontWeight: 600,
                 lineHeight: 1.2,
