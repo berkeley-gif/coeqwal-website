@@ -180,20 +180,13 @@ export interface PercentileMatrixProps {
   tooltipUnit?: string
 }
 
-// Water month labels (short - for axis)
-const WATER_MONTH_LABELS = [
-  "O",
-  "N",
-  "D",
-  "J",
-  "F",
-  "M",
-  "A",
-  "M",
-  "J",
-  "J",
-  "A",
-  "S",
+// X-axis tick labels: only quarter-start months keep small cells legible.
+// monthIndex is 0-based water months (0=Oct ... 11=Sep).
+const X_AXIS_TICKS = [
+  { index: 0, label: "Oct" },
+  { index: 3, label: "Jan" },
+  { index: 6, label: "Apr" },
+  { index: 9, label: "Jul" },
 ]
 
 // Full month names (for tooltips)
@@ -212,12 +205,16 @@ const WATER_MONTH_NAMES = [
   "September",
 ]
 
-// Color scheme for percentile bands (delivery - blue)
+// Color scheme for percentile bands (delivery - blue).
+// Single hue at stepped alphas keeps each band distinct: the q30-q70 inner
+// swath reads clearly darker than the q10-q90 outer swath where they overlap.
+// q0/q100 (min/max) is a thin dashed reference line, not a fill, so the bands
+// stay clustered around the median instead of flooding the chart floor.
 const COLORS = {
-  range: "#d9eafb", // q0-q100 (lightest)
-  outer: "#c5dbf3", // q10-q90
-  inner: "#a2bee1", // q30-q70
-  median: "#2c5aa0", // q50 (darkest)
+  range: "#6baed6", // q0/q100 min-max dashed reference line
+  outer: "rgba(49, 130, 189, 0.2)", // q10-q90
+  inner: "rgba(49, 130, 189, 0.45)", // q30-q70
+  median: "#08519c", // q50 (darkest)
   text: "#5a6c7a",
   grid: "#e8edf0",
   gridStrong: "#d0d8dd",
@@ -229,10 +226,10 @@ const COLORS = {
 
 // Color scheme for shortage - orange/amber
 const COLORS_SHORTAGE = {
-  range: "#fef3e2", // q0-q100 (lightest amber)
-  outer: "#fdd49e", // q10-q90
-  inner: "#fdae6b", // q30-q70
-  median: "#e6550d", // q50 (darkest orange)
+  range: "#fdae6b", // q0/q100 min-max dashed reference line
+  outer: "rgba(253, 141, 60, 0.2)", // q10-q90
+  inner: "rgba(253, 141, 60, 0.45)", // q30-q70
+  median: "#a63603", // q50 (darkest orange)
   text: "#5a6c7a",
   grid: "#e8edf0",
   gridStrong: "#d0d8dd",
@@ -985,7 +982,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             .attr("stroke-width", 1)
         })
 
-        // x-axis labels for each individual chart cell (months Oct-Sep)
+        // x-axis labels for each individual chart cell. Only the quarter-start
+        // months (Oct, Jan, Apr, Jul) are labelled so small cells stay legible.
         reservoirs.forEach((_, rowIndex) => {
           scenarios.forEach((__, colIndex) => {
             const cellBottom =
@@ -993,7 +991,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
               rowIndex * cellHeight +
               chartPadding.top +
               chartHeight
-            WATER_MONTH_LABELS.forEach((label, i) => {
+            X_AXIS_TICKS.forEach(({ index: i, label }) => {
               const x = getCellX(colIndex) + chartPadding.left + xScale(i)
               g.append("text")
                 .attr("x", x)
@@ -1004,25 +1002,6 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                 .attr("fill", COLORS.text)
                 .text(label)
             })
-          })
-        })
-
-        // Vertical month gridlines for each individual chart cell
-        reservoirs.forEach((_, rowIndex) => {
-          const cellTop =
-            colHeaderHeight + rowIndex * cellHeight + chartPadding.top
-          const cellBottom = cellTop + chartHeight
-          scenarios.forEach((__, colIndex) => {
-            for (let i = 0; i < 12; i++) {
-              const x = getCellX(colIndex) + chartPadding.left + xScale(i)
-              g.append("line")
-                .attr("x1", x)
-                .attr("x2", x)
-                .attr("y1", cellTop)
-                .attr("y2", cellBottom)
-                .attr("stroke", COLORS.grid)
-                .attr("stroke-width", 0.5)
-            }
           })
         })
 
@@ -1045,9 +1024,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
           if (tierColor) {
             // Create color variants from the tier color using rgba for SVG compatibility
             return {
-              range: hexToRgba(tierColor, 0.06), // Very light
-              outer: hexToRgba(tierColor, 0.18), // Light
-              inner: hexToRgba(tierColor, 0.32), // Medium
+              range: hexToRgba(tierColor, 0.55), // q0/q100 min-max dashed line
+              outer: hexToRgba(tierColor, 0.2), // q10-q90
+              inner: hexToRgba(tierColor, 0.45), // q30-q70
               median: tierColor, // Full color for median line
             }
           }
@@ -1359,13 +1338,10 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
 
               if (processedData.length === 0) return
 
-              // Area generators (using per-reservoir Y scale)
-              const rangeArea = area<(typeof processedData)[0]>()
-                .x((d) => xScale(d.monthIndex))
-                .y0((d) => cellYScale(d.q0))
-                .y1((d) => cellYScale(d.q100))
-                .curve(curveLinear)
-
+              // Area generators (using per-reservoir Y scale).
+              // Only q10-q90 and q30-q70 render as filled swaths. q0/q100
+              // (min/max) render as thin dashed reference lines below so the
+              // filled bands stay clustered around the median.
               const outerArea = area<(typeof processedData)[0]>()
                 .x((d) => xScale(d.monthIndex))
                 .y0((d) => cellYScale(d.q10))
@@ -1378,17 +1354,22 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                 .y1((d) => cellYScale(d.q70))
                 .curve(curveLinear)
 
+              const minLine = line<(typeof processedData)[0]>()
+                .x((d) => xScale(d.monthIndex))
+                .y((d) => cellYScale(d.q0))
+                .curve(curveLinear)
+
+              const maxLine = line<(typeof processedData)[0]>()
+                .x((d) => xScale(d.monthIndex))
+                .y((d) => cellYScale(d.q100))
+                .curve(curveLinear)
+
               const medianLine = line<(typeof processedData)[0]>()
                 .x((d) => xScale(d.monthIndex))
                 .y((d) => cellYScale(d.q50))
                 .curve(curveLinear)
 
-              // Bands and line with scenario-specific colors
-              cellG
-                .append("path")
-                .datum(processedData)
-                .attr("fill", colors.range)
-                .attr("d", rangeArea)
+              // Filled swaths (outer then inner) with scenario-specific colors
               cellG
                 .append("path")
                 .datum(processedData)
@@ -1399,12 +1380,34 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                 .datum(processedData)
                 .attr("fill", colors.inner)
                 .attr("d", innerArea)
+              // Min/max dashed reference lines (q0 and q100)
+              cellG
+                .append("path")
+                .datum(processedData)
+                .attr("fill", "none")
+                .attr("stroke", colors.range)
+                .attr("stroke-width", 1)
+                .attr("stroke-dasharray", "3,3")
+                .attr("opacity", 0.7)
+                .attr("d", minLine)
+              cellG
+                .append("path")
+                .datum(processedData)
+                .attr("fill", "none")
+                .attr("stroke", colors.range)
+                .attr("stroke-width", 1)
+                .attr("stroke-dasharray", "3,3")
+                .attr("opacity", 0.7)
+                .attr("d", maxLine)
+              // Median line (q50) - the hero line
               cellG
                 .append("path")
                 .datum(processedData)
                 .attr("fill", "none")
                 .attr("stroke", colors.median)
-                .attr("stroke-width", 1.5)
+                .attr("stroke-width", 2)
+                .attr("stroke-linecap", "round")
+                .attr("stroke-linejoin", "round")
                 .attr("d", medianLine)
             }
           })

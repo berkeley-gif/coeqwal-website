@@ -17,12 +17,19 @@ export interface BandColors {
   median: string
 }
 
-/** Delivery / storage percentile bands (blue). */
+/**
+ * Delivery / storage percentile bands (blue).
+ *
+ * `range` is the q0/q100 min-max dashed reference line color (no longer a
+ * fill). `outer` and `inner` are the solid-over-white equivalents of the
+ * single-hue 0.2 / 0.45 alpha swaths drawn by PercentileMatrix, so the legend
+ * matches the rendered chart.
+ */
 export const DELIVERY_BAND_COLORS: BandColors = {
-  range: "#d9eafb", // q0-q100 (lightest)
-  outer: "#c5dbf3", // q10-q90
-  inner: "#a2bee1", // q30-q70
-  median: "#2c5aa0", // q50 (darkest)
+  range: "#6baed6", // q0/q100 min-max dashed line
+  outer: "#d6e6f2", // q10-q90
+  inner: "#a2c7e1", // q30-q70
+  median: "#08519c", // q50 (darkest)
 }
 
 /**
@@ -34,10 +41,10 @@ export const STORAGE_BAND_COLORS: BandColors = DELIVERY_BAND_COLORS
 
 /** Shortage percentile bands (orange/amber). */
 export const SHORTAGE_BAND_COLORS: BandColors = {
-  range: "#fef3e2",
-  outer: "#fdd49e",
-  inner: "#fdae6b",
-  median: "#e6550d",
+  range: "#fdae6b", // q0/q100 min-max dashed line
+  outer: "#ffe8d8", // q10-q90
+  inner: "#fecca7", // q30-q70
+  median: "#a63603", // q50 (darkest)
 }
 
 /** Percent-of-unimpaired percentile bands (green). */

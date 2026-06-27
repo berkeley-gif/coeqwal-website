@@ -223,14 +223,13 @@ function StorageTierCharts({
 function PercentileBandsLegend() {
   return (
     <>
-      {/* Min-Max (0-100th) band */}
+      {/* Min-Max (0-100th) range - dashed reference line */}
       <Box
         component="span"
         sx={{
           width: 14,
-          height: 14,
-          backgroundColor: STORAGE_BAND_COLORS.range,
-          borderRadius: "2px",
+          height: 0,
+          borderTop: `2px dashed ${STORAGE_BAND_COLORS.range}`,
         }}
       />
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>

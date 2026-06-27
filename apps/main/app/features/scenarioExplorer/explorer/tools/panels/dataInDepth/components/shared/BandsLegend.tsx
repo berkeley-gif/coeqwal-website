@@ -41,11 +41,14 @@ export const COMPACT_BAND_LABELS: BandLegendLabels = {
 function LegendSwatch({
   color,
   isLine,
+  dashed,
   label,
   first,
 }: {
   color: string
   isLine?: boolean
+  /** Render as a dashed reference line (used for the min/max range). */
+  dashed?: boolean
   label: string
   first?: boolean
 }) {
@@ -55,9 +58,13 @@ function LegendSwatch({
         component="span"
         sx={{
           width: 14,
-          height: isLine ? 3 : 14,
-          backgroundColor: color,
-          borderRadius: isLine ? "1px" : "2px",
+          ...(dashed
+            ? { height: 0, borderTop: `2px dashed ${color}` }
+            : {
+                height: isLine ? 3 : 14,
+                backgroundColor: color,
+                borderRadius: isLine ? "1px" : "2px",
+              }),
           ...(first ? {} : { ml: 0.75 }),
         }}
       />
@@ -82,7 +89,7 @@ export function BandLegend({
 }) {
   return (
     <>
-      <LegendSwatch color={colors.range} label={labels.range} first />
+      <LegendSwatch color={colors.range} label={labels.range} dashed first />
       <LegendSwatch color={colors.outer} label={labels.outer} />
       <LegendSwatch color={colors.inner} label={labels.inner} />
       <LegendSwatch color={colors.median} label={labels.median} isLine />
