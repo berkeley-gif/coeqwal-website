@@ -301,7 +301,7 @@ function moveTo() {
 
 ### Why MTS
 
-Any geometry the COEQWAL map renders must come from a Mapbox vector tileset, not from the API. Points, lines, and polygons all travel through tiles. The API returns only identifiers (`short_code`, `du_id`, `location_id`, `wba_id`) which the frontend joins to tile features at render time. The rationale lives in the backend [database/README.md](../../../coeqwal-backend/database/README.md) under "API conventions, geometry". Short version: vector tiles are pre-quantized, zoom-aware, CDN-cached, and consumed natively by Mapbox GL. A full demand-unit polygon `FeatureCollection` from the API is multiple MB. The equivalent tile request at zoom 8 is typically tens of KB.
+Any geometry the COEQWAL map renders must come from a Mapbox vector tileset, not from the API. Points, lines, and polygons all travel through tiles. The API returns only identifiers (`short_code`, `du_id`, `location_id`, `wba_id`) which the frontend joins to tile features at render time. The rationale lives in the data platform [database/README.md](../../../coeqwal-data-platform/database/README.md) under "API conventions, geometry". Short version: vector tiles are pre-quantized, zoom-aware, CDN-cached, and consumed natively by Mapbox GL. A full demand-unit polygon `FeatureCollection` from the API is multiple MB. The equivalent tile request is typically tens of KB.
 
 Mapbox Tiling Service (MTS) is the supported pipeline for uploading source GeoJSON or line-delimited GeoJSON, applying a recipe that controls zoom-level behavior, and publishing the result as a tileset under the `coeqwal` Mapbox account.
 
@@ -314,21 +314,45 @@ These are the authoritative how-tos. Read them first.
 - Recipe reference (recipe JSON schema and `layers` semantics): [https://docs.mapbox.com/mapbox-tiling-service/reference/](https://docs.mapbox.com/mapbox-tiling-service/reference/)
 - Mapbox Studio (style editor used to bundle tilesets into a basemap style): [https://docs.mapbox.com/studio-manual/](https://docs.mapbox.com/studio-manual/)
 
+### The join key
+
+The API never sends geometry. It sends an identifier for each location. Each tile feature must carry that same identifier as a feature property. At render time the frontend matches the API identifier against the tile feature whose join-key property equals it, and then paints that feature.
+
+So the join key (the location short code) must be the same string in both of these places:
+
+- the identifier property baked into the tile features when you export the source data (step 1 of the workflow below), and
+- the `idProperty` for the outcome in [apps/main/app/features/map/config/outcomeLayerRegistry.ts](../../apps/main/app/features/map/config/outcomeLayerRegistry.ts), which is the property the frontend reads off each feature with `["get", idProperty]` (see `OutcomePolygonLayer.tsx`).
+
+For demand units the join key is `DU_ID` (`WBA_ID` for water budget areas, `gnisidlabel` for reservoirs).
+
+Usually the tile property should carry the exact id the API returns. Where they intentionally differ, an explicit mapping table translates the API id first, and the translated value must then match exactly. Two outcomes do this: reservoirs (API `SHSTA` to tile `gnisidlabel`, via `RESERVOIR_CALSIM_TO_GNISIDLABEL`) and the delta (`DELTA_ECO` to tile `WBA_ID` value `DETAW`, via the per-outcome `featureIdMap`).
+
+### Where the geometry comes from
+
+Export the geometry from the latest COEQWAL GeoPackage, found in the data platform GIS folder, [coeqwal-data-platform/database/seed_tables/03_GIS](../../../coeqwal-data-platform/database/seed_tables/03_GIS), and confirm with the WAM team that you have the latest. The demand-unit source today is [`du_4326.gpkg`](../../../coeqwal-data-platform/database/seed_tables/03_GIS/du_4326.gpkg): layer `demandunits`, one dissolved `MULTIPOLYGON` per `DU_ID`, EPSG:4326.
+
+Two things to know before you export:
+
+- The same GeoPackage feeds the database loader [`load_du_geometries.py`](../../../coeqwal-data-platform/database/scripts/data_processing/load_du_geometries.py), so treating the GeoPackage as the single source keeps the database geometry and the tiles consistent. The Postgres `geom` columns are downstream of this file, not a separate source.
+- Coverage is incomplete. Not every entity has a polygon yet. The demand units missing geometry are listed in [coeqwal-data-platform/database/topic_docs/geometry.md](../../../coeqwal-data-platform/database/topic_docs/geometry.md). There is a whole section of work around updating the Community Water Systems delivery polygons. Check with the backend team, the WAM team, and the Community Water System/Drinking Water team.
+
 ### COEQWAL workflow for a new tileset
 
-1. **Write the recipe.** Place a recipe JSON in `coeqwal-backend/scripts/mapbox_recipes/`. The existing example `calsim_demand_units.json` uses `minzoom: 4` and `maxzoom: 16`. The naming convention is `<dataset_slug>.json` matching the final tileset id.
-2. **Export the source data.** Run `ST_AsGeoJSON` against the entity's `geom` column in Postgres and write to NDGeoJSON (one feature per line). Keep the export script next to the recipe so the source generation is reproducible.
+1. **Export the source data from the GeoPackage.** Convert the relevant GeoPackage layer to line-delimited GeoJSON (one feature per line), projected to EPSG:4326, preserving the join-key property (see "The join key" above).
+
+2. **Write the recipe.** Place a recipe JSON in [coeqwal-data-platform/scripts/mapbox_recipes/](../../../coeqwal-data-platform/scripts/mapbox_recipes/). The existing example `calsim_demand_units.json` uses `minzoom: 4` and `maxzoom: 16`. The naming convention is `<dataset_slug>.json` matching the final tileset id. The key under `layers` becomes the published source-layer name, so set it to the string `tilesetSources.ts` expects.
+
 3. **Upload the source** to Mapbox.
 
    ```bash
-   tilesets upload-source coeqwal <slug> <file.geojson.ld>
+   tilesets upload-source coeqwal <slug> <slug>.geojson.ld
    ```
 
 4. **Create the tileset** from the recipe.
 
    ```bash
    tilesets create coeqwal.<slug> \
-     --recipe coeqwal-backend/scripts/mapbox_recipes/<slug>.json \
+     --recipe coeqwal-data-platform/scripts/mapbox_recipes/<slug>.json \
      --name "<Human-readable name>"
    ```
 
@@ -338,7 +362,7 @@ These are the authoritative how-tos. Read them first.
    tilesets publish coeqwal.<slug>
    ```
 
-6. **Register the tileset on the website side.** Add an entry to `COEQWAL_TILESETS` in [apps/main/app/features/map/config/tilesetSources.ts](../../apps/main/app/features/map/config/tilesetSources.ts).
+6. **Register the tileset on the website.** Add an entry to `COEQWAL_TILESETS` in [apps/main/app/features/map/config/tilesetSources.ts](../../apps/main/app/features/map/config/tilesetSources.ts).
 
    ```ts
    {
@@ -349,22 +373,37 @@ These are the authoritative how-tos. Read them first.
 
    If the layer needs to be available on non-satellite basemaps (Light, Streets), also add an entry to `RUNTIME_LAYERS` so it is created on the fly when those basemaps are active.
 
-7. **Bundle into the satellite basemap (optional).** If the layer should appear on the satellite basemap without runtime injection, add it to the Mapbox Studio satellite style `coeqwal/cmh2f40sm000w01qy8m0gaea8`. It will then be available via the `composite` source.
-
 ### Authentication
 
-The `tilesets` CLI uses a `MAPBOX_ACCESS_TOKEN` environment variable with `tilesets:write` scope. The token is owned by the COEQWAL Mapbox account holder. Issuance and rotation happen out of band. Link to the internal credentials doc when one exists, otherwise leave a note in the recipe folder pointing to whoever currently holds the token.
+The `tilesets` CLI uses a `MAPBOX_ACCESS_TOKEN` environment variable with `tilesets:write` scope.
 
 ### Existing COEQWAL tilesets
 
-| Source id              | Tileset URL                             | Source layer           | What it carries                                                                                                           |
-| ---------------------- | --------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `coeqwal-demand-units` | `mapbox://coeqwal.calsim_demand_units`  | `demand_units`         | CalSim demand-unit polygons (urban + ag), keyed by `DU_ID`                                                                |
-| `coeqwal-wba`          | `mapbox://coeqwal.calsim-wba`           | `geoschem`             | Water budget area polygons, keyed by `WBA_ID`                                                                             |
-| `coeqwal-reservoir`    | `mapbox://coeqwal.california-reservoir` | `california-reservoir` | Reservoir polygons, currently keyed by `gnisidlabel` (TODO: add `calsim_id` property and drop the frontend mapping table) |
-| `coeqwal-delta-water`  | `mapbox://coeqwal.delta-water`          | `delta_water`          | Delta water body context layer                                                                                            |
+| Source id              | Tileset URL                             | Source layer           | Join key      | What it carries                                                                                                           |
+| ---------------------- | --------------------------------------- | ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `coeqwal-demand-units` | `mapbox://coeqwal.calsim_demand_units`  | `demand_units`         | `DU_ID`       | CalSim demand-unit polygons (urban + ag)                                                                                  |
+| `coeqwal-wba`          | `mapbox://coeqwal.calsim-wba`           | `geoschem`             | `WBA_ID`      | Water budget area polygons                                                                                                |
+| `coeqwal-reservoir`    | `mapbox://coeqwal.california-reservoir` | `california-reservoir` | `gnisidlabel` | Reservoir polygons, currently keyed by `gnisidlabel` (TODO: add `calsim_id` property and drop the frontend mapping table) |
+| `coeqwal-delta-water`  | `mapbox://coeqwal.delta-water`          | `delta_water`          | (context)     | Delta water body context layer (no join, not data-driven)                                                                 |
 
-Anything in this table is consumed by `tilesetSources.ts`. New tilesets should follow the same registration pattern.
+Anything in this table is consumed by `tilesetSources.ts`. New tilesets should follow the same registration pattern. The `delta-detaw` outcome layer is not its own tileset: it is a runtime layer defined in `tilesetSources.ts` from the `coeqwal-wba` source (`geoschem`) filtered to `WBA_ID == "DETAW"`.
+
+### Naming: match the published names exactly
+
+The ids in the table above are historical and not internally consistent. The tileset id may use an underscore (`calsim_demand_units`) or a hyphen (`calsim-wba`, `california-reservoir`, `delta-water`). The source-layer is a separate string (`demand_units`, `geoschem`, `california-reservoir`, `delta_water`), and the website `sourceId` (`coeqwal-...`) is different again. None of these are typos. Two separate matches are what actually matter:
+
+- **Source-layer name.** The recipe `layers` key, the published source-layer, and the `sourceLayer` in `RUNTIME_LAYERS` (`tilesetSources.ts`) must be the same string, because that is what `ensureCustomLayers` passes as `"source-layer"` when it creates the layer. For demand units it is `demand_units` (underscore).
+- **Join key.** The identifier property on the tile features must equal the outcome's `idProperty` in `outcomeLayerRegistry.ts` (see "The join key" above).
+
+Note that `outcomeLayerRegistry.ts` also has a `sourceLayer` field that for demand units reads `demand-units` (hyphen) while the tileset's source-layer is `demand_units`. That field is not the binding string (`OutcomePolygonLayer` reads the source-layer back off the live map layer), so the mismatch is tolerated, but it is the kind of inconsistency to watch.
+
+### Related documentation
+
+- [apps/main/app/features/map/README.md](../../apps/main/app/features/map/README.md) - the consumer side: how the app resolves locations to tile features, the `idProperty` join, runtime source injection, and camera bounds. Read this alongside the publishing workflow here.
+- [coeqwal-data-platform/database/topic_docs/geometry.md](../../../coeqwal-data-platform/database/topic_docs/geometry.md) - how geometry is stored in the database, the demand-unit coverage gaps, and the list of `DU_ID`s without polygons.
+- [coeqwal-data-platform/database/README.md](../../../coeqwal-data-platform/database/README.md) - "API conventions, geometry" (the policy that no geometry flows through the API) and the Mapbox tile-work roadmap.
+- [coeqwal-data-platform/database/scripts/data_processing/load_du_geometries.py](../../../coeqwal-data-platform/database/scripts/data_processing/load_du_geometries.py) - the loader that reads `du_4326.gpkg` into the database; rerun it when new polygons land in the GeoPackage.
+- [coeqwal-data-platform/scripts/mapbox_recipes/](../../../coeqwal-data-platform/scripts/mapbox_recipes/) - where recipe JSON files live (`calsim_demand_units.json` is the worked example).
 
 ## Advanced Usage
 
