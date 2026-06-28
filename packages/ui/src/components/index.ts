@@ -21,16 +21,32 @@ export type { RoundedRightArrowProps } from "./icons/RoundedRightArrow"
 export { NavArrow } from "./common/NavArrow"
 export type { NavArrowProps, NavArrowDirection } from "./common/NavArrow"
 export { CircularArrowButton } from "./common/CircularArrowButton"
-// Tooltip components (all use HybridTooltip internally for device-adaptive behavior)
+// InfoTooltip: description + optional actions, built on HybridTooltip
 export { InfoTooltip } from "./common/InfoTooltip"
 export type { InfoTooltipProps } from "./common/InfoTooltip"
-// Core tooltip system
-export { ClickTooltip } from "./common/tooltips/ClickTooltip"
-export type { ClickTooltipProps } from "./common/tooltips/ClickTooltip"
+// Device-adaptive hover/click tooltip
 export { HybridTooltip } from "./common/tooltips/HybridTooltip"
 export type { HybridTooltipProps } from "./common/tooltips/HybridTooltip"
 export { TooltipCloseButton } from "./common/tooltips/TooltipCloseButton"
 export type { TooltipCloseButtonProps } from "./common/tooltips/TooltipCloseButton"
+// Tooltip foundations (shared surface, disclosure state, anchored positioning)
+export { tooltipSurface } from "./common/tooltips/tooltipSurface"
+export type {
+  TooltipSurfaceOptions,
+  TooltipDensity,
+} from "./common/tooltips/tooltipSurface"
+export { useDisclosure } from "./common/tooltips/useDisclosure"
+export type {
+  UseDisclosureOptions,
+  UseDisclosureResult,
+} from "./common/tooltips/useDisclosure"
+export { AnchoredPortal } from "./common/tooltips/AnchoredPortal"
+export type { AnchoredPortalProps } from "./common/tooltips/AnchoredPortal"
+// Standard tooltip surfaces (hover hint + click/anchored popover)
+export { HoverTip } from "./common/tooltips/HoverTip"
+export type { HoverTipProps } from "./common/tooltips/HoverTip"
+export { InfoPopover } from "./common/tooltips/InfoPopover"
+export type { InfoPopoverProps } from "./common/tooltips/InfoPopover"
 export { InfoIconButton } from "./common/InfoIconButton"
 export type { InfoIconButtonProps } from "./common/InfoIconButton"
 export { SortButton } from "./common/SortButton"

@@ -4,13 +4,13 @@
  * KeyOutcomesPanel - Shows key outcomes glyphs
  *
  * Used in the Learn section scrollytelling.
- * Uses shared OutcomeGlyphItem components with ClickTooltip wrappers.
+ * Uses shared OutcomeGlyphItem components with InfoPopover wrappers.
  */
 
 import { useEffect } from "react"
 import { preload } from "@repo/data/swr"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
-import { ClickTooltip } from "@repo/ui"
+import { InfoPopover } from "@repo/ui"
 import { fetchScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import {
@@ -97,7 +97,7 @@ export function KeyOutcomesPanel({
     const isActive = hasData(code)
 
     return (
-      <ClickTooltip
+      <InfoPopover
         key={code}
         open={openTooltip === code}
         onClose={handleClose}
@@ -154,7 +154,7 @@ export function KeyOutcomesPanel({
             }}
           />
         </Box>
-      </ClickTooltip>
+      </InfoPopover>
     )
   }
 

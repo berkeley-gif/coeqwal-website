@@ -15,8 +15,8 @@
  */
 
 import React, { useState, useMemo } from "react"
-import { Box, Typography, Tooltip, useTheme } from "@repo/ui/mui"
-import { CompactSelect } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { CompactSelect, HoverTip } from "@repo/ui"
 import { PercentileMatrix } from "@repo/viz"
 import type {
   ReservoirData,
@@ -282,8 +282,8 @@ export default function EnvFlowSection({
             onChange={(v) => setChannelFilter(v as ChannelFilter)}
             minWidth={200}
           />
-          <Tooltip
-            title={
+          <HoverTip
+            content={
               <Box sx={{ maxWidth: 300, fontSize: "0.8rem", lineHeight: 1.5 }}>
                 <Box sx={{ fontWeight: 600, mb: 0.5 }}>Channel subsets</Box>
                 <Box sx={{ mb: 0.75 }}>
@@ -313,7 +313,6 @@ export default function EnvFlowSection({
               </Box>
             }
             placement="bottom-start"
-            arrow
           >
             <Box
               component="span"
@@ -337,7 +336,7 @@ export default function EnvFlowSection({
             >
               ?
             </Box>
-          </Tooltip>
+          </HoverTip>
         </Box>
         {isVolume && (
           <CompactSelect
