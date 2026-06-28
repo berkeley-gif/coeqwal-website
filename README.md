@@ -24,6 +24,7 @@ Dependencies and configurations set at the root level are overriden by local dep
   - [How to deploy your app after a package change](#how-to-deploy-your-app-after-a-package-change)
   - [Adding a new app to the dev deploy pipeline](#adding-a-new-app-to-the-dev-deploy-pipeline)
 - [Do local dev builds feel sluggish?](#do-local-dev-builds-feel-sluggish)
+- [Finding dead code](#finding-dead-code)
 - [Changes from the standard Turborepo](#changes-from-the-standard-turborepo)
 - [React StrictMode](#react-strictmode)
 - [SSG and hydration boundaries](#ssg-and-hydration-boundaries)
@@ -320,6 +321,47 @@ rm -rf .turbo apps/main/.next
 ```
 
 See also the `clean` scripts in the root `package.json`.
+
+## Finding dead code
+
+The repo uses [knip](https://knip.dev/) to find unused files, exports, and dependencies across the workspaces.
+
+```sh
+pnpm dead-code
+```
+
+Knip prints its findings straight to the terminal and exits with a non-zero status when it finds anything, so the command could look "failed" (red) even though nothing is wrong. If it is too long to read in the console, you can pipe the output, or pipe to read just a slice of it, for example `pnpm dead-code | grep apps/main`.
+
+The terminal output is grouped into sections, which vary with what is found. A full run currently shows: unused files, unused dependencies, unused devDependencies, unresolved imports, unused exports, unused exported types, and duplicate exports. Because knip scans all apps and packages together, a file or symbol that is only used by another app (or a shared `@repo/*` package consumed by an app) will not be reported as unused.
+
+Always review findings before removing anything. The sections below describe what the tool can and cannot tell you. Don't over-trust the report.
+
+The export-related sections in particular are large and mostly not dead code. Two categories dominate the noise: **duplicate exports** (the repo's convention of exporting both a named and a `default` symbol from the same file) and the **public API of `@repo/*` packages** (exports with no in-repo importer, which does not make them dead). Treat both as expected noise rather than removal candidates.
+
+### What knip cannot detect
+
+Knip analyzes the **static import graph**. It knows which files import which other files and symbols. It does not run the code, so two important categories slip past it:
+
+- **Runtime-dead code that is still statically imported.** A component can be imported and rendered in the JSX yet never actually appear, for example because it is gated behind a prop or flag that is always false. Knip sees the import and the render, so it reports the file as used. Deciding whether such code is truly live requires reading the call chain by hand, not the report. A concrete example in this repo is the basin inflow arrows: they are imported and rendered by `BaseLayers`, so knip considers them used, even though whether they ever draw depends on runtime state.
+- **References built from strings or wired in at build time.** Dynamic imports assembled from string fragments, registry lookups keyed by string, and build-time config references are all invisible to the static graph (see the false positives below).
+
+### Barrels can hide dead files
+
+A barrel is an `index.ts` whose job is to re-export symbols from neighboring files. Knip marks a file as used if any reachable module imports it, so when a barrel re-exports a file and the barrel is imported anywhere, that file counts as used even if nothing actually consumes the re-exported symbol. The deadness then shows up under unused exports (the redundant re-export line), not under unused files. This is why the unused-files list can look short while real dead code hides one level down.
+
+To find files that are masked this way, there are two reliable methods:
+
+- **Prune and re-run.** Remove the unused re-export lines from a barrel, then run `pnpm dead-code` again. Any file that was reachable only through a removed line now appears under unused files.
+- **Trace imports by path.** For each re-exported file, search the codebase for direct imports of that file. If the only importer is the barrel, the file is dead.
+
+Note that knip's `ignore` option does **not** help here: ignored files are still treated as importers, so ignoring a barrel does not reveal the files it was masking. This was verified directly. Use the two methods above instead.
+
+### Known false positives
+
+- **Build-time loaders referenced by string**, such as `apps/main/geojson-loader.cjs` (named in `next.config.js`). This is not dead code.
+- **Framework and tooling dependencies that are not imported directly**, such as `sass` (compiled by Next), the Emotion packages (used through MUI), `@turbo/gen` and the turbo generator config (used by `turbo gen`), and `@types/*` packages.
+
+When a finding is confirmed to be a false positive of the first kind (a real entry point the static graph misses), record it in [`knip.json`](knip.json) so future runs stay accurate. For example, `geojson-loader.cjs` is declared there as an entry for `apps/main`. Do not add genuinely dead code to the ignore lists just to quiet the report.
 
 ## Changes from the standard Turborepo
 

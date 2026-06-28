@@ -12,9 +12,6 @@ export type { OutcomeGlyphItemProps } from "./OutcomeGlyphItem"
 export { NoDataAtThisTime } from "./NoDataAtThisTime"
 export type { NoDataAtThisTimeProps } from "./NoDataAtThisTime"
 
-export { OutcomeGrid } from "./OutcomeGrid"
-export type { OutcomeGridProps } from "./OutcomeGrid"
-
 export { OperationsIconGroup } from "./OperationsIconGroup"
 export type { OperationsIconGroupProps } from "./OperationsIconGroup"
 

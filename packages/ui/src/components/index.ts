@@ -13,7 +13,6 @@ export { SkipLink } from "./navigation/SkipLink"
 // Common components
 export { default as AutoHeight } from "./common/AutoHeight"
 export { Logo, LogoColor, LogoLight } from "./common/Logo"
-export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { LeadingMarkerText } from "./common/LeadingMarkerText"
 export { ArrowHead } from "./icons/ArrowHead"
 export { RoundedRightArrow } from "./icons/RoundedRightArrow"
@@ -49,8 +48,6 @@ export { InfoPopover } from "./common/tooltips/InfoPopover"
 export type { InfoPopoverProps } from "./common/tooltips/InfoPopover"
 export { InfoIconButton } from "./common/InfoIconButton"
 export type { InfoIconButtonProps } from "./common/InfoIconButton"
-export { SortButton } from "./common/SortButton"
-export type { SortButtonProps } from "./common/SortButton"
 export { ToggleSortButton } from "./common/ToggleSortButton"
 export type {
   ToggleSortButtonProps,
@@ -58,8 +55,6 @@ export type {
 } from "./common/ToggleSortButton"
 export { StyledTextInput } from "./common/StyledTextInput"
 export type { StyledTextInputProps } from "./common/StyledTextInput"
-export { CompactSearchBar } from "./common/CompactSearchBar"
-export type { CompactSearchBarProps } from "./common/CompactSearchBar"
 export { InfoOverlay } from "./common/InfoOverlay"
 export type { InfoOverlayProps } from "./common/InfoOverlay"
 export { CompactSelect } from "./common/CompactSelect"
@@ -83,9 +78,6 @@ export type {
 } from "./common/BarredColumns"
 
 // Text utilities
-export { TruncatedText } from "./common/TruncatedText"
-export type { TruncatedTextProps } from "./common/TruncatedText"
-
 // Panel components
 export { Panel } from "./panels/Panel"
 export type { PanelProps } from "./panels/Panel"
@@ -135,14 +127,12 @@ export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePan
 
 // Chip components
 export {
-  ToggleChip,
   TierChip,
   LocationChip,
   ScenarioBadge,
   HydroclimateBadge,
 } from "./Chip"
 export type {
-  ToggleChipProps,
   TierChipProps,
   LocationChipProps,
   ScenarioBadgeProps,

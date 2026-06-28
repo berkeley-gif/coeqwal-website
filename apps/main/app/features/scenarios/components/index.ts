@@ -12,7 +12,6 @@ export type { ScenarioRowProps } from "./ScenarioRow"
 // Shared scenario/outcome components
 export {
   OutcomeGlyphItem,
-  OutcomeGrid,
   OperationsIconGroup,
   StrategyHeader,
   SmartSummary,
@@ -26,7 +25,6 @@ export {
 } from "./shared"
 export type {
   OutcomeGlyphItemProps,
-  OutcomeGridProps,
   OperationsIconGroupProps,
   StrategyHeaderProps,
   SmartSummaryProps,
