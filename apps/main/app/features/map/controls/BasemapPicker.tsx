@@ -107,7 +107,7 @@ export function BasemapPicker() {
               sx={{
                 fontSize: "0.55rem",
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? "primary.main" : "text.secondary",
+                color: isActive ? "primary.main" : "grey.600",
                 lineHeight: 1,
                 userSelect: "none",
               }}

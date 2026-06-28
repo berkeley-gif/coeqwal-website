@@ -5,6 +5,10 @@
  *
  * Displays directional arrows on the map indicating water flow
  * into major basins. Opacity controlled by scroll progress.
+ * 
+ * Currently only renders in Learn mode when showArrows is true,
+ * could be helpful as a template for how to put arrows on the map.
+ * arrows on the map in the future.
  */
 
 import { Marker } from "@repo/map"

@@ -309,12 +309,12 @@ export function GridScenarioHeader({
             justifyContent: "center",
             alignItems: "center",
             py: 1,
+            px: theme.space.component.sm,
           }}
         >
           <Typography
+            variant="axisLabel"
             sx={{
-              fontSize: "0.9286rem", // 14.8571px
-              fontWeight: theme.typography.fontWeightMedium,
               color: theme.palette.blue.darkest,
               textAlign: "center",
               fontFeatureSettings: "'tnum' 1",
