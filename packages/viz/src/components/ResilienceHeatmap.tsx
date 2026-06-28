@@ -250,7 +250,7 @@ export interface ResilienceHeatmapProps {
    */
   columnLabelRotation?: number
   /**
-   * Capture-mode props (P2.1). Off-screen capture sets all three:
+   * Capture-mode props. Off-screen capture sets all three:
    *  - `interactive=false`: skips all hover/click handler attachment
    *    so the rendered SVG carries no listener residue.
    *  - `animate=false`: reserved for future transitions; the heatmap
