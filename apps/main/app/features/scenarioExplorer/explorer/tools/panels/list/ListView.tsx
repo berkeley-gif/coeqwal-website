@@ -18,7 +18,7 @@ import { useWorkspaceSlice, useListSlice } from "../../../store"
 import StrategyGrid from "./grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
 import type { ChartDataPoint } from "../../../../../scenarios/components/shared"
-import { getScenariosWithIcon } from "../../../../../scenarios/components/shared/opsIcons"
+import { getScenariosWithIcon } from "../../../../../scenarios/components/shared/iconRegistry"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 

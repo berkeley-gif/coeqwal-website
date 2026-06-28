@@ -29,14 +29,15 @@ export { getIconSize } from "./strategyIcons"
 export type { ScenarioIcon, ScenarioIconConfig } from "./strategyIcons"
 
 // Icon system
+export { OpsCircleIcon } from "./OpsCircleIcon"
+export type { OpsCircleIconProps } from "./OpsCircleIcon"
 export {
-  OpsCircleIcon,
   getScenarioIconDefs,
   renderIconDef,
   ICON_REGISTRY,
   SCENARIO_ICONS,
-} from "./opsIcons"
-export type { IconDef, OpsCircleIconProps } from "./opsIcons"
+} from "./iconRegistry"
+export type { IconDef } from "./iconRegistry"
 
 // Tier summary
 export { TierSummaryCell } from "./TierSummaryCell"

@@ -3,21 +3,22 @@
 /**
  * OperationsIconGroup - Renders scenario operation icons with tooltips
  *
- * Data-driven component that reads from the icon registry in opsIcons.tsx.
+ * Data-driven component that reads from the icon registry in iconRegistry.tsx.
  * Each scenario maps to an ordered list of icons (theme icon first, then operations).
  *
  * Used by StrategyGrid, ScenarioRow, and KeyOperationsPanel.
  */
 
-import React, { useCallback } from "react"
+import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
-import { useDrawerStore } from "@repo/state/drawer"
 import type { ScenarioTheme } from "../../../../content/scenarios"
 import { getIconSize } from "./strategyIcons"
-import { getScenarioIconDefs, renderIconDef } from "./opsIcons"
+import { getScenarioIconDefs, renderIconDef } from "./iconRegistry"
+import { useGlossaryRenderer, type GlossaryTerm } from "./strategyGlossary"
 
-const OPS_GLOSSARY_TERMS = [
+// Operation tooltips link a subset of the glossary terms (no TUCP).
+const OPS_GLOSSARY_TERMS: GlossaryTerm[] = [
   {
     pattern: /\bSGMA\b/g,
     glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
@@ -29,53 +30,8 @@ const OPS_GLOSSARY_TERMS = [
 ]
 
 function OpsDescriptionWithLinks({ text }: { text: string }) {
-  const { setDrawerContent, openDrawer } = useDrawerStore()
-
-  const handleClick = useCallback(
-    (glossaryTerm: string) => (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setDrawerContent({ selectedTerm: glossaryTerm })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  const combinedPattern = new RegExp(
-    `(${OPS_GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})`,
-    "g",
-  )
-  const parts = text.split(combinedPattern)
-
-  return (
-    <>
-      {parts.map((part, i) => {
-        const term = OPS_GLOSSARY_TERMS.find((t) =>
-          new RegExp(t.pattern.source).test(part),
-        )
-        if (term) {
-          return (
-            <Box
-              key={i}
-              component="button"
-              onClick={handleClick(term.glossaryTerm)}
-              sx={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                textDecoration: "underline",
-                font: "inherit",
-                color: "inherit",
-              }}
-            >
-              {part}
-            </Box>
-          )
-        }
-        return <span key={i}>{part}</span>
-      })}
-    </>
-  )
+  const renderText = useGlossaryRenderer(text, OPS_GLOSSARY_TERMS)
+  return <>{renderText()}</>
 }
 
 export interface OperationsIconGroupProps {

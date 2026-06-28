@@ -18,7 +18,7 @@ import {
 import type { Scenario } from "../../../../scenarios/hooks/useScenarioList"
 import type { OutcomeScoreData } from "../../../../scenarios/hooks"
 import type { ScenarioTheme } from "../../../../../content/scenarios"
-import { getScenariosWithIcon } from "../../../../scenarios/components/shared/opsIcons"
+import { getScenariosWithIcon } from "../../../../scenarios/components/shared/iconRegistry"
 import {
   PRIMARY_SCENARIO_BASELINE_ID,
   compareScenarioIdsForThemeSubgroupOrder,
