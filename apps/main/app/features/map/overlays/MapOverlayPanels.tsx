@@ -24,6 +24,8 @@ import { themeValues } from "@repo/ui/themes/theme"
 import { PanelEyebrow } from "./PanelEyebrow"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
+import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel } from "../../scenarioExplorer/getStarted/panels"
+
 
 // ============================================================================
 // MAIN COMPONENT
@@ -277,6 +279,61 @@ export default function MapOverlayPanels() {
         }}
         aria-hidden="true"
       />
+
+      <Scrollama onStepEnter={onStepEnter} offset={SCROLLAMA_CONFIG.offset}>
+        <Step data={"coeqwal" as SectionId}>
+          <Box
+            id="coeqwal"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <WelcomePanel />
+          </Box>
+        </Step>
+        <Step data={"water-issues" as SectionId}>
+          <Box
+            id="water-issues"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <WaterIssuesPanel />
+          </Box>
+        </Step>
+        <Step data={"hydroclimates" as SectionId}>
+          <Box
+            id="hydroclimates"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <HydroclimateFuturesPanel />
+          </Box>
+        </Step>
+        <Step data={"key-outcomes" as SectionId}>
+          <Box
+            id="key-outcomes"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <KeyOutcomesPanel />
+          </Box>
+        </Step>
+      </Scrollama>
     </Box>
   )
 }

@@ -7,6 +7,7 @@ import {
   CALIFORNIA_VIEW,
   CENTRAL_VALLEY_VIEW,
   DELTA_VIEW,
+  CALIFORNIA_CENTERED_VIEW
 } from "./cameraPresets"
 
 /** Section IDs for Learn mode scrollytelling */
@@ -17,6 +18,11 @@ export type SectionId =
   | "rivers"
   | "distribution"
   | "calsim"
+  | "coeqwal"
+  | "water-issues"
+  | "hydroclimates"
+  | "key-outcomes"
+  | "outcomes-viz"
 
 /**
  * Layer visibility configuration for a section.
@@ -90,6 +96,14 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     ...BASINS_AND_RIVERS,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  coeqwal: {},
+  "water-issues": {},
+  hydroclimates: {},
+  "key-outcomes": {},
+  "outcomes-viz": {
+    camera: CALIFORNIA_CENTERED_VIEW,
+  },
 }
 
 export const SECTION_LABELS: Record<SectionId, string> = {
@@ -99,4 +113,9 @@ export const SECTION_LABELS: Record<SectionId, string> = {
   rivers: "Rivers",
   distribution: "Water distribution",
   calsim: "CalSim Model",
+  coeqwal: "What is COEQWAL?",
+  "water-issues": "Water Issues",
+  hydroclimates: "Hydroclimate Futures",
+  "key-outcomes": "Key Outcomes",
+  "outcomes-viz": "Visualizing Outcomes"
 }
