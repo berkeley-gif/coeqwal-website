@@ -34,18 +34,18 @@ export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
   },
   ecv: {
     icon: WaterDropIcon,
-    bgColor: "#30e8ae",
+    bgColor: "#44ce1b",
   },
   cc50: {
     icon: WbSunnyIcon,
-    bgColor: "#e8d930",
+    bgColor: "#f7e379",
   },
   cc95: {
     icon: WbSunnyIcon,
-    bgColor: "#e89830",
+    bgColor: "#f2a134",
   },
   tai: {
     icon: LocalFireDepartmentIcon,
-    bgColor: "#c62828",
+    bgColor: "#e51f1f",
   },
 }
