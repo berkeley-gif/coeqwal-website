@@ -23,6 +23,10 @@ export type SectionId =
   | "hydroclimates"
   | "key-outcomes"
   | "outcomes-viz"
+  | "data-in-depth-intro"
+  | "interpreting-outcomes"
+  | "choosing-scenarios"
+  | "before-exploring"
 
 /**
  * Layer visibility configuration for a section.
@@ -104,6 +108,10 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   "outcomes-viz": {
     camera: CALIFORNIA_CENTERED_VIEW,
   },
+  "data-in-depth-intro": {},
+  "interpreting-outcomes": {},
+  "choosing-scenarios": {},
+  "before-exploring": {}
 }
 
 export const SECTION_LABELS: Record<SectionId, string> = {
@@ -114,8 +122,12 @@ export const SECTION_LABELS: Record<SectionId, string> = {
   distribution: "Water distribution",
   calsim: "CalSim Model",
   coeqwal: "What is COEQWAL?",
-  "water-issues": "Water Issues",
-  hydroclimates: "Hydroclimate Futures",
-  "key-outcomes": "Key Outcomes",
-  "outcomes-viz": "Visualizing Outcomes"
+  "water-issues": "Water issues",
+  hydroclimates: "Hydroclimate futures",
+  "key-outcomes": "Key outcomes",
+  "outcomes-viz": "Visualizing outcomes",
+  "data-in-depth-intro": "Data in depth intro",
+  "interpreting-outcomes": "Interpreting outcomes",
+  "choosing-scenarios": "Choosing scenarios",
+  "before-exploring": "Before exploring"
 }

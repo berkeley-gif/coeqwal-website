@@ -24,7 +24,7 @@ import { themeValues } from "@repo/ui/themes/theme"
 import { PanelEyebrow } from "./PanelEyebrow"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
-import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel } from "../../scenarioExplorer/getStarted/panels"
+import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel, DataInDepthPanel, InterpretingOutcomesPanel, ChooseScenariosPanel, BeforeYouBeginPanel } from "../../scenarioExplorer/getStarted/panels"
 import TierAnimationSection from "../../scenarioExplorer/animation/TierAnimationSection"
 
 
@@ -315,11 +315,15 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <WaterIssuesPanel />
           </Box>
         </Step>
+
+
         <Step data={"hydroclimates" as SectionId}>
           <Box
             id="hydroclimates"
@@ -360,7 +364,7 @@ export default function MapOverlayPanels() {
         <Step data={"outcomes-viz" as SectionId} progress>
           <Box
             sx={{
-              minHeight: "300vh",
+              minHeight: "100vh",
               position: "relative",
               pointerEvents: "none",
               paddingLeft: (theme) => theme.space.panel.paddingXl,
@@ -382,6 +386,71 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
+
+        <Step data={"data-in-depth-intro" as SectionId}>
+          <Box
+            id="data-in-depth-intro"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
+            }}
+          >
+            <DataInDepthPanel />
+          </Box>
+        </Step>
+
+        <Step data={"interpreting-outcomes" as SectionId}>
+          <Box
+            id="interpreting-outcomes"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
+            }}
+          >
+            <InterpretingOutcomesPanel />
+          </Box>
+        </Step>
+
+        <Step data={"choosing-scenarios" as SectionId}>
+          <Box
+            id="choosing-scenarios"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
+            }}
+          >
+            <ChooseScenariosPanel />
+          </Box>
+        </Step>
+
+
+        <Step data={"before-exploring" as SectionId}>
+          <Box
+            id="before-exploring"
+            sx={{
+              minHeight: "80vh",
+              display: "flex",
+              alignItems: "center",
+              pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
+            }}
+          >
+            <BeforeYouBeginPanel />
+          </Box>
+        </Step>
       </Scrollama>
     </Box>
   )

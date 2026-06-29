@@ -730,13 +730,16 @@ export default function TierAnimationSection() {
       // Reset storyboard state on exit so re-entry starts clean.
       // When scroll migration lands, beat position will be derived from
       // scroll progress and this reset won't be needed.
+      if (hasPlayedRef.current) {
+        progress.set(0)
+        backOutOpacity.set(1)
+      }
+
       setBeatIndex(0)
       beatIndexRef.current = 0
       setHasPlayed(false)
       hasPlayedRef.current = false
       setPlayState("idle")
-      progress.set(0)
-      backOutOpacity.set(1)
     }, [isActive, progress, backOutOpacity])
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
