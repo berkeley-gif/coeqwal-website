@@ -19,6 +19,7 @@ import {
   mapActions,
   useActiveOutcomeVisualization,
   useMapStore,
+  useActiveSection,
 } from "../../map/store"
 import {
   getOutcomeConfig,
@@ -67,8 +68,6 @@ import {
   type Arbiter,
   type HideScheduleEntry,
 } from "./engine"
-
-const STORYBOARD_CONTENT_OVERFLOW_PX = 320
 
 /* Beats where the squares are settled as a grid, so hovering or clicking a
  * single square is meaningful. Other settled beats (list-bar, radar,
@@ -140,7 +139,8 @@ export default function TierAnimationSection() {
 
   const panelRef = useRef<HTMLDivElement>(null)
 
-  const [panelInView, setPanelInView] = useState(false)
+  const activeSection = useActiveSection()
+  const isActive = activeSection === "outcomes-viz"
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref copy of `beatIndex` so navigation callbacks read the latest cursor
@@ -724,6 +724,21 @@ export default function TierAnimationSection() {
       return locData.ids.has(lid) ? lid : null
     }
 
+    useEffect(() => {
+      if (isActive) return
+
+      // Reset storyboard state on exit so re-entry starts clean.
+      // When scroll migration lands, beat position will be derived from
+      // scroll progress and this reset won't be needed.
+      setBeatIndex(0)
+      beatIndexRef.current = 0
+      setHasPlayed(false)
+      hasPlayedRef.current = false
+      setPlayState("idle")
+      progress.set(0)
+      backOutOpacity.set(1)
+    }, [isActive, progress, backOutOpacity])
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onMouseMove = (e: any) => {
       if (!layerId || !map.getLayer(layerId)) return
@@ -790,46 +805,6 @@ export default function TierAnimationSection() {
       map.getCanvas().style.cursor = ""
     }
   }, [isInteractive, mapHoverCode, mapAPI.mapRef])
-
-  /* Activate persistent map (no visualization until interactive mode). */
-  useEffect(() => {
-    mapActions.setMapMode("get-started")
-
-    const suppressInterval = setInterval(() => {
-      if (polygonsAllowedRef.current) {
-        clearInterval(suppressInterval)
-        return
-      }
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      if (!map?.isStyleLoaded?.()) return
-      try {
-        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-          if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
-          if (map.getLayer(outline))
-            map.setPaintProperty(outline, "line-opacity", 0)
-        }
-      } catch {
-        /* ok */
-      }
-    }, 50)
-
-    return () => {
-      clearInterval(suppressInterval)
-      mapActions.setMapMode("hidden")
-      mapActions.clearOutcomeVisualization()
-
-      if (mapAPI.mapRef?.current) {
-        try {
-          mapAPI.mapRef.current.easeTo({
-            padding: { top: 0, bottom: 0, left: 0, right: 0 },
-            duration: 0,
-          })
-        } catch {
-          /* ok */
-        }
-      }
-    }
-  }, [mapAPI.mapRef])
 
   /* Keep outcome visualization scenario in sync with hydroclimate. */
   useEffect(() => {
@@ -1069,7 +1044,7 @@ export default function TierAnimationSection() {
   } = useScreenPolygonProjection({
     panelRef,
     isLoading,
-    panelInView,
+    panelInView: isActive,
     centroids,
     allLocationIds,
     outcomeLocations,
@@ -1086,12 +1061,9 @@ export default function TierAnimationSection() {
    * prime the map session (collect polygons, baseline the demand-units
    * palette). */
   useStoryboardCamera({
-    panelRef,
-    panelInView,
-    setPanelInView,
+    isActive,
     isLoading,
     mapAPI,
-    home: { center: CAM_CENTER, zoom: CAM_ZOOM },
     computePolygonDataRef,
     applyPanelOffsetRef,
     polygonsAllowedRef,
@@ -1127,7 +1099,7 @@ export default function TierAnimationSection() {
       progress,
       backOutOpacity,
       prefersReducedMotion,
-      panelInView,
+      panelInView: isActive,
       mapAPI,
       cameraArbiter: CAMERA_ARBITER,
       animPolygonLayers: ANIM_POLYGON_LAYERS,
@@ -1171,9 +1143,7 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: getStartedViewportCardHeightCss(theme, {
-          contentOverflowPx: STORYBOARD_CONTENT_OVERFLOW_PX,
-        }),
+        height: "100vh",
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
@@ -1261,10 +1231,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                        setSpotlightedTier((prev) =>
-                          prev === tier ? null : tier,
-                        )
-                      }
+                      setSpotlightedTier((prev) =>
+                        prev === tier ? null : tier,
+                      )
+                    }
                     : undefined
                 }
               />

@@ -18,7 +18,7 @@ export default function WelcomePanel() {
   const dropletIcon = <WaterDroplet />
 
   return (
-    <Box sx={{ pt: `${WELCOME_TOP_MARGIN_PX}px` }}>
+    <Box>
       <PanelShell background={theme.palette.tabPanels.exploreDeep}>
         <PanelHeading title="What is the COEQWAL scenario library and how should I use it?" />
 

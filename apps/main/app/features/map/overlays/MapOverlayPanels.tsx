@@ -25,6 +25,7 @@ import { PanelEyebrow } from "./PanelEyebrow"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel } from "../../scenarioExplorer/getStarted/panels"
+import TierAnimationSection from "../../scenarioExplorer/animation/TierAnimationSection"
 
 
 // ============================================================================
@@ -69,6 +70,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <CallResponsePanel
@@ -103,6 +106,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <CallResponsePanel
@@ -144,6 +149,8 @@ export default function MapOverlayPanels() {
               minHeight: "150vh",
               position: "relative",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <Box
@@ -195,6 +202,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <CallResponsePanel
@@ -221,6 +230,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <CallResponsePanel
@@ -289,6 +300,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <WelcomePanel />
@@ -315,6 +328,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <HydroclimateFuturesPanel />
@@ -328,11 +343,45 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
             <KeyOutcomesPanel />
           </Box>
         </Step>
+
+        {/* ==================== Storyboard ====================
+        300vh runway gives the click-driven storyboard room to sit.
+        sticky + 100vh pins it in view while the user is in this section.
+        progress={true} is prep for scroll-driven migration — onStepProgress
+        will eventually write the storyboard's MotionValue instead of Next/Back.
+        */}
+        <Step data={"outcomes-viz" as SectionId} progress>
+          <Box
+            sx={{
+              minHeight: "300vh",
+              position: "relative",
+              pointerEvents: "none",
+              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingRight: (theme) => theme.space.panel.padding,
+            }}
+          >
+            <Box
+              sx={{
+                position: "sticky",
+                top: 0,
+                height: "100vh",
+                // Re-enable pointer events for Play/Next/Back controls
+                // and interactive squares.
+                pointerEvents: "auto",
+              }}
+            >
+              <TierAnimationSection />
+            </Box>
+          </Box>
+        </Step>
+
       </Scrollama>
     </Box>
   )

@@ -65,8 +65,6 @@ export function CallResponsePanel({
         alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        paddingLeft: (theme: Theme) => theme.space.panel.paddingXl,
-        paddingRight: (theme: Theme) => theme.space.panel.padding,
       }}
     >
       <motion.div
