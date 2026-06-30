@@ -31,14 +31,9 @@ export default function BarIllustration() {
   const eyebrowSx = {
     display: "block",
     color: theme.palette.grey[700],
-    fontSize: "0.6875rem",
-    fontWeight: 700,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    lineHeight: 1,
   }
 
-  const panelBg = "#faf8f5"
+  const panelBg = theme.palette.undertone.warm
   const ruleColor = theme.palette.divider
 
   return (
@@ -69,7 +64,7 @@ export default function BarIllustration() {
             borderRight: `1px solid ${ruleColor}`,
           }}
         >
-          <Typography component="span" sx={eyebrowSx}>
+          <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
             Bar chart
           </Typography>
           <Box
@@ -102,7 +97,7 @@ export default function BarIllustration() {
             gap: 1,
           }}
         >
-          <Typography component="span" sx={eyebrowSx}>
+          <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
             Tiers
           </Typography>
           <TourTierLegend bare compact />
