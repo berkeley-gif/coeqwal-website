@@ -92,7 +92,7 @@ export interface HydroclimateDef {
  * below all derive from this, so there is one place to edit.
  *
  * apiId must match the numeric hydroclimate_id the API returns for this
- * climate's scenarios. See the "Add a hydroclimate" guide in the
+ * climate's scenarios. See the "How to add a hydroclimate" guide in the
  * scenario explorer README.
  */
 export const HYDROCLIMATE_DEFS = [

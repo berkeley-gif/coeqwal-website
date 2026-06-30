@@ -6,10 +6,11 @@ React visualization components for the COEQWAL scenario explorer, built with D3.
 
 ```
 packages/viz/src/
-├── components/       # All chart and glyph components
+├── components/       # Chart and glyph components
 ├── hooks/            # useResizeObserver
-├── utils/            # D3 helpers, color palettes
+├── utils/            # D3 helpers, color palettes, tier-scale math, shape morphing, clustering
 ├── types.ts          # Shared interfaces (ChartConfig, DecileData, etc.)
+├── types/            # Ambient module declarations (e.g. mapbox-gl-compare)
 └── index.ts          # Barrel exports
 ```
 
@@ -130,6 +131,21 @@ They still follow the same definition/export/props conventions but skip the
 `useResizeObserver` + `useCallback` + `useEffect` pattern since there is no imperative DOM
 manipulation.
 
+### A complete worked example
+
+The skeleton above is intentionally minimal. `RadarPlot` (`src/components/RadarPlot.tsx`) is the fullest real example. Open it alongside this map of where each convention shows up:
+
+- **Definition and export** - `const RadarPlot: React.FC<RadarPlotProps> = React.memo(...)`, then `RadarPlot.displayName = "RadarPlot"` and `export default RadarPlot`.
+- **Plain props, events out** - inputs are data plus callbacks (`onLineHover`, `onLineClick`, `onDotClick`, `onPinnedToggle`, `onAxisPositions`, `onReady`). It reads no store and fetches nothing.
+- **Callbacks held in refs** - `onLineHoverRef` and `onDotHoverRef` mirror the incoming callbacks so the D3 draw code calls the latest version without listing it as a `useCallback` dependency.
+- **Debounced, deduped hover notifications** - the dot `mouseenter` handler compares against `lastNotifiedIdRef` and only fires after `HOVER_NOTIFY_MS` (80 ms), so sweeping across one scenario's dots notifies the parent at most once.
+- **Guarded entrance animation** - `hasAnimatedRef` plays the fly-in once, then later redraws run at duration 0.
+- **Hoisted constants** - sizing and color defaults (`RADAR_DOT_R`, `RADAR_DIM_OPACITY`, and friends) live at module scope rather than in destructuring defaults, so they keep a stable identity across renders.
+
+The last three bullets are the [Avoiding hover flicker](#avoiding-hover-flicker-in-d3-charts) rules in practice. `RadarPlotSnapshot` is the capture sibling: it pre-binds `interactive={false}` and `animate={false}` so an offscreen host can paint a single static frame for share thumbnails, which only works because `RadarPlot` reads no store.
+
+For how a consuming app wires one of these charts (store-driven data, memoized props, hover and share callbacks), see ["Write your visualization"](../../apps/main/app/features/scenarioExplorer/README.md#write-your-visualization-repoviz) in the Scenario Explorer README.
+
 ## Avoiding hover flicker in D3 charts
 
 D3 imperative charts are sensitive to unnecessary React re-renders because each render of the
@@ -165,7 +181,7 @@ tooltipRef.current!.style.display = "none"
 ### 2. Debounce parent notifications
 
 When a chart calls `onLineHover?.(scenario)`, this typically triggers `setState` in the parent
-(e.g. ComparisonPanel), which re-renders the entire parent tree. Even if `React.memo` prevents
+(e.g. RadarPanel), which re-renders the entire parent tree. Even if `React.memo` prevents
 the chart from re-rendering, the parent reconciliation can block the main thread and delay paint
 of the D3 hover visuals.
 
@@ -280,10 +296,14 @@ useEffect(() => {
 
 ## Exports
 
-The barrel file (`src/index.ts`) re-exports every component as a named export alongside its
-props type. It also exports:
+The barrel file (`src/index.ts`) is the authoritative export list. It re-exports each public
+component as a named export, usually alongside its props type, plus:
 
-- **D3 (curated)** - `curveBasis`, `timeFormat`, `interpolateRgb`, `range`, `max`, `scaleLinear`, `area`, `line`, `mean`, `extent`, `ticks`, `scaleBand`, `select`, and types `ScaleLinear`, `Area`
+- **Curated D3 re-exports** - a hand-picked set of D3 functions and types so consumers import them from `@repo/viz` rather than adding `d3` themselves. Currently includes the scales (`scaleLinear`, `scaleBand`, `scalePoint`, `scaleTime`), shape generators (`line`, `area`, the `curve*` family), selection (`select`), array/stat helpers (`extent`, `max`, `min`, `mean`, `range`, `ticks`, `bisector`), formatting (`format`, `timeFormat`, `interpolateRgb`), CSV helpers (`csv`, `csvParse`, `autoType`), and the types `Area`, `ScaleLinear`, `ScalePoint`, `ScaleTime`. Add to this list in `src/index.ts` when a consumer needs a new symbol.
 - **`useResizeObserver`** - shared responsive sizing hook
-- **D3 utilities** - `parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
-- **Color palettes** - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light→dark for chart indices), `getThemeLineColor` from `utils/themeLineColors.ts`
+- **D3 utilities** (`utils/d3-utils.ts`) - `parseDecileData`, `createDecileColorScale`, `createCategoricalColorScale`, `formatValue`, `calculateChartDimensions`, `getNestedValue`
+- **Tier-scale helpers** (`utils/tierScale.ts`) - `TIER_COUNT`, `TIER_LEVELS`, `normalizedToRadar`, `radarValueToTier`, `clampTier`
+- **Color palettes** (`utils/themeLineColors.ts`) - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light-to-dark for chart indices), `getThemeLineColor`, and the `ThemeKey` type
+- **Shape morphing** (`utils/shape-morph.ts`) - `resampleClosedPath`, `rectPoints`, `diamondPoints`, `circlePoints`, `lineSegmentPoints`, `pointsToD`, `easeInOut`, `lerp`, the `POINTS_PER_SHAPE` / `SQUARE_SIZE` / `SQUARE_GAP` constants, and the `ShapeMorphData` type
+- **Clustering** (`utils/clustering.ts`) - `hierarchicalRowOrder`
+- **Sidebar-highlight policy** (`utils/sidebarHighlightPolicy.ts`) - `isFullOpacityDuringSidebarHighlight`
