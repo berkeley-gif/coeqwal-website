@@ -151,7 +151,6 @@ export function saveShareState(
     }
     localStorage.setItem(SHARE_STORAGE_KEY, JSON.stringify(envelope))
   } catch {
-    // localStorage full or unavailable, silently ignore;
-    // in-memory state still works for the rest of the session.
+    // localStorage full or unavailable, silently ignore.
   }
 }
