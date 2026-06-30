@@ -15,8 +15,8 @@
  */
 
 import React, { useState, useMemo } from "react"
-import { Box, Typography, Tooltip, useTheme } from "@repo/ui/mui"
-import { CompactSelect } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { CompactSelect, HoverTip } from "@repo/ui"
 import { PercentileMatrix } from "@repo/viz"
 import type {
   ReservoirData,
@@ -302,7 +302,6 @@ export default function EnvFlowSection({
               </Box>
             }
             placement="bottom-start"
-            arrow
           >
             <Box
               component="span"
@@ -326,7 +325,7 @@ export default function EnvFlowSection({
             >
               ?
             </Box>
-          </Tooltip>
+          </HoverTip>
         </Box>
         {isVolume && (
           <CompactSelect

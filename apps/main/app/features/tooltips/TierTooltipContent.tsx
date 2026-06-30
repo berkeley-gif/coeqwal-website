@@ -4,7 +4,7 @@
  * TierTooltipContent - Shared tier tooltip content
  *
  * Displays outcome tier descriptions in a consistent format.
- * Used by TierLegend, ClickTooltip, and HybridTooltip.
+ * Used by TierLegend, TierTooltipPortal, and InfoPopover.
  *
  * WCAG 4.1.2: When scenarioLabel + chartData are provided, displays the
  * scenario's actual tier level with a visual indicator, making glyph data

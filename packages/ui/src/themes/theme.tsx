@@ -1,4 +1,5 @@
 import { createTheme, Theme, alpha } from "@mui/material/styles"
+import { tooltipSurface } from "../components/common/tooltips/tooltipSurface"
 
 /* ========================================================
  * COEQWAL MUI THEME
@@ -1778,6 +1779,7 @@ const theme = createTheme({
         enterNextDelay: 100, // Faster subsequent tooltips
       },
       styleOverrides: {
+        // Single source of truth for the tooltip look: see tooltipSurface
         tooltip: ({ theme }) => ({
           backgroundColor: theme.palette.background.paper,
           color: theme.palette.text.primary,
@@ -1795,7 +1797,7 @@ const theme = createTheme({
         arrow: ({ theme }) => ({
           color: theme.palette.background.paper,
           "&::before": {
-            border: `1px solid ${theme.palette.action.hover}`,
+            border: theme.border.light,
           },
         }),
         // Create a safe area between trigger and tooltip
