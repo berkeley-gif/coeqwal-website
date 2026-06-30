@@ -22,7 +22,8 @@ export function useRadarPlotTheme(): RadarPlotPalette {
   const theme = useTheme()
 
   const gridStroke = theme.palette.grey[300]
-  const tierLabelText = theme.palette.text.secondary
+  // Match the axis (spoke) titles, which use brand.panelDark via axisTitleFill.
+  const tierLabelText = theme.palette.brand.panelDark
   const commonWhite = theme.palette.common.white
   const rangeBandFill = theme.palette.grey[300]
   const rangeBandStroke = theme.palette.grey[400]
