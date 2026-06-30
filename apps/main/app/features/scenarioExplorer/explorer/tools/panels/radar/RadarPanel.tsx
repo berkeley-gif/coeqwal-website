@@ -25,7 +25,7 @@ import {
   type RadarAxisLabelDetailChromeOptions,
   type VerticalParallelLineData,
 } from "@repo/viz"
-import { ChartToast, ClickTooltip } from "@repo/ui"
+import { ChartToast, InfoPopover } from "@repo/ui"
 import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { useTierChartData } from "../../hooks/useTierChartData"
 import { useRadarPlotTheme } from "./useRadarPlotTheme"
@@ -932,7 +932,7 @@ export default function RadarPanel({
                       lineHeight: 0,
                     }}
                   >
-                    <ClickTooltip
+                    <InfoPopover
                       open={isOpen}
                       onClose={closeInfoTooltip}
                       placement="top"
@@ -998,7 +998,7 @@ export default function RadarPanel({
                           />
                         </Box>
                       </span>
-                    </ClickTooltip>
+                    </InfoPopover>
                   </Box>
                 )
               })}

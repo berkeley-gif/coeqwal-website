@@ -440,7 +440,7 @@ export function GridSpanRow({
       >
         {label && (
           <Typography
-            variant="smallSectionLabel"
+            variant="compactCaptionMedium"
             sx={{
               textTransform: "uppercase",
               letterSpacing: "0.06em",

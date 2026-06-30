@@ -2,6 +2,26 @@
 
 The mainstem of the COEQWAL website. A statically-exported Next.js 15 (App Router) app that pairs an interactive Mapbox basemap with a scrolling intro and a three-tab explorer (Learn / Explore / Share). It's the application visitors land on at the project's primary domain.
 
+## Feature READMEs
+
+- [Map feature](app/features/map/README.md)
+- [Scenario Explorer](app/features/scenarioExplorer/README.md)
+- [Animation (Get-started storyboard)](app/features/scenarioExplorer/animation/README.md)
+- [Share system](app/features/scenarioExplorer/explorer/share/README.md)
+- [Data in Depth](app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/README.md)
+- [Tour subsystem](app/features/scenarioExplorer/explorer/tools/tour/README.md)
+
+## How-tos
+
+- [How to add a visualization tool](app/features/scenarioExplorer/README.md#how-to-add-a-visualization-tool)
+- [How to add a hydroclimate](app/features/scenarioExplorer/README.md#how-to-add-a-hydroclimate)
+- [How to add a variant (share)](app/features/scenarioExplorer/explorer/share/README.md#how-to-add-a-variant)
+- [How to add or change a beat (animation)](app/features/scenarioExplorer/animation/README.md#how-to-add-or-change-a-beat)
+- [How to add a tour to a new tool](app/features/scenarioExplorer/explorer/tools/tour/README.md#how-to-add-a-tour-to-a-new-tool)
+- [How to add a new point outcome to the map](app/features/map/README.md#how-to-add-a-new-point-outcome-to-the-map)
+- [How to add a camera zoom for an outcome](app/features/map/README.md#how-to-add-a-camera-zoom-for-an-outcome)
+- [How to measure the extent of a Mapbox layer](app/features/map/README.md#how-to-measure-the-extent-of-a-mapbox-layer)
+
 ## Routes
 
 | Path     | What it is                                                                             |
@@ -23,7 +43,8 @@ Workspace packages (consumed via `workspace:*` in `package.json`):
 | `@repo/motion`         | Animated transitions in `app/sections/IntroSection.tsx`, tab panels, scenario explorer cards                                                 |
 | `@repo/scrollytelling` | `StickyScrollSection`, `useScrollProgress`, `useMeetingProgress` in `app/sections/IntroSection.tsx` and the Learn-tab scenes                 |
 | `@repo/state`          | Zustand + Immer re-exports backing `app/features/map/store.ts` and `app/features/scenarioExplorer/store.ts`                                  |
-| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/tools/panels/dataInDepth` and `app/features/scenarios/components/shared`           |
+| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/explorer/tools/panels/dataInDepth` and `app/features/scenarios/components/shared`   |
+| `@repo/i18n`           | `TranslationProvider` in `app/layout.tsx`, wrapping the whole app for locale-aware copy                                                      |
 
 Notable third-party packages in this app's `package.json`:
 
@@ -53,7 +74,7 @@ StrictMode
                 └── {children}                                 (page content)
 ```
 
-**Translation provider:** Wrapping `DataProvider`, `ThemeRegistry`, and all layout chrome as shown. We can swap the new translation package in at that layer.
+**Translation provider:** `TranslationProvider` from `@repo/i18n` wraps `DataProvider`, `ThemeRegistry`, and all layout chrome as shown, so every component below it can read locale-aware copy.
 
 `app/page.tsx` (Server Component) renders the home-only stack:
 
@@ -75,7 +96,7 @@ The map is `position: fixed` at `zIndex.persistentMap`, behind everything. `Main
 
 `next.config.js` sets `output: "export"`. All pages render to static HTML at build time and deploy as plain files (via AWS Amplify). Implications:
 
-- No API routes, no middleware, no `revalidate`. Data fetching is client-side via SWR against `https://api.coeqwal.org`.
+- No API routes, no middleware, no `revalidate`. Data fetching is client-side via SWR against `https://api.coeqwal.org/api` (the `DEFAULT_API_BASE` in `@repo/data`, overridable via `<DataProvider apiBaseUrl={...}>`).
 - `NEXT_PUBLIC_MAPBOX_TOKEN` must be set at build time.
 - Anything that touches `useSearchParams()` must sit under a `Suspense` boundary because search params are not knowable until the client hydrates (see next section).
 
@@ -89,6 +110,8 @@ Every `useSearchParams()` call in client code suspends during static export. The
 | `ActiveThemePanel`   | `app/layout.tsx`                | reads `?theme=` to decide visibility |
 | `WaterThemesPanel`   | `app/sections/IntroSection.tsx` | reads `?theme=` via `usePanelRoute`  |
 | `TabPanels`          | `app/page.tsx`                  | reads `?tab=` for active-tab sync    |
+
+`ThemePanel` and the get-started `WaterIssuesPanel` also read `?theme=` through `usePanelRoute`, but they render inside one of the boundaries above (the `Header` / `ActiveThemePanel` / `WaterThemesPanel` subtree and the `TabPanels` subtree respectively), so they do not need their own.
 
 ### Error boundaries
 
@@ -104,9 +127,9 @@ Three layers, from broadest to narrowest:
 | ---------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
 | `?tab=`                                  | `TabPanels` (URL `<->` `activeTab` sync)                           | `TabPanels`, plus URL-init read at mount                       |
 | `?theme=`                                | `usePanelRoute` (open/close theme panels)                          | `Header`, `ActiveThemePanel`, `WaterThemesPanel`, `ThemePanel` |
-| `?climate=`, `?items=`, `?story=`, `?v=` | Share-card encoder in `app/features/scenarioExplorer/share/url.ts` | `useShareUrlRehydration` hook (mount-once)                     |
+| `?climate=`, `?items=`, `?story=`, `?v=` | Share-card encoder in `app/features/scenarioExplorer/explorer/share/url.ts` | `useShareUrlRehydration` hook (mount-once)           |
 
-Share-link rehydration uses `window.location.search` directly inside a mount `useEffect` (see `app/features/scenarioExplorer/share/useShareUrlRehydration.ts`) so it does not call `useSearchParams` and does not need a Suspense ancestor. Only `?tab=` and `?theme=` are read through `useSearchParams`, which is why those are the only Suspense-causing parameters.
+Share-link rehydration uses `window.location.search` directly inside a mount `useEffect` (see `app/features/scenarioExplorer/explorer/share/useShareUrlRehydration.ts`) so it does not call `useSearchParams` and does not need a Suspense ancestor. Only `?tab=` and `?theme=` are read through `useSearchParams`, which is why those are the only Suspense-causing parameters.
 
 ### State management
 

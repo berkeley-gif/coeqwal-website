@@ -425,7 +425,7 @@ export function OutcomeGlyphItem({
             <Typography
               component="div"
               sx={{
-                fontFamily: themeValues.fontFamily.display,
+                fontFamily: theme.fontFamily.display,
                 fontSize: "0.8125rem",
                 fontWeight: 600,
                 lineHeight: 1.2,

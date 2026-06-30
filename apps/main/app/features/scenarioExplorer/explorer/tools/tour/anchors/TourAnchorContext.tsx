@@ -1,20 +1,18 @@
 "use client"
 
 /**
- * TourAnchorContext. Lightweight registry that lets chart components
- * expose DOM elements to the tour runner by a stable string id, without
- * having to wire refs up through props.
+ * TourAnchorContext. A registry that maps a stable string id to a live
+ * DOM element, so the tour can find controls (a button, a chart axis)
+ * that live anywhere in the app and mount at different times.
  *
- * Typical usage inside a chart subcomponent:
+ *   register:  useTourAnchor("list.toolbar.search") gives a ref to attach
+ *   resolve:   the runner calls resolve("list.toolbar.search")
  *
- *   const tourRef = useTourAnchor("list.toolbar.search")
- *   return <Box ref={tourRef}>...</Box>
- *
- * The registry keeps an id -> Element map in a mutable ref. Writes
- * (from registering elements) do not trigger re-renders. Only the tour
- * runner's own state changes trigger re-renders when it looks up
- * targets. If two components register the same id, the most recently
- * mounted wins.
+ * Kept in a ref, not state, so controls registering and unregistering
+ * do not re-render the tree. Because the runner may resolve before a
+ * control mounts, the registry notifies subscribers on change
+ * (subscribe/notify); useTourAnchorResolver listens and re-renders only
+ * the runner.
  */
 
 import React, {
@@ -37,10 +35,10 @@ type AnchorMap = Map<string, Element>
 interface TourAnchorContextValue {
   register: (id: string, el: Element | null) => void
   resolve: (id: string) => Element | null
-  /** Increasing counter that the runner can subscribe to
-   *  to re-render when any anchor changes. Exposed through a subscribe
-   *  callback so readers can opt in without causing unrelated
-   *  re-renders. */
+  /** Register a listener that fires whenever any anchor is added,
+   *  replaced, or removed. `useTourAnchorResolver` uses this to bump a
+   *  version counter and re-render, so readers opt in explicitly and
+   *  components that only register anchors avoid unrelated re-renders. */
   subscribe: (listener: () => void) => () => void
 }
 

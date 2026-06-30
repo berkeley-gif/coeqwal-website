@@ -1816,7 +1816,7 @@ export default function OutcomeMorphOverlay({
           padding: "3px 8px",
           borderRadius: 4,
           background: alpha(theme.palette.common.white, 0.92),
-          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          boxShadow: theme.shadow.marker,
           fontFamily: "inherit",
           fontSize: 11,
           lineHeight: 1.3,

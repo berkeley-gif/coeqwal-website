@@ -57,7 +57,7 @@ export function AddedEntityChips({
             py: 0.25,
             backgroundColor: theme.palette.grey[100],
             borderRadius: theme.borderRadius.sm,
-            fontSize: "0.75rem",
+            typography: "compactCaption",
           }}
         >
           {item.label}
