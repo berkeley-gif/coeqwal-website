@@ -141,7 +141,7 @@ function BandsLegend({
           borderRadius: "2px",
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Min–max
       </Box>
       <Box
@@ -154,7 +154,7 @@ function BandsLegend({
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         10–90th
       </Box>
       <Box
@@ -167,7 +167,7 @@ function BandsLegend({
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         30–70th
       </Box>
       <Box
@@ -180,7 +180,7 @@ function BandsLegend({
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Median
       </Box>
     </Box>
@@ -331,18 +331,7 @@ export default function DeltaSection({
     <>
       {/* Sticky scenario header. Soft drop shadow matches the List view's
           pinned block so content reads as scrolling under a fixed header. */}
-      <Box
-        sx={{
-          position: "sticky",
-          top: 64,
-          zIndex: 9,
-          backgroundColor: theme.palette.background.paper,
-          py: theme.space.component.sm,
-          mx: -theme.space.component.xl,
-          px: theme.space.component.xl,
-          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
-        }}
-      >
+      <Box sx={theme.scenarios.stickyScenarioHeader}>
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader
             scenarios={scenarios}

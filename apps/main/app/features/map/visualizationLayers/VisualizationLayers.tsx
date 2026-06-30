@@ -447,7 +447,7 @@ export default function VisualizationLayers({
                     p: "3px 8px",
                     borderRadius: "4px",
                     background: alpha(theme.palette.common.white, 0.75),
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                    boxShadow: theme.shadow.marker,
                     fontSize: 11,
                     lineHeight: 1.3,
                     textAlign: "center",

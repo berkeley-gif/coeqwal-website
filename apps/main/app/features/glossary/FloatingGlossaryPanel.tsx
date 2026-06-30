@@ -251,9 +251,10 @@ export function FloatingGlossaryPanel({
                 {term.icon}
               </Box>
               <Typography
-                variant="body1Medium"
+                variant="body1"
                 component="h3"
                 color="blue.darkest"
+                sx={{ fontWeight: 500, lineHeight: 1.6 }}
               >
                 {term.term}
               </Typography>

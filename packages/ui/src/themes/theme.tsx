@@ -20,7 +20,7 @@ import { tooltipSurface } from "../components/common/tooltips/tooltipSurface"
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
  *                       Typography variants: h1, h2-h6, body1, body2,
- *                       nav (tracked uppercase text), tabLabel, tabLabelDocked, storyBody, displayBody,
+ *                       nav (tracked uppercase text), tabLabel, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline,
  *                       compactTitle-micro, axisLabel, scenarioTitle, …
  *
@@ -230,6 +230,9 @@ const typeScale = {
   h5: "1.84rem", // 29.4px - Explorer titles
   h6: "1.38rem", // 22.1px - Category labels
 
+  // Dense UI controls: buttons, tabs, toggles, form labels
+  uiControl: "0.95rem", // 15.2px
+
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
     title: "0.9rem", // 14.4px
@@ -414,6 +417,10 @@ const shadow = {
   sm: "0 2px 4px rgba(0,0,0,0.10)", // Elevated cards, panels
   md: "0 4px 8px rgba(0,0,0,0.12)", // Dropdowns, tooltips, overlays
   lg: "0 8px 16px rgba(0,0,0,0.15)", // Modals, large panels
+  // Soft raised shadow for sticky section/grid headers (negative spread keeps the edge tight)
+  stickyHeader: "0 4px 8px -2px rgba(0,0,0,0.1)",
+  // Small ambient shadow for floating map markers and labels
+  marker: "0 1px 4px rgba(0,0,0,0.12)",
   // Focus rings (accessibility) - 3:1+ contrast against their target background
   focusOnLight: "0 0 0 3px rgba(25, 118, 210, 0.7)", // #1976D2 at 70% - 4.5:1 vs white
   focusOnDark: "0 0 0 3px rgba(100, 181, 246, 0.85)", // #64B5F6 at 85% - 5:1 vs dark
@@ -803,6 +810,21 @@ export const themeValues = {
         transformOrigin: "100% 50%",
       } as const,
     },
+
+    // Sticky header for Data in Depth scenario sections: pins below the tool's
+    // fixed top bar (64px) so chart content scrolls under a soft-shadowed band.
+    // Spacing multipliers mirror space.component.sm (py) and space.component.xl (mx/px).
+    // Usage: <Box sx={theme.scenarios.stickyScenarioHeader}>
+    stickyScenarioHeader: {
+      position: "sticky",
+      top: 64,
+      zIndex: 9,
+      backgroundColor: palette.common.white,
+      py: 1,
+      mx: -3,
+      px: 3,
+      boxShadow: shadow.stickyHeader,
+    } as const,
   },
 }
 
@@ -987,12 +1009,6 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.75,
     },
-    body1Medium: {
-      fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.25rem", // 20px - same as body1
-      fontWeight: 500,
-      lineHeight: 1.6,
-    },
     body2: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.1rem", // 17.6px - secondary body text (DisplayBlock mobile)
@@ -1057,15 +1073,6 @@ const theme = createTheme({
       letterSpacing: "0.01rem",
       textTransform: "capitalize" as const,
     },
-    // Tab labels - docked state (with header)
-    tabLabelDocked: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "1rem",
-      fontWeight: 500,
-      lineHeight: 1.1,
-      letterSpacing: "0.01em",
-      textTransform: "none" as const,
-    },
     dashboard: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem", // 14px
@@ -1073,7 +1080,15 @@ const theme = createTheme({
       lineHeight: 1.5,
       letterSpacing: "normal",
     },
-    smallSectionLabel: {
+    // 600-weight sibling of `dashboard` (14px), e.g. chart legend labels
+    dashboardBold: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.875rem", // 14px
+      fontWeight: 600,
+      lineHeight: 1.3,
+    },
+    // 500-weight sibling of `compactCaption` (12px) for small section labels
+    compactCaptionMedium: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
       fontWeight: 500,
@@ -1228,7 +1243,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "3px",
+          borderRadius: themeValues.borderRadius.sm,
           textDecoration: "none",
           boxShadow: themeValues.shadow.md,
         },
@@ -1239,7 +1254,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           // keep MUI's focus ring behavior sane
-          borderRadius: "3px",
+          borderRadius: themeValues.borderRadius.sm,
         },
       },
     },
@@ -1315,7 +1330,7 @@ const theme = createTheme({
             boxShadow: "none",
             border: "none",
             padding: "16px",
-            fontSize: "0.95rem",
+            fontSize: typeScale.uiControl,
             fontWeight: 400,
             textAlign: "center",
             transition: themeValues.transition.default,
@@ -1507,7 +1522,7 @@ const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
-          fontSize: "0.95rem",
+          fontSize: typeScale.uiControl,
           fontWeight: 500,
           backgroundColor: "transparent",
           color: theme.palette.text.primary,
@@ -1561,7 +1576,7 @@ const theme = createTheme({
           // Map custom variants to semantic HTML elements
           // Block variants (render as <p> or <div>)
           dashboard: "p",
-          smallSectionLabel: "p",
+          compactCaptionMedium: "p",
           outcomeLabel: "div",
           outcomeHeader: "p",
           scenarioTitle: "h3",
@@ -1574,6 +1589,7 @@ const theme = createTheme({
           axisLabel: "span",
           compactCaption: "span",
           compactMicro: "span",
+          dashboardBold: "span",
         },
       },
       variants: [
@@ -1714,7 +1730,7 @@ const theme = createTheme({
           margin: 0, // Remove default margins for condensed spacing
           alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
-            fontSize: "0.95rem",
+            fontSize: typeScale.uiControl,
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
@@ -1736,7 +1752,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary,
-          fontSize: "0.95rem",
+          fontSize: typeScale.uiControl,
           fontWeight: 400,
           textTransform: "none",
           minWidth: "auto",
@@ -1765,7 +1781,15 @@ const theme = createTheme({
       styleOverrides: {
         // Single source of truth for the tooltip look: see tooltipSurface
         tooltip: ({ theme }) => ({
-          ...tooltipSurface(theme),
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.action.hover}`,
+          borderRadius: theme.borderRadius.md,
+          boxShadow: themeValues.shadow.md,
+          fontSize: "0.875rem",
+          fontWeight: 400,
+          lineHeight: 1.4,
+          padding: theme.spacing(themeValues.spacing.component.lg),
           maxWidth: themeValues.layout.maxWidth.sm,
           // Add pointer events so tooltip can be hovered
           pointerEvents: "auto",
@@ -1818,6 +1842,7 @@ theme.textShadow = themeValues.textShadow
 theme.transition = themeValues.transition
 theme.scenarios = themeValues.scenarios
 theme.space = themeValues.spacing
+theme.fontFamily = themeValues.fontFamily
 
 export default theme
 
@@ -1918,6 +1943,8 @@ declare module "@mui/material/styles" {
     scenarios: typeof themeValues.scenarios
     // Semantic spacing tokens
     space: typeof themeValues.spacing
+    // Font families (text + display)
+    fontFamily: typeof themeValues.fontFamily
   }
 
   // ThemeOptions interface - optional versions for createTheme()
@@ -1940,13 +1967,12 @@ declare module "@mui/material/styles" {
   interface TypographyVariants {
     fontWeightSemiBold: number
     h2Main: React.CSSProperties
-    body1Medium: React.CSSProperties
     nav: React.CSSProperties
     tabLabel: React.CSSProperties
-    tabLabelDocked: React.CSSProperties
     dashboard: React.CSSProperties
+    dashboardBold: React.CSSProperties
     displayBody: React.CSSProperties
-    smallSectionLabel: React.CSSProperties
+    compactCaptionMedium: React.CSSProperties
     outcomeLabel: React.CSSProperties
     outcomeHeader: React.CSSProperties
     compactTitle: React.CSSProperties
@@ -1961,13 +1987,12 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
     h2Main?: React.CSSProperties
-    body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
     tabLabel?: React.CSSProperties
-    tabLabelDocked?: React.CSSProperties
     dashboard?: React.CSSProperties
+    dashboardBold?: React.CSSProperties
     displayBody?: React.CSSProperties
-    smallSectionLabel?: React.CSSProperties
+    compactCaptionMedium?: React.CSSProperties
     outcomeLabel?: React.CSSProperties
     outcomeHeader?: React.CSSProperties
     compactTitle?: React.CSSProperties
@@ -1993,13 +2018,12 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     h2Main: true
-    body1Medium: true
     nav: true
     tabLabel: true
-    tabLabelDocked: true
     dashboard: true
+    dashboardBold: true
     displayBody: true
-    smallSectionLabel: true
+    compactCaptionMedium: true
     outcomeLabel: true
     outcomeHeader: true
     compactTitle: true

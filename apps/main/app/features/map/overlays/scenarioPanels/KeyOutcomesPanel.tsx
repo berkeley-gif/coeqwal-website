@@ -188,7 +188,7 @@ export function KeyOutcomesPanel({
       <HydroclimateGate scenarioId={scenarioId} variant="block">
         {/* Multiple location outcomes - first 5 */}
         <Typography
-          variant="smallSectionLabel"
+          variant="compactCaptionMedium"
           sx={{ mb: theme.space.component.sm }}
         >
           Multiple location outcomes
@@ -210,7 +210,7 @@ export function KeyOutcomesPanel({
 
         {/* Single location outcomes - last 4 */}
         <Typography
-          variant="smallSectionLabel"
+          variant="compactCaptionMedium"
           sx={{ mb: theme.space.component.sm }}
         >
           Single location outcomes
