@@ -85,7 +85,7 @@ export function InfoPopover({
   })
 
   const handleTriggerClick = (e: React.MouseEvent) => {
-    // In controlled mode the parent owns opening; just forward the click.
+    // In controlled mode the parent owns opening. Just forward the click.
     if (!isControlled) onToggle()
     children.props.onClick?.(e)
   }

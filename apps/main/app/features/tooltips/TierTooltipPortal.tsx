@@ -4,7 +4,7 @@
  * TierTooltipPortal - Tier tooltip shown next to its glyph.
  *
  * Positioning, the arrow, and the mobile-modal fallback all come from the
- * shared AnchoredPortal; this component only supplies the tier content and
+ * shared AnchoredPortal. This component only supplies the tier content and
  * close button. Click-away and Escape call onClose (debounced upstream to
  * survive the opening click); the X button calls onForceClose.
  *

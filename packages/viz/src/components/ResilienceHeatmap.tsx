@@ -15,7 +15,7 @@
  * Follows the @repo/viz hover-flicker rules:
  *  - Ref-based tooltip (no useState), two flavors: cell + axis label.
  *  - Debounced onCellHover via startTransition in the parent.
- *  - updateChart deps are minimal; callbacks live in refs.
+ *  - updateChart deps are minimal. Callbacks live in refs.
  */
 
 import React, { useRef, useEffect, useCallback, useMemo } from "react"
@@ -196,15 +196,15 @@ export interface ResilienceHeatmapProps {
     entry: ResilienceGlyphEntry
   }) => void
   /**
-   * Row keys to keep at full opacity; rows whose key is not in the set
+   * Row keys to keep at full opacity. Rows whose key is not in the set
    * are dimmed. Pass `null` or an empty set to disable dimming. The viz
-   * is agnostic about where the set comes from; in this app it is
+   * is agnostic about where the set comes from. In this app it is
    * typically driven by sidebar / scenario-list hover, but any caller
    * can supply it (or omit it) and the chart works unchanged.
    */
   highlightedRowKeys?: Set<string> | null
   /**
-   * Column keys to keep at full opacity; columns whose key is not in the
+   * Column keys to keep at full opacity. Columns whose key is not in the
    * set are dimmed. Used when the horizontal axis is scenarios (e.g.
    * by-hydroclimate view, aggregate over hydroclimates).
    */
@@ -253,7 +253,7 @@ export interface ResilienceHeatmapProps {
    * Capture-mode props. Off-screen capture sets all three:
    *  - `interactive=false`: skips all hover/click handler attachment
    *    so the rendered SVG carries no listener residue.
-   *  - `animate=false`: reserved for future transitions; the heatmap
+   *  - `animate=false`: reserved for future transitions. The heatmap
    *    has none today, so this is currently a no-op flag kept for
    *    parity with `RadarPlot`.
    *  - `onReady`: invoked once after the first successful render
@@ -277,7 +277,7 @@ export interface ResilienceColumnGroup {
 
 // Hydroclimate (column) labels render ABOVE the plot, so the top
 // margin owns the x-axis label band plus an optional column-group
-// header; the bottom margin is just a small pad plus (when present)
+// header. The bottom margin is just a small pad plus (when present)
 // the shared tier legend. Left margin is sized for outcome row ticks;
 // right margin is a small pad unless a row marginal strip needs room
 // (extraRight is added dynamically).
@@ -338,7 +338,7 @@ function clamp(n: number, lo: number, hi: number): number {
 
 /**
  * Piecewise-linear interpolation across 5 diverging anchors. Input value
- * is a tier delta; domain clamps to [-3, +3].
+ * is a tier delta. Domain clamps to [-3, +3].
  */
 function divergingColor(
   value: number,
@@ -548,7 +548,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       [onDarkTier, onLightTier],
     )
 
-    // Primitives used inside updateChart; destructured so the memo dep
+    // Primitives used inside updateChart. Destructured so the memo dep
     // signature stays stable when palette object identity changes.
     const {
       text: paletteText,
@@ -578,7 +578,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           }
           const fill = divergingColor(dv, palette)
           const text = formatDelta(dv)
-          // Dark anchors only at large magnitudes; use dark-on-light for mid,
+          // Dark anchors only at large magnitudes. Use dark-on-light for mid,
           // light-on-dark at the extremes.
           const absDv = Math.abs(dv)
           const textColor = absDv >= 2 ? onDarkTier : onLightTier
@@ -1828,7 +1828,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         cellRender,
         showCellNumbers,
         // `palette` itself is read for its diverging / density /
-        // leverage gradient stops; the seven primitives below are
+        // leverage gradient stops. The seven primitives below are
         // destructured from `palette` at the top of the component
         // and used as bare identifiers inside `updateChart`, so
         // ESLint can't see they're derived. Listing them explicitly

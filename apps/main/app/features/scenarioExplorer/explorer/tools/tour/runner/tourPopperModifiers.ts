@@ -3,7 +3,7 @@
 /**
  * buildTourPopperModifiers - Popper.js modifier config for an anchored
  * tour card, pulled out of `ToolTour` so the render path stays
- * scannable. Pure function of the step; no React.
+ * scannable. Pure function of the step. No React.
  *
  *  - offset: a fixed gap from the anchor on the main axis. On the cross
  *    axis the card can "skid" past the anchor by a multiple of the

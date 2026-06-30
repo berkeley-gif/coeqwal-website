@@ -24,12 +24,12 @@
  *
  *   ToolTour                 This file. Orchestrates: read store, pick the
  *                            step, render scrim + card + ring, call the hooks
- *   TourCard                 Card shell; composes the header/dots/actions
+ *   TourCard                 Card shell. Composes the header/dots/actions
  *   TourCardHeader           Eyebrow + step counter + close
  *   TourStepDots             Progress dots
  *   TourCardActions          Skip / Back / Next buttons
  *   HighlightRing            Portal overlay ring, RAF-tracked to anchor bounds
- *   TourBodyContent          Renders step body; replaces `{{infoIcon}}`
+ *   TourBodyContent          Renders step body. Replaces `{{infoIcon}}`
  *   tourPopperModifiers      Builds the anchored card's Popper.js modifiers
  *   useTourAnchorElement     Resolve step anchor id to an element (+ late mounts)
  *   useTourKeyboardNav       Esc / arrow-key navigation while active
@@ -168,7 +168,7 @@ export default function ToolTour() {
   /** Popper when anchor resolves; otherwise fixed card at bottom center */
   const useCentered = !step.anchorId || anchorEl === null
 
-  // Same card for both layouts; only its positioning wrapper differs.
+  // Same card for both layouts. Only its positioning wrapper differs.
   const card = (
     <TourCard
       step={step}

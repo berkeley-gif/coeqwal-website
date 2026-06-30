@@ -28,7 +28,7 @@ export type ShareScenarioLookup = Map<string, ShareScenarioInfo>
  *
  * The live radar data comes from `useShareRadarLive`, supplied by the
  * `ShareRadarLiveProvider` that wraps each share surface. That provider
- * fetches every hydroclimate and scales with the 
+ * fetches every hydroclimate and scales with the
  * `HYDROCLIMATES` list, so nothing here changes when a climate is added.
  */
 export function useShareRenderContext() {

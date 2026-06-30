@@ -89,15 +89,15 @@ Two principles tie these together.
 
 ### Files for each box above
 
-| Box | File |
-| --- | --- |
-| progress clock, engine context | `TierAnimationSection.tsx` |
-| ACTOR_GROUPS | `engine/actorGroups.ts` |
-| BeatEngine | `engine/BeatEngine.ts` |
-| Playback arbiters | `engine/arbiters/{MapPaint, MapPopup, OverlayPopup, Narration, OverlayMorph}Arbiter.ts` |
-| Interactive layer director | `engine/InteractiveLayerDirector.ts`, `engine/arbiters/InteractivePaintArbiter.ts`, `engine/arbiters/PolygonLayerDriver.ts`, `interactiveLayerSchema.ts` |
-| Overlays (text, morph) | `BeatTextOverlay.tsx` (panel shell), `Narration.tsx` (left-column copy), `StoryboardControls.tsx` (controls), `useOutcomeLabelGeometry.ts` (label math), `OutcomeMorphOverlay.tsx` (SVG morph) |
-| Mapbox layers | shared app map via `@repo/map` |
+| Box                            | File                                                                                                                                                                                           |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| progress clock, engine context | `TierAnimationSection.tsx`                                                                                                                                                                     |
+| ACTOR_GROUPS                   | `engine/actorGroups.ts`                                                                                                                                                                        |
+| BeatEngine                     | `engine/BeatEngine.ts`                                                                                                                                                                         |
+| Playback arbiters              | `engine/arbiters/{MapPaint, MapPopup, OverlayPopup, Narration, OverlayMorph}Arbiter.ts`                                                                                                        |
+| Interactive layer director     | `engine/InteractiveLayerDirector.ts`, `engine/arbiters/InteractivePaintArbiter.ts`, `engine/arbiters/PolygonLayerDriver.ts`, `interactiveLayerSchema.ts`                                       |
+| Overlays (text, morph)         | `BeatTextOverlay.tsx` (panel shell), `Narration.tsx` (left-column copy), `StoryboardControls.tsx` (controls), `useOutcomeLabelGeometry.ts` (label math), `OutcomeMorphOverlay.tsx` (SVG morph) |
+| Mapbox layers                  | shared app map via `@repo/map`                                                                                                                                                                 |
 
 ## TierAnimationSection
 
@@ -179,24 +179,24 @@ Defined by `ActorGroup` in [engine/actorGroups.ts](engine/actorGroups.ts). An ac
 
 If you want to change the storyboard, these are the files to start from.
 
-| To change                                                             | Edit                                 | File                                                                       |
-| --------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------- |
-| Beat timing (progress targets, durations)                             | `TIMING_BEATS`                       | [animationTiming.ts](animationTiming.ts)                                   |
-| What plays during a beat (the actors)                                 | `ACTOR_GROUPS`                       | [engine/actorGroups.ts](engine/actorGroups.ts)                             |
-| Actor and payload shapes                                              | `Actor`, `ActorKind`, payload types  | [engine/types.ts](engine/types.ts)                                         |
-| How an effect is carried out                                          | the arbiter for that `kind`          | [engine/arbiters/](engine/arbiters/)                                       |
-| The dispatch loop (enter, update, exit)                               | `BeatEngine`                         | [engine/BeatEngine.ts](engine/BeatEngine.ts)                               |
-| Wiring and engine context                                             | `TierAnimationSection`               | [TierAnimationSection.tsx](TierAnimationSection.tsx)                       |
-| Play / Next / Back / Restart and keyboard shortcuts                   | `useStoryboardNavigation`            | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts)       |
+| To change                                                             | Edit                                 | File                                                                         |
+| --------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| Beat timing (progress targets, durations)                             | `TIMING_BEATS`                       | [animationTiming.ts](animationTiming.ts)                                     |
+| What plays during a beat (the actors)                                 | `ACTOR_GROUPS`                       | [engine/actorGroups.ts](engine/actorGroups.ts)                               |
+| Actor and payload shapes                                              | `Actor`, `ActorKind`, payload types  | [engine/types.ts](engine/types.ts)                                           |
+| How an effect is carried out                                          | the arbiter for that `kind`          | [engine/arbiters/](engine/arbiters/)                                         |
+| The dispatch loop (enter, update, exit)                               | `BeatEngine`                         | [engine/BeatEngine.ts](engine/BeatEngine.ts)                                 |
+| Wiring and engine context                                             | `TierAnimationSection`               | [TierAnimationSection.tsx](TierAnimationSection.tsx)                         |
+| Play / Next / Back / Restart and keyboard shortcuts                   | `useStoryboardNavigation`            | [hooks/useStoryboardNavigation.ts](hooks/useStoryboardNavigation.ts)         |
 | Interactive layer ownership + handoff                                 | `useInteractiveLayerDirector`        | [hooks/useInteractiveLayerDirector.ts](hooks/useInteractiveLayerDirector.ts) |
-| Projecting outcome geometry to screen polygons                        | `useScreenPolygonProjection`         | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts) |
-| The Beat 2 grid layout and feature hide schedule                      | `useStoryboardLayout`                | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts)               |
-| Panel-in-view detection and camera fly-home                           | `useStoryboardCamera`                | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts)               |
-| Narration copy and intro timing                                       | `NARRATION_BY_BEAT`, intro constants | [Narration.tsx](Narration.tsx)                                             |
-| Storyboard navigation buttons                                         | `StoryboardControls`                 | [StoryboardControls.tsx](StoryboardControls.tsx)                           |
-| Per-frame label geometry (titles, captions, radar and heatmap labels) | `useOutcomeLabelGeometry`            | [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts)                   |
-| The overlay panel shell and right-column grid                         | `BeatTextOverlay`                    | [BeatTextOverlay.tsx](BeatTextOverlay.tsx)                                 |
-| The SVG morph overlay                                                 | `OutcomeMorphOverlay`                | [OutcomeMorphOverlay.tsx](OutcomeMorphOverlay.tsx)                         |
+| Projecting outcome geometry to screen polygons                        | `useScreenPolygonProjection`         | [hooks/useScreenPolygonProjection.ts](hooks/useScreenPolygonProjection.ts)   |
+| The Beat 2 grid layout and feature hide schedule                      | `useStoryboardLayout`                | [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts)                 |
+| Panel-in-view detection and camera fly-home                           | `useStoryboardCamera`                | [hooks/useStoryboardCamera.ts](hooks/useStoryboardCamera.ts)                 |
+| Narration copy and intro timing                                       | `NARRATION_BY_BEAT`, intro constants | [Narration.tsx](Narration.tsx)                                               |
+| Storyboard navigation buttons                                         | `StoryboardControls`                 | [StoryboardControls.tsx](StoryboardControls.tsx)                             |
+| Per-frame label geometry (titles, captions, radar and heatmap labels) | `useOutcomeLabelGeometry`            | [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts)                     |
+| The overlay panel shell and right-column grid                         | `BeatTextOverlay`                    | [BeatTextOverlay.tsx](BeatTextOverlay.tsx)                                   |
+| The SVG morph overlay                                                 | `OutcomeMorphOverlay`                | [OutcomeMorphOverlay.tsx](OutcomeMorphOverlay.tsx)                           |
 
 ## The storyboard, beat by beat
 
@@ -204,7 +204,7 @@ Eight timing beats run from `progress` 0 to 1. Full per-beat timing lives in [an
 
 | Index | Id                    | Ends at progress | What the user sees                                                                                                                                                                 |
 | ----- | --------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0     | `legend`              | 0.225            | Intro paragraphs fade in and the tier legend is revealed. Starts when the visitor clicks Play, reduced motion jumps straight to the final beat.                                     |
+| 0     | `legend`              | 0.225            | Intro paragraphs fade in and the tier legend is revealed. Starts when the visitor clicks Play, reduced motion jumps straight to the final beat.                                    |
 | 1     | `collapse-and-colors` | 0.365            | Intro text collapses, the legend floats to the top, and the demand-unit layer cross-fades from a blue palette into agriculture tier colors while narration explains the colors.    |
 | 2     | `ag-rev-morph`        | 0.40             | The agriculture revenue polygons morph into distribution squares, with a before and after caption.                                                                                 |
 | 3     | `all-other-morphs`    | 0.50             | The remaining eight outcomes morph into distribution squares back to back.                                                                                                         |
@@ -219,10 +219,10 @@ Beats 3, 6, and 7 have empty actor arrays in the table. That is intentional, not
 
 Exactly one owner writes each interactive map layer at any time. The `interactiveLayerSchema.ts` lookup (derived from `OUTCOME_LAYER_REGISTRY`) maps each outcome to its layer family (`demand-units`, `polygon`, `river`, `marker`), the fill/outline ids, and the transition timings. The `InteractiveLayerDirector` reads that schema to pick the driver for a selection and to sequence the handoff: a same-layer change recolors in place, while a cross-family change fades the outgoing driver out and fades the incoming one in once the camera goes idle (a selection almost always flies the camera, so gating the fade-in on `idle` keeps the new layer from painting mid-flight). Ownership follows the engine mode and the play state.
 
-| Mode          | When                                                                | Owner of demand-units                                  |
-| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
-| `idle`        | Before Play, or after Restart                                       | No one. The layer sits at its invisible baseline.      |
-| `playback`    | A beat is tweening (`playState` is `playing`)                       | `MapPaintArbiter`, driven by progress-keyed actors.    |
+| Mode          | When                                                                | Owner of demand-units                                                      |
+| ------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `idle`        | Before Play, or after Restart                                       | No one. The layer sits at its invisible baseline.                          |
+| `playback`    | A beat is tweening (`playState` is `playing`)                       | `MapPaintArbiter`, driven by progress-keyed actors.                        |
 | `interactive` | The storyboard has settled on the final beat and the user can click | `InteractiveLayerDirector`, routing to the driver for the selected family. |
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).

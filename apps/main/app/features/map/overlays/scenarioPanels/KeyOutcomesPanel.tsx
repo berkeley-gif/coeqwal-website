@@ -177,7 +177,7 @@ export function KeyOutcomesPanel({
         sx={{
           ...theme.scenarios.panelTitle,
           // Tightened so the section labels below sit closer to the
-          // panel title; reclaims vertical runway so the full panel
+          // panel title. Reclaims vertical runway so the full panel
           // stack fits on shorter screens.
           mb: theme.space.component.xs,
         }}

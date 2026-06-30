@@ -168,23 +168,23 @@ Add a `getStarted/store.ts` only when a value must survive get-started panel nav
 
 These are intentional one-way reads, not shared state:
 
-| Caller                              | Reads                                  | Purpose                               |
-| ----------------------------------- | -------------------------------------- | ------------------------------------- |
-| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView`    | Mount get-started vs tools surface    |
-| `useExplorerMapLayout`              | shell `mainView` + explorer `showMap`  | Map pass-through styling per surface  |
+| Caller                              | Reads                                  | Purpose                                |
+| ----------------------------------- | -------------------------------------- | -------------------------------------- |
+| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView`    | Mount get-started vs tools surface     |
+| `useExplorerMapLayout`              | shell `mainView` + explorer `showMap`  | Map pass-through styling per surface   |
 | `useExplorerLifecycle`              | shell `mainView`                       | Scroll-to-tabs on get-started to tools |
-| Share tab (app)                     | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards      |
-| Get-started panels / animation      | map store, local state                 | No explorer store reads today         |
+| Share tab (app)                     | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards       |
+| Get-started panels / animation      | map store, local state                 | No explorer store reads today          |
 
 ### Three types of state
 
 Within the tools surface, new fields belong in one of three types. Two are **Zustand** slices inside `useExplorerStore`. The third is **React local state** (`useState` in a panel or section).
 
-| Type         | Mechanism | Where                                                         |
-| ------------ | --------- | ------------------------------------------------------------- |
-| Workspace    | Zustand   | `workspaceStoreSlice.ts`                                      |
+| Type         | Mechanism | Where                                                      |
+| ------------ | --------- | ---------------------------------------------------------- |
+| Workspace    | Zustand   | `workspaceStoreSlice.ts`                                   |
 | Tool session | Zustand   | `<tool>StoreSlice.ts` (list, radar, equity, resilience, …) |
-| Ephemeral    | React     | `useState` in a panel or section                              |
+| Ephemeral    | React     | `useState` in a panel or section                           |
 
 `useExplorerStore` is one Zustand instance composed from colocated slice files under [`explorer/store/`](explorer/store/).
 
@@ -351,9 +351,9 @@ A tool is a single panel registered as an `ExploreMode`. The shell is already mo
 
 **Two surfaces, two stores**
 
-| Surface     | Store                            | Key field                 | Renders           |
-| ----------- | -------------------------------- | ------------------------- | ----------------- |
-| Get started | `useScenarioExplorerStore`       | `mainView: "get-started"` | `GetStartedView`  |
+| Surface     | Store                                                          | Key field                 | Renders           |
+| ----------- | -------------------------------------------------------------- | ------------------------- | ----------------- |
+| Get started | `useScenarioExplorerStore`                                     | `mainView: "get-started"` | `GetStartedView`  |
 | Tools       | `useExplorerStore` via slice hooks (`useWorkspaceSlice`, etc.) | `exploreMode`             | `ActiveToolPanel` |
 
 When `mainView === "explorer"`, shared chrome is already mounted around your panel:
@@ -366,12 +366,12 @@ The sidebar, hydroclimate chooser, and map model/reveal are set up for all tools
 
 These are separate components.
 
-| Row | Component | What it shows | Typical tools |
-| --- | --- | --- | --- |
-| 1 | `ToolJourneyStrip` | Chart title + one-sentence purpose (+ "Take the tour" when a tour exists). Copy from `journey.ts`. | List, Radar, Distribution, Resilience |
-| 2 | `ToolToolbar` | Shared view controls: "Show map", "Choose locations to track", hydroclimate chooser | All tools except list-specific title layout |
-| 3 | `*ChartControls` (optional) | Tool-specific controls passed into `ToolIsland` (outcome pickers, share button, etc.) | Radar, Equity, Resilience |
-| 4 | Panel | Your chart or data view (`YourToolPanel`, `DataExplorerView`, etc.) | Every tool |
+| Row | Component                   | What it shows                                                                                      | Typical tools                               |
+| --- | --------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| 1   | `ToolJourneyStrip`          | Chart title + one-sentence purpose (+ "Take the tour" when a tour exists). Copy from `journey.ts`. | List, Radar, Distribution, Resilience       |
+| 2   | `ToolToolbar`               | Shared view controls: "Show map", "Choose locations to track", hydroclimate chooser                | All tools except list-specific title layout |
+| 3   | `*ChartControls` (optional) | Tool-specific controls passed into `ToolIsland` (outcome pickers, share button, etc.)              | Radar, Equity, Resilience                   |
+| 4   | Panel                       | Your chart or data view (`YourToolPanel`, `DataExplorerView`, etc.)                                | Every tool                                  |
 
 `ToolJourneyStrip` sits directly under `ExploreSubNav` and above `ToolToolbar`. Hiding the journey strip (step 8) removes row 1 only. `ToolToolbar` and your panel still render.
 
@@ -425,15 +425,15 @@ The table is the full registration checklist. Each row matches one numbered sect
 
 Steps 1-7 are required for every new tool. Step 8 is optional (only if your tool should hide `ToolJourneyStrip`, row 1 in the table above).
 
-| #   | File to edit                                       | What you do there                                                                                                          |
-| --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `explorer/tools/panels/<tool>/YourToolPanel.tsx`   | Create the panel component (plus optional data hook and chart controls in the same folder)                                 |
-| 2   | `explorer/tools/index.ts`                          | Export the panel and controls from the tools barrel                                                                        |
-| 3   | `explorer/ActiveToolPanel.tsx`                     | Add a `case` that mounts the panel inside `ToolErrorBoundary` + `ToolIsland`                                               |
-| 4   | `explorer/store/types.ts`                          | Add your mode string to the `ExploreMode` union                                                                            |
-| 5   | `explorer/tools/chrome/nav/ExploreSubNav.tsx`      | Add a sub-nav tab (icon, label, short purpose) so users can switch to your tool                                            |
-| 6   | `explorer/tools/chrome/layout/journey.ts`          | Register chart title and purpose copy for `ToolJourneyStrip` (row 1)                                                       |
-| 7   | `explorer/store/exploreSessionPersist.ts`          | Add your mode to the `EXPLORE_MODES` validation set so persisted sessions accept it                                        |
+| #   | File to edit                                       | What you do there                                                                                                                 |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `explorer/tools/panels/<tool>/YourToolPanel.tsx`   | Create the panel component (plus optional data hook and chart controls in the same folder)                                        |
+| 2   | `explorer/tools/index.ts`                          | Export the panel and controls from the tools barrel                                                                               |
+| 3   | `explorer/ActiveToolPanel.tsx`                     | Add a `case` that mounts the panel inside `ToolErrorBoundary` + `ToolIsland`                                                      |
+| 4   | `explorer/store/types.ts`                          | Add your mode string to the `ExploreMode` union                                                                                   |
+| 5   | `explorer/tools/chrome/nav/ExploreSubNav.tsx`      | Add a sub-nav tab (icon, label, short purpose) so users can switch to your tool                                                   |
+| 6   | `explorer/tools/chrome/layout/journey.ts`          | Register chart title and purpose copy for `ToolJourneyStrip` (row 1)                                                              |
+| 7   | `explorer/store/exploreSessionPersist.ts`          | Add your mode to the `EXPLORE_MODES` validation set so persisted sessions accept it                                               |
 | 8   | `explorer/tools/chrome/layout/UnifiedToolView.tsx` | Optional. Skip rendering `ToolJourneyStrip` for your mode (see the `data` tool and [Chrome exceptions](#chrome-exceptions) below) |
 
 **Step 1 - create the panel**
@@ -557,21 +557,25 @@ Hiding `ToolJourneyStrip` does **not** remove `ToolToolbar`. Users will still se
 
 ```tsx
 // UnifiedToolView.tsx - data tool today
-{exploreMode !== "data" && (
-  <Box sx={{ flexShrink: 0 }}>
-    <ToolJourneyStrip mode={exploreMode} />
-  </Box>
-)}
+{
+  exploreMode !== "data" && (
+    <Box sx={{ flexShrink: 0 }}>
+      <ToolJourneyStrip mode={exploreMode} />
+    </Box>
+  )
+}
 ```
 
 To also hide the strip for your tool, extend the condition:
 
 ```tsx
-{exploreMode !== "data" && exploreMode !== "yourTool" && (
-  <Box sx={{ flexShrink: 0 }}>
-    <ToolJourneyStrip mode={exploreMode} />
-  </Box>
-)}
+{
+  exploreMode !== "data" && exploreMode !== "yourTool" && (
+    <Box sx={{ flexShrink: 0 }}>
+      <ToolJourneyStrip mode={exploreMode} />
+    </Box>
+  )
+}
 ```
 
 If a tool is ever pre-registered as a placeholder (its `ExploreMode`, sub-nav tab, and chart copy already exist but `ActiveToolPanel` renders a stub), you only need steps 1-3 to swap in the real panel. A brand-new tool needs steps 1-7 (and 8 only when applicable).
@@ -580,10 +584,10 @@ If a tool is ever pre-registered as a placeholder (its `ExploreMode`, sub-nav ta
 
 Most tools use the shell as-is. A few special-case it:
 
-| Tool         | Exception                                                    |
-| ------------ | ------------------------------------------------------------ |
-| `list`       | No sidebar (`isListMode` in `ExplorerToolView`)              |
-| `resilience` | Hydroclimate chooser hidden in `ToolToolbar`                 |
+| Tool         | Exception                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| `list`       | No sidebar (`isListMode` in `ExplorerToolView`)                                              |
+| `resilience` | Hydroclimate chooser hidden in `ToolToolbar`                                                 |
 | `data`       | `ToolJourneyStrip` hidden in `UnifiedToolView`; `ToolToolbar` still shown (see step 8 above) |
 
 Adjust `ExplorerToolView`, `ToolToolbar`, `ExplorerSidebar`, or `UnifiedToolView` when your tool needs similar behavior.
@@ -785,7 +789,10 @@ The pattern: user clicks an element in the visualization -> write to the map sto
 
 ```typescript
 // From a file under explorer/tools/panels/<tool>/:
-import { mapActions, useActiveOutcomeVisualization } from "../../../../../map/store"
+import {
+  mapActions,
+  useActiveOutcomeVisualization,
+} from "../../../../../map/store"
 
 // Which outcome is currently shown on the map? (null if none)
 const activeVisualization = useActiveOutcomeVisualization()
@@ -898,12 +905,12 @@ Before opening a PR:
 
 #### Reference implementations
 
-| Tool            | Complexity   | Copy for                                                                       |
-| --------------- | ------------ | ------------------------------------------------------------------------------ |
-| **radar**       | Medium       | **Best folder-structure reference:** Chart + controls + share + tour + slice |
-| **equity**      | Medium       | Distribution chart + share                                                     |
-| **resilience**  | High         | Complex controls, multi-HC matrix, layered write model                         |
-| **list**        | Special      | No sidebar; grid layout; barChart share from rows; tour with demo effects      |
+| Tool            | Complexity   | Copy for                                                                                                |
+| --------------- | ------------ | ------------------------------------------------------------------------------------------------------- |
+| **radar**       | Medium       | **Best folder-structure reference:** Chart + controls + share + tour + slice                            |
+| **equity**      | Medium       | Distribution chart + share                                                                              |
+| **resilience**  | High         | Complex controls, multi-HC matrix, layered write model                                                  |
+| **list**        | Special      | No sidebar; grid layout; barChart share from rows; tour with demo effects                               |
 | **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; no share variant; `ToolJourneyStrip` hidden, `ToolToolbar` kept |
 
 See [Make your directory](#make-your-directory) for the `radar` folder layout.
@@ -911,8 +918,9 @@ See [Make your directory](#make-your-directory) for the `radar` folder layout.
 ## How to add a hydroclimate
 
 This walks through adding a new hydroclimate to the main app. The main idea is to:
-- register it app-wide once, 
-- the chooser and every tool pick it up, 
+
+- register it app-wide once,
+- the chooser and every tool pick it up,
 - and then a few tools need some local wiring.
 
 ### Before you start
@@ -969,6 +977,3 @@ A couple of spots still need a hand-edit, because the centralized list cannot ge
 Once the entry is in `HYDROCLIMATE_DEFS`, the derived constants update automatically. The toolbar chooser in `ToolToolbar` reads `hydroclimateOptions`, so the new climate appears in the UI. The resolver hooks read `HYDROCLIMATE_ID_MAP` to translate the store's hydroclimate string into the numeric `hydroclimate_id` and then into the correct variant `short_code` for each sibling group.
 
 Most tools need no further changes. Any panel that fetches tier data through `useResolvedScenarioTiers()` or resolves ids through `useResolvedIdMapping()` picks up the new climate when the user selects it in the chooser. You do not import the chooser or resolve scenario ids by hand in those tools.
-
-
-

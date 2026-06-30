@@ -17,7 +17,7 @@ export function LogoColor({ width = 150, className }: LogoColorProps) {
       viewBox="0 0 164.1 32.1"
       width={width}
       className={className}
-      // Decorative when inside a labeled button; standalone use should wrap with aria-label
+      // Decorative when inside a labeled button. Standalone use should wrap with aria-label
       aria-hidden="true"
       focusable="false"
     >

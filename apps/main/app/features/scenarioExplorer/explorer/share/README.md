@@ -20,17 +20,17 @@ Share button              (chart controls or scenario sidebar)
 
 **Read path:**
 
-| File | Role |
-| ---- | ---- |
-| `ShareItemView.tsx` | Single dispatcher: hands each `ShareItem` to `handlerForItem(item).renderCard` |
-| `ShareDataRehydrationHost.tsx` | Mounts each variant's optional `DataRehydrator` for URL-restored items |
-| `ShareDrawer.tsx` / `tab/SharePanel.tsx` | Share UI surfaces |
-| `url.ts` / `useShareUrlRehydration.ts` | Encode and decode share deep links |
-| `live/*` | Live fallback charts when `cachedSvg` is missing (e.g. URL load) |
-| `export/csv/*` | CSV bodies that handlers delegate to via `exportCsv` |
-| `persist.ts` | localStorage persistence for the share tray |
+| File                                                            | Role                                                                                                                                         |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ShareItemView.tsx`                                             | Single dispatcher: hands each `ShareItem` to `handlerForItem(item).renderCard`                                                               |
+| `ShareDataRehydrationHost.tsx`                                  | Mounts each variant's optional `DataRehydrator` for URL-restored items                                                                       |
+| `ShareDrawer.tsx` / `tab/SharePanel.tsx`                        | Share UI surfaces                                                                                                                            |
+| `url.ts` / `useShareUrlRehydration.ts`                          | Encode and decode share deep links                                                                                                           |
+| `live/*`                                                        | Live fallback charts when `cachedSvg` is missing (e.g. URL load)                                                                             |
+| `export/csv/*`                                                  | CSV bodies that handlers delegate to via `exportCsv`                                                                                         |
+| `persist.ts`                                                    | localStorage persistence for the share tray                                                                                                  |
 | `ShareRadarLiveProvider.tsx` / `hooks/useShareRenderContext.ts` | Build the shared `RenderContext` (scenario lookups, per-hydroclimate live radar data, outcome names) that both surfaces pass to `renderCard` |
-| `utils/shareRadarLiveData.ts` | `ShareRadarHydroKey` and the per-climate field shaping the provider fetches |
+| `utils/shareRadarLiveData.ts`                                   | `ShareRadarHydroKey` and the per-climate field shaping the provider fetches                                                                  |
 
 ## Files you will touch most
 
@@ -80,7 +80,7 @@ Steps 1-6 build the variant's data shape, capture, card, and registry handler. S
    myChart: { width: 600, height: 400 },
    ```
 
-The off-screen capture (the next two steps) has three layers. You write only the adapter; the other two you reuse:
+The off-screen capture (the next two steps) has three layers. You write only the adapter. The other two you reuse:
 
 - **Host** (`offscreenCapture` in `capture/OffscreenCaptureHost.tsx`): chart-agnostic engine. Mounts whatever element you give it into a hidden, fixed-size container, waits for `onReady`, then serializes the `<svg>` and rasterizes the PNG. You do not need to touch it.
 - **Snapshot** (`RadarPlotSnapshot`, `TierGridSnapshot` in `@repo/viz`): the render target. A thin wrapper that pins `interactive={false}` / `animate={false}` and forwards `onReady` (step 3).
@@ -111,11 +111,21 @@ The off-screen capture (the next two steps) has three layers. You write only the
      type: "myChart",
      urlPrefix: "m", // one unused letter, unique across the registry
      rasterDimensionsKey: "myChart",
-     renderCard(item, ctx) { /* return <ShareMyChartCard ... /> */ },
-     encodeUrlToken(item) { /* token body, no prefix */ },
-     decodeUrlToken(parts) { /* reverse of encodeUrlToken */ },
-     filenameLabel(item, lookups) { /* download basename, no extension */ },
-     exportCsv(item, lookups) { /* CSV body, or null when nothing to export */ },
+     renderCard(item, ctx) {
+       /* return <ShareMyChartCard ... /> */
+     },
+     encodeUrlToken(item) {
+       /* token body, no prefix */
+     },
+     decodeUrlToken(parts) {
+       /* reverse of encodeUrlToken */
+     },
+     filenameLabel(item, lookups) {
+       /* download basename, no extension */
+     },
+     exportCsv(item, lookups) {
+       /* CSV body, or null when nothing to export */
+     },
      DataRehydrator: ({ items, context }) => null, // optional, see below
    }
    ```
@@ -165,7 +175,11 @@ The off-screen capture (the next two steps) has three layers. You write only the
      return useMemo(
        () => ({
          chartControlsProps: { onSaveSnapshot: () => void saveSnapshot() },
-         sidebarProps: { onMyChartScenarioShare: (id: string) => { /* optional */ } },
+         sidebarProps: {
+           onMyChartScenarioShare: (id: string) => {
+             /* optional */
+           },
+         },
        }),
        [saveSnapshot],
      )
@@ -193,12 +207,12 @@ The off-screen capture (the next two steps) has three layers. You write only the
 
 ### Reference implementations
 
-| Variant | Key files | Reference when |
-| ------- | --------- | --------- |
-| **Equity** | `useEquityShareCapture.ts`, `OffscreenEquityCapture.tsx`, `variants/equity.ts`, `live/ShareEquityLiveChart.tsx` | New chart tool with toolbar/sidebar share, no panel capture refs |
-| **Radar** | `useRadarShareCapture.ts`, `RadarPanel.tsx` (staging), `OffscreenRadarCapture.tsx`, `variants/radar.ts` | Full pattern: panel ref registration, multi-scenario sidebar capture |
+| Variant        | Key files                                                                                                                                                                    | Reference when                                                          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Equity**     | `useEquityShareCapture.ts`, `OffscreenEquityCapture.tsx`, `variants/equity.ts`, `live/ShareEquityLiveChart.tsx`                                                              | New chart tool with toolbar/sidebar share, no panel capture refs        |
+| **Radar**      | `useRadarShareCapture.ts`, `RadarPanel.tsx` (staging), `OffscreenRadarCapture.tsx`, `variants/radar.ts`                                                                      | Full pattern: panel ref registration, multi-scenario sidebar capture    |
 | **Resilience** | `hooks/useResilienceShareCapture.ts`, `OffscreenResilienceCapture.tsx`, `OffscreenResiliencePanelCapture.tsx`, `variants/resilience.ts`, `live/ShareResilienceLiveChart.tsx` | Matrix or heatmap tool: panel and tile capture, two off-screen adapters |
-| **barChart** | `StrategyGridRow.tsx`, `variants/barChart.ts` | Row-level share from List view only, not a tool-panel template |
+| **barChart**   | `StrategyGridRow.tsx`, `variants/barChart.ts`                                                                                                                                | Row-level share from List view only, not a tool-panel template          |
 
 ## A note on the React rules of hooks
 

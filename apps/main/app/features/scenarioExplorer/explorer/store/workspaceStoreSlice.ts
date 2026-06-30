@@ -61,7 +61,7 @@ export interface WorkspaceState {
   showShareDrawer: boolean
   shareUrlVersionMismatch: boolean
 
-  // --- Chart cosmetics (radar panel, tier overlays; some list/radar hooks) ---
+  // --- Chart cosmetics (radar panel, tier overlays, some list/radar hooks) ---
   relativeToBaseline: boolean
   highlightBaseline: boolean
   overlayTiers: boolean

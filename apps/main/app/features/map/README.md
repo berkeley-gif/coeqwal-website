@@ -165,7 +165,7 @@ console.log(
 
 ### Step 4 Hardcode the result
 
-Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry entry. The `window.__mapInstance` assignment in `MapInstance.tsx` is dev-only and does not need to be removed - it is a no-op in production.
+Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry entry. The `window.__mapInstance` assignment in `MapInstance.tsx` is dev-only and does not need to be removed. It is a no-op in production.
 
 ---
 
@@ -180,4 +180,4 @@ All bounds constants live in `config/cameraPresets.ts` and are wired to outcomes
 | `RES_STOR`                     | `RES_STOR_BOUNDS`      | `[[-123.68, 36.26], [-117.66, 42.8]]`      | 7 reservoir markers, with extra vertical padding for the label stack above Trinity Lake                     |
 | `ENV_FLOWS`                    | `ENV_FLOWS_BOUNDS`     | `[[-123.804, 36.295], [-119.897, 41.72]]`  | 17 environmental-flow monitoring stations                                                                   |
 | `FW_DELTA_USES`                | `FW_DELTA_USES_BOUNDS` | `[[-121.82, 37.95], [-121.47, 38.2]]`      | 2 Delta salinity compliance stations (Emmaton + Jersey Point), `maxZoom: 9`                                 |
-| `FW_EXP`                       | `FW_EXP_BOUNDS`        | `[[-121.72, 37.75], [-121.49, 37.95]]`     | 2 export pumping plants (Banks + Jones), `maxZoom: 9`                                                        |
+| `FW_EXP`                       | `FW_EXP_BOUNDS`        | `[[-121.72, 37.75], [-121.49, 37.95]]`     | 2 export pumping plants (Banks + Jones), `maxZoom: 9`                                                       |

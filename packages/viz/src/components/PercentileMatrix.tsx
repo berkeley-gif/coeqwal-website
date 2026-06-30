@@ -1032,7 +1032,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
         }
 
         // Select base color scheme based on colorScheme prop
-        // A caller-supplied bandColors override wins; otherwise fall back to
+        // A caller-supplied bandColors override wins. Otherwise fall back to
         // the built-in delivery/shortage schemes. text/grid/etc are always
         // inherited from COLORS so only the band stops change.
         const baseColors = bandColors

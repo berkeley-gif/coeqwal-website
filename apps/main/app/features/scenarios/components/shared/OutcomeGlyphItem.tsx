@@ -6,9 +6,9 @@
  * Shared component for rendering outcome tier visualizations.
  * Used by both Learn mode (KeyOutcomesPanel) and Explore mode (StrategyGrid).
  *
- * The icon work throughout is provisional, until someone has time to make real 
+ * The icon work throughout is provisional, until someone has time to make real
  * icons.
- * 
+ *
  * Renders:
  * - ScenarioGlyph (bars or dots based on tier type)
  * - Outcome label

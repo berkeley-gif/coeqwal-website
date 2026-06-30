@@ -3,7 +3,7 @@
 /**
  * Presentational primitives for the resilience sentence-style controls
  *
- * ResilienceControls.tsx` focuses on state wiring and layout. 
+ * ResilienceControls.tsx` focuses on state wiring and layout.
  * These primitives are stateless building blocks:
  *
  *   PhraseButton   underlined inline trigger for a sentence phrase

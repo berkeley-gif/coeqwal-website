@@ -25,7 +25,7 @@ export interface StageShareItemArgs<T extends ShareItem, R> {
   /**
    * Build the share item from the capture result. Receives `null`
    * when the capture rejected or returned `null`. Always returns the
-   * item to stage; the share card can render without snapshot data.
+   * item to stage. The share card can render without snapshot data.
    */
   buildItem: (captured: R | null) => T
   /** Append the resulting item to the share drawer. */

@@ -1,7 +1,7 @@
 /**
  * Text-fitting math for the circle operation icons
- * 
- * The icon work throughout is provisional, until someone has time to make real 
+ *
+ * The icon work throughout is provisional, until someone has time to make real
  * icons.
  *
  * Estimates rendered line width and computes the largest font size that keeps

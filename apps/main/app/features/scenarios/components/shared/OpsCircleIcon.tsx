@@ -3,8 +3,8 @@
  *
  * Renders centered text lines inside a colored circle, auto-sizing the font to
  * fit, with optional custom SVG children and a diagonal strikethrough.
- * 
- * The icon work throughout is provisional, until someone has time to make real 
+ *
+ * The icon work throughout is provisional, until someone has time to make real
  * icons.
  */
 

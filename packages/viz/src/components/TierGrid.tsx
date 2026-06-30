@@ -675,7 +675,7 @@ export default function TierGrid({
   > | null>(null)
 
   // Refs let the d3 callbacks read the latest values without triggering
-  // a re-bind on every render; matches the pattern in RadarPlot and
+  // a re-bind on every render. Matches the pattern in RadarPlot and
   // ResilienceHeatmap.
   const interactiveRef = useRef(interactive)
   interactiveRef.current = interactive

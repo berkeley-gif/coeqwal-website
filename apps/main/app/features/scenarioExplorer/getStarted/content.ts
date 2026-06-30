@@ -149,8 +149,7 @@ export interface InterpretingLens {
 export const INTERPRETING_LENSES: ReadonlyArray<InterpretingLens> = [
   {
     label: "Trade-offs",
-    description:
-      "How outcomes improve or decline together across scenarios",
+    description: "How outcomes improve or decline together across scenarios",
   },
   {
     label: "Equity",

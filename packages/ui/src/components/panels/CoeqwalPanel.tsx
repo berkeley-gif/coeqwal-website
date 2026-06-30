@@ -12,17 +12,17 @@
  *   - optional children slot (for card grids, etc.)
  *
  * layout="single" .everything stacked left-aligned in one column
- * layout="split"  .headline spans full width; description sits in the
+ * layout="split"  .headline spans full width. Description sits in the
  *                    right half only
  *
  * Rounded-corner / inset support:
  *
  *   - `borderRadius` accepts a token key ("md", "lg", ...) or a raw
- *     number / CSS string; it is applied to the panel's outer (or inner,
+ *     number / CSS string. It is applied to the panel's outer (or inner,
  *     when inset) `Box` along with `overflow: hidden`.
  *   - `inset` pulls the panel in from the viewport edges so all four
  *     rounded corners are visible against a `frameBackground` frame.
- *     `inset={true}` uses a responsive default; pass `{ x, y }` to tune.
+ *     `inset={true}` uses a responsive default. Pass `{ x, y }` to tune.
  *   - Without `inset`, radius is applied in-place and only shows where
  *     a differently-coloured neighbour sits above / below.
  */
@@ -61,7 +61,7 @@ export interface CoeqwalPanelProps {
   cta?: React.ReactNode
   /**
    * "single" .headline + description stacked in one column (default)
-   * "split"  .headline spans full width; description in right half only
+   * "split"  .headline spans full width. Description in right half only
    */
   layout?: "single" | "split"
   /** Section background colour (default: theme.palette.common.white) */

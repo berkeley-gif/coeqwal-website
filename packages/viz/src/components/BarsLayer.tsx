@@ -17,7 +17,7 @@ import { SQUARE_SIZE, SQUARE_GAP } from "../utils/shape-morph"
  *
  * This component is pure SVG. No refs, no D3, no
  * theme dependency. Callers may override `trackColor` / `gridlineColor`
- * to thread theme tokens through; defaults match the previous hardcoded
+ * to thread theme tokens through. Defaults match the previous hardcoded
  * values so adopting BarsLayer is a no-op visually.
  */
 

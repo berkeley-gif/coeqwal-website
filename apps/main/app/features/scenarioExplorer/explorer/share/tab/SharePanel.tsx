@@ -183,7 +183,10 @@ function SharePanelContent() {
         overflow: "hidden",
       }}
     >
-      <ShareDataRehydrationHost items={shareItems} context={rehydrationContext} />
+      <ShareDataRehydrationHost
+        items={shareItems}
+        context={rehydrationContext}
+      />
       <Box
         sx={{
           flexShrink: 0,

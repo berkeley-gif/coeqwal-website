@@ -135,20 +135,29 @@ export class PolygonLayerDriver implements InteractiveLayerDriver {
               HIGHLIGHT_GOLD,
               spec.colorExpression,
             ])
-            map.setPaintProperty(spec.outlineId, "line-width", OUTLINE_ONLY_WIDTH)
+            map.setPaintProperty(
+              spec.outlineId,
+              "line-width",
+              OUTLINE_ONLY_WIDTH,
+            )
             map.setPaintProperty(spec.outlineId, "line-opacity", 1)
           } else {
-            const { lineColor, lineWidth, lineOpacity } = buildActiveOutlineExpr(
-              overlay.activeFeatureIds,
-              idProp,
-              spec.colorExpression,
-            )
+            const { lineColor, lineWidth, lineOpacity } =
+              buildActiveOutlineExpr(
+                overlay.activeFeatureIds,
+                idProp,
+                spec.colorExpression,
+              )
             map.setPaintProperty(spec.outlineId, "line-color", lineColor)
             map.setPaintProperty(spec.outlineId, "line-width", lineWidth)
             map.setPaintProperty(spec.outlineId, "line-opacity", lineOpacity)
           }
         } else {
-          map.setPaintProperty(spec.outlineId, "line-color", spec.colorExpression)
+          map.setPaintProperty(
+            spec.outlineId,
+            "line-color",
+            spec.colorExpression,
+          )
           map.setPaintProperty(
             spec.outlineId,
             "line-width",

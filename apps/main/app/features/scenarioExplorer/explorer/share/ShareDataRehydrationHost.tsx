@@ -5,14 +5,14 @@
  *
  * Mounts each variant's `DataRehydrator` once, with the share items
  * of that variant + a shared `DataRehydrationContext`. Renders no
- * visible UI; its only job is to keep the rules-of-hooks-bound
+ * visible UI. Its only job is to keep the rules-of-hooks-bound
  * data-fetching machinery alive while the share panel is open so
  * URL-restored items end up with `cachedChartData` populated before
  * the user clicks "Download all data".
  *
  * Why this lives here (and not in each card):
  * - Cards re-mount as the share tab is opened / closed and as items
- *   are added or removed; running fetches in card mounts would race
+ *   are added or removed. Running fetches in card mounts would race
  *   the bulk-export trigger.
  * - The bulk export needs `cachedChartData` for *every* item, not
  *   just the ones currently rendered into the story canvas. The host

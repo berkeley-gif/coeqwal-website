@@ -41,7 +41,7 @@ export function useRadarPlotTheme(): RadarPlotPalette {
       // change once the theme exposes a dedicated `baselineAccent` token.
       baselineColor: "#cc9a06",
       // Subtle outline so distribution dots read as discrete locations without
-      // adding a heavy black border; leaves theme-dark behaviour to a follow-up.
+      // adding a heavy black border. Leaves theme-dark behaviour to a follow-up.
       distributionDotStroke: "rgba(0,0,0,0.25)",
       // Slate-blue fallback used only when a row in `lineColors` is empty,
       // which the explore radar always populates via theme/scenario maps.

@@ -22,7 +22,7 @@ import type { EasingFunction } from "@repo/motion"
 export interface ScrollValueOptions {
   /**
    * Easing function(s) applied to each keyframe segment.
-   * A single function applies to all segments; an array applies one per segment.
+   * A single function applies to all segments. An array applies one per segment.
    * Common easings: easeIn, easeOut, easeInOut (import from @repo/scrollytelling).
    */
   ease?: EasingFunction | EasingFunction[]

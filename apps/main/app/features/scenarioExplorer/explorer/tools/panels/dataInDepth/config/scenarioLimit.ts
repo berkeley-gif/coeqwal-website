@@ -5,7 +5,7 @@
  * any number of scenarios. Data in Depth renders one chart column per scenario
  * and fans out one data hook per scenario, so it caps the comparison here
  * rather than globally. Selections beyond this limit are ignored by the Data in
- * Depth views only; other tools still see the full selection.
+ * Depth views only. Other tools still see the full selection.
  *
  * This must match MAX_FETCH_SLOTS in hooks/useMultiScenarioSlots.ts, which
  * hard-codes one fetch slot per scenario (it cannot read this value because the

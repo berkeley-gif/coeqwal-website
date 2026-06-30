@@ -83,7 +83,7 @@ export interface RadarPlotProps {
    * Min-height (px) on the chart root when `responsive` is true. The main
    * explorer panel uses 400 so the plot does not collapse while the column
    * is still measuring. Tight embeds (share card thumbnails) should pass 0
-   * so the root respects the parent height; otherwise 400 can clip or
+   * so the root respects the parent height. Otherwise 400 can clip or
    * scale incorrectly inside a small, overflow-hidden box.
    */
   containerMinHeight?: number
@@ -851,7 +851,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               baselineId: baselineData?.id ?? null,
             })
 
-          // 1. Tier zone rings (draw from outermost inward; each filled circle
+          // 1. Tier zone rings (draw from outermost inward. Each filled circle
           //    covers the inner portion of the previous one)
           if (showTierZones) {
             ;[...TIER_POSITIONS].forEach((t, i) => {
@@ -943,7 +943,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           })
 
           // Build dot positions for polygon drawing.
-          // Dense array indexed by axis position; entries are null when the
+          // Dense array indexed by axis position. Entries are null when the
           // scenario has no value on that axis. This lets the polygon
           // renderer split into open polylines around missing axes instead
           // of closing a chord across the gap.
@@ -954,7 +954,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           // non-null entries, honoring the wrap from the last index back to
           // the first. When every entry is non-null we emit a single closed
           // run (the original polygon). When any entry is null we emit one
-          // open run per non-null streak; runs of length 1 carry a single
+          // open run per non-null streak. Runs of length 1 carry a single
           // dot and produce no line segment. Each run also reports the
           // axis indices it covers so callers can rebuild matching paths
           // (e.g. for morph replay) keyed by axis name.
@@ -1553,7 +1553,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 if (!sid) return
                 const finalD = el.attr("d")
                 // Each rendered path knows which axes its run covers and
-                // whether it was drawn closed; we replay only when the
+                // whether it was drawn closed. We replay only when the
                 // morph snapshot has an old position on every axis in the
                 // run. If anything is missing, fall back to a fade-in so
                 // we never animate from a half-built shape.
@@ -1907,7 +1907,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       }
     }, [updateChart])
 
-    // Observe container size imperatively; call updateChart directly
+    // Observe container size imperatively. Call updateChart directly
     // without a React state roundtrip to avoid resize → re-render loops.
     useEffect(() => {
       const el = containerRef.current
@@ -2010,7 +2010,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       // pinnedScenarioIds is intentionally NOT a dep here: a pin
       // change goes through updateChart's full rebuild (it changes
       // distribution layer membership). highlightBaseline/baselineData
-      // are deps because the closure reads them; updateChart also
+      // are deps because the closure reads them. updateChart also
       // re-runs on those changes (redundant but harmless).
     }, [
       chosenIds,

@@ -38,7 +38,7 @@ export type EquityChartDataShape = {
  * Convert a distribution-card payload into a CSV table. Layout: one
  * row per (location, outcome) tier assignment, with a baseline-tier
  * column when comparison was on at capture time. Both the scenario
- * tier and baseline tier columns are integers 1-4; the canonical
+ * tier and baseline tier columns are integers 1-4. The canonical
  * tier scale legend rides through the shared header block.
  */
 export function equityDataToCSV(

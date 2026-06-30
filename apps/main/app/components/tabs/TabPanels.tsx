@@ -167,7 +167,7 @@ export default function TabPanels() {
   }, [activeTab, collapsedHeaderHeight, panelRef, tabsRef])
 
   // Background color tied to active tab
-  // Learn and Explore tabs use transparent - they manage their own backgrounds
+  // Learn and Explore tabs use transparent. They manage their own backgrounds
   // (Learn uses persistent map, Explore uses DashboardPanel with conditional background)
   // Note: Use rgba format for Framer Motion animation compatibility
   const panelColor: string = useMemo(() => {

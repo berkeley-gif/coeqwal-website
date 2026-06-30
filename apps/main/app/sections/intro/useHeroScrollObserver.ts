@@ -6,7 +6,7 @@
  *
  * `isPastHero` controls the Header's transparency transition: while
  * the hero video is mostly on-screen the header reads as transparent
- * over the dark video; once the user has scrolled into the About
+ * over the dark video. Once the user has scrolled into the About
  * panel the header swaps to its solid state.
  */
 

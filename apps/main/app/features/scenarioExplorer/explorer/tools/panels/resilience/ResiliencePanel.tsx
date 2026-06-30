@@ -9,7 +9,7 @@
  *
  * CONTENTS (in source order)
  * --------------------------
- *  1. Types and props   Result/data types live in ./types; ResiliencePanelProps here.
+ *  1. Types and props   Result/data types live in ./types. ResiliencePanelProps here.
  *  2. Store reads        resilience* slice fields + derived scenario/aggregate scope.
  *  3. Columns and rows   Hydroclimate/scenario columns, outcome row codes, row ids.
  *  4. Cell value builders buildValueFn, valueGrid, ordered keys, rows/cells.
@@ -119,10 +119,7 @@ export type {
   ResilienceHeatmapChartData,
   ResilienceCaptureResult,
 } from "./types"
-import type {
-  ResilienceChartDataRow,
-  ResilienceCaptureResult,
-} from "./types"
+import type { ResilienceChartDataRow, ResilienceCaptureResult } from "./types"
 
 export type {
   ResilienceCaptureFn,
@@ -213,16 +210,8 @@ export default function ResiliencePanel({
   } = useResilienceSlice()
   const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
 
-  // Legacy walkthrough-open state (unused. Guide lives in ResilienceControls).
-  // const [walkthroughOpen, setWalkthroughOpen] = useState(false)
-
-  // Effective per-view scenario scope. Mirrors the radar-panel pattern:
-  // when showAllScenarios is off, respect sidebar `selectedScenarios`;
-  // when on, fall back to all 24. Phase 1 renders a single heatmap. The
-  // by-scenario branch picks the first item as its focus and later
-  // phases will fan this out into small multiples.
   // ============================================================
-  // 2-3. Store-derived scope, columns, and rows
+  // Store-derived scope, columns, and rows
   // ============================================================
   const _effectiveScenarioScope = useMemo<readonly string[]>(() => {
     if (showAllScenarios) return [] // sentinel: "all" resolved from matrix
@@ -238,9 +227,7 @@ export default function ResiliencePanel({
   const scenarioRendersAsOverview =
     view === "scenario" && selectedScenarios.length === 0
   // "Empty" per-outcome only when neither the outcome-axis picker nor
-  // the primary/compare fields yield any renderable outcome - the axis
-  // picker is authoritative for what rows the chart shows, so treat it
-  // as the first source before falling back to "pick a primary".
+  // the primary/compare fields yield any renderable outcome.
   const hasOutcomeAxisSelection = useMemo(
     () =>
       resilienceVisibleOutcomes.some(
@@ -1531,7 +1518,7 @@ export default function ResiliencePanel({
   // ============================================================
   // 7. Interaction handlers (cell / tile / row / col / square hover + click)
   // Refactor backlog: the most interdependent cluster (timers, refs,
-  // pinned-square state). Highest regression risk; extract last.
+  // pinned-square state). Highest regression risk. Extract last.
   // ============================================================
   const handleCellHover = useCallback(
     (cell: ResilienceHeatmapCell | null) => {
@@ -1586,7 +1573,7 @@ export default function ResiliencePanel({
     [notifyChartHover],
   )
 
-  // Aggregate view has no "current" scenario/hydroclimate - every column
+  // Aggregate view has no "current" scenario/hydroclimate. Every column
   // and row aggregates across them. We anchor the map call on the
   // historical baseline (same scenarioId Get Started uses, which has the
   // widest /locations coverage) and bypass hydroclimate re-resolution so
@@ -1837,7 +1824,7 @@ export default function ResiliencePanel({
         // Location mode encodes LOIs. Entries carry no scenarioId, so we
         // defer to triggerMapForOutcome which picks between the
         // hydroclimate-aware and fixed-baseline paths based on view. Pin
-        // state below updates regardless - the guard inside the trigger
+        // state below updates regardless. The guard inside the trigger
         // prevents repeat clicks from toggling the layer off.
         triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
 
@@ -2177,7 +2164,7 @@ export default function ResiliencePanel({
       const tile = makeScenarioSoloMultiplesTile(scenarioId)
       if (!tile) return null
       // Refuse to capture an empty card. Happens when the user has cleared
-      // all hydroclimate chips or all outcome rows; the heatmap would
+      // all hydroclimate chips or all outcome rows. The heatmap would
       // render a blank thumbnail and the share card would be unhelpful.
       if (tile.cells.length === 0) {
         console.warn(

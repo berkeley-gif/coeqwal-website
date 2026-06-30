@@ -147,7 +147,7 @@ const CURRENT_OPS_COLOR = "#cc9a06"
  *
  * @param theme            - The scenario's theme key
  * @param indexWithinTheme - Zero-based position among selected scenarios of this theme
- * @param scenarioId       - Optional scenario ID; s0020 always gets CURRENT_OPS_COLOR
+ * @param scenarioId       - Optional scenario ID. s0020 always gets CURRENT_OPS_COLOR
  */
 export function getThemeLineColor(
   theme: ThemeKey,

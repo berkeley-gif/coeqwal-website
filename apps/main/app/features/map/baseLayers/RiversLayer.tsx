@@ -5,7 +5,7 @@
  *
  * Renders river lines with labels. Visibility controlled via Mapbox layout property.
  * Handles its own visualization coloring for Salmon abundance outcome.
- * 
+ *
  * Triple layered effect so it shows up on various basemaps.
  */
 

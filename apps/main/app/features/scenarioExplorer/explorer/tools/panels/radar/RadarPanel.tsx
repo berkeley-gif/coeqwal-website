@@ -154,7 +154,7 @@ interface RadarPanelProps {
   /**
    * Notifies the parent whether sidebar share icons (single-scenario
    * row icon + theme-header "share all") should be enabled. Sidebar
-   * actions don't depend on what's currently on the chart - they
+   * actions don't depend on what's currently on the chart. They
    * capture explicitly chosen scenarios. They only need at least one
    * axis selected, otherwise the captured card would be a blank
    * wireframe with no spokes.

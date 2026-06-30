@@ -43,7 +43,7 @@ Workspace packages (consumed via `workspace:*` in `package.json`):
 | `@repo/motion`         | Animated transitions in `app/sections/IntroSection.tsx`, tab panels, scenario explorer cards                                                 |
 | `@repo/scrollytelling` | `StickyScrollSection`, `useScrollProgress`, `useMeetingProgress` in `app/sections/IntroSection.tsx` and the Learn-tab scenes                 |
 | `@repo/state`          | Zustand + Immer re-exports backing `app/features/map/store.ts` and `app/features/scenarioExplorer/store.ts`                                  |
-| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/explorer/tools/panels/dataInDepth` and `app/features/scenarios/components/shared`   |
+| `@repo/viz`            | D3 chart components inside `app/features/scenarioExplorer/explorer/tools/panels/dataInDepth` and `app/features/scenarios/components/shared`  |
 | `@repo/i18n`           | `TranslationProvider` in `app/layout.tsx`, wrapping the whole app for locale-aware copy                                                      |
 
 Notable third-party packages in this app's `package.json`:
@@ -123,11 +123,11 @@ Three layers, from broadest to narrowest:
 
 ### URL state and deep links
 
-| Param                                    | Owner / writer                                                     | Reader                                                         |
-| ---------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `?tab=`                                  | `TabPanels` (URL `<->` `activeTab` sync)                           | `TabPanels`, plus URL-init read at mount                       |
-| `?theme=`                                | `usePanelRoute` (open/close theme panels)                          | `Header`, `ActiveThemePanel`, `WaterThemesPanel`, `ThemePanel` |
-| `?climate=`, `?items=`, `?story=`, `?v=` | Share-card encoder in `app/features/scenarioExplorer/explorer/share/url.ts` | `useShareUrlRehydration` hook (mount-once)           |
+| Param                                    | Owner / writer                                                              | Reader                                                         |
+| ---------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `?tab=`                                  | `TabPanels` (URL `<->` `activeTab` sync)                                    | `TabPanels`, plus URL-init read at mount                       |
+| `?theme=`                                | `usePanelRoute` (open/close theme panels)                                   | `Header`, `ActiveThemePanel`, `WaterThemesPanel`, `ThemePanel` |
+| `?climate=`, `?items=`, `?story=`, `?v=` | Share-card encoder in `app/features/scenarioExplorer/explorer/share/url.ts` | `useShareUrlRehydration` hook (mount-once)                     |
 
 Share-link rehydration uses `window.location.search` directly inside a mount `useEffect` (see `app/features/scenarioExplorer/explorer/share/useShareUrlRehydration.ts`) so it does not call `useSearchParams` and does not need a Suspense ancestor. Only `?tab=` and `?theme=` are read through `useSearchParams`, which is why those are the only Suspense-causing parameters.
 

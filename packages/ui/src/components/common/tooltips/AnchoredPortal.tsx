@@ -4,7 +4,7 @@
  * AnchoredPortal - Shows content next to an element, positioned for the device.
  *
  * On desktop it uses an MUI Popper with a dynamic arrow that flips to stay in
- * the viewport; below the sm breakpoint it falls back to a centered MobileModal.
+ * the viewport. Below the sm breakpoint it falls back to a centered MobileModal.
  * Styling comes from tooltipSurface, and callers pass their own content (and
  * close button) as children.
  */
@@ -59,7 +59,7 @@ export interface AnchoredPortalProps {
 
 /**
  * Arrow that points at the anchor. Popper's arrow modifier sets the top/left
- * offset along the relevant edge; this only paints the rotated square.
+ * offset along the relevant edge. This only paints the rotated square.
  */
 function PortalArrow({
   placement,
