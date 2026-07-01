@@ -1,0 +1,139 @@
+name: CI
+
+# Pull-request quality gate for coeqwal-website.
+#
+# This is the first PR-gating workflow in the repo. It runs the checks that
+# already exist as package.json scripts and rolls them up into a single `gate`
+# status check — the only context a branch ruleset needs to require.
+#
+# HOW TO EXTEND (keep this contract):
+#   - Add a REQUIRED check: add its job, then append the job id to `gate.needs`.
+#     The gate is default-deny over `needs`, so the new job is enforced
+#     automatically — you do NOT edit shell logic, and branch protection is
+#     unchanged.
+#   - Add an ADVISORY check: give it its own job with `continue-on-error: true`
+#     and do NOT add it to `gate.needs` (see the `build` job). It reports its own
+#     status without gating merges.
+#
+# Required today: static-checks (format:check + lint + check-types).
+# Advisory today: build — it compiles the shipped static export, verifies it,
+# and uploads it, but does not gate merges. It is promoted to required (moved
+# into gate.needs, continue-on-error removed) once the Turbo build env is fully
+# declared and Amplify parity is proven.
+#
+# SECURITY: this is a `pull_request` workflow that checks out and executes
+# untrusted fork code (install/rebuild run arbitrary lifecycle scripts). Do NOT
+# add secrets here and never switch to `pull_request_target`. Any secret-needing
+# job belongs in a separate, non-fork-triggered workflow. NEXT_PUBLIC_* values
+# are public and passed as repository variables, not secrets.
+#
+# Setup order is load-bearing: pnpm/action-setup runs BEFORE actions/setup-node
+# so pnpm is on PATH when setup-node reads `packageManager: pnpm@10` for its
+# cache. Running setup-node first trips Corepack ("Unable to locate executable
+# file: pnpm"). Do not reorder these steps.
+
+on:
+  pull_request:
+    branches: [dev, main]
+  # Re-run on the branch tip after merge so a protected branch keeps a recorded
+  # status for the same contexts.
+  push:
+    branches: [dev, main]
+  # Run inside a merge queue if one is ever enabled, so the required `gate`
+  # reports there too.
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # Cancel superseded runs only for pull requests; never cancel push/merge_group
+  # runs, so the recorded status on a protected branch tip is not lost.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  static-checks:
+    name: static-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6 # installs pnpm from packageManager; MUST precede setup-node
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm check-types
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Advisory: does not gate merges (not in gate.needs) and its failure does not
+    # fail the run (continue-on-error). Mirrors amplify.yml for the main app:
+    # `pnpm rebuild` + `turbo run build --filter=main` on Node 22 / pnpm 10,
+    # producing apps/main/out. NEXT_PUBLIC_MAPBOX_TOKEN is a public build-time
+    # value passed as a repository *variable* (not a secret); an unset token
+    # yields a valid build with a non-functional map, acceptable for a compile
+    # check. Promote to required by moving into gate.needs and removing
+    # continue-on-error once Amplify parity is proven.
+    continue-on-error: true
+    env:
+      NEXT_PUBLIC_MAPBOX_TOKEN: ${{ vars.NEXT_PUBLIC_MAPBOX_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm rebuild # parity with amplify.yml (rebuild native deps)
+      - run: pnpm turbo run build --filter=main
+      - run: pnpm verify:static-export
+      - uses: actions/upload-artifact@v7
+        with:
+          name: apps-main-out
+          path: apps/main/out
+          retention-days: 1
+          if-no-files-found: error
+
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    # Default-deny roll-up: every job in `needs` must succeed. Add a required
+    # check by appending its job id here — no shell edits needed.
+    needs: [static-checks]
+    if: ${{ always() }}
+    timeout-minutes: 5
+    env:
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - name: Require all needed jobs to have succeeded
+        run: |
+          echo "needs = $NEEDS_JSON"
+          fail=0
+          for job in $(echo "$NEEDS_JSON" | jq -r 'keys[]'); do
+            result=$(echo "$NEEDS_JSON" | jq -r --arg j "$job" '.[$j].result')
+            if [ "$result" = "success" ]; then
+              echo "  ok    $job = $result"
+            else
+              echo "::error::required job '$job' = $result (expected success)"
+              fail=1
+            fi
+          done
+          if [ "$fail" = 0 ]; then echo "gate: PASS"; else echo "gate: FAIL"; exit 1; fi
