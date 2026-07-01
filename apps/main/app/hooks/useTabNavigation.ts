@@ -1,5 +1,7 @@
 /**
- * useTabNavigation.dispatches tab changes to context state
+ * useTabNavigation — single entry point for changing tabs.
+ * Updates context state AND the URL path (`/${tab}`) so the two never
+ * drift apart. Use this instead of dispatching setActiveTab directly.
  */
 "use client"
 
