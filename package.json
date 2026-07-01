@@ -1,52 +1,51 @@
 {
-  "name": "coeqwal-website",
+  "name": "@repo/ui",
+  "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "dev:main": "pnpm --filter main dev",
-    "dev:storyline-flow": "pnpm --filter storyline-flow dev",
-    "dev:storyline-climate": "pnpm --filter storyline-climate dev",
-    "lint": "turbo run lint",
-    "check-types": "turbo run check-types",
-    "dead-code": "knip",
-    "format": "prettier . --write --ignore-unknown --cache",
-    "format:check": "prettier . --check --ignore-unknown --cache",
-    "serve": "pnpm --filter main build && pnpm dlx serve apps/main/out/",
-    "clean:turbo": "rm -rf .turbo/cache",
-    "clean:next": "rm -rf apps/*/.next/cache",
-    "clean:ts": "find . -name '*.tsbuildinfo' -type f -delete",
-    "clean:caches": "pnpm clean:turbo && pnpm clean:next && pnpm clean:ts",
-    "clean:all": "rm -rf node_modules .turbo apps/*/.next",
-    "reset": "pnpm clean:all && pnpm install",
-    "qa": "pnpm lint && pnpm check-types && pnpm turbo run build"
+  "exports": {
+    ".": "./src/components/index.ts",
+    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
+    "./themes/theme": "./src/themes/theme.tsx",
+    "./mui": "./src/mui-components.tsx",
+    "./mdi": "./src/mdi-components.tsx",
+    "./hooks": "./src/hooks/index.ts"
   },
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "sass": "^1.86.0"
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "peerDependencies": {
+    "@types/node": ">=22.13.10",
+    "@types/react": ">=19.0.10",
+    "@types/react-dom": ">=19.0.4",
+    "eslint": ">=9.22.0",
+    "react": ">=19",
+    "react-dom": ">=19",
+    "typescript": ">=5.8.2"
   },
   "devDependencies": {
-    "@types/node": "^22.13.10",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
-    "eslint": "^9.39.2",
-    "knip": "^6.21.0",
-    "prettier": "^3.5.3",
-    "turbo": "^2.7.5",
-    "typescript": "5.8.2"
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@turbo/gen": "^2.7.5"
   },
-  "packageManager": "pnpm@10.0.0",
-  "engines": {
-    "node": "22.x"
+  "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mdi/js": "^7.4.47",
+    "@mdi/react": "^1.6.1",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "@mui/material-nextjs": "^7.3.7",
+    "@mui/system": "^7.3.2",
+    "@re-dev/react-truncate": "^0.5.2",
+    "@repo/i18n": "workspace:*",
+    "@repo/motion": "workspace:*",
+    "@repo/viz": "workspace:*",
+    "immer": "^10.1.1",
+    "zustand": "^5.0.3"
   },
-  "pnpm": {
-    "overrides": {
-      "js-yaml": "^4.1.1",
-      "tmp": "^0.2.4",
-      "diff": "^8.0.3",
-      "brace-expansion": "^2.0.1",
-      "handlebars": "^4.7.9"
-    }
-  }
+  "sideEffects": false
 }

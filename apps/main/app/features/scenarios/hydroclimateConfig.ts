@@ -8,16 +8,13 @@
  */
 
 import type { ElementType } from "react"
-import {
-  HistoryIcon,
-  WaterDropIcon,
-  WbSunnyIcon,
-  LocalFireDepartmentIcon,
-} from "@repo/ui/mui"
+import { Icon } from "@repo/ui/mdi";
+import { mdiWeatherSunnyAlert} from "@repo/ui/mdi"
+import { HistoryIcon, WaterDropIcon, WbSunnyIcon, LocalFireDepartmentIcon } from "@repo/ui/mui"
 
 export interface HydroclimateVisualConfig {
   /** MUI icon component rendered inside the colored circle */
-  icon: ElementType
+  icon: typeof Icon
   /** Accent / background color for the circle and derived shells */
   bgColor: string
 }
@@ -39,18 +36,18 @@ export const HYDROCLIMATE_CONFIG: Record<string, HydroclimateVisualConfig> = {
   },
   ecv: {
     icon: WaterDropIcon,
-    bgColor: "#44ce1b",
+    bgColor: "#30e8ae",
   },
   cc50: {
     icon: WbSunnyIcon,
-    bgColor: "#f7e379",
+    bgColor: "#e8d930",
   },
   cc95: {
     icon: WbSunnyIcon,
-    bgColor: "#f2a134",
+    bgColor: "#e89830",
   },
   tai: {
-    icon: LocalFireDepartmentIcon,
-    bgColor: "#e51f1f",
+    icon: mdiWeatherSunnyAlert,
+    bgColor: "#c62828",
   },
 }
