@@ -91,6 +91,11 @@ export function useInteractiveLayerDirector({
     const director = directorRef.current
     if (!director) return
 
+    if (!engineContext.isActive) {
+       director.release(engineContext)
+      return
+    }
+
     const mode = engineApiRef.current?.getMode?.() ?? "idle"
     const canOwn =
       selectedOutcomeCode !== null && mode !== "idle" && playState !== "playing"
@@ -197,7 +202,7 @@ export function useInteractiveLayerDirector({
    *  Reservoir keys are translated to Mapbox feature ids. */
   useEffect(() => {
     const director = directorRef.current
-    if (!director || !selectedOutcomeCode) return
+    if (!director || !selectedOutcomeCode || !engineContext.isActive) return
 
     const schema = getInteractiveLayerSchema(selectedOutcomeCode)
     if (

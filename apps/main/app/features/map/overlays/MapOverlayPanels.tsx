@@ -375,7 +375,7 @@ export default function MapOverlayPanels() {
               sx={{
                 position: "sticky",
                 top: 0,
-                height: "100vh",
+                height: "120vh",
                 // Re-enable pointer events for Play/Next/Back controls
                 // and interactive squares.
                 pointerEvents: "auto",

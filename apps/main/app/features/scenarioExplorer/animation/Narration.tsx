@@ -134,7 +134,8 @@ export default function Narration({
         style={{
           opacity: headingOpacity,
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
+          alignItems: "flex-start",
           gap: "12px",
           pointerEvents: "none",
           flexShrink: 0,
@@ -163,14 +164,15 @@ export default function Narration({
               size="small"
               aria-label="Play"
               sx={{
-                width: 44,
-                height: 44,
+                width: 85,
+                height: 85,
                 backgroundColor: alpha(theme.palette.common.white, 0.2),
                 backdropFilter: "blur(8px)",
                 color: "text.secondary",
                 "&:hover": {
                   backgroundColor: alpha(theme.palette.common.white, 0.35),
                 },
+                mt: theme.space.gap.xl
               }}
             >
               <PlayArrowIcon sx={{ fontSize: 24 }} />
@@ -194,9 +196,9 @@ export default function Narration({
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ maxWidth: "66%", opacity: 0.85 }}
+                sx={{ maxWidth: "66%", opacity: 0.85, mt: theme.space.gap.lg }}
               >
-                How are scenario results measured?
+                Click the play button and follow the steps to understand how scenario results are measured.
               </Typography>
             </motion.div>
           )}

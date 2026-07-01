@@ -28,7 +28,6 @@ export default function PanelFrame({
     <Box
       sx={{
         pointerEvents: "auto",
-        px: theme.layout.panel.insetX,
         py: theme.layout.panel.insetY,
         ...((outerSx as object) ?? {}),
       }}

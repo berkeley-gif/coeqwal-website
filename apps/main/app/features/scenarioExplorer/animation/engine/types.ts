@@ -378,7 +378,9 @@ export interface BeatEngineContext {
    * Current engine mode. Arbiters that only act in a certain mode (like
    * `InteractivePaintArbiter` in `interactive`) check this.
    */
-  getMode: () => EngineMode
+  getMode: () => EngineMode,
+  /** Whether the visualization section is active during scroll */
+  isActive: boolean
 }
 
 // Arbiter interface

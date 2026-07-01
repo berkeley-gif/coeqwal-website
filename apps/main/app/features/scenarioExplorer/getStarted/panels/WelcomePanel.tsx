@@ -5,13 +5,6 @@ import { LinedList, WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 
-/** Extra top margin applied ONLY to the Welcome panel (the first
- *  get-started panel). Provides clearance between the Explore tab's
- *  expandable description strip above the tabs stack and the Welcome
- *  card below it, so that when the strip collapses while scrolling
- *  the Welcome card can't be pulled up into the docked sticky bar */
-const WELCOME_TOP_MARGIN_PX = 160
-
 export default function WelcomePanel() {
   const theme = useTheme()
   const sp = theme.space.component
@@ -21,7 +14,6 @@ export default function WelcomePanel() {
     <Box>
       <PanelShell background={theme.palette.tabPanels.exploreDeep}>
         <PanelHeading title="What is the COEQWAL scenario library and how should I use it?" />
-
         <Box
           sx={{
             display: "grid",

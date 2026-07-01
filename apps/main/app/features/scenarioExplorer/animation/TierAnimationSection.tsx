@@ -50,7 +50,7 @@ import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { TIMING_BEATS } from "./animationTiming"
 import { LOI_DU_ID } from "./demandUnitsPaint"
-import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
+
 import {
   useBeatEngine,
   ACTOR_GROUPS,
@@ -698,6 +698,41 @@ export default function TierAnimationSection() {
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
+  /* Effect to reset map when you scroll away from the section */
+  useEffect(() => {
+    if (isActive) return
+
+    // Reset storyboard state on exit so re-entry starts clean.
+    // When scroll migration lands, beat position will be derived from
+    // scroll progress and this reset won't be needed.
+    if (hasPlayedRef.current) {
+      progress.set(0)
+      backOutOpacity.set(1)
+    }
+
+    setBeatIndex(0)
+    beatIndexRef.current = 0
+    setHasPlayed(false)
+    hasPlayedRef.current = false
+    setPlayState("idle")
+
+    // Clear any colored map layers left over from the storyboard
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (map?.isStyleLoaded()) {
+      try {
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill)) {
+            map.setPaintProperty(fill, "fill-opacity", 0)
+          }
+          if (map.getLayer(outline))
+            map.setPaintProperty(outline, "line-opacity", 0)
+        }
+      } catch {
+        console.log("No map fills or layers to clear")
+      }
+    }
+  }, [isActive, progress, backOutOpacity])
+
   useEffect(() => {
     if (!isInteractive || !mapHoverCode) return
     const map = mapAPI.mapRef?.current?.getMap?.()
@@ -724,23 +759,7 @@ export default function TierAnimationSection() {
       return locData.ids.has(lid) ? lid : null
     }
 
-    useEffect(() => {
-      if (isActive) return
 
-      // Reset storyboard state on exit so re-entry starts clean.
-      // When scroll migration lands, beat position will be derived from
-      // scroll progress and this reset won't be needed.
-      if (hasPlayedRef.current) {
-        progress.set(0)
-        backOutOpacity.set(1)
-      }
-
-      setBeatIndex(0)
-      beatIndexRef.current = 0
-      setHasPlayed(false)
-      hasPlayedRef.current = false
-      setPlayState("idle")
-    }, [isActive, progress, backOutOpacity])
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onMouseMove = (e: any) => {
@@ -969,12 +988,13 @@ export default function TierAnimationSection() {
       // arbiters call `getMode()` only during dispatch, after `useBeatEngine`
       // populates the ref. Defaults to "idle" before first mount.
       getMode: () => engineApiRef.current?.getMode() ?? "idle",
+      isActive,
     }),
     // `buildBlendedTierExpr` is a non-stable inner function but closes over a
     // ref, so its identity doesn't matter. Explicit deps memoize the context
     // on identity-stable inputs only. The engine reads via a ref, so this dep
     // set does not drive re-subscription.
-    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup],
+    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup, isActive],
   )
   engineContextRef.current = engineContext
 
@@ -983,7 +1003,7 @@ export default function TierAnimationSection() {
     actorGroups: ACTOR_GROUPS,
     context: engineContext,
     arbiters: arbitersRef.current,
-    enabled: !isLoading,
+    enabled: !isLoading && isActive,
   })
   engineApiRef.current = engineApi
 
@@ -1146,7 +1166,7 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: "100vh",
+        height: "100%",
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
