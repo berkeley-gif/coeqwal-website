@@ -698,41 +698,6 @@ export default function TierAnimationSection() {
   const locHandlersRef = useRef(locHandlers)
   locHandlersRef.current = locHandlers
 
-  /* Effect to reset map when you scroll away from the section */
-  useEffect(() => {
-    if (isActive) return
-
-    // Reset storyboard state on exit so re-entry starts clean.
-    // When scroll migration lands, beat position will be derived from
-    // scroll progress and this reset won't be needed.
-    if (hasPlayedRef.current) {
-      progress.set(0)
-      backOutOpacity.set(1)
-    }
-
-    setBeatIndex(0)
-    beatIndexRef.current = 0
-    setHasPlayed(false)
-    hasPlayedRef.current = false
-    setPlayState("idle")
-
-    // Clear any colored map layers left over from the storyboard
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (map?.isStyleLoaded()) {
-      try {
-        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-          if (map.getLayer(fill)) {
-            map.setPaintProperty(fill, "fill-opacity", 0)
-          }
-          if (map.getLayer(outline))
-            map.setPaintProperty(outline, "line-opacity", 0)
-        }
-      } catch {
-        console.log("No map fills or layers to clear")
-      }
-    }
-  }, [isActive, progress, backOutOpacity])
-
   useEffect(() => {
     if (!isInteractive || !mapHoverCode) return
     const map = mapAPI.mapRef?.current?.getMap?.()
@@ -994,7 +959,7 @@ export default function TierAnimationSection() {
     // ref, so its identity doesn't matter. Explicit deps memoize the context
     // on identity-stable inputs only. The engine reads via a ref, so this dep
     // set does not drive re-subscription.
-    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup, isActive],
+    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup],
   )
   engineContextRef.current = engineContext
 
@@ -1003,7 +968,7 @@ export default function TierAnimationSection() {
     actorGroups: ACTOR_GROUPS,
     context: engineContext,
     arbiters: arbitersRef.current,
-    enabled: !isLoading && isActive,
+    enabled: !isLoading,
   })
   engineApiRef.current = engineApi
 
@@ -1139,6 +1104,11 @@ export default function TierAnimationSection() {
       interactiveLayerDirectorRef,
       computePolygonDataRef,
     })
+
+  useEffect(() => {
+    if (isActive) return
+    handleRestart()
+  }, [isActive, handleRestart])
 
   useStoryboardDebugLog({ progress, beatIndex, playState })
 
