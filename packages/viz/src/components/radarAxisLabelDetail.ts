@@ -150,6 +150,7 @@ export type RadarAxisLabelDetailPayload = {
   scenarioId: string
   scenarioName: string
   tierIndex: number
+  weighted_score: number
 }
 
 /** Payload passed to `onScenarioControlsMount`, includes layout for anchor-aware chrome. */
