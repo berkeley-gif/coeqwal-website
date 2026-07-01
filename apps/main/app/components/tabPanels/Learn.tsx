@@ -18,9 +18,12 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import { useMapReady, useMapError, mapActions, useActiveSection } from "../../features/map/store"
+import { InfoCard, InfoCardGrid } from "@repo/ui"
+import { usePanelRoute } from "../../hooks/usePanelRoute"
+import { WATER_ISSUE_THEMES } from "../../features/scenarioExplorer/getStarted/content"
 
 import VerticalNav from "../verticalNav/VerticalNav"
 
@@ -31,6 +34,7 @@ export default function LearnPanel() {
   const scrollytellingRef = useRef<HTMLDivElement>(null)
   const activeSubSection = useActiveSection()
   const [activeSection, setActiveSection] = useState("get-started")
+  const { openThemePanel } = usePanelRoute()
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -172,8 +176,45 @@ export default function LearnPanel() {
         </div>
       )}
       {activeSection === "water-issues" && (
-        <Box sx={{ p: 4, color: "black", backgroundColor: "white", minHeight: "100vh" }}>
-          Water Issues — content coming soon
+        <Box sx={{
+          p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.blue.dark, minHeight: "100vh",
+          paddingTop: (theme) => theme.space.panel.paddingXl,
+          paddingLeft: (theme) => theme.space.panel.paddingXl,
+          paddingRight: (theme) => theme.space.panel.padding,
+        }}>
+          <Typography
+            variant="h3"
+            sx={{ maxWidth: "66%" }}
+          >
+            What water issues matter to you?
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+          >
+            Water is important to all of us — from farmers in the Central
+            Valley to communities in the Delta, from salmon in the Sacramento
+            River to urban water users in Los Angeles. We can consider how
+            decisions affect the issues people care about.
+          </Typography>
+          <Box sx={{ mt: theme.space.listGap.sm }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs}}>
+              Click on each water issue to learn more.
+            </Typography>
+            <InfoCardGrid columns={5}>
+              {WATER_ISSUE_THEMES.map(({ title, description, themeKey, dimmed }) => (
+                <InfoCard
+                  key={themeKey}
+                  title={title}
+                  description={description}
+                  onClick={dimmed ? undefined : () => openThemePanel(themeKey)}
+                  dimmed={dimmed}
+                  variant="onDark"
+                />
+              ))}
+            </InfoCardGrid>
+          </Box>
+
         </Box>
       )}
 

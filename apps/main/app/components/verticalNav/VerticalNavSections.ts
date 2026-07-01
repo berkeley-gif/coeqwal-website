@@ -47,14 +47,14 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     // FLAG: update id to match the Water Issues route key
-    id: "water-issues-section",
+    id: "water-issues",
     label: "Water Issues",
     // No sub-sections yet — add when the Water Issues page has scrollable sections
     subSections: [],
   },
   {
     // FLAG: update id to match the Water Stories route key
-    id: "water-stories-section",
+    id: "water-stories",
     label: "Water Stories",
     // No sub-sections yet — add when the Water Stories page has scrollable sections
     subSections: [],
