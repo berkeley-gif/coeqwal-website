@@ -19,9 +19,9 @@
  *   The underlying chart MUST fire `onReady` exactly once after
  *   its first render attempt, on every code path - including the
  *   empty-data and zero-dimension bail-outs. The capture host
- *   waits on this signal before serializing; a missed fire shows
+ *   waits on this signal before serializing. A missed fire shows
  *   up as `onReady did not fire within timeout`. Empty data is
- *   the caller's responsibility to filter out earlier; the chart
+ *   the caller's responsibility to filter out earlier. The chart
  *   must still complete its render-attempt handshake.
  *
  * Tooltip refs are still installed by `ResilienceHeatmap` (the

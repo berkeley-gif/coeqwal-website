@@ -18,7 +18,7 @@ export function useScrollamaSection() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    // The california step has no visible content; entering it immediately triggers
+    // The california step has no visible content. Entering it immediately triggers
     // the central-valley map state so the zoom animation starts right away.
     appActions.setActiveSection(data)
   }, [])

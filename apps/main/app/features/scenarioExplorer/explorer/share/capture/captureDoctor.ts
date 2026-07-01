@@ -13,7 +13,7 @@
  *  - Missing `<svg>` after `onReady` (the chart's snapshot wrapper
  *    fired the callback but did not commit a real SVG to the DOM).
  *  - Capture-kind tags that look generic ("unknown") at lots of
- *    call sites; the doctor encourages each call site to set
+ *    call sites. The doctor encourages each call site to set
  *    `captureKind` explicitly so traces are filterable.
  *
  * The doctor never mutates state and never throws. It logs to the

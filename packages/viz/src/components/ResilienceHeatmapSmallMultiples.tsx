@@ -6,7 +6,7 @@
  * Trellis wrapper for the ResilienceHeatmap. Renders a responsive grid
  * of mini heatmap tiles, each sharing the same rows, columns, palette,
  * and color scale. One shared legend is drawn once at the bottom of the
- * grid; per-tile legends are suppressed (see `hideLegend` on
+ * grid. Per-tile legends are suppressed (see `hideLegend` on
  * ResilienceHeatmap).
  *
  * The component is layout-only. All D3 work happens inside each
@@ -145,7 +145,7 @@ export interface ResilienceHeatmapSmallMultiplesProps {
   /**
    * Callback ref forwarded to the first tile's heatmap so a consumer
    * can anchor a tour popper (or other overlay) on an actual cell.
-   * Only the first tile wires this up; subsequent tiles receive
+   * Only the first tile wires this up. Subsequent tiles receive
    * `undefined` so the ref isn't overwritten.
    */
   firstCellRef?: (el: SVGRectElement | null) => void

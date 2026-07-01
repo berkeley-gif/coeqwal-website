@@ -88,7 +88,7 @@ const AG_AGGREGATE_SORT_ORDER: Record<string, number> = {
  * the chart would draw a misleading floor (matches the `isFullPercentileRow`
  * guard used for CWS data).
  *
- * `q0` is tolerated as null and coerced to 0 - a DU with zero shortage
+ * `q0` is tolerated as null and coerced to 0. A DU with zero shortage
  * in the driest year is a valid row
  */
 function shortageStatsToPercentiles(

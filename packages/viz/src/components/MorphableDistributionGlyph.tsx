@@ -262,7 +262,7 @@ const MorphableDistributionGlyph: React.FC<MorphableDistributionGlyphProps> =
       if (mode === "bars") {
         // Note: `compact` / `size` only apply to bars mode. Distribution
         // mode is inherently a 100-square (10 x 10) grid and always renders
-        // in its native footprint; callers that use compact bars today
+        // in its native footprint. Callers that use compact bars today
         // never switch this glyph into distribution mode.
         return (
           <BarOnly

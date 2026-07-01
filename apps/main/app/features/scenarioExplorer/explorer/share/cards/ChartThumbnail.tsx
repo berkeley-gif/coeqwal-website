@@ -11,7 +11,7 @@
  *   3. `liveChart` -> mount the panel-rendered chart as a fallback,
  *      when the parent has decided to pay the live render cost.
  *   4. Optional placeholder copy for variants that always reserve
- *      space (radar card uses this; snapshot card omits it).
+ *      space (radar card uses this. Snapshot card omits it).
  *
  * Variants tweak the surface styling so individual cards stay
  * visually distinct:

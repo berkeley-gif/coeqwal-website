@@ -19,7 +19,7 @@ import {
 import {
   getScenarioIconDefs,
   type IconDef,
-} from "../components/shared/opsIcons"
+} from "../components/shared/iconRegistry"
 import { useScenarioTiers } from "./useTierData"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 

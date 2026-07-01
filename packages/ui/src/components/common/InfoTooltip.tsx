@@ -12,7 +12,7 @@
  * Best for: icon explanations with "Learn more" links, feature hints.
  *
  * @see HybridTooltip - The underlying device-adaptive component
- * @see ClickTooltip - For always click-to-open behavior
+ * @see InfoPopover - For always click-to-open behavior
  */
 
 import React from "react"
@@ -49,7 +49,7 @@ export function InfoTooltip({
   )
 
   return (
-    <HybridTooltip content={content} placement={placement}>
+    <HybridTooltip content={content} placement={placement} density="spacious">
       {children}
     </HybridTooltip>
   )

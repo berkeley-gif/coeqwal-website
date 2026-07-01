@@ -9,6 +9,7 @@
     "dev:storyline-climate": "pnpm --filter storyline-climate dev",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
+    "dead-code": "knip",
     "format": "prettier . --write --ignore-unknown --cache",
     "format:check": "prettier . --check --ignore-unknown --cache",
     "serve": "pnpm --filter main build && pnpm dlx serve apps/main/out/",
@@ -30,6 +31,7 @@
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "eslint": "^9.39.2",
+    "knip": "^6.21.0",
     "prettier": "^3.5.3",
     "turbo": "^2.7.5",
     "typescript": "5.8.2"

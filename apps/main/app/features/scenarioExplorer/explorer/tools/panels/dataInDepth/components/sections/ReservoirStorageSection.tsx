@@ -223,17 +223,16 @@ function StorageTierCharts({
 function PercentileBandsLegend() {
   return (
     <>
-      {/* Min-Max (0-100th) band */}
+      {/* Min-Max (0-100th) range - dashed reference line */}
       <Box
         component="span"
         sx={{
           width: 14,
-          height: 14,
-          backgroundColor: STORAGE_BAND_COLORS.range,
-          borderRadius: "2px",
+          height: 0,
+          borderTop: `2px dashed ${STORAGE_BAND_COLORS.range}`,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Minimum to maximum range
       </Box>
 
@@ -248,7 +247,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         10–90th percentile
       </Box>
 
@@ -263,7 +262,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         30–70th percentile
       </Box>
 
@@ -278,7 +277,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Median
       </Box>
     </>
@@ -302,7 +301,7 @@ function ReferenceLinesLegend() {
           backgroundSize: "6px 2px",
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Capacity
       </Box>
 
@@ -318,7 +317,7 @@ function ReferenceLinesLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Dead pool
       </Box>
     </>
@@ -424,7 +423,7 @@ function MonthlyStorageSection({
                 <>
                   <Typography
                     component="span"
-                    sx={{ color: "grey.400", fontSize: "0.875rem" }}
+                    sx={{ color: "grey.400", typography: "dashboard" }}
                   >
                     ·
                   </Typography>
@@ -466,8 +465,7 @@ function MonthlyStorageSection({
                     component="span"
                     sx={{
                       color: "grey.500",
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
+                      typography: "dashboardBold",
                     }}
                   >
                     Overlapping percentile bands:
@@ -569,7 +567,7 @@ function MonthlyStorageSection({
                   py: 0.25,
                   backgroundColor: theme.palette.grey[100],
                   borderRadius: theme.borderRadius.sm,
-                  fontSize: "0.75rem",
+                  typography: "compactCaption",
                 }}
               >
                 {reservoir?.reservoir_name ?? id}

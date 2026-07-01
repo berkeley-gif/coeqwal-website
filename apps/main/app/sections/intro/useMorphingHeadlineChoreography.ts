@@ -179,7 +179,7 @@ export function useMorphingHeadlineChoreography({
   )
 
   // Transition 0 (VideoHero -> About): gap enters when hero's bottom
-  // reaches the headline's bottom; leaves when About's top reaches the
+  // reaches the headline's bottom. Leaves when About's top reaches the
   // headline's top. Because the headline is `position: fixed`, the
   // window's width equals the headline's own height.
   const gap1Start = useMeetingProgress(
@@ -236,7 +236,7 @@ export function useMorphingHeadlineChoreography({
   //
   // Exit: anchored off `gap2End` (seam reaches the top of the
   // centered headline), deliberately not off `textCrossfadeEnd`. The
-  // delay applied to the text crossfade is a cosmetic shift; the
+  // delay applied to the text crossfade is a cosmetic shift. The
   // motion pause + return glide should still be scheduled relative
   // to the seam itself so timing doesn't drift if the text delay is
   // tweaked later.
@@ -251,7 +251,7 @@ export function useMorphingHeadlineChoreography({
 
   // Build panel boundaries for `MorphingHeadline` from the meeting
   // points. `ready` flips true once both crossfadeAt values have
-  // measured a real position; before that, MorphingHeadline falls
+  // measured a real position. Before that, MorphingHeadline falls
   // back to weight-based timing.
   const panelBoundaries = useMemo(
     () => ({

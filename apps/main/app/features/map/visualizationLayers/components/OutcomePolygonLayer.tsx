@@ -318,7 +318,7 @@ export function OutcomePolygonLayer({
     // ── Crossfade path: data was already showing, just update colors ──
     // Mapbox interpolates fill-color and line-color natively, so we only
     // need to set the transition duration and update the expression.
-    // Always ensure visibility is "visible" - the layer may have been hidden
+    // Always ensure visibility is "visible". The layer may have been hidden
     // by a previous unmount cleanup when switching between different polygon
     // layer types (e.g. demand-units → calsim-wba).
     if (wasShowingDataRef.current) {
@@ -501,6 +501,6 @@ export function OutcomePolygonLayer({
     }
   }, [mapRef, fillId, outlineId, idProperty])
 
-  // This component doesn't render anything - it just manages Mapbox layer styling
+  // This component doesn't render anything. It just manages Mapbox layer styling
   return null
 }

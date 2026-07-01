@@ -101,7 +101,7 @@ export type ShareItem =
       outcomeCodes: string[]
       /**
        * Which capture surface produced this item. "panel" captures the
-       * whole chart body; the small-multiples kinds capture a single
+       * whole chart body. The small-multiples kinds capture a single
        * tile. Absent values rehydrate to "panel" for backwards-compatible
        * URL round trips.
        */
@@ -127,7 +127,7 @@ export type ShareItem =
  * `cachedSvg`, `cachedImageDataUrl`, and `cachedChartData` all
  * survive a reload so the share cards render and the data-download
  * icons stay enabled (only the bar chart variant has a live
- * recompute path; the others would otherwise lose their data).
+ * recompute path. The others would otherwise lose their data).
  *
  * `share/persist.ts` enforces this at runtime via `toPersisted`;
  * the alias is kept as a named, mutable contract so a future

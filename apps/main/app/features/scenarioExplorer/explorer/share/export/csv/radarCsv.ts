@@ -3,11 +3,7 @@
  * with decimal tier scores so sub-tier interpolation survives.
  */
 
-import {
-  buildCsvHeaderBlock,
-  csvQuote,
-  type CsvHeaderInput,
-} from "./csvFormat"
+import { buildCsvHeaderBlock, csvQuote, type CsvHeaderInput } from "./csvFormat"
 
 /**
  * Convert the internal radar coordinate (-1 … +1) back to a weighted

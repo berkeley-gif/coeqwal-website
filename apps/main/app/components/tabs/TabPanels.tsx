@@ -2,12 +2,10 @@
 
 /**
  * TabPanels
- * - Renders the active tab's panel with a nice crossfade/slide.
- * - On mount, syncs activeTab from the URL pathname to support deep links.
- * - Keeps URL <-> state in sync on load or on manual URL edits (deep-link safe).
+ * - Renders the active tab's panel 
  */
 
-import { useMemo, useEffect, useRef } from "react"
+import { useMemo, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { AnimatePresence, motion } from "@repo/motion"
 import { useTheme } from "@repo/ui/mui"
@@ -52,10 +50,6 @@ export default function TabPanels() {
   // Mount-once rehydration of share-link state into the scenario-explorer
   // store. Reads window.location.search directly, so it does not suspend.
   // Lives in apps/main/app/features/scenarioExplorer/share/useShareUrlRehydration.ts
-  useShareUrlRehydration()
-
-  // Share-link rehydration reads window.location.search for explorer
-  // store state. Separate concern from tab routing.
   useShareUrlRehydration()
 
   // Map tabs need pointerEvents: "none" on wrapper so the persistent map

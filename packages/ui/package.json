@@ -37,12 +37,8 @@
     "@mui/material": "^7.0.1",
     "@mui/material-nextjs": "^7.3.7",
     "@mui/system": "^7.3.2",
-    "@re-dev/react-truncate": "^0.5.2",
     "@repo/i18n": "workspace:*",
-    "@repo/motion": "workspace:*",
-    "@repo/viz": "workspace:*",
-    "immer": "^10.1.1",
-    "zustand": "^5.0.3"
+    "@repo/motion": "workspace:*"
   },
   "sideEffects": false
 }

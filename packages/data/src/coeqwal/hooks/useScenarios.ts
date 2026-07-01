@@ -3,7 +3,7 @@
 /**
  * Hook for fetching the scenario list
  *
- * This is an atomic hook - it does one thing well.
+ * This is an atomic hook. It does one thing well.
  * The scenario list is relatively static data.
  */
 

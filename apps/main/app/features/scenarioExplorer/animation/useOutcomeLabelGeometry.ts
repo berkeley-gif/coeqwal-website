@@ -389,7 +389,9 @@ export function useOutcomeLabelGeometry({
         const fadeIn = clamp01(
           (v - eyebrows[i]!.animationStart) / BACKDROP_FADE_IN_WIDTH,
         )
-        const fadeOut = clamp01((v - ALL_OTHER_OUTCOMES_OUT) / LOI_HIGHLIGHT_EXIT)
+        const fadeOut = clamp01(
+          (v - ALL_OTHER_OUTCOMES_OUT) / LOI_HIGHLIGHT_EXIT,
+        )
         el.style.opacity = String(fadeIn * (1 - fadeOut))
       }
     }

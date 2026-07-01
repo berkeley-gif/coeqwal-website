@@ -18,7 +18,7 @@ export function LogoLight({ width = 150, className }: LogoLightProps) {
       viewBox="0 0 164.1 32.1"
       width={width}
       className={className}
-      // Decorative when inside a labeled button; standalone use should override
+      // Decorative when inside a labeled button. Standalone use should override
       aria-hidden="true"
       focusable="false"
     >

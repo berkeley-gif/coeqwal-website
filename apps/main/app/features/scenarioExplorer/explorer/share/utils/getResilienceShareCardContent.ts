@@ -5,7 +5,7 @@
 
 import type { ShareItem } from "../../store"
 import { RESILIENCE_HYDROCLIMATES } from "../../tools/panels/resilience/useResilienceMatrix"
-import type { ResilienceHeatmapChartData } from "../../tools/panels/resilience/ResiliencePanel"
+import type { ResilienceHeatmapChartData } from "../../tools/panels/resilience/types"
 
 export type ResilienceShareItem = Extract<ShareItem, { type: "resilience" }>
 

@@ -2,7 +2,7 @@
  * List tour module. Plug-in entry consumed by `tour/registry.ts`.
  *
  * The colocated `useListInfoTooltipSync` hook is not part of the module
- * surface because it needs `StrategyGrid`'s local tooltip state; the
+ * surface because it needs `StrategyGrid`'s local tooltip state. The
  * grid calls it directly.
  */
 

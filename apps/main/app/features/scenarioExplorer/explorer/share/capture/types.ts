@@ -15,7 +15,7 @@
 import type {
   ResilienceCaptureResult,
   ResilienceHeatmapChartData as _ResilienceHeatmapChartData,
-} from "../../tools/panels/resilience/ResiliencePanel"
+} from "../../tools/panels/resilience/types"
 
 /**
  * Base shape returned by every off-screen capture host call.
