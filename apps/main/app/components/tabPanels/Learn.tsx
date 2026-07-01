@@ -24,6 +24,7 @@ import { useMapReady, useMapError, mapActions, useActiveSection } from "../../fe
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/scenarioExplorer/getStarted/content"
+import { WATER_STORIES } from "../../content/stories"
 
 import VerticalNav from "../verticalNav/VerticalNav"
 
@@ -198,7 +199,7 @@ export default function LearnPanel() {
             decisions affect the issues people care about.
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs}}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs }}>
               Click on each water issue to learn more.
             </Typography>
             <InfoCardGrid columns={5}>
@@ -219,8 +220,42 @@ export default function LearnPanel() {
       )}
 
       {activeSection === "water-stories" && (
-        <Box sx={{ p: 4, color: "black", backgroundColor: "white", minHeight: "100vh" }}>
-          Water Stories — content coming soon
+        <Box sx={{
+          p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.nature.forest,
+          paddingTop: (theme) => theme.space.panel.paddingXl,
+          paddingLeft: (theme) => theme.space.panel.paddingXl,
+          paddingRight: (theme) => theme.space.panel.padding,
+        }}>
+          <Typography
+            variant="h3"
+            sx={{ maxWidth: "66%" }}
+          >
+            Did you know that California has one of the most complex water systems in the world?
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+          >
+            Here is a paragraph that will explain what the water stories cover
+          </Typography>
+          <Box sx={{ mt: theme.space.listGap.sm }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs }}>
+              Click on each water story to learn more.
+            </Typography>
+            <InfoCardGrid columns={5}>
+              {WATER_STORIES.map(({ id, label, description, href, dimmed }) => (
+                <InfoCard
+                  key={id}
+                  title={label}
+                  description={description}
+                  onClick={dimmed || !href ? undefined : () => window.open(href, "_blank", "noopener,noreferrer")}
+                  dimmed={dimmed}
+                  variant="onDark"
+                />
+              ))}
+            </InfoCardGrid>
+          </Box>
+
         </Box>
       )}
     </>
