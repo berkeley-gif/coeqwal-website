@@ -174,6 +174,7 @@ function useAdditionalReservoirData(
   )
 
   const results = useMultiScenarioSlots(fetchIds, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useReservoirPercentilesByIds(id, additionalReservoirIds),
   )
   const isLoading = results.some((r) => r.isLoading)
