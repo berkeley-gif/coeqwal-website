@@ -45,6 +45,28 @@ export function PercentileMatrixSkeleton({
   // Row height should match the actual PercentileMatrix row height
   const rowHeight = 160
 
+  // Shared shimmer: a light band sweeps left-to-right across each placeholder
+  // to signal that data is on the way. Applied to every placeholder box.
+  // The band travels fully off-screen at both ends (±200%) with linear timing,
+  // so each loop restarts on an identical (plain) frame with no visible snap.
+  // Disabled entirely when the user prefers reduced motion.
+  const shimmerSx = {
+    backgroundColor: theme.palette.grey[100],
+    backgroundImage: `linear-gradient(90deg, transparent 0%, ${theme.palette.grey[300]} 50%, transparent 100%)`,
+    backgroundSize: "200% 100%",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "200% 0",
+    "@keyframes matrixSkeletonShimmer": {
+      "0%": { backgroundPosition: "200% 0" },
+      "100%": { backgroundPosition: "-200% 0" },
+    },
+    animation: "matrixSkeletonShimmer 1.6s linear infinite",
+    "@media (prefers-reduced-motion: reduce)": {
+      animation: "none",
+      backgroundImage: "none",
+    },
+  }
+
   return (
     <Box sx={{ position: "relative" }}>
       {/* Grid skeleton */}
@@ -54,7 +76,7 @@ export function PercentileMatrixSkeleton({
           gridTemplateColumns,
           gap: `${CHART_GRID.rowGap}px 0`,
           width: "100%",
-          opacity: 0.5,
+          opacity: 0.7,
         }}
       >
         {/* Generate placeholder rows */}
@@ -75,8 +97,8 @@ export function PercentileMatrixSkeleton({
                 sx={{
                   height: 12,
                   width: `${60 + (rowIndex % 3) * 15}%`,
-                  backgroundColor: theme.palette.grey[200],
                   borderRadius: theme.borderRadius.xs,
+                  ...shimmerSx,
                 }}
               />
               {/* Secondary label placeholder (shorter) */}
@@ -84,8 +106,8 @@ export function PercentileMatrixSkeleton({
                 sx={{
                   height: 10,
                   width: `${40 + (rowIndex % 2) * 10}%`,
-                  backgroundColor: theme.palette.grey[100],
                   borderRadius: theme.borderRadius.xs,
+                  ...shimmerSx,
                 }}
               />
             </Box>
@@ -106,8 +128,8 @@ export function PercentileMatrixSkeleton({
                     width: "100%",
                     maxWidth: 180,
                     height: rowHeight,
-                    backgroundColor: theme.palette.grey[100],
                     borderRadius: theme.borderRadius.sm,
+                    ...shimmerSx,
                   }}
                 />
               </Box>
@@ -116,33 +138,44 @@ export function PercentileMatrixSkeleton({
         ))}
       </Box>
 
-      {/* Centered loading indicator overlay */}
+      {/* Loading indicator. Pinned near the top of the visible area (sticky)
+          rather than the vertical center, so it stays above the fold even when
+          the skeleton grid is tall. */}
       <Box
         sx={{
           position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
+          inset: 0,
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          px: theme.space.component.lg,
-          py: theme.space.component.md,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          pointerEvents: "none",
         }}
       >
-        <CircularProgress size={20} sx={{ color: theme.palette.grey[300] }} />
-        <Typography
-          variant="compactCaption"
+        <Box
           sx={{
-            ml: theme.space.component.md,
-            color: theme.palette.grey[400],
+            position: "sticky",
+            top: theme.space.component.md,
+            alignSelf: "flex-start",
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: theme.borderRadius.md,
+            px: theme.space.component.lg,
+            py: theme.space.component.md,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            pointerEvents: "auto",
           }}
         >
-          {message}
-        </Typography>
+          <CircularProgress size={20} sx={{ color: theme.palette.grey[300] }} />
+          <Typography
+            variant="compactCaption"
+            sx={{
+              ml: theme.space.component.md,
+              color: theme.palette.grey[400],
+            }}
+          >
+            {message}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   )

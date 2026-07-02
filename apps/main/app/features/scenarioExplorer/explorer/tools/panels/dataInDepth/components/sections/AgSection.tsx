@@ -10,7 +10,7 @@
  * Uses the same CSS Grid layout patterns as CwsSection and ReservoirStorageSection.
  */
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { CompactSelect } from "@repo/ui"
 import { PercentileMatrix } from "@repo/viz"
@@ -265,17 +265,6 @@ function MonthlyAgSection({
       demandUnitsList,
     )
 
-  // Track when data arrives. We flip false once entities are empty so the
-  // skeleton can re-appear if scenarios change
-  const [hasReceivedData, setHasReceivedData] = useState(false)
-  useEffect(() => {
-    if (entities.length > 0) {
-      setHasReceivedData(true)
-    } else {
-      setHasReceivedData(false)
-    }
-  }, [entities.length])
-
   // Group options for the "Add a demand unit" CompactSelect: by hydrologic
   // region (Sacramento / San Joaquin / Tulare / Other), with already-added
   // ids removed. Label format is "Agency (du_id)" to disambiguate
@@ -409,8 +398,10 @@ function MonthlyAgSection({
         onRemove={handleRemoveDemandUnit}
       />
 
-      {/* Loading state with skeleton. Five aggregate rows plus any added DUs */}
-      {!hasReceivedData && !error && (
+      {/* Loading state with skeleton. Five aggregate rows plus any added DUs.
+          Gated directly on data presence (no latch), so it reappears while a
+          new hydroclimate is being fetched instead of collapsing. */}
+      {entities.length === 0 && !error && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrixSkeleton
             scenarios={scenarios}
@@ -442,7 +433,7 @@ function MonthlyAgSection({
       )}
 
       {/* Matrix */}
-      {hasReceivedData && entities.length > 0 && (
+      {entities.length > 0 && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrix
             reservoirs={reservoirData}
