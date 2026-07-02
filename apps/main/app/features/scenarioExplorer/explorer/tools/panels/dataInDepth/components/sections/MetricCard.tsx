@@ -217,7 +217,10 @@ export function MetricCard({
                     {scenario.scenarioName}
                   </Typography>
                   {isSingleValueTier(scenario.tierData) ? (
-                    <TierCircles tiers={scenario.tierData} size={TIER_CHART_SIZE} />
+                    <TierCircles
+                      tiers={scenario.tierData}
+                      size={TIER_CHART_SIZE}
+                    />
                   ) : (
                     <VerticalBarChart
                       tiers={scenario.tierData}

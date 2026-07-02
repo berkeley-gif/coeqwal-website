@@ -330,4 +330,3 @@ export function useSpillMonthly(
     hasData: !!data && Object.keys(data.reservoirs).length > 0,
   }
 }
-
