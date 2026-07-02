@@ -1,0 +1,555 @@
+/**
+ * Deterministic sample-data engine for mock-backed explorer variables.
+ *
+ * Pure functions, no React, no Date/Math.random at call time: every value is
+ * derived from a seeded hash of (variable, scenario, climate, location), so
+ * the same inputs always render the same charts, across reloads and builds.
+ * Ported from the team's Data-in-Depth design prototype so the sample data
+ * mimics the structure of CalSim3 post-processed output (scenario and
+ * climate contrasts are ILLUSTRATIVE ONLY). Every surface rendering from
+ * this engine is labeled "sample data" in the UI.
+ *
+ * value[year] = base x scenarioEffect x climateEffect x hydroYear^sens x noise
+ * Hydrology year-factors are shared per climate so scenarios co-move across
+ * the same simulated trace, as in real paired CalSim runs.
+ */
+
+import {
+  VARIABLES,
+  getLocation,
+  type VariableDef,
+  type LocationDef,
+} from "./variableRegistry"
+
+export const MOCK_YEARS = 100
+
+/* ------------------------------------------------------------------ */
+/* Seeded randomness (FNV-1a hash -> mulberry32 -> Box-Muller)          */
+/* ------------------------------------------------------------------ */
+
+function hash(s: string): number {
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+function rng(seed: number): () => number {
+  let s = seed
+  return () => {
+    s |= 0
+    s = (s + 0x6d2b79f5) | 0
+    let t = Math.imul(s ^ (s >>> 15), 1 | s)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function gauss(r: () => number): number {
+  let u = 0
+  let v = 0
+  while (!u) u = r()
+  while (!v) v = r()
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
+}
+
+/* ------------------------------------------------------------------ */
+/* Climate stress                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Stress level per hydroclimate, 0 (historical) to 1 (most severe).
+ * Keys are the app's hydroclimate group keys.
+ */
+export const MOCK_CLIMATE_STRESS: Record<string, number> = {
+  hist: 0.0,
+  ecv: 0.15,
+  cc50: 0.4,
+  cc95: 0.7,
+  tai: 1.0,
+}
+
+/* ------------------------------------------------------------------ */
+/* Metric kinds: climate response, sensitivity, variability, shape     */
+/* ------------------------------------------------------------------ */
+
+interface Kind {
+  clim: number
+  sens: number
+  cv0: number
+  cvS: number
+  shape?: keyof typeof SHAPES
+  clamp?: [number, number]
+}
+
+const KINDS: Record<string, Kind> = {
+  storage: { clim: -0.22, sens: 0.5, cv0: 0.18, cvS: 0.45 },
+  gwstor: { clim: -0.15, sens: 0.3, cv0: 0.07, cvS: 0.4 },
+  flow: { clim: -0.28, sens: 1.1, cv0: 0.3, cvS: 0.5, shape: "flow" },
+  outflow: { clim: -0.25, sens: 1.2, cv0: 0.34, cvS: 0.5, shape: "outflow" },
+  sal: { clim: 0.18, sens: -0.6, cv0: 0.2, cvS: 0.55, shape: "sal" },
+  x2: { clim: 0.1, sens: -0.32, cv0: 0.08, cvS: 0.5 },
+  exports: { clim: -0.2, sens: 0.7, cv0: 0.24, cvS: 0.5, shape: "exports" },
+  agdel: { clim: -0.18, sens: 0.5, cv0: 0.2, cvS: 0.45, shape: "agdel" },
+  pump: { clim: 0.12, sens: -0.45, cv0: 0.16, cvS: 0.4, shape: "agdel" },
+  short: { clim: 0.55, sens: -2.0, cv0: 0.55, cvS: 0.4 },
+  shortpct: {
+    clim: 0.55,
+    sens: -2.0,
+    cv0: 0.55,
+    cvS: 0.4,
+    clamp: [0, 100],
+  },
+  rev: { clim: -0.1, sens: 0.22, cv0: 0.08, cvS: 0.45 },
+  cwsdel: { clim: -0.08, sens: 0.22, cv0: 0.06, cvS: 0.45 },
+  pctuif: { clim: -0.08, sens: 0.12, cv0: 0.1, cvS: 0.4, clamp: [2, 98] },
+}
+
+/** Seasonal shapes by water month (Oct..Sep). */
+const SHAPES = {
+  storage: [
+    0.78, 0.76, 0.78, 0.84, 0.92, 1.0, 1.08, 1.1, 1.05, 0.96, 0.86, 0.8,
+  ],
+  flow: [
+    0.04, 0.05, 0.08, 0.12, 0.15, 0.15, 0.12, 0.11, 0.07, 0.05, 0.03, 0.03,
+  ],
+  outflow: [
+    0.04, 0.06, 0.1, 0.15, 0.17, 0.15, 0.11, 0.09, 0.05, 0.03, 0.02, 0.03,
+  ],
+  sal: [1.25, 1.15, 0.95, 0.8, 0.7, 0.7, 0.75, 0.85, 0.95, 1.1, 1.25, 1.35],
+  exports: [
+    0.07, 0.06, 0.07, 0.08, 0.08, 0.08, 0.08, 0.09, 0.1, 0.1, 0.1, 0.09,
+  ],
+  agdel: [
+    0.02, 0.02, 0.02, 0.03, 0.04, 0.07, 0.12, 0.15, 0.16, 0.15, 0.13, 0.09,
+  ],
+}
+
+/* ------------------------------------------------------------------ */
+/* Illustrative scenario effects (fractional shifts vs current ops)    */
+/* ------------------------------------------------------------------ */
+
+interface ScenarioEffect {
+  /** Effect concentrated South of Delta */
+  sod?: boolean
+  eff: Record<string, number>
+}
+
+/**
+ * Keyed by scenario short code. Unknown scenarios get a small deterministic
+ * pseudo-effect derived from their id, so any workspace selection renders
+ * distinguishable sample curves.
+ */
+const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
+  s0020: { eff: {} },
+  s0011: { eff: { agDel: 0.02, gwStor: 0.03 } },
+  s0021: { eff: { storage: -0.04, outflow: 0.05, exports: -0.05, sal: -0.04 } },
+  s0024: { eff: { exports: 0.04, storage: -0.02, flows: -0.03 } },
+  s0023: { eff: { exports: -0.02, outflow: 0.04, sal: -0.03, storage: -0.04 } },
+  s0035: { eff: { cws: 0.15, cwsShort: -0.45, agDel: -0.03 } },
+  s0037: { eff: { cws: 0.3, cwsShort: -0.65, agDel: -0.08, storage: -0.03 } },
+  s0025: {
+    sod: true,
+    eff: { pump: -0.3, short: 0.45, rev: -0.07, gwStor: 0.15, gwTrend: 0.6 },
+  },
+  s0026: {
+    sod: true,
+    eff: {
+      pump: -0.35,
+      agDel: -0.12,
+      short: 0.2,
+      rev: -0.11,
+      gwStor: 0.2,
+      gwTrend: 0.7,
+    },
+  },
+  s0027: {
+    eff: { pump: -0.35, short: 0.5, rev: -0.09, gwStor: 0.2, gwTrend: 0.7 },
+  },
+  s0028: {
+    eff: {
+      pump: -0.4,
+      agDel: -0.15,
+      short: 0.25,
+      rev: -0.13,
+      gwStor: 0.25,
+      gwTrend: 0.8,
+    },
+  },
+  s0030: {
+    eff: {
+      flows: -0.3,
+      exports: 0.12,
+      agDel: 0.1,
+      storage: 0.08,
+      outflow: -0.15,
+      sal: 0.1,
+      pctUIF: -0.2,
+    },
+  },
+  s0046: {
+    eff: {
+      flows: 0.3,
+      exports: -0.12,
+      agDel: -0.1,
+      storage: -0.05,
+      outflow: 0.12,
+      sal: -0.06,
+      pctUIF: 0.25,
+    },
+  },
+  s0032: {
+    eff: {
+      flows: 0.32,
+      exports: -0.15,
+      agDel: -0.12,
+      pump: -0.3,
+      rev: -0.1,
+      gwStor: 0.2,
+      gwTrend: 0.7,
+      pctUIF: 0.27,
+      short: 0.3,
+    },
+  },
+  s0031: {
+    eff: {
+      flows: 0.22,
+      storage: 0.06,
+      sepBonus: 0.1,
+      exports: -0.1,
+      agDel: -0.08,
+      pctUIF: 0.15,
+    },
+  },
+  s0033: {
+    eff: {
+      flows: 0.24,
+      storage: 0.06,
+      sepBonus: 0.1,
+      exports: -0.12,
+      pump: -0.3,
+      rev: -0.09,
+      gwStor: 0.2,
+      gwTrend: 0.7,
+      pctUIF: 0.17,
+      short: 0.3,
+    },
+  },
+  s0040: { eff: { outflow: -0.15, exports: 0.12, sal: 0.12, pctUIF: -0.18 } },
+  s0041: { eff: { outflow: 0.02, exports: 0.02, pctUIF: 0.02 } },
+  s0042: { eff: { outflow: 0.15, exports: -0.13, sal: -0.08, pctUIF: 0.2 } },
+  s0039: {
+    eff: {
+      outflow: 0.3,
+      exports: -0.27,
+      sal: -0.15,
+      pctUIF: 0.42,
+      storage: -0.07,
+      agDel: -0.1,
+    },
+  },
+  s0044: {
+    eff: { storage: 0.1, sepBonus: 0.12, exports: -0.05, agDel: -0.04 },
+  },
+  s0045: { eff: { sal: 0.2, exports: 0.08, outflow: -0.1, cws: -0.03 } },
+  s0065: { eff: { exports: 0.1, outflow: -0.04, sal: 0.03, cws: 0.05 } },
+}
+
+function scenarioEffect(scenarioId: string): ScenarioEffect {
+  const known = SCENARIO_EFFECTS[scenarioId]
+  if (known) return known
+  // Deterministic pseudo-effect for scenarios outside the illustrative table:
+  // small, id-derived shifts so curves separate visibly but plausibly.
+  const r = rng(hash(`eff|${scenarioId}`))
+  const shift = () => (r() - 0.5) * 0.24
+  return {
+    eff: {
+      storage: shift(),
+      flows: shift(),
+      exports: shift(),
+      outflow: shift(),
+      agDel: shift(),
+      cws: shift(),
+      pump: shift(),
+      short: shift(),
+      rev: shift() * 0.5,
+      gwStor: shift(),
+      gwTrend: shift(),
+      sal: shift(),
+      pctUIF: shift(),
+      cwsShort: shift(),
+    },
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base magnitudes                                                     */
+/* ------------------------------------------------------------------ */
+
+const AG_BASE: Record<
+  string,
+  { del: number; pump: number; short: number; shortpct: number; rev: number }
+> = {
+  AG_SAC: { del: 5200, pump: 2300, short: 620, shortpct: 7, rev: 9.2 },
+  AG_SJV: { del: 4600, pump: 5600, short: 980, shortpct: 11, rev: 14.8 },
+  AG_TUL: { del: 2400, pump: 4400, short: 760, shortpct: 12, rev: 12.4 },
+  AG_ALL: { del: 12200, pump: 12300, short: 2360, shortpct: 10, rev: 36.4 },
+}
+
+function baseFor(variable: VariableDef, location: LocationDef): number {
+  switch (variable.id) {
+    case "res_apr":
+      return (location.capacityTaf ?? 1000) * 0.72
+    case "res_sep":
+      return (location.capacityTaf ?? 1000) * 0.45
+    case "x2_apr":
+      return 74
+    case "x2_sep":
+      return 84
+    case "cvp_del":
+      return 5000 * (location.mockBase ?? 1)
+    case "swp_del":
+      return 2600 * (location.mockBase ?? 1)
+    case "tot_exp":
+      return 4800
+    case "ndo_uif":
+      return 42
+    case "riv_uif":
+      return 38
+    case "ag_del":
+      return AG_BASE[location.id]?.del ?? 4000
+    case "ag_pump":
+      return AG_BASE[location.id]?.pump ?? 3000
+    case "ag_short":
+      return AG_BASE[location.id]?.short ?? 800
+    case "ag_shortpct":
+      return AG_BASE[location.id]?.shortpct ?? 10
+    case "ag_rev":
+      return AG_BASE[location.id]?.rev ?? 15
+    case "cws_short":
+      return (location.mockBase ?? 500) * 0.06
+    default:
+      return location.mockBase ?? 1000
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Series generation                                                   */
+/* ------------------------------------------------------------------ */
+
+const yearFactorCache: Record<string, number[]> = {}
+
+/** Shared hydrologic trace per climate (droughts cluster via persistence). */
+function yearFactors(climateKey: string): number[] {
+  const cached = yearFactorCache[climateKey]
+  if (cached) return cached
+  const stress = MOCK_CLIMATE_STRESS[climateKey] ?? 0
+  const r = rng(hash(`hydro|${climateKey}`))
+  const out: number[] = []
+  let prev = 0
+  for (let i = 0; i < MOCK_YEARS; i++) {
+    const g = 0.55 * prev + Math.sqrt(1 - 0.55 * 0.55) * gauss(r)
+    prev = g
+    out.push(Math.exp(0.42 * (1 + 0.25 * stress) * g - 0.5 * 0.42 * 0.42))
+  }
+  yearFactorCache[climateKey] = out
+  return out
+}
+
+function regionWeight(effect: ScenarioEffect, location: LocationDef): number {
+  if (!effect.sod) return 1
+  if (location.region === "SOD") return 1
+  if (location.region === "ALL") return 0.6
+  return 0.2
+}
+
+function effectFor(
+  variable: VariableDef,
+  effect: ScenarioEffect,
+  location: LocationDef,
+): number {
+  let e =
+    (effect.eff[variable.mockEffect] ?? 0) * regionWeight(effect, location)
+  if (variable.id === "res_sep" && effect.eff.sepBonus) {
+    e += effect.eff.sepBonus
+  }
+  return e
+}
+
+const seriesCache: Record<string, number[]> = {}
+
+/** 100 deterministic annual values for one member. */
+export function mockAnnualSeries(
+  variableId: string,
+  scenarioId: string,
+  climateKey: string,
+  locationId: string,
+): number[] {
+  const key = [variableId, scenarioId, climateKey, locationId].join("|")
+  const cached = seriesCache[key]
+  if (cached) return cached
+  const variable = VARIABLES[variableId]
+  if (!variable) return []
+  const location = getLocation(variable.locationGroup, locationId)
+  if (!location) return []
+  const kind = KINDS[variable.mockKind] ?? (KINDS.flow as Kind)
+  const stress = MOCK_CLIMATE_STRESS[climateKey] ?? 0
+  const effect = scenarioEffect(scenarioId)
+  const yf = yearFactors(climateKey)
+  const median =
+    baseFor(variable, location) *
+    (1 + effectFor(variable, effect, location)) *
+    (1 + kind.clim * stress)
+  const r = rng(hash(`noise|${key}`))
+  const sigma = kind.cv0 * (1 + kind.cvS * stress) * 0.55
+  const out: number[] = []
+  for (let i = 0; i < MOCK_YEARS; i++) {
+    let v =
+      median *
+      Math.pow(yf[i] as number, kind.sens) *
+      Math.exp(sigma * gauss(r) - 0.5 * sigma * sigma)
+    if (kind.clamp) v = Math.min(kind.clamp[1], Math.max(kind.clamp[0], v))
+    else v = Math.max(0, v)
+    out.push(v)
+  }
+  seriesCache[key] = out
+  return out
+}
+
+export interface MonthlyBand {
+  p10: number
+  p50: number
+  p90: number
+}
+
+/** Per-water-month p10/p50/p90 bands for one member. */
+export function mockMonthlyBands(
+  variableId: string,
+  scenarioId: string,
+  climateKey: string,
+  locationId: string,
+): MonthlyBand[] {
+  const variable = VARIABLES[variableId]
+  if (!variable) return []
+  const kind = KINDS[variable.mockKind] ?? (KINDS.flow as Kind)
+  const shape =
+    SHAPES[kind.shape ?? (variable.mockKind === "storage" ? "storage" : "flow")]
+  const annual = mockAnnualSeries(
+    variableId,
+    scenarioId,
+    climateKey,
+    locationId,
+  )
+  if (annual.length === 0) return []
+  const r = rng(
+    hash(`mon|${[variableId, scenarioId, climateKey, locationId].join("|")}`),
+  )
+  const bands: MonthlyBand[] = []
+  for (let month = 0; month < 12; month++) {
+    const values: number[] = []
+    for (let y = 0; y < MOCK_YEARS; y++) {
+      values.push(
+        Math.max(
+          0,
+          (annual[y] as number) *
+            (shape[month] as number) *
+            Math.exp(0.1 * gauss(r)),
+        ),
+      )
+    }
+    values.sort((a, b) => a - b)
+    bands.push({
+      p10: quantileSorted(values, 0.1),
+      p50: quantileSorted(values, 0.5),
+      p90: quantileSorted(values, 0.9),
+    })
+  }
+  return bands
+}
+
+/* ------------------------------------------------------------------ */
+/* Stats                                                               */
+/* ------------------------------------------------------------------ */
+
+export interface SeriesStats {
+  min: number
+  p10: number
+  p25: number
+  p50: number
+  p75: number
+  p90: number
+  max: number
+  mean: number
+  cv: number
+}
+
+export function quantileSorted(sorted: number[], p: number): number {
+  if (sorted.length === 0) return 0
+  const i = (sorted.length - 1) * p
+  const lo = Math.floor(i)
+  const hi = Math.ceil(i)
+  const a = sorted[lo] as number
+  const b = sorted[hi] as number
+  return a + (b - a) * (i - lo)
+}
+
+export function seriesStats(values: number[]): SeriesStats {
+  const sorted = [...values].sort((a, b) => a - b)
+  const mean = values.reduce((a, b) => a + b, 0) / (values.length || 1)
+  const sd = Math.sqrt(
+    values.reduce((a, b) => a + (b - mean) * (b - mean), 0) /
+      (values.length || 1),
+  )
+  return {
+    min: sorted[0] ?? 0,
+    p10: quantileSorted(sorted, 0.1),
+    p25: quantileSorted(sorted, 0.25),
+    p50: quantileSorted(sorted, 0.5),
+    p75: quantileSorted(sorted, 0.75),
+    p90: quantileSorted(sorted, 0.9),
+    max: sorted[sorted.length - 1] ?? 0,
+    mean,
+    cv: mean ? sd / mean : 0,
+  }
+}
+
+/** Single summary value per member (the "value" view). */
+export function mockSummaryValue(
+  variableId: string,
+  scenarioId: string,
+  climateKey: string,
+  locationId: string,
+): number {
+  const variable = VARIABLES[variableId]
+  if (!variable) return 0
+  if (variableId === "gw_trend") {
+    const location = getLocation(variable.locationGroup, locationId)
+    const base = location?.region === "SOD" ? -1.6 : -0.45
+    const effect = scenarioEffect(scenarioId)
+    const e =
+      (effect.eff.gwTrend ?? 0) *
+      (location ? regionWeight(effect, location) : 1)
+    const stress = MOCK_CLIMATE_STRESS[climateKey] ?? 0
+    const r = rng(
+      hash(`tr|${[variableId, scenarioId, climateKey, locationId].join("|")}`),
+    )
+    return base * (1 - e) - 0.55 * stress + 0.08 * gauss(r)
+  }
+  const stats = seriesStats(
+    mockAnnualSeries(variableId, scenarioId, climateKey, locationId),
+  )
+  return variableId === "ag_rev" ? stats.mean : stats.p50
+}
+
+/** Exceedance points (probability ascending) from an annual series. */
+export function toExceedancePoints(
+  values: number[],
+): Array<{ probability: number; value: number }> {
+  const sorted = [...values].sort((a, b) => b - a)
+  return sorted.map((value, k) => ({
+    probability: (k + 0.5) / sorted.length,
+    value,
+  }))
+}
