@@ -5,7 +5,7 @@
 // Deliberately not overfit to route names: it asserts the export's structural
 // invariants (entry page, not-found page, a real hashed JS bundle, at least one
 // routed page beyond the root shells, a real app shell), not a hardcoded list of
-// pages — so adding or renaming a page does not break this check.
+// pages - so adding or renaming a page does not break this check.
 //
 // Usage: node .github/scripts/verify-static-export.mjs [outDir]   (default apps/main/out)
 
@@ -18,7 +18,7 @@ const pass = (m) => console.log(`  ok  ${m}`)
 const must = (cond, msg) => (cond ? pass(msg) : errors.push(msg))
 
 // Collect every file path under a directory (iterative; does not follow into
-// nothing special — symlinked dirs report isDirectory() false, so are not walked).
+// nothing special - symlinked dirs report isDirectory() false, so are not walked).
 const walk = (root) => {
   const out = []
   const stack = [root]
