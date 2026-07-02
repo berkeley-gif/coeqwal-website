@@ -125,7 +125,6 @@ export default function Narration({
         display: "flex",
         flexDirection: "column",
         pt: padding,
-        px: padding,
         pb: padding,
       }}
     >
