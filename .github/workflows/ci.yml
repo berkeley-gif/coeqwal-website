@@ -12,14 +12,14 @@ name: CI
 #     automatically — you do NOT edit shell logic, and branch protection is
 #     unchanged.
 #   - Add an ADVISORY check: give it its own job with `continue-on-error: true`
-#     and do NOT add it to `gate.needs` (see the `build` job). It reports its own
-#     status without gating merges.
+#     and do NOT add it to `gate.needs`. It reports its own status without
+#     gating merges.
 #
-# Required today: static-checks (format:check + lint + check-types).
-# Advisory today: build — it compiles the shipped static export, verifies it,
-# and uploads it, but does not gate merges. It is promoted to required (moved
-# into gate.needs, continue-on-error removed) once the Turbo build env is fully
-# declared and Amplify parity is proven.
+# Required today: static-checks (format:check + lint + check-types) and build
+# (static export of the main app + verify + artifact upload). build was
+# promoted from advisory once the Turbo build env was fully declared
+# (turbo.json globalEnv/build.env) and Amplify parity was proven — the CI
+# build job and the Amplify deploy were green from the same dev commit.
 #
 # SECURITY: this is a `pull_request` workflow that checks out and executes
 # untrusted fork code (install/rebuild run arbitrary lifecycle scripts). Do NOT
@@ -80,15 +80,14 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    # Advisory: does not gate merges (not in gate.needs) and its failure does not
-    # fail the run (continue-on-error). Mirrors amplify.yml for the main app:
-    # `pnpm rebuild` + `turbo run build --filter=main` on Node 22 / pnpm 10,
-    # producing apps/main/out. NEXT_PUBLIC_MAPBOX_TOKEN is a public build-time
-    # value passed as a repository *variable* (not a secret); an unset token
-    # yields a valid build with a non-functional map, acceptable for a compile
-    # check. Promote to required by moving into gate.needs and removing
-    # continue-on-error once Amplify parity is proven.
-    continue-on-error: true
+    # Required: gates merges via gate.needs. Mirrors amplify.yml for the main
+    # app: `pnpm rebuild` + `turbo run build --filter=main` on Node 22 / pnpm
+    # 10, producing apps/main/out. NEXT_PUBLIC_MAPBOX_TOKEN is a public
+    # build-time value passed as a repository *variable* (not a secret); an
+    # unset token yields a valid build with a non-functional map, acceptable
+    # for a compile check. Storyline apps are not built here (--filter=main),
+    # so NEXT_PUBLIC_MAIN_APP_URL — read only by storyline headers — is not
+    # passed; declare it in this job's env if storyline builds are ever added.
     env:
       NEXT_PUBLIC_MAPBOX_TOKEN: ${{ vars.NEXT_PUBLIC_MAPBOX_TOKEN }}
     steps:
@@ -117,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     # Default-deny roll-up: every job in `needs` must succeed. Add a required
     # check by appending its job id here — no shell edits needed.
-    needs: [static-checks]
+    needs: [static-checks, build]
     if: ${{ always() }}
     timeout-minutes: 5
     env:
