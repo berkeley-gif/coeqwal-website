@@ -424,12 +424,15 @@ function useIndividualDemandUnitsData(
   )
 
   const monthlyResults = useMultiScenarioSlots(fetchIds, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useDemandUnitsMonthly(id, joinedDuIds),
   )
   const shortageResults = useMultiScenarioSlots(fetchIds, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useDemandUnitsShortageMonthly(id, joinedDuIds),
   )
   const periodResults = useMultiScenarioSlots(fetchIds, (id) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useDemandUnitsPeriod(id, joinedDuIds),
   )
 

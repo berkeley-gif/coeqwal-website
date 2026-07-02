@@ -321,7 +321,6 @@ The split follows the size of the entity pool and how sure we are about the data
 
 Concurrent fan-out fires N requests in parallel and leans on HTTP/2 multiplexing over one connection, so a handful of scenarios stays cheap. SWR dedupes repeats across panels, and the batch lane already covers the common categories, so the total request count stays low for a normal session.
 
-
 ### Lazy rendering and no preload
 
 The batch fires as soon as scenarios are selected, but each section mounts only the first time its accordion opens. `CategoryView` tracks `hasBeenExpanded` and gates rendering on it, so a category that is never opened never registers its fan-out hooks. There is no prefetch (yet, until this tool is understood better).
