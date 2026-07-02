@@ -26,7 +26,7 @@ import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/scenarioExplorer/getStarted/content"
 import { WATER_STORIES } from "../../content/stories"
 
-import VerticalNav from "../verticalNav/VerticalNav"
+import VerticalNav, { NAV_WIDTH_COLLAPSED, NAV_WIDTH_EXPANDED } from "../verticalNav/VerticalNav"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
@@ -36,6 +36,8 @@ export default function LearnPanel() {
   const activeSubSection = useActiveSection()
   const [activeSection, setActiveSection] = useState("get-started")
   const { openThemePanel } = usePanelRoute()
+  const [isVertNavExpanded, setIsVertNavExpanded] = useState(false)
+  const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -95,7 +97,15 @@ export default function LearnPanel() {
 
   return (
     <>
-      <VerticalNav activeSectionId={activeSection} activeSubSectionId={activeSubSection} onNavigate={handleNavigate} />
+      {/** Vertical Side Nav */}
+      <VerticalNav
+        activeSectionId={activeSection}
+        activeSubSectionId={activeSubSection}
+        isExpanded={isVertNavExpanded}
+        onToggleExpanded={() => setIsVertNavExpanded((prev) => !prev)}
+        onNavigate={handleNavigate} />
+
+      {/** Get Started section */}
       {activeSection === "get-started" && (
         <div
           style={{
@@ -103,6 +113,7 @@ export default function LearnPanel() {
             pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
           }}
         >
+
           {/* 
         Scrollytelling Container
         The persistent map is positioned fixed at page level.
@@ -139,7 +150,9 @@ export default function LearnPanel() {
               }}
             >
               {mapReady || mapError ? (
-                <MapOverlayPanels />
+                <MapOverlayPanels
+                  navWidth={navWidth}
+                />
               ) : (
                 <Box
                   sx={{
@@ -180,7 +193,7 @@ export default function LearnPanel() {
         <Box sx={{
           p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.blue.dark, minHeight: "100vh",
           paddingTop: (theme) => theme.space.panel.paddingXl,
-          paddingLeft: (theme) => theme.space.panel.paddingXl,
+          paddingLeft: (theme) => `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
           paddingRight: (theme) => theme.space.panel.padding,
         }}>
           <Typography
@@ -223,7 +236,7 @@ export default function LearnPanel() {
         <Box sx={{
           p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.nature.forest,
           paddingTop: (theme) => theme.space.panel.paddingXl,
-          paddingLeft: (theme) => theme.space.panel.paddingXl,
+          paddingLeft: (theme) => `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
           paddingRight: (theme) => theme.space.panel.padding,
         }}>
           <Typography

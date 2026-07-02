@@ -27,13 +27,20 @@ import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel, DataInDepthPanel, InterpretingOutcomesPanel, ChooseScenariosPanel, BeforeYouBeginPanel } from "../../scenarioExplorer/getStarted/panels"
 import TierAnimationSection from "../../scenarioExplorer/animation/TierAnimationSection"
 
+interface MapOverlayPanelsProps {
+  navWidth: number
+}
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export default function MapOverlayPanels() {
+export default function MapOverlayPanels({
+  navWidth
+}: MapOverlayPanelsProps) {
   const theme = useTheme()
+  const defaultLeftPadding = `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`
+  const defPaddingTransition = "padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
 
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
@@ -70,8 +77,9 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
               paddingRight: (theme) => theme.space.panel.padding,
+              transition: defPaddingTransition,
             }}
           >
             <CallResponsePanel
@@ -106,7 +114,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -149,7 +158,8 @@ export default function MapOverlayPanels() {
               minHeight: "150vh",
               position: "relative",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -202,7 +212,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -230,7 +241,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -300,7 +312,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -315,7 +328,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -332,7 +346,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -347,7 +362,7 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -367,7 +382,8 @@ export default function MapOverlayPanels() {
               minHeight: "100vh",
               position: "relative",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -395,7 +411,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -411,7 +428,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -427,7 +445,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >
@@ -444,7 +463,8 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              paddingLeft: (theme) => theme.space.panel.paddingXl,
+              paddingLeft: defaultLeftPadding,
+              transition: defPaddingTransition,
               paddingRight: (theme) => theme.space.panel.padding,
             }}
           >

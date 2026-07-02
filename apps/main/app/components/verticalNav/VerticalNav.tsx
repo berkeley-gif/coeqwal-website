@@ -31,8 +31,8 @@ import { NAV_SECTIONS, type NavSection } from "./VerticalNavSections"
 // Constants
 // ============================================================================
 
-const NAV_WIDTH_EXPANDED = 200
-const NAV_WIDTH_COLLAPSED = 40
+export const NAV_WIDTH_EXPANDED = 200
+export const NAV_WIDTH_COLLAPSED = 40
 
 // ============================================================================
 // Sub-types
@@ -54,6 +54,9 @@ interface VerticalNavProps {
     /** If provided, overrides internal scroll detection. Used when the parent
  *  already tracks scroll position (e.g. via Scrollama + map store). */
     activeSubSectionId: string
+    /** Whether is collapsed or expanded */
+    isExpanded: boolean
+    onToggleExpanded: () => void
 }
 
 /**
@@ -213,11 +216,10 @@ function SubSectionItem({
 export default function VerticalNav({
     onNavigate,
     activeSectionId,
-    activeSubSectionId
-}: VerticalNavProps) {
+    activeSubSectionId,
+    isExpanded,
+    onToggleExpanded, }: VerticalNavProps) {
     const theme = useTheme()
-    const [isExpanded, setIsExpanded] = useState(false)
-
     // How far from the top the nav sits. Should clear your sticky header stack.
     // FLAG: replace with theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
     // once you confirm the correct theme tokens.
@@ -311,7 +313,7 @@ export default function VerticalNav({
                 }}
             >
                 <IconButton
-                    onClick={() => setIsExpanded((prev) => !prev)}
+                    onClick={onToggleExpanded}
                     aria-label={isExpanded ? "Collapse navigation" : "Expand navigation"}
                     size="small"
                     sx={{
