@@ -15,6 +15,7 @@ import { VerticalBarChart, TierCircles } from "@repo/viz"
 import { isSingleValueTier } from "../../../../../../../scenarios/components/shared"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../../hooks/useMetricData"
+import { TIER_CHART_SIZE } from "../shared/chartConstants"
 
 export function MetricCard({
   metric,
@@ -216,9 +217,12 @@ export function MetricCard({
                     {scenario.scenarioName}
                   </Typography>
                   {isSingleValueTier(scenario.tierData) ? (
-                    <TierCircles tiers={scenario.tierData} size={140} />
+                    <TierCircles tiers={scenario.tierData} size={TIER_CHART_SIZE} />
                   ) : (
-                    <VerticalBarChart tiers={scenario.tierData} size={140} />
+                    <VerticalBarChart
+                      tiers={scenario.tierData}
+                      size={TIER_CHART_SIZE}
+                    />
                   )}
                 </Box>
               ))}

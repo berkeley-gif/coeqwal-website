@@ -17,6 +17,7 @@
 import { useMemo } from "react"
 import type { MonthlyPercentiles } from "@repo/viz"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
 import { useDeltaMonthly } from "@repo/data/coeqwal/hooks"
 import type {
   DeltaMonthlyStats,
@@ -171,7 +172,12 @@ export function useDeltaData(
   envFlowBatch: Record<string, BatchEnvFlowData> | undefined,
   isBatchLoading: boolean,
 ) {
-  const results = useMultiScenarioSlots(scenarios, useDeltaMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useDeltaMonthly)
 
   const deltaLoading = results.some((r) => r.isLoading)
   const deltaLoadingScenarios = scenarios.filter(

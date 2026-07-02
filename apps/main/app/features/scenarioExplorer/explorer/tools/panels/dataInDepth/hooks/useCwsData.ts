@@ -12,12 +12,13 @@
  *   - aggregates: the batched response (cwsBatch) built in CategoryView
  *   - M&I contractors / demand units: per-scenario fan-out via
  *     useMultiScenarioSlots (not covered by the batch endpoint)
- *   - added demand units: the single-unit endpoints stitched together
+ *   - added demand units: per-scenario fan-out via useMultiScenarioSlots with a
+ *     du_id list filter
  */
 
-import { useMemo, useCallback } from "react"
-import useSWR from "@repo/data/swr"
+import { useMemo } from "react"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
 import {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
@@ -25,11 +26,6 @@ import {
   useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
-import {
-  fetchDemandUnitsMonthly,
-  fetchDemandUnitsShortageMonthly,
-  fetchDemandUnitsPeriod,
-} from "@repo/data/coeqwal"
 import type {
   CwsDeliveryMonthlyStats,
   CwsShortageMonthlyStats,
@@ -72,11 +68,16 @@ type StitchedDemandUnitStats = {
  * Hook to fetch M&I contractor data for multiple scenarios
  */
 function useMultiScenarioMiContractors(scenarios: string[]) {
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
   const monthlyResults = useMultiScenarioSlots(
-    scenarios,
+    fetchIds,
     useMiContractorsMonthly,
   )
-  const periodResults = useMultiScenarioSlots(scenarios, useMiContractorsPeriod)
+  const periodResults = useMultiScenarioSlots(fetchIds, useMiContractorsPeriod)
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||
@@ -222,12 +223,17 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
  * hook keeps a parallel results array for each
  */
 function useMultiScenarioDemandUnits(scenarios: string[]) {
-  const monthlyResults = useMultiScenarioSlots(scenarios, useDemandUnitsMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const monthlyResults = useMultiScenarioSlots(fetchIds, useDemandUnitsMonthly)
   const shortageResults = useMultiScenarioSlots(
-    scenarios,
+    fetchIds,
     useDemandUnitsShortageMonthly,
   )
-  const periodResults = useMultiScenarioSlots(scenarios, useDemandUnitsPeriod)
+  const periodResults = useMultiScenarioSlots(fetchIds, useDemandUnitsPeriod)
 
   const isLoading =
     monthlyResults.some((r) => r.isLoading) ||
@@ -389,8 +395,9 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
 }
 
 /**
- * Hook to fetch individual demand unit statistics across multiple scenarios
- * Uses the single-unit endpoint for each (scenario, duId) combination
+ * Hook to fetch individual demand unit statistics across multiple scenarios.
+ * Fans out per scenario via useMultiScenarioSlots, filtering each request to
+ * the requested du_id list (the endpoint accepts a comma-separated list).
  *
  * @param scenarios - Array of scenario IDs to fetch data for
  * @param demandUnitIds - Array of demand unit IDs to fetch
@@ -401,82 +408,78 @@ function useIndividualDemandUnitsData(
   demandUnitIds: string[],
   demandUnitsList: Array<{ du_id: string; label: string; group?: string }> = [],
 ) {
-  // Create a stable cache key based on scenarios and demand unit IDs
-  const cacheKey = useMemo(() => {
-    if (demandUnitIds.length === 0) return null
-    return ["individual-demand-units", ...scenarios, ...demandUnitIds].join("|")
-  }, [scenarios, demandUnitIds])
-
-  // Create a stable fetcher function that SWR can reliably call.
-  // Fans out per (duId, scenarioId) to the three decomposed urban-DU endpoints
-  // (delivery-monthly, shortage-monthly, period-summary) with `?du_id=X` and
-  // stitches the results back into the per-DU shape the matrix builder
-  // expects. Shortage 404s are tolerated. some DUs have no shortage data
-  const fetcher = useCallback(async () => {
-    const results: Record<string, Record<string, StitchedDemandUnitStats>> = {}
-
-    const fetchPromises = demandUnitIds.flatMap((duId) =>
-      scenarios.map(async (scenarioId) => {
-        try {
-          const [monthlyResp, shortageResp, periodResp] = await Promise.all([
-            fetchDemandUnitsMonthly(scenarioId, duId).catch(() => null),
-            fetchDemandUnitsShortageMonthly(scenarioId, duId).catch(() => null),
-            fetchDemandUnitsPeriod(scenarioId, duId).catch(() => null),
-          ])
-
-          const monthlyEntry = monthlyResp?.demand_units?.[duId] ?? null
-          const shortageEntry = shortageResp?.demand_units?.[duId] ?? null
-          const periodEntry = periodResp?.demand_units?.[duId] ?? null
-
-          if (!monthlyEntry && !shortageEntry && !periodEntry) {
-            return { duId, scenarioId, data: null }
-          }
-
-          const data: StitchedDemandUnitStats = {
-            community_agency:
-              monthlyEntry?.community_agency ??
-              shortageEntry?.community_agency ??
-              null,
-            period_summary: periodEntry,
-            monthly_delivery: monthlyEntry?.monthly_delivery ?? null,
-            monthly_shortage: shortageEntry?.monthly_shortage ?? null,
-          }
-
-          return { duId, scenarioId, data }
-        } catch (err) {
-          console.warn(`Failed to fetch stats for ${duId}/${scenarioId}:`, err)
-          return { duId, scenarioId, data: null }
-        }
-      }),
-    )
-
-    const responses = await Promise.all(fetchPromises)
-
-    responses.forEach(({ duId, scenarioId, data }) => {
-      if (data) {
-        if (!results[duId]) {
-          results[duId] = {}
-        }
-        results[duId][scenarioId] = data
-      }
-    })
-
-    return results
-  }, [demandUnitIds, scenarios])
-
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR<Record<string, Record<string, StitchedDemandUnitStats>>>(
-    cacheKey,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-    },
+  // Resolve the user's sibling-group ids to the active hydroclimate's
+  // short_codes for fetching, while keying results back by group id (by slot
+  // index) so the matrix stays in group-id space. Resolving before the fetch is
+  // what makes a hydroclimate toggle refetch instead of returning stale
+  // historical data.
+  const { idMapping } = useResolvedIdMapping()
+  const hasIds = demandUnitIds.length > 0
+  // The urban-DU endpoints accept a comma-separated du_id list, so we fan out
+  // once per scenario (not per scenario-DU pair) via the shared slots idiom.
+  const joinedDuIds = hasIds ? [...demandUnitIds].sort().join(",") : undefined
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => (hasIds ? (idMapping[id] ?? null) : null)),
+    [scenarios, idMapping, hasIds],
   )
 
-  const error = swrError ? String(swrError.message || swrError) : null
+  const monthlyResults = useMultiScenarioSlots(fetchIds, (id) =>
+    useDemandUnitsMonthly(id, joinedDuIds),
+  )
+  const shortageResults = useMultiScenarioSlots(fetchIds, (id) =>
+    useDemandUnitsShortageMonthly(id, joinedDuIds),
+  )
+  const periodResults = useMultiScenarioSlots(fetchIds, (id) =>
+    useDemandUnitsPeriod(id, joinedDuIds),
+  )
+
+  const isLoading =
+    monthlyResults.some((r) => r.isLoading) ||
+    shortageResults.some((r) => r.isLoading) ||
+    periodResults.some((r) => r.isLoading)
+  const error =
+    monthlyResults.find((r) => r.error)?.error ??
+    shortageResults.find((r) => r.error)?.error ??
+    periodResults.find((r) => r.error)?.error ??
+    null
+
+  // Stitch the three per-scenario responses back into the per-DU shape the
+  // matrix builder expects (keyed by duId, then group id). The merged
+  // `/demand-units/monthly` endpoint serves both delivery and shortage, so the
+  // shortage slot is deduped by SWR and never costs an extra request.
+  const data = useMemo(() => {
+    if (!hasIds) return undefined
+    const out: Record<string, Record<string, StitchedDemandUnitStats>> = {}
+    scenarios.forEach((groupId, index) => {
+      const monthlyDU = monthlyResults[index]?.demandUnits
+      const shortageDU = shortageResults[index]?.demandUnits
+      const periodDU = periodResults[index]?.demandUnits
+      demandUnitIds.forEach((duId) => {
+        const monthlyEntry = monthlyDU?.[duId] ?? null
+        const shortageEntry = shortageDU?.[duId] ?? null
+        const periodEntry = periodDU?.[duId] ?? null
+        if (!monthlyEntry && !shortageEntry && !periodEntry) return
+        if (!out[duId]) out[duId] = {}
+        out[duId][groupId] = {
+          community_agency:
+            monthlyEntry?.community_agency ??
+            shortageEntry?.community_agency ??
+            null,
+          period_summary: periodEntry,
+          monthly_delivery: monthlyEntry?.monthly_delivery ?? null,
+          monthly_shortage: shortageEntry?.monthly_shortage ?? null,
+        }
+      })
+    })
+    return out
+  }, [
+    hasIds,
+    scenarios,
+    demandUnitIds,
+    monthlyResults,
+    shortageResults,
+    periodResults,
+  ])
 
   // Transform data into the format expected by useMultiScenarioCwsData
   const entityMap: Record<string, EntityInfo> = {}

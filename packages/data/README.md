@@ -119,38 +119,38 @@ Defined in `packages/data/src/cache/keys.ts`. Static keys are plain strings (mir
 
 Exported from `@repo/data/coeqwal/hooks` (and `@repo/data/fetching` for `useLocalData`). One row per hook, paired with the cache key it owns and the data shape it returns.
 
-| Domain               | Hook                                               | Cache key                           | What it fetches                                                                                                        |
-| -------------------- | -------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Tier metadata        | `useTiers()`                                       | `TIER_LIST`                         | Outcome definitions: short codes, names, tier types, and tier counts for all 9 outcomes                                |
-| Tier metadata        | `useTierMapping()`                                 | derived from `useTiers`             | `short_code` -> display-name lookup table, derived in-memory from `useTiers`                                           |
-| Scenarios            | `useScenarios()`                                   | `SCENARIOS`                         | Full scenario list: short codes, run names, descriptions, hydroclimate ids, sibling-group ids, and active flags        |
-| Tier scores          | `useScenarioTiers(id)`                             | `scenarioTiers(id)`                 | All 9 outcomes for one scenario: weighted score, normalized score, and tier distribution counts                        |
-| Tier locations       | `useTierLocationAssignments(id, code)`             | `tierLocations(id, code)`           | Per-location `tier_level` for one scenario+outcome pair (e.g. 121 demand units for `CWS_DEL`). No geometry             |
-| Tier locations       | `useTierLocationAssignmentsBatch(id, codes)`       | `tierLocationsBatch(id, codes)`     | Same as above for multiple outcomes in one HTTP request; splays results into the single-outcome cache on success       |
-| Reservoirs           | `useAllReservoirsList()`                           | `STATISTICS_RESERVOIRS_ALL`         | Full reservoir list with statistics, used to populate the "add reservoir" dropdown                                     |
-| Reservoirs           | `useReservoirPercentiles(id, resId)`               | `reservoirPercentilesFiltered(...)` | Monthly storage percentiles (q0-q100) for one reservoir in one scenario                                                |
-| Reservoirs           | `useAllReservoirPercentiles(id)`                   | `allReservoirPercentiles(id)`       | Monthly storage percentiles for every reservoir in one scenario                                                        |
-| Reservoirs           | `useGroupedReservoirPercentiles(id, group)`        | `groupedReservoirPercentiles(...)`  | Monthly storage percentiles for one reservoir group (e.g. `"major"`)                                                   |
-| Reservoirs           | `useSpillMonthly(id, group)`                       | `spillMonthly(id, group)`           | Monthly spill frequency and spill magnitude statistics                                                                 |
-| Reservoirs           | `useMultipleReservoirPercentiles(ids)`             | per-scenario fan-out                | Fan-out wrapper that calls `useReservoirPercentiles` once per scenario id                                              |
-| M&I contractors      | `useMiContractorsMonthly(id, contractor?)`         | `miContractorsMonthly(...)`         | Monthly delivery and shortage stats per M&I contractor for one scenario                                                |
-| M&I contractors      | `useMiContractorsPeriod(id, contractor?)`          | `miContractorsPeriod(...)`          | Period-of-record summary per M&I contractor                                                                            |
-| Urban demand units   | `useDemandUnitsList(group?)`                       | `demandUnitsList(group?)`           | 46 urban demand units, optionally filtered by hydrologic-region group                                                  |
-| Urban demand units   | `useDemandUnitsMonthly(id, duId?, group?)`         | `demandUnitsMonthly(...)`           | Monthly delivery and shortage percentiles per urban demand unit                                                        |
-| Urban demand units   | `useDemandUnitsShortageMonthly(id, duId?, group?)` | `demandUnitsShortageMonthly(...)`   | Monthly shortage band, companion to `useDemandUnitsMonthly`. Both hit `/demand-units/monthly`; SWR dedupes             |
-| Urban demand units   | `useDemandUnitsPeriod(id, duId?, group?)`          | `demandUnitsPeriod(...)`            | Period-of-record summary per urban demand unit                                                                         |
-| AG demand units      | `useAgDemandUnitsList(filters?)`                   | `agDemandUnitsList(filters?)`       | ~150 AG demand units, filterable by region / cs3 type / provider                                                       |
-| AG demand units      | `useAgDemandUnitsDeliveryMonthly(id, duIds?)`      | `agDemandUnitsDeliveryMonthly(...)` | Monthly delivery / demand / GW pumping / shortage per AG demand unit (merged `/monthly`)                               |
-| AG demand units      | `useAgDemandUnitsShortageMonthly(id, duIds?)`      | `agDemandUnitsShortageMonthly(...)` | Monthly shortage band, companion to the delivery hook. Both hit the same merged `/monthly` URL; SWR dedupes            |
-| AG demand units      | `useAgDemandUnitsPeriod(id, duIds?)`               | `agDemandUnitsPeriod(...)`          | Period-of-record summary per AG demand unit                                                                            |
-| Refuge               | `useRefugeDemandUnitsList()`                       | `REFUGE_DUS_LIST`                   | 18 wildlife refuge demand units with metadata                                                                          |
-| Refuge               | `useRefugeDusDeliveryMonthly(id, duId?)`           | `refugeDusDeliveryMonthly(...)`     | Monthly surface-water delivery percentile bands per refuge DU (merged `/monthly` payload)                              |
-| Refuge               | `useRefugeDusShortageMonthly(id, duId?)`           | `refugeDusShortageMonthly(...)`     | Monthly shortage band, companion to the delivery hook. Both hit `/refuge-demand-units/monthly`; SWR dedupes            |
-| Refuge               | `useRefugeDusPeriod(id, duId?)`                    | `refugeDusPeriod(...)`              | Period-of-record summary per refuge DU                                                                                 |
-| Channels (env flows) | `useChannelsList(class?, watershed?)`              | `CHANNELS_LIST` (or filtered URL)   | All 59 CalSim channel reaches with watershed and capability attributes                                                 |
-| Delta                | `useDeltaMonthly(id, category?)`                   | `deltaMonthly(id, category?)`       | Monthly Delta statistics: X2 position, salinity compliance, salinity at pumps, outflow (8 variables × 12 water months) |
-| Batch stats          | `useBatchStatistics(scenarios, types?)`            | `batchStatistics(scenarios, types)` | Storage + CWS + AG + env-flow in **one** HTTP request for many scenarios; powers the Data in Depth tool                |
-| Local JSON           | `useLocalData(url, options?)`                      | URL or custom cache key             | Any JSON / GeoJSON file served from `public/` (markers, content files, static lookups)                                 |
+| Domain               | Hook                                               | Cache key                           | What it fetches                                                                                                         |
+| -------------------- | -------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Tier metadata        | `useTiers()`                                       | `TIER_LIST`                         | Outcome definitions: short codes, names, tier types, and tier counts for every outcome                                  |
+| Tier metadata        | `useTierMapping()`                                 | derived from `useTiers`             | `short_code` -> display-name lookup table, derived in-memory from `useTiers`                                            |
+| Scenarios            | `useScenarios()`                                   | `SCENARIOS`                         | Full scenario list: short codes, run names, descriptions, hydroclimate ids, sibling-group ids, and active flags         |
+| Tier scores          | `useScenarioTiers(id)`                             | `scenarioTiers(id)`                 | All outcomes for one scenario: weighted score, normalized score, and tier distribution counts                           |
+| Tier locations       | `useTierLocationAssignments(id, code)`             | `tierLocations(id, code)`           | Per-location `tier_level` for one scenario+outcome pair (e.g. the demand units for `CWS_DEL`). No geometry              |
+| Tier locations       | `useTierLocationAssignmentsBatch(id, codes)`       | `tierLocationsBatch(id, codes)`     | Same as above for multiple outcomes in one HTTP request                                                                 |
+| Reservoirs           | `useAllReservoirsList()`                           | `STATISTICS_RESERVOIRS_ALL`         | Full reservoir list with statistics, used to populate the "add reservoir" dropdown                                      |
+| Reservoirs           | `useReservoirPercentiles(id, resId)`               | `reservoirPercentilesFiltered(...)` | Monthly storage percentiles (q0-q100) for one reservoir in one scenario                                                 |
+| Reservoirs           | `useAllReservoirPercentiles(id)`                   | `allReservoirPercentiles(id)`       | Monthly storage percentiles for every reservoir in one scenario                                                         |
+| Reservoirs           | `useGroupedReservoirPercentiles(id, group)`        | `groupedReservoirPercentiles(...)`  | Monthly storage percentiles for one reservoir group (e.g. `"major"`)                                                    |
+| Reservoirs           | `useSpillMonthly(id, group)`                       | `spillMonthly(id, group)`           | Monthly spill frequency and spill magnitude statistics                                                                  |
+| Reservoirs           | `useReservoirPercentilesByIds(id, reservoirIds)`   | `reservoirPercentilesFiltered(...)` | Percentiles for a list of reservoirs in one scenario (one request per scenario, callers fan out per scenario)           |
+| M&I contractors      | `useMiContractorsMonthly(id, contractor?)`         | `miContractorsMonthly(...)`         | Monthly delivery and shortage stats per M&I contractor for one scenario                                                 |
+| M&I contractors      | `useMiContractorsPeriod(id, contractor?)`          | `miContractorsPeriod(...)`          | Period-of-record summary per M&I contractor                                                                             |
+| Urban demand units   | `useDemandUnitsList(group?)`                       | `demandUnitsList(group?)`           | List of urban demand units. Optional filter by group short_code (e.g. `var_wba`, `var_swp_contractor`)                  |
+| Urban demand units   | `useDemandUnitsMonthly(id, duId?, group?)`         | `demandUnitsMonthly(...)`           | Monthly delivery and shortage percentiles per urban demand unit (merged `/monthly`)                                     |
+| Urban demand units   | `useDemandUnitsShortageMonthly(id, duId?, group?)` | `demandUnitsShortageMonthly(...)`   | Monthly shortage band, companion to `useDemandUnitsMonthly`. Both hit `/demand-units/monthly`; SWR dedupes              |
+| Urban demand units   | `useDemandUnitsPeriod(id, duId?, group?)`          | `demandUnitsPeriod(...)`            | Period-of-record summary per urban demand unit                                                                          |
+| AG demand units      | `useAgDemandUnitsList(filters?)`                   | `agDemandUnitsList(filters?)`       | List of AG demand units. Optional filter by hydrologic region (SAC / SJR / TULARE), cs3 type, or provider               |
+| AG demand units      | `useAgDemandUnitsDeliveryMonthly(id, duIds?)`      | `agDemandUnitsDeliveryMonthly(...)` | Monthly delivery, demand, GW pumping, and shortage per AG demand unit (merged `/monthly`)                               |
+| AG demand units      | `useAgDemandUnitsShortageMonthly(id, duIds?)`      | `agDemandUnitsShortageMonthly(...)` | Monthly shortage band, companion to `useAgDemandUnitsDeliveryMonthly`. Both hit `/ag-demand-units/monthly`; SWR dedupes |
+| AG demand units      | `useAgDemandUnitsPeriod(id, duIds?)`               | `agDemandUnitsPeriod(...)`          | Period-of-record summary per AG demand unit                                                                             |
+| Refuge               | `useRefugeDemandUnitsList()`                       | `REFUGE_DUS_LIST`                   | List of wildlife refuge demand units                                                                                    |
+| Refuge               | `useRefugeDusDeliveryMonthly(id, duId?)`           | `refugeDusDeliveryMonthly(...)`     | Monthly surface-water delivery percentile bands per refuge demand unit (merged `/monthly`)                              |
+| Refuge               | `useRefugeDusShortageMonthly(id, duId?)`           | `refugeDusShortageMonthly(...)`     | Monthly shortage band, companion to `useRefugeDusDeliveryMonthly`. Both hit `/refuge-demand-units/monthly`; SWR dedupes |
+| Refuge               | `useRefugeDusPeriod(id, duId?)`                    | `refugeDusPeriod(...)`              | Period-of-record summary per refuge demand unit                                                                         |
+| Channels (env flows) | `useChannelsList(class?, watershed?)`              | `CHANNELS_LIST` (or filtered URL)   | All CalSim channel reaches with watershed and capability attributes                                                     |
+| Delta                | `useDeltaMonthly(id, category?)`                   | `deltaMonthly(id, category?)`       | Monthly Delta statistics: X2 position, salinity compliance, salinity at pumps, outflow, by water-year month             |
+| Batch stats          | `useBatchStatistics(scenarios, types?)`            | `batchStatistics(scenarios, types)` | Storage + CWS + AG + env-flow in **one** HTTP request for many scenarios; powers the Data in Depth tool                 |
+| Local JSON           | `useLocalData(url, options?)`                      | URL or custom cache key             | Any JSON / GeoJSON file served from `public/` (markers, content files, static lookups)                                  |
 
 Selectors (not hooks themselves) that pair with `useBatchStatistics`: `getStorageForScenario`, `getCwsForScenario`, `getAgForScenario`, `getEnvFlowForScenario` slice the batch response by scenario id.
 
@@ -216,15 +216,13 @@ Smaller, scoped preloads that run when a specific panel or interaction tells us 
 | `apps/main/app/features/map/overlays/scenarioPanels/KeyOutcomesPanel.tsx`                         | Key Outcomes panel mounts in the Learn scrollytelling | `scenarioTiers(variantId)` for the panel's `scenarioId` (defaults to `s0020`) across every hydroclimate variant |
 | `apps/main/app/features/map/hooks/useMapVisualizationAction.ts`                                   | User selects an outcome on a scenario via the map     | `tierLocationsBatch(id, PREFETCHABLE_TIER_CODES)` for the scenarios the user is about to compare                |
 
-A note on `KeyOutcomesPanel`: it is a scrollytelling panel in the Learn section, not the Explore tab. It shows the nine outcome glyphs for one specific scenario (the prop `scenarioId`, defaulting to `s0020`). Sitting next to it is a `KeyOperationsPanel` with a hydroclimate chooser. When the user flips climates, the panel needs `useScenarioTiers(variantId)` for that climate's variant of the same sibling group. The preload loop in `KeyOutcomesPanel.tsx:60-66` walks every hydroclimate, resolves the sibling group to its per-climate variant id, and warms `scenarioTiers(variantId)` for each. The result: the climate toggle changes a key but never an HTTP request.
-
 Every call has the same shape:
 
 ```ts
 preload(CACHE_KEYS.someKey(args), () => fetchSomething(args))
 ```
 
-The discipline is non-negotiable: the key the preloader passes and the key the consumer hook builds must be **byte-for-byte identical**. If they don't match, the warming silently does nothing and you're back to an on-demand fetch. That is why every key builder lives in one file and sorts list inputs.
+The key the preloader passes and the key the consumer hook builds must be **byte-for-byte identical**. If they don't match, the warming silently does nothing and you're back to an on-demand fetch. That is why every key builder lives in one file and sorts list inputs.
 
 ### Worked example: the radar chart
 
@@ -273,11 +271,11 @@ A user toggling hydroclimates is the same flow with a different `idMapping`. The
 
 ## Data fetching in the Data in Depth tool
 
-The Data in Depth tool (entry point `apps/main/app/features/scenarioExplorer/tools/panels/dataInDepth/DataExplorerView.tsx` -> `CategoryView`) is shaped differently from the Explore tab tools. Tier data is light and shared across panels, so the Explore tab can prefetch everything up front. The statistics endpoints behind Data in Depth (storage percentiles, CWS monthly delivery/shortage, AG aggregates, env flow, refuge, delta salinity, spill) are heavier and only matter once the user has actually chosen scenarios to compare. So the tool fetches differently: **one batched call at the top, lazy section expansion underneath, fan-out hooks for the long tail, and no preload at all**.
+The Data in Depth tool (entry point `apps/main/app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/`, rendered by `CategoryView`) loads heavier statistics only after the user picks scenarios to compare. Tier data is light and shared, so the Explore tab prefetches it, but the statistics endpoints here (storage percentiles, CWS monthly delivery and shortage, AG aggregates, env flow, refuge, delta salinity, spill, etc.) are heavier and are visible once selected. The tool uses two fetch lanes plus lazy section rendering, and it does no preload.
 
-### One batched call at the top
+### The batch lane
 
-`CategoryView` reads the user's selected scenarios from the store, resolves them to short codes via `useResolvedSelectedScenarios()`, then makes a single batched call:
+`CategoryView` reads the selected scenarios from the store, resolves them to short codes with `useResolvedSelectedScenarios()`, and makes one batched call.
 
 ```ts
 const { data: rawBatchData, isLoading: isBatchLoading } = useBatchStatistics(
@@ -286,96 +284,55 @@ const { data: rawBatchData, isLoading: isBatchLoading } = useBatchStatistics(
 )
 ```
 
-`useBatchStatistics` is a `@repo/data` hook that hits the `batchStatistics(scenarios, types)` cache key. It returns four datasets in one response, keyed by API short_code. `CategoryView` then re-keys the response by sibling-group id (using `rekeyByGroup`) and passes the re-keyed `batchData` down as a prop to every section that needs it. Four of the six categories source from the batch directly:
+`useBatchStatistics` returns four datasets in one response, keyed by API short code. `CategoryView` re-keys the response by sibling-group id with `rekeyByGroup` and passes `batchData` to each section. Re-keying lets the rest of the UI keep speaking sibling-group ids while the API and cache speak short codes. The categories that line up with the batch read from it directly, and the rest use the fan-out lane below.
 
-| Category                | Section component         | Source                                |
-| ----------------------- | ------------------------- | ------------------------------------- |
-| Reservoir storage       | `ReservoirStorageSection` | `batchData.storage`                   |
-| Community water systems | `CwsSection`              | `batchData.cws` (project totals view) |
-| Agricultural water      | `AgSection`               | `batchData.ag`                        |
-| Environmental flows     | `EnvFlowSection`          | `batchData.env_flow`                  |
+| Category                | Section component         | Batch slice          |
+| ----------------------- | ------------------------- | -------------------- |
+| Reservoir storage       | `ReservoirStorageSection` | `batchData.storage`  |
+| Community water systems | `CwsSection`              | `batchData.cws`      |
+| Agricultural water      | `AgSection`               | `batchData.ag`       |
+| Environmental flows     | `EnvFlowSection`          | `batchData.env_flow` |
 
-Re-keying is what lets the rest of the UI keep speaking sibling-group ids ("`s0020`") while the API and the cache speak short codes ("`s0028`"). Sibling-group ids are the canonical identifier downstream of `CategoryView`.
+### The fan-out lane
 
-### Lazy section rendering
-
-The batch fires immediately when scenarios are selected, but the _sections themselves_ only mount the first time their accordion is expanded. `CategoryView` tracks `hasBeenExpanded` and gates section rendering on it:
-
-```tsx
-{!hasBeenExpanded.has(category.id) ? null : (
-  // section component for this category
-)}
-```
-
-This matters for the long-tail hooks below: a category that's never expanded never registers its fan-out hooks, and never spends bandwidth.
-
-### Fan-out hooks for the long tail
-
-The batch endpoint covers storage, CWS aggregates, AG, and env flow. Anything else uses **fan-out hooks**: helpers that call one underlying `@repo/data` hook per scenario and merge the results. The pattern lives in `apps/main/app/features/scenarioExplorer/tools/panels/dataInDepth/components/useMultiScenarioSlots.ts`:
+Everything the batch does not cover uses one shared idiom, `useMultiScenarioSlots`, in `apps/main/app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/hooks/useMultiScenarioSlots.ts`. It calls one `@repo/data` hook per scenario in a stable order, so each scenario keeps its own SWR cache slot and React sees a fixed hook count across renders.
 
 ```ts
-const monthlyResults = useMultiScenarioSlots(scenarios, useMiContractorsMonthly)
-const periodResults = useMultiScenarioSlots(scenarios, useMiContractorsPeriod)
+const results = useMultiScenarioSlots(fetchIds, useReservoirPercentilesByIds)
 ```
 
-`useMultiScenarioSlots` calls the supplied hook once per scenario in a stable order. Each call gets its own cache slot. SWR deduplicates across the React tree, so if some other component asks for the same `(scenarioId, ...)` later in the same session, it's a cache hit.
+The one rule that matters is that `fetchIds` must be the resolved ids for the active hydroclimate, taken from `useResolvedIdMapping`, and never the raw sibling-group ids. Passing raw ids makes the charts ignore hydroclimate changes. Slots accepts `null` for a scenario that has no variant in the current hydroclimate, which keeps the hook order stable.
 
-What uses fan-out today:
+What uses the fan-out lane today
 
-- **M&I contractors and urban demand units** inside `CwsSection` (`useMiContractorsMonthly`, `useMiContractorsPeriod`, `useDemandUnitsMonthly`, `useDemandUnitsPeriod`)
-- **Refuge delivery / shortage** in `RefugeSection` (`useRefugeDusDeliveryMonthly`, etc.)
-- **Spill frequency** in the spill matrix (`useSpillMonthly` via `useMultiScenarioSpillData`)
-- **Delta monthly statistics** in `DeltaSection` (`useDeltaMonthly`)
-- **Per-reservoir tier colors** for the reservoir percentile matrix, via a small inline `useSWR(["reservoir-tier-locations", ...scenarios], ...)` that calls `fetchTierLocationAssignments(scenarioId, "RES_STOR")` in parallel
-- **Individually added demand units** (when the user picks one from the dropdown), via `useIndividualDemandUnitsData` (local to `CwsSection.tsx`). It fans out `fetchDemandUnitsMonthly`, `fetchDemandUnitsShortageMonthly`, and `fetchDemandUnitsPeriod` per `(scenario, du_id)` pair, stitches the results into one per-DU shape the matrix expects, and stores the result in a `useSWR` slot keyed by `["individual-demand-units", ...scenarios, ...duIds]`
+- Extra reservoirs added by the user, through `useReservoirPercentilesByIds`
+- M&I contractors and urban demand units in `CwsSection`
+- Individually added demand units in `CwsSection` and `AgSection`, through the list-filtered urban and ag hooks
+- Refuge delivery and shortage in `RefugeSection`
+- Spill frequency in `SpillFrequencySection`, through `useSpillMonthly`
+- Delta monthly statistics in `DeltaSection`
 
-The fan-out pattern looks chatty (N hooks, potentially N requests), but in practice it is fine: scenario counts in Data in Depth are bounded by user selection (typically 2-6), the responses are small, and SWR dedupes across panels. The tradeoff is deliberate: making one batched endpoint per (resource, scenario-set, filter) combination would balloon the backend surface area for a tool that most users only open occasionally.
+### The design logic behind two lanes
 
-### Tier glyphs share the Explore tab's cache
+The split follows the size of the entity pool and how sure we are about the data shape.
 
-The bar charts do **not** call the statistics endpoints. They use `useMetricData`, which under the hood calls the same `useMultipleScenarioTiers(idMapping)` that the radar uses. That cache slot was populated by `usePrefetchTiers` the moment the user landed on Explore. So those glyphs render instantly when Data in Depth opens, with no additional request, regardless of whether the batch is still in flight.
+- Small bounded pool, so fetch the whole set: Reservoirs, CWS aggregates, AG aggregates, and env flow are small and shared, so the batch pulls the whole set once.
+- Large pool, so fetch a small headline set and add individuals on demand: There are many demand units, so the tool shows a headline set and fans out one request per scenario only for the individual entities a user adds.
 
-### No preload, by design
+Concurrent fan-out fires N requests in parallel and leans on HTTP/2 multiplexing over one connection, so a handful of scenarios stays cheap. SWR dedupes repeats across panels, and the batch lane already covers the common categories, so the total request count stays low for a normal session.
 
-Data in Depth has no equivalent of `usePrefetchTiers`. There are two reasons:
 
-1. **Intent is explicit.** Data in Depth requires the user to select scenarios before any of its categories have anything to render. The tool sits behind an empty-state ("Choose scenarios"). By the time a request makes sense, the user has already told us which scenarios they care about. Preloading earlier would be a guess.
-2. **The batch is already one request.** Once scenarios are picked, the batch endpoint returns four datasets in one round trip. There's no equivalent to the "fan out and warm everything" win that `usePrefetchTiers` gets, because the heavy lifting is already a single call.
+### Lazy rendering and no preload
 
-The lazy section expansion (`hasBeenExpanded`) then defers the long-tail fan-out hooks until the user actually opens a category. So the request pattern over a typical session is: select 4 scenarios -> one batch request fires -> user opens "Community water systems" -> M&I monthly hooks fan out (~8 requests for 4 scenarios x 2 endpoints) -> user collapses and opens "Agricultural water" -> AG already came in the batch, no new requests.
+The batch fires as soon as scenarios are selected, but each section mounts only the first time its accordion opens. `CategoryView` tracks `hasBeenExpanded` and gates rendering on it, so a category that is never opened never registers its fan-out hooks. There is no prefetch (yet, until this tool is understood better).
 
-### Summary diagram
+The tier glyphs are the one exception that does preload. They read the tier cache that the Explore tab already warmed with `usePrefetchTiers`, through `useMetricData`, so they render with no extra request.
 
-```
-User selects scenarios in sidebar
-        |
-        v
-CategoryView mounts with selectedScenarios
-        |
-        v
-useBatchStatistics(resolvedIds, {types: ["storage","cws","ag","env_flow"]})
-        |   one HTTP request to /api/statistics/batch
-        v
-batchData re-keyed by sibling-group id
-        |
-        v -- passed as prop -->  ReservoirStorageSection, CwsSection,
-        |                         AgSection, EnvFlowSection (all read from batchData)
-        v
-User expands an accordion
-        |
-        v
-Section component mounts (`hasBeenExpanded` gate)
-        |
-        +--> tier-glyph thumbnails: useMetricData -> useMultipleScenarioTiers
-        |     (CACHE HIT - already warmed by Explore tab's usePrefetchTiers)
-        |
-        +--> batched sub-data: read straight from batchData prop, no fetch
-        |
-        +--> long-tail sub-data: useMultiScenarioSlots(scenarios, hook)
-              fans out to N parallel useSWR calls, one per scenario
-```
+### Where the fan-out lane could go next
 
-The contrast with the Explore tab is the central design choice: the Explore tab is shaped around "everything is instant because we prefetched", and the Data in Depth tool is shaped around "the batch covers most of it, the rest fans out lazily, and nothing fires until you ask".
+The fan-out lane is deliberately simple, and some of it can be upgraded to a true batch call later, once we understand the data shape for this tool better. A likely model is the tier fetching path, which is set-based on the server (`WHERE tr.scenario_short_code = ANY($1)` in `tier_endpoints.py:383`) and sits behind a server-side cache, so one request covers many scenarios.
+
+The open question is what the sets should be. Tier data reached an optimal shape because the entity set for an outcome is well defined. Until that is settled we do not know which entities should form a default set that is batch-fetched for every scenario, and which should stay on demand through the fan-out lane.
 
 ## Usage
 
@@ -493,49 +450,6 @@ const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
 // [{ shortCode: "CWS_DEL", displayName: "Community Water Systems Delivery" }, ...]
 ```
 
-#### `useMultipleScenarioTiers(idMapping?)`
-
-Fetches tier scores for all scenarios in a single batched request via `/api/tiers/batch`. When `idMapping` is provided, fetches only the resolved IDs and re-keys output to sibling group IDs. Uses `keepPreviousData` to avoid loading flashes during hydroclimate switches.
-
-```tsx
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-
-const {
-  allChartData,
-  allScoreData,
-  allScenariosData,
-  scenarioIds,
-  outcomeNames,
-  isLoading,
-  isValidating,
-  error,
-} = useMultipleScenarioTiers(idMapping)
-```
-
-> **Prefer `useResolvedScenarioTiers()`** (below) over calling this directly.it handles hydroclimate resolution automatically.
-
-#### `useResolvedScenarioTiers()`
-
-Convenience hook that reads the active hydroclimate from the store, resolves sibling group IDs, and calls `useMultipleScenarioTiers` under the hood. This is the recommended hook for any tool panel that needs tier data.
-
-```tsx
-import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-
-const {
-  allChartData,
-  allScoreData,
-  allScenariosData,
-  outcomeNames,
-  siblingGroups,
-  getDisplayName,
-  getThemeForScenario,
-  idMapping,
-  isLoading,
-  isValidating,
-  error,
-} = useResolvedScenarioTiers()
-```
-
 #### `useTierLocationAssignments(scenarioId, tierCode)`
 
 Fetches per-location tier assignments for a single scenario+outcome pair. Returns location-level data (no geometry), suitable for treemaps, tables, or any visualization that needs to know which locations fall into which tier. Pass `null` for either argument to skip fetching.
@@ -582,6 +496,51 @@ const { data, isLoading, error } = useTierLocationAssignmentsBatch(
 const allAssignments = React.useMemo(() => data?.results ?? {}, [data])
 ```
 
+### App-level tier hooks
+
+These two hooks live in `apps/main`, not in `@repo/data`. They wrap the package hooks with hydroclimate resolution and are the recommended entry point for tier data in a tool panel.
+
+#### `useResolvedScenarioTiers()` (app-level)
+
+Convenience hook that reads the active hydroclimate from the store, resolves sibling group IDs, and calls `useMultipleScenarioTiers` under the hood. This is the recommended hook for any tool panel that needs tier data. It handles hydroclimate resolution automagicically.
+
+```tsx
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+
+const {
+  allChartData,
+  allScoreData,
+  allScenariosData,
+  outcomeNames,
+  siblingGroups,
+  getDisplayName,
+  getThemeForScenario,
+  idMapping,
+  isLoading,
+  isValidating,
+  error,
+} = useResolvedScenarioTiers()
+```
+
+#### `useMultipleScenarioTiers(idMapping?)` (app-level)
+
+Fetches tier scores for all scenarios in a single batched request via `/api/tiers/batch`. When `idMapping` is provided, fetches only the resolved IDs and re-keys output to sibling group IDs. Uses `keepPreviousData` to avoid loading flashes during hydroclimate switches. Prefer `useResolvedScenarioTiers()` over calling this directly.
+
+```tsx
+import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+
+const {
+  allChartData,
+  allScoreData,
+  allScenariosData,
+  scenarioIds,
+  outcomeNames,
+  isLoading,
+  isValidating,
+  error,
+} = useMultipleScenarioTiers(idMapping)
+```
+
 ### Fetchers
 
 **Prefer hooks** in React components. They handle caching, deduplication, loading states, and errors automatically.
@@ -597,7 +556,6 @@ Use fetchers when you need to:
 | `fetchTierList()`                                | Tier definitions (short codes, names, types)                                                                                                                                                                       |
 | `fetchScenarioList()`                            | Active scenario list. Six fields per row: `short_code`, `name`, `short_description`, `hydroclimate_id`, `sibling_group`, `is_active`.                                                                              |
 | `fetchScenarioTiers(id)`                         | Tier data for a single scenario                                                                                                                                                                                    |
-| `fetchScenarioTierByCode(id, code)`              | Tier data for one outcome of one scenario.                                                                                                                                                                         |
 | `fetchAllScenarioTiers(ids)`                     | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.           |
 | `fetchTierLocationAssignments(id, code)`         | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                    |
 | `fetchTierLocationAssignmentsBatch(id, codes[])` | **Batch** per-location tier assignments for multiple outcomes in one request. Hits `/api/tiers/scenarios/{id}/locations?codes=...`. Falls back to parallel per-code requests if the batch endpoint is unavailable. |
@@ -761,7 +719,7 @@ This section walks through the data-fetching flow for a new tool in the Scenario
 
 ### Step 1: Subscribe to general scenario and tier data (already cached)
 
-Tier data for **all 24 scenarios across all hydroclimates** is prefetched when the Explore tab mounts (via `usePrefetchTiers` in `ScenarioExplorer.tsx`, using the batch endpoint `/api/tiers/batch`). By the time your tool panel renders, everything is already in the SWR cache.
+Tier data for **every scenario across every hydroclimate** is prefetched when the Explore tab mounts (via `usePrefetchTiers` in `ScenarioExplorer.tsx`, using the batch endpoint `/api/tiers/batch`). By the time your tool panel renders, everything is already in the SWR cache.
 
 To access it, call `useResolvedScenarioTiers()`. This does not trigger additional API requests. It subscribes to the cached data, keyed to the active hydroclimate. Switching hydroclimate data is instant (should not see the loading spinner).
 
@@ -770,7 +728,7 @@ import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useScenarioExplorerStore } from "../store"
 
 const {
-  allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
+  allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - every scenario
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
   allScoreData, // Scores per outcome: weighted_score and normalized_score
   outcomeNames, // Display-ordered list of { shortCode, displayName }
@@ -845,7 +803,7 @@ const cwsA = tiersA?.tiers["CWS_DEL"]
 //   { value: 30, normalized: 0.395 },  // index 3 = tier4 (worst)
 // ]
 
-// --- Per-location tier values (fetched on first access, then cached by SWR) ---
+// Per-location tier values (fetched on first access, then cached by SWR)
 
 // One request per scenario+outcome returns all locations at once.
 // Uses the lightweight /locations endpoint (no polygon geometry).
@@ -856,7 +814,7 @@ const { data: locationsB } = useTierLocationAssignments("s0021", "CWS_DEL")
 // First call fetches from API; subsequent renders with the same
 // scenario+outcome return the cached response instantly.
 
-// locationsA response shape (all 121 locations in one response):
+// locationsA response shape (all locations in one response):
 // {
 //   scenario: "s0020",
 //   tier_code: "CWS_DEL",
@@ -867,7 +825,7 @@ const { data: locationsB } = useTierLocationAssignments("s0021", "CWS_DEL")
 //       location_type: "demand_unit", tier_level: 1, tier_value: null },
 //     { location_id: "03_PU1", location_name: "03_PU1",
 //       location_type: "demand_unit", tier_level: 2, tier_value: 1 },
-//     ...121 locations total
+//     ...all locations
 //   ],
 //   metadata: {
 //     total_locations: 121,

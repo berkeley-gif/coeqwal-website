@@ -18,11 +18,13 @@ export interface SpillMonthlyStats {
   spill_months_count: number
   total_months: number
   spill_frequency_pct: number // 0-100
-  spill_avg_cfs: number
-  spill_max_cfs: number
-  spill_q50: number // median spill CFS
-  spill_q90: number
-  spill_q100: number // max spill CFS
+  // Magnitude (CFS) columns are null when not computed by the ETL. Callers must
+  // not fabricate a value; the chart skips markers for null magnitudes.
+  spill_avg_cfs: number | null
+  spill_max_cfs: number | null
+  spill_q50: number | null // median spill CFS
+  spill_q90: number | null
+  spill_q100: number | null // max spill CFS
   storage_at_spill_avg_pct: number | null
 }
 
@@ -38,6 +40,13 @@ export interface SpillChartProps {
   width: number
   /** Chart height in pixels */
   height: number
+  /**
+   * Whether to render the bottom spill-magnitude (CFS) panel. Defaults to true.
+   * Set false when the CFS columns are not populated (the current ETL computes
+   * spill frequency only), so the chart shows the frequency panel full height
+   * instead of a flat zero row.
+   */
+  showMagnitude?: boolean
 }
 
 // Water month labels (short single-letter, Oct=1 through Sep=12)
@@ -64,7 +73,7 @@ const SEPARATOR_COLOR = "#d0d8dd"
 const NO_SPILL_COLOR = "#9ca3af"
 
 const SpillChart: React.FC<SpillChartProps> = React.memo(
-  ({ data, width, height }) => {
+  ({ data, width, height, showMagnitude = true }) => {
     // Gather monthly data in water-month order (1-12)
     const months: Array<{
       month: number
@@ -113,10 +122,15 @@ const SpillChart: React.FC<SpillChartProps> = React.memo(
       )
     }
 
-    // Panel heights (within inner area)
-    const separatorHeight = 1
-    const topPanelHeight = (innerHeight - separatorHeight) * 0.6
-    const bottomPanelHeight = (innerHeight - separatorHeight) * 0.4
+    // Panel heights (within inner area). When magnitude is hidden the
+    // frequency panel takes the full height and there is no separator.
+    const separatorHeight = showMagnitude ? 1 : 0
+    const topPanelHeight = showMagnitude
+      ? (innerHeight - separatorHeight) * 0.6
+      : innerHeight
+    const bottomPanelHeight = showMagnitude
+      ? (innerHeight - separatorHeight) * 0.4
+      : 0
 
     // X positioning for 12 bars
     const barGroupWidth = innerWidth / 12
@@ -131,8 +145,13 @@ const SpillChart: React.FC<SpillChartProps> = React.memo(
     // Find max q100 across months with spill
     const maxQ100 = Math.max(
       ...months
-        .filter((m) => m.stats && m.stats.spill_frequency_pct > 0)
-        .map((m) => m.stats!.spill_q100),
+        .filter(
+          (m) =>
+            m.stats &&
+            m.stats.spill_frequency_pct > 0 &&
+            m.stats.spill_q100 != null,
+        )
+        .map((m) => m.stats!.spill_q100!),
       1, // Prevent division by zero
     )
 
@@ -203,72 +222,79 @@ const SpillChart: React.FC<SpillChartProps> = React.memo(
             )
           })}
 
-          {/* ============ SEPARATOR ============ */}
-          <line
-            x1={0}
-            y1={separatorY}
-            x2={innerWidth}
-            y2={separatorY}
-            stroke={SEPARATOR_COLOR}
-            strokeWidth={separatorHeight}
-          />
+          {/* SEPARATOR + BOTTOM PANEL: Spill magnitude */}
+          {/* Hidden when showMagnitude is false (CFS columns not populated). */}
+          {showMagnitude && (
+            <>
+              <line
+                x1={0}
+                y1={separatorY}
+                x2={innerWidth}
+                y2={separatorY}
+                stroke={SEPARATOR_COLOR}
+                strokeWidth={separatorHeight}
+              />
 
-          {/* ============ BOTTOM PANEL: Spill magnitude ============ */}
+              {/* Y-axis label for magnitude (max value) */}
+              <text
+                x={-4}
+                y={bottomPanelY + magnitudeScale(maxQ100)}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fontSize="8px"
+                fontFamily="'Inter', -apple-system, sans-serif"
+                fill={TEXT_COLOR}
+              >
+                {formatCfs(maxQ100)}
+              </text>
+              <text
+                x={-4}
+                y={bottomPanelY + magnitudeScale(0)}
+                textAnchor="end"
+                dominantBaseline="middle"
+                fontSize="8px"
+                fontFamily="'Inter', -apple-system, sans-serif"
+                fill={TEXT_COLOR}
+              >
+                0
+              </text>
 
-          {/* Y-axis label for magnitude (max value) */}
-          <text
-            x={-4}
-            y={bottomPanelY + magnitudeScale(maxQ100)}
-            textAnchor="end"
-            dominantBaseline="middle"
-            fontSize="8px"
-            fontFamily="'Inter', -apple-system, sans-serif"
-            fill={TEXT_COLOR}
-          >
-            {formatCfs(maxQ100)}
-          </text>
-          <text
-            x={-4}
-            y={bottomPanelY + magnitudeScale(0)}
-            textAnchor="end"
-            dominantBaseline="middle"
-            fontSize="8px"
-            fontFamily="'Inter', -apple-system, sans-serif"
-            fill={TEXT_COLOR}
-          >
-            0
-          </text>
+              {/* Magnitude lines and dots for months with spill */}
+              {months.map((m, i) => {
+                const stats = m.stats
+                if (!stats || stats.spill_frequency_pct <= 0) return null
+                // Skip months whose magnitude was not computed (null): draw no
+                // marker rather than fabricating a zero.
+                if (stats.spill_q100 == null || stats.spill_q50 == null)
+                  return null
 
-          {/* Magnitude lines and dots for months with spill */}
-          {months.map((m, i) => {
-            const stats = m.stats
-            if (!stats || stats.spill_frequency_pct <= 0) return null
+                const x = i * barGroupWidth + barGroupWidth / 2
+                const yQ100 = bottomPanelY + magnitudeScale(stats.spill_q100)
+                const yQ50 = bottomPanelY + magnitudeScale(stats.spill_q50)
 
-            const x = i * barGroupWidth + barGroupWidth / 2
-            const yQ100 = bottomPanelY + magnitudeScale(stats.spill_q100)
-            const yQ50 = bottomPanelY + magnitudeScale(stats.spill_q50)
-
-            return (
-              <g key={`mag-${m.month}`}>
-                {/* Vertical line from q50 to q100 */}
-                <line
-                  x1={x}
-                  y1={yQ100}
-                  x2={x}
-                  y2={yQ50}
-                  stroke={MAGNITUDE_COLOR}
-                  strokeWidth={1.5}
-                />
-                {/* Dot at q50 (median) */}
-                <circle
-                  cx={x}
-                  cy={yQ50}
-                  r={Math.min(barWidth / 3, 3)}
-                  fill={MAGNITUDE_COLOR}
-                />
-              </g>
-            )
-          })}
+                return (
+                  <g key={`mag-${m.month}`}>
+                    {/* Vertical line from q50 to q100 */}
+                    <line
+                      x1={x}
+                      y1={yQ100}
+                      x2={x}
+                      y2={yQ50}
+                      stroke={MAGNITUDE_COLOR}
+                      strokeWidth={1.5}
+                    />
+                    {/* Dot at q50 (median) */}
+                    <circle
+                      cx={x}
+                      cy={yQ50}
+                      r={Math.min(barWidth / 3, 3)}
+                      fill={MAGNITUDE_COLOR}
+                    />
+                  </g>
+                )
+              })}
+            </>
+          )}
 
           {/* ============ MONTH LABELS (shared at bottom) ============ */}
           {WATER_MONTH_LABELS.map((label, i) => (

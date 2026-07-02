@@ -33,6 +33,12 @@ export interface SpillMatrixProps {
   labelColumnWidth?: number
   /** Scenario IDs that are still loading data (shows spinner in empty cells) */
   loadingScenarios?: string[]
+  /**
+   * Whether each cell renders the spill-magnitude (CFS) panel. Defaults to
+   * true. Set false when magnitude data is not populated so cells show
+   * frequency only. Forwarded to SpillChart.
+   */
+  showMagnitude?: boolean
 }
 
 // Styling constants (matching PercentileMatrix aesthetic)
@@ -56,6 +62,7 @@ const SpillMatrix: React.FC<SpillMatrixProps> = React.memo(
     showScenarioHeaders = true,
     labelColumnWidth = 120,
     loadingScenarios,
+    showMagnitude = true,
   }) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const dimensions = useResizeObserver(
@@ -182,6 +189,7 @@ const SpillMatrix: React.FC<SpillMatrixProps> = React.memo(
                         data={monthlyData}
                         width={cellWidth}
                         height={cellHeight}
+                        showMagnitude={showMagnitude}
                       />
                     ) : loadingScenarios?.includes(scenarioId) ? (
                       <svg
