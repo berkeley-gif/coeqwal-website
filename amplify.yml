@@ -58,6 +58,35 @@ applications:
       variables:
         NODE_VERSION: 22
 
+  - appRoot: apps/storyline-equity
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - npm install -g pnpm@10.0.0
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-equity
+      artifacts:
+        baseDirectory: apps/storyline-equity/out
+        files:
+          - "**/*"
+      cache:
+        # Cache the pnpm content-addressable store only. node_modules is
+        # rebuilt fresh by pnpm install each run, which avoids hardlink
+        # drift across cached builds.
+        paths:
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: 22
+
   - appRoot: apps/storyline-flow
     frontend:
       phases:
@@ -86,3 +115,33 @@ applications:
     environment:
       variables:
         NODE_VERSION: 22
+
+  - appRoot: apps/storyline-management
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - npm install -g pnpm@10.0.0
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-management
+      artifacts:
+        baseDirectory: apps/storyline-management/out
+        files:
+          - "**/*"
+      cache:
+        # Cache the pnpm content-addressable store only. node_modules is
+        # rebuilt fresh by pnpm install each run, which avoids hardlink
+        # drift across cached builds.
+        paths:
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    environment:
+      variables:
+        NODE_VERSION: 22
+
