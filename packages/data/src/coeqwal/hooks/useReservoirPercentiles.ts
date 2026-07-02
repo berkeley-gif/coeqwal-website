@@ -11,6 +11,7 @@ import { CACHE_KEYS } from "../../cache/keys"
 import {
   fetchAllReservoirsList,
   fetchReservoirPercentiles,
+  fetchReservoirPercentilesByIds,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
   fetchSpillMonthly,
@@ -125,6 +126,47 @@ export function useReservoirPercentiles(
     isLoading,
     error,
     hasData: !!data,
+  }
+}
+
+/**
+ * Fetch percentile data for a list of reservoirs in a single scenario.
+ *
+ * One request per scenario (the endpoint accepts an id list), so multi-scenario
+ * callers fan out per scenario via `useMultiScenarioSlots`. Returns the
+ * reservoirs map keyed by the requested reservoir ids.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020"), or null to skip
+ * @param reservoirIds - Reservoir IDs to fetch (empty skips the request)
+ */
+export function useReservoirPercentilesByIds(
+  scenarioId: string | null,
+  reservoirIds: string[],
+) {
+  const sortedIds = [...reservoirIds].sort()
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<GroupedReservoirPercentilesResponse>(
+    scenarioId && sortedIds.length > 0
+      ? CACHE_KEYS.reservoirPercentilesFiltered(scenarioId, sortedIds)
+      : null,
+    () => fetchReservoirPercentilesByIds(scenarioId!, sortedIds),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    reservoirs: data?.reservoirs ?? {},
+    isLoading,
+    error,
+    hasData: !!data && Object.keys(data.reservoirs).length > 0,
   }
 }
 
@@ -289,97 +331,3 @@ export function useSpillMonthly(
   }
 }
 
-/**
- * Fetcher function for multiple reservoir percentiles
- * Fetches all combinations of scenarios and reservoirs in parallel
- */
-async function fetchMultipleReservoirPercentiles(
-  scenarioIds: string[],
-  reservoirIds: string[],
-): Promise<Record<string, Record<string, ReservoirPercentiles>>> {
-  const results: Record<string, Record<string, ReservoirPercentiles>> = {}
-
-  // Fetch all combinations in parallel
-  const promises: Promise<void>[] = []
-
-  for (const scenarioId of scenarioIds) {
-    for (const reservoirId of reservoirIds) {
-      const promise = fetchReservoirPercentiles(scenarioId, reservoirId)
-        .then((data) => {
-          if (!results[reservoirId]) {
-            results[reservoirId] = {}
-          }
-          results[reservoirId][scenarioId] = data
-        })
-        .catch(() => {
-          // Silently ignore individual fetch errors
-        })
-      promises.push(promise)
-    }
-  }
-
-  await Promise.all(promises)
-  return results
-}
-
-/**
- * Fetch percentile data for multiple reservoirs across multiple scenarios
- * Uses a single SWR call to fetch all combinations in parallel
- *
- * @param scenarioIds - Array of scenario IDs
- * @param reservoirIds - Array of reservoir IDs to fetch
- * @returns Combined percentile data with loading and error states
- *
- * @example
- * ```typescript
- * function AdditionalReservoirs({ scenarios, reservoirIds }) {
- *   const { data, isLoading } = useMultipleReservoirPercentiles(scenarios, reservoirIds)
- *
- *   if (isLoading) return <Spinner />
- *
- *   return (
- *     <Grid>
- *       {Object.entries(data).map(([reservoirId, scenarioData]) => (
- *         <ReservoirChart key={reservoirId} data={scenarioData} />
- *       ))}
- *     </Grid>
- *   )
- * }
- * ```
- */
-export function useMultipleReservoirPercentiles(
-  scenarioIds: string[],
-  reservoirIds: string[],
-) {
-  // Create a stable cache key from the arrays
-  // Create copies before sorting to avoid mutating the original arrays
-  const cacheKey =
-    reservoirIds.length > 0 && scenarioIds.length > 0
-      ? [
-          "multiple-reservoir-percentiles",
-          ...[...scenarioIds].sort(),
-          ...[...reservoirIds].sort(),
-        ]
-      : null
-
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR(
-    cacheKey,
-    () => fetchMultipleReservoirPercentiles(scenarioIds, reservoirIds),
-    {
-      revalidateOnFocus: false,
-    },
-  )
-
-  const error = swrError ? String(swrError.message || swrError) : null
-
-  return {
-    data: data ?? {},
-    isLoading,
-    error,
-    hasData: !!data && Object.keys(data).length > 0,
-  }
-}

@@ -8,7 +8,7 @@
  * Supports both percentage of capacity and absolute TAF display modes.
  */
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
 import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
@@ -19,9 +19,11 @@ import type {
   BatchStorageData,
 } from "@repo/data/coeqwal"
 import {
-  useMultipleReservoirPercentiles,
+  useReservoirPercentilesByIds,
   useGroupedReservoirPercentiles,
 } from "@repo/data/coeqwal/hooks"
+import { useResolvedIdMapping } from "../../../../../../../scenarios/hooks"
+import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
 
 export type StorageDisplayMode = "percentage" | "volume"
 export type VolumeScaleMode = "absolute" | "relative"
@@ -32,8 +34,6 @@ interface ReservoirPercentilesSectionProps {
   labelColumnWidth?: number
   /** Whether to show scenario headers (set false if parent shows them) */
   showScenarioHeaders?: boolean
-  /** Map of scenarioId to reservoirId to tier color (for coloring individual cells) */
-  cellColors?: Record<string, Record<string, string>>
   /** Display mode: percentage of capacity or volume in TAF */
   displayMode?: StorageDisplayMode
   /** Y-axis scale mode for volume display: absolute (shared) or relative (per-reservoir) */
@@ -163,10 +163,20 @@ function useAdditionalReservoirData(
   additionalReservoirIds: string[],
   displayMode: StorageDisplayMode,
 ) {
-  const { data, isLoading, error } = useMultipleReservoirPercentiles(
-    scenarioIds,
-    additionalReservoirIds,
+  // Resolve sibling-group ids to the active hydroclimate's short_codes for the
+  // fetch, then re-key the response back to group ids by slot index so the
+  // matrix stays in group-id space. Without this the added reservoirs would be
+  // pinned to the historical variant regardless of the selected hydroclimate.
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarioIds.map((id) => idMapping[id] ?? null),
+    [scenarioIds, idMapping],
   )
+
+  const results = useMultiScenarioSlots(fetchIds, (id) =>
+    useReservoirPercentilesByIds(id, additionalReservoirIds),
+  )
+  const isLoading = results.some((r) => r.isLoading)
 
   // Build reservoir list and data structure from fetched data
   const reservoirMap: Record<string, ReservoirData> = {}
@@ -175,54 +185,52 @@ function useAdditionalReservoirData(
     Record<string, MonthlyPercentiles | undefined>
   > = {}
 
-  if (data) {
-    Object.entries(data).forEach(([reservoirId, scenarioData]) => {
-      Object.entries(scenarioData).forEach(([scenarioId, percentileData]) => {
-        // Build reservoir info. capacity_taf / dead_pool_taf may be null
-        // when the reservoir entity is missing seeded capacity metadata;
-        // viz treats 0 as "no reservoir mode" so this is a safe fallback
-        // for the row label area.
-        if (!reservoirMap[reservoirId]) {
-          reservoirMap[reservoirId] = {
-            reservoirId: reservoirId,
-            reservoirName: percentileData.reservoir_name ?? reservoirId,
-            capacityTaf: percentileData.capacity_taf ?? 0,
-            deadPoolTaf: percentileData.dead_pool_taf ?? 0,
-          }
+  results.forEach((result, index) => {
+    const scenarioId = scenarioIds[index]
+    if (!scenarioId) return
+    Object.entries(result.reservoirs).forEach(([reservoirId, entry]) => {
+      // Build reservoir info. capacity_taf / dead_pool_taf may be null
+      // when the reservoir entity is missing seeded capacity metadata;
+      // viz treats 0 as "no reservoir mode" so this is a safe fallback
+      // for the row label area.
+      if (!reservoirMap[reservoirId]) {
+        reservoirMap[reservoirId] = {
+          reservoirId: reservoirId,
+          reservoirName: entry.name ?? reservoirId,
+          capacityTaf: entry.capacity_taf ?? 0,
+          deadPoolTaf: entry.dead_pool_taf ?? 0,
         }
+      }
 
-        if (!matrixData[reservoirId]) {
-          matrixData[reservoirId] = {}
-        }
+      if (!matrixData[reservoirId]) {
+        matrixData[reservoirId] = {}
+      }
 
-        // The individual endpoint returns percentage data. For volume mode,
-        // convert to TAF using capacity, but skip the cell when capacity is
-        // null so we don't draw a misleading zero baseline.
-        if (displayMode === "volume" && percentileData.monthly_percentiles) {
-          matrixData[reservoirId][scenarioId] = convertPercentToTaf(
-            percentileData.monthly_percentiles,
-            percentileData.capacity_taf,
-          )
-        } else {
-          matrixData[reservoirId][scenarioId] =
-            percentileData.monthly_percentiles
-        }
-      })
+      // The individual endpoint returns percentage data. For volume mode,
+      // convert to TAF using capacity, but skip the cell when capacity is
+      // null so we don't draw a misleading zero baseline.
+      if (displayMode === "volume" && entry.monthly_percentiles) {
+        matrixData[reservoirId][scenarioId] = convertPercentToTaf(
+          entry.monthly_percentiles,
+          entry.capacity_taf,
+        )
+      } else {
+        matrixData[reservoirId][scenarioId] = entry.monthly_percentiles
+      }
     })
-  }
+  })
 
   const reservoirs = Object.values(reservoirMap).sort((a, b) =>
     (a.reservoirName ?? "").localeCompare(b.reservoirName ?? ""),
   )
 
-  return { reservoirs, matrixData, isLoading, error }
+  return { reservoirs, matrixData, isLoading, error: null }
 }
 
 export default function ReservoirPercentilesSection({
   scenarios,
   labelColumnWidth = 100,
   showScenarioHeaders = true,
-  cellColors,
   displayMode = "percentage",
   volumeScaleMode = "absolute",
   additionalReservoirs = [],
@@ -256,22 +264,16 @@ export default function ReservoirPercentilesSection({
   const matrixData = { ...majorMatrixData, ...additionalMatrixData }
   const error = majorError || additionalError
 
-  // Track when data first arrives to ensure skeleton shows on initial mount
-  const [hasReceivedData, setHasReceivedData] = useState(false)
-  useEffect(() => {
-    if (reservoirs.length > 0) {
-      setHasReceivedData(true)
-    }
-  }, [reservoirs.length])
-
   // Build scenario display names
   const scenarioNames: Record<string, string> = {}
   scenarios.forEach((id) => {
     scenarioNames[id] = id
   })
 
-  // Loading state with skeleton - show until we've received data
-  if (!hasReceivedData && !error) {
+  // Loading state with skeleton. Gated directly on data presence (no latch),
+  // so the skeleton reappears whenever data is absent, including while a new
+  // hydroclimate is being fetched, instead of collapsing to an empty matrix.
+  if (reservoirs.length === 0 && !error) {
     return (
       <PercentileMatrixSkeleton
         scenarios={scenarios}
@@ -335,7 +337,6 @@ export default function ReservoirPercentilesSection({
           height={matrixHeight}
           labelColumnWidth={labelColumnWidth}
           showScenarioHeaders={showScenarioHeaders}
-          cellColors={cellColors}
           displayMode={displayMode}
           volumeScaleMode={volumeScaleMode}
           loadingScenarios={majorLoadingScenarios}

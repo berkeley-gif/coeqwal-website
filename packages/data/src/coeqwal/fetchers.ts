@@ -317,6 +317,29 @@ export async function fetchReservoirPercentiles(
 }
 
 /**
+ * Fetch percentile data for a list of reservoirs in a single scenario.
+ *
+ * One request per scenario (the endpoint takes a comma-separated id list),
+ * so callers fan out per scenario rather than per reservoir-scenario pair.
+ * The response is keyed by the requested reservoir ids.
+ */
+export async function fetchReservoirPercentilesByIds(
+  scenarioId: string,
+  reservoirIds: string[],
+): Promise<GroupedReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.reservoirPercentilesFiltered(scenarioId, reservoirIds),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
  * Fetch percentile data for all reservoirs in a scenario
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")

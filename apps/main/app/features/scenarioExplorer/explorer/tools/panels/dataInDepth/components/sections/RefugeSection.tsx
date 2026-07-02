@@ -28,6 +28,7 @@ import { ChartGridProvider } from "../shared/ChartGridContext"
 import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
 import { SectionHeader } from "../shared/SectionHeader"
 import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../../scenarios/hooks"
 import { BandLegend } from "../shared/BandsLegend"
 import {
   DELIVERY_BAND_COLORS,
@@ -163,7 +164,12 @@ function shortageMonthsToPercentiles(
 // ============================================================================
 
 function useMultiScenarioRefugeDelivery(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusDeliveryMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusDeliveryMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -186,7 +192,12 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
 }
 
 function useMultiScenarioRefugeShortage(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusShortageMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusShortageMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -214,7 +225,12 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
  * so PercentileMatrix can render per-cell stats below each chart.
  */
 function useMultiScenarioRefugePeriod(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusPeriod)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusPeriod)
 
   const isLoading = results.some((r) => r.isLoading)
   const cellStats: CellStatsMap = {}

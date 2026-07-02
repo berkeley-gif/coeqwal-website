@@ -17,6 +17,7 @@
 
 import { useMemo } from "react"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
 import {
   useAgDemandUnitsDeliveryMonthly,
   useAgDemandUnitsShortageMonthly,
@@ -84,12 +85,15 @@ const AG_AGGREGATE_SORT_ORDER: Record<string, number> = {
  * The shortage row has a few extras (`shortage_frequency_pct`,
  * `shortage_pct_of_demand_avg`) that the matrix doesn't consume, so we
  * project down to the q0..q100 + mean fields. Rows are skipped when any
- * of q10..q100 or `avg_taf` is null, since feeding a partial band into
- * the chart would draw a misleading floor (matches the `isFullPercentileRow`
- * guard used for CWS data).
+ * of q10..q100 or `avg_taf` is null.
  *
- * `q0` is tolerated as null and coerced to 0. A DU with zero shortage
- * in the driest year is a valid row
+ * `q0` is the minimum monthly shortage across years (the least-short year),
+ * normally 0 because most DUs have at least one year with no shortage. The
+ * `q0 ?? 0` below is a defensive floor. tThe ETL always
+ * computes q0 alongside q10..q100 (`np.percentile(..., 0)`), so with current
+ * data it never fires. It would only matter if the backend returned a null q0
+ * while the other percentiles were present, in which case 0 is a safe lower
+ * bound that keeps the row rather than dropping it.
  */
 function shortageStatsToPercentiles(
   monthlyData: Record<string, AgDemandUnitShortageMonthlyStats>,
@@ -242,15 +246,20 @@ function buildAgAggregatesData(
  * correctly without shortage data
  */
 function useMultiScenarioAgDemandUnits(scenarios: string[], duIds: string[]) {
-  const deliveryResults = useMultiScenarioSlots(scenarios, (id) =>
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const deliveryResults = useMultiScenarioSlots(fetchIds, (id) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsDeliveryMonthly(id, duIds),
   )
-  const shortageResults = useMultiScenarioSlots(scenarios, (id) =>
+  const shortageResults = useMultiScenarioSlots(fetchIds, (id) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsShortageMonthly(id, duIds),
   )
-  const periodResults = useMultiScenarioSlots(scenarios, (id) =>
+  const periodResults = useMultiScenarioSlots(fetchIds, (id) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useAgDemandUnitsPeriod(id, duIds),
   )
