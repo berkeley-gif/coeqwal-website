@@ -149,7 +149,10 @@ export async function downloadShareItemAsSvg(
 ): Promise<void> {
   const svg = await captureShareItemSvgString(item, liveEl, backgroundColor)
   if (svg) {
-    downloadSvgString(svg, withExt(shareItemFilenameLabel(item, lookups), "svg"))
+    downloadSvgString(
+      svg,
+      withExt(shareItemFilenameLabel(item, lookups), "svg"),
+    )
   }
 }
 

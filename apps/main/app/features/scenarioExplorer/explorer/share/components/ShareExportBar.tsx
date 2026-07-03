@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Button, Tooltip, useTheme, icons } from "@repo/ui/mui"
+import { Box, Button, useTheme, icons } from "@repo/ui/mui"
+import { HoverTip } from "@repo/ui"
 import { useExplorerStore } from "../../store"
 import { encodeShareItems } from "../url"
 
@@ -28,7 +29,11 @@ export default function ShareExportBar({
 
   const handleCopyLink = async () => {
     const st = useExplorerStore.getState()
-    const url = encodeShareItems(st.shareItems, st.hydroclimate, st.storyItemIds)
+    const url = encodeShareItems(
+      st.shareItems,
+      st.hydroclimate,
+      st.storyItemIds,
+    )
     try {
       await navigator.clipboard.writeText(url)
     } catch {
@@ -54,9 +59,9 @@ export default function ShareExportBar({
         borderTop: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <Tooltip
-        title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
-        arrow
+      <HoverTip
+        content={copied ? "Copied!" : "Copy shareable URL to clipboard"}
+        density="compact"
       >
         <Button
           variant="outlined"
@@ -77,8 +82,11 @@ export default function ShareExportBar({
         >
           {copied ? "Copied!" : "Copy link"}
         </Button>
-      </Tooltip>
-      <Tooltip title="Download a ZIP with a PNG and an SVG per card" arrow>
+      </HoverTip>
+      <HoverTip
+        content="Download a ZIP with a PNG and an SVG per card"
+        density="compact"
+      >
         <Button
           variant="outlined"
           size="small"
@@ -92,14 +100,14 @@ export default function ShareExportBar({
         >
           Download all images
         </Button>
-      </Tooltip>
-      <Tooltip
-        title={
+      </HoverTip>
+      <HoverTip
+        content={
           dataReady
             ? "Download a ZIP with one CSV per card"
             : "Preparing data..."
         }
-        arrow
+        density="compact"
       >
         <span>
           <Button
@@ -117,7 +125,7 @@ export default function ShareExportBar({
             Download all data
           </Button>
         </span>
-      </Tooltip>
+      </HoverTip>
       <Button
         variant="outlined"
         size="small"

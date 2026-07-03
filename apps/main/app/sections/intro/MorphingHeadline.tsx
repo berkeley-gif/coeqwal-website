@@ -284,7 +284,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       // For each headline build its opacity keyframes from two
       // (at most) overlapping-but-disjoint ranges: a fade-in drawn
       // from the previous transition, and a fade-out drawn from the
-      // next transition. First headline has no fade-in; last has no
+      // next transition. First headline has no fade-in. Last has no
       // fade-out.
       return headlines.map((_, index) => {
         const fadeIn = index > 0 ? transitionRange(index - 1) : null
@@ -369,7 +369,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       if (!centerEnterRange && !centerExitRange) return [0, 1]
       const enter = centerEnterRange ?? [0, 0]
       const exit = centerExitRange ?? [1, 1]
-      // Build a monotonically increasing input array; clamp if ranges
+      // Build a monotonically increasing input array. Clamp if ranges
       // were passed out of order so useTransform doesn't throw.
       const pts = [0, enter[0], enter[1], exit[0], exit[1], 1]
       for (let i = 1; i < pts.length; i++) {

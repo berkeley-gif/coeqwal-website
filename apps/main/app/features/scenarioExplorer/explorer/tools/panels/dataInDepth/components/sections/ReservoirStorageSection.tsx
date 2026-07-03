@@ -26,8 +26,6 @@ import {
 import { CompactSelect, InfoTooltip } from "@repo/ui"
 import { TierGlyphWithTooltip } from "../../../../../../../tooltips/TierGlyphWithTooltip"
 import type { ChartDataPoint } from "../../../../../../../scenarios/components/shared"
-import useSWR from "@repo/data/swr"
-import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
 import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import type { BatchStatisticsResponse } from "@repo/data/coeqwal"
 import {
@@ -47,69 +45,6 @@ import { STORAGE_BAND_COLORS } from "../../config/bandColors"
 import { TIER_CHART_SIZE } from "../shared/chartConstants"
 
 export type VolumeScaleMode = "absolute" | "relative"
-
-/**
- * Hook to get per-reservoir tier colors for multiple scenarios.
- * Fetches tier location data for RES_STOR and builds a mapping of
- * scenarioId to reservoirId to tier color.
- */
-function useReservoirTierColors(scenarios: string[]) {
-  const theme = useTheme()
-
-  // Fetch lightweight tier assignments (no geometry) for each scenario
-  const { data: allLocationData } = useSWR(
-    scenarios.length > 0 ? ["reservoir-tier-locations", ...scenarios] : null,
-    async () => {
-      const results = await Promise.all(
-        scenarios.map((scenarioId) =>
-          fetchTierLocationAssignments(scenarioId, "RES_STOR").catch(
-            () => null,
-          ),
-        ),
-      )
-      return results
-    },
-    { revalidateOnFocus: false },
-  )
-
-  // Build the cell color mapping: scenarioId to reservoirId to color
-  const cellColors = useMemo(() => {
-    const tierLevelColors: Record<number, string> = {
-      1: theme.palette.tiers.tier1,
-      2: theme.palette.tiers.tier2,
-      3: theme.palette.tiers.tier3,
-      4: theme.palette.tiers.tier4,
-    }
-
-    const colors: Record<string, Record<string, string>> = {}
-
-    if (!allLocationData) return colors
-
-    scenarios.forEach((scenarioId, index) => {
-      const locationData = allLocationData[index]
-      if (!locationData?.locations) return
-
-      const scenarioColors: Record<string, string> = {}
-      locationData.locations.forEach(
-        (loc: { location_id: string; tier_level: number }) => {
-          // Tier location uses "FOLSM", percentile data uses "S_FOLSM"
-          // Add S_ prefix to match percentile reservoir IDs
-          const reservoirId = loc.location_id.startsWith("S_")
-            ? loc.location_id
-            : `S_${loc.location_id}`
-          const color =
-            tierLevelColors[loc.tier_level] || theme.palette.tiers.tier3
-          scenarioColors[reservoirId] = color
-        },
-      )
-      colors[scenarioId] = scenarioColors
-    })
-
-    return colors
-  }, [allLocationData, scenarios, theme.palette.tiers])
-
-  return cellColors
-}
 
 // Get the reservoir-storage tier metric (constant, safe to call outside component)
 const RESERVOIR_TIER_METRIC = getMetricsByCategory("reservoir-storage").find(
@@ -223,17 +158,16 @@ function StorageTierCharts({
 function PercentileBandsLegend() {
   return (
     <>
-      {/* Min-Max (0-100th) band */}
+      {/* Min-Max (0-100th) range - dashed reference line */}
       <Box
         component="span"
         sx={{
           width: 14,
-          height: 14,
-          backgroundColor: STORAGE_BAND_COLORS.range,
-          borderRadius: "2px",
+          height: 0,
+          borderTop: `2px dashed ${STORAGE_BAND_COLORS.range}`,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Minimum to maximum range
       </Box>
 
@@ -248,7 +182,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         10–90th percentile
       </Box>
 
@@ -263,7 +197,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         30–70th percentile
       </Box>
 
@@ -278,7 +212,7 @@ function PercentileBandsLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Median
       </Box>
     </>
@@ -302,7 +236,7 @@ function ReferenceLinesLegend() {
           backgroundSize: "6px 2px",
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Capacity
       </Box>
 
@@ -318,7 +252,7 @@ function ReferenceLinesLegend() {
           ml: 0.75,
         }}
       />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+      <Box component="span" sx={{ typography: "dashboard", color: "grey.500" }}>
         Dead pool
       </Box>
     </>
@@ -344,13 +278,11 @@ const VOLUME_SCALE_OPTIONS = [
  */
 function MonthlyStorageSection({
   scenarios,
-  cellColors,
   batchData,
   isBatchLoading,
   isModal = false,
 }: {
   scenarios: string[]
-  cellColors?: Record<string, Record<string, string>>
   batchData: BatchStatisticsResponse | undefined
   isBatchLoading: boolean
   /** Whether this section is inside a modal (affects dropdown z-index) */
@@ -424,7 +356,7 @@ function MonthlyStorageSection({
                 <>
                   <Typography
                     component="span"
-                    sx={{ color: "grey.400", fontSize: "0.875rem" }}
+                    sx={{ color: "grey.400", typography: "dashboard" }}
                   >
                     ·
                   </Typography>
@@ -466,8 +398,7 @@ function MonthlyStorageSection({
                     component="span"
                     sx={{
                       color: "grey.500",
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
+                      typography: "dashboardBold",
                     }}
                   >
                     Overlapping percentile bands:
@@ -569,7 +500,7 @@ function MonthlyStorageSection({
                   py: 0.25,
                   backgroundColor: theme.palette.grey[100],
                   borderRadius: theme.borderRadius.sm,
-                  fontSize: "0.75rem",
+                  typography: "compactCaption",
                 }}
               >
                 {reservoir?.reservoir_name ?? id}
@@ -601,7 +532,6 @@ function MonthlyStorageSection({
         <ReservoirPercentilesSection
           scenarios={scenarios}
           showScenarioHeaders={false}
-          cellColors={cellColors}
           displayMode={displayMode}
           volumeScaleMode={volumeScaleMode}
           additionalReservoirs={additionalReservoirs}
@@ -621,14 +551,12 @@ function MonthlyStorageSection({
 function ReservoirStorageContent({
   scenarios,
   scenarioNames,
-  cellColors,
   batchData,
   isBatchLoading,
   isModal = false,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
-  cellColors: Record<string, Record<string, string>>
   batchData: BatchStatisticsResponse | undefined
   isBatchLoading: boolean
   /** Whether this content is inside a modal (affects dropdown z-index) */
@@ -701,7 +629,6 @@ function ReservoirStorageContent({
         <ChartGridProvider scenarios={scenarios}>
           <MonthlyStorageSection
             scenarios={scenarios}
-            cellColors={cellColors}
             batchData={batchData}
             isBatchLoading={isBatchLoading}
             isModal={isModal}
@@ -741,8 +668,6 @@ export default function ReservoirStorageSection({
   batchData,
   isBatchLoading,
 }: BatchSectionProps) {
-  const cellColors = useReservoirTierColors(scenarios)
-
   return (
     <ExpandableSection
       scenarios={scenarios}
@@ -754,7 +679,6 @@ export default function ReservoirStorageSection({
         <ReservoirStorageContent
           scenarios={scenarios}
           scenarioNames={scenarioNames}
-          cellColors={cellColors}
           batchData={batchData}
           isBatchLoading={isBatchLoading}
           isModal={isModal}

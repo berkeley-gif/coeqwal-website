@@ -6,6 +6,26 @@
  * Control state lives on the explorer store. This panel reads
  * `resilience*` fields directly (same pattern as RadarPanel).
  * and useResilienceAggregate for aggregate-view cells.
+ *
+ * CONTENTS (in source order)
+ * --------------------------
+ *  1. Types and props   Result/data types live in ./types. ResiliencePanelProps here.
+ *  2. Store reads        resilience* slice fields + derived scenario/aggregate scope.
+ *  3. Columns and rows   Hydroclimate/scenario columns, outcome row codes, row ids.
+ *  4. Cell value builders buildValueFn, valueGrid, ordered keys, rows/cells.
+ *  5. Small multiples     byScenario / byHydroclimate / byOutcome tile builders.
+ *  6. Marginals           Row/column mean strips.
+ *  7. Interaction         Cell/tile/row/col/square hover + click handlers.
+ *  8. Map highlights       LOI distribution, pinned squares, highlight emission.
+ *  9. Sidebar highlights   Row/col/tile highlight + dim derivations from sidebar.
+ * 10. Latest-value refs    Refs mirroring reactive values for the capture closures.
+ * 11. Capture              Solo / panel / tile capture + onCapture* wiring.
+ * 12. Chart-view state     Assembles the props handed to ResiliencePanelChartView.
+ * 13. Render               Error / loading / chart states.
+ *
+ * This file is large. Sections 4, 5, 7, and 11 are candidates for
+ * extraction into colocated hooks/modules, but they close heavily over
+ * component scope. See resilience/README.md ("Refactor backlog").
  */
 
 import React, {
@@ -43,7 +63,7 @@ export type {
   AggregateScope,
   ResilienceControlsState,
 } from "../../../store"
-import type { ResilienceView, CellEncoding, DeltaMode } from "../../../store"
+import type { ResilienceView, DeltaMode } from "../../../store"
 import {
   useResilienceMatrix,
   type ResilienceHydroclimate,
@@ -94,47 +114,12 @@ import {
 import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { ResiliencePanelTitle } from "./ResiliencePanelTitle"
 
-/**
- * Flat, CSV-friendly row shape for a single captured heatmap cell.
- * Mirrors the fields we can reasonably derive from `ResilienceHeatmapCell`
- * without reaching back into the source matrix.
- */
-export interface ResilienceChartDataRow {
-  rowKey: string
-  rowLabel: string
-  colKey: string
-  colLabel: string
-  tier?: number
-  value?: number
-  delta?: number
-  count?: number
-}
-
-/**
- * Payload handed off to the Share drawer when the resilience heatmap
- * is snapshotted. Consumers should treat it as opaque data. The CSV
- * export is the only reader that inspects the row shape today.
- */
-export interface ResilienceHeatmapChartData {
-  kind: "resilience"
-  view: ResilienceView
-  cellEncoding: CellEncoding
-  tileScope: "panel" | "scenario" | "outcome" | "hydroclimate"
-  tileLabel?: string
-  rows: ResilienceChartDataRow[]
-}
-
-export interface ResilienceCaptureResult {
-  /** PNG data URL. Always populated. */
-  dataUrl: string
-  /**
-   * Serialized SVG with computed styles inlined. Populated by the
-   * off-screen capture path (tile / solo). The panel-wide capture
-   * path leaves this undefined while it is still composed-DOM.
-   */
-  svg?: string
-  chartData: ResilienceHeatmapChartData
-}
+export type {
+  ResilienceChartDataRow,
+  ResilienceHeatmapChartData,
+  ResilienceCaptureResult,
+} from "./types"
+import type { ResilienceChartDataRow, ResilienceCaptureResult } from "./types"
 
 export type {
   ResilienceCaptureFn,
@@ -225,14 +210,9 @@ export default function ResiliencePanel({
   } = useResilienceSlice()
   const { selectedScenarios, setHydroclimate } = useWorkspaceSlice()
 
-  // Legacy walkthrough-open state (unused. Guide lives in ResilienceControls).
-  // const [walkthroughOpen, setWalkthroughOpen] = useState(false)
-
-  // Effective per-view scenario scope. Mirrors the radar-panel pattern:
-  // when showAllScenarios is off, respect sidebar `selectedScenarios`;
-  // when on, fall back to all 24. Phase 1 renders a single heatmap. The
-  // by-scenario branch picks the first item as its focus and later
-  // phases will fan this out into small multiples.
+  // ============================================================
+  // Store-derived scope, columns, and rows
+  // ============================================================
   const _effectiveScenarioScope = useMemo<readonly string[]>(() => {
     if (showAllScenarios) return [] // sentinel: "all" resolved from matrix
     return selectedScenarios
@@ -247,9 +227,7 @@ export default function ResiliencePanel({
   const scenarioRendersAsOverview =
     view === "scenario" && selectedScenarios.length === 0
   // "Empty" per-outcome only when neither the outcome-axis picker nor
-  // the primary/compare fields yield any renderable outcome - the axis
-  // picker is authoritative for what rows the chart shows, so treat it
-  // as the first source before falling back to "pick a primary".
+  // the primary/compare fields yield any renderable outcome.
   const hasOutcomeAxisSelection = useMemo(
     () =>
       resilienceVisibleOutcomes.some(
@@ -595,6 +573,11 @@ export default function ResiliencePanel({
     signal: number | null
   }
 
+  // ============================================================
+  // 4. Cell value builders
+  // Refactor backlog: this and valueGrid/rows/cells below are a
+  // candidate hook (useResilienceCells) but close over view scope.
+  // ============================================================
   const buildValueFn = useCallback<
     () => {
       rowKeys: string[]
@@ -1103,6 +1086,9 @@ export default function ResiliencePanel({
     return scenarioSmallMultiplesIds
   }, [view, showAllScenarios, scenarioRowIdsAll, scenarioSmallMultiplesIds])
 
+  // ============================================================
+  // 5. Small-multiples tile builders (by scenario / hydroclimate / outcome)
+  // ============================================================
   const byScenarioTiles = useMemo<ResilienceSmallMultiplesTile[]>(() => {
     if (view !== "scenario" || byScenarioScope.length === 0) return []
     const tiles: ResilienceSmallMultiplesTile[] = []
@@ -1455,6 +1441,9 @@ export default function ResiliencePanel({
   ])
 
   // Row and column marginals: mean of each row's/col's signal values.
+  // ============================================================
+  // 6. Marginals (row / column mean strips)
+  // ============================================================
   const marginalsData = useMemo<ResilienceHeatmapMarginals | undefined>(() => {
     if (!showMarginals) return undefined
     const row: (number | null)[] = orderedRowKeys.map((rk) => {
@@ -1526,6 +1515,11 @@ export default function ResiliencePanel({
     }
   }, [])
 
+  // ============================================================
+  // 7. Interaction handlers (cell / tile / row / col / square hover + click)
+  // Refactor backlog: the most interdependent cluster (timers, refs,
+  // pinned-square state). Highest regression risk. Extract last.
+  // ============================================================
   const handleCellHover = useCallback(
     (cell: ResilienceHeatmapCell | null) => {
       if (!cell) {
@@ -1579,7 +1573,7 @@ export default function ResiliencePanel({
     [notifyChartHover],
   )
 
-  // Aggregate view has no "current" scenario/hydroclimate - every column
+  // Aggregate view has no "current" scenario/hydroclimate. Every column
   // and row aggregates across them. We anchor the map call on the
   // historical baseline (same scenarioId Get Started uses, which has the
   // widest /locations coverage) and bypass hydroclimate re-resolution so
@@ -1740,6 +1734,9 @@ export default function ResiliencePanel({
 
   // Merged [pinned ∪ hovered] emitter. Reads both sources from refs so
   // its own identity is stable across renders.
+  // ============================================================
+  // 8. Map highlights (LOI distribution, pinned squares, emission)
+  // ============================================================
   const emitLocationHighlights = useCallback(() => {
     const list: LocationHighlight[] = []
     for (const { highlight } of pinnedSquareLoisRef.current.values()) {
@@ -1827,7 +1824,7 @@ export default function ResiliencePanel({
         // Location mode encodes LOIs. Entries carry no scenarioId, so we
         // defer to triggerMapForOutcome which picks between the
         // hydroclimate-aware and fixed-baseline paths based on view. Pin
-        // state below updates regardless - the guard inside the trigger
+        // state below updates regardless. The guard inside the trigger
         // prevents repeat clicks from toggling the layer off.
         triggerMapForOutcome(outcomeCode, cell.scenarioId ?? null)
 
@@ -1896,6 +1893,9 @@ export default function ResiliencePanel({
   }, [])
 
   // Sidebar → chart: emphasize scenario rows, columns, or tiles.
+  // ============================================================
+  // 9. Sidebar-driven highlight + dim derivations
+  // ============================================================
   const highlightedRowKeysFromSidebar = useMemo<Set<string> | null>(() => {
     if (!highlightedIds || highlightedIds.size === 0) return null
     if (view === "outcome") return new Set(highlightedIds)
@@ -2102,6 +2102,11 @@ export default function ResiliencePanel({
   // Per-tile capture locates the tile's root SVG via the
   // `data-tile-id` attribute that `ResilienceHeatmapSmallMultiples`
   // stamps on each tile wrapper.
+  // ============================================================
+  // 10. Latest-value refs
+  // Mirror reactive values so the capture closures (section 11) can
+  // read current data without being re-created on every change.
+  // ============================================================
   const effectiveViewRef = useRef(effectiveView)
   useEffect(() => {
     effectiveViewRef.current = effectiveView
@@ -2132,6 +2137,13 @@ export default function ResiliencePanel({
     displayCellsRef.current = displayCells
   }, [displayCells])
 
+  // ============================================================
+  // 11. Capture (solo / panel / tile) + onCapture* wiring
+  // Refactor backlog: candidate useResilienceCapture hook, but it
+  // threads ~8 refs + ~15 reactive values + the capture props, and two
+  // refs (chartViewState/Visuals) are declared in section 12. Deferred;
+  // see resilience/README.md before extracting.
+  // ============================================================
   const cellsToRows = useCallback(
     (cellsIn: ResilienceHeatmapCell[]): ResilienceChartDataRow[] =>
       cellsIn.map((cell) => ({
@@ -2152,7 +2164,7 @@ export default function ResiliencePanel({
       const tile = makeScenarioSoloMultiplesTile(scenarioId)
       if (!tile) return null
       // Refuse to capture an empty card. Happens when the user has cleared
-      // all hydroclimate chips or all outcome rows; the heatmap would
+      // all hydroclimate chips or all outcome rows. The heatmap would
       // render a blank thumbnail and the share card would be unhelpful.
       if (tile.cells.length === 0) {
         console.warn(
@@ -2442,6 +2454,9 @@ export default function ResiliencePanel({
   // Snapshot of the chart-area state in the shape ResiliencePanelChartView
   // expects. Both the live render and captureResilience read this so the
   // toolbar share produces the same chart at fixed dimensions.
+  // ============================================================
+  // 12. Chart-view state assembly
+  // ============================================================
   const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
     const labelRotation =
       !transposed &&
@@ -2580,7 +2595,9 @@ export default function ResiliencePanel({
     chartViewVisualsRef.current = chartViewVisuals
   }, [chartViewVisuals])
 
-  // Render states
+  // ============================================================
+  // 13. Render (error / loading / chart states)
+  // ============================================================
 
   if (error) {
     return (

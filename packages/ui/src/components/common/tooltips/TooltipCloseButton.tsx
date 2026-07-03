@@ -3,7 +3,7 @@
 /**
  * TooltipCloseButton - Shared close button for tooltip components
  *
- * Used by HybridTooltip, ClickTooltip, TierTooltipPortal, and other
+ * Used by InfoPopover, AnchoredPortal, TierTooltipPortal, and other
  * tooltip variants that need a dismissible close button.
  * - WCAG 2.5.5: 44x44px touch target on mobile, 24x24px on desktop
  *

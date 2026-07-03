@@ -209,7 +209,7 @@ export function useEquityObjectives({
     }
   }, [outcomeNames, tierDataByCode, baselineTierDataByCode, compareToBaseline])
 
-  // `ready` only requires the live tier queries; baseline data is
+  // `ready` only requires the live tier queries. Baseline data is
   // optional even when comparison is on so a partial baseline does not
   // block render. The objectives builder already falls back to the
   // current tier when a baseline entry is missing.

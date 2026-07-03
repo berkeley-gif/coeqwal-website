@@ -34,7 +34,7 @@ export default function ListTourEffects({ step, resolve }: TourEffectsProps) {
 
   // ------------------------------------------------------------------
   // list.step1.operations: ensure the key-operations column is visible
-  // while the step is active; restore prior value on exit.
+  // while the step is active. Restore prior value on exit.
   // ------------------------------------------------------------------
 
   const opsDemoRef = useRef<{ prevShowKeyOperations: boolean } | null>(null)

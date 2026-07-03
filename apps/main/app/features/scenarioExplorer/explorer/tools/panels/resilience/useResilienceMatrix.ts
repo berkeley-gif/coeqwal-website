@@ -8,7 +8,7 @@
  * then derives each hydroclimate's view by re-keying that shared dataset
  * through the climate's idMapping. This hits the SWR cache warmed by
  * usePrefetchTiers(), so no extra network traffic.
- * 
+ *
  * Produces a flat matrix of per-(scenario, outcome, hydroclimate) cells:
  *   - Aggregate outcomes use the API's weighted_score (multi-value) or
  *     level (single-value).

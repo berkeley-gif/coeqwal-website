@@ -1147,7 +1147,7 @@ export interface RefugeMonthlyResponse {
 }
 
 /** Back-compat aliases for the delivery / shortage hooks. The merged
- *  `/monthly` URL returns the same payload for both; the hooks read
+ *  `/monthly` URL returns the same payload for both. The hooks read
  *  `monthly_delivery` or `monthly_shortage` off each DU entry */
 export type RefugeDeliveryMonthlyResponse = RefugeMonthlyResponse
 export type RefugeShortageMonthlyResponse = RefugeMonthlyResponse

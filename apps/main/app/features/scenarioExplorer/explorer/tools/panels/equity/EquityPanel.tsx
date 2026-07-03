@@ -650,7 +650,7 @@ export default function EquityPanel({
   }, [equityFocusScenario, showEquityComparison, objectives])
 
   // Paint map markers when the user selects grid cells. Selection turns the
-  // map panel on if it was off; handleShowOnMap also sets mapMode explore.
+  // map panel on if it was off. handleShowOnMap also sets mapMode explore.
   useEffect(() => {
     if (selectedObjectives.length > 0) {
       const selectedTierLocationCodes = selectedObjectives.map(

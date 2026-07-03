@@ -302,7 +302,7 @@ export default function BeatTextOverlay({
                       }}
                       sx={{ opacity: 0 }}
                     >
-                      <Typography variant="smallSectionLabel" component="p">
+                      <Typography variant="compactCaptionMedium" component="p">
                         {beat2Layout.eyebrows[col]!.label}
                       </Typography>
                     </Box>

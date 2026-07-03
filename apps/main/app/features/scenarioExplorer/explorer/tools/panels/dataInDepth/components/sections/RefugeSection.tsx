@@ -28,6 +28,7 @@ import { ChartGridProvider } from "../shared/ChartGridContext"
 import { PercentileMatrixSkeleton } from "../shared/PercentileMatrixSkeleton"
 import { SectionHeader } from "../shared/SectionHeader"
 import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../../scenarios/hooks"
 import { BandLegend } from "../shared/BandsLegend"
 import {
   DELIVERY_BAND_COLORS,
@@ -163,7 +164,12 @@ function shortageMonthsToPercentiles(
 // ============================================================================
 
 function useMultiScenarioRefugeDelivery(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusDeliveryMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusDeliveryMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -186,7 +192,12 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
 }
 
 function useMultiScenarioRefugeShortage(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusShortageMonthly)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusShortageMonthly)
 
   const isLoading = results.some((r) => r.isLoading)
   const loadingScenarios = scenarios.filter(
@@ -214,7 +225,12 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
  * so PercentileMatrix can render per-cell stats below each chart.
  */
 function useMultiScenarioRefugePeriod(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, useRefugeDusPeriod)
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, useRefugeDusPeriod)
 
   const isLoading = results.some((r) => r.isLoading)
   const cellStats: CellStatsMap = {}
@@ -327,18 +343,7 @@ export default function RefugeSection({
     <>
       {/* Sticky scenario header. Soft drop shadow matches the List view's
           pinned block so content reads as scrolling under a fixed header. */}
-      <Box
-        sx={{
-          position: "sticky",
-          top: 64,
-          zIndex: 9,
-          backgroundColor: theme.palette.background.paper,
-          py: theme.space.component.sm,
-          mx: -theme.space.component.xl,
-          px: theme.space.component.xl,
-          boxShadow: "0 4px 8px -2px rgba(0,0,0,0.1)",
-        }}
-      >
+      <Box sx={theme.scenarios.stickyScenarioHeader}>
         <ChartGridProvider scenarios={scenarios}>
           <GridScenarioHeader
             scenarios={scenarios}
@@ -429,8 +434,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            fontSize: "0.875rem",
-                            fontWeight: 600,
+                            typography: "dashboardBold",
                           }}
                         >
                           Overlapping percentile bands:
@@ -441,7 +445,7 @@ export default function RefugeSection({
                         component="span"
                         sx={{
                           color: "grey.400",
-                          fontSize: "0.8rem",
+                          typography: "compactSubtitle",
                           fontStyle: "italic",
                         }}
                       >
@@ -478,8 +482,7 @@ export default function RefugeSection({
                           component="span"
                           sx={{
                             color: "grey.500",
-                            fontSize: "0.875rem",
-                            fontWeight: 600,
+                            typography: "dashboardBold",
                           }}
                         >
                           Overlapping percentile bands:
@@ -490,7 +493,7 @@ export default function RefugeSection({
                         component="span"
                         sx={{
                           color: "grey.400",
-                          fontSize: "0.8rem",
+                          typography: "compactSubtitle",
                           fontStyle: "italic",
                         }}
                       >

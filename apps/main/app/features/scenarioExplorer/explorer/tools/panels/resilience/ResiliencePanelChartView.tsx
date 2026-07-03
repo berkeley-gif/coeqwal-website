@@ -95,7 +95,7 @@ export interface ResiliencePanelChartViewProps {
   /**
    * When true, render the small-multiples grid for off-screen capture:
    * a fixed two-column layout, no scroll container, full content
-   * height. Aggregate / single-heatmap views ignore this flag - they
+   * height. Aggregate / single-heatmap views ignore this flag. They
    * already lay out at the host's fixed dims. Live mounts leave this
    * undefined so the responsive grid behaves as before.
    */
@@ -114,7 +114,7 @@ const CAPTURE_OUTER_PADDING = 24
  * out at full content height (no scroll, no clipping) and the composer
  * gathers every tile's bounding rect in the rendered output.
  *
- * Aggregate / single-heatmap captures do not call this; they keep the
+ * Aggregate / single-heatmap captures do not call this. They keep the
  * fixed `CAPTURE_DIMENSIONS.resiliencePanel.height`.
  *
  * Reads `RESILIENCE_SMALL_MULTIPLES_CAPTURE_COLUMNS` from `@repo/viz`

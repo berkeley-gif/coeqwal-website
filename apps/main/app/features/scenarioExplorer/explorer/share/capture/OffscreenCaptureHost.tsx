@@ -51,7 +51,7 @@ export interface OffscreenCaptureInput {
   height?: number
   /**
    * Tag the host div with a data attribute so dev-mode tooling
-   * (P2.4 captureDoctor) can identify which capture each
+   * (captureDoctor) can identify which capture each
    * outstanding host belongs to. Free-form, e.g.
    * "radar:single-scenario", "resilience:panel".
    */
@@ -64,10 +64,8 @@ export interface OffscreenCaptureInput {
    */
   pruneClone?: (clone: SVGSVGElement) => void
   /**
-   * Whether to also rasterize the SVG into a PNG. Defaults to
-   * `true` for backward compatibility with cards that read
-   * `cachedImageDataUrl`. P2 cards prefer `cachedSvg` and can opt
-   * out by setting `false` to skip the canvas paint.
+   * Whether to also produce a PNG (`cachedImageDataUrl`) alongside
+   * the SVG.
    */
   rasterize?: boolean
   /**

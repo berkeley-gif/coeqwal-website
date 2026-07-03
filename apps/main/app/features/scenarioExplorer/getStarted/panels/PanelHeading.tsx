@@ -22,7 +22,7 @@ export default function PanelHeading({
   const theme = useTheme()
   const sp = theme.space.component
 
-  // Tighter mb under the title when more heading content follows; bigger
+  // Tighter mb under the title when more heading content follows. Bigger
   // mb when the title is the only heading element above the body
   const titleMb = kicker
     ? sp.sm

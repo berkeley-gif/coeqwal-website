@@ -8,7 +8,7 @@
  * cache). Mirrors `ShareRadarLiveChart` for the radar variant.
  *
  * Reuses `useEquityObjectives` so the data path is identical to the
- * live `EquityPanel` and the offscreen capture mount; SWR cache hits
+ * live `EquityPanel` and the offscreen capture mount. SWR cache hits
  * keep the network cost negligible whenever the live panel has
  * already loaded the same scenario. The captured `hydroclimate`
  * field is shown by the parent's badge but does not influence the

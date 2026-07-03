@@ -1123,7 +1123,10 @@ export default function OutcomeMorphOverlay({
       const clampRangeEaseOut = (lo: number, hi: number) =>
         v <= lo ? 0 : v >= hi ? 1 : easeOutCubic((v - lo) / (hi - lo))
       const radarChromeIn = clampRange(RADAR_SHAPE_END, RADAR_CHROME_END)
-      const radarChromeOut = clampRange(RADAR_CHROME_END, HEATMAP_CHROME_OUT_END)
+      const radarChromeOut = clampRange(
+        RADAR_CHROME_END,
+        HEATMAP_CHROME_OUT_END,
+      )
       return {
         barBlend: clampRangeEaseOut(LIST_BAR_START, LIST_BAR_BARS_END),
         avgBlend: clampRange(LIST_BAR_END, RADAR_AVG_END),
@@ -1816,7 +1819,7 @@ export default function OutcomeMorphOverlay({
           padding: "3px 8px",
           borderRadius: 4,
           background: alpha(theme.palette.common.white, 0.92),
-          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          boxShadow: theme.shadow.marker,
           fontFamily: "inherit",
           fontSize: 11,
           lineHeight: 1.3,

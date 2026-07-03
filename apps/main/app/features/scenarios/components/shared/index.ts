@@ -12,9 +12,6 @@ export type { OutcomeGlyphItemProps } from "./OutcomeGlyphItem"
 export { NoDataAtThisTime } from "./NoDataAtThisTime"
 export type { NoDataAtThisTimeProps } from "./NoDataAtThisTime"
 
-export { OutcomeGrid } from "./OutcomeGrid"
-export type { OutcomeGridProps } from "./OutcomeGrid"
-
 export { OperationsIconGroup } from "./OperationsIconGroup"
 export type { OperationsIconGroupProps } from "./OperationsIconGroup"
 
@@ -29,14 +26,15 @@ export { getIconSize } from "./strategyIcons"
 export type { ScenarioIcon, ScenarioIconConfig } from "./strategyIcons"
 
 // Icon system
+export { OpsCircleIcon } from "./OpsCircleIcon"
+export type { OpsCircleIconProps } from "./OpsCircleIcon"
 export {
-  OpsCircleIcon,
   getScenarioIconDefs,
   renderIconDef,
   ICON_REGISTRY,
   SCENARIO_ICONS,
-} from "./opsIcons"
-export type { IconDef, OpsCircleIconProps } from "./opsIcons"
+} from "./iconRegistry"
+export type { IconDef } from "./iconRegistry"
 
 // Tier summary
 export { TierSummaryCell } from "./TierSummaryCell"

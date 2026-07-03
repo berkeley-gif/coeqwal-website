@@ -240,7 +240,7 @@ export function useMapLayers() {
 
     // ALWAYS apply ALL layer groups to their correct state
     Object.keys(LAYER_GROUPS).forEach((groupKey) => {
-      // Skip inflowWatersheds when entering rivers section - the rivers progress effect handles it
+      // Skip inflowWatersheds when entering rivers section. The rivers progress effect handles it
       if (groupKey === "inflowWatersheds" && activeSection === "rivers") {
         return
       }

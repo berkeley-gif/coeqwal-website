@@ -7,31 +7,40 @@
  * Rendered inside a CSS Grid (ChartGridProvider) and spans all scenario
  * columns. Wired into ReservoirStorageContent.
  *
- * Planned / incomplete: the CFS spill-magnitude columns
- * (spill_avg_cfs / spill_max_cfs / spill_q50..q100) are not yet populated
- * for most reservoirs in the ETL, so toVizMonthlySpill defaults them to 0.
- * The frequency bar still renders. Revisit once magnitude data lands.
+ * Data status: the frequency data is ready, the magnitude data is not, so this
+ * section renders frequency only (SpillMatrix showMagnitude={false}).
+ * The backend defines spill as a storage threshold crossing (storage at or
+ * above the flood control level), which yields a frequency only. The CFS
+ * magnitude columns (spill_avg_cfs, spill_max_cfs, spill_q50..q100) are never
+ * computed by the ETL and always arrive null. The frequency bar is meaningful
+ * and is populated for the major reservoirs shown here (they have a usable
+ * flood level, while most minor reservoirs do not, but those are not displayed in
+ * this section). When the backend computes real spill volume, flip
+ * showMagnitude back on to restore the bottom panel. Tracked as a backend
+ * hardening plan (see coeqwal-data-platform etl/statistics README,
+ * "reservoir spill threshold coverage and spill volume").
  */
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { SpillMatrix } from "@repo/viz"
 import type { MonthlySpillData } from "@repo/viz"
 import { useSpillMonthly } from "@repo/data/coeqwal/hooks"
 import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
 import { useMultiScenarioSlots } from "../../hooks/useMultiScenarioSlots"
+import { useResolvedIdMapping } from "../../../../../../../scenarios/hooks"
 import { SectionHeader } from "../shared/SectionHeader"
 
 /**
- * Convert the data-package `MonthlySpillData` (numeric fields nullable to
- * reflect ETL gaps) into the viz `MonthlySpillData` shape (numeric fields
- * required). A month with a null `spill_frequency_pct` is dropped. A month
- * with a valid frequency but null magnitudes has those magnitudes set to 0
- * so the chart can still draw the frequency bar without crashing.
- * TODO: Create a true empty space for null values.
- *
- * The CFS magnitude columns are not populated for most reservoirs today,
- * which is why this guard exists.
+ * Convert the data-package spill shape into the viz `MonthlySpillData` shape.
+ * A month with a null `spill_frequency_pct` is dropped. Magnitude (CFS) columns
+ * are passed through unchanged, including null: the current ETL computes spill
+ * as a storage-threshold frequency (not a flow volume) and never populates the
+ * CFS columns, so they arrive null. We deliberately do NOT coerce null to 0
+ * (that would fabricate a real-looking value); the viz type is nullable and the
+ * chart skips markers for null magnitudes. The magnitude panel is also hidden
+ * here (SpillMatrix showMagnitude={false}) until the backend computes real
+ * spill volume (see coeqwal-data-platform etl/statistics README).
  */
 function toVizMonthlySpill(
   data: Record<
@@ -56,11 +65,13 @@ function toVizMonthlySpill(
       spill_months_count: stats.spill_months_count ?? 0,
       total_months: stats.total_months ?? 0,
       spill_frequency_pct: stats.spill_frequency_pct,
-      spill_avg_cfs: stats.spill_avg_cfs ?? 0,
-      spill_max_cfs: stats.spill_max_cfs ?? 0,
-      spill_q50: stats.spill_q50 ?? 0,
-      spill_q90: stats.spill_q90 ?? 0,
-      spill_q100: stats.spill_q100 ?? 0,
+      // Magnitude columns are passed through as-is (null when the ETL did not
+      // compute them). The chart skips null markers.
+      spill_avg_cfs: stats.spill_avg_cfs,
+      spill_max_cfs: stats.spill_max_cfs,
+      spill_q50: stats.spill_q50,
+      spill_q90: stats.spill_q90,
+      spill_q100: stats.spill_q100,
       storage_at_spill_avg_pct: stats.storage_at_spill_avg_pct,
     }
   })
@@ -73,7 +84,12 @@ function toVizMonthlySpill(
  * SpillMatrix expects: reservoirId to scenarioId to monthly spill data.
  */
 function useMultiScenarioSpillData(scenarios: string[]) {
-  const results = useMultiScenarioSlots(scenarios, (s) =>
+  const { idMapping } = useResolvedIdMapping()
+  const fetchIds = useMemo(
+    () => scenarios.map((id) => idMapping[id] ?? null),
+    [scenarios, idMapping],
+  )
+  const results = useMultiScenarioSlots(fetchIds, (s) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
     useSpillMonthly(s, "major"),
   )
@@ -154,13 +170,8 @@ export default function SpillFrequencySection({
         }}
       >
         <SectionHeader
-          title="Spill frequency & magnitude"
-          description={
-            <>
-              Top: monthly spill frequency (% of years) · Bottom: spill
-              magnitude (median to max CFS)
-            </>
-          }
+          title="Spill frequency"
+          description="Monthly spill frequency (% of years) for major reservoirs"
         />
       </Box>
 
@@ -217,6 +228,7 @@ export default function SpillFrequencySection({
             showScenarioHeaders={false}
             labelColumnWidth={120}
             loadingScenarios={loadingScenarios}
+            showMagnitude={false}
           />
         </Box>
       )}

@@ -22,8 +22,7 @@ dataInDepth/
 │   │   ├── EnvFlowSection.tsx      Environmental river flows section
 │   │   ├── RefugeSection.tsx       Wildlife refuge section
 │   │   ├── DeltaSection.tsx        Delta inflow/export/outflow/salinity/X2 section
-│   │   ├── MetricCard.tsx          Generic per-metric card (tier viz or "coming soon")
-│   │   └── ReservoirView.tsx       Legacy standalone reservoir view (currently unwired)
+│   │   └── MetricCard.tsx          Generic per-metric card (tier viz or "coming soon")
 │   └── shared/                 Structural + shared building blocks
 │       ├── ExpandableSection.tsx   Sticky header + expand-to-modal scaffolding
 │       ├── BandsLegend.tsx         Shared percentile-band legend component
@@ -146,8 +145,6 @@ These are intentionally kept (not deleted) and wired or stubbed for a future pas
   `spatialType`, and `spatialLocation` metric fields and the `getMapMetrics` /
   `getMetricsBySpatialType` helpers back a planned Data Explorer to map
   hand-off. No caller wires them up yet.
-- **`ReservoirView.tsx`**: a legacy standalone reservoir view that is no longer
-  imported. Retained for reference until the storage section fully supersedes it.
 - **Band colors to theme** (`config/bandColors.ts`): the percentile-band ramps
   live in a feature-local config for now. Once the palette is finalized they
   should move into the shared `@repo/ui` theme alongside the tier colors and be

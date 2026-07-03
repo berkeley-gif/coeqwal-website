@@ -10,16 +10,16 @@ A note on windows. A beat is a span of `progress`, but an actor's `window` does 
 
 ## At a glance
 
-| Beat | Id                    | Span (progress) | Duration | View header       | What you see                                                                 |
-| ---- | --------------------- | --------------- | -------- | ----------------- | ---------------------------------------------------------------------------- |
+| Beat | Id                    | Span (progress) | Duration | View header       | What you see                                                                       |
+| ---- | --------------------- | --------------- | -------- | ----------------- | ---------------------------------------------------------------------------------- |
 | 0    | `legend`              | 0.000 to 0.225  | 12s      | none              | Intro paragraphs fade in, tier legend appears, demand-unit polygons cycle and hold |
-| 1    | `collapse-and-colors` | 0.225 to 0.365  | 9s       | none              | Intro collapses, legend floats up, dots cross-fade from blue to tier colors  |
-| 2    | `ag-rev-morph`        | 0.365 to 0.400  | 5s       | none              | Agriculture revenue polygons morph into distribution squares                 |
-| 3    | `all-other-morphs`    | 0.400 to 0.500  | 14s      | none              | The remaining eight outcomes morph into distribution squares back to back    |
-| 4    | `loi-highlight`       | 0.500 to 0.620  | 9s       | Distribution view | One location of interest is highlighted in five steps                        |
-| 5    | `list-bar`            | 0.620 to 0.720  | 5s       | List view         | Distribution grids morph into per-outcome bar glyphs                         |
-| 6    | `radar`               | 0.720 to 0.870  | 7s       | Radar chart       | Bars collapse into dots that glide to polar vertices, then radar chrome fades in |
-| 7    | `heatmap`             | 0.870 to 1.000  | 5s       | Heat map          | Dots migrate into a stacked column of tier-colored cells, then chrome fades in |
+| 1    | `collapse-and-colors` | 0.225 to 0.365  | 9s       | none              | Intro collapses, legend floats up, dots cross-fade from blue to tier colors        |
+| 2    | `ag-rev-morph`        | 0.365 to 0.400  | 5s       | none              | Agriculture revenue polygons morph into distribution squares                       |
+| 3    | `all-other-morphs`    | 0.400 to 0.500  | 14s      | none              | The remaining eight outcomes morph into distribution squares back to back          |
+| 4    | `loi-highlight`       | 0.500 to 0.620  | 9s       | Distribution view | One location of interest is highlighted in five steps                              |
+| 5    | `list-bar`            | 0.620 to 0.720  | 5s       | List view         | Distribution grids morph into per-outcome bar glyphs                               |
+| 6    | `radar`               | 0.720 to 0.870  | 7s       | Radar chart       | Bars collapse into dots that glide to polar vertices, then radar chrome fades in   |
+| 7    | `heatmap`             | 0.870 to 1.000  | 5s       | Heat map          | Dots migrate into a stacked column of tier-colored cells, then chrome fades in     |
 
 The view header is the overline label in the right panel, set in `VIEW_MODE_HEADER_BY_BEAT` in [BeatTextOverlay.tsx](BeatTextOverlay.tsx). Beats 0 through 3 have no header.
 
@@ -31,11 +31,11 @@ What you see: The intro paragraphs fade in and the tier legend is revealed. The 
 
 Actors: `mapPaint` through `MapPaintArbiter`.
 
-| Actor id                  | Window         | Effect                                              |
-| ------------------------- | -------------- | --------------------------------------------------- |
-| `legend:mapPaint:reset`   | [0.000, 0.010] | Assert the full demand-units baseline               |
-| `legend:mapPaint:cycle`   | [0.010, 0.090] | Blue color-cycle and fade-in (`blue-cycle`)         |
-| `legend:mapPaint:hold`    | [0.090, 0.260] | Hold the blue palette with a breath (`blue-hold`)   |
+| Actor id                | Window         | Effect                                            |
+| ----------------------- | -------------- | ------------------------------------------------- |
+| `legend:mapPaint:reset` | [0.000, 0.010] | Assert the full demand-units baseline             |
+| `legend:mapPaint:cycle` | [0.010, 0.090] | Blue color-cycle and fade-in (`blue-cycle`)       |
+| `legend:mapPaint:hold`  | [0.090, 0.260] | Hold the blue palette with a breath (`blue-hold`) |
 
 Morph stage: The SVG squares are not visible yet. The morph bridge is running but no outcome has entered its morph window.
 
@@ -45,10 +45,10 @@ What you see: The intro text collapses, the legend floats to the top, and the de
 
 Actors: `mapPaint` through `MapPaintArbiter`.
 
-| Actor id                              | Window         | Effect                                                   |
-| ------------------------------------- | -------------- | -------------------------------------------------------- |
-| `collapse-and-colors:mapPaint:blend`  | [0.260, 0.280] | Two-stage blue to tier-color blend (`tier-color-blend`)  |
-| `collapse-and-colors:mapPaint:tail`   | [0.280, 0.380] | Hold the tier colors (`tier-color-hold`)                 |
+| Actor id                             | Window         | Effect                                                  |
+| ------------------------------------ | -------------- | ------------------------------------------------------- |
+| `collapse-and-colors:mapPaint:blend` | [0.260, 0.280] | Two-stage blue to tier-color blend (`tier-color-blend`) |
+| `collapse-and-colors:mapPaint:tail`  | [0.280, 0.380] | Hold the tier colors (`tier-color-hold`)                |
 
 The blend starts at 0.260, a little after the beat begins. The tail runs to 0.380, a little into beat 2. Both are intentional.
 
@@ -60,10 +60,10 @@ What you see: The agriculture revenue polygons morph into distribution squares, 
 
 Actors: `mapPaint` through `MapPaintArbiter`.
 
-| Actor id                              | Window        | Effect                                                                 |
-| ------------------------------------- | ------------- | ---------------------------------------------------------------------- |
-| `ag-rev-morph:mapPaint:hideSchedule`  | [0.380, 0.500]| Fade outcome polygons off the map on the per-outcome schedule          |
-| `ag-rev-morph:mapPaint:lineFades`     | [0.380, 1.000]| Hide the line layers and keep them hidden for the rest of the storyboard |
+| Actor id                             | Window         | Effect                                                                   |
+| ------------------------------------ | -------------- | ------------------------------------------------------------------------ |
+| `ag-rev-morph:mapPaint:hideSchedule` | [0.380, 0.500] | Fade outcome polygons off the map on the per-outcome schedule            |
+| `ag-rev-morph:mapPaint:lineFades`    | [0.380, 1.000] | Hide the line layers and keep them hidden for the rest of the storyboard |
 
 Morph stage: The SVG morph squares begin appearing here. Each outcome has its own morph window built in [hooks/useStoryboardLayout.ts](hooks/useStoryboardLayout.ts) and applied per frame in [OutcomeMorphOverlay.tsx](OutcomeMorphOverlay.tsx) through the overlay-morph bridge.
 
@@ -81,15 +81,15 @@ What you see: A single location of interest is highlighted in five steps: the la
 
 Actors:
 
-| Actor id                           | Kind          | Window           | Arbiter             | Effect                                  |
-| ---------------------------------- | ------------- | ---------------- | ------------------- | --------------------------------------- |
-| `loi-highlight:mapPaint:enter`     | `mapPaint`    | [0.500, 0.630]   | `MapPaintArbiter`   | One-shot filter swap at entry           |
-| `loi-highlight:mapPaint:layerFade` | `mapPaint`    | [0.500, 0.630]   | `MapPaintArbiter`   | Opacity ramp for the AG layer           |
-| `loi-highlight:overlayPopup:ring`  | `overlayPopup`| [0.540, 0.620]   | `OverlayPopupArbiter`| Gold ring on the square (step 2)        |
-| `loi-highlight:overlayPopup:hover` | `overlayPopup`| [0.550, 0.620]   | `OverlayPopupArbiter`| Square-side popup (step 3)              |
-| `loi-highlight:mapPaint:polyRing`  | `mapPaint`    | [0.560, 0.620]   | `MapPaintArbiter`   | Gold stroke on the polygon (step 4)     |
-| `loi-highlight:mapPopup:loi`       | `mapPopup`    | [0.565, 0.630]   | `MapPopupArbiter`   | `LocationHighlight` on the polygon (step 5) |
-| `loi-highlight:mapPaint:exit`      | `mapPaint`    | [0.6295, 0.630]  | `MapPaintArbiter`   | Clear the gold ring on the last frame   |
+| Actor id                           | Kind           | Window          | Arbiter               | Effect                                      |
+| ---------------------------------- | -------------- | --------------- | --------------------- | ------------------------------------------- |
+| `loi-highlight:mapPaint:enter`     | `mapPaint`     | [0.500, 0.630]  | `MapPaintArbiter`     | One-shot filter swap at entry               |
+| `loi-highlight:mapPaint:layerFade` | `mapPaint`     | [0.500, 0.630]  | `MapPaintArbiter`     | Opacity ramp for the AG layer               |
+| `loi-highlight:overlayPopup:ring`  | `overlayPopup` | [0.540, 0.620]  | `OverlayPopupArbiter` | Gold ring on the square (step 2)            |
+| `loi-highlight:overlayPopup:hover` | `overlayPopup` | [0.550, 0.620]  | `OverlayPopupArbiter` | Square-side popup (step 3)                  |
+| `loi-highlight:mapPaint:polyRing`  | `mapPaint`     | [0.560, 0.620]  | `MapPaintArbiter`     | Gold stroke on the polygon (step 4)         |
+| `loi-highlight:mapPopup:loi`       | `mapPopup`     | [0.565, 0.630]  | `MapPopupArbiter`     | `LocationHighlight` on the polygon (step 5) |
+| `loi-highlight:mapPaint:exit`      | `mapPaint`     | [0.6295, 0.630] | `MapPaintArbiter`     | Clear the gold ring on the last frame       |
 
 Morph stage: The squares sit at rest. The five highlight steps play on top of them.
 
@@ -99,9 +99,9 @@ What you see: The distribution grids morph into per-outcome bar glyphs, the list
 
 Actors, `mapPaint` through `MapPaintArbiter`.
 
-| Actor id                     | Window         | Effect                                                                  |
-| ---------------------------- | -------------- | ----------------------------------------------------------------------- |
-| `list-bar:mapPaint:restore`  | [0.630, 1.000] | Take the demand-unit layers back from loi-highlight and pin them at 0   |
+| Actor id                    | Window         | Effect                                                                |
+| --------------------------- | -------------- | --------------------------------------------------------------------- |
+| `list-bar:mapPaint:restore` | [0.630, 1.000] | Take the demand-unit layers back from loi-highlight and pin them at 0 |
 
 Morph stage: The bars blend in. See `LIST_BAR_START` (0.62), `LIST_BAR_BARS_END` (0.68), and `LIST_BAR_END` (0.72) in `OutcomeMorphOverlay`. The captions fade out as this beat ends, keyed off `RADAR_CAPTION_OUT` (0.72) in [useOutcomeLabelGeometry.ts](useOutcomeLabelGeometry.ts).
 

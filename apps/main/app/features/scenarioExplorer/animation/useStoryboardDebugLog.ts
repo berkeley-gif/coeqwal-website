@@ -76,7 +76,6 @@ export function useStoryboardDebugLog({
     if (process.env.NODE_ENV !== "development") return
     if (strictModeNoteLogged) return
     strictModeNoteLogged = true
-    // eslint-disable-next-line no-console
     console.log(STRICT_MODE_NOTE)
   }, [])
 
@@ -95,7 +94,6 @@ export function useStoryboardDebugLog({
     const logActor = (event: "enter" | "exit", index: number, v: number) => {
       const { actor, beat } = entries[index]!
       const [start, end] = actor.window
-      // eslint-disable-next-line no-console
       console.log(
         formatLine({
           event,
@@ -133,7 +131,6 @@ export function useStoryboardDebugLog({
   /* Navigation: the beat the visitor moved to, set by Play, Next, or Back. */
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return
-    // eslint-disable-next-line no-console
     console.log(
       formatLine({
         event: "beat",

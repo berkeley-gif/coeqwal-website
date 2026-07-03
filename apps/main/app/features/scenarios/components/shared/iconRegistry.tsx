@@ -1,15 +1,19 @@
 /**
- * Operations Icons.Centralized icon definitions and reusable components
+ * Operations icon registry and scenario-to-icon mapping
  *
  * This module provides:
- * - `OpsCircleIcon`.A generic circle-with-text SVG component
- * - `ICON_REGISTRY`.All icon definitions (id -> rendering config + tooltip metadata)
- * - `SCENARIO_ICONS`.Scenario ID -> ordered array of icon IDs
- * - `getScenarioIconDefs()`.Helper to get resolved icon definitions for a scenario
+ * - `ICON_REGISTRY`: all icon definitions, mapping each id to its rendering config and tooltip metadata
+ * - `SCENARIO_ICONS`: maps a scenario id to an ordered array of icon ids
+ * - `getScenarioIconDefs()`: resolves the icon definitions for a scenario
+ * - `getScenariosWithIcon()`: finds the scenarios that include a given icon
+ * - `renderIconDef()`: renders an icon definition as a React element
+ *
+ * The circle-with-text rendering lives in the `OpsCircleIcon` component.
  */
 
 import React from "react"
 import { themeValues } from "@repo/ui/themes/theme"
+import { OpsCircleIcon } from "./OpsCircleIcon"
 
 const white = themeValues.palette.common.white
 
@@ -49,155 +53,7 @@ interface CircleIconDef extends BaseIconDef {
 export type IconDef = SvgFileIconDef | CircleIconDef
 
 // ============================================================================
-// OpsCircleIcon.Generic reusable circle-with-text SVG component
-// ============================================================================
-
-export interface OpsCircleIconProps {
-  /** Text lines to render centered in the circle */
-  lines: string[]
-  /** Circle fill color */
-  color: string
-  /** Render a diagonal prohibition line over the text */
-  strikethrough?: boolean
-  /** Font size override (auto-sized based on line count if omitted) */
-  fontSize?: number
-  /** Font weight (default: 600) */
-  fontWeight?: number
-  /** Size of the rendered icon (CSS value) */
-  size?: number | string
-  /** Optional custom SVG elements to render inside the circle */
-  children?: React.ReactNode
-}
-
-/**
- * Estimate line width as a multiple of fontSize using per-character metrics
- * for Arial Rounded MT Bold / Arial bold.
- */
-function estimateLineWidth(line: string): number {
-  let w = 0
-  for (const ch of line) {
-    if (ch === "W" || ch === "M") w += 0.82
-    else if (ch >= "A" && ch <= "Z") w += 0.7
-    else if (ch === "m" || ch === "w") w += 0.7
-    else if (ch === "i" || ch === "l" || ch === "j") w += 0.32
-    else if (ch === "t" || ch === "f" || ch === "r") w += 0.42
-    else if (ch >= "a" && ch <= "z") w += 0.55
-    else if (ch >= "0" && ch <= "9") w += 0.6
-    else if (ch === " ") w += 0.28
-    else if (ch === "." || ch === "/" || ch === "%" || ch === "'") w += 0.32
-    else if (ch === "-" || ch === "+") w += 0.4
-    else w += 0.55
-  }
-  return w
-}
-
-/**
- * Analytically compute the maximum font size that fits text inside a circle.
- *
- * For n lines of text centered in a circle of radius R, the topmost/bottommost
- * line sits at y-offset = (n-1) * lineHeight * fs / 2 from center.
- * Available width at that y: 2 * sqrt(R² - y²).
- * Text width: estimatedLineWidth * fs.
- *
- * Solving: fs = 2R / sqrt(a² + 4b²)
- * where a = maxLineWidth * safety, b = (n-1) * lineHeightRatio / 2
- */
-function getAutoFontSize(lines: string[]): number {
-  const R = 52 // usable radius (60 minus padding)
-  const LINE_HEIGHT = 1.25
-  const SAFETY = 1.08 // 8% safety margin for font metrics variance
-
-  const maxLineW = Math.max(...lines.map(estimateLineWidth))
-  const n = lines.length
-
-  const a = maxLineW * SAFETY
-  const b = ((n - 1) * LINE_HEIGHT) / 2
-
-  // Horizontal + vertical combined constraint
-  const fromCircle = (2 * R) / Math.sqrt(a * a + 4 * b * b)
-
-  // Pure vertical constraint
-  const fromHeight = (2 * R) / (n * LINE_HEIGHT)
-
-  return Math.min(Math.floor(Math.min(fromCircle, fromHeight)), 40)
-}
-
-export function OpsCircleIcon({
-  lines,
-  color,
-  strikethrough = false,
-  fontSize: fontSizeOverride,
-  fontWeight = 600,
-  size = "100%",
-  children,
-}: OpsCircleIconProps) {
-  const fontSize = fontSizeOverride ?? getAutoFontSize(lines)
-  const lineHeight = fontSize * 1.25
-
-  // Center text block vertically
-  const totalTextHeight = lines.length * lineHeight
-  const startY = 60 - totalTextHeight / 2 + fontSize * 0.85
-
-  return (
-    <svg
-      viewBox="0 0 120 120"
-      style={{
-        width: typeof size === "number" ? `${size}px` : size,
-        height: typeof size === "number" ? `${size}px` : size,
-        display: "block",
-      }}
-    >
-      <circle cx="60" cy="60" r="60" fill={color} />
-
-      {/* Text lines */}
-      {lines.map((line, i) => (
-        <text
-          key={i}
-          x="60"
-          y={startY + i * lineHeight}
-          textAnchor="middle"
-          fill={white}
-          fontSize={fontSize}
-          fontWeight={fontWeight}
-          fontFamily="'Arial Rounded MT Bold', 'Arial', sans-serif"
-        >
-          {line}
-        </text>
-      ))}
-
-      {/* Custom SVG children (e.g., salmon silhouette) */}
-      {children}
-
-      {/* Prohibition strikethrough */}
-      {strikethrough && (
-        <>
-          {/* Diagonal line from top-left to bottom-right */}
-          <line
-            x1="22"
-            y1="22"
-            x2="98"
-            y2="98"
-            stroke={white}
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-          {/* Ring border to define the prohibition circle */}
-          <circle
-            cx="60"
-            cy="60"
-            r="52"
-            fill="none"
-            stroke={white}
-            strokeWidth="8"
-          />
-        </>
-      )}
-    </svg>
-  )
-}
-
-// ============================================================================
-// Salmon Silhouette SVG (for functional_flows_salmon icon)
+// Salmon Silhouette SVG (needs redo, to look more like Chinook)
 // ============================================================================
 
 const SalmonSilhouette = (

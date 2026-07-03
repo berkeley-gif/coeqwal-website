@@ -41,7 +41,7 @@ export interface CsvHeaderInput {
    * When true, appends the canonical tier legend row. Variants whose
    * data table contains any tier column should set this. Bar chart's
    * pivoted layout also sets it because the column headers ARE the
-   * tier labels - the legend is harmless and reinforces the convention.
+   * tier labels. The legend is harmless and reinforces the convention.
    */
   includeTierScale?: boolean
   /**

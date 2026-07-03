@@ -45,9 +45,7 @@ export function SectionHeader({
       >
         <Typography
           sx={{
-            fontSize: "0.9375rem",
-            fontWeight: 600,
-            lineHeight: 1.3,
+            typography: "tooltipHeader",
             color: theme.palette.text.primary,
             whiteSpace: "nowrap",
           }}

@@ -11,7 +11,7 @@
  *  - `cachedSvg`, `cachedImageDataUrl`, and `cachedChartData` are all
  *    preserved on every variant. The SVG is what the share cards
  *    render (rasterized to PNG on demand). `cachedChartData` is the
- *    structured payload the per-variant CSV builders consume; keeping
+ *    structured payload the per-variant CSV builders consume. Keeping
  *    it on disk is what makes the data-download icons work for
  *    radar / equity / resilience after a page reload (only barChart
  *    items have a recompute path through `useResolvedScenarioTiers`).
@@ -32,10 +32,7 @@
  *    envelope is a JSON object `{ version, shareItems, storyItemIds }`
  *    and `migrateEnvelope` is a chained migrator that walks any
  *    older version forward to the current one. Use this when the
- *    new build CAN read old data with a transformation. P2.3
- *    introduces v2 with the share/types.ts split. Pre-v2 envelopes
- *    were written under `coeqwal-share-v1` (no version field),
- *    those are silently discarded by the key bump.
+ *    new build CAN read old data with a transformation.
  */
 
 import type { PersistedShareItem, ShareItem } from "./types"
@@ -62,7 +59,7 @@ interface ShareEnvelope {
  *
  * v1 → v2 (current): identity. The v1 → v2 transition is paired
  * with the `coeqwal-share-v1` → `coeqwal-share-v2` storage-key
- * bump (P2.3), so v1 items never reach this migrator under the
+ * bump, so v1 items never reach this migrator under the
  * v2 key. Kept as a documented placeholder so future migrations
  * follow the same shape.
  */
@@ -91,7 +88,7 @@ function migrateEnvelope(envIn: unknown): ShareEnvelope | null {
 
 /**
  * Project a `ShareItem` to its persisted shape. The persisted shape
- * currently includes every runtime field; the function exists as a
+ * currently includes every runtime field. The function exists as a
  * single chokepoint where future strip-on-save policies can be
  * applied (e.g. dropping a transient computed field) without every
  * call site needing to learn about it.
@@ -106,7 +103,7 @@ function toPersisted(item: ShareItem): PersistedShareItem {
 
 /**
  * Load the persisted share state on store hydration. Tolerant of
- * a missing or corrupt envelope; returns an empty state in that
+ * a missing or corrupt envelope. Returns an empty state in that
  * case so the app still boots.
  */
 export function loadShareState(): {
@@ -154,7 +151,6 @@ export function saveShareState(
     }
     localStorage.setItem(SHARE_STORAGE_KEY, JSON.stringify(envelope))
   } catch {
-    // localStorage full or unavailable, silently ignore;
-    // in-memory state still works for the rest of the session.
+    // localStorage full or unavailable, silently ignore.
   }
 }

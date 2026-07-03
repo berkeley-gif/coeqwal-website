@@ -4,7 +4,7 @@
  * These functions fetch data from the COEQWAL API.
  * They use the shared apiFetcher with retry logic.
  *
- * Note: These fetchers have no baseUrl parameter - they always use
+ * Note: These fetchers have no baseUrl parameter. They always use
  * the production API. This makes them compatible with SWR's fetcher
  * signature (SWR passes the cache key as the first argument).
  */
@@ -314,6 +314,29 @@ export async function fetchReservoirPercentiles(
     dead_pool_taf: entry.dead_pool_taf,
     monthly_percentiles: entry.monthly_percentiles,
   }
+}
+
+/**
+ * Fetch percentile data for a list of reservoirs in a single scenario.
+ *
+ * One request per scenario (the endpoint takes a comma-separated id list),
+ * so callers fan out per scenario rather than per reservoir-scenario pair.
+ * The response is keyed by the requested reservoir ids.
+ */
+export async function fetchReservoirPercentilesByIds(
+  scenarioId: string,
+  reservoirIds: string[],
+): Promise<GroupedReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.reservoirPercentilesFiltered(scenarioId, reservoirIds),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
 }
 
 /**
@@ -653,7 +676,7 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
  *
  * Source variable: `GW_SHORT_*`. Available only for SJR and TULARE region
  * DUs. Sacramento DUs are not present in the response. A 404 from the
- * backend means none of the requested DUs have shortage data; the fetcher
+ * backend means none of the requested DUs have shortage data. The fetcher
  * surfaces the error rather than swallowing it so callers can distinguish
  * "no data" from a real failure.
  *

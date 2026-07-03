@@ -241,7 +241,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> =
               lineOpacity = getScenarioOpacity(scenario, "line")
               circleOpacity = getScenarioOpacity(scenario, "circle")
             } else if (isHovered) {
-              // This is the hovered line - keep fully visible
+              // This is the hovered line. Keep fully visible
               lineOpacity = 1.0
               circleOpacity = 1.0
             } else {

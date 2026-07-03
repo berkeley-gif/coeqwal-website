@@ -16,7 +16,10 @@ import { downloadBlob, downloadCSV } from "../download"
  * null when the variant has no exporter or has no cached data, so the
  * caller can skip the item.
  */
-function renderShareItemCsv(item: ShareItem, lookups: CsvLookups): string | null {
+function renderShareItemCsv(
+  item: ShareItem,
+  lookups: CsvLookups,
+): string | null {
   const handler = handlerForItem(item)
   if (!handler.exportCsv) return null
   return handler.exportCsv(item as never, lookups)

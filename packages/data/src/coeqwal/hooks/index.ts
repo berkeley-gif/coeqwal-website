@@ -23,10 +23,10 @@ export { useScenarioTiers } from "./useScenarioTiers"
 export {
   useAllReservoirsList,
   useReservoirPercentiles,
+  useReservoirPercentilesByIds,
   useAllReservoirPercentiles,
   useGroupedReservoirPercentiles,
   useSpillMonthly,
-  useMultipleReservoirPercentiles,
 } from "./useReservoirPercentiles"
 export {
   useMiContractorsMonthly,
