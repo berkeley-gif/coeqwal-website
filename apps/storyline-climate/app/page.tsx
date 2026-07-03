@@ -5,7 +5,10 @@ import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import { Temperature, TemperatureBuilder } from "./components/02Temperature"
+import {
+  Temperature,
+  TemperatureBuilder,
+} from "./components/02Temperature.scrollytelling"
 import { AnimatePresence, motion } from "@repo/motion"
 import { BaseHeader } from "@repo/ui"
 import {

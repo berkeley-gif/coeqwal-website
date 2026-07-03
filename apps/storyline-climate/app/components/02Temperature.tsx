@@ -1,11 +1,13 @@
 "use client"
 
-import { Box, Typography, Stack, useTheme } from "@repo/ui/mui"
+import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { Box, useTheme } from "@repo/ui/mui"
 import TemperatureLineChart from "./vis/TemperatureLineChart"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import StickyContainer from "./helpers/StickyContainer"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { useRef } from "react"
+import temperatureContent from "../../public/locales/english/temperature.json"
 
 //TODO: update text-section styles
 export function TemperatureBuilder() {
@@ -69,23 +71,7 @@ export function TemperatureBuilder() {
       >
         <motion.div style={{ opacity: firstParagraphOpacity }}>
           <Box className="paragraph">
-            <Typography variant="body1">
-              {
-                "California’s water system is under pressure to meet multiple demands."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {"People need clean drinking water."}
-            </Typography>
-            <Typography variant="body1">
-              {"Farms need water to grow food."}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {"Fish and wildlife need water to survive."}
-            </Typography>
-            <Typography variant="body1" style={{ fontWeight: "bold" }}>
-              {"Climate change is making matters worse."}
-            </Typography>
+            <Paragraph blocks={temperatureContent.builder.firstParagraph} />
           </Box>
         </motion.div>
         <motion.div style={{ opacity: secondParagraphOpacity }}>
@@ -93,19 +79,7 @@ export function TemperatureBuilder() {
             className="paragraph"
             sx={{ marginTop: "6rem", marginBottom: "5rem" }}
           >
-            <Typography variant="body1">
-              <span className="highlight-text">{"Warmer temperatures"}</span>
-              {", "}
-            </Typography>
-            <Typography variant="body1">
-              {"less predictable rain and snow, "}
-            </Typography>
-            <Typography variant="body1">
-              {"and higher sea levels are stressing"}
-            </Typography>
-            <Typography variant="body1">
-              {"both our water infrastructure and living environment."}
-            </Typography>
+            <Paragraph blocks={temperatureContent.builder.secondParagraph} />
           </Box>
         </motion.div>
       </Box>
@@ -188,7 +162,7 @@ export function Temperature() {
             startOffset="38.5%"
             textAnchor="middle"
           >
-            Overall Warming Trend
+            {temperatureContent.warmingTrendLabel}
           </textPath>
         </motion.text>
         {/* Arrow  */}
@@ -214,33 +188,18 @@ export function Temperature() {
           pointerEvents: "auto",
         }}
       >
-        <Stack
-          direction="column"
-          spacing={1}
-          alignItems="flex-start"
+        <Visualization
+          title={temperatureContent.chart.title}
+          source={temperatureContent.chart.source}
+          headerWrapper={(header) => (
+            <motion.div style={{ opacity: chartHeadingOpacity }}>
+              {header}
+            </motion.div>
+          )}
           sx={{ width: "100%" }}
         >
-          <motion.div style={{ opacity: chartHeadingOpacity }}>
-            <Typography variant="h5" sx={{ textAlign: "left" }}>
-              California Annual Average Temperature
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ opacity: 0.7, textAlign: "left" }}
-            >
-              Data source:{" "}
-              <a
-                href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/4/tavg/12/12/1960-2026"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "inherit", textDecoration: "underline" }}
-              >
-                NOAA
-              </a>
-            </Typography>
-          </motion.div>
           <TemperatureLineChart scrollProgress={scrollYProgress} />
-        </Stack>
+        </Visualization>
       </Box>
 
       <Box
@@ -258,30 +217,12 @@ export function Temperature() {
       >
         <motion.div style={{ opacity: bottomTitleOpacity }}>
           <Box className="paragraph">
-            <Typography variant="h3">
-              {"A "}
-              <span className="highlight-text">Warmer</span>
-              {" Future"}
-            </Typography>
+            <SectionTitle text={temperatureContent.future.title} />
           </Box>
         </motion.div>
         <motion.div style={{ opacity: bottomParagraphOpacity }}>
           <Box className="paragraph">
-            <Typography variant="body1">
-              {
-                "Year after year, rising global temperatures reveal that our climate is changing. "
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Since 1960, California’s average temperature has increased by about 2°F (1.1°C). "
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Climate models predict that average temperatures may increase by an additional 6-9°F by the end of the century."
-              }
-            </Typography>
+            <Paragraph blocks={temperatureContent.future.body} />
           </Box>
         </motion.div>
       </Box>

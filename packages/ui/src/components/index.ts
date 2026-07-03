@@ -77,6 +77,25 @@ export type {
   BarredColumnItem,
 } from "./common/BarredColumns"
 
+// Scrollytelling components
+export { Paragraph, SectionTitle, Text, Visualization } from "./storylines"
+export type {
+  InlineLegend,
+  Legend,
+  LegendShape,
+  MarkClassNames,
+  MarkSx,
+  ParagraphProps,
+  RichText,
+  SectionTitleProps,
+  Source,
+  TextBlock,
+  TextProps,
+  TextSegment,
+  UnderlineLegend,
+  VisualizationProps,
+} from "./storylines"
+
 // Text utilities
 // Panel components
 export { Panel } from "./panels/Panel"
