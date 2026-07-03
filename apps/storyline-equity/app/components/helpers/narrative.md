@@ -4,19 +4,19 @@
 
 Understanding equity in California water begins with a few fundamental questions:
 
-* Whose needs are being met?  
-* Who is left behind?  
-* Who benefits from water allocations, and who bears the costs when water is scarce?
+- Whose needs are being met?
+- Who is left behind?
+- Who benefits from water allocations, and who bears the costs when water is scarce?
 
 These questions sit at the heart of today’s water debates, and at the core of COEQWAL.
 
 ### **Frame 1\. Introduction**
 
-***How California’s water system flows***
+**_How California’s water system flows_**
 
 California’s water begins in the mountain headwaters, flows through rivers and tributaries, and moves downstream toward the ocean. Along the way, dams, reservoirs, canals, and pumps store, redirect, and deliver water across the state.
 
-The State operates one of the largest and most complex water delivery systems in the world. Our \<Link\>How Water Flows Through California module\<Link\> explores how this vast network moves water hundreds of miles to support farms, communities, and ecosystems. 
+The State operates one of the largest and most complex water delivery systems in the world. Our \<Link\>How Water Flows Through California module\<Link\> explores how this vast network moves water hundreds of miles to support farms, communities, and ecosystems.
 
 ---
 
@@ -28,15 +28,15 @@ Yet the benefits of this system are not shared equally. Some water users have re
 
 To understand water equity in California today, it’s important to recognize that these inequities are deeply rooted in the state’s history.
 
-### **Frame 2\. Historical Context** 
+### **Frame 2\. Historical Context**
 
-***How Indigenous communities managed water*** 
+**_How Indigenous communities managed water_**
 
 For thousands of years, Indigenous communities across California lived in relationship with water’s natural cycles. Tribes adapted to seasonal variability, moving across their territories to follow abundant plants, fish, and wildlife, and developing sophisticated practices for sustainably harvesting salmon and farming in arid regions.
 
 ---
 
-Water was managed collectively and locally, guided by ecological knowledge, cultural values, and long-term stewardship. 
+Water was managed collectively and locally, guided by ecological knowledge, cultural values, and long-term stewardship.
 
 Together, these approaches reflected a way of living in which people, water, plants, and animals are deeply connected and cared for in a relationship. They emphasized shared access, balance, and sustainability, rather than ownership or exclusive control.
 
@@ -46,7 +46,7 @@ This relationship with water was dramatically disrupted with the arrival of Euro
 
 ### **Frame 3\. 19th Century – Gold Rush and Water Rights**
 
-***How inequity started***
+**_How inequity started_**
 
 The mid-19th century marked a turning point in California’s water history. During the Gold Rush, European settlers introduced new legal and political systems that fundamentally redefined who could access land and water.
 
@@ -54,22 +54,22 @@ The 1850 Act for the Government and Protection of Indians instituted forced remo
 
 Two legal doctrines became foundational:
 
-* **Riparian rights**, which tied water access to private land ownership along rivers and streams  
-* **Appropriative rights**, summarized as “first in time, first in right.” The arlist miners and farmers who diverted water for extractive use were rewarded with priority access to water. Later, junior water rights holders got what was left. And those without water rights got nothing.
+- **Riparian rights**, which tied water access to private land ownership along rivers and streams
+- **Appropriative rights**, summarized as “first in time, first in right.” The arlist miners and farmers who diverted water for extractive use were rewarded with priority access to water. Later, junior water rights holders got what was left. And those without water rights got nothing.
 
-Indigenous water needs and practices were not recognized under these laws.  Only white men could claim and hold water rights.
+Indigenous water needs and practices were not recognized under these laws. Only white men could claim and hold water rights.
 
 ---
 
-This period established a lasting hierarchy of “legitimate” water users. Today’s water rights reflect values and priorities of the Gold Rush: rapid resource extraction, expansion of agriculture, and maximizing out-of-stream water use to support settlement and economic growth, primarily for white landowners. Systems of exclusion and racism continue to deny Indigenous communities and others equal rights, recognition, and access to water. 
+This period established a lasting hierarchy of “legitimate” water users. Today’s water rights reflect values and priorities of the Gold Rush: rapid resource extraction, expansion of agriculture, and maximizing out-of-stream water use to support settlement and economic growth, primarily for white landowners. Systems of exclusion and racism continue to deny Indigenous communities and others equal rights, recognition, and access to water.
 
-While these priorities drove development, they locked in patterns of  water allocation that have been difficult to change, deven as societal values and understandings of equity have evolved.
+While these priorities drove development, they locked in patterns of water allocation that have been difficult to change, deven as societal values and understandings of equity have evolved.
 
 ### **Frame 4\. 20th Century – Institutions and Infrastructure**
 
-***How infrastructure shaped inequity***
+**_How infrastructure shaped inequity_**
 
-In the 20th century, California’s massive investments in water infrastructure reinforced inequities. Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems designed to store and deliver water. 
+In the 20th century, California’s massive investments in water infrastructure reinforced inequities. Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems designed to store and deliver water.
 
 These dams, reservoirs, and canals expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion. Over time, these systems reshaped how water flows through the landscape, redirecting rivers, interrupting natural pathways, and prioritizing some uses over others.
 
@@ -81,13 +81,13 @@ The environmental costs were also largely overlooked. Dams blocked more than 95%
 
 ### **Frame 5\. 21st Century – Climate and Resilience**
 
-***How inequity persists under climate change***
+**_How inequity persists under climate change_**
 
 Over time, the worldviews, rights, and values of the people of California have changed. Environmental protections such as the Endangered Species Act and Clean Water Act, recognition of the human right to water, and implementation of the Sustainable Groundwater Management Act all represent meaningful progress toward a more equitable water management system.
 
 ---
 
-Yet inequities remain embedded in our institutions, infrastructure, and water-allocation decisions. Water rights, contracts, and operational rules lock us into historical values that do not reflect those of present day society. 
+Yet inequities remain embedded in our institutions, infrastructure, and water-allocation decisions. Water rights, contracts, and operational rules lock us into historical values that do not reflect those of present day society.
 
 As climate change disrupts our water system – bringing more intense droughts and floods – the most vulnerable are likely to bear the burden.
 
@@ -98,7 +98,7 @@ Water is rarely sufficient to meet every need at once. The central question is n
 
 ### **Frame 6\. Rising tension**
 
-***Why transparency matters*** 
+**_Why transparency matters_**
 
 Today, water managers rely on complex technical models, such as CalSim, to guide allocation decisions. These tools are powerful, but they are also highly technical and difficult for non-experts to interpret.
 
@@ -112,11 +112,11 @@ Without transparency, communities are marginalized from planning and negotiation
 
 ---
 
-Understanding California’s water system, both historically and technically, is essential for building a future that is resilient, fair, and shared. 
+Understanding California’s water system, both historically and technically, is essential for building a future that is resilient, fair, and shared.
 
 ### **Frame 7\. Resolution**
 
-***How COEQWAL addresses equity*** 
+**_How COEQWAL addresses equity_**
 
 So far, we’ve looked at how inequity in California water have developed over time. While COEQWAL cannot undo historical inequities, it can make them visible, clarify their impacts, and support more informed and equitable decisions moving forward.
 
@@ -132,7 +132,7 @@ Trade-offs are unavoidable in water management, and balancing the needs of all i
 
 ### **Frame 8\. Resolution – Tiers**
 
-***A common yardstick for distributional equity: Tiers***
+**_A common yardstick for distributional equity: Tiers_**
 
 Within this broader approach to equity, COEQWAL uses a tier-based interpretive framework to understand distributional equity – how benefits and impacts are shared across people, places, and ecosystems.
 
@@ -156,16 +156,16 @@ By comparing tier outcomes across sectors and locations, users can see who benef
 
 ### **Frame 9\. Conclusion**
 
-***Putting equity into practice***
+**_Putting equity into practice_**
 
-COEQWAL is a platform that brings a distributional equity lens to real-world water decisions. Making trade-offs visible through a shared framework, it gives communities, Tribes, and decision-makers a clearer understanding of who benefits, who is strained, and what alternatives exist. 
+COEQWAL is a platform that brings a distributional equity lens to real-world water decisions. Making trade-offs visible through a shared framework, it gives communities, Tribes, and decision-makers a clearer understanding of who benefits, who is strained, and what alternatives exist.
 
-COEQWAL creates a transparent, shared space where choices can be weighed using the same evidence. 
+COEQWAL creates a transparent, shared space where choices can be weighed using the same evidence.
 
 ---
 
 By translating complex model outputs into clear, comparable tiers, COEQWAL provides a shared language for understanding impacts, evaluating trade-offs, and advocating for more equitable water futures.
 
-When the impacts on Tribes, rural communities, and ecosystems become visible, their needs can move from the margins to the center of decision-making. 
+When the impacts on Tribes, rural communities, and ecosystems become visible, their needs can move from the margins to the center of decision-making.
 
-With COEQWAL, users can carry clear, credible insights into hearings, planning meetings, and negotiations, advocating for water futures that are not only resilient but also fairer and more just. 
+With COEQWAL, users can carry clear, credible insights into hearings, planning meetings, and negotiations, advocating for water futures that are not only resilient but also fairer and more just.

@@ -10,33 +10,37 @@ import {
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 
-export default function HistoricalContext() {
+export default function BackgroundPrevious() {
   return (
     <Box
       component="section"
-      id="frame-2"
-      aria-label="Historical context for water equity"
+      id="frame-1"
+      aria-label="California water system introduction"
     >
       <ScrollSection height="250vh" offset={["start start", "end center"]}>
         <StickyElement top="15vh" style={{ height: "35vh" }}>
-          <HistoricalContextPanel />
+          <BackgroundSystemPanel />
         </StickyElement>
       </ScrollSection>
     </Box>
   )
 }
 
-function HistoricalContextPanel() {
+function BackgroundSystemPanel() {
   const progress = useScrollProgress()
-  const titleOpacity = useScrollValue(progress, [0, 0.78, 0.86], [1, 1, 0])
+  const titleOpacity = useScrollValue(
+    progress,
+    [0.04, 0.12, 0.78, 0.86],
+    [0, 1, 1, 0],
+  )
   const firstParagraphOpacity = useScrollValue(
     progress,
-    [0, 0.78, 0.86],
-    [1, 1, 0],
+    [0.08, 0.18, 0.78, 0.86],
+    [0, 1, 1, 0],
   )
   const secondParagraphOpacity = useScrollValue(
     progress,
-    [0.38, 0.46, 0.78, 0.86],
+    [0.42, 0.5, 0.78, 0.86],
     [0, 1, 1, 0],
   )
   const thirdParagraphOpacity = useScrollValue(
@@ -60,7 +64,7 @@ function HistoricalContextPanel() {
         <Box sx={{ gridArea: "1 / 1" }}>
           <motion.div style={{ opacity: titleOpacity }}>
             <Box className="paragraph" component="header" role="banner">
-              <SectionTitle text={"How Indigenous communities managed water"} />
+              <SectionTitle text={"How California's water system flows"} />
             </Box>
           </motion.div>
 
@@ -69,8 +73,8 @@ function HistoricalContextPanel() {
               <Box className="paragraph" component="article">
                 <Paragraph
                   blocks={[
-                    "For thousands of years, Indigenous communities across California lived in relationship with water's natural cycles.",
-                    "Tribes adapted to seasonal variability, moving across their territories to follow abundant plants, fish, and wildlife, and developing sophisticated practices for sustainably harvesting salmon and farming in arid regions.",
+                    "California's water begins in the mountain headwaters, flows through rivers and tributaries, and moves downstream toward the ocean.",
+                    "Along the way, dams, reservoirs, canals, and pumps store, redirect, and deliver water across the state.",
                   ]}
                 />
               </Box>
@@ -81,15 +85,18 @@ function HistoricalContextPanel() {
                 <Box className="paragraph" component="article">
                   <Paragraph
                     blocks={[
-                      "Water was managed collectively and locally, guided by ecological knowledge, cultural values, and long-term stewardship.",
+                      "Everyone depends on this system.",
+                      "Agriculture relies on water for crops.",
+                      "Cities depend on it for drinking and commercial uses.",
+                      "Rivers, wetlands, and fish need sufficient flows to function and thrive.",
+                      "People also depend on the health of our rivers for cultural practices, subsistence fishing, recreation, and access to clean water.",
                     ]}
                   />
                 </Box>
                 <Box className="paragraph" component="article">
                   <Paragraph
                     blocks={[
-                      "Together, these approaches reflected a way of living in which people, water, plants, and animals are deeply connected and cared for in a relationship.",
-                      "They emphasized shared access, balance, and sustainability, rather than ownership or exclusive control.",
+                      "Laws and regulations determine how water is shared, how much is diverted to farms and cities, how much remains in rivers, who receives water first, and who bears the greatest impacts during shortages.",
                     ]}
                   />
                 </Box>
@@ -101,14 +108,23 @@ function HistoricalContextPanel() {
         <motion.div
           style={{ gridArea: "1 / 1", opacity: thirdParagraphOpacity }}
         >
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "This relationship with water was dramatically disrupted with the arrival of European settlers.",
-                "Their systems, laws, and values reshaped California's landscapes and set inequities in motion.",
-              ]}
-            />
-          </Box>
+          <Stack spacing={2} direction="column">
+            <Box className="paragraph" component="article">
+              <Paragraph
+                blocks={[
+                  "Yet the benefits of this system are not shared equally.",
+                  "Some water users have reliable access year after year, while others face chronic shortages or degraded water quality.",
+                ]}
+              />
+            </Box>
+            <Box className="paragraph" component="article">
+              <Paragraph
+                blocks={[
+                  "To understand water equity in California today, it's important to recognize that these inequities are deeply rooted in the state's history.",
+                ]}
+              />
+            </Box>
+          </Stack>
         </motion.div>
       </Box>
     </Box>

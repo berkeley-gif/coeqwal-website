@@ -7,7 +7,9 @@ interface PersistentMapWrapperProps {
   mapboxToken?: string
 }
 
-export default function PersistentMapWrapper({ mapboxToken }: PersistentMapWrapperProps) {
+export default function PersistentMapWrapper({
+  mapboxToken,
+}: PersistentMapWrapperProps) {
   return (
     <MapInstance mapboxToken={mapboxToken}>
       <LayerOrchestrator />

@@ -28,7 +28,7 @@ export const BACKGROUND_RIVER_LABELS: LocationLabel[] = [
 export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "central-valley-agriculture",
-    name: "Agriculture",
+    name: "Central Valley",
     latitude: 36.72,
     longitude: -120.38,
     color: "#40835D",
@@ -36,7 +36,7 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   },
   {
     id: "bay-area-city",
-    name: "City",
+    name: "Bay Area",
     latitude: 37.78,
     longitude: -122.42,
     color: "#F27322",
@@ -44,7 +44,7 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   },
   {
     id: "los-angeles-city",
-    name: "City",
+    name: "Los Angeles",
     latitude: 34.05,
     longitude: -118.24,
     color: "#F27322",
@@ -60,7 +60,7 @@ export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   },
   {
     id: "shasta-salmon",
-    name: "Salmon",
+    name: "Chinook Salmon",
     latitude: 40.72,
     longitude: -122.42,
     color: "#FCB321",

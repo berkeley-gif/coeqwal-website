@@ -2,7 +2,6 @@
 
 import { Box } from "@repo/ui/mui"
 import { AnimatePresence, motion } from "@repo/motion"
-import RiverNetworkSegmented from "../../../public/graphics/river_network_segmented.svg"
 import StateBoundary from "./graphics/StateBoundary"
 
 const MotionBox = motion.create(Box)
@@ -12,10 +11,7 @@ interface ContainerProps {
   isVisible: boolean
 }
 
-export default function Container({
-  elementId,
-  isVisible,
-}: ContainerProps) {
+export default function Container({ elementId, isVisible }: ContainerProps) {
   return (
     <AnimatePresence initial={false} mode="wait">
       {isVisible ? (
@@ -40,12 +36,12 @@ export default function Container({
             justifyContent: "center",
             overflow: "hidden",
           }}
-              >
-                  <svg width='100%' height='100%'>
-                    <StateBoundary />
-                  </svg>
+        >
+          <svg width="100%" height="100%">
+            <StateBoundary />
+          </svg>
 
-                  {/* The SVG is used as a background element, so we set aria-hidden and focusable to ensure it doesn't interfere with screen readers or keyboard navigation 
+          {/* The SVG is used as a background element, so we set aria-hidden and focusable to ensure it doesn't interfere with screen readers or keyboard navigation 
           <Box
             component={RiverNetworkSegmented}
             aria-hidden="true"

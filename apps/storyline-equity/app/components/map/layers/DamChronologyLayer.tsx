@@ -5,6 +5,7 @@ import { Marker } from "@repo/map"
 import { motion } from "@repo/motion"
 import { dams } from "@repo/data"
 import { Box, Typography } from "@repo/ui/mui"
+import { useActiveSectionStore } from "../../../store"
 import { InfrastructureColor } from "../../helpers/colorPalette"
 
 type DamFeature = {
@@ -29,12 +30,9 @@ type DamMarker = {
   capacity: number
 }
 
-const INFRASTRUCTURE_REVEAL_RANGE: [number, number] = [0.08, 0.78]
+const INFRASTRUCTURE_REVEAL_RANGE: [number, number] = [0.05, 0.55]
 
-function normalizeProgress(
-  progress: number,
-  [start, end]: [number, number],
-) {
+function normalizeProgress(progress: number, [start, end]: [number, number]) {
   if (end === start) return progress >= start ? 1 : 0
   return Math.max(0, Math.min(1, (progress - start) / (end - start)))
 }
@@ -69,13 +67,9 @@ function readDamMarkers(): DamMarker[] {
     .sort((a, b) => a.year - b.year)
 }
 
-export default function DamChronologyLayer({
-  visible,
-  progress,
-}: {
-  visible: boolean
-  progress: number
-}) {
+export default function DamChronologyLayer({ progress }: { progress: number }) {
+  const activeSection = useActiveSectionStore()
+  const visible = activeSection === "Infrastructure"
   const markers = useMemo(() => readDamMarkers(), [])
   const yearRange = useMemo(() => {
     const years = markers.map((marker) => marker.year)
@@ -87,7 +81,10 @@ export default function DamChronologyLayer({
 
   if (!visible || markers.length === 0) return null
 
-  const revealProgress = normalizeProgress(progress, INFRASTRUCTURE_REVEAL_RANGE)
+  const revealProgress = normalizeProgress(
+    progress,
+    INFRASTRUCTURE_REVEAL_RANGE,
+  )
   const currentYear =
     yearRange.min + revealProgress * (yearRange.max - yearRange.min)
 

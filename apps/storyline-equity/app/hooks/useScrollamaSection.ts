@@ -6,7 +6,7 @@
 
 import { useCallback } from "react"
 import type { StepEvent, StepProgressEvent } from "react-scrollama"
-import { appActions, SectionId } from "../store"
+import { appActions, isAtOrAfterSection, SectionId } from "../store"
 
 /**
  * Hook that returns scroll callbacks for react-scrollama.
@@ -18,32 +18,38 @@ export function useScrollamaSection() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    // The california step has no visible content; entering it immediately triggers
-    // the central-valley map state so the zoom animation starts right away.
-    appActions.setActiveSection(data)
-
     if (data === "Background") {
       appActions.setRiverProgress(0)
       appActions.setBackgroundProgress(0)
-      appActions.setMcCloudRiverProgress(0)
-      appActions.setHistoricalContextProgress(0)
-      appActions.setInfrastructureProgress(0)
     } else if (data === "HistoricalContext") {
-      appActions.setMcCloudRiverProgress(0)
-      appActions.setHistoricalContextProgress(0)
+      appActions.setRiverProgress(1)
       appActions.setBackgroundProgress(0)
-      appActions.setInfrastructureProgress(0)
+    } else if (data === "GoldRush") {
+      appActions.setRiverProgress(1)
+      appActions.setGoldRushProgress(0)
+      appActions.setYubaRiverProgress(0)
+      appActions.setBackgroundProgress(0)
     } else if (data === "Infrastructure") {
+      appActions.setRiverProgress(1)
+      appActions.setYubaRiverProgress(1)
       appActions.setInfrastructureProgress(0)
       appActions.setBackgroundProgress(0)
-      appActions.setMcCloudRiverProgress(0)
-      appActions.setHistoricalContextProgress(0)
+      appActions.setGoldRushProgress(0)
     } else {
+      appActions.setRiverProgress(
+        isAtOrAfterSection(data, "HistoricalContext") ? 1 : 0,
+      )
+      appActions.setYubaRiverProgress(
+        isAtOrAfterSection(data, "Infrastructure") ? 1 : 0,
+      )
       appActions.setBackgroundProgress(0)
-      appActions.setMcCloudRiverProgress(0)
-      appActions.setHistoricalContextProgress(0)
+      appActions.setGoldRushProgress(0)
       appActions.setInfrastructureProgress(0)
     }
+
+    appActions.setMcCloudRiverProgress(0)
+    appActions.setHistoricalContextProgress(0)
+    appActions.setActiveSection(data)
   }, [])
 
   /**
@@ -62,8 +68,8 @@ export function useScrollamaSection() {
       if (data === "HistoricalContext") {
         appActions.setHistoricalContextProgress(progress)
 
-        const startScroll = 0.08
-        const endScroll = 0.42
+        const startScroll = 0.38
+        const endScroll = 0.46
 
         const clampedScroll = Math.max(
           startScroll,
@@ -81,6 +87,22 @@ export function useScrollamaSection() {
         return
       }
 
+      if (data === "GoldRush") {
+        appActions.setGoldRushProgress(progress)
+
+        const startScroll = 0.16
+        const endScroll = 0.58
+        const clampedScroll = Math.max(
+          startScroll,
+          Math.min(endScroll, progress),
+        )
+        const animationProgress =
+          (clampedScroll - startScroll) / (endScroll - startScroll)
+
+        appActions.setYubaRiverProgress(animationProgress)
+        return
+      }
+
       if (data !== "Background") return
 
       appActions.setBackgroundProgress(progress)
@@ -88,10 +110,7 @@ export function useScrollamaSection() {
       const startScroll = 0.08
       const endScroll = 0.42
 
-      const clampedScroll = Math.max(
-        startScroll,
-        Math.min(endScroll, progress),
-      )
+      const clampedScroll = Math.max(startScroll, Math.min(endScroll, progress))
       const animationProgress =
         (clampedScroll - startScroll) / (endScroll - startScroll)
 

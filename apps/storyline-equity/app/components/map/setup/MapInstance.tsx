@@ -4,9 +4,8 @@ import { ReactNode, useEffect, useRef } from "react"
 import { Box } from "@repo/ui/mui"
 import { Map, useMap } from "@repo/map"
 import "./mapboxControlStyles.css"
-import { useActiveSectionStore, useCameraView } from "../../../store"
+import { useCameraView } from "../../../store"
 import { CALIFORNIA_VIEW } from "../config/cameraPresets"
-import type { SectionId } from "../config/sectionConfig"
 
 // ============================================================================
 // Constants
@@ -22,6 +21,7 @@ export const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
   [-114.0, 42.0],
 ]
 
+/*
 const EMPTY_MAP_STYLE = {
   version: 8,
   name: "empty map",
@@ -36,25 +36,34 @@ const EMPTY_MAP_STYLE = {
     },
   ],
 } as const
-
-
+ */
 interface MapInstanceProps {
   mapboxToken?: string
   children?: ReactNode
 }
 
-export default function MapInstance({ mapboxToken, children }: MapInstanceProps) {
+export default function MapInstance({
+  mapboxToken,
+  children,
+}: MapInstanceProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
-  const activeSection = useActiveSectionStore()
   const cameraView = useCameraView()
-  const prevSectionRef = useRef<SectionId | null>(null)
+  const prevCameraRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!map.mapRef?.current || !cameraView) return
-    if (prevSectionRef.current === activeSection) return
+    const cameraKey = [
+      cameraView.longitude,
+      cameraView.latitude,
+      cameraView.zoom,
+      cameraView.bearing ?? 0,
+      cameraView.pitch ?? 0,
+    ].join(":")
 
-    prevSectionRef.current = activeSection
+    if (prevCameraRef.current === cameraKey) return
+
+    prevCameraRef.current = cameraKey
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
       zoom: cameraView.zoom,
@@ -64,7 +73,7 @@ export default function MapInstance({ mapboxToken, children }: MapInstanceProps)
       duration: 1500,
       easing: (t: number) => t * (2 - t),
     })
-  }, [activeSection, cameraView, map])
+  }, [cameraView, map])
 
   return (
     <Box
@@ -82,7 +91,7 @@ export default function MapInstance({ mapboxToken, children }: MapInstanceProps)
       <Map
         mapboxToken={token}
         mapStyle={"mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"}
-        //mapStyle={EMPTY_MAP_STYLE as unknown as string} //
+        //mapStyle={EMPTY_MAP_STYLE as unknown as string}
         initialViewState={CALIFORNIA_VIEW}
         maxBounds={MAP_BOUNDS}
         style={{ width: "100%", height: "100%" }}

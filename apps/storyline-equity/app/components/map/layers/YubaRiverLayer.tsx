@@ -1,48 +1,34 @@
 "use client"
 
-/**
- * RiversLayer - Sacramento and San Joaquin rivers
- *
- * Renders river lines with labels. Visibility controlled via Mapbox layout property.
- * Handles its own visualization coloring for Salmon abundance outcome.
- */
+import { useEffect, useMemo } from "react"
+import { Layer, Marker, Source, useMap } from "@repo/map"
+import { yubaRiver } from "@repo/data"
+import { Box, Typography } from "@repo/ui/mui"
+import { RiverWaterColor } from "../../helpers/colorPalette"
 
-import { useMemo, useEffect } from "react"
-import { Source, Layer, useMap } from "@repo/map"
-import { sacramentoRiver, sanJoaquinRiverMainstem } from "@repo/data"
-import { FreshWaterColor } from "../../helpers/colorPalette"
+const YUBA_RIVER_LAYER_IDS = ["yuba-river-halo", "yuba-river-body"] as const
 
-export const RIVER_LAYER_IDS = [
-  "sacramento-river-trough",
-  "sacramento-river-body",
-  "san-joaquin-river-trough",
-  "san-joaquin-river-outline",
-  "san-joaquin-river-body",
-] as const
-
-const RIVER_BODY_COLOR = FreshWaterColor // rgb(4, 47, 103)
-const RIVER_TROUGH_COLOR = "#080c46"
-const HEADWATERS_PHASE_END = 0.45
+const YUBA_RIVER_SOURCE_ID = "yuba-river-source"
+const RIVER_HALO_COLOR = "#07142c"
+const YUBA_RIVER_LABEL_COORDINATE: [number, number] = [-121.05, 39.28]
+const HEADWATERS_PHASE_END = 0.58
 
 type Coordinate = [number, number]
 type LineGeometry = {
   type: "LineString" | "MultiLineString"
   coordinates: Coordinate[] | Coordinate[][]
 }
-
-//NOTE: if performance is too heavy, then we can do two layers (one for headwaters, one for mainstem) and use trimoffset
-
-type SacramentoRiverFeature = {
+type YubaRiverFeature = {
   type: "Feature"
   properties?: {
     flow_order?: number
+    segment?: string
   } | null
   geometry?: LineGeometry | null
 }
-
-type SacramentoRiverFeatureCollection = {
+type YubaRiverFeatureCollection = {
   type: "FeatureCollection"
-  features: SacramentoRiverFeature[]
+  features: YubaRiverFeature[]
 }
 
 function getDistance(a: Coordinate, b: Coordinate) {
@@ -113,11 +99,11 @@ function clipGeometry(
   return coordinates.length > 0 ? { ...geometry, coordinates } : null
 }
 
-function getAnimatedSacramentoRiver(
+function getAnimatedYubaRiver(
   headwatersProgress: number,
   mainstemProgress: number,
 ) {
-  const data = sacramentoRiver as SacramentoRiverFeatureCollection
+  const data = yubaRiver as YubaRiverFeatureCollection
 
   return {
     ...data,
@@ -138,171 +124,116 @@ function getAnimatedSacramentoRiver(
   }
 }
 
-type SacramentoRiverData = typeof sacramentoRiver
+type YubaRiverData = typeof yubaRiver
 
-interface RiversLayerProps {
-  visible: boolean
-  progress: number
-}
-
-export default function MajorRiversLayer({
+export default function YubaRiverLayer({
   visible,
   progress,
-}: RiversLayerProps) {
+}: {
+  visible: boolean
+  progress: number
+}) {
   const { mapRef } = useMap()
-
   const clampedProgress = Math.max(0, Math.min(1, progress))
   const headwatersProgress = Math.min(clampedProgress / HEADWATERS_PHASE_END, 1)
   const mainstemProgress = Math.max(
     0,
     (clampedProgress - HEADWATERS_PHASE_END) / (1 - HEADWATERS_PHASE_END),
   )
-  const mainstemTrimOffset = useMemo<[number, number]>(
-    () => [mainstemProgress, 1],
-    [mainstemProgress],
-  )
-  const animatedSacramentoRiver = useMemo(
-    () => getAnimatedSacramentoRiver(headwatersProgress, mainstemProgress),
+  const animatedYubaRiver = useMemo(
+    () => getAnimatedYubaRiver(headwatersProgress, mainstemProgress),
     [headwatersProgress, mainstemProgress],
   )
   const visibilityValue = visible ? "visible" : "none"
 
-  // Update layer properties when visibility, progress, or color changes
   useEffect(() => {
     const map = mapRef?.current?.getMap()
     if (!map?.isStyleLoaded()) return
 
-    if (map.getLayer("sacramento-river-trough")) {
-      map.setLayoutProperty(
-        "sacramento-river-trough",
-        "visibility",
-        visibilityValue,
-      )
-    }
-    if (map.getLayer("sacramento-river-body")) {
-      map.setLayoutProperty(
-        "sacramento-river-body",
-        "visibility",
-        visibilityValue,
-      )
-    }
+    YUBA_RIVER_LAYER_IDS.forEach((id) => {
+      if (!map.getLayer(id)) return
 
-    // San Joaquin layers
-    if (map.getLayer("san-joaquin-river-trough")) {
-      map.setLayoutProperty(
-        "san-joaquin-river-trough",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-trough",
-        "line-trim-offset",
-        mainstemTrimOffset,
-      )
-    }
-    if (map.getLayer("san-joaquin-river-body")) {
-      map.setLayoutProperty(
-        "san-joaquin-river-body",
-        "visibility",
-        visibilityValue,
-      )
-      map.setPaintProperty(
-        "san-joaquin-river-body",
-        "line-trim-offset",
-        mainstemTrimOffset,
-      )
-    }
-  }, [visible, visibilityValue, mainstemTrimOffset, mapRef])
+      map.setLayoutProperty(id, "visibility", visibilityValue)
+    })
+  }, [mapRef, visibilityValue])
 
-  // Move rivers to top when visible
   useEffect(() => {
     if (!visible) return
     const map = mapRef?.current?.getMap()
     if (!map?.isStyleLoaded()) return
 
-    RIVER_LAYER_IDS.forEach((id) => {
+    YUBA_RIVER_LAYER_IDS.forEach((id) => {
       try {
         if (map.getLayer(id)) map.moveLayer(id)
       } catch {
-        // ignore
+        // Layer order is best-effort while the Mapbox style settles.
       }
     })
-  }, [visible, mapRef])
+  }, [mapRef, visible])
 
   return (
     <>
       <Source
-        id="sacramento-river-source"
+        id={YUBA_RIVER_SOURCE_ID}
         type="geojson"
-        data={animatedSacramentoRiver as SacramentoRiverData}
+        data={animatedYubaRiver as YubaRiverData}
       >
         <Layer
-          id="sacramento-river-trough"
+          id="yuba-river-halo"
           type="line"
           paint={{
-            "line-color": RIVER_TROUGH_COLOR,
-            "line-width": 7,
-            "line-opacity": 0.6,
+            "line-color": RIVER_HALO_COLOR,
+            "line-width": 9,
+            "line-opacity": 0.72,
           }}
           layout={{
-            "line-join": "round",
             "line-cap": "round",
+            "line-join": "round",
             visibility: visibilityValue,
           }}
         />
         <Layer
-          id="sacramento-river-body"
+          id="yuba-river-body"
           type="line"
           paint={{
-            "line-color": RIVER_BODY_COLOR,
+            "line-color": RiverWaterColor,
             "line-width": 5,
             "line-opacity": 1,
           }}
           layout={{
-            "line-join": "round",
             "line-cap": "round",
+            "line-join": "round",
             visibility: visibilityValue,
           }}
         />
       </Source>
 
-      <Source
-        id="san-joaquin-river-source"
-        type="geojson"
-        data={sanJoaquinRiverMainstem}
-        lineMetrics={true}
-      >
-        <Layer
-          id="san-joaquin-river-trough"
-          type="line"
-          paint={{
-            "line-color": RIVER_TROUGH_COLOR,
-            "line-width": 7,
-            "line-opacity": 0.6,
-            "line-trim-offset": mainstemTrimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
-        />
-        <Layer
-          id="san-joaquin-river-body"
-          type="line"
-          paint={{
-            "line-color": RIVER_BODY_COLOR,
-            "line-width": 5,
-            "line-opacity": 1,
-            "line-trim-offset": mainstemTrimOffset,
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-            visibility: visibilityValue,
-          }}
-        />
-      </Source>
+      {visible ? (
+        <Marker
+          longitude={YUBA_RIVER_LABEL_COORDINATE[0]}
+          latitude={YUBA_RIVER_LABEL_COORDINATE[1]}
+        >
+          <Box
+            sx={{ position: "absolute", transform: "translate(-50%, -50%)" }}
+          >
+            <Typography
+              component="span"
+              sx={{
+                position: "absolute",
+                left: 12,
+                top: -10,
+                whiteSpace: "nowrap",
+                color: "#fcfbfa",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
+              }}
+            >
+              Yuba River
+            </Typography>
+          </Box>
+        </Marker>
+      ) : null}
     </>
   )
 }

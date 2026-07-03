@@ -2,6 +2,7 @@ import {
   CALIFORNIA_VIEW,
   CameraView,
   SHASTA_MCCLOUD_VIEW,
+  YUBA_RIVER_VIEW,
 } from "./cameraPresets"
 import {
   BACKGROUND_CIRCLE_ANNOTATIONS,
@@ -25,7 +26,7 @@ export type SectionId =
 export interface SectionLayerConfig {
   majorRivers?: boolean
   shastaMcCloud?: boolean
-  dams?: boolean
+  yubaRiver?: boolean
   locationLabels?: LocationLabel[]
   circleAnnotations?: MapCircleAnnotation[]
   camera?: CameraView
@@ -36,9 +37,7 @@ export const getSectionLayerConfig = (
 ): SectionLayerConfig => {
   const config: SectionLayerConfig = {
     camera:
-      sectionId === "HistoricalContext"
-        ? SHASTA_MCCLOUD_VIEW
-        : CALIFORNIA_VIEW,
+      sectionId === "HistoricalContext" ? SHASTA_MCCLOUD_VIEW : CALIFORNIA_VIEW,
   }
 
   switch (sectionId) {
@@ -50,8 +49,9 @@ export const getSectionLayerConfig = (
     case "HistoricalContext":
       config.majorRivers = true
       break
-    case "Infrastructure":
-      config.dams = true
+    case "GoldRush":
+      config.majorRivers = true
+      config.yubaRiver = true
       break
     default:
       break
@@ -59,6 +59,10 @@ export const getSectionLayerConfig = (
 
   if (sectionId === "HistoricalContext") {
     config.shastaMcCloud = true
+  }
+
+  if (sectionId === "GoldRush") {
+    config.camera = YUBA_RIVER_VIEW
   }
 
   return config

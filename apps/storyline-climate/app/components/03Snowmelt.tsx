@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
 import { Box, Slider, Stack, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import SnowpackLine from "./vis/SnowpackLine"
@@ -10,6 +11,7 @@ import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import { useRef, useState } from "react"
 import SWECurve from "./vis/SWECurve"
 import SierraNevadaImageScroller from "./vis/SierraNevadaImageScroller"
+import snowmeltContent from "../../public/locales/english/snowmelt.json"
 
 export default function SierraNevada() {
   const sectionRef = useRef(null)
@@ -99,88 +101,46 @@ export default function SierraNevada() {
       >
         <Box className="paragraph">
           <motion.div style={{ opacity: titleOpacity }}>
-            <Typography variant="h3">
-              {"Losing the Natural Reservoir"}
-            </Typography>
+            <SectionTitle text={snowmeltContent.sierraNevada.title} />
           </motion.div>
         </Box>
 
         <Stack spacing={1} direction="column">
           <motion.div style={{ opacity: firstParagraphOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {
-                  "The mountain snowpack has historically served as an important "
-                }
-                <span style={{ fontWeight: "bold" }}>natural reservoir</span>
-                {" to supply water for California."}
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "Snow builds up in the winter and melts in the late spring to feed rivers and top off reservoirs downstream before the long dry season."
-                }
-              </Typography>
-              <Typography variant="body1">
-                {"But "}
-                <span className="highlight-text">{"warmer temperatures"}</span>
-                {" mean more precipitation falls as rain instead of snow."}
-              </Typography>
-              <Typography variant="body1">
-                {"And "}
-                <span className="highlight-text">
-                  {"the snowpack we do receive melts earlier"}
-                </span>
-                {" in the year."}
-              </Typography>
+              <Paragraph blocks={snowmeltContent.sierraNevada.firstParagraph} />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: secondParagraphOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {"However, this natural reservoir is highly variable."}
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "Use the slider below to compare a record-breaking wet year (2023) with a severe dry year (2015) to see what snowpack may look like in a warmer future."
-                }
-              </Typography>
+              <Paragraph
+                blocks={snowmeltContent.sierraNevada.secondParagraph}
+              />
             </Box>
           </motion.div>
         </Stack>
 
         <Stack spacing={1} direction="column" sx={{ mt: 2, pt: 2 }}>
-          <Box
+          <Visualization
+            title={snowmeltContent.sierraNevada.chart.title}
+            source={snowmeltContent.sierraNevada.chart.source}
             className="paragraph"
-            style={{
+            headerWrapper={(header) => (
+              <motion.div style={{ opacity: chartHeadingOpacity }}>
+                {header}
+              </motion.div>
+            )}
+            sx={{
               height: "fit-content",
               width: "100%",
               pointerEvents: "none",
             }}
           >
-            <motion.div style={{ opacity: chartHeadingOpacity }}>
-              <Typography variant="h5">
-                {"California's Changing Snowpack"}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ opacity: 0.7, textAlign: "left" }}
-              >
-                Satellite image source:{" "}
-                <a
-                  href="https://worldview.earthdata.nasa.gov/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "inherit", textDecoration: "underline" }}
-                >
-                  NASA Worldview
-                </a>
-              </Typography>
-            </motion.div>
             <SWECurve
               selectedMonth={monthIdx}
               scrollYProgress={scrollYProgress}
             />
-          </Box>
+          </Visualization>
           <div id="month-slider">
             <Slider
               min={0}
@@ -223,7 +183,7 @@ export default function SierraNevada() {
               }}
             />
             <Typography variant="caption" gutterBottom>
-              Months in a Water Year
+              {snowmeltContent.sierraNevada.monthSliderLabel}
             </Typography>
           </div>
         </Stack>
@@ -304,7 +264,7 @@ export function Snowmelt() {
             startOffset="35%"
             textAnchor="middle"
           >
-            Rising heat melts the snow
+            {snowmeltContent.snowmelt.risingHeatLabel}
           </textPath>
         </motion.text>
       </SVGLineContainer>
@@ -324,22 +284,7 @@ export function Snowmelt() {
       >
         <motion.div style={{ opacity: firstParagraphOpacity }}>
           <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "Predictions of climate change effects indicate that snowpack will continue to decline over the long-term."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {"Less snowpack means there will be "}
-              <span style={{ fontWeight: "bold" }}>
-                {"less water available"}
-              </span>
-              {
-                " in rivers and reservoirs during the dry summer when we \u2014 humans and ecosystems \u2014 "
-              }
-              <span style={{ fontWeight: "bold" }}>{"need it most"}</span>
-              {"."}
-            </Typography>
+            <Paragraph blocks={snowmeltContent.snowmelt.body} />
           </Box>
         </motion.div>
       </Box>
@@ -357,57 +302,44 @@ export function Snowmelt() {
           paddingRight: "5rem",
         }}
       >
-        <Box
+        <Visualization
+          title={snowmeltContent.snowmelt.chart.title}
+          source={snowmeltContent.snowmelt.chart.source}
           className="paragraph"
-          component="article"
+          headerWrapper={(header) => (
+            <motion.div style={{ opacity: chartHeadingOpacity }}>
+              {header}
+            </motion.div>
+          )}
           sx={{ pointerEvents: "auto" }}
         >
-          <motion.div style={{ opacity: chartHeadingOpacity }}>
-            <Typography variant="h5" align="left">
-              {"Projected Change in Snowpack by 2050"}
-            </Typography>
-            <Typography variant="caption" align={"left"} sx={{ opacity: 0.7 }}>
-              {"Source: "}
-              <a
-                href="https://v2.cal-adapt.org/tools/snowpack/#climatevar=swe&scenario=rcp85&lat=38.90625&lng=-120.03125&boundary=locagrid&units=inch"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "inherit", textDecoration: "underline" }}
-              >
-                Cal-Adapt
-              </a>
-              {
-                ", Fourth Assessment Climate Region modeled by CanESM2 in high emission scenario"
-              }
+          <motion.div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              opacity: labelOpacity,
+            }}
+          >
+            <Image
+              src="/icons/snowflake_icon.svg"
+              alt="Snowflake icon"
+              width={48}
+              height={48}
+              style={{
+                display: "block",
+                marginRight: 8,
+                filter: "invert(1) brightness(100%)",
+              }}
+            />
+            <Typography variant="caption">
+              {snowmeltContent.snowmelt.snowWaterEquivalentLabel}
             </Typography>
           </motion.div>
-        </Box>
-        <motion.div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            opacity: labelOpacity,
-          }}
-        >
-          <Image
-            src="/icons/snowflake_icon.svg"
-            alt="Snowflake icon"
-            width={48}
-            height={48}
-            style={{
-              display: "block",
-              marginRight: 8,
-              filter: "invert(1) brightness(100%)",
-            }}
-          />
-          <Typography variant="caption">
-            {"April Snow Water Equivalent"}
-          </Typography>
-        </motion.div>
-        <Box width="100%" height="50%">
-          <SnowpackLine scrollProgress={scrollYProgress} />
-        </Box>
+          <Box width="100%" height="50%">
+            <SnowpackLine scrollProgress={scrollYProgress} />
+          </Box>
+        </Visualization>
       </Box>
     </StickyContainer>
   )
