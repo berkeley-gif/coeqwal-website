@@ -64,7 +64,7 @@ function gauss(r: () => number): number {
  * Keys are the app's hydroclimate group keys.
  */
 export const MOCK_CLIMATE_STRESS: Record<string, number> = {
-  hist: 0.0,
+  historical: 0.0,
   ecv: 0.15,
   cc50: 0.4,
   cc95: 0.7,

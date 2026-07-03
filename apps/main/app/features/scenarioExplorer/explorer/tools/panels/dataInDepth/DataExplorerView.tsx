@@ -1,13 +1,30 @@
 "use client"
 
 /**
- * DataExplorerView - Explore data in depth for the user's selected scenarios
+ * DataExplorerView - Explore data in depth for the user's selected scenarios.
+ *
+ * Two modes, switched by the header toggle:
+ *  - "By category": the existing outcome-category accordions (unchanged).
+ *  - "Explorer": the by-variable explorer (sector rail -> variable -> view),
+ *    which works from the Current Operations reference even before any
+ *    scenario is selected.
  */
 
-import React from "react"
-import { Box, Typography, useTheme, Button } from "@repo/ui/mui"
+import React, { useState } from "react"
+import {
+  Box,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  useTheme,
+} from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../../store"
 import CategoryView from "./components/CategoryView"
+import ExplorerView from "./explorer/ExplorerView"
+import ToolErrorBoundary from "../../../ToolErrorBoundary"
+
+type DataMode = "category" | "explorer"
 
 interface DataExplorerViewProps {
   /** Callback to navigate back to explorer view */
@@ -19,6 +36,7 @@ export default function DataExplorerView({
 }: DataExplorerViewProps) {
   const theme = useTheme()
   const { selectedScenarios } = useWorkspaceSlice()
+  const [mode, setMode] = useState<DataMode>("category")
 
   const hasData = selectedScenarios.length > 0
 
@@ -31,25 +49,43 @@ export default function DataExplorerView({
         backgroundColor: theme.palette.background.paper,
       }}
     >
-      {!hasData && (
-        <Box
-          sx={{
-            backgroundColor: theme.palette.background.paper,
-            borderBottom: theme.border.light,
-            px: { xs: 3, md: 6 },
-            py: 2,
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          px: { xs: 3, md: 6 },
+          py: 1.5,
+        }}
+      >
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={mode}
+          onChange={(_, next: DataMode | null) => {
+            if (next) setMode(next)
           }}
+          aria-label="Data view mode"
         >
+          <ToggleButton value="category" sx={{ textTransform: "none", px: 2 }}>
+            By category
+          </ToggleButton>
+          <ToggleButton value="explorer" sx={{ textTransform: "none", px: 2 }}>
+            Explorer
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        {mode === "category" && !hasData && (
           <Typography
             variant="subtitle2"
-            sx={{
-              color: theme.palette.text.primary,
-            }}
+            sx={{ color: theme.palette.text.secondary }}
           >
             Select scenarios to explore
           </Typography>
-        </Box>
-      )}
+        )}
+      </Box>
 
       <Box
         sx={{
@@ -58,7 +94,15 @@ export default function DataExplorerView({
           backgroundColor: theme.palette.background.toolPanel,
         }}
       >
-        {!hasData ? (
+        {mode === "explorer" ? (
+          <Box
+            sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}
+          >
+            <ToolErrorBoundary tool="data">
+              <ExplorerView />
+            </ToolErrorBoundary>
+          </Box>
+        ) : !hasData ? (
           <Box
             sx={{
               display: "flex",
@@ -79,7 +123,8 @@ export default function DataExplorerView({
               }}
             >
               Choose scenarios to access detailed charts, aggregate statistics,
-              and data downloads.
+              and data downloads. Or open the Explorer to browse variables from
+              the Current Operations reference.
             </Typography>
 
             <Box>

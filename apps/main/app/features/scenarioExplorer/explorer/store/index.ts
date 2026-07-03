@@ -32,6 +32,13 @@ export type {
   ResilienceControlFields,
 } from "./resilienceStoreSlice"
 
+export type {
+  DataState,
+  DataSlice,
+  DataDistKind,
+  DataCompareBy,
+} from "./dataStoreSlice"
+
 export type { ExplorerStore } from "./storeInstance"
 export { useExplorerStore } from "./storeInstance"
 
@@ -41,6 +48,7 @@ export {
   useRadarSlice,
   useEquitySlice,
   useResilienceSlice,
+  useDataSlice,
 } from "./useToolSlices"
 
 export {

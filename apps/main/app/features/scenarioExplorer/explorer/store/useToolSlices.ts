@@ -27,6 +27,7 @@
 import { useShallow } from "@repo/state/zustand"
 import { useExplorerStore } from "./storeInstance"
 import {
+  pickDataSlice,
   pickEquitySlice,
   pickListSlice,
   pickRadarSlice,
@@ -53,3 +54,4 @@ export const useListSlice = createSliceHook(pickListSlice)
 export const useRadarSlice = createSliceHook(pickRadarSlice)
 export const useEquitySlice = createSliceHook(pickEquitySlice)
 export const useResilienceSlice = createSliceHook(pickResilienceSlice)
+export const useDataSlice = createSliceHook(pickDataSlice)
