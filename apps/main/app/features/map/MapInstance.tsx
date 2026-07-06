@@ -11,7 +11,7 @@ import {
   useMapMode,
   useMapStyle,
   useLearnMapScrollOffset,
-  useActiveSection,
+  useActiveSubSection,
   useCameraView,
   useExplorePanelWidth,
   mapActions,
@@ -19,7 +19,7 @@ import {
 } from "./store"
 import { CALIFORNIA_VIEW } from "./config/cameraPresets"
 import { ensureCustomLayers } from "./config/tilesetSources"
-import type { SectionId } from "./config/sectionLayers"
+import type { SubSectionId } from "./config/sectionLayers"
 import { BasemapPicker } from "./controls/BasemapPicker"
 import "./styles/mapboxControlStyles.css"
 
@@ -113,12 +113,12 @@ export default function MapInstance({
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
   const theme = useTheme()
-  const prevSectionRef = useRef<SectionId | null>(null)
+  const prevSectionRef = useRef<SubSectionId | null>(null)
 
   const mapMode = useMapMode()
   const mapStyle = useMapStyle()
   const learnMapScrollOffset = useLearnMapScrollOffset()
-  const activeSection = useActiveSection()
+  const activeSubSection = useActiveSubSection()
   const cameraView = useCameraView()
   const explorePanelWidth = useExplorePanelWidth()
 
@@ -256,9 +256,9 @@ export default function MapInstance({
       return
     }
     if (!map.mapRef?.current || !cameraView) return
-    if (prevSectionRef.current === activeSection) return
+    if (prevSectionRef.current === activeSubSection) return
 
-    prevSectionRef.current = activeSection
+    prevSectionRef.current = activeSubSection
 
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
@@ -269,7 +269,7 @@ export default function MapInstance({
       duration: 2000,
       easing: (t: number) => t * (2 - t),
     })
-  }, [activeSection, cameraView, map, mapMode])
+  }, [activeSubSection, cameraView, map, mapMode])
 
   // ============================================================================
   // Render

@@ -34,10 +34,10 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const exploreStyles: React.CSSProperties =
       isExploreTab && mapMode !== "get-started"
         ? {
-            height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
-            minHeight: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
-            overflow: "hidden",
-          }
+          height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
+          minHeight: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
+          overflow: "hidden",
+        }
         : {}
 
     // Panels above the map need pointerEvents: "none" so the persistent map behind them

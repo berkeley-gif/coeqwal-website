@@ -24,7 +24,7 @@ export function useLearnScrollama() {
       // The california step has no visible content. Entering it immediately triggers
       // the central-valley map state so the zoom animation starts right away.
       const effectiveSection = data === "california" ? "central-valley" : data
-      mapActions.setActiveSection(effectiveSection)
+      mapActions.setActiveSubSection(effectiveSection)
 
       if (data !== "outcomes-viz") {
         mapActions.clearOutcomeVisualization()

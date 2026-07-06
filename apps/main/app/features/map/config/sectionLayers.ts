@@ -10,8 +10,46 @@ import {
   CALIFORNIA_CENTERED_VIEW
 } from "./cameraPresets"
 
+export type LearnNavSection = "get-started" | "water-issues" | "water-stories"
+
+export const LearnNavSections: LearnNavSection[] = [
+  'get-started', 'water-issues', 'water-stories'
+]
+
+/** Human-readable copy for each LearnNavSection, for UI display
+  *  (e.g. the "Learn more about ___" footer CTA). Same idea as
+  *  SECTION_LABELS below, just for the top-level nav instead of
+  *  the scrollytelling sub-sections. */
+export const LEARN_NAV_SECTION_LABELS: Record<LearnNavSection, string> = {
+  "get-started": "Get started",
+  "water-issues": "Water issues",
+  "water-stories": "Water stories",
+}
+
+/**
+ * Returns the LearnNavSection that comes after `current` in display
+ * order, or `undefined` if `current` is already the last section.
+ *
+ * Deliberately does NOT wrap around like `nextTab` does for top-level
+ * tabs. Tabs cycle forever (learn -> explore -> share -> learn), but
+ * Learn's sections are a finite sequence you move through once - once
+ * you're on the last one, there's nothing further to "learn more"
+ * about, so the caller should hide that CTA rather than loop back to
+ * "get-started".
+ */
+export function nextLearnNavSection(
+  order: LearnNavSection[],
+  current: LearnNavSection,
+): LearnNavSection | undefined {
+  const currentIndex = order.indexOf(current)
+  if (currentIndex === -1 || currentIndex === order.length - 1) {
+    return undefined
+  }
+  return order[currentIndex + 1]
+}
+
 /** Section IDs for Learn mode scrollytelling */
-export type SectionId =
+export type SubSectionId =
   | "intro"
   | "california"
   | "central-valley"
@@ -33,7 +71,7 @@ export type SectionId =
  * Each boolean controls whether that layer group should be visible.
  * Missing = false (hidden).
  */
-export interface SectionLayerConfig {
+export interface SubSectionLayerConfig {
   // Native Mapbox layers (controlled via useMapLayers)
   californiaLabel?: boolean
   centralValley?: boolean
@@ -68,13 +106,13 @@ export interface SectionLayerConfig {
  */
 
 // Shared config for sections that show basins + rivers
-const BASINS_AND_RIVERS: SectionLayerConfig = {
+const BASINS_AND_RIVERS: SubSectionLayerConfig = {
   basins: true,
   rivers: true,
   camera: CENTRAL_VALLEY_VIEW,
 }
 
-export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
+export const SECTION_LAYERS: Record<SubSectionId, SubSectionLayerConfig> = {
   // === Introduction ===
   intro: {
     camera: CALIFORNIA_VIEW,
@@ -114,7 +152,7 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   "before-exploring": {}
 }
 
-export const SECTION_LABELS: Record<SectionId, string> = {
+export const SECTION_LABELS: Record<SubSectionId, string> = {
   intro: "Introduction",
   california: "California overview",
   "central-valley": "Central Valley",

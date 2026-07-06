@@ -20,11 +20,12 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, useMapError, mapActions, useActiveSection } from "../../features/map/store"
+import { useMapReady, useMapError, mapActions, useActiveSubSection, useLearnNavSection } from "../../features/map/store"
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/scenarioExplorer/getStarted/content"
 import { WATER_STORIES } from "../../content/stories"
+import type { LearnNavSection } from "../../features/map/config/sectionLayers"
 
 import VerticalNav, { NAV_WIDTH_COLLAPSED, NAV_WIDTH_EXPANDED } from "../verticalNav/VerticalNav"
 
@@ -33,8 +34,8 @@ export default function LearnPanel() {
   const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
-  const activeSubSection = useActiveSection()
-  const [activeSection, setActiveSection] = useState("get-started")
+  const activeSubSection = useActiveSubSection()
+  const activeSection = useLearnNavSection()
   const { openThemePanel } = usePanelRoute()
   const [isVertNavExpanded, setIsVertNavExpanded] = useState(false)
   const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
@@ -76,12 +77,8 @@ export default function LearnPanel() {
   }, [])
 
   const handleNavigate = useCallback((sectionId: string) => {
-    setActiveSection(sectionId)
-    if (sectionId !== "get-started") {
-      mapActions.setMapMode("hidden")
-    } else {
-      mapActions.setMapMode("learn")
-    }
+    // setLearnNavSection now also syncs mapMode internally - see store.ts
+    mapActions.setLearnNavSection(sectionId as LearnNavSection)
   }, [])
 
   // Set up scroll listener

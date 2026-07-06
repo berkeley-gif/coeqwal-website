@@ -19,7 +19,7 @@ import {
   mapActions,
   useActiveOutcomeVisualization,
   useMapStore,
-  useActiveSection,
+  useActiveSubSection,
 } from "../../map/store"
 import {
   getOutcomeConfig,
@@ -139,8 +139,8 @@ export default function TierAnimationSection() {
 
   const panelRef = useRef<HTMLDivElement>(null)
 
-  const activeSection = useActiveSection()
-  const isActive = activeSection === "outcomes-viz"
+  const activeSubSection = useActiveSubSection()
+  const isActive = activeSubSection === "outcomes-viz"
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref copy of `beatIndex` so navigation callbacks read the latest cursor

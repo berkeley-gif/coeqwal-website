@@ -11,11 +11,22 @@ import { TABS, TAB_ORDER } from "../../types/tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import { ButtonCta } from "@repo/ui"
+import {
+  LearnNavSections,
+  nextLearnNavSection,
+  LEARN_NAV_SECTION_LABELS,
+} from "../../features/map/config/sectionLayers"
+import { mapActions, useLearnNavSection } from "../../features/map/store"
 
 export default function AutoAdvanceFooter() {
   const { state } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
+  const learnNavSection = useLearnNavSection()
+  const nextLearnSection = nextLearnNavSection(LearnNavSections, learnNavSection)
+  const nextLearnSectionLabel = nextLearnSection
+    ? LEARN_NAV_SECTION_LABELS[nextLearnSection]
+    : null
   const setMainView = useScenarioExplorerStore((s) => s.setMainView)
   const theme = useTheme()
 
@@ -52,40 +63,6 @@ export default function AutoAdvanceFooter() {
         padding: `${theme.spacing(theme.space.section.lg)} 0`
       }}
     >
-      {/*       <button
-        type="button"
-        onClick={onAdvance}
-        aria-label={footerText}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: theme.spacing(theme.space.component.lg),
-          padding: `${theme.spacing(theme.space.section.lg)} ${theme.spacing(theme.space.section.md)}`,
-          width: "100%",
-          background: "transparent",
-          border: "none",
-          color: "inherit",
-          font: "inherit",
-          cursor: "pointer",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="tabLabel"
-          component="span"
-          sx={{ color: "common.white", textTransform: "none" }}
-        >
-          {footerText}
-        </Typography>
-        <ScrollToButton
-          animationComplete
-          rotation="-90deg"
-          axis="horizontal"
-          size={60}
-          color={theme.palette.common.white}
-        />
-      </button> */}
       <Box
         sx={{
           display: "flex",
@@ -94,14 +71,15 @@ export default function AutoAdvanceFooter() {
           gap: 2,
         }}
       >
+        {nextLearnSection && (
+          <ButtonCta
+            onClick={() => mapActions.setLearnNavSection(nextLearnSection)}
+          >
+            Learn more about {nextLearnSectionLabel}
+          </ButtonCta>
+        )}
         <ButtonCta
-          href=""
-        >
-          Learn more about Water Issues
-        </ButtonCta>
-
-        <ButtonCta
-          href=""
+          href="/explore"
         >
           Explore water allocation scenarios
         </ButtonCta>
