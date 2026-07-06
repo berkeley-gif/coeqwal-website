@@ -1,7 +1,32 @@
+import type { CSSProperties } from "react"
 import { useState, useEffect, useRef } from "react"
 
+const DROP_COUNT = 100
+
+type Drop = {
+  left: number
+  delay: number
+  baseDur: number
+  visibilityThreshold: number
+}
+
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
+const drops: Drop[] = Array.from({ length: DROP_COUNT }, (_, i) => {
+  const seed = i + 1
+
+  return {
+    left: seededRandom(seed) * 100,
+    delay: seededRandom(seed * 2) * 5,
+    baseDur: 2 + seededRandom(seed * 3) * 2,
+    visibilityThreshold: seededRandom(seed * 4),
+  }
+})
+
 export default function RainAnimation() {
-  const [drops] = useState(Array(100).fill(null))
   const [intensity, setIntensity] = useState(1)
   const rainRef = useRef<HTMLDivElement | null>(null)
   const [travelPx, setTravelPx] = useState(0)
@@ -42,23 +67,21 @@ export default function RainAnimation() {
       <div
         ref={rainRef}
         className="rain"
-        style={{ ["--rain-travel" as string]: `${travelPx}px` }}
+        style={{ "--rain-travel": `${travelPx}px` } as CSSProperties}
       >
-        {drops.map((_, i) => {
-          const delay = Math.random() * 5
-          const baseDur = 2 + Math.random() * 2
-          const dur = baseDur / Math.max(intensity, 0.5)
+        {drops.map((drop, i) => {
+          const dur = drop.baseDur / Math.max(intensity, 0.5)
           const opacity = 0.3 + intensity * 0.7
-          const isVisible = Math.random() < intensity
+          const isVisible = drop.visibilityThreshold < intensity
 
           return (
             <div
               key={i}
               className="drop"
               style={{
-                left: `${Math.random() * 100}%`,
+                left: `${drop.left}%`,
                 animationDuration: `${dur}s`,
-                animationDelay: `${delay}s`,
+                animationDelay: `${drop.delay}s`,
                 opacity: isVisible ? opacity : 0,
                 transition: "opacity 0.5s ease-in-out",
               }}
@@ -67,14 +90,14 @@ export default function RainAnimation() {
                 className="stem"
                 style={{
                   animationDuration: `${dur}s`,
-                  animationDelay: `${delay}s`,
+                  animationDelay: `${drop.delay}s`,
                 }}
               />
               <div
                 className="splat"
                 style={{
                   animationDuration: `${dur}s`,
-                  animationDelay: `${delay}s`,
+                  animationDelay: `${drop.delay}s`,
                 }}
               />
             </div>

@@ -1,44 +1,81 @@
 "use client"
 
 import { motion, useScroll, useTransform } from "@repo/motion"
-import { Box, Typography } from "@repo/ui/mui"
+import { Paragraph, SectionTitle } from "@repo/ui"
+import { Box } from "@repo/ui/mui"
 import { useEffect, useRef, useState } from "react"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import { scaleLinear, range, line, curveCatmullRom } from "@repo/viz"
 import "../rain.css"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import RainAnimation from "./helpers/RainAnimation"
-import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
+import {
+  StickyScrollSection,
+  useScrollProgress,
+  useScrollValue,
+} from "@repo/scrollytelling"
+
+const uncertaintyBlocks = [
+  {
+    text: "While many aspects of climate change are well understood, the rate and degree in which the climate will change is difficult to predict.",
+  },
+  {
+    segments: [
+      {
+        text: "The impacts of climate change on our water system also depend on the actions we take now.",
+        mark: "strong",
+      },
+    ],
+  },
+]
+
+const actionBlocks = [
+  {
+    text: "We may choose to limit groundwater pumping, restore watersheds, modify reservoir operations, or build new water engineering projects.",
+  },
+  {
+    text: "Each of these actions comes with different costs, benefits, and tradeoffs that must be carefully weighed.",
+  },
+  {
+    text: "The key is finding the right combination of approaches that balance California's diverse water needs while also building flexibility to adapt our water system to a changing climate.",
+  },
+]
 
 export default function Balance() {
-  const sectionRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
+  return (
+    <StickyScrollSection
+      id="balance"
+      ariaLabel="Balancing climate adaptation actions"
+      height="220vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <BalanceContent />
+    </StickyScrollSection>
+  )
+}
 
-  const firstLinePath = useTransform(scrollYProgress, [0.3, 0.7], [0, 1])
-  const secondaryLinePath = useTransform(scrollYProgress, [0.45, 0.85], [0, 1])
-  const thirdLinePath = useTransform(scrollYProgress, [0.5, 1], [0, 1])
-  const opacity = useTransform(scrollYProgress, [0.5, 0.6], [0, 1])
-  const paragraphOneOpacity = useTransform(
-    scrollYProgress,
+function BalanceContent() {
+  const progress = useScrollProgress()
+
+  const firstLinePath = useScrollValue(progress, [0.3, 0.7], [0, 1])
+  const secondaryLinePath = useScrollValue(progress, [0.45, 0.85], [0, 1])
+  const thirdLinePath = useScrollValue(progress, [0.5, 1], [0, 1])
+  const opacity = useScrollValue(progress, [0.5, 0.6], [0, 1])
+  const paragraphOneOpacity = useScrollValue(
+    progress,
     [0.22, 0.42],
     [0, 1],
   )
-  const paragraphTwoOpacity = useTransform(
-    scrollYProgress,
+  const paragraphTwoOpacity = useScrollValue(
+    progress,
     [0.38, 0.58],
     [0, 1],
   )
 
   return (
-    <StickyContainer
-      sectionID="balance"
-      stickyRollHeight="120vh"
-      sectionRef={sectionRef}
-    >
+    <>
       <Box
         width="100%"
         height="100%"
@@ -87,42 +124,16 @@ export default function Balance() {
       >
         <motion.div style={{ opacity: paragraphOneOpacity }}>
           <Box className="paragraph" component="article">
-            <Typography variant="body1" gutterBottom>
-              {
-                "While some aspects of climate change \u2014 such as rising temperatures \u2014 are well understood, it is hard to predict exactly "
-              }
-              <span className="highlight-text">
-                {"how climate will affect California’s water system"}
-              </span>
-              {" in the future."}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {"This is, in part, because "}
-              <span style={{ fontWeight: "bold" }}>
-                {
-                  "the impacts of climate change depend on the actions that we take"
-                }
-              </span>
-              {"."}
-            </Typography>
+            <Paragraph blocks={uncertaintyBlocks} gutterBottom />
           </Box>
         </motion.div>
         <motion.div style={{ opacity: paragraphTwoOpacity }}>
           <Box className="paragraph" component="article">
-            <Typography variant="body1" gutterBottom>
-              {
-                "We may choose to sustainably manage our groundwater, restore watersheds, modify reservoir operations, or build new water engineering projects. "
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "The key is finding the right combination of approaches that work for California's diverse communities, farms, and ecosystems."
-              }
-            </Typography>
+            <Paragraph blocks={actionBlocks} />
           </Box>
         </motion.div>
       </Box>
-    </StickyContainer>
+    </>
   )
 }
 
@@ -175,6 +186,7 @@ export function Bullet() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   })
   const bulletPathLength = useTransform(scrollYProgress, [0.2, 0.5], [0, 1])
   const bulletOpacity = usePlayAnimationOnce(
@@ -240,12 +252,14 @@ export function Bullet() {
           component="article"
           sx={{ position: "relative" }}
         >
-          <Typography variant="h2">
-            What is clear is that there is no simple solution
-          </Typography>
-          <Typography variant="h2">
-            to the challenge that climate change poses to California water.
-          </Typography>
+          <SectionTitle
+            variant="h2"
+            text={[
+              {
+                text: "What is clear is that there is no simple solution to the challenge that climate change poses to California water.",
+              },
+            ]}
+          />
         </Box>
       </motion.div>
     </Box>

@@ -10,6 +10,7 @@ function HorizontalScroller() {
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
+    layoutEffect: false,
   })
   const x = useTransform(
     scrollYProgress,

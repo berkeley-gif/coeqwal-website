@@ -60,15 +60,22 @@ export function Visualization({
           {source ? (
             <>
               {source.prefix ?? "Source: "}
-              <Typography
+              <Box
                 component="a"
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                sx={{ color: "inherit", textDecoration: "underline" }}
+                sx={{
+                  color: "inherit",
+                  fontFamily: "inherit",
+                  fontSize: "inherit",
+                  fontWeight: "inherit",
+                  lineHeight: "inherit",
+                  textDecoration: "underline",
+                }}
               >
                 {source.label}
-              </Typography>
+              </Box>
               {source.suffix}
             </>
           ) : null}

@@ -96,6 +96,7 @@ function ScenarioTheme() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   })
 
   const firstScenario = useTransform(scrollYProgress, [0.2, 0.45], [0, 1])
@@ -125,6 +126,7 @@ function ScenarioTransition() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
+    layoutEffect: false,
   })
   const pathLength = useTransform(scrollYProgress, [0.2, 0.9], [0, 1])
 
@@ -183,6 +185,7 @@ function Conclusion() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
+    layoutEffect: false,
   })
 
   const firstParagraphOpacity = useTransform(

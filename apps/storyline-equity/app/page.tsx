@@ -15,18 +15,18 @@ import Transparency from "./components/07Transparency"
 import Resolution from "./components/08Resolution"
 import Tiers from "./components/09Tiers"
 import Conclusion from "./components/10Conclusion"
-import { BaseHeader } from "@repo/ui"
+import {
+  BaseHeader,
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
   useScrollamaSection,
 } from "./hooks/useScrollamaSection"
 import { useMemo } from "react"
-import {
-  getStorylineWaterThemesOptions,
-  goToMainAbout,
-  goToMainData,
-  goToMainHome,
-} from "./components/helpers/header"
 import { useActiveSectionStore, type SectionId } from "./store"
 
 export default function StoryContainer() {
