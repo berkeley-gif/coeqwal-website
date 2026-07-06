@@ -116,7 +116,7 @@ export default function ChartCard() {
     const series: ExceedanceSeries[] = data.members.map((m) => ({
       id: m.id,
       label: m.label,
-      points: toExceedancePoints(m.series),
+      points: m.livePoints ?? toExceedancePoints(m.series),
     }))
     chart = (
       <ExceedanceChart series={series} yAxisLabel={yLabel} formatValue={fmt} />
@@ -136,10 +136,16 @@ export default function ChartCard() {
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
         <Chip
           size="small"
-          label="Sample data"
+          label={data.source === "live" ? "Live data" : "Sample data"}
           sx={{
-            backgroundColor: theme.palette.grey[100],
-            color: theme.palette.text.secondary,
+            backgroundColor:
+              data.source === "live"
+                ? theme.palette.info.light
+                : theme.palette.grey[100],
+            color:
+              data.source === "live"
+                ? theme.palette.info.dark
+                : theme.palette.text.secondary,
             fontWeight: 600,
           }}
         />
@@ -232,8 +238,9 @@ export default function ChartCard() {
           fontStyle: "italic",
         }}
       >
-        Sample data ({MOCK_YEARS} simulated years, seeded): illustrative
-        structure that mimics CalSim3 post-processed output, not model results.
+        {data.source === "live"
+          ? "Live reservoir data from api.coeqwal.org (CalSim3 post-processed percentiles)."
+          : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
       </Typography>
     </Box>
   )
