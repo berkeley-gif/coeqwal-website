@@ -25,7 +25,7 @@ export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
   return (
-     <div style={{ backgroundColor: theme.palette.brand.water }}>
+     <div style={{ backgroundColor: theme.palette.brand.sky }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -33,7 +33,7 @@ export function AboutCoeqwalPanel() {
       >
         <CoeqwalPanel
           id="about-coeqwal"
-          background={theme.palette.brand.water}
+          background={theme.palette.brand.sky}
           textColor={theme.palette.text.secondary}
           minHeight="100vh"
           borderRadius={0}
