@@ -1,14 +1,22 @@
 "use client"
 
+import { ImageCaption, Paragraph, StorylineOpener } from "@repo/ui"
 import { Box, Typography } from "@repo/ui/mui"
 import { VerticalImageSlider } from "./helpers/ImageSlider"
-import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
-import { useEffect, useRef, useState } from "react"
+import { motion } from "@repo/motion"
+import { useEffect, useState } from "react"
 import ScrollIndicator from "./helpers/ScrollIndicator"
 import SVGLineContainer from "./helpers/SVGLineContainer"
-import theme from "@repo/ui/themes/theme"
 
-//TODO: see if I can fix this SVG Line issue
+const openerBody = [
+  {
+    text: "Whether you're a farmer worried about drought, a resident concerned about the water security of your community, or someone who cares about California's wildlife, the impacts of climate change on California's water are important to understand.",
+  },
+]
+
+//TODO: decide on maxWidth should be 70ch or what
+//TODO: make sure the line matches the images across the devices
+//TODO: style ImageCaption style
 function Opener() {
   const [hideHint, setHideHint] = useState(false)
   const [knobReady, setKnobReady] = useState(false)
@@ -24,9 +32,22 @@ function Opener() {
     <Box
       height="100vh"
       className="container-center"
-      sx={{ justifyContent: "center", position: "relative" }}
+      sx={{ position: "relative" }}
     >
-      <SourceAnnouncer />
+      <ImageCaption
+        hideOnScroll
+        placement="top-left"
+        offset={30}
+        hiddenTop="45px"
+        visibleTop="74.5px"
+        lines={[
+          "Enterprise Bridge at Oroville Dam",
+          "Wet year \u2014 2023 (top)",
+          "Dry year \u2014 2021 (bottom)",
+          "Photo by Justin Sullivan",
+        ]}
+        sx={{ backgroundColor: "rgba(33, 33, 33, 0.58)" }}
+      />
       <VerticalImageSlider
         topSrc="/images/oroville_2023_aligned.png"
         bottomSrc="/images/oroville_2021_aligned.png"
@@ -68,93 +89,27 @@ function Opener() {
           </Typography>
         </Box>
       )}
-      {/* Title */}
-      <Box
-        className="paragraph text-center-holder"
-        component="header"
-        role="banner"
+      <StorylineOpener
+        title="How climate change affects California's water"
+        subtitle="Adapting to a hotter, more uncertain climate future"
+        alignment="center"
+        textShadow
+        scrollIndicator={<ScrollIndicator animationComplete={true} />}
         sx={{
           top: "50%",
-          zIndex: 2,
-          pointerEvents: "none",
-          textShadow: theme.textShadow.display,
         }}
       >
-        <Typography
-          variant="h1"
-          sx={{ textShadow: "0 2px 18px rgba(0, 0, 0, 1)" }}
-        >
-          {"How Climate Change Affects California's Water"}
-        </Typography>
-        <Typography
-          variant="h3"
-          gutterBottom
-          sx={{ textShadow: "0 5px 14px rgba(0, 0, 0, 1)" }}
-        >
-          {"Adapting to a Hotter, More Uncertain Climate Future"}
-        </Typography>
-        <Typography
+        <Paragraph
           variant="body1"
+          blocks={openerBody}
+          alignment="center"
           sx={{
             maxWidth: "70%",
-            margin: "0 auto",
             textShadow: "0 1px 10px rgba(0, 0, 0, 1)",
           }}
-        >
-          {
-            "Whether you’re a farmer worried about drought, a homeowner concerned about your water bill, or someone who cares about California’s wildlife, the impacts of climate change on California’s water are important to understand."
-          }
-        </Typography>
-        <ScrollIndicator animationComplete={true} />
-      </Box>
+        />
+      </StorylineOpener>
     </Box>
-  )
-}
-
-function SourceAnnouncer() {
-  const { scrollY } = useScroll()
-  const lastYRef = useRef(0)
-  const [isHidden, setIsHidden] = useState(false)
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const difference = latest - lastYRef.current
-    if (Math.abs(difference) > 10) {
-      setIsHidden(difference > 0)
-    }
-    lastYRef.current = latest
-  })
-
-  return (
-    <motion.div
-      animate={isHidden ? "hidden" : "visible"}
-      variants={{
-        hidden: {
-          top: "45px",
-        },
-        visible: {
-          top: "74.5px",
-        },
-      }}
-      transition={{ duration: 0.3 }}
-      className="panel"
-      style={{
-        position: "absolute",
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-        color: "common.white",
-        backgroundColor: "overlay.waterDark",
-        zIndex: 3,
-        pointerEvents: "none",
-      }}
-    >
-      <Box>
-        <p>Enterprise Bridge at Oroville Dam</p>
-        <p>{"Wet year \u2014 2023 (top)"}</p>
-        <p>{"Dry year \u2014 2021 (bottom)"}</p>
-        <p>Photo by Justin Sullivan</p>
-      </Box>
-    </motion.div>
   )
 }
 

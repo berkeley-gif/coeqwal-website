@@ -88,7 +88,7 @@ const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
 const MOBILE_DRAWER_ID = "mobile-nav-drawer"
 // Active water story - determined by current URL hostname
-type ActiveWaterStory = "flow" | "climate" | null
+type ActiveWaterStory = "flow" | "climate" | "managed" | "equity" | null
 
 // Translation types
 type HeaderTranslations = {
@@ -242,6 +242,8 @@ const translations: TranslationsMap = {
 const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
+  managed: "https://management.coeqwal.org",
+  equity: "https://equity.coeqwal.org",
 }
 
 export function BaseHeader({
@@ -350,6 +352,10 @@ export function BaseHeader({
       setActiveWaterStory("flow")
     } else if (hostname.includes("climate.coeqwal")) {
       setActiveWaterStory("climate")
+    } else if (hostname.includes("management.coeqwal")) {
+      setActiveWaterStory("managed")
+    } else if (hostname.includes("equity.coeqwal")) {
+      setActiveWaterStory("equity")
     }
     // Note: On localhost, no water story is active (dev environment)
   }, [])
@@ -598,14 +604,14 @@ export function BaseHeader({
                     {
                       key: "managed",
                       label: t.waterStories.managed,
-                      onClick: () => { },
-                      disabled: true,
+                      onClick: () => (window.location.href = URLS.managed),
+                      active: activeWaterStory === "managed",
                     },
                     {
                       key: "equity",
                       label: t.waterStories.equity,
-                      onClick: () => { },
-                      disabled: true,
+                      onClick: () => (window.location.href = URLS.equity),
+                      active: activeWaterStory === "equity",
                     },
                   ]}
                   variant="text"
@@ -894,18 +900,38 @@ export function BaseHeader({
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
-                    disabled
+                    onClick={() => {
+                      window.location.href = URLS.managed
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "managed"}
+                    aria-current={
+                      activeWaterStory === "managed" ? "page" : undefined
+                    }
                     sx={{
                       pl: 4,
                       pr: 2,
                       minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
                     }}
                   >
+                    {activeWaterStory === "managed" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
                     <ListItemText
                       primary={t.waterStories.managed}
                       slotProps={{
                         primary: {
-                          sx: { ...theme.typography.caption },
+                          sx: {
+                            ...theme.typography.caption,
+                            fontWeight:
+                              activeWaterStory === "managed"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
                         },
                       }}
                     />
@@ -913,18 +939,38 @@ export function BaseHeader({
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
-                    disabled
+                    onClick={() => {
+                      window.location.href = URLS.equity
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "equity"}
+                    aria-current={
+                      activeWaterStory === "equity" ? "page" : undefined
+                    }
                     sx={{
                       pl: 4,
                       pr: 2,
                       minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
                     }}
                   >
+                    {activeWaterStory === "equity" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
                     <ListItemText
                       primary={t.waterStories.equity}
                       slotProps={{
                         primary: {
-                          sx: { ...theme.typography.caption },
+                          sx: {
+                            ...theme.typography.caption,
+                            fontWeight:
+                              activeWaterStory === "equity"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
                         },
                       }}
                     />

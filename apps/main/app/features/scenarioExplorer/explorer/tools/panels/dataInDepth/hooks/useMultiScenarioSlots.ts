@@ -39,7 +39,7 @@
 const MAX_FETCH_SLOTS = 6
 
 export function useMultiScenarioSlots<T>(
-  scenarios: string[],
+  scenarios: (string | null)[],
   fetchHook: (scenarioId: string | null) => T,
 ): T[] {
   if (

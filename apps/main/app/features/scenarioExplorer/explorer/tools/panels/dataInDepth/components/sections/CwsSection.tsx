@@ -10,7 +10,7 @@
  * Uses the same CSS Grid layout patterns as ReservoirStorageSection.
  */
 
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { CompactSelect } from "@repo/ui"
 import { TierGlyphWithTooltip } from "../../../../../../../tooltips/TierGlyphWithTooltip"
@@ -368,14 +368,6 @@ function MonthlyCwsSection({
     demandUnitsList,
   )
 
-  // Track when data first arrives to ensure skeleton shows on initial mount
-  const [hasReceivedData, setHasReceivedData] = useState(false)
-  useEffect(() => {
-    if (aggregates.length > 0) {
-      setHasReceivedData(true)
-    }
-  }, [aggregates.length])
-
   // Convert to PercentileMatrix format
   // Note: We don't pass summary stats in reservoirData because they vary by scenario.
   // Instead, we pass cellStats separately for per-cell rendering below each chart.
@@ -514,8 +506,10 @@ function MonthlyCwsSection({
           </DataAvailabilityNotice>
         )}
 
-      {/* Loading state with skeleton - show until we've received data */}
-      {!hasReceivedData && !error && (
+      {/* Loading state with skeleton. Gated directly on data presence (no
+          latch), so the skeleton reappears whenever data is absent, including
+          while a new hydroclimate is being fetched, instead of collapsing. */}
+      {aggregates.length === 0 && !error && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrixSkeleton
             scenarios={scenarios}
@@ -546,8 +540,8 @@ function MonthlyCwsSection({
         </Box>
       )}
 
-      {/* Matrix visualization - show once we've received data */}
-      {hasReceivedData && aggregates.length > 0 && (
+      {/* Matrix visualization - show once data is present */}
+      {aggregates.length > 0 && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrix
             reservoirs={reservoirData}

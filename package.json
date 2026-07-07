@@ -12,6 +12,7 @@
     "dead-code": "knip",
     "format": "prettier . --write --ignore-unknown --cache",
     "format:check": "prettier . --check --ignore-unknown --cache",
+    "verify:static-export": "node .github/scripts/verify-static-export.mjs apps/main/out",
     "serve": "pnpm --filter main build && pnpm dlx serve apps/main/out/",
     "clean:turbo": "rm -rf .turbo/cache",
     "clean:next": "rm -rf apps/*/.next/cache",

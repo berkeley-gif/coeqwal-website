@@ -43,11 +43,15 @@ const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
 type Props = {
   scrollProgress: MotionValue<number>
   debug?: boolean
+  groundwaterGuideValue?: number
+  onGroundwaterGuidePointChange?: (point: { x: number; y: number }) => void
 }
 
 export default function GroundwaterLine({
   scrollProgress,
   debug = false,
+  groundwaterGuideValue,
+  onGroundwaterGuidePointChange,
 }: Props) {
   const revealClipId = useId().replace(/:/g, "")
   const [data, setData] = useState<GroundwaterRow[]>([])
@@ -183,6 +187,28 @@ export default function GroundwaterLine({
 
   const plotWidth = Math.max(0, size.width - margin.left - margin.right)
   const plotHeight = Math.max(0, size.height - margin.top - margin.bottom)
+
+  useEffect(() => {
+    if (
+      groundwaterGuideValue == null ||
+      size.width <= 0 ||
+      size.height <= 0 ||
+      !Number.isFinite(groundwaterGuideValue)
+    ) {
+      return
+    }
+
+    onGroundwaterGuidePointChange?.({
+      x: size.width - margin.right,
+      y: yScale(groundwaterGuideValue),
+    })
+  }, [
+    groundwaterGuideValue,
+    onGroundwaterGuidePointChange,
+    size.height,
+    size.width,
+    yScale,
+  ])
   const chartRevealProgress = usePlayAnimationOnce(
     scrollProgress,
     [0.5, 0.7],

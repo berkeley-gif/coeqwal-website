@@ -1,49 +1,119 @@
 "use client"
 
-import { Box, LibraryBooksIcon, Typography, useTheme } from "@repo/ui/mui"
-import { useRef } from "react"
-import StickyContainer from "./helpers/StickyContainer"
+import { ImageCaption, Paragraph, SectionTitle } from "@repo/ui"
+import { Box, LibraryBooksIcon, Stack, useTheme } from "@repo/ui/mui"
+import type { SxProps, Theme } from "@repo/ui/mui"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import SVGLineContainer from "./helpers/SVGLineContainer"
-import { motion, useScroll, useTransform } from "@repo/motion"
+import { motion } from "@repo/motion"
+import {
+  StickyScrollSection,
+  useScrollProgress,
+  useScrollValue,
+} from "@repo/scrollytelling"
+
+const deltaSeaLevelIntro = [
+  {
+    text: "You may be aware that climate change melts polar ice, raising sea levels worldwide.",
+  },
+  { text: "But do you know how this will affect California?" },
+]
+
+const deltaLocation = [
+  {
+    segments: [
+      {
+        text: "One of the most vulnerable places to rising sea levels is the Delta, where two of the state's largest rivers \u2014 ",
+      },
+      { text: "the Sacramento and San Joaquin", mark: "freshWater" },
+      { text: " \u2014 meet the San Francisco Bay." },
+    ],
+  },
+]
+
+const deltaUses = [
+  { text: "This area is home to many small communities and farms." },
+  {
+    text: "It is also where huge pumps move freshwater south of the Delta to supply large farms in the San Joaquin Valley and cities in Southern California.",
+  },
+]
+
+const deltaSalinity = [
+  {
+    text: "As sea levels rise, salty ocean water can extend further into the Delta, limiting freshwater supplies for in-Delta uses and water exports.",
+  },
+]
+
+const deltaAdaptation = [
+  {
+    text: "People are exploring ways to manage salinity in the Delta under future droughts and sea level rise.",
+  },
+  <>
+    For example,{" "}
+    <strong>
+      <a
+        href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: "inherit", textDecoration: "underline" }}
+      >
+        Just Transitions in the Delta
+      </a>
+    </strong>{" "}
+    <LibraryBooksIcon sx={{ verticalAlign: "middle" }} /> is a research project
+    that examines a wide range of adaptation strategies for addressing salinity
+    intrusion in the Delta.
+  </>,
+]
+
+const deltaTextOverlaySx = {
+  width: "fit-content",
+  maxWidth: { xs: "calc(100% - 2rem)", md: "70rem", xl: "86rem" },
+  px: { xs: 2.25, md: 3, xl: 3.5 },
+  py: { xs: 2.25, md: 2.75, xl: 3.25 },
+  borderRadius: "8px",
+  border: "1px solid rgba(252, 251, 250, 0.16)",
+  backgroundColor: "rgba(25, 61, 107, 0.58)",
+  boxShadow: "0 18px 56px rgba(0, 0, 0, 0.18)",
+  backdropFilter: "blur(3px)",
+  color: "#FCFBFA",
+  textShadow: "none",
+} satisfies SxProps<Theme>
 
 export default function DeltaFarms() {
-  const sectionRef = useRef(null)
-  const theme = useTheme()
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const linePathLength = useTransform(scrollYProgress, [0.6, 0.9], [0, 1])
-  const lineOpacity = useTransform(scrollYProgress, [0.55, 0.7], [0, 1])
-  const titleOpacity = useTransform(scrollYProgress, [0.18, 0.32], [0, 1])
-  const paragraphOneOpacity = useTransform(
-    scrollYProgress,
-    [0.28, 0.42],
-    [0, 1],
+  return (
+    <StickyScrollSection
+      id="deltaFarms"
+      ariaLabel="Rising seas, rising risks"
+      height="200vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <DeltaFarmsContent />
+    </StickyScrollSection>
   )
-  const paragraphTwoOpacity = useTransform(
-    scrollYProgress,
-    [0.38, 0.54],
-    [0, 1],
-  )
-  const paragraphThreeOpacity = useTransform(
-    scrollYProgress,
-    [0.48, 0.64],
-    [0, 1],
-  )
+}
+
+function DeltaFarmsContent() {
+  const progress = useScrollProgress()
+  const linePathLength = useScrollValue(progress, [0.6, 0.9], [0, 1])
+  const lineOpacity = useScrollValue(progress, [0.55, 0.7], [0, 1])
+  const panelOpacity = useScrollValue(progress, [0.14, 0.28], [0, 1])
+  const titleOpacity = useScrollValue(progress, [0.18, 0.32], [0, 1])
+  const paragraphOneOpacity = useScrollValue(progress, [0.28, 0.42], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.38, 0.54], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.48, 0.64], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="deltaFarms"
-      stickyRollHeight="100vh"
-      sectionRef={sectionRef}
-    >
-      <DeltaSourceAnnouncer
+    <>
+      <ImageCaption
+        placement="bottom-left"
+        offset={30}
         lines={[
           "Aerial view of farmland and waterways in Sacramento-San Joaquin Delta, California",
           "Source: DWR Gallery, photo by Paul Hames",
         ]}
+        sx={{ bottom: "5rem", backgroundColor: "rgba(33, 33, 33, 0.58)" }}
       />
       <Box
         width="100%"
@@ -72,7 +142,7 @@ export default function DeltaFarms() {
 
       <Box
         className="text-section"
-        width="65%"
+        width="100%"
         height="100%"
         sx={{
           position: "relative",
@@ -82,86 +152,73 @@ export default function DeltaFarms() {
           flexDirection: "column",
           justifyContent: "flex-start",
           paddingTop: "5rem",
-          textShadow: theme.textShadow.displayBody,
         }}
       >
-        <motion.div style={{ opacity: titleOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="h3">{"Rising seas, rising risks"}</Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "You may be aware that climate change melts polar ice, raising sea levels worldwide."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {"But do you know how this will affect California? "}
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              One of the most vulnerable places to rising sea levels is the
-              Delta, where two of the state&apos;s largest rivers {"\u2014"}{" "}
-              <span style={{ fontWeight: "bold", color: FreshWaterColor }}>
-                the Sacramento and San Joaquin
-              </span>{" "}
-              {"\u2014"} meet the San Francisco Bay.{" "}
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphThreeOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"This area is home to many small communities and farms."}
-            </Typography>
-            <Typography variant="body1">
-              {
-                "It is also where huge pumps move freshwater south to the Delta to supply large farms in the San Joaquin Valley and cities in Southern California."
-              }
-            </Typography>
+        <motion.div style={{ opacity: panelOpacity }}>
+          <Box
+            className="paragraph"
+            component="article"
+            sx={deltaTextOverlaySx}
+          >
+            <Stack direction="column" spacing={{ xs: 2, md: 2.25 }}>
+              <motion.div style={{ opacity: titleOpacity }}>
+                <SectionTitle text="Rising seas, rising risks" />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphOneOpacity }}>
+                <Paragraph blocks={deltaSeaLevelIntro} />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphTwoOpacity }}>
+                <Paragraph
+                  blocks={deltaLocation}
+                  markSx={{
+                    freshWater: { fontWeight: "bold", color: FreshWaterColor },
+                  }}
+                />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphThreeOpacity }}>
+                <Paragraph blocks={deltaUses} />
+              </motion.div>
+            </Stack>
           </Box>
         </motion.div>
       </Box>
-    </StickyContainer>
+    </>
   )
 }
 
 export function DeltaAqueduct() {
-  const sectionRef = useRef(null)
+  return (
+    <StickyScrollSection
+      id="deltaAqueduct"
+      ariaLabel="Delta salinity and adaptation"
+      height="200vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <DeltaAqueductContent />
+    </StickyScrollSection>
+  )
+}
+
+function DeltaAqueductContent() {
   const theme = useTheme()
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const linePathLength = useTransform(scrollYProgress, [0.6, 0.9], [0, 1])
-  const lineOpacity = useTransform(scrollYProgress, [0.55, 0.7], [0, 1])
-  const paragraphOneOpacity = useTransform(
-    scrollYProgress,
-    [0.24, 0.42],
-    [0, 1],
-  )
-  const paragraphTwoOpacity = useTransform(
-    scrollYProgress,
-    [0.38, 0.56],
-    [0, 1],
-  )
+  const progress = useScrollProgress()
+  const linePathLength = useScrollValue(progress, [0.6, 0.9], [0, 1])
+  const lineOpacity = useScrollValue(progress, [0.55, 0.7], [0, 1])
+  const panelOpacity = useScrollValue(progress, [0.2, 0.36], [0, 1])
+  const paragraphOneOpacity = useScrollValue(progress, [0.24, 0.42], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.38, 0.56], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="deltaAqueduct"
-      stickyRollHeight="100vh"
-      sectionRef={sectionRef}
-    >
-      <DeltaSourceAnnouncer
+    <>
+      <ImageCaption
+        placement="bottom-left"
+        offset={30}
         lines={[
           "California Aqueduct near Crows Landing, Stanislaus County, California",
           "Source: DWR Gallery, photo by Nick Shockey",
         ]}
+        sx={{ bottom: "5rem", backgroundColor: "rgba(33, 33, 33, 0.58)" }}
       />
       <Box
         width="100%"
@@ -199,85 +256,35 @@ export function DeltaAqueduct() {
           flexDirection: "column",
           justifyContent: "flex-start",
           paddingTop: "5rem",
-          color: "text.primary",
         }}
       >
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "As sea levels rise, salty ocean water can extend further into the Delta."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Increasing salinity threatens local communities and farms that rely on fresh water flowing through the Delta."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "It also puts water exports to San Joaquin Valley and Southern California at risk."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "People are looking for ways to manage salinity in the Delta, which is becoming more difficult as the climate changes."
-              }
-            </Typography>
-            <Typography variant="body1">
-              For example,{" "}
-              <strong>
-                <a
-                  href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "inherit", textDecoration: "underline" }}
-                >
-                  Just Transitions in the Delta
-                </a>
-              </strong>{" "}
-              <LibraryBooksIcon
-                sx={{
-                  fontSize: theme.typography.body1.fontSize,
-                  verticalAlign: "middle",
-                }}
-              />{" "}
-              {
-                " is a research project exploring a wide range of adaptation strategies to address salinity intrusion in the Delta"
-              }
-            </Typography>
+        <motion.div style={{ opacity: panelOpacity }}>
+          <Box
+            className="paragraph"
+            component="article"
+            sx={{
+              ...deltaTextOverlaySx,
+              maxWidth: { xs: "calc(100% - 2rem)", md: "54rem", xl: "62rem" },
+            }}
+          >
+            <Stack direction="column" spacing={{ xs: 2, md: 2.25 }}>
+              <motion.div style={{ opacity: paragraphOneOpacity }}>
+                <Paragraph blocks={deltaSalinity} />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphTwoOpacity }}>
+                <Paragraph
+                  blocks={deltaAdaptation}
+                  sx={{
+                    "& .MuiSvgIcon-root": {
+                      fontSize: theme.typography.body1.fontSize,
+                    },
+                  }}
+                />
+              </motion.div>
+            </Stack>
           </Box>
         </motion.div>
       </Box>
-    </StickyContainer>
-  )
-}
-
-function DeltaSourceAnnouncer({ lines }: { lines: string[] }) {
-  return (
-    <motion.div
-      className="panel"
-      style={{
-        position: "absolute",
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-        color: "common.white",
-        backgroundColor: "overlay.waterDark",
-        zIndex: 3,
-        pointerEvents: "none",
-        bottom: "5rem",
-      }}
-    >
-      <Box>
-        {lines.map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-      </Box>
-    </motion.div>
+    </>
   )
 }
