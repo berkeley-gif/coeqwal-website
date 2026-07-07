@@ -724,8 +724,6 @@ export default function TierAnimationSection() {
       return locData.ids.has(lid) ? lid : null
     }
 
-
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onMouseMove = (e: any) => {
       if (!layerId || !map.getLayer(layerId)) return
@@ -959,7 +957,7 @@ export default function TierAnimationSection() {
     // ref, so its identity doesn't matter. Explicit deps memoize the context
     // on identity-stable inputs only. The engine reads via a ref, so this dep
     // set does not drive re-subscription.
-    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup],
+    [mapAPI.mapRef, outcomeLocations, engineCentroidLookup, isActive],
   )
   engineContextRef.current = engineContext
 
@@ -1224,10 +1222,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                      setSpotlightedTier((prev) =>
-                        prev === tier ? null : tier,
-                      )
-                    }
+                        setSpotlightedTier((prev) =>
+                          prev === tier ? null : tier,
+                        )
+                      }
                     : undefined
                 }
               />

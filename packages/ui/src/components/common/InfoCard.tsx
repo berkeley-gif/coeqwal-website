@@ -59,17 +59,17 @@ export function InfoCard({
 
   const defaults = isDark
     ? {
-      bg: "rgba(255,255,255,0.08)",
-      border: "1px solid rgba(255,255,255,0.12)",
-      hoverBg: "rgba(255,255,255,0.14)",
-      color: "text.secondary",
-    }
+        bg: "rgba(255,255,255,0.08)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        hoverBg: "rgba(255,255,255,0.14)",
+        color: "text.secondary",
+      }
     : {
-      bg: "rgba(210,228,242,0.8)",
-      border: "1px solid rgba(210,228,242,0.85)",
-      hoverBg: "rgba(210,228,242,0.9)",
-      color: "text.primary",
-    }
+        bg: "rgba(210,228,242,0.8)",
+        border: "1px solid rgba(210,228,242,0.85)",
+        hoverBg: "rgba(210,228,242,0.9)",
+        color: "text.primary",
+      }
 
   const bg = bgProp ?? defaults.bg
   const border = borderProp ?? defaults.border
@@ -98,11 +98,11 @@ export function InfoCard({
         ...(dimmed && { opacity: 0.45 }),
         ...(interactive &&
           !dimmed && {
-          "&:hover": {
-            background: hoverBg,
-            ...(isDark && { borderColor: "rgba(255,255,255,0.25)" }),
-          },
-        }),
+            "&:hover": {
+              background: hoverBg,
+              ...(isDark && { borderColor: "rgba(255,255,255,0.25)" }),
+            },
+          }),
         ...((sx as object) ?? {}),
       }}
     >

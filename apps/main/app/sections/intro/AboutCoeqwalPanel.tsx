@@ -25,7 +25,7 @@ export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
   return (
-     <div style={{ backgroundColor: theme.palette.brand.sky }}>
+    <div style={{ backgroundColor: theme.palette.brand.sky }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -57,14 +57,16 @@ export function AboutCoeqwalPanel() {
           }
           description={
             <>
-              COEQWAL – the Collaboratory for Equity in Water Allocation – 
-              is a publicly-funded project that works with communities to better 
-              understand how water decisions affect us now and for generations to come
+              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+              publicly-funded project that works with communities to better
+              understand how water decisions affect us now and for generations
+              to come
               <br />
               <br />
-              Using a water planning model for California’s Central Valley, 
-              COEQWAL helps you learn how water is currently managed,
-               explore alternative pathways, and share your vision for California’s water future.
+              Using a water planning model for California’s Central Valley,
+              COEQWAL helps you learn how water is currently managed, explore
+              alternative pathways, and share your vision for California’s water
+              future.
             </>
           }
           cta={

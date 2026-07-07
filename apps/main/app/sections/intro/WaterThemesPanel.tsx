@@ -8,12 +8,9 @@ import React from "react"
 import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import {
   InfoCard,
-  InfoCardGrid,
   CircularArrowButton,
-  ScrollToButton,
   resolveRadius,
   resolveInset,
-  resolveCssLengthPx,
   type RadiusValue,
   type PanelInset,
 } from "@repo/ui"
@@ -30,11 +27,6 @@ import { TabKey } from "../../types/tabs"
 /* IMAGE & TAB CARDS                                                       */
 /*───────────────── */
 
-/** Delta Aerials image is width:100%/height:auto, bottom-anchored, so
- *  its displayed height (and thus its top edge) scales with viewport
- *  width at this fixed aspect ratio. */
-const IMG_ASPECT_RATIO = 1066 / 2784
-
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
 interface TabCard {
@@ -48,20 +40,17 @@ const TAB_CARDS: TabCard[] = [
   {
     tab: "learn",
     title: "Learn",
-    description:
-      "how water in California’s Central Valley is managed",
+    description: "how water in California’s Central Valley is managed",
   },
   {
     tab: "explore",
     title: "Explore",
-    description:
-      "how water outcomes shift under different scenarios, and",
+    description: "how water outcomes shift under different scenarios, and",
   },
   {
     tab: "share",
     title: "Share",
-    description:
-      "your insights about California’s water future",
+    description: "your insights about California’s water future",
   },
 ]
 
@@ -188,12 +177,11 @@ function WaterThemesPanelContent({
             >
               Water is limited and every choice has trade-offs. COEQWAL allows
               you to explore different water scenarios and understand how
-              decisions shape potential futures for communities, farms,
-              rivers, and the Delta.
+              decisions shape potential futures for communities, farms, rivers,
+              and the Delta.
             </Typography>
           </Box>
         </motion.div>
-
 
         {/* Three squares, one per tab - anchored to the image's top
             edge instead of floating wherever vertical centering left
@@ -225,17 +213,12 @@ function WaterThemesPanelContent({
                   sx={{ flex: 1, height: "200px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
-                  <CircularArrowButton
-                    decorative
-                    size={40}
-                    rotation="-90deg"
-                  />
+                  <CircularArrowButton decorative size={40} rotation="-90deg" />
                 )}
               </React.Fragment>
             )
           })}
         </Box>
-
       </Box>
     </Box>
   )
@@ -316,4 +299,3 @@ export function WaterThemesPanel({
     </div>
   )
 }
-

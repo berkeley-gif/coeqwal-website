@@ -32,7 +32,7 @@ export function useExplorerMapLayout(): ExplorerMapLayout {
         color: textPrimary,
         pointerEvents: showMap ? "none" : "auto",
         height: "100%",
-        overflow: "hidden"
+        overflow: "hidden",
       },
       contentMiddleSx: {
         display: "flex",
@@ -48,10 +48,6 @@ export function useExplorerMapLayout(): ExplorerMapLayout {
         ...(!showMap && { pointerEvents: "auto" }),
       },
     }),
-    [
-      showMap,
-      exploreBackground,
-      textPrimary,
-    ],
+    [showMap, exploreBackground, textPrimary],
   )
 }

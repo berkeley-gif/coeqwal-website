@@ -31,7 +31,8 @@ export function Header() {
   // On any route other than "/", there's no hero to scroll past.
   // Default to the "past hero" appearance (solid nav) immediately.
   const isHomePage = pathname === "/"
-  const isTabsPage = (pathname === "/learn") || (pathname === "/explore") || (pathname === "/share")
+  const isTabsPage =
+    pathname === "/learn" || pathname === "/explore" || pathname === "/share"
 
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real

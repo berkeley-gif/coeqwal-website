@@ -38,10 +38,7 @@ import {
   HEAT_SIDE_PAD,
   HEAT_BLOCK_SHIFT_X,
 } from "./storyboardGeometry"
-import {
-  ENV_FLOWS_NAMES,
-  STATION_NAMES,
-} from "../config/outcomeLocations"
+import { ENV_FLOWS_NAMES, STATION_NAMES } from "../config/outcomeLocations"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../config/outcomeLayerRegistry"
 import {
   isSingleValueTier,

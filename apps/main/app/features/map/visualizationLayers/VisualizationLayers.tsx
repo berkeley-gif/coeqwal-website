@@ -48,7 +48,7 @@ import {
   getOnLocationToggle,
   getOnLocationClick,
   getOnLocationHover,
-  useActiveSubSection
+  useActiveSubSection,
 } from "../store"
 import { MAP_THEME_URLS } from "@repo/map"
 
@@ -102,8 +102,6 @@ export default function VisualizationLayers({
     locationData,
     featureIds,
   } = useOutcomeVisualization()
-
-
 
   // Clear all pinned tooltips when signal changes (triggered by glyph clicks)
   const clearTooltipsSignal = useClearTooltipsSignal()
@@ -305,27 +303,27 @@ export default function VisualizationLayers({
                 onHover={
                   isStoryBoardActive
                     ? (feature) => {
-                      if (!feature) {
-                        getOnLocationHover()?.(null)
-                      } else {
-                        getOnLocationHover()?.({
-                          code: outcomeCode!,
-                          sourceId: feature.featureId,
-                          tier: feature.tierLevel,
-                        })
+                        if (!feature) {
+                          getOnLocationHover()?.(null)
+                        } else {
+                          getOnLocationHover()?.({
+                            code: outcomeCode!,
+                            sourceId: feature.featureId,
+                            tier: feature.tierLevel,
+                          })
+                        }
                       }
-                    }
                     : handlePointHover
                 }
                 onClick={
                   isStoryBoardActive
                     ? (feature) => {
-                      getOnLocationClick()?.({
-                        code: outcomeCode!,
-                        sourceId: feature.featureId,
-                        tier: feature.tierLevel,
-                      })
-                    }
+                        getOnLocationClick()?.({
+                          code: outcomeCode!,
+                          sourceId: feature.featureId,
+                          tier: feature.tierLevel,
+                        })
+                      }
                     : handlePointClick
                 }
                 highlightedIds={highlightedLocationIds}
@@ -341,27 +339,27 @@ export default function VisualizationLayers({
                 onHover={
                   isStoryBoardActive
                     ? (info) => {
-                      if (!info) {
-                        getOnLocationHover()?.(null)
-                      } else {
-                        getOnLocationHover()?.({
-                          code: outcomeCode!,
-                          sourceId: info.id,
-                          tier: info.tier,
-                        })
+                        if (!info) {
+                          getOnLocationHover()?.(null)
+                        } else {
+                          getOnLocationHover()?.({
+                            code: outcomeCode!,
+                            sourceId: info.id,
+                            tier: info.tier,
+                          })
+                        }
                       }
-                    }
                     : undefined
                 }
                 onClick={
                   isStoryBoardActive
                     ? (info) => {
-                      getOnLocationClick()?.({
-                        code: outcomeCode!,
-                        sourceId: info.id,
-                        tier: info.tier,
-                      })
-                    }
+                        getOnLocationClick()?.({
+                          code: outcomeCode!,
+                          sourceId: info.id,
+                          tier: info.tier,
+                        })
+                      }
                     : undefined
                 }
               />
@@ -396,7 +394,7 @@ export default function VisualizationLayers({
               key="hover"
               feature={hoveredFeature}
               isPinned={false}
-              onClose={() => { }}
+              onClose={() => {}}
             />
           )}
 

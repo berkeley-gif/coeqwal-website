@@ -104,9 +104,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
   // Whether visualization should be active
   const isActive =
-    !!outcome &&
-    !!config &&
-    (mapMode === "learn" || mapMode === "explore")
+    !!outcome && !!config && (mapMode === "learn" || mapMode === "explore")
 
   // Fetch tier data (using outcomeCode)
   const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)

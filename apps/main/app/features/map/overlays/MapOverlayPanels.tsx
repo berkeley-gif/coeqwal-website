@@ -17,14 +17,23 @@
  */
 
 import { useTheme } from "@repo/ui/mui"
-import { Box, Typography, InfoIcon } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
 import { themeValues } from "@repo/ui/themes/theme"
 import { PanelEyebrow } from "./PanelEyebrow"
 import type { SubSectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
-import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel, DataInDepthPanel, InterpretingOutcomesPanel, ChooseScenariosPanel, BeforeYouBeginPanel } from "./learnPanels"
+import {
+  WelcomePanel,
+  WaterIssuesPanel,
+  HydroclimateFuturesPanel,
+  KeyOutcomesPanel,
+  DataInDepthPanel,
+  InterpretingOutcomesPanel,
+  ChooseScenariosPanel,
+  BeforeYouBeginPanel,
+} from "./learnPanels"
 import TierAnimationSection from "../animation/TierAnimationSection"
 interface MapOverlayPanelsProps {
   navWidth: number
@@ -34,9 +43,7 @@ interface MapOverlayPanelsProps {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function MapOverlayPanels({
-  navWidth
-}: MapOverlayPanelsProps) {
+export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
   const theme = useTheme()
   const defaultLeftPadding = `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`
   const defPaddingTransition = "padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
@@ -67,7 +74,7 @@ export default function MapOverlayPanels({
         offset={SCROLLAMA_CONFIG.offset}
         debug={SCROLLAMA_CONFIG.debug}
       >
-        { /* ==================== Intro =========================== */}
+        {/* ==================== Intro =========================== */}
         <Step data={"intro" as SubSectionId}>
           <Box
             id="intro"
@@ -88,7 +95,10 @@ export default function MapOverlayPanels({
               isVisible
             >
               <Typography variant="body1">
-                Review this section to learn how you can explore the COEQWAL scenario library, evaluate the effects of different water management strategies on communities, farms, and the environment, and gather information to share with others.
+                Review this section to learn how you can explore the COEQWAL
+                scenario library, evaluate the effects of different water
+                management strategies on communities, farms, and the
+                environment, and gather information to share with others.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -336,7 +346,6 @@ export default function MapOverlayPanels({
           </Box>
         </Step>
 
-
         <Step data={"hydroclimates" as SubSectionId}>
           <Box
             id="hydroclimates"
@@ -401,7 +410,6 @@ export default function MapOverlayPanels({
           </Box>
         </Step>
 
-
         <Step data={"data-in-depth-intro" as SubSectionId}>
           <Box
             id="data-in-depth-intro"
@@ -452,7 +460,6 @@ export default function MapOverlayPanels({
             <ChooseScenariosPanel />
           </Box>
         </Step>
-
 
         <Step data={"before-exploring" as SubSectionId}>
           <Box

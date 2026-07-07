@@ -21,7 +21,10 @@ export default function AutoAdvanceFooter() {
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const learnNavSection = useLearnNavSection()
-  const nextLearnSection = nextLearnNavSection(LearnNavSections, learnNavSection)
+  const nextLearnSection = nextLearnNavSection(
+    LearnNavSections,
+    learnNavSection,
+  )
   const nextLearnSectionLabel = nextLearnSection
     ? LEARN_NAV_SECTION_LABELS[nextLearnSection]
     : null
@@ -41,7 +44,7 @@ export default function AutoAdvanceFooter() {
         color: theme.palette.common.white,
         pointerEvents: "auto",
         minHeight: "100px",
-        padding: `${theme.spacing(theme.space.section.lg)} 0`
+        padding: `${theme.spacing(theme.space.section.lg)} 0`,
       }}
     >
       <Box
@@ -59,15 +62,13 @@ export default function AutoAdvanceFooter() {
             Learn about {nextLearnSectionLabel}
           </ButtonCta>
         )}
-        {activeTab === "learn" && !nextLearnSection && (
+        {activeTab === "learn" && (
           <ButtonCta onClick={onAdvance}>
             Explore water allocation scenarios
           </ButtonCta>
         )}
         {activeTab === "explore" && (
-          <ButtonCta onClick={onAdvance}>
-            Share your findings
-          </ButtonCta>
+          <ButtonCta onClick={onAdvance}>Share your findings</ButtonCta>
         )}
       </Box>
     </div>

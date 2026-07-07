@@ -207,11 +207,7 @@ export default function MapInstance({
 
   /** Explore / hide base layers */
   useEffect(() => {
-    if (
-      (mapMode !== "explore") ||
-      !map.mapRef?.current
-    )
-      return
+    if (mapMode !== "explore" || !map.mapRef?.current) return
 
     const mapInstance = map.mapRef.current.getMap()
     MAPBOX_LAYER_IDS.forEach((layerId) => {
