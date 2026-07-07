@@ -4,160 +4,279 @@ import {
   Box,
   LibraryBooksIcon,
   Stack,
-  Typography,
   useTheme,
+  type Theme,
 } from "@repo/ui/mui"
-import { useEffect, useRef } from "react"
+import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { useRef } from "react"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import HydroClimateContainer from "./vis/HydroClimate"
-import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
+import {
+  StickyScrollSection,
+  useScrollProgress,
+  useScrollValue,
+} from "@repo/scrollytelling"
+
+const coeqwalIntro = [
+  {
+    text: "Using a water planning model called CalSim, COEQWAL helps us understand how the actions we take could affect California's communities, farms, and ecosystems under current and future climates.",
+  },
+]
+
+const hydroclimateDescription = [
+  {
+    segments: [
+      {
+        text: "COEQWAL explores the effects of climate change on California's water system by evaluating four alternative ",
+      },
+      { text: "hydroclimates", mark: "strong" },
+      {
+        text: " - specific changes in temperature, precipitation, and streamflow from historical climate conditions - that we may experience by the middle of the century.",
+      },
+    ],
+  },
+  {
+    segments: [
+      { text: "These hydroclimates represent " },
+      { text: "different levels of risk to our water system", mark: "yellow" },
+      {
+        text: ' that we should be prepared for. For example, a "moderate risk" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme risk" hydroclimate future is less likely, but possible.',
+      },
+    ],
+  },
+]
+
+const hydroclimateTransitionTitle = [
+  { text: "While we can't control the climate, we can " },
+  { text: "take actions", mark: "yellowStrong" },
+  { text: " to limit the impacts of climate change." },
+]
+
+const hydroclimateTransitionText = [
+  [
+    { text: "COEQWAL explores " },
+    { text: "different strategies for managing water.", mark: "strong" },
+  ],
+]
+
+const hydroclimateContentMaxWidth = {
+  xs: "100%",
+  md: "64rem",
+  lg: "78rem",
+  xl: "112rem",
+} as const
+
+const hydroclimateChartHeight = {
+  xs: "24rem",
+  md: "28rem",
+  lg: "31rem",
+  xl: "34rem",
+} as const
+
+const conclusionOpening = [
+  {
+    segments: [
+      {
+        text: "In the years ahead,\nCalifornia's climate will continue to change. ",
+      },
+      { text: "How we manage water must also change.", mark: "strong" },
+    ],
+  },
+]
+
+const conclusionScenarios = [
+  {
+    text: "By exploring different scenarios for California's water future, we can evaluate options and identify solutions that will allow us to thrive.",
+  },
+]
+
+const conclusionLink = [
+  <>
+    Are you curious about how these scenarios might affect you?
+    <br />
+    You can start{" "}
+    <strong>
+      <a
+        href="https://dev.coeqwal.org/?tab=explore"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: "inherit", textDecoration: "underline" }}
+      >
+        exploring scenarios
+      </a>
+    </strong>{" "}
+    <LibraryBooksIcon sx={{ verticalAlign: "middle" }} /> and consider how you
+    can chart a pathway to a water future that benefits all.
+  </>,
+]
+
+export function CoeqwalCallout() {
+  return (
+    <Box
+      id="coeqwal-callout"
+      className="container-center"
+      minHeight="75vh"
+      sx={{
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#172a48",
+        color: "common.white",
+        px: { xs: 3, md: 8 },
+      }}
+    >
+      <SVGLineContainer viewBox="0 0 1728 720" preserveAspectRatio="none">
+        <motion.path
+          className="svg-line glow-effect"
+          d="M-32 354C242 165 496 474 762 296C1028 118 1215 194 1395 292C1575 390 1746 327 1772 312"
+          pathLength={1}
+          style={{ opacity: 0.65 }}
+        />
+      </SVGLineContainer>
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{ position: "relative", zIndex: 1, textShadow: "0 2px 18px #000" }}
+      >
+        <SectionTitle
+          variant="h1"
+          text={[
+            { text: "This is where " },
+            { text: "COEQWAL", mark: "highlight" },
+            { text: " comes in." },
+          ]}
+        />
+      </Box>
+    </Box>
+  )
+}
 
 export function Hydroclimate() {
-  const sectionRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const titleOpacity = useTransform(scrollYProgress, [0.12, 0.28], [0, 1])
-  const paragraphOneOpacity = useTransform(
-    scrollYProgress,
-    [0.22, 0.38],
-    [0, 1],
+  return (
+    <StickyScrollSection
+      id="hydroclimate"
+      ariaLabel="COEQWAL planning hydroclimates"
+      height="200vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <HydroclimateContent />
+    </StickyScrollSection>
   )
-  const paragraphTwoOpacity = useTransform(scrollYProgress, [0.32, 0.5], [0, 1])
-  const chartHeadingOpacity = useTransform(scrollYProgress, [0.44, 0.6], [0, 1])
+}
+
+function HydroclimateContent() {
+  const progress = useScrollProgress()
+  const titleOpacity = useScrollValue(progress, [0.12, 0.28], [0, 1])
+  const paragraphOneOpacity = useScrollValue(progress, [0.22, 0.38], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.32, 0.5], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="hydroclimate"
-      stickyRollHeight="100vh"
-      sectionRef={sectionRef}
+    <Box
+      sx={{
+        position: "relative",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        py: { xs: "3rem", md: "3.5rem", lg: "4rem" },
+      }}
     >
       <Box
-        width="100%"
-        height="100vh"
+        className="text-section"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
+          position: "relative",
+          width: "100%",
+          boxSizing: "border-box",
+          pointerEvents: "auto",
         }}
       >
-        <Box
-          className="text-section"
-          width="100%"
+        <Stack
+          direction="column"
           sx={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            paddingTop: { xs: "2rem", md: "4rem" },
-            paddingBottom: { xs: 0, md: 0 },
-            pointerEvents: "auto",
+            width: "100%",
+            maxWidth: hydroclimateContentMaxWidth,
+            textAlign: "left",
+            gap: { xs: 1, md: 1, lg: 2 },
           }}
         >
           <motion.div style={{ opacity: titleOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography variant="h4">
-                {"COEQWAL: Planning for the future"}
-              </Typography>
+              <SectionTitle
+                variant="h4"
+                text="COEQWAL: Planning for the future"
+              />
             </Box>
           </motion.div>
-          <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <motion.div
+            style={{ opacity: paragraphOneOpacity, maxWidth: "73ch" }}
+          >
             <Box className="paragraph" component="article">
-              <Typography variant="body1" style={{ fontWeight: "bold" }}>
-                {"This is where COEQWAL comes in."}
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "Using a water planning model called CalSim, COEQWAL helps us understand how climate change might affect California's water system."
-                }
-              </Typography>
+              <Paragraph blocks={coeqwalIntro} />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphTwoOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {"COEQWAL studies the effects of different plausible future "}
-                <span style={{ fontWeight: "bold" }}>{"hydroclimates"}</span>
-                {
-                  " \u2014 specific changes in temperature, precipitation, and streamflow."
-                }
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "Some hydroclimates involve moderate changes that our water storage and delivery system can accommodate. "
-                }
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "But other hydroclimates represent much greater changes in climate, including significant reductions in streamflow."
-                }
-              </Typography>
+              <Paragraph
+                blocks={hydroclimateDescription}
+                markSx={{
+                  yellow: {
+                    color: "#ffb347",
+                    fontWeight: "inherit",
+                  },
+                }}
+              />
             </Box>
           </motion.div>
-        </Box>
+        </Stack>
 
-        <Box
-          className="text-section"
-          width="100%"
-          height="100%"
+        <Visualization
+          title="Streamflow Changes under Different Hydroclimates"
+          caption="Changes in total average streamflow by month for each hydroclimate based on the period 1922 - 2021."
           sx={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            pointerEvents: "auto",
+            width: "100%",
           }}
         >
-          <motion.div
-            style={{
-              opacity: chartHeadingOpacity,
-              marginBottom: "1rem",
-            }}
-          >
-            <Box component="article">
-              <Typography variant="h5">
-                {"Streamflow Changes under Different Hydroclimates"}
-              </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                {
-                  "Changes in total average streamflow by month for each hydroclimate based on the period 1922 \u2013 2021."
-                }
-              </Typography>
-            </Box>
-          </motion.div>
           <Box
-            className="container-center-horizontal"
-            width="100%"
-            height="100%"
+            sx={{
+              width: "100%",
+              height: hydroclimateChartHeight,
+              display: "flex",
+              justifyContent: "flex-start",
+            }}
           >
             <HydroClimateContainer />
           </Box>
-        </Box>
+        </Visualization>
       </Box>
-    </StickyContainer>
+    </Box>
   )
 }
 
 export function HydroclimateTransition() {
-  const sectionRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const headingOpacity = useTransform(scrollYProgress, [0.2, 0.45], [0, 1])
-  const paragraphOpacity = useTransform(scrollYProgress, [0.34, 0.58], [0, 1])
-  const linePath = useTransform(scrollYProgress, [0.5, 0.9], [0, 1])
-  const linePathTwo = useTransform(scrollYProgress, [0.6, 0.95], [0, 1])
-  const linePathThree = useTransform(scrollYProgress, [0.7, 1], [0, 1])
+  return (
+    <StickyScrollSection
+      id="hydroclimateTransition"
+      ariaLabel="COEQWAL water management strategies"
+      height="190vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <HydroclimateTransitionContent />
+    </StickyScrollSection>
+  )
+}
+
+function HydroclimateTransitionContent() {
+  const progress = useScrollProgress()
+  const headingOpacity = useScrollValue(progress, [0.2, 0.45], [0, 1])
+  const paragraphOpacity = useScrollValue(progress, [0.34, 0.58], [0, 1])
+  const linePath = useScrollValue(progress, [0.5, 0.9], [0, 1])
+  const linePathTwo = useScrollValue(progress, [0.6, 0.95], [0, 1])
+  const linePathThree = useScrollValue(progress, [0.7, 1], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="hydroclimateTransition"
-      stickyRollHeight="90vh"
-      sectionRef={sectionRef}
-    >
+    <>
       <SVGLineContainer viewBox="0 0 1728 1117" preserveAspectRatio="none">
         <path d="M1728 0H0" fill="none" stroke="none" />
         <g style={{ opacity: 0.7 }}>
@@ -206,30 +325,29 @@ export function HydroclimateTransition() {
           sx={{
             position: "relative",
             p: { xs: 2, md: 4 },
+            textAlign: "center",
+            "& .MuiTypography-root": {
+              textAlign: "center",
+            },
           }}
         >
           <motion.div style={{ opacity: headingOpacity }}>
-            <Typography variant="h3" gutterBottom>
-              {"While we can't control the climate, we can "}
-              <Box component="span" sx={{ color: "#ffb347" }}>
-                {"adapt"}
-              </Box>
-              {" how we manage our water."}
-            </Typography>
+            <SectionTitle
+              text={hydroclimateTransitionTitle}
+              markSx={{
+                yellowStrong: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
+            />
           </motion.div>
           <motion.div style={{ opacity: paragraphOpacity }}>
-            <Typography variant="h3">
-              {"COEQWAL also explores strategies for addressing "}
-              <span style={{ fontWeight: "bold" }}> water issues </span>
-              {" in California"}
-            </Typography>
-            <Typography variant="h3">
-              and how these might help limit the impacts of climate change.
-            </Typography>
+            <Paragraph variant="h3" blocks={hydroclimateTransitionText} />
           </motion.div>
         </Box>
       </Box>
-    </StickyContainer>
+    </>
   )
 }
 
@@ -273,6 +391,7 @@ export function Themes() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end end"],
+    layoutEffect: false,
   })
 
   const communityLineProgress = useTransform(
@@ -558,28 +677,39 @@ export function Themes() {
               maxWidth: "400px",
             }}
           >
-            <Typography
+            <SectionTitle
               variant="h6"
+              text="Community water systems"
               sx={{
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
-              gutterBottom
-            >
-              Community water systems
-            </Typography>
-            <Typography
+            />
+            <Paragraph
               variant="body2"
+              blocks={[
+                {
+                  segments: [
+                    { text: "Prioritizing", mark: "action" },
+                    { text: " deliveries to community water systems" },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
               }}
-            >
-              Whether people and communities can reliably access safe drinking
-              water for daily life, health, and essential services
-            </Typography>
+            />
           </Box>
         </motion.div>
 
@@ -597,28 +727,39 @@ export function Themes() {
               maxWidth: "400px",
             }}
           >
-            <Typography
+            <SectionTitle
               variant="h6"
+              text="Farms and groundwater"
               sx={{
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
               }}
-              gutterBottom
-            >
-              Farms and groundwater
-            </Typography>
-            <Typography
+            />
+            <Paragraph
               variant="body2"
+              blocks={[
+                {
+                  segments: [
+                    { text: "Limiting", mark: "action" },
+                    {
+                      text: " groundwater pumping in the Central Valley to sustainable levels",
+                    },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
               }}
-            >
-              Whether agricultural water deliveries can sustain food protection,
-              while preventing over-draft of groundwater basins
-            </Typography>
+            />
           </Box>
         </motion.div>
 
@@ -637,28 +778,42 @@ export function Themes() {
               textAlign: "right",
             }}
           >
-            <Typography
+            <SectionTitle
               variant="h6"
+              text="Rivers, salmon, and the Delta ecosystem"
               sx={{
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
-              gutterBottom
-            >
-              Rivers, salmon, and the Delta ecosystem
-            </Typography>
-            <Typography
+            />
+            <Paragraph
               variant="body2"
+              blocks={[
+                {
+                  segments: [
+                    { text: "Increasing", mark: "action" },
+                    {
+                      text: " Delta outflows and enhancing flows in Central Valley rivers to improve ecosystem health",
+                    },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
-            >
-              Whether rivers, salmon, and the Delta estuary receive the flows
-              they need to remain functional and resilient
-            </Typography>
+            />
           </Box>
         </motion.div>
 
@@ -677,28 +832,40 @@ export function Themes() {
               textAlign: "right",
             }}
           >
-            <Typography
+            <SectionTitle
               variant="h6"
+              text="Operations and impacts"
               sx={{
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
               }}
-              gutterBottom
-            >
-              Operations and impacts
-            </Typography>
-            <Typography
+            />
+            <Paragraph
               variant="body2"
+              blocks={[
+                {
+                  segments: [
+                    { text: "Changing", mark: "action" },
+                    {
+                      text: " operations to maintain freshwater conditions in the Delta",
+                    },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
-            >
-              How water management decisions affect trade-offs, equity, and
-              resilience
-            </Typography>
+            />
           </Box>
         </motion.div>
 
@@ -717,28 +884,40 @@ export function Themes() {
               textAlign: "right",
             }}
           >
-            <Typography
+            <SectionTitle
               variant="h5"
+              text="Delta exports"
               sx={{
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
-              gutterBottom
-            >
-              The Delta as a living place
-            </Typography>
-            <Typography
+            />
+            <Paragraph
               variant="body1"
+              blocks={[
+                {
+                  segments: [
+                    { text: "Improving", mark: "action" },
+                    { text: " reliability of exports from the Delta" },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
-            >
-              Whether the Delta is a place where communities, farms, and
-              ecosystems coexist and thrive
-            </Typography>
+            />
           </Box>
         </motion.div>
       </Box>
@@ -748,36 +927,28 @@ export function Themes() {
 
 export function Conclusion() {
   const theme = useTheme()
-  const sectionRef = useRef<HTMLDivElement | null>(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const paragraphOneOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 1])
-  const paragraphTwoOpacity = useTransform(
-    scrollYProgress,
-    [0.35, 0.55],
-    [0, 1],
+  return (
+    <StickyScrollSection
+      id="conclusion"
+      ariaLabel="Conclusion"
+      height="210vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <ConclusionContent theme={theme} />
+    </StickyScrollSection>
   )
-  const paragraphThreeOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.7],
-    [0, 1],
-  )
-  const linePath = useTransform(scrollYProgress, [0.5, 0.9], [0, 1])
+}
 
-  useEffect(() => {
-    scrollYProgress.on("change", (latest) => {
-      console.log(latest)
-    })
-  }, [scrollYProgress])
+function ConclusionContent({ theme }: { theme: Theme }) {
+  const progress = useScrollProgress()
+  const paragraphOneOpacity = useScrollValue(progress, [0.2, 0.4], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.35, 0.55], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.5, 0.7], [0, 1])
+  const linePath = useScrollValue(progress, [0.5, 0.9], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="conclusion"
-      sectionRef={sectionRef}
-      stickyRollHeight="110vh"
-    >
+    <>
       {/* Layer 1: Gradient background */}
       <Box
         sx={{
@@ -834,67 +1005,31 @@ export function Conclusion() {
         <Stack spacing={2} direction="column" alignItems="center">
           <motion.div style={{ opacity: paragraphOneOpacity, width: "100%" }}>
             <Box width="100%" className="paragraph" component="article">
-              <Typography variant="body1">{"In the years ahead,"}</Typography>
-              <Typography variant="body1">
-                {
-                  "California will keep getting hotter, with more severe droughts, less snowpack in the mountains, and higher sea levels."
-                }
-              </Typography>
-              <Typography variant="body1">
-                {"This will change "}
-                <span style={{ fontWeight: "bold" }}>
-                  {
-                    "when and how much surface water we have to allocate to different uses."
-                  }
-                </span>{" "}
-              </Typography>
+              <Paragraph
+                blocks={conclusionOpening}
+                sx={{ whiteSpace: "pre-line" }}
+              />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphTwoOpacity, width: "100%" }}>
             <Box width="100%" className="paragraph" component="article">
-              <Typography variant="body1">
-                {
-                  "By evaluating different scenarios for California's water future, "
-                }
-              </Typography>
-              <Typography variant="body1">
-                {
-                  "we can better plan for these challenges ahead and find solutions that work for everyone."
-                }
-              </Typography>
+              <Paragraph blocks={conclusionScenarios} />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphThreeOpacity, width: "100%" }}>
             <Box width="100%" className="paragraph" component="article">
-              <Typography variant="body1">
-                {"Are you curious about how these scenarios might affect you? "}
-              </Typography>
-              <Typography variant="body1">
-                {"You can start "}
-                <strong>
-                  <a
-                    href="https://dev.coeqwal.org/?tab=explore"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "inherit", textDecoration: "underline" }}
-                  >
-                    exploring scenarios
-                  </a>
-                </strong>{" "}
-                <LibraryBooksIcon
-                  sx={{
+              <Paragraph
+                blocks={conclusionLink}
+                sx={{
+                  "& .MuiSvgIcon-root": {
                     fontSize: theme.typography.body1.fontSize,
-                    verticalAlign: "middle",
-                  }}
-                />
-                {
-                  " and think about how you can help California adapt to our changing climate."
-                }
-              </Typography>
+                  },
+                }}
+              />
             </Box>
           </motion.div>
         </Stack>
       </Box>
-    </StickyContainer>
+    </>
   )
 }

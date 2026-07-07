@@ -1,5 +1,6 @@
 "use client"
 
+import { SectionTitle } from "@repo/ui"
 import { Box, Slider, Stack, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useRef, useState } from "react"
 import PrecipitationBar from "./vis/PrecipitationBar"
@@ -9,7 +10,6 @@ import AnimatedCurve from "./vis/AnimatedCurve"
 import { MONTHIDS, MONTHS, selectedMonths } from "./helpers/constants"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { springUpTextVariants } from "@repo/motion/variants"
-import Legend from "./helpers/Legend"
 import {
   FreshWaterColorScale,
   SnowWaterColorScale,
@@ -48,13 +48,17 @@ export function Precipitation() {
     <Box ref={sectionRef} className="container">
       {/* Title */}
       <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
-        <Typography variant="h3" gutterBottom>
-          {content?.title1}{" "}
-          <Legend colors={colors} labels={labels}>
-            {content?.title2}
-          </Legend>{" "}
-          {content?.title3}
-        </Typography>
+        <SectionTitle
+          gutterBottom
+          text={[
+            { text: `${content?.title1 ?? ""} ` },
+            {
+              text: content?.title2 ?? "",
+              legend: { variant: "underline", colors, labels },
+            },
+            { text: ` ${content?.title3 ?? ""}` },
+          ]}
+        />
       </motion.div>
       {/* Paragraph */}
       <Stack spacing={6} direction="column">
@@ -212,13 +216,17 @@ export function Snowpack() {
   return (
     <Box ref={sectionRef} className="container">
       <Box className="paragraph">
-        <Typography variant="h3" gutterBottom>
-          {content?.title1}
-          <Legend colors={colors} labels={labels}>
-            {content?.title2}
-          </Legend>{" "}
-          {content?.title3}
-        </Typography>
+        <SectionTitle
+          gutterBottom
+          text={[
+            { text: content?.title1 ?? "" },
+            {
+              text: content?.title2 ?? "",
+              legend: { variant: "underline", colors, labels },
+            },
+            { text: ` ${content?.title3 ?? ""}` },
+          ]}
+        />
       </Box>
 
       <Stack

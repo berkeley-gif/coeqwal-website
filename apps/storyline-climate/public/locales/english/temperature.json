@@ -1,0 +1,82 @@
+{
+  "builder": {
+    "firstParagraph": [
+      {
+        "text": "California's water system is under pressure to meet multiple demands."
+      },
+      {
+        "text": "People need clean drinking water."
+      },
+      {
+        "text": "Farms need water to grow food."
+      },
+      {
+        "text": "Fish and wildlife need water to survive."
+      },
+      {
+        "segments": [
+          {
+            "text": "Climate change is making matters worse.",
+            "mark": "strong"
+          }
+        ]
+      }
+    ],
+    "secondParagraph": [
+      {
+        "segments": [
+          {
+            "text": "Warmer temperatures",
+            "mark": "highlight"
+          },
+          {
+            "text": ", "
+          }
+        ]
+      },
+      {
+        "text": "less predictable rain and snow, "
+      },
+      {
+        "text": "and higher sea levels are stressing"
+      },
+      {
+        "text": "both our water infrastructure and living environment."
+      }
+    ]
+  },
+  "chart": {
+    "title": "California Annual Average Temperature",
+    "source": {
+      "prefix": "Data source: ",
+      "label": "NOAA",
+      "url": "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/4/tavg/12/12/1960-2026"
+    }
+  },
+  "future": {
+    "title": [
+      {
+        "text": "A "
+      },
+      {
+        "text": "Warmer",
+        "mark": "highlight"
+      },
+      {
+        "text": " Future"
+      }
+    ],
+    "body": [
+      {
+        "text": "Year after year, rising global temperatures reveal that our climate is changing. "
+      },
+      {
+        "text": "Since 1960, California's average temperature has increased by about 2\u00b0F (1.1\u00b0C). "
+      },
+      {
+        "text": "Climate models predict that average temperatures may increase by an additional 6-9\u00b0F by the end of the century."
+      }
+    ]
+  },
+  "warmingTrendLabel": "Overall Warming Trend"
+}

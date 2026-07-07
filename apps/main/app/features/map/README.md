@@ -1,6 +1,6 @@
 # Map feature
 
-Persistent Mapbox GL map used across the Learn, Get Started, and Explore tabs.
+Persistent Mapbox GL map used across the Learn and Explore tabs.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ Persistent Mapbox GL map used across the Learn, Get Started, and Explore tabs.
 - **`store.ts`** Zustand store for map mode, active outcome visualization, explore panel width / camera view, and tier-animation location highlights.
 - **`config/outcomeLayerRegistry.ts`** single source of truth for all outcome layer configs (geometry type, Mapbox layer IDs, tooltip fields, camera presets/bounds).
 - **`config/cameraPresets.ts`** named `CameraView` (center + zoom) and `cameraBounds` (`[[sw], [ne]]`) constants.
-- **`config/resolveOutcomeCamera.ts`** pure resolver that turns an outcome + map mode into a camera action: `fitBounds` for `cameraBounds`, `easeTo` for `cameraPreset`, mode-specific default otherwise. Shared by the Learn/Explore reactive camera and the Get Started inline camera so the priority logic lives in one place.
+- **`config/resolveOutcomeCamera.ts`** pure resolver that turns an outcome + map mode into a camera action: `fitBounds` for `cameraBounds`, `easeTo` for `cameraPreset`, mode-specific default otherwise. Shared by the Learn/Explore reactive camera and the tier-animation storyboard's inline camera so the priority logic lives in one place.
 - **`visualizationLayers/hooks/useOutcomeVisualization.ts`** activates/deactivates a layer, fetches tier data, drives camera on outcome click.
 
 ---
@@ -48,7 +48,7 @@ Coordinates are **hardcoded** in a single file:
 
 Each map marker component imports the specific table it needs directly.
 
-`outcomeLocations.ts` also exports a unified helper, `getOutcomeLocationCoordinates(outcomeCode, locationId)`, plus `CWS_DEL_COORDINATES`, `AG_REV_COORDINATES`, and `SALMON_RIVER_CENTROID`. These are not used by the persistent map. They feed the Get Started animation (`scenarioExplorer/animation/`), which projects outcome locations to screen space and needs coordinates for the polygon outcomes too. On the map, `CWS_DEL`/`AG_REV` render as demand-unit polygons and salmon renders as a highlighted river line, so none of them resolve through this helper here.
+`outcomeLocations.ts` also exports a unified helper, `getOutcomeLocationCoordinates(outcomeCode, locationId)`, plus `CWS_DEL_COORDINATES`, `AG_REV_COORDINATES`, and `SALMON_RIVER_CENTROID`. These are not used by the persistent map. They feed the tier-animation storyboard (`map/animation/`), which projects outcome locations to screen space and needs coordinates for the polygon outcomes too. On the map, `CWS_DEL`/`AG_REV` render as demand-unit polygons and salmon renders as a highlighted river line, so none of them resolve through this helper here.
 
 ### How to add a new point outcome to the map
 
@@ -56,7 +56,7 @@ Each map marker component imports the specific table it needs directly.
 2. Add `[lng, lat]` coordinates to the appropriate table in `config/outcomeLocations.ts` (or create a new table), keyed by `location_id`
 3. Register the outcome in `config/outcomeLayerRegistry.ts` with `geometryType: "react-marker"` and `layerType: "marker"`
 4. Wire the new table into the marker component that renders it (`TierMarkers` or `TierLocationLabels`). These read their tables directly, so a new table is not picked up until you reference it there.
-5. If the Get Started animation also needs these coordinates, add a case to `getOutcomeLocationCoordinates()` (animation only, not the map)
+5. If the tier-animation storyboard also needs these coordinates, add a case to `getOutcomeLocationCoordinates()` (animation only, not the map)
 
 ### Data flow
 

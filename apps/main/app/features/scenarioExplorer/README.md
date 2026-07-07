@@ -10,14 +10,12 @@ The Scenario Explorer is the main interface for exploring water allocation scena
   - [Layout: UnifiedToolView](#layout-unifiedtoolview)
   - [Error boundaries](#error-boundaries)
 - [Key components](#key-components)
-  - [GetStartedView.tsx](#getstartedviewtsx)
   - [ScenarioExplorer.tsx](#scenarioexplorertsx)
   - [ExplorerToolView.tsx](#explorertoolviewtsx)
   - [ActiveToolPanel.tsx](#activetoolpaneltsx)
   - [UnifiedToolView.tsx](#unifiedtoolviewtsx)
   - [ListView.tsx](#listviewtsx)
 - [State management](#state-management)
-  - [Get-started state](#get-started-state)
   - [Cross-store coordination](#cross-store-coordination)
   - [Three types of state](#three-types-of-state)
   - [Persistence](#persistence)
@@ -53,16 +51,11 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 
 ### Main app navigation
 
-The Explore tab's primary sub-nav (`ExploreSubNav`) has two entries controlled by `mainView` state:
-
-| View          | Label       | Description                                  |
-| ------------- | ----------- | -------------------------------------------- |
-| `get-started` | Get started | Onboarding / intro view                      |
-| `explorer`    | Tools       | All exploration tools via `ExplorerToolView` |
+The Explore tab renders `ExplorerToolView` directly — there is no onboarding sub-view to switch away from. The Explore tab's sub-nav (`ExploreSubNav`) shows the tool tabs described in [Tool modes](#tool-modes) below.
 
 ### Tool modes
 
-When `mainView === "explorer"`, five tool tabs are shown in the Explore sub-nav (`ExploreSubNav`, lifted to the page shell), controlled by `exploreMode` state:
+Five tool tabs are shown in the Explore sub-nav (`ExploreSubNav`, lifted to the page shell), controlled by `exploreMode` state:
 
 | Mode         | Label         | Description                                       |
 | ------------ | ------------- | ------------------------------------------------- |
@@ -87,11 +80,10 @@ All tools are rendered inside `UnifiedToolView`, which provides a persistent thr
 
 ### Error boundaries
 
-Each surface gets its own `<ErrorBoundary>` (from `@repo/utils`), placed where that surface mounts (Get started in `ScenarioExplorer.tsx`, the rest in `ExplorerToolView`/`ActiveToolPanel`):
+Each surface gets its own `<ErrorBoundary>` (from `@repo/utils`), placed where that surface mounts (in `ExplorerToolView`/`ActiveToolPanel`):
 
 | Boundary     | What it wraps                           | Reset                                       | Fallback                                |
 | ------------ | --------------------------------------- | ------------------------------------------- | --------------------------------------- |
-| Get started  | `<GetStartedView />`                    | Auto via mount/unmount on `mainView`        | `ErrorFallback` with retry              |
 | Active tool  | controls + panel in `ActiveToolPanel`   | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
 | Share drawer | `<ShareDrawer />` in `ExplorerToolView` | Auto on leaving explorer                    | `null` (drawer disappears)              |
 | Tool tour    | `<ToolTour />` in `ExplorerToolView`    | Auto on leaving explorer                    | `null` (tour ends)                      |
@@ -100,15 +92,9 @@ The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../com
 
 ## Key components
 
-### GetStartedView.tsx
-
-Scroll onboarding for the get-started sub-tab. Composes `getStarted/panels/*` and mounts `animation/TierAnimationSection` (the only place the get-started animation is mounted). It reads the map mode but does not set it. `TierAnimationSection` drives the map into `get-started` mode while it is mounted and resets it to `hidden` on unmount.
-
 ### ScenarioExplorer.tsx
 
-Routes by `mainView`. Runs lifecycle effects (tier prefetch, scroll-on-tab-switch) and map pass-through layout. Delegates the tools surface to `ExplorerToolView`.
-
-**State from store:** `mainView` (`useScenarioExplorerStore`)
+Runs lifecycle effects (tier prefetch) and map pass-through layout. Delegates the tools surface to `ExplorerToolView`.
 
 ### ExplorerToolView.tsx
 
@@ -142,39 +128,19 @@ Renders scenarios using the `StrategyGrid` system. Supports search filtering, ou
 
 ## State management
 
-Two Zustand stores (all use Immer via `@repo/state/zustand`):
+One Zustand store (uses Immer via `@repo/state/zustand`):
 
-| Store                      | File                                 | Owns                                                |
-| -------------------------- | ------------------------------------ | --------------------------------------------------- |
-| `useScenarioExplorerStore` | [`store.ts`](store.ts)               | Shell routing: `mainView` only                      |
-| `useExplorerStore`         | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
+| Store              | File                                 | Owns                                                |
+| ------------------ | ------------------------------------ | --------------------------------------------------- |
+| `useExplorerStore` | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
 
 Get started and explorer **do not share fields**. They coordinate through intentional one-way reads (for example `useExplorerMapLayout` reads shell `mainView` plus explorer `showMap`), not a merged store.
 
-### Get-started state
-
-Get-started uses component-local React state and the app map store. No third Zustand store today:
-
-| State today                               | Owner                             | Notes                           |
-| ----------------------------------------- | --------------------------------- | ------------------------------- |
-| Animation beat, play, pins, encoding mode | `TierAnimationSection` `useState` | Ephemeral scroll-through UI     |
-| Outcome hover in Key outcomes panel       | `KeyOutcomesPanel` `useState`     | Panel-local                     |
-| Fetched tier/geojson for animation        | `useTierAnimationData`            | Data loading, not journey flags |
-| Get-started map visibility                | app map store (`useMapMode`)      | Shared map layer                |
-
-Add a `getStarted/store.ts` only when a value must survive get-started panel navigation or hand off to explorer on first tools visit. Do **not** put `mainView` there. That is shell routing.
-
 ### Cross-store coordination
 
-These are intentional one-way reads, not shared state:
-
-| Caller                              | Reads                                  | Purpose                                |
-| ----------------------------------- | -------------------------------------- | -------------------------------------- |
-| `ScenarioExplorer`, `ExploreSubNav` | `useScenarioExplorerStore.mainView`    | Mount get-started vs tools surface     |
-| `useExplorerMapLayout`              | shell `mainView` + explorer `showMap`  | Map pass-through styling per surface   |
-| `useExplorerLifecycle`              | shell `mainView`                       | Scroll-to-tabs on get-started to tools |
-| Share tab (app)                     | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards       |
-| Get-started panels / animation      | map store, local state                 | No explorer store reads today          |
+| Caller          | Reads                                  | Purpose                          |
+| --------------- | -------------------------------------- | -------------------------------- |
+| Share tab (app) | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards |
 
 ### Three types of state
 
@@ -208,7 +174,7 @@ Within the tools surface, new fields belong in one of three types. Two are **Zus
 
 Some Zustand tool-slice fields are kept out of sessionStorage on purpose (for example `showAxisSelector`, pin snackbar flags). They are still Zustand, not React state. See [Persistence](#persistence) for what gets restored on reload.
 
-**Rule of thumb:** If only one panel reads it and it does not need to survive a tool switch, use React `useState`. If the sidebar, toolbar, or share layer needs it, add it to a Zustand slice (workspace or the relevant tool slice). Shell routing (`mainView`) belongs in `useScenarioExplorerStore`. Get-started-only UI belongs in local React state (see [Get-started state](#get-started-state)).
+**Rule of thumb:** If only one panel reads it and it does not need to survive a tool switch, use React `useState`. If the sidebar, toolbar, or share layer needs it, add it to a Zustand slice (workspace or the relevant tool slice).
 
 **Coordination:** Do not hide one tool's rules inside another tool's actions. Example: resilience view sync with sidebar selection lives in `useResilienceSelectionSync` in the resilience panel folder, not in `toggleScenario`.
 
@@ -218,10 +184,10 @@ To wire a new tool slice, see [State: when to add a store slice](#state-when-to-
 
 Explore session state survives a page reload within the same tab. Closing the tab clears sessionStorage. Implementation and key lists: [`exploreSessionPersist.ts`](explorer/store/exploreSessionPersist.ts) (authoritative) and [`pickSlices.ts`](explorer/store/pickSlices.ts) (key index).
 
-| Storage          | Scope                                                                         | Survives reload? | Survives tab close? |
-| ---------------- | ----------------------------------------------------------------------------- | ---------------- | ------------------- |
-| `localStorage`   | Share tray (`shareItems`, `storyItemIds`)                                     | Yes              | Yes                 |
-| `sessionStorage` | Shell `mainView`, workspace selection/chrome/cosmetics, all tool store slices | Yes (same tab)   | No                  |
+| Storage          | Scope                                                       | Survives reload? | Survives tab close? |
+| ---------------- | ----------------------------------------------------------- | ---------------- | ------------------- |
+| `localStorage`   | Share tray (`shareItems`, `storyItemIds`)                   | Yes              | Yes                 |
+| `sessionStorage` | Workspace selection/chrome/cosmetics, all tool store slices | Yes (same tab)   | No                  |
 
 **sessionStorage key:** `coeqwal-explorer-tool-sessions-v2`
 
@@ -349,14 +315,9 @@ This guide has four parts: the mental model, a quickstart that gets an empty too
 
 A tool is a single panel registered as an `ExploreMode`. The shell is already mounted around it, so you are adding a known shape rather than building a page from scratch.
 
-**Two surfaces, two stores**
+Your tool is one panel in a single surface, driven by `useExplorerStore` via slice hooks (`useWorkspaceSlice`, etc.), keyed on `exploreMode`, and rendered through `ActiveToolPanel`.
 
-| Surface     | Store                                                          | Key field                 | Renders           |
-| ----------- | -------------------------------------------------------------- | ------------------------- | ----------------- |
-| Get started | `useScenarioExplorerStore`                                     | `mainView: "get-started"` | `GetStartedView`  |
-| Tools       | `useExplorerStore` via slice hooks (`useWorkspaceSlice`, etc.) | `exploreMode`             | `ActiveToolPanel` |
-
-When `mainView === "explorer"`, shared chrome is already mounted around your panel:
+Shared chrome is already mounted around your panel:
 
 `ExplorerToolView` -> `UnifiedToolView` -> (`ExplorerSidebar` + tool chrome rows + `ActiveToolPanel`)
 
@@ -883,7 +844,7 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 ##### Map reference implementations
 
 - **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) - Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
-- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/animation/`) - Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
+- **`TierAnimationSection.tsx`** (`apps/main/app/features/map/animation/`) - Tier-animation storyboard with post-animation outcome toggle on both text labels and SVG distribution shapes.
 
 For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.
 
@@ -970,7 +931,7 @@ Most tools need nothing here, including the two that hold data for every climate
 A couple of spots still need a hand-edit, because the centralized list cannot generate them:
 
 - Optional: add a short token to the `HC_SLUG` map in `share/utils/filename.ts`, for example `cc_new: "ccnew"`. This is the compact hydroclimate string used in download filenames. If you skip it, `hydroclimateSlug` falls back to `slugifyForFilename(value)`, so `cc_new` becomes `cc-new` in the filename and the download still works.
-- By design: the get-started animation in `animation/TierAnimationSection.tsx` hard-codes the moderate (`cc50`) and high (`cc95`) climate columns with hand-written labels. It is a curated teaching sequence, not a general tool, so it does not auto-scale. Add a column there by hand only if you want the new climate in that animation.
+- By design: the tier-animation storyboard in `map/animation/TierAnimationSection.tsx` hard-codes the moderate (`cc50`) and high (`cc95`) climate columns with hand-written labels. It is a curated teaching sequence, not a general tool, so it does not auto-scale. Add a column there by hand only if you want the new climate in that animation.
 
 ### 4. The chooser and tools pick it up
 

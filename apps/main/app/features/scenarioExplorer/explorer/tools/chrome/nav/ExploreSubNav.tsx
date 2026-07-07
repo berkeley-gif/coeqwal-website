@@ -13,34 +13,17 @@
 import React, { useState, useEffect } from "react"
 import {
   Box,
-  Typography,
   useTheme,
   alpha,
-  LocationOnIcon,
   ViewListIcon,
-  ExploreIcon,
   AdjustIcon,
   AppsIcon,
   GridOnIcon,
   InsightsIcon,
 } from "@repo/ui/mui"
-import { useScenarioExplorerStore, type MainView } from "../../../../store"
 import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
-
-const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
-  {
-    view: "get-started",
-    icon: <LocationOnIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Get started",
-  },
-  {
-    view: "explorer",
-    icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Tools",
-  },
-]
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -96,7 +79,6 @@ export default function ExploreSubNav() {
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
 
-  const { mainView, setMainView } = useScenarioExplorerStore()
   const { exploreMode, setExploreMode } = useWorkspaceSlice()
 
   // Research-only tools hidden by default, toggled with "A" key
@@ -143,178 +125,99 @@ export default function ExploreSubNav() {
         gap: 1,
       }}
     >
-      {MAIN_VIEWS.map(({ view, icon, label }) => {
-        const active = mainView === view
-        return (
-          <Box
-            key={view}
-            component="button"
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => setMainView(view)}
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              px: 1.25,
-              py: 0.5,
-              border: "none",
-              borderRadius: theme.borderRadius.sm ?? "4px",
-              cursor: "pointer",
-              background: active
-                ? alpha(theme.palette.common.white, 0.2)
-                : "transparent",
-              color: theme.palette.common.white,
-              transition: "background-color 0.15s",
-              "&:hover": {
-                background: alpha(theme.palette.common.white, 0.15),
-              },
-            }}
-          >
-            {icon}
-            <Typography
-              component="span"
-              variant="nav"
-              sx={{
-                fontWeight: active ? 600 : 500,
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-                color: "inherit",
-              }}
-            >
-              {label}
-            </Typography>
-          </Box>
-        )
-      })}
-
-      {/* Grid container: 0fr collapses to zero width, 1fr reveals. */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: mainView === "explorer" ? "1fr" : "0fr",
-          transition: "grid-template-columns 0.35s cubic-bezier(0.4,0,0.2,1)",
-          flexShrink: 0,
-        }}
-      >
-        <Box
-          sx={{
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            minWidth: 0,
-            opacity: mainView === "explorer" ? 1 : 0,
-            transition:
-              mainView === "explorer" ? "opacity 0.25s 0.15s" : "opacity 0.15s",
-          }}
-        >
-          <Box
-            sx={{
-              width: "1px",
-              height: 20,
-              backgroundColor: alpha(theme.palette.common.white, 0.35),
-              flexShrink: 0,
-              mx: 0.5,
-            }}
-          />
-
-          {/* Buttons to the different tools */}
-          {FLOW.filter((step) => !step.research || showResearchTools).map(
-            (step) => {
-              const isShare = step.mode === null
-              const active = step.mode !== null && exploreMode === step.mode
-              const handleClick = () => {
-                if (isShare) {
-                  navigateToTab("share")
-                } else if (step.mode) {
-                  setExploreMode(step.mode)
-                }
-              }
-              return (
-                <React.Fragment key={step.label}>
+      {/* Buttons to the different tools */}
+      {FLOW.filter((step) => !step.research || showResearchTools).map(
+        (step) => {
+          const isShare = step.mode === null
+          const active = step.mode !== null && exploreMode === step.mode
+          const handleClick = () => {
+            if (isShare) {
+              navigateToTab("share")
+            } else if (step.mode) {
+              setExploreMode(step.mode)
+            }
+          }
+          return (
+            <React.Fragment key={step.label}>
+              <Box
+                component="button"
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={handleClick}
+                title={`${step.label}: ${step.purpose}`}
+                aria-label={`${step.label}: ${step.purpose}`}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.6,
+                  px: 0.9,
+                  py: 0.4,
+                  border: `1px solid ${alpha(
+                    theme.palette.common.white,
+                    active ? 0.7 : 0.3,
+                  )}`,
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  background: active
+                    ? alpha(theme.palette.common.white, 0.18)
+                    : "transparent",
+                  color: theme.palette.common.white,
+                  transition: "all 120ms ease",
+                  lineHeight: 1.1,
+                  "&:hover": {
+                    background: alpha(theme.palette.common.white, 0.12),
+                    borderColor: alpha(theme.palette.common.white, 0.6),
+                  },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    color: theme.palette.common.white,
+                  }}
+                >
+                  {step.icon}
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    lineHeight: 1.1,
+                  }}
+                >
                   <Box
-                    component="button"
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={handleClick}
-                    title={`${step.label}: ${step.purpose}`}
-                    aria-label={`${step.label}: ${step.purpose}`}
+                    component="span"
                     sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 0.6,
-                      px: 0.9,
-                      py: 0.4,
-                      border: `1px solid ${alpha(
-                        theme.palette.common.white,
-                        active ? 0.7 : 0.3,
-                      )}`,
-                      borderRadius: "12px",
-                      cursor: "pointer",
-                      background: active
-                        ? alpha(theme.palette.common.white, 0.18)
-                        : "transparent",
+                      fontSize: "0.8125rem",
+                      fontWeight: active ? 700 : 600,
                       color: theme.palette.common.white,
-                      transition: "all 120ms ease",
-                      lineHeight: 1.1,
-                      "&:hover": {
-                        background: alpha(theme.palette.common.white, 0.12),
-                        borderColor: alpha(theme.palette.common.white, 0.6),
-                      },
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    <Box
-                      component="span"
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        color: theme.palette.common.white,
-                      }}
-                    >
-                      {step.icon}
-                    </Box>
-                    <Box
-                      component="span"
-                      sx={{
-                        display: "inline-flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      <Box
-                        component="span"
-                        sx={{
-                          fontSize: "0.8125rem",
-                          fontWeight: active ? 700 : 600,
-                          color: theme.palette.common.white,
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {step.label}
-                      </Box>
-                      <Box
-                        component="span"
-                        sx={{
-                          fontSize: "0.6875rem",
-                          fontWeight: 400,
-                          color: alpha(theme.palette.common.white, 0.8),
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {step.purpose}
-                      </Box>
-                    </Box>
+                    {step.label}
                   </Box>
-                </React.Fragment>
-              )
-            },
-          )}
-        </Box>
-      </Box>
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: "0.6875rem",
+                      fontWeight: 400,
+                      color: alpha(theme.palette.common.white, 0.8),
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {step.purpose}
+                  </Box>
+                </Box>
+              </Box>
+            </React.Fragment>
+          )
+        },
+      )}
     </Box>
   )
 }
