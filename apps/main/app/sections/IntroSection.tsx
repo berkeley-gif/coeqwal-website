@@ -117,17 +117,9 @@ const IntroSection = () => {
             panelRef={waterThemesPanelRef}
             dockRef={waterThemesDockRef}
             contentOpacity={waterThemesOpacity}
-            borderRadius={theme.layout.panel.radius}
-            inset={{
-              x: theme.layout.panel.insetX,
-              y: theme.layout.panel.insetY,
-            }}
-            frameBackground={theme.palette.common.white}
           />
         </Suspense>
       </ErrorBoundary>
-
-      <WantToKnowMorePanel />
     </Box>
   )
 }

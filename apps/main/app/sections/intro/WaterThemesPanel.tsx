@@ -6,11 +6,11 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import {
-  NavArrow,
   InfoCard,
   InfoCardGrid,
+  CircularArrowButton,
   ScrollToButton,
   resolveRadius,
   resolveInset,
@@ -25,11 +25,11 @@ import {
   useScrollValue,
 } from "@repo/scrollytelling"
 import type { MotionValue } from "@repo/motion"
-import { WATER_THEMES } from "../../content/themes"
-import { usePanelRoute } from "../../hooks/usePanelRoute"
+import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { TabKey } from "../../types/tabs"
 
 /*───────────────── */
-/* IMAGE & CIRCLE CONFIG                                                       */
+/* IMAGE & TAB CARDS                                                       */
 /*───────────────── */
 
 /** Native dimensions of the Delta Aerials image (kept for reference). */
@@ -38,263 +38,33 @@ const _IMG_H = 1066
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
-const WATER_THEME_PHOTOS: Record<string, string | undefined> = {
-  cws: "/images/themes/FL_Porterville-9320.jpg",
-  ag_gw: "/images/themes/PJH_Sprinklers_10911-2_07_15_2004.jpg",
-  eco: "/images/themes/CC_salmon_underH20-5_10_15_2012.jpg",
-  delta: "/images/themes/2025_03_11_NS_0036_Oroville_Lake_Levels.jpg",
-} as const
-
-interface ThemeCircle {
-  id: string
-  /** Center X in image-space pixels (0-2784) */
-  cx: number
-  /** Center Y in image-space pixels (0-1066) */
-  cy: number
-  /** Radius in image-space pixels */
-  r: number
-  photo: string
-  /** Scale factor for the photo within the circle (default 1). Values > 1 zoom out. */
-  photoScale?: number
-  label: string
+interface TabCard {
+  tab: TabKey
+  title: string
   description: string
 }
 
-/** Throws at module load if a theme ID is missing from WATER_THEMES. */
-function requireTheme(id: string) {
-  const t = WATER_THEMES.find((t) => t.id === id)
-  if (!t) throw new Error(`WATER_THEMES: no entry for id "${id}"`)
-  return t
-}
-
-/** Circle positions.tune visually against the aerial image. Content comes from WATER_THEMES. */
-const CIRCLE_CONFIG: ThemeCircle[] = [
+/** The three squares link straight to a tab via navigateToTab. */
+const TAB_CARDS: TabCard[] = [
   {
-    id: "cws",
-    cx: 1028,
-    cy: 560,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.cws!,
-    label: requireTheme("cws").shortLabel,
-    description: requireTheme("cws").description,
+    tab: "learn",
+    title: "Learn",
+    description:
+      "Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making.",
   },
   {
-    id: "ag_gw",
-    cx: 628,
-    cy: 873,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.ag_gw!,
-    label: requireTheme("ag_gw").shortLabel,
-    description: requireTheme("ag_gw").description,
+    tab: "explore",
+    title: "Explore",
+    description:
+      "Explore how water allocations change under different scenarios and hydroclimates — and discover new possibilities for California's water future.",
   },
   {
-    id: "eco",
-    cx: 1420,
-    cy: 871,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.eco!,
-    label: requireTheme("eco").shortLabel,
-    description: requireTheme("eco").description,
-  },
-  {
-    id: "delta",
-    cx: 1810,
-    cy: 558,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.delta!,
-    label: requireTheme("delta").shortLabel,
-    description: requireTheme("delta").description,
-  },
-  {
-    id: "governance",
-    cx: 2200,
-    cy: 871,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.governance ?? "",
-    label: requireTheme("governance").shortLabel,
-    description: requireTheme("governance").description,
+    tab: "share",
+    title: "Share",
+    description:
+      "Select scenario data and share what you've learned to shape our water future.",
   },
 ]
-
-/*───────────────── */
-/* STAGGER TIMING                                                              */
-/*───────────────── */
-
-/** Left-to-right reveal order.sorted by cx position */
-const SORTED_INDICES = CIRCLE_CONFIG.map((c, i) => ({ cx: c.cx, i }))
-  .sort((a, b) => a.cx - b.cx)
-  .map((entry) => entry.i)
-
-const PHOTO_START = 0.3
-const PHOTO_END = 0.7
-const LABEL_START = 0.32
-const LABEL_END = 0.72
-const FADE_DUR = 0.08
-const CIRCLE_COUNT = CIRCLE_CONFIG.length
-
-function getStaggerStart(index: number, rangeStart: number, rangeEnd: number) {
-  const order = SORTED_INDICES.indexOf(index)
-  return (
-    rangeStart +
-    (order / (CIRCLE_COUNT - 1)) * (rangeEnd - rangeStart - FADE_DUR)
-  )
-}
-
-/*───────────────── */
-/* PER-CIRCLE SUB-COMPONENTS (each calls its own hooks.lint-safe)            */
-/*───────────────── */
-
-/** Photo fill clipped to a circle.owns its staggered opacity hook */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ThemeCirclePhoto({
-  circle,
-  index,
-  progress,
-  prefersReducedMotion,
-}: {
-  circle: ThemeCircle
-  index: number
-  progress: MotionValue<number>
-  prefersReducedMotion: boolean | null
-}) {
-  const start = getStaggerStart(index, PHOTO_START, PHOTO_END)
-  const opacity = useScrollValue(
-    progress,
-    [start, start + FADE_DUR],
-    prefersReducedMotion ? [1, 1] : [0, 1],
-  )
-
-  if (!circle.photo) return null
-
-  const zoomOut = circle.photoScale ?? 1
-  const imgR = circle.r / zoomOut
-  const fit = circle.photoScale ? "xMidYMid meet" : "xMidYMid slice"
-
-  return (
-    <motion.image
-      href={circle.photo}
-      x={circle.cx - imgR}
-      y={circle.cy - imgR}
-      width={imgR * 2}
-      height={imgR * 2}
-      clipPath={`url(#clip-${circle.id})`}
-      preserveAspectRatio={fit}
-      style={{ opacity }}
-    />
-  )
-}
-
-/** Label card positioned at 9:00.owns its staggered opacity hook */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ThemeCircleLabel({
-  circle,
-  index,
-  progress,
-  prefersReducedMotion,
-  onLearnMore,
-  comingSoon,
-}: {
-  circle: ThemeCircle
-  index: number
-  progress: MotionValue<number>
-  prefersReducedMotion: boolean | null
-  onLearnMore?: () => void
-  comingSoon?: boolean
-}) {
-  const theme = useTheme()
-  const start = getStaggerStart(index, LABEL_START, LABEL_END)
-  const opacity = useScrollValue(
-    progress,
-    [start, start + FADE_DUR],
-    prefersReducedMotion ? [1, 1] : [0, 1],
-  )
-
-  const labelW = 400
-  const gap = 20
-  const labelX = circle.cx - circle.r - gap - labelW
-  const labelY = circle.cy - 140
-
-  const themeColors = theme.palette.waterThemes[
-    circle.id as keyof typeof theme.palette.waterThemes
-  ] ?? { background: "#eee", text: "#333" }
-
-  return (
-    <motion.foreignObject
-      x={labelX}
-      y={labelY}
-      width={labelW}
-      height={320}
-      style={{ opacity, overflow: "visible" }}
-    >
-      <div
-        style={{
-          backgroundColor: themeColors.background,
-          color: theme.palette.text.primary,
-          fontFamily: "inherit",
-          borderRadius: "8px",
-          padding: "14px 18px",
-        }}
-      >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: "24px",
-            lineHeight: 1.3,
-            marginBottom: "6px",
-          }}
-        >
-          {circle.label}
-        </div>
-        <div
-          style={{
-            fontSize: theme.typography.displayBody.fontSize,
-            fontWeight: theme.typography.displayBody.fontWeight,
-            lineHeight: theme.typography.displayBody.lineHeight,
-          }}
-        >
-          {circle.description}
-        </div>
-        {onLearnMore ? (
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={onLearnMore}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault()
-                onLearnMore()
-              }
-            }}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              marginTop: "10px",
-              fontSize: theme.typography.displayBody.fontSize as string,
-              fontWeight: 600,
-              cursor: "pointer",
-              pointerEvents: "auto",
-            }}
-          >
-            Learn more
-            <NavArrow />
-          </div>
-        ) : comingSoon ? (
-          <div
-            style={{
-              marginTop: "10px",
-              fontSize: theme.typography.displayBody.fontSize as string,
-              fontWeight: 600,
-              opacity: 0.5,
-            }}
-          >
-            Coming soon
-          </div>
-        ) : null}
-      </div>
-    </motion.foreignObject>
-  )
-}
 
 /*───────────────── */
 /* INNER CONTENT (reads scroll progress from StickyScrollSection context)      */
@@ -315,7 +85,7 @@ function WaterThemesPanelContent({
 }) {
   const theme = useTheme()
   const prefersReducedMotion = useReducedMotion()
-  const { openThemePanel } = usePanelRoute()
+  const { navigateToTab } = useTabNavigation()
 
   // Local scroll progress (0-1) within this StickyScrollSection
   const progress = useScrollProgress()
@@ -324,8 +94,8 @@ function WaterThemesPanelContent({
   // Image stays visible while cards are fully opaque, then fades out late
   const imageOpacity = useScrollValue(
     progress,
-    [0.85, 0.95],
-    prefersReducedMotion ? [0, 0] : [1, 0],
+    [0, 1],
+    prefersReducedMotion ? [1, 1] : [0, 1],
   )
 
   const radius = resolveRadius(borderRadius, theme.borderRadius)
@@ -348,7 +118,7 @@ function WaterThemesPanelContent({
           position: "absolute",
           inset: 0,
           zIndex: 0,
-          background: `linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`,
+          background: `${theme.palette.brand.panelLight}`,
         }}
       />
 
@@ -470,82 +240,43 @@ function WaterThemesPanelContent({
           </Box>
         </motion.div>
 
-        {/* Five theme cards - horizontal grid */}
-        <InfoCardGrid
-          columns={5}
+        {/* Three squares, one per tab */}
+
+
+        <Box
           sx={{
-            // Short-viewport layout: the text block above is anchored
-            // to the headline's top instead of being vertically
-            // centered, which removes the natural breathing room
-            // between the paragraph and the cards. Restore it with an
-            // explicit top padding.
-            "@media (max-height: 859px)": {
-              pt: "60px",
-            },
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.section.sm,
+            "@media (max-height: 859px)": { pt: "60px" },
           }}
         >
-          {CIRCLE_CONFIG.map((c) => {
-            const active = c.id !== "governance"
+          {TAB_CARDS.map((c, i) => {
+            const panelColor = theme.palette.tabPanels[c.tab]
             return (
-              <InfoCard
-                key={c.id}
-                title={c.label}
-                description={c.description}
-                onClick={active ? () => openThemePanel(c.id) : undefined}
-                variant="onLight"
-                // Active cards: lift the translucent fill
-                // (rgba(210,228,242,0.8) by default) to full opacity
-                // on hover so the card "comes forward" and invites
-                // interaction. Non-active ("Coming soon") cards
-                // inherit the default hover behaviour (no click, so
-                // no hover lift is applied by InfoCard).
-                hoverBackground={active ? "rgb(210,228,242)" : undefined}
-              >
-                {!active && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mt: theme.space.component.sm,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
+              <React.Fragment key={c.tab}>
+                <InfoCard
+                  title={c.title}
+                  titleVariant="h6"
+                  description={c.description}
+                  onClick={() => navigateToTab(c.tab)}
+                  variant="onDark"
+                  background={panelColor}
+                  hoverBackground={alpha(panelColor, 0.85)}
+                  sx={{ flex: 1, height: "250px" }}
+                />
+                {i < TAB_CARDS.length - 1 && (
+                  <CircularArrowButton
+                    decorative
+                    size={40}
+                    rotation="-90deg"
+                  />
                 )}
-              </InfoCard>
+              </React.Fragment>
             )
           })}
-        </InfoCardGrid>
-      </Box>
+        </Box>
 
-      {/* Scroll-down arrow, matches the VideoHero and About panels.
-          Absolutely positioned against the rounded card (whose wrapper
-          has position:relative), bottom-center, above all other
-          layers so it stays visible throughout the sticky pin. */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "clamp(24px, 4vh, 48px)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 3,
-          pointerEvents: "auto",
-        }}
-      >
-        <ScrollToButton
-          color={`${theme.palette.common.white}D9`}
-          size={52}
-          scrollToId="want-to-know-more"
-          // Same offset math as the VideoHero / About buttons: land
-          // the target section's rounded card flush below the fixed
-          // header. Resolved at click time so the responsive
-          // `clamp()` value is read at the viewport's current width.
-          scrollOffset={() =>
-            theme.layout.headerHeight -
-            resolveCssLengthPx(theme.layout.panel.insetY, 24)
-          }
-          ariaLabel="Scroll down to the want to know more section"
-        />
       </Box>
     </Box>
   )

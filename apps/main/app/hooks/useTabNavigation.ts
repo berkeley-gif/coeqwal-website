@@ -17,10 +17,9 @@ export function useTabNavigation() {
   const navigateToTab = useCallback(
     (tab: TabKey) => {
       dispatch(setActiveTab(tab))
-      router.replace(`/${tab}`, { scroll: false })
+      router.replace(`/${tab}`)
     },
     [dispatch, router],
   )
-
   return { navigateToTab }
 }
