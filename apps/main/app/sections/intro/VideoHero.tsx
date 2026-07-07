@@ -319,8 +319,10 @@ export default function VideoHero({
           zIndex: theme.zIndex.heroContent,
         }}
       >
-        Water is vital to our communities, farms, and the environment. But satisfying water needs is becoming more difficult. 
-        We invite you to explore and shape pathways to a water future that works for all Californians.
+        Water is vital to our communities, farms, and the environment. But
+        satisfying water needs is becoming more difficult. We invite you to
+        explore and shape pathways to a water future that works for all
+        Californians.
       </Typography>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}

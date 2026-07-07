@@ -171,7 +171,7 @@ export default function Narration({
                 "&:hover": {
                   backgroundColor: alpha(theme.palette.common.white, 0.35),
                 },
-                mt: theme.space.gap.xl
+                mt: theme.space.gap.xl,
               }}
             >
               <PlayArrowIcon sx={{ fontSize: 24 }} />
@@ -197,7 +197,8 @@ export default function Narration({
                 color="text.secondary"
                 sx={{ maxWidth: "66%", opacity: 0.85, mt: theme.space.gap.lg }}
               >
-                Click the play button and follow the steps to understand how scenario results are measured.
+                Click the play button and follow the steps to understand how
+                scenario results are measured.
               </Typography>
             </motion.div>
           )}

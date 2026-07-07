@@ -378,8 +378,7 @@ export interface BeatEngineContext {
    * Current engine mode. Arbiters that only act in a certain mode (like
    * `InteractivePaintArbiter` in `interactive`) check this.
    */
-  getMode: () => EngineMode,
-
+  getMode: () => EngineMode
 }
 
 // Arbiter interface

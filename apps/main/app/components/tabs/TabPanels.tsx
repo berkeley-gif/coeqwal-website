@@ -2,7 +2,7 @@
 
 /**
  * TabPanels
- * - Renders the active tab's panel 
+ * - Renders the active tab's panel
  */
 
 import { useMemo, useEffect } from "react"
@@ -37,15 +37,16 @@ export default function TabPanels() {
   const { state, panelRef, dispatch } = useTabs()
   const { activeTab } = state
 
-  // Mount-once: if the user lands on /explore or /share directly,
-  // sync context to match before first render.
-  // After this, context drives everything — URL follows via useTabNavigation.
+  // pathname is read only for this one-time sync; adding it would re-run on
+  // every navigation and fight the context-driven tab state described above.
   useEffect(() => {
     const segment = pathname.split("/").pop() ?? null
     if (isTabKey(segment)) {
       dispatch(setActiveTab(segment))
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch])
+
   // Mount-once rehydration of share-link state into the scenario-explorer
   // store. Reads window.location.search directly, so it does not suspend.
   // Lives in apps/main/app/features/scenarioExplorer/share/useShareUrlRehydration.ts
@@ -59,7 +60,8 @@ export default function TabPanels() {
   // Learn and Explore are transparent — they let the map show through.
   // Share has its own background color.
   const panelColor: string = useMemo(() => {
-    if (activeTab === "learn" || activeTab === "explore") return "rgba(0, 0, 0, 0)"
+    if (activeTab === "learn" || activeTab === "explore")
+      return "rgba(0, 0, 0, 0)"
     return (
       TABS.find((t) => t.key === activeTab)?.panelColor ??
       theme.palette.common.white

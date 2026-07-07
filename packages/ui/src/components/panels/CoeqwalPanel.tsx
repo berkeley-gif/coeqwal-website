@@ -145,11 +145,11 @@ export function CoeqwalPanel({
   const motionProps = contentMotionStyle
     ? { style: contentMotionStyle }
     : {
-      initial: { opacity: 0, y: 20 },
-      whileInView: { opacity: 1, y: 0 },
-      viewport: { once: true, amount: 0.3 },
-      transition: { duration: 0.5, ease: "easeOut" },
-    }
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.3 },
+        transition: { duration: 0.5, ease: "easeOut" },
+      }
 
   const contentInner = (
     <>
@@ -158,11 +158,11 @@ export function CoeqwalPanel({
         sx={
           layout === "split"
             ? {
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              rowGap: { xs: 3, md: 4 },
-              columnGap: { md: 6 },
-            }
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                rowGap: { xs: 3, md: 4 },
+                columnGap: { md: 6 },
+              }
             : { maxWidth: "680px" }
         }
       >
@@ -231,7 +231,6 @@ export function CoeqwalPanel({
     </>
   )
 
-
   const panelPadding = {
     px: theme.space.panel.padding,
     py: theme.space.panel.padding,
@@ -240,14 +239,14 @@ export function CoeqwalPanel({
   const minHeightSx =
     minHeight !== undefined
       ? {
-        minHeight,
-        display: "flex",
-        flexDirection: "column" as const,
-        justifyContent:
-          contentAlign === "top"
-            ? ("flex-start" as const)
-            : ("center" as const),
-      }
+          minHeight,
+          display: "flex",
+          flexDirection: "column" as const,
+          justifyContent:
+            contentAlign === "top"
+              ? ("flex-start" as const)
+              : ("center" as const),
+        }
       : {}
 
   const scrollIndicatorSlot = scrollIndicator ? (
@@ -262,8 +261,6 @@ export function CoeqwalPanel({
       {scrollIndicator}
     </Box>
   ) : null
-
-
 
   // Inset path: outer section is the frame, inner is the rounded card.
 

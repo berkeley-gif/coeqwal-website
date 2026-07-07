@@ -2,7 +2,6 @@
 
 import { forwardRef, type ReactNode } from "react"
 import { useTheme } from "@repo/ui/mui"
-import { useMapMode } from "../../features/map/store"
 import AutoAdvanceFooter from "./AutoAdvanceFooter"
 
 type TabPanelProps = {
@@ -27,14 +26,13 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const headerAndTabsOffset =
       theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
     const subNavHeight = isExploreTab ? theme.layout.collapsedTabHeight : 0
-    const exploreStyles: React.CSSProperties =
-      isExploreTab
-        ? {
+    const exploreStyles: React.CSSProperties = isExploreTab
+      ? {
           height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
           minHeight: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
           overflow: "hidden",
         }
-        : {}
+      : {}
 
     // Panels above the map need pointerEvents: "none" so the persistent map behind them
     // can receive drag/pan events. Child components re-enable pointer events as needed.

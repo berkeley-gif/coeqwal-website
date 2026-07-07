@@ -7,19 +7,21 @@ import {
   CALIFORNIA_VIEW,
   CENTRAL_VALLEY_VIEW,
   DELTA_VIEW,
-  CALIFORNIA_CENTERED_VIEW
+  CALIFORNIA_CENTERED_VIEW,
 } from "./cameraPresets"
 
 export type LearnNavSection = "get-started" | "water-issues" | "water-stories"
 
 export const LearnNavSections: LearnNavSection[] = [
-  'get-started', 'water-issues', 'water-stories'
+  "get-started",
+  "water-issues",
+  "water-stories",
 ]
 
 /** Human-readable copy for each LearnNavSection, for UI display
-  *  (e.g. the "Learn more about ___" footer CTA). Same idea as
-  *  SECTION_LABELS below, just for the top-level nav instead of
-  *  the scrollytelling sub-sections. */
+ *  (e.g. the "Learn more about ___" footer CTA). Same idea as
+ *  SECTION_LABELS below, just for the top-level nav instead of
+ *  the scrollytelling sub-sections. */
 export const LEARN_NAV_SECTION_LABELS: Record<LearnNavSection, string> = {
   "get-started": "Get started",
   "water-issues": "Water issues",
@@ -118,7 +120,7 @@ export const SECTION_LAYERS: Record<SubSectionId, SubSectionLayerConfig> = {
     camera: CALIFORNIA_VIEW,
   },
 
-  // === California intro === 
+  // === California intro ===
   california: {
     californiaLabel: true,
     camera: CALIFORNIA_VIEW,
@@ -149,7 +151,7 @@ export const SECTION_LAYERS: Record<SubSectionId, SubSectionLayerConfig> = {
   "data-in-depth-intro": {},
   "interpreting-outcomes": {},
   "choosing-scenarios": {},
-  "before-exploring": {}
+  "before-exploring": {},
 }
 
 export const SECTION_LABELS: Record<SubSectionId, string> = {
@@ -167,5 +169,5 @@ export const SECTION_LABELS: Record<SubSectionId, string> = {
   "data-in-depth-intro": "Data in depth intro",
   "interpreting-outcomes": "Interpreting outcomes",
   "choosing-scenarios": "Choosing scenarios",
-  "before-exploring": "Before exploring"
+  "before-exploring": "Before exploring",
 }

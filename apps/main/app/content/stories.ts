@@ -19,29 +19,33 @@ export const WATER_STORIES: Story[] = [
   {
     id: "how-water-moves-through-california",
     label: "How water moves through California",
-    description: "How water moves through California a longer description goes here",
+    description:
+      "How water moves through California a longer description goes here",
     href: "https://flow.coeqwal.org",
-    dimmed: false
+    dimmed: false,
   },
   {
     id: "how-climate-change-affects-California-water",
     label: "How climate change affects California water",
-    description: "How climate change affects California water a longer description goes here",
+    description:
+      "How climate change affects California water a longer description goes here",
     href: "https://climate.coeqwal.org",
-    dimmed: false
+    dimmed: false,
   },
   {
     id: "how-water-is-managed-in-california",
     label: "How water is managed in California",
-    description: "How water is managed in California a longer description goes here",
+    description:
+      "How water is managed in California a longer description goes here",
     href: "",
-    dimmed: true
+    dimmed: true,
   },
   {
     id: "how-equity-shapes-California-water",
     label: "How equity shapes California water",
-    description: "How equity shapes California water a longer description goes here",
+    description:
+      "How equity shapes California water a longer description goes here",
     href: "",
-    dimmed: true
+    dimmed: true,
   },
 ]

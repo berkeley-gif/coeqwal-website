@@ -60,7 +60,7 @@ interface MapState {
   mapStyle: string
 
   // Learn mode
-  activeSection: LearnNavSection,
+  activeSection: LearnNavSection
   activeSubSection: SubSectionId
   riversProgress: number
   geocoderMarker: [number, number] | null
@@ -80,7 +80,7 @@ interface MapState {
   // Lightweight highlight tooltips driven by the tier animation overlay
   locationHighlights: LocationHighlight[]
 
-  // When true, unpinned (hover) highlights also render as map popups in the storyboard. 
+  // When true, unpinned (hover) highlights also render as map popups in the storyboard.
   // It turns this on for the beats where the
   // distribution grid is settled, so hovering a square or a map polygon shows
   // a map popup. Off elsewhere so hover stays quiet on the map by default.
@@ -171,7 +171,6 @@ export const mapActions = {
     // remember to call setMapMode too.
     mapActions.setMapMode(section === "get-started" ? "learn" : "hidden")
   },
-
 
   setRiversProgress: (progress: number) =>
     useMapStore.setState({ riversProgress: progress }),
@@ -265,8 +264,8 @@ export const mapActions = {
   setOnLocationHover: (
     fn:
       | ((
-        info: { code: string; sourceId: string; tier: number } | null,
-      ) => void)
+          info: { code: string; sourceId: string; tier: number } | null,
+        ) => void)
       | null,
   ) => {
     _onLocationHover = fn

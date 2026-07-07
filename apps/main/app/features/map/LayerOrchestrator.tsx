@@ -48,7 +48,7 @@ export default function LayerOrchestrator() {
   //   (RiversLayer). Salmon is a line outcome with no demand-units or polygon
   //   layer, so the tier animation's own paint path cannot show it.
   const showSalmonRiversForOutcome =
-    (mapMode === "explore") &&
+    mapMode === "explore" &&
     activeOutcomeVisualization?.outcomeCode === "WRC_SALMON_AB"
   const riversVisible =
     (isLearnMode && showRivers) || showSalmonRiversForOutcome

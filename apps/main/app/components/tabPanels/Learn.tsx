@@ -20,14 +20,23 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, useMapError, mapActions, useActiveSubSection, useLearnNavSection } from "../../features/map/store"
+import {
+  useMapReady,
+  useMapError,
+  mapActions,
+  useActiveSubSection,
+  useLearnNavSection,
+} from "../../features/map/store"
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
 import { WATER_STORIES } from "../../content/stories"
 import type { LearnNavSection } from "../../features/map/config/sectionLayers"
 
-import VerticalNav, { NAV_WIDTH_COLLAPSED, NAV_WIDTH_EXPANDED } from "../verticalNav/VerticalNav"
+import VerticalNav, {
+  NAV_WIDTH_COLLAPSED,
+  NAV_WIDTH_EXPANDED,
+} from "../verticalNav/VerticalNav"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
@@ -100,7 +109,8 @@ export default function LearnPanel() {
         activeSubSectionId={activeSubSection}
         isExpanded={isVertNavExpanded}
         onToggleExpanded={() => setIsVertNavExpanded((prev) => !prev)}
-        onNavigate={handleNavigate} />
+        onNavigate={handleNavigate}
+      />
 
       {/** Get Started section */}
       {activeSection === "get-started" && (
@@ -110,7 +120,6 @@ export default function LearnPanel() {
             pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
           }}
         >
-
           {/* 
         Scrollytelling Container
         The persistent map is positioned fixed at page level.
@@ -147,9 +156,7 @@ export default function LearnPanel() {
               }}
             >
               {mapReady || mapError ? (
-                <MapOverlayPanels
-                  navWidth={navWidth}
-                />
+                <MapOverlayPanels navWidth={navWidth} />
               ) : (
                 <Box
                   sx={{
@@ -161,7 +168,6 @@ export default function LearnPanel() {
                     flexDirection: "column",
                     gap: theme.space.gap.lg,
                     pointerEvents: "none", // Don't block map panning while loading
-
                   }}
                 >
                   <Box
@@ -187,60 +193,73 @@ export default function LearnPanel() {
         </div>
       )}
       {activeSection === "water-issues" && (
-        <Box sx={{
-          p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.blue.dark, minHeight: "100vh",
-          paddingTop: (theme) => theme.space.panel.paddingXl,
-          paddingLeft: (theme) => `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
-          paddingRight: (theme) => theme.space.panel.padding,
-        }}>
-          <Typography
-            variant="h3"
-            sx={{ maxWidth: "66%" }}
-          >
+        <Box
+          sx={{
+            p: 4,
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.blue.dark,
+            minHeight: "100vh",
+            paddingTop: (theme) => theme.space.panel.paddingXl,
+            paddingLeft: (theme) =>
+              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
+            paddingRight: (theme) => theme.space.panel.padding,
+          }}
+        >
+          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
             What water issues matter to you?
           </Typography>
           <Typography
             variant="body1"
             sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
           >
-            Water is important to all of us — from farmers in the Central
-            Valley to communities in the Delta, from salmon in the Sacramento
-            River to urban water users in Los Angeles. We can consider how
-            decisions affect the issues people care about.
+            Water is important to all of us — from farmers in the Central Valley
+            to communities in the Delta, from salmon in the Sacramento River to
+            urban water users in Los Angeles. We can consider how decisions
+            affect the issues people care about.
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: theme.space.listGap.xs }}
+            >
               Click on each water issue to learn more.
             </Typography>
             <InfoCardGrid columns={5}>
-              {WATER_ISSUE_THEMES.map(({ title, description, themeKey, dimmed }) => (
-                <InfoCard
-                  key={themeKey}
-                  title={title}
-                  description={description}
-                  onClick={dimmed ? undefined : () => openThemePanel(themeKey)}
-                  dimmed={dimmed}
-                  variant="onDark"
-                />
-              ))}
+              {WATER_ISSUE_THEMES.map(
+                ({ title, description, themeKey, dimmed }) => (
+                  <InfoCard
+                    key={themeKey}
+                    title={title}
+                    description={description}
+                    onClick={
+                      dimmed ? undefined : () => openThemePanel(themeKey)
+                    }
+                    dimmed={dimmed}
+                    variant="onDark"
+                  />
+                ),
+              )}
             </InfoCardGrid>
           </Box>
-
         </Box>
       )}
 
       {activeSection === "water-stories" && (
-        <Box sx={{
-          p: 4, color: theme.palette.common.white, backgroundColor: theme.palette.nature.forest,
-          paddingTop: (theme) => theme.space.panel.paddingXl,
-          paddingLeft: (theme) => `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
-          paddingRight: (theme) => theme.space.panel.padding,
-        }}>
-          <Typography
-            variant="h3"
-            sx={{ maxWidth: "66%" }}
-          >
-            Did you know that California has one of the most complex water systems in the world?
+        <Box
+          sx={{
+            p: 4,
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.nature.forest,
+            paddingTop: (theme) => theme.space.panel.paddingXl,
+            paddingLeft: (theme) =>
+              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
+            paddingRight: (theme) => theme.space.panel.padding,
+          }}
+        >
+          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
+            Did you know that California has one of the most complex water
+            systems in the world?
           </Typography>
           <Typography
             variant="body1"
@@ -249,7 +268,11 @@ export default function LearnPanel() {
             Here is a paragraph that will explain what the water stories cover
           </Typography>
           <Box sx={{ mt: theme.space.listGap.sm }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: theme.space.listGap.xs }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: theme.space.listGap.xs }}
+            >
               Click on each water story to learn more.
             </Typography>
             <InfoCardGrid columns={5}>
@@ -258,17 +281,19 @@ export default function LearnPanel() {
                   key={id}
                   title={label}
                   description={description}
-                  onClick={dimmed || !href ? undefined : () => window.open(href, "_blank", "noopener,noreferrer")}
+                  onClick={
+                    dimmed || !href
+                      ? undefined
+                      : () => window.open(href, "_blank", "noopener,noreferrer")
+                  }
                   dimmed={dimmed}
                   variant="onDark"
                 />
               ))}
             </InfoCardGrid>
           </Box>
-
         </Box>
       )}
     </>
-
   )
 }

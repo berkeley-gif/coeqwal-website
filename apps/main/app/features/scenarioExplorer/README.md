@@ -83,11 +83,10 @@ All tools are rendered inside `UnifiedToolView`, which provides a persistent thr
 Each surface gets its own `<ErrorBoundary>` (from `@repo/utils`), placed where that surface mounts (in `ExplorerToolView`/`ActiveToolPanel`):
 
 | Boundary     | What it wraps                           | Reset                                       | Fallback                                |
-| ------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------- |
+| ------------ | --------------------------------------- | ------------------------------------------- | --------------------------------------- |
 | Active tool  | controls + panel in `ActiveToolPanel`   | `key={exploreMode}` per `ToolErrorBoundary` | `ErrorFallback`, "try a different tool" |
 | Share drawer | `<ShareDrawer />` in `ExplorerToolView` | Auto on leaving explorer                    | `null` (drawer disappears)              |
 | Tool tour    | `<ToolTour />` in `ExplorerToolView`    | Auto on leaving explorer                    | `null` (tour ends)                      |
-
 
 The outer boundary in [apps/main/app/components/tabPanels/Explore.tsx](../../components/tabPanels/Explore.tsx) catches anything escaping these.
 
@@ -132,18 +131,16 @@ Renders scenarios using the `StrategyGrid` system. Supports search filtering, ou
 One Zustand store (uses Immer via `@repo/state/zustand`):
 
 | Store              | File                                 | Owns                                                |
-| ------------------- | ------------------------------------- | ----------------------------------------------------- |
+| ------------------ | ------------------------------------ | --------------------------------------------------- |
 | `useExplorerStore` | [`explorer/store/`](explorer/store/) | Tools domain, composed from workspace + tool slices |
-
 
 Get started and explorer **do not share fields**. They coordinate through intentional one-way reads (for example `useExplorerMapLayout` reads shell `mainView` plus explorer `showMap`), not a merged store.
 
 ### Cross-store coordination
 
-| Caller           | Reads                                  | Purpose                          |
-| ----------------- | ----------------------------------------- | ----------------------------------- |
-| Share tab (app)  | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards |
-
+| Caller          | Reads                                  | Purpose                          |
+| --------------- | -------------------------------------- | -------------------------------- |
+| Share tab (app) | `useExplorerStore` + `explorer/share/` | Story canvas from captured cards |
 
 ### Three types of state
 
@@ -187,9 +184,9 @@ To wire a new tool slice, see [State: when to add a store slice](#state-when-to-
 
 Explore session state survives a page reload within the same tab. Closing the tab clears sessionStorage. Implementation and key lists: [`exploreSessionPersist.ts`](explorer/store/exploreSessionPersist.ts) (authoritative) and [`pickSlices.ts`](explorer/store/pickSlices.ts) (key index).
 
-| Storage          | Scope                                                                         | Survives reload? | Survives tab close? |
-| ---------------- | ----------------------------------------------------------------------------- | ---------------- | ------------------- |
-| `localStorage`   | Share tray (`shareItems`, `storyItemIds`)                                     | Yes              | Yes                 |
+| Storage          | Scope                                                       | Survives reload? | Survives tab close? |
+| ---------------- | ----------------------------------------------------------- | ---------------- | ------------------- |
+| `localStorage`   | Share tray (`shareItems`, `storyItemIds`)                   | Yes              | Yes                 |
 | `sessionStorage` | Workspace selection/chrome/cosmetics, all tool store slices | Yes (same tab)   | No                  |
 
 **sessionStorage key:** `coeqwal-explorer-tool-sessions-v2`

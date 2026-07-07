@@ -9,7 +9,11 @@
  *
  */
 
-import { SECTION_LABELS, type SubSectionId, SECTION_LAYERS } from "../../features/map/config/sectionLayers"
+import {
+  SECTION_LABELS,
+  type SubSectionId,
+  SECTION_LAYERS,
+} from "../../features/map/config/sectionLayers"
 
 export interface NavSubSection {
   /** Must match the `id` prop on the rendered DOM element for scroll detection */

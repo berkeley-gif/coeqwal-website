@@ -34,7 +34,6 @@ export default function PanelShell({
     )
   }
 
-
   /** Card min-height that fits one viewport, minus the sticky header/tab
    *  stack above it and a fixed breathing margin. `contentOverflowPx` lets
    *  a caller's content run past one viewport deliberately (e.g. the tier
@@ -44,12 +43,12 @@ export default function PanelShell({
     options: { contentOverflowPx?: number } = {},
   ) {
     const { contentOverflowPx = 0 } = options
-    return `calc(100vh - ${stickyStackOffsetPx(theme) + PANEL_BREATHING_PX - contentOverflowPx
-      }px)`
+    return `calc(100vh - ${
+      stickyStackOffsetPx(theme) + PANEL_BREATHING_PX - contentOverflowPx
+    }px)`
   }
 
   const resolvedMinHeight = minHeight ?? getPanelCardHeightCss(theme)
-
 
   return (
     <PanelFrame

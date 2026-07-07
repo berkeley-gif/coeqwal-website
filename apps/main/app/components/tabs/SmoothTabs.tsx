@@ -1,18 +1,15 @@
 "use client"
 
 import { useCallback } from "react"
-import { motion, AnimatePresence } from "@repo/motion"
-import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
-import { TwoColumnInterstitial } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 
-import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
+import { TABS, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 import ExploreSubNav from "../../features/scenarioExplorer/explorer/tools/chrome/nav/ExploreSubNav"
 
 /** Renders the active tab's description panel content */
-function TabDescription({
+/* function TabDescription({
   tab,
   onScrollPromptClick,
 }: {
@@ -65,7 +62,7 @@ function TabDescription({
         />
       )
   }
-}
+} */
 
 export default function SmoothTabs() {
   const { state, tabsRef } = useTabs()
@@ -142,7 +139,6 @@ export default function SmoothTabs() {
                 },
               }}
             >
-
               <Typography
                 component="span"
                 variant="nav"
@@ -174,7 +170,6 @@ export default function SmoothTabs() {
           gap: 1,
         }}
       />
-
 
       <ExploreSubNav />
     </div>
