@@ -18,7 +18,7 @@ import { MAP_THEME_URLS } from "@repo/map"
 // ============================================================================
 
 /** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel), get-started (visible background with page-scroll interaction) */
-export type MapMode = "hidden" | "learn" | "explore" | "get-started"
+export type MapMode = "hidden" | "learn" | "explore"
 
 /** Outcome visualization state used by both Learn and Explore modes */
 export interface OutcomeVisualization {
@@ -80,13 +80,13 @@ interface MapState {
   // Lightweight highlight tooltips driven by the tier animation overlay
   locationHighlights: LocationHighlight[]
 
-  // When true, unpinned (hover) highlights also render as map popups in
-  // get-started mode. The storyboard turns this on for the beats where the
+  // When true, unpinned (hover) highlights also render as map popups in the storyboard. 
+  // It turns this on for the beats where the
   // distribution grid is settled, so hovering a square or a map polygon shows
   // a map popup. Off elsewhere so hover stays quiet on the map by default.
   showHoverHighlightsOnMap: boolean
 
-  // When true, the get-started storyboard region lets pointer events through
+  // When true, the storyboard region lets pointer events through
   // to the map behind it, so the user can pan, zoom, and hover map polygons.
   // The storyboard turns this on only for the settled-grid beats. Off
   // elsewhere keeps the storyboard a solid card with a scripted camera.
@@ -143,7 +143,7 @@ export const mapActions = {
     }
 
     // Learn and get-started always use the satellite basemap
-    if (mode === "learn" || mode === "get-started") {
+    if (mode === "learn") {
       updates.mapStyle = MAP_THEME_URLS.satellite
     }
 

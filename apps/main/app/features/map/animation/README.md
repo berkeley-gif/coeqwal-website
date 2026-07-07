@@ -1,8 +1,8 @@
-# Animation (Get-started storyboard)
+# Animation (tier-animation storyboard)
 
-The "Visualizing key outcomes" click-through animation on the Get-started tab walks a visitor through how scenario key outcomes are read, using a sequence of beats that paint the Mapbox map and animate SVG overlays together.
+The "Visualizing key outcomes" click-through animation, part of the Learn tab's scrollytelling, walks a visitor through how scenario key outcomes are read, using a sequence of beats that paint the Mapbox map and animate SVG overlays together.
 
-- **Mounted by**: `GetStartedView`
+- **Mounted by**: `MapOverlayPanels` (Learn tab, the `outcomes-viz` scroll step)
 - **Map**: shared app Mapbox map via `@repo/map`
 - **Animation**: `@repo/motion` (Framer Motion)
 
@@ -227,7 +227,7 @@ Exactly one owner writes each interactive map layer at any time. The `interactiv
 
 `TierAnimationSection` sets the mode from its navigation handlers (Play sets `playback`, settling on the final beat sets `interactive`, Restart sets `idle`).
 
-The other (non-demand-unit) polygon outcomes, like reservoirs and the Delta, are painted in interactive mode by `PolygonLayerDriver`. It is the single imperative writer for those fills and outlines (the `OutcomePolygonLayer` React component still owns them in Explore and Learn modes, but is skipped in get-started), folds the gold highlight into its own `applyOverlay` pass, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step. The popup data behind both (the `LocationHighlight[]` the store reads) is derived separately in `TierAnimationSection`, since it is data rather than paint.
+The other (non-demand-unit) polygon outcomes, like reservoirs and the Delta, are painted in interactive mode by `PolygonLayerDriver`. It is the single imperative writer for those fills and outlines (the `OutcomePolygonLayer` React component still owns them in Explore and Learn modes, but is skipped while the storyboard is active, i.e. `activeSubSection === "outcomes-viz"`), folds the gold highlight into its own `applyOverlay` pass, and shares the gold-outline and fill-opacity expression builders in [demandUnitsPaint.ts](demandUnitsPaint.ts) with `InteractivePaintArbiter` so the two stay in step.
 
 ## Two families of arbiter
 

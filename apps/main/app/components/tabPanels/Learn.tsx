@@ -23,7 +23,7 @@ import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import { useMapReady, useMapError, mapActions, useActiveSubSection, useLearnNavSection } from "../../features/map/store"
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
-import { WATER_ISSUE_THEMES } from "../../features/scenarioExplorer/getStarted/content"
+import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
 import { WATER_STORIES } from "../../content/stories"
 import type { LearnNavSection } from "../../features/map/config/sectionLayers"
 

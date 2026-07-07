@@ -1,7 +1,7 @@
 /* InteractiveLayerDirector
  *
  * Single entry point for "user selected outcome X, make the map show it"
- * in get-started interactive mode. It sequences the cross-family handoff
+ * in the storyboard's interactive mode. It sequences the cross-family handoff
  * that previously flickered, since the demand-units arbiter, non-DU
  * outline arbiter, and `OutcomePolygonLayer` each reacted on their own.
  *

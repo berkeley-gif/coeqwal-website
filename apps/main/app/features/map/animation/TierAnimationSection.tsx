@@ -435,7 +435,7 @@ export default function TierAnimationSection() {
         }
 
         if (isNewOutcomeSelection) {
-          const action = resolveOutcomeCamera(info.code, "get-started")
+          const action = resolveOutcomeCamera(info.code, "learn")
           mapAPI.withMap((mapRef) => {
             if (action.type === "fitBounds") {
               mapRef.fitBounds(action.bounds, {
@@ -462,7 +462,7 @@ export default function TierAnimationSection() {
   // Shared by the bar-glyph click below.
   const flyToOutcome = useCallback(
     (code: string) => {
-      const action = resolveOutcomeCamera(code, "get-started")
+      const action = resolveOutcomeCamera(code, "learn")
       mapAPI.withMap((mapRef) => {
         if (action.type === "fitBounds") {
           mapRef.fitBounds(action.bounds, {

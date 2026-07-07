@@ -3,7 +3,7 @@
 import { useMemo, useCallback } from "react"
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../store"
-import type { ShareItem } from "../../../store"
+import type { ShareItem } from "../types"
 import type { ShareRadarLiveDataFields } from "../utils/shareRadarLiveData"
 import { useTabNavigation } from "../../../../../hooks/useTabNavigation"
 import { useShareRenderContext } from "../hooks/useShareRenderContext"

@@ -7,7 +7,7 @@
 import { useCallback } from "react"
 import type { StepEvent, StepProgressEvent } from "react-scrollama"
 import { mapActions } from "../store"
-import type { SectionId } from "../config/sectionLayers"
+import type { SubSectionId } from "../config/sectionLayers"
 import { smoothScrollToCenter } from "../../../utils/smoothScrollToCenter"
 
 /**
@@ -20,7 +20,7 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(
-    ({ data, direction }: StepEvent<SectionId>) => {
+    ({ data, direction }: StepEvent<SubSectionId>) => {
       // The california step has no visible content. Entering it immediately triggers
       // the central-valley map state so the zoom animation starts right away.
       const effectiveSection = data === "california" ? "central-valley" : data
@@ -44,7 +44,7 @@ export function useLearnScrollama() {
    * Called when a step exits the viewport.
    * Used for cleanup like clearing outcome visualization when leaving scenario-intro.
    */
-  const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
+  const onStepExit = useCallback(({ data }: StepEvent<SubSectionId>) => {
     if (data === "outcomes-viz") {
       mapActions.clearOutcomeVisualization()
       mapActions.clearLocationHighlights()
@@ -56,7 +56,7 @@ export function useLearnScrollama() {
    * Used for animations like rivers that need 0-1 progress values.
    */
   const onStepProgress = useCallback(
-    ({ data, progress }: StepProgressEvent<SectionId>) => {
+    ({ data, progress }: StepProgressEvent<SubSectionId>) => {
       // Rivers animation uses progress to draw rivers progressively
       if (data === "rivers") {
         // Scale progress: rivers animate during first ~67% of section scroll

@@ -10,7 +10,7 @@
  * from scattered booleans.
  */
 
-import { getOutcomeConfig } from "../../map/config/outcomeLayerRegistry"
+import { getOutcomeConfig } from "../config/outcomeLayerRegistry"
 import type { InteractiveLayerFamily } from "./engine"
 
 export interface InteractiveLayerSchemaEntry {

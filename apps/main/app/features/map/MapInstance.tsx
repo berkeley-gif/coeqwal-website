@@ -90,8 +90,6 @@ const getContainerStyles = (
       }
     case "explore":
       return { ...base, opacity: 1, pointerEvents: "auto" }
-    case "get-started":
-      return { ...base, opacity: 1, pointerEvents: "auto" }
     default:
       return base
   }
@@ -207,10 +205,10 @@ export default function MapInstance({
     })
   }, [mapMode, map, explorePanelWidth])
 
-  /** Explore / get-started mode: hide base layers */
+  /** Explore / hide base layers */
   useEffect(() => {
     if (
-      (mapMode !== "explore" && mapMode !== "get-started") ||
+      (mapMode !== "explore") ||
       !map.mapRef?.current
     )
       return

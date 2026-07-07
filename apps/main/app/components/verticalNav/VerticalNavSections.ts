@@ -9,8 +9,7 @@
  *
  */
 
-import { SECTION_LABELS, type SectionId, SECTION_LAYERS } from "../../features/map/config/sectionLayers"
-
+import { SECTION_LABELS, type SubSectionId, SECTION_LAYERS } from "../../features/map/config/sectionLayers"
 
 export interface NavSubSection {
   /** Must match the `id` prop on the rendered DOM element for scroll detection */
@@ -30,7 +29,7 @@ export interface NavSection {
 }
 
 const GET_STARTED_SUBSECTIONS: NavSubSection[] = (
-  Object.keys(SECTION_LABELS) as SectionId[]
+  Object.keys(SECTION_LABELS) as SubSectionId[]
 )
   .filter((id) => !SECTION_LAYERS[id].isHiddenFromVerticalNav)
   .map((id) => ({

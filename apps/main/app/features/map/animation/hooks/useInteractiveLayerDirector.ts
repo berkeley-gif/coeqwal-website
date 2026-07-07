@@ -21,7 +21,7 @@ import {
 } from "../../../map/config/outcomeLayerRegistry"
 import { getInteractiveLayerSchema } from "../interactiveLayerSchema"
 import type { LocationInfo } from "../OutcomeMorphOverlay"
-import type { OutcomeLocationData } from "../useTierAnimationData"
+import { OutcomeLocationData } from "../useTierAnimationData"
 import type {
   InteractiveLayerDirector,
   BeatEngineContext,

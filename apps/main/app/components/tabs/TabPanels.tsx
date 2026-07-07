@@ -41,12 +41,11 @@ export default function TabPanels() {
   // sync context to match before first render.
   // After this, context drives everything — URL follows via useTabNavigation.
   useEffect(() => {
-    const segment = pathname.split("/").pop()
+    const segment = pathname.split("/").pop() ?? null
     if (isTabKey(segment)) {
       dispatch(setActiveTab(segment))
     }
   }, [])
-
   // Mount-once rehydration of share-link state into the scenario-explorer
   // store. Reads window.location.search directly, so it does not suspend.
   // Lives in apps/main/app/features/scenarioExplorer/share/useShareUrlRehydration.ts

@@ -106,7 +106,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   const isActive =
     !!outcome &&
     !!config &&
-    (mapMode === "learn" || mapMode === "explore" || mapMode === "get-started")
+    (mapMode === "learn" || mapMode === "explore")
 
   // Fetch tier data (using outcomeCode)
   const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)
@@ -119,8 +119,6 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // overview on deselect. In explore mode, all easeTo/fitBounds calls
   // include left padding so the camera centers within the visible strip.
   useEffect(() => {
-    if (mapMode === "get-started") return
-
     const isExplore = mapMode === "explore"
     const leftPadding = isExplore
       ? window.innerWidth * (explorePanelWidth / 100) + 10

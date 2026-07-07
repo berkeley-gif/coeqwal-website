@@ -80,15 +80,6 @@ export default function SmoothTabs() {
     [activeTab, navigateToTab],
   )
 
-  // Keyboard a11y: ArrowLeft/Right, Home/End
-  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    const idx = TAB_ORDER.indexOf(activeTab)
-    if (e.key === "ArrowRight") onSelect(TAB_ORDER[(idx + 1) % TAB_ORDER.length])
-    if (e.key === "ArrowLeft") onSelect(TAB_ORDER[(idx - 1 + TAB_ORDER.length) % TAB_ORDER.length])
-    if (e.key === "Home") onSelect(TAB_ORDER[0])
-    if (e.key === "End") onSelect(TAB_ORDER[TAB_ORDER.length - 1])
-  }
-
   return (
     <div
       id="tabs"
@@ -104,7 +95,6 @@ export default function SmoothTabs() {
       <div
         role="tablist"
         aria-label="tab-sections"
-        onKeyDown={handleKeyDown}
         className="tab-container"
         style={{
           display: "grid",

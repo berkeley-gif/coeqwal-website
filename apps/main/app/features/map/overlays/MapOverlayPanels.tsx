@@ -22,11 +22,10 @@ import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
 import { themeValues } from "@repo/ui/themes/theme"
 import { PanelEyebrow } from "./PanelEyebrow"
-import type { SectionId } from "../config/sectionLayers"
+import type { SubSectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
-import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel, DataInDepthPanel, InterpretingOutcomesPanel, ChooseScenariosPanel, BeforeYouBeginPanel } from "../../scenarioExplorer/getStarted/panels"
-import TierAnimationSection from "../../scenarioExplorer/animation/TierAnimationSection"
-
+import { WelcomePanel, WaterIssuesPanel, HydroclimateFuturesPanel, KeyOutcomesPanel, DataInDepthPanel, InterpretingOutcomesPanel, ChooseScenariosPanel, BeforeYouBeginPanel } from "./learnPanels"
+import TierAnimationSection from "../animation/TierAnimationSection"
 interface MapOverlayPanelsProps {
   navWidth: number
 }
@@ -69,7 +68,7 @@ export default function MapOverlayPanels({
         debug={SCROLLAMA_CONFIG.debug}
       >
         { /* ==================== Intro =========================== */}
-        <Step data={"intro" as SectionId}>
+        <Step data={"intro" as SubSectionId}>
           <Box
             id="intro"
             sx={{
@@ -101,12 +100,12 @@ export default function MapOverlayPanels({
             the viewport, triggering the Central Valley zoom via useLearnScrollama.
             50vh gives the zoom animation time to play and the momentum of an
             active scroll to settle before the central-valley paragraph slides in. */}
-        <Step data={"california" as SectionId}>
+        <Step data={"california" as SubSectionId}>
           <Box sx={{ height: "50vh", pointerEvents: "none" }} />
         </Step>
 
         {/* ==================== Central Valley ==================== */}
-        <Step data={"central-valley" as SectionId}>
+        <Step data={"central-valley" as SubSectionId}>
           <Box
             id="central-valley"
             sx={{
@@ -151,7 +150,7 @@ export default function MapOverlayPanels({
         </Step>
 
         {/* ==================== Rivers (sticky with progress) ==================== */}
-        <Step data={"rivers" as SectionId} progress>
+        <Step data={"rivers" as SubSectionId} progress>
           <Box
             id="rivers"
             sx={{
@@ -204,7 +203,7 @@ export default function MapOverlayPanels({
         </Step>
 
         {/* ==================== Water Distribution ==================== */}
-        <Step data={"distribution" as SectionId}>
+        <Step data={"distribution" as SubSectionId}>
           <Box
             id="distribution"
             sx={{
@@ -233,7 +232,7 @@ export default function MapOverlayPanels({
         </Step>
 
         {/* ==================== CalSim ==================== */}
-        <Step data={"calsim" as SectionId}>
+        <Step data={"calsim" as SubSectionId}>
           <Box
             id="calsim"
             sx={{
@@ -304,7 +303,7 @@ export default function MapOverlayPanels({
       />
 
       <Scrollama onStepEnter={onStepEnter} offset={SCROLLAMA_CONFIG.offset}>
-        <Step data={"coeqwal" as SectionId}>
+        <Step data={"coeqwal" as SubSectionId}>
           <Box
             id="coeqwal"
             sx={{
@@ -320,7 +319,7 @@ export default function MapOverlayPanels({
             <WelcomePanel />
           </Box>
         </Step>
-        <Step data={"water-issues" as SectionId}>
+        <Step data={"water-issues" as SubSectionId}>
           <Box
             id="water-issues"
             sx={{
@@ -338,7 +337,7 @@ export default function MapOverlayPanels({
         </Step>
 
 
-        <Step data={"hydroclimates" as SectionId}>
+        <Step data={"hydroclimates" as SubSectionId}>
           <Box
             id="hydroclimates"
             sx={{
@@ -354,7 +353,7 @@ export default function MapOverlayPanels({
             <HydroclimateFuturesPanel />
           </Box>
         </Step>
-        <Step data={"key-outcomes" as SectionId}>
+        <Step data={"key-outcomes" as SubSectionId}>
           <Box
             id="key-outcomes"
             sx={{
@@ -376,7 +375,7 @@ export default function MapOverlayPanels({
         progress={true} is prep for scroll-driven migration — onStepProgress
         will eventually write the storyboard's MotionValue instead of Next/Back.
         */}
-        <Step data={"outcomes-viz" as SectionId} progress>
+        <Step data={"outcomes-viz" as SubSectionId} progress>
           <Box
             sx={{
               minHeight: "100vh",
@@ -403,7 +402,7 @@ export default function MapOverlayPanels({
         </Step>
 
 
-        <Step data={"data-in-depth-intro" as SectionId}>
+        <Step data={"data-in-depth-intro" as SubSectionId}>
           <Box
             id="data-in-depth-intro"
             sx={{
@@ -420,7 +419,7 @@ export default function MapOverlayPanels({
           </Box>
         </Step>
 
-        <Step data={"interpreting-outcomes" as SectionId}>
+        <Step data={"interpreting-outcomes" as SubSectionId}>
           <Box
             id="interpreting-outcomes"
             sx={{
@@ -437,7 +436,7 @@ export default function MapOverlayPanels({
           </Box>
         </Step>
 
-        <Step data={"choosing-scenarios" as SectionId}>
+        <Step data={"choosing-scenarios" as SubSectionId}>
           <Box
             id="choosing-scenarios"
             sx={{
@@ -455,7 +454,7 @@ export default function MapOverlayPanels({
         </Step>
 
 
-        <Step data={"before-exploring" as SectionId}>
+        <Step data={"before-exploring" as SubSectionId}>
           <Box
             id="before-exploring"
             sx={{
