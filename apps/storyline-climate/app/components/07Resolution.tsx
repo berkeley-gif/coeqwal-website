@@ -37,15 +37,21 @@ const hydroclimateDescription = [
     ],
   },
   {
-    text: 'These hydroclimates represent different levels of risk to our water system that we should be prepared for. For example, a "moderate risk" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme risk" hydroclimate future is less likely, but possible.',
-  },
-  {
-    text: "See how monthly average river flows are expected to change under these two hydroclimate futures.",
+    segments: [
+      { text: "These hydroclimates represent " },
+      { text: "different levels of risk to our water system", mark: "yellow" },
+      {
+        text: ' that we should be prepared for. For example, a "moderate risk" hydroclimate future represents a change in conditions that are likely to occur, while the "extreme risk" hydroclimate future is less likely, but possible.',
+      },
+    ],
   },
 ]
 
-const hydroclimateTransitionTitle =
-  "While we can't control the climate, we can take actions to limit the impacts of climate change."
+const hydroclimateTransitionTitle = [
+  { text: "While we can't control the climate, we can " },
+  { text: "take actions", mark: "yellowStrong" },
+  { text: " to limit the impacts of climate change." },
+]
 
 const hydroclimateTransitionText = [
   [
@@ -54,22 +60,41 @@ const hydroclimateTransitionText = [
   ],
 ]
 
+const hydroclimateContentMaxWidth = {
+  xs: "100%",
+  md: "64rem",
+  lg: "78rem",
+  xl: "112rem",
+} as const
+
+const hydroclimateChartHeight = {
+  xs: "24rem",
+  md: "28rem",
+  lg: "31rem",
+  xl: "34rem",
+} as const
+
 const conclusionOpening = [
-  { text: "In the years ahead," },
   {
-    text: "California's climate will continue to change. How we manage water must also change.",
+    segments: [
+      {
+        text: "In the years ahead,\nCalifornia's climate will continue to change. ",
+      },
+      { text: "How we manage water must also change.", mark: "strong" },
+    ],
   },
+]
+
+const conclusionScenarios = [
   {
     text: "By exploring different scenarios for California's water future, we can evaluate options and identify solutions that will allow us to thrive.",
   },
 ]
 
-const conclusionQuestion = [
-  { text: "Are you curious about how these scenarios might affect you?" },
-]
-
 const conclusionLink = [
   <>
+    Are you curious about how these scenarios might affect you?
+    <br />
     You can start{" "}
     <strong>
       <a
@@ -114,7 +139,7 @@ export function CoeqwalCallout() {
         sx={{ position: "relative", zIndex: 1, textShadow: "0 2px 18px #000" }}
       >
         <SectionTitle
-          variant="h2"
+          variant="h1"
           text={[
             { text: "This is where " },
             { text: "COEQWAL", mark: "highlight" },
@@ -143,36 +168,36 @@ export function Hydroclimate() {
 function HydroclimateContent() {
   const progress = useScrollProgress()
   const titleOpacity = useScrollValue(progress, [0.12, 0.28], [0, 1])
-  const paragraphOneOpacity = useScrollValue(
-    progress,
-    [0.22, 0.38],
-    [0, 1],
-  )
+  const paragraphOneOpacity = useScrollValue(progress, [0.22, 0.38], [0, 1])
   const paragraphTwoOpacity = useScrollValue(progress, [0.32, 0.5], [0, 1])
-  const chartHeadingOpacity = useScrollValue(progress, [0.44, 0.6], [0, 1])
 
   return (
-    <>
+    <Box
+      sx={{
+        position: "relative",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        py: { xs: "3rem", md: "3.5rem", lg: "4rem" },
+      }}
+    >
       <Box
-        width="100%"
-        height="100vh"
+        className="text-section"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
+          position: "relative",
+          width: "100%",
+          boxSizing: "border-box",
+          pointerEvents: "auto",
         }}
       >
-        <Box
-          className="text-section"
-          width="100%"
+        <Stack
+          direction="column"
           sx={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            paddingTop: { xs: "2rem", md: "4rem" },
-            paddingBottom: { xs: 0, md: 0 },
-            pointerEvents: "auto",
+            width: "100%",
+            maxWidth: hydroclimateContentMaxWidth,
+            textAlign: "left",
+            gap: { xs: 1, md: 1, lg: 2 },
           }}
         >
           <motion.div style={{ opacity: titleOpacity }}>
@@ -183,56 +208,48 @@ function HydroclimateContent() {
               />
             </Box>
           </motion.div>
-          <motion.div style={{ opacity: paragraphOneOpacity }}>
+          <motion.div
+            style={{ opacity: paragraphOneOpacity, maxWidth: "73ch" }}
+          >
             <Box className="paragraph" component="article">
               <Paragraph blocks={coeqwalIntro} />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphTwoOpacity }}>
             <Box className="paragraph" component="article">
-              <Paragraph blocks={hydroclimateDescription} />
+              <Paragraph
+                blocks={hydroclimateDescription}
+                markSx={{
+                  yellow: {
+                    color: "#ffb347",
+                    fontWeight: "inherit",
+                  },
+                }}
+              />
             </Box>
           </motion.div>
-        </Box>
+        </Stack>
 
-        <Box
-          className="text-section"
-          width="100%"
-          height="100%"
+        <Visualization
+          title="Streamflow Changes under Different Hydroclimates"
+          caption="Changes in total average streamflow by month for each hydroclimate based on the period 1922 - 2021."
           sx={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            pointerEvents: "auto",
+            width: "100%",
           }}
         >
-          <Visualization
-            title="Streamflow Changes under Different Hydroclimates"
-            caption="Changes in total average streamflow by month for each hydroclimate based on the period 1922 - 2021."
-            headerWrapper={(header) => (
-              <motion.div
-                style={{
-                  opacity: chartHeadingOpacity,
-                  marginBottom: "1rem",
-                }}
-              >
-                {header}
-              </motion.div>
-            )}
-            sx={{ height: "100%" }}
+          <Box
+            sx={{
+              width: "100%",
+              height: hydroclimateChartHeight,
+              display: "flex",
+              justifyContent: "flex-start",
+            }}
           >
-            <Box
-              className="container-center-horizontal"
-              width="100%"
-              height="100%"
-            >
-              <HydroClimateContainer />
-            </Box>
-          </Visualization>
-        </Box>
+            <HydroClimateContainer />
+          </Box>
+        </Visualization>
       </Box>
-    </>
+    </Box>
   )
 }
 
@@ -308,10 +325,22 @@ function HydroclimateTransitionContent() {
           sx={{
             position: "relative",
             p: { xs: 2, md: 4 },
+            textAlign: "center",
+            "& .MuiTypography-root": {
+              textAlign: "center",
+            },
           }}
         >
           <motion.div style={{ opacity: headingOpacity }}>
-            <SectionTitle text={hydroclimateTransitionTitle} />
+            <SectionTitle
+              text={hydroclimateTransitionTitle}
+              markSx={{
+                yellowStrong: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
+            />
           </motion.div>
           <motion.div style={{ opacity: paragraphOpacity }}>
             <Paragraph variant="h3" blocks={hydroclimateTransitionText} />
@@ -655,11 +684,26 @@ export function Themes() {
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
             />
             <Paragraph
               variant="body2"
-              blocks={["Prioritizing deliveries to community water systems"]}
+              blocks={[
+                {
+                  segments: [
+                    { text: "Prioritizing", mark: "action" },
+                    { text: " deliveries to community water systems" },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
@@ -695,8 +739,21 @@ export function Themes() {
             <Paragraph
               variant="body2"
               blocks={[
-                "Limiting groundwater pumping in the Central Valley to sustainable levels",
+                {
+                  segments: [
+                    { text: "Limiting", mark: "action" },
+                    {
+                      text: " groundwater pumping in the Central Valley to sustainable levels",
+                    },
+                  ],
+                },
               ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
@@ -728,17 +785,33 @@ export function Themes() {
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
             />
             <Paragraph
               variant="body2"
               blocks={[
-                "Increasing Delta outflows and enhancing flows in Central Valley rivers to improve ecosystem health",
+                {
+                  segments: [
+                    { text: "Increasing", mark: "action" },
+                    {
+                      text: " Delta outflows and enhancing flows in Central Valley rivers to improve ecosystem health",
+                    },
+                  ],
+                },
               ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
             />
           </Box>
@@ -771,12 +844,26 @@ export function Themes() {
             <Paragraph
               variant="body2"
               blocks={[
-                "Changing operations to maintain freshwater conditions in the Delta",
+                {
+                  segments: [
+                    { text: "Changing", mark: "action" },
+                    {
+                      text: " operations to maintain freshwater conditions in the Delta",
+                    },
+                  ],
+                },
               ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
             />
           </Box>
@@ -804,15 +891,31 @@ export function Themes() {
                 fontWeight: "bold",
                 color: "#ffb347",
                 fontSize: theme.typography.body1.fontSize,
+                textAlign: "right",
+                width: "100%",
               }}
             />
             <Paragraph
               variant="body1"
-              blocks={["Improving reliability of exports from the Delta"]}
+              blocks={[
+                {
+                  segments: [
+                    { text: "Improving", mark: "action" },
+                    { text: " reliability of exports from the Delta" },
+                  ],
+                },
+              ]}
+              markSx={{
+                action: {
+                  color: "#ffb347",
+                  fontWeight: "bold",
+                },
+              }}
               sx={{
                 color: theme.palette.common.white,
                 fontSize: theme.typography.body1.fontSize,
                 lineHeight: 1.4,
+                textAlign: "right",
               }}
             />
           </Box>
@@ -840,16 +943,8 @@ export function Conclusion() {
 function ConclusionContent({ theme }: { theme: Theme }) {
   const progress = useScrollProgress()
   const paragraphOneOpacity = useScrollValue(progress, [0.2, 0.4], [0, 1])
-  const paragraphTwoOpacity = useScrollValue(
-    progress,
-    [0.35, 0.55],
-    [0, 1],
-  )
-  const paragraphThreeOpacity = useScrollValue(
-    progress,
-    [0.5, 0.7],
-    [0, 1],
-  )
+  const paragraphTwoOpacity = useScrollValue(progress, [0.35, 0.55], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.5, 0.7], [0, 1])
   const linePath = useScrollValue(progress, [0.5, 0.9], [0, 1])
 
   return (
@@ -910,12 +1005,15 @@ function ConclusionContent({ theme }: { theme: Theme }) {
         <Stack spacing={2} direction="column" alignItems="center">
           <motion.div style={{ opacity: paragraphOneOpacity, width: "100%" }}>
             <Box width="100%" className="paragraph" component="article">
-              <Paragraph blocks={conclusionOpening} />
+              <Paragraph
+                blocks={conclusionOpening}
+                sx={{ whiteSpace: "pre-line" }}
+              />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphTwoOpacity, width: "100%" }}>
             <Box width="100%" className="paragraph" component="article">
-              <Paragraph blocks={conclusionQuestion} />
+              <Paragraph blocks={conclusionScenarios} />
             </Box>
           </motion.div>
           <motion.div style={{ opacity: paragraphThreeOpacity, width: "100%" }}>

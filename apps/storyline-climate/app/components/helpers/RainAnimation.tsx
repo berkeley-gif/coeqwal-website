@@ -1,7 +1,6 @@
-import type { CSSProperties } from "react"
-import { useState, useEffect, useRef } from "react"
+"use client"
 
-const DROP_COUNT = 100
+import { useState, useEffect, useRef } from "react"
 
 type Drop = {
   left: number
@@ -15,18 +14,21 @@ function seededRandom(seed: number) {
   return x - Math.floor(x)
 }
 
-const drops: Drop[] = Array.from({ length: DROP_COUNT }, (_, i) => {
-  const seed = i + 1
+function createDrop(index: number): Drop {
+  const seed = index + 1
 
   return {
     left: seededRandom(seed) * 100,
-    delay: seededRandom(seed * 2) * 5,
+    delay: seededRandom(seed * 2) * -5,
     baseDur: 2 + seededRandom(seed * 3) * 2,
     visibilityThreshold: seededRandom(seed * 4),
   }
-})
+}
 
 export default function RainAnimation() {
+  const [drops] = useState<Drop[]>(() =>
+    Array.from({ length: 100 }, (_, index) => createDrop(index)),
+  )
   const [intensity, setIntensity] = useState(1)
   const rainRef = useRef<HTMLDivElement | null>(null)
   const [travelPx, setTravelPx] = useState(0)
@@ -42,7 +44,7 @@ export default function RainAnimation() {
     }
 
     updateIntensity()
-    const interval = setInterval(updateIntensity, 50) // Update every 50ms for smooth transitions
+    const interval = setInterval(updateIntensity, 160)
 
     return () => clearInterval(interval)
   }, [])
@@ -67,10 +69,10 @@ export default function RainAnimation() {
       <div
         ref={rainRef}
         className="rain"
-        style={{ "--rain-travel": `${travelPx}px` } as CSSProperties}
+        style={{ ["--rain-travel" as string]: `${travelPx}px` }}
       >
         {drops.map((drop, i) => {
-          const dur = drop.baseDur / Math.max(intensity, 0.5)
+          const dur = drop.baseDur
           const opacity = 0.3 + intensity * 0.7
           const isVisible = drop.visibilityThreshold < intensity
 

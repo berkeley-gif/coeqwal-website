@@ -1,20 +1,39 @@
 "use client"
 
 import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Stack, useTheme } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import GroundwaterLine from "./vis/GroundwaterLine"
 import SVGLineContainer from "./helpers/SVGLineContainer"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   StickyScrollSection,
   useScrollProgress,
   useScrollValue,
 } from "@repo/scrollytelling"
 
+const groundwaterLine = {
+  guideValue: 108,
+  viewBoxY: 20,
+  viewBoxWidth: 1728,
+  viewBoxHeight: 1115,
+  translateX: 0,
+  initialTranslateY: -14,
+  textOffsetY: -24,
+  path: "M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115",
+} as const
+
 const droughtIntro = [
   { text: "Droughts are not new to California." },
   {
-    text: "But in a changing climate, droughts are expected to occur more often.",
+    segments: [
+      { text: "But " },
+      {
+        text: "in a changing climate, droughts are expected to occur more often",
+        mark: "highlight",
+      },
+      { text: "." },
+    ],
   },
 ]
 
@@ -64,49 +83,38 @@ function Groundwater() {
 
 function GroundwaterContent() {
   const theme = useTheme()
+  const alignment = useGroundwaterLineAlignment()
   const progress = useScrollProgress()
 
   const linePath = useScrollValue(progress, [0.7, 0.9], [0, 1])
   const textOpacity = useScrollValue(progress, [0.7, 0.8], [0, 1])
   const titleOpacity = useScrollValue(progress, [0.2, 0.35], [0, 1])
-  const paragraphOneOpacity = useScrollValue(
-    progress,
-    [0.28, 0.44],
-    [0, 1],
-  )
-  const paragraphTwoOpacity = useScrollValue(
-    progress,
-    [0.36, 0.52],
-    [0, 1],
-  )
-  const paragraphThreeOpacity = useScrollValue(
-    progress,
-    [0.44, 0.6],
-    [0, 1],
-  )
-  const paragraphFourOpacity = useScrollValue(
-    progress,
-    [0.52, 0.68],
-    [0, 1],
-  )
+  const paragraphOneOpacity = useScrollValue(progress, [0.28, 0.44], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.36, 0.52], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.44, 0.6], [0, 1])
+  const paragraphFourOpacity = useScrollValue(progress, [0.52, 0.68], [0, 1])
   const chartHeadingOpacity = useScrollValue(progress, [0.6, 0.75], [0, 1])
 
   return (
-    <>
+    <Box
+      ref={alignment.sectionRef}
+      sx={{ position: "relative", height: "100%" }}
+    >
       <SVGLineContainer viewBox="0 20 1728 1115" zIndex={3}>
         <motion.path
+          ref={alignment.pathRef}
           id="groundwaterPumpingPath"
-          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          d={groundwaterLine.path}
           className="svg-line glow-effect"
           pathLength={linePath}
-          transform={"translate(0, -14)"}
+          transform={`translate(${groundwaterLine.translateX}, ${alignment.lineTranslateY})`}
         />
         <motion.path
           id="groundwaterPumpingTextPath"
-          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          d={groundwaterLine.path}
           fill="none"
           stroke="none"
-          transform="translate(0, -38)"
+          transform={`translate(${groundwaterLine.translateX}, ${alignment.textTranslateY + 55})`}
         />
         <motion.text
           fill="#F1B143"
@@ -118,7 +126,7 @@ function GroundwaterContent() {
         >
           <textPath
             href="#groundwaterPumpingTextPath"
-            startOffset="35%"
+            startOffset="40%"
             textAnchor="middle"
           >
             Droughts drive groundwater pumping
@@ -139,31 +147,34 @@ function GroundwaterContent() {
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ opacity: titleOpacity }}>
-          <Box className="paragraph" component="article">
-            <SectionTitle text="Managing Groundwater During Droughts" />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={droughtIntro} />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={groundwaterUse} />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphThreeOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={groundwaterRecharge} />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphFourOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={groundwaterManagement} />
-          </Box>
-        </motion.div>
+        <Box className="paragraph" component="article">
+          <motion.div style={{ opacity: titleOpacity }}>
+            <SectionTitle text="More Managing Groundwater During Droughts" />
+          </motion.div>
+          <Stack direction="column" spacing={2}>
+            {[
+              { blocks: droughtIntro, opacity: paragraphOneOpacity },
+              { blocks: groundwaterUse, opacity: paragraphTwoOpacity },
+              { blocks: groundwaterRecharge, opacity: paragraphThreeOpacity },
+              { blocks: groundwaterManagement, opacity: paragraphFourOpacity },
+            ].map(({ blocks, opacity }, index) => (
+              <motion.div key={index} style={{ opacity }}>
+                <Paragraph
+                  blocks={blocks}
+                  markSx={{
+                    highlight: {
+                      color: "#F1B143",
+                      fontWeight: "normal",
+                    },
+                    strong: {
+                      fontWeight: "bold",
+                    },
+                  }}
+                />
+              </motion.div>
+            ))}
+          </Stack>
+        </Box>
       </Box>
 
       <Box
@@ -201,13 +212,101 @@ function GroundwaterContent() {
             pointerEvents: "auto",
           }}
         >
-          <Box width="100%" height={{ xs: "42vh", md: "52vh" }}>
-            <GroundwaterLine scrollProgress={progress} />
+          <Box
+            ref={alignment.chartRef}
+            width="100%"
+            height={{ xs: "42vh", md: "52vh" }}
+          >
+            <GroundwaterLine
+              scrollProgress={progress}
+              groundwaterGuideValue={groundwaterLine.guideValue}
+              onGroundwaterGuidePointChange={alignment.setChartGuidePoint}
+            />
           </Box>
         </Visualization>
       </Box>
-    </>
+    </Box>
   )
 }
 
 export default Groundwater
+
+function useGroundwaterLineAlignment() {
+  const sectionRef = useRef<HTMLDivElement | null>(null)
+  const chartRef = useRef<HTMLDivElement | null>(null)
+  const pathRef = useRef<SVGPathElement | null>(null)
+  const [chartGuidePoint, setChartGuidePoint] = useState<{
+    x: number
+    y: number
+  } | null>(null)
+  const [lineTranslateY, setLineTranslateY] = useState<number>(
+    groundwaterLine.initialTranslateY,
+  )
+
+  const measure = useCallback(() => {
+    const section = sectionRef.current
+    const chart = chartRef.current
+    const path = pathRef.current
+    if (!section || !chart || !path || chartGuidePoint === null) return
+
+    const sectionRect = section.getBoundingClientRect()
+    const chartRect = chart.getBoundingClientRect()
+    if (sectionRect.width <= 0 || sectionRect.height <= 0) return
+
+    const guideXInSection =
+      chartRect.left - sectionRect.left + chartGuidePoint.x
+    const guideYInSection = chartRect.top - sectionRect.top + chartGuidePoint.y
+    const guideXInViewBox =
+      (guideXInSection / sectionRect.width) * groundwaterLine.viewBoxWidth
+    const guideYInViewBox =
+      groundwaterLine.viewBoxY +
+      (guideYInSection / sectionRect.height) * groundwaterLine.viewBoxHeight
+
+    setLineTranslateY(
+      guideYInViewBox -
+        getPathYAtX(path, guideXInViewBox - groundwaterLine.translateX),
+    )
+  }, [chartGuidePoint])
+
+  useEffect(() => {
+    measure()
+
+    const observer = new ResizeObserver(() => requestAnimationFrame(measure))
+    const section = sectionRef.current
+    const chart = chartRef.current
+
+    if (section) observer.observe(section)
+    if (chart) observer.observe(chart)
+    window.addEventListener("resize", measure)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [measure])
+
+  return {
+    sectionRef,
+    chartRef,
+    pathRef,
+    lineTranslateY,
+    textTranslateY: lineTranslateY + groundwaterLine.textOffsetY,
+    setChartGuidePoint,
+  }
+}
+
+function getPathYAtX(path: SVGPathElement, x: number) {
+  const length = path.getTotalLength()
+  let start = 0
+  let end = length
+
+  for (let i = 0; i < 32; i += 1) {
+    const midpoint = (start + end) / 2
+    const point = path.getPointAtLength(midpoint)
+
+    if (point.x < x) start = midpoint
+    else end = midpoint
+  }
+
+  return path.getPointAtLength((start + end) / 2).y
+}

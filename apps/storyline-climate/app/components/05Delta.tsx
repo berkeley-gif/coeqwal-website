@@ -1,7 +1,8 @@
 "use client"
 
 import { ImageCaption, Paragraph, SectionTitle } from "@repo/ui"
-import { Box, LibraryBooksIcon, useTheme } from "@repo/ui/mui"
+import { Box, LibraryBooksIcon, Stack, useTheme } from "@repo/ui/mui"
+import type { SxProps, Theme } from "@repo/ui/mui"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import { motion } from "@repo/motion"
@@ -22,10 +23,10 @@ const deltaLocation = [
   {
     segments: [
       {
-        text: "One of the most vulnerable places to rising sea levels is the Delta, where two of the state's largest rivers - ",
+        text: "One of the most vulnerable places to rising sea levels is the Delta, where two of the state's largest rivers \u2014 ",
       },
       { text: "the Sacramento and San Joaquin", mark: "freshWater" },
-      { text: " - meet the San Francisco Bay." },
+      { text: " \u2014 meet the San Francisco Bay." },
     ],
   },
 ]
@@ -65,6 +66,20 @@ const deltaAdaptation = [
   </>,
 ]
 
+const deltaTextOverlaySx = {
+  width: "fit-content",
+  maxWidth: { xs: "calc(100% - 2rem)", md: "70rem", xl: "86rem" },
+  px: { xs: 2.25, md: 3, xl: 3.5 },
+  py: { xs: 2.25, md: 2.75, xl: 3.25 },
+  borderRadius: "8px",
+  border: "1px solid rgba(252, 251, 250, 0.16)",
+  backgroundColor: "rgba(25, 61, 107, 0.58)",
+  boxShadow: "0 18px 56px rgba(0, 0, 0, 0.18)",
+  backdropFilter: "blur(3px)",
+  color: "#FCFBFA",
+  textShadow: "none",
+} satisfies SxProps<Theme>
+
 export default function DeltaFarms() {
   return (
     <StickyScrollSection
@@ -80,26 +95,14 @@ export default function DeltaFarms() {
 }
 
 function DeltaFarmsContent() {
-  const theme = useTheme()
   const progress = useScrollProgress()
   const linePathLength = useScrollValue(progress, [0.6, 0.9], [0, 1])
   const lineOpacity = useScrollValue(progress, [0.55, 0.7], [0, 1])
+  const panelOpacity = useScrollValue(progress, [0.14, 0.28], [0, 1])
   const titleOpacity = useScrollValue(progress, [0.18, 0.32], [0, 1])
-  const paragraphOneOpacity = useScrollValue(
-    progress,
-    [0.28, 0.42],
-    [0, 1],
-  )
-  const paragraphTwoOpacity = useScrollValue(
-    progress,
-    [0.38, 0.54],
-    [0, 1],
-  )
-  const paragraphThreeOpacity = useScrollValue(
-    progress,
-    [0.48, 0.64],
-    [0, 1],
-  )
+  const paragraphOneOpacity = useScrollValue(progress, [0.28, 0.42], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.38, 0.54], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.48, 0.64], [0, 1])
 
   return (
     <>
@@ -139,7 +142,7 @@ function DeltaFarmsContent() {
 
       <Box
         className="text-section"
-        width="65%"
+        width="100%"
         height="100%"
         sx={{
           position: "relative",
@@ -149,32 +152,33 @@ function DeltaFarmsContent() {
           flexDirection: "column",
           justifyContent: "flex-start",
           paddingTop: "5rem",
-          textShadow: theme.textShadow.displayBody,
         }}
       >
-        <motion.div style={{ opacity: titleOpacity }}>
-          <Box className="paragraph" component="article">
-            <SectionTitle text="Rising seas, rising risks" />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={deltaSeaLevelIntro} />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={deltaLocation}
-              markSx={{
-                freshWater: { fontWeight: "bold", color: FreshWaterColor },
-              }}
-            />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphThreeOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={deltaUses} />
+        <motion.div style={{ opacity: panelOpacity }}>
+          <Box
+            className="paragraph"
+            component="article"
+            sx={deltaTextOverlaySx}
+          >
+            <Stack direction="column" spacing={{ xs: 2, md: 2.25 }}>
+              <motion.div style={{ opacity: titleOpacity }}>
+                <SectionTitle text="Rising seas, rising risks" />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphOneOpacity }}>
+                <Paragraph blocks={deltaSeaLevelIntro} />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphTwoOpacity }}>
+                <Paragraph
+                  blocks={deltaLocation}
+                  markSx={{
+                    freshWater: { fontWeight: "bold", color: FreshWaterColor },
+                  }}
+                />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphThreeOpacity }}>
+                <Paragraph blocks={deltaUses} />
+              </motion.div>
+            </Stack>
           </Box>
         </motion.div>
       </Box>
@@ -201,16 +205,9 @@ function DeltaAqueductContent() {
   const progress = useScrollProgress()
   const linePathLength = useScrollValue(progress, [0.6, 0.9], [0, 1])
   const lineOpacity = useScrollValue(progress, [0.55, 0.7], [0, 1])
-  const paragraphOneOpacity = useScrollValue(
-    progress,
-    [0.24, 0.42],
-    [0, 1],
-  )
-  const paragraphTwoOpacity = useScrollValue(
-    progress,
-    [0.38, 0.56],
-    [0, 1],
-  )
+  const panelOpacity = useScrollValue(progress, [0.2, 0.36], [0, 1])
+  const paragraphOneOpacity = useScrollValue(progress, [0.24, 0.42], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.38, 0.56], [0, 1])
 
   return (
     <>
@@ -259,24 +256,32 @@ function DeltaAqueductContent() {
           flexDirection: "column",
           justifyContent: "flex-start",
           paddingTop: "5rem",
-          color: "text.primary",
         }}
       >
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph blocks={deltaSalinity} />
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={deltaAdaptation}
-              sx={{
-                "& .MuiSvgIcon-root": {
-                  fontSize: theme.typography.body1.fontSize,
-                },
-              }}
-            />
+        <motion.div style={{ opacity: panelOpacity }}>
+          <Box
+            className="paragraph"
+            component="article"
+            sx={{
+              ...deltaTextOverlaySx,
+              maxWidth: { xs: "calc(100% - 2rem)", md: "54rem", xl: "62rem" },
+            }}
+          >
+            <Stack direction="column" spacing={{ xs: 2, md: 2.25 }}>
+              <motion.div style={{ opacity: paragraphOneOpacity }}>
+                <Paragraph blocks={deltaSalinity} />
+              </motion.div>
+              <motion.div style={{ opacity: paragraphTwoOpacity }}>
+                <Paragraph
+                  blocks={deltaAdaptation}
+                  sx={{
+                    "& .MuiSvgIcon-root": {
+                      fontSize: theme.typography.body1.fontSize,
+                    },
+                  }}
+                />
+              </motion.div>
+            </Stack>
           </Box>
         </motion.div>
       </Box>

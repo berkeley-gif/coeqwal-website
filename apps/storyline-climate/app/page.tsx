@@ -5,10 +5,7 @@ import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import {
-  Temperature,
-  TemperatureBuilder,
-} from "./components/02Temperature"
+import { Temperature, TemperatureBuilder } from "./components/02Temperature"
 import { AnimatePresence, motion } from "@repo/motion"
 import {
   BaseHeader,
@@ -29,7 +26,6 @@ import DeltaFarms, { DeltaAqueduct } from "./components/05Delta"
 import Balance, { Bullet } from "./components/06AdaptTransition"
 import {
   Conclusion,
-  CoeqwalCallout,
   Hydroclimate,
   HydroclimateTransition,
   Themes,
@@ -144,12 +140,6 @@ function ContentContainer() {
         <Step data="bullet">
           <Box width="100%">
             <Bullet />
-          </Box>
-        </Step>
-
-        <Step data="coeqwalCallout">
-          <Box width="100%">
-            <CoeqwalCallout />
           </Box>
         </Step>
 

@@ -140,13 +140,14 @@ export function HorizontalImageSlider({
       />
       {/* Divider line */}
       <Box
+        className="glow-effect"
         sx={{
           position: "absolute",
           top: 0,
           bottom: 0,
           left: `calc(${pos}% - 1px)`,
-          width: "4px",
-          backgroundColor: "#f0f2ef",
+          width: "3px",
+          backgroundColor: "#F1B143",
           pointerEvents: "none",
           cursor: "pointer",
         }}
@@ -176,6 +177,8 @@ export function HorizontalImageSlider({
           height: 44,
           borderRadius: "50%",
           backgroundColor: "#fcfbfa",
+          border: "3px solid #F1B143",
+          boxShadow: "0 0 0 5px rgba(241, 177, 67, 0.18)",
           display: "grid",
           placeItems: "center",
           cursor: "ew-resize",

@@ -269,7 +269,7 @@ function TemperatureContent() {
         >
           <textPath
             href="#warmingTrendTextPath"
-            startOffset="38.5%"
+            startOffset="47%"
             textAnchor="middle"
           >
             {warmingTrendLabel}
@@ -364,16 +364,15 @@ function useTemperatureSectionAlignment() {
     const chartRect = chart.getBoundingClientRect()
     if (sectionRect.width <= 0 || sectionRect.height <= 0) return
 
-    const guideXInSection = chartRect.left - sectionRect.left + chartGuidePoint.x
+    const guideXInSection =
+      chartRect.left - sectionRect.left + chartGuidePoint.x
     const guideYInSection = chartRect.top - sectionRect.top + chartGuidePoint.y
     const guideXInViewBox =
       (guideXInSection / sectionRect.width) * trendLine.viewBoxWidth
     const guideYInViewBox =
       (guideYInSection / sectionRect.height) * trendLine.viewBoxHeight
 
-    setLineTranslateY(
-      guideYInViewBox - getPathYAtX(path, guideXInViewBox - 50),
-    )
+    setLineTranslateY(guideYInViewBox - getPathYAtX(path, guideXInViewBox - 50))
   }, [chartGuidePoint])
 
   useEffect(() => {

@@ -19,11 +19,7 @@
  *   </CoordinateBox>
  * </CoordinateStage>
  */
-export {
-  CoordinateBox,
-  CoordinateStage,
-  CoordinateSvg,
-} from "@repo/ui"
+export { CoordinateBox, CoordinateStage, CoordinateSvg } from "@repo/ui"
 export type {
   CoordinateBoxProps,
   CoordinateStageFit,
