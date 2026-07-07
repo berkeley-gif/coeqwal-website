@@ -7,6 +7,7 @@ import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
+import { useTabNavigation } from "../hooks/useTabNavigation"
 
 /**
  * Main application header
@@ -20,6 +21,7 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const theme = useTheme()
+  const { navigateToTab } = useTabNavigation()
 
   // Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
@@ -89,8 +91,8 @@ export function Header() {
       onLogoClick={handleLogoClick}
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
-      onGetStartedClick={() => router.push("/learn")}
-      onToolsClick={() => router.push("/explore")}
+      onGetStartedClick={() => navigateToTab("learn")}
+      onToolsClick={() => navigateToTab("explore")}
       waterThemesOptions={waterThemesOptions}
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}

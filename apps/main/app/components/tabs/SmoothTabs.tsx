@@ -87,6 +87,7 @@ export default function SmoothTabs() {
       style={{
         position: "sticky",
         top: theme.layout.collapsedHeaderHeight,
+        marginTop: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
         backgroundColor: theme.palette.common.white,
         pointerEvents: "auto",
