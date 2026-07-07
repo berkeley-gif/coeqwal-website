@@ -27,6 +27,10 @@ export interface InfoCardProps {
   titleColor?: string
   /** Description color override. Same defaults as titleColor. */
   descriptionColor?: string
+  /** Typography variant for the title. Defaults to "body2" (existing behavior). */
+  titleVariant?: "body2" | "h6" | "h5"
+  /** Optional icon rendered inline next to the title (e.g. NavArrow). */
+  titleIcon?: React.ReactNode
   /** Optional accessible name when the card is a button (e.g. open details). */
   ariaLabel?: string
   sx?: SxProps<Theme>
@@ -44,6 +48,8 @@ export function InfoCard({
   dimmed = false,
   titleColor,
   descriptionColor,
+  titleVariant = "body2",
+  titleIcon,
   ariaLabel,
   sx,
   children,
@@ -100,9 +106,12 @@ export function InfoCard({
         ...((sx as object) ?? {}),
       }}
     >
-      <Typography variant="body2" fontWeight={600} sx={{ color }}>
-        {title}
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography variant={titleVariant} fontWeight={600} sx={{ color }}>
+          {title}
+        </Typography>
+        {titleIcon}
+      </Box>
       {description && (
         <Typography
           variant="body2"

@@ -1,29 +1,25 @@
 /**
- * useTabNavigation.dispatches tab changes to context state.
- *
- * URL responsibility: this hook does NOT write ?tab= to the URL.
- * TabPanels owns the ?tab= parameter because it needs to add/remove it
- * based on scroll position (isInTabsArea), not just on click events.
- * See the useEffect in TabPanels.tsx that reacts to [isInTabsArea, activeTab].
+ * useTabNavigation — single entry point for changing tabs.
+ * Updates context state AND the URL path (`/${tab}`) so the two never
+ * drift apart. Use this instead of dispatching setActiveTab directly.
  */
 "use client"
 
 import { useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { useTabs, setActiveTab } from "../context/Tabs"
 import type { TabKey } from "../types/tabs"
 
 export function useTabNavigation() {
-  const { state, dispatch } = useTabs()
-  const { activeTab } = state
+  const router = useRouter()
+  const { dispatch } = useTabs()
 
   const navigateToTab = useCallback(
     (tab: TabKey) => {
-      if (tab !== activeTab) {
-        dispatch(setActiveTab(tab))
-      }
+      dispatch(setActiveTab(tab))
+      router.replace(`/${tab}`)
     },
-    [activeTab, dispatch],
+    [dispatch, router],
   )
-
   return { navigateToTab }
 }

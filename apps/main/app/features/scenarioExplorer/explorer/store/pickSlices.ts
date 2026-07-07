@@ -41,17 +41,6 @@ type ExplorerStore = WorkspaceSlice &
   EquitySlice &
   ResilienceSlice
 
-export type ShellMainView = "get-started" | "explorer"
-
-export interface ShellPersistedState {
-  mainView: ShellMainView
-}
-
-/** Shell routing restored after reload */
-export const SHELL_PERSIST_KEYS = [
-  "mainView",
-] as const satisfies readonly (keyof ShellPersistedState)[]
-
 /** Scenario selection and active tool tab */
 export const WORKSPACE_SELECTION_PERSIST_KEYS = [
   "selectedScenarios",
@@ -267,12 +256,6 @@ function pickKeys<T extends object, K extends keyof T>(
     picked[key] = state[key]
   }
   return picked
-}
-
-export function pickShellPersistedState(state: {
-  mainView: ShellMainView
-}): ShellPersistedState {
-  return pickKeys(state, SHELL_PERSIST_KEYS)
 }
 
 export function pickWorkspacePersistedState(

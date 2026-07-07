@@ -88,25 +88,6 @@ html {
   /* background-color: var(--primary-color); */
 }
 
-#month-slider {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-@media (min-width: 1536px) {
-  #month-slider {
-    width: calc(100% - 210px);
-    margin-left: 140px;
-  }
-}
-
-@media (min-width: 1200px) {
-  #month-slider {
-    width: calc(100% - 180px);
-    margin-left: 124px;
-  }
-}
-
 .sticky-container {
   position: sticky;
   bottom: 0;

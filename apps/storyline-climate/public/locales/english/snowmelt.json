@@ -1,0 +1,108 @@
+{
+  "sierraNevada": {
+    "title": "Losing the Natural Reservoir",
+    "firstParagraph": [
+      {
+        "segments": [
+          {
+            "text": "The mountain snowpack has historically served as an important "
+          },
+          {
+            "text": "natural reservoir",
+            "mark": "strong"
+          },
+          {
+            "text": " to supply water for California."
+          }
+        ]
+      },
+      {
+        "text": "Snow builds up in the winter and melts in the late spring to feed rivers and top off reservoirs downstream before the long dry season."
+      },
+      {
+        "segments": [
+          {
+            "text": "But "
+          },
+          {
+            "text": "warmer temperatures",
+            "mark": "highlight"
+          },
+          {
+            "text": " mean more precipitation falls as rain instead of snow."
+          }
+        ]
+      },
+      {
+        "segments": [
+          {
+            "text": "And "
+          },
+          {
+            "text": "the snowpack we do receive melts earlier",
+            "mark": "highlight"
+          },
+          {
+            "text": " in the year."
+          }
+        ]
+      }
+    ],
+    "secondParagraph": [
+      {
+        "text": "However, this natural reservoir is highly variable."
+      },
+      {
+        "text": "Use the slider below to compare a record-breaking wet year (2023) with a severe dry year (2015) to see what snowpack may look like in a warmer future."
+      }
+    ],
+    "chart": {
+      "title": "California's Changing Snowpack",
+      "source": {
+        "prefix": "Satellite image source: ",
+        "label": "NASA Worldview",
+        "url": "https://worldview.earthdata.nasa.gov/"
+      }
+    },
+    "monthSliderLabel": "Months in a Water Year"
+  },
+  "snowmelt": {
+    "body": [
+      {
+        "text": "Predictions of climate change effects indicate that snowpack will continue to decline over the long-term."
+      },
+      {
+        "segments": [
+          {
+            "text": "Less snowpack means there will be "
+          },
+          {
+            "text": "less water available",
+            "mark": "strong"
+          },
+          {
+            "text": " in rivers and reservoirs during the dry summer when we - humans and ecosystems - "
+          },
+          {
+            "text": "need it most",
+            "mark": "strong"
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ],
+    "chart": {
+      "title": "Projected Change in Snowpack by 2050",
+      "source": {
+        "prefix": "Source: ",
+        "label": "Cal-Adapt",
+        "url": "https://v2.cal-adapt.org/tools/snowpack/#climatevar=swe&scenario=rcp85&lat=38.90625&lng=-120.03125&boundary=locagrid&units=inch",
+        "suffix": ", Fourth Assessment Climate Region modeled by CanESM2 in high emission scenario"
+      }
+    },
+    "risingHeatLabel": "Rising heat melts the snow",
+    "snowWaterEquivalentLabel": "April Snow Water Equivalent"
+  }
+}
