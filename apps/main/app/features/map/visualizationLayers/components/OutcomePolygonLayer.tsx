@@ -21,7 +21,7 @@ import {
   OUTCOME_FILL_OPACITY,
   OUTCOME_OUTLINE_WIDTH,
   OUTCOME_OUTLINE_OFFSET,
-} from "../../../scenarioExplorer/animation/demandUnitsPaint"
+} from "../../animation/demandUnitsPaint"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

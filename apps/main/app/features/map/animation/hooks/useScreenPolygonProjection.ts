@@ -13,11 +13,11 @@ import {
   lineSegmentPoints,
   POINTS_PER_SHAPE,
 } from "@repo/viz"
-import { getOutcomeConfig } from "../../../map/config/outcomeLayerRegistry"
+import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
-} from "../../../map/config/outcomeLocations"
+} from "../../config/outcomeLocations"
 import type { Centroid, OutcomeLocationData } from "../useTierAnimationData"
 
 /** One outcome shape projected into panel-relative screen space. */

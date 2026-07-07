@@ -53,7 +53,7 @@ export interface CoeqwalPanelProps {
   /** Overline label rendered above the headline */
   eyebrow?: string
   /** Primary heading.accepts JSX so callers can embed <br /> etc. Optional
-   *  when the headline is handled externally (e.g. MorphingHeadline overlay). */
+   *  when the headline is supplied via `responsiveHeadline` instead. */
   headline?: React.ReactNode
   /** Body description rendered below the headline */
   description?: React.ReactNode
@@ -85,9 +85,10 @@ export interface CoeqwalPanelProps {
   /** Top margin above the children slot (default: 5 = 40px).
    *  Accepts any MUI spacing value, CSS string, or responsive object. */
   childrenMt?: string | number | Record<string, string | number>
-  /** Headline rendered only on small screens (hidden at lg+) where the
-   *  MorphingHeadline overlay is not active. Renders directly without a
-   *  Typography wrapper so callers can supply the correct variant pair. */
+  /** Static headline for the panel. Renders directly without a
+   *  Typography wrapper so callers can supply the correct variant pair.
+   *  In "split" layout it sits in the left column, beside the
+   *  description in the right column. */
   responsiveHeadline?: React.ReactNode
   /** Vertical content alignment when minHeight is set.
    *  "center" (default).vertically centres content.
@@ -144,11 +145,11 @@ export function CoeqwalPanel({
   const motionProps = contentMotionStyle
     ? { style: contentMotionStyle }
     : {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.3 },
-        transition: { duration: 0.5, ease: "easeOut" },
-      }
+      initial: { opacity: 0, y: 20 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, amount: 0.3 },
+      transition: { duration: 0.5, ease: "easeOut" },
+    }
 
   const contentInner = (
     <>
@@ -157,21 +158,20 @@ export function CoeqwalPanel({
         sx={
           layout === "split"
             ? {
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                rowGap: { xs: 3, md: 4 },
-                columnGap: { md: 6 },
-              }
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              rowGap: { xs: 3, md: 4 },
+              columnGap: { md: 6 },
+            }
             : { maxWidth: "680px" }
         }
       >
-        {/* Responsive headline.visible on xs-md only; lg+ uses MorphingHeadline overlay */}
+        {/* Static headline.left column in "split" layout, full width in "single". */}
         {responsiveHeadline && (
           <Box
             sx={{
-              display: { xs: "block", lg: "none" },
-              ...(layout === "split" && { gridColumn: { md: "1 / -1" } }),
-              mb: 2,
+              ...(layout === "split" && { gridColumn: { md: "1" } }),
+              mb: { xs: 2, md: 0 },
             }}
           >
             {responsiveHeadline}
@@ -231,6 +231,7 @@ export function CoeqwalPanel({
     </>
   )
 
+
   const panelPadding = {
     px: theme.space.panel.padding,
     py: theme.space.panel.padding,
@@ -239,33 +240,33 @@ export function CoeqwalPanel({
   const minHeightSx =
     minHeight !== undefined
       ? {
-          minHeight,
-          display: "flex",
-          flexDirection: "column" as const,
-          justifyContent:
-            contentAlign === "top"
-              ? ("flex-start" as const)
-              : ("center" as const),
-        }
+        minHeight,
+        display: "flex",
+        flexDirection: "column" as const,
+        justifyContent:
+          contentAlign === "top"
+            ? ("flex-start" as const)
+            : ("center" as const),
+      }
       : {}
 
   const scrollIndicatorSlot = scrollIndicator ? (
     <Box
-      aria-hidden="false"
       sx={{
         position: "absolute",
-        bottom: "clamp(24px, 4vh, 48px)",
+        bottom: "clamp(64px, 8vh, 96px)",
         left: "50%",
         transform: "translateX(-50%)",
-        zIndex: 1,
-        pointerEvents: "auto",
       }}
     >
       {scrollIndicator}
     </Box>
   ) : null
 
+
+
   // Inset path: outer section is the frame, inner is the rounded card.
+
   if (insetCfg) {
     return (
       <Box

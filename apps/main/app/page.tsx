@@ -7,9 +7,6 @@
  * `TabsProvider`, theme / translation / data providers) live in
  * `app/layout.tsx` and apply to every route.
  *
- * Only one Suspense boundary lives here, around `TabPanels`, which reads
- * `?tab=...` via `useSearchParams` in its URL <-> activeTab sync.
- *
  * In Next.js App Router under SSG, any client component that calls
  * `useSearchParams()` must have a Suspense boundary above it. Search
  * params are not available at build time, so the hook suspends until the
@@ -48,22 +45,13 @@ function TabPanelsErrorFallback() {
 
 export default function Home() {
   return (
-    <MapProvider>
-      {/* DynamicMap - renders once, stays mounted across tab switches */}
-      <DynamicMap />
-
+    <>
       <FloatingGlossary />
 
       {/* WCAG 2.4.1: SkipLink target lives on the <main> element below */}
       <MainContent>
         <IntroSection />
-        <SmoothTabs />
-        <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
-          <Suspense fallback={null}>
-            <TabPanels />
-          </Suspense>
-        </ErrorBoundary>
       </MainContent>
-    </MapProvider>
+    </>
   )
 }

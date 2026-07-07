@@ -21,7 +21,7 @@ import {
 } from "../../../map/config/outcomeLayerRegistry"
 import { getInteractiveLayerSchema } from "../interactiveLayerSchema"
 import type { LocationInfo } from "../OutcomeMorphOverlay"
-import type { OutcomeLocationData } from "../useTierAnimationData"
+import { OutcomeLocationData } from "../useTierAnimationData"
 import type {
   InteractiveLayerDirector,
   BeatEngineContext,
@@ -90,7 +90,6 @@ export function useInteractiveLayerDirector({
   useEffect(() => {
     const director = directorRef.current
     if (!director) return
-
     const mode = engineApiRef.current?.getMode?.() ?? "idle"
     const canOwn =
       selectedOutcomeCode !== null && mode !== "idle" && playState !== "playing"

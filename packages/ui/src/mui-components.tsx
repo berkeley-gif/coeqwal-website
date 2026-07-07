@@ -122,6 +122,7 @@ import InfoIcon from "@mui/icons-material/Info"
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
+import MenuIcon from "@mui/icons-material/Menu"
 import EditNoteIcon from "@mui/icons-material/EditNote"
 import AgricultureIcon from "@mui/icons-material/Agriculture"
 import ScienceIcon from "@mui/icons-material/Science"
@@ -195,6 +196,7 @@ export {
   InfoOutlinedIcon,
   UnfoldMoreIcon,
   MyLocationIcon,
+  MenuIcon,
   EditNoteIcon,
   AgricultureIcon,
   ScienceIcon,

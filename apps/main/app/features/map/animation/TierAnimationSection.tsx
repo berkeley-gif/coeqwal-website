@@ -19,6 +19,7 @@ import {
   mapActions,
   useActiveOutcomeVisualization,
   useMapStore,
+  useActiveSubSection,
 } from "../../map/store"
 import {
   getOutcomeConfig,
@@ -49,7 +50,7 @@ import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { TIMING_BEATS } from "./animationTiming"
 import { LOI_DU_ID } from "./demandUnitsPaint"
-import { getStartedViewportCardHeightCss } from "../getStarted/getStartedViewport"
+
 import {
   useBeatEngine,
   ACTOR_GROUPS,
@@ -67,8 +68,6 @@ import {
   type Arbiter,
   type HideScheduleEntry,
 } from "./engine"
-
-const STORYBOARD_CONTENT_OVERFLOW_PX = 320
 
 /* Beats where the squares are settled as a grid, so hovering or clicking a
  * single square is meaningful. Other settled beats (list-bar, radar,
@@ -140,7 +139,8 @@ export default function TierAnimationSection() {
 
   const panelRef = useRef<HTMLDivElement>(null)
 
-  const [panelInView, setPanelInView] = useState(false)
+  const activeSubSection = useActiveSubSection()
+  const isActive = activeSubSection === "outcomes-viz"
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref copy of `beatIndex` so navigation callbacks read the latest cursor
@@ -435,7 +435,7 @@ export default function TierAnimationSection() {
         }
 
         if (isNewOutcomeSelection) {
-          const action = resolveOutcomeCamera(info.code, "get-started")
+          const action = resolveOutcomeCamera(info.code, "learn")
           mapAPI.withMap((mapRef) => {
             if (action.type === "fitBounds") {
               mapRef.fitBounds(action.bounds, {
@@ -462,7 +462,7 @@ export default function TierAnimationSection() {
   // Shared by the bar-glyph click below.
   const flyToOutcome = useCallback(
     (code: string) => {
-      const action = resolveOutcomeCamera(code, "get-started")
+      const action = resolveOutcomeCamera(code, "learn")
       mapAPI.withMap((mapRef) => {
         if (action.type === "fitBounds") {
           mapRef.fitBounds(action.bounds, {
@@ -724,6 +724,8 @@ export default function TierAnimationSection() {
       return locData.ids.has(lid) ? lid : null
     }
 
+
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onMouseMove = (e: any) => {
       if (!layerId || !map.getLayer(layerId)) return
@@ -790,46 +792,6 @@ export default function TierAnimationSection() {
       map.getCanvas().style.cursor = ""
     }
   }, [isInteractive, mapHoverCode, mapAPI.mapRef])
-
-  /* Activate persistent map (no visualization until interactive mode). */
-  useEffect(() => {
-    mapActions.setMapMode("get-started")
-
-    const suppressInterval = setInterval(() => {
-      if (polygonsAllowedRef.current) {
-        clearInterval(suppressInterval)
-        return
-      }
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      if (!map?.isStyleLoaded?.()) return
-      try {
-        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-          if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
-          if (map.getLayer(outline))
-            map.setPaintProperty(outline, "line-opacity", 0)
-        }
-      } catch {
-        /* ok */
-      }
-    }, 50)
-
-    return () => {
-      clearInterval(suppressInterval)
-      mapActions.setMapMode("hidden")
-      mapActions.clearOutcomeVisualization()
-
-      if (mapAPI.mapRef?.current) {
-        try {
-          mapAPI.mapRef.current.easeTo({
-            padding: { top: 0, bottom: 0, left: 0, right: 0 },
-            duration: 0,
-          })
-        } catch {
-          /* ok */
-        }
-      }
-    }
-  }, [mapAPI.mapRef])
 
   /* Keep outcome visualization scenario in sync with hydroclimate. */
   useEffect(() => {
@@ -991,6 +953,7 @@ export default function TierAnimationSection() {
       // arbiters call `getMode()` only during dispatch, after `useBeatEngine`
       // populates the ref. Defaults to "idle" before first mount.
       getMode: () => engineApiRef.current?.getMode() ?? "idle",
+      isActive,
     }),
     // `buildBlendedTierExpr` is a non-stable inner function but closes over a
     // ref, so its identity doesn't matter. Explicit deps memoize the context
@@ -1069,7 +1032,7 @@ export default function TierAnimationSection() {
   } = useScreenPolygonProjection({
     panelRef,
     isLoading,
-    panelInView,
+    panelInView: isActive,
     centroids,
     allLocationIds,
     outcomeLocations,
@@ -1086,12 +1049,9 @@ export default function TierAnimationSection() {
    * prime the map session (collect polygons, baseline the demand-units
    * palette). */
   useStoryboardCamera({
-    panelRef,
-    panelInView,
-    setPanelInView,
+    isActive,
     isLoading,
     mapAPI,
-    home: { center: CAM_CENTER, zoom: CAM_ZOOM },
     computePolygonDataRef,
     applyPanelOffsetRef,
     polygonsAllowedRef,
@@ -1127,7 +1087,7 @@ export default function TierAnimationSection() {
       progress,
       backOutOpacity,
       prefersReducedMotion,
-      panelInView,
+      panelInView: isActive,
       mapAPI,
       cameraArbiter: CAMERA_ARBITER,
       animPolygonLayers: ANIM_POLYGON_LAYERS,
@@ -1144,6 +1104,11 @@ export default function TierAnimationSection() {
       interactiveLayerDirectorRef,
       computePolygonDataRef,
     })
+
+  useEffect(() => {
+    if (isActive) return
+    handleRestart()
+  }, [isActive, handleRestart])
 
   useStoryboardDebugLog({ progress, beatIndex, playState })
 
@@ -1171,9 +1136,7 @@ export default function TierAnimationSection() {
       ref={panelRef}
       sx={{
         position: "relative",
-        height: getStartedViewportCardHeightCss(theme, {
-          contentOverflowPx: STORYBOARD_CONTENT_OVERFLOW_PX,
-        }),
+        height: "100%",
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
@@ -1261,10 +1224,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                        setSpotlightedTier((prev) =>
-                          prev === tier ? null : tier,
-                        )
-                      }
+                      setSpotlightedTier((prev) =>
+                        prev === tier ? null : tier,
+                      )
+                    }
                     : undefined
                 }
               />

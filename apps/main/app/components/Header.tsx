@@ -7,6 +7,7 @@ import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "../content/themes"
+import { useTabNavigation } from "../hooks/useTabNavigation"
 
 /**
  * Main application header
@@ -20,18 +21,25 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const theme = useTheme()
+  const { navigateToTab } = useTabNavigation()
 
   // Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
 
   const { isPastHero: rawIsPastHero } = useTabs()
 
+  // On any route other than "/", there's no hero to scroll past.
+  // Default to the "past hero" appearance (solid nav) immediately.
+  const isHomePage = pathname === "/"
+  const isTabsPage = (pathname === "/learn") || (pathname === "/explore") || (pathname === "/share")
+
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real
   // scroll-based value takes over.
   const [hasMounted, setHasMounted] = useState(false)
   useEffect(() => setHasMounted(true), [])
-  const isPastHero = hasMounted && rawIsPastHero
+  const isPastHero = hasMounted && (isHomePage ? rawIsPastHero : true)
+  const shrinkOnScroll = !isTabsPage
 
   const handleLogoClick = () => {
     if (typeof window === "undefined") return
@@ -83,6 +91,8 @@ export function Header() {
       onLogoClick={handleLogoClick}
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
+      onGetStartedClick={() => navigateToTab("learn")}
+      onToolsClick={() => navigateToTab("explore")}
       waterThemesOptions={waterThemesOptions}
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}
@@ -93,7 +103,8 @@ export function Header() {
       }
       navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
       logoVariant={isPastHero ? "color" : "light"}
-      shrinkOnScroll
+      shrinkOnScroll={shrinkOnScroll}
+      forceShrunk={isTabsPage}
     />
   )
 }

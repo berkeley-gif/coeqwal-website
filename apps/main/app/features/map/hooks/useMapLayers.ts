@@ -1,5 +1,5 @@
 /**
- * useMapLayers - applies native Mapbox layer visibility based on activeSection
+ * useMapLayers - applies native Mapbox layer visibility based on activeSubSection
  */
 
 "use client"
@@ -7,13 +7,13 @@
 import { useEffect, useRef, useCallback } from "react"
 import { useMap } from "@repo/map"
 import {
-  useActiveSection,
+  useActiveSubSection,
   useRiversProgress,
   useShowInflowWatersheds,
   useMapReady,
   useMapMode,
 } from "../store"
-import { SECTION_LAYERS, type SectionId } from "../config/sectionLayers"
+import { SECTION_LAYERS, type SubSectionId } from "../config/sectionLayers"
 import { coordinator } from "../choreography/animationCoordinator"
 import { ANIMATION_DURATION } from "../choreography/scrollChoreographyConstants"
 
@@ -73,13 +73,13 @@ const LAYER_ANIMATION_PREFIX = "layer-"
 
 export function useMapLayers() {
   const map = useMap()
-  const activeSection = useActiveSection()
+  const activeSubSection = useActiveSubSection()
   const riversProgress = useRiversProgress()
   const showInflowWatersheds = useShowInflowWatersheds()
   const mapReady = useMapReady() // Use global Zustand state
   const mapMode = useMapMode() // Track which mode the map is in
 
-  const prevSectionRef = useRef<SectionId | null>(null)
+  const prevSectionRef = useRef<SubSectionId | null>(null)
   const initializedRef = useRef(false)
 
   // Reset initialization state when mapReady cycles (e.g. basemap change)
@@ -213,7 +213,7 @@ export function useMapLayers() {
       return
     }
 
-    const currentConfig = SECTION_LAYERS[activeSection]
+    const currentConfig = SECTION_LAYERS[activeSubSection]
     const prevSection = prevSectionRef.current
     const isFirstRun = !initializedRef.current
 
@@ -241,7 +241,7 @@ export function useMapLayers() {
     // ALWAYS apply ALL layer groups to their correct state
     Object.keys(LAYER_GROUPS).forEach((groupKey) => {
       // Skip inflowWatersheds when entering rivers section. The rivers progress effect handles it
-      if (groupKey === "inflowWatersheds" && activeSection === "rivers") {
+      if (groupKey === "inflowWatersheds" && activeSubSection === "rivers") {
         return
       }
 
@@ -252,17 +252,17 @@ export function useMapLayers() {
       // On section change: animate the transition
       if (isFirstRun) {
         applyLayerGroup(groupKey, shouldBeVisible, true) // immediate
-      } else if (prevSection !== activeSection) {
+      } else if (prevSection !== activeSubSection) {
         applyLayerGroup(groupKey, shouldBeVisible, false) // animate
       }
     })
 
-    prevSectionRef.current = activeSection
-  }, [activeSection, map.mapRef, applyLayerGroup, mapReady, mapMode])
+    prevSectionRef.current = activeSubSection
+  }, [activeSubSection, map.mapRef, applyLayerGroup, mapReady, mapMode])
 
   // Rivers section: fade out inflow watersheds as rivers animate
   useEffect(() => {
-    if (!mapReady || activeSection !== "rivers") return
+    if (!mapReady || activeSubSection !== "rivers") return
 
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
@@ -288,12 +288,12 @@ export function useMapLayers() {
     } catch {
       // Layer might not exist
     }
-  }, [activeSection, riversProgress, map.mapRef, mapReady])
+  }, [activeSubSection, riversProgress, map.mapRef, mapReady])
 
   // Restore inflow-watersheds when leaving rivers section
   useEffect(() => {
     if (!mapReady) return
-    if (activeSection === "rivers") return
+    if (activeSubSection === "rivers") return
 
     // If inflow-watersheds should be visible but we just left rivers
     if (showInflowWatersheds) {
@@ -313,7 +313,7 @@ export function useMapLayers() {
         // Layer might not exist
       }
     }
-  }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
+  }, [activeSubSection, showInflowWatersheds, map.mapRef, mapReady])
 
   // Hide delta-detaw layer when leaving the delta section in Learn mode only
   // (The delta-detaw layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
@@ -321,7 +321,7 @@ export function useMapLayers() {
   useEffect(() => {
     if (!mapReady) return
     if (mapMode !== "learn") return // Only manage in Learn mode
-    if ((activeSection as string) === "delta") return // Still in delta, don't hide
+    if ((activeSubSection as string) === "delta") return // Still in delta, don't hide
 
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
@@ -375,10 +375,10 @@ export function useMapLayers() {
     } catch {
       // Layer might not exist
     }
-  }, [activeSection, map.mapRef, mapReady, mapMode])
+  }, [activeSubSection, map.mapRef, mapReady, mapMode])
 
   return {
-    activeSection,
+    activeSubSection,
     riversProgress,
   }
 }

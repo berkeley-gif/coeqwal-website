@@ -37,7 +37,7 @@ export function useMapVisualizationAction() {
   const selectedScenarios = useExplorerStore((s) => s.selectedScenarios)
   const mapMode = useMapMode()
   const isMapVisible =
-    showMap || mapMode === "learn" || mapMode === "get-started"
+    showMap || mapMode === "learn"
 
   const { idMapping } = useResolvedIdMapping()
   const allMappings = useResolvedIdMappings()

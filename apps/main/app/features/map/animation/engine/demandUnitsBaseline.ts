@@ -162,7 +162,7 @@ export interface DemandUnitsOutlineInitSpec {
 }
 
 /** Create the `demand-units-outline` layer if missing. Normally
- *  `OutcomePolygonLayer` makes it, but get-started mode skips that and
+ *  `OutcomePolygonLayer` makes it, but the storyboard skips that and
  *  the storyboard owns it. Safe to call every mount (returns early if it
  *  exists). Copies `source` and `source-layer` from the fill layer, and
  *  bails if the fill isn't there yet. */

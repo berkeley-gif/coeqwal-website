@@ -7,8 +7,9 @@
 import { create, immer } from "@repo/state/zustand"
 import {
   SECTION_LAYERS,
-  type SectionLayerConfig,
-  type SectionId,
+  type SubSectionLayerConfig,
+  type SubSectionId,
+  type LearnNavSection,
 } from "./config/sectionLayers"
 import { MAP_THEME_URLS } from "@repo/map"
 
@@ -17,7 +18,7 @@ import { MAP_THEME_URLS } from "@repo/map"
 // ============================================================================
 
 /** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel), get-started (visible background with page-scroll interaction) */
-export type MapMode = "hidden" | "learn" | "explore" | "get-started"
+export type MapMode = "hidden" | "learn" | "explore"
 
 /** Outcome visualization state used by both Learn and Explore modes */
 export interface OutcomeVisualization {
@@ -59,7 +60,8 @@ interface MapState {
   mapStyle: string
 
   // Learn mode
-  activeSection: SectionId
+  activeSection: LearnNavSection,
+  activeSubSection: SubSectionId
   riversProgress: number
   geocoderMarker: [number, number] | null
   geocodingResetCounter: number
@@ -78,13 +80,13 @@ interface MapState {
   // Lightweight highlight tooltips driven by the tier animation overlay
   locationHighlights: LocationHighlight[]
 
-  // When true, unpinned (hover) highlights also render as map popups in
-  // get-started mode. The storyboard turns this on for the beats where the
+  // When true, unpinned (hover) highlights also render as map popups in the storyboard. 
+  // It turns this on for the beats where the
   // distribution grid is settled, so hovering a square or a map polygon shows
   // a map popup. Off elsewhere so hover stays quiet on the map by default.
   showHoverHighlightsOnMap: boolean
 
-  // When true, the get-started storyboard region lets pointer events through
+  // When true, the storyboard region lets pointer events through
   // to the map behind it, so the user can pan, zoom, and hover map polygons.
   // The storyboard turns this on only for the settled-grid beats. Off
   // elsewhere keeps the storyboard a solid card with a scripted camera.
@@ -96,7 +98,8 @@ const initialState: MapState = {
   mapReady: false,
   mapError: false,
   mapStyle: MAP_THEME_URLS.satellite,
-  activeSection: "california",
+  activeSection: "get-started",
+  activeSubSection: "intro",
   riversProgress: 0,
   geocoderMarker: null,
   geocodingResetCounter: 0,
@@ -140,7 +143,7 @@ export const mapActions = {
     }
 
     // Learn and get-started always use the satellite basemap
-    if (mode === "learn" || mode === "get-started") {
+    if (mode === "learn") {
       updates.mapStyle = MAP_THEME_URLS.satellite
     }
 
@@ -154,8 +157,21 @@ export const mapActions = {
   setMapStyle: (style: string) => useMapStore.setState({ mapStyle: style }),
 
   // Learn mode
-  setActiveSection: (section: SectionId) =>
-    useMapStore.setState({ activeSection: section }),
+  setActiveSubSection: (section: SubSectionId) =>
+    useMapStore.setState({ activeSubSection: section }),
+
+  setLearnNavSection: (section: LearnNavSection) => {
+    useMapStore.setState({ activeSection: section })
+    // The persistent map only shows during "get-started" (it's the
+    // scrollytelling section) - every other Learn section is static
+    // content with the map hidden. Doing that switch here, rather than
+    // in each caller, means every future entry point that changes the
+    // Learn section (VerticalNav today, the footer CTA now, anything
+    // later) gets correct map behavior for free instead of having to
+    // remember to call setMapMode too.
+    mapActions.setMapMode(section === "get-started" ? "learn" : "hidden")
+  },
+
 
   setRiversProgress: (progress: number) =>
     useMapStore.setState({ riversProgress: progress }),
@@ -178,7 +194,8 @@ export const mapActions = {
 
   resetLearnState: () =>
     useMapStore.setState({
-      activeSection: "california",
+      activeSection: "get-started",
+      activeSubSection: "california",
       riversProgress: 0,
       geocoderMarker: null,
       learnMapScrollOffset: 0,
@@ -248,8 +265,8 @@ export const mapActions = {
   setOnLocationHover: (
     fn:
       | ((
-          info: { code: string; sourceId: string; tier: number } | null,
-        ) => void)
+        info: { code: string; sourceId: string; tier: number } | null,
+      ) => void)
       | null,
   ) => {
     _onLocationHover = fn
@@ -267,7 +284,10 @@ export const useMapError = () => useMapStore((s) => s.mapError)
 export const useMapStyle = () => useMapStore((s) => s.mapStyle)
 
 // Learn mode
-export const useActiveSection = (): SectionId =>
+export const useActiveSubSection = (): SubSectionId =>
+  useMapStore((s) => s.activeSubSection)
+
+export const useLearnNavSection = (): LearnNavSection =>
   useMapStore((s) => s.activeSection)
 
 export const useRiversProgress = () => useMapStore((s) => s.riversProgress)
@@ -285,8 +305,8 @@ export const useExplorePanelWidth = () =>
   useMapStore((s) => s.explorePanelWidth)
 
 // Derived layer visibility selectors
-const createLayerSelector = (key: keyof SectionLayerConfig) => () =>
-  useMapStore((s) => !!SECTION_LAYERS[s.activeSection][key])
+const createLayerSelector = (key: keyof SubSectionLayerConfig) => () =>
+  useMapStore((s) => !!SECTION_LAYERS[s.activeSubSection][key])
 
 export const useShowBasins = createLayerSelector("basins")
 export const useShowRivers = createLayerSelector("rivers")
@@ -294,10 +314,10 @@ export const useShowArrows = createLayerSelector("arrows")
 export const useShowInflowWatersheds = createLayerSelector("inflowWatersheds")
 
 export const useCameraView = () =>
-  useMapStore((s) => SECTION_LAYERS[s.activeSection].camera)
+  useMapStore((s) => SECTION_LAYERS[s.activeSubSection].camera)
 
 export const useDerivedArrowsOpacity = () =>
-  useMapStore((s) => (SECTION_LAYERS[s.activeSection].arrows ? 1 : 0))
+  useMapStore((s) => (SECTION_LAYERS[s.activeSubSection].arrows ? 1 : 0))
 
 // Visualization
 export const useActiveOutcomeVisualization = () =>

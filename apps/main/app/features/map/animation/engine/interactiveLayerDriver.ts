@@ -2,7 +2,7 @@
  *
  * Uniform contract every interactive map-layer owner implements so
  * `InteractiveLayerDirector` can treat them the same on select, swap, or
- * deselect during get-started interactive mode.
+ * deselect during the storyboard's interactive mode.
  *
  * Two concrete imperative drivers exist:
  *   - `InteractivePaintArbiter` owns `demand-units` / `demand-units-outline`

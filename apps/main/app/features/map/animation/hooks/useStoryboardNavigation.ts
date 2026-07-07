@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef } from "react"
 import { animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
-import { mapActions } from "../../../map/store"
+import { mapActions } from "../../store"
 import type { LocationInfo } from "../OutcomeMorphOverlay"
 import { TIMING_BEATS, FINAL_TIMING_BEAT_INDEX } from "../animationTiming"
 import {

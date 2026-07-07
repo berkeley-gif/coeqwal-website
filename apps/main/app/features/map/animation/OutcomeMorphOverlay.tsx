@@ -41,8 +41,8 @@ import {
 import {
   ENV_FLOWS_NAMES,
   STATION_NAMES,
-} from "../../map/config/outcomeLocations"
-import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
+} from "../config/outcomeLocations"
+import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../config/outcomeLayerRegistry"
 import {
   isSingleValueTier,
   type ChartDataPoint,
