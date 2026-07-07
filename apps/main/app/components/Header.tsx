@@ -39,11 +39,6 @@ export function Header() {
   const isPastHero = hasMounted && (isHomePage ? rawIsPastHero : true)
   const shrinkOnScroll = !isTabsPage
 
-  console.log(
-    'shrinkOnScroll: ',
-    shrinkOnScroll
-  )
-
   const handleLogoClick = () => {
     if (typeof window === "undefined") return
 
@@ -94,6 +89,8 @@ export function Header() {
       onLogoClick={handleLogoClick}
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
+      onGetStartedClick={() => router.push("/learn")}
+      onToolsClick={() => router.push("/explore")}
       waterThemesOptions={waterThemesOptions}
       backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}

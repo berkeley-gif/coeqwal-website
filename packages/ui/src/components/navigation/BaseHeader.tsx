@@ -163,6 +163,8 @@ export interface BaseHeaderProps {
   onLogoClick?: () => void
   onGetDataClick?: () => void
   onAboutClick?: () => void
+  onGetStartedClick?: () => void
+  onToolsClick?: () => void
 
   /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
   waterThemesOptions?: NavDropdownOption[]
@@ -246,6 +248,8 @@ export function BaseHeader({
   onLogoClick,
   onGetDataClick,
   onAboutClick,
+  onGetStartedClick,
+  onToolsClick,
   waterThemesOptions,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
@@ -567,7 +571,7 @@ export function BaseHeader({
                 <Button
                   variant="text"
                   disableRipple
-                  onClick={onGetDataClick ? onGetDataClick : undefined}
+                  onClick={onGetStartedClick ? onGetStartedClick : undefined}
                   sx={buttonStyle}
                 >
                   Get Started
@@ -624,7 +628,7 @@ export function BaseHeader({
                 <Button
                   variant="text"
                   disableRipple
-                  onClick={onGetDataClick ? onGetDataClick : undefined}
+                  onClick={onToolsClick ? onToolsClick : undefined}
                   sx={buttonStyle}
                 >
                   Tools
