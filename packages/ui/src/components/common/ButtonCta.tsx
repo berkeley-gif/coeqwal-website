@@ -2,7 +2,6 @@
 
 /** Text CTA with an arrow */
 
-import Link from "next/link"
 import { Box, Typography } from "@repo/ui/mui"
 import { NavArrow } from "@repo/ui"
 
@@ -10,7 +9,7 @@ interface ButtonCtaProps {
   children: React.ReactNode
   /** Provide href for a real navigation link, OR onClick for an
    *  in-app action - not both. If href is present, this renders a
-   *  Link; otherwise it renders a <button> so actions that don't go
+   *  link; otherwise it renders a <button> so actions that don't go
    *  anywhere aren't disguised as anchors. */
   href?: string
   onClick?: () => void
@@ -45,9 +44,9 @@ export function ButtonCta({ children, href, onClick }: ButtonCtaProps) {
 
   if (href) {
     return (
-      <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+      <a href={href} style={{ textDecoration: "none", color: "inherit" }}>
         {content}
-      </Link>
+      </a>
     )
   }
 
