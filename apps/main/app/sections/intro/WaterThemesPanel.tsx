@@ -1,8 +1,7 @@
 "use client"
 
 /**
- * WaterThemesPanel.Sticky scrollytelling panel for the "What water issues
- * matter to you?" section of the IntroSection
+ * WaterThemesPanel.Sticky panel for the "Want to know more section of the IntroSection
  */
 
 import React from "react"
@@ -24,7 +23,6 @@ import {
   useScrollProgress,
   useScrollValue,
 } from "@repo/scrollytelling"
-import type { MotionValue } from "@repo/motion"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { TabKey } from "../../types/tabs"
 
@@ -32,9 +30,10 @@ import { TabKey } from "../../types/tabs"
 /* IMAGE & TAB CARDS                                                       */
 /*───────────────── */
 
-/** Native dimensions of the Delta Aerials image (kept for reference). */
-const _IMG_W = 2784
-const _IMG_H = 1066
+/** Delta Aerials image is width:100%/height:auto, bottom-anchored, so
+ *  its displayed height (and thus its top edge) scales with viewport
+ *  width at this fixed aspect ratio. */
+const IMG_ASPECT_RATIO = 1066 / 2784
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
@@ -50,19 +49,19 @@ const TAB_CARDS: TabCard[] = [
     tab: "learn",
     title: "Learn",
     description:
-      "Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making.",
+      "how water in California’s Central Valley is managed",
   },
   {
     tab: "explore",
     title: "Explore",
     description:
-      "Explore how water allocations change under different scenarios and hydroclimates — and discover new possibilities for California's water future.",
+      "how water outcomes shift under different scenarios, and",
   },
   {
     tab: "share",
     title: "Share",
     description:
-      "Select scenario data and share what you've learned to shape our water future.",
+      "your insights about California’s water future",
   },
 ]
 
@@ -71,13 +70,11 @@ const TAB_CARDS: TabCard[] = [
 /*───────────────── */
 
 function WaterThemesPanelContent({
-  contentOpacity,
   borderBottom,
   borderRadius,
   inset,
   frameBackground,
 }: {
-  contentOpacity: MotionValue<number>
   borderBottom?: string
   borderRadius?: RadiusValue
   inset?: PanelInset
@@ -95,7 +92,7 @@ function WaterThemesPanelContent({
   const imageOpacity = useScrollValue(
     progress,
     [0, 1],
-    prefersReducedMotion ? [1, 1] : [0, 1],
+    prefersReducedMotion ? [1, 1] : [0.15, 1],
   )
 
   const radius = resolveRadius(borderRadius, theme.borderRadius)
@@ -147,67 +144,36 @@ function WaterThemesPanelContent({
           px: theme.space.panel.padding,
           pt: theme.space.panel.topOffset,
           pb: theme.space.panel.padding,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
           height: "100%",
           boxSizing: "border-box",
-          // Short-viewport layout: anchor content to the top so the
-          // paragraph sits at the same vertical level as the morphing
-          // headline instead of being vertically centered. The top
-          // padding is reduced by headerHeight + insetY so the content
-          // starts at the same viewport Y as the MorphingHeadline
-          // overlay (which is fixed at `top: panel.topOffset`). The
-          // sticky panel is pinned at `headerHeight` from the viewport
-          // top, and the rounded card is inset by `insetY`, so those
-          // two offsets must be subtracted for the content's top edge
-          // to land on the same viewport row as the headline.
-          "@media (max-height: 859px)": {
-            justifyContent: "flex-start",
-            pt: `calc(${theme.space.panel.topOffset} - ${theme.layout.headerHeight}px - ${theme.layout.panel.insetY})`,
-          },
         }}
       >
-        {/* Headline + intro - fades in with crossfade */}
-        <motion.div style={{ opacity: contentOpacity }}>
-          {/* Short-viewport split: responsive headline in the left
-              column, paragraph in the right column (mirrors the About
-              panel's split layout). Only kicks in at md+ widths so the
-              paragraph does not get cramped on narrow landscape phones.
-              On lg+ the responsive headline is hidden and the
-              MorphingHeadline overlay occupies the left half, so the
-              paragraph still reads as sitting beside it. */}
+        {/* Headline + intro - pinned near the top, fades in on first
+            scroll into view */}
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          {/* Static headline in the left column, paragraph in the
+              right column (mirrors the About panel's split layout). */}
           <Box
             sx={{
-              "@media (max-height: 859px)": {
-                display: { xs: "block", md: "grid" },
-                gridTemplateColumns: { md: "1fr 1fr" },
-                columnGap: { md: theme.space.section.lg },
-                alignItems: "start",
-              },
+              display: { xs: "block", md: "grid" },
+              gridTemplateColumns: { md: "1fr 1fr" },
+              columnGap: { md: theme.space.section.lg },
+              alignItems: "start",
             }}
           >
-            {/* Responsive headline - visible on xs-md only */}
-            <Box
-              sx={{
-                display: { xs: "block", lg: "none" },
-                mb: 2,
-                "@media (max-height: 859px)": { mb: { xs: 2, md: 0 } },
-              }}
-            >
-              <Typography
-                variant="h2Main"
-                component="span"
-                sx={{ display: "block", color: "text.primary" }}
-              >
-                What water issues
-              </Typography>
+            <Box sx={{ mb: { xs: 2, md: 0 } }}>
               <Typography
                 variant="h1"
                 component="span"
                 sx={{ display: "block", color: "text.primary" }}
               >
-                matter to you?
+                Want to know more?
               </Typography>
             </Box>
 
@@ -215,40 +181,33 @@ function WaterThemesPanelContent({
               variant="body1"
               sx={{
                 color: "text.primary",
-                maxWidth: "66%",
-                mb: theme.space.section.md,
-                "@media (max-height: 859px)": {
-                  maxWidth: { xs: "66%", md: "none" },
-                  mb: { xs: theme.space.section.md, md: 0 },
-                  gridColumn: { md: "2" },
-                  // Lift the paragraph by its own half-leading so the
-                  // first character's cap-top aligns with the morphing
-                  // headline's top instead of sitting below it by the
-                  // body1 line-height gap. body1 has lineHeight 1.75
-                  // at fontSize 1.25rem, so (1.75 - 1) / 2 = 0.375em
-                  // of invisible space sits above the glyphs. Negating
-                  // that margin brings the visual top flush.
-                  mt: { md: "-0.375em" },
-                },
+                maxWidth: { xs: "66%", md: "none" },
+                mb: { xs: theme.space.section.md, md: 0 },
+                gridColumn: { md: "2" },
               }}
             >
-              Water is important to all of us — from farmers in the Central
-              Valley to communities in the Delta, from salmon in the Sacramento
-              River to urban water users in Los Angeles. We can consider how
-              decisions affect the issues people care about.
+              Water is limited and every choice has trade-offs. COEQWAL allows
+              you to explore different water scenarios and understand how
+              decisions shape potential futures for communities, farms,
+              rivers, and the Delta.
             </Typography>
           </Box>
         </motion.div>
 
-        {/* Three squares, one per tab */}
 
-
+        {/* Three squares, one per tab - anchored to the image's top
+            edge instead of floating wherever vertical centering left
+            them. The Delta Aerials image is width:100%, height:auto,
+            bottom-anchored, so its top edge sits
+            `100vw * IMG_ASPECT_RATIO` up from the panel's bottom edge.
+            translateY(-50%) centers the row ON that line so it reads
+            as "starting where the photo begins." */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: theme.space.section.sm,
-            "@media (max-height: 859px)": { pt: "60px" },
+            mt: "10vh",
           }}
         >
           {TAB_CARDS.map((c, i) => {
@@ -257,13 +216,13 @@ function WaterThemesPanelContent({
               <React.Fragment key={c.tab}>
                 <InfoCard
                   title={c.title}
-                  titleVariant="h6"
+                  titleVariant="h5"
                   description={c.description}
                   onClick={() => navigateToTab(c.tab)}
                   variant="onDark"
                   background={panelColor}
                   hoverBackground={alpha(panelColor, 0.85)}
-                  sx={{ flex: 1, height: "250px" }}
+                  sx={{ flex: 1, height: "200px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
                   <CircularArrowButton
@@ -308,18 +267,6 @@ function WaterThemesPanelContent({
 /*───────────────── */
 
 export interface WaterThemesPanelProps {
-  /** Ref forwarded to the outer wrapper */
-  panelRef: React.RefObject<HTMLDivElement | null>
-  /**
-   * Ref attached to an invisible marker at the END of the scroll runway.
-   * MorphingHeadline uses this via useDockOffset so the headline only
-   * scrolls away once the full 300vh sticky section has been scrolled through.
-   * Without this, docking starts as soon as the section's *top* passes y=0,
-   * which pushes the headline off-screen ~200vh too early.
-   */
-  dockRef?: React.RefObject<HTMLDivElement | null>
-  /** Scroll-driven opacity from the IntroSection crossfade system */
-  contentOpacity: MotionValue<number>
   /** Bottom border style */
   borderBottom?: string
   /** Rounded corner radius for the pinned panel surface. */
@@ -332,9 +279,6 @@ export interface WaterThemesPanelProps {
 }
 
 export function WaterThemesPanel({
-  panelRef,
-  dockRef,
-  contentOpacity,
   borderBottom,
   borderRadius,
   inset,
@@ -348,13 +292,10 @@ export function WaterThemesPanel({
   //   100vh - headerHeight - 2 · insetY
   // (one gap-band above and below the rounded rect). The 200vh
   // scroll runway gives a ~100vh pinned window that drives the
-  // image-fade / circle-reveal phases. The wrapper is painted
-  // with the frame background so the pinned surface reads as
-  // continuous frame.
+  // background-image fade phase.
   const headerHeight = theme.layout.headerHeight
   return (
     <div
-      ref={panelRef}
       id="water-themes"
       style={{
         backgroundColor: frameBackground,
@@ -366,24 +307,13 @@ export function WaterThemesPanel({
         stickyHeight={`calc(100vh - ${headerHeight}px)`}
       >
         <WaterThemesPanelContent
-          contentOpacity={contentOpacity}
           borderBottom={borderBottom}
           borderRadius={borderRadius}
           inset={inset}
           frameBackground={frameBackground}
         />
       </StickyScrollSection>
-      {/* Dock marker.positioned 75vh above the section end via
-          position:relative so getBoundingClientRect() reflects the offset.
-          The headline starts scrolling away once this marker's top crosses y=0,
-          which happens ~75vh before the section ends (after photos/labels
-          are fully revealed at the ~0.75 progress mark). */}
-      {dockRef && (
-        <div
-          ref={dockRef}
-          style={{ height: 0, position: "relative", top: "-100vh" }}
-        />
-      )}
     </div>
   )
 }
+

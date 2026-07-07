@@ -28,7 +28,7 @@ export interface InfoCardProps {
   /** Description color override. Same defaults as titleColor. */
   descriptionColor?: string
   /** Typography variant for the title. Defaults to "body2" (existing behavior). */
-  titleVariant?: "body2" | "h6"
+  titleVariant?: "body2" | "h6" | "h5"
   /** Optional icon rendered inline next to the title (e.g. NavArrow). */
   titleIcon?: React.ReactNode
   /** Optional accessible name when the card is a button (e.g. open details). */
