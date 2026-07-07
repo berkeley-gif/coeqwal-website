@@ -5,12 +5,15 @@ import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import {
-  Temperature,
-  TemperatureBuilder,
-} from "./components/02Temperature.scrollytelling"
+import { Temperature, TemperatureBuilder } from "./components/02Temperature"
 import { AnimatePresence, motion } from "@repo/motion"
-import { BaseHeader } from "@repo/ui"
+import {
+  BaseHeader,
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "@repo/ui"
 import {
   SCROLLAMA_CONFIG,
   useScrollamaSection,
@@ -27,12 +30,6 @@ import {
   HydroclimateTransition,
   Themes,
 } from "./components/07Resolution"
-import {
-  getStorylineWaterThemesOptions,
-  goToMainAbout,
-  goToMainData,
-  goToMainHome,
-} from "./components/helpers/header"
 
 export default function StoryContainer() {
   const isMapReady = true //useStoryStore((state) => state.isMapReady)
@@ -65,50 +62,50 @@ function ContentContainer() {
         color: "common.white",
       }}
     >
-      <Scrollama
+      <Scrollama<SectionId>
         onStepEnter={onStepEnter}
         offset={SCROLLAMA_CONFIG.offset}
         debug={SCROLLAMA_CONFIG.debug}
       >
         {/* Opener is intentionally non-sticky. */}
-        <Step data={"opener" as SectionId}>
+        <Step data="opener">
           <Box height="100vh" width="100%" className="story-step-container">
             <Opener />
           </Box>
         </Step>
 
-        {/* These components already manage sticky behavior internally via StickyContainer. */}
-        <Step data={"temperatureBuilder" as SectionId}>
+        {/* These components manage sticky scroll progress internally. */}
+        <Step data="temperatureBuilder">
           <Box width="100%">
             <TemperatureBuilder />
           </Box>
         </Step>
 
-        <Step data={"temperature" as SectionId}>
+        <Step data="temperature">
           <Box width="100%">
             <Temperature />
           </Box>
         </Step>
 
-        <Step data={"sierranevada" as SectionId}>
+        <Step data="sierranevada">
           <Box width="100%">
             <SierraNevada />
           </Box>
         </Step>
 
-        <Step data={"snowmelt" as SectionId}>
+        <Step data="snowmelt">
           <Box width="100%">
             <Snowmelt />
           </Box>
         </Step>
 
-        <Step data={"groundwater" as SectionId}>
+        <Step data="groundwater">
           <Box width="100%">
             <Groundwater />
           </Box>
         </Step>
 
-        <Step data={"groundwaterTransition" as SectionId}>
+        <Step data="groundwaterTransition">
           <Box
             aria-hidden
             sx={{
@@ -122,49 +119,49 @@ function ContentContainer() {
           />
         </Step>
 
-        <Step data={"deltaFarms" as SectionId}>
+        <Step data="deltaFarms">
           <Box width="100%">
             <DeltaFarms />
           </Box>
         </Step>
 
-        <Step data={"deltaAqueduct" as SectionId}>
+        <Step data="deltaAqueduct">
           <Box width="100%">
             <DeltaAqueduct />
           </Box>
         </Step>
 
-        <Step data={"balance" as SectionId}>
+        <Step data="balance">
           <Box width="100%">
             <Balance />
           </Box>
         </Step>
 
-        <Step data={"bullet" as SectionId}>
+        <Step data="bullet">
           <Box width="100%">
             <Bullet />
           </Box>
         </Step>
 
-        <Step data={"hydroclimate" as SectionId}>
+        <Step data="hydroclimate">
           <Box width="100%">
             <Hydroclimate />
           </Box>
         </Step>
 
-        <Step data={"hydroclimateTransition" as SectionId}>
+        <Step data="hydroclimateTransition">
           <Box width="100%">
             <HydroclimateTransition />
           </Box>
         </Step>
 
-        <Step data={"themes" as SectionId}>
+        <Step data="themes">
           <Box width="100%">
             <Themes />
           </Box>
         </Step>
 
-        <Step data={"conclusion" as SectionId}>
+        <Step data="conclusion">
           <Box width="100%">
             <Conclusion />
           </Box>

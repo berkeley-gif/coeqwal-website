@@ -78,16 +78,40 @@ export type {
 } from "./common/BarredColumns"
 
 // Scrollytelling components
-export { Paragraph, SectionTitle, Text, Visualization } from "./storylines"
+export {
+  Paragraph,
+  SectionTitle,
+  CoordinateBox,
+  CoordinateStage,
+  CoordinateSvg,
+  ImageCaption,
+  StorylineOpener,
+  Text,
+  Visualization,
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "./storylines"
 export type {
+  ImageCaptionPlacement,
+  ImageCaptionProps,
   InlineLegend,
   Legend,
   LegendShape,
   MarkClassNames,
   MarkSx,
+  ParagraphAlignment,
   ParagraphProps,
+  CoordinateBoxProps,
+  CoordinateStageFit,
+  CoordinateStageProps,
+  CoordinateSvgProps,
+  CoordinateValue,
   RichText,
   SectionTitleProps,
+  StorylineOpenerAlignment,
+  StorylineOpenerProps,
   Source,
   TextBlock,
   TextProps,

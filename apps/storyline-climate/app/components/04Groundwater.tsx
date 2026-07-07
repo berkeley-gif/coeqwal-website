@@ -1,65 +1,120 @@
 "use client"
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { motion, useScroll, useTransform } from "@repo/motion"
+import { Paragraph, SectionTitle, Visualization } from "@repo/ui"
+import { Box, Stack, useTheme } from "@repo/ui/mui"
+import { motion } from "@repo/motion"
 import GroundwaterLine from "./vis/GroundwaterLine"
-import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
-import { useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  StickyScrollSection,
+  useScrollProgress,
+  useScrollValue,
+} from "@repo/scrollytelling"
+
+const groundwaterLine = {
+  guideValue: 108,
+  viewBoxY: 20,
+  viewBoxWidth: 1728,
+  viewBoxHeight: 1115,
+  translateX: 0,
+  initialTranslateY: -14,
+  textOffsetY: -24,
+  path: "M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115",
+} as const
+
+const droughtIntro = [
+  { text: "Droughts are not new to California." },
+  {
+    segments: [
+      { text: "But " },
+      {
+        text: "in a changing climate, droughts are expected to occur more often",
+        mark: "highlight",
+      },
+      { text: "." },
+    ],
+  },
+]
+
+const groundwaterUse = [
+  {
+    segments: [
+      {
+        text: "Historically, when rivers and reservoirs ran low, communities and farmers in California increased the use of ",
+      },
+      { text: "groundwater", mark: "strong" },
+      { text: " to meet their needs." },
+    ],
+  },
+]
+
+const groundwaterRecharge = [
+  {
+    text: "Groundwater is naturally replenished in wet years and serves as another natural reservoir below the land surface. But when pumping exceeds recharge rates, groundwater tables fall.",
+  },
+]
+
+const groundwaterManagement = [
+  {
+    segments: [
+      { text: "In 2014, the state enacted " },
+      { text: "Sustainable Groundwater Management Act (SGMA)", mark: "strong" },
+      {
+        text: ". This law is intended to protect groundwater for the future. It aims to reduce overpumping so groundwater supplies will still be available to help us withstand extreme droughts.",
+      },
+    ],
+  },
+]
 
 function Groundwater() {
-  const sectionRef = useRef(null)
-  const theme = useTheme()
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
+  return (
+    <StickyScrollSection
+      id="groundwater"
+      ariaLabel="Managing groundwater during droughts"
+      height="220vh"
+      stickyHeight="100vh"
+      stickyTop={0}
+    >
+      <GroundwaterContent />
+    </StickyScrollSection>
+  )
+}
 
-  const linePath = useTransform(scrollYProgress, [0.7, 0.9], [0, 1])
-  const textOpacity = useTransform(scrollYProgress, [0.7, 0.8], [0, 1])
-  const titleOpacity = useTransform(scrollYProgress, [0.2, 0.35], [0, 1])
-  const paragraphOneOpacity = useTransform(
-    scrollYProgress,
-    [0.28, 0.44],
-    [0, 1],
-  )
-  const paragraphTwoOpacity = useTransform(
-    scrollYProgress,
-    [0.36, 0.52],
-    [0, 1],
-  )
-  const paragraphThreeOpacity = useTransform(
-    scrollYProgress,
-    [0.44, 0.6],
-    [0, 1],
-  )
-  const paragraphFourOpacity = useTransform(
-    scrollYProgress,
-    [0.52, 0.68],
-    [0, 1],
-  )
-  const chartHeadingOpacity = useTransform(scrollYProgress, [0.6, 0.75], [0, 1])
+function GroundwaterContent() {
+  const theme = useTheme()
+  const alignment = useGroundwaterLineAlignment()
+  const progress = useScrollProgress()
+
+  const linePath = useScrollValue(progress, [0.7, 0.9], [0, 1])
+  const textOpacity = useScrollValue(progress, [0.7, 0.8], [0, 1])
+  const titleOpacity = useScrollValue(progress, [0.2, 0.35], [0, 1])
+  const paragraphOneOpacity = useScrollValue(progress, [0.28, 0.44], [0, 1])
+  const paragraphTwoOpacity = useScrollValue(progress, [0.36, 0.52], [0, 1])
+  const paragraphThreeOpacity = useScrollValue(progress, [0.44, 0.6], [0, 1])
+  const paragraphFourOpacity = useScrollValue(progress, [0.52, 0.68], [0, 1])
+  const chartHeadingOpacity = useScrollValue(progress, [0.6, 0.75], [0, 1])
 
   return (
-    <StickyContainer
-      sectionID="groundwater"
-      stickyRollHeight="120vh"
-      sectionRef={sectionRef}
+    <Box
+      ref={alignment.sectionRef}
+      sx={{ position: "relative", height: "100%" }}
     >
-      <SVGLineContainer viewBox="0 20 1728 1115" zIndex={1}>
+      <SVGLineContainer viewBox="0 20 1728 1115" zIndex={3}>
         <motion.path
+          ref={alignment.pathRef}
           id="groundwaterPumpingPath"
-          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          d={groundwaterLine.path}
           className="svg-line glow-effect"
           pathLength={linePath}
-          transform={"translate(0, -14)"}
+          transform={`translate(${groundwaterLine.translateX}, ${alignment.lineTranslateY})`}
         />
         <motion.path
           id="groundwaterPumpingTextPath"
-          d="M-16 -52C-16 -52 -14 12 270 42C554 72 588 128 805 297C1022 466 1481.44 712.033 1755 844V1115"
+          d={groundwaterLine.path}
           fill="none"
           stroke="none"
-          transform="translate(0, -38)"
+          transform={`translate(${groundwaterLine.translateX}, ${alignment.textTranslateY + 55})`}
         />
         <motion.text
           fill="#F1B143"
@@ -71,7 +126,7 @@ function Groundwater() {
         >
           <textPath
             href="#groundwaterPumpingTextPath"
-            startOffset="35%"
+            startOffset="40%"
             textAnchor="middle"
           >
             Droughts drive groundwater pumping
@@ -85,68 +140,41 @@ function Groundwater() {
         height="100%"
         sx={{
           position: "relative",
-          zIndex: 1,
+          zIndex: 4,
           pointerEvents: "auto",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ opacity: titleOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="h3">{"Increasing Droughts"}</Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphOneOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"Droughts are not new to California."}
-            </Typography>
-            <Typography variant="body1">
-              {
-                "But in a changing climate, droughts are expected to occur more often. "
-              }
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphTwoOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "In past droughts, when water available in rivers and reservoirs is reduced, "
-              }
-              {"communities and farmers in California turned to "}
-              <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
-              {" to meet their needs."}
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphThreeOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"Unfortunately, "}
-              <span className="highlight-text">
-                {
-                  "overpumping of groundwater has depleted underground water storage"
-                }
-              </span>
-              {" , causing wells to dry and the land to sink."}
-            </Typography>
-          </Box>
-        </motion.div>
-        <motion.div style={{ opacity: paragraphFourOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"In 2014, the state enacted "}
-              <span style={{ fontWeight: "bold" }}>
-                {"Sustainable Groundwater Management Act (SGMA)"}
-              </span>
-              {
-                ". This law is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
+        <Box className="paragraph" component="article">
+          <motion.div style={{ opacity: titleOpacity }}>
+            <SectionTitle text="More Managing Groundwater During Droughts" />
+          </motion.div>
+          <Stack direction="column" spacing={2}>
+            {[
+              { blocks: droughtIntro, opacity: paragraphOneOpacity },
+              { blocks: groundwaterUse, opacity: paragraphTwoOpacity },
+              { blocks: groundwaterRecharge, opacity: paragraphThreeOpacity },
+              { blocks: groundwaterManagement, opacity: paragraphFourOpacity },
+            ].map(({ blocks, opacity }, index) => (
+              <motion.div key={index} style={{ opacity }}>
+                <Paragraph
+                  blocks={blocks}
+                  markSx={{
+                    highlight: {
+                      color: "#F1B143",
+                      fontWeight: "normal",
+                    },
+                    strong: {
+                      fontWeight: "bold",
+                    },
+                  }}
+                />
+              </motion.div>
+            ))}
+          </Stack>
+        </Box>
       </Box>
 
       <Box
@@ -160,38 +188,125 @@ function Groundwater() {
           flexDirection: "column",
           justifyContent: "center",
           paddingRight: "5rem",
+          pointerEvents: "auto",
+          zIndex: 1,
         }}
       >
-        <Box
+        <Visualization
+          title="Cumulative Groundwater Loss in Central Valley"
+          source={{
+            prefix:
+              "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: ",
+            label: "Liu et al., 2022",
+            url: "https://doi.org/10.1038/s41467-022-35582-x",
+          }}
           className="paragraph"
-          component="article"
-          sx={{ pointerEvents: "auto" }}
+          headerWrapper={(header) => (
+            <motion.div style={{ opacity: chartHeadingOpacity }}>
+              {header}
+            </motion.div>
+          )}
+          sx={{
+            width: "100%",
+            height: { xs: "62vh", md: "70vh" },
+            pointerEvents: "auto",
+          }}
         >
-          <motion.div style={{ opacity: chartHeadingOpacity }}>
-            <Typography variant="h5" align="left">
-              {"Cumulative Groundwater Loss in Central Valley"}
-            </Typography>
-            <Typography variant="caption" align="left" sx={{ opacity: 0.7 }}>
-              {
-                "Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: "
-              }
-              <a
-                href="https://doi.org/10.1038/s41467-022-35582-x"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "inherit", textDecoration: "underline" }}
-              >
-                {"Liu et al., 2022"}
-              </a>
-            </Typography>
-          </motion.div>
-        </Box>
-        <Box width="100%" height="50%">
-          <GroundwaterLine scrollProgress={scrollYProgress} />
-        </Box>
+          <Box
+            ref={alignment.chartRef}
+            width="100%"
+            height={{ xs: "42vh", md: "52vh" }}
+          >
+            <GroundwaterLine
+              scrollProgress={progress}
+              groundwaterGuideValue={groundwaterLine.guideValue}
+              onGroundwaterGuidePointChange={alignment.setChartGuidePoint}
+            />
+          </Box>
+        </Visualization>
       </Box>
-    </StickyContainer>
+    </Box>
   )
 }
 
 export default Groundwater
+
+function useGroundwaterLineAlignment() {
+  const sectionRef = useRef<HTMLDivElement | null>(null)
+  const chartRef = useRef<HTMLDivElement | null>(null)
+  const pathRef = useRef<SVGPathElement | null>(null)
+  const [chartGuidePoint, setChartGuidePoint] = useState<{
+    x: number
+    y: number
+  } | null>(null)
+  const [lineTranslateY, setLineTranslateY] = useState<number>(
+    groundwaterLine.initialTranslateY,
+  )
+
+  const measure = useCallback(() => {
+    const section = sectionRef.current
+    const chart = chartRef.current
+    const path = pathRef.current
+    if (!section || !chart || !path || chartGuidePoint === null) return
+
+    const sectionRect = section.getBoundingClientRect()
+    const chartRect = chart.getBoundingClientRect()
+    if (sectionRect.width <= 0 || sectionRect.height <= 0) return
+
+    const guideXInSection =
+      chartRect.left - sectionRect.left + chartGuidePoint.x
+    const guideYInSection = chartRect.top - sectionRect.top + chartGuidePoint.y
+    const guideXInViewBox =
+      (guideXInSection / sectionRect.width) * groundwaterLine.viewBoxWidth
+    const guideYInViewBox =
+      groundwaterLine.viewBoxY +
+      (guideYInSection / sectionRect.height) * groundwaterLine.viewBoxHeight
+
+    setLineTranslateY(
+      guideYInViewBox -
+        getPathYAtX(path, guideXInViewBox - groundwaterLine.translateX),
+    )
+  }, [chartGuidePoint])
+
+  useEffect(() => {
+    measure()
+
+    const observer = new ResizeObserver(() => requestAnimationFrame(measure))
+    const section = sectionRef.current
+    const chart = chartRef.current
+
+    if (section) observer.observe(section)
+    if (chart) observer.observe(chart)
+    window.addEventListener("resize", measure)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [measure])
+
+  return {
+    sectionRef,
+    chartRef,
+    pathRef,
+    lineTranslateY,
+    textTranslateY: lineTranslateY + groundwaterLine.textOffsetY,
+    setChartGuidePoint,
+  }
+}
+
+function getPathYAtX(path: SVGPathElement, x: number) {
+  const length = path.getTotalLength()
+  let start = 0
+  let end = length
+
+  for (let i = 0; i < 32; i += 1) {
+    const midpoint = (start + end) / 2
+    const point = path.getPointAtLength(midpoint)
+
+    if (point.x < x) start = midpoint
+    else end = midpoint
+  }
+
+  return path.getPointAtLength((start + end) / 2).y
+}

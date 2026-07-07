@@ -24,9 +24,20 @@ const axisColor = OffWhiteColor
 type Props = {
   scrollProgress: MotionValue<number>
   debug?: boolean
+  snowpackGuideValue?: number
+  onSnowpackGuidePointChange?: (point: { x: number; y: number }) => void
+  snowpackExitValue?: number
+  onSnowpackExitPointChange?: (point: { x: number; y: number }) => void
 }
 
-export default function SnowpackLine({ scrollProgress, debug = false }: Props) {
+export default function SnowpackLine({
+  scrollProgress,
+  debug = false,
+  snowpackGuideValue,
+  onSnowpackGuidePointChange,
+  snowpackExitValue,
+  onSnowpackExitPointChange,
+}: Props) {
   const clipId = useId().replace(/:/g, "")
   const [data, setData] = useState<SnowRow[]>([])
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
@@ -121,6 +132,34 @@ export default function SnowpackLine({ scrollProgress, debug = false }: Props) {
     0,
     size.height - safeMargin.top - safeMargin.bottom,
   )
+
+  useEffect(() => {
+    if (size.width <= 0 || size.height <= 0) return
+
+    if (snowpackGuideValue != null && Number.isFinite(snowpackGuideValue)) {
+      onSnowpackGuidePointChange?.({
+        x: plotX,
+        y: yScale(snowpackGuideValue),
+      })
+    }
+
+    if (snowpackExitValue != null && Number.isFinite(snowpackExitValue)) {
+      onSnowpackExitPointChange?.({
+        x: plotX + plotWidth,
+        y: yScale(snowpackExitValue),
+      })
+    }
+  }, [
+    onSnowpackExitPointChange,
+    onSnowpackGuidePointChange,
+    plotWidth,
+    plotX,
+    snowpackExitValue,
+    snowpackGuideValue,
+    size.height,
+    size.width,
+    yScale,
+  ])
 
   useLayoutEffect(() => {
     if (!xAxisRef.current) return
