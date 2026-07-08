@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -20,28 +21,27 @@ body.back-row-toggle .rain.back-row {
 
 .drop {
   position: absolute;
-  top: -60px;
+  top: 0;
   width: 15px;
   height: 60px;
   pointer-events: none;
   animation: drop 0.5s linear infinite;
+  transform: translateY(-80px);
+  will-change: transform;
 }
 
 @keyframes drop {
   0% {
-    transform: translateY(0);
-  }
-  75% {
-    transform: translateY(var(--rain-travel, 100vh));
+    transform: translateY(-80px);
   }
   100% {
-    transform: translateY(var(--rain-travel, 100vh));
+    transform: translateY(calc(var(--rain-travel, 100vh) + 80px));
   }
 }
 
 /* the visible streak */
 .stem {
-  width: 1px; /* thin line so it’s not a rectangle */
+  width: 1px; /* thin line so it's not a rectangle */
   height: 60%;
   margin-left: 7px; /* centers the streak in 15px container */
   background: var(--rain-color);

@@ -1,17 +1,26 @@
 import { create, immer } from "@repo/state/zustand"
 
 interface AppState {
-  activeSection: string
+  activeSection: SectionId
 }
 
 export type SectionId =
   | "opener"
   | "temperature"
+  | "temperatureBuilder"
+  | "sierranevada"
   | "snowmelt"
   | "groundwater"
-  | "delta"
-  | "adapt-transition"
-  | "resolution"
+  | "groundwaterTransition"
+  | "deltaFarms"
+  | "deltaAqueduct"
+  | "balance"
+  | "bullet"
+  | "coeqwalCallout"
+  | "hydroclimate"
+  | "hydroclimateTransition"
+  | "themes"
+  | "conclusion"
 
 const initialState: AppState = {
   activeSection: "opener",

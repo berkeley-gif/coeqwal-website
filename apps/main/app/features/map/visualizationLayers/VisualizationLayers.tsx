@@ -48,6 +48,7 @@ import {
   getOnLocationToggle,
   getOnLocationClick,
   getOnLocationHover,
+  useActiveSubSection,
 } from "../store"
 import { MAP_THEME_URLS } from "@repo/map"
 
@@ -102,23 +103,6 @@ export default function VisualizationLayers({
     featureIds,
   } = useOutcomeVisualization()
 
-  // Unified tooltip state for all map features (polygons + point markers)
-  const {
-    hoveredFeature,
-    pinnedFeatures,
-    isHoveredAlreadyPinned,
-    handlePointHover,
-    handlePointClick,
-    clearPinned,
-    clearAllPinned,
-  } = useMapTooltips({
-    polygonConfig: config,
-    tierLevelMap,
-    locationData,
-    polygonEnabled:
-      isVisualizationActive && usesMapboxLayers && mapMode !== "get-started",
-  })
-
   // Clear all pinned tooltips when signal changes (triggered by glyph clicks)
   const clearTooltipsSignal = useClearTooltipsSignal()
   const prevSignalRef = useRef(clearTooltipsSignal)
@@ -158,18 +142,36 @@ export default function VisualizationLayers({
   )
 
   const isLearnMode = mapMode === "learn"
-  const isGetStartedMode = mapMode === "get-started"
+  const activeSubSection = useActiveSubSection()
+  const isStoryBoardActive = activeSubSection === "outcomes-viz"
   const mapStyle = useMapStyle()
   const isSatellite = mapStyle === MAP_THEME_URLS.satellite
+
+  // Unified tooltip state for all map features (polygons + point markers)
+  const {
+    hoveredFeature,
+    pinnedFeatures,
+    isHoveredAlreadyPinned,
+    handlePointHover,
+    handlePointClick,
+    clearPinned,
+    clearAllPinned,
+  } = useMapTooltips({
+    polygonConfig: config,
+    tierLevelMap,
+    locationData,
+    polygonEnabled:
+      isVisualizationActive && usesMapboxLayers && !isStoryBoardActive,
+  })
 
   // Dim overlay only on satellite basemap (light/streets have enough contrast).
   // Force to 0 when the map is hidden so the Source stays mounted without visual effect.
   const dimOpacity = useMemo(
     () =>
-      !hidden && isVisualizationActive && !isGetStartedMode && isSatellite
+      !hidden && isVisualizationActive && !isStoryBoardActive && isSatellite
         ? BASEMAP_DIM_OPACITY
         : 0,
-    [hidden, isVisualizationActive, isGetStartedMode, isSatellite],
+    [hidden, isVisualizationActive, isStoryBoardActive, isSatellite],
   )
 
   // Position dim overlay below all outcome polygon fill layers so
@@ -197,28 +199,26 @@ export default function VisualizationLayers({
     }
 
     const positionDimLayer = () => {
-      if (!mapInstance.getLayer(DIM_ID)) return
-
-      const style = mapInstance.getStyle()
-      if (!style?.layers) return
-
-      const layerIds = style.layers.map((l) => l.id)
-      const dimIdx = layerIds.indexOf(DIM_ID)
-      if (dimIdx === -1) return
-
-      let firstFillId: string | undefined
-      for (const id of layerIds) {
-        if (OUTCOME_FILLS.has(id)) {
-          firstFillId = id
-          break
-        }
-      }
-
-      if (!firstFillId) return
-      if (dimIdx < layerIds.indexOf(firstFillId)) return
-
       try {
-        mapInstance.moveLayer(DIM_ID, firstFillId)
+        if (!mapInstance.getLayer(DIM_ID)) return
+
+        const style = mapInstance.getStyle()
+        if (!style?.layers) return
+
+        const layerIds = style.layers.map((l) => l.id)
+        const dimIdx = layerIds.indexOf(DIM_ID)
+        if (dimIdx === -1) return
+
+        let firstFillId: string | undefined
+        for (const id of layerIds) {
+          if (OUTCOME_FILLS.has(id)) {
+            firstFillId = id
+            break
+          }
+        }
+
+        if (!firstFillId) return
+        if (dimIdx < layerIds.indexOf(firstFillId)) return
       } catch {
         /* layer may not exist yet */
       }
@@ -265,19 +265,19 @@ export default function VisualizationLayers({
           )}
 
           {/* Polygon layer (demand-units, WBA, delta, reservoir)
-              In get-started mode every polygon family is owned imperatively by
+              In learn storyboard mode every polygon family is owned imperatively by
               `InteractiveLayerDirector` (the demand-units arbiter and the
               polygon driver, see
-              `apps/main/app/features/scenarioExplorer/animation/engine/InteractiveLayerDirector.ts`)
+              `apps/main/app/features/map/animation/engine/InteractiveLayerDirector.ts`)
               to enforce the storyboard's single-writer-per-resource
               invariant and to sequence cross-family handoffs. Skip the OPL
-              mount entirely in get-started so the two writers don't race for
+              mount entirely in storyboard/learn so the two writers don't race for
               the layer. Explore and Learn modes still use the declarative
               OPL here. */}
           {isVisualizationActive &&
             geometryType === "polygon" &&
             config &&
-            !isGetStartedMode && (
+            !isStoryBoardActive && (
               <OutcomePolygonLayer
                 tierColorMap={tierColorMap}
                 layerType={layerType!}
@@ -301,7 +301,7 @@ export default function VisualizationLayers({
                 locations={tierLocations}
                 tierCode={tierCode}
                 onHover={
-                  isGetStartedMode
+                  isStoryBoardActive
                     ? (feature) => {
                         if (!feature) {
                           getOnLocationHover()?.(null)
@@ -316,7 +316,7 @@ export default function VisualizationLayers({
                     : handlePointHover
                 }
                 onClick={
-                  isGetStartedMode
+                  isStoryBoardActive
                     ? (feature) => {
                         getOnLocationClick()?.({
                           code: outcomeCode!,
@@ -337,7 +337,7 @@ export default function VisualizationLayers({
                 tierLookup={tierLevelMap}
                 highlightedIds={highlightedLocationIds}
                 onHover={
-                  isGetStartedMode
+                  isStoryBoardActive
                     ? (info) => {
                         if (!info) {
                           getOnLocationHover()?.(null)
@@ -352,7 +352,7 @@ export default function VisualizationLayers({
                     : undefined
                 }
                 onClick={
-                  isGetStartedMode
+                  isStoryBoardActive
                     ? (info) => {
                         getOnLocationClick()?.({
                           code: outcomeCode!,
@@ -377,8 +377,8 @@ export default function VisualizationLayers({
               />
             )}
 
-          {/* Pinned tooltips (multiple allowed) - suppressed in get-started mode */}
-          {!isGetStartedMode &&
+          {/* Pinned tooltips (multiple allowed) - suppressed in storyboard/learn mode */}
+          {!isStoryBoardActive &&
             pinnedFeatures.map((feature) => (
               <MapFeatureTooltip
                 key={`pinned-${feature.featureId}`}
@@ -388,8 +388,8 @@ export default function VisualizationLayers({
               />
             ))}
 
-          {/* Hover tooltip (only if not already pinned) - suppressed in get-started mode */}
-          {!isGetStartedMode && hoveredFeature && !isHoveredAlreadyPinned && (
+          {/* Hover tooltip (only if not already pinned) - suppressed in storyboard/learn mode */}
+          {!isStoryBoardActive && hoveredFeature && !isHoveredAlreadyPinned && (
             <MapFeatureTooltip
               key="hover"
               feature={hoveredFeature}
@@ -411,7 +411,7 @@ export default function VisualizationLayers({
            * simpler, in-place popup. */}
           {locationHighlights
             .filter((hl) => {
-              if (!isGetStartedMode) return true
+              if (!isStoryBoardActive) return true
               // Hover (unpinned) highlights stay quiet on the map unless the
               // storyboard opted in for the settled-grid beats.
               if (!hl.pinned && !showHoverHighlightsOnMap) return false

@@ -1,30 +1,17 @@
 "use client"
 
 import { useMemo } from "react"
-import { BaseHeader } from "@repo/ui"
+import {
+  BaseHeader,
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "@repo/ui"
 import { Box } from "@repo/ui/mui"
 
-function getManagementThemesOptions() {
-  return []
-}
-
-function goToMainHome() {
-  window.location.href = "/"
-}
-
-function goToMainAbout() {
-  window.location.href = "/about"
-}
-
-function goToMainData() {
-  window.location.href = "/data"
-}
-
 export default function ManagementContainer() {
-  const managementThemesOptions = useMemo(
-    () => getManagementThemesOptions(),
-    [],
-  )
+  const waterThemesOptions = useMemo(() => getStorylineWaterThemesOptions(), [])
 
   return (
     <>
@@ -33,7 +20,7 @@ export default function ManagementContainer() {
         onLogoClick={goToMainHome}
         onAboutClick={goToMainAbout}
         onGetDataClick={goToMainData}
-        waterThemesOptions={managementThemesOptions}
+        waterThemesOptions={waterThemesOptions}
       />
       <Box
         component="main"

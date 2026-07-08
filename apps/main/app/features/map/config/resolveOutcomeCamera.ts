@@ -4,7 +4,7 @@
  * Priority: cameraBounds > cameraPreset > mode-specific default.
  *
  * Used by both the reactive camera in useOutcomeVisualization (learn/explore)
- * and the inline camera in TierAnimationSection (get-started) so the
+ * and the inline camera in TierAnimationSection (Learn tab's tier-animation storyboard) so the
  * resolution logic lives in exactly one place.
  */
 

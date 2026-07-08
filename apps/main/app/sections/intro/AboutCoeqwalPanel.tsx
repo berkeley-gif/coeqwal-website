@@ -1,20 +1,16 @@
 "use client"
 
 /**
- * About COEQWAL panel: the second panel in the IntroSection's morphing
- * stack. Pinned at the header for a ~100vh scroll runway via
- * `StickyScrollSection` so the user can read the description while the
- * MorphingHeadline morphs above it. Mirrors the WaterThemesPanel
+ * About COEQWAL panel: the second panel in the intro. Pinned at the
+ * header for a ~100vh scroll runway via `StickyScrollSection` so the
+ * user can read the description in place. Mirrors the WaterThemesPanel
  * geometry (stickyTop = headerHeight, stickyHeight = 100vh - header)
  * so both panels share the same pinned rectangle below the header.
  *
  * The outer wrapper is painted with the frame background so the
- * sticky region reads as continuous white frame. The headline itself
- * is drawn by the MorphingHeadline overlay on lg+; the
- * `responsiveHeadline` slot below fills in on smaller screens.
+ * sticky region reads as continuous white frame.
  */
 
-import { forwardRef } from "react"
 import Link from "next/link"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import {
@@ -24,24 +20,12 @@ import {
   resolveCssLengthPx,
 } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
-import type { MotionValue } from "@repo/motion"
 
-interface AboutCoeqwalPanelProps {
-  /**
-   * Per-panel content opacity, driven by the morphing-headline
-   * choreography. Wired into `CoeqwalPanel.contentMotionStyle.opacity`.
-   */
-  contentOpacity: MotionValue<number>
-}
-
-export const AboutCoeqwalPanel = forwardRef<
-  HTMLDivElement,
-  AboutCoeqwalPanelProps
->(function AboutCoeqwalPanel({ contentOpacity }, ref) {
+export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
   return (
-    <div ref={ref} style={{ backgroundColor: theme.palette.common.white }}>
+    <div style={{ backgroundColor: theme.palette.brand.sky }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -49,26 +33,10 @@ export const AboutCoeqwalPanel = forwardRef<
       >
         <CoeqwalPanel
           id="about-coeqwal"
-          background={theme.palette.brand.water}
+          background={theme.palette.brand.sky}
           textColor={theme.palette.text.secondary}
-          // Size the inner rounded card so the CoeqwalPanel's total
-          // outer height (minHeight + 2·insetY from its own py
-          // padding) equals the StickyScrollSection's stickyHeight
-          // (`100vh - headerHeight`). Mirrors the WaterThemesPanel
-          // geometry. Without subtracting the second `insetY` the
-          // CoeqwalPanel is `insetY` taller than the sticky
-          // container, which clips the bottom frame-gap under
-          // `overflow: hidden` and makes the rounded card sit flush
-          // with the sticky bottom edge instead of floating with
-          // symmetric top/bottom padding.
-          minHeight={`calc(100vh - ${theme.layout.headerHeight}px - 2 * ${theme.layout.panel.insetY})`}
-          borderRadius={theme.layout.panel.radius}
-          inset={{
-            x: theme.layout.panel.insetX,
-            y: theme.layout.panel.insetY,
-          }}
-          frameBackground={theme.palette.common.white}
-          contentMotionStyle={{ opacity: contentOpacity }}
+          minHeight="100vh"
+          borderRadius={0}
           responsiveHeadline={
             <>
               <Typography
@@ -91,11 +59,13 @@ export const AboutCoeqwalPanel = forwardRef<
             <>
               COEQWAL – the Collaboratory for Equity in Water Allocation – is a
               publicly-funded project that works with communities to better
-              understand how water is managed in California.
+              understand how water decisions affect us now and for generations
+              to come
               <br />
               <br />
-              Using water planning models, COEQWAL sheds light on how
-              alternative decisions and climate change scenarios shape our water
+              Using a water planning model for California’s Central Valley,
+              COEQWAL helps you learn how water is currently managed, explore
+              alternative pathways, and share your vision for California’s water
               future.
             </>
           }
@@ -119,14 +89,14 @@ export const AboutCoeqwalPanel = forwardRef<
                 theme.layout.headerHeight -
                 resolveCssLengthPx(theme.layout.panel.insetY, 24)
               }
-              ariaLabel="Scroll down to the water issues section"
+              ariaLabel="Scroll down to the know more section"
             />
           }
         />
       </StickyScrollSection>
     </div>
   )
-})
+}
 
 /** Pill-style CTA for the About COEQWAL panel. */
 function AboutCtaLink({

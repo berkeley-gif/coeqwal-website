@@ -1706,7 +1706,7 @@ export default function ResiliencePanel({
   )
 
   // Pinned squares survive hover-leave and are rendered as persistent
-  // popups on the map (same UX as the get-started key-outcomes overlay).
+  // popups on the map (same UX as the tier-animation storyboard's key-outcomes overlay).
   // We keep `outcomeCode` alongside each highlight so we can drop pins
   // when the active map outcome changes.
   const [pinnedSquareLois, setPinnedSquareLois] = useState<

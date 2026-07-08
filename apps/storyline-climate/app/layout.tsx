@@ -17,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>{children}</ThemeRegistry>
