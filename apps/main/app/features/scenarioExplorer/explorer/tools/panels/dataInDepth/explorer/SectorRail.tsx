@@ -71,7 +71,7 @@ export default function SectorRail() {
             sx={{
               display: "block",
               px: 1.5,
-              color: theme.palette.text.secondary,
+              color: theme.palette.grey[600],
               fontWeight: 700,
               letterSpacing: "0.06em",
               opacity: sector.locked ? 0.5 : 1,
@@ -86,7 +86,7 @@ export default function SectorRail() {
               sx={{
                 display: "block",
                 px: 1.5,
-                color: theme.palette.text.disabled,
+                color: theme.palette.grey[500],
                 fontStyle: "italic",
               }}
             >
@@ -119,7 +119,7 @@ export default function SectorRail() {
                           : "transparent",
                         color: active
                           ? theme.palette.text.primary
-                          : theme.palette.text.secondary,
+                          : theme.palette.grey[600],
                         fontWeight: active ? 600 : 400,
                         fontSize: "0.86rem",
                         px: 1.5,

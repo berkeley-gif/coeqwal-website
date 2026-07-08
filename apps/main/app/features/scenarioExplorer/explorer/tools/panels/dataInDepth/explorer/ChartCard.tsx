@@ -72,7 +72,7 @@ export default function ChartCard() {
           alignItems: "center",
           justifyContent: "center",
           height: CHART_HEIGHT,
-          color: theme.palette.text.secondary,
+          color: theme.palette.grey[600],
         }}
       >
         <Typography variant="body2">
@@ -145,7 +145,7 @@ export default function ChartCard() {
             color:
               data.source === "live"
                 ? theme.palette.info.dark
-                : theme.palette.text.secondary,
+                : theme.palette.grey[600],
             fontWeight: 600,
           }}
         />
@@ -214,7 +214,7 @@ export default function ChartCard() {
                   sx={{
                     fontSize: "0.62rem",
                     fontWeight: 600,
-                    color: theme.palette.text.secondary,
+                    color: theme.palette.grey[600],
                     border: `1px solid ${theme.palette.divider}`,
                     borderRadius: "4px",
                     px: 0.5,
@@ -234,7 +234,7 @@ export default function ChartCard() {
         sx={{
           display: "block",
           mt: 1.5,
-          color: theme.palette.text.disabled,
+          color: theme.palette.grey[500],
           fontStyle: "italic",
         }}
       >

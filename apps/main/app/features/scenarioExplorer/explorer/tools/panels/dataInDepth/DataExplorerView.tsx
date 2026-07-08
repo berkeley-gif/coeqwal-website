@@ -80,7 +80,7 @@ export default function DataExplorerView({
         {mode === "category" && !hasData && (
           <Typography
             variant="subtitle2"
-            sx={{ color: theme.palette.text.secondary }}
+            sx={{ color: theme.palette.grey[600] }}
           >
             Select scenarios to explore
           </Typography>

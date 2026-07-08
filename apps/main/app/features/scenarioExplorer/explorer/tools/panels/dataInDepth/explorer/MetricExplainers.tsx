@@ -37,10 +37,7 @@ export default function MetricExplainers() {
           <Typography variant="body2" sx={{ mb: 1 }}>
             {variable.plain}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: theme.palette.text.secondary }}
-          >
+          <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
             <strong>Technical:</strong> {variable.tech} Units:{" "}
             {variable.unitLabel}.
           </Typography>

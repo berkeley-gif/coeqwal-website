@@ -189,7 +189,7 @@ export default function CompareControls() {
           sx={{
             display: "block",
             mb: 0.5,
-            color: theme.palette.text.secondary,
+            color: theme.palette.grey[600],
           }}
         >
           Compare by
@@ -224,7 +224,7 @@ export default function CompareControls() {
               sx={{
                 display: "block",
                 mb: 0.5,
-                color: theme.palette.text.secondary,
+                color: theme.palette.grey[600],
               }}
             >
               Scenarios (from your selection)
@@ -272,7 +272,7 @@ export default function CompareControls() {
               sx={{
                 display: "block",
                 mb: 0.5,
-                color: theme.palette.text.secondary,
+                color: theme.palette.grey[600],
               }}
             >
               Climate futures
@@ -300,7 +300,7 @@ export default function CompareControls() {
                             : "transparent",
                           border: on
                             ? "none"
-                            : `1px solid ${theme.palette.text.disabled}`,
+                            : `1px solid ${theme.palette.grey[500]}`,
                         }}
                       />
                     }
@@ -323,7 +323,7 @@ export default function CompareControls() {
               sx={{
                 display: "block",
                 mb: 0.5,
-                color: theme.palette.text.secondary,
+                color: theme.palette.grey[600],
               }}
             >
               {group.label}s (up to {MAX_COMPARE_LOCATIONS})
@@ -354,7 +354,7 @@ export default function CompareControls() {
                               : "transparent",
                             border: on
                               ? "none"
-                              : `1px solid ${theme.palette.text.disabled}`,
+                              : `1px solid ${theme.palette.grey[500]}`,
                           }}
                         />
                       }

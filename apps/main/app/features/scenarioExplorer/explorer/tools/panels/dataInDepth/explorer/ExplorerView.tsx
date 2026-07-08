@@ -50,10 +50,7 @@ export default function ExplorerView() {
               mb: 0.5,
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{ color: theme.palette.text.secondary }}
-            >
+            <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
               <strong style={{ color: theme.palette.text.primary }}>
                 {sector?.name}
               </strong>{" "}
@@ -66,7 +63,7 @@ export default function ExplorerView() {
                 label={`feeds tier: ${variable.tierOutcomeName}`}
                 sx={{
                   fontSize: "0.72rem",
-                  color: theme.palette.text.secondary,
+                  color: theme.palette.grey[600],
                   borderColor: theme.palette.divider,
                 }}
               />
