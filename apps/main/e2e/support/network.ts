@@ -39,7 +39,13 @@ export function collectConsoleErrors(page: Page): string[] {
   page.on("console", (message) => {
     if (message.type() !== "error") return
     if (ALLOWLISTED_TEXT.some((pattern) => pattern.test(message.text()))) return
+    // Aborting an external origin (Mapbox, Typekit) surfaces as a "Failed to
+    // fetch <url>" error whose origin is in the message text, while
+    // location().url is the app chunk that logged it. Match against both so
+    // the harness ignores the aborts it deliberately causes regardless of
+    // whether the build has a real Mapbox token.
     if (ALLOWLISTED_SOURCES.test(message.location().url)) return
+    if (ALLOWLISTED_SOURCES.test(message.text())) return
     errors.push(message.text())
   })
   return errors
