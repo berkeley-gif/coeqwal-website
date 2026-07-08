@@ -27,6 +27,10 @@ dist
 .DS_Store
 *.pem
 
+# Playwright
+test-results/
+playwright-report/
+
 # Documentation / developer notes
 docs/
 
