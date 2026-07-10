@@ -14,7 +14,7 @@
  * This is the source of truth for outcome names.
  */
 export const OUTCOME_NAMES = {
-  CWS_DEL: "Community deliveries",
+  CWS_DEL: "Community surface water",
   AG_REV: "Agricultural revenue",
   ENV_FLOWS: "Environmental flows",
   RES_STOR: "Reservoir storage",
