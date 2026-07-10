@@ -314,13 +314,13 @@ export interface TierValueDefinitions {
 export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   CWS_DEL: {
     tier1:
-      "Near full deliveries in most years, no years with large shortfalls (Definition: **≥ 90%** **of target** met in **≥ 90% of years**, no year with **≤ 70%** **of target** delivered)",
+      "Surface water deliveries satisfy associated drinking water demands in nearly all years, with no years with significant shortfalls (**> 90%** of drinking water demand satisfied in **≥ 90%** of years, with no shortfall years **< 70%** of demand).",
     tier2:
-      "Near full deliveries in at least half of years, no years with critical shortfalls (Definition: **≥ 90%** **of target** met in **≥ 50% of years**, no years with **≤ 50%** **of target** delivered)",
+      "Surface water deliveries satisfy associated drinking water demands in majority of years, with no years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no shortfall years **< 50%** of demand).",
     tier3:
-      "Near full deliveries in at least half of years, no more than 20 years with critical shortfalls (Definition: **≥ 90%** **of target** met in **≥ 50% of years**, no more than **20% of years** with **< 50%** **of target** delivered)",
+      "Surface water deliveries satisfy associated drinking water demands in majority of years, with some years with critical shortfalls (**> 90%** of drinking water demand satisfied in **≥ 50%** of years, with no more than **20%** of shortfall years **< 50%** of demand).",
     tier4:
-      "None of the above criteria met (Either **≥ 90%** **of target** met in **< 50% of years** and/or **≥ 20%** years with **< 50%** **of target** delivered)",
+      "None of the above criteria met (**> 90%** of estimated potable demand met in **< 50%** of years and/or **> 20%** of years in which **50%** of demand is not satisfied).",
   },
   AG_REV: {
     tier1:
