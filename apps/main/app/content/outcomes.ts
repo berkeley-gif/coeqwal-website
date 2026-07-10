@@ -245,7 +245,7 @@ export function describeOutcomeLocations(
  */
 export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
-    "Tiers reflect the degree of Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
+    "Tiers reflect the extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to estimated recent potable water demands for these deliveries at 74 locations of interest.",
   AG_REV:
     "Tiers correspond to the impact of water shortages on agricultural production",
   ENV_FLOWS:
@@ -266,9 +266,9 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
 
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   NOD_DW:
-    "Tiers reflect the degree of NOD Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
+    "Tiers reflect the extent to which NOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
   SOD_DW:
-    "Tiers reflect the degree of SOD Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
+    "Tiers reflect the extent to which SOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
   NOD_AG:
     "Tiers correspond to the impact of water shortages on NOD agricultural production",
   SOD_AG:
