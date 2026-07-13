@@ -251,7 +251,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   ENV_FLOWS:
     "Tiers reflect the extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   RES_STOR:
-    'Tier reflects the degree to which a reservoir fills each spring in advance of the summer delivery season (Apr-Oct) during which reservoirs provide water to irrigators and communities. Tiers are designated for select key reservoirs based on how frequently those reservoirs have April 30 (end of month) storage above or below certain thresholds. These thresholds are different for each reservoir and are set here based on percentiles of recent historical data, but may be adjusted in the future. The scheme described here yields tier designations that will be "1" if storage conditions are more consistently higher than recent historical conditions; "2" if they are roughly equivalent to recent conditions; "3" if they are moderately lower than recent conditions; and "4" if they are consistently and substantially lower than recent conditions',
+    "Tier reflects how full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   GW_STOR:
     "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
   DELTA_ECO:
@@ -272,7 +272,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   ENV_FLOWS:
     "For more information, see technical documentation on **Data** page.",
   RES_STOR:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   GW_STOR:
     "",
   DELTA_ECO:
@@ -299,9 +299,9 @@ export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   SOD_EFLOWS:
     "Tiers reflect the extent to which winter and spring SOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   NOD_RES:
-    "Tier reflects the degree to which NOD reservoirs fill each spring in advance of the summer delivery season",
+    "Tier reflects how full NOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   SOD_RES:
-    "Tier reflects the degree to which SOD reservoirs fill each spring in advance of the summer delivery season",
+    "Tier reflects how full SOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   NOD_GW:
     "Tier reflects how NOD groundwater storage conditions compare to a reference condition",
   SOD_GW:
@@ -364,13 +364,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   RES_STOR: {
     tier1:
-      "Reservoir storage is greater than or equal to the **top threshold** for each reservoir for at least **90% of years** (as represented by April values). As of July 2025, this threshold is set at the 50th percentile of recent historical data as available through CDEC.",
+      "Reservoir storage is frequently high (There is a **90%** chance that end-of-April reservoir storage is greater than the long-term median value).",
     tier2:
-      "Reservoir storage is greater than or equal to the **middle threshold** for each reservoir for at least **67% of years** (as represented by April values). As of July 2025, this threshold is set at the 33rd percentile of recent historical data as available through CDEC.",
+      "Reservoir storage is similar to recent history (In more than two out of three years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
     tier3:
-      "Reservoir storage is greater than or equal to the **middle threshold** for each reservoir for at least **30% of years** (as represented by April values). As of July 2025, this threshold is set at the 33rd percentile of recent historical data as available through CDEC.",
+      "Reservoir storage is slightly lower than recent history (In more than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
     tier4:
-      "Reservoir storage is **not high enough to meet the conditions of Tiers 1-3**. Reservoir storage is below the middle threshold (at or below the lower threshold) for more than 70% of years (as represented by April values). As of July 2025, the lower threshold is set as the 20th percentile of recent historical values.",
+      "Reservoir storage is much lower than recent history (In fewer than three out of ten years, end-of-April storage exceeds the **33rd** percentile of long-term values).",
   },
   GW_STOR: {
     tier1:
