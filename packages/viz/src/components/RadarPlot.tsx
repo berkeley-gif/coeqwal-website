@@ -1275,7 +1275,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     scenarioId: scenario.id,
                     scenarioName: scenario.name,
                     tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
-                    weighted_score: sv,
+                    weighted_score: toTier(sv),
                   })
                   setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
 

@@ -8,7 +8,7 @@
  */
 
 /** Number of discrete tier levels, 1 (best) through `TIER_COUNT` (worst) */
-export const TIER_COUNT = 4
+export const TIER_COUNT = 5
 
 /** Tier levels in order, best to worst */
 export const TIER_LEVELS = [1, 2, 3, 4] as const
