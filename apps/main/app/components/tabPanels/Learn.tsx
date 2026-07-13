@@ -17,16 +17,37 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { useEffect, useRef, useCallback } from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, useMapError, mapActions } from "../../features/map/store"
+import {
+  useMapReady,
+  useMapError,
+  mapActions,
+  useActiveSubSection,
+  useLearnNavSection,
+} from "../../features/map/store"
+import { InfoCard, InfoCardGrid } from "@repo/ui"
+import { usePanelRoute } from "../../hooks/usePanelRoute"
+import { WATER_ISSUE_THEMES } from "../../features/map/overlays/content"
+import { WATER_STORIES } from "../../content/stories"
+import type { LearnNavSection } from "../../features/map/config/sectionLayers"
+
+import VerticalNav, {
+  NAV_WIDTH_COLLAPSED,
+  NAV_WIDTH_EXPANDED,
+} from "../verticalNav/VerticalNav"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
   const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
+  const activeSubSection = useActiveSubSection()
+  const activeSection = useLearnNavSection()
+  const { openThemePanel } = usePanelRoute()
+  const [isVertNavExpanded, setIsVertNavExpanded] = useState(false)
+  const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -64,6 +85,11 @@ export default function LearnPanel() {
     }
   }, [])
 
+  const handleNavigate = useCallback((sectionId: string) => {
+    // setLearnNavSection now also syncs mapMode internally - see store.ts
+    mapActions.setLearnNavSection(sectionId as LearnNavSection)
+  }, [])
+
   // Set up scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -76,82 +102,198 @@ export default function LearnPanel() {
   }, [handleScroll])
 
   return (
-    <div
-      style={{
-        position: "relative",
-        pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
-      }}
-    >
-      {/* 
+    <>
+      {/** Vertical Side Nav */}
+      <VerticalNav
+        activeSectionId={activeSection}
+        activeSubSectionId={activeSubSection}
+        isExpanded={isVertNavExpanded}
+        onToggleExpanded={() => setIsVertNavExpanded((prev) => !prev)}
+        onNavigate={handleNavigate}
+      />
+
+      {/** Get Started section */}
+      {activeSection === "get-started" && (
+        <div
+          style={{
+            position: "relative",
+            pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
+          }}
+        >
+          {/* 
         Scrollytelling Container
         The persistent map is positioned fixed at page level.
         When this container's bottom scrolls above the viewport,
         the map "releases" and scrolls up with the content.
       */}
-      <Box
-        ref={scrollytellingRef}
-        sx={{
-          position: "relative",
-          minHeight: "100vh",
-          // Transparent background - map shows through
-          backgroundColor: "transparent",
-          pointerEvents: "none", // Allow map panning
-        }}
-      >
-        {/* Spacer for the initial map view - transparent, allows map panning */}
-        <Box
-          sx={{
-            height: "100vh",
-            backgroundColor: "transparent",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Overlay content - scrolls over the fixed persistent map */}
-        <Box
-          sx={{
-            position: "relative",
-            marginTop: "-100vh", // Pull up to overlap the map area
-            zIndex: 1,
-            pointerEvents: "none", // Let map interactions through
-            backgroundColor: "transparent",
-          }}
-        >
-          {mapReady || mapError ? (
-            <MapOverlayPanels />
-          ) : (
+          <Box
+            ref={scrollytellingRef}
+            sx={{
+              position: "relative",
+              minHeight: "100vh",
+              // Transparent background - map shows through
+              backgroundColor: "transparent",
+              pointerEvents: "none", // Allow map panning
+            }}
+          >
+            {/* Spacer for the initial map view - transparent, allows map panning */}
             <Box
               sx={{
-                height: "200vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: theme.palette.common.white,
-                flexDirection: "column",
-                gap: theme.space.gap.lg,
-                pointerEvents: "none", // Don't block map panning while loading
+                height: "100vh",
+                backgroundColor: "transparent",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Overlay content - scrolls over the fixed persistent map */}
+            <Box
+              sx={{
+                position: "relative",
+                marginTop: "-100vh", // Pull up to overlap the map area
+                zIndex: 1,
+                pointerEvents: "none", // Let map interactions through
+                backgroundColor: "transparent",
               }}
             >
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: theme.borderRadius.circle,
-                  border: "3px solid",
-                  borderColor: "grey.300",
-                  borderTopColor: "primary.main",
-                  animation: "spin 1s linear infinite",
-                  "@keyframes spin": {
-                    "0%": { transform: "rotate(0deg)" },
-                    "100%": { transform: "rotate(360deg)" },
-                  },
-                }}
-              />
-              Loading map...
+              {mapReady || mapError ? (
+                <MapOverlayPanels navWidth={navWidth} />
+              ) : (
+                <Box
+                  sx={{
+                    height: "200vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: theme.palette.common.white,
+                    flexDirection: "column",
+                    gap: theme.space.gap.lg,
+                    pointerEvents: "none", // Don't block map panning while loading
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: theme.borderRadius.circle,
+                      border: "3px solid",
+                      borderColor: "grey.300",
+                      borderTopColor: "primary.main",
+                      animation: "spin 1s linear infinite",
+                      "@keyframes spin": {
+                        "0%": { transform: "rotate(0deg)" },
+                        "100%": { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
+                  Loading map...
+                </Box>
+              )}
             </Box>
-          )}
+          </Box>
+        </div>
+      )}
+      {activeSection === "water-issues" && (
+        <Box
+          sx={{
+            p: 4,
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.blue.dark,
+            minHeight: "100vh",
+            paddingTop: (theme) => theme.space.panel.paddingXl,
+            paddingLeft: (theme) =>
+              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
+            paddingRight: (theme) => theme.space.panel.padding,
+          }}
+        >
+          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
+            What water issues matter to you?
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+          >
+            Water is important to all of us — from farmers in the Central Valley
+            to communities in the Delta, from salmon in the Sacramento River to
+            urban water users in Los Angeles. We can consider how decisions
+            affect the issues people care about.
+          </Typography>
+          <Box sx={{ mt: theme.space.listGap.sm }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: theme.space.listGap.xs }}
+            >
+              Click on each water issue to learn more.
+            </Typography>
+            <InfoCardGrid columns={5}>
+              {WATER_ISSUE_THEMES.map(
+                ({ title, description, themeKey, dimmed }) => (
+                  <InfoCard
+                    key={themeKey}
+                    title={title}
+                    description={description}
+                    onClick={
+                      dimmed ? undefined : () => openThemePanel(themeKey)
+                    }
+                    dimmed={dimmed}
+                    variant="onDark"
+                  />
+                ),
+              )}
+            </InfoCardGrid>
+          </Box>
         </Box>
-      </Box>
-    </div>
+      )}
+
+      {activeSection === "water-stories" && (
+        <Box
+          sx={{
+            p: 4,
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.nature.forest,
+            paddingTop: (theme) => theme.space.panel.paddingXl,
+            paddingLeft: (theme) =>
+              `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
+            paddingRight: (theme) => theme.space.panel.padding,
+          }}
+        >
+          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
+            Did you know that California has one of the most complex water
+            systems in the world?
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+          >
+            Here is a paragraph that will explain what the water stories cover
+          </Typography>
+          <Box sx={{ mt: theme.space.listGap.sm }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: theme.space.listGap.xs }}
+            >
+              Click on each water story to learn more.
+            </Typography>
+            <InfoCardGrid columns={5}>
+              {WATER_STORIES.map(({ id, label, description, href, dimmed }) => (
+                <InfoCard
+                  key={id}
+                  title={label}
+                  description={description}
+                  onClick={
+                    dimmed || !href
+                      ? undefined
+                      : () => window.open(href, "_blank", "noopener,noreferrer")
+                  }
+                  dimmed={dimmed}
+                  variant="onDark"
+                />
+              ))}
+            </InfoCardGrid>
+          </Box>
+        </Box>
+      )}
+    </>
   )
 }

@@ -3,7 +3,7 @@
  *
  * This file is the single source of truth for geographic coordinates used by
  * both the map visualization components (TierMarkers, TierLocationLabels) and
- * the get-started animation. Coordinates are hardcoded because the tier API
+ * the tier-animation storyboard. Coordinates are hardcoded because the tier API
  * returns location IDs and tier levels but not geometry.
  */
 export const AG_REV_COORDINATES: Record<string, [number, number]> = {

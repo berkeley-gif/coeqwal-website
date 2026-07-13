@@ -68,6 +68,26 @@ export type {
 export { default as PackedDots } from "./components/PackedDots"
 export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
+export { default as ExceedanceChart } from "./components/ExceedanceChart"
+export type {
+  ExceedanceChartProps,
+  ExceedanceSeries,
+  ExceedancePoint,
+} from "./components/ExceedanceChart"
+export { default as BoxPlot } from "./components/BoxPlot"
+export type {
+  BoxPlotProps,
+  BoxPlotDatum,
+  BoxPlotStats,
+  WhiskerMode,
+} from "./components/BoxPlot"
+export { default as CategoricalBarChart } from "./components/CategoricalBarChart"
+export type {
+  CategoricalBarChartProps,
+  CategoricalBarDatum,
+} from "./components/CategoricalBarChart"
+export { SERIES_PALETTE, getSeriesColor } from "./seriesPalette"
+
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps, RadarPlotPalette } from "./components/RadarPlot"
 export { default as RadarPlotSnapshot } from "./components/RadarPlotSnapshot"

@@ -3,7 +3,6 @@
  *
  * What survives a page reload within the same tab
  * ------------------------------------------------
- * - Shell routing (`mainView`: get-started vs Tools) via `store.ts`
  * - Workspace cross-tool state (`workspaceStoreSlice.ts`): selected scenarios,
  *   hydroclimate, active tool tab, toolbar chrome, chart cosmetics, highlighted
  *   scenario, share drawer open, in-progress tool tour
@@ -42,11 +41,8 @@ import type { WorkspaceState } from "./workspaceStoreSlice"
 import { workspaceInitialState } from "./workspaceStoreSlice"
 import {
   pickExplorerPersistedSession,
-  pickShellPersistedState,
   pickWorkspacePersistedState,
   type ResilienceHydroclimatePersisted,
-  type ShellMainView,
-  type ShellPersistedState,
 } from "./pickSlices"
 import type { WorkspaceSlice } from "./workspaceStoreSlice"
 import type { ListSlice } from "./listStoreSlice"
@@ -74,7 +70,6 @@ type ExplorerStore = WorkspaceSlice &
 
 export interface PersistedExploreSession {
   version: number
-  shell: Partial<ShellPersistedState>
   workspace: Partial<
     Pick<WorkspaceState, keyof ReturnType<typeof pickWorkspacePersistedState>>
   >
@@ -89,7 +84,6 @@ export interface PersistedExploreSession {
 }
 
 export interface ExploreSessionHydration {
-  shell: ShellPersistedState
   workspace: Partial<WorkspaceState>
   list: Partial<ListState>
   radar: Partial<RadarState>
@@ -97,10 +91,7 @@ export interface ExploreSessionHydration {
   resilience: Partial<ResilienceState>
 }
 
-const DEFAULT_SHELL: ShellPersistedState = { mainView: "get-started" }
-
 const EMPTY_HYDRATION: ExploreSessionHydration = {
-  shell: DEFAULT_SHELL,
   workspace: {},
   list: {},
   radar: {},
@@ -139,11 +130,6 @@ function asBoolean(value: unknown): boolean | undefined {
 function asStringOrNull(value: unknown): string | null | undefined {
   if (value === null) return null
   return typeof value === "string" ? value : undefined
-}
-
-function validateMainView(value: unknown): ShellMainView | undefined {
-  if (value === "get-started" || value === "explorer") return value
-  return undefined
 }
 
 function validateExploreMode(value: unknown): ExploreMode | undefined {
@@ -308,12 +294,8 @@ function migrateEnvelope(
 ): PersistedExploreSession {
   const version = typeof env.version === "number" ? env.version : 1
 
-  const shellRaw = isRecord(env.shell) ? env.shell : {}
-  const mainView = validateMainView(shellRaw.mainView) ?? DEFAULT_SHELL.mainView
-
   return {
     version: EXPLORE_SESSION_STORAGE_VERSION,
-    shell: version >= 2 ? { mainView } : { mainView: DEFAULT_SHELL.mainView },
     workspace: version >= 2 ? validateWorkspaceSection(env.workspace) : {},
     list: isRecord(env.list) ? (env.list as Partial<ListState>) : {},
     radar: isRecord(env.radar) ? (env.radar as Partial<RadarState>) : {},
@@ -340,7 +322,6 @@ function readPersistedEnvelope(): PersistedExploreSession {
   if (!isRecord(parsed)) {
     return {
       version: EXPLORE_SESSION_STORAGE_VERSION,
-      shell: DEFAULT_SHELL,
       workspace: {},
       list: {},
       radar: {},
@@ -354,11 +335,8 @@ function readPersistedEnvelope(): PersistedExploreSession {
 export function loadExploreSessionState(): ExploreSessionHydration {
   try {
     const envelope = readPersistedEnvelope()
-    const mainView =
-      validateMainView(envelope.shell.mainView) ?? DEFAULT_SHELL.mainView
 
     return {
-      shell: { mainView },
       workspace: validateWorkspaceSection(envelope.workspace),
       list: envelope.list,
       radar: envelope.radar,
@@ -372,11 +350,9 @@ export function loadExploreSessionState(): ExploreSessionHydration {
 
 export function pickPersistedExploreSession(
   explorerState: ExplorerStore,
-  shellState: ShellPersistedState,
 ): PersistedExploreSession {
   return {
     version: EXPLORE_SESSION_STORAGE_VERSION,
-    shell: pickShellPersistedState(shellState),
     ...pickExplorerPersistedSession(explorerState),
   }
 }
@@ -389,7 +365,6 @@ export function saveExploreSessionState(
     const current = readPersistedEnvelope()
     const merged: PersistedExploreSession = {
       version: EXPLORE_SESSION_STORAGE_VERSION,
-      shell: { ...current.shell, ...partial.shell },
       workspace: { ...current.workspace, ...partial.workspace },
       list: { ...current.list, ...partial.list },
       radar: { ...current.radar, ...partial.radar },

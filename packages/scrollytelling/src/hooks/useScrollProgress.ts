@@ -29,7 +29,7 @@ export function useScrollProgress(
 
   const context = useContext(ScrollSectionContext)
   const fallbackRef = useRef<HTMLElement>(null)
-  const ref = targetRef || fallbackRef
+  const ref = targetRef || context?.sectionRef || fallbackRef
 
   // Always call useScroll to satisfy rules of hooks
   const { scrollYProgress } = useScroll({

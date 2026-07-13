@@ -12,10 +12,17 @@ type Point = { year: number; value: number }
 
 type Margin = { top: number; right: number; bottom: number; left: number }
 type ContainerSize = { width: number; height: number }
+type TemperatureGuidePoint = { x: number; y: number }
 
 type Props = {
   scrollProgress: MotionValue<number>
   debug?: boolean
+  temperatureGuideValue?: number
+  onTemperatureGuideYChange?: (y: number) => void
+  onTemperatureGuidePointChange?: (point: TemperatureGuidePoint) => void
+  plotAspectRatio?: number
+  plotWidthPercent?: number
+  averageLabelPlacement?: "right" | "below"
 }
 
 const defaultMargin: Margin = { top: 24, right: 24, bottom: 80, left: 100 }
@@ -226,6 +233,12 @@ function YTick({
 export default function TemperatureLineChart({
   scrollProgress,
   debug = false,
+  temperatureGuideValue,
+  onTemperatureGuideYChange,
+  onTemperatureGuidePointChange,
+  plotAspectRatio = 3.2,
+  plotWidthPercent = 90,
+  averageLabelPlacement = "right",
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [wrapWidth, setWrapWidth] = useState<number>(800)
@@ -270,39 +283,54 @@ export default function TemperatureLineChart({
     return filtered.length ? mean(filtered, (d) => d.value)! : undefined
   }, [points])
 
-  const height = 480
   const margin = defaultMargin
-  const size: ContainerSize = { width: wrapWidth, height }
-  const innerW = size.width - margin.left - margin.right
-  const innerH = size.height - margin.top - margin.bottom
+  const plotWidth = wrapWidth - margin.left - margin.right
+  const plotHeight = plotWidth / plotAspectRatio
+  const chartSize: ContainerSize = {
+    width: wrapWidth,
+    height: margin.top + plotHeight + margin.bottom,
+  }
 
   const xScale = useMemo(() => {
     if (!points.length) return null
     return scaleLinear()
       .domain([START_YEAR, END_YEAR])
-      .range([margin.left, margin.left + innerW])
-  }, [points, innerW, margin.left])
+      .range([margin.left, margin.left + plotWidth])
+  }, [points, plotWidth, margin.left])
 
   const yScale = useMemo(() => {
     if (!points.length) return null
     return scaleLinear()
       .domain(extent(points, (d) => d.value) as [number, number])
       .nice()
-      .range([margin.top + innerH, margin.top])
-  }, [points, innerH, margin.top])
+      .range([margin.top + plotHeight, margin.top])
+  }, [points, plotHeight, margin.top])
 
   const xTicks = useMemo(() => {
     if (!xScale) return []
-    const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
+    const count = Math.min(10, Math.max(3, Math.floor(plotWidth / 60)))
     return ticks(START_YEAR, END_YEAR, count)
-  }, [xScale, innerW])
+  }, [xScale, plotWidth])
 
   const yTicks = useMemo(() => {
     if (!yScale) return []
     const [y0, y1] = yScale.domain() as [number, number] // force tuple
-    //const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
     return ticks(y0, y1, 6)
   }, [yScale])
+
+  useEffect(() => {
+    if (!yScale || temperatureGuideValue === undefined) return
+    const guidePoint = { x: margin.left, y: yScale(temperatureGuideValue) }
+
+    onTemperatureGuideYChange?.(guidePoint.y)
+    onTemperatureGuidePointChange?.(guidePoint)
+  }, [
+    margin.left,
+    onTemperatureGuidePointChange,
+    onTemperatureGuideYChange,
+    temperatureGuideValue,
+    yScale,
+  ])
 
   const linePath = useMemo(() => {
     if (!xScale || !yScale) return ""
@@ -363,12 +391,15 @@ export default function TemperatureLineChart({
       }}
     >
       <div style={{ display: "flex", alignItems: "flex-end", width: "100%" }}>
-        <div ref={wrapRef} style={{ flex: "0 0 90%", minWidth: 0 }}>
-          <svg width={size.width} height={size.height}>
+        <div
+          ref={wrapRef}
+          style={{ flex: `0 0 ${plotWidthPercent}%`, minWidth: 0 }}
+        >
+          <svg width={chartSize.width} height={chartSize.height}>
             {xScale && yScale && (
               <>
                 <XAxis
-                  size={size}
+                  size={chartSize}
                   xScale={xScale}
                   margin={margin}
                   ticks={xTicks}
@@ -411,7 +442,7 @@ export default function TemperatureLineChart({
             {yScale && avg !== undefined && (
               <motion.line
                 x1={margin.left}
-                x2={size.width - margin.right}
+                x2={chartSize.width - margin.right}
                 y1={yScale(avg)}
                 y2={yScale(avg)}
                 stroke={OffWhiteColor}
@@ -424,11 +455,11 @@ export default function TemperatureLineChart({
         </div>
       </div>
 
-      {yScale && avg !== undefined && (
+      {yScale && avg !== undefined && averageLabelPlacement === "right" && (
         <motion.div
           style={{
             position: "absolute",
-            left: "90%",
+            left: `${plotWidthPercent}%`,
             top: `${yScale(avg)}px`, // align text with the dashed line
             transform: "translateY(-50%)",
             color: OffWhiteColor,
@@ -442,6 +473,28 @@ export default function TemperatureLineChart({
           </Typography>
           <Typography variant="subtitle2">Historical average</Typography>
           <Typography variant="subtitle2">{format(".1f")(avg)} °F</Typography>
+        </motion.div>
+      )}
+
+      {yScale && avg !== undefined && averageLabelPlacement === "below" && (
+        <motion.div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.35rem 0.75rem",
+            marginLeft: `${margin.left}px`,
+            marginTop: "-1.25rem",
+            color: OffWhiteColor,
+            opacity: historicalAvgLabelOpacity,
+          }}
+        >
+          <Typography variant="caption">
+            {START_YEAR}
+            {"\u2014"}
+            {END_YEAR}
+          </Typography>
+          <Typography variant="caption">Historical average</Typography>
+          <Typography variant="caption">{format(".1f")(avg)} °F</Typography>
         </motion.div>
       )}
     </Box>

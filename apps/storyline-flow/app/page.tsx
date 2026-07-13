@@ -23,7 +23,13 @@ import {
   useTooltip,
 } from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
-import { BaseHeader } from "@repo/ui"
+import {
+  BaseHeader,
+  getStorylineWaterThemesOptions,
+  goToMainAbout,
+  goToMainData,
+  goToMainHome,
+} from "@repo/ui"
 //import { HeaderStory } from "@repo/motion/components"
 import {
   OffWhiteColor,
@@ -58,12 +64,6 @@ import {
   SCROLLAMA_CONFIG,
   useScrollamaSection,
 } from "./hooks/useScrollamaSection"
-import {
-  getStorylineWaterThemesOptions,
-  goToMainAbout,
-  goToMainData,
-  goToMainHome,
-} from "./components/helpers/header"
 
 const MotionBox = motion.create(Box)
 
