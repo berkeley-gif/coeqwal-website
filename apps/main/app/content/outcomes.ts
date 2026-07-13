@@ -255,7 +255,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   GW_STOR:
     "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
   DELTA_ECO:
-    "Tiers reflect ecological responses to flow, measured by direct indicators (submerged aquatic vegetation growth, salinity, turbidity, and microhabitat availability). Indicators are assigned a given score based on average winter/spring flows, and scores are scaled accordingly to accommodate threshold effects and additive impacts from multiple years of wet/dry conditions.",
+    "Tiers reflect the extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   FW_EXP:
     "Tier reflects the amount of fresh water exported from the Delta pumps (Banks, Jones) over a 100-year simulation period. For this tier calculation, the volume of water pumped at either pumping location is reduced proportionally by the amount the salinity of that water exceeds 900 uS/cm. Water pumped with salinity greater than 2500 uS/cm is assigned a 0 value. Tiers are defined based on the combined total volume pumped at each pumping location for the 100-year period.",
   FW_DELTA_USES:
@@ -276,7 +276,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   GW_STOR:
     "",
   DELTA_ECO:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   FW_EXP:
     "",
   FW_DELTA_USES:
@@ -295,9 +295,9 @@ export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   SOD_AG:
     "Tiers reflect how average SOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   NOD_EFLOWS:
-    "Tiers reflect the extent to which NOD river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "Tiers reflect the extent to which winter and spring NOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   SOD_EFLOWS:
-    "Tiers reflect the extent to which SOD river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "Tiers reflect the extent to which winter and spring SOD outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   NOD_RES:
     "Tier reflects the degree to which NOD reservoirs fill each spring in advance of the summer delivery season",
   SOD_RES:
@@ -384,13 +384,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   DELTA_ECO: {
     tier1:
-      "Scenario scores in the **top 25%** based on yearly evaluation of ecosystem indicators: low submerged aquatic vegetation (SAV), high turbidity, fresh conditions, and expanded microhabitats in most years",
+      "Flows support ecological indicators in best possible conditions (low SAV, high turbidity, seasonally fresh conditions, expanded microhabitats in most years, representing **upper 25%** of indicator values).",
     tier2:
-      "Scenario scores in the **top 50%** based on yearly evaluation of ecosystem indicators: unchanged SAV, high turbidity, fresh conditions, some microhabitats available in most years",
+      "Flows support ecological indicators in moderate conditions (moderate SAV, high turbidity, seasonally fresh conditions, some microhabitats available in most years, representing **25-50%** of indicator values).",
     tier3:
-      "Scenario scores in the **top 75%** based on yearly evaluation of ecosystem indicators: unchanged SAV, standard turbidity, moderate salinity, few microhabitats available in most years",
+      "Flows support ecological indicators in poor conditions (moderate SAV, moderate turbidity, moderate salinity, few microhabitats available in most years, representing **lower 50%-75%** of indicator values).",
     tier4:
-      "None of the above thresholds met: unchanged SAV, low turbidity, moderate to high salinity, few microhabitats available in most years",
+      "Flows are insufficient to maintain beneficial ecological processes (moderate SAV, low turbidity, moderate to high salinity, few microhabitats available in most years, representing **lowest 25%** of indicator values).",
   },
   FW_EXP: {
     tier1:
