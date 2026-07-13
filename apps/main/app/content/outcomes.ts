@@ -247,7 +247,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
     "Tiers reflect the extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to estimated recent potable water demands for these deliveries at 74 locations of interest.",
   AG_REV:
-    "Tiers correspond to the impact of water shortages on agricultural production",
+    "Tiers reflect how average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   ENV_FLOWS:
     "Tiers reflect the extent to which modeled flows sustain ecological function relative to natural or functional flow (FF) targets. The framework distinguishes between fully functional ecosystems, partially functional conditions, existing regulatory baselines, and degraded/no-function states.",
   RES_STOR:
@@ -268,7 +268,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
     "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
   AG_REV:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   ENV_FLOWS:
     "",
   RES_STOR:
@@ -291,9 +291,9 @@ export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   SOD_DW:
     "Tiers reflect the extent to which SOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
   NOD_AG:
-    "Tiers correspond to the impact of water shortages on NOD agricultural production",
+    "Tiers reflect how average NOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   SOD_AG:
-    "Tiers correspond to the impact of water shortages on SOD agricultural production",
+    "Tiers reflect how average SOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   NOD_EFLOWS:
     "Tiers reflect the extent to which NOD modeled flows sustain ecological function relative to natural or functional flow targets",
   SOD_EFLOWS:
@@ -345,13 +345,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   AG_REV: {
     tier1:
-      "**Increased production:** Agricultural production **increases** with respect to today's outcomes",
+      "Agricultural revenue increases (**≥ 0%**)",
     tier2:
-      "**Minimal impact:** Agricultural production **declines** less than 5% with respect to today's outcomes",
+      "Agricultural revenue declines **< 5%**",
     tier3:
-      "**Moderate impact:** Agricultural production **declines** 5%-20% with respect to today's outcomes",
+      "Agricultural revenue declines between **5% and 20%**",
     tier4:
-      "**Severe impact:** Agricultural production **declines** more than 20% with respect to today's outcomes",
+      "Agricultural revenue declines **> 20%**",
   },
   ENV_FLOWS: {
     tier1:
