@@ -249,7 +249,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   AG_REV:
     "Tiers reflect how average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   ENV_FLOWS:
-    "Tiers reflect the extent to which modeled flows sustain ecological function relative to natural or functional flow (FF) targets. The framework distinguishes between fully functional ecosystems, partially functional conditions, existing regulatory baselines, and degraded/no-function states.",
+    "Tiers reflect the extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   RES_STOR:
     'Tier reflects the degree to which a reservoir fills each spring in advance of the summer delivery season (Apr-Oct) during which reservoirs provide water to irrigators and communities. Tiers are designated for select key reservoirs based on how frequently those reservoirs have April 30 (end of month) storage above or below certain thresholds. These thresholds are different for each reservoir and are set here based on percentiles of recent historical data, but may be adjusted in the future. The scheme described here yields tier designations that will be "1" if storage conditions are more consistently higher than recent historical conditions; "2" if they are roughly equivalent to recent conditions; "3" if they are moderately lower than recent conditions; and "4" if they are consistently and substantially lower than recent conditions',
   GW_STOR:
@@ -270,7 +270,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   AG_REV:
     "For more information, see technical documentation on **Data** page.",
   ENV_FLOWS:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   RES_STOR:
     "",
   GW_STOR:
@@ -295,9 +295,9 @@ export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   SOD_AG:
     "Tiers reflect how average SOD agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   NOD_EFLOWS:
-    "Tiers reflect the extent to which NOD modeled flows sustain ecological function relative to natural or functional flow targets",
+    "Tiers reflect the extent to which NOD river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   SOD_EFLOWS:
-    "Tiers reflect the extent to which SOD modeled flows sustain ecological function relative to natural or functional flow targets",
+    "Tiers reflect the extent to which SOD river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   NOD_RES:
     "Tier reflects the degree to which NOD reservoirs fill each spring in advance of the summer delivery season",
   SOD_RES:
@@ -355,12 +355,12 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   ENV_FLOWS: {
     tier1:
-      "**Functional Ecosystem** Functional flows to sustain native freshwater species in 90% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
+      "Flows meet or exceed all seasonal functional flow targets in at least **95%** of years.",
     tier2:
-      "**Modified Functional Flows** Partial functional flows in wet season and spring. Full functional flows in summer in 75% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer.",
+      "Flows meet or exceed all seasonal functional flow targets set for dry years in at least **90%** of years.",
     tier3:
-      "**Existing Flow Requirements** CalSim minimum flow constraints for Baseline Scenario in 50% of years",
-    tier4: "**No function** none of the above thresholds met",
+      "Flows meet or exceed functional flow targets for wet and dry season baseflows in dry years in at least **90%** of years",
+    tier4: "None of the above criteria are satisfied.",
   },
   RES_STOR: {
     tier1:
