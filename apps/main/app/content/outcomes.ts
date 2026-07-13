@@ -257,9 +257,9 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   DELTA_ECO:
     "Tiers reflect the extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   FW_EXP:
-    "Tier reflects the amount of fresh water exported from the Delta pumps (Banks, Jones) over a 100-year simulation period. For this tier calculation, the volume of water pumped at either pumping location is reduced proportionally by the amount the salinity of that water exceeds 900 uS/cm. Water pumped with salinity greater than 2500 uS/cm is assigned a 0 value. Tiers are defined based on the combined total volume pumped at each pumping location for the 100-year period.",
+    "Tier reflects the amount of freshwater exported from the Delta (Banks and Jones pumping plants), with volumes reduced if salinity exceeds water quality requirements for drinking water or irrigation needs.",
   FW_DELTA_USES:
-    "Tiers reflect the frequency with which water in the western Delta falls into fresh, moderate, or saline categories as an indicator of its suitability for in-Delta uses. Tiers are defined based on the frequency with which two west-Delta salinity stations (Emmaton [EM], Jersey Point [JP]) are below/above three salinity thresholds (measured in microSiemens/cm, uS/cm): **900 uS/cm** low salinity - **1600 uS/cm** moderate - **2500 uS/cm** high",
+    "Tiers reflect how often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
   WRC_SALMON_AB:
     "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
 }
@@ -278,9 +278,9 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   DELTA_ECO:
     "For more information, see technical documentation on **Data** page.",
   FW_EXP:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   FW_DELTA_USES:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   WRC_SALMON_AB:
     "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population. For more information, see technical documentation on **Data** page.",
 }
@@ -394,7 +394,7 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   FW_EXP: {
     tier1:
-      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 505 million acre-feet**",
+      "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 505 million acre-feet**.",
     tier2:
       "Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is **greater than 465 million acre-feet but less than 505 million acre-feet**",
     tier3:
@@ -404,13 +404,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   FW_DELTA_USES: {
     tier1:
-      "Maximum of EM and JP is below the low threshold **75%** of all months and max of EM and JP is above the highest threshold no more than **5%** of all months",
+      "Water is fresh enough for human use with no restrictions in at least **75%** of all months, and unusable no more than in **5%** of all months.",
     tier2:
-      "Maximum of EM and JP is below the low threshold at least **65%** of all months, below the moderate threshold at least **75%** of months, and max of EM and JP is above the highest threshold no more than **12%** of all months",
+      "Water is fresh enough for human use with no restrictions in at least **65%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **75%** of months, and unusable in no more than **12%** of all months.",
     tier3:
-      "Maximum of EM and JP is below the low threshold at least **55%** of all months, below the moderate threshold at least **65%** of months, and max of EM and JP is above the highest threshold no more than **20%** of all months",
+      "Water is fresh enough for human use with no restrictions in at least **55%** of all months, fresh enough for human use with some treatment or cropping adjustments in at least **65%** of months, and unusable in no more than **20%** of all months.",
     tier4:
-      "Maximum of EM and JP is below the low threshold less than **55%** of all months and/or max of EM and JP is above the highest threshold more than **20%** of all months",
+      "Water is fresh enough for human use with no restrictions in less than **55%** of all months and/or is unusable in more than **20%** of all months.",
   },
   WRC_SALMON_AB: {
     tier1:
