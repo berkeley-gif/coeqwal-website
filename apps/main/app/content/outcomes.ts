@@ -267,8 +267,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
 export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
     "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
-  AG_REV:
-    "For more information, see technical documentation on **Data** page.",
+  AG_REV: "For more information, see technical documentation on **Data** page.",
   ENV_FLOWS:
     "For more information, see technical documentation on **Data** page.",
   RES_STOR:
@@ -277,8 +276,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
     "For more information, see technical documentation on **Data** page.",
   DELTA_ECO:
     "For more information, see technical documentation on **Data** page.",
-  FW_EXP:
-    "For more information, see technical documentation on **Data** page.",
+  FW_EXP: "For more information, see technical documentation on **Data** page.",
   FW_DELTA_USES:
     "For more information, see technical documentation on **Data** page.",
   WRC_SALMON_AB:
@@ -344,14 +342,10 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
       "None of the above criteria met (**> 90%** of estimated potable demand met in **< 50%** of years and/or **> 20%** of years in which **50%** of demand is not satisfied).",
   },
   AG_REV: {
-    tier1:
-      "Agricultural revenue increases (**≥ 0%**).",
-    tier2:
-      "Agricultural revenue declines **< 5%**.",
-    tier3:
-      "Agricultural revenue declines between **5% and 20%**.",
-    tier4:
-      "Agricultural revenue declines **> 20%**.",
+    tier1: "Agricultural revenue increases (**≥ 0%**).",
+    tier2: "Agricultural revenue declines **< 5%**.",
+    tier3: "Agricultural revenue declines between **5% and 20%**.",
+    tier4: "Agricultural revenue declines **> 20%**.",
   },
   ENV_FLOWS: {
     tier1:
@@ -377,10 +371,8 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
       "Groundwater trend is stable or increasing and average total storage is greater than historical.",
     tier2:
       "Groundwater trend is stable or increasing and average total storage is less than historical.",
-    tier3:
-      "Groundwater trend is declining at a moderate rate.",
-    tier4:
-      "Groundwater trend is declining at a rapid rate.",
+    tier3: "Groundwater trend is declining at a moderate rate.",
+    tier4: "Groundwater trend is declining at a rapid rate.",
   },
   DELTA_ECO: {
     tier1:
