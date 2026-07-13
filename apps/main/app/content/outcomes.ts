@@ -345,13 +345,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   AG_REV: {
     tier1:
-      "Agricultural revenue increases (**≥ 0%**)",
+      "Agricultural revenue increases (**≥ 0%**).",
     tier2:
-      "Agricultural revenue declines **< 5%**",
+      "Agricultural revenue declines **< 5%**.",
     tier3:
-      "Agricultural revenue declines between **5% and 20%**",
+      "Agricultural revenue declines between **5% and 20%**.",
     tier4:
-      "Agricultural revenue declines **> 20%**",
+      "Agricultural revenue declines **> 20%**.",
   },
   ENV_FLOWS: {
     tier1:
