@@ -261,7 +261,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   FW_DELTA_USES:
     "Tiers reflect the frequency with which water in the western Delta falls into fresh, moderate, or saline categories as an indicator of its suitability for in-Delta uses. Tiers are defined based on the frequency with which two west-Delta salinity stations (Emmaton [EM], Jersey Point [JP]) are below/above three salinity thresholds (measured in microSiemens/cm, uS/cm): **900 uS/cm** low salinity - **1600 uS/cm** moderate - **2500 uS/cm** high",
   WRC_SALMON_AB:
-    "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
+    "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
 }
 
 export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
@@ -282,7 +282,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   FW_DELTA_USES:
     "",
   WRC_SALMON_AB:
-    "",
+    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population. For more information, see technical documentation on **Data** page.",
 }
 
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
@@ -414,12 +414,12 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   WRC_SALMON_AB: {
     tier1:
-      "Tier 1 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 3-year average.",
+      "There is at least an **80%** chance that greater than **50%** of maximum available spawning habitat is utilized.",
     tier2:
-      "Tier 2 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 3-year average.",
+      "There is at least an **80%** chance that between **18 and 50%** of maximum available spawning habitat is utilized.",
     tier3:
-      "Tier 3 is met if there is at least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 3-year average.",
+      "There is at least an **80%** chance that between **6 and 18%** of maximum available spawning habitat is utilized.",
     tier4:
-      "Tier 4 is assigned if the change in population size does not satisfy Tier 1, 2, or 3.",
+      "There is at least an **80%** chance that less than **6%** of maximum available spawning habitat is utilized.",
   },
 }
