@@ -264,6 +264,27 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
     "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
 }
 
+export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
+  CWS_DEL:
+    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
+  AG_REV:
+    "",
+  ENV_FLOWS:
+    "",
+  RES_STOR:
+    "",
+  GW_STOR:
+    "",
+  DELTA_ECO:
+    "",
+  FW_EXP:
+    "",
+  FW_DELTA_USES:
+    "",
+  WRC_SALMON_AB:
+    "",
+}
+
 export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   NOD_DW:
     "Tiers reflect the extent to which NOD surface water deliveries to cities and towns satisfy associated drinking water demands.",
