@@ -253,7 +253,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   RES_STOR:
     "Tier reflects how full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   GW_STOR:
-    "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
+    "Tier reflects trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
   DELTA_ECO:
     "Tiers reflect the extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
   FW_EXP:
@@ -274,7 +274,7 @@ export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   RES_STOR:
     "For more information, see technical documentation on **Data** page.",
   GW_STOR:
-    "",
+    "For more information, see technical documentation on **Data** page.",
   DELTA_ECO:
     "For more information, see technical documentation on **Data** page.",
   FW_EXP:
@@ -303,9 +303,9 @@ export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
   SOD_RES:
     "Tier reflects how full SOD reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   NOD_GW:
-    "Tier reflects how NOD groundwater storage conditions compare to a reference condition",
+    "Tier reflects trends in NOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
   SOD_GW:
-    "Tier reflects how SOD groundwater storage conditions compare to a reference condition",
+    "Tier reflects trends in SOD groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
 }
 
 /**
@@ -374,13 +374,13 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   GW_STOR: {
     tier1:
-      "The groundwater trend in a WBA is stable or increasing from 1960-2021 and the trend is greater than that in the reference scenario",
+      "Groundwater trend is stable or increasing and average total storage is greater than historical.",
     tier2:
-      "The groundwater trend in a WBA is stable or increasing but the trend is less than that in the reference scenario",
+      "Groundwater trend is stable or increasing and average total storage is less than historical.",
     tier3:
-      "The groundwater trend is **declining** (not stable or increasing as in Tiers 1 or 2) but at a **moderate rate** (fitted linear trend is less negative than -0.015 ft/yr)",
+      "Groundwater trend is declining at a moderate rate.",
     tier4:
-      "Groundwater trends in a WBA are **declining more severely**, at a rate greater than 0.015 ft/year (slope <= -0.015 ft/yr)",
+      "Groundwater trend is declining at a rapid rate.",
   },
   DELTA_ECO: {
     tier1:
