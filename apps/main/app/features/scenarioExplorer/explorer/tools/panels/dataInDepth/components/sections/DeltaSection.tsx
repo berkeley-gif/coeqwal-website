@@ -30,6 +30,7 @@ import {
   buildChannelMatrix,
   buildMatrixForVariables,
 } from "../../hooks/useDeltaData"
+import { perfTime } from "@repo/data/perf"
 import {
   SALINITY_BAND_COLORS,
   OUTFLOW_BAND_COLORS,
@@ -268,26 +269,41 @@ export default function DeltaSection({
 
   // Build matrices for salinity and outflow chart groups
   const complianceMatrix = useMemo(
-    () => buildMatrixForVariables(allData, COMPLIANCE_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, COMPLIANCE_VARS),
+      ),
     [allData],
   )
   const pumpsMatrix = useMemo(
-    () => buildMatrixForVariables(allData, PUMPS_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, PUMPS_VARS),
+      ),
     [allData],
   )
   const outflowMatrix = useMemo(
-    () => buildMatrixForVariables(allData, OUTFLOW_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, OUTFLOW_VARS),
+      ),
     [allData],
   )
 
   const inflowIds = DELTA_INFLOW_CHANNELS.map((c) => c.id)
   const exportIds = DELTA_EXPORT_CHANNELS.map((c) => c.id)
   const inflowMatrix = useMemo(
-    () => buildChannelMatrix(channelData, inflowIds),
+    () =>
+      perfTime("transform:delta", () =>
+        buildChannelMatrix(channelData, inflowIds),
+      ),
     [channelData, inflowIds],
   )
   const exportMatrix = useMemo(
-    () => buildChannelMatrix(channelData, exportIds),
+    () =>
+      perfTime("transform:delta", () =>
+        buildChannelMatrix(channelData, exportIds),
+      ),
     [channelData, exportIds],
   )
 

@@ -23,6 +23,7 @@ import {
   useAgDemandUnitsShortageMonthly,
   useAgDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
+import { perfTime } from "@repo/data/perf"
 import type {
   AgAggregateData,
   AgAggregatePeriodSummary,
@@ -405,7 +406,8 @@ export function useMultiScenarioAgData(
   addedDemandUnitsList: AgDemandUnitListItem[],
 ) {
   const aggregatesData = useMemo(
-    () => buildAgAggregatesData(scenarios, agBatch),
+    () =>
+      perfTime("transform:ag", () => buildAgAggregatesData(scenarios, agBatch)),
     [scenarios, agBatch],
   )
 
