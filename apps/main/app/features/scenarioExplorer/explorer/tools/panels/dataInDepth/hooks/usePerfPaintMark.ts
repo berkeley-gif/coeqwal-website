@@ -19,12 +19,30 @@ export function usePerfPaintMark(
 ): void {
   const markedForRef = useRef<string | null>(null)
   useEffect(() => {
-    if (!isPerfEnabled() || !ready) return
+    if (!isPerfEnabled()) return
+    if (!ready) {
+      // Selection cleared or data reloading: re-arm so a repeat selection
+      // of the same signature (the warm-cache lane) marks again.
+      markedForRef.current = null
+      return
+    }
     if (markedForRef.current === signature) return
     markedForRef.current = signature
-    const id = requestAnimationFrame(() => {
-      requestAnimationFrame(() => perfMark(name, { signature }))
+    // StrictMode-safe: if cleanup cancels the frames before the mark fired
+    // (dev double-invoked effects), un-claim the signature so the re-run
+    // schedules again instead of skipping forever.
+    let fired = false
+    let innerId = 0
+    const outerId = requestAnimationFrame(() => {
+      innerId = requestAnimationFrame(() => {
+        fired = true
+        perfMark(name, { signature })
+      })
     })
-    return () => cancelAnimationFrame(id)
+    return () => {
+      cancelAnimationFrame(outerId)
+      if (innerId) cancelAnimationFrame(innerId)
+      if (!fired) markedForRef.current = null
+    }
   }, [name, ready, signature])
 }
