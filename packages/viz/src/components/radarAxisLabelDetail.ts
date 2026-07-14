@@ -490,8 +490,8 @@ export function renderRadarAxisLabelDetailInto(
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
   const tierLevel = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}` 
-  const tierScore = payload.weighted_score ?? "0.00"
-  const tierText = tierLevel + tierScore
+  const tierScore = "(" + payload.weighted_score + ")"
+  const tierText = [tierLevel, tierScore].join(' ')
 
   const inner = detailG.append("g").attr("class", "axis-label-detail-inner")
 
