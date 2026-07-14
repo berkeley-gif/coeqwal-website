@@ -7,6 +7,7 @@
  */
 
 import { create, immer } from "@repo/state/zustand"
+import { isPerfEnabled, perfMark, registerPerfAction } from "@repo/data/perf"
 import type { ShareItem } from "../share/types"
 import { saveShareState } from "../share/persist"
 import { createWorkspaceSlice } from "./workspaceStoreSlice"
@@ -82,3 +83,24 @@ useExplorerStore.subscribe((state) => {
   prevExploreSessionSerialized = serialized
   saveExploreSessionState(next)
 })
+
+// Dev-only (NEXT_PUBLIC_PERF_LOG=1): mark selection commits for the latency
+// study and expose a driver-facing selection action. Reference compares
+// only, so this subscription costs two identity checks per store commit.
+if (isPerfEnabled()) {
+  let prevSelectedScenarios = useExplorerStore.getState().selectedScenarios
+  let prevHydroclimate = useExplorerStore.getState().hydroclimate
+  useExplorerStore.subscribe((state) => {
+    if (state.selectedScenarios !== prevSelectedScenarios) {
+      prevSelectedScenarios = state.selectedScenarios
+      perfMark("select:scenarios", { count: state.selectedScenarios.length })
+    }
+    if (state.hydroclimate !== prevHydroclimate) {
+      prevHydroclimate = state.hydroclimate
+      perfMark("select:hydroclimate", { value: state.hydroclimate })
+    }
+  })
+  registerPerfAction("selectScenarios", (ids: string[]) =>
+    useExplorerStore.getState().selectScenarios(ids),
+  )
+}
