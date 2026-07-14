@@ -7,11 +7,13 @@ import { buildCsvHeaderBlock, csvQuote, type CsvHeaderInput } from "./csvFormat"
 
 /**
  * Convert the internal radar coordinate (-1 … +1) back to a weighted
- * tier score on the 1-4 scale used by the tier system:
- *   1 = Optimal, 2 = Acceptable, 3 = At-risk, 4 = Critical
+ * tier score on the 1-5 scale used by the tier system:
+ *   1.0 = Optimal, 2.0 = Acceptable, 3.0 = At-risk, 4.0+ = Critical
  */
+export const TIER_COUNT = 5
+
 function radarValueToTierScore(v: number): number {
-  return Math.round((4 - (v + 1) * 1.5) * 100) / 100
+  return TIER_COUNT - (v + 1) * ((TIER_COUNT - 1) / 2)
 }
 
 /**
@@ -61,7 +63,7 @@ export function radarDataToCSV(
     const label = outcomeNameLookup?.(code) ?? code
     const vals = scenarioEntries.map(([, values]) => {
       const v = values[code]
-      return v != null ? String(radarValueToTierScore(v)) : ""
+      return v != null ? String(radarValueToTierScore(v).toFixed(2)) : ""
     })
     lines.push([csvQuote(label), ...vals].join(","))
   }
