@@ -11,6 +11,7 @@
  */
 
 import { FetchError, type FetchOptions } from "./types"
+import { isPerfEnabled, pushPerfRecord } from "../perf/perfLog"
 
 const DEFAULT_TIMEOUT = 10000
 const DEFAULT_RETRIES = 2
@@ -76,10 +77,22 @@ export async function apiFetcher<T>(
   const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
   let lastError: FetchError | null = null
 
+  // Dev-only timing (NEXT_PUBLIC_PERF_LOG=1): one PerfApiRecord per call,
+  // covering all attempts including backoff sleeps. Flag off: zero overhead
+  // beyond a boolean check, and the response.json() path is untouched.
+  const perfOn = isPerfEnabled()
+  const clock = () =>
+    typeof performance !== "undefined" ? performance.now() : Date.now()
+  const tFirst = perfOn ? clock() : 0
+  let attempts = 0
+  let timedOut = false
+
   for (let attempt = 0; attempt <= retries; attempt++) {
+    attempts = attempt + 1
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeout)
+      const tAttempt = perfOn ? clock() : 0
 
       const response = await fetch(url, {
         signal: controller.signal,
@@ -104,10 +117,34 @@ export async function apiFetcher<T>(
         )
       }
 
+      if (perfOn) {
+        // Read text then parse so body-download and parse are separable.
+        const text = await response.text()
+        const tBodyDone = clock()
+        const data = JSON.parse(text) as T
+        const tParsed = clock()
+        const contentLength = response.headers.get("content-length")
+        pushPerfRecord({
+          kind: "api",
+          url,
+          status: response.status,
+          attempts,
+          timedOut,
+          totalMs: tParsed - tFirst,
+          netMs: tBodyDone - tAttempt,
+          parseMs: tParsed - tBodyDone,
+          transferBytes: contentLength ? Number(contentLength) : null,
+          decodedChars: text.length,
+          t: tFirst,
+        })
+        return data
+      }
+
       return response.json() as Promise<T>
     } catch (error) {
       // Handle abort (timeout)
       if (error instanceof DOMException && error.name === "AbortError") {
+        timedOut = true
         lastError = new FetchError(
           `Request timeout after ${timeout}ms`,
           0,
@@ -137,6 +174,22 @@ export async function apiFetcher<T>(
 
       break
     }
+  }
+
+  if (perfOn && lastError) {
+    pushPerfRecord({
+      kind: "api",
+      url,
+      status: lastError.status,
+      attempts,
+      timedOut,
+      totalMs: clock() - tFirst,
+      netMs: null,
+      parseMs: null,
+      transferBytes: null,
+      decodedChars: null,
+      t: tFirst,
+    })
   }
 
   throw lastError
