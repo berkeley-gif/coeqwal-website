@@ -15,6 +15,8 @@ export {
   registerPerfAction,
 } from "./perfLog"
 
+export { swrTimingMiddleware } from "./swrTiming"
+
 export type {
   PerfApiRecord,
   PerfMarkRecord,

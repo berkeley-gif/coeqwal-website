@@ -11,6 +11,8 @@ import { SWRConfig } from "swr"
 import type { ReactNode } from "react"
 import { apiFetcher } from "../fetching/fetcher"
 import { DEFAULT_API_BASE } from "../coeqwal/api"
+import { isPerfEnabled, registerPerfGlobal } from "../perf/perfLog"
+import { swrTimingMiddleware } from "../perf/swrTiming"
 
 /**
  * Default SWR options optimized for static/semi-static data
@@ -102,10 +104,16 @@ export function DataProvider({
     return apiFetcher(url)
   }
 
+  // Dev-only (NEXT_PUBLIC_PERF_LOG=1): attach the perf harvest surface and
+  // the SWR timing middleware. Both are no-ops / absent on default builds.
+  if (isPerfEnabled()) registerPerfGlobal()
+  const swrUse = isPerfEnabled() ? [swrTimingMiddleware] : undefined
+
   return (
     <SWRConfig
       value={{
         ...mergedOptions,
+        ...(swrUse ? { use: swrUse } : {}),
         fetcher: globalFetcher,
       }}
     >
