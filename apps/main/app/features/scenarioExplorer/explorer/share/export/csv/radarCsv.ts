@@ -10,10 +10,10 @@ import { buildCsvHeaderBlock, csvQuote, type CsvHeaderInput } from "./csvFormat"
  * tier score on the 1-5 scale used by the tier system:
  *   1.0 = Optimal, 2.0 = Acceptable, 3.0 = At-risk, 4.0+ = Critical
  */
-export const TIER_COUNT = 5
+export const TIER_MAX = 5
 
 function radarValueToTierScore(v: number): number {
-  return TIER_COUNT - (v + 1) * ((TIER_COUNT - 1) / 2)
+  return TIER_MAX - (v + 1) * ((TIER_MAX - 1) / 2)
 }
 
 /**
