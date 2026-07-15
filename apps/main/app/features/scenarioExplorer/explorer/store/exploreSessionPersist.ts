@@ -37,6 +37,8 @@ import type { EquityState } from "./equityStoreSlice"
 import { equityInitialState } from "./equityStoreSlice"
 import type { ResilienceState } from "./resilienceStoreSlice"
 import { resilienceInitialState } from "./resilienceStoreSlice"
+import type { DataState } from "./dataStoreSlice"
+import { dataInitialState } from "./dataStoreSlice"
 import type { WorkspaceState } from "./workspaceStoreSlice"
 import { workspaceInitialState } from "./workspaceStoreSlice"
 import {
@@ -49,6 +51,7 @@ import type { ListSlice } from "./listStoreSlice"
 import type { RadarSlice } from "./radarStoreSlice"
 import type { EquitySlice } from "./equityStoreSlice"
 import type { ResilienceSlice } from "./resilienceStoreSlice"
+import type { DataSlice } from "./dataStoreSlice"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"
 import { hasTourFor, type TourTool } from "../tools/tour/registry"
 import {
@@ -56,8 +59,15 @@ import {
   type ResilienceHydroclimate,
 } from "../tools/panels/resilience/resilienceHydroclimates"
 
-export const EXPLORE_SESSION_STORAGE_KEY = "coeqwal-explorer-tool-sessions-v2"
-export const EXPLORE_SESSION_STORAGE_VERSION = 2
+export const EXPLORE_SESSION_STORAGE_KEY = "coeqwal-explorer-tool-sessions-v3"
+export const EXPLORE_SESSION_STORAGE_VERSION = 3
+
+/** Prior storage keys, newest first, read as fallback so an in-tab session
+ * migrates forward instead of being dropped on a version bump. */
+const LEGACY_SESSION_STORAGE_KEYS = [
+  "coeqwal-explorer-tool-sessions-v2",
+  "coeqwal-explorer-tool-sessions-v1",
+] as const
 
 /** @deprecated Use EXPLORE_SESSION_STORAGE_KEY */
 export const TOOL_SESSION_STORAGE_KEY = EXPLORE_SESSION_STORAGE_KEY
@@ -66,7 +76,8 @@ type ExplorerStore = WorkspaceSlice &
   ListSlice &
   RadarSlice &
   EquitySlice &
-  ResilienceSlice
+  ResilienceSlice &
+  DataSlice
 
 export interface PersistedExploreSession {
   version: number
@@ -81,6 +92,7 @@ export interface PersistedExploreSession {
   > & {
     resilienceSelectedHydroclimates?: ResilienceHydroclimatePersisted
   }
+  data: Partial<DataState>
 }
 
 export interface ExploreSessionHydration {
@@ -89,6 +101,7 @@ export interface ExploreSessionHydration {
   radar: Partial<RadarState>
   equity: Partial<EquityState>
   resilience: Partial<ResilienceState>
+  data: Partial<DataState>
 }
 
 const EMPTY_HYDRATION: ExploreSessionHydration = {
@@ -97,6 +110,7 @@ const EMPTY_HYDRATION: ExploreSessionHydration = {
   radar: {},
   equity: {},
   resilience: {},
+  data: {},
 }
 
 const EXPLORE_MODES = new Set<ExploreMode>([
@@ -301,14 +315,17 @@ function migrateEnvelope(
     radar: isRecord(env.radar) ? (env.radar as Partial<RadarState>) : {},
     equity: isRecord(env.equity) ? (env.equity as Partial<EquityState>) : {},
     resilience: validateResiliencePersistedSection(env.resilience),
+    data: isRecord(env.data) ? (env.data as Partial<DataState>) : {},
   }
 }
 
 function readRawEnvelope(): unknown {
   if (typeof window === "undefined") return null
-  const raw =
-    sessionStorage.getItem(EXPLORE_SESSION_STORAGE_KEY) ??
-    sessionStorage.getItem("coeqwal-explorer-tool-sessions-v1")
+  let raw = sessionStorage.getItem(EXPLORE_SESSION_STORAGE_KEY)
+  for (const legacyKey of LEGACY_SESSION_STORAGE_KEYS) {
+    if (raw) break
+    raw = sessionStorage.getItem(legacyKey)
+  }
   if (!raw) return null
   try {
     return JSON.parse(raw) as unknown
@@ -327,6 +344,7 @@ function readPersistedEnvelope(): PersistedExploreSession {
       radar: {},
       equity: {},
       resilience: {},
+      data: {},
     }
   }
   return migrateEnvelope(parsed)
@@ -342,6 +360,7 @@ export function loadExploreSessionState(): ExploreSessionHydration {
       radar: envelope.radar,
       equity: envelope.equity,
       resilience: validateResilienceHydration(envelope.resilience),
+      data: envelope.data,
     }
   } catch {
     return EMPTY_HYDRATION
@@ -370,6 +389,7 @@ export function saveExploreSessionState(
       radar: { ...current.radar, ...partial.radar },
       equity: { ...current.equity, ...partial.equity },
       resilience: { ...current.resilience, ...partial.resilience },
+      data: { ...current.data, ...partial.data },
     }
     sessionStorage.setItem(EXPLORE_SESSION_STORAGE_KEY, JSON.stringify(merged))
   } catch {
@@ -411,4 +431,10 @@ export function mergeResilienceInitialState(
   hydration: Partial<ResilienceState>,
 ): ResilienceState {
   return { ...resilienceInitialState, ...hydration }
+}
+
+export function mergeDataInitialState(
+  hydration: Partial<DataState>,
+): DataState {
+  return { ...dataInitialState, ...hydration }
 }
