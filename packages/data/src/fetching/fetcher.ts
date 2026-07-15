@@ -86,6 +86,8 @@ export async function apiFetcher<T>(
   const tFirst = perfOn ? clock() : 0
   let attempts = 0
   let timedOut = false
+  let perfOkResponse: Response | null = null
+  let perfTAttempt = 0
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     attempts = attempt + 1
@@ -118,26 +120,13 @@ export async function apiFetcher<T>(
       }
 
       if (perfOn) {
-        // Read text then parse so body-download and parse are separable.
-        const text = await response.text()
-        const tBodyDone = clock()
-        const data = JSON.parse(text) as T
-        const tParsed = clock()
-        const contentLength = response.headers.get("content-length")
-        pushPerfRecord({
-          kind: "api",
-          url,
-          status: response.status,
-          attempts,
-          timedOut,
-          totalMs: tParsed - tFirst,
-          netMs: tBodyDone - tAttempt,
-          parseMs: tParsed - tBodyDone,
-          transferBytes: contentLength ? Number(contentLength) : null,
-          decodedChars: text.length,
-          t: tFirst,
-        })
-        return data
+        // Defer the body read to below the loop, outside this try/catch:
+        // a body-read or parse failure must propagate raw and un-retried,
+        // exactly like the flag-off response.json() path (whose rejection
+        // settles after the loop has exited and never hits the catch).
+        perfOkResponse = response
+        perfTAttempt = tAttempt
+        break
       }
 
       return response.json() as Promise<T>
@@ -174,6 +163,29 @@ export async function apiFetcher<T>(
 
       break
     }
+  }
+
+  if (perfOn && perfOkResponse) {
+    // Read text then parse so body-download and parse are separable.
+    const text = await perfOkResponse.text()
+    const tBodyDone = clock()
+    const data = JSON.parse(text) as T
+    const tParsed = clock()
+    const contentLength = perfOkResponse.headers.get("content-length")
+    pushPerfRecord({
+      kind: "api",
+      url,
+      status: perfOkResponse.status,
+      attempts,
+      timedOut,
+      totalMs: tParsed - tFirst,
+      netMs: tBodyDone - perfTAttempt,
+      parseMs: tParsed - tBodyDone,
+      transferBytes: contentLength ? Number(contentLength) : null,
+      decodedChars: text.length,
+      t: tFirst,
+    })
+    return data
   }
 
   if (perfOn && lastError) {

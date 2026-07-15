@@ -7,7 +7,9 @@ import { appendResult } from "../support/results"
 // end to end. Endpoint paths verified against
 // packages/data/src/coeqwal/api.ts (DEFAULT_API_BASE + ENDPOINTS).
 const API = "https://api.coeqwal.org/api"
-const RUNS = Number(process.env.PERF_RUNS ?? 10)
+// `|| 10` also covers empty/non-numeric PERF_RUNS (Number("") is 0, NaN is
+// falsy), so a bad value cannot silently produce a zero-iteration green run.
+const RUNS = Math.max(1, Number(process.env.PERF_RUNS) || 10)
 const TYPES = ["storage", "cws", "ag", "env_flow"] as const
 
 test("api latency matrix", async ({ request }) => {

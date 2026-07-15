@@ -9,7 +9,9 @@ import { clearPerf, harvestPerf, waitForMark } from "../support/harvest"
 // Scenario ids are workspace-format sibling-group ids (validated against the
 // running app: the List-tab checkboxes commit exactly these into
 // workspace.selectedScenarios). Override with PERF_SCENARIOS=a,b,c.
-const RUNS = Number(process.env.PERF_RUNS ?? 10)
+// `|| 10` also covers empty/non-numeric PERF_RUNS (Number("") is 0, NaN is
+// falsy), so a bad value cannot silently produce a zero-iteration green run.
+const RUNS = Math.max(1, Number(process.env.PERF_RUNS) || 10)
 const SCENARIO_IDS = (process.env.PERF_SCENARIOS ?? "s0020,s0025,s0030").split(
   ",",
 )
@@ -18,8 +20,13 @@ const DID_TAB = /Data in depth/
 
 async function openDataInDepth(page: import("@playwright/test").Page) {
   await page.goto("/explore")
-  await page.getByRole("tab", { name: DID_TAB }).click()
-  await page.waitForFunction(() => !!window.__coeqwalPerf)
+  await page.getByRole("tab", { name: DID_TAB }).click({ timeout: 30_000 })
+  // Explicit timeout: with no configured actionTimeout this would otherwise
+  // inherit the (long) test timeout and hang for the full hour when the
+  // target app is broken instead of failing the run fast.
+  await page.waitForFunction(() => !!window.__coeqwalPerf, undefined, {
+    timeout: 30_000,
+  })
 }
 
 async function selectScenarios(

@@ -2,11 +2,13 @@
  * computeBench.ts - dev-only front-end quantile compute benchmark
  *
  * Times the panel's real quantile functions (mockDataEngine.seriesStats,
- * which calls quantileSorted) over synthetic 100-point series, at the
- * scales from the latency measurement plan:
+ * which calls quantileSorted) over synthetic 100-point series (one value
+ * per simulated water year), at three scales:
  *   x1  - one variable, whole-record quantile set
  *   x6  - one variable, record + 5 water-year-type subsets
  *   x6 across 20 variables and 6 scenarios (720 stat sets, worst case)
+ * These bound the front-end cost of computing box-plot/exceedance stats
+ * client-side instead of fetching pre-computed percentiles.
  *
  * Pure and synchronous; invoked via window.__coeqwalPerf.bench(iterations).
  */

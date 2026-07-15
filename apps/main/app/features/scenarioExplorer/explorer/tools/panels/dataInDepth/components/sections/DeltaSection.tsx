@@ -78,6 +78,11 @@ const DELTA_EXPORT_CHANNELS = [
   { id: "C_DMC000", label: "CVP exports (Tracy)" },
 ] as const
 
+// Hoisted so the matrix memos below get stable dependency identities; fresh
+// per-render arrays would re-run buildChannelMatrix on every render.
+const DELTA_INFLOW_IDS = DELTA_INFLOW_CHANNELS.map((c) => c.id)
+const DELTA_EXPORT_IDS = DELTA_EXPORT_CHANNELS.map((c) => c.id)
+
 // ============================================================================
 // Entity-label builders
 // ============================================================================
@@ -290,21 +295,19 @@ export default function DeltaSection({
     [allData],
   )
 
-  const inflowIds = DELTA_INFLOW_CHANNELS.map((c) => c.id)
-  const exportIds = DELTA_EXPORT_CHANNELS.map((c) => c.id)
   const inflowMatrix = useMemo(
     () =>
       perfTime("transform:delta", () =>
-        buildChannelMatrix(channelData, inflowIds),
+        buildChannelMatrix(channelData, DELTA_INFLOW_IDS),
       ),
-    [channelData, inflowIds],
+    [channelData],
   )
   const exportMatrix = useMemo(
     () =>
       perfTime("transform:delta", () =>
-        buildChannelMatrix(channelData, exportIds),
+        buildChannelMatrix(channelData, DELTA_EXPORT_IDS),
       ),
-    [channelData, exportIds],
+    [channelData],
   )
 
   const complianceEntities = useMemo(

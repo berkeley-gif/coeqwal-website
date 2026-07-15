@@ -8,12 +8,19 @@
  * select-to-paint end-to-end table derived from app-flow record dumps.
  */
 
-import { readFileSync, readdirSync } from "fs"
+import { existsSync, readFileSync, readdirSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const dir = process.argv[2] ?? join(here, "results")
+
+if (!existsSync(dir)) {
+  console.error(
+    `No results directory at ${dir}. Run the perf driver first (see e2e/perf/README.md).`,
+  )
+  process.exit(1)
+}
 
 function median(values) {
   const s = [...values].sort((a, b) => a - b)
@@ -54,10 +61,20 @@ for (const [key, agg] of [...bySuiteCell.entries()].sort()) {
 
 // App-flow rows carry nested records rather than a flat ms; summarize the
 // end-to-end span (select mark to paint mark) per cell, plus the batch API
-// span inside each run.
+// span inside each run. "expand-*" cells are cumulative harvests taken after
+// a section expand: their select/paint marks duplicate the preceding cold
+// cell, so they feed the transform table below, not the end-to-end table.
 const flowCells = new Map()
+const transformCells = new Map()
 for (const row of rows) {
   if (!Array.isArray(row.records)) continue
+  for (const r of row.records) {
+    if (typeof r.name === "string" && r.name.startsWith("transform:")) {
+      if (!transformCells.has(r.name)) transformCells.set(r.name, [])
+      transformCells.get(r.name).push(r.durMs ?? 0)
+    }
+  }
+  if (String(row.cell).startsWith("expand-")) continue
   const select = row.records.find((r) => r.name === "select:scenarios")
   const paint = row.records.find((r) => r.name === "paint:category-batch")
   if (!select || !paint) continue
@@ -76,6 +93,19 @@ if (flowCells.size) {
     const apiMed = agg.api.length ? median(agg.api).toFixed(0) : ""
     console.log(
       `| ${cell} | ${agg.e2e.length} | ${median(agg.e2e).toFixed(0)} | ${Math.min(...agg.e2e).toFixed(0)} | ${Math.max(...agg.e2e).toFixed(0)} | ${apiMed} |`,
+    )
+  }
+}
+
+// Transform measures harvested from app-flow record dumps (fire on section
+// expand; duplicates across cumulative harvests collapse via the raw values)
+if (transformCells.size) {
+  console.log(`\n## transforms (payload to chart props)\n`)
+  console.log("| name | samples | median ms | min | max |")
+  console.log("|------|---------|-----------|-----|-----|")
+  for (const [name, values] of [...transformCells.entries()].sort()) {
+    console.log(
+      `| ${name} | ${values.length} | ${median(values).toFixed(1)} | ${Math.min(...values).toFixed(1)} | ${Math.max(...values).toFixed(1)} |`,
     )
   }
 }

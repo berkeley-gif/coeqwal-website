@@ -1,7 +1,10 @@
 import { test, expect } from "@playwright/test"
 
 // Node-side specs driving apiFetcher against a stubbed global fetch.
-// Asserts the PerfApiRecord contract from the latency measurement plan.
+// Asserts the PerfApiRecord contract: one record per apiFetcher call
+// carrying url, status, attempts, timedOut, totalMs (all attempts plus
+// backoff), netMs/parseMs (final attempt), transferBytes, decodedChars,
+// and, with the flag off, zero records plus the untouched response.json path.
 
 const realFetch = global.fetch
 
@@ -90,6 +93,25 @@ test("retryable failure then success counts attempts", async () => {
   expect(apiRecords[0]).toMatchObject({ status: 200, attempts: 2 })
   // includes the 1s backoff sleep
   expect((apiRecords[0] as { totalMs: number }).totalMs).toBeGreaterThan(900)
+})
+
+test("flag on: malformed 200 body rejects raw without retry, like flag off", async () => {
+  let calls = 0
+  global.fetch = (async () => {
+    calls += 1
+    return new Response("not json", {
+      status: 200,
+      headers: { "content-length": "8" },
+    })
+  }) as typeof fetch
+  const { apiFetcher } = await import("@repo/data/fetching")
+  const { getPerfRecords } = await import("@repo/data/perf")
+
+  await expect(
+    apiFetcher("/api/x", { baseUrl: "http://test.local" }),
+  ).rejects.toThrow(SyntaxError)
+  expect(calls).toBe(1)
+  expect(getPerfRecords().filter((r) => r.kind === "api")).toHaveLength(0)
 })
 
 test("flag off: no records, response.json path", async () => {

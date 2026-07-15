@@ -74,6 +74,15 @@ to the default (instrumentation-free) configuration.
   client-observable for api.coeqwal.org without a `Timing-Allow-Origin`
   response header; sizes fall back to `Content-Length` and decoded text
   length.
+- The api-matrix suite re-hits identical URLs across cells and runs in a
+  fixed order, so every cell after the very first request measures a
+  server-warm regime. That is the fair steady-state comparison between
+  strategies; the cold story comes from the app-flow suite's fresh browser
+  contexts. Do not read api-matrix rows as cold-start numbers.
+- Flag-off builds still emit the (never-fetched) compute-bench async chunk
+  and carry the small perf-core module; the flag-off e2e guard asserts the
+  strongest observable (no window global, no marks on the explore route),
+  not bundle-byte parity.
 - React StrictMode (dev builds) double-mounts components: `swr:data-ready`
   records can appear duplicated, and dev-server numbers include dev-mode
   React overhead. Rankings measured on dev are indicative; confirm absolute
@@ -85,3 +94,7 @@ pnpm turbo run build --filter=main`, then serve `out/`).
   measures the cache path, not a revalidation.
 - Results JSONL is local-only (gitignored). Summaries belong in issue or PR
   text, not committed artifacts.
+- Do not run builds while a measurement is in flight: `next build` and
+  `next dev` share `apps/main/.next`, so a concurrent build corrupts the
+  dev server mid-run (it starts returning 500s), and any build competes
+  for CPU and skews timings. Finish the driver run first, then run gates.
