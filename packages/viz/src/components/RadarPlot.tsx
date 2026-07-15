@@ -1274,7 +1274,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   showAxisLabelDetail(axis, {
                     scenarioId: scenario.id,
                     scenarioName: scenario.name,
-                    tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
+                    tierIndex: Math.min(4, Math.max(1, Math.trunc(toTier(sv)))),
                     weighted_score: toTier(sv).toFixed(2),
                   })
                   setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
@@ -1303,7 +1303,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   showAxisLabelDetail(axis, {
                     scenarioId: scenario.id,
                     scenarioName: scenario.name,
-                    tierIndex: Math.min(4, Math.max(1, Math.round(toTier(sv)))),
+                    tierIndex: Math.min(4, Math.max(1, Math.trunc(toTier(sv)))),
                     weighted_score: toTier(sv).toFixed(2),
                   })
                 })
@@ -1820,7 +1820,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const scenario = data.find((d) => d.id === reopen.detail.scenarioId)
             const sv = scenario?.values[reopen.axis]
             if (scenario != null && sv != null && axes.includes(reopen.axis)) {
-              const tierIndex = Math.min(4, Math.max(1, Math.round(toTier(sv))))
+              const tierIndex = Math.min(4, Math.max(1, Math.trunc(toTier(sv))))
               const weighted_score = toTier(sv).toFixed(2)
               resetAllAxisLabelTitlesFontWeight()
               applyFocusVisuals(scenario.id)
