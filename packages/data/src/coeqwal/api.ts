@@ -4,11 +4,54 @@
  * Centralized endpoint definitions for the COEQWAL API.
  */
 
+import type {
+  ReservoirStorageDidOptions,
+  RiverFlowsDidOptions,
+  DeltaSalinityDidOptions,
+} from "./types"
+
 /**
  * Default COEQWAL API base URL
  * Can be overridden via DataProvider's apiBaseUrl prop
  */
-export const DEFAULT_API_BASE = "https://api.coeqwal.org/api"
+ export const DEFAULT_API_BASE = "https://api.coeqwal.org/api"
+
+/**
+ * Shared builder for the /data-in-depth/* endpoints. Every list param is
+ * deduped + sorted (numeric sort for wyt) and serialized in a fixed order, so
+ * the resulting URL — and thus the SWR cache key — is independent of caller
+ * order and matches the backend's sorted cache key. Optional params are omitted
+ * when empty (the backend applies its defaults).
+ */
+interface DataInDepthParams {
+  subjects?: string[]
+  periods?: string[]
+  units?: string[]
+  include?: string[]
+  wyt?: number[]
+}
+
+function dataInDepthPath(
+  path: string,
+  scenarios: string[],
+  opts: DataInDepthParams,
+): string {
+  const uniqSort = (a: string[]) => Array.from(new Set(a)).sort().join(",")
+  const q = new URLSearchParams()
+  q.set("scenarios", uniqSort(scenarios))
+  if (opts.subjects?.length) q.set("subjects", uniqSort(opts.subjects))
+  if (opts.periods?.length) q.set("periods", uniqSort(opts.periods))
+  if (opts.units?.length) q.set("units", uniqSort(opts.units))
+  if (opts.include?.length) q.set("include", uniqSort(opts.include))
+  if (opts.wyt?.length)
+    q.set(
+      "wyt",
+      Array.from(new Set(opts.wyt))
+        .sort((a, b) => a - b)
+        .join(","),
+    )
+  return `${path}?${q.toString()}`
+}
 
 /**
  * API endpoint paths (relative to base URL)
@@ -299,4 +342,44 @@ export const ENDPOINTS = {
     types: string[] = ["storage", "cws", "ag"],
   ) =>
     `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
+
+  // Data in Depth (generic data_in_depth_* tables). Multiple sibling endpoints
+  // per domain will land under /data-in-depth/*.
+
+  /**
+   * April/September reservoir storage with live-computed stats. Multi-scenario.
+   * Every list param is deduped + sorted so the URL — and thus the SWR cache
+   * key — is independent of caller order, matching the backend's sorted cache
+   * key. Optional params are omitted when empty (backend applies its defaults).
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  reservoirStorageDataInDepth: (
+    scenarios: string[],
+    opts: ReservoirStorageDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/reservoir-storage", scenarios, opts),
+
+  /**
+   * Annual water-year river flow with live-computed stats. Multi-scenario.
+   * Annual + TAF only. Lists deduped + sorted so the URL / SWR cache key is
+   * independent of caller order. Optional params omitted when empty.
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  riverFlowsDataInDepth: (
+    scenarios: string[],
+    opts: RiverFlowsDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/river-flows", scenarios, opts),
+
+  /**
+   * April/September Delta X2 position with live-computed stats. Multi-scenario.
+   * april/sept periods, km unit only. Lists deduped + sorted for stable cache
+   * keys. Optional params omitted when empty.
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  deltaSalinityDataInDepth: (
+    scenarios: string[],
+    opts: DeltaSalinityDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/delta-salinity", scenarios, opts),
 } as const
