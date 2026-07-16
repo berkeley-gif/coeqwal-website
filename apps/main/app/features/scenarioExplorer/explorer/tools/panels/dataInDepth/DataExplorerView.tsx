@@ -4,10 +4,11 @@
  * DataExplorerView - Explore data in depth for the user's selected scenarios.
  *
  * Two modes, switched by the header toggle:
- *  - "By category": the existing outcome-category accordions (unchanged).
- *  - "Explorer": the by-variable explorer (sector rail -> variable -> view),
- *    which works from the Current Operations reference even before any
- *    scenario is selected.
+ *  - "Explorer" (default): the by-variable explorer (sector rail -> variable
+ *    -> view), which works from the Current Operations reference even before
+ *    any scenario is selected.
+ *  - "By category": the original outcome-category accordions, kept reachable
+ *    behind the toggle while the tools transition to the new interface.
  */
 
 import React, { useState } from "react"
@@ -36,7 +37,7 @@ export default function DataExplorerView({
 }: DataExplorerViewProps) {
   const theme = useTheme()
   const { selectedScenarios } = useWorkspaceSlice()
-  const [mode, setMode] = useState<DataMode>("category")
+  const [mode, setMode] = useState<DataMode>("explorer")
 
   const hasData = selectedScenarios.length > 0
 

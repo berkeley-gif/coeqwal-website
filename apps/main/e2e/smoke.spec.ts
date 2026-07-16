@@ -25,9 +25,17 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  // With no scenarios selected the tool shows its choose-scenarios empty
-  // state. Rendering the reservoir charts with data needs a full scenario
-  // selection flow and is covered when that section is wired (PR 2).
+  // The by-variable Explorer is the default mode and works from the Current
+  // Operations reference, so a chart card renders before any scenario is
+  // selected: the data-source chip and the comparison controls are visible.
+  await expect(
+    page.getByRole("button", { name: "Explorer", pressed: true }),
+  ).toBeVisible()
+  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  await expect(page.getByRole("group", { name: "Compare by" })).toBeVisible()
+  // The original category view stays reachable behind the toggle and keeps
+  // its choose-scenarios empty state when nothing is selected.
+  await page.getByRole("button", { name: "By category" }).click()
   await expect(page.getByText("Select scenarios to explore")).toBeVisible()
   await expect(
     page.getByRole("button", { name: "Choose scenarios" }),

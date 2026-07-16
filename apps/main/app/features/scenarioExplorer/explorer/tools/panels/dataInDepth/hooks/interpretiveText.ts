@@ -182,7 +182,3 @@ export function howToReadText(
   }
   return `An exceedance plot answers: "in what share of years is the value at least this big?" Pick a point on a line: its horizontal position is the percent of years, the vertical position the value. The left side shows wet/abundant years, the right side dry/scarce years. Where one line sits above another, that alternative delivers more in that kind of year. Reading at 50% gives the median year; at 90%, a dry year exceeded 9 years in 10.`
 }
-
-/** Explainer for the deliberate absence of a climate-vs-operations split. */
-export const WHY_NO_BREAKDOWN =
-  "Elsewhere on the site, results on the tier scale are shown in two steps: what climate change alone would do, and what a strategy adds or subtracts. That works for tiers because tiers are broad categories. The detailed numbers on this page don't support the same split. The water system is full of hard limits: reservoirs fill or empty completely, deliveries can't exceed contracts or fall below zero. So the effect of a strategy, measured in acre-feet or flow, depends on which climate it is measured under; the two pieces don't add up to the total change, and a strategy can look ineffective simply because the system is pinned against a limit. So this page lets you change one thing at a time - compare strategies under the same climate, or climates under the same strategy - which the model genuinely supports. The missing breakdown is deliberate, not a gap."
