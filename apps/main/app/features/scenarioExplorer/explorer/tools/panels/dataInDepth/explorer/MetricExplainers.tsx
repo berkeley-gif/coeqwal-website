@@ -1,11 +1,10 @@
 "use client"
 
 /**
- * MetricExplainers - the three explainer accordions under the chart card:
- * what the metric is, how to read the current chart, and why the page does
- * not split climate change from operations. Copy is ported from the team's
- * design prototype (registry + interpretiveText); this component only lays it
- * out.
+ * MetricExplainers - the explainer accordions under the chart card: what the
+ * metric is and how to read the current chart. Copy is ported from the
+ * team's design prototype (registry + interpretiveText); this component only
+ * lays it out.
  */
 
 import React from "react"
@@ -20,7 +19,7 @@ import {
 } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
 import { getVariable } from "../config/variableRegistry"
-import { howToReadText, WHY_NO_BREAKDOWN } from "../hooks/interpretiveText"
+import { howToReadText } from "../hooks/interpretiveText"
 
 export default function MetricExplainers() {
   const theme = useTheme()
@@ -50,11 +49,6 @@ export default function MetricExplainers() {
       body: (
         <Typography variant="body2">{howToReadText(view, distKind)}</Typography>
       ),
-    },
-    {
-      key: "why",
-      title: "Why is there no climate-vs-operations breakdown here?",
-      body: <Typography variant="body2">{WHY_NO_BREAKDOWN}</Typography>,
     },
   ]
 
