@@ -8,7 +8,7 @@
 
 import { useMemo } from "react"
 import { useTheme, type SxProps, type Theme } from "@repo/ui/mui"
-import { useWorkspaceSlice } from "./store"
+import { useWorkspaceSlice, isMapPairedMode } from "./store"
 
 export type ExplorerMapLayout = {
   rootSx: SxProps<Theme>
@@ -18,7 +18,11 @@ export type ExplorerMapLayout = {
 
 export function useExplorerMapLayout(): ExplorerMapLayout {
   const theme = useTheme()
-  const showMap = useWorkspaceSlice((s) => s.showMap)
+  const rawShowMap = useWorkspaceSlice((s) => s.showMap)
+  const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
+  // Data in depth never pairs with the map, so its layout stays opaque and
+  // interactive even when the shared showMap flag is on for other tools.
+  const showMap = rawShowMap && isMapPairedMode(exploreMode)
 
   const exploreBackground = theme.palette.explore.background
   const textPrimary = theme.palette.text.primary

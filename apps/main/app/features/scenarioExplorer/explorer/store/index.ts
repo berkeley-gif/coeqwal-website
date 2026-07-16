@@ -17,6 +17,7 @@
 
 export type { ExploreMode, OutcomeDisplayMode, TourTool } from "./types"
 export type { ShareItem, ShareItemPatch } from "./types"
+export { isMapPairedMode } from "./types"
 export {
   DEFAULT_RESILIENCE_CONTROLS,
   selectResilienceControls,
