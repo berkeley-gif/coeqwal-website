@@ -16,7 +16,7 @@
 //   markdown=<multiline>  Markdown body for the sticky comment
 
 import { execSync } from "node:child_process"
-import { appendFileSync, readFileSync, readdirSync, statSync } from "node:fs"
+import { appendFileSync, existsSync, readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 
 const baseSha = process.env.BASE_SHA
@@ -58,11 +58,38 @@ console.log(
   `Broad-impact files: ${[...broadImpact].sort().join(", ") || "(none)"}`,
 )
 
-// Source of truth for "which apps does this monorepo deploy + who owns them"
-// is CODEOWNERS. A line like `/apps/main/  @user1 @user2` means main is a
-// tracked app with those owners.
+// Which apps this monorepo deploys is discovered from the filesystem: every
+// apps/<name>/ directory containing a package.json is a tracked app. Do NOT
+// key this off .github/CODEOWNERS: its rules get commented out whenever the
+// team pauses code-owner review, and this comment must keep posting through
+// that. CODEOWNERS only enriches the Owner column when its /apps/<name>/
+// entries are active.
+let appNames = []
+try {
+  appNames = readdirSync("apps")
+    .filter((entry) => existsSync(join("apps", entry, "package.json")))
+    .sort()
+} catch {
+  // Missing apps/ falls through to the fail-closed check below.
+}
+
+if (appNames.length === 0) {
+  console.error(
+    "No apps found under apps/ (expected apps/<name>/package.json). Incomplete checkout?",
+  )
+  process.exit(1)
+}
+
+// Owner enrichment, best effort: a CODEOWNERS line like
+// `/apps/main/  @user1 @user2` assigns owners for the Owner column. A missing
+// file or zero active entries is a valid, deliberate state, never an error.
 const appOwners = {}
-const codeowners = readFileSync(".github/CODEOWNERS", "utf8")
+let codeowners = ""
+try {
+  codeowners = readFileSync(".github/CODEOWNERS", "utf8")
+} catch {
+  // CODEOWNERS absent: every app renders as unassigned.
+}
 for (const rawLine of codeowners.split("\n")) {
   const line = rawLine.trim()
   if (!line || line.startsWith("#")) continue
@@ -73,37 +100,28 @@ for (const rawLine of codeowners.split("\n")) {
   if (m && owners.length) appOwners[m[1]] = owners
 }
 
-const appNames = Object.keys(appOwners).sort()
-if (appNames.length === 0) {
-  console.error(
-    "No tracked apps found in .github/CODEOWNERS (looking for /apps/<name>/ entries)",
+// Drift guard: when CODEOWNERS is active (at least one /apps/<name>/ entry),
+// partial coverage or dead entries are maintenance gaps. Warn so it shows up
+// as a workflow annotation, but don't fail. Zero entries means ownership
+// tracking is paused on purpose; note it once without warning noise.
+const ownerEntries = Object.keys(appOwners)
+const unownedApps = appNames.filter((app) => !(app in appOwners))
+const deadOwnerEntries = ownerEntries.filter((app) => !appNames.includes(app))
+if (ownerEntries.length === 0) {
+  console.log(
+    "CODEOWNERS has no active /apps/<name>/ entries (code-owner review paused?). Owner column will show unassigned.",
   )
-  process.exit(1)
-}
-
-// CODEOWNERS drift guard: compare the apps/ directory on disk to the set of
-// apps registered in CODEOWNERS. Drift in either direction is a maintenance
-// gap. Warn loudly so it shows up as a workflow annotation, but don't fail.
-const onDisk = new Set()
-try {
-  for (const entry of readdirSync("apps")) {
-    if (statSync(join("apps", entry)).isDirectory()) onDisk.add(entry)
+} else {
+  if (unownedApps.length > 0) {
+    console.log(
+      `::warning title=CODEOWNERS drift::apps/ on disk has ${unownedApps.join(", ")} with no /apps/<name>/ entry in .github/CODEOWNERS. Still tracked, but shown as unassigned in the package-impact comment.`,
+    )
   }
-} catch {
-  // apps/ missing is its own problem, but not for this script to fix
-}
-const inCodeowners = new Set(appNames)
-const missingFromCodeowners = [...onDisk].filter((a) => !inCodeowners.has(a))
-const missingFromDisk = [...inCodeowners].filter((a) => !onDisk.has(a))
-if (missingFromCodeowners.length > 0) {
-  console.log(
-    `::warning title=CODEOWNERS drift::apps/ on disk has ${missingFromCodeowners.join(", ")} which is not registered in .github/CODEOWNERS as /apps/<name>/. New apps are invisible to the package-impact comment until added.`,
-  )
-}
-if (missingFromDisk.length > 0) {
-  console.log(
-    `::warning title=CODEOWNERS drift::.github/CODEOWNERS lists ${missingFromDisk.join(", ")} but no matching apps/<name>/ directory exists. The entry is dead.`,
-  )
+  if (deadOwnerEntries.length > 0) {
+    console.log(
+      `::warning title=CODEOWNERS drift::.github/CODEOWNERS lists ${deadOwnerEntries.join(", ")} but no matching apps/<name>/package.json exists. The entry is dead.`,
+    )
+  }
 }
 
 const appDeps = {}
@@ -161,7 +179,7 @@ if (affected.size === 0) {
       .map((p) => `\`@repo/${p}\``)
       .join(", ")
     lines.push(
-      `Changed packages: ${list || "(none)"}. None of the tracked apps in CODEOWNERS depend on these packages, so no app needs a redeploy.`,
+      `Changed packages: ${list || "(none)"}. None of the apps in this monorepo depend on these packages, so no app needs a redeploy.`,
     )
     lines.push("")
     lines.push(
@@ -202,7 +220,7 @@ if (affected.size === 0) {
   lines.push("| App | Owner(s) | Dispatch |")
   lines.push("|---|---|---|")
   for (const app of [...affected].sort()) {
-    const owners = (appOwners[app] || []).join(" ")
+    const owners = (appOwners[app] || []).join(" ") || "_unassigned_"
     const link = `[Deploy ${app}](${workflowUrl})`
     lines.push(`| ${app} | ${owners} | ${link} |`)
   }
@@ -210,6 +228,12 @@ if (affected.size === 0) {
   lines.push(
     "> No app will auto-deploy from this PR. When you are ready to ship the package change into your app, click your row's **Dispatch** link and run `Deploy to Amplify` with your app and branch `dev`.",
   )
+  if ([...affected].some((app) => !(app in appOwners))) {
+    lines.push("")
+    lines.push(
+      "> Owners come from `/apps/<name>/` entries in `.github/CODEOWNERS` and show as _unassigned_ while those entries are commented out or missing.",
+    )
+  }
 
   markdown = lines.join("\n")
   summaryLine = `Flagged apps: ${[...affected].sort().join(", ")}`
@@ -239,15 +263,21 @@ if (ghSummary) {
         .join(", ")}`,
     )
   }
-  if (missingFromCodeowners.length > 0) {
+  if (ownerEntries.length === 0) {
     summary.push(
-      `- :warning: CODEOWNERS drift: missing entries for ${missingFromCodeowners.join(", ")}`,
+      "- Owners: no active CODEOWNERS entries (owner column shows unassigned)",
     )
-  }
-  if (missingFromDisk.length > 0) {
-    summary.push(
-      `- :warning: CODEOWNERS drift: dead entries for ${missingFromDisk.join(", ")}`,
-    )
+  } else {
+    if (unownedApps.length > 0) {
+      summary.push(
+        `- :warning: CODEOWNERS drift: no owner entry for ${unownedApps.join(", ")}`,
+      )
+    }
+    if (deadOwnerEntries.length > 0) {
+      summary.push(
+        `- :warning: CODEOWNERS drift: dead entries for ${deadOwnerEntries.join(", ")}`,
+      )
+    }
   }
   appendFileSync(ghSummary, summary.join("\n") + "\n")
 }
