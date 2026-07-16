@@ -22,11 +22,13 @@ export function normalizedToRadar(normalized: number): number {
  * Convert a radar axis value (-1 center, +1 edge) back to a tier on the
  * 1 (best) to `TIER_COUNT` (worst) scale
  */
+export const TIER_MAX = 5
+
 export function radarValueToTier(v: number): number {
-  return TIER_COUNT - (v + 1) * ((TIER_COUNT - 1) / 2)
+  return TIER_MAX - (v + 1) * ((TIER_MAX - 1) / 2)
 }
 
 /** Round and clamp a continuous tier value into the integer range [1, `TIER_COUNT`] */
 export function clampTier(value: number): number {
-  return Math.min(TIER_COUNT, Math.max(1, Math.round(value)))
+  return Math.min(TIER_COUNT, Math.max(1, Math.trunc(value)))
 }

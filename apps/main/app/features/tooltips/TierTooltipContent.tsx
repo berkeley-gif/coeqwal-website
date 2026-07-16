@@ -16,6 +16,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useOutcomeDefinitions } from "../scenarios/hooks"
 import {
   OUTCOME_TIER_VALUES,
+  OUTCOME_FOOTER_DEFINITIONS,
   getOutcomeName,
   type OutcomeCode,
 } from "../../content/outcomes"
@@ -340,6 +341,12 @@ export default function TierTooltipContent({
             </Box>
           )
         })}
+        <Typography variant="dashboard" component="span">
+          {formatTierText(
+            OUTCOME_FOOTER_DEFINITIONS[outcomeCode as OutcomeCode],
+            emphasisWeight,
+          )}
+        </Typography>
       </Box>
     </Box>
   )
