@@ -68,6 +68,8 @@ type TabsContextShape = {
   setIsPastHero: React.Dispatch<React.SetStateAction<boolean>>
   descriptionsExpanded: boolean
   setDescriptionsExpanded: React.Dispatch<React.SetStateAction<boolean>>
+  isNavigatingToTabs: boolean
+  setIsNavigatingToTabs: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
@@ -94,6 +96,8 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // tracks whether user has scrolled past 50% of the hero section
   const [isPastHero, setIsPastHero] = React.useState(false)
 
+  const [isNavigatingToTabs, setIsNavigatingToTabs] = React.useState(false)
+
   // whether the tab description/interstitial panels are currently expanded
   const [descriptionsExpanded, setDescriptionsExpanded] = React.useState(true)
 
@@ -115,6 +119,8 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       setIsPastHero,
       descriptionsExpanded,
       setDescriptionsExpanded,
+      isNavigatingToTabs,
+      setIsNavigatingToTabs,
     }),
     [
       state,
@@ -123,6 +129,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       isHeaderDark,
       isPastHero,
       descriptionsExpanded,
+      isNavigatingToTabs,
     ],
   )
 
@@ -142,23 +149,25 @@ export function useTabs() {
   if (!ctx) {
     return {
       state: initialState,
-      dispatch: () => {},
+      dispatch: () => { },
       tabsRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       subNavRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       panelRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       hasEnteredTabsFirstTime: false,
-      setHasEnteredTabsFirstTime: () => {},
+      setHasEnteredTabsFirstTime: () => { },
       scrollIntentRef: { current: "none" as const } as React.RefObject<
         "none" | "user" | "sync"
       >,
       isInTabsArea: false,
-      setIsInTabsArea: () => {},
+      setIsInTabsArea: () => { },
       isHeaderDark: false,
-      setIsHeaderDark: () => {},
+      setIsHeaderDark: () => { },
       isPastHero: false,
-      setIsPastHero: () => {},
+      setIsPastHero: () => { },
       descriptionsExpanded: true,
-      setDescriptionsExpanded: () => {},
+      setDescriptionsExpanded: () => { },
+      isNavigatingToTabs: false,
+      setIsNavigatingToTabs: () => { },
     }
   }
 

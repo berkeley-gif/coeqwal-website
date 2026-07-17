@@ -17,6 +17,7 @@ import React, { Fragment, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
+import { useOutcomeMapAction } from "../../../../../map/hooks"
 import {
     StrategyHeader,
     OutcomeGlyphItem,
@@ -137,6 +138,8 @@ export default function BarPanel() {
     const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
     const { sortBy, sortDirection, setSortBy, setSortDirection } =
         useListSlice()
+
+    const { showOutcomeOnMap, isOutcomeActive, isMapVisible } = useOutcomeMapAction()
 
     const { allChartData, outcomeNames, allScoreData, isLoading, error } =
         useResolvedScenarioTiers()
@@ -323,6 +326,11 @@ export default function BarPanel() {
                                                 isActive={!!chartData[shortCode]}
                                                 showLabel={true}
                                                 showInfoButton={false}
+                                                onGlyphClick={
+                                                    isMapVisible
+                                                        ? () => showOutcomeOnMap(shortCode, scenario.scenarioId)
+                                                        : undefined
+                                                }
                                             />
                                         </Box>
                                     ))}
