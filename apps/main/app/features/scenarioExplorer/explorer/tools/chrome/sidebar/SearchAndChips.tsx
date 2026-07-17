@@ -53,6 +53,8 @@ export default function SearchAndChips({
     setShowAlternativeBaselines,
     showKeyOperations,
     setShowKeyOperations,
+    selectedScenarios,
+    clearScenarios,
   } = useWorkspaceSlice()
 
   const searchAnchorRef = useTourAnchor("list.toolbar.search")
@@ -114,6 +116,39 @@ export default function SearchAndChips({
           </IconButton>
         )}
       </Box>
+
+      {selectedScenarios.length > 0 && (
+        <Box
+          component="button"
+          type="button"
+          onClick={clearScenarios}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
+            px: 1.25,
+            py: 0.5,
+            border: "none",
+            borderRadius: theme.borderRadius.lg,
+            cursor: "pointer",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            color: theme.palette.grey[800],
+            background: theme.palette.grey[200],
+            transition: "all 150ms ease",
+            "&:hover": {
+              background: theme.palette.interaction.selectedBackground,
+              color: theme.palette.blue.bright,
+            },
+          }}
+        >
+          <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+          Clear all
+        </Box>
+      )}
 
       {showDivider && (
         <Box
