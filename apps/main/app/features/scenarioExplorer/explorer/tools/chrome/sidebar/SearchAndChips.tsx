@@ -150,10 +150,10 @@ export default function SearchAndChips({
           }}
         >
           <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-          Filtered by: {THEME_LABEL_CONFIG[selectedTheme]?.label ?? selectedTheme}
+          Filtered by:{" "}
+          {THEME_LABEL_CONFIG[selectedTheme]?.label ?? selectedTheme}
         </Box>
       )}
-
 
       {selectedScenarios.length > 0 && (
         <Box

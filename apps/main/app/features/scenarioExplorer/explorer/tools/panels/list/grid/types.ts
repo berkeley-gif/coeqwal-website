@@ -38,6 +38,8 @@ export interface StrategyGridProps {
   onShowAlternativeBaselinesChange?: (value: boolean) => void
 
   // Layout
+  compact?: boolean
+  outcomesOnly?: boolean
   renderMode?: "all" | "headersOnly" | "contentOnly"
   /** When false, hides the key operations column (col 3) from the grid */
   showOperations?: boolean

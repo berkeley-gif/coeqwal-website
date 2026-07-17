@@ -52,7 +52,7 @@ const FLOW: FlowStep[] = [
     mode: "bar",
     icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Bar",
-    purpose: "Compare outcomes side by side"
+    purpose: "Compare outcomes side by side",
   },
   {
     mode: "radar",

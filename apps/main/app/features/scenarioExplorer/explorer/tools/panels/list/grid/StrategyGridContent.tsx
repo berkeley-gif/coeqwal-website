@@ -311,7 +311,12 @@ export function StrategyGridContent({
         rows.push(
           <Box
             key={`divider-${scenario.scenarioId}`}
-            sx={{ gridColumn: "1 / -1", my: theme.space.section.sm, height: "1px", backgroundColor: theme.palette.grey[300] }}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
           />,
         )
       }
@@ -319,7 +324,12 @@ export function StrategyGridContent({
         rows.push(
           <Box
             key={`theme-divider-${scenario.scenarioId}`}
-            sx={{ gridColumn: "1 / -1", my: theme.space.section.sm, height: "1px", backgroundColor: theme.palette.grey[300] }}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
           />,
         )
       }
@@ -327,7 +337,12 @@ export function StrategyGridContent({
         rows.push(
           <Box
             key={`icon-divider-${scenario.scenarioId}`}
-            sx={{ gridColumn: "1 / -1", my: theme.space.section.sm, height: "1px", backgroundColor: theme.palette.grey[300] }}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
           />,
         )
       }
@@ -335,7 +350,12 @@ export function StrategyGridContent({
         rows.push(
           <Box
             key={`theme-group-divider-${scenario.scenarioId}`}
-            sx={{ gridColumn: "1 / -1", my: theme.space.section.sm, height: "1px", backgroundColor: theme.palette.grey[300] }}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
           />,
         )
       }

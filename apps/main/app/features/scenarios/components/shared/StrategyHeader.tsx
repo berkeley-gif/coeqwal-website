@@ -65,7 +65,7 @@ function CompactDescription({
   const [expanded, setExpanded] = useState(false)
   const renderGlossaryText = useGlossaryRenderer(description)
 
-  if (disableTruncation) {    
+  if (disableTruncation) {
     return (
       <Box
         sx={{
@@ -188,43 +188,43 @@ export function StrategyHeader({
     const compactTitleLineHeight = 1.3
     const themeBadgeButtonSx = onThemeBadgeClick
       ? {
-        background: "none" as const,
-        border: "none",
-        padding: 0,
-        cursor: "pointer" as const,
-        textAlign: "left" as const,
-        minWidth: 0,
-        display: "inline-flex" as const,
-        alignItems: themeBadgeMultiline ? "flex-start" : "center",
-        flex: 1,
-        flexBasis: 0,
-        overflow: themeBadgeMultiline ? "visible" : "hidden",
-        flexShrink: 1,
-        "&:hover > span": { opacity: 0.8 },
-        "&:focus-visible": {
-          outline: `2px solid ${theme.palette.blue.bright}`,
-          outlineOffset: "2px",
-          borderRadius: "2px",
-        },
-      }
+          background: "none" as const,
+          border: "none",
+          padding: 0,
+          cursor: "pointer" as const,
+          textAlign: "left" as const,
+          minWidth: 0,
+          display: "inline-flex" as const,
+          alignItems: themeBadgeMultiline ? "flex-start" : "center",
+          flex: 1,
+          flexBasis: 0,
+          overflow: themeBadgeMultiline ? "visible" : "hidden",
+          flexShrink: 1,
+          "&:hover > span": { opacity: 0.8 },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.blue.bright}`,
+            outlineOffset: "2px",
+            borderRadius: "2px",
+          },
+        }
       : {
-        minWidth: 0,
-        display: "inline-flex" as const,
-        alignItems: themeBadgeMultiline ? "flex-start" : "center",
-        flex: 1,
-        flexBasis: 0,
-        overflow: themeBadgeMultiline ? "visible" : "hidden",
-        flexShrink: 1,
-      }
+          minWidth: 0,
+          display: "inline-flex" as const,
+          alignItems: themeBadgeMultiline ? "flex-start" : "center",
+          flex: 1,
+          flexBasis: 0,
+          overflow: themeBadgeMultiline ? "visible" : "hidden",
+          flexShrink: 1,
+        }
     const themeBadgeTextSx = themeBadgeMultiline
       ? { minWidth: 0, maxWidth: "100%" }
       : {
-        whiteSpace: "nowrap" as const,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        minWidth: 0,
-        flexShrink: 0,
-      }
+          whiteSpace: "nowrap" as const,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          minWidth: 0,
+          flexShrink: 0,
+        }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
@@ -258,9 +258,9 @@ export function StrategyHeader({
               onClick={
                 onThemeBadgeClick && strategy.theme
                   ? (e: React.MouseEvent) => {
-                    e.stopPropagation()
-                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                  }
+                      e.stopPropagation()
+                      onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                    }
                   : undefined
               }
               sx={themeBadgeButtonSx}
@@ -366,42 +366,42 @@ export function StrategyHeader({
             onClick={
               onThemeBadgeClick && strategy.theme
                 ? (e: React.MouseEvent) => {
-                  e.stopPropagation()
-                  onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                }
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
                 : undefined
             }
             sx={
               onThemeBadgeClick
                 ? {
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  minWidth: 0,
-                  display: "inline-flex",
-                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                  flex: 1,
-                  flexBasis: 0,
-                  overflow: themeBadgeMultiline ? "visible" : "hidden",
-                  flexShrink: 1,
-                  "&:hover > span": { opacity: 0.8 },
-                  "&:focus-visible": {
-                    outline: `2px solid ${theme.palette.blue.bright}`,
-                    outlineOffset: "2px",
-                    borderRadius: "2px",
-                  },
-                }
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    minWidth: 0,
+                    display: "inline-flex",
+                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                    flex: 1,
+                    flexBasis: 0,
+                    overflow: themeBadgeMultiline ? "visible" : "hidden",
+                    flexShrink: 1,
+                    "&:hover > span": { opacity: 0.8 },
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "2px",
+                      borderRadius: "2px",
+                    },
+                  }
                 : {
-                  minWidth: 0,
-                  display: "inline-flex",
-                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                  flex: 1,
-                  flexBasis: 0,
-                  overflow: themeBadgeMultiline ? "visible" : "hidden",
-                  flexShrink: 1,
-                }
+                    minWidth: 0,
+                    display: "inline-flex",
+                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                    flex: 1,
+                    flexBasis: 0,
+                    overflow: themeBadgeMultiline ? "visible" : "hidden",
+                    flexShrink: 1,
+                  }
             }
           >
             <ScenarioBadge
@@ -412,12 +412,12 @@ export function StrategyHeader({
                 themeBadgeMultiline
                   ? { minWidth: 0, maxWidth: "100%" }
                   : {
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    minWidth: 0,
-                    flexShrink: 0,
-                  }
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      minWidth: 0,
+                      flexShrink: 0,
+                    }
               }
             />
           </Box>

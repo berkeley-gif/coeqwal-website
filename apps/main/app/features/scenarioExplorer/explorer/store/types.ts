@@ -1,4 +1,10 @@
-export type ExploreMode = "list" | "bar" | "radar" | "equity" | "resilience" | "data"
+export type ExploreMode =
+  | "list"
+  | "bar"
+  | "radar"
+  | "equity"
+  | "resilience"
+  | "data"
 
 export type OutcomeDisplayMode = "average" | "bar" | "distribution"
 

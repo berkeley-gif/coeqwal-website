@@ -6,11 +6,9 @@ import {
   OperationsIconGroup,
   StrategyHeader,
   type ChartDataPoint,
-  type OutcomeName,
   type ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice } from "../../../../store"
-import { describeOutcomeLocations } from "../../../../../../../content/outcomes"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import type { LayoutMode } from "./StrategyGridHeader"
 import { InlineRowActions } from "./InlineRowActions"
@@ -26,8 +24,6 @@ interface NonCompactRowContentProps {
   layoutMode: LayoutMode
   showOperations?: boolean
   showDescription?: boolean
-  outcomeNames: OutcomeName[]
-  renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
   showThemeBadge?: boolean
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
@@ -63,7 +59,6 @@ export function NonCompactRowContent({
   const isListMode = useWorkspaceSlice((s) => s.exploreMode === "list")
   const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
 
-  const isWrappedMode = layoutMode === "wrapped"
   const isCompactMode = layoutMode === "compact"
   const isFullMode = layoutMode === "full"
 

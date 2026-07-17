@@ -12,11 +12,7 @@
 import { Box } from "@repo/ui/mui"
 import { useTabs } from "../../context/Tabs"
 
-export default function TabsShell({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function TabsShell({ children }: { children: React.ReactNode }) {
   const { state } = useTabs()
   const isExploreTab = state.activeTab === "explore"
 

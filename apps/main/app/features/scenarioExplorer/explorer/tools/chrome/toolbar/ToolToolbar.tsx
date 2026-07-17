@@ -44,7 +44,6 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
-  const listMapTourRef = useTourAnchor("list.toolbar.map")
   const listClimateTourRef = useTourAnchor("list.toolbar.climate")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
@@ -70,7 +69,7 @@ export default function ToolToolbar({
   // Distribution) is intentionally deactivated for the current demo
   // build. Flip the `false &&` guard below to bring it back.
 
-  const viewControls = (
+  const viewControls =
     exploreMode === "list" ? null : (
       <>
         <Box
@@ -95,10 +94,7 @@ export default function ToolToolbar({
           ) : null}
         </Box>
 
-        <Box
-          ref={exploreMode === "list" ? listMapTourRef : undefined}
-          sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Typography
             variant="dashboard"
             sx={{
@@ -187,7 +183,6 @@ export default function ToolToolbar({
         )}
       </>
     )
-  )
 
   if (gridAligned) {
     const SM = 600

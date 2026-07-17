@@ -26,13 +26,20 @@ export function Header() {
   // Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
 
-  const { isPastHero: rawIsPastHero, isNavigatingToTabs, setIsNavigatingToTabs } = useTabs()
+  const {
+    isPastHero: rawIsPastHero,
+    isNavigatingToTabs,
+    setIsNavigatingToTabs,
+  } = useTabs()
 
   // On any route other than "/", there's no hero to scroll past.
   // Default to the "past hero" appearance (solid nav) immediately.
   const isHomePage = pathname === "/"
   const isTabsPage =
-    pathname === "/learn" || pathname === "/explore" || pathname === "/share" || isNavigatingToTabs
+    pathname === "/learn" ||
+    pathname === "/explore" ||
+    pathname === "/share" ||
+    isNavigatingToTabs
 
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real

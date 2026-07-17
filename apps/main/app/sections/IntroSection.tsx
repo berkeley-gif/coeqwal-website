@@ -7,9 +7,8 @@
  * headline overlay.
  */
 
-import { Suspense, useRef } from "react"
+import { useRef } from "react"
 import { Box } from "@repo/ui/mui"
-import { ErrorBoundary } from "@repo/utils"
 
 import VideoHero from "./intro/VideoHero"
 import type { VideoSource } from "./intro/VideoHero"
@@ -40,7 +39,6 @@ const IntroSection = () => {
 
       <AboutCoeqwalPanel />
       <WaterThemesPanel />
-
     </Box>
   )
 }

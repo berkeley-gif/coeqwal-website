@@ -102,7 +102,7 @@ export default function TabPanels() {
         marginTop: -1,
         pointerEvents: isMapTab ? "none" : "auto",
         ...(activeTab === "explore" && {
-          height: "100%"
+          height: "100%",
         }),
       }}
     >
@@ -118,7 +118,7 @@ export default function TabPanels() {
             position: "relative",
             pointerEvents: isMapTab ? "none" : "auto",
             ...(activeTab === "explore" && {
-              height: "100%"
+              height: "100%",
             }),
           }}
         >
@@ -138,7 +138,11 @@ export default function TabPanels() {
         }),
       }}
     >
-      {activeTab === "explore" ? panelContent : <AutoHeight>{panelContent}</AutoHeight>}
+      {activeTab === "explore" ? (
+        panelContent
+      ) : (
+        <AutoHeight>{panelContent}</AutoHeight>
+      )}
     </div>
   )
 }

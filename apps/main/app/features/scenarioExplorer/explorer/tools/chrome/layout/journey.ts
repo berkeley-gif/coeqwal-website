@@ -28,10 +28,12 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   },
   bar: {
     mode: "bar",
-    purpose: "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
+    purpose:
+      "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
     nextMode: "radar",
     nextLabel: "Compare chosen scenarios on Radar chart",
-    nextRationale: "See your shortlist scenarios side by side on all outcomes at once.",
+    nextRationale:
+      "See your shortlist scenarios side by side on all outcomes at once.",
   },
   radar: {
     mode: "radar",

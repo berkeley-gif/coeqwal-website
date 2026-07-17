@@ -213,7 +213,12 @@ function WaterThemesPanelContent({
                   sx={{ flex: 1, height: "200px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
-                  <CircularArrowButton decorative size={50} rotation="-90deg" color={theme.palette.brand.panelLight}/>
+                  <CircularArrowButton
+                    decorative
+                    size={50}
+                    rotation="-90deg"
+                    color={theme.palette.brand.panelLight}
+                  />
                 )}
               </React.Fragment>
             )

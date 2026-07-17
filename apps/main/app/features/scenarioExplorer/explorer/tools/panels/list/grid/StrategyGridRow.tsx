@@ -11,7 +11,11 @@
 
 import React, { useCallback } from "react"
 import { Box, useTheme, Checkbox } from "@repo/ui/mui"
-import type { ChartDataPoint, OutcomeName, ScenarioForDisplay } from "../../../../../../scenarios/components/shared"
+import type {
+  ChartDataPoint,
+  OutcomeName,
+  ScenarioForDisplay,
+} from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice, useListSlice } from "../../../../store"
 import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"
@@ -235,9 +239,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           tourListFirstItem && isListMode ? listRowShareTourRef : undefined
         }
         operationsRowTourRef={
-          tourListFirstItem && isListMode
-            ? listRowOperationsTourRef
-            : undefined
+          tourListFirstItem && isListMode ? listRowOperationsTourRef : undefined
         }
       />
     </Box>

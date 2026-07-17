@@ -149,25 +149,25 @@ export function useTabs() {
   if (!ctx) {
     return {
       state: initialState,
-      dispatch: () => { },
+      dispatch: () => {},
       tabsRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       subNavRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       panelRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       hasEnteredTabsFirstTime: false,
-      setHasEnteredTabsFirstTime: () => { },
+      setHasEnteredTabsFirstTime: () => {},
       scrollIntentRef: { current: "none" as const } as React.RefObject<
         "none" | "user" | "sync"
       >,
       isInTabsArea: false,
-      setIsInTabsArea: () => { },
+      setIsInTabsArea: () => {},
       isHeaderDark: false,
-      setIsHeaderDark: () => { },
+      setIsHeaderDark: () => {},
       isPastHero: false,
-      setIsPastHero: () => { },
+      setIsPastHero: () => {},
       descriptionsExpanded: true,
-      setDescriptionsExpanded: () => { },
+      setDescriptionsExpanded: () => {},
       isNavigatingToTabs: false,
-      setIsNavigatingToTabs: () => { },
+      setIsNavigatingToTabs: () => {},
     }
   }
 
