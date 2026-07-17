@@ -13,7 +13,7 @@
  * with its rows.
  */
 
-import React, { Fragment, useMemo } from "react"
+import React, { Fragment, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
@@ -29,9 +29,15 @@ import { useTierTooltipState } from "../../../../../tooltips/useTierTooltipState
 import { TierTooltipPortal } from "../../../../../tooltips/TierTooltipPortal"
 import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
+import { captureBarChartRow } from "../list/grid/captureBarChartRow"
+import { InlineRowActions } from "../list/grid/InlineRowActions"
+import { stageShareItem } from "../../../share/stage"
 
 /** Fixed column width so header cells and every card's glyph cells line up. */
 const OUTCOME_COLUMN_WIDTH = 90
+
+/** Glyph size forwarded to the off-screen share capture. List derives this from container width; Bar's columns are fixed-width, so one constant is enough. */
+const SHARE_GLYPH_SIZE = 60
 
 function ThemeGroupLabel({ themeKey }: { themeKey: ScenarioTheme }) {
     const theme = useTheme()
@@ -136,10 +142,19 @@ function BarOutcomeHeaderCell({
 export default function BarPanel() {
     const theme = useTheme()
     const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
-    const { sortBy, sortDirection, setSortBy, setSortDirection } =
-        useListSlice()
+    const {
+        sortBy,
+        sortDirection,
+        setSortBy,
+        setSortDirection,
+        pinnedScenarioIds,
+        togglePinnedScenario,
+    } = useListSlice()
+    const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
+    const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+    const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
 
-    const { showOutcomeOnMap, isOutcomeActive, isMapVisible } = useOutcomeMapAction()
+    const { showOutcomeOnMap, isMapVisible } = useOutcomeMapAction()
 
     const { allChartData, outcomeNames, allScoreData, isLoading, error } =
         useResolvedScenarioTiers()
@@ -161,14 +176,48 @@ export default function BarPanel() {
         setSortDirection(direction)
     }
 
+    const handleShare = useCallback(
+        (scenario: (typeof cardScenarios)[number]) => () =>
+            stageShareItem({
+                capture: () =>
+                    captureBarChartRow({
+                        outcomeNames,
+                        chartData: allChartData[scenario.scenarioId] ?? {},
+                        viewMode: outcomeDisplayMode,
+                        theme,
+                        glyphSize: SHARE_GLYPH_SIZE,
+                    }),
+                buildItem: (captured) => ({
+                    id: crypto.randomUUID(),
+                    type: "barChart",
+                    scenarioId: scenario.scenarioId,
+                    viewMode: outcomeDisplayMode,
+                    hydroclimate,
+                    cachedChartData: (allChartData[scenario.scenarioId] ?? {}) as Record<string, unknown>,
+                    cachedSvg: captured?.svg,
+                    cachedImageDataUrl: captured?.dataUrl,
+                }),
+                addItem: addShareItem,
+                errorLabel: "BarPanel.handleShare",
+            }),
+        [outcomeNames, allChartData, outcomeDisplayMode, theme, hydroclimate, addShareItem],
+    )
+
+
     const selectedSet = useMemo(
         () => new Set(selectedScenarios),
         [selectedScenarios],
     )
-    const cardScenarios = useMemo(
-        () => orderedScenarios.filter((s) => selectedSet.has(s.scenarioId)),
-        [orderedScenarios, selectedSet],
+    const pinnedSet = useMemo(
+        () => new Set(pinnedScenarioIds),
+        [pinnedScenarioIds],
     )
+    const cardScenarios = useMemo(() => {
+        const selected = orderedScenarios.filter((s) => selectedSet.has(s.scenarioId))
+        const pinned = selected.filter((s) => pinnedSet.has(s.scenarioId))
+        const unpinned = selected.filter((s) => !pinnedSet.has(s.scenarioId))
+        return [...pinned, ...unpinned]
+    }, [orderedScenarios, selectedSet, pinnedSet])
 
     if (isLoading) {
         return (
@@ -300,6 +349,17 @@ export default function BarPanel() {
                                     showThemeBadge={false}
                                     descriptionMaxWidth="80ch"
                                     disableTruncation
+                                    inlineActions={
+                                        <InlineRowActions
+                                            scenarioId={scenario.scenarioId}
+                                            scenarioLabel={scenario.label}
+                                            displayMode={outcomeDisplayMode}
+                                            isPinned={pinnedScenarioIds.includes(scenario.scenarioId)}
+                                            accentColor={theme.palette.blue.bright}
+                                            onShare={handleShare(scenario)}
+                                            togglePinnedScenario={togglePinnedScenario}
+                                        />
+                                    }
                                 />
                                 <Box
                                     sx={{
