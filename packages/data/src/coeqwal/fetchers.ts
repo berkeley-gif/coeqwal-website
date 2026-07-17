@@ -39,6 +39,12 @@ import type {
   DeltaMonthlyResponse,
   TierLocationAssignmentsResponse,
   TierLocationAssignmentsBatchResponse,
+  ReservoirStorageDidResponse,
+  ReservoirStorageDidOptions,
+  RiverFlowsDidResponse,
+  RiverFlowsDidOptions,
+  DeltaSalinityDidResponse,
+  DeltaSalinityDidOptions,
 } from "./types"
 
 /**
@@ -877,5 +883,70 @@ export async function fetchDeltaMonthly(
   return apiFetcher<DeltaMonthlyResponse>(
     ENDPOINTS.deltaMonthly(scenarioId, category),
     { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+// ============================================================================
+// Data in Depth (generic data_in_depth_* tables)
+// ============================================================================
+
+/**
+ * Fetch April/September reservoir storage (raw values + live-computed stats)
+ * for one or more scenarios. Larger timeout: payload scales with
+ * scenarios × subjects × periods × units × included facets.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchReservoirStorageDataInDepth(
+  scenarios: string[],
+  options: ReservoirStorageDidOptions = {},
+): Promise<ReservoirStorageDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<ReservoirStorageDidResponse>(
+    ENDPOINTS.reservoirStorageDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/**
+ * Fetch annual water-year river flow (raw TAF + live-computed stats) for one
+ * or more scenarios. Annual + TAF only.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchRiverFlowsDataInDepth(
+  scenarios: string[],
+  options: RiverFlowsDidOptions = {},
+): Promise<RiverFlowsDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<RiverFlowsDidResponse>(
+    ENDPOINTS.riverFlowsDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/**
+ * Fetch April/September Delta X2 position (raw km + live-computed stats) for
+ * one or more scenarios. april/sept periods, km unit only.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchDeltaSalinityDataInDepth(
+  scenarios: string[],
+  options: DeltaSalinityDidOptions = {},
+): Promise<DeltaSalinityDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<DeltaSalinityDidResponse>(
+    ENDPOINTS.deltaSalinityDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
   )
 }
