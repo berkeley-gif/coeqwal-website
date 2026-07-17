@@ -13,6 +13,7 @@
     "format": "prettier . --write --ignore-unknown --cache",
     "format:check": "prettier . --check --ignore-unknown --cache",
     "verify:static-export": "node .github/scripts/verify-static-export.mjs apps/main/out",
+    "test:ci-scripts": "node --test \".github/scripts/*.test.mjs\"",
     "e2e": "pnpm --filter main e2e",
     "serve": "pnpm --filter main build && pnpm dlx serve apps/main/out/",
     "clean:turbo": "rm -rf .turbo/cache",

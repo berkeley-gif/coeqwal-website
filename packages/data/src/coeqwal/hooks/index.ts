@@ -59,5 +59,10 @@ export {
 } from "./useRefugeStatistics"
 export { useChannelsList } from "./useEnvFlowStatistics"
 export { useDeltaMonthly } from "./useDeltaStatistics"
+export {
+  useReservoirStorageDataInDepth,
+  useRiverFlowsDataInDepth,
+  useDeltaSalinityDataInDepth,
+} from "./useDataInDepth"
 export { useTierLocationAssignments } from "./useTierLocationAssignments"
 export { useTierLocationAssignmentsBatch } from "./useTierLocationAssignmentsBatch"

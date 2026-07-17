@@ -15,8 +15,9 @@ name: CI
 #     and do NOT add it to `gate.needs`. It reports its own status without
 #     gating merges.
 #
-# Required today: static-checks (format:check + lint + check-types) and build
-# (static export of the main app + verify + artifact upload). build was
+# Required today: static-checks (format:check + lint + check-types + node
+# --test over .github/scripts) and build (static export of the main app +
+# verify + artifact upload). build was
 # promoted from advisory once the Turbo build env was fully declared
 # (turbo.json globalEnv/build.env) and Amplify parity was proven - the CI
 # build job and the Amplify deploy were green from the same dev commit.
@@ -75,6 +76,10 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm check-types
+      # Guards the CI helper scripts themselves, notably that the notify
+      # workflow's compute-affected-apps.mjs survives a paused (fully
+      # commented-out) or missing CODEOWNERS.
+      - run: pnpm test:ci-scripts
 
   build:
     name: build

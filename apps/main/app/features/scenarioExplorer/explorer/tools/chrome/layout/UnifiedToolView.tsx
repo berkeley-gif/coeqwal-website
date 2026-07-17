@@ -14,7 +14,7 @@
 import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
-import { useWorkspaceSlice } from "../../../store"
+import { useWorkspaceSlice, isMapPairedMode } from "../../../store"
 import { mapActions } from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
@@ -42,13 +42,17 @@ export default function UnifiedToolView({
 
   const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
+  // The map panel opens only for tools that pair with the map: Data in
+  // depth ignores the shared showMap flag entirely (no map, full width).
+  const mapActive = showMap && isMapPairedMode(exploreMode)
+
   const sidebarWidth = showKeyOperations
     ? SIDEBAR_WIDTH_EXPANDED
     : SIDEBAR_WIDTH_COLLAPSED
 
-  // Keep map mode + panel width in sync with showMap
+  // Keep map mode + panel width in sync with the effective map state
   useEffect(() => {
-    if (showMap) {
+    if (mapActive) {
       mapActions.setMapMode("explore")
       mapActions.setExplorePanelWidth(100 - MAP_WIDTH_PERCENT)
     } else {
@@ -56,7 +60,7 @@ export default function UnifiedToolView({
       mapActions.clearOutcomeVisualization()
       mapActions.setExplorePanelWidth(50)
     }
-  }, [showMap])
+  }, [mapActive])
 
   useEffect(() => {
     return () => {
@@ -137,7 +141,7 @@ export default function UnifiedToolView({
       <Box
         sx={{
           position: "relative",
-          width: showMap ? `${MAP_WIDTH_PERCENT}%` : 0,
+          width: mapActive ? `${MAP_WIDTH_PERCENT}%` : 0,
           flexShrink: 0,
           height: "100%",
           pointerEvents: "none",
@@ -145,7 +149,7 @@ export default function UnifiedToolView({
           transition: "width 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
         }}
       >
-        {showMap && mapHydroBadge && (
+        {mapActive && mapHydroBadge && (
           <Box
             sx={{
               position: "absolute",
