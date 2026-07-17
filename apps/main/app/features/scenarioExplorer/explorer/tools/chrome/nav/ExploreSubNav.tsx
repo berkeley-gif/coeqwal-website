@@ -16,6 +16,7 @@ import {
   useTheme,
   alpha,
   ViewListIcon,
+  BarChartIcon,
   AdjustIcon,
   AppsIcon,
   GridOnIcon,
@@ -46,6 +47,12 @@ const FLOW: FlowStep[] = [
     icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
     label: "List",
     purpose: "Shortlist scenarios",
+  },
+  {
+    mode: "bar",
+    icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Bar",
+    purpose: "Compare outcomes side by side"
   },
   {
     mode: "radar",

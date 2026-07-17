@@ -248,7 +248,7 @@ export function NonCompactRowContent({
               alignSelf: "start",
             }}
           >
-            {strategyHeaderBlock(false)}
+            {strategyHeaderBlock(true)}
           </Box>
 
           {/* Column 3: Key operations */}

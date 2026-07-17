@@ -260,6 +260,7 @@ export default function ListView({
     showAlternativeBaselines,
     showOperations: showKeyOperations,
     hideColumnTitles: true,
+    hideOutcomes: true,
     groupByTheme,
     scenariosInContiguousThemeOrder,
     compact: false,
