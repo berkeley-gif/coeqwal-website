@@ -1,10 +1,6 @@
 import React, { useRef, useEffect, useCallback, useMemo, useState } from "react"
-<<<<<<< Updated upstream
-import * as d3 from "d3"
-=======
 import { select, group, scaleOrdinal, easeCubicOut } from "d3"
 import type { Selection } from "d3"
->>>>>>> Stashed changes
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
 // ============================================================================
@@ -97,6 +93,18 @@ const DEFAULT_TIER_COLORS = {
   "Tier 3": "#f2944f",
   "Tier 4": "#ee5d32",
 }
+const CATEGORY_COLORS = [
+  "#4e79a7", // Blue
+  "#f28e2b", // Orange
+  "#e15759", // Red
+  "#76b7b2", // Cyan
+  "#59a14f", // Green
+  "#edc948", // Yellow
+  "#b07aa1", // Purple
+  "#ff9da7", // Pink
+  "#9c755f", // Brown
+  "#bab0ac", // Gray
+]
 
 // ============================================================================
 // Calculation Functions
@@ -313,17 +321,7 @@ const calculateTierPositions = (
     }
   >()
 
-<<<<<<< Updated upstream
-  const grouped = d3.group(
-    objectives,
-    (d) => d.tier,
-    (d) => d.category,
-  )
-
-  tiers.forEach((tier, tierIndex) => {
-=======
   levelKeys.forEach((levelKey, levelIndex) => {
->>>>>>> Stashed changes
     categories.forEach((category) => {
       const cellObjectives = grouped.get(levelKey)?.get(category) || []
       if (cellObjectives.length === 0) {
@@ -496,10 +494,10 @@ const drawTierGrid = (
             onTierCategoryClick(layout.category, tier, event),
           )
           .on("mouseover", function () {
-            d3.select(this).attr("fill", "rgba(0, 0, 0, 0.1)")
+            select(this).attr("fill", "rgba(0, 0, 0, 0.1)")
           })
           .on("mouseout", function () {
-            d3.select(this).attr("fill", "transparent")
+            select(this).attr("fill", "transparent")
           })
       })
     })
@@ -703,7 +701,7 @@ const drawMeanLines = (
 }
 
 const drawCategoryLabels = (
-  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  svg: Selection<SVGSVGElement, unknown, null, undefined>,
   height: number,
   categoryLayouts: CategoryLayout[],
   onCategoryClick?: (category: string) => void,
@@ -741,7 +739,7 @@ const drawCategoryLabels = (
       .attr("class", "category-label-group")
 
     // Add background rectangle if clickable
-    let backgroundRect: d3.Selection<
+    let backgroundRect: Selection<
       SVGRectElement,
       unknown,
       null,
@@ -791,10 +789,10 @@ const drawCategoryLabels = (
       backgroundRect
         .on("click", () => onCategoryClick(layout.category))
         .on("mouseover", function () {
-          d3.select(this).attr("fill", "#e3f2fd").attr("stroke", "#1976d2")
+          select(this).attr("fill", "#e3f2fd").attr("stroke", "#1976d2")
         })
         .on("mouseout", function () {
-          d3.select(this).attr("fill", "#f5f5f5").attr("stroke", "#ddd")
+          select(this).attr("fill", "#f5f5f5").attr("stroke", "#ddd")
         })
     }
   })
@@ -829,7 +827,7 @@ export default function TierGrid({
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const svgSelection = useRef<d3.Selection<
+  const svgSelection = useRef<Selection<
     SVGSVGElement,
     unknown,
     null,
@@ -866,15 +864,12 @@ export default function TierGrid({
 
   const getSvgSelection = useCallback(() => {
     if (!svgSelection.current && svgRef.current) {
-      svgSelection.current = d3.select(svgRef.current)
+      svgSelection.current = select(svgRef.current)
     }
     return svgSelection.current
   }, [])
 
-  const categoryColorScale = useMemo(
-    () => d3.scaleOrdinal(d3.schemeTableau10),
-    [],
-  )
+  const categoryColorScale = useMemo(() => scaleOrdinal(CATEGORY_COLORS), [])
 
   const selectedOutcomeLocationCodes = useMemo(
     () =>
@@ -1043,7 +1038,7 @@ export default function TierGrid({
       allShapes
         .transition()
         .duration(enterDuration)
-        .ease(d3.easeCubicOut)
+        .ease(easeCubicOut)
         .attr("d", getShapePath)
         .attr("fill", (d) =>
           getFillColor(
@@ -1091,7 +1086,7 @@ export default function TierGrid({
               showMapView &&
               !selectedOutcomeLocationCodes.has(String(d.id))
             ) {
-              d3.select(this).attr("stroke", "#333").attr("stroke-width", 2)
+              select(this).attr("stroke", "#333").attr("stroke-width", 2)
             }
 
             // Show tooltip
@@ -1184,7 +1179,7 @@ export default function TierGrid({
           })
           .on("mouseout", function (this: SVGPathElement, _event, d) {
             if (!selectedOutcomeLocationCodes.has(String(d.id))) {
-              d3.select(this).attr("stroke-width", 0)
+              select(this).attr("stroke-width", 0)
             }
 
             // Hide tooltip
