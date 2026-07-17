@@ -71,120 +71,122 @@ export default function ToolToolbar({
   // build. Flip the `false &&` guard below to bring it back.
 
   const viewControls = (
-    <>
-      <Box
-        sx={{
-          display: "contents",
-        }}
-      >
-        {/* Outcome view toggle (Average / Bar / Distribution) hidden
+    exploreMode === "list" ? null : (
+      <>
+        <Box
+          sx={{
+            display: "contents",
+          }}
+        >
+          {/* Outcome view toggle (Average / Bar / Distribution) hidden
             . The list view reverts to its bar-chart
             default. The glyph click-through to map layers is
             unaffected. */}
-        {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
-        {false && exploreMode === "list" ? (
-          <>
-            <VerticalDivider />
-            <OutcomeViewToggle
-              value={outcomeDisplayMode}
-              onChange={setOutcomeDisplayMode}
-            />
-            <VerticalDivider />
-          </>
-        ) : null}
-      </Box>
+          {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
+          {false && exploreMode === "list" ? (
+            <>
+              <VerticalDivider />
+              <OutcomeViewToggle
+                value={outcomeDisplayMode}
+                onChange={setOutcomeDisplayMode}
+              />
+              <VerticalDivider />
+            </>
+          ) : null}
+        </Box>
 
-      <Box
-        ref={exploreMode === "list" ? listMapTourRef : undefined}
-        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-      >
-        <Typography
-          variant="dashboard"
-          sx={{
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            whiteSpace: "nowrap",
-          }}
+        <Box
+          ref={exploreMode === "list" ? listMapTourRef : undefined}
+          sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
         >
-          Show map
-        </Typography>
-        <Switch
-          size="small"
-          checked={showMap}
-          onChange={(_, checked) => setShowMap(checked)}
-          sx={{ ml: -0.5 }}
-        />
-      </Box>
-
-      <VerticalDivider />
-
-      <Box
-        component="span"
-        sx={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 0.5,
-          color: "grey.400",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      >
-        <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
-        <Typography
-          variant="dashboard"
-          sx={{
-            fontWeight: 500,
-            whiteSpace: "nowrap",
-            color: "inherit",
-          }}
-        >
-          Choose locations to track
-        </Typography>
-      </Box>
-
-      {showToolbarHydroclimateChooser && (
-        <>
-          <VerticalDivider />
-
-          <Box
-            ref={climateMergedRef}
+          <Typography
+            variant="dashboard"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.75,
-              flexWrap: "wrap",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+              whiteSpace: "nowrap",
             }}
           >
-            <Typography
-              variant="dashboard"
+            Show map
+          </Typography>
+          <Switch
+            size="small"
+            checked={showMap}
+            onChange={(_, checked) => setShowMap(checked)}
+            sx={{ ml: -0.5 }}
+          />
+        </Box>
+
+        <VerticalDivider />
+
+        <Box
+          component="span"
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "grey.400",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              color: "inherit",
+            }}
+          >
+            Choose locations to track
+          </Typography>
+        </Box>
+
+        {showToolbarHydroclimateChooser && (
+          <>
+            <VerticalDivider />
+
+            <Box
+              ref={climateMergedRef}
               sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                flexWrap: "wrap",
               }}
             >
-              View by climate
-            </Typography>
-            <HydroclimateChooser
-              layout="horizontal"
-              showTitle={false}
-              showLabels={false}
-              hideDisabled
-              iconSize="28px"
-              iconFontSize="1rem"
-              value={hydroclimate}
-              onChange={setHydroclimate}
-            />
-            {!showMap && hydroBadge && (
-              <HydroclimateBadge
-                title={hydroBadge.title}
-                accentColor={hydroBadge.accentColor}
+              <Typography
+                variant="dashboard"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                View by climate
+              </Typography>
+              <HydroclimateChooser
+                layout="horizontal"
+                showTitle={false}
+                showLabels={false}
+                hideDisabled
+                iconSize="28px"
+                iconFontSize="1rem"
+                value={hydroclimate}
+                onChange={setHydroclimate}
               />
-            )}
-          </Box>
-        </>
-      )}
-    </>
+              {!showMap && hydroBadge && (
+                <HydroclimateBadge
+                  title={hydroBadge.title}
+                  accentColor={hydroBadge.accentColor}
+                />
+              )}
+            </Box>
+          </>
+        )}
+      </>
+    )
   )
 
   if (gridAligned) {
