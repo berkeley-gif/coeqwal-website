@@ -5,6 +5,7 @@ import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import { SimpleButton } from "../../chrome/actions/SimpleButton"
 import { mapActions } from "../../../../../map/store"
+import { useMap } from "@repo/map"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
 import type { ExploreShareCapture } from "../../../useExploreShareCapture"
 
@@ -15,11 +16,22 @@ type EquityChartControlsProps = {
 export default function EquityChartControls({
   share,
 }: EquityChartControlsProps) {
-  const { showEquityComparison, setShowEquityComparison } = useEquitySlice()
+  const {
+    showEquityComparison,
+    setShowEquityComparison,
+    yAxisMode,
+    setYAxisMode,
+  } = useEquitySlice()
   const { equityFocusScenario } = useWorkspaceSlice()
+  const { setMotionChildren } = useMap()
 
   const canSnapshot = equityFocusScenario !== null
   const { onSaveSnapshot } = share.chartControlsProps
+
+  const handleClearSelection = () => {
+    mapActions.clearLocationHighlights()
+    setMotionChildren?.(null)
+  }
 
   return (
     <ChartControlsBar>
@@ -28,9 +40,16 @@ export default function EquityChartControls({
         active={showEquityComparison}
         onClick={() => setShowEquityComparison(!showEquityComparison)}
       />
+      <InlineToggleChip
+        label="Continuous Tiers"
+        active={yAxisMode === "continuous"}
+        onClick={() =>
+          setYAxisMode(yAxisMode === "continuous" ? "discrete" : "continuous")
+        }
+      />
       <SimpleButton
         label="Clear Map Selection"
-        onClick={() => mapActions.clearLocationHighlights()}
+        onClick={handleClearSelection}
       />
       <SaveSnapshotButton disabled={!canSnapshot} onClick={onSaveSnapshot} />
     </ChartControlsBar>

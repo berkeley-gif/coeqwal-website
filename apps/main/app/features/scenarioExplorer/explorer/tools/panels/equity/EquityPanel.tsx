@@ -185,14 +185,14 @@ export default function EquityPanel({
   ) => void
 }) {
   const theme = useTheme()
-  const { mapRef, setMotionChildren } = useMap()
+  const { mapRef, setMotionChildren, motionChildren } = useMap()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // The Distribution (equity) tool uses its own focus field rather
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
-  const { showEquityComparison } = useEquitySlice()
+  const { showEquityComparison, yAxisMode } = useEquitySlice()
 
   const { objectives, categories } = useEquityObjectives({
     scenarioId: equityFocusScenario,
@@ -202,6 +202,7 @@ export default function EquityPanel({
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]
   >([])
+
   const [hasShownMapHint, setHasShownMapHint] = useState(false)
   const [showMapHintSnackbar, setShowMapHintSnackbar] = useState(false)
   const [contextMenu, setContextMenu] = useState<{
@@ -275,13 +276,35 @@ export default function EquityPanel({
         })
       } else {
         // Direct selection in non-comparison mode
-        const tierCategoryObjectives = objectives.filter(
-          (obj) => obj.category === categoryName && obj.tier === tier,
-        )
+        let tierCategoryObjectives: TierGridProps["objectives"]
+
+        if (yAxisMode === "continuous") {
+          // Filter by continuous range (1.0-5.0)
+          // Tier 1 = 1.0-2.0, Tier 2 = 2.0-3.0, Tier 3 = 3.0-4.0, Tier 4 = 4.0-5.0
+          const tierNum = parseInt(tier.replace("Tier ", ""))
+          const rangeStart = tierNum
+          const rangeEnd = tierNum + 1
+
+          tierCategoryObjectives = objectives.filter((obj) => {
+            if (obj.category !== categoryName) return false
+            if (obj.tierContinuous === undefined) return false
+
+            // All tiers use ranges [start, end)
+            return (
+              obj.tierContinuous >= rangeStart && obj.tierContinuous < rangeEnd
+            )
+          })
+        } else {
+          // Filter by discrete tier
+          tierCategoryObjectives = objectives.filter(
+            (obj) => obj.category === categoryName && obj.tier === tier,
+          )
+        }
+
         setSelectedObjectives(tierCategoryObjectives)
       }
     },
-    [objectives, showEquityComparison],
+    [objectives, showEquityComparison, yAxisMode],
   )
 
   const handleContextMenuSelect = (
@@ -290,10 +313,34 @@ export default function EquityPanel({
     if (!contextMenu) return
 
     const { category, tier } = contextMenu
-    let filtered = objectives.filter(
-      (obj) => obj.category === category && obj.tier === tier,
-    )
 
+    // First filter by category and tier (continuous or discrete)
+    let filtered: TierGridProps["objectives"]
+
+    if (yAxisMode === "continuous") {
+      // Filter by continuous range (1.0-5.0)
+      // Tier 1 = 1.0-2.0, Tier 2 = 2.0-3.0, Tier 3 = 3.0-4.0, Tier 4 = 4.0-5.0
+      const tierNum = parseInt(tier.replace("Tier ", ""))
+      const rangeStart = tierNum
+      const rangeEnd = tierNum + 1
+
+      filtered = objectives.filter((obj) => {
+        if (obj.category !== category) return false
+        if (obj.tierContinuous === undefined) return false
+
+        // All tiers use ranges [start, end)
+        return (
+          obj.tierContinuous >= rangeStart && obj.tierContinuous < rangeEnd
+        )
+      })
+    } else {
+      // Filter by discrete tier
+      filtered = objectives.filter(
+        (obj) => obj.category === category && obj.tier === tier,
+      )
+    }
+
+    // Then apply comparison filter
     if (filter === "improved") {
       filtered = filtered.filter((obj) => {
         const currentTier = parseInt(obj.tier.replace("Tier ", ""))
@@ -671,6 +718,21 @@ export default function EquityPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showMap])
 
+  // Watch for external map marker clearing (from Clear button)
+  const prevMotionChildrenRef = useRef(motionChildren)
+  useEffect(() => {
+    const prev = prevMotionChildrenRef.current
+    prevMotionChildrenRef.current = motionChildren
+    // If motion children were cleared externally and we have selected objectives
+    if (
+      prev !== null &&
+      motionChildren === null &&
+      selectedObjectives.length > 0
+    ) {
+      setSelectedObjectives([])
+    }
+  }, [motionChildren, selectedObjectives.length])
+
   // Cleanup markers on unmount
   useEffect(() => {
     return () => {
@@ -722,6 +784,7 @@ export default function EquityPanel({
             tiers={TIERS}
             colorMode="tier"
             showComparison={showEquityComparison}
+            yAxisMode={yAxisMode}
             selectedObjectives={selectedObjectives}
             onObjectiveClick={handleObjectiveClick}
             onCategoryClick={handleCategoryClick}

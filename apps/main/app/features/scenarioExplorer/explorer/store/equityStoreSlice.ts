@@ -11,11 +11,13 @@ export interface EquityState {
   showEquityComparison: boolean
   /** Outcome codes included in equity share snapshots */
   equityVisibleOutcomes: string[]
+  yAxisMode: "discrete" | "continuous"
 }
 
 export interface EquityActions {
   setShowEquityComparison: (show: boolean) => void
   setEquityVisibleOutcomes: (codes: string[]) => void
+  setYAxisMode: (mode: "discrete" | "continuous") => void
 }
 
 export type EquitySlice = EquityState & EquityActions
@@ -23,6 +25,7 @@ export type EquitySlice = EquityState & EquityActions
 export const equityInitialState: EquityState = {
   showEquityComparison: false,
   equityVisibleOutcomes: [...OUTCOME_CODE_ORDER],
+  yAxisMode: "discrete",
 }
 
 type ImmerSet = (fn: (state: EquitySlice) => void) => void
@@ -42,6 +45,11 @@ export function createEquitySlice(
     setEquityVisibleOutcomes: (codes) =>
       set((state) => {
         state.equityVisibleOutcomes = codes
+      }),
+
+    setYAxisMode: (mode) =>
+      set((state) => {
+        state.yAxisMode = mode
       }),
   }
 }

@@ -120,6 +120,7 @@ export const RADAR_PERSIST_KEYS = [
 export const EQUITY_PERSIST_KEYS = [
   "showEquityComparison",
   "equityVisibleOutcomes",
+  "yAxisMode",
 ] as const satisfies readonly (keyof EquityState)[]
 
 /**
@@ -234,6 +235,7 @@ const RADAR_ACTION_KEYS = [
 const EQUITY_ACTION_KEYS = [
   "setShowEquityComparison",
   "setEquityVisibleOutcomes",
+  "setYAxisMode",
 ] as const satisfies readonly (keyof EquitySlice)[]
 
 const RESILIENCE_ACTION_KEYS = [
