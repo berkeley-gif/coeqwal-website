@@ -137,6 +137,7 @@ export interface TierLocationAssignment {
   location_type: string
   tier_level: number
   tier_value: number | null
+  tier_continuous?: number
 }
 
 export interface TierLocationAssignmentsResponse {
