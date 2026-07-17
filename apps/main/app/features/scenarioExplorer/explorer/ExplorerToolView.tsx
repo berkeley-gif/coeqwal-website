@@ -10,8 +10,11 @@
 import { useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
-import { useWorkspaceSlice } from "./store"
+import { useWorkspaceSlice, useDataSlice } from "./store"
 import UnifiedToolView from "./tools/chrome/layout/UnifiedToolView"
+import CollapsedRailStrip, {
+  COLLAPSED_RAIL_WIDTH,
+} from "./tools/chrome/layout/CollapsedRailStrip"
 import ToolToolbar from "./tools/chrome/toolbar/ToolToolbar"
 import KeyboardShortcuts from "./tools/chrome/overlays/KeyboardShortcuts"
 import ShareDrawer from "./share/ShareDrawer"
@@ -25,6 +28,15 @@ export default function ExplorerToolView() {
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const isListMode = exploreMode === "list"
 
+  // Data in depth collapses its scenario sidebar to a slim strip; other
+  // modes keep the fixed sidebar (collapse state is data-tool session state).
+  const scenarioRailCollapsed = useDataSlice((s) => s.scenarioRailCollapsed)
+  const setScenarioRailCollapsed = useDataSlice(
+    (s) => s.setScenarioRailCollapsed,
+  )
+  const isDataMode = exploreMode === "data"
+  const sidebarCollapsed = isDataMode && scenarioRailCollapsed
+
   const hover = useExploreHoverCoordination()
   const share = useExploreShareCapture()
 
@@ -36,13 +48,24 @@ export default function ExplorerToolView() {
     <TourAnchorProvider>
       <Box sx={{ flex: 1, overflow: "hidden" }}>
         <UnifiedToolView
+          sidebarWidth={sidebarCollapsed ? COLLAPSED_RAIL_WIDTH : undefined}
           sidebar={
-            isListMode ? undefined : (
+            isListMode ? undefined : sidebarCollapsed ? (
+              <CollapsedRailStrip
+                label="Scenarios"
+                ariaLabel="Expand scenarios"
+                onExpand={() => setScenarioRailCollapsed(false)}
+                bordered={false}
+              />
+            ) : (
               <ExplorerSidebar
                 exploreMode={exploreMode}
                 hover={hover}
                 share={share}
                 radarScenarioColors={radarScenarioColors}
+                onCollapse={
+                  isDataMode ? () => setScenarioRailCollapsed(true) : undefined
+                }
               />
             )
           }

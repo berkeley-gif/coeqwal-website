@@ -148,6 +148,8 @@ export const DATA_PERSIST_KEYS = [
   "pinnedLocationByGroup",
   "selectedClimates",
   "selectedLocationsByGroup",
+  "scenarioRailCollapsed",
+  "variableRailCollapsed",
 ] as const satisfies readonly (keyof DataState)[]
 
 /** List fields kept in memory only (not written to sessionStorage) */
@@ -272,6 +274,8 @@ const DATA_ACTION_KEYS = [
   "setPinnedLocation",
   "setSelectedClimates",
   "setSelectedLocations",
+  "setScenarioRailCollapsed",
+  "setVariableRailCollapsed",
 ] as const satisfies readonly (keyof DataSlice)[]
 
 function pickKeys<T extends object, K extends keyof T>(

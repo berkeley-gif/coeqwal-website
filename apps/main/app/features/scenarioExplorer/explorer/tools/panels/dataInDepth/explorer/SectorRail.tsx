@@ -12,8 +12,15 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  IconButton,
+  ChevronLeftIcon,
+} from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
+import CollapsedRailStrip from "../../../chrome/layout/CollapsedRailStrip"
 import {
   getVariable,
   LOCATION_GROUPS,
@@ -33,9 +40,11 @@ export default function SectorRail() {
     selectedVariableId,
     view,
     compareBy,
+    variableRailCollapsed,
     setSelectedVariableId,
     setView,
     setCompareBy,
+    setVariableRailCollapsed,
   } = useDataSlice()
 
   const handlePick = (variableId: string) => {
@@ -52,6 +61,17 @@ export default function SectorRail() {
     }
   }
 
+  if (variableRailCollapsed) {
+    return (
+      <CollapsedRailStrip
+        label="Variables"
+        ariaLabel="Expand variables"
+        onExpand={() => setVariableRailCollapsed(false)}
+        horizontalOnXs
+      />
+    )
+  }
+
   return (
     <Box
       component="nav"
@@ -64,6 +84,36 @@ export default function SectorRail() {
         pr: { md: 1 },
       }}
     >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          pl: 1.5,
+          pr: 0.5,
+          mb: 0.5,
+        }}
+      >
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.grey[600],
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+          }}
+        >
+          Variables
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => setVariableRailCollapsed(true)}
+          aria-label="Collapse variables"
+          sx={{ color: theme.palette.grey[600] }}
+        >
+          <ChevronLeftIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
       {SECTORS.map((sector) => (
         <Box key={sector.id} sx={{ mb: 2 }}>
           <Typography
