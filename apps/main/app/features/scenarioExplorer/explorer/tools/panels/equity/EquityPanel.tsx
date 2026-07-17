@@ -329,9 +329,7 @@ export default function EquityPanel({
         if (obj.tierContinuous === undefined) return false
 
         // All tiers use ranges [start, end)
-        return (
-          obj.tierContinuous >= rangeStart && obj.tierContinuous < rangeEnd
-        )
+        return obj.tierContinuous >= rangeStart && obj.tierContinuous < rangeEnd
       })
     } else {
       // Filter by discrete tier
