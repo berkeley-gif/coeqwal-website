@@ -39,16 +39,8 @@ const IntroSection = () => {
       </div>
 
       <AboutCoeqwalPanel />
+      <WaterThemesPanel />
 
-      {/* 
-          Silent null fallback on error: this is a passive scroll
-          decoration. Replacing it with an error UI mid-intro would
-          be more disruptive than letting it disappear. */}
-      <ErrorBoundary fallback={null}>
-        <Suspense fallback={null}>
-          <WaterThemesPanel />
-        </Suspense>
-      </ErrorBoundary>
     </Box>
   )
 }
