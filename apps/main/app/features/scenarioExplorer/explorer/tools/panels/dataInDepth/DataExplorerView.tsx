@@ -11,7 +11,7 @@
  *    behind the toggle while the tools transition to the new interface.
  */
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ import {
   Typography,
   useTheme,
 } from "@repo/ui/mui"
+import { isPerfEnabled, registerPerfGlobal } from "@repo/data/perf"
 import { useWorkspaceSlice } from "../../../store"
 import CategoryView from "./components/CategoryView"
 import ExplorerView from "./explorer/ExplorerView"
@@ -38,6 +39,18 @@ export default function DataExplorerView({
   const theme = useTheme()
   const { selectedScenarios } = useWorkspaceSlice()
   const [mode, setMode] = useState<DataMode>("explorer")
+
+  // Dev-only (NEXT_PUBLIC_PERF_LOG=1): expose the FE quantile bench for the
+  // Playwright driver. Dynamic import keeps the bench out of default bundles.
+  useEffect(() => {
+    if (!isPerfEnabled() || typeof window === "undefined") return
+    registerPerfGlobal()
+    void import("./perf/computeBench").then(({ runComputeBench }) => {
+      if (window.__coeqwalPerf) {
+        window.__coeqwalPerf.bench = (n?: number) => runComputeBench(n ?? 10)
+      }
+    })
+  }, [])
 
   const hasData = selectedScenarios.length > 0
 

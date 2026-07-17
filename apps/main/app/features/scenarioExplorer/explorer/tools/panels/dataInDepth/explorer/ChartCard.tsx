@@ -25,6 +25,7 @@ import {
 } from "@repo/viz"
 import { useDataSlice } from "../../../../store"
 import { useVariableData } from "../hooks/useVariableData"
+import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import {
   formatValue,
@@ -74,6 +75,14 @@ export default function ChartCard() {
 
   const yLabel = data.view === "cv" ? "CV" : data.unit
   const hasMembers = data.members.length > 0
+
+  // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
+  // hits the screen for the current members/variable/view combination.
+  usePerfPaintMark(
+    "paint:explorer-chart",
+    hasMembers,
+    `${data.members.map((m) => m.id).join(",")}|${data.variable?.name ?? ""}|${data.view}`,
+  )
 
   let chart: React.ReactNode = null
   if (!hasMembers) {

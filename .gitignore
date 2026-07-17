@@ -51,3 +51,6 @@ scripts
 apps/main/scripts
 !.github/scripts/
 !.github/scripts/**
+
+# local perf-driver measurement output (never committed)
+apps/main/e2e/perf/results/

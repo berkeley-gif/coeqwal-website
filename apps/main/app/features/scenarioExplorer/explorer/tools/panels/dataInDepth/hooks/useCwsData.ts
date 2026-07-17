@@ -26,6 +26,7 @@ import {
   useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
+import { perfTime } from "@repo/data/perf"
 import type {
   CwsDeliveryMonthlyStats,
   CwsShortageMonthlyStats,
@@ -623,7 +624,10 @@ export function useMultiScenarioCwsData(
   demandUnitsList: Array<{ du_id: string; label: string; group?: string }> = [],
 ) {
   const aggregatesData = useMemo(
-    () => buildCwsAggregatesData(scenarios, cwsBatch),
+    () =>
+      perfTime("transform:cws", () =>
+        buildCwsAggregatesData(scenarios, cwsBatch),
+      ),
     [scenarios, cwsBatch],
   )
   const contractorsData = useMultiScenarioMiContractors(scenarios)

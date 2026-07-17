@@ -33,6 +33,7 @@ import {
 } from "../config/outcomeDefinitions"
 import { outcomeCategories } from "../config/outcomeCategories"
 import { useResolvedSelectedScenarios } from "../hooks/useResolvedSelectedScenarios"
+import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useScenarioList } from "../../../../../../scenarios/hooks"
 import CwsSection from "./sections/CwsSection"
@@ -146,6 +147,14 @@ export default function CategoryView() {
       env_flow: rekeyByGroup(rawBatchData.env_flow, map),
     }
   }, [rawBatchData, resolved])
+
+  // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the batch-backed
+  // sections hit the screen for the current selection.
+  usePerfPaintMark(
+    "paint:category-batch",
+    batchData != null,
+    resolved.resolvedIds.join(","),
+  )
 
   // Build scenario ID to display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {
