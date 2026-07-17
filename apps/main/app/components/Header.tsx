@@ -26,11 +26,26 @@ export function Header() {
   // Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
 
-  const {
-    isPastHero: rawIsPastHero,
-    isNavigatingToTabs,
-    setIsNavigatingToTabs,
-  } = useTabs()
+  const { isPastHero: rawIsPastHero } = useTabs()
+
+  // Tracks whether a tab navigation click just fired, so the header can
+  // snap to its shrunk state immediately instead of waiting for `pathname`
+  // to catch up (which lags a beat behind the synchronous tab-context
+  // update and caused the tabs strip to render clipped under the header
+  // on the first paint). Local state, not shared context - setting it
+  // should only re-render this component, not the whole app.
+  const [isNavigatingToTabs, setIsNavigatingToTabs] = useState(false)
+
+  useEffect(() => {
+    const handleNavigating = () => setIsNavigatingToTabs(true)
+    window.addEventListener("explore:navigating", handleNavigating)
+    return () =>
+      window.removeEventListener("explore:navigating", handleNavigating)
+  }, [])
+
+  useEffect(() => {
+    setIsNavigatingToTabs(false)
+  }, [pathname])
 
   // On any route other than "/", there's no hero to scroll past.
   // Default to the "past hero" appearance (solid nav) immediately.
@@ -93,10 +108,6 @@ export function Header() {
       })),
     [activeThemeKey, openThemePanel],
   )
-
-  useEffect(() => {
-    setIsNavigatingToTabs(false)
-  }, [pathname, setIsNavigatingToTabs])
 
   return (
     <BaseHeader

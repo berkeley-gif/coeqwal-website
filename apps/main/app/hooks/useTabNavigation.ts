@@ -16,11 +16,11 @@ export function useTabNavigation() {
 
   const navigateToTab = useCallback(
     (tab: TabKey) => {
-      setIsNavigatingToTabs(true)
+      window.dispatchEvent(new Event("explore:navigating"))
       dispatch(setActiveTab(tab))
       router.replace(`/${tab}`)
     },
-    [dispatch, router, setIsNavigatingToTabs],
+    [dispatch, router],
   )
   return { navigateToTab }
 }
