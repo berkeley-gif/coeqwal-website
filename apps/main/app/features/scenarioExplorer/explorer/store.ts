@@ -12,6 +12,8 @@ export {
   useRadarSlice,
   useEquitySlice,
   useResilienceSlice,
+  useDataSlice,
+  isMapPairedMode,
 } from "./store/index"
 
 export type {
@@ -28,4 +30,8 @@ export type {
   DeltaMode,
   AggregateScope,
   ResilienceControlFields,
+  DataState,
+  DataSlice,
+  DataDistKind,
+  DataCompareBy,
 } from "./store/index"

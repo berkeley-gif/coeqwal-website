@@ -1,7 +1,7 @@
 /**
  * Scenario icons - Shared utilities for icon sizing
  *
- * Icon definitions and rendering are now in opsIcons.tsx.
+ * Icon definitions and rendering are now in iconRegistry.tsx.
  * This file retains only the icon sizing utility used by OperationsIconGroup.
  */
 

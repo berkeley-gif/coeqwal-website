@@ -13,6 +13,16 @@
  * colored by average tier. That trailing clause is static text.
  *
  * Writes go through controls/ (read → plan → write). See controls/index.ts.
+ * Presentational primitives (PhraseButton, PopoverShell, RadioRow) live
+ * in ./ResilienceControlsParts.
+ *
+ * CONTENTS (in source order)
+ * --------------------------
+ *  1. Store + writer reads   slice fields via useResilienceControlsWriter.
+ *  2. Derived items          scenario/outcome option lists, pivot + axes.
+ *  3. Handlers               pivot / X / Y / hydroclimate / outcome changes.
+ *  4. Popover anchor state   one anchor per sentence phrase.
+ *  5. Render                 the sentence + per-phrase PopoverShell popovers.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react"
@@ -24,14 +34,14 @@ import {
   Popover,
   Select,
   type SelectChangeEvent,
-  Tooltip,
   Typography,
   icons,
   useTheme,
 } from "@repo/ui/mui"
+import { HoverTip } from "@repo/ui"
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
-import type { Theme } from "@repo/ui/mui"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
+import { PhraseButton, PopoverShell, RadioRow } from "./ResilienceControlsParts"
 import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
 import { useWorkspaceSlice, useResilienceSlice } from "../../../store"
 import { useResilienceControlsWriter } from "./useResilienceControlsWriter"
@@ -77,195 +87,6 @@ interface ResilienceControlsProps {
 // layer keep working, but there is no longer any UI that sets them
 // to anything other than `tier` / `none`. A migration effect below
 // coerces legacy or imported state back to those defaults.
-
-// --------------------------------------------------------------------
-// Sentence-phrase trigger
-// --------------------------------------------------------------------
-
-interface PhraseButtonProps {
-  label: React.ReactNode
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-  active?: boolean
-  ariaLabel?: string
-}
-
-function phraseButtonSx(theme: Theme, active: boolean) {
-  return {
-    display: "inline-flex",
-    alignItems: "baseline",
-    gap: 0.25,
-    px: 0.5,
-    py: 0.25,
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "inherit",
-    fontWeight: 600,
-    color: active ? theme.palette.blue.bright : theme.palette.text.primary,
-    background: active
-      ? theme.palette.interaction.selectedBackground
-      : "transparent",
-    textDecoration: "underline",
-    textDecorationColor: theme.palette.grey[400],
-    textUnderlineOffset: "3px",
-    transition: "color 150ms ease, background 150ms ease",
-    "&:hover, &:focus-visible": {
-      color: theme.palette.blue.bright,
-      background: theme.palette.action.hover,
-      textDecorationColor: theme.palette.blue.bright,
-      outline: "none",
-    },
-  } as const
-}
-
-function PhraseButton({
-  label,
-  onClick,
-  active = false,
-  ariaLabel,
-}: PhraseButtonProps) {
-  const theme = useTheme()
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-haspopup="dialog"
-      aria-expanded={active}
-      aria-label={ariaLabel}
-      sx={phraseButtonSx(theme, active)}
-    >
-      {label}
-      <icons.KeyboardArrowDown
-        sx={{ fontSize: "0.9em", transform: "translateY(2px)" }}
-      />
-    </Box>
-  )
-}
-
-// --------------------------------------------------------------------
-// Reusable popover shell
-// --------------------------------------------------------------------
-
-interface PopoverShellProps {
-  title: string
-  subtitle?: string
-  children: React.ReactNode
-  width?: number
-}
-
-function PopoverShell({
-  title,
-  subtitle,
-  children,
-  width = 280,
-}: PopoverShellProps) {
-  const theme = useTheme()
-  return (
-    <Box
-      sx={{
-        width,
-        maxWidth: "90vw",
-        p: 1.25,
-        display: "flex",
-        flexDirection: "column",
-        gap: 0.75,
-      }}
-    >
-      <Box>
-        <Typography
-          variant="compactCaption"
-          sx={{
-            fontWeight: 700,
-            fontSize: "0.75rem",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: theme.palette.grey[800],
-          }}
-        >
-          {title}
-        </Typography>
-        {subtitle && (
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              fontSize: "0.72rem",
-              color: theme.palette.grey[600],
-              mt: 0.25,
-              lineHeight: 1.3,
-            }}
-          >
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      <Divider sx={{ borderColor: theme.palette.divider }} />
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
-        {children}
-      </Box>
-    </Box>
-  )
-}
-
-// --------------------------------------------------------------------
-// Radio-row option (shared by X / Y / Z popovers)
-// --------------------------------------------------------------------
-
-interface RadioRowProps {
-  active: boolean
-  disabled?: boolean
-  label: React.ReactNode
-  onClick: () => void
-}
-
-function RadioRow({ active, disabled = false, label, onClick }: RadioRowProps) {
-  const theme = useTheme()
-  return (
-    <Box
-      component="button"
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 0.75,
-        px: 0.75,
-        py: 0.5,
-        border: "none",
-        borderRadius: "6px",
-        cursor: disabled ? "default" : "pointer",
-        textAlign: "left",
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : "transparent",
-        color: disabled
-          ? theme.palette.grey[400]
-          : active
-            ? theme.palette.blue.bright
-            : theme.palette.text.primary,
-        fontSize: "0.8125rem",
-        opacity: disabled ? 0.6 : 1,
-        "&:hover:not(:disabled)": {
-          background: theme.palette.action.hover,
-        },
-      }}
-    >
-      {active ? (
-        <icons.RadioButtonChecked
-          sx={{ fontSize: "1rem", color: theme.palette.blue.bright }}
-        />
-      ) : (
-        <icons.RadioButtonUnchecked
-          sx={{ fontSize: "1rem", color: theme.palette.grey[400] }}
-        />
-      )}
-      {label}
-    </Box>
-  )
-}
 
 // --------------------------------------------------------------------
 // ResilienceControls
@@ -660,7 +481,12 @@ export default function ResilienceControls({
           Presets
         </Typography>
         {RESILIENCE_SALIENT_PRESETS.map((preset) => (
-          <Tooltip key={preset.id} title={preset.description} placement="top">
+          <HoverTip
+            key={preset.id}
+            content={preset.description}
+            density="compact"
+            placement="top"
+          >
             <Button
               type="button"
               size="small"
@@ -688,7 +514,7 @@ export default function ResilienceControls({
             >
               {preset.label}
             </Button>
-          </Tooltip>
+          </HoverTip>
         ))}
       </Box>
 

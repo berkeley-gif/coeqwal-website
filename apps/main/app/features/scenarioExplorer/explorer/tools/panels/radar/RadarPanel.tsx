@@ -25,7 +25,7 @@ import {
   type RadarAxisLabelDetailChromeOptions,
   type VerticalParallelLineData,
 } from "@repo/viz"
-import { ChartToast, ClickTooltip } from "@repo/ui"
+import { ChartToast, InfoPopover } from "@repo/ui"
 import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { useTierChartData } from "../../hooks/useTierChartData"
 import { useRadarPlotTheme } from "./useRadarPlotTheme"
@@ -154,7 +154,7 @@ interface RadarPanelProps {
   /**
    * Notifies the parent whether sidebar share icons (single-scenario
    * row icon + theme-header "share all") should be enabled. Sidebar
-   * actions don't depend on what's currently on the chart - they
+   * actions don't depend on what's currently on the chart. They
    * capture explicitly chosen scenarios. They only need at least one
    * axis selected, otherwise the captured card would be a blank
    * wireframe with no spokes.
@@ -932,7 +932,7 @@ export default function RadarPanel({
                       lineHeight: 0,
                     }}
                   >
-                    <ClickTooltip
+                    <InfoPopover
                       open={isOpen}
                       onClose={closeInfoTooltip}
                       placement="top"
@@ -998,7 +998,7 @@ export default function RadarPanel({
                           />
                         </Box>
                       </span>
-                    </ClickTooltip>
+                    </InfoPopover>
                   </Box>
                 )
               })}

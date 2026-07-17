@@ -411,7 +411,7 @@ export function SummaryPanel({
                   {outcomeSummary.criticalLocations.length > 0 && (
                     <Box sx={{ ...flexWrapStyles, alignItems: "center" }}>
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         component="span"
                         sx={{ color: tierColors[4], mr: 0.5 }}
                       >
@@ -441,7 +441,7 @@ export function SummaryPanel({
                   {outcomeSummary.atRiskLocations.length > 0 && (
                     <Box sx={{ ...flexWrapStyles, alignItems: "center" }}>
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         component="span"
                         sx={{ color: tierColors[3], mr: 0.5 }}
                       >
@@ -491,7 +491,7 @@ export function SummaryPanel({
                   {outcomeSummary.criticalLocations.length > 0 && (
                     <Box sx={{ mb: theme.space.component.md }}>
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         sx={{
                           color: tierColors[4],
                           mb: theme.space.component.xs,
@@ -528,7 +528,7 @@ export function SummaryPanel({
                   {outcomeSummary.atRiskLocations.length > 0 && (
                     <Box>
                       <Typography
-                        variant="smallSectionLabel"
+                        variant="compactCaptionMedium"
                         sx={{ color: tierColors[3], mb: 0.5 }}
                       >
                         At-risk locations (

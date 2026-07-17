@@ -25,11 +25,6 @@ export default function MapLegend() {
   const eyebrowSx = {
     display: "block",
     color: theme.palette.grey[700],
-    fontSize: "0.6875rem",
-    fontWeight: 700,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    lineHeight: 1,
     textAlign: "center" as const,
   }
 
@@ -40,7 +35,7 @@ export default function MapLegend() {
         m: 0,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 1.5,
-        bgcolor: "#faf8f5",
+        bgcolor: theme.palette.undertone.warm,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -55,7 +50,7 @@ export default function MapLegend() {
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography component="span" sx={eyebrowSx}>
+        <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
           Show map toggle
         </Typography>
         <Box
@@ -97,7 +92,7 @@ export default function MapLegend() {
           gap: 1,
         }}
       >
-        <Typography component="span" sx={eyebrowSx}>
+        <Typography component="span" variant="outcomeHeader" sx={eyebrowSx}>
           Tiers
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center" }}>

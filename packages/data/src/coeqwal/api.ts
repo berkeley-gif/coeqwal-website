@@ -4,11 +4,54 @@
  * Centralized endpoint definitions for the COEQWAL API.
  */
 
+import type {
+  ReservoirStorageDidOptions,
+  RiverFlowsDidOptions,
+  DeltaSalinityDidOptions,
+} from "./types"
+
 /**
  * Default COEQWAL API base URL
  * Can be overridden via DataProvider's apiBaseUrl prop
  */
 export const DEFAULT_API_BASE = "https://api.coeqwal.org/api"
+
+/**
+ * Shared builder for the /data-in-depth/* endpoints. Every list param is
+ * deduped + sorted (numeric sort for wyt) and serialized in a fixed order, so
+ * the resulting URL — and thus the SWR cache key — is independent of caller
+ * order and matches the backend's sorted cache key. Optional params are omitted
+ * when empty (the backend applies its defaults).
+ */
+interface DataInDepthParams {
+  subjects?: string[]
+  periods?: string[]
+  units?: string[]
+  include?: string[]
+  wyt?: number[]
+}
+
+function dataInDepthPath(
+  path: string,
+  scenarios: string[],
+  opts: DataInDepthParams,
+): string {
+  const uniqSort = (a: string[]) => Array.from(new Set(a)).sort().join(",")
+  const q = new URLSearchParams()
+  q.set("scenarios", uniqSort(scenarios))
+  if (opts.subjects?.length) q.set("subjects", uniqSort(opts.subjects))
+  if (opts.periods?.length) q.set("periods", uniqSort(opts.periods))
+  if (opts.units?.length) q.set("units", uniqSort(opts.units))
+  if (opts.include?.length) q.set("include", uniqSort(opts.include))
+  if (opts.wyt?.length)
+    q.set(
+      "wyt",
+      Array.from(new Set(opts.wyt))
+        .sort((a, b) => a - b)
+        .join(","),
+    )
+  return `${path}?${q.toString()}`
+}
 
 /**
  * API endpoint paths (relative to base URL)
@@ -52,7 +95,7 @@ export const ENDPOINTS = {
   // Statistics endpoints (reservoir percentiles)
 
   /** List of all reservoirs with statistics data */
-  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
+  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs",
 
   /**
    * Percentile data for all reservoirs in a scenario
@@ -100,7 +143,7 @@ export const ENDPOINTS = {
    * @param contractor - Optional filter by contractor short_code
    */
   miContractorsMonthly: (scenarioId: string, contractor?: string) =>
-    `/statistics/scenarios/${scenarioId}/mi-contractors/delivery-monthly${contractor ? `?contractor=${contractor}` : ""}`,
+    `/statistics/scenarios/${scenarioId}/mi-contractors/monthly${contractor ? `?contractor=${contractor}` : ""}`,
 
   /**
    * Period-of-record summary for M&I contractors
@@ -134,11 +177,12 @@ export const ENDPOINTS = {
     const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
-    return `/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+    return `/statistics/scenarios/${scenarioId}/demand-units/monthly${params ? `?${params}` : ""}`
   },
 
   /**
-   * Monthly shortage statistics for urban demand units
+   * Monthly shortage for urban demand units. Hits the same merged `/monthly`
+   * URL as `demandUnitsMonthly`. SWR dedupes the underlying fetch
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param duId - Optional filter by demand unit ID
    * @param group - Optional group filter
@@ -151,7 +195,7 @@ export const ENDPOINTS = {
     const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
-    return `/statistics/scenarios/${scenarioId}/demand-units/shortage-monthly${params ? `?${params}` : ""}`
+    return `/statistics/scenarios/${scenarioId}/demand-units/monthly${params ? `?${params}` : ""}`
   },
 
   /**
@@ -190,35 +234,31 @@ export const ENDPOINTS = {
   },
 
   /**
-   * Monthly surface-water delivery statistics for AG demand units.
-   * Backend route is `sw-delivery-monthly`. The frontend remaps the
-   * response's `monthly_sw_delivery` field to `monthly_delivery` so the
-   * matrix code can reuse the same shape as CWS aggregates.
+   * Monthly delivery, demand, GW pumping, and shortage for AG demand units.
+   * Hits the merged `/monthly` route. The fetcher reads `monthly_sw_delivery`
+   * off each DU entry. `monthly_demand`, `monthly_gw_pumping`, and
+   * `monthly_shortage` are also present on the same payload.
    *
-   * Pass `duIds` to restrict the response to specific demand units via
-   * the backend's comma-separated `du_id` filter. The list is sorted so
-   * different call orders produce the same URL (and same SWR cache key)
+   * `duIds` are sorted before being encoded so different call orders share
+   * the same SWR cache entry
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsDeliveryMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
-    return `/statistics/scenarios/${scenarioId}/ag-demand-units/sw-delivery-monthly${qs}`
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/monthly${qs}`
   },
 
   /**
-   * Monthly GW restriction shortage statistics for AG demand units.
-   * Source: `GW_SHORT_*` variables. Available only for SJR / TULARE DUs.
-   *
-   * Pass `duIds` to restrict the response to specific demand units via the
-   * backend's comma-separated `du_id` filter. The list is sorted so different
-   * call orders produce the same URL (and same SWR cache key)
+   * Monthly GW restriction shortage for AG demand units. Hits the same merged
+   * `/monthly` URL as `agDemandUnitsDeliveryMonthly`. SWR dedupes the fetch.
+   * Source: `GW_SHORT_*`. Available only for SJR / TULARE DUs
    * @param scenarioId - Scenario ID (e.g., "s0025")
    * @param duIds - Optional list of demand unit IDs to fetch
    */
   agDemandUnitsShortageMonthly: (scenarioId: string, duIds?: string[]) => {
     const qs = duIds?.length ? `?du_id=${[...duIds].sort().join(",")}` : ""
-    return `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly${qs}`
+    return `/statistics/scenarios/${scenarioId}/ag-demand-units/monthly${qs}`
   },
 
   /**
@@ -240,18 +280,19 @@ export const ENDPOINTS = {
   refugeDemandUnitsList: () => `/statistics/refuge-demand-units`,
 
   /**
-   * Monthly delivery statistics for refuge demand units
+   * Monthly delivery + shortage for refuge demand units (merged response)
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   refugeDusDeliveryMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/refuge-demand-units/delivery-monthly`,
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/monthly`,
 
   /**
-   * Monthly shortage statistics for refuge demand units
+   * Monthly shortage for refuge demand units. Hits the same merged `/monthly`
+   * URL as `refugeDusDeliveryMonthly`. SWR dedupes the fetch
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   refugeDusShortageMonthly: (scenarioId: string) =>
-    `/statistics/scenarios/${scenarioId}/refuge-demand-units/shortage-monthly`,
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/monthly`,
 
   /**
    * Period-of-record summary for refuge demand units
@@ -301,4 +342,44 @@ export const ENDPOINTS = {
     types: string[] = ["storage", "cws", "ag"],
   ) =>
     `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
+
+  // Data in Depth (generic data_in_depth_* tables). Multiple sibling endpoints
+  // per domain will land under /data-in-depth/*.
+
+  /**
+   * April/September reservoir storage with live-computed stats. Multi-scenario.
+   * Every list param is deduped + sorted so the URL — and thus the SWR cache
+   * key — is independent of caller order, matching the backend's sorted cache
+   * key. Optional params are omitted when empty (backend applies its defaults).
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  reservoirStorageDataInDepth: (
+    scenarios: string[],
+    opts: ReservoirStorageDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/reservoir-storage", scenarios, opts),
+
+  /**
+   * Annual water-year river flow with live-computed stats. Multi-scenario.
+   * Annual + TAF only. Lists deduped + sorted so the URL / SWR cache key is
+   * independent of caller order. Optional params omitted when empty.
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  riverFlowsDataInDepth: (
+    scenarios: string[],
+    opts: RiverFlowsDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/river-flows", scenarios, opts),
+
+  /**
+   * April/September Delta X2 position with live-computed stats. Multi-scenario.
+   * april/sept periods, km unit only. Lists deduped + sorted for stable cache
+   * keys. Optional params omitted when empty.
+   * @param scenarios - scenario short_codes (>= 1 required)
+   * @param opts - subjects / periods / units / include / wyt filters
+   */
+  deltaSalinityDataInDepth: (
+    scenarios: string[],
+    opts: DeltaSalinityDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/delta-salinity", scenarios, opts),
 } as const

@@ -4,13 +4,13 @@
  * KeyOutcomesPanel - Shows key outcomes glyphs
  *
  * Used in the Learn section scrollytelling.
- * Uses shared OutcomeGlyphItem components with ClickTooltip wrappers.
+ * Uses shared OutcomeGlyphItem components with InfoPopover wrappers.
  */
 
 import { useEffect } from "react"
 import { preload } from "@repo/data/swr"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
-import { ClickTooltip } from "@repo/ui"
+import { InfoPopover } from "@repo/ui"
 import { fetchScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import {
@@ -97,7 +97,7 @@ export function KeyOutcomesPanel({
     const isActive = hasData(code)
 
     return (
-      <ClickTooltip
+      <InfoPopover
         key={code}
         open={openTooltip === code}
         onClose={handleClose}
@@ -154,7 +154,7 @@ export function KeyOutcomesPanel({
             }}
           />
         </Box>
-      </ClickTooltip>
+      </InfoPopover>
     )
   }
 
@@ -177,7 +177,7 @@ export function KeyOutcomesPanel({
         sx={{
           ...theme.scenarios.panelTitle,
           // Tightened so the section labels below sit closer to the
-          // panel title; reclaims vertical runway so the full panel
+          // panel title. Reclaims vertical runway so the full panel
           // stack fits on shorter screens.
           mb: theme.space.component.xs,
         }}
@@ -188,7 +188,7 @@ export function KeyOutcomesPanel({
       <HydroclimateGate scenarioId={scenarioId} variant="block">
         {/* Multiple location outcomes - first 5 */}
         <Typography
-          variant="smallSectionLabel"
+          variant="compactCaptionMedium"
           sx={{ mb: theme.space.component.sm }}
         >
           Multiple location outcomes
@@ -210,7 +210,7 @@ export function KeyOutcomesPanel({
 
         {/* Single location outcomes - last 4 */}
         <Typography
-          variant="smallSectionLabel"
+          variant="compactCaptionMedium"
           sx={{ mb: theme.space.component.sm }}
         >
           Single location outcomes

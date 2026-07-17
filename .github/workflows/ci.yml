@@ -1,0 +1,176 @@
+name: CI
+
+# Pull-request quality gate for coeqwal-website.
+#
+# This is the first PR-gating workflow in the repo. It runs the checks that
+# already exist as package.json scripts and rolls them up into a single `gate`
+# status check - the only context a branch ruleset needs to require.
+#
+# HOW TO EXTEND (keep this contract):
+#   - Add a REQUIRED check: add its job, then append the job id to `gate.needs`.
+#     The gate is default-deny over `needs`, so the new job is enforced
+#     automatically - you do NOT edit shell logic, and branch protection is
+#     unchanged.
+#   - Add an ADVISORY check: give it its own job with `continue-on-error: true`
+#     and do NOT add it to `gate.needs`. It reports its own status without
+#     gating merges.
+#
+# Required today: static-checks (format:check + lint + check-types + node
+# --test over .github/scripts) and build (static export of the main app +
+# verify + artifact upload). build was
+# promoted from advisory once the Turbo build env was fully declared
+# (turbo.json globalEnv/build.env) and Amplify parity was proven - the CI
+# build job and the Amplify deploy were green from the same dev commit.
+#
+# SECURITY: this is a `pull_request` workflow that checks out and executes
+# untrusted fork code (install/rebuild run arbitrary lifecycle scripts). Do NOT
+# add secrets here and never switch to `pull_request_target`. Any secret-needing
+# job belongs in a separate, non-fork-triggered workflow. NEXT_PUBLIC_* values
+# are public and passed as repository variables, not secrets.
+#
+# Setup order is load-bearing: pnpm/action-setup runs BEFORE actions/setup-node
+# so pnpm is on PATH when setup-node reads `packageManager: pnpm@10` for its
+# cache. Running setup-node first trips Corepack ("Unable to locate executable
+# file: pnpm"). Do not reorder these steps.
+
+on:
+  pull_request:
+    branches: [dev, main]
+  # Re-run on the branch tip after merge so a protected branch keeps a recorded
+  # status for the same contexts.
+  push:
+    branches: [dev, main]
+  # Run inside a merge queue if one is ever enabled, so the required `gate`
+  # reports there too.
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # Cancel superseded runs only for pull requests; never cancel push/merge_group
+  # runs, so the recorded status on a protected branch tip is not lost.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  static-checks:
+    name: static-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6 # installs pnpm from packageManager; MUST precede setup-node
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm check-types
+      # Guards the CI helper scripts themselves, notably that the notify
+      # workflow's compute-affected-apps.mjs survives a paused (fully
+      # commented-out) or missing CODEOWNERS.
+      - run: pnpm test:ci-scripts
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Required: gates merges via gate.needs. Mirrors amplify.yml for the main
+    # app: `pnpm rebuild` + `turbo run build --filter=main` on Node 22 / pnpm
+    # 10, producing apps/main/out. NEXT_PUBLIC_MAPBOX_TOKEN is a public
+    # build-time value passed as a repository *variable* (not a secret); an
+    # unset token yields a valid build with a non-functional map, acceptable
+    # for a compile check. Storyline apps are not built here (--filter=main),
+    # so NEXT_PUBLIC_MAIN_APP_URL - read only by storyline headers - is not
+    # passed; declare it in this job's env if storyline builds are ever added.
+    env:
+      NEXT_PUBLIC_MAPBOX_TOKEN: ${{ vars.NEXT_PUBLIC_MAPBOX_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm rebuild # parity with amplify.yml (rebuild native deps)
+      - run: pnpm turbo run build --filter=main
+      - run: pnpm verify:static-export
+      - uses: actions/upload-artifact@v7
+        with:
+          name: apps-main-out
+          path: apps/main/out
+          retention-days: 1
+          if-no-files-found: error
+
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    # Default-deny roll-up: every job in `needs` must succeed. Add a required
+    # check by appending its job id here - no shell edits needed.
+    needs: [static-checks, build]
+    if: ${{ always() }}
+    timeout-minutes: 5
+    env:
+      NEEDS_JSON: ${{ toJSON(needs) }}
+    steps:
+      - name: Require all needed jobs to have succeeded
+        run: |
+          echo "needs = $NEEDS_JSON"
+          fail=0
+          for job in $(echo "$NEEDS_JSON" | jq -r 'keys[]'); do
+            result=$(echo "$NEEDS_JSON" | jq -r --arg j "$job" '.[$j].result')
+            if [ "$result" = "success" ]; then
+              echo "  ok    $job = $result"
+            else
+              echo "::error::required job '$job' = $result (expected success)"
+              fail=1
+            fi
+          done
+          if [ "$fail" = 0 ]; then echo "gate: PASS"; else echo "gate: FAIL"; exit 1; fi
+
+  e2e-core:
+    name: e2e-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Advisory: reports its own status without gating merges (not in
+    # gate.needs). Promote by moving it into gate.needs once it has proven
+    # stable across several PRs. Runs the Playwright smoke suite against the
+    # shipped static export, fully offline (API replayed from a committed HAR,
+    # other origins aborted), so no Mapbox token or live backend is needed.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6 # MUST precede setup-node (see header note)
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm rebuild
+      - run: pnpm turbo run build --filter=main
+      - run: pnpm --filter main exec playwright install --with-deps chromium
+      - run: pnpm --filter main e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/main/playwright-report
+          retention-days: 7
+          if-no-files-found: ignore

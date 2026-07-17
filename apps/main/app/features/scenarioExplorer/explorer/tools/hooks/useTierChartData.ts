@@ -6,7 +6,11 @@ import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../../../scenarios/hooks"
-import { type VerticalParallelLineData, getThemeLineColor } from "@repo/viz"
+import {
+  type VerticalParallelLineData,
+  getThemeLineColor,
+  normalizedToRadar,
+} from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
 import { useWorkspaceSlice, useListSlice } from "../../store"
 import {
@@ -25,10 +29,21 @@ import {
 const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 const HC_HISTORICAL = "historical"
 
-/** Convert a tier mean (1-4 scale) to the radar chart's internal format,
- *  matching the API path: normalized_score = (4 - ws) / 3, then * 2 - 1. */
+// These helpers do NOT recompute tier scores. The API already produces
+// `normalized_score` (0 = worst, 1 = best) and the frontend trusts it. The
+// radar chart draws on an axis from -1 (center) to +1 (edge), so we only
+// reproject the API value into that drawing coordinate. Presentation, not data.
+
+// EXCEPTION: NOD/SOD regional outcomes are NOT served by the tier API. They come
+// from a bundled static dataset (@repo/data/coeqwal regionalTierMeans.json) as
+// raw tier means on the 1-4 scale, so here we redo the API's (4 - mean) / 3
+// normalization locally. This duplicates API logic and is a candidate to fold
+// back into the API.
+
+/** Convert a regional tier mean (1-4 scale) to the radar's [-1, 1] axis,
+ *  matching the API path: normalized_score = (4 - mean) / 3, then to the axis */
 function tierMeanToRadarValue(tierMean: number): number {
-  return ((4 - tierMean) / 3) * 2 - 1
+  return normalizedToRadar((4 - tierMean) / 3)
 }
 
 /**
@@ -155,15 +170,9 @@ export function useTierChartData(
           // through and produce `null * 2 - 1 = -1`, anchoring the axis
           // wrong.
           if (outcomeScore?.normalized_score != null) {
-            let v = outcomeScore.normalized_score * 2 - 1
-            // Winter-run salmon tier scores sometimes come through above 4
-            // on the 1-4 tier scale, which maps to radar values below -1.
-            // Clip anything over 4 back to 4 (radar value -1) so those
-            // scenarios still render at the bottom of the axis instead of
-            // clipping off-chart. Not clear why the upstream scores exceed
-            // 4. Leaving that for someone else to figure out.
-            if (code === "WRC_SALMON_AB" && v < -1) v = -1
-            values[displayName] = v
+            values[displayName] = normalizedToRadar(
+              outcomeScore.normalized_score,
+            )
           } else {
             values[displayName] = null
           }
@@ -171,8 +180,12 @@ export function useTierChartData(
 
         // Radar pulls NOD/SOD means only under the historical hydroclimate
         // today so it stays comparable to the current axis reference. The
-        // underlying data package now carries cc50 and cc95 too, so opening
-        // this up later is a matter of removing the guard.
+        // underlying data package carries cc50 and cc95 too, but that
+        // regional data is provisional and in transition (see the header in
+        // packages/data src/coeqwal/regional/index.ts). We do not substitute
+        // historical for the other climates, we return null, so non-historical
+        // NOD/SOD axes render empty until the data is trusted and this guard
+        // is opened up.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
           const raw =
@@ -215,10 +228,7 @@ export function useTierChartData(
       for (const code of OUTCOME_CODE_ORDER) {
         const s = scores[code]
         if (s?.normalized_score == null) continue
-        let v = s.normalized_score * 2 - 1
-        // Match the salmon clamp in parallelPlotData so axis min/max does
-        // not get dragged off the bottom of the radar.
-        if (code === "WRC_SALMON_AB" && v < -1) v = -1
+        const v = normalizedToRadar(s.normalized_score)
         const name = getOutcomeName(code)
         const cur = range[name]
         if (cur) {
@@ -271,7 +281,9 @@ export function useTierChartData(
       const s = scores[code]
       const name = getOutcomeName(code)
       values[name] =
-        s?.normalized_score != null ? s.normalized_score * 2 - 1 : null
+        s?.normalized_score != null
+          ? normalizedToRadar(s.normalized_score)
+          : null
     })
     NOD_SOD_OUTCOME_CODES.forEach((code) => {
       const name = getOutcomeName(code)

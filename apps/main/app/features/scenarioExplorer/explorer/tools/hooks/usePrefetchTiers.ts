@@ -9,7 +9,7 @@
  * single-outcome requests (equity heatmaps, tier animations, etc.).
  *
  * Uses SWR's `preload()` so that in-flight requests are shared with any
- * `useSWR` hook that mounts with the same cache key (proper deduplication).
+ * `useSWR` hook that mounts with the same cache key (deduplication).
  *
  * Call this once near the top of the Explore tab tree (e.g. ScenarioExplorer).
  */
@@ -22,6 +22,7 @@ import {
 } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import { useResolvedIdMappings } from "../../../../scenarios/hooks/useResolvedIdMapping"
+import { useScenarios } from "@repo/data/coeqwal/hooks"
 import { OUTCOME_CODE_ORDER } from "../../../../../content/outcomes"
 
 // Normalize once at module scope so the prefetch cache key and any consumer
@@ -30,6 +31,7 @@ const ALL_OUTCOME_CODES = Array.from(new Set(OUTCOME_CODE_ORDER)).sort()
 
 export function usePrefetchTiers() {
   const allMappings = useResolvedIdMappings()
+  const { activeScenarioIds } = useScenarios()
   const didPrefetch = useRef(false)
 
   useEffect(() => {
@@ -40,6 +42,17 @@ export function usePrefetchTiers() {
     if (allEmpty) return
 
     didPrefetch.current = true
+
+    // Per-climate keys warm the toolbar path (useResolvedScenarioTiers
+    // fetches one climate at a time). The resilience matrix instead fetches
+    // every active scenario in one batch, so warm that combined key too.
+    // Build the key from the same activeScenarioIds useMultipleScenarioTiers
+    // uses with no mapping, so the keys match and resilience hits cache.
+    if (activeScenarioIds.length > 0) {
+      preload(CACHE_KEYS.allScenarioTiers(activeScenarioIds), () =>
+        fetchAllScenarioTiers(activeScenarioIds),
+      )
+    }
 
     // Deduplicate scenario ids across hydroclimates so we don't re-preload the
     // same (scenario, codes) batch for sibling scenarios that share an id.
@@ -63,5 +76,5 @@ export function usePrefetchTiers() {
         fetchTierLocationAssignmentsBatch(id, ALL_OUTCOME_CODES),
       )
     }
-  }, [allMappings])
+  }, [allMappings, activeScenarioIds])
 }

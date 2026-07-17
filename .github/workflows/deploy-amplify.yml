@@ -24,12 +24,13 @@ on:
           - main
           - storyline-flow
           - storyline-climate
-          - all-three
+          - storyline-equity
+          - storyline-management
+          - all
       branch:
         # Only `dev` is offered today. Production branches will be added to
         # this list, the MAP block in the deploy job, and the README "Apps and
         # Amplify ids" table when the production Amplify apps are created
-        # (see README "Production deploys" for the playbook).
         description: "Amplify branch to deploy"
         required: true
         type: choice
@@ -42,9 +43,13 @@ on:
       - "apps/main/**"
       - "apps/storyline-flow/**"
       - "apps/storyline-climate/**"
+      - "apps/storyline-equity/**"
+      - "apps/storyline-management/**"
       - "!apps/main/**/*.md"
       - "!apps/storyline-flow/**/*.md"
       - "!apps/storyline-climate/**/*.md"
+      - "!apps/storyline-equity/**/*.md"
+      - "!apps/storyline-management/**/*.md"
 
 permissions:
   id-token: write
@@ -108,6 +113,12 @@ jobs:
             storyline-climate:
               - 'apps/storyline-climate/**'
               - '!apps/storyline-climate/**/*.md'
+            storyline-equity:
+              - 'apps/storyline-equity/**'
+              - '!apps/storyline-equity/**/*.md'
+            storyline-management:
+              - 'apps/storyline-management/**'
+              - '!apps/storyline-management/**/*.md'
 
       - id: compute
         env:
@@ -118,23 +129,29 @@ jobs:
           MAIN_CHANGED: ${{ steps.filter.outputs.main || 'false' }}
           FLOW_CHANGED: ${{ steps.filter.outputs.storyline-flow || 'false' }}
           CLIMATE_CHANGED: ${{ steps.filter.outputs.storyline-climate || 'false' }}
+          EQUITY_CHANGED: ${{ steps.filter.outputs.storyline-equity || 'false' }}
+          MANAGEMENT_CHANGED: ${{ steps.filter.outputs.storyline-management || 'false' }}
         run: |
           set -euo pipefail
           if [[ "$EVENT" == "workflow_dispatch" ]]; then
             BRANCH="$DISPATCH_BRANCH"
             case "$SELECTION" in
-              main)               APPS='["main"]' ;;
-              storyline-flow)     APPS='["storyline-flow"]' ;;
-              storyline-climate)  APPS='["storyline-climate"]' ;;
-              all-three)          APPS='["main","storyline-flow","storyline-climate"]' ;;
+              main)                  APPS='["main"]' ;;
+              storyline-flow)        APPS='["storyline-flow"]' ;;
+              storyline-climate)     APPS='["storyline-climate"]' ;;
+              storyline-equity)      APPS='["storyline-equity"]' ;;
+              storyline-management)  APPS='["storyline-management"]' ;;
+              all)                   APPS='["main","storyline-flow","storyline-climate","storyline-equity","storyline-management"]' ;;
               *) echo "::error::Unknown selection $SELECTION"; exit 1 ;;
             esac
           else
             BRANCH="$PUSH_BRANCH"
             APPS='[]'
-            [[ "$MAIN_CHANGED"    == "true" ]] && APPS=$(jq -c '. + ["main"]' <<<"$APPS")
-            [[ "$FLOW_CHANGED"    == "true" ]] && APPS=$(jq -c '. + ["storyline-flow"]' <<<"$APPS")
-            [[ "$CLIMATE_CHANGED" == "true" ]] && APPS=$(jq -c '. + ["storyline-climate"]' <<<"$APPS")
+            [[ "$MAIN_CHANGED"       == "true" ]] && APPS=$(jq -c '. + ["main"]' <<<"$APPS")
+            [[ "$FLOW_CHANGED"       == "true" ]] && APPS=$(jq -c '. + ["storyline-flow"]' <<<"$APPS")
+            [[ "$CLIMATE_CHANGED"    == "true" ]] && APPS=$(jq -c '. + ["storyline-climate"]' <<<"$APPS")
+            [[ "$EQUITY_CHANGED"     == "true" ]] && APPS=$(jq -c '. + ["storyline-equity"]' <<<"$APPS")
+            [[ "$MANAGEMENT_CHANGED" == "true" ]] && APPS=$(jq -c '. + ["storyline-management"]' <<<"$APPS")
           fi
           echo "apps=$APPS" >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
@@ -163,11 +180,13 @@ jobs:
           set -euo pipefail
           # Static map of (branch, app) -> Amplify appId. When wiring a
           # production app, add its row here AND add `<app name>` to
-          # the `branch:` dropdown above. See README "Production deploys".
+          # the `branch:` dropdown above.
           declare -A MAP=(
             ["dev:main"]="d2yqk6im560ffz"
             ["dev:storyline-flow"]="d11fk80jyl948s"
             ["dev:storyline-climate"]="d1tv02ylgdru7l"
+            ["dev:storyline-equity"]="d4gv5pgozj14e"
+            ["dev:storyline-management"]="d3vuf3410wjicl"
           )
           ID="${MAP[${BRANCH}:${APP}]:-}"
           if [[ -z "$ID" ]]; then

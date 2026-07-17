@@ -1,329 +1,75 @@
 "use client"
 
 /**
- * TierTooltipPortal - Renders tier tooltip via MUI Popper (desktop) or Modal (mobile)
+ * TierTooltipPortal - Tier tooltip shown next to its glyph.
  *
- * Desktop: Uses Popper for automatic viewport boundary handling with dynamic arrow
- * Mobile: Uses centered modal with vertical scrolling
+ * Positioning, the arrow, and the mobile-modal fallback all come from the
+ * shared AnchoredPortal. This component only supplies the tier content and
+ * close button. Click-away and Escape call onClose (debounced upstream to
+ * survive the opening click); the X button calls onForceClose.
  *
- * WCAG 4.1.2: When scenarioLabel + chartData are provided, displays the
- * scenario's actual tier level alongside tier definitions, making chart data
- * accessible to screen reader users.
+ * WCAG 4.1.2: when scenarioLabel and chartData are provided, the content shows
+ * the scenario's actual tier level alongside the tier definitions.
  */
 
-import React, { useEffect, useMemo, useState } from "react"
-import {
-  Box,
-  Popper,
-  ClickAwayListener,
-  useTheme,
-  useMediaQuery,
-} from "@repo/ui/mui"
-import type { PopperProps } from "@repo/ui/mui"
-import { TooltipCloseButton, MobileModal } from "@repo/ui"
+import { AnchoredPortal, TooltipCloseButton } from "@repo/ui"
 import TierTooltipContent from "./TierTooltipContent"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
+
+const TIER_TOOLTIP_WIDTH = 450
 
 interface TierTooltipPortalProps {
   /** The outcome code to show tooltip for (null = hidden) */
   outcomeCode: string | null
-  /** Anchor element for positioning (replaces manual position calculation) */
+  /** Anchor element for positioning */
   anchorEl: HTMLElement | null
-  /** Called when user clicks away */
+  /** Called on click-away (debounced upstream) */
   onClose: () => void
-  /** Called when user clicks close button */
+  /** Called when the user clicks the close button */
   onForceClose: () => void
-  /** Optional: Scenario label for context */
+  /** Optional: scenario label for context */
   scenarioLabel?: string
-  /** Optional: Chart data for tier distribution display */
+  /** Optional: chart data for tier distribution display */
   chartData?: TooltipChartDataPoint[]
-  /** Optional: Override z-index (use theme.zIndex.tooltipAboveModal when inside a modal) */
+  /** Optional: override z-index (use theme.zIndex.tooltipAboveModal inside a modal) */
   zIndex?: number
 }
 
-// ============================================================================
-// DESKTOP TOOLTIP (Popper with dynamic arrow)
-// ============================================================================
-
-/**
- * Arrow component that points toward the anchor element
- * Popper's arrow modifier sets the top/left position dynamically
- */
-function TooltipArrow({
-  placement,
-  setRef,
-}: {
-  placement: string
-  setRef: (el: HTMLDivElement | null) => void
-}) {
-  const theme = useTheme()
-  const isHorizontal =
-    placement.startsWith("left") || placement.startsWith("right")
-  const pointsRight = placement.startsWith("left")
-  const pointsDown = placement.startsWith("top")
-
-  // Arrow size for the rotated square
-  const arrowSize = 12
-
-  if (isHorizontal) {
-    // Horizontal placement - arrow on left or right edge
-    // Popper sets `top` style to align arrow with anchor
-    return (
-      <Box
-        ref={setRef}
-        sx={{
-          position: "absolute",
-          width: arrowSize,
-          height: arrowSize,
-          // Position on the edge of the tooltip
-          ...(pointsRight
-            ? { right: -arrowSize / 2 }
-            : { left: -arrowSize / 2 }),
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            width: arrowSize,
-            height: arrowSize,
-            backgroundColor: theme.palette.background.paper,
-            transform: "rotate(45deg)",
-            border: theme.border.light,
-            ...(pointsRight
-              ? {
-                  borderLeft: "none",
-                  borderBottom: "none",
-                  boxShadow: "2px -2px 4px rgba(0, 0, 0, 0.05)",
-                }
-              : {
-                  borderRight: "none",
-                  borderTop: "none",
-                  boxShadow: "-2px 2px 4px rgba(0, 0, 0, 0.05)",
-                }),
-          },
-        }}
-      />
-    )
-  } else {
-    // Vertical placement - arrow on top or bottom edge
-    // Popper sets `left` style to align arrow with anchor
-    return (
-      <Box
-        ref={setRef}
-        sx={{
-          position: "absolute",
-          width: arrowSize,
-          height: arrowSize,
-          // Position on the edge of the tooltip
-          ...(pointsDown
-            ? { bottom: -arrowSize / 2 }
-            : { top: -arrowSize / 2 }),
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            width: arrowSize,
-            height: arrowSize,
-            backgroundColor: theme.palette.background.paper,
-            transform: "rotate(45deg)",
-            border: theme.border.light,
-            ...(pointsDown
-              ? {
-                  borderTop: "none",
-                  borderLeft: "none",
-                  boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.05)",
-                }
-              : {
-                  borderBottom: "none",
-                  borderRight: "none",
-                  boxShadow: "-2px -2px 4px rgba(0, 0, 0, 0.05)",
-                }),
-          },
-        }}
-      />
-    )
-  }
-}
-
-/**
- * Desktop tooltip using Popper with dynamic arrow positioning
- */
-function DesktopTooltip({
+export function TierTooltipPortal({
   outcomeCode,
   anchorEl,
   onClose,
   onForceClose,
   scenarioLabel,
   chartData,
-  zIndex: providedZIndex,
+  zIndex,
 }: TierTooltipPortalProps) {
-  const theme = useTheme()
-  // Use state setter as callback ref - this updates synchronously when element mounts
-  const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null)
   const isOpen = Boolean(outcomeCode && anchorEl)
-  const resolvedZIndex = providedZIndex ?? theme.zIndex.tooltip
-
-  // Memoize modifiers so they update when arrowElement changes
-  const popperModifiers: PopperProps["modifiers"] = useMemo(
-    () => [
-      {
-        name: "flip",
-        enabled: true,
-        options: {
-          fallbackPlacements: ["right", "top", "bottom"],
-        },
-      },
-      {
-        name: "preventOverflow",
-        enabled: true,
-        options: {
-          padding: 16,
-          boundary: "viewport",
-        },
-      },
-      {
-        name: "offset",
-        options: {
-          offset: [0, 12], // Gap from anchor element
-        },
-      },
-      {
-        name: "arrow",
-        enabled: Boolean(arrowElement),
-        options: {
-          element: arrowElement,
-          padding: 8, // Keep arrow away from tooltip edges
-        },
-      },
-    ],
-    [arrowElement],
-  )
 
   return (
-    <Popper
+    <AnchoredPortal
       open={isOpen}
       anchorEl={anchorEl}
-      placement="left"
-      modifiers={popperModifiers}
-      sx={{ zIndex: resolvedZIndex }}
-    >
-      {({ placement }) => (
-        <ClickAwayListener
-          onClickAway={onClose}
-          mouseEvent="onMouseUp"
-          touchEvent="onTouchEnd"
-        >
-          <Box
-            sx={{
-              position: "relative",
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              border: theme.border.light,
-              borderRadius: theme.borderRadius.md,
-              boxShadow: theme.shadow.md,
-              p: theme.space.component.xl,
-              width: "450px",
-              maxWidth: "calc(100vw - 48px)",
-              ...theme.typography.compactSubtitle,
-            }}
-          >
-            <TooltipCloseButton
-              onClick={onForceClose}
-              offset={{ top: 8, right: 8 }}
-            />
-
-            <TooltipArrow placement={placement} setRef={setArrowElement} />
-
-            <TierTooltipContent
-              outcomeCode={outcomeCode!}
-              showTitle={true}
-              scenarioLabel={scenarioLabel}
-              chartData={chartData}
-            />
-          </Box>
-        </ClickAwayListener>
-      )}
-    </Popper>
-  )
-}
-
-// ============================================================================
-// MOBILE VIEW (uses shared MobileModal)
-// ============================================================================
-
-/**
- * Mobile view - uses shared MobileModal with custom TooltipCloseButton
- * TooltipCloseButton provides WCAG 2.5.5 compliant 44x44px touch targets
- */
-function TierTooltipMobileView({
-  outcomeCode,
-  anchorEl,
-  onClose,
-  onForceClose,
-  scenarioLabel,
-  chartData,
-}: TierTooltipPortalProps) {
-  const theme = useTheme()
-  const isOpen = Boolean(outcomeCode && anchorEl)
-
-  return (
-    <MobileModal
-      open={isOpen}
       onClose={onClose}
-      maxWidth={450}
-      maxHeight="calc(100vh - 64px)"
-      showCloseButton={false}
+      placement="left"
+      fallbackPlacements={["right", "top", "bottom"]}
+      width={TIER_TOOLTIP_WIDTH}
+      maxWidth="calc(100vw - 48px)"
+      mobileMaxWidth={TIER_TOOLTIP_WIDTH}
+      zIndex={zIndex}
     >
-      <Box
-        sx={{
-          position: "relative",
-          ...theme.typography.compactSubtitle,
-        }}
-      >
-        <TooltipCloseButton
-          onClick={onForceClose}
-          offset={{ top: 0, right: 0 }}
-        />
-
-        <TierTooltipContent
-          outcomeCode={outcomeCode!}
-          showTitle={true}
-          scenarioLabel={scenarioLabel}
-          chartData={chartData}
-        />
-      </Box>
-    </MobileModal>
+      <TooltipCloseButton
+        onClick={onForceClose}
+        offset={{ top: 8, right: 8 }}
+      />
+      <TierTooltipContent
+        outcomeCode={outcomeCode!}
+        showTitle={true}
+        scenarioLabel={scenarioLabel}
+        chartData={chartData}
+      />
+    </AnchoredPortal>
   )
-}
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
-export function TierTooltipPortal(props: TierTooltipPortalProps) {
-  const { onForceClose } = props
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const isOpen = Boolean(props.outcomeCode && props.anchorEl)
-
-  // WCAG 2.1.1: Close tooltip on Escape key (desktop only - MobileModal handles its own)
-  useEffect(() => {
-    if (isMobile || !isOpen) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault()
-        onForceClose()
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isMobile, isOpen, onForceClose])
-
-  // Render mobile modal or desktop Popper
-  if (isMobile) {
-    return <TierTooltipMobileView {...props} />
-  }
-
-  return <DesktopTooltip {...props} />
 }
 
 export default TierTooltipPortal

@@ -1,7 +1,16 @@
-import React, { useState } from "react"
+import React, { type ElementType, useState } from "react"
 import { useFetchData } from "../../hooks/useFetchData"
 import FlowLine, { FlowEntry } from "./HydroClimateLine"
-import { Box, Button, Stack, Typography, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  Button,
+  LocalFireDepartmentIcon,
+  Stack,
+  Typography,
+  WaterDropIcon,
+  WbSunnyIcon,
+  useTheme,
+} from "@repo/ui/mui"
 
 export type ContainerSize = {
   width: number
@@ -13,31 +22,43 @@ type Model = {
   background: string
   hover: string
   text: string
+  icon: ElementType
 }
 
 const models: Model[] = [
   {
-    model: "Moderate climate risk",
-    background: "#c28433",
-    hover: "rgb(160, 101, 25)",
+    model: "Moderate-wet climate risk",
+    background: "#44ce1b",
+    hover: "#35a915",
     text: "#fcfbfa",
+    icon: WaterDropIcon,
+  },
+  {
+    model: "Moderate-dry climate risk",
+    background: "#f7e379",
+    hover: "#dfc94f",
+    text: "#fcfbfa",
+    icon: WbSunnyIcon,
   },
   {
     model: "High climate risk",
-    background: "#a72525",
-    hover: "#961919",
+    background: "#f2a134",
+    hover: "#d8841f",
     text: "#fcfbfa",
+    icon: WbSunnyIcon,
   },
   {
     model: "Extreme climate risk",
-    background: "#5c0b0b",
-    hover: "#460909",
+    background: "#e51f1f",
+    hover: "#bf1616",
     text: "#fcfbfa",
+    icon: LocalFireDepartmentIcon,
   },
 ]
 
 const modelQueryMap: Record<string, string> = {
-  "Moderate climate risk": "Warmer & Drier I",
+  "Moderate-wet climate risk": "Warmer & Wetter",
+  "Moderate-dry climate risk": "Warmer & Drier I",
   "High climate risk": "Warmer & Drier II",
   "Extreme climate risk": "Warmer & Drier III",
 }
@@ -45,7 +66,9 @@ const modelQueryMap: Record<string, string> = {
 export default function HydroClimateContainer() {
   const [flowData, setFlowData] = useState<FlowEntry[]>([])
   const [flowYExtents, setFlowYExtents] = useState<[number, number]>([0, 0])
-  const [selectedModel, setSelectedModel] = useState<string>("")
+  const [selectedModel, setSelectedModel] = useState<string>(
+    "Moderate-wet climate risk",
+  )
   const selectedDataModel = modelQueryMap[selectedModel] ?? selectedModel
 
   useFetchData(
@@ -83,13 +106,14 @@ export default function HydroClimateContainer() {
             alignItems: "center",
             justifyContent: "flex-start",
             marginBottom: "1rem",
+            gap: "0.75rem",
           }}
         >
           <Typography
             variant="body2"
             sx={{ mr: 2, whiteSpace: "nowrap", fontWeight: 700 }}
           >
-            {"Choose a hydroclimate:"}
+            {"Examine a hydroclimate:"}
           </Typography>
           <ClimateModelSelector
             onSelect={onModelSelect}
@@ -102,21 +126,6 @@ export default function HydroClimateContainer() {
             data={flowData.filter((d) => d.model === selectedDataModel)}
             yExtents={flowYExtents}
           />
-        )}
-        {!selectedModel && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "50%",
-            }}
-          >
-            <Typography variant="body1">
-              Click a <span className="highlight-text">hydroclimate</span> above
-              to see how the river flows change across months in a year!
-            </Typography>
-          </div>
         )}
       </div>
     </>
@@ -154,45 +163,73 @@ function ClimateModelSelector({
           px: 2,
         }}
       >
-        {models.map((model: Model, idx) => (
-          <Button
-            key={idx}
-            variant="contained"
-            size="small"
-            onClick={() => onSelect(model.model)}
-            sx={{
-              borderRadius: "999px",
-              px: { xs: 1, md: 2 },
-              py: { xs: 0.5, md: 0.9 },
-              minHeight: { xs: "16px", md: "20px" },
-              fontSize: {
-                xs: theme.typography.body2.fontSize,
-                md: theme.typography.caption.fontSize,
-              },
-              textTransform: "none",
-              fontWeight: 700,
-              letterSpacing: "0.01em",
-              backgroundColor:
-                selectedModel === model.model ? model.hover : model.background,
-              color: selectedModel === model.model ? "#ffffff" : model.text,
-              border:
-                selectedModel === model.model
-                  ? "2px solid rgba(252, 251, 250, 0.92)"
-                  : "1px solid rgba(252, 251, 250, 0.35)",
-              boxShadow:
-                selectedModel === model.model
+        {models.map((model: Model) => {
+          const Icon = model.icon
+          const isSelected = selectedModel === model.model
+
+          return (
+            <Button
+              key={model.model}
+              variant="contained"
+              size="small"
+              onClick={() => onSelect(model.model)}
+              startIcon={
+                <Box
+                  component="span"
+                  sx={{
+                    width: { xs: 20, md: 24 },
+                    height: { xs: 20, md: 24 },
+                    borderRadius: "50%",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: model.background,
+                    color: model.text,
+                    boxShadow: isSelected
+                      ? "0 0 0 2px rgba(252, 251, 250, 0.86)"
+                      : "0 0 0 1px rgba(252, 251, 250, 0.45)",
+                  }}
+                >
+                  <Icon sx={{ fontSize: { xs: 14, md: 16 } }} />
+                </Box>
+              }
+              sx={{
+                borderRadius: "999px",
+                px: { xs: 1.25, md: 1.5 },
+                py: { xs: 0.5, md: 0.9 },
+                minHeight: { xs: "16px", md: "20px" },
+                fontSize: {
+                  xs: theme.typography.body2.fontSize,
+                  md: theme.typography.caption.fontSize,
+                },
+                textTransform: "none",
+                fontWeight: 700,
+                letterSpacing: "0.01em",
+                backgroundColor: isSelected
+                  ? "rgba(252, 251, 250, 0.16)"
+                  : "rgba(252, 251, 250, 0.08)",
+                color: "#fcfbfa",
+                border: isSelected
+                  ? `2px solid ${model.background}`
+                  : "1px solid rgba(252, 251, 250, 0.28)",
+                boxShadow: isSelected
                   ? "0 0 0 2px rgba(241, 177, 67, 0.26), 0 8px 20px rgba(0, 0, 0, 0.25)"
                   : "0 4px 12px rgba(0, 0, 0, 0.2)",
-              "&:hover": {
-                backgroundColor: model.hover,
-                transform: "translateY(-1px)",
-                boxShadow: "0 8px 20px rgba(0, 0, 0, 0.25)",
-              },
-            }}
-          >
-            {model.model}
-          </Button>
-        ))}
+                "& .MuiButton-startIcon": {
+                  mr: 0.75,
+                  ml: 0,
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(252, 251, 250, 0.18)",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 8px 20px rgba(0, 0, 0, 0.25)",
+                },
+              }}
+            >
+              {model.model}
+            </Button>
+          )
+        })}
       </Stack>
     </Box>
   )

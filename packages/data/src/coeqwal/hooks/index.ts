@@ -23,19 +23,21 @@ export { useScenarioTiers } from "./useScenarioTiers"
 export {
   useAllReservoirsList,
   useReservoirPercentiles,
+  useReservoirPercentilesByIds,
   useAllReservoirPercentiles,
   useGroupedReservoirPercentiles,
   useSpillMonthly,
-  useMultipleReservoirPercentiles,
 } from "./useReservoirPercentiles"
 export {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
+} from "./useMiContractorStatistics"
+export {
   useDemandUnitsList,
   useDemandUnitsMonthly,
   useDemandUnitsShortageMonthly,
   useDemandUnitsPeriod,
-} from "./useCwsStatistics"
+} from "./useUrbanDemandUnitStatistics"
 export {
   useAgDemandUnitsList,
   useAgDemandUnitsDeliveryMonthly,
@@ -57,5 +59,10 @@ export {
 } from "./useRefugeStatistics"
 export { useChannelsList } from "./useEnvFlowStatistics"
 export { useDeltaMonthly } from "./useDeltaStatistics"
+export {
+  useReservoirStorageDataInDepth,
+  useRiverFlowsDataInDepth,
+  useDeltaSalinityDataInDepth,
+} from "./useDataInDepth"
 export { useTierLocationAssignments } from "./useTierLocationAssignments"
 export { useTierLocationAssignmentsBatch } from "./useTierLocationAssignmentsBatch"

@@ -83,10 +83,13 @@ export async function apiFetcher<T>(
 
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          ...headers,
-        },
+        // No default Content-Type: these are bodyless GETs, and a
+        // non-safelisted Content-Type (application/json) forces a CORS
+        // preflight (OPTIONS) before every request. On a cold load that
+        // doubles the request count and intermittently drops requests,
+        // which the browser mislabels as a CORS failure. Callers that send
+        // a body can still pass their own Content-Type via `headers`.
+        headers: { ...headers },
       })
 
       clearTimeout(timeoutId)

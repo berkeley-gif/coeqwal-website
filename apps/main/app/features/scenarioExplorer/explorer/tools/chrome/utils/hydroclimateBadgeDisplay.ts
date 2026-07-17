@@ -1,15 +1,18 @@
 import { hydroclimateOptions } from "../../../../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../../../../scenarios/hydroclimateConfig"
+import {
+  HYDROCLIMATE_CONFIG,
+  HYDROCLIMATE_FALLBACK_ACCENT,
+} from "../../../../../scenarios/hydroclimateConfig"
 
 export function getHydroclimateBadgeDisplay(hydroclimate: string): {
   title: string
   accentColor: string
 } | null {
   const opt = hydroclimateOptions.find((o) => o.value === hydroclimate)
+  if (!opt) return null
   const cfg = HYDROCLIMATE_CONFIG[hydroclimate]
-  if (!opt || !cfg) return null
   return {
     title: `${opt.label} hydroclimate`,
-    accentColor: cfg.bgColor,
+    accentColor: cfg?.bgColor ?? HYDROCLIMATE_FALLBACK_ACCENT,
   }
 }

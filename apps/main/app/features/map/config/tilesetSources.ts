@@ -87,7 +87,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
     paint: {
       "fill-color": "#70a981",
       "fill-opacity": 0.5,
-      "fill-outline-color": themeValues.palette.common.white,
+      "fill-outline-color": alpha(themeValues.palette.common.white, 0),
     },
     layout: { visibility: "none" },
   },

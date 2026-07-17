@@ -21,15 +21,15 @@
  *
  * This is not a general-purpose tooltip. For standard tooltips use:
  * - HybridTooltip: Hover on desktop, click on touch
- * - ClickTooltip: Always click-to-open with close button
+ * - InfoPopover: Always click-to-open with close button
  *
  * @see HybridTooltip - Device-adaptive hover/click behavior
- * @see ClickTooltip - Always click-to-open with close button
+ * @see InfoPopover - Always click-to-open with close button
  */
 
 import { RefObject, useEffect, useState, ReactNode } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { TooltipCloseButton } from "@repo/ui"
+import { TooltipCloseButton, tooltipSurface } from "@repo/ui"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
@@ -237,13 +237,7 @@ export default function ScrollTooltip({
       <Box
         sx={{
           position: "relative",
-          // Match MUI Tooltip theme styling
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          border: theme.border.light,
-          borderRadius: theme.borderRadius.md,
-          boxShadow: theme.shadow.md,
-          p: theme.space.component.lg,
+          ...tooltipSurface(theme),
           maxWidth: theme.layout.maxWidth.sm,
         }}
       >

@@ -9,39 +9,22 @@
  */
 
 import { Box } from "@repo/ui/mui"
-import { ErrorBoundary } from "@repo/utils"
-import { ErrorFallback } from "@repo/ui"
-import GetStartedView from "./getStarted/GetStartedView"
+
 import {
   ExplorerToolView,
   useExplorerLifecycle,
   useExplorerMapLayout,
 } from "./explorer"
-import { useScenarioExplorerStore } from "./store"
 
 export default function ScenarioExplorer() {
   useExplorerLifecycle()
   const layout = useExplorerMapLayout()
-  const mainView = useScenarioExplorerStore((s) => s.mainView)
 
   return (
     <Box sx={layout.rootSx}>
       <Box sx={layout.contentMiddleSx}>
         <Box sx={layout.contentInnerSx}>
-          {mainView === "get-started" && (
-            <ErrorBoundary
-              fallback={
-                <ErrorFallback
-                  title="Get started couldn't load"
-                  message="This might be a temporary issue. Try refreshing the page or switch to the Tools sub-tab."
-                />
-              }
-            >
-              <GetStartedView />
-            </ErrorBoundary>
-          )}
-
-          {mainView === "explorer" && <ExplorerToolView />}
+          <ExplorerToolView />
         </Box>
       </Box>
     </Box>

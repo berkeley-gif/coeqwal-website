@@ -17,6 +17,11 @@ import {
   LAYER_IDS,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../config/outcomeLayerRegistry"
+import {
+  OUTCOME_FILL_OPACITY,
+  OUTCOME_OUTLINE_WIDTH,
+  OUTCOME_OUTLINE_OFFSET,
+} from "../../animation/demandUnitsPaint"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -313,7 +318,7 @@ export function OutcomePolygonLayer({
     // ── Crossfade path: data was already showing, just update colors ──
     // Mapbox interpolates fill-color and line-color natively, so we only
     // need to set the transition duration and update the expression.
-    // Always ensure visibility is "visible" - the layer may have been hidden
+    // Always ensure visibility is "visible". The layer may have been hidden
     // by a previous unmount cleanup when switching between different polygon
     // layer types (e.g. demand-units → calsim-wba).
     if (wasShowingDataRef.current) {
@@ -407,32 +412,16 @@ export function OutcomePolygonLayer({
         map.setPaintProperty(outlineId, "line-width", 0.5)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else {
-        map.setPaintProperty(outlineId, "line-width", [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          5,
-          0.5,
-          7,
-          1,
-          9,
-          2,
-          11,
-          3,
-        ])
-        map.setPaintProperty(outlineId, "line-offset", [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          5,
-          -0.25,
-          7,
-          -0.5,
-          9,
-          -1,
-          11,
-          -1.5,
-        ])
+        map.setPaintProperty(
+          outlineId,
+          "line-width",
+          OUTCOME_OUTLINE_WIDTH as never,
+        )
+        map.setPaintProperty(
+          outlineId,
+          "line-offset",
+          OUTCOME_OUTLINE_OFFSET as never,
+        )
       }
     }
 
@@ -449,17 +438,11 @@ export function OutcomePolygonLayer({
       } else if (layerType === "delta") {
         map.setPaintProperty(fillId, "fill-opacity", 0.9)
       } else {
-        map.setPaintProperty(fillId, "fill-opacity", [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          5,
-          0.75,
-          8,
-          0.55,
-          10,
-          0.35,
-        ])
+        map.setPaintProperty(
+          fillId,
+          "fill-opacity",
+          OUTCOME_FILL_OPACITY as never,
+        )
       }
 
       if (map.getLayer(outlineId)) {
@@ -518,6 +501,6 @@ export function OutcomePolygonLayer({
     }
   }, [mapRef, fillId, outlineId, idProperty])
 
-  // This component doesn't render anything - it just manages Mapbox layer styling
+  // This component doesn't render anything. It just manages Mapbox layer styling
   return null
 }

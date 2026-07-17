@@ -89,40 +89,42 @@ interface ColorScheme {
   hover: string // hover line color
 }
 
-// Sophisticated slate/blue palette (default)
+// Single-hue blue palette (default). Stepped alphas keep the q30-q70 inner
+// swath clearly darker than the q10-q90 outer swath; `range` is now the
+// q0/q100 dashed min-max reference line color rather than a fill.
 const DEFAULT_COLOR_SCHEME: ColorScheme = {
-  outer: "rgba(99, 130, 150, 0.15)",
-  inner: "rgba(99, 130, 150, 0.28)",
-  median: "#3d5a6c",
+  outer: "rgba(49, 130, 189, 0.2)",
+  inner: "rgba(49, 130, 189, 0.45)",
+  median: "#08519c",
   mean: "#8b9da8",
-  range: "rgba(99, 130, 150, 0.06)",
+  range: "#6baed6",
   text: "#5a6c7a",
   grid: "#e8edf0",
-  hover: "#3d5a6c",
+  hover: "#08519c",
 }
 
 const COLOR_SCHEMES: Record<string, ColorScheme> = {
   blues: DEFAULT_COLOR_SCHEME,
   slate: DEFAULT_COLOR_SCHEME,
   greens: {
-    outer: "rgba(76, 127, 93, 0.15)",
-    inner: "rgba(76, 127, 93, 0.28)",
-    median: "#3a6b4a",
+    outer: "rgba(76, 127, 93, 0.2)",
+    inner: "rgba(76, 127, 93, 0.45)",
+    median: "#1d7a45",
     mean: "#8da898",
-    range: "rgba(76, 127, 93, 0.06)",
+    range: "#74c69d",
     text: "#5a6c5e",
     grid: "#e8f0ea",
-    hover: "#3a6b4a",
+    hover: "#1d7a45",
   },
   oranges: {
-    outer: "rgba(178, 120, 70, 0.15)",
-    inner: "rgba(178, 120, 70, 0.28)",
-    median: "#9a6840",
+    outer: "rgba(230, 85, 13, 0.2)",
+    inner: "rgba(230, 85, 13, 0.45)",
+    median: "#a63603",
     mean: "#c4a888",
-    range: "rgba(178, 120, 70, 0.06)",
+    range: "#fdae6b",
     text: "#6c5a4a",
     grid: "#f0ebe8",
-    hover: "#9a6840",
+    hover: "#a63603",
   },
 }
 
@@ -237,13 +239,8 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = React.memo(
           .attr("stroke", colors.grid)
           .attr("stroke-width", 1)
 
-        // Create area generators for bands
-        const rangeArea = area<(typeof processedData)[0]>()
-          .x((d) => xScale(d.monthIndex))
-          .y0((d) => yScale(d.q0))
-          .y1((d) => yScale(d.q100))
-          .curve(curveLinear)
-
+        // Create area generators for the filled swaths (q10-q90 and q30-q70).
+        // q0/q100 (min/max) render as dashed reference lines instead of a fill.
         const outerArea = area<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
           .y0((d) => yScale(d.q10))
@@ -257,6 +254,16 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = React.memo(
           .curve(curveLinear)
 
         // Create line generators
+        const minLine = line<(typeof processedData)[0]>()
+          .x((d) => xScale(d.monthIndex))
+          .y((d) => yScale(d.q0))
+          .curve(curveLinear)
+
+        const maxLine = line<(typeof processedData)[0]>()
+          .x((d) => xScale(d.monthIndex))
+          .y((d) => yScale(d.q100))
+          .curve(curveLinear)
+
         const medianLine = line<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
           .y((d) => yScale(d.q50))
@@ -266,12 +273,6 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = React.memo(
           .x((d) => xScale(d.monthIndex))
           .y((d) => yScale(d.mean))
           .curve(curveLinear)
-
-        // Draw range band (min-max) - very subtle background
-        g.append("path")
-          .datum(processedData)
-          .attr("fill", colors.range)
-          .attr("d", rangeArea)
 
         // Draw outer band (q10-q90)
         g.append("path")
@@ -284,6 +285,24 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = React.memo(
           .datum(processedData)
           .attr("fill", colors.inner)
           .attr("d", innerArea)
+
+        // Draw min/max (q0/q100) as thin dashed reference lines
+        g.append("path")
+          .datum(processedData)
+          .attr("fill", "none")
+          .attr("stroke", colors.range)
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "3,3")
+          .attr("opacity", 0.7)
+          .attr("d", minLine)
+        g.append("path")
+          .datum(processedData)
+          .attr("fill", "none")
+          .attr("stroke", colors.range)
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "3,3")
+          .attr("opacity", 0.7)
+          .attr("d", maxLine)
 
         // Draw median line (q50) - the hero line
         g.append("path")

@@ -150,6 +150,7 @@ export type RadarAxisLabelDetailPayload = {
   scenarioId: string
   scenarioName: string
   tierIndex: number
+  weighted_score: string
 }
 
 /** Payload passed to `onScenarioControlsMount`, includes layout for anchor-aware chrome. */
@@ -488,7 +489,9 @@ export function renderRadarAxisLabelDetailInto(
   const svgRoot = rootG.node()?.ownerSVGElement ?? null
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
-  const tierText = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}`
+  const tierLevel = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}`
+  const tierScore = "(" + payload.weighted_score + ")"
+  const tierText = [tierLevel, tierScore].join(" ")
 
   const inner = detailG.append("g").attr("class", "axis-label-detail-inner")
 

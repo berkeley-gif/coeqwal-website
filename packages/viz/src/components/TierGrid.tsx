@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useMemo, useState } from "react"
 import { select, group, scaleOrdinal, easeCubicOut } from "d3"
-import type { Selection } from "d3"
+import type { Selection, ScaleOrdinal } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
 // ============================================================================
@@ -93,6 +93,19 @@ const DEFAULT_TIER_COLORS = {
   "Tier 3": "#f2944f",
   "Tier 4": "#ee5d32",
 }
+const CATEGORY_COLORS = [
+  "#4e79a7", // Blue
+  "#f28e2b", // Orange
+  "#e15759", // Red
+  "#76b7b2", // Cyan
+  "#59a14f", // Green
+  "#edc948", // Yellow
+  "#b07aa1", // Purple
+  "#ff9da7", // Pink
+  "#9c755f", // Brown
+  "#bab0ac", // Gray
+]
+
 const CATEGORY_COLORS = [
   "#4e79a7", // Blue
   "#f28e2b", // Orange
@@ -427,7 +440,7 @@ const getFillColor = (
   obj: Objective,
   colorMode: string,
   tierColorMap: Record<string, string>,
-  categoryColorScale: d3.ScaleOrdinal<string, string, never>,
+  categoryColorScale: ScaleOrdinal<string, string, never>,
   _showComparison: boolean = false,
 ): string => {
   if (colorMode === "tier") {
@@ -456,7 +469,7 @@ const getFillColor = (
 }
 
 const drawTierGrid = (
-  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  svg: Selection<SVGSVGElement, unknown, null, undefined>,
   width: number,
   height: number,
   categoryLayouts: CategoryLayout[],
@@ -835,7 +848,7 @@ export default function TierGrid({
   > | null>(null)
 
   // Refs let the d3 callbacks read the latest values without triggering
-  // a re-bind on every render; matches the pattern in RadarPlot and
+  // a re-bind on every render. Matches the pattern in RadarPlot and
   // ResilienceHeatmap.
   const interactiveRef = useRef(interactive)
   interactiveRef.current = interactive

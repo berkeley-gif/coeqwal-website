@@ -15,7 +15,10 @@ import {
   hydroclimateOptions,
   type HydroclimateOption,
 } from "../../../../../content/scenarios"
-import { HYDROCLIMATE_CONFIG } from "../../../../scenarios/hydroclimateConfig"
+import {
+  HYDROCLIMATE_CONFIG,
+  HYDROCLIMATE_FALLBACK_ACCENT,
+} from "../../../../scenarios/hydroclimateConfig"
 
 interface HydroclimateBadgeProps {
   hydroclimate?: string
@@ -33,7 +36,11 @@ export default function HydroclimateBadge({
     ? HYDROCLIMATE_CONFIG[hydroclimate]
     : undefined
 
-  if (!climateOption || !climateConfig) return null
+  if (!climateOption) return null
+
+  // Fall back to a neutral accent so a climate without a visual config
+  // still shows its label instead of dropping the badge entirely.
+  const accentColor = climateConfig?.bgColor ?? HYDROCLIMATE_FALLBACK_ACCENT
 
   return (
     <Box
@@ -41,8 +48,8 @@ export default function HydroclimateBadge({
         display: "inline-flex",
         alignItems: "flex-start",
         gap: 0.5,
-        backgroundColor: `${climateConfig.bgColor}0F`,
-        border: `1px solid ${climateConfig.bgColor}28`,
+        backgroundColor: `${accentColor}0F`,
+        border: `1px solid ${accentColor}28`,
         borderRadius: theme.borderRadius.sm,
         px: 0.75,
         py: 0.375,
@@ -54,7 +61,7 @@ export default function HydroclimateBadge({
           width: 7,
           height: 7,
           borderRadius: theme.borderRadius.circle,
-          backgroundColor: climateConfig.bgColor,
+          backgroundColor: accentColor,
           flexShrink: 0,
           mt: "3px",
         }}

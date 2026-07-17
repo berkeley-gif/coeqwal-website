@@ -88,7 +88,7 @@ const MIN_TOUCH_TARGET = 44
 // ID for drawer (used by aria-controls)
 const MOBILE_DRAWER_ID = "mobile-nav-drawer"
 // Active water story - determined by current URL hostname
-type ActiveWaterStory = "flow" | "climate" | null
+type ActiveWaterStory = "flow" | "climate" | "managed" | "equity" | null
 
 // Translation types
 type HeaderTranslations = {
@@ -157,11 +157,14 @@ export interface BaseHeaderProps {
   /* --- Optional features --- */
   shrinkOnScroll?: boolean // default: true
   showLanguageSwitcher?: boolean // default: false
+  forceShrunk?: boolean // force the header to load in it's shrunk state
 
   /* --- Action handlers (optional overrides) --- */
   onLogoClick?: () => void
   onGetDataClick?: () => void
   onAboutClick?: () => void
+  onGetStartedClick?: () => void
+  onToolsClick?: () => void
 
   /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
   waterThemesOptions?: NavDropdownOption[]
@@ -239,16 +242,21 @@ const translations: TranslationsMap = {
 const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
+  managed: "https://management.coeqwal.org",
+  equity: "https://equity.coeqwal.org",
 }
 
 export function BaseHeader({
   onLogoClick,
   onGetDataClick,
   onAboutClick,
+  onGetStartedClick,
+  onToolsClick,
   waterThemesOptions,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
   navTextShadow = "none",
+  forceShrunk = false,
   zIndex,
   backgroundColorScrolled,
   backgroundScrollThreshold = 200,
@@ -344,6 +352,10 @@ export function BaseHeader({
       setActiveWaterStory("flow")
     } else if (hostname.includes("climate.coeqwal")) {
       setActiveWaterStory("climate")
+    } else if (hostname.includes("management.coeqwal")) {
+      setActiveWaterStory("managed")
+    } else if (hostname.includes("equity.coeqwal")) {
+      setActiveWaterStory("equity")
     }
     // Note: On localhost, no water story is active (dev environment)
   }, [])
@@ -397,11 +409,13 @@ export function BaseHeader({
   const logoScale = useTransform(shrinkProgress, [0, 1], [1, 0.85])
 
   // Static fallbacks when shrinkOnScroll is disabled or user prefers reduced motion
-  const staticHeaderH = `${expandedHeight}px`
-  const staticPadY = "8px"
+  const staticHeaderH = forceShrunk
+    ? `${collapsedHeight}px`
+    : `${expandedHeight}px`
+  const staticPadY = forceShrunk ? "4px" : "8px"
 
   // WCAG 2.3.3: Disable animations if user prefers reduced motion
-  const shouldAnimate = shrinkOnScroll && !prefersReducedMotion
+  const shouldAnimate = !forceShrunk && shrinkOnScroll && !prefersReducedMotion
 
   /* ========================================
    * BUTTON STYLING (theme.typography.nav)
@@ -518,7 +532,7 @@ export function BaseHeader({
             }}
             style={{
               // WCAG 2.3.3: Only animate if user hasn't requested reduced motion
-              scale: shouldAnimate ? logoScale : 1,
+              scale: shouldAnimate ? logoScale : forceShrunk ? 0.85 : 1,
               originX: 0,
               originY: 0.5,
               willChange: shouldAnimate ? "transform" : "auto",
@@ -559,9 +573,19 @@ export function BaseHeader({
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center">
-                {/* 1. Water stories dropdown */}
+                {/* Getting Started */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={onGetStartedClick ? onGetStartedClick : undefined}
+                  sx={buttonStyle}
+                >
+                  Get Started
+                </Button>
+
+                {/* Water stories dropdown */}
                 <NavDropdown
-                  label={t.buttons.waterStories}
+                  label="Water Stories"
                   menuDescription={t.dropdownIntros.guides}
                   disableRipple
                   options={[
@@ -580,14 +604,14 @@ export function BaseHeader({
                     {
                       key: "managed",
                       label: t.waterStories.managed,
-                      onClick: () => {},
-                      disabled: true,
+                      onClick: () => (window.location.href = URLS.managed),
+                      active: activeWaterStory === "managed",
                     },
                     {
                       key: "equity",
                       label: t.waterStories.equity,
-                      onClick: () => {},
-                      disabled: true,
+                      onClick: () => (window.location.href = URLS.equity),
+                      active: activeWaterStory === "equity",
                     },
                   ]}
                   variant="text"
@@ -597,7 +621,7 @@ export function BaseHeader({
                 {/* 2. Water themes dropdown (rendered when options are provided) */}
                 {waterThemesOptions && waterThemesOptions.length > 0 && (
                   <NavDropdown
-                    label={t.buttons.waterThemes}
+                    label="Water Issues"
                     menuDescription={t.dropdownIntros.waterThemes}
                     disableRipple
                     options={waterThemesOptions}
@@ -606,6 +630,16 @@ export function BaseHeader({
                   />
                 )}
 
+                {/* Scenario explorer */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={onToolsClick ? onToolsClick : undefined}
+                  sx={buttonStyle}
+                >
+                  Tools
+                </Button>
+
                 {/* 3. Get data */}
                 <Button
                   variant="text"
@@ -613,7 +647,7 @@ export function BaseHeader({
                   onClick={onGetDataClick ? onGetDataClick : undefined}
                   sx={buttonStyle}
                 >
-                  {t.buttons.getData}
+                  Data
                 </Button>
 
                 {/* 4. About COEQWAL */}
@@ -623,7 +657,7 @@ export function BaseHeader({
                   onClick={onAboutClick ? onAboutClick : undefined}
                   sx={buttonStyle}
                 >
-                  {t.buttons.about}
+                  About Us
                 </Button>
 
                 {/* Language switcher (OPTIONAL) */}
@@ -866,18 +900,38 @@ export function BaseHeader({
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
-                    disabled
+                    onClick={() => {
+                      window.location.href = URLS.managed
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "managed"}
+                    aria-current={
+                      activeWaterStory === "managed" ? "page" : undefined
+                    }
                     sx={{
                       pl: 4,
                       pr: 2,
                       minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
                     }}
                   >
+                    {activeWaterStory === "managed" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
                     <ListItemText
                       primary={t.waterStories.managed}
                       slotProps={{
                         primary: {
-                          sx: { ...theme.typography.caption },
+                          sx: {
+                            ...theme.typography.caption,
+                            fontWeight:
+                              activeWaterStory === "managed"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
                         },
                       }}
                     />
@@ -885,18 +939,38 @@ export function BaseHeader({
                 </ListItem>
                 <ListItem disablePadding>
                   <ListItemButton
-                    disabled
+                    onClick={() => {
+                      window.location.href = URLS.equity
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "equity"}
+                    aria-current={
+                      activeWaterStory === "equity" ? "page" : undefined
+                    }
                     sx={{
                       pl: 4,
                       pr: 2,
                       minHeight: MIN_TOUCH_TARGET,
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
                     }}
                   >
+                    {activeWaterStory === "equity" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
                     <ListItemText
                       primary={t.waterStories.equity}
                       slotProps={{
                         primary: {
-                          sx: { ...theme.typography.caption },
+                          sx: {
+                            ...theme.typography.caption,
+                            fontWeight:
+                              activeWaterStory === "equity"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
                         },
                       }}
                     />

@@ -1,10 +1,10 @@
 /**
- * COEQWAL API fetch functions
+ * fetchers.ts - COEQWAL API fetch functions
  *
  * These functions fetch data from the COEQWAL API.
  * They use the shared apiFetcher with retry logic.
  *
- * Note: These fetchers have no baseUrl parameter - they always use
+ * Note: These fetchers have no baseUrl parameter. They always use
  * the production API. This makes them compatible with SWR's fetcher
  * signature (SWR passes the cache key as the first argument).
  */
@@ -39,6 +39,12 @@ import type {
   DeltaMonthlyResponse,
   TierLocationAssignmentsResponse,
   TierLocationAssignmentsBatchResponse,
+  ReservoirStorageDidResponse,
+  ReservoirStorageDidOptions,
+  RiverFlowsDidResponse,
+  RiverFlowsDidOptions,
+  DeltaSalinityDidResponse,
+  DeltaSalinityDidOptions,
 } from "./types"
 
 /**
@@ -317,6 +323,29 @@ export async function fetchReservoirPercentiles(
 }
 
 /**
+ * Fetch percentile data for a list of reservoirs in a single scenario.
+ *
+ * One request per scenario (the endpoint takes a comma-separated id list),
+ * so callers fan out per scenario rather than per reservoir-scenario pair.
+ * The response is keyed by the requested reservoir ids.
+ */
+export async function fetchReservoirPercentilesByIds(
+  scenarioId: string,
+  reservoirIds: string[],
+): Promise<GroupedReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.reservoirPercentilesFiltered(scenarioId, reservoirIds),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
  * Fetch percentile data for all reservoirs in a scenario
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
@@ -421,7 +450,11 @@ export async function fetchSpillMonthly(
  * @example
  * ```typescript
  * const data = await fetchMiContractorsMonthly("s0020")
- * // { scenario_id: "s0020", contractors: { "mwd_mi": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * // {
+ * //   scenario_id: "s0020",
+ * //   contractors: { "mwd_mi": { label, monthly_delivery: {...}, monthly_shortage: {...} } },
+ * //   count: 30,
+ * // }
  * ```
  */
 export async function fetchMiContractorsMonthly(
@@ -612,19 +645,20 @@ export async function fetchAgDemandUnitsList(filters?: {
 }
 
 /**
- * Fetch monthly surface-water delivery statistics for AG demand units.
+ * Fetch the merged monthly statistics for AG demand units.
  *
- * The backend route is `sw-delivery-monthly` and returns each DU's monthly
- * stats under `monthly_sw_delivery`. We remap that to `monthly_delivery`
- * here so the frontend can reuse `AgDemandUnitDeliveryData` and the same
- * matrix code path as CWS aggregates.
+ * The backend `/monthly` endpoint returns demand, surface-water delivery,
+ * groundwater pumping, and GW restriction shortage in one payload (each DU
+ * entry carries `monthly_demand`, `monthly_sw_delivery`, `monthly_gw_pumping`,
+ * and `monthly_shortage`). Pages that need more than one band cost one HTTP
+ * request thanks to SWR dedup on the shared cache key.
  *
  * Pass `duIds` to scope the response to specific demand units. The list
  * gets serialized to the backend's comma-separated `du_id` filter
  *
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @param duIds - Optional list of demand unit IDs to fetch
- * @returns Monthly delivery statistics for the requested AG demand units
+ * @returns Merged AG demand-unit monthly response (delivery + demand + GW + shortage)
  */
 export async function fetchAgDemandUnitsDeliveryMonthly(
   scenarioId: string,
@@ -634,45 +668,13 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
     throw new Error("Scenario ID is required")
   }
 
-  // Backend response shape: { demand_units: { [duId]: { monthly_sw_delivery: {...}, ... } } }
-  // We surface it as `monthly_delivery` for downstream callers
-  type RawDuEntry = {
-    agency: string
-    hydrologic_region: string | null
-    cs3_type: string | null
-    provider: string | null
-    monthly_sw_delivery?: Record<string, unknown>
-    monthly_delivery?: Record<string, unknown>
-  }
-  type RawResponse = {
-    scenario_id: string
-    demand_units: Record<string, RawDuEntry>
-  }
-
-  const raw = await apiFetcher<RawResponse>(
+  return apiFetcher<AgDemandUnitDeliveryMonthlyResponse>(
     ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId, duIds),
     {
       baseUrl: DEFAULT_API_BASE,
       timeout: 30000,
     },
   )
-
-  const remapped: AgDemandUnitDeliveryMonthlyResponse = {
-    scenario_id: raw.scenario_id,
-    demand_units: {},
-  }
-  for (const [duId, entry] of Object.entries(raw.demand_units ?? {})) {
-    const monthly = entry.monthly_sw_delivery ?? entry.monthly_delivery ?? {}
-    remapped.demand_units[duId] = {
-      agency: entry.agency,
-      hydrologic_region: entry.hydrologic_region,
-      cs3_type: entry.cs3_type,
-      provider: entry.provider,
-      monthly_delivery:
-        monthly as AgDemandUnitDeliveryMonthlyResponse["demand_units"][string]["monthly_delivery"],
-    }
-  }
-  return remapped
 }
 
 /**
@@ -680,7 +682,7 @@ export async function fetchAgDemandUnitsDeliveryMonthly(
  *
  * Source variable: `GW_SHORT_*`. Available only for SJR and TULARE region
  * DUs. Sacramento DUs are not present in the response. A 404 from the
- * backend means none of the requested DUs have shortage data; the fetcher
+ * backend means none of the requested DUs have shortage data. The fetcher
  * surfaces the error rather than swallowing it so callers can distinguish
  * "no data" from a real failure.
  *
@@ -881,5 +883,70 @@ export async function fetchDeltaMonthly(
   return apiFetcher<DeltaMonthlyResponse>(
     ENDPOINTS.deltaMonthly(scenarioId, category),
     { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+// ============================================================================
+// Data in Depth (generic data_in_depth_* tables)
+// ============================================================================
+
+/**
+ * Fetch April/September reservoir storage (raw values + live-computed stats)
+ * for one or more scenarios. Larger timeout: payload scales with
+ * scenarios × subjects × periods × units × included facets.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchReservoirStorageDataInDepth(
+  scenarios: string[],
+  options: ReservoirStorageDidOptions = {},
+): Promise<ReservoirStorageDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<ReservoirStorageDidResponse>(
+    ENDPOINTS.reservoirStorageDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/**
+ * Fetch annual water-year river flow (raw TAF + live-computed stats) for one
+ * or more scenarios. Annual + TAF only.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchRiverFlowsDataInDepth(
+  scenarios: string[],
+  options: RiverFlowsDidOptions = {},
+): Promise<RiverFlowsDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<RiverFlowsDidResponse>(
+    ENDPOINTS.riverFlowsDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/**
+ * Fetch April/September Delta X2 position (raw km + live-computed stats) for
+ * one or more scenarios. april/sept periods, km unit only.
+ *
+ * @param scenarios - scenario short_codes (>= 1)
+ * @param options - subjects / periods / units / include / wyt filters
+ */
+export async function fetchDeltaSalinityDataInDepth(
+  scenarios: string[],
+  options: DeltaSalinityDidOptions = {},
+): Promise<DeltaSalinityDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<DeltaSalinityDidResponse>(
+    ENDPOINTS.deltaSalinityDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
   )
 }

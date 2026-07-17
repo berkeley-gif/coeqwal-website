@@ -1,25 +1,30 @@
 # Code owners for coeqwal-website
 #
-# GitHub uses this file to auto-request reviews when a PR touches matching
-# paths. Owners receive a notification per their own GitHub email settings.
+# TEMPORARILY DISABLED: the team is on a self-review / self-merge workflow for
+# now, so the ownership rules below are commented out to stop GitHub from
+# auto-requesting reviewers on every PR. To reopen code-owner review later,
+# uncomment the rules below (and adjust owners as needed).
 #
-# This is so app owners receive a notification if a Turborepo package change affects their app.
+# When active, GitHub uses this file to auto-request reviews when a PR touches
+# matching paths. Owners receive a notification per their own GitHub email
+# settings. This is so app owners are notified when a Turborepo package change
+# affects their app.
 
-*                              @fantauzza @melijimenez11
+# *                              @melijimenez11
 
-# Per-app ownership
-/apps/main/                    @fantauzza @melijimenez11
-/apps/storyline-flow/          @yunhsinkuo
-/apps/storyline-climate/       @yunhsinkuo
+# # Per-app ownership
+# /apps/main/                    @melijimenez11
+# /apps/storyline-flow/          @yunhsinkuo
+# /apps/storyline-climate/       @yunhsinkuo
 
-# Shared workspaces: all owners review changes
-/packages/                     @fantauzza @melijimenez11 @yunhsinkuo
+# # Shared workspaces: all owners review changes
+# /packages/                     @melijimenez11 @yunhsinkuo
 
-# Build + deploy infrastructure (workflow, Amplify specs, lockfile)
-/.github/                      @fantauzza @melijimenez11 @yunhsinkuo
-/apps/main/amplify.yml         @fantauzza @melijimenez11 @yunhsinkuo
-/apps/storyline-flow/amplify.yml      @fantauzza @melijimenez11 @yunhsinkuo
-/apps/storyline-climate/amplify.yml   @fantauzza @melijimenez11 @yunhsinkuo
-/pnpm-lock.yaml                @fantauzza @melijimenez11 @yunhsinkuo
-/pnpm-workspace.yaml           @fantauzza @melijimenez11 @yunhsinkuo
-/turbo.json                    @fantauzza @melijimenez11 @yunhsinkuo
+# # Build + deploy infrastructure (workflow, Amplify specs, lockfile)
+# /.github/                      @melijimenez11 @yunhsinkuo
+# /apps/main/amplify.yml         @melijimenez11 @yunhsinkuo
+# /apps/storyline-flow/amplify.yml      @melijimenez11 @yunhsinkuo
+# /apps/storyline-climate/amplify.yml   @melijimenez11 @yunhsinkuo
+# /pnpm-lock.yaml                @melijimenez11 @yunhsinkuo
+# /pnpm-workspace.yaml           @melijimenez11 @yunhsinkuo
+# /turbo.json                    @melijimenez11 @yunhsinkuo

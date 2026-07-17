@@ -1,7 +1,7 @@
 /**
  * List tour illustrations registry. Maps the `illustration` string used in
  * `steps.ts` to a renderer that the `ToolTour` runner inlines into the
- * popper card. Keep entries tightly scoped per visual block; the
+ * popper card. Keep entries tightly scoped per visual block. The
  * `ControlIllustration` variants are exposed as distinct keys so the
  * step copy can refer to "the search field" or "the sort button"
  * without forking illustrations into separate components.

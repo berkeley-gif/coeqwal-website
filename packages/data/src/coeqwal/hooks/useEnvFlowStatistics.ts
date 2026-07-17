@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Hooks for fetching environmental river flow channel metadata
+ * useEnvFlowStatistics.ts - Hooks for fetching environmental river flow channel metadata
  *
  * Channel-level scenario data is served through the batch endpoint.
  *
@@ -15,7 +15,7 @@ import { fetchChannelsList } from "../fetchers"
 import type { ChannelsListResponse } from "../types"
 
 /**
- * Fetch all 59 channel reach entities with watershed and capability attributes.
+ * Fetch all channel reach entities with watershed and capability attributes.
  *
  * This is a static list.it rarely changes between ETL runs.
  * Use to populate channel selectors and decorate channel rows with metadata.
@@ -44,9 +44,9 @@ export function useChannelsList(channelClass?: string, watershed?: string) {
   return {
     data,
     channels: data?.channels ?? [],
-    total: data?.total ?? 0,
+    count: data?.count ?? 0,
     isLoading,
     error,
-    hasData: !!data && (data.total ?? 0) > 0,
+    hasData: !!data && (data.count ?? 0) > 0,
   }
 }

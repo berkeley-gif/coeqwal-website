@@ -3,7 +3,6 @@
  *
  * What survives a page reload within the same tab
  * ------------------------------------------------
- * - Shell routing (`mainView`: get-started vs Tools) via `store.ts`
  * - Workspace cross-tool state (`workspaceStoreSlice.ts`): selected scenarios,
  *   hydroclimate, active tool tab, toolbar chrome, chart cosmetics, highlighted
  *   scenario, share drawer open, in-progress tool tour
@@ -38,21 +37,21 @@ import type { EquityState } from "./equityStoreSlice"
 import { equityInitialState } from "./equityStoreSlice"
 import type { ResilienceState } from "./resilienceStoreSlice"
 import { resilienceInitialState } from "./resilienceStoreSlice"
+import type { DataState } from "./dataStoreSlice"
+import { dataInitialState } from "./dataStoreSlice"
 import type { WorkspaceState } from "./workspaceStoreSlice"
 import { workspaceInitialState } from "./workspaceStoreSlice"
 import {
   pickExplorerPersistedSession,
-  pickShellPersistedState,
   pickWorkspacePersistedState,
   type ResilienceHydroclimatePersisted,
-  type ShellMainView,
-  type ShellPersistedState,
 } from "./pickSlices"
 import type { WorkspaceSlice } from "./workspaceStoreSlice"
 import type { ListSlice } from "./listStoreSlice"
 import type { RadarSlice } from "./radarStoreSlice"
 import type { EquitySlice } from "./equityStoreSlice"
 import type { ResilienceSlice } from "./resilienceStoreSlice"
+import type { DataSlice } from "./dataStoreSlice"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"
 import { hasTourFor, type TourTool } from "../tools/tour/registry"
 import {
@@ -60,8 +59,15 @@ import {
   type ResilienceHydroclimate,
 } from "../tools/panels/resilience/resilienceHydroclimates"
 
-export const EXPLORE_SESSION_STORAGE_KEY = "coeqwal-explorer-tool-sessions-v2"
-export const EXPLORE_SESSION_STORAGE_VERSION = 2
+export const EXPLORE_SESSION_STORAGE_KEY = "coeqwal-explorer-tool-sessions-v3"
+export const EXPLORE_SESSION_STORAGE_VERSION = 3
+
+/** Prior storage keys, newest first, read as fallback so an in-tab session
+ * migrates forward instead of being dropped on a version bump. */
+const LEGACY_SESSION_STORAGE_KEYS = [
+  "coeqwal-explorer-tool-sessions-v2",
+  "coeqwal-explorer-tool-sessions-v1",
+] as const
 
 /** @deprecated Use EXPLORE_SESSION_STORAGE_KEY */
 export const TOOL_SESSION_STORAGE_KEY = EXPLORE_SESSION_STORAGE_KEY
@@ -70,11 +76,11 @@ type ExplorerStore = WorkspaceSlice &
   ListSlice &
   RadarSlice &
   EquitySlice &
-  ResilienceSlice
+  ResilienceSlice &
+  DataSlice
 
 export interface PersistedExploreSession {
   version: number
-  shell: Partial<ShellPersistedState>
   workspace: Partial<
     Pick<WorkspaceState, keyof ReturnType<typeof pickWorkspacePersistedState>>
   >
@@ -86,26 +92,25 @@ export interface PersistedExploreSession {
   > & {
     resilienceSelectedHydroclimates?: ResilienceHydroclimatePersisted
   }
+  data: Partial<DataState>
 }
 
 export interface ExploreSessionHydration {
-  shell: ShellPersistedState
   workspace: Partial<WorkspaceState>
   list: Partial<ListState>
   radar: Partial<RadarState>
   equity: Partial<EquityState>
   resilience: Partial<ResilienceState>
+  data: Partial<DataState>
 }
 
-const DEFAULT_SHELL: ShellPersistedState = { mainView: "get-started" }
-
 const EMPTY_HYDRATION: ExploreSessionHydration = {
-  shell: DEFAULT_SHELL,
   workspace: {},
   list: {},
   radar: {},
   equity: {},
   resilience: {},
+  data: {},
 }
 
 const EXPLORE_MODES = new Set<ExploreMode>([
@@ -139,11 +144,6 @@ function asBoolean(value: unknown): boolean | undefined {
 function asStringOrNull(value: unknown): string | null | undefined {
   if (value === null) return null
   return typeof value === "string" ? value : undefined
-}
-
-function validateMainView(value: unknown): ShellMainView | undefined {
-  if (value === "get-started" || value === "explorer") return value
-  return undefined
 }
 
 function validateExploreMode(value: unknown): ExploreMode | undefined {
@@ -308,25 +308,24 @@ function migrateEnvelope(
 ): PersistedExploreSession {
   const version = typeof env.version === "number" ? env.version : 1
 
-  const shellRaw = isRecord(env.shell) ? env.shell : {}
-  const mainView = validateMainView(shellRaw.mainView) ?? DEFAULT_SHELL.mainView
-
   return {
     version: EXPLORE_SESSION_STORAGE_VERSION,
-    shell: version >= 2 ? { mainView } : { mainView: DEFAULT_SHELL.mainView },
     workspace: version >= 2 ? validateWorkspaceSection(env.workspace) : {},
     list: isRecord(env.list) ? (env.list as Partial<ListState>) : {},
     radar: isRecord(env.radar) ? (env.radar as Partial<RadarState>) : {},
     equity: isRecord(env.equity) ? (env.equity as Partial<EquityState>) : {},
     resilience: validateResiliencePersistedSection(env.resilience),
+    data: isRecord(env.data) ? (env.data as Partial<DataState>) : {},
   }
 }
 
 function readRawEnvelope(): unknown {
   if (typeof window === "undefined") return null
-  const raw =
-    sessionStorage.getItem(EXPLORE_SESSION_STORAGE_KEY) ??
-    sessionStorage.getItem("coeqwal-explorer-tool-sessions-v1")
+  let raw = sessionStorage.getItem(EXPLORE_SESSION_STORAGE_KEY)
+  for (const legacyKey of LEGACY_SESSION_STORAGE_KEYS) {
+    if (raw) break
+    raw = sessionStorage.getItem(legacyKey)
+  }
   if (!raw) return null
   try {
     return JSON.parse(raw) as unknown
@@ -340,12 +339,12 @@ function readPersistedEnvelope(): PersistedExploreSession {
   if (!isRecord(parsed)) {
     return {
       version: EXPLORE_SESSION_STORAGE_VERSION,
-      shell: DEFAULT_SHELL,
       workspace: {},
       list: {},
       radar: {},
       equity: {},
       resilience: {},
+      data: {},
     }
   }
   return migrateEnvelope(parsed)
@@ -354,16 +353,14 @@ function readPersistedEnvelope(): PersistedExploreSession {
 export function loadExploreSessionState(): ExploreSessionHydration {
   try {
     const envelope = readPersistedEnvelope()
-    const mainView =
-      validateMainView(envelope.shell.mainView) ?? DEFAULT_SHELL.mainView
 
     return {
-      shell: { mainView },
       workspace: validateWorkspaceSection(envelope.workspace),
       list: envelope.list,
       radar: envelope.radar,
       equity: envelope.equity,
       resilience: validateResilienceHydration(envelope.resilience),
+      data: envelope.data,
     }
   } catch {
     return EMPTY_HYDRATION
@@ -372,11 +369,9 @@ export function loadExploreSessionState(): ExploreSessionHydration {
 
 export function pickPersistedExploreSession(
   explorerState: ExplorerStore,
-  shellState: ShellPersistedState,
 ): PersistedExploreSession {
   return {
     version: EXPLORE_SESSION_STORAGE_VERSION,
-    shell: pickShellPersistedState(shellState),
     ...pickExplorerPersistedSession(explorerState),
   }
 }
@@ -389,12 +384,12 @@ export function saveExploreSessionState(
     const current = readPersistedEnvelope()
     const merged: PersistedExploreSession = {
       version: EXPLORE_SESSION_STORAGE_VERSION,
-      shell: { ...current.shell, ...partial.shell },
       workspace: { ...current.workspace, ...partial.workspace },
       list: { ...current.list, ...partial.list },
       radar: { ...current.radar, ...partial.radar },
       equity: { ...current.equity, ...partial.equity },
       resilience: { ...current.resilience, ...partial.resilience },
+      data: { ...current.data, ...partial.data },
     }
     sessionStorage.setItem(EXPLORE_SESSION_STORAGE_KEY, JSON.stringify(merged))
   } catch {
@@ -436,4 +431,10 @@ export function mergeResilienceInitialState(
   hydration: Partial<ResilienceState>,
 ): ResilienceState {
   return { ...resilienceInitialState, ...hydration }
+}
+
+export function mergeDataInitialState(
+  hydration: Partial<DataState>,
+): DataState {
+  return { ...dataInitialState, ...hydration }
 }

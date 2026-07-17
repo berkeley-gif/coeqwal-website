@@ -1,5 +1,18 @@
 /**
- * Regional (NOD / SOD) tier means for the resilience heatmap.
+ * Regional (NOD / SOD) tier means for the resilience heatmap and the radar
+ * NOD/SOD axes.
+ *
+ * IN TRANSITION. This dataset is provisional. The source is the
+ * water-data-dashboard `data/tier_df_synthetic.csv`, a synthetic file, not
+ * the production API. The bundled JSON carries historical, cc50, and cc95,
+ * but the cc50 and cc95 regional values are not yet trusted for display, so
+ * the radar still gates NOD/SOD to historical only (see the guard in
+ * `useTierChartData.ts`). Before treating cc50 and cc95 regional data as
+ * real, the source needs to move to the real pipeline and be validated. If
+ * you add a hydroclimate to the app, this dataset will not cover it until it
+ * is regenerated, and `RegionalHydroclimate` below must be extended to match
+ * (this type lives here because the app cannot be imported from the data
+ * package).
  *
  * Source: water-data-dashboard `data/tier_df_synthetic.csv`, filtered to
  * the three hydroclimates the website currently ships (historical, cc50,

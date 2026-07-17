@@ -22,7 +22,7 @@ export function useOutcomeMapAction() {
   /**
    * Trigger (or toggle off) a map visualization for an outcome + scenario.
    * Accepts either an outcome short code ("CWS_DEL") or a display name
-   * ("Community water system deliveries") - the display name is resolved
+   * ("Community water system deliveries"). The display name is resolved
    * to a code automatically.
    */
   const showOutcomeOnMap = useCallback(

@@ -24,10 +24,11 @@ Dependencies and configurations set at the root level are overriden by local dep
   - [How to deploy your app after a package change](#how-to-deploy-your-app-after-a-package-change)
   - [Adding a new app to the dev deploy pipeline](#adding-a-new-app-to-the-dev-deploy-pipeline)
 - [Do local dev builds feel sluggish?](#do-local-dev-builds-feel-sluggish)
+- [Finding dead code](#finding-dead-code)
 - [Changes from the standard Turborepo](#changes-from-the-standard-turborepo)
 - [React StrictMode](#react-strictmode)
 - [SSG and hydration boundaries](#ssg-and-hydration-boundaries)
-- [Adding a new app](#adding-a-new-app)
+- [Adding a new app to the Turborepo (monorepo)](#adding-a-new-app)
 - [Adding a new package](#adding-a-new-package)
 - [Regular Turborepo maintenance (for lead dev)](#regular-turborepo-maintenance-for-lead-dev)
 - [Roadmap](#roadmap)
@@ -92,7 +93,7 @@ State management combines **Zustand** stores (map state, scenario explorer state
 | Data fetching  | [SWR](https://swr.vercel.app/), native fetch                                                                                        |
 | Maps           | [Mapbox GL](https://mapbox.com/) + [react-map-gl](https://visgl.github.io/react-map-gl/), [Turf.js](https://turfjs.org/)            |
 | Charts         | [D3 v7](https://d3js.org/) (custom components in `@repo/viz`)                                                                       |
-| Animation      | [Framer Motion](https://motion.dev/), [Flubber](https://github.com/veltman/flubber) (shape morphing)                                |
+| Animation      | [Framer Motion](https://motion.dev/)                                                                                                |
 | Scrollytelling | [react-scrollama](https://github.com/jsonkao/react-scrollama), custom `@repo/scrollytelling`                                        |
 | Drag and drop  | [@dnd-kit](https://dndkit.com/)                                                                                                     |
 | Deploy         | [AWS Amplify](https://aws.amazon.com/amplify/) (static export)                                                                      |
@@ -101,11 +102,11 @@ State management combines **Zustand** stores (map state, scenario explorer state
 
 ### Data flow
 
-The main app wraps its component tree in a `DataProvider` (SWR) that communicates with the external COEQWAL API at `https://api.coeqwal.org/api`. Typed hooks in `@repo/data` (such as `useScenarios`, `useTiers`, `useReservoirPercentiles`, and others) abstract the API calls and manage caching via SWR cache keys. File downloads are handled through a separate AWS API Gateway endpoint. There are no Next.js API routes in the repo. All apps are statically exported and rely on client-side fetching to external services.
+The main app wraps its component tree in a `DataProvider` (SWR) that communicates with the external COEQWAL API at `https://api.coeqwal.org/api`. Typed hooks in `@repo/data` (such as `useScenarios`, `useTiers`, `useReservoirPercentiles`, and others) abstract the API calls and manage caching via SWR cache keys. File downloads are handled through a separate AWS API Gateway endpoint. There are no Next.js API routes in the repo. All apps are statically exported.
 
 ### State management
 
-Zustand stores manage complex UI state for the map (`apps/main/app/features/map/store.ts`) and the scenario explorer (`apps/main/app/features/scenarioExplorer/store.ts`). React Context is used for the map API (`MapContext`), tab navigation (`TabsProvider`), chart grid layout (`ChartGridContext`), and internationalization (`TranslationProvider`). The active tab is also synced to URL query parameters.
+Zustand stores manage UI state for the map (`apps/main/app/features/map/store.ts`) and the scenario explorer (`apps/main/app/features/scenarioExplorer/store.ts`). React Context is used for the map API (`MapContext`), tab navigation (`TabsProvider`), chart grid layout (`ChartGridContext`), and internationalization (`TranslationProvider`). The active tab is also synced to URL query parameters.
 
 ### Persistent map
 
@@ -224,14 +225,27 @@ The COEQWAL website is hosted on AWS Amplify as the independent apps that share 
 
 "Shared workspaces" are `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, and the root `package.json`.
 
-| Trigger                                                                                  | What happens                                                                                                                                                                                                           | Where it is configured                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push or PR merge to `dev` touching one or more `apps/<x>/**` (non-Markdown)              | Each app with changes auto-deploys.                                                                                                                                                                                    | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `on.push.paths`, `dorny/paths-filter` filters, and the `compute` step that maps changed apps to deploy targets.                                                                                                         |
-| PR into `dev` touching shared workspaces (non-Markdown)                                  | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps, their [CODEOWNERS](.github/CODEOWNERS), and a per-app dispatch link. **Never triggers a deploy.** | [notify-package-changes.yml](.github/workflows/notify-package-changes.yml): `on.pull_request.paths`; impact list from [compute-affected-apps.mjs](.github/scripts/compute-affected-apps.mjs).                                                                                       |
-| Push to `dev` (not via PR) touching shared workspaces or `pnpm-lock.yaml` (non-Markdown) | [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) fails the run. The pusher gets a "workflow failed" email. Please open a PR for shared workspaces.                                                  | [enforce-package-pr.yml](.github/workflows/enforce-package-pr.yml): `on.push.paths` and the "Inspect push commits for PR provenance" step.                                                                                                                                          |
-| Anything touching only Markdown                                                          | Nothing. Markdown is exempt from both notify and enforce.                                                                                                                                                              | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `!apps/<app>/**/*.md` in `on.push.paths` and in `dorny/paths-filter`. [enforce-package-pr.yml](.github/workflows/enforce-package-pr.yml): `!**/*.md` / `!**/*.mdx` in `on.push.paths` and the inspect-step `grep -vE`.  |
-| Anything touching only `pnpm-lock.yaml`                                                  | Nothing. Lockfile churn is treated as a non-event.                                                                                                                                                                     | Omitted from [notify-package-changes.yml](.github/workflows/notify-package-changes.yml) `on.pull_request.paths` and from [compute-affected-apps.mjs](.github/scripts/compute-affected-apps.mjs); not in [deploy-amplify.yml](.github/workflows/deploy-amplify.yml) `on.push.paths`. |
-| **Deploy to Amplify** via GitHub Actions tab -> Run workflow                             | Manually deploys the chosen app(s) on `dev`.                                                                                                                                                                           | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `on.workflow_dispatch` inputs (`apps`, `branch`) and the deploy job `MAP` lookup.                                                                                                                                       |
+**Summary** There are two kinds of changes, and they behave differently:
+
+- **App-only changes** (files under `apps/<x>/**`) deploy automatically.
+- **Shared-workspace changes** can affect every app at once, so they never auto-deploy. They go through a PR, and each app owner redeploys their own app when ready.
+
+**Quick rules**
+
+- **Editing one app?** Open a PR into `dev`. When it merges (or when you push to `dev`), that one app auto-deploys. Markdown-only edits never deploy an app.
+- **Editing shared code?** Open a PR. Merging it updates the source on `dev` but doesn't deploy an app. Affected app owners get a notification listing their apps and the deploy link, and they redeploy when ready. Pushing shared code straight to `dev` without a PR fails CI on purpose.
+- **Need to deploy right now** (for example, to pick up a shared change)? Go to the **Actions** tab -> **Deploy to Amplify** -> **Run workflow**, then choose your app and `dev`.
+
+When in doubt, the table below is the full reference for every trigger, with the exact files that configure each behavior.
+
+| Trigger                                                                                  | What happens                                                                                                                                                                                                                                                                                                                                                                                                                      | Where it is configured                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Push or PR merge to `dev` touching one or more `apps/<x>/**` (non-Markdown)              | Each app with changes auto-deploys.                                                                                                                                                                                                                                                                                                                                                                                               | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `on.push.paths`, `dorny/paths-filter` filters, and the `compute` step that maps changed apps to deploy targets.                                                                                                                                                                                                                                                                                                                                        |
+| PR into `dev` touching shared workspaces (non-Markdown)                                  | [Notify package changes](.github/workflows/notify-package-changes.yml) posts a sticky comment listing affected apps (discovered from `apps/*/package.json`), their owners (from [CODEOWNERS](.github/CODEOWNERS) entries, when active), and a per-app dispatch link. **Never triggers a deploy.** Merging a shared-package PR to `dev` changes the source on `dev`, but it will not deploy to the site without manual deployment. | [notify-package-changes.yml](.github/workflows/notify-package-changes.yml): `on.pull_request.paths`; impact list from [compute-affected-apps.mjs](.github/scripts/compute-affected-apps.mjs).                                                                                                                                                                                                                                                                                                                      |
+| Push to `dev` (not via PR) touching shared workspaces or `pnpm-lock.yaml` (non-Markdown) | [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) fails the run. The pusher gets a "workflow failed" email. Please open a PR for shared workspaces.                                                                                                                                                                                                                                                             | [enforce-package-pr.yml](.github/workflows/enforce-package-pr.yml): `on.push.paths` and the "Inspect push commits for PR provenance" step, which runs [check-package-pr-provenance.mjs](.github/scripts/check-package-pr-provenance.mjs) (retries transient GitHub API failures; an exhausted-retries failure asks for a re-run instead of reporting a violation).                                                                                                                                                 |
+| Anything touching only Markdown                                                          | Nothing. Markdown is exempt from both notify and enforce.                                                                                                                                                                                                                                                                                                                                                                         | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `!apps/<app>/**/*.md` in `on.push.paths` and in `dorny/paths-filter`. [enforce-package-pr.yml](.github/workflows/enforce-package-pr.yml): `!**/*.md` / `!**/*.mdx` in `on.push.paths` and the markdown filter in [check-package-pr-provenance.mjs](.github/scripts/check-package-pr-provenance.mjs).                                                                                                                                                   |
+| Anything touching only `pnpm-lock.yaml`                                                  | No notify, no deploy. A lockfile-only PR merge to `dev` is a non-event. A direct (non-PR) lockfile push to `dev` still fails [Enforce package-PR rule](.github/workflows/enforce-package-pr.yml) (see the row above).                                                                                                                                                                                                             | Omitted from [notify-package-changes.yml](.github/workflows/notify-package-changes.yml) `on.pull_request.paths` and from [compute-affected-apps.mjs](.github/scripts/compute-affected-apps.mjs); not in [deploy-amplify.yml](.github/workflows/deploy-amplify.yml) `on.push.paths`. But `pnpm-lock.yaml` **is** in [enforce-package-pr.yml](.github/workflows/enforce-package-pr.yml) `on.push.paths` and the watched paths of [check-package-pr-provenance.mjs](.github/scripts/check-package-pr-provenance.mjs). |
+| Deploy to Amplify via GitHub Actions tab -> Run workflow                                 | Manually deploys the chosen app(s) on `dev`.                                                                                                                                                                                                                                                                                                                                                                                      | [deploy-amplify.yml](.github/workflows/deploy-amplify.yml): `on.workflow_dispatch` inputs (`apps`, `branch`) and the deploy job `MAP` lookup.                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### Apps and Amplify ids
 
@@ -245,7 +259,7 @@ The Amplify build-spec is the repo-root [`amplify.yml`](amplify.yml). The online
 
 ### Shared-package PRs
 
-A PR into `dev` that touches `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, or root `package.json` triggers [Notify package changes](.github/workflows/notify-package-changes.yml). The script [`compute-affected-apps.mjs`](.github/scripts/compute-affected-apps.mjs) diffs the PR against `dev`, reads [`.github/CODEOWNERS`](.github/CODEOWNERS) to learn which apps the monorepo deploys, and reads each app's `package.json` to find which apps depend on each changed package. It then posts a comment on the PR (header `package-deploy-impact`) listing the affected apps, their CODEOWNERS, and a per-app dispatch link.
+A PR into `dev` that touches `packages/**`, `pnpm-workspace.yaml`, `turbo.json`, or root `package.json` triggers [Notify package changes](.github/workflows/notify-package-changes.yml). The script [`compute-affected-apps.mjs`](.github/scripts/compute-affected-apps.mjs) diffs the PR against `dev`, discovers the monorepo's apps from `apps/<name>/package.json` on disk, and reads each app's `package.json` to find which apps depend on each changed package. It then posts a comment on the PR (header `package-deploy-impact`) listing the affected apps, their owners, and a per-app dispatch link. Owners come from active `/apps/<name>/` entries in [`.github/CODEOWNERS`](.github/CODEOWNERS); while those rules are commented out (code-owner review paused), apps show as unassigned and the comment still posts. The script is covered by `pnpm test:ci-scripts`, which runs in the CI `static-checks` job.
 
 `pnpm-lock.yaml` is intentionally excluded from the trigger paths and from the script's impact set because lockfile churn (regenerations, transitive bumps, dependabot) is too noisy.
 
@@ -259,13 +273,38 @@ After a package PR merges to `dev`, each affected app's CODEOWNER decides whethe
 
 ### Adding a new app to the dev deploy pipeline
 
-1. **Amplify Console:** create a new Amplify app pointed at `berkeley-gif/coeqwal-website`, branch `dev`. Set `AMPLIFY_MONOREPO_APP_ROOT=apps/<name>`. **Disable auto-build on `dev`**. Paste a per-app fallback inline build spec mirroring the matching stanza in root [amplify.yml](amplify.yml). Note the App ID.
-2. **IAM:** extend the `amplify-start-job` policy on role `coeqwal-website-amplify-deploy-role` to include the new app's ARN for `amplify:StartJob`, `amplify:GetJob`, `amplify:ListJobs`.
-3. **Root [amplify.yml](amplify.yml):** add an `applications:` stanza copy-pasted from one of the existing three, with `appRoot: apps/<name>`, `baseDirectory: apps/<name>/out`, `--filter=<name>`. Keep the same `cache:` block and `NODE_VERSION` pin.
-4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** add `<name>` to `workflow_dispatch.inputs.apps.options`. Add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths` filter, and add a matching block to the `dorny/paths-filter` filter map (the step uses `predicate-quantifier: 'every'` so the `!*.md` line works as an exclusion). Add a `case` line for `<name>` in the compute step and a `MAP[dev:<name>]="d<appId>"` entry in the lookup step. Do **not** add a production branch entry yet. That comes when production is wired (see **Production deploys**).
-5. **[.github/CODEOWNERS](.github/CODEOWNERS):** add `/apps/<name>/  @owner1 @owner2`. The notify workflow reads CODEOWNERS as the source of truth for which apps are tracked.
-6. **Smoke test:** dispatch **Deploy to Amplify** for `<name>` on `dev`, confirm `SUCCEED`. Then push a one-line edit under `apps/<name>/`, confirm only `<name>` auto-deploys.
-7. **Custom domain:** In Amplify Console (Hosting → Custom domains), attach `<sub>.coeqwal.org`. Amplify provisions HTTPS through [AWS Certificate Manager](https://docs.aws.amazon.com/acm/) (ACM). Complete ACM DNS validation: add the CNAME records Amplify shows in Route 53 (or wherever `coeqwal.org` DNS is hosted) and wait until the certificate is **Issued** and `https://<sub>.coeqwal.org` loads. This step is DNS and certificate setup only, not a deploy or smoke test (those are step 6).
+Steps 1, 4, and 5 are repo edits. Make them on a branch and merge them into `dev` before the smoke test in step 6, because that test runs against whatever is on `dev`. Steps 2 and 3 are AWS-side (Amplify Console and IAM). The App ID created in step 2 is needed by the IAM policy (step 3) and the workflow `MAP` (step 4).
+
+1. **Root [amplify.yml](amplify.yml) - author the build spec first.** Add an `applications:` stanza copy-pasted from one of the existing three, with `appRoot: apps/<name>`, `baseDirectory: apps/<name>/out`, and `--filter=<name>`. Keep the same `cache:` block and `NODE_VERSION` pin. The console step mirrors this stanza as its fallback, so it has to exist first.
+2. **Amplify Console - create the app as a static (`WEB`) host.** These apps are static exports (`output: "export"` in each `next.config`, emitted to `out/`), so they should run on Amplify's static `WEB` platform, not the Next.js `WEB_COMPUTE` (server) platform. Amplify's framework auto-detection, when it sees a Next.js repo, generally defaults the new app to `WEB_COMPUTE`, which expects `baseDirectory: .next` and will not serve our `out/`, so the platform has to be forced back to `WEB`. The console paths below are the expected locations. Labels can shift between Amplify Console versions, so navigate around if they have changed:
+   - **a.** Amplify Console -> **Create new app** -> **GitHub**, authorize, then choose `berkeley-gif/coeqwal-website` and branch `dev`.
+   - **b.** Check **My app is a monorepo** and enter the app root `apps/<name>`. The console sets `AMPLIFY_MONOREPO_APP_ROOT=apps/<name>` for you.
+   - **c.** **Force the platform to `WEB`.** Amplify auto-detects Next.js and creates the app as `WEB_COMPUTE`, which expects `baseDirectory: .next` and serves nothing from our `out/`. After the app is created, flip it back with the AWS CLI (the console may not expose a reliable platform toggle once Next.js is detected, so the CLI is the dependable way):
+     ```bash
+     aws amplify update-app --app-id <appId> --platform WEB
+     # verify (must print WEB):
+     aws amplify get-app --app-id <appId> --query 'app.platform' --output text
+     ```
+     The AWS console should now show the app as `WEB`.
+   - **d.** **Disable auto-build on `dev`** (App settings -> Branch settings -> turn off automatic builds). Every deploy is driven by the `Deploy to Amplify` workflow, never by Amplify's own Git trigger.
+   - **e.** Paste a per-app fallback inline build spec mirroring the stanza you added in step 1.
+   - **f.** Note the **App ID**. You need it for the IAM policy (step 3) and the workflow `MAP` lookup (step 4).
+   - **g.** Set the app's **build-time environment variables** (App settings -> Environment variables). Any `NEXT_PUBLIC_*` value the app reads at build time goes here. Today that means `NEXT_PUBLIC_MAPBOX_TOKEN` if the app renders a map. Each such variable must also be listed in root [turbo.json](turbo.json) (`globalEnv` and the `build` task's `env`), or Turbo strips it from the build environment and the value reaches the bundle as `undefined`. `NEXT_PUBLIC_MAPBOX_TOKEN` is already declared there. A var that is new to the monorepo needs that declaration added.
+3. **IAM:** extend the `amplify-start-job` policy on role `coeqwal-website-amplify-deploy-role` to grant `amplify:StartJob` and `amplify:GetJob` on the new app's job resources, i.e. add `arn:aws:amplify:us-west-2:<acct>:apps/<appId>/*` to the policy's `Resource` list (the `/*` reaches the branch and job sub-resources that these actions act on. The bare `apps/<appId>` ARN is not enough). This policy is deliberately scoped to each app's ARN, so a new app is denied deploys until its ARN is added here. The reason the `Resource` has to name the job sub-resource is that `amplify:StartJob` and `amplify:GetJob` are resource-scoped to the `jobs` resource type (`arn:...:apps/${AppId}/branches/${BranchName}/jobs/${JobId}`). See the [AWS Amplify Service Authorization Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsamplify.html) (the `jobs` resource type, and the `StartJob` / `GetJob` rows) and [How Amplify works with IAM](https://docs.aws.amazon.com/amplify/latest/userguide/security_iam_service-with-iam.html).
+4. **[.github/workflows/deploy-amplify.yml](.github/workflows/deploy-amplify.yml):** register the new app in the deploy workflow according to the process below. All of the edits below are made in this file (`.github/workflows/deploy-amplify.yml`):
+   - **Dispatch menu:** add `- <name>` to `workflow_dispatch.inputs.apps.options`.
+   - **"Deploy all" option:** add `<name>` to the `all)` case's `APPS='[...]'` array so the `all` choice includes it.
+   - **Push trigger paths:** add `apps/<name>/**` and `!apps/<name>/**/*.md` to the workflow-level `push.paths`.
+   - **Path filter:** add a matching block to the `dorny/paths-filter` `filters` map (`<name>:` with `apps/<name>/**` and `!apps/<name>/**/*.md`). The step uses `predicate-quantifier: 'every'`, so the `!*.md` line acts as an exclusion.
+   - **Compute step, `env:`** add `<NAME>_CHANGED: ${{ steps.filter.outputs.<name> || 'false' }}` to the `compute` step's `env:` block.
+   - **Compute step, dispatch `case`:** add `<name>) APPS='["<name>"]' ;;` to the `case "$SELECTION"` block.
+   - **Compute step, push append:** add `[[ "$<NAME>_CHANGED" == "true" ]] && APPS=$(jq -c '. + ["<name>"]' <<<"$APPS")` to the push branch, so a push touching the app auto-deploys it. Use the same `<NAME>_CHANGED` name as the `env:` entry above. **Without this line the app never auto-deploys on push** (the dispatch `case` alone only covers manual runs).
+   - **App-ID lookup:** add `["dev:<name>"]="d<appId>"` to the `MAP` in the lookup step.
+   - Do **not** add a production branch entry yet. That comes when production is wired.
+   - No new GitHub secret or variable is needed: the workflow authenticates with the shared `AMPLIFY_DEPLOY_ROLE_ARN` Actions variable (repo Settings -> Secrets and variables -> Actions -> Variables), which every app reuses.
+5. **[.github/CODEOWNERS](.github/CODEOWNERS) (optional):** add `/apps/<name>/  @owner1 @owner2` to show owners in the package-impact comment. The notify workflow tracks the app automatically once `apps/<name>/package.json` exists; without an active CODEOWNERS entry the app shows as _unassigned_.
+6. **Smoke test:** once steps 1 and 4 are merged to `dev`, dispatch **Deploy to Amplify** for `<name>` on `dev`, confirm `SUCCEED`. Then push a one-line edit under `apps/<name>/`, confirm only `<name>` auto-deploys.
+7. **Custom domain:** In Amplify Console (Hosting -> Custom domains), attach `<sub>.coeqwal.org`. Amplify provisions HTTPS through [AWS Certificate Manager](https://docs.aws.amazon.com/acm/) (ACM). Complete ACM DNS validation: add the CNAME records Amplify shows in Route 53 (or wherever `coeqwal.org` DNS is hosted) and wait until the certificate is **Issued** and `https://<sub>.coeqwal.org` loads. This step is DNS and certificate setup only, not a deploy or smoke test (those are step 6).
 
 ## Do local dev builds feel sluggish?
 
@@ -282,6 +321,47 @@ rm -rf .turbo apps/main/.next
 ```
 
 See also the `clean` scripts in the root `package.json`.
+
+## Finding dead code
+
+The repo uses [knip](https://knip.dev/) to find unused files, exports, and dependencies across the workspaces.
+
+```sh
+pnpm dead-code
+```
+
+Knip prints its findings straight to the terminal and exits with a non-zero status when it finds anything, so the command could look "failed" (red) even though nothing is wrong. If it is too long to read in the console, you can pipe the output, or pipe to read just a slice of it, for example `pnpm dead-code | grep apps/main`.
+
+The terminal output is grouped into sections, which vary with what is found. A full run currently shows: unused files, unused dependencies, unused devDependencies, unresolved imports, unused exports, unused exported types, and duplicate exports. Because knip scans all apps and packages together, a file or symbol that is only used by another app (or a shared `@repo/*` package consumed by an app) will not be reported as unused.
+
+Always review findings before removing anything. The sections below describe what the tool can and cannot tell you. Don't over-trust the report.
+
+The export-related sections in particular are large and mostly not dead code. Two categories dominate the noise: **duplicate exports** (the repo's convention of exporting both a named and a `default` symbol from the same file) and the **public API of `@repo/*` packages** (exports with no in-repo importer, which does not make them dead). Treat both as expected noise rather than removal candidates.
+
+### What knip cannot detect
+
+Knip analyzes the **static import graph**. It knows which files import which other files and symbols. It does not run the code, so two important categories slip past it:
+
+- **Runtime-dead code that is still statically imported.** A component can be imported and rendered in the JSX yet never actually appear, for example because it is gated behind a prop or flag that is always false. Knip sees the import and the render, so it reports the file as used. Deciding whether such code is truly live requires reading the call chain by hand, not the report. A concrete example in this repo is the basin inflow arrows: they are imported and rendered by `BaseLayers`, so knip considers them used, even though whether they ever draw depends on runtime state.
+- **References built from strings or wired in at build time.** Dynamic imports assembled from string fragments, registry lookups keyed by string, and build-time config references are all invisible to the static graph (see the false positives below).
+
+### Barrels can hide dead files
+
+A barrel is an `index.ts` whose job is to re-export symbols from neighboring files. Knip marks a file as used if any reachable module imports it, so when a barrel re-exports a file and the barrel is imported anywhere, that file counts as used even if nothing actually consumes the re-exported symbol. The deadness then shows up under unused exports (the redundant re-export line), not under unused files. This is why the unused-files list can look short while real dead code hides one level down.
+
+To find files that are masked this way, there are two reliable methods:
+
+- **Prune and re-run.** Remove the unused re-export lines from a barrel, then run `pnpm dead-code` again. Any file that was reachable only through a removed line now appears under unused files.
+- **Trace imports by path.** For each re-exported file, search the codebase for direct imports of that file. If the only importer is the barrel, the file is dead.
+
+Note that knip's `ignore` option does **not** help here: ignored files are still treated as importers, so ignoring a barrel does not reveal the files it was masking. This was verified directly. Use the two methods above instead.
+
+### Known false positives
+
+- **Build-time loaders referenced by string**, such as `apps/main/geojson-loader.cjs` (named in `next.config.js`). This is not dead code.
+- **Framework and tooling dependencies that are not imported directly**, such as `sass` (compiled by Next), the Emotion packages (used through MUI), `@turbo/gen` and the turbo generator config (used by `turbo gen`), and `@types/*` packages.
+
+When a finding is confirmed to be a false positive of the first kind (a real entry point the static graph misses), record it in [`knip.json`](knip.json) so future runs stay accurate. For example, `geojson-loader.cjs` is declared there as an entry for `apps/main`. Do not add genuinely dead code to the ignore lists just to quiet the report.
 
 ## Changes from the standard Turborepo
 
@@ -371,28 +451,6 @@ MUI's `sx` prop uses Emotion CSS-in-JS, which processes styles at runtime. When 
 
 3. **Dynamic imports for heavy libraries**: The Mapbox map is dynamically imported with `ssr: false` to reduce initial bundle size.
 
-### Architecture
-
-```
-layout.tsx (Server Component)
-├── TranslationProvider, DataProvider, ThemeRegistry
-├── Suspense > ActiveThemePanel
-└── TabsProvider
-    ├── SkipLink
-    ├── Suspense > Header
-    └── {children}
-        └── page.tsx (Server Component)
-            └── MapProvider
-                ├── DynamicMap (dynamic import, ssr: false)
-                ├── FloatingGlossary
-                └── MainContent (Server Component - inlined theme values)
-                    ├── IntroSection (Client - uses hooks)
-                    │   ├── VideoHero, About sticky panel, ... (render at SSG)
-                    │   └── Suspense > WaterThemesPanel (uses ?theme=)
-                    ├── SmoothTabs (Client - uses hooks)
-                    └── Suspense > TabPanels (Client - uses ?tab=)
-```
-
 ### Guidelines
 
 - **Add `"use client"` when**: Component uses React hooks, browser APIs, or event handlers
@@ -404,7 +462,7 @@ layout.tsx (Server Component)
 
 MUI supports CSS variables mode (`cssVariables: true` in theme config), which would allow Server Components to use theme values via `var(--mui-zIndex-pageContent)`. This is a potential future optimization.
 
-## Adding a new app
+## Adding a new app to the Turborepo (monorepo)
 
 To add a new app, cd into the `apps` directory and run
 
