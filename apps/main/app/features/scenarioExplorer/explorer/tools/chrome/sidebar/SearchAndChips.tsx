@@ -20,6 +20,7 @@ import {
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import ToggleChip from "../chips/ToggleChip"
 import { useTourAnchor } from "../../tour"
+import { THEME_LABEL_CONFIG } from "../../../../../../content/themes"
 
 interface SearchAndChipsProps {
   /** Show a vertical divider between search and chips (toolbar layout) */
@@ -45,6 +46,8 @@ export default function SearchAndChips({
     setShowOnlyChosen,
     groupByTheme,
     setGroupByTheme,
+    selectedTheme,
+    setSelectedTheme,
   } = useListSlice()
   const {
     showDefinitions,
@@ -53,6 +56,8 @@ export default function SearchAndChips({
     setShowAlternativeBaselines,
     showKeyOperations,
     setShowKeyOperations,
+    selectedScenarios,
+    clearScenarios,
   } = useWorkspaceSlice()
 
   const searchAnchorRef = useTourAnchor("list.toolbar.search")
@@ -68,6 +73,7 @@ export default function SearchAndChips({
     <>
       <Box
         ref={searchAnchorRef}
+        id="search-and-chips__container"
         sx={{
           display: "flex",
           alignItems: "center",
@@ -114,6 +120,73 @@ export default function SearchAndChips({
           </IconButton>
         )}
       </Box>
+
+      {selectedTheme && (
+        <Box
+          component="button"
+          type="button"
+          onClick={() => setSelectedTheme(null)}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
+            px: 1.25,
+            py: 0.5,
+            border: "none",
+            borderRadius: theme.borderRadius.lg,
+            cursor: "pointer",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            color: theme.palette.blue.bright,
+            background: theme.palette.interaction.selectedBackground,
+            transition: "all 150ms ease",
+            "&:hover": {
+              background: theme.palette.grey[200],
+              color: theme.palette.grey[800],
+            },
+          }}
+        >
+          <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+          Filtered by:{" "}
+          {THEME_LABEL_CONFIG[selectedTheme]?.label ?? selectedTheme}
+        </Box>
+      )}
+
+      {selectedScenarios.length > 0 && (
+        <Box
+          component="button"
+          type="button"
+          onClick={clearScenarios}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
+            px: 1.25,
+            py: 0.5,
+            border: "none",
+            borderRadius: theme.borderRadius.lg,
+            cursor: "pointer",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            color: theme.palette.grey[800],
+            background: theme.palette.grey[200],
+            transition: "all 150ms ease",
+            "&:hover": {
+              background: theme.palette.interaction.selectedBackground,
+              color: theme.palette.blue.bright,
+            },
+          }}
+        >
+          <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+          Clear all
+        </Box>
+      )}
 
       {showDivider && (
         <Box

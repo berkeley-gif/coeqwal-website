@@ -12,6 +12,7 @@ import { DynamicMap } from "../components/DynamicMap"
 import { FloatingGlossary } from "../features/glossary"
 import SmoothTabs from "../components/tabs/SmoothTabs"
 import TabPanels from "../components/tabs/TabPanels"
+import TabsShell from "../components/tabs/TabsShell"
 
 function TabPanelsErrorFallback() {
   return (
@@ -30,12 +31,14 @@ export default function LearnPage() {
       <DynamicMap />
       <FloatingGlossary />
       <MainContent>
-        <SmoothTabs />
-        <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
-          <Suspense fallback={null}>
-            <TabPanels />
-          </Suspense>
-        </ErrorBoundary>
+        <TabsShell>
+          <SmoothTabs />
+          <ErrorBoundary fallback={<TabPanelsErrorFallback />}>
+            <Suspense fallback={null}>
+              <TabPanels />
+            </Suspense>
+          </ErrorBoundary>
+        </TabsShell>
       </MainContent>
     </MapProvider>
   )

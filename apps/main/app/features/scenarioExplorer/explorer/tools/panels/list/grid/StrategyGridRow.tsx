@@ -9,33 +9,20 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, {
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useCallback,
-} from "react"
+import React, { useCallback } from "react"
 import { Box, useTheme, Checkbox } from "@repo/ui/mui"
-import {
-  OutcomeGlyphItem,
-  TierSummaryCell,
-  type ChartDataPoint,
-  type OutcomeName,
-  type ScenarioForDisplay,
+import type {
+  ChartDataPoint,
+  OutcomeName,
+  ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
 import { useWorkspaceSlice, useListSlice } from "../../../../store"
-import { useOutcomeMapAction } from "../../../../../../map/hooks"
 import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import { captureBarChartRow } from "./captureBarChartRow"
 import { stageShareItem } from "../../../../share/stage"
-import {
-  CompactRowContent,
-  NonCompactRowContent,
-  OutcomesOnlyRowContent,
-} from "./StrategyGridRowLayouts"
+import { NonCompactRowContent } from "./StrategyGridRowLayouts"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -52,44 +39,20 @@ export interface StrategyGridRowProps {
   isHighlighted: boolean
   /** Whether this scenario is selected/chosen */
   isChosen: boolean
-  /** Compact mode uses different layout */
-  compact: boolean
   /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
   /** When false, hides the key operations column */
   showOperations?: boolean
-  /** When true, only outcomes are shown (no checkbox, title, or ops) */
-  outcomesOnly?: boolean
-  /** Outcome names with display info */
+  /** Outcome names - used only for the row's share-to-drawer capture, not rendered */
   outcomeNames: OutcomeName[]
-  /** Get chart data for this scenario */
+  /** Get chart data for this scenario - used only for the row's share-to-drawer capture */
   getChartDataForScenario: (
     scenarioId: string,
   ) => Record<string, ChartDataPoint[]>
-  /** Currently selected outcome for this scenario */
-  selectedOutcome: string | null
-  /** Active tooltip outcome name */
-  activeTooltip: string | null
-  /** Current sort column */
-  sortBy: string | null
-  /** Sort direction */
-  sortDirection: "asc" | "desc"
-  /** Whether sort controls are enabled */
-  sortEnabled: boolean
-  /** Glyph size in pixels */
+  /** Glyph size in pixels, forwarded to the off-screen share capture */
   glyphSize: number
-  /** Whether we're in aligned grid mode (labels in header) */
-  isAlignedGrid: boolean
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
-  /** Called when a tier glyph is clicked (for map visualization) */
-  onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  /** Toggle tooltip with anchor (may include scenario context for glyph clicks) */
-  onTooltipToggle: (name: string, anchor: HTMLElement) => void
-  /** Toggle tooltip without scenario context (for info icon clicks) */
-  onInfoTooltipToggle?: (name: string, anchor: HTMLElement) => void
-  /** Sort change handler */
-  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
   /** Whether to show inline theme badge on each row */
   showThemeBadge?: boolean
   /** Select all scenarios sharing a theme when badge is clicked */
@@ -115,24 +78,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   tourListFirstItem = false,
   isHighlighted,
   isChosen,
-  compact,
   layoutMode,
   showOperations = true,
-  outcomesOnly = false,
   outcomeNames,
   getChartDataForScenario,
-  selectedOutcome,
-  activeTooltip,
-  sortBy,
-  sortDirection,
-  sortEnabled,
   glyphSize,
-  isAlignedGrid,
   onToggleScenario,
-  onTierClick,
-  onTooltipToggle,
-  onInfoTooltipToggle,
-  onSortChange,
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
@@ -150,80 +101,17 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const togglePinnedScenario = useListSlice((s) => s.togglePinnedScenario)
 
   const accentColor = scenarioColor || theme.palette.blue.bright
-  const outcomeColRef = useRef<HTMLDivElement>(null)
-  const listBarChartTourCellRef = useRef<HTMLDivElement | null>(null)
-  const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   // Tour anchors. Only the first list exemplar row registers (see
   // `tourListFirstItem`), so the tour highlights one checkbox / pin / share
   // instead of bulk-registering all rows.
   const listSelectCheckboxTourRef = useTourAnchor("list.select.checkbox")
-  const listOutcomeBarChartTourRef = useTourAnchor("list.outcome.barChart")
   const listRowPinTourRef = useTourAnchor("list.row.pin")
   const listRowShareTourRef = useTourAnchor("list.row.share")
   const listRowOperationsTourRef = useTourAnchor("list.row.operations")
-  const outcomeColAnchorRef = useTourAnchor("list.outcome.column")
 
-  // Bridge the outcome column ref into the tour registry. Mirroring
-  // through an effect lets `outcomeColRef` stay a stable React ref
-  // while still notifying the tour anchor whenever the first row
-  // remounts.
-  useEffect(() => {
-    if (!isFirst) return
-    outcomeColAnchorRef(outcomeColRef.current)
-    return () => outcomeColAnchorRef(null)
-  }, [isFirst, outcomeColAnchorRef])
-
-  const firstListOutcomeShort = outcomeNames[0]?.shortCode
-  const glyphBoxRefByShortCode = useMemo(() => {
-    const m = new Map<string, (el: HTMLDivElement | null) => void>()
-    for (const { shortCode } of outcomeNames) {
-      m.set(shortCode, (el) => {
-        glyphRefs.current[shortCode] = el
-        if (
-          tourListFirstItem &&
-          isListMode &&
-          firstListOutcomeShort === shortCode
-        ) {
-          listBarChartTourCellRef.current =
-            outcomeDisplayMode === "bar" ? el : null
-        }
-      })
-    }
-    return m
-  }, [
-    outcomeNames,
-    tourListFirstItem,
-    isListMode,
-    firstListOutcomeShort,
-    outcomeDisplayMode,
-  ])
-
-  // Tour anchor for the bar-chart step: useLayoutEffect + stable glyph refs
-  // so we never register in an inline ref callback. Inline callbacks get a
-  // new identity every parent render. React detaches/reattaches, toggling
-  // the anchor and triggering TourAnchorContext notify loops.
-  useLayoutEffect(() => {
-    if (!tourListFirstItem || !isListMode || outcomeDisplayMode !== "bar") {
-      listOutcomeBarChartTourRef(null)
-      return
-    }
-    listOutcomeBarChartTourRef(listBarChartTourCellRef.current)
-    return () => {
-      listOutcomeBarChartTourRef(null)
-    }
-  }, [
-    tourListFirstItem,
-    isListMode,
-    outcomeDisplayMode,
-    listOutcomeBarChartTourRef,
-  ])
-
-  // Map visualization hook
-  const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
-    useOutcomeMapAction()
-
-  // Get chart data for this scenario
+  // Chart data feeds only the off-screen share capture below - outcomes
+  // are never rendered in this row (they live in the Bar tool now).
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
 
   const handleShare = useCallback(
@@ -261,117 +149,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       glyphSize,
     ],
   )
-  const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
-
-  const handleOutcomeClick = (shortCode: string) => {
-    const anchor = glyphRefs.current[shortCode]
-    if (anchor) {
-      onTooltipToggle(shortCode, anchor)
-    }
-    onTierClick?.(scenario.scenarioId, shortCode)
-  }
-
-  /**
-   * Render a single outcome item. The visualization depends on the
-   * current tool context and the outcomeDisplayMode toggle:
-   *
-   * List view:
-   *   average      → TierSummaryCell
-   *   bar          → OutcomeGlyphItem (bars)
-   *   distribution → OutcomeGlyphItem (distribution squares)
-   *
-   * Other tools:
-   *   average      → TierSummaryCell (compact heatmap)
-   *   bar          → OutcomeGlyphItem (bars)
-   *   distribution → OutcomeGlyphItem (bars)
-   */
-  const renderOutcomeItem = (shortCode: string, displayName: string) => {
-    const chartData = scenarioChartData[shortCode]
-    const isActive = chartData !== undefined && chartData.length > 0
-    const isSelected = selectedOutcome === displayName
-    const isSorted = sortBy === shortCode
-    const glyphRefFor = glyphBoxRefByShortCode.get(shortCode)
-
-    // The list tour's map step replays a real click on this cell. When
-    // this render is that anchored cell, tag the wrapper with data-*
-    // attributes so ToolTour can read (scenarioId, outcomeCode) straight
-    // off the anchor element without coupling to the tour system here.
-    const isTourAnchorCell =
-      tourListFirstItem &&
-      isListMode &&
-      outcomeDisplayMode === "bar" &&
-      firstListOutcomeShort === shortCode
-    const tourCellDataAttrs = isTourAnchorCell
-      ? {
-          "data-tour-scenario-id": scenario.scenarioId,
-          "data-tour-outcome-code": shortCode,
-        }
-      : undefined
-
-    if (outcomeDisplayMode === "average") {
-      return (
-        <Box key={shortCode} ref={glyphRefFor} {...tourCellDataAttrs}>
-          <TierSummaryCell
-            chartData={chartData}
-            isActive={isActive}
-            isTooltipActive={activeTooltip === shortCode}
-            onClick={() => handleOutcomeClick(shortCode)}
-            mode={isListMode ? "numeric" : "label"}
-          />
-        </Box>
-      )
-    }
-
-    // All other cases use the full OutcomeGlyphItem shell.
-    // In list mode + distribution toggle, override variant to "distribution".
-    const variantOverride =
-      isListMode && outcomeDisplayMode === "distribution"
-        ? ("distribution" as const)
-        : undefined
-    const showLabelBelowGlyph = !isAlignedGrid
-    const showControlsBelowGlyph = !isAlignedGrid
-
-    return (
-      <Box key={shortCode} ref={glyphRefFor} {...tourCellDataAttrs}>
-        <OutcomeGlyphItem
-          displayName={displayName}
-          name={displayName}
-          outcomeCode={shortCode}
-          chartData={chartData}
-          isActive={isActive}
-          isSelected={
-            isSelected || isOutcomeActive(shortCode, scenario.scenarioId)
-          }
-          isTooltipActive={activeTooltip === shortCode}
-          variant={variantOverride}
-          morphEnabled={isListMode}
-          size={glyphSize}
-          showLabel={showLabelBelowGlyph}
-          showInfoButton={showControlsBelowGlyph}
-          showSortButton={showControlsBelowGlyph && sortEnabled}
-          sortState={isSorted ? sortDirection : null}
-          onGlyphClick={
-            isMapVisible
-              ? () => showOutcomeOnMap(shortCode, scenario.scenarioId)
-              : undefined
-          }
-          onInfoClick={(e) => {
-            ;(onInfoTooltipToggle ?? onTooltipToggle)(
-              shortCode,
-              e.currentTarget,
-            )
-          }}
-          onSortToggle={(newState) => {
-            if (newState === null) {
-              onSortChange?.(null, "asc")
-            } else {
-              onSortChange?.(shortCode, newState)
-            }
-          }}
-        />
-      </Box>
-    )
-  }
 
   return (
     <Box
@@ -382,11 +159,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       sx={{
         gridColumn: "1 / -1",
         display: "grid",
-        gridTemplateColumns: outcomesOnly
-          ? "1fr"
-          : compact
-            ? "32px 1fr"
-            : "subgrid",
+        gridTemplateColumns: "subgrid",
         "--row-bg": isActive
           ? `${accentColor}1A`
           : isHighlighted
@@ -394,10 +167,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
             : "#faf8f5",
         backgroundColor: "var(--row-bg)",
         borderRadius: theme.borderRadius.sm,
-        ...(compact && {
-          py: theme.scenarios.grid.row.padding,
-          px: theme.space.component.xl,
-        }),
         rowGap: theme.scenarios.grid.row.internalGap,
         alignItems: "stretch",
         transition:
@@ -418,96 +187,61 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         ...(isFirst && { marginTop: theme.scenarios.grid.row.firstOffset }),
       }}
     >
-      {outcomesOnly ? (
-        <OutcomesOnlyRowContent
-          outcomeNames={outcomeNames}
-          renderOutcomeItem={renderOutcomeItem}
-          isDistributionView={isDistributionView}
-          scenarioChartData={scenarioChartData}
+      {/* Column 1: Checkbox */}
+      <Box
+        ref={
+          tourListFirstItem && isListMode
+            ? listSelectCheckboxTourRef
+            : undefined
+        }
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "flex-start",
+          alignSelf: "start",
+          mr: -0.5,
+          pt: isListMode
+            ? theme.spacing(theme.scenarios.grid.row.padding as number)
+            : `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
+          pb: theme.scenarios.grid.row.padding,
+        }}
+      >
+        <Checkbox
+          size="small"
+          checked={isChosen}
+          onChange={() => onToggleScenario(scenario.scenarioId)}
+          slotProps={{
+            input: { "aria-label": `Select ${scenario.label} scenario` },
+          }}
+          sx={{
+            ...theme.scenarios.checkbox.sm,
+            cursor: "pointer",
+          }}
         />
-      ) : (
-        <>
-          {/* Column 1: Checkbox */}
-          <Box
-            ref={
-              tourListFirstItem && isListMode
-                ? listSelectCheckboxTourRef
-                : undefined
-            }
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "flex-start",
-              alignSelf: "start",
-              mr: -0.5,
-              ...(!compact && {
-                pt: isListMode
-                  ? theme.spacing(theme.scenarios.grid.row.padding as number)
-                  : `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
-                pb: theme.scenarios.grid.row.padding,
-              }),
-              ...(compact && { gridRow: "1 / -1" }),
-            }}
-          >
-            <Checkbox
-              size="small"
-              checked={isChosen}
-              onChange={() => onToggleScenario(scenario.scenarioId)}
-              slotProps={{
-                input: { "aria-label": `Select ${scenario.label} scenario` },
-              }}
-              sx={{
-                ...theme.scenarios.checkbox.sm,
-                cursor: "pointer",
-              }}
-            />
-          </Box>
+      </Box>
 
-          {/* Content: compact vs non-compact layout */}
-          {compact ? (
-            <CompactRowContent
-              scenario={scenario}
-              outcomeNames={outcomeNames}
-              renderOutcomeItem={renderOutcomeItem}
-              showThemeBadge={showThemeBadge}
-              onThemeBadgeClick={onThemeBadgeClick}
-              onIconClick={onIconClick}
-            />
-          ) : (
-            <NonCompactRowContent
-              scenario={scenario}
-              layoutMode={layoutMode}
-              showOperations={showOperations}
-              showDescription={showDefinitions}
-              outcomeNames={outcomeNames}
-              renderOutcomeItem={renderOutcomeItem}
-              showThemeBadge={showThemeBadge}
-              onThemeBadgeClick={onThemeBadgeClick}
-              onIconClick={onIconClick}
-              isDistributionView={isDistributionView}
-              scenarioChartData={scenarioChartData}
-              isPinned={isPinned}
-              accentColor={accentColor}
-              handleShare={handleShare}
-              togglePinnedScenario={togglePinnedScenario}
-              outcomeColRef={outcomeColRef}
-              pinRowTourRef={
-                tourListFirstItem && isListMode ? listRowPinTourRef : undefined
-              }
-              shareRowTourRef={
-                tourListFirstItem && isListMode
-                  ? listRowShareTourRef
-                  : undefined
-              }
-              operationsRowTourRef={
-                tourListFirstItem && isListMode
-                  ? listRowOperationsTourRef
-                  : undefined
-              }
-            />
-          )}
-        </>
-      )}
+      <NonCompactRowContent
+        scenario={scenario}
+        layoutMode={layoutMode}
+        showOperations={showOperations}
+        showDescription={showDefinitions}
+        showThemeBadge={showThemeBadge}
+        onThemeBadgeClick={onThemeBadgeClick}
+        onIconClick={onIconClick}
+        isPinned={isPinned}
+        accentColor={accentColor}
+        handleShare={handleShare}
+        togglePinnedScenario={togglePinnedScenario}
+        pinRowTourRef={
+          tourListFirstItem && isListMode ? listRowPinTourRef : undefined
+        }
+        shareRowTourRef={
+          tourListFirstItem && isListMode ? listRowShareTourRef : undefined
+        }
+        operationsRowTourRef={
+          tourListFirstItem && isListMode ? listRowOperationsTourRef : undefined
+        }
+      />
     </Box>
   )
 })

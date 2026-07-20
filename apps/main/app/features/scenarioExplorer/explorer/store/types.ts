@@ -1,4 +1,10 @@
-export type ExploreMode = "list" | "radar" | "equity" | "resilience" | "data"
+export type ExploreMode =
+  | "list"
+  | "bar"
+  | "radar"
+  | "equity"
+  | "resilience"
+  | "data"
 
 /**
  * Whether a tool pairs with the map panel. Data in depth deliberately has

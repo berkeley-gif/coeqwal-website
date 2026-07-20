@@ -91,38 +91,58 @@ export default function TabPanels() {
     }
   }
 
-  return (
-    <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
-      <AutoHeight>
+  const panelContent = (
+    <motion.div
+      initial={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
+      animate={{ backgroundColor: panelColor }}
+      transition={{ type: "spring", stiffness: 180, damping: 26 }}
+      style={{
+        position: "relative",
+        borderRadius: 0,
+        marginTop: -1,
+        pointerEvents: isMapTab ? "none" : "auto",
+        ...(activeTab === "explore" && {
+          height: "100%",
+        }),
+      }}
+    >
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
-          initial={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
-          animate={{ backgroundColor: panelColor }}
-          transition={{ type: "spring", stiffness: 180, damping: 26 }}
+          key={activeTab}
+          variants={panelVariants}
+          initial="center"
+          animate="center"
+          exit="exit"
+          transition={{ type: "spring", stiffness: 220, damping: 26 }}
           style={{
             position: "relative",
-            borderRadius: 0,
-            marginTop: -1,
             pointerEvents: isMapTab ? "none" : "auto",
+            ...(activeTab === "explore" && {
+              height: "100%",
+            }),
           }}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeTab}
-              variants={panelVariants}
-              initial="center"
-              animate="center"
-              exit="exit"
-              transition={{ type: "spring", stiffness: 220, damping: 26 }}
-              style={{
-                position: "relative",
-                pointerEvents: isMapTab ? "none" : "auto",
-              }}
-            >
-              {render(activeTab)}
-            </motion.div>
-          </AnimatePresence>
+          {render(activeTab)}
         </motion.div>
-      </AutoHeight>
+      </AnimatePresence>
+    </motion.div>
+  )
+
+  return (
+    <div
+      style={{
+        pointerEvents: isMapTab ? "none" : "auto",
+        ...(activeTab === "explore" && {
+          flex: 1,
+          minHeight: 0,
+        }),
+      }}
+    >
+      {activeTab === "explore" ? (
+        panelContent
+      ) : (
+        <AutoHeight>{panelContent}</AutoHeight>
+      )}
     </div>
   )
 }

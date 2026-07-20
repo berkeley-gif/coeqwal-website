@@ -12,6 +12,7 @@ import type { ReactNode } from "react"
 import { Box } from "@repo/ui/mui"
 import type { ExploreMode } from "./store"
 import {
+  BarPanel,
   DataExplorerView,
   EquityChartControls,
   EquityPanel,
@@ -67,6 +68,12 @@ export default function ActiveToolPanel({
           <ToolIsland
             panel={<ListView highlightedIds={hover.highlightedIds} />}
           />
+        </ToolErrorBoundary>
+      )
+    case "bar":
+      return (
+        <ToolErrorBoundary tool="bar">
+          <ToolIsland panel={<BarPanel />} />
         </ToolErrorBoundary>
       )
     case "radar":

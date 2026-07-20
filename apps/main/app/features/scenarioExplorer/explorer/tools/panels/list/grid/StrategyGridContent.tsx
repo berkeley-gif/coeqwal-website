@@ -23,7 +23,6 @@ import type {
 } from "../../../../../../scenarios/components/shared"
 import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
-import type { TooltipScenarioContext } from "../../../../../../tooltips/useTierTooltipState"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
 import ThemeGroupHeader from "../../../chrome/sidebar/ThemeGroupHeader"
 import { HydroclimateGate } from "../../../../../../scenarios/components/HydroclimateGate"
@@ -32,88 +31,35 @@ import { captureBarChartRow } from "./captureBarChartRow"
 import { stageShareItem } from "../../../../share/stage"
 
 export interface StrategyGridContentProps {
-  /** Scenarios to display */
   scenarios: ScenarioForDisplay[]
-  /** Set of highlighted scenario IDs (search matches) */
   highlightedScenarios: Set<string>
-  /** Whether to show search divider between highlighted and non-highlighted */
   showSearchDivider: boolean
-  /** Set of scenario IDs matching the active theme filter */
   themeMatchingScenarioIds?: Set<string>
-  /** Whether to show a divider after the theme-matching group */
   showThemeDivider?: boolean
-  /** Whether to show dividers between all adjacent scenarios with different themes */
   showAllThemeDividers?: boolean
-  /** When true, shows ThemeGroupHeader subheaders above each theme group */
   groupByTheme?: boolean
-  /**
-   * When false with groupByTheme, order interleaves themes: hide subheaders, show per-row theme badges
-   * @default true
-   */
   scenariosInContiguousThemeOrder?: boolean
-  /** Set of scenario IDs matching the active icon filter */
   iconMatchingScenarioIds?: Set<string>
-  /** Whether to show a divider after the icon-matching group */
   showIconDivider?: boolean
-  /** Selected/chosen scenario IDs */
   selectedScenarios: string[]
-  /** Show only chosen scenarios */
   showOnlyChosen: boolean
-  /** Show alternative baseline scenarios */
   showAlternativeBaselines: boolean
-  /** Compact layout mode */
-  compact: boolean
-  /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
-  /** When false, hides the key operations column */
   showOperations?: boolean
-  /** When true, only outcomes are shown (no checkbox, title, or ops columns) */
-  outcomesOnly?: boolean
-  /** Outcome names with display info */
+  /** Outcome names - used only for each row's share-to-drawer capture */
   outcomeNames: OutcomeName[]
-  /** Get chart data for a scenario */
+  /** Get chart data for a scenario - used only for each row's share-to-drawer capture */
   getChartDataForScenario: (
     scenarioId: string,
   ) => Record<string, ChartDataPoint[]>
-  /** Currently selected outcomes per scenario */
-  selectedOutcomes: Record<string, string | null>
-  /** Active tooltip outcome name */
-  activeTooltip: string | null
-  /** Current sort column */
-  sortBy: string | null
-  /** Sort direction */
-  sortDirection: "asc" | "desc"
-  /** Whether sort is enabled */
-  sortEnabled: boolean
-  /** Glyph size in pixels */
+  /** Glyph size in pixels, forwarded to the off-screen share capture */
   glyphSize: number
-  /** Whether in aligned grid mode */
-  isAlignedGrid: boolean
-  /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
-  /** Called when a tier glyph is clicked (for map visualization) */
-  onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  /** Toggle tooltip (basic - no scenario context) */
-  onTooltipToggle: (name: string, anchor: HTMLElement) => void
-  /** Toggle tooltip with scenario context (for accessibility) */
-  onTooltipToggleWithContext?: (
-    name: string,
-    anchor: HTMLElement,
-    context: TooltipScenarioContext,
-  ) => void
-  /** Sort change handler */
-  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
-  /** Select all scenarios sharing a theme when badge is clicked */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
-  /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
-  /** Map of scenario ID to color for accent border / swatch */
   scenarioColors?: Record<string, string>
-  /** Set of pinned scenario IDs */
   pinnedScenarioIds?: string[]
-  /** Set of externally active (hovered/highlighted) scenario IDs */
   activeScenarioIds?: Set<string>
-  /** Called on mouse enter/leave for hover sync with other panels */
   onRowHover?: (scenarioIds: string[] | null) => void
 }
 
@@ -135,24 +81,12 @@ export function StrategyGridContent({
   selectedScenarios,
   showOnlyChosen,
   showAlternativeBaselines,
-  compact,
   layoutMode,
   showOperations = true,
-  outcomesOnly = false,
   outcomeNames,
   getChartDataForScenario,
-  selectedOutcomes,
-  activeTooltip,
-  sortBy,
-  sortDirection,
-  sortEnabled,
   glyphSize,
-  isAlignedGrid,
   onToggleScenario,
-  onTierClick,
-  onTooltipToggle,
-  onTooltipToggleWithContext,
-  onSortChange,
   onThemeBadgeClick,
   onIconClick,
   scenarioColors,
@@ -162,16 +96,12 @@ export function StrategyGridContent({
 }: StrategyGridContentProps) {
   const theme = useTheme()
 
-  // The primary baseline scenario, shown by default, others hidden until expanded
   const PRIMARY_BASELINE_ID = "s0020"
 
-  // Filter scenarios: chosen-only takes precedence, then baseline visibility
   const displayScenarios = (() => {
-    // When showing only chosen scenarios, respect that fully - no baseline filtering
     if (showOnlyChosen) {
       return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
     }
-    // When showing all: hide alternative baselines unless toggled on
     if (!showAlternativeBaselines) {
       return scenarios.filter(
         (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
@@ -184,7 +114,6 @@ export function StrategyGridContent({
     () => displayScenarios.some((s) => Boolean(s.theme)),
     [displayScenarios],
   )
-  // Subheaders only when theme order allows and at least one row is themed. Else row badges
   const themeSubheaderMode =
     groupByTheme && scenariosInContiguousThemeOrder && hasThemedScenarios
   const showThemeBadgeUnpinned = !themeSubheaderMode
@@ -204,7 +133,6 @@ export function StrategyGridContent({
     [displayScenarios, pinnedSet],
   )
 
-  // Pre-compute scenario IDs per theme for ThemeGroupHeader (full display set)
   const themeScenarioIds = useMemo(() => {
     if (!themeSubheaderMode) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
@@ -218,8 +146,6 @@ export function StrategyGridContent({
     return map
   }, [themeSubheaderMode, displayScenarios])
 
-  // For pinned section: only show theme header when ALL scenarios
-  // in that theme (from the display set) are pinned together.
   const pinnedThemeScenarioIds = useMemo(() => {
     if (!themeSubheaderMode || pinnedScenarios.length === 0)
       return new Map<string, string[]>()
@@ -231,7 +157,6 @@ export function StrategyGridContent({
         map.set(s.theme, ids)
       }
     }
-    // Only keep themes where ALL display-set scenarios are pinned
     for (const [theme, pinnedIds] of map) {
       const totalIds = themeScenarioIds.get(theme) ?? []
       if (pinnedIds.length < totalIds.length) {
@@ -287,38 +212,12 @@ export function StrategyGridContent({
     ],
   )
 
-  // Create context-aware tooltip handler for a specific scenario
-  const createTooltipHandler = useCallback(
-    (scenario: ScenarioForDisplay) => (name: string, anchor: HTMLElement) => {
-      if (onTooltipToggleWithContext) {
-        const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
-        const outcomeChartData = scenarioChartData[name]
-
-        onTooltipToggleWithContext(name, anchor, {
-          scenarioId: scenario.scenarioId,
-          scenarioLabel: scenario.label,
-          chartData: outcomeChartData,
-        })
-      } else {
-        onTooltipToggle(name, anchor)
-      }
-    },
-    [onTooltipToggle, onTooltipToggleWithContext, getChartDataForScenario],
-  )
-
-  /** Render a list of scenarios as grid rows with dividers and optional theme headers. */
   const renderScenarioRows = (
     list: ScenarioForDisplay[],
     opts: {
       themeIds: Map<string, string[]>
       isFirstGroup: boolean
-      /** Pinned block always had row theme badges. Keep when subheaders are partial/empty */
       showThemeBadgeInPinnedSection?: boolean
-      /**
-       * True for the block that contains the first visible list row (pinned head
-       * or unpinned list). Used so the `list.row.pin` tour anchor attaches to the
-       * first row that has pin and share controls, even with group-by-theme or mixed pinned sections.
-       */
       registerTourFirstListItem: boolean
     },
   ) =>
@@ -387,24 +286,12 @@ export function StrategyGridContent({
             tourListFirstItem={opts.registerTourFirstListItem && index === 0}
             isHighlighted={isHighlighted}
             isChosen={selectedScenarios.includes(scenario.scenarioId)}
-            compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
-            outcomesOnly={outcomesOnly}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
-            selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
-            activeTooltip={activeTooltip}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            sortEnabled={sortEnabled}
             glyphSize={glyphSize}
-            isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
-            onTierClick={onTierClick}
-            onTooltipToggle={createTooltipHandler(scenario)}
-            onInfoTooltipToggle={onTooltipToggle}
-            onSortChange={onSortChange}
             showThemeBadge={
               opts.showThemeBadgeInPinnedSection === true
                 ? true
@@ -433,7 +320,6 @@ export function StrategyGridContent({
           />,
         )
       }
-
       if (shouldShowThemeDivider) {
         rows.push(
           <Box
@@ -447,7 +333,6 @@ export function StrategyGridContent({
           />,
         )
       }
-
       if (shouldShowIconDivider) {
         rows.push(
           <Box
@@ -461,7 +346,6 @@ export function StrategyGridContent({
           />,
         )
       }
-
       if (shouldShowThemeGroupDivider) {
         rows.push(
           <Box
@@ -494,7 +378,6 @@ export function StrategyGridContent({
 
   return (
     <>
-      {/* Sticky pinned rows - stick at top of scroll area */}
       {hasPinned && (
         <Box
           sx={{
@@ -522,7 +405,6 @@ export function StrategyGridContent({
         </Box>
       )}
 
-      {/* Unpinned rows - scroll normally */}
       {renderScenarioRows(unpinnedScenarios, {
         themeIds: themeScenarioIds,
         isFirstGroup: !hasPinned,

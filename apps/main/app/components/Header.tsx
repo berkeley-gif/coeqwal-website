@@ -28,11 +28,33 @@ export function Header() {
 
   const { isPastHero: rawIsPastHero } = useTabs()
 
+  // Tracks whether a tab navigation click just fired, so the header can
+  // snap to its shrunk state immediately instead of waiting for `pathname`
+  // to catch up (which lags a beat behind the synchronous tab-context
+  // update and caused the tabs strip to render clipped under the header
+  // on the first paint). Local state, not shared context - setting it
+  // should only re-render this component, not the whole app.
+  const [isNavigatingToTabs, setIsNavigatingToTabs] = useState(false)
+
+  useEffect(() => {
+    const handleNavigating = () => setIsNavigatingToTabs(true)
+    window.addEventListener("explore:navigating", handleNavigating)
+    return () =>
+      window.removeEventListener("explore:navigating", handleNavigating)
+  }, [])
+
+  useEffect(() => {
+    setIsNavigatingToTabs(false)
+  }, [pathname])
+
   // On any route other than "/", there's no hero to scroll past.
   // Default to the "past hero" appearance (solid nav) immediately.
   const isHomePage = pathname === "/"
   const isTabsPage =
-    pathname === "/learn" || pathname === "/explore" || pathname === "/share"
+    pathname === "/learn" ||
+    pathname === "/explore" ||
+    pathname === "/share" ||
+    isNavigatingToTabs
 
   // Defer isPastHero until after hydration so server and client render
   // the same initial markup (variant="light"). Once mounted, the real

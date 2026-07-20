@@ -47,9 +47,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   iconMatchingScenarioIds,
   showIconDivider = false,
   onToggleScenario,
-  onTierClick,
   selectedScenarios,
-  selectedOutcomes,
   showMapView,
   showOnlyChosen,
   showAlternativeBaselines,
@@ -62,16 +60,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   hideColumnTitles = false,
   groupByTheme = false,
   scenariosInContiguousThemeOrder = true,
-  sortBy,
-  sortDirection = "asc",
-  onSortChange,
   onThemeBadgeClick,
   onIconClick,
   scenarioColors,
   pinnedScenarioIds,
   activeScenarioIds,
   onRowHover,
-  hideOutcomes = false,
   onLayoutModeChange,
 }: StrategyGridProps) {
   const theme = useTheme()
@@ -102,8 +96,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         ? "wrapped"
         : "compact"
 
-  const isAlignedGrid = !compact && !showMapView && layoutMode === "full"
-
   useEffect(() => {
     onLayoutModeChange?.(layoutMode)
   }, [layoutMode, onLayoutModeChange])
@@ -117,7 +109,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     anchor: tooltipAnchor,
     scenarioContext,
     handleToggleWithAnchor,
-    handleToggleWithContext,
     handleClose: closeTooltip,
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
@@ -136,9 +127,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const displayScenarios = scenariosProp ?? []
   const highlighted = highlightedScenarios || new Set<string>()
 
-  // Whether sort controls should be shown
-  const sortEnabled = !!onSortChange
-
   // =========================================================================
   // Render
   // =========================================================================
@@ -149,6 +137,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   return (
     <Box
       ref={containerRef}
+      id="strategy-grid"
       sx={{
         position: "relative",
         containerType: "inline-size",
@@ -172,43 +161,20 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           /**
            * Responsive grid columns via @container queries:
            * - default: 2 columns (checkbox + content)
-           * - 600px+: 4 columns (checkbox + scenario + operations + outcomes wrap)
+           * - 600px+: 4 columns (checkbox + scenario + operations)
            * - fullBreakpoint+: Full 4 columns with outcomes inline
-           *
-           * When hideOutcomes is true, columns stay at 2-3 (no col 4),
-           * and a descendant selector hides `.outcome-col` elements.
            */
           gridTemplateColumns: outcomesOnly
             ? "1fr"
             : theme.scenarios.grid.columns.xs,
-          ...(!outcomesOnly &&
-            (hideOutcomes
-              ? {
-                  [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]:
-                    {
-                      gridTemplateColumns: showOperations
-                        ? "32px minmax(0, 1fr) auto"
-                        : "32px minmax(0, 1fr) 0px",
-                    },
-                }
-              : {
-                  [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]:
-                    {
-                      gridTemplateColumns: showOperations
-                        ? "32px minmax(0, 600px) 140px 1fr"
-                        : "32px minmax(0, 600px) 0px 1fr",
-                    },
-                  [`@container strategy-grid (min-width: ${FULL_BREAKPOINT}px)`]:
-                    {
-                      gridTemplateColumns: showOperations
-                        ? theme.scenarios.grid.columns.full
-                        : "32px 0.382fr 0px 1fr",
-                    },
-                })),
-          transition: "grid-template-columns 300ms ease",
-          ...(hideOutcomes && {
-            "& .outcome-col": { display: "none" },
+          ...(!outcomesOnly && {
+            [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]: {
+              gridTemplateColumns: showOperations
+                ? "32px minmax(0, 1fr) auto"
+                : "32px minmax(0, 1fr) 0px",
+            },
           }),
+          transition: "grid-template-columns 300ms ease",
           /**
            * Grid gap configuration:
            * - rowGap: Varies by mode (compact uses larger gap between rows)
@@ -233,22 +199,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         {/* Column headers */}
         {shouldRenderHeaders && (
           <StrategyGridHeader
-            outcomeNames={outcomeNames}
-            compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
-            outcomesOnly={outcomesOnly}
             hideColumnTitles={hideColumnTitles}
-            activeTooltip={activeTooltip}
-            sortBy={sortBy ?? null}
-            sortDirection={sortDirection}
-            sortEnabled={sortEnabled}
             showOnlyChosen={showOnlyChosen}
             showAlternativeBaselines={showAlternativeBaselines}
             onShowOnlyChosenChange={onShowOnlyChosenChange}
             onShowAlternativeBaselinesChange={onShowAlternativeBaselinesChange}
-            onTooltipToggle={handleToggleWithAnchor}
-            onSortChange={onSortChange}
           />
         )}
 
@@ -268,24 +225,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
             showAlternativeBaselines={showAlternativeBaselines}
-            compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
-            outcomesOnly={outcomesOnly}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
-            selectedOutcomes={selectedOutcomes}
-            activeTooltip={activeTooltip}
-            sortBy={sortBy ?? null}
-            sortDirection={sortDirection}
-            sortEnabled={sortEnabled}
             glyphSize={glyphSize}
-            isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
-            onTierClick={onTierClick}
-            onTooltipToggle={handleToggleWithAnchor}
-            onTooltipToggleWithContext={handleToggleWithContext}
-            onSortChange={onSortChange}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
             scenarioColors={scenarioColors}

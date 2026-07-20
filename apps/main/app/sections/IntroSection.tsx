@@ -7,9 +7,8 @@
  * headline overlay.
  */
 
-import { Suspense, useRef } from "react"
+import { useRef } from "react"
 import { Box } from "@repo/ui/mui"
-import { ErrorBoundary } from "@repo/utils"
 
 import VideoHero from "./intro/VideoHero"
 import type { VideoSource } from "./intro/VideoHero"
@@ -39,16 +38,7 @@ const IntroSection = () => {
       </div>
 
       <AboutCoeqwalPanel />
-
-      {/* 
-          Silent null fallback on error: this is a passive scroll
-          decoration. Replacing it with an error UI mid-intro would
-          be more disruptive than letting it disappear. */}
-      <ErrorBoundary fallback={null}>
-        <Suspense fallback={null}>
-          <WaterThemesPanel />
-        </Suspense>
-      </ErrorBoundary>
+      <WaterThemesPanel />
     </Box>
   )
 }

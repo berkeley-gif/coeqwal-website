@@ -151,6 +151,9 @@ export function createWorkspaceSlice(
         if (state.exploreMode !== mode) {
           state.tour = { tool: null, step: 0 }
         }
+        if (mode === "list") {
+          state.showMap = false
+        }
         state.exploreMode = mode
       }),
 
