@@ -151,3 +151,51 @@ export function seriesFromValues(
   }
   return out
 }
+
+/** Per-scenario response array key for each domain. */
+const RESPONSE_ARRAY_BY_DOMAIN: Record<
+  DidDomain,
+  "reservoirs" | "rivers" | "subjects"
+> = {
+  reservoir: "reservoirs",
+  river: "rivers",
+  delta: "subjects",
+}
+
+/** Request unit token -> response unit key. */
+const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
+  volume: "TAF",
+  pct_capacity: "PCT_CAP",
+  km: "km",
+}
+
+/** Minimal structural shape of one scenario block in a data-in-depth response. */
+type LiveFacet = { values?: ReadonlyArray<{ value: number | null }> }
+type LiveSubject = {
+  subject: string
+  periods?: Record<string, Record<string, LiveFacet>>
+}
+export type LiveScenarioBlock = {
+  reservoirs?: LiveSubject[]
+  rivers?: LiveSubject[]
+  subjects?: LiveSubject[]
+}
+
+/**
+ * Pull the raw annual series for one (subject, period, unit) out of a single
+ * scenario's response block. Returns [] when the block, subject, period, or
+ * unit is absent, so the caller falls back to the mock engine.
+ */
+export function pickLiveSeries(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+  period: DidPeriodToken,
+  unitToken: DidUnitToken,
+): number[] {
+  if (!block) return []
+  const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  const match = subjects?.find((s) => s.subject === subject)
+  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  return seriesFromValues(facet?.values)
+}

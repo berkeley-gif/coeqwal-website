@@ -6,6 +6,7 @@ import {
   unitTokenForView,
   includeForView,
   seriesFromValues,
+  pickLiveSeries,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -90,4 +91,74 @@ test("seriesFromValues extracts numbers and drops nulls", () => {
   ).toEqual([10, 0, 4552.1])
   expect(seriesFromValues([])).toEqual([])
   expect(seriesFromValues(undefined)).toEqual([])
+})
+
+test("pickLiveSeries reads the values facet by domain, subject, period, unit", () => {
+  // Reservoir: array key "reservoirs", request unit "volume" -> response key "TAF".
+  const reservoirBlock = {
+    scenario: "s0020",
+    reservoirs: [
+      {
+        subject: "SHSTA",
+        periods: {
+          april: {
+            TAF: {
+              values: [{ value: 4552.1 }, { value: null }, { value: 2157.9 }],
+            },
+          },
+          sept: { TAF: { values: [{ value: 1200 }] } },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(reservoirBlock, "reservoir", "SHSTA", "april", "volume"),
+  ).toEqual([4552.1, 2157.9])
+
+  // pct request unit -> response key PCT_CAP
+  const pctBlock = {
+    reservoirs: [
+      {
+        subject: "SHSTA",
+        periods: { april: { PCT_CAP: { values: [{ value: 90 }] } } },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(pctBlock, "reservoir", "SHSTA", "april", "pct_capacity"),
+  ).toEqual([90])
+
+  // River: array key "rivers", annual, TAF
+  const riverBlock = {
+    rivers: [
+      {
+        subject: "YUB002",
+        periods: { annual: { TAF: { values: [{ value: 300 }] } } },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(riverBlock, "river", "YUB002", "annual", "volume"),
+  ).toEqual([300])
+
+  // Delta: array key "subjects", km
+  const deltaBlock = {
+    subjects: [
+      {
+        subject: "X2",
+        periods: { april: { km: { values: [{ value: 64.3 }] } } },
+      },
+    ],
+  }
+  expect(pickLiveSeries(deltaBlock, "delta", "X2", "april", "km")).toEqual([
+    64.3,
+  ])
+
+  // Missing subject / period / block -> empty (caller falls back to mock)
+  expect(
+    pickLiveSeries(reservoirBlock, "reservoir", "OROVL", "april", "volume"),
+  ).toEqual([])
+  expect(
+    pickLiveSeries(undefined, "reservoir", "SHSTA", "april", "volume"),
+  ).toEqual([])
 })
