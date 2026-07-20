@@ -4,7 +4,7 @@
  * ListView - Scenario grid
  *
  * Purely grid + data. Controls are in other components.
- * Uses a single CSS Grid (checkbox | scenario | operations | outcomes)
+ * Uses a single CSS Grid (checkbox | scenario | operations)
  * for a single scroll container,
  * with subgrid rows for column alignment.
  *
@@ -23,14 +23,10 @@ import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
 
 interface ListViewProps {
-  onTierClick?: (scenarioId: string, outcomeCode: string) => void
   highlightedIds?: Set<string> | null
 }
 
-export default function ListView({
-  onTierClick,
-  highlightedIds,
-}: ListViewProps) {
+export default function ListView({ highlightedIds }: ListViewProps) {
   const theme = useTheme()
 
   const {
@@ -87,10 +83,6 @@ export default function ListView({
     setShowOnlyChosen,
     searchQuery,
     selectedTheme,
-    setSortBy,
-    setSortDirection,
-    sortBy,
-    sortDirection,
     selectedIconId,
     setSelectedTheme,
     setSelectedIconId,
@@ -142,14 +134,6 @@ export default function ListView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWrappedLayout])
 
-  const handleSortChange = (
-    outcome: string | null,
-    direction: "asc" | "desc",
-  ) => {
-    setSortBy(outcome)
-    setSortDirection(direction)
-  }
-
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
   }
@@ -193,14 +177,6 @@ export default function ListView({
       setSelectedIconId(iconId)
     }
     scrollListToTop()
-  }
-
-  const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
-    Record<string, string>
-  >({})
-
-  const handleOutcomeSelect = (scenarioId: string, outcome: string) => {
-    setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
   }
 
   const mergedHighlighted = useMemo(() => {
@@ -250,11 +226,8 @@ export default function ListView({
     showAllThemeDividers,
     iconMatchingScenarioIds,
     showIconDivider,
-    onOutcomeSelect: handleOutcomeSelect,
-    onTierClick,
     onToggleScenario: handleToggleScenario,
     selectedScenarios,
-    selectedOutcomes: localSelectedOutcomes,
     showMapView: false,
     showOnlyChosen,
     showAlternativeBaselines,
@@ -262,13 +235,9 @@ export default function ListView({
     hideColumnTitles: true,
     groupByTheme,
     scenariosInContiguousThemeOrder,
-    compact: false,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
-    sortBy,
-    sortDirection,
-    onSortChange: handleSortChange,
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
     pinnedScenarioIds,
@@ -294,7 +263,7 @@ export default function ListView({
           position: "relative",
           zIndex: 1,
           px: theme.space.tool.px,
-          pt: 1.25,
+          py: 1.25,
           backgroundColor: theme.palette.grey[100],
           boxShadow: [
             `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}`,

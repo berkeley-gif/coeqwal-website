@@ -27,13 +27,10 @@ export interface StrategyGridProps {
   showIconDivider?: boolean
 
   // Events
-  onOutcomeSelect: (scenarioId: string, outcome: string) => void
-  onTierClick?: (scenarioId: string, outcomeCode: string) => void
   onToggleScenario: (scenarioId: string) => void
 
   // State (fully controlled)
   selectedScenarios: string[]
-  selectedOutcomes: Record<string, string | null>
   showMapView: boolean
   showOnlyChosen: boolean
   showAlternativeBaselines: boolean
@@ -42,11 +39,10 @@ export interface StrategyGridProps {
 
   // Layout
   compact?: boolean
+  outcomesOnly?: boolean
   renderMode?: "all" | "headersOnly" | "contentOnly"
   /** When false, hides the key operations column (col 3) from the grid */
   showOperations?: boolean
-  /** When true, hides scenario title (col 2) and ops (col 3) - shows only outcomes */
-  outcomesOnly?: boolean
   /** When true, hides the column title row (Scenario library / Key operations / Key outcomes) */
   hideColumnTitles?: boolean
   /** When true, shows ThemeGroupHeader subheaders above each theme group instead of divider lines */
@@ -56,11 +52,6 @@ export interface StrategyGridProps {
    * is on (e.g. search or sort has interleaved themes). From useOrderedScenarios.
    */
   scenariosInContiguousThemeOrder?: boolean
-
-  // Sorting (optional)
-  sortBy?: string | null
-  sortDirection?: "asc" | "desc"
-  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 
   // Badge / icon click-to-select
   /** Select all scenarios sharing a theme when badge is clicked */
@@ -77,13 +68,6 @@ export interface StrategyGridProps {
   activeScenarioIds?: Set<string>
   /** Called on mouse enter/leave for hover sync with other panels */
   onRowHover?: (scenarioIds: string[] | null) => void
-
-  /**
-   * Hide the outcome columns (col 4) via CSS display:none.
-   * Cascades to children through a `.outcome-col` class selector
-   * on the grid container - no prop drilling required.
-   */
-  hideOutcomes?: boolean
 
   /** Called when the internal layout mode changes (derived from container width) */
   onLayoutModeChange?: (mode: "full" | "wrapped" | "compact") => void

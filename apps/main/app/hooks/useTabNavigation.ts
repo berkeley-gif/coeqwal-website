@@ -16,6 +16,7 @@ export function useTabNavigation() {
 
   const navigateToTab = useCallback(
     (tab: TabKey) => {
+      window.dispatchEvent(new Event("explore:navigating"))
       dispatch(setActiveTab(tab))
       router.replace(`/${tab}`)
     },

@@ -8,6 +8,8 @@
 
 export { default as ListView } from "./panels/list/ListView"
 
+export { default as BarPanel } from "./panels/bar/BarPanel"
+
 export { default as RadarPanel } from "./panels/radar/RadarPanel"
 export type {
   SingleScenarioCaptureFn,

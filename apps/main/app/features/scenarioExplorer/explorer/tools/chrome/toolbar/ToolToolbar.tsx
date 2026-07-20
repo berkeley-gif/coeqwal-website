@@ -51,7 +51,6 @@ export default function ToolToolbar({
   // tour. Resilience reuses this control too but its tour does not
   // step through it, so a single id is fine.
   const climateChipsAnchorRef = useTourAnchor("radar.climateChips")
-  const listMapTourRef = useTourAnchor("list.toolbar.map")
   const listClimateTourRef = useTourAnchor("list.toolbar.climate")
   // High-level orientation anchor for the list tour: the whole strip
   // of view controls (hydroclimate, map, etc.) on the right side of
@@ -77,128 +76,126 @@ export default function ToolToolbar({
   // Distribution) is intentionally deactivated for the current demo
   // build. Flip the `false &&` guard below to bring it back.
 
-  const viewControls = (
-    <>
-      <Box
-        sx={{
-          display: "contents",
-        }}
-      >
-        {/* Outcome view toggle (Average / Bar / Distribution) hidden
+  const viewControls =
+    exploreMode === "list" ? null : (
+      <>
+        <Box
+          sx={{
+            display: "contents",
+          }}
+        >
+          {/* Outcome view toggle (Average / Bar / Distribution) hidden
             . The list view reverts to its bar-chart
             default. The glyph click-through to map layers is
             unaffected. */}
-        {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
-        {false && exploreMode === "list" ? (
+          {/* eslint-disable-next-line no-constant-condition, no-constant-binary-expression */}
+          {false && exploreMode === "list" ? (
+            <>
+              <VerticalDivider />
+              <OutcomeViewToggle
+                value={outcomeDisplayMode}
+                onChange={setOutcomeDisplayMode}
+              />
+              <VerticalDivider />
+            </>
+          ) : null}
+        </Box>
+
+        {mapPaired && (
           <>
-            <VerticalDivider />
-            <OutcomeViewToggle
-              value={outcomeDisplayMode}
-              onChange={setOutcomeDisplayMode}
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="dashboard"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Show map
+              </Typography>
+              <Switch
+                size="small"
+                checked={showMap}
+                onChange={(_, checked) => setShowMap(checked)}
+                sx={{ ml: -0.5 }}
+              />
+            </Box>
+
             <VerticalDivider />
           </>
-        ) : null}
-      </Box>
+        )}
 
-      {mapPaired && (
-        <>
+        {mapPaired && (
           <Box
-            ref={exploreMode === "list" ? listMapTourRef : undefined}
-            sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-          >
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Show map
-            </Typography>
-            <Switch
-              size="small"
-              checked={showMap}
-              onChange={(_, checked) => setShowMap(checked)}
-              sx={{ ml: -0.5 }}
-            />
-          </Box>
-
-          <VerticalDivider />
-        </>
-      )}
-
-      {mapPaired && (
-        <Box
-          component="span"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: "grey.400",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
-          <Typography
-            variant="dashboard"
+            component="span"
             sx={{
-              fontWeight: 500,
-              whiteSpace: "nowrap",
-              color: "inherit",
-            }}
-          >
-            Choose locations to track
-          </Typography>
-        </Box>
-      )}
-
-      {showToolbarHydroclimateChooser && (
-        <>
-          {mapPaired && <VerticalDivider />}
-
-          <Box
-            ref={climateMergedRef}
-            sx={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              gap: 0.75,
-              flexWrap: "wrap",
+              gap: 0.5,
+              color: "grey.400",
+              pointerEvents: "none",
+              userSelect: "none",
             }}
           >
+            <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
             <Typography
               variant="dashboard"
               sx={{
                 fontWeight: 500,
-                color: theme.palette.text.primary,
                 whiteSpace: "nowrap",
+                color: "inherit",
               }}
             >
-              View by climate
+              Choose locations to track
             </Typography>
-            <HydroclimateChooser
-              layout="horizontal"
-              showTitle={false}
-              showLabels={false}
-              hideDisabled
-              iconSize="28px"
-              iconFontSize="1rem"
-              value={hydroclimate}
-              onChange={setHydroclimate}
-            />
-            {(!showMap || !mapPaired) && hydroBadge && (
-              <HydroclimateBadge
-                title={hydroBadge.title}
-                accentColor={hydroBadge.accentColor}
-              />
-            )}
           </Box>
-        </>
-      )}
-    </>
-  )
+        )}
+
+        {showToolbarHydroclimateChooser && (
+          <>
+            {mapPaired && <VerticalDivider />}
+
+            <Box
+              ref={climateMergedRef}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography
+                variant="dashboard"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                View by climate
+              </Typography>
+              <HydroclimateChooser
+                layout="horizontal"
+                showTitle={false}
+                showLabels={false}
+                hideDisabled
+                iconSize="28px"
+                iconFontSize="1rem"
+                value={hydroclimate}
+                onChange={setHydroclimate}
+              />
+              {(!showMap || !mapPaired) && hydroBadge && (
+                <HydroclimateBadge
+                  title={hydroBadge.title}
+                  accentColor={hydroBadge.accentColor}
+                />
+              )}
+            </Box>
+          </>
+        )}
+      </>
+    )
 
   if (gridAligned) {
     const SM = 600
@@ -211,13 +208,8 @@ export default function ToolToolbar({
           gridTemplateColumns: theme.scenarios.grid.columns.xs,
           [`@container strategy-grid (min-width: ${SM}px)`]: {
             gridTemplateColumns: showKeyOperations
-              ? "32px minmax(0, 600px) 140px 1fr"
-              : "32px minmax(0, 600px) 0px 1fr",
-          },
-          [`@container strategy-grid (min-width: ${FULL}px)`]: {
-            gridTemplateColumns: showKeyOperations
-              ? theme.scenarios.grid.columns.full
-              : "32px 0.382fr 0px 1fr",
+              ? "32px minmax(0, 1fr) auto"
+              : "32px minmax(0, 1fr) 0px",
           },
           transition: "grid-template-columns 300ms ease",
           columnGap: theme.scenarios.grid.gap.default,

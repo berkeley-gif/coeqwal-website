@@ -1,7 +1,6 @@
 "use client"
 
 import { forwardRef, type ReactNode } from "react"
-import { useTheme } from "@repo/ui/mui"
 import AutoAdvanceFooter from "./AutoAdvanceFooter"
 
 type TabPanelProps = {
@@ -11,7 +10,6 @@ type TabPanelProps = {
 
 const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
-    const theme = useTheme()
     const thisPanelId = `panel-${tabKey}`
 
     // Both learn and explore tabs are transparent so the persistent map
@@ -20,19 +18,6 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
     const backgroundColor = isMapTab ? "transparent" : undefined
-
-    // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
-    // The sub-nav (ExploreSubNav) is an additional sticky bar.
-    const headerAndTabsOffset =
-      theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
-    const subNavHeight = isExploreTab ? theme.layout.collapsedTabHeight : 0
-    const exploreStyles: React.CSSProperties = isExploreTab
-      ? {
-          height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
-          minHeight: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
-          overflow: "hidden",
-        }
-      : {}
 
     // Panels above the map need pointerEvents: "none" so the persistent map behind them
     // can receive drag/pan events. Child components re-enable pointer events as needed.
@@ -50,17 +35,14 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
           // Minimum height ensures enough page content for sticky tabs to work.
           // Without this, shorter panels cause the browser to clamp scrollY,
           // pushing the tab row to change height.
-          minHeight: `calc(100vh - ${headerAndTabsOffset}px)`,
-          ...exploreStyles,
+          ...(isExploreTab && {
+            height: "100%",
+            overflow: "hidden",
+          }),
         }}
       >
         {children}
-        {/* Auto-advance footer sentinel.
-            - Share is the last tab, so no footer needed.
-            - In the Explore tab, the footer is only shown at the end
-              of the Get Started sub-view; the Tools / Data sub-views
-              take the full viewport and scroll internally, so there's no place for it. */}
-        {tabKey !== "share" && <AutoAdvanceFooter />}
+        {tabKey === "learn" && <AutoAdvanceFooter />}
       </div>
     )
   },

@@ -55,13 +55,31 @@ export interface StrategyHeaderProps {
 function CompactDescription({
   description,
   forceExpanded = false,
+  disableTruncation = false,
 }: {
   description: string
   forceExpanded?: boolean
+  disableTruncation?: boolean
 }) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
   const renderGlossaryText = useGlossaryRenderer(description)
+
+  if (disableTruncation) {
+    return (
+      <Box
+        sx={{
+          color: theme.palette.grey[600],
+          fontSize: "0.75rem",
+          lineHeight: 1.35,
+          mt: "1px",
+          pb: 0.5,
+        }}
+      >
+        {renderGlossaryText()}
+      </Box>
+    )
+  }
 
   const toggleStyles = {
     color: theme.palette.blue.medium,
@@ -307,6 +325,7 @@ export function StrategyHeader({
           <CompactDescription
             description={strategy.description}
             forceExpanded={expandDescription}
+            disableTruncation={disableTruncation}
           />
         )}
       </Box>

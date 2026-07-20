@@ -171,9 +171,7 @@ export function createListSlice(
     setSortBy: (outcome) =>
       set((state) => {
         state.sortBy = outcome
-        if (outcome !== null) {
-          state.groupByTheme = false
-        }
+        state.groupByTheme = false
       }),
 
     setSortDirection: (direction) =>

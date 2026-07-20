@@ -26,6 +26,15 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
     nextLabel: "Compare chosen scenarios on Radar chart",
     nextRationale: "See your shortlist scenarios side by side.",
   },
+  bar: {
+    mode: "bar",
+    purpose:
+      "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
+    nextMode: "radar",
+    nextLabel: "Compare chosen scenarios on Radar chart",
+    nextRationale:
+      "See your shortlist scenarios side by side on all outcomes at once.",
+  },
   radar: {
     mode: "radar",
     purpose:
@@ -70,6 +79,7 @@ export function getJourneyStage(mode: ExploreMode): JourneyStageConfig {
  */
 export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
   list: "List view",
+  bar: "Bar chart comparison",
   radar: "Radar chart",
   equity: "Distribution",
   resilience: "Resilience heatmap",

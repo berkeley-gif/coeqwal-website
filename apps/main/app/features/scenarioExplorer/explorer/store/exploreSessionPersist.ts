@@ -401,12 +401,16 @@ export function mergeWorkspaceInitialState(
   hydration: Partial<WorkspaceState>,
 ): WorkspaceState {
   const validated = validateWorkspaceSection(hydration)
-  return {
+  const merged = {
     ...workspaceInitialState,
     ...validated,
     shareItems: workspaceInitialState.shareItems,
     storyItemIds: workspaceInitialState.storyItemIds,
   }
+  if (merged.exploreMode === "list") {
+    merged.showMap = false
+  }
+  return merged
 }
 
 export function mergeListInitialState(

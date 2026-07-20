@@ -25,7 +25,7 @@ export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
   return (
-    <div style={{ backgroundColor: theme.palette.brand.sky }}>
+    <div style={{ backgroundColor: theme.palette.blue.pale }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -33,23 +33,23 @@ export function AboutCoeqwalPanel() {
       >
         <CoeqwalPanel
           id="about-coeqwal"
-          background={theme.palette.brand.sky}
-          textColor={theme.palette.text.secondary}
-          minHeight="100vh"
+          background="inherit"
+          textColor={theme.palette.blue.darkest}
+          minHeight="100%"
           borderRadius={0}
           responsiveHeadline={
             <>
               <Typography
                 variant="h2Main"
                 component="span"
-                sx={{ display: "block", color: "text.secondary" }}
+                sx={{ display: "block", color: "inherit" }}
               >
                 What is
               </Typography>
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: "text.secondary" }}
+                sx={{ display: "block", color: "inherit" }}
               >
                 COEQWAL?
               </Typography>
@@ -76,7 +76,7 @@ export function AboutCoeqwalPanel() {
           descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
           scrollIndicator={
             <ScrollToButton
-              color={`${theme.palette.text.secondary}D9`}
+              color={`${theme.palette.blue.darkest}`}
               size={52}
               scrollToId="water-themes"
               // Same offset math as VideoHero's scroll button: land
