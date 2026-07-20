@@ -10,6 +10,8 @@ type ExplorerSidebarProps = {
   hover: ExploreHover
   share: ExploreShareCapture
   radarScenarioColors: Record<string, string>
+  /** Collapse control for modes with a collapsible sidebar (data tool) */
+  onCollapse?: () => void
 }
 
 export default function ExplorerSidebar({
@@ -17,9 +19,11 @@ export default function ExplorerSidebar({
   hover,
   share,
   radarScenarioColors,
+  onCollapse,
 }: ExplorerSidebarProps) {
   return (
     <ScenarioSelectionSidebar
+      onCollapse={onCollapse}
       scenarioColors={exploreMode === "radar" ? radarScenarioColors : undefined}
       hoveredInteraction={hover.hoveredInteraction}
       onRowHover={hover.onSidebarRowHover}

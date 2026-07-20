@@ -27,12 +27,15 @@ interface UnifiedToolViewProps {
   sidebar?: React.ReactNode
   toolbar: React.ReactNode
   activeTool: React.ReactNode
+  /** Overrides the standard sidebar width (collapsed-rail strip mode) */
+  sidebarWidth?: number
 }
 
 export default function UnifiedToolView({
   sidebar,
   toolbar,
   activeTool,
+  sidebarWidth: sidebarWidthOverride,
 }: UnifiedToolViewProps) {
   const theme = useTheme()
   const showMap = useWorkspaceSlice((s) => s.showMap)
@@ -46,9 +49,9 @@ export default function UnifiedToolView({
   // depth ignores the shared showMap flag entirely (no map, full width).
   const mapActive = showMap && isMapPairedMode(exploreMode)
 
-  const sidebarWidth = showKeyOperations
-    ? SIDEBAR_WIDTH_EXPANDED
-    : SIDEBAR_WIDTH_COLLAPSED
+  const sidebarWidth =
+    sidebarWidthOverride ??
+    (showKeyOperations ? SIDEBAR_WIDTH_EXPANDED : SIDEBAR_WIDTH_COLLAPSED)
 
   // Keep map mode + panel width in sync with the effective map state
   useEffect(() => {
