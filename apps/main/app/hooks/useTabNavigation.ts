@@ -12,7 +12,7 @@ import type { TabKey } from "../types/tabs"
 
 export function useTabNavigation() {
   const router = useRouter()
-  const { dispatch, setIsNavigatingToTabs } = useTabs()
+  const { dispatch } = useTabs()
 
   const navigateToTab = useCallback(
     (tab: TabKey) => {
