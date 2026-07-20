@@ -30,6 +30,7 @@ import {
   buildChannelMatrix,
   buildMatrixForVariables,
 } from "../../hooks/useDeltaData"
+import { perfTime } from "@repo/data/perf"
 import {
   SALINITY_BAND_COLORS,
   OUTFLOW_BAND_COLORS,
@@ -76,6 +77,11 @@ const DELTA_EXPORT_CHANNELS = [
   { id: "C_CAA003", label: "SWP exports (Banks)" },
   { id: "C_DMC000", label: "CVP exports (Tracy)" },
 ] as const
+
+// Hoisted so the matrix memos below get stable dependency identities; fresh
+// per-render arrays would re-run buildChannelMatrix on every render.
+const DELTA_INFLOW_IDS = DELTA_INFLOW_CHANNELS.map((c) => c.id)
+const DELTA_EXPORT_IDS = DELTA_EXPORT_CHANNELS.map((c) => c.id)
 
 // ============================================================================
 // Entity-label builders
@@ -268,27 +274,40 @@ export default function DeltaSection({
 
   // Build matrices for salinity and outflow chart groups
   const complianceMatrix = useMemo(
-    () => buildMatrixForVariables(allData, COMPLIANCE_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, COMPLIANCE_VARS),
+      ),
     [allData],
   )
   const pumpsMatrix = useMemo(
-    () => buildMatrixForVariables(allData, PUMPS_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, PUMPS_VARS),
+      ),
     [allData],
   )
   const outflowMatrix = useMemo(
-    () => buildMatrixForVariables(allData, OUTFLOW_VARS),
+    () =>
+      perfTime("transform:delta", () =>
+        buildMatrixForVariables(allData, OUTFLOW_VARS),
+      ),
     [allData],
   )
 
-  const inflowIds = DELTA_INFLOW_CHANNELS.map((c) => c.id)
-  const exportIds = DELTA_EXPORT_CHANNELS.map((c) => c.id)
   const inflowMatrix = useMemo(
-    () => buildChannelMatrix(channelData, inflowIds),
-    [channelData, inflowIds],
+    () =>
+      perfTime("transform:delta", () =>
+        buildChannelMatrix(channelData, DELTA_INFLOW_IDS),
+      ),
+    [channelData],
   )
   const exportMatrix = useMemo(
-    () => buildChannelMatrix(channelData, exportIds),
-    [channelData, exportIds],
+    () =>
+      perfTime("transform:delta", () =>
+        buildChannelMatrix(channelData, DELTA_EXPORT_IDS),
+      ),
+    [channelData],
   )
 
   const complianceEntities = useMemo(

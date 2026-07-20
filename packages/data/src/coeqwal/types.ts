@@ -137,6 +137,7 @@ export interface TierLocationAssignment {
   location_type: string
   tier_level: number
   tier_value: number | null
+  tier_continuous?: number
 }
 
 export interface TierLocationAssignmentsResponse {
@@ -1486,4 +1487,173 @@ export interface DeltaMonthlyResponse {
   scenario_id: string
   data: DeltaMonthlyStats[]
   count: number
+}
+
+// ============================================================================
+// DATA IN DEPTH (generic data_in_depth_* tables)
+// ============================================================================
+// Shared facet shapes — reused across the sibling /api/data-in-depth/* domain
+// endpoints. Only the per-endpoint response wrapper (e.g. reservoir storage)
+// changes; values/exceedance/box/statistics are common.
+
+/** `annual` is intentionally excluded — only april/sept are exposed. */
+export type DidPeriod = "april" | "sept"
+/** Response unit keys. (Request tokens are `volume` / `pct_capacity`.) */
+export type DidUnit = "TAF" | "PCT_CAP"
+export type DidUnitToken = "volume" | "pct_capacity"
+export type DidInclude = "values" | "exceedance" | "box" | "statistics"
+
+export interface DidStatistics {
+  n: number
+  mean: number | null
+  /** Sample CV (ddof=1); null when n < 2 or mean == 0. */
+  cv: number | null
+}
+
+/** Tukey box: quartiles, IQR, 1.5×IQR whiskers, and outlier points. */
+export interface DidBox {
+  min: number | null
+  q1: number | null
+  median: number | null
+  q3: number | null
+  max: number | null
+  iqr: number | null
+  whisker_low: number | null
+  whisker_high: number | null
+  outliers: number[]
+}
+
+export interface DidValuePoint {
+  water_year: number
+  value: number | null
+}
+
+/** Weibull descending exceedance point (m=1 = largest value = lowest %). */
+export interface DidExceedancePoint extends DidValuePoint {
+  percentile: number | null
+}
+
+/** Facets are all optional; presence depends on the `include` request param. */
+export interface DidFacets {
+  values?: DidValuePoint[]
+  exceedance?: DidExceedancePoint[]
+  box?: DidBox | null
+  statistics?: DidStatistics
+}
+
+/** Request options for the data-in-depth reservoir-storage endpoint. */
+export interface ReservoirStorageDidOptions {
+  /** Subject short_codes (e.g. "SHSTA", "NOD"); default = all reservoir + NOD/SOD. */
+  subjects?: string[]
+  /** Default april,sept. */
+  periods?: DidPeriod[]
+  /** Request tokens; default both. */
+  units?: DidUnitToken[]
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all (no filtering). */
+  wyt?: number[]
+}
+
+/** One reservoir/subject within a scenario: period → unit → facets. */
+export interface DidReservoirSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<Record<DidPeriod, Partial<Record<DidUnit, DidFacets>>>>
+}
+
+export interface DidReservoirScenario {
+  scenario: string
+  n_years: number
+  reservoirs: DidReservoirSubject[]
+}
+
+/** Response from GET /api/data-in-depth/reservoir-storage */
+export interface ReservoirStorageDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidReservoirScenario[]
+}
+
+// ---- Data in Depth: river flows (annual, TAF only) ----
+// Reuses the shared Did* facet types. Differs from reservoir storage: annual
+// period only, TAF unit only, and the per-scenario subject array is `rivers`.
+
+/** River flow is annual only. */
+export type DidRiverPeriod = "annual"
+
+/** One river node/subject within a scenario: period → unit → facets. */
+export interface DidRiverSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<Record<DidRiverPeriod, Partial<Record<DidUnit, DidFacets>>>>
+}
+
+export interface DidRiverScenario {
+  scenario: string
+  n_years: number
+  rivers: DidRiverSubject[]
+}
+
+/** Request options for the data-in-depth river-flows endpoint. */
+export interface RiverFlowsDidOptions {
+  /** River-node short_codes (e.g. "SAC000", "YUB002"); default = all. */
+  subjects?: string[]
+  /** Only `annual` is valid; default annual. */
+  periods?: DidRiverPeriod[]
+  /** River flow is TAF only (request token `volume`). */
+  units?: Array<"volume">
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/river-flows */
+export interface RiverFlowsDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidRiverScenario[]
+}
+
+// ---- Data in Depth: delta salinity (X2 position; april/sept, km) ----
+// Reuses the shared Did* facets and the DidPeriod (april|sept) type. Unit is
+// km. Per-scenario subjects are returned under `subjects` (currently just X2).
+// Backend scopes by an explicit source-variable list, not a prefix.
+
+/** Delta salinity is reported in km (X2 isohaline distance). */
+export type DidDeltaUnit = "km"
+
+/** One delta subject within a scenario (e.g. X2): period → unit → facets. */
+export interface DidDeltaSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<Record<DidPeriod, Partial<Record<DidDeltaUnit, DidFacets>>>>
+}
+
+export interface DidDeltaScenario {
+  scenario: string
+  n_years: number
+  subjects: DidDeltaSubject[]
+}
+
+/** Request options for the data-in-depth delta-salinity endpoint. */
+export interface DeltaSalinityDidOptions {
+  /** Subject short_codes; default X2. */
+  subjects?: string[]
+  /** `april` / `sept`; default both. */
+  periods?: DidPeriod[]
+  /** km only (request token `km`). */
+  units?: Array<"km">
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/delta-salinity */
+export interface DeltaSalinityDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidDeltaScenario[]
 }

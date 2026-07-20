@@ -12,7 +12,11 @@ import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
-import { useWorkspaceSlice, type OutcomeDisplayMode } from "../../../store"
+import {
+  useWorkspaceSlice,
+  isMapPairedMode,
+  type OutcomeDisplayMode,
+} from "../../../store"
 import { useTourAnchor } from "../../tour"
 
 interface ToolToolbarProps {
@@ -37,6 +41,9 @@ export default function ToolToolbar({
   } = useWorkspaceSlice()
 
   const showToolbarHydroclimateChooser = exploreMode !== "resilience"
+  // Data in depth has no map: hide the Show map switch there and treat the
+  // map as off (the badge next to the chooser stays visible).
+  const mapPaired = isMapPairedMode(exploreMode)
 
   const hydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
@@ -94,54 +101,60 @@ export default function ToolToolbar({
           ) : null}
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Typography
-            variant="dashboard"
+        {mapPaired && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="dashboard"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Show map
+              </Typography>
+              <Switch
+                size="small"
+                checked={showMap}
+                onChange={(_, checked) => setShowMap(checked)}
+                sx={{ ml: -0.5 }}
+              />
+            </Box>
+
+            <VerticalDivider />
+          </>
+        )}
+
+        {mapPaired && (
+          <Box
+            component="span"
             sx={{
-              fontWeight: 500,
-              color: theme.palette.text.primary,
-              whiteSpace: "nowrap",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              color: "grey.400",
+              pointerEvents: "none",
+              userSelect: "none",
             }}
           >
-            Show map
-          </Typography>
-          <Switch
-            size="small"
-            checked={showMap}
-            onChange={(_, checked) => setShowMap(checked)}
-            sx={{ ml: -0.5 }}
-          />
-        </Box>
-
-        <VerticalDivider />
-
-        <Box
-          component="span"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: "grey.400",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
-          <Typography
-            variant="dashboard"
-            sx={{
-              fontWeight: 500,
-              whiteSpace: "nowrap",
-              color: "inherit",
-            }}
-          >
-            Choose locations to track
-          </Typography>
-        </Box>
+            <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                color: "inherit",
+              }}
+            >
+              Choose locations to track
+            </Typography>
+          </Box>
+        )}
 
         {showToolbarHydroclimateChooser && (
           <>
-            <VerticalDivider />
+            {mapPaired && <VerticalDivider />}
 
             <Box
               ref={climateMergedRef}
@@ -172,7 +185,7 @@ export default function ToolToolbar({
                 value={hydroclimate}
                 onChange={setHydroclimate}
               />
-              {!showMap && hydroBadge && (
+              {(!showMap || !mapPaired) && hydroBadge && (
                 <HydroclimateBadge
                   title={hydroBadge.title}
                   accentColor={hydroBadge.accentColor}
@@ -195,13 +208,8 @@ export default function ToolToolbar({
           gridTemplateColumns: theme.scenarios.grid.columns.xs,
           [`@container strategy-grid (min-width: ${SM}px)`]: {
             gridTemplateColumns: showKeyOperations
-              ? "32px minmax(0, 600px) 140px 1fr"
-              : "32px minmax(0, 600px) 0px 1fr",
-          },
-          [`@container strategy-grid (min-width: ${FULL}px)`]: {
-            gridTemplateColumns: showKeyOperations
-              ? theme.scenarios.grid.columns.full
-              : "32px 0.382fr 0px 1fr",
+              ? "32px minmax(0, 1fr) auto"
+              : "32px minmax(0, 1fr) 0px",
           },
           transition: "grid-template-columns 300ms ease",
           columnGap: theme.scenarios.grid.gap.default,

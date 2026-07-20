@@ -7,9 +7,10 @@
  * The chart is chosen from the current view and distribution style:
  *  - annual distribution / percent of capacity -> ExceedanceChart or BoxPlot
  *  - year-to-year variability / summary value  -> CategoricalBarChart
- * Series colors follow member order via the shared @repo/viz palette, so the
- * legend swatches match the chart. Every card is labeled "Sample data" while
- * the explorer runs on the deterministic sample-data engine.
+ * Series colors are sticky per member id (seriesColorAssignment), so a member
+ * keeps its color across selection changes and the legend swatches, the
+ * chart marks, and the CompareControls chips all agree. Every card is labeled
+ * "Sample data" while it runs on the deterministic sample-data engine.
  */
 
 import React from "react"
@@ -18,13 +19,14 @@ import {
   BoxPlot,
   CategoricalBarChart,
   ExceedanceChart,
-  getSeriesColor,
   type BoxPlotDatum,
   type CategoricalBarDatum,
   type ExceedanceSeries,
 } from "@repo/viz"
 import { useDataSlice } from "../../../../store"
 import { useVariableData } from "../hooks/useVariableData"
+import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
+import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import {
   formatValue,
   summarySentence,
@@ -39,6 +41,17 @@ export default function ChartCard() {
   const theme = useTheme()
   const { compareBy, distKind } = useDataSlice()
   const data = useVariableData()
+
+  // One sticky color per member id, shared with the CompareControls chips
+  // (same scope key + same ordered member ids on both surfaces).
+  const colorScope =
+    compareBy === "locations"
+      ? `locations:${data.variable?.locationGroup ?? ""}`
+      : compareBy
+  const memberColors = getStableSeriesColors(
+    colorScope,
+    data.members.map((m) => m.id),
+  )
 
   const fmt = (v: number) => formatValue(v, data.unit)
 
@@ -63,6 +76,14 @@ export default function ChartCard() {
   const yLabel = data.view === "cv" ? "CV" : data.unit
   const hasMembers = data.members.length > 0
 
+  // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
+  // hits the screen for the current members/variable/view combination.
+  usePerfPaintMark(
+    "paint:explorer-chart",
+    hasMembers,
+    `${data.members.map((m) => m.id).join(",")}|${data.variable?.name ?? ""}|${data.view}`,
+  )
+
   let chart: React.ReactNode = null
   if (!hasMembers) {
     chart = (
@@ -81,18 +102,20 @@ export default function ChartCard() {
       </Box>
     )
   } else if (data.view === "cv" || data.view === "value") {
-    const bars: CategoricalBarDatum[] = data.members.map((m) => ({
+    const bars: CategoricalBarDatum[] = data.members.map((m, i) => ({
       id: m.id,
       label: m.label,
       value: m.value,
+      color: memberColors[i],
     }))
     chart = (
       <CategoricalBarChart bars={bars} yAxisLabel={yLabel} formatValue={fmt} />
     )
   } else if (distKind === "box") {
-    const boxes: BoxPlotDatum[] = data.members.map((m) => ({
+    const boxes: BoxPlotDatum[] = data.members.map((m, i) => ({
       id: m.id,
       label: m.label,
+      color: memberColors[i],
       stats: {
         min: m.stats.min,
         q1: m.stats.p25,
@@ -113,10 +136,11 @@ export default function ChartCard() {
       />
     )
   } else {
-    const series: ExceedanceSeries[] = data.members.map((m) => ({
+    const series: ExceedanceSeries[] = data.members.map((m, i) => ({
       id: m.id,
       label: m.label,
       points: m.livePoints ?? toExceedancePoints(m.series),
+      color: memberColors[i],
     }))
     chart = (
       <ExceedanceChart series={series} yAxisLabel={yLabel} formatValue={fmt} />
@@ -198,7 +222,7 @@ export default function ChartCard() {
                   width: 12,
                   height: 12,
                   borderRadius: "3px",
-                  backgroundColor: getSeriesColor(i),
+                  backgroundColor: memberColors[i],
                   flexShrink: 0,
                 }}
               />

@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./gis/*": "./src/gis/*",
     "./fetching": "./src/fetching/index.ts",
+    "./perf": "./src/perf/index.ts",
     "./cache": "./src/cache/index.ts",
     "./providers": "./src/providers/index.ts",
     "./coeqwal": "./src/coeqwal/index.ts",

@@ -20,6 +20,7 @@ import type {
   ChannelPeriodSummary,
   BatchEnvFlowData,
 } from "@repo/data/coeqwal"
+import { perfTime } from "@repo/data/perf"
 
 /** Matrix data structure for monthly percentiles (entityId to scenarioId to bands) */
 type MatrixDataType = Record<
@@ -205,7 +206,10 @@ export function useEnvFlowData(
   isBatchLoading: boolean,
 ) {
   const { volumeMatrix, pctMatrix, annualCellStats } = useMemo(
-    () => buildMonthlyMatrices(scenarios, envFlowBatch, unit),
+    () =>
+      perfTime("transform:env-flow", () =>
+        buildMonthlyMatrices(scenarios, envFlowBatch, unit),
+      ),
     [scenarios, envFlowBatch, unit],
   )
 

@@ -8,6 +8,12 @@ name: Enforce package-PR rule
 #
 # A violation generates a failed workflow run on the Actions tab. Whoever
 # pushed gets the standard GitHub "workflow failed" email.
+#
+# The check itself lives in .github/scripts/check-package-pr-provenance.mjs
+# (covered by pnpm test:ci-scripts). It retries transient GitHub API failures
+# and, when the API stays unavailable, fails with an explicit availability
+# error instead of a policy-violation error, still exit 1 so enforcement
+# never fails open. Re-run the workflow to clear an availability failure.
 
 on:
   push:
@@ -41,49 +47,4 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          # First push to a new branch reports BEFORE_SHA as 40 zeros. Treat
-          # that as nothing to enforce against (branch creation is not a
-          # package-change push by itself).
-          if [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
-            echo "Branch-creation push (no prior history). Skipping enforcement."
-            exit 0
-          fi
-
-          COMMITS=$(git rev-list "${BEFORE_SHA}..${AFTER_SHA}")
-          VIOLATIONS=""
-          for SHA in $COMMITS; do
-            # Watched package paths touched by this commit, with .md and .mdx
-            # filtered out so a docs-only change inside packages/ does not
-            # count as a package change.
-            TOUCHED=$(git show --name-only --pretty=format: "$SHA" \
-              | grep -E '^(packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|turbo\.json$|package\.json$)' \
-              | grep -vE '\.(md|mdx)$' \
-              || true)
-            if [[ -z "$TOUCHED" ]]; then
-              continue
-            fi
-            # Ask the GitHub API which PRs (if any) contain this commit.
-            # `state=closed merged_at!=null base.ref=dev` is the green path.
-            PR_JSON=$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "dev")]')
-            PR_COUNT=$(echo "$PR_JSON" | jq 'length')
-            if [[ "$PR_COUNT" -eq 0 ]]; then
-              VIOLATIONS+="$SHA"$'\n'
-            else
-              PR_NUM=$(echo "$PR_JSON" | jq '.[0].number')
-              echo "Commit $SHA delivered via PR #$PR_NUM (OK)"
-            fi
-          done
-
-          if [[ -z "$VIOLATIONS" ]]; then
-            echo "All package-touching commits in this push were delivered via merged PRs."
-            exit 0
-          fi
-
-          echo "::error title=Direct package push to dev::One or more commits in this push touched packages/**, the lockfile, the workspace file, turbo.json, or root package.json without going through a pull request. Project policy requires a PR for these paths so the Notify package changes workflow can run and the right owners are pinged. See the run log for the offending commit shas."
-          # Surface every violating sha in the run log so the failed-run email
-          # has actionable information without needing to open the run.
-          echo "Violating commits:"
-          echo "$VIOLATIONS"
-          exit 1
+        run: node .github/scripts/check-package-pr-provenance.mjs

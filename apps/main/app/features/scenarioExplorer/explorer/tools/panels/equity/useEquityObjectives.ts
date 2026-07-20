@@ -159,15 +159,20 @@ export function useEquityObjectives({
     let globalId = 0
 
     const baselineTierMap = new Map<string, number>()
+    const baselineTierContinuousMap = new Map<string, number>()
     if (compareToBaseline) {
       outcomeNames.forEach((outcome) => {
         const baselineData = baselineTierDataByCode[outcome.shortCode]
         if (baselineData) {
           baselineData.locations.forEach((location) => {
-            baselineTierMap.set(
-              `${outcome.shortCode},${location.location_id}`,
-              location.tier_level,
-            )
+            const key = `${outcome.shortCode},${location.location_id}`
+            baselineTierMap.set(key, location.tier_level)
+            if (location.tier_continuous !== undefined) {
+              baselineTierContinuousMap.set(
+                key,
+                parseFloat(String(location.tier_continuous)),
+              )
+            }
           })
         }
       })
@@ -183,11 +188,18 @@ export function useEquityObjectives({
 
       currentData.locations.forEach((location) => {
         const currentTierLevel = location.tier_level
+        const locationKey = `${outcome.shortCode},${location.location_id}`
         const baselineTierLevel = compareToBaseline
-          ? (baselineTierMap.get(
-              `${outcome.shortCode},${location.location_id}`,
-            ) ?? currentTierLevel)
+          ? (baselineTierMap.get(locationKey) ?? currentTierLevel)
           : currentTierLevel
+
+        const tierContinuous =
+          location.tier_continuous !== undefined
+            ? parseFloat(String(location.tier_continuous))
+            : undefined
+        const baselineTierContinuous = compareToBaseline
+          ? baselineTierContinuousMap.get(locationKey)
+          : undefined
 
         result.push({
           id: globalId++,
@@ -197,6 +209,8 @@ export function useEquityObjectives({
           locationId: location.location_id,
           locationName: location.location_name,
           tierLevel: currentTierLevel,
+          tierContinuous,
+          baselineTierContinuous,
           baselineTierLevel, // Added for share functionality
           tierCode,
         })

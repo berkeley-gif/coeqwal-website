@@ -13,6 +13,7 @@ export {
   useEquitySlice,
   useResilienceSlice,
   useDataSlice,
+  isMapPairedMode,
 } from "./store/index"
 
 export type {

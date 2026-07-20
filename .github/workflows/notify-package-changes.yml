@@ -2,9 +2,9 @@ name: Notify package changes
 
 # Fires on PRs to dev that touch shared workspaces (packages, workspace,
 # turbo.json, root package.json). Posts a single sticky comment listing the
-# apps that depend on the changed code, their CODEOWNERS, and a dispatch
-# link for the Deploy to Amplify workflow. The comment never triggers a
-# deploy.
+# apps that depend on the changed code (discovered from apps/*/package.json),
+# their owners (from CODEOWNERS entries, when active), and a dispatch link
+# for the Deploy to Amplify workflow. The comment never triggers a deploy.
 #
 # The comment is "sticky" via marocchino/sticky-pull-request-comment with the
 # header `package-deploy-impact`. Subsequent runs on the same PR update the

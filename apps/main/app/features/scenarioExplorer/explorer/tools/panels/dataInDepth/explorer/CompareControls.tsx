@@ -13,6 +13,14 @@
  *    hydroclimate.
  * Scenario membership is owned by the workspace (the selection sidebar); this
  * control only reflects it and marks the locked reference.
+ *
+ * Layout rule: the compared members' chips come first, then the two pinned
+ * (held-constant) selectors as one non-wrapping cluster, so e.g. the
+ * reservoir dropdown always sits next to the hydroclimate dropdown instead
+ * of wrapping apart at narrow widths.
+ *
+ * Chip swatches use the same sticky per-member colors as the chart and its
+ * legend (seriesColorAssignment, shared scope keys with ChartCard).
  */
 
 import React from "react"
@@ -29,7 +37,6 @@ import {
   Typography,
   useTheme,
 } from "@repo/ui/mui"
-import { getSeriesColor } from "@repo/viz"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import type { DataCompareBy } from "../../../../store"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
@@ -40,6 +47,7 @@ import {
 } from "../../../../../../../content/scenarios"
 import { getVariable, LOCATION_GROUPS } from "../config/variableRegistry"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
+import { getStableSeriesColors } from "../config/seriesColorAssignment"
 
 const MAX_COMPARE_LOCATIONS = 6
 const DEFAULT_LOCATION_COUNT = 3
@@ -107,6 +115,14 @@ export default function CompareControls() {
     [...HYDROCLIMATES].filter((c) => ids.includes(c))
   const orderLocations = (ids: string[]) =>
     group.items.map((l) => l.id).filter((id) => ids.includes(id))
+
+  // Sticky per-member colors, shared with ChartCard (same scopes + id order).
+  const scenarioColors = getStableSeriesColors("scenarios", compareScenarios)
+  const climateColors = getStableSeriesColors("climates", effectiveClimates)
+  const locationColors = getStableSeriesColors(
+    `locations:${groupId}`,
+    effectiveLocations,
+  )
 
   const toggleClimate = (id: string) => {
     const next = effectiveClimates.includes(id)
@@ -243,7 +259,7 @@ export default function CompareControls() {
                           height: 10,
                           borderRadius: "3px",
                           ml: 1,
-                          backgroundColor: getSeriesColor(i),
+                          backgroundColor: scenarioColors[i],
                         }}
                       />
                     }
@@ -258,14 +274,21 @@ export default function CompareControls() {
               })}
             </Box>
           </Box>
-          {climatePin}
-          {locationPin}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              gap: 2.5,
+            }}
+          >
+            {climatePin}
+            {locationPin}
+          </Box>
         </>
       )}
 
       {compareBy === "climates" && (
         <>
-          {scenarioPin}
           <Box>
             <Typography
               variant="caption"
@@ -296,7 +319,7 @@ export default function CompareControls() {
                           borderRadius: "50%",
                           ml: 1,
                           backgroundColor: on
-                            ? getSeriesColor(effectiveClimates.indexOf(c))
+                            ? climateColors[effectiveClimates.indexOf(c)]
                             : "transparent",
                           border: on
                             ? "none"
@@ -309,14 +332,21 @@ export default function CompareControls() {
               })}
             </Box>
           </Box>
-          {locationPin}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              gap: 2.5,
+            }}
+          >
+            {scenarioPin}
+            {locationPin}
+          </Box>
         </>
       )}
 
       {compareBy === "locations" && (
         <>
-          {scenarioPin}
-          {climatePin}
           <Box>
             <Typography
               variant="caption"
@@ -350,7 +380,7 @@ export default function CompareControls() {
                             borderRadius: "50%",
                             ml: 1,
                             backgroundColor: on
-                              ? getSeriesColor(effectiveLocations.indexOf(l.id))
+                              ? locationColors[effectiveLocations.indexOf(l.id)]
                               : "transparent",
                             border: on
                               ? "none"
@@ -363,6 +393,16 @@ export default function CompareControls() {
                 )
               })}
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              gap: 2.5,
+            }}
+          >
+            {scenarioPin}
+            {climatePin}
           </Box>
         </>
       )}
