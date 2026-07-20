@@ -14,7 +14,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
-import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  Checkbox,
+  IconButton,
+  ChevronLeftIcon,
+} from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import {
@@ -75,6 +82,12 @@ interface ScenarioSelectionSidebarProps {
   shareDisabled?: boolean
   /** Tooltip shown over disabled share icons explaining the gate. */
   shareDisabledTooltip?: React.ReactNode
+  /**
+   * When provided, the header shows a collapse control that calls this.
+   * The Data in Depth tool uses it to shrink the sidebar to a slim strip;
+   * other modes omit it and keep the fixed sidebar.
+   */
+  onCollapse?: () => void
 }
 
 export default function ScenarioSelectionSidebar({
@@ -88,6 +101,7 @@ export default function ScenarioSelectionSidebar({
   onEquityScenarioShare,
   shareDisabled = false,
   shareDisabledTooltip,
+  onCollapse,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -221,6 +235,16 @@ export default function ScenarioSelectionSidebar({
         >
           Scenario library
         </Typography>
+        {onCollapse && (
+          <IconButton
+            size="small"
+            onClick={onCollapse}
+            aria-label="Collapse scenarios"
+            sx={{ ml: "auto", color: theme.palette.explore.text }}
+          >
+            <ChevronLeftIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
 
       {/* Search + visibility chips */}
