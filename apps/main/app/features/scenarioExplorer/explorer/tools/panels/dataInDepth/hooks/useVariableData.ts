@@ -12,24 +12,33 @@
  *
  * Data source
  * -----------
- * Reservoir variables (`data: "live"`) use LIVE API data on the compare-by-
- * scenarios axis for the exceedance view: the per-scenario reservoir percentile
- * grid (q0..q100, values in percent-of-capacity) is adapted to exceedance
- * points, used directly for the "% capacity" view or multiplied by the
- * reservoir capacity for the "storage" (TAF) view. Everything else - the box
- * plot (the API grid has no q25/q75), the CV view (no per-year sd), the climate
- * and location compare axes (the resolver resolves one hydroclimate), and all
- * non-reservoir variables - uses the deterministic sample-data engine. The
- * card is labeled per the resolved `source`.
+ * Reservoir, river-flow, and X2 variables (mapped in `didMapping`) use LIVE data
+ * on the compare-by-scenarios axis: each scenario's raw annual series is fetched
+ * from the matching /api/data-in-depth/* endpoint (per-scenario parallel
+ * fan-out), and every derived value the chart needs (exceedance curve, box,
+ * mean, CV) is computed on the frontend from that series via `seriesStats` and
+ * `toExceedancePoints` - the same path the mock engine feeds. So the live and
+ * mock members are shaped identically; only the origin of `series` differs.
  *
- * Scenario ids are used as opaque seeds for mock members and passed straight to
- * the reservoir endpoint for live members; hydroclimate id resolution for the
- * (still mock) climate axis is left to a later live-widening pass.
+ * Everything else - the climate and location compare axes, and any variable not
+ * served by a data-in-depth endpoint - uses the deterministic sample-data
+ * engine. Each member falls back to mock individually if its live series is
+ * absent, and the card is labeled per the resolved `source`.
+ *
+ * Scenario ids are resolved through the active hydroclimate
+ * (`useResolvedIdMapping`) before fetching, so switching hydroclimate fetches
+ * the correct variant. A pinned climate that differs from the workspace
+ * hydroclimate falls back to mock (live is resolved for the workspace climate).
  */
 
 import { useMemo } from "react"
-import { useReservoirPercentiles } from "@repo/data/coeqwal/hooks"
+import {
+  useReservoirStorageDataInDepth,
+  useRiverFlowsDataInDepth,
+  useDeltaSalinityDataInDepth,
+} from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
+import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
 import {
   getScenarioShortLabel,
@@ -52,40 +61,19 @@ import {
   type MonthlyBand,
   type SeriesStats,
 } from "../config/mockDataEngine"
+import {
+  didDomainForVariable,
+  didPeriodForVariable,
+  toDidSubject,
+  unitTokenForView,
+  includeForView,
+  pickLiveSeries,
+} from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
 
 /** Default count of locations seeded into a "compare by locations" set. */
 const DEFAULT_LOCATION_COUNT = 3
-
-/**
- * Registry reservoir-location id -> API reservoir short_code. Most match; only
- * the two San Luis basins differ. Aggregates (AGG_*) have no API reservoir, so
- * they resolve to null and fall back to mock.
- */
-const RESERVOIR_ID_MAP: Record<string, string> = {
-  SLCVP: "SLUIS_CVP",
-  SLSWP: "SLUIS_SWP",
-}
-const AGGREGATE_RESERVOIRS = new Set(["AGG_NOD", "AGG_SOD"])
-
-/** Water-month key (1=Oct..12=Sep) for each live reservoir variable. */
-const WATER_MONTH_BY_VARIABLE: Record<string, string> = {
-  res_apr: "7",
-  res_sep: "12",
-}
-
-/** Map a registry reservoir-location id to its API reservoir id, or null. */
-function toApiReservoirId(locationId: string): string | null {
-  if (AGGREGATE_RESERVOIRS.has(locationId)) return null
-  return RESERVOIR_ID_MAP[locationId] ?? locationId
-}
-
-/** An exceedance-curve point (probability of being at least this value). */
-export interface ExceedanceCurvePoint {
-  probability: number
-  value: number
-}
 
 /** One comparison member (a scenario, a climate, or a location). */
 export interface VariableMember {
@@ -103,12 +91,6 @@ export interface VariableMember {
   bands: MonthlyBand[]
   /** Single value for the "cv" and "value" views */
   value: number
-  /**
-   * Live exceedance points from the reservoir percentile grid. Present only for
-   * live reservoir members; the caller draws these instead of deriving points
-   * from `series`.
-   */
-  livePoints?: ExceedanceCurvePoint[]
 }
 
 export interface VariableData {
@@ -139,7 +121,7 @@ interface MemberSpec {
   scenarioId: string
   climateKey: string
   locationId: string
-  /** Index into the reservoir fan-out slots (scenarios axis only) */
+  /** Index into the per-scenario live fan-out slots (scenarios axis only) */
   slotIndex?: number
 }
 
@@ -208,26 +190,79 @@ export function useVariableData(): VariableData {
     [scenarioIdsJoined],
   )
 
-  // Live reservoir data: only for `data:"live"` variables on the scenarios axis.
-  const liveReservoirId =
-    variable?.data === "live" && compareBy === "scenarios"
-      ? toApiReservoirId(heldLocation)
-      : null
+  // Live request mapping for the current variable (null domain -> mock only).
+  const domain = variable ? didDomainForVariable(variable.id) : null
+  const period = variable ? didPeriodForVariable(variable.id) : null
+  const subject = domain ? toDidSubject(domain, heldLocation) : null
+  const unitToken = domain ? unitTokenForView(domain, view) : "volume"
+  const include = includeForView(view)
 
-  // Fan out the reservoir percentile fetch across the comparison scenarios. The
-  // hook is always invoked MAX_FETCH_SLOTS times (inactive slots pass null and
-  // never fetch); passing [] when not live yields no results but keeps the hook
-  // count constant.
+  // Resolve the comparison scenarios through the active hydroclimate. Live is
+  // only correct when the held climate is the workspace hydroclimate the
+  // resolver used; otherwise fall back to mock.
+  const resolved = useResolvedIdMapping()
+  const liveEligible =
+    domain != null &&
+    subject != null &&
+    period != null &&
+    compareBy === "scenarios" &&
+    heldClimate === resolved.hydroclimate
+
+  // Resolved short_code (or null) per comparison scenario, in member order.
+  const fanoutIds = liveEligible
+    ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
+    : []
+
+  // Fan out each domain's endpoint across the comparison scenarios. Only the
+  // active domain passes real ids; the others pass [] so every slot defers.
+  // The hook count stays constant across renders (Rules of Hooks).
   const reservoirSlots = useMultiScenarioSlots(
-    liveReservoirId ? compareScenarioIds : [],
-    (scenarioId) =>
-      // eslint-disable-next-line react-hooks/rules-of-hooks -- helper guarantees stable hook order
-      useReservoirPercentiles(scenarioId, liveReservoirId),
+    domain === "reservoir" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useReservoirStorageDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        periods:
+          period === "annual" ? undefined : period ? [period] : undefined,
+        units: view === "pct" ? ["pct_capacity"] : ["volume"],
+        include,
+      }),
   )
-  const liveDataSignature = reservoirSlots
+  const riverSlots = useMultiScenarioSlots(
+    domain === "river" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useRiverFlowsDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        units: ["volume"],
+        include,
+      }),
+  )
+  const deltaSlots = useMultiScenarioSlots(
+    domain === "delta" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useDeltaSalinityDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        periods:
+          period === "annual" ? undefined : period ? [period] : undefined,
+        units: ["km"],
+        include,
+      }),
+  )
+
+  const activeSlots =
+    domain === "reservoir"
+      ? reservoirSlots
+      : domain === "river"
+        ? riverSlots
+        : domain === "delta"
+          ? deltaSlots
+          : []
+  const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")
-  const liveLoading = reservoirSlots.some((r) => r?.isLoading)
+  const liveLoading = activeSlots.some((r) => r?.isLoading)
 
   return useMemo<VariableData>(() => {
     const emptyContext = {
@@ -302,17 +337,10 @@ export function useVariableData(): VariableData {
     }
 
     const isPct = view === "pct"
-    // Live only covers the exceedance view of a reservoir variable on the
-    // scenarios axis (the q-grid maps cleanly to an exceedance curve).
-    const useLive =
-      liveReservoirId != null &&
-      compareBy === "scenarios" &&
-      (view === "dist" || view === "pct") &&
-      distKind === "exceedance"
-    const liveMonth = WATER_MONTH_BY_VARIABLE[variable.id] ?? "7"
 
     let anyLive = false
     const members: VariableMember[] = specs.map((spec) => {
+      // Mock baseline (also the fallback when a live series is absent).
       const raw = mockAnnualSeries(
         variable.id,
         spec.scenarioId,
@@ -327,6 +355,30 @@ export function useVariableData(): VariableData {
       } else {
         series = raw
       }
+
+      // Live override: the endpoint already returns the requested unit
+      // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
+      if (
+        liveEligible &&
+        subject &&
+        period &&
+        domain &&
+        spec.slotIndex != null
+      ) {
+        const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
+        const liveSeries = pickLiveSeries(
+          block,
+          domain,
+          subject,
+          period,
+          unitToken,
+        )
+        if (liveSeries.length > 0) {
+          series = liveSeries
+          anyLive = true
+        }
+      }
+
       const stats = seriesStats(series)
       const bands =
         view === "monthly"
@@ -348,40 +400,6 @@ export function useVariableData(): VariableData {
         )
       else value = stats.p50
 
-      // Live override for the exceedance view when reservoir data is present.
-      let livePoints: ExceedanceCurvePoint[] | undefined
-      if (useLive && spec.slotIndex != null) {
-        const pv =
-          reservoirSlots[spec.slotIndex]?.data?.monthly_percentiles?.[liveMonth]
-        if (pv) {
-          const toUnit = (p: number) =>
-            isPct ? p : capacity ? (p / 100) * capacity : p
-          livePoints = [
-            { probability: 1.0, value: toUnit(pv.q0) },
-            { probability: 0.9, value: toUnit(pv.q10) },
-            { probability: 0.7, value: toUnit(pv.q30) },
-            { probability: 0.5, value: toUnit(pv.q50) },
-            { probability: 0.3, value: toUnit(pv.q70) },
-            { probability: 0.1, value: toUnit(pv.q90) },
-            { probability: 0.0, value: toUnit(pv.q100) },
-          ]
-          value = toUnit(pv.q50)
-          // Point the member series at the live percentile grid so the summary
-          // sentence (which derives its median from `series`) matches the chart:
-          // seriesStats of the 7 sorted values yields p50 === live q50.
-          series = [
-            toUnit(pv.q0),
-            toUnit(pv.q10),
-            toUnit(pv.q30),
-            toUnit(pv.q50),
-            toUnit(pv.q70),
-            toUnit(pv.q90),
-            toUnit(pv.q100),
-          ]
-          anyLive = true
-        }
-      }
-
       return {
         id: spec.id,
         label: spec.label,
@@ -390,7 +408,6 @@ export function useVariableData(): VariableData {
         stats,
         bands,
         value,
-        livePoints,
       }
     })
 
@@ -410,7 +427,7 @@ export function useVariableData(): VariableData {
       provisional: variable.provisional ?? false,
       source: anyLive ? "live" : "mock",
       ...emptyContext,
-      isLoading: useLive ? liveLoading : false,
+      isLoading: liveEligible ? liveLoading : false,
       error: null,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- primitive deps below fully capture the object/array inputs (joined ids, live signature); recompute only when the selection or live data changes
@@ -426,8 +443,12 @@ export function useVariableData(): VariableData {
     locationIdsJoined,
     scenarioIdsJoined,
     compareScenarioIds,
-    liveReservoirId,
-    liveDataSignature,
+    liveEligible,
+    subject,
+    period,
+    domain,
+    unitToken,
+    liveSignature,
     liveLoading,
   ])
 }

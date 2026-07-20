@@ -139,7 +139,7 @@ export default function ChartCard() {
     const series: ExceedanceSeries[] = data.members.map((m, i) => ({
       id: m.id,
       label: m.label,
-      points: m.livePoints ?? toExceedancePoints(m.series),
+      points: toExceedancePoints(m.series),
       color: memberColors[i],
     }))
     chart = (
@@ -263,7 +263,7 @@ export default function ChartCard() {
         }}
       >
         {data.source === "live"
-          ? "Live reservoir data from api.coeqwal.org (CalSim3 post-processed percentiles)."
+          ? "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
           : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
       </Typography>
     </Box>
