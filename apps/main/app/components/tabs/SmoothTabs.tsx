@@ -154,7 +154,7 @@ export default function SmoothTabs() {
           )
         })}
       </div>
-      {activeTab !== 'explore' && (
+      {activeTab !== "explore" && (
         <Box
           id="tabPanelHeader"
           role="tabPanelHeader"
@@ -173,7 +173,6 @@ export default function SmoothTabs() {
           }}
         />
       )}
-
 
       <ExploreSubNav />
     </div>

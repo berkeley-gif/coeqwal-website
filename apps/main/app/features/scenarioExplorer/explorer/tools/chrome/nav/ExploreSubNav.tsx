@@ -163,12 +163,12 @@ export default function ExploreSubNav() {
                   gap: 0.6,
                   px: 0.9,
                   py: 0.4,
-                  border: step.noBorder ?
-                    "none"
+                  border: step.noBorder
+                    ? "none"
                     : `1px solid ${alpha(
-                      theme.palette.common.white,
-                      active ? 0.7 : 0.3,
-                    )}`,
+                        theme.palette.common.white,
+                        active ? 0.7 : 0.3,
+                      )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active

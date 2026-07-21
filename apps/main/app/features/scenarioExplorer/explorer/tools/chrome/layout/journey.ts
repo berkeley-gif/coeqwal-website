@@ -23,7 +23,8 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
     purpose:
       "Browse the full library of scenarios and select the ones that you want to study more closely.",
     nextMode: "bar",
-    nextLabel: "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
+    nextLabel:
+      "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
     nextRationale: "See your shortlist scenarios side by side.",
   },
   bar: {
