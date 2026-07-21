@@ -9,12 +9,7 @@
  */
 
 import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  ArrowForwardIcon,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 
 const RAIL_WIDTH = 66
 
