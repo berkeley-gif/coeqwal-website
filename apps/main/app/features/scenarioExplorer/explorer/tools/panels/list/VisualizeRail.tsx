@@ -13,7 +13,6 @@ import {
   Box,
   Typography,
   useTheme,
-  alpha,
   ArrowForwardIcon,
 } from "@repo/ui/mui"
 
