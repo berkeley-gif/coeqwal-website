@@ -78,7 +78,7 @@ export function getJourneyStage(mode: ExploreMode): JourneyStageConfig {
  * chart title in the ToolJourneyStrip top row.
  */
 export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
-  list: "List view",
+  list: "Home view",
   bar: "Bar chart comparison",
   radar: "Radar chart",
   equity: "Distribution",
