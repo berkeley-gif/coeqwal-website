@@ -15,7 +15,8 @@ import {
   Box,
   useTheme,
   alpha,
-  ViewListIcon,
+  HomeIcon,
+  ArrowForwardIcon,
   BarChartIcon,
   AdjustIcon,
   AppsIcon,
@@ -39,14 +40,16 @@ type FlowStep = {
   label: string
   purpose: string
   research?: boolean
+  noBorder?: boolean
 }
 
 const FLOW: FlowStep[] = [
   {
     mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
-    label: "List",
-    purpose: "Shortlist scenarios",
+    icon: <HomeIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Home",
+    purpose: "Select your scenarios",
+    noBorder: true,
   },
   {
     mode: "bar",
@@ -160,10 +163,12 @@ export default function ExploreSubNav() {
                   gap: 0.6,
                   px: 0.9,
                   py: 0.4,
-                  border: `1px solid ${alpha(
-                    theme.palette.common.white,
-                    active ? 0.7 : 0.3,
-                  )}`,
+                  border: step.noBorder ?
+                    "none"
+                    : `1px solid ${alpha(
+                      theme.palette.common.white,
+                      active ? 0.7 : 0.3,
+                    )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -221,6 +226,19 @@ export default function ExploreSubNav() {
                   </Box>
                 </Box>
               </Box>
+              {step.noBorder && (
+                <Box
+                  component="span"
+                  aria-hidden="true"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    color: alpha(theme.palette.common.white, 0.6),
+                  }}
+                >
+                  <ArrowForwardIcon sx={{ fontSize: "1.1rem" }} />
+                </Box>
+              )}
             </React.Fragment>
           )
         },
