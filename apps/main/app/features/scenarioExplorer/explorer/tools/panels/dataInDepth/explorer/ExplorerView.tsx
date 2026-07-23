@@ -18,6 +18,7 @@ import { getSector, getVariable } from "../config/variableRegistry"
 import SectorRail from "./SectorRail"
 import CompareControls from "./CompareControls"
 import ViewBar from "./ViewBar"
+import WytFilterChips from "./WytFilterChips"
 import ChartCard from "./ChartCard"
 import MetricExplainers from "./MetricExplainers"
 
@@ -73,6 +74,7 @@ export default function ExplorerView() {
 
         <CompareControls />
         <ViewBar />
+        <WytFilterChips />
         <Box sx={{ mt: 2 }}>
           <ChartCard />
         </Box>
