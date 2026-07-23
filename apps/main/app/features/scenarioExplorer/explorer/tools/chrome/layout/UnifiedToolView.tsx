@@ -222,6 +222,7 @@ export default function UnifiedToolView({
               justifyContent: "center",
               backgroundColor: theme.palette.background.toolPanel,
               boxShadow: theme.shadows[2],
+              border: `1px solid ${theme.palette.divider}`
             }}>
             <Box
               sx={{

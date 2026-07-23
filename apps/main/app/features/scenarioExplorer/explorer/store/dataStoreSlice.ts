@@ -52,8 +52,6 @@ export interface DataState {
   selectedClimates: string[]
   /** Multi-member set per group for "compare by locations" (empty -> seed) */
   selectedLocationsByGroup: Record<string, string[]>
-  /** Scenario library sidebar collapsed to a slim strip (data tool only) */
-  scenarioRailCollapsed: boolean
   /** Variables rail collapsed to a slim strip */
   variableRailCollapsed: boolean
 }
@@ -68,7 +66,6 @@ export interface DataActions {
   setPinnedLocation: (groupId: string, locationId: string) => void
   setSelectedClimates: (climates: string[]) => void
   setSelectedLocations: (groupId: string, locationIds: string[]) => void
-  setScenarioRailCollapsed: (collapsed: boolean) => void
   setVariableRailCollapsed: (collapsed: boolean) => void
 }
 
@@ -84,7 +81,6 @@ export const dataInitialState: DataState = {
   pinnedLocationByGroup: defaultLocationSelection(),
   selectedClimates: [],
   selectedLocationsByGroup: {},
-  scenarioRailCollapsed: false,
   variableRailCollapsed: false,
 }
 
@@ -140,11 +136,6 @@ export function createDataSlice(
     setSelectedLocations: (groupId, locationIds) =>
       set((state) => {
         state.selectedLocationsByGroup[groupId] = locationIds
-      }),
-
-    setScenarioRailCollapsed: (collapsed) =>
-      set((state) => {
-        state.scenarioRailCollapsed = collapsed
       }),
 
     setVariableRailCollapsed: (collapsed) =>

@@ -58,6 +58,7 @@ export const WORKSPACE_TOOLBAR_PERSIST_KEYS = [
   "showKeyOperations",
   "showAlternativeBaselines",
   "outcomeDisplayMode",
+  "scenarioRailCollapsed",
 ] as const satisfies readonly (keyof WorkspaceState)[]
 
 /** Shared chart overlay toggles */
@@ -149,7 +150,6 @@ export const DATA_PERSIST_KEYS = [
   "pinnedLocationByGroup",
   "selectedClimates",
   "selectedLocationsByGroup",
-  "scenarioRailCollapsed",
   "variableRailCollapsed",
 ] as const satisfies readonly (keyof DataState)[]
 
@@ -189,6 +189,7 @@ const WORKSPACE_ACTION_KEYS = [
   "setShowKeyOperations",
   "setOutcomeDisplayMode",
   "setShowMap",
+  "setScenarioRailCollapsed",
   "addShareItem",
   "removeShareItem",
   "clearShareItems",
@@ -276,7 +277,6 @@ const DATA_ACTION_KEYS = [
   "setPinnedLocation",
   "setSelectedClimates",
   "setSelectedLocations",
-  "setScenarioRailCollapsed",
   "setVariableRailCollapsed",
 ] as const satisfies readonly (keyof DataSlice)[]
 

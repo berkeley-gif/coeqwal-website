@@ -133,6 +133,7 @@ export default function ExploreSubNav() {
         color: theme.palette.common.white,
         justifyContent: "center",
         gap: 1,
+        py: 4
       }}
     >
       {/* Buttons to the different tools */}

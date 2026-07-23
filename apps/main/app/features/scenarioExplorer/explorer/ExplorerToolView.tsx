@@ -28,14 +28,14 @@ export default function ExplorerToolView() {
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const isListMode = exploreMode === "list"
 
-  // Data in depth collapses its scenario sidebar to a slim strip; other
-  // modes keep the fixed sidebar (collapse state is data-tool session state).
-  const scenarioRailCollapsed = useDataSlice((s) => s.scenarioRailCollapsed)
-  const setScenarioRailCollapsed = useDataSlice(
+  // Every sidebar-layout tool (bar, equity, radar, resilience, data) can
+  // collapse the scenario sidebar to a slim strip; list mode has no sidebar.
+  const scenarioRailCollapsed = useWorkspaceSlice((s) => s.scenarioRailCollapsed)
+  const setScenarioRailCollapsed = useWorkspaceSlice(
     (s) => s.setScenarioRailCollapsed,
   )
   const isDataMode = exploreMode === "data"
-  const sidebarCollapsed = isDataMode && scenarioRailCollapsed
+  const sidebarCollapsed = !isListMode && scenarioRailCollapsed
 
   const hover = useExploreHoverCoordination()
   const share = useExploreShareCapture()
@@ -63,9 +63,7 @@ export default function ExplorerToolView() {
                 hover={hover}
                 share={share}
                 radarScenarioColors={radarScenarioColors}
-                onCollapse={
-                  isDataMode ? () => setScenarioRailCollapsed(true) : undefined
-                }
+                onCollapse={() => setScenarioRailCollapsed(true)}
               />
             )
           }

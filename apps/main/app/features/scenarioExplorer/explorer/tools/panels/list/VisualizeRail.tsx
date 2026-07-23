@@ -53,11 +53,13 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
     >
       <ArrowForwardIcon sx={{ fontSize: "1.25rem" }} />
       <Typography
-        variant="dashboard"
+        component="span"
         sx={{
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
           writingMode: "vertical-rl",
-          fontWeight: 600,
-          fontSize: "0.8125rem",
           whiteSpace: "nowrap",
           color: "inherit",
         }}
