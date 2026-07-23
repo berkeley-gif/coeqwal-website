@@ -1,129 +1,132 @@
 "use client"
 
-import { motion } from "@repo/motion"
-import {
-  ScrollElement,
-  ScrollSection,
-  StickyElement,
-  useScrollProgress,
-  useScrollValue,
-} from "@repo/scrollytelling"
+import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 
+const goldRushText = {
+  title: { text: "How inequity started and persists" },
+  priorities: {
+    introduction: [
+      {
+        text: "Today’s water rights reflect the values and priorities of California’s Gold Rush:",
+      },
+    ],
+    points: [
+      {
+        text: "Rapid resource extraction with no regard for downstream impacts.",
+      },
+      {
+        text: "Expansion of settlement and export-driven agriculture.",
+      },
+      {
+        text: 'Maximized water diversions to avoid "waste" of water.',
+      },
+    ],
+  },
+  exclusion: [
+    {
+      text: "New legal and political systems redefined who could access land and water.",
+    },
+    {
+      text: "Indigenous water practices were communal, seasonal and protective of water flows.",
+    },
+    { text: "New laws excluded them." },
+    { text: "In practice, only white men could claim and hold water rights." },
+    {
+      text: "In effect, rivers could go dry without regard for downstream communities, ecosystems, or ways of life.",
+    },
+  ],
+  legacy: [
+    {
+      text: "Legalized systems of exclusion began with European settlement and cemented a lasting hierarchy of “legitimate” water users.",
+    },
+    {
+      text: "Much of California’s available water was claimed under these early rights, locking in inequities that dominate today’s water allocations.",
+    },
+    {
+      text: "The state’s systematic dispossession of California's Indigenous peoples from their land, water and ways of life did not happen in isolation.",
+    },
+    {
+      text: "It was one dimension of state-sponsored policies and acts of violence, genocide and cultural erasure.",
+    },
+    {
+      text: "This racist legacy persists by denying the rights to water that sustain cultures, health and well-being.",
+    },
+  ],
+} as const
+
 export default function GoldRush() {
   return (
-    <Box
-      component="section"
+    <StickyScrollSection
       id="frame-3"
-      aria-label="Gold Rush water rights and inequity"
+      ariaLabel="Gold Rush water rights and inequity"
+      height="520vh"
+      stickyTop="15vh"
+      stickyHeight="70vh"
+      offset={["start start", "end center"]}
     >
-      <ScrollSection height="250vh" offset={["start start", "end center"]}>
-        <StickyElement top="15vh" style={{ height: "35vh" }}>
-          <GoldRushOriginsPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="205vh">
-        <StickyElement top="15vh">
-          <GoldRushLegacyPanel />
-        </StickyElement>
-      </ScrollSection>
-    </Box>
-  )
-}
-
-function GoldRushOriginsPanel() {
-  const progress = useScrollProgress()
-  const titleOpacity = useScrollValue(progress, [0.04, 0.12], [0, 1])
-  const firstParagraphOpacity = useScrollValue(progress, [0.08, 0.18], [0, 1])
-  const secondParagraphOpacity = useScrollValue(progress, [0.42, 0.5], [0, 1])
-  const thirdParagraphOpacity = useScrollValue(progress, [0.68, 0.76], [0, 1])
-
-  return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-        minHeight: "70vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      <motion.div style={{ opacity: titleOpacity }}>
-        <Box className="paragraph" component="header" role="banner">
-          <SectionTitle text={"How inequity started"} />
-        </Box>
-      </motion.div>
-
-      <Stack spacing={2} direction="column">
-        <motion.div style={{ opacity: firstParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "The mid-19th century marked a turning point in California's water history.",
-                "During the Gold Rush, European settlers introduced new legal and political systems that fundamentally redefined who could access land and water.",
-              ]}
-            />
-          </Box>
-        </motion.div>
-
-        <motion.div style={{ opacity: secondParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "The 1850 Act for the Government and Protection of Indians instituted forced removal, cultural suppression, and the large-scale dispossession of Indigenous lands and waters.",
-                "At the same time, settlers established their own system of water rights.",
-              ]}
-            />
-          </Box>
-        </motion.div>
-
-        <motion.div style={{ opacity: thirdParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "Indigenous water needs and practices were not recognized under these laws.",
-                "Only white men could claim and hold water rights.",
-              ]}
-            />
-          </Box>
-        </motion.div>
-      </Stack>
-    </Box>
-  )
-}
-
-function GoldRushLegacyPanel() {
-  return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-        minHeight: "70vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.88]}
-        exit={[0.88, 0.98]}
-        animation="slideUp"
+      <Box
+        className="container text-section"
+        sx={{
+          width: "min(75ch, calc(100vw - 6rem))",
+          maxWidth: "75ch",
+          minHeight: "70vh",
+          display: "grid",
+          alignItems: "center",
+        }}
       >
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "This period established a lasting hierarchy of 'legitimate' water users.",
-              "Today's water rights reflect values and priorities of the Gold Rush: rapid resource extraction, expansion of agriculture, and maximizing out-of-stream water use to support settlement and economic growth, primarily for white landowners.",
-              "Systems of exclusion and racism continue to deny Indigenous communities and others equal rights, recognition, and access to water.",
-              "While these priorities drove development, they locked in patterns of water allocation that have been difficult to change, even as societal values and understandings of equity have evolved.",
-            ]}
-          />
-        </Box>
-      </ScrollElement>
-    </Box>
+        <ScrollElement
+          enter={[0, 0.04]}
+          hold={[0.04, 0.3]}
+          exit={[0.3, 0.34]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Box component="header">
+            <SectionTitle text={goldRushText.title} />
+          </Box>
+          <Stack component="section" spacing={2}>
+            <Paragraph blocks={goldRushText.priorities.introduction} />
+            <Box component="ul" sx={{ margin: 0, paddingLeft: 4 }}>
+              {goldRushText.priorities.points.map((point) => (
+                <Box key={point.text} component="li" sx={{ paddingLeft: 1 }}>
+                  <Paragraph blocks={[point]} />
+                </Box>
+              ))}
+            </Box>
+          </Stack>
+        </ScrollElement>
+
+        <ScrollElement
+          enter={[0.34, 0.38]}
+          hold={[0.38, 0.66]}
+          exit={[0.66, 0.7]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack component="section" spacing={1.25}>
+            <Paragraph blocks={[goldRushText.exclusion[0]]} />
+            <Paragraph blocks={goldRushText.exclusion.slice(1)} />
+          </Stack>
+        </ScrollElement>
+
+        <ScrollElement
+          enter={[0.7, 0.74]}
+          hold={[0.74, 1]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack spacing={6}>
+            <Stack component="section" spacing={1.25}>
+              <Paragraph blocks={goldRushText.legacy.slice(0, 2)} />
+            </Stack>
+            <Stack spacing={1.25}>
+              <Paragraph blocks={goldRushText.legacy.slice(2)} />
+            </Stack>
+          </Stack>
+        </ScrollElement>
+      </Box>
+    </StickyScrollSection>
   )
 }

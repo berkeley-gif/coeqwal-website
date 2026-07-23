@@ -13,11 +13,11 @@ import {
   INFRASTRUCTURE_DELTA_PROGRESS,
   INFRASTRUCTURE_DELTA_PIPES_PROGRESS,
   useBackgroundProgress,
+  useCentralValleyIcon,
   useCircleAnnotations,
   useHistoricalContextProgress,
   useInfrastructureProgress,
   useLocationLabels,
-  useMcCloudRiverProgress,
   useActiveSectionStore,
   useMetroRiverPlaygroundMode,
   useRiversProgress,
@@ -25,6 +25,10 @@ import {
   useShowShastaMcCloud,
   useShowYubaRiver,
   useYubaRiverProgress,
+  useUrbanIcon,
+  useWetlandIcon,
+  useShowMapIconStrokes,
+  useSalmonIcon,
 } from "../../../store"
 
 export default function LayerOrchestrator() {
@@ -35,11 +39,27 @@ export default function LayerOrchestrator() {
   const locationLabels = useLocationLabels()
   const circleAnnotations = useCircleAnnotations()
   const backgroundProgress = useBackgroundProgress()
-  const mcCloudRiverProgress = useMcCloudRiverProgress()
+  const centralValleyIcon = useCentralValleyIcon()
+  const urbanIcon = useUrbanIcon()
+  const wetlandIcon = useWetlandIcon()
+  const showMapIconStrokes = useShowMapIconStrokes()
+  const salmonIcon = useSalmonIcon()
   const yubaRiverProgress = useYubaRiverProgress()
   const historicalContextProgress = useHistoricalContextProgress()
   const infrastructureProgress = useInfrastructureProgress()
   const activeSection = useActiveSectionStore()
+  const hideBackgroundIcons =
+    activeSection === "Background" && backgroundProgress >= 0.72
+  const showBackgroundMigration =
+    activeSection === "Background" && backgroundProgress >= 0.76
+  const backgroundMigrationProgress = showBackgroundMigration
+    ? 0.12 + Math.min(1, (backgroundProgress - 0.76) / 0.24) * 0.78
+    : 0
+  const showBackgroundMcCloudRiver =
+    activeSection === "Background" && backgroundProgress >= 0.84
+  const backgroundMcCloudRiverProgress = showBackgroundMcCloudRiver
+    ? Math.min(1, Math.max(0, (backgroundProgress - 0.86) / 0.1))
+    : 0
   const metroRiverMode = useMetroRiverPlaygroundMode()
   const showMetroRiverOverlay = activeSection === "Transparency"
   const morphToMetro = metroRiverMode === "metro-map"
@@ -64,13 +84,29 @@ export default function LayerOrchestrator() {
         progress={backgroundProgress}
       />
       <MapCircleAnnotationLayer
-        annotations={circleAnnotations}
+        annotations={hideBackgroundIcons ? [] : circleAnnotations}
         progress={backgroundProgress}
+        showStrokes={showMapIconStrokes}
+        iconOverrides={{
+          "central-valley-agriculture": centralValleyIcon,
+          "bay-area-city": urbanIcon,
+          "los-angeles-city": urbanIcon,
+          delta: wetlandIcon,
+          "shasta-salmon": salmonIcon,
+        }}
       />
       <ShastaMcCloudLayer
-        visible={showShastaMcCloud}
-        progress={mcCloudRiverProgress}
-        sectionProgress={historicalContextProgress}
+        visible={showShastaMcCloud || showBackgroundMigration}
+        progress={showBackgroundMigration ? backgroundMcCloudRiverProgress : 1}
+        sectionProgress={
+          showBackgroundMigration
+            ? backgroundMigrationProgress
+            : historicalContextProgress
+        }
+        showMigration={showBackgroundMigration}
+        migrationOnly={showBackgroundMigration}
+        showRiver={!showBackgroundMigration || showBackgroundMcCloudRiver}
+        salmonIconSrc={salmonIcon}
       />
       <YubaRiverLayer visible={showYubaRiver} progress={yubaRiverProgress} />
       <DamChronologyLayer progress={infrastructureProgress} />

@@ -90,3 +90,12 @@ html {
   word-break: break-word;
   overflow-wrap: break-word;
 }
+
+.story-step-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: max-content;
+  pointer-events: none;
+}

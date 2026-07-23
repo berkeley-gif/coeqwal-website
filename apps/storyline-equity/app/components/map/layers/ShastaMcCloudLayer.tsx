@@ -163,10 +163,18 @@ export default function ShastaMcCloudLayer({
   visible,
   progress,
   sectionProgress = 0,
+  showMigration = false,
+  migrationOnly = false,
+  showRiver = !migrationOnly,
+  salmonIconSrc,
 }: {
   visible: boolean
   progress: number
   sectionProgress?: number
+  showMigration?: boolean
+  migrationOnly?: boolean
+  showRiver?: boolean
+  salmonIconSrc?: string
 }) {
   const clampedProgress = Math.max(0, Math.min(1, progress))
   const { mapRef } = useMap()
@@ -200,6 +208,7 @@ export default function ShastaMcCloudLayer({
   }, [movingPointProgress, postShastaProgress])
   const showMovingPoint =
     visible &&
+    showMigration &&
     sectionProgress >= MOVING_POINT_RANGE[0] &&
     sectionProgress < TREE_EXIT_RANGE[1]
   const treeZoomScale = Math.min(
@@ -227,164 +236,194 @@ export default function ShastaMcCloudLayer({
 
   return (
     <>
-      <Source
-        id={MCCLOUD_RIVER_SOURCE_ID}
-        type="geojson"
-        data={mcCloudRiver}
-        lineMetrics={true}
-      >
-        <Layer
-          id="mccloud-river-halo"
-          type="line"
-          paint={{
-            "line-color": "#07142c",
-            "line-width": 9,
-            "line-opacity": 0.75,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-cap": "round",
-            "line-join": "round",
-            visibility: visibilityValue,
-          }}
-        />
-        <Layer
-          id="mccloud-river-body"
-          type="line"
-          paint={{
-            "line-color": RiverWaterColor,
-            "line-width": 5,
-            "line-opacity": 1,
-            "line-trim-offset": trimOffset,
-          }}
-          layout={{
-            "line-cap": "round",
-            "line-join": "round",
-            visibility: visibilityValue,
-          }}
-        />
-      </Source>
+      {showRiver ? (
+        <Source
+          id={MCCLOUD_RIVER_SOURCE_ID}
+          type="geojson"
+          data={mcCloudRiver}
+          lineMetrics={true}
+        >
+          <Layer
+            id="mccloud-river-halo"
+            type="line"
+            paint={{
+              "line-color": "#07142c",
+              "line-width": 9,
+              "line-opacity": 0.75,
+              "line-trim-offset": trimOffset,
+            }}
+            layout={{
+              "line-cap": "round",
+              "line-join": "round",
+              visibility: visibilityValue,
+            }}
+          />
+          <Layer
+            id="mccloud-river-body"
+            type="line"
+            paint={{
+              "line-color": RiverWaterColor,
+              "line-width": 5,
+              "line-opacity": 1,
+              "line-trim-offset": trimOffset,
+            }}
+            layout={{
+              "line-cap": "round",
+              "line-join": "round",
+              visibility: visibilityValue,
+            }}
+          />
+        </Source>
+      ) : null}
 
       {visible ? (
         <>
+          {showRiver && clampedProgress > 0 ? (
+            <Marker longitude={-122.22} latitude={40.92}>
+              <Typography
+                component="span"
+                sx={{
+                  position: "absolute",
+                  left: 10,
+                  top: -6,
+                  whiteSpace: "nowrap",
+                  color: "#fcfbfa",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
+                }}
+              >
+                McCloud River
+              </Typography>
+            </Marker>
+          ) : null}
           {showMovingPoint && movingPointCoordinate ? (
             <Marker
               longitude={movingPointCoordinate[0]}
               latitude={movingPointCoordinate[1]}
             >
-              <Box
-                sx={{
-                  position: "absolute",
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: InfrastructureColor,
-                  border: "2px solid #fcfbfa",
-                  boxShadow: "0 0 0 6px rgba(242, 115, 34, 0.22)",
-                }}
-              />
+              {salmonIconSrc ? (
+                <Box
+                  component="img"
+                  src={salmonIconSrc}
+                  alt=""
+                  aria-hidden="true"
+                  sx={{
+                    position: "absolute",
+                    width: 30,
+                    height: 18,
+                    objectFit: "contain",
+                    transform: "translate(-50%, -50%)",
+                    filter: "drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45))",
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: InfrastructureColor,
+                    border: "2px solid #fcfbfa",
+                    boxShadow: "0 0 0 6px rgba(242, 115, 34, 0.22)",
+                  }}
+                />
+              )}
             </Marker>
           ) : null}
-          <Marker longitude={-122.42} latitude={40.718}>
-            <Box
-              sx={{
-                position: "absolute",
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                transform: "translate(-50%, -50%)",
-                backgroundColor: "#fcfbfa",
-                border: `2px solid ${InfrastructureColor}`,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.35)",
-              }}
-            />
-          </Marker>
-          <Marker longitude={-122.42} latitude={40.718}>
-            <Typography
-              component="span"
-              sx={{
-                position: "absolute",
-                left: 14,
-                top: -8,
-                whiteSpace: "nowrap",
-                color: "#fcfbfa",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
-              }}
-            >
-              Shasta Dam
-            </Typography>
-          </Marker>
-          <Marker longitude={-122.22} latitude={40.92}>
-            <Typography
-              component="span"
-              sx={{
-                position: "absolute",
-                left: 10,
-                top: -6,
-                whiteSpace: "nowrap",
-                color: "#fcfbfa",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
-              }}
-            >
-              McCloud River
-            </Typography>
-          </Marker>
-          {showTrees && MCCLOUD_RIVER_MIDPOINT ? (
-            <Marker
-              longitude={MCCLOUD_RIVER_MIDPOINT[0]}
-              latitude={MCCLOUD_RIVER_MIDPOINT[1]}
-            >
-              <Box
-                aria-hidden="true"
-                sx={{
-                  position: "absolute",
-                  width: 70,
-                  height: 68,
-                  transform: `translate(-50%, -100%) scale(${treeZoomScale})`,
-                  transformOrigin: "50% 100%",
-                  opacity: treeOpacity,
-                  color: "#269d2c",
-                  pointerEvents: "none",
-                }}
-              >
-                {TREE_MARKERS.map((tree) => (
+          {!migrationOnly ? (
+            <>
+              <Marker longitude={-122.42} latitude={40.718}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "#fcfbfa",
+                    border: `2px solid ${InfrastructureColor}`,
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.35)",
+                  }}
+                />
+              </Marker>
+              <Marker longitude={-122.42} latitude={40.718}>
+                <Typography
+                  component="span"
+                  sx={{
+                    position: "absolute",
+                    left: 14,
+                    top: -8,
+                    whiteSpace: "nowrap",
+                    color: "#fcfbfa",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
+                  }}
+                >
+                  Shasta Dam
+                </Typography>
+              </Marker>
+              {showTrees && MCCLOUD_RIVER_MIDPOINT ? (
+                <Marker
+                  longitude={MCCLOUD_RIVER_MIDPOINT[0]}
+                  latitude={MCCLOUD_RIVER_MIDPOINT[1]}
+                >
                   <Box
-                    key={tree.id}
+                    aria-hidden="true"
                     sx={{
                       position: "absolute",
-                      left: `calc(50% + ${tree.x}px)`,
-                      bottom: -tree.y,
-                      width: 30,
-                      height: 58,
-                      transform: "translateX(-50%)",
+                      width: 70,
+                      height: 68,
+                      transform: `translate(-50%, -100%) scale(${treeZoomScale})`,
+                      transformOrigin: "50% 100%",
+                      opacity: treeOpacity,
+                      color: "#269d2c",
+                      pointerEvents: "none",
                     }}
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 16, scale: tree.size * 0.72 }}
-                      animate={{ opacity: 1, y: 0, scale: tree.size }}
-                      transition={{
-                        duration: 0.36,
-                        delay: tree.delay,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        filter: "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35))",
-                        transformOrigin: "50% 100%",
-                      }}
-                    >
-                      <TreeIcon width="100%" height="100%" />
-                    </motion.div>
+                    {TREE_MARKERS.map((tree) => (
+                      <Box
+                        key={tree.id}
+                        sx={{
+                          position: "absolute",
+                          left: `calc(50% + ${tree.x}px)`,
+                          bottom: -tree.y,
+                          width: 30,
+                          height: 58,
+                          transform: "translateX(-50%)",
+                        }}
+                      >
+                        <motion.div
+                          initial={{
+                            opacity: 0,
+                            y: 16,
+                            scale: tree.size * 0.72,
+                          }}
+                          animate={{ opacity: 1, y: 0, scale: tree.size }}
+                          transition={{
+                            duration: 0.36,
+                            delay: tree.delay,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            filter:
+                              "drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35))",
+                            transformOrigin: "50% 100%",
+                          }}
+                        >
+                          <TreeIcon width="100%" height="100%" />
+                        </motion.div>
+                      </Box>
+                    ))}
                   </Box>
-                ))}
-              </Box>
-            </Marker>
+                </Marker>
+              ) : null}
+            </>
           ) : null}
         </>
       ) : null}
