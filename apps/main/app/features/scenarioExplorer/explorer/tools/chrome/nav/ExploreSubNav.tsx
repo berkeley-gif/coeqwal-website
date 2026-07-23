@@ -40,7 +40,7 @@ type FlowStep = {
   label: string
   purpose: string
   research?: boolean
-  noBorder?: boolean
+  showTrailingArrow?: boolean
 }
 
 const FLOW: FlowStep[] = [
@@ -49,7 +49,7 @@ const FLOW: FlowStep[] = [
     icon: <HomeIcon sx={{ fontSize: "1.1rem" }} />,
     label: "Home",
     purpose: "Select your scenarios",
-    noBorder: true,
+    showTrailingArrow: true,
   },
   {
     mode: "bar",
@@ -164,7 +164,7 @@ export default function ExploreSubNav() {
                   gap: 0.6,
                   px: 0.9,
                   py: 0.4,
-                  border: step.noBorder
+                  border: step.showTrailingArrow
                     ? "none"
                     : `1px solid ${alpha(
                         theme.palette.common.white,
@@ -227,7 +227,7 @@ export default function ExploreSubNav() {
                   </Box>
                 </Box>
               </Box>
-              {step.noBorder && (
+              {step.showTrailingArrow && (
                 <Box
                   component="span"
                   aria-hidden="true"
