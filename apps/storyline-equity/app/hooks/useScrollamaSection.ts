@@ -67,18 +67,6 @@ export function useScrollamaSection() {
     ({ data, progress }: StepProgressEvent<SectionId>) => {
       if (data === "HistoricalContext") {
         appActions.setHistoricalContextProgress(progress)
-
-        const startScroll = 0.38
-        const endScroll = 0.46
-
-        const clampedScroll = Math.max(
-          startScroll,
-          Math.min(endScroll, progress),
-        )
-        const animationProgress =
-          (clampedScroll - startScroll) / (endScroll - startScroll)
-
-        appActions.setMcCloudRiverProgress(animationProgress)
         return
       }
 
@@ -107,8 +95,8 @@ export function useScrollamaSection() {
 
       appActions.setBackgroundProgress(progress)
 
-      const startScroll = 0.08
-      const endScroll = 0.42
+      const startScroll = 0.03
+      const endScroll = 0.14
 
       const clampedScroll = Math.max(startScroll, Math.min(endScroll, progress))
       const animationProgress =

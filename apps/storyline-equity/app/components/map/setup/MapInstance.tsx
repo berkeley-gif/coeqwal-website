@@ -21,7 +21,6 @@ export const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
   [-114.0, 42.0],
 ]
 
-/*
 const EMPTY_MAP_STYLE = {
   version: 8,
   name: "empty map",
@@ -36,7 +35,7 @@ const EMPTY_MAP_STYLE = {
     },
   ],
 } as const
- */
+
 interface MapInstanceProps {
   mapboxToken?: string
   children?: ReactNode
@@ -90,14 +89,14 @@ export default function MapInstance({
     >
       <Map
         mapboxToken={token}
-        mapStyle={"mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"}
-        //mapStyle={EMPTY_MAP_STYLE as unknown as string}
+        //mapStyle={"mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"}
+        mapStyle={EMPTY_MAP_STYLE as unknown as string}
         initialViewState={CALIFORNIA_VIEW}
         maxBounds={MAP_BOUNDS}
         style={{ width: "100%", height: "100%" }}
-        interactive={true}
-        navigationControl={true}
-        dragPan={true}
+        interactive={false}
+        navigationControl={false}
+        dragPan={false}
       >
         {children}
       </Map>

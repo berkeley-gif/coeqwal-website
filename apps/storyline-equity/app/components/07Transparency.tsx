@@ -1,16 +1,8 @@
 "use client"
 
-import { motion } from "@repo/motion"
-import type { ReactNode } from "react"
-import {
-  ScrollElement,
-  ScrollSection,
-  StickyElement,
-  useScrollProgress,
-  useScrollValue,
-} from "@repo/scrollytelling"
-import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
+import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
+import { Paragraph, SectionTitle } from "@repo/ui"
 import {
   appActions,
   useActiveSectionStore,
@@ -18,7 +10,57 @@ import {
   type MetroRiverPlaygroundMode,
 } from "../store"
 
-const METRO_RIVER_OPTIONS: Array<{
+const transparencyText = {
+  en: {
+    title: { text: "Why transparency matters" },
+    sections: [
+      [
+        [
+          {
+            text: "Today, water managers rely on complex technical models, such as CalSim, to guide allocation decisions.",
+          },
+          {
+            text: "These tools are powerful, but they are also highly technical and difficult for non-experts to interpret.",
+          },
+        ],
+      ],
+      [
+        [
+          {
+            text: "As a result, many communities cannot easily see how decisions are made, what assumptions shape outcomes, or whose priorities are embedded in the models.",
+          },
+          {
+            text: "For example, a rule that allows more water to be diverted during dry periods may increase supplies for farms and cities, while reducing river flows needed for fish and ecosystems.",
+          },
+        ],
+      ],
+      [
+        [
+          {
+            text: "It also becomes difficult to understand how conditions differ across the system, from upstream sources to downstream communities and ecosystems.",
+          },
+        ],
+        [
+          {
+            text: "Without transparency, communities are marginalized from planning and negotiation.",
+          },
+          {
+            text: "Their needs, values, and vulnerabilities remain invisible, even as decisions directly affect their water security.",
+          },
+        ],
+      ],
+      [
+        [
+          {
+            text: "Understanding California's water system, both historically and technically, is essential for building a future that is resilient, fair, and shared.",
+          },
+        ],
+      ],
+    ],
+  },
+} as const
+
+const metroRiverOptions: Array<{
   mode: MetroRiverPlaygroundMode
   label: string
 }> = [
@@ -28,33 +70,56 @@ const METRO_RIVER_OPTIONS: Array<{
 
 export default function Transparency() {
   return (
-    <Box component="section" id="frame-6" aria-label="Why transparency matters">
+    <>
       <MetroRiverPlaygroundControls />
-
-      <ScrollSection height="250vh" offset={["start start", "end center"]}>
-        <StickyElement top="15vh" style={{ height: "35vh" }}>
-          <TransparencyModelsPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="155vh">
-        <StickyElement top="15vh">
-          <TransparencyAssumptionsPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="165vh">
-        <StickyElement top="15vh">
-          <TransparencyCommunityPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="170vh">
-        <StickyElement top="15vh">
-          <TransparencyFuturePanel />
-        </StickyElement>
-      </ScrollSection>
-    </Box>
+      <StickyScrollSection
+        id="frame-6"
+        ariaLabel="Why transparency matters"
+        height="680vh"
+        stickyTop="15vh"
+        stickyHeight="70vh"
+        offset={["start start", "end center"]}
+      >
+        <Box
+          className="container text-section"
+          sx={{
+            width: "min(75ch, calc(100vw - 6rem))",
+            maxWidth: "75ch",
+            minHeight: "70vh",
+            display: "grid",
+            alignItems: "center",
+          }}
+        >
+          {transparencyText.en.sections.map((groups, index) => {
+            const start = index / transparencyText.en.sections.length
+            const end = (index + 1) / transparencyText.en.sections.length
+            return (
+              <ScrollElement
+                key={index}
+                enter={[start, start + 0.04]}
+                hold={[start + 0.04, end - 0.04]}
+                exit={[end - 0.04, end]}
+                animation="slideUp"
+                style={{ gridArea: "1 / 1" }}
+              >
+                {index === 0 ? (
+                  <Box component="header">
+                    <SectionTitle text={transparencyText.en.title} />
+                  </Box>
+                ) : null}
+                <Stack component="section" spacing={2}>
+                  {groups.map((sentences, paragraphIndex) => (
+                    <Box key={paragraphIndex} component="article">
+                      <Paragraph blocks={sentences} />
+                    </Box>
+                  ))}
+                </Stack>
+              </ScrollElement>
+            )
+          })}
+        </Box>
+      </StickyScrollSection>
+    </>
   )
 }
 
@@ -94,9 +159,8 @@ function MetroRiverPlaygroundControls() {
         Metro river playground
       </Box>
       <Stack spacing={0.75}>
-        {METRO_RIVER_OPTIONS.map((option) => {
+        {metroRiverOptions.map((option) => {
           const selected = option.mode === mode
-
           return (
             <Box
               key={option.mode}
@@ -136,123 +200,5 @@ function MetroRiverPlaygroundControls() {
         })}
       </Stack>
     </Box>
-  )
-}
-
-function PanelContainer({ children }: { children: ReactNode }) {
-  return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-        minHeight: "70vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-function TransparencyModelsPanel() {
-  const progress = useScrollProgress()
-  const titleOpacity = useScrollValue(progress, [0.04, 0.12], [0, 1])
-  const paragraphOpacity = useScrollValue(progress, [0.08, 0.18], [0, 1])
-
-  return (
-    <PanelContainer>
-      <motion.div style={{ opacity: titleOpacity }}>
-        <Box className="paragraph" component="header" role="banner">
-          <SectionTitle text={"Why transparency matters"} />
-        </Box>
-      </motion.div>
-
-      <motion.div style={{ opacity: paragraphOpacity }}>
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "Today, water managers rely on complex technical models, such as CalSim, to guide allocation decisions.",
-              "These tools are powerful, but they are also highly technical and difficult for non-experts to interpret.",
-            ]}
-          />
-        </Box>
-      </motion.div>
-    </PanelContainer>
-  )
-}
-
-function TransparencyAssumptionsPanel() {
-  return (
-    <PanelContainer>
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.86]}
-        exit={[0.86, 0.98]}
-        animation="slideUp"
-      >
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "As a result, many communities cannot easily see how decisions are made, what assumptions shape outcomes, or whose priorities are embedded in the models.",
-              "For example, a rule that allows more water to be diverted during dry periods may increase supplies for farms and cities, while reducing river flows needed for fish and ecosystems.",
-            ]}
-          />
-        </Box>
-      </ScrollElement>
-    </PanelContainer>
-  )
-}
-
-function TransparencyCommunityPanel() {
-  return (
-    <PanelContainer>
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.8]}
-        exit={[0.8, 0.94]}
-        animation="slideUp"
-      >
-        <Stack spacing={2} direction="column">
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "It also becomes difficult to understand how conditions differ across the system, from upstream sources to downstream communities and ecosystems.",
-              ]}
-            />
-          </Box>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "Without transparency, communities are marginalized from planning and negotiation.",
-                "Their needs, values, and vulnerabilities remain invisible, even as decisions directly affect their water security.",
-              ]}
-            />
-          </Box>
-        </Stack>
-      </ScrollElement>
-    </PanelContainer>
-  )
-}
-
-function TransparencyFuturePanel() {
-  return (
-    <PanelContainer>
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.78]}
-        exit={[0.78, 0.92]}
-        animation="slideUp"
-      >
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "Understanding California's water system, both historically and technically, is essential for building a future that is resilient, fair, and shared.",
-            ]}
-          />
-        </Box>
-      </ScrollElement>
-    </PanelContainer>
   )
 }

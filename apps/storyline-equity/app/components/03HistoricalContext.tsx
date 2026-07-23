@@ -1,116 +1,125 @@
 "use client"
 
-import { motion } from "@repo/motion"
-import {
-  ScrollSection,
-  StickyElement,
-  useScrollProgress,
-  useScrollValue,
-} from "@repo/scrollytelling"
+import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 
+const historicalContextText = {
+  title: { text: "How Indigenous communities relate to water" },
+  opening: [
+    {
+      text: "For thousands of years, California’s Indigenous communities have lived in sync with the seasons, rivers, and wildlife.",
+    },
+    {
+      text: "To many California Tribes, salmon are relatives and rivers are sacred sites.",
+    },
+  ],
+  mcCloud: [
+    {
+      text: 'For the Winnemem Wintu of the McCloud "Middle Water" River, cold-water springs of Mount Shasta gave birth to humans and the Nur.',
+    },
+    {
+      text: "In the creation story, these Winter-Run Chinook Salmon gave their voice to humans.",
+    },
+    {
+      text: "In return, the Winnemem People feel an obligation to speak for the salmon.",
+    },
+    {
+      text: "Through fishing practices, traditions, and ceremonies, the Winnemem Wintu honor the Nur as relatives.",
+    },
+    {
+      text: "By protecting their springs and rivers, they protect salmon and their Tribe’s traditional way of life.",
+    },
+  ],
+  closing: [
+    {
+      text: "Across California, Tribes have managed their waters collectively according to traditional ecological knowledge.",
+    },
+    {
+      text: "These locally-adapted practices sustained their people for millennia.",
+    },
+    {
+      text: "With the arrival of European settlers, forced removal of Indigenous communities from their homelands severed their sacred relationship with water as a source of life.",
+    },
+    {
+      text: "In many ways, inequities take root in the state's history.",
+    },
+  ],
+} as const
+
 export default function HistoricalContext() {
   return (
-    <Box
-      component="section"
+    <StickyScrollSection
       id="frame-2"
-      aria-label="Historical context for water equity"
+      ariaLabel="Historical context for water equity"
+      height="650vh"
+      stickyTop="15vh"
+      stickyHeight="70vh"
+      offset={["start start", "end center"]}
     >
-      <ScrollSection height="250vh" offset={["start start", "end center"]}>
-        <StickyElement top="15vh" style={{ height: "35vh" }}>
-          <HistoricalContextPanel />
-        </StickyElement>
-      </ScrollSection>
-    </Box>
-  )
-}
-
-function HistoricalContextPanel() {
-  const progress = useScrollProgress()
-  const titleOpacity = useScrollValue(progress, [0, 0.78, 0.86], [1, 1, 0])
-  const firstParagraphOpacity = useScrollValue(
-    progress,
-    [0, 0.78, 0.86],
-    [1, 1, 0],
-  )
-  const secondParagraphOpacity = useScrollValue(
-    progress,
-    [0.38, 0.46, 0.78, 0.86],
-    [0, 1, 1, 0],
-  )
-  const thirdParagraphOpacity = useScrollValue(
-    progress,
-    [0.78, 0.86, 0.985, 1],
-    [0, 1, 1, 0],
-  )
-
-  return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-        minHeight: "70vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      <Box sx={{ display: "grid", alignItems: "center" }}>
-        <Box sx={{ gridArea: "1 / 1" }}>
-          <motion.div style={{ opacity: titleOpacity }}>
-            <Box className="paragraph" component="header" role="banner">
-              <SectionTitle text={"How Indigenous communities managed water"} />
-            </Box>
-          </motion.div>
-
-          <Stack spacing={2} direction="column">
-            <motion.div style={{ opacity: firstParagraphOpacity }}>
-              <Box className="paragraph" component="article">
-                <Paragraph
-                  blocks={[
-                    "For thousands of years, Indigenous communities across California lived in relationship with water's natural cycles.",
-                    "Tribes adapted to seasonal variability, moving across their territories to follow abundant plants, fish, and wildlife, and developing sophisticated practices for sustainably harvesting salmon and farming in arid regions.",
-                  ]}
-                />
-              </Box>
-            </motion.div>
-
-            <motion.div style={{ opacity: secondParagraphOpacity }}>
-              <Stack spacing={2} direction="column">
-                <Box className="paragraph" component="article">
-                  <Paragraph
-                    blocks={[
-                      "Water was managed collectively and locally, guided by ecological knowledge, cultural values, and long-term stewardship.",
-                    ]}
-                  />
-                </Box>
-                <Box className="paragraph" component="article">
-                  <Paragraph
-                    blocks={[
-                      "Together, these approaches reflected a way of living in which people, water, plants, and animals are deeply connected and cared for in a relationship.",
-                      "They emphasized shared access, balance, and sustainability, rather than ownership or exclusive control.",
-                    ]}
-                  />
-                </Box>
-              </Stack>
-            </motion.div>
-          </Stack>
-        </Box>
-
-        <motion.div
-          style={{ gridArea: "1 / 1", opacity: thirdParagraphOpacity }}
+      <Box
+        className="container text-section"
+        sx={{
+          width: "75ch",
+          minHeight: "70vh",
+          display: "grid",
+          alignItems: "center",
+        }}
+      >
+        <ScrollElement
+          enter={[0, 0.04]}
+          hold={[0.04, 0.18]}
+          exit={[0.18, 0.22]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
         >
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "This relationship with water was dramatically disrupted with the arrival of European settlers.",
-                "Their systems, laws, and values reshaped California's landscapes and set inequities in motion.",
-              ]}
-            />
+          <Box component="header">
+            <SectionTitle text={historicalContextText.title} />
           </Box>
-        </motion.div>
+          <Stack component="section" spacing={1.25}>
+            <Paragraph blocks={historicalContextText.opening} />
+          </Stack>
+        </ScrollElement>
+
+        <ScrollElement
+          enter={[0.22, 0.26]}
+          hold={[0.26, 0.68]}
+          exit={[0.68, 0.72]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack component="section" spacing={1.25}>
+            {historicalContextText.mcCloud.slice(1).map((sentence, index) => {
+              const start = 0.3 + index * 0.07
+
+              return (
+                <ScrollElement
+                  key={sentence.text}
+                  enter={[start, start + 0.035]}
+                  hold={[start + 0.035, 0.68]}
+                  exit={[0.68, 0.72]}
+                >
+                  <Paragraph blocks={[sentence]} />
+                </ScrollElement>
+              )
+            })}
+          </Stack>
+        </ScrollElement>
+
+        <ScrollElement
+          enter={[0.72, 0.76]}
+          hold={[0.76, 1]}
+          animation="slideUp"
+          style={{ gridArea: "1 / 1" }}
+        >
+          <Stack component="section" spacing={3.5}>
+            <Stack spacing={1.25}>
+              <Paragraph blocks={historicalContextText.closing.slice(0, 3)} />
+            </Stack>
+            <Paragraph blocks={[historicalContextText.closing[3]]} />
+          </Stack>
+        </ScrollElement>
       </Box>
-    </Box>
+    </StickyScrollSection>
   )
 }
