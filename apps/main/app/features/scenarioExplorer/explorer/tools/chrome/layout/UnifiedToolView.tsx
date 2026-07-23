@@ -74,7 +74,8 @@ export default function UnifiedToolView({
   // whether that's the default 25% or a width the user dragged to.
   useEffect(() => {
     if (!mapActive) return
-    const containerWidth = containerRef.current?.clientWidth ?? window.innerWidth
+    const containerWidth =
+      containerRef.current?.clientWidth ?? window.innerWidth
     const widthPx = mapWidthPx ?? containerWidth * (MAP_WIDTH_PERCENT / 100)
     mapActions.setExplorePanelWidth(100 - (widthPx / containerWidth) * 100)
   }, [mapActive, mapWidthPx])
@@ -101,7 +102,8 @@ export default function UnifiedToolView({
 
     const containerWidth = container.clientWidth
     const startX = e.clientX
-    const startWidthPx = mapWidthPx ?? containerWidth * (MAP_WIDTH_PERCENT / 100)
+    const startWidthPx =
+      mapWidthPx ?? containerWidth * (MAP_WIDTH_PERCENT / 100)
     const minWidthPx = containerWidth * (MAP_WIDTH_PERCENT / 100)
     const maxWidthPx = containerWidth - sidebarWidth - MIN_TOOL_VISIBLE_PX
 
@@ -126,7 +128,6 @@ export default function UnifiedToolView({
     window.addEventListener("pointermove", handlePointerMove)
     window.addEventListener("pointerup", handlePointerUp)
   }
-
 
   return (
     <Box
@@ -222,8 +223,9 @@ export default function UnifiedToolView({
               justifyContent: "center",
               backgroundColor: theme.palette.background.toolPanel,
               boxShadow: theme.shadows[2],
-              border: `1px solid ${theme.palette.divider}`
-            }}>
+              border: `1px solid ${theme.palette.divider}`,
+            }}
+          >
             <Box
               sx={{
                 width: 20,

@@ -86,7 +86,7 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
               minWidth: 0,
               overflow: "hidden",
               textOverflow: "ellipsis",
-              whiteSpace: "noWrap"
+              whiteSpace: "noWrap",
             }}
           >
             {stage.purpose}

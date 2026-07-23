@@ -10,7 +10,7 @@
 import { useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
-import { useWorkspaceSlice, useDataSlice } from "./store"
+import { useWorkspaceSlice } from "./store"
 import UnifiedToolView from "./tools/chrome/layout/UnifiedToolView"
 import CollapsedRailStrip, {
   COLLAPSED_RAIL_WIDTH,
@@ -30,11 +30,12 @@ export default function ExplorerToolView() {
 
   // Every sidebar-layout tool (bar, equity, radar, resilience, data) can
   // collapse the scenario sidebar to a slim strip; list mode has no sidebar.
-  const scenarioRailCollapsed = useWorkspaceSlice((s) => s.scenarioRailCollapsed)
+  const scenarioRailCollapsed = useWorkspaceSlice(
+    (s) => s.scenarioRailCollapsed,
+  )
   const setScenarioRailCollapsed = useWorkspaceSlice(
     (s) => s.setScenarioRailCollapsed,
   )
-  const isDataMode = exploreMode === "data"
   const sidebarCollapsed = !isListMode && scenarioRailCollapsed
 
   const hover = useExploreHoverCoordination()

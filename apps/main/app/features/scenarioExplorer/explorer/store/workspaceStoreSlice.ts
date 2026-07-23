@@ -55,7 +55,7 @@ export interface WorkspaceState {
   outcomeDisplayMode: OutcomeDisplayMode
   showMap: boolean
 
-  // --- Scenario sidebar (ScenarioSelectioSidebar, all sidebar-layout tools) --- 
+  // --- Scenario sidebar (ScenarioSelectioSidebar, all sidebar-layout tools) ---
   scenarioRailCollapsed: boolean
 
   // --- Share drawer (ShareDrawer, URL rehydration, useExploreShareCapture) ---
