@@ -50,6 +50,10 @@ export interface ExceedanceChartProps {
   height?: number
   /** Chart margins */
   margin?: { top: number; right: number; bottom: number; left: number }
+  /** When false, skips hover listeners and the tooltip (capture mode) */
+  interactive?: boolean
+  /** Fires once after the first committed draw (off-screen capture waits on it) */
+  onReady?: () => void
 }
 
 const DEFAULT_MARGIN = { top: 16, right: 20, bottom: 48, left: 64 }
@@ -94,6 +98,8 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
     width = 600,
     height = 320,
     margin = DEFAULT_MARGIN,
+    interactive = true,
+    onReady,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -102,6 +108,11 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
+    const onReadyRef = useRef(onReady)
+    useEffect(() => {
+      onReadyRef.current = onReady
+    }, [onReady])
+    const hasFiredOnReadyRef = useRef(false)
 
     useEffect(() => {
       if (responsive && dimensions && dimensions.width > 0) {
@@ -242,6 +253,7 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
         })
 
         // Hover probe: vertical line + per-series readout tooltip
+        if (!interactive) return null
         const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 11)}`
         const tooltip = select("body")
           .append("div")
@@ -307,12 +319,16 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
 
         return tooltipId
       },
-      [series, yAxisLabel, formatValue, margin],
+      [series, yAxisLabel, formatValue, margin, interactive],
     )
 
     useEffect(() => {
       if (currentWidth > 0 && currentHeight > 0) {
         const tooltipId = updateChart(currentWidth, currentHeight)
+        if (!hasFiredOnReadyRef.current) {
+          hasFiredOnReadyRef.current = true
+          requestAnimationFrame(() => onReadyRef.current?.())
+        }
         return () => {
           if (tooltipId) select(`#${tooltipId}`).remove()
         }
