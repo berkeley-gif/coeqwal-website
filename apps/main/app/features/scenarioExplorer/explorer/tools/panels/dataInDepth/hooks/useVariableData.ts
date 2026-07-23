@@ -57,10 +57,12 @@ import {
   mockAnnualSeries,
   mockMonthlyBands,
   mockSummaryValue,
+  mockWaterYearType,
   seriesStats,
   type MonthlyBand,
   type SeriesStats,
 } from "../config/mockDataEngine"
+import { filterSeriesByWyt } from "../config/wytFilter"
 import {
   didDomainForVariable,
   didPeriodForVariable,
@@ -151,6 +153,7 @@ export function useVariableData(): VariableData {
     pinnedLocationByGroup,
     selectedClimates,
     selectedLocationsByGroup,
+    selectedWaterYearTypes,
   } = useDataSlice()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
   const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
@@ -180,6 +183,7 @@ export function useVariableData(): VariableData {
     (groupId ? selectedLocationsByGroup[groupId] : undefined) ?? []
   ).join(",")
   const scenarioIdsJoined = selectedScenarios.join(",")
+  const wytJoined = selectedWaterYearTypes.join(",")
 
   // Scenario comparison set (reference first), shared by the fan-out and specs.
   const compareScenarioIds = useMemo(
@@ -215,6 +219,9 @@ export function useVariableData(): VariableData {
     ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
     : []
 
+  const wyt =
+    selectedWaterYearTypes.length > 0 ? selectedWaterYearTypes : undefined
+
   // Fan out each domain's endpoint across the comparison scenarios. Only the
   // active domain passes real ids; the others pass [] so every slot defers.
   // The hook count stays constant across renders (Rules of Hooks).
@@ -228,6 +235,7 @@ export function useVariableData(): VariableData {
           period === "annual" ? undefined : period ? [period] : undefined,
         units: view === "pct" ? ["pct_capacity"] : ["volume"],
         include,
+        wyt,
       }),
   )
   const riverSlots = useMultiScenarioSlots(
@@ -238,6 +246,7 @@ export function useVariableData(): VariableData {
         subjects: subject ? [subject] : undefined,
         units: ["volume"],
         include,
+        wyt,
       }),
   )
   const deltaSlots = useMultiScenarioSlots(
@@ -250,6 +259,7 @@ export function useVariableData(): VariableData {
           period === "annual" ? undefined : period ? [period] : undefined,
         units: ["km"],
         include,
+        wyt,
       }),
   )
 
@@ -358,6 +368,7 @@ export function useVariableData(): VariableData {
         series = raw
       }
       let waterYears: number[] | undefined
+      let adoptedLive = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
@@ -381,7 +392,24 @@ export function useVariableData(): VariableData {
           waterYears =
             points.waterYears.length > 0 ? points.waterYears : undefined
           anyLive = true
+          adoptedLive = true
         }
+      }
+
+      // Mock members: apply the water-year-type filter client-side with the
+      // deterministic sample classification. Live members arrive already
+      // filtered by the wyt request parameter. The single-value view has no
+      // annual series to filter.
+      if (
+        !adoptedLive &&
+        selectedWaterYearTypes.length > 0 &&
+        view !== "value"
+      ) {
+        series = filterSeriesByWyt(
+          series,
+          selectedWaterYearTypes,
+          mockWaterYearType,
+        )
       }
 
       const stats = seriesStats(series)
@@ -456,5 +484,6 @@ export function useVariableData(): VariableData {
     unitToken,
     liveSignature,
     liveLoading,
+    wytJoined,
   ])
 }
