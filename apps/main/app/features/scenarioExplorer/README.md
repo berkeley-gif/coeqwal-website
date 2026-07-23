@@ -866,13 +866,13 @@ Before opening a PR:
 
 #### Reference implementations
 
-| Tool            | Complexity   | Copy for                                                                                                |
-| --------------- | ------------ | ------------------------------------------------------------------------------------------------------- |
-| **radar**       | Medium       | **Best folder-structure reference:** Chart + controls + share + tour + slice                            |
-| **equity**      | Medium       | Distribution chart + share                                                                              |
-| **resilience**  | High         | Complex controls, multi-HC matrix, layered write model                                                  |
-| **list**        | Special      | No sidebar; grid layout; barChart share from rows; tour with demo effects                               |
-| **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; no share variant; `ToolJourneyStrip` hidden, `ToolToolbar` kept |
+| Tool            | Complexity   | Copy for                                                                                                                                   |
+| --------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **radar**       | Medium       | **Best folder-structure reference:** Chart + controls + share + tour + slice                                                               |
+| **equity**      | Medium       | Distribution chart + share                                                                                                                 |
+| **resilience**  | High         | Complex controls, multi-HC matrix, layered write model                                                                                     |
+| **list**        | Special      | No sidebar; grid layout; barChart share from rows; tour with demo effects                                                                  |
+| **dataInDepth** | Large module | Batched stats via `useBatchStatistics`; shares via the `data` variant (per-chart PNG + CSV); `ToolJourneyStrip` hidden, `ToolToolbar` kept |
 
 See [Make your directory](#make-your-directory) for the `radar` folder layout.
 
