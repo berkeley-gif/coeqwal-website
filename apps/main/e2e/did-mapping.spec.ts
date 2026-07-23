@@ -7,6 +7,8 @@ import {
   includeForView,
   seriesFromValues,
   pickLiveSeries,
+  pointsFromValues,
+  pickLiveSeriesPoints,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -160,5 +162,46 @@ test("pickLiveSeries reads the values facet by domain, subject, period, unit", (
   ).toEqual([])
   expect(
     pickLiveSeries(undefined, "reservoir", "SHSTA", "april", "volume"),
+  ).toEqual([])
+})
+
+test("pointsFromValues keeps years aligned with values and drops null years", () => {
+  const { series, waterYears } = pointsFromValues([
+    { water_year: 1921, value: 4200 },
+    { water_year: 1922, value: null },
+    { water_year: 1923, value: 3100 },
+  ])
+  expect(series).toEqual([4200, 3100])
+  expect(waterYears).toEqual([1921, 1923])
+})
+
+test("pointsFromValues tolerates missing water_year fields", () => {
+  const { series, waterYears } = pointsFromValues([{ value: 5 }, { value: 7 }])
+  expect(series).toEqual([5, 7])
+  expect(waterYears).toEqual([])
+})
+
+test("pickLiveSeriesPoints mirrors pickLiveSeries and adds years", () => {
+  const block = {
+    reservoirs: [
+      {
+        subject: "SHSTA",
+        periods: {
+          april: { TAF: { values: [{ water_year: 1921, value: 4200 }] } },
+        },
+      },
+    ],
+  }
+  const points = pickLiveSeriesPoints(
+    block,
+    "reservoir",
+    "SHSTA",
+    "april",
+    "volume",
+  )
+  expect(points.series).toEqual([4200])
+  expect(points.waterYears).toEqual([1921])
+  expect(
+    pickLiveSeriesPoints(block, "reservoir", "OROVL", "april", "volume").series,
   ).toEqual([])
 })

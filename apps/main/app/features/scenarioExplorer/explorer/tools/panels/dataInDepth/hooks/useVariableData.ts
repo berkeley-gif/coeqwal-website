@@ -67,7 +67,7 @@ import {
   toDidSubject,
   unitTokenForView,
   includeForView,
-  pickLiveSeries,
+  pickLiveSeriesPoints,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
@@ -85,6 +85,8 @@ export interface VariableMember {
   isReference: boolean
   /** Annual series in display units (percent-of-capacity applied for "pct") */
   series: number[]
+  /** Water years aligned with `series` (live members only; absent for mock) */
+  waterYears?: number[]
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -355,6 +357,7 @@ export function useVariableData(): VariableData {
       } else {
         series = raw
       }
+      let waterYears: number[] | undefined
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
@@ -366,15 +369,17 @@ export function useVariableData(): VariableData {
         spec.slotIndex != null
       ) {
         const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
-        const liveSeries = pickLiveSeries(
+        const points = pickLiveSeriesPoints(
           block,
           domain,
           subject,
           period,
           unitToken,
         )
-        if (liveSeries.length > 0) {
-          series = liveSeries
+        if (points.series.length > 0) {
+          series = points.series
+          waterYears =
+            points.waterYears.length > 0 ? points.waterYears : undefined
           anyLive = true
         }
       }
@@ -405,6 +410,7 @@ export function useVariableData(): VariableData {
         label: spec.label,
         isReference: spec.isReference,
         series,
+        waterYears,
         stats,
         bands,
         value,
