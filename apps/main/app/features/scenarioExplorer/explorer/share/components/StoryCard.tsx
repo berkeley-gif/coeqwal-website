@@ -154,6 +154,7 @@ export default function StoryCard({
           <HoverTip content="Download as PNG" density="compact">
             <IconButton
               size="small"
+              aria-label="Download as PNG"
               onClick={handleDownloadPng}
               sx={{ p: 0.75, color: theme.palette.grey[600] }}
             >
@@ -163,6 +164,7 @@ export default function StoryCard({
           <HoverTip content="Download as SVG" density="compact">
             <IconButton
               size="small"
+              aria-label="Download as SVG"
               onClick={handleDownloadSvg}
               sx={{ p: 0.75, color: theme.palette.grey[600] }}
             >
@@ -178,6 +180,7 @@ export default function StoryCard({
             <span>
               <IconButton
                 size="small"
+                aria-label="Download data"
                 onClick={() => onDownloadData(item)}
                 disabled={!hasData}
                 sx={{

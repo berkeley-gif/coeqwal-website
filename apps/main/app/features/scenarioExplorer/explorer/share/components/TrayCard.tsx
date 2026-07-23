@@ -37,11 +37,21 @@ export default function TrayCard({
 
   return (
     <Box
+      role="button"
+      tabIndex={0}
+      aria-label={isInStory ? "Remove from story" : "Add to story"}
+      aria-pressed={isInStory}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest("[data-share-note]")) {
           return
         }
         onToggle()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onToggle()
+        }
       }}
       sx={{
         position: "relative",
