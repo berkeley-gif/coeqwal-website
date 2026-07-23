@@ -44,7 +44,7 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
         minHeight: 44,
         borderBottom: `1px solid ${theme.palette.divider}`,
         backgroundColor: theme.palette.background.paper,
-        flexWrap: "wrap",
+        overflow: "hidden",
       }}
     >
       <Box
@@ -54,7 +54,7 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
           display: "flex",
           alignItems: "baseline",
           gap: 1.25,
-          flexWrap: "wrap",
+          overflow: "hidden",
         }}
       >
         <Typography
@@ -64,6 +64,7 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
             color: theme.palette.text.primary,
             lineHeight: 1.3,
             whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
           {viewName}
@@ -82,6 +83,10 @@ export default function ToolJourneyStrip({ mode }: ToolJourneyStripProps) {
               fontWeight: 400,
               color: theme.palette.text.primary,
               lineHeight: 1.3,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "noWrap"
             }}
           >
             {stage.purpose}
