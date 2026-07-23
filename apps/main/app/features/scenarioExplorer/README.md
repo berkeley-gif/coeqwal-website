@@ -25,6 +25,13 @@ The Scenario Explorer is the main interface for exploring water allocation scena
   - [Data hooks](#data-hooks)
   - [Tier score encoding: heatmap vs radar](#tier-score-encoding-heatmap-vs-radar)
   - [Hydroclimate resolution](#hydroclimate-resolution)
+- [Data in Depth explorer](#data-in-depth-explorer)
+  - [Layout](#layout)
+  - [Explorer data flow](#explorer-data-flow)
+  - [Water-year-type filter](#water-year-type-filter)
+  - [Sticky member colors](#sticky-member-colors)
+  - [Share and export](#share-and-export)
+  - [Testing](#testing)
 - [How to add a visualization tool](#how-to-add-a-visualization-tool)
   - [How a tool fits together](#how-a-tool-fits-together)
   - [Quickstart: a tool that renders](#quickstart-a-tool-that-renders)
@@ -306,6 +313,53 @@ There is no separate hydroclimate API endpoint. The supported set is defined by 
 5. `useMultipleScenarioTiers(idMapping)` batch-fetches tier data for the resolved codes and re-keys results back to sibling group IDs
 
 You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-5 into a single hook call. For tools that need raw resolved IDs (e.g. statistics or batch endpoints that don't go through the tier hook), call `useResolvedIdMapping()` (or `useResolvedIdMappings()` for all hydroclimates at once) directly. See `packages/data/README.md` for details.
+
+## Data in Depth explorer
+
+The Data in Depth tool (`exploreMode: "data"`, files under `explorer/tools/panels/dataInDepth/`) has two modes, switched inside `DataExplorerView.tsx`:
+
+- **Explorer** (default): the by-variable explorer. Pick a sector and variable, choose how to compare (by scenarios, climates, or locations) and a view, and read one chart plus an interpretive sentence. This is the mode documented below.
+- **Category** (legacy): the older by-category sections (reservoir storage, CWS, AG, delta). Documented separately in `explorer/tools/panels/dataInDepth/README.md`.
+
+The tool renders no map, by the client's product decision.
+
+### Layout
+
+`ExplorerView` lays out a sector/variable rail, a scenario-selection rail, and the chart card. Both rails collapse to a slim strip via `CollapsedRailStrip` (`tools/chrome/layout/`); the collapse state lives on the data tool-session slice (`scenarioRailCollapsed`, `variableRailCollapsed`) so it survives a tab switch and a same-tab reload.
+
+### Explorer data flow
+
+`config/variableRegistry.ts` defines the variables, their views (`VIEW_LABELS`: annual distribution, % of capacity, monthly pattern, year-to-year variability, summary value), and the location groups. `hooks/useVariableData.ts` turns the current selection into one member per comparison item (a scenario, a climate, or a location), each carrying a raw annual `series`, summary `stats`, and a single `value`. `explorer/chartMarks.ts` maps those members onto the `@repo/viz` chart props, and `ChartCard` picks the chart for the current view and distribution style:
+
+- annual distribution / % of capacity, exceedance style --> `ExceedanceChart`
+- annual distribution / % of capacity, box style --> `BoxPlot`
+- year-to-year variability / summary value --> `CategoricalBarChart`
+
+**Live vs sample data.** On the scenarios compare axis, `config/didMapping.ts` maps the reservoir, river, and X2 (delta salinity) variables to the data-in-depth endpoints, fetched through the `@repo/data` hooks (`useReservoirStorageDataInDepth`, `useRiverFlowsDataInDepth`, `useDeltaSalinityDataInDepth`). Every other variable, every non-scenario axis, and every per-member gap falls back to the deterministic sample-data engine (`config/mockDataEngine.ts`). Each member resolves its own source and the card labels the result "Live data" or "Sample data". Live series carry their real water years end to end; sample series are labeled by year index.
+
+### Water-year-type filter
+
+`config/wytFilter.ts` defines the Sacramento Valley index classes (1 = Wet through 5 = Critical) and the pure filter helpers; `explorer/WytFilterChips.tsx` renders the toggle chips under the view bar. An empty selection means all years. Live members pass the selection through the data-in-depth `wyt` request parameter, so the server returns the filtered years and every frontend-derived statistic follows; sample members filter client-side against a deterministic seeded classification (`mockWaterYearType`, one shared classification for all sample members, since per-scenario classes are a live-data property). The chip row hides itself on the single-value view, which has no annual series to filter.
+
+### Sticky member colors
+
+`config/seriesColorAssignment.ts` (`getStableSeriesColors`) assigns one color per member id within a scope, so a member keeps its color across selection changes and the chart marks, the legend, and the compare-controls chips all agree.
+
+### Share and export
+
+The tool shares through the `data` variant of the share system (see `explorer/share/README.md`). A save-snapshot button on the chart card stages the current chart as a share card: `hooks/useDataShareCapture.ts` re-renders the visible chart off-screen (`OffscreenDataCapture.tsx`) from the same members, colors, and view state the card used, so the exported image cannot drift from the on-screen chart. Downloads are a PNG or SVG of the chart and a CSV of the underlying data (per-member summary statistics plus the annual series, labeled by real water year for live captures and by year index for sample captures). URL-restored data cards carry selection state only, so they render as metadata-only cards with the data download disabled (there is no live rehydrator in this version).
+
+### Testing
+
+Pure request-mapping and pure filter/CSV logic get node-side specs (no browser); the interactive flows get browser specs. All live under `apps/main/e2e/` and run in the `e2e-core` CI job:
+
+- `did-mapping.spec.ts` - live request mapping and water-year extraction
+- `did-share-pure.spec.ts` - chart-mark builders and the CSV body
+- `did-wyt-pure.spec.ts` - the water-year-type vocabulary, seeded classification, and filter helpers
+- `did-collapsible-rails.spec.ts` - rail collapse and persistence
+- `did-share.spec.ts` - save, share, and export the chart end to end
+- `did-wyt.spec.ts` - the filter chips, persistence, and the filter effect on the data
+- `smoke.spec.ts` - the tool activates and renders its panel
 
 ## How to add a visualization tool
 
