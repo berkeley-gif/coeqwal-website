@@ -325,10 +325,16 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
     useEffect(() => {
       if (currentWidth > 0 && currentHeight > 0) {
         const tooltipId = updateChart(currentWidth, currentHeight)
+        // TierGrid's ordering: the fired flag is set inside the frame, so a
+        // frame cancelled by a re-render re-schedules on the next effect run
+        // instead of losing the only onReady the capture host waits for.
         let readyFrame: number | undefined
         if (!hasFiredOnReadyRef.current) {
-          hasFiredOnReadyRef.current = true
-          readyFrame = requestAnimationFrame(() => onReadyRef.current?.())
+          readyFrame = requestAnimationFrame(() => {
+            if (hasFiredOnReadyRef.current) return
+            hasFiredOnReadyRef.current = true
+            onReadyRef.current?.()
+          })
         }
         return () => {
           if (readyFrame != null) cancelAnimationFrame(readyFrame)
