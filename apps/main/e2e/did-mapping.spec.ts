@@ -205,3 +205,20 @@ test("pickLiveSeriesPoints mirrors pickLiveSeries and adds years", () => {
     pickLiveSeriesPoints(block, "reservoir", "OROVL", "april", "volume").series,
   ).toEqual([])
 })
+
+test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted", async () => {
+  // The wyt= query parameter IS the server-side water-year-type filter and
+  // doubles as part of the SWR cache key, so its serialization must be
+  // order-independent. Imported from @repo/data source directly (types-only
+  // imports, safe in this node-side spec).
+  const { ENDPOINTS } = await import("../../../packages/data/src/coeqwal/api")
+  const path = ENDPOINTS.reservoirStorageDataInDepth(["s0020"], {
+    subjects: ["SHSTA"],
+    wyt: [5, 1, 5],
+  })
+  expect(path).toContain("wyt=1%2C5")
+  const unfiltered = ENDPOINTS.reservoirStorageDataInDepth(["s0020"], {
+    subjects: ["SHSTA"],
+  })
+  expect(unfiltered).not.toContain("wyt=")
+})

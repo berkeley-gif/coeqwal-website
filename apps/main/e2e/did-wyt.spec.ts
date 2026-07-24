@@ -9,10 +9,10 @@ import { collectConsoleErrors, setupNetwork } from "./support/network"
 // reload via the explorer session storage, and (the substance) filtering
 // actually shrinks the data - a Dry+Critical selection cuts the 100 sample
 // years down to the subset the seeded classification assigns to those
-// classes, which the exported CSV reflects. The live server-side `wyt=`
-// passthrough is covered by the request-mapping unit spec and a manual
-// check against the real API; it cannot be observed under this offline
-// harness because no live request is made.
+// classes, which the exported CSV reflects. The live `wyt=` request
+// serialization is covered by the endpoint-path test in did-mapping.spec.ts
+// (plus a manual check against the real API); the request itself cannot be
+// observed under this offline harness because no live request is made.
 
 test("wyt chips filter the sample data and persist across reload", async ({
   page,
@@ -60,6 +60,8 @@ test("wyt chips filter the sample data and persist across reload", async ({
   // The filter actually reduces the data: save a snapshot of the filtered
   // chart and confirm its CSV carries fewer than the full 100 sample years.
   await page.getByRole("button", { name: "save snapshot" }).click()
+  // dispatchEvent, not click: the drawer's footer button sits just below the
+  // 720px headless viewport (same workaround as did-share.spec.ts).
   await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
   await page.getByRole("button", { name: "Add to story" }).click()
   const downloadPromise = page.waitForEvent("download")
