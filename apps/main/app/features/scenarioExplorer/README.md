@@ -321,7 +321,7 @@ The Data in Depth tool (`exploreMode: "data"`, files under `explorer/tools/panel
 - **Explorer** (default): the by-variable explorer. Pick a sector and variable, choose how to compare (by scenarios, climates, or locations) and a view, and read one chart plus an interpretive sentence. This is the mode documented below.
 - **Category** (legacy): the older by-category sections (reservoir storage, CWS, AG, delta). Documented separately in `explorer/tools/panels/dataInDepth/README.md`.
 
-The tool renders no map, by the client's product decision.
+The tool renders no map: the map was removed from this tool by product decision (2026-07-10).
 
 ### Layout
 
@@ -329,13 +329,13 @@ The tool renders no map, by the client's product decision.
 
 ### Explorer data flow
 
-`config/variableRegistry.ts` defines the variables, their views (`VIEW_LABELS`: annual distribution, % of capacity, monthly pattern, year-to-year variability, summary value), and the location groups. `hooks/useVariableData.ts` turns the current selection into one member per comparison item (a scenario, a climate, or a location), each carrying a raw annual `series`, summary `stats`, and a single `value`. `explorer/chartMarks.ts` maps those members onto the `@repo/viz` chart props, and `ChartCard` picks the chart for the current view and distribution style:
+`config/variableRegistry.ts` defines the variables, their views (`VIEW_LABELS`), and the location groups. The explorer offers annual distribution, % of capacity, year-to-year variability, and summary value; the registry's monthly-pattern view is filtered out by `ViewBar` (out of the explorer's first version). `hooks/useVariableData.ts` turns the current selection into one member per comparison item (a scenario, a climate, or a location), each carrying a raw annual `series`, summary `stats`, and a single `value`. `explorer/chartMarks.ts` maps those members onto the `@repo/viz` chart props, and `ChartCard` picks the chart for the current view and distribution style:
 
 - annual distribution / % of capacity, exceedance style --> `ExceedanceChart`
 - annual distribution / % of capacity, box style --> `BoxPlot`
 - year-to-year variability / summary value --> `CategoricalBarChart`
 
-**Live vs sample data.** On the scenarios compare axis, `config/didMapping.ts` maps the reservoir, river, and X2 (delta salinity) variables to the data-in-depth endpoints, fetched through the `@repo/data` hooks (`useReservoirStorageDataInDepth`, `useRiverFlowsDataInDepth`, `useDeltaSalinityDataInDepth`). Every other variable, every non-scenario axis, and every per-member gap falls back to the deterministic sample-data engine (`config/mockDataEngine.ts`). Each member resolves its own source and the card labels the result "Live data" or "Sample data". Live series carry their real water years end to end; sample series are labeled by year index.
+**Live vs sample data.** On the scenarios compare axis, `config/didMapping.ts` maps the reservoir, river, and X2 (delta salinity) variables to the data-in-depth endpoints, fetched through the `@repo/data` hooks (`useReservoirStorageDataInDepth`, `useRiverFlowsDataInDepth`, `useDeltaSalinityDataInDepth`). Every other variable, every non-scenario axis, and every per-member gap falls back to the deterministic sample-data engine (`config/mockDataEngine.ts`). Each member resolves its own source and the card labels the result "Live data" or "Sample data". Live members carry their real water years; the exported CSV labels rows by water year only when every member in the capture has them (with blank cells where a member lacks a year) and falls back to a year index otherwise, with each member's provenance in the statistics table.
 
 ### Water-year-type filter
 
@@ -347,7 +347,7 @@ The tool renders no map, by the client's product decision.
 
 ### Share and export
 
-The tool shares through the `data` variant of the share system (see `explorer/share/README.md`). A save-snapshot button on the chart card stages the current chart as a share card: `hooks/useDataShareCapture.ts` re-renders the visible chart off-screen (`OffscreenDataCapture.tsx`) from the same members, colors, and view state the card used, so the exported image cannot drift from the on-screen chart. Downloads are a PNG or SVG of the chart and a CSV of the underlying data (per-member summary statistics plus the annual series, labeled by real water year for live captures and by year index for sample captures). URL-restored data cards carry selection state only, so they render as metadata-only cards with the data download disabled (there is no live rehydrator in this version).
+The tool shares through the `data` variant of the share system (see `explorer/share/README.md`). A save-snapshot button on the chart card stages the current chart as a share card: `hooks/useDataShareCapture.ts` re-renders the visible chart off-screen (`OffscreenDataCapture.tsx`) from the same members, colors, and view state the card used, so the exported image cannot drift from the on-screen chart. Downloads are a PNG or SVG of the chart and a CSV of the underlying data: per-member summary statistics (with per-member provenance) plus the annual series, pivoted on the union of water years when every member carries them and labeled by year index otherwise. An active water-year-type filter is recorded in the CSV header. URL-restored data cards carry selection state only, so they render as metadata-only cards with the data download disabled (there is no live rehydrator in this version).
 
 ### Testing
 
