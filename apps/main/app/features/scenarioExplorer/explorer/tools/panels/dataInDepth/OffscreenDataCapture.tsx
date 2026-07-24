@@ -48,6 +48,8 @@ export interface CaptureDataInDepthInput {
   compareByLabel: string
   unitLabel: string
   source: "live" | "mock"
+  /** Active water-year-type filter, e.g. "Dry; Critical" (absent = all years) */
+  waterYearTypesLabel?: string
 }
 
 export interface CaptureDataInDepthResult {
@@ -114,10 +116,12 @@ export async function captureDataInDepthOffscreen(
     compareByLabel: input.compareByLabel,
     unitLabel: input.unitLabel,
     source: input.source,
+    waterYearTypesLabel: input.waterYearTypesLabel,
     members: input.members.map((m) => ({
       label: m.label,
       series: m.series,
       waterYears: m.waterYears,
+      isLive: m.isLive,
       stats: m.stats,
       value: m.value,
     })),

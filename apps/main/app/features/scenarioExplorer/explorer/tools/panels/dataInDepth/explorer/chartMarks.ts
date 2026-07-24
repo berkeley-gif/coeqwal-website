@@ -20,6 +20,8 @@ export interface MarkMember {
   stats: SeriesStats
   value: number
   waterYears?: number[]
+  /** Per-member provenance, carried through to the CSV payload (not drawn) */
+  isLive?: boolean
 }
 
 /** One bar per member (the "cv" and "value" views). */

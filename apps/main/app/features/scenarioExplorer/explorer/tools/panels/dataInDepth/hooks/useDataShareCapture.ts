@@ -14,6 +14,7 @@ import { useTheme } from "@repo/ui/mui"
 import { stageShareItem } from "../../../../share/stage"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import { VIEW_LABELS, type VariableView } from "../config/variableRegistry"
+import { WYT_LABELS } from "../config/wytFilter"
 import { captureDataInDepthOffscreen } from "../OffscreenDataCapture"
 import type { VariableData } from "./useVariableData"
 
@@ -34,7 +35,13 @@ export function useDataShareCapture(
 ): DataShareCapture {
   const theme = useTheme()
   const { addShareItem, hydroclimate } = useWorkspaceSlice()
-  const { selectedVariableId, compareBy, distKind } = useDataSlice()
+  const {
+    selectedVariableId,
+    compareBy,
+    distKind,
+    pinnedClimate,
+    selectedWaterYearTypes,
+  } = useDataSlice()
 
   const canSnapshot = data.members.length > 0 && !data.isLoading
 
@@ -42,6 +49,15 @@ export function useDataShareCapture(
     if (data.members.length === 0) return
     const variableName = data.variable?.name ?? selectedVariableId
     const viewLabel = VIEW_LABELS[data.view as VariableView] ?? data.view
+    // Record the climate the chart was actually generated under: the pinned
+    // (held) climate when one is set, except on the climates axis where the
+    // members themselves are climates and the workspace value stands.
+    const capturedHydroclimate =
+      compareBy === "climates" ? hydroclimate : (pinnedClimate ?? hydroclimate)
+    const waterYearTypesLabel =
+      selectedWaterYearTypes.length > 0
+        ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? c).join("; ")
+        : undefined
     await stageShareItem({
       capture: () =>
         captureDataInDepthOffscreen({
@@ -56,9 +72,10 @@ export function useDataShareCapture(
           compareByLabel: COMPARE_LABELS[compareBy] ?? compareBy,
           unitLabel: data.unitLabel,
           source: data.source,
+          waterYearTypesLabel,
         }),
       buildItem: (captured) => ({
-        id: `data-${selectedVariableId}-${Date.now()}`,
+        id: `data-${selectedVariableId}-${crypto.randomUUID()}`,
         type: "data",
         variableId: selectedVariableId,
         view: data.view,
@@ -67,7 +84,7 @@ export function useDataShareCapture(
         memberIds: data.members.map((m) => m.id),
         memberLabels: data.members.map((m) => m.label),
         source: data.source,
-        hydroclimate,
+        hydroclimate: capturedHydroclimate,
         cachedSvg: captured?.svg,
         cachedImageDataUrl: captured?.dataUrl,
         cachedChartData: captured?.chartData as
@@ -84,6 +101,8 @@ export function useDataShareCapture(
     selectedVariableId,
     compareBy,
     distKind,
+    pinnedClimate,
+    selectedWaterYearTypes,
     hydroclimate,
     addShareItem,
   ])

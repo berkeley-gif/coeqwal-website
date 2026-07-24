@@ -15,7 +15,10 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   await page
     .getByRole("tab", { name: "Data in depth: Explore underlying data" })
     .click()
-  await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
+  // Offline the chart always renders sample data (the HAR fixture drives no
+  // live request); assert that up front so an unexpected live render fails
+  // here, not later at the CSV body diff.
+  await expect(page.getByText(/^Sample data$/)).toBeVisible()
 
   // Stage the snapshot from the chart card. This auto-opens the persistent
   // share drawer on the right.
@@ -45,7 +48,7 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   const csv = Buffer.concat(chunks).toString("utf8")
   expect(csv).toContain("Coeqwal export,Data in depth")
   expect(csv).toContain("Data source,Sample data")
-  expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max")
+  expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
   expect(csv).toContain("Year index")
 
   // Download the PNG (html-to-image path renders the live card).

@@ -89,6 +89,7 @@ const csvData = (
       label: "Current Operations",
       series: [4200, 3100],
       waterYears: [1921, 1922],
+      isLive: true,
       stats: {
         min: 3100,
         p10: 3210,
@@ -97,7 +98,9 @@ const csvData = (
         p75: 3925,
         p90: 4090,
         max: 4200,
-        mean: 3650,
+        // Mean deliberately differs from the median so a Mean/Median column
+        // swap in the builder cannot pass this suite.
+        mean: 3660,
         cv: 0.15,
       },
       value: 0.15,
@@ -116,13 +119,89 @@ test("dataInDepthToCSV emits header, stats block, and year-labeled series", () =
   expect(lines[0]).toBe("Coeqwal export,Data in depth")
   expect(csv).toContain("Variable,Reservoir storage (April)")
   expect(csv).toContain("Data source,Live data")
-  expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max")
+  expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
   expect(csv).toContain(
-    "Current Operations,3650,0.15,3100,3210,3375,3650,3925,4090,4200",
+    "Current Operations,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Live",
   )
   expect(csv).toContain("Water year,Current Operations")
   expect(csv).toContain("1921,4200")
   expect(csv).toContain("1922,3100")
+})
+
+test("dataInDepthToCSV records an active water-year-type filter in the header", () => {
+  const filtered = dataInDepthToCSV(
+    csvData({ waterYearTypesLabel: "Dry; Critical" }),
+    { variantTitle: "Data in depth" },
+  )
+  expect(filtered).toContain("Water year types,Dry; Critical")
+  const unfiltered = dataInDepthToCSV(csvData(), {
+    variantTitle: "Data in depth",
+  })
+  expect(unfiltered).not.toContain("Water year types")
+})
+
+test("dataInDepthToCSV pivots divergent live year sets onto a year union with blanks", () => {
+  // Two live members whose surviving year sets differ (the wyt filter
+  // classifies per scenario, so this happens on real data). Rows must be
+  // labeled by the union of years with blanks where a member lacks a year,
+  // never by raw array index against the first member's years.
+  const stats = csvData().members[0]!.stats
+  const csv = dataInDepthToCSV(
+    csvData({
+      members: [
+        {
+          label: "A",
+          series: [10, 20, 30],
+          waterYears: [1921, 1922, 1923],
+          isLive: true,
+          stats,
+          value: 0.1,
+        },
+        {
+          label: "B",
+          series: [22, 33, 44],
+          waterYears: [1922, 1923, 1924],
+          isLive: true,
+          stats,
+          value: 0.2,
+        },
+      ],
+    }),
+    { variantTitle: "Data in depth" },
+  )
+  expect(csv).toContain("Water year,A,B")
+  expect(csv).toContain("1921,10,")
+  expect(csv).toContain("1922,20,22")
+  expect(csv).toContain("1923,30,33")
+  expect(csv).toContain("1924,,44")
+})
+
+test("dataInDepthToCSV labels per-member provenance in the stats table", () => {
+  const stats = csvData().members[0]!.stats
+  const csv = dataInDepthToCSV(
+    csvData({
+      members: [
+        {
+          label: "Live one",
+          series: [1],
+          waterYears: [1921],
+          isLive: true,
+          stats,
+          value: 0.1,
+        },
+        { label: "Mock one", series: [2], stats, value: 0.2 },
+      ],
+    }),
+    { variantTitle: "Data in depth" },
+  )
+  expect(csv).toContain(
+    "Live one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Live",
+  )
+  expect(csv).toContain(
+    "Mock one,3660,0.15,3100,3210,3375,3650,3925,4090,4200,Sample",
+  )
+  // Mixed year coverage: fall back to index labels, never member 0's years.
+  expect(csv).toContain("Year index,Live one,Mock one")
 })
 
 test("dataInDepthToCSV falls back to year index labels without waterYears", () => {

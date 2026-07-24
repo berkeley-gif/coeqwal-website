@@ -23,10 +23,14 @@ export type DataChartDataShape = {
   compareByLabel: string
   unitLabel: string
   source: string
+  /** Active water-year-type filter at capture, e.g. "Dry; Critical" (absent = all years) */
+  waterYearTypesLabel?: string
   members: Array<{
     label: string
     series: number[]
     waterYears?: number[]
+    /** Per-member provenance: true when the series came from the live API */
+    isLive?: boolean
     stats: {
       min: number
       p10: number
@@ -42,7 +46,7 @@ export type DataChartDataShape = {
   }>
 }
 
-const STATS_HEADER = "Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max"
+const STATS_HEADER = "Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source"
 
 /** Trim float noise without losing precision users care about. */
 function num(v: number): string {
@@ -71,6 +75,11 @@ export function dataInDepthToCSV(
         ["Compare by", data.compareByLabel],
         ["Unit", data.unitLabel],
         ["Data source", data.source === "live" ? "Live data" : "Sample data"],
+        ...(data.waterYearTypesLabel
+          ? ([["Water year types", data.waterYearTypesLabel]] as Array<
+              [string, string]
+            >)
+          : []),
         ...(header.extra ?? []),
       ],
     }),
@@ -91,33 +100,58 @@ export function dataInDepthToCSV(
         num(m.stats.p75),
         num(m.stats.p90),
         num(m.stats.max),
+        m.isLive ? "Live" : "Sample",
       ].join(","),
     )
   }
 
   const maxLen = Math.max(...data.members.map((m) => m.series.length))
-  if (maxLen > 0) {
-    // Use real water years only when every member's years align with its
-    // series; otherwise fall back to a 1-based index so columns stay aligned.
-    const allYears = data.members.every(
-      (m) => m.waterYears && m.waterYears.length === m.series.length,
+  const allYears = data.members.every(
+    (m) => m.waterYears && m.waterYears.length === m.series.length,
+  )
+  if (allYears && maxLen > 0) {
+    // Every member carries aligned water years, but the SETS can differ
+    // between members (the water-year-type filter classifies per scenario,
+    // and null-value years are dropped per member). Pivot on the sorted
+    // union of years and look each member's value up by year, leaving a
+    // blank cell where a member lacks that year, so a row's label is
+    // correct for every column.
+    const years = Array.from(
+      new Set(data.members.flatMap((m) => m.waterYears!)),
+    ).sort((a, b) => a - b)
+    const byYear = data.members.map(
+      (m) => new Map(m.waterYears!.map((y, i) => [y, m.series[i]])),
     )
-    const yearLabel = (row: number): string => {
-      if (allYears) {
-        const first = data.members[0]!.waterYears!
-        return String(first[row] ?? "")
-      }
-      return String(row + 1)
-    }
     lines.push("")
     lines.push(
-      [allYears ? "Water year" : "Year index"]
+      ["Water year"]
+        .concat(data.members.map((m) => csvEscape(m.label)))
+        .join(","),
+    )
+    for (const year of years) {
+      lines.push(
+        [String(year)]
+          .concat(
+            byYear.map((map) => {
+              const v = map.get(year)
+              return v == null ? "" : num(v)
+            }),
+          )
+          .join(","),
+      )
+    }
+  } else if (maxLen > 0) {
+    // At least one member has no year labels (sample data), so a shared
+    // year axis does not exist; fall back to a 1-based index.
+    lines.push("")
+    lines.push(
+      ["Year index"]
         .concat(data.members.map((m) => csvEscape(m.label)))
         .join(","),
     )
     for (let row = 0; row < maxLen; row++) {
       lines.push(
-        [yearLabel(row)]
+        [String(row + 1)]
           .concat(
             data.members.map((m) =>
               m.series[row] == null ? "" : num(m.series[row]!),

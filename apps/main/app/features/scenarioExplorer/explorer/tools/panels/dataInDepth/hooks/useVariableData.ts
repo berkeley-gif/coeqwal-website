@@ -89,6 +89,8 @@ export interface VariableMember {
   series: number[]
   /** Water years aligned with `series` (live members only; absent for mock) */
   waterYears?: number[]
+  /** True when this member's series came from the live API (mock fallback = false) */
+  isLive?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -439,6 +441,7 @@ export function useVariableData(): VariableData {
         isReference: spec.isReference,
         series,
         waterYears,
+        isLive: adoptedLive,
         stats,
         bands,
         value,
