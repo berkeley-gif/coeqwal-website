@@ -65,6 +65,10 @@ export interface BoxPlotProps {
   height?: number
   /** Chart margins */
   margin?: { top: number; right: number; bottom: number; left: number }
+  /** When false, skips hover listeners and the tooltip (capture mode) */
+  interactive?: boolean
+  /** Fires once after the first committed draw (off-screen capture waits on it) */
+  onReady?: () => void
 }
 
 const DEFAULT_MARGIN = { top: 16, right: 20, bottom: 44, left: 64 }
@@ -106,6 +110,8 @@ const BoxPlot: React.FC<BoxPlotProps> = React.memo(
     width = 600,
     height = 320,
     margin = DEFAULT_MARGIN,
+    interactive = true,
+    onReady,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -114,6 +120,11 @@ const BoxPlot: React.FC<BoxPlotProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
+    const onReadyRef = useRef(onReady)
+    useEffect(() => {
+      onReadyRef.current = onReady
+    }, [onReady])
+    const hasFiredOnReadyRef = useRef(false)
 
     useEffect(() => {
       if (responsive && dimensions && dimensions.width > 0) {
@@ -210,21 +221,25 @@ const BoxPlot: React.FC<BoxPlotProps> = React.memo(
             .text(yAxisLabel)
         }
 
-        const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 11)}`
-        const tooltip = select("body")
-          .append("div")
-          .attr("id", tooltipId)
-          .style("position", "absolute")
-          .style("visibility", "hidden")
-          .style("background", "#fff")
-          .style("border-radius", "6px")
-          .style("padding", "10px 14px")
-          .style("font-size", "12px")
-          .style("font-family", FONT)
-          .style("box-shadow", "0 4px 20px rgba(0,0,0,0.12)")
-          .style("pointer-events", "none")
-          .style("z-index", "1000")
-          .style("line-height", "1.5")
+        const tooltipId = interactive
+          ? `tooltip-${Math.random().toString(36).slice(2, 11)}`
+          : null
+        const tooltip = tooltipId
+          ? select("body")
+              .append("div")
+              .attr("id", tooltipId)
+              .style("position", "absolute")
+              .style("visibility", "hidden")
+              .style("background", "#fff")
+              .style("border-radius", "6px")
+              .style("padding", "10px 14px")
+              .style("font-size", "12px")
+              .style("font-family", FONT)
+              .style("box-shadow", "0 4px 20px rgba(0,0,0,0.12)")
+              .style("pointer-events", "none")
+              .style("z-index", "1000")
+              .style("line-height", "1.5")
+          : null
 
         drawable.forEach((b, i) => {
           const cx = band * (i + 0.5)
@@ -329,6 +344,7 @@ const BoxPlot: React.FC<BoxPlotProps> = React.memo(
             .attr("height", innerHeight)
             .attr("fill", "transparent")
             .on("mousemove", (event: MouseEvent) => {
+              if (!tooltip) return
               tooltip
                 .style("visibility", "visible")
                 .style("left", `${event.pageX + 16}px`)
@@ -348,19 +364,32 @@ const BoxPlot: React.FC<BoxPlotProps> = React.memo(
                 )
             })
             .on("mouseout", () => {
+              if (!tooltip) return
               tooltip.style("visibility", "hidden")
             })
         })
 
         return tooltipId
       },
-      [boxes, whiskers, yAxisLabel, formatValue, margin],
+      [boxes, whiskers, yAxisLabel, formatValue, margin, interactive],
     )
 
     useEffect(() => {
       if (currentWidth > 0 && currentHeight > 0) {
         const tooltipId = updateChart(currentWidth, currentHeight)
+        // TierGrid's ordering: the fired flag is set inside the frame, so a
+        // frame cancelled by a re-render re-schedules on the next effect run
+        // instead of losing the only onReady the capture host waits for.
+        let readyFrame: number | undefined
+        if (!hasFiredOnReadyRef.current) {
+          readyFrame = requestAnimationFrame(() => {
+            if (hasFiredOnReadyRef.current) return
+            hasFiredOnReadyRef.current = true
+            onReadyRef.current?.()
+          })
+        }
         return () => {
+          if (readyFrame != null) cancelAnimationFrame(readyFrame)
           if (tooltipId) select(`#${tooltipId}`).remove()
         }
       }

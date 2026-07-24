@@ -543,6 +543,21 @@ export function mockSummaryValue(
   return variableId === "ag_rev" ? stats.mean : stats.p50
 }
 
+/**
+ * Deterministic sample-data water-year-type class for a year index
+ * (1=Wet ... 5=Critical, matching the live API's classes). One shared
+ * classification for every mock member; real data classifies per scenario,
+ * which only the live path reflects.
+ */
+export function mockWaterYearType(yearIndex: number): number {
+  const r = rng(hash(`wyt|${yearIndex}`))()
+  if (r < 0.25) return 1
+  if (r < 0.4) return 2
+  if (r < 0.55) return 3
+  if (r < 0.8) return 4
+  return 5
+}
+
 /** Exceedance points (probability ascending) from an annual series. */
 export function toExceedancePoints(
   values: number[],

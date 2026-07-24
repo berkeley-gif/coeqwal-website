@@ -37,11 +37,26 @@ export default function TrayCard({
 
   return (
     <Box
+      role="button"
+      tabIndex={0}
+      aria-label={isInStory ? "Remove from story" : "Add to story"}
+      aria-pressed={isInStory}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest("[data-share-note]")) {
           return
         }
         onToggle()
+      }}
+      onKeyDown={(e) => {
+        // Same guard as onClick: keystrokes inside the note editor (typing
+        // spaces, pressing Enter) must not bubble up and toggle the card.
+        if ((e.target as HTMLElement).closest("[data-share-note]")) {
+          return
+        }
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onToggle()
+        }
       }}
       sx={{
         position: "relative",

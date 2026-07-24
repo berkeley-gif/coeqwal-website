@@ -121,6 +121,24 @@ export type ShareItem =
        */
       showCellNumbers?: boolean
     })
+  | (ShareItemBaseFields & {
+      type: "data"
+      /** Registry id of the captured variable, e.g. "res_apr" */
+      variableId: string
+      /** VariableView at capture time: "dist" | "pct" | "cv" | "value" */
+      view: string
+      /** Distribution style at capture: "exceedance" | "box" (dist/pct views) */
+      distKind: string
+      /** Compare axis at capture: "scenarios" | "climates" | "locations" */
+      compareBy: string
+      /** Ordered member ids, aligned with memberLabels */
+      memberIds: string[]
+      /** Ordered display labels, aligned with memberIds */
+      memberLabels: string[]
+      /** Data provenance at capture time */
+      source: "live" | "mock"
+      hydroclimate: string
+    })
 
 /**
  * On-disk shape of a share item. Currently the same as `ShareItem`:

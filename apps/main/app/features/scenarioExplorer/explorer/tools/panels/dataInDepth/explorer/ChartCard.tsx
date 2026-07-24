@@ -15,14 +15,7 @@
 
 import React from "react"
 import { Box, Chip, Tooltip, Typography, useTheme } from "@repo/ui/mui"
-import {
-  BoxPlot,
-  CategoricalBarChart,
-  ExceedanceChart,
-  type BoxPlotDatum,
-  type CategoricalBarDatum,
-  type ExceedanceSeries,
-} from "@repo/viz"
+import { BoxPlot, CategoricalBarChart, ExceedanceChart } from "@repo/viz"
 import { useDataSlice } from "../../../../store"
 import { useVariableData } from "../hooks/useVariableData"
 import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
@@ -33,7 +26,10 @@ import {
   type SummaryContext,
   type SummaryMember,
 } from "../hooks/interpretiveText"
-import { MOCK_YEARS, toExceedancePoints } from "../config/mockDataEngine"
+import { MOCK_YEARS } from "../config/mockDataEngine"
+import { toBars, toBoxes, toSeries } from "./chartMarks"
+import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
+import { useDataShareCapture } from "../hooks/useDataShareCapture"
 
 const CHART_HEIGHT = 340
 
@@ -52,6 +48,8 @@ export default function ChartCard() {
     colorScope,
     data.members.map((m) => m.id),
   )
+
+  const share = useDataShareCapture(data, memberColors)
 
   const fmt = (v: number) => formatValue(v, data.unit)
 
@@ -102,48 +100,29 @@ export default function ChartCard() {
       </Box>
     )
   } else if (data.view === "cv" || data.view === "value") {
-    const bars: CategoricalBarDatum[] = data.members.map((m, i) => ({
-      id: m.id,
-      label: m.label,
-      value: m.value,
-      color: memberColors[i],
-    }))
     chart = (
-      <CategoricalBarChart bars={bars} yAxisLabel={yLabel} formatValue={fmt} />
+      <CategoricalBarChart
+        bars={toBars(data.members, memberColors)}
+        yAxisLabel={yLabel}
+        formatValue={fmt}
+      />
     )
   } else if (distKind === "box") {
-    const boxes: BoxPlotDatum[] = data.members.map((m, i) => ({
-      id: m.id,
-      label: m.label,
-      color: memberColors[i],
-      stats: {
-        min: m.stats.min,
-        q1: m.stats.p25,
-        median: m.stats.p50,
-        q3: m.stats.p75,
-        max: m.stats.max,
-        mean: m.stats.mean,
-        p10: m.stats.p10,
-        p90: m.stats.p90,
-      },
-    }))
     chart = (
       <BoxPlot
-        boxes={boxes}
+        boxes={toBoxes(data.members, memberColors)}
         whiskers="p10p90"
         yAxisLabel={yLabel}
         formatValue={fmt}
       />
     )
   } else {
-    const series: ExceedanceSeries[] = data.members.map((m, i) => ({
-      id: m.id,
-      label: m.label,
-      points: toExceedancePoints(m.series),
-      color: memberColors[i],
-    }))
     chart = (
-      <ExceedanceChart series={series} yAxisLabel={yLabel} formatValue={fmt} />
+      <ExceedanceChart
+        series={toSeries(data.members, memberColors)}
+        yAxisLabel={yLabel}
+        formatValue={fmt}
+      />
     )
   }
 
@@ -187,6 +166,11 @@ export default function ChartCard() {
             />
           </Tooltip>
         )}
+        <Box sx={{ flex: 1 }} />
+        <SaveSnapshotButton
+          disabled={!share.canSnapshot}
+          onClick={share.onSaveSnapshot}
+        />
       </Box>
 
       {/* Interpretive summary sentence */}
