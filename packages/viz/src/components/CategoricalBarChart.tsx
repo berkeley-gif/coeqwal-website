@@ -275,11 +275,13 @@ const CategoricalBarChart: React.FC<CategoricalBarChartProps> = React.memo(
     useEffect(() => {
       if (currentWidth > 0 && currentHeight > 0) {
         const tooltipId = updateChart(currentWidth, currentHeight)
+        let readyFrame: number | undefined
         if (!hasFiredOnReadyRef.current) {
           hasFiredOnReadyRef.current = true
-          requestAnimationFrame(() => onReadyRef.current?.())
+          readyFrame = requestAnimationFrame(() => onReadyRef.current?.())
         }
         return () => {
+          if (readyFrame != null) cancelAnimationFrame(readyFrame)
           if (tooltipId) select(`#${tooltipId}`).remove()
         }
       }
