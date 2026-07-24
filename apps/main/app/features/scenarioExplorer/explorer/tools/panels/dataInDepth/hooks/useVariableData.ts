@@ -400,13 +400,12 @@ export function useVariableData(): VariableData {
 
       // Mock members: apply the water-year-type filter client-side with the
       // deterministic sample classification. Live members arrive already
-      // filtered by the wyt request parameter. The single-value view has no
-      // annual series to filter.
-      if (
-        !adoptedLive &&
-        selectedWaterYearTypes.length > 0 &&
-        view !== "value"
-      ) {
+      // filtered by the wyt request parameter, in EVERY view (the hooks pass
+      // wyt unconditionally), so the mock path filters in every view too:
+      // the displayed summary value never derives from the series, but the
+      // exported series and stats must match what the capture's provenance
+      // header claims.
+      if (!adoptedLive && selectedWaterYearTypes.length > 0) {
         series = filterSeriesByWyt(
           series,
           selectedWaterYearTypes,

@@ -339,7 +339,7 @@ The tool renders no map: the map was removed from this tool by product decision 
 
 ### Water-year-type filter
 
-`config/wytFilter.ts` defines the Sacramento Valley index classes (1 = Wet through 5 = Critical) and the pure filter helpers; `explorer/WytFilterChips.tsx` renders the toggle chips under the view bar. An empty selection means all years. Live members pass the selection through the data-in-depth `wyt` request parameter, so the server returns the filtered years and every frontend-derived statistic follows; sample members filter client-side against a deterministic seeded classification (`mockWaterYearType`, one shared classification for all sample members, since per-scenario classes are a live-data property). The chip row hides itself on the single-value view, which has no annual series to filter.
+`config/wytFilter.ts` defines the Sacramento Valley index classes (1 = Wet through 5 = Critical) and the pure filter helpers; `explorer/WytFilterChips.tsx` renders the toggle chips under the view bar. An empty selection means all years. Live members pass the selection through the data-in-depth `wyt` request parameter, so the server returns the filtered years and every frontend-derived statistic follows; sample members filter client-side against a deterministic seeded classification (`mockWaterYearType`, one shared classification for all sample members, since per-scenario classes are a live-data property). Both paths filter in every view so a capture's exported series always matches its recorded filter. The chip row hides itself on the single-value view (the displayed value has no annual series), but a selection made elsewhere still applies to the underlying series and its export.
 
 ### Sticky member colors
 
