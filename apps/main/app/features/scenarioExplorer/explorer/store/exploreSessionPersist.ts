@@ -236,6 +236,11 @@ function validateWorkspaceSection(raw: unknown): Partial<WorkspaceState> {
   const outcomeDisplayMode = validateOutcomeDisplayMode(raw.outcomeDisplayMode)
   if (outcomeDisplayMode) workspace.outcomeDisplayMode = outcomeDisplayMode
 
+  const scenarioRailCollapsed = asBoolean(raw.scenarioRailCollapsed)
+  if (scenarioRailCollapsed !== undefined) {
+    workspace.scenarioRailCollapsed = scenarioRailCollapsed
+  }
+
   const relativeToBaseline = asBoolean(raw.relativeToBaseline)
   if (relativeToBaseline !== undefined) {
     workspace.relativeToBaseline = relativeToBaseline
