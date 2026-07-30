@@ -243,12 +243,12 @@ export default function ExploreSubNav() {
                 >
                   <motion.div
                     animate={
-                      selectedScenarios.length > 0 && !prefersReducedMotion
+                      selectedScenarios.length > 0 && exploreMode === 'list' && !prefersReducedMotion
                         ? { x: [0, 4, 0] }
                         : { x: 0 }
                     }
                     transition={
-                      selectedScenarios.length > 0 && !prefersReducedMotion
+                      selectedScenarios.length > 0 && exploreMode === 'list' && !prefersReducedMotion
                         ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
                         : { duration: 0.2, ease: "easeOut" }
                     }
