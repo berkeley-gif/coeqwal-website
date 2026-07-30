@@ -12,8 +12,8 @@
  * Tier chart data from `useResolvedScenarioTiers` (API batch via SWR, warmed by `usePrefetchTiers`).
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Box, Typography, Snackbar, useTheme, alpha } from "@repo/ui/mui"
+import React, { useMemo, useRef } from "react"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import StrategyGrid from "./grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
@@ -63,14 +63,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
 
   const listScrollRef = useRef<HTMLDivElement>(null)
 
-  const [gridLayoutMode, setGridLayoutMode] = useState<
-    "full" | "wrapped" | "compact"
-  >("full")
-  const handleLayoutModeChange = useCallback(
-    (mode: "full" | "wrapped" | "compact") => setGridLayoutMode(mode),
-    [],
-  )
-
   const {
     selectedScenarios,
     toggleScenario,
@@ -89,52 +81,7 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     setSelectedTheme,
     setSelectedIconId,
     groupByTheme,
-    pinnedScenarioIds,
-    pinCapReached,
-    setMaxPinnedScenarios,
-    dismissPinCapReached,
-    stashedPinnedScenarioIds,
-    stashAndTrimPins,
-    restoreStashedPins,
-    pinsTrimmedForMap,
-    dismissPinsTrimmedForMap,
   } = useListSlice()
-
-  const ROW_HEIGHT_ESTIMATE = 80
-  const MAX_STICKY_RATIO = 0.35
-  const WRAPPED_PIN_CAP = 1
-
-  const isWrappedLayout = gridLayoutMode !== "full"
-
-  useEffect(() => {
-    if (isWrappedLayout) {
-      setMaxPinnedScenarios(WRAPPED_PIN_CAP)
-      return
-    }
-    const compute = () => {
-      const max = Math.max(
-        2,
-        Math.ceil(
-          (window.innerHeight * MAX_STICKY_RATIO) / ROW_HEIGHT_ESTIMATE,
-        ),
-      )
-      setMaxPinnedScenarios(max)
-    }
-    compute()
-    window.addEventListener("resize", compute)
-    return () => window.removeEventListener("resize", compute)
-  }, [setMaxPinnedScenarios, isWrappedLayout])
-
-  // Stash pins when layout wraps (if more than cap), restore when it goes back to full
-  useEffect(() => {
-    if (isWrappedLayout && pinnedScenarioIds.length > WRAPPED_PIN_CAP) {
-      stashAndTrimPins(WRAPPED_PIN_CAP)
-    } else if (!isWrappedLayout && stashedPinnedScenarioIds !== null) {
-      restoreStashedPins()
-    }
-    // Only react to layout mode changes - not to pin array changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isWrappedLayout])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
@@ -242,8 +189,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
-    pinnedScenarioIds,
-    onLayoutModeChange: handleLayoutModeChange,
   }
 
   return (
@@ -313,42 +258,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
           )}
           <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
         </Box>
-
-        <Snackbar
-          open={pinCapReached}
-          autoHideDuration={3000}
-          onClose={dismissPinCapReached}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          message="Pin limit reached - unpin a scenario to pin another"
-          ContentProps={{
-            sx: {
-              backgroundColor: theme.palette.grey[800],
-              color: theme.palette.common.white,
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              borderRadius: theme.borderRadius.sm,
-              justifyContent: "center",
-            },
-          }}
-        />
-
-        <Snackbar
-          open={pinsTrimmedForMap}
-          autoHideDuration={4000}
-          onClose={dismissPinsTrimmedForMap}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          message="Pins reduced to 1 for this view - will restore at full width"
-          ContentProps={{
-            sx: {
-              backgroundColor: theme.palette.grey[800],
-              color: theme.palette.common.white,
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              borderRadius: theme.borderRadius.sm,
-              justifyContent: "center",
-            },
-          }}
-        />
       </Box>
       <VisualizeRail
         active={selectedScenarios.length > 0}

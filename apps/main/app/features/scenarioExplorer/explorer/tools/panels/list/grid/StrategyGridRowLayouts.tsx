@@ -39,18 +39,14 @@ export function NonCompactRowContent({
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
-  isPinned = false,
   accentColor,
   handleShare,
-  togglePinnedScenario,
   pinRowTourRef,
   shareRowTourRef,
   operationsRowTourRef,
 }: NonCompactRowContentProps & {
-  isPinned?: boolean
   accentColor?: string
   handleShare?: () => void
-  togglePinnedScenario?: (id: string) => void
   pinRowTourRef?: React.RefCallback<HTMLElement | null>
   shareRowTourRef?: React.RefCallback<HTMLElement | null>
   operationsRowTourRef?: React.RefCallback<HTMLElement | null>
@@ -63,16 +59,14 @@ export function NonCompactRowContent({
   const isFullMode = layoutMode === "full"
 
   const inlineActionsNode =
-    isListMode && handleShare && togglePinnedScenario && accentColor ? (
+    isListMode && handleShare && accentColor ? (
       <Box sx={{ display: "inline-flex", alignItems: "center" }}>
         <InlineRowActions
           scenarioId={scenario.scenarioId}
           scenarioLabel={scenario.label}
           displayMode={outcomeDisplayMode}
-          isPinned={isPinned}
           accentColor={accentColor}
           onShare={handleShare}
-          togglePinnedScenario={togglePinnedScenario}
           pinTourRef={pinRowTourRef}
           shareTourRef={shareRowTourRef}
         />

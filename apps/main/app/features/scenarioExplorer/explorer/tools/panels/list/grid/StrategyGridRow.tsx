@@ -16,7 +16,7 @@ import type {
   OutcomeName,
   ScenarioForDisplay,
 } from "../../../../../../scenarios/components/shared"
-import { useWorkspaceSlice, useListSlice } from "../../../../store"
+import { useWorkspaceSlice } from "../../../../store"
 import { useTourAnchor } from "../../../tour"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../../../../../content/scenarios"
@@ -61,8 +61,6 @@ export interface StrategyGridRowProps {
   onIconClick?: (iconId: string) => void
   /** Optional color for accent border and swatch */
   scenarioColor?: string
-  /** Whether this scenario is pinned */
-  isPinned?: boolean
   /** Whether this row is in an "active" state (hovered/highlighted externally) */
   isActive?: boolean
   /** Called on mouse enter/leave for hover sync with other panels */
@@ -88,7 +86,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onThemeBadgeClick,
   onIconClick,
   scenarioColor,
-  isPinned = false,
   isActive = false,
   onRowHover,
 }: StrategyGridRowProps) {
@@ -98,7 +95,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const showDefinitions = useWorkspaceSlice((s) => s.showDefinitions)
   const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
-  const togglePinnedScenario = useListSlice((s) => s.togglePinnedScenario)
 
   const accentColor = scenarioColor || theme.palette.blue.bright
 
@@ -228,10 +224,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         showThemeBadge={showThemeBadge}
         onThemeBadgeClick={onThemeBadgeClick}
         onIconClick={onIconClick}
-        isPinned={isPinned}
         accentColor={accentColor}
         handleShare={handleShare}
-        togglePinnedScenario={togglePinnedScenario}
         pinRowTourRef={
           tourListFirstItem && isListMode ? listRowPinTourRef : undefined
         }

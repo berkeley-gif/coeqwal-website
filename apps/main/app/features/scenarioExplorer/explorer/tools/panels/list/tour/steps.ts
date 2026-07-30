@@ -75,15 +75,6 @@ export const LIST_TOUR: TourStep[] = [
     placement: "left-start",
   },
   {
-    id: "list.step1.pin",
-    anchorId: "list.row.pin",
-    eyebrow: "arrange the list",
-    title: "Pin",
-    titleIcon: "pin",
-    body: "Pin a scenario to float it to the top of the list while you compare.",
-    placement: "left-start",
-  },
-  {
     id: "list.step1.share",
     anchorId: "list.row.share",
     eyebrow: "arrange the list",

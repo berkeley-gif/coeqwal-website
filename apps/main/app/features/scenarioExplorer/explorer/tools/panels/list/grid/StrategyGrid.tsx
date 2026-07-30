@@ -17,7 +17,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useEffect, useRef } from "react"
+import React, { useRef } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { useTierTooltipState } from "../../../../../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../../../../../tooltips/TierTooltipPortal"
@@ -94,10 +94,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
       : containerWidth >= SM_BREAKPOINT
         ? "wrapped"
         : "compact"
-
-  useEffect(() => {
-    onLayoutModeChange?.(layoutMode)
-  }, [layoutMode, onLayoutModeChange])
 
   // =========================================================================
   // Tooltip State Management
