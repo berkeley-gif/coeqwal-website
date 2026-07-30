@@ -32,9 +32,9 @@ import {
 
 export interface CaptureDataInDepthInput {
   theme: Theme
-  /** View at capture time: "dist" | "pct" | "cv" | "value" */
+  /** View at capture time, e.g. "dist" | "pct" | "level" | "value" */
   view: string
-  /** "exceedance" | "box"; only read for the dist/pct views */
+  /** "exceedance" | "box"; only read for the dist-like views */
   distKind: string
   /** Members exactly as the live card rendered them */
   members: MarkMember[]

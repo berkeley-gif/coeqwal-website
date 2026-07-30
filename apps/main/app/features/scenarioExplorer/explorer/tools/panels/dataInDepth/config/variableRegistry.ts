@@ -20,6 +20,7 @@
 export type VariableView =
   | "dist" // annual distribution (exceedance curve or box plot)
   | "pct" // annual distribution as percent of capacity (reservoirs)
+  | "level" // annual distribution of groundwater levels in feet
   | "monthly" // monthly pattern (median + band per water month)
   | "cv" // year-to-year variability (coefficient of variation)
   | "value" // single summary value per member
@@ -27,6 +28,7 @@ export type VariableView =
 export const VIEW_LABELS: Record<VariableView, string> = {
   dist: "Annual distribution",
   pct: "% of capacity",
+  level: "Level (ft)",
   monthly: "Monthly pattern",
   cv: "Year-to-year variability",
   value: "Summary value",
@@ -81,6 +83,9 @@ export interface VariableDef {
   /** Per-variable overrides of the default VIEW_LABELS button text, so a
    *  view can be labeled by the quantity it shows (e.g. "Volume (TAF)"). */
   viewLabels?: Partial<Record<VariableView, string>>
+  /** Per-view unit overrides for views whose quantity differs from the
+   *  variable's base unit (e.g. groundwater level in feet). */
+  viewUnits?: Partial<Record<VariableView, { unit: string; unitLabel: string }>>
   /** Plain-language explanation ("What is this metric?") */
   plain: string
   /** Technical note (source variables, caveats) */
@@ -264,7 +269,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
 
 export const SECTORS: SectorDef[] = [
   { id: "res", name: "Reservoir storage", variables: ["res_apr", "res_sep"] },
-  { id: "gw", name: "Groundwater storage", variables: ["gw_vol", "gw_trend"] },
+  { id: "gw", name: "Groundwater storage", variables: ["gw_stor"] },
   {
     id: "salin",
     name: "Delta salinity",
@@ -343,40 +348,24 @@ export const VARIABLES: Record<string, VariableDef> = {
     mockKind: "storage",
     mockEffect: "storage",
   },
-  gw_vol: {
-    id: "gw_vol",
-    name: "Groundwater storage volume",
+  gw_stor: {
+    id: "gw_stor",
+    name: "Groundwater storage",
     sectorId: "gw",
     locationGroup: "basins",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist"],
+    views: ["dist", "level"],
+    viewLabels: { dist: "Volume (TAF)", level: "Level (ft)" },
+    viewUnits: { level: { unit: "ft", unitLabel: "feet" } },
     plain:
-      "The total amount of water stored underground in each groundwater basin.",
-    tech: "Annual groundwater storage percentiles per water budget area (WBA), from CalSim3 groundwater module output.",
+      "How much water is stored underground in each groundwater basin, as a total volume or as the groundwater level in feet.",
+    tech: "Annual groundwater storage percentiles per water budget area (WBA), from CalSim3 groundwater module output. The level view shows the corresponding groundwater levels in feet.",
     tierOutcome: "GW_STOR",
     tierOutcomeName: "Groundwater storage",
     data: "mock",
     mockKind: "gwstor",
     mockEffect: "gwStor",
-  },
-  gw_trend: {
-    id: "gw_trend",
-    name: "Groundwater level trend",
-    sectorId: "gw",
-    locationGroup: "basins",
-    unit: "ft/yr",
-    unitLabel: "feet per year",
-    views: ["value"],
-    plain:
-      "Whether groundwater levels are rising or falling over the long run. Negative numbers mean declining aquifers.",
-    tech: "Long-term linear trend of simulated groundwater levels (ft/yr) per WBA. The outcomes sheet lists overall percent change (feet/month); shown annualized here pending a units ruling.",
-    tierOutcome: "GW_STOR",
-    tierOutcomeName: "Groundwater storage",
-    data: "mock",
-    provisional: true,
-    mockKind: "gwstor",
-    mockEffect: "gwTrend",
   },
   x2_apr: {
     id: "x2_apr",

@@ -105,10 +105,11 @@ test("a value-view capture with a lingering filter exports filtered, labeled dat
     .click()
   await expect(page.getByText(/^Sample data$/)).toBeVisible()
 
-  // Select a class where the chips are visible, then move to a variable
-  // whose only view is the single summary value (chips hidden there).
+  // Select a class where the chips are visible, then move to the single
+  // summary-value view of a variable that offers one (chips hidden there).
   await page.getByRole("button", { name: "Critical", exact: true }).click()
-  await page.getByRole("button", { name: /Groundwater level trend/ }).click()
+  await page.getByRole("button", { name: /Gross crop revenues/ }).click()
+  await page.getByRole("button", { name: "Summary value" }).click()
   await expect(page.getByText("Water year types")).toBeHidden()
 
   await page.getByRole("button", { name: "save snapshot" }).click()

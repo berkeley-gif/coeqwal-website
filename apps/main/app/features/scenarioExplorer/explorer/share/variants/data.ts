@@ -31,9 +31,12 @@ const DIST_LABELS: Record<string, string> = {
 }
 
 function viewLabelFor(item: DataItem): string {
-  const view = VIEW_LABELS[item.view as VariableView] ?? item.view
+  const view =
+    getVariable(item.variableId)?.viewLabels?.[item.view as VariableView] ??
+    VIEW_LABELS[item.view as VariableView] ??
+    item.view
   const dist =
-    item.view === "dist" || item.view === "pct"
+    item.view === "dist" || item.view === "pct" || item.view === "level"
       ? DIST_LABELS[item.distKind]
       : undefined
   return dist ? `${view} (${dist})` : view

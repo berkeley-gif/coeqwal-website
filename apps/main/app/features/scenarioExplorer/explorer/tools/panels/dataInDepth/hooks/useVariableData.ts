@@ -54,6 +54,7 @@ import {
   type VariableView,
 } from "../config/variableRegistry"
 import {
+  gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
   mockSummaryValue,
@@ -351,6 +352,7 @@ export function useVariableData(): VariableData {
     }
 
     const isPct = view === "pct"
+    const isLevel = view === "level"
 
     let anyLive = false
     const members: VariableMember[] = specs.map((spec) => {
@@ -361,11 +363,13 @@ export function useVariableData(): VariableData {
         spec.climateKey,
         spec.locationId,
       )
-      const capacity = getLocation(groupId, spec.locationId)?.capacityTaf
+      const location = getLocation(groupId, spec.locationId)
       let series: number[]
-      if (isPct && capacity) {
-        const cap = capacity
+      if (isPct && location?.capacityTaf) {
+        const cap = location.capacityTaf
         series = raw.map((v) => (v / cap) * 100)
+      } else if (isLevel && location) {
+        series = gwLevelFromStorage(raw, location)
       } else {
         series = raw
       }
@@ -447,12 +451,17 @@ export function useVariableData(): VariableData {
       }
     })
 
-    const unit = isPct ? "%" : view === "cv" ? "" : variable.unit
+    const viewUnit = variable.viewUnits?.[view]
+    const unit = isPct
+      ? "%"
+      : view === "cv"
+        ? ""
+        : (viewUnit?.unit ?? variable.unit)
     const unitLabel = isPct
       ? "percent of capacity"
       : view === "cv"
         ? "coefficient of variation"
-        : variable.unitLabel
+        : (viewUnit?.unitLabel ?? variable.unitLabel)
 
     return {
       variable,

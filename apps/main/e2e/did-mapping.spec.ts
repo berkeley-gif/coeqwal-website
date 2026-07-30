@@ -24,7 +24,7 @@ test("didDomainForVariable maps live variables and returns null for mock ones", 
   expect(didDomainForVariable("x2_sep")).toBe("delta")
   // Not served live -> mock:
   expect(didDomainForVariable("riv_uif")).toBeNull() // % of unimpaired not served
-  expect(didDomainForVariable("gw_vol")).toBeNull()
+  expect(didDomainForVariable("gw_stor")).toBeNull()
   expect(didDomainForVariable("station_ec")).toBeNull()
   expect(didDomainForVariable("nonsense")).toBeNull()
 })
@@ -35,7 +35,7 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("riv_flow")).toBe("annual")
   expect(didPeriodForVariable("x2_apr")).toBe("april")
   expect(didPeriodForVariable("x2_sep")).toBe("sept")
-  expect(didPeriodForVariable("gw_vol")).toBeNull()
+  expect(didPeriodForVariable("gw_stor")).toBeNull()
 })
 
 test("toDidSubject maps reservoir location ids to API subject codes", () => {
