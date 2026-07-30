@@ -4,14 +4,15 @@
  * VisualizeRail. Full-height CTA rail on the right edge of the List view.
  *
  * Nudges the user toward Bar mode once they've selected at least one
- * scenario — muted/inert at zero selections, active once there's
+ * scenario — active once there's
  * something to visualize.
  */
 
 import React from "react"
+import { motion, useReducedMotion } from "@repo/motion"
 import { Box, Typography, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 
-const RAIL_WIDTH = 66
+const RAIL_WIDTH = 76
 
 interface VisualizeRailProps {
   active: boolean
@@ -19,6 +20,8 @@ interface VisualizeRailProps {
 }
 export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
   const theme = useTheme()
+
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <Box
@@ -29,7 +32,8 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
       aria-label="Start visualizing: switch to Bar mode"
       sx={{
         flexShrink: 0,
-        width: RAIL_WIDTH,
+        width: active ? RAIL_WIDTH : 0,
+        overflow: "hidden",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -38,12 +42,10 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
         gap: 1,
         border: "none",
         borderLeft: `1px solid ${theme.palette.divider}`,
-        backgroundColor: active
-          ? theme.palette.tabPanels.explore
-          : theme.palette.grey[100],
-        color: active ? theme.palette.common.white : theme.palette.grey[400],
+        backgroundColor: theme.palette.tabPanels.explore,
+        color: theme.palette.common.white,
         cursor: active ? "pointer" : "default",
-        transition: "background-color 150ms ease, color 150ms ease",
+        transition: "width 220ms ease",
         "&:hover": active ? { filter: "brightness(1.15)" } : {},
         "&:focus-visible": {
           outline: `2px solid ${theme.palette.blue.bright}`,
@@ -51,7 +53,15 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
         },
       }}
     >
-      <ArrowForwardIcon sx={{ fontSize: "1.25rem" }} />
+      <motion.div
+        animate={
+          active && !prefersReducedMotion ? { x: [0, 4, 0] } : { x: 0 }
+        }
+        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ display: "flex" }}
+      >
+        <ArrowForwardIcon sx={{ fontSize: "1.25rem" }} />
+      </motion.div>
       <Typography
         component="span"
         sx={{

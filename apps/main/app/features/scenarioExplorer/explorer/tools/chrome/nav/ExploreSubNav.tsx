@@ -26,6 +26,7 @@ import {
 import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
+import { motion, useReducedMotion } from "@repo/motion"
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -89,7 +90,8 @@ export default function ExploreSubNav() {
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
 
-  const { exploreMode, setExploreMode } = useWorkspaceSlice()
+  const { exploreMode, setExploreMode, selectedScenarios } = useWorkspaceSlice()
+  const prefersReducedMotion = useReducedMotion()
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
@@ -115,6 +117,8 @@ export default function ExploreSubNav() {
   if (activeTab !== "explore") return null
 
   const navHeight = theme.layout.collapsedTabHeight
+
+
 
   return (
     <Box
@@ -167,9 +171,9 @@ export default function ExploreSubNav() {
                   border: step.showTrailingArrow
                     ? "none"
                     : `1px solid ${alpha(
-                        theme.palette.common.white,
-                        active ? 0.7 : 0.3,
-                      )}`,
+                      theme.palette.common.white,
+                      active ? 0.7 : 0.3,
+                    )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -237,7 +241,21 @@ export default function ExploreSubNav() {
                     color: alpha(theme.palette.common.white, 0.6),
                   }}
                 >
-                  <ArrowForwardIcon sx={{ fontSize: "1.1rem" }} />
+                  <motion.div
+                    animate={
+                      selectedScenarios.length > 0 && !prefersReducedMotion
+                        ? { x: [0, 4, 0] }
+                        : { x: 0 }
+                    }
+                    transition={
+                      selectedScenarios.length > 0 && !prefersReducedMotion
+                        ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                        : { duration: 0.2, ease: "easeOut" }
+                    }
+                    style={{ display: "flex" }}
+                  >
+                    <ArrowForwardIcon sx={{ fontSize: "1.1rem" }} />
+                  </motion.div>
                 </Box>
               )}
             </React.Fragment>
