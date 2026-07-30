@@ -60,7 +60,6 @@ export default function ExplorerToolView() {
     return () => clearTimeout(timeout)
   }, [exploreMode, startToolTour])
 
-
   return (
     <TourAnchorProvider>
       <Box sx={{ flex: 1, overflow: "hidden" }}>
