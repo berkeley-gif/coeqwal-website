@@ -330,7 +330,7 @@ These are separate components.
 | Row | Component                   | What it shows                                                                                      | Typical tools                               |
 | --- | --------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | 1   | `ToolJourneyStrip`          | Chart title + one-sentence purpose (+ "Take the tour" when a tour exists). Copy from `journey.ts`. | List, Radar, Distribution, Resilience       |
-| 2   | `ToolToolbar`               | Shared view controls: "Show map", "Choose locations to track", hydroclimate chooser                | All tools except list-specific title layout |
+| 2   | `ToolToolbar`               | Shared view controls: "Show map",  hydroclimate chooser                | All tools except list-specific title layout |
 | 3   | `*ChartControls` (optional) | Tool-specific controls passed into `ToolIsland` (outcome pickers, share button, etc.)              | Radar, Equity, Resilience                   |
 | 4   | Panel                       | Your chart or data view (`YourToolPanel`, `DataExplorerView`, etc.)                                | Every tool                                  |
 
