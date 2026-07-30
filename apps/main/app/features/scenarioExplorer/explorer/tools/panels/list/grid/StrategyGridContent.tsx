@@ -58,7 +58,6 @@ export interface StrategyGridContentProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
   scenarioColors?: Record<string, string>
-  pinnedScenarioIds?: string[]
   activeScenarioIds?: Set<string>
   onRowHover?: (scenarioIds: string[] | null) => void
 }
@@ -90,7 +89,6 @@ export function StrategyGridContent({
   onThemeBadgeClick,
   onIconClick,
   scenarioColors,
-  pinnedScenarioIds = [],
   activeScenarioIds,
   onRowHover,
 }: StrategyGridContentProps) {
@@ -118,21 +116,6 @@ export function StrategyGridContent({
     groupByTheme && scenariosInContiguousThemeOrder && hasThemedScenarios
   const showThemeBadgeUnpinned = !themeSubheaderMode
 
-  const pinnedSet = useMemo(
-    () => new Set(pinnedScenarioIds),
-    [pinnedScenarioIds],
-  )
-
-  const pinnedScenarios = useMemo(
-    () => displayScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
-    [displayScenarios, pinnedSet],
-  )
-
-  const unpinnedScenarios = useMemo(
-    () => displayScenarios.filter((s) => !pinnedSet.has(s.scenarioId)),
-    [displayScenarios, pinnedSet],
-  )
-
   const themeScenarioIds = useMemo(() => {
     if (!themeSubheaderMode) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
@@ -145,26 +128,6 @@ export function StrategyGridContent({
     }
     return map
   }, [themeSubheaderMode, displayScenarios])
-
-  const pinnedThemeScenarioIds = useMemo(() => {
-    if (!themeSubheaderMode || pinnedScenarios.length === 0)
-      return new Map<string, string[]>()
-    const map = new Map<string, string[]>()
-    for (const s of pinnedScenarios) {
-      if (s.theme) {
-        const ids = map.get(s.theme) ?? []
-        ids.push(s.scenarioId)
-        map.set(s.theme, ids)
-      }
-    }
-    for (const [theme, pinnedIds] of map) {
-      const totalIds = themeScenarioIds.get(theme) ?? []
-      if (pinnedIds.length < totalIds.length) {
-        map.delete(theme)
-      }
-    }
-    return map
-  }, [themeSubheaderMode, pinnedScenarios, themeScenarioIds])
 
   const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
@@ -217,7 +180,6 @@ export function StrategyGridContent({
     opts: {
       themeIds: Map<string, string[]>
       isFirstGroup: boolean
-      showThemeBadgeInPinnedSection?: boolean
       registerTourFirstListItem: boolean
     },
   ) =>
@@ -292,15 +254,10 @@ export function StrategyGridContent({
             getChartDataForScenario={getChartDataForScenario}
             glyphSize={glyphSize}
             onToggleScenario={onToggleScenario}
-            showThemeBadge={
-              opts.showThemeBadgeInPinnedSection === true
-                ? true
-                : showThemeBadgeUnpinned
-            }
+            showThemeBadge={showThemeBadgeUnpinned}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
             scenarioColor={scenarioColors?.[scenario.scenarioId]}
-            isPinned={pinnedSet.has(scenario.scenarioId)}
             isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
             onRowHover={onRowHover}
           />
@@ -374,41 +331,12 @@ export function StrategyGridContent({
     )
   }
 
-  const hasPinned = pinnedScenarios.length > 0
-
   return (
     <>
-      {hasPinned && (
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            display: "grid",
-            gridTemplateColumns: "subgrid",
-            position: "sticky",
-            top: 0,
-            zIndex: 2,
-            backgroundColor: "#faf8f5",
-            boxShadow: `
-              -${theme.spacing(theme.space.tool.px)} 0 0 0 ${theme.palette.grey[100]},
-               ${theme.spacing(theme.space.tool.px)} 0 0 0 ${theme.palette.grey[100]},
-               0 -12px 0 0 #faf8f5,
-               ${theme.shadow.stickyHeader}
-            `,
-          }}
-        >
-          {renderScenarioRows(pinnedScenarios, {
-            themeIds: pinnedThemeScenarioIds,
-            isFirstGroup: true,
-            showThemeBadgeInPinnedSection: true,
-            registerTourFirstListItem: hasPinned,
-          })}
-        </Box>
-      )}
-
-      {renderScenarioRows(unpinnedScenarios, {
+      {renderScenarioRows(displayScenarios, {
         themeIds: themeScenarioIds,
-        isFirstGroup: !hasPinned,
-        registerTourFirstListItem: !hasPinned && unpinnedScenarios.length > 0,
+        isFirstGroup: true,
+        registerTourFirstListItem: displayScenarios.length > 0,
       })}
     </>
   )

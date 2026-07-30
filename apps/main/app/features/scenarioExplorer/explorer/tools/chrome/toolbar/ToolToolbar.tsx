@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from "react"
-import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
@@ -121,35 +121,7 @@ export default function ToolToolbar({
                 sx={{ ml: -0.5 }}
               />
             </Box>
-
-            <VerticalDivider />
           </>
-        )}
-
-        {mapPaired && (
-          <Box
-            component="span"
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.5,
-              color: "grey.400",
-              pointerEvents: "none",
-              userSelect: "none",
-            }}
-          >
-            <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-                color: "inherit",
-              }}
-            >
-              Choose locations to track
-            </Typography>
-          </Box>
         )}
 
         {showToolbarHydroclimateChooser && (

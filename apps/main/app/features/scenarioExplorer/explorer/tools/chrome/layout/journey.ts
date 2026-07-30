@@ -21,9 +21,10 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   list: {
     mode: "list",
     purpose:
-      "Browse the full library and narrow down a shortlist of scenarios that you want to study more closely.",
-    nextMode: "radar",
-    nextLabel: "Compare chosen scenarios on Radar chart",
+      "Browse the full library of scenarios and select the ones that you want to study more closely.",
+    nextMode: "bar",
+    nextLabel:
+      "Compare your shortlisted scenarios' outcomes as bar charts, side by side.",
     nextRationale: "See your shortlist scenarios side by side.",
   },
   bar: {
@@ -78,7 +79,7 @@ export function getJourneyStage(mode: ExploreMode): JourneyStageConfig {
  * chart title in the ToolJourneyStrip top row.
  */
 export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
-  list: "List view",
+  list: "Home view",
   bar: "Bar chart comparison",
   radar: "Radar chart",
   equity: "Distribution",

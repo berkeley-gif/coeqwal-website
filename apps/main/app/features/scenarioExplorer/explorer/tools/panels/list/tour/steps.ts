@@ -15,8 +15,9 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.hero",
     eyebrow: "start here",
-    title: "The List view lets you browse scenarios and compare outcomes",
-    body: "Start with the scenario list on the left, then read across each row to compare the key outcomes on the right. This is where you can arrange the view, sort by outcomes, and build a shortlist to carry forward.",
+    title:
+      "The List view lets you select the scenarios that you want to compare",
+    body: "Select your scenarios and use the top bar to move between tools",
   },
 
   // Orientation + details for the scenario-list controls band.
@@ -45,6 +46,12 @@ export const LIST_TOUR: TourStep[] = [
     placement: "bottom-start",
   },
   {
+    id: "list.step1.themeFilterChip",
+    eyebrow: "arrange the list",
+    title: "Filtering shows a removable chip",
+    body: "Click a scenario's theme badge to filter the list to that theme, or select any scenarios to reveal a Clear all chip. Both appear next to the chips above and let you back out of a filter in one click.",
+  },
+  {
     id: "list.step3.showOnlyChosen",
     anchorId: "list.select.showOnlyChosen",
     eyebrow: "arrange the list",
@@ -61,12 +68,11 @@ export const LIST_TOUR: TourStep[] = [
     placement: "bottom-start",
   },
   {
-    id: "list.step1.pin",
-    anchorId: "list.row.pin",
+    id: "list.step1.operationsIcons",
+    anchorId: "list.row.operations",
     eyebrow: "arrange the list",
-    title: "Pin",
-    titleIcon: "pin",
-    body: "Pin a scenario to float it to the top of the list while you compare.",
+    title: "Click an icon to filter by that operation",
+    body: "Selecting an operation icon selects every scenario in the library that shares it, so you can quickly build a shortlist around one water-management choice.",
     placement: "left-start",
   },
   {
@@ -77,62 +83,6 @@ export const LIST_TOUR: TourStep[] = [
     titleIcon: "share",
     body: "Use share to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
     placement: "left-start",
-  },
-
-  // Orientation + details for the top toolbar view controls.
-  {
-    id: "list.step0.viewArea",
-    anchorId: "list.viewArea",
-    eyebrow: "get oriented",
-    title: "These controls set the data view",
-    body: "The controls apply to the chart. The map toggle opens the map pane, and the climate chips switch the hydroclimate.",
-    placement: "bottom-end",
-  },
-  {
-    id: "list.step4.map",
-    anchorId: "list.toolbar.map",
-    eyebrow: "open the map",
-    title: "",
-    illustration: "listMapLegend",
-    body: "Turn on Show map to open the map panel beside the list. Try clicking on an outcome chart to see it on the map. Use this to see where outcomes are strongest or weakest, compare scenarios in place, and view changes by hydroclimate. Pan and zoom as you would in any web map.",
-    placement: "bottom-start",
-  },
-  {
-    id: "list.step4.climate",
-    anchorId: "list.toolbar.climate",
-    eyebrow: "switch the hydroclimate",
-    title: "",
-    illustration: "listHydroclimate",
-    body: "Switch hydroclimates to see how the same scenarios perform under different conditions. The outcomes across every row update to reflect that climate, as does the map, so you can test a shortlist against different futures.",
-    placement: "bottom-end",
-  },
-
-  // Reading the outcomes (outcome columns + per-cell controls).
-  {
-    id: "list.step4.bar",
-    anchorId: "list.outcome.barChart",
-    eyebrow: "read the outcomes",
-    title: "",
-    illustration: "listBarTiers",
-    body: "Each bar shows what percentage of the locations fall into each tier. Longer bars mean a larger share of the locations is in that tier. Read across a row to compare one scenario across outcomes, or down a column to compare scenarios on the same outcome.",
-    placement: "left",
-  },
-  {
-    id: "list.step2.info",
-    anchorId: "list.outcome.infoButton",
-    eyebrow: "read the outcomes",
-    title: "Outcome summary",
-    body: "Click the {{infoIcon}} when you need a reminder of what the outcome measures.",
-    placement: "bottom",
-  },
-  {
-    id: "list.step2.sort",
-    anchorId: "list.outcome.sortButton",
-    eyebrow: "read the outcomes",
-    title: "Sorting ranks rows by average",
-    illustration: "listSortButton",
-    body: "Use the sort button to rank scenarios by average outcome, then reverse the order to inspect the other end of the library.",
-    placement: "bottom",
   },
 
   // Gather a shortlist (row-level selection).
@@ -146,15 +96,11 @@ export const LIST_TOUR: TourStep[] = [
     placement: "right",
   },
 
-  /*
-   * Outcome view toolbar toggles (Average / Bar / Distribution) are not
-   * mounted in the list toolbar while the toggle is feature-flagged off.
-   * The bar tour step anchors to a live `list.outcome.barChart` cell instead.
-   */
+  // Move forward with your shortlist
   {
     id: "list.journey",
     eyebrow: "take your shortlist forward",
     title: "What to do after this chart",
-    body: "Your shortlist stays with you in the other views. Use the links above to go to the next tool when you are ready.",
+    body: "Your shortlist stays with you in the other views. Use the links in the top toolbar to go to the next tool when you are ready, or click the Start Visualizing rail on the right to get started",
   },
 ]
