@@ -54,7 +54,6 @@ export type LocationGroupId =
   | "reservoirs"
   | "basins"
   | "rivers"
-  | "stations"
   | "delta"
   | "sysregions"
   | "agregions"
@@ -79,6 +78,9 @@ export interface VariableDef {
   /** Long unit label for axis titles, e.g. "thousand acre-feet" */
   unitLabel: string
   views: VariableView[]
+  /** Per-variable overrides of the default VIEW_LABELS button text, so a
+   *  view can be labeled by the quantity it shows (e.g. "Volume (TAF)"). */
+  viewLabels?: Partial<Record<VariableView, string>>
   /** Plain-language explanation ("What is this metric?") */
   plain: string
   /** Technical note (source variables, caveats) */
@@ -181,15 +183,6 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
       { id: "MKM", name: "Mokelumne River", region: "SOD", mockBase: 710 },
     ],
   },
-  stations: {
-    label: "Delta station",
-    items: [
-      { id: "EMM", name: "Emmaton", region: "Delta", mockBase: 1500 },
-      { id: "JP", name: "Jersey Point", region: "Delta", mockBase: 900 },
-      { id: "BANKS", name: "Banks", region: "Delta", mockBase: 450 },
-      { id: "JONES", name: "Jones", region: "Delta", mockBase: 480 },
-    ],
-  },
   delta: {
     label: "Location",
     items: [
@@ -275,7 +268,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "salin",
     name: "Delta salinity",
-    variables: ["x2_apr", "x2_sep", "station_ec"],
+    variables: ["x2_apr", "x2_sep"],
   },
   {
     id: "sysdel",
@@ -321,7 +314,8 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "reservoirs",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "pct", "cv"],
+    views: ["dist", "pct"],
+    viewLabels: { dist: "Volume (TAF)" },
     plain:
       "How full each major reservoir is at the start of April - the end of the wet season, when storage is normally near its peak.",
     tech: "Annual series of end-of-April storage (CalSim3 S_* variables), summarized as percentiles across the simulation period. Also available as percent of capacity.",
@@ -338,7 +332,8 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "reservoirs",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "pct", "cv"],
+    views: ["dist", "pct"],
+    viewLabels: { dist: "Volume (TAF)" },
     plain:
       "How much water is left in each reservoir at the end of the dry season (carryover storage) - a key buffer against the next year being dry.",
     tech: "Annual series of end-of-September storage, summarized as percentiles. Carryover-targeted scenarios act mainly on this variable.",
@@ -355,7 +350,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "basins",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "The total amount of water stored underground in each groundwater basin.",
     tech: "Annual groundwater storage percentiles per water budget area (WBA), from CalSim3 groundwater module output.",
@@ -390,7 +385,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How far upstream salty water reaches into the Delta in April. X2 is the distance (km from the Golden Gate) where salinity hits 2 ppt - smaller is fresher.",
     tech: "Annual April X2 percentiles. X2 responds to Delta outflow; spring position matters for estuarine habitat.",
@@ -407,7 +402,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How far upstream salty water reaches in September, at the end of the dry season, when the Delta is at its saltiest.",
     tech: "Annual September X2 percentiles. The fall X2 standard is the subject of the salinity-standards scenario.",
@@ -417,23 +412,6 @@ export const VARIABLES: Record<string, VariableDef> = {
     mockKind: "x2",
     mockEffect: "sal",
   },
-  station_ec: {
-    id: "station_ec",
-    name: "Station salinity (EC)",
-    sectorId: "salin",
-    locationGroup: "stations",
-    unit: "µS/cm",
-    unitLabel: "microsiemens per cm",
-    views: ["monthly", "dist", "cv"],
-    plain:
-      "How salty the water is at key Delta locations, month by month. Higher electrical conductivity (EC) = saltier water, which limits drinking and irrigation use.",
-    tech: "Monthly EC percentiles at Emmaton, Jersey Point, Banks and Jones (CalSim3 ANN-estimated). Annual distribution uses the annual mean EC.",
-    tierOutcome: "FW_DELTA_USES",
-    tierOutcomeName: "Freshwater for in-Delta uses",
-    data: "mock",
-    mockKind: "sal",
-    mockEffect: "sal",
-  },
   cvp_del: {
     id: "cvp_del",
     name: "Central Valley Project deliveries",
@@ -441,7 +419,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "sysregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How much water the federal Central Valley Project delivers to its contractors each year.",
     tech: "Annual CVP delivery percentiles (DEL_CVP_* variables), split North / South of Delta.",
@@ -458,7 +436,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "sysregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How much water the State Water Project delivers to its contractors each year.",
     tech: "Annual SWP delivery percentiles (SWP_*_TOTAL variables), split North / South of Delta.",
@@ -475,7 +453,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "delta",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "monthly", "cv"],
+    views: ["dist", "monthly"],
     plain:
       "The combined volume of water pumped out of the Delta at the Banks and Jones pumping plants for use elsewhere.",
     tech: "Annual and monthly percentiles of TOTAL_EXP. This is the supply side of the Delta outflow / export trade-off.",
@@ -492,7 +470,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "delta",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "monthly", "cv"],
+    views: ["dist", "monthly"],
     plain:
       "How much fresh water flows out of the Delta toward San Francisco Bay. Outflow keeps the estuary fresh and supports fish and wildlife.",
     tech: "Net Delta Outflow (NDO), monthly and annual percentiles.",
@@ -527,7 +505,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "rivers",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "monthly", "cv"],
+    views: ["dist", "monthly"],
     plain:
       "How much water flows down each major river over the year, and in which months - the basis for healthy river ecosystems.",
     tech: "Annual and monthly flow percentiles at river locations (CalSim3 C_* channel variables).",
@@ -562,7 +540,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "agregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "monthly", "cv"],
+    views: ["dist", "monthly"],
     plain: "How much river and project water is delivered to farms each year.",
     tech: "Annual agricultural surface delivery percentiles per demand-unit group.",
     tierOutcome: "AG_REV",
@@ -578,7 +556,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "agregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How much groundwater farms pump to make up for surface water they don't receive. Pumping rises in dry years.",
     tech: "Annual agricultural groundwater pumping percentiles. Pumping-limit scenarios constrain this directly.",
@@ -595,7 +573,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "agregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts.",
     tech: "Annual shortage volume percentiles (demand minus deliveries minus pumping), post-processed from CalSim3. Deck-only metric pending scope confirmation.",
@@ -649,7 +627,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "cws",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
     tech: "Annual CWS surface delivery percentiles per system group (system groups are illustrative until the location list is finalized).",
     tierOutcome: "CWS_DEL",
@@ -665,7 +643,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     locationGroup: "cws",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist", "cv"],
+    views: ["dist"],
     plain:
       "How much water community systems were short of their needs - the gap the tiers pathway scores against human-health thresholds.",
     tech: "Annual CWS shortage percentiles (external post-processing). Pairs with the Community deliveries tier definition.",

@@ -54,6 +54,7 @@ import type { ResilienceSlice } from "./resilienceStoreSlice"
 import type { DataSlice } from "./dataStoreSlice"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"
 import { hasTourFor, type TourTool } from "../tools/tour/registry"
+import { getVariable } from "../tools/panels/dataInDepth/config/variableRegistry"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
@@ -445,5 +446,18 @@ export function mergeResilienceInitialState(
 export function mergeDataInitialState(
   hydration: Partial<DataState>,
 ): DataState {
-  return { ...dataInitialState, ...hydration }
+  const merged = { ...dataInitialState, ...hydration }
+  // Heal ids and views the variable registry no longer offers, so a stale
+  // persisted session cannot select a retired variable or render a view
+  // that has no button.
+  const variable = getVariable(merged.selectedVariableId)
+  if (!variable) {
+    merged.selectedVariableId = dataInitialState.selectedVariableId
+    merged.view = dataInitialState.view
+    return merged
+  }
+  if (!variable.views.includes(merged.view)) {
+    merged.view = variable.views[0] ?? dataInitialState.view
+  }
+  return merged
 }

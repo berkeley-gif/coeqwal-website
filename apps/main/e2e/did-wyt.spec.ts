@@ -25,24 +25,31 @@ test("wyt chips filter the sample data and persist across reload", async ({
     .click()
   await expect(page.getByText(/^Sample data$/)).toBeVisible()
 
-  // The chip row renders.
+  // The chip row renders with "All years" as the selected default.
   await expect(page.getByText("Water year types")).toBeVisible()
   const critical = page.getByRole("button", { name: "Critical", exact: true })
   await expect(critical).toBeVisible()
+  const allYears = page.getByRole("button", { name: "All years" })
+  await expect(
+    page.getByRole("button", { name: "All years", pressed: true }),
+  ).toBeVisible()
 
-  // Toggling sets the pressed state and reveals the clear chip; clearing
-  // returns to the unfiltered state.
+  // Toggling a class deselects "All years"; clicking "All years" clears the
+  // filter and reselects it.
   await critical.click()
   await expect(
     page.getByRole("button", { name: "Critical", exact: true, pressed: true }),
   ).toBeVisible()
-  const allYears = page.getByRole("button", { name: "All years" })
-  await expect(allYears).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "All years", pressed: false }),
+  ).toBeVisible()
   await allYears.click()
   await expect(
     page.getByRole("button", { name: "Critical", exact: true, pressed: false }),
   ).toBeVisible()
-  await expect(allYears).toBeHidden()
+  await expect(
+    page.getByRole("button", { name: "All years", pressed: true }),
+  ).toBeVisible()
 
   // Select two dry classes for the filter-effect and persistence checks.
   await page.getByRole("button", { name: "Dry", exact: true }).click()

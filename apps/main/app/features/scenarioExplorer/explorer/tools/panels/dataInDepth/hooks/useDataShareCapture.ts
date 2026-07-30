@@ -48,7 +48,10 @@ export function useDataShareCapture(
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
     const variableName = data.variable?.name ?? selectedVariableId
-    const viewLabel = VIEW_LABELS[data.view as VariableView] ?? data.view
+    const viewLabel =
+      data.variable?.viewLabels?.[data.view as VariableView] ??
+      VIEW_LABELS[data.view as VariableView] ??
+      data.view
     // Record the climate the chart was actually generated under: the pinned
     // (held) climate when one is set, except on the climates axis where the
     // members themselves are climates and the workspace value stands.

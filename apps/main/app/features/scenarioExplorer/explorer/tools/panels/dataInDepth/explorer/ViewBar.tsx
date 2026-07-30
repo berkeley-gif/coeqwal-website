@@ -61,7 +61,7 @@ export default function ViewBar() {
             value={v}
             sx={{ textTransform: "none", px: 1.5 }}
           >
-            {VIEW_LABELS[v]}
+            {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
