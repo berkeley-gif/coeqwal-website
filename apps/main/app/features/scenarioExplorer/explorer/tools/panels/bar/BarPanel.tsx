@@ -13,8 +13,8 @@
  * with its rows.
  */
 
-import React, { Fragment, useCallback, useMemo } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import React, { Fragment, useCallback, useMemo, useEffect } from "react"
+import { Box, Snackbar, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import { useOutcomeMapAction } from "../../../../../map/hooks"
@@ -158,7 +158,34 @@ export default function BarPanel() {
     setSortDirection,
     pinnedScenarioIds,
     togglePinnedScenario,
+    setMaxPinnedScenarios,
+    pinCapReached,
+    dismissPinCapReached,
   } = useListSlice()
+
+  // Bar's cards are much taller than List's rows (full description + a row
+  // of 9 labeled bar glyphs), so it needs its own height estimate for the
+  // pin cap - same MAX_STICKY_RATIO as List, for consistent "how much of
+  // the screen can pinned cards take up" behavior.
+  const BAR_CARD_HEIGHT_ESTIMATE = 320
+  const MAX_STICKY_RATIO = 0.35
+
+  useEffect(() => {
+    const compute = () => {
+      const max = Math.max(
+        3,
+        Math.ceil(
+          (window.innerHeight * MAX_STICKY_RATIO) / BAR_CARD_HEIGHT_ESTIMATE,
+        ),
+      )
+      setMaxPinnedScenarios(max)
+    }
+    compute()
+    window.addEventListener("resize", compute)
+    return () => window.removeEventListener("resize", compute)
+  }, [setMaxPinnedScenarios])
+
+
   const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
   const addShareItem = useWorkspaceSlice((s) => s.addShareItem)
@@ -232,14 +259,18 @@ export default function BarPanel() {
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
   )
-  const cardScenarios = useMemo(() => {
-    const selected = orderedScenarios.filter((s) =>
-      selectedSet.has(s.scenarioId),
-    )
-    const pinned = selected.filter((s) => pinnedSet.has(s.scenarioId))
-    const unpinned = selected.filter((s) => !pinnedSet.has(s.scenarioId))
-    return [...pinned, ...unpinned]
-  }, [orderedScenarios, selectedSet, pinnedSet])
+  const cardScenarios = useMemo(
+    () => orderedScenarios.filter((s) => selectedSet.has(s.scenarioId)),
+    [orderedScenarios, selectedSet],
+  )
+  const pinnedCardScenarios = useMemo(
+    () => cardScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
+    [cardScenarios, pinnedSet],
+  )
+  const unpinnedCardScenarios = useMemo(
+    () => cardScenarios.filter((s) => !pinnedSet.has(s.scenarioId)),
+    [cardScenarios, pinnedSet],
+  )
 
   if (isLoading) {
     return (
@@ -284,6 +315,72 @@ export default function BarPanel() {
     )
   }
 
+  const renderCard = (scenario: (typeof cardScenarios)[number]) => {
+    const chartData = allChartData[scenario.scenarioId] ?? {}
+    const isFirstCard = scenario.scenarioId === cardScenarios[0]?.scenarioId
+
+    return (
+      <Box
+        key={scenario.scenarioId}
+        sx={{
+          backgroundColor: theme.palette.common.white,
+          border: `1px solid ${theme.palette.grey[300]}`,
+          borderRadius: theme.borderRadius.sm,
+          p: theme.space.component.md,
+        }}
+      >
+        <StrategyHeader
+          strategy={scenario}
+          titleVariant="body2"
+          showThemeBadge={false}
+          descriptionMaxWidth="100%"
+          disableTruncation
+          inlineActions={
+            <InlineRowActions
+              scenarioId={scenario.scenarioId}
+              scenarioLabel={scenario.label}
+              displayMode={outcomeDisplayMode}
+              isPinned={pinnedScenarioIds.includes(scenario.scenarioId)}
+              accentColor={theme.palette.blue.bright}
+              onShare={handleShare(scenario)}
+              togglePinnedScenario={togglePinnedScenario}
+            />
+          }
+        />
+        <Box sx={{ mt: theme.space.gap.md, display: "flex", gap: theme.space.gap.sm }}>
+          {outcomeNames.map(({ shortCode, displayName }, outcomeIndex) => (
+            <Box
+              key={shortCode}
+              ref={isFirstCard && outcomeIndex === 0 ? barGlyphTourRef : undefined}
+              sx={{
+                flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`,
+                width: OUTCOME_COLUMN_WIDTH,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <OutcomeGlyphItem
+                displayName={displayName}
+                name={shortCode}
+                outcomeCode={shortCode}
+                chartData={chartData[shortCode]}
+                isActive={!!chartData[shortCode]}
+                showLabel={true}
+                showInfoButton={false}
+                onGlyphClick={
+                  isMapVisible
+                    ? () => showOutcomeOnMap(shortCode, scenario.scenarioId)
+                    : undefined
+                }
+              />
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    )
+  }
+
+
   return (
     <Box
       sx={{
@@ -307,50 +404,64 @@ export default function BarPanel() {
           once there are more outcomes than fit. */}
       <Box
         sx={{
-          minWidth: "100%",
-          width: "max-content",
           display: "flex",
           flexDirection: "column",
           gap: theme.space.gap.md,
         }}
       >
-        {/* Shared column header - sticky at the top of the scroll area */}
+        {/* One shared sticky region: header + pinned cards move together as a unit */}
         <Box
           sx={{
             position: "sticky",
             top: 0,
             zIndex: 2,
             backgroundColor: theme.palette.grey[100],
-            display: "flex",
-            gap: theme.space.gap.sm,
-            pl: theme.space.component.md,
-            pt: theme.space.component.md,
-            pb: theme.space.gap.sm,
           }}
         >
-          {outcomeNames.map(({ shortCode, displayName }, index) => (
+          <Box
+            sx={{
+              display: "flex",
+              gap: theme.space.gap.sm,
+              pl: theme.space.component.md,
+              pt: theme.space.component.md,
+              pb: theme.space.gap.sm,
+            }}
+          >
+            {outcomeNames.map(({ shortCode, displayName }, index) => (
+              <Box key={shortCode} sx={{ flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`, minWidth: OUTCOME_COLUMN_WIDTH }}>
+                <BarOutcomeHeaderCell
+                  shortCode={shortCode}
+                  displayName={displayName}
+                  isSorted={sortBy === shortCode}
+                  sortDirection={sortDirection}
+                  activeTooltip={activeTooltip}
+                  onTooltipToggle={handleToggleWithAnchor}
+                  onSortChange={handleSortChange}
+                  isFirstColumn={index === 0}
+                />
+              </Box>
+            ))}
+          </Box>
+
+          {pinnedCardScenarios.length > 0 && (
             <Box
-              key={shortCode}
-              sx={{ width: OUTCOME_COLUMN_WIDTH, flexShrink: 0 }}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: theme.space.gap.md,
+                pb: theme.space.gap.md,
+                maxHeight: "40vh",
+                overflowY: "auto",
+              }}
             >
-              <BarOutcomeHeaderCell
-                shortCode={shortCode}
-                displayName={displayName}
-                isSorted={sortBy === shortCode}
-                sortDirection={sortDirection}
-                activeTooltip={activeTooltip}
-                onTooltipToggle={handleToggleWithAnchor}
-                onSortChange={handleSortChange}
-                isFirstColumn={index === 0}
-              />
+              {pinnedCardScenarios.map((scenario) => renderCard(scenario))}
             </Box>
-          ))}
+          )}
         </Box>
 
-        {cardScenarios.map((scenario, index) => {
-          const chartData = allChartData[scenario.scenarioId] ?? {}
+        {unpinnedCardScenarios.map((scenario, index) => {
           const previousTheme =
-            index > 0 ? (cardScenarios[index - 1]?.theme ?? null) : null
+            index > 0 ? (unpinnedCardScenarios[index - 1]?.theme ?? null) : null
           const showGroupLabel = scenario.theme !== previousTheme
 
           return (
@@ -358,77 +469,29 @@ export default function BarPanel() {
               {showGroupLabel && scenario.theme && (
                 <ThemeGroupLabel themeKey={scenario.theme as ScenarioTheme} />
               )}
-              <Box
-                sx={{
-                  backgroundColor: theme.palette.common.white,
-                  border: `1px solid ${theme.palette.grey[300]}`,
-                  borderRadius: theme.borderRadius.sm,
-                  p: theme.space.component.md,
-                }}
-              >
-                <StrategyHeader
-                  strategy={scenario}
-                  titleVariant="body2"
-                  showThemeBadge={false}
-                  descriptionMaxWidth="80ch"
-                  disableTruncation
-                  inlineActions={
-                    <InlineRowActions
-                      scenarioId={scenario.scenarioId}
-                      scenarioLabel={scenario.label}
-                      displayMode={outcomeDisplayMode}
-                      isPinned={pinnedScenarioIds.includes(scenario.scenarioId)}
-                      accentColor={theme.palette.blue.bright}
-                      onShare={handleShare(scenario)}
-                      togglePinnedScenario={togglePinnedScenario}
-                    />
-                  }
-                />
-                <Box
-                  sx={{
-                    mt: theme.space.gap.md,
-                    display: "flex",
-                    gap: theme.space.gap.sm,
-                  }}
-                >
-                  {outcomeNames.map(({ shortCode, displayName }, outcomeIndex) => (
-                    <Box
-                      key={shortCode}
-                      ref={
-                        index === 0 && outcomeIndex === 0
-                          ? barGlyphTourRef
-                          : undefined
-                      }
-                      sx={{
-                        width: OUTCOME_COLUMN_WIDTH,
-                        flexShrink: 0,
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <OutcomeGlyphItem
-                        displayName={displayName}
-                        name={shortCode}
-                        outcomeCode={shortCode}
-                        chartData={chartData[shortCode]}
-                        isActive={!!chartData[shortCode]}
-                        showLabel={true}
-                        showInfoButton={false}
-                        onGlyphClick={
-                          isMapVisible
-                            ? () =>
-                              showOutcomeOnMap(shortCode, scenario.scenarioId)
-                            : undefined
-                        }
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+              {renderCard(scenario)}
             </Fragment>
           )
         })}
       </Box>
+      <Snackbar
+        open={pinCapReached}
+        autoHideDuration={3000}
+        onClose={dismissPinCapReached}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        message="Pin limit reached - unpin a scenario to pin another"
+        ContentProps={{
+          sx: {
+            backgroundColor: theme.palette.grey[800],
+            color: theme.palette.common.white,
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            borderRadius: theme.borderRadius.sm,
+            justifyContent: "center",
+          },
+        }}
+      />
+
     </Box>
   )
 }
