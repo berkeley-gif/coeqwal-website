@@ -8,8 +8,8 @@
  * something to visualize.
  */
 
-import React from "react"
-import { motion, useReducedMotion } from "@repo/motion"
+import React, { useEffect } from "react"
+import { motion, useReducedMotion, useAnimationControls } from "@repo/motion"
 import { Box, Typography, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 
 const RAIL_WIDTH = 76
@@ -21,7 +21,20 @@ interface VisualizeRailProps {
 export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
   const theme = useTheme()
 
+  const controls = useAnimationControls()
   const prefersReducedMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (active && !prefersReducedMotion) {
+      controls.start({
+        x: [0, 4, 0],
+        transition: { duration: 1.4, repeat: Infinity, ease: "easeInOut" },
+      })
+    } else {
+      controls.start({ x: 0, transition: { duration: 0.2, ease: "easeOut" } })
+    }
+  }, [active, prefersReducedMotion, controls])
+
 
   return (
     <Box
@@ -53,13 +66,7 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
         },
       }}
     >
-      <motion.div
-        animate={
-          active && !prefersReducedMotion ? { x: [0, 4, 0] } : { x: 0 }
-        }
-        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-        style={{ display: "flex" }}
-      >
+      <motion.div animate={controls} style={{ display: "flex" }}>
         <ArrowForwardIcon sx={{ fontSize: "1.25rem" }} />
       </motion.div>
       <Typography
