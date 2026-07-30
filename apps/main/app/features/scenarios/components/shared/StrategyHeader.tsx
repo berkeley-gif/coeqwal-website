@@ -188,43 +188,41 @@ export function StrategyHeader({
     const compactTitleLineHeight = 1.3
     const themeBadgeButtonSx = onThemeBadgeClick
       ? {
-          background: "none" as const,
-          border: "none",
-          padding: 0,
-          cursor: "pointer" as const,
-          textAlign: "left" as const,
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          flex: 1,
-          flexBasis: 0,
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-          "&:hover > span": { opacity: 0.8 },
-          "&:focus-visible": {
-            outline: `2px solid ${theme.palette.blue.bright}`,
-            outlineOffset: "2px",
-            borderRadius: "2px",
-          },
-        }
+        background: "none" as const,
+        border: "none",
+        padding: 0,
+        cursor: "pointer" as const,
+        textAlign: "left" as const,
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        flex: 1,
+        flexBasis: 0,
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+        "&:hover > span": { opacity: 0.8 },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.blue.bright}`,
+          outlineOffset: "2px",
+          borderRadius: "2px",
+        },
+      }
       : {
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          flex: 1,
-          flexBasis: 0,
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-        }
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+      }
     const themeBadgeTextSx = themeBadgeMultiline
       ? { minWidth: 0, maxWidth: "100%" }
       : {
-          whiteSpace: "nowrap" as const,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          minWidth: 0,
-          flexShrink: 0,
-        }
+        whiteSpace: "nowrap" as const,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: 0,
+        flexShrink: 0,
+      }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
@@ -238,19 +236,47 @@ export function StrategyHeader({
             minWidth: 0,
           }}
         >
-          <Typography
+          <Box
             component="span"
+            onClick={onTitleClick}
             sx={{
-              color: theme.palette.grey[600],
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              fontSize: "0.6875rem",
-              lineHeight: 1,
-              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: titleStartAdornment ? "6px" : 0,
+              color: theme.palette.text.primary,
+              cursor: onTitleClick ? "pointer" : "default",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: compactTitleLineHeight,
+              flex: "0 1 auto",
+              minWidth: 0,
+              maxWidth: "100%",
             }}
           >
-            {strategy.scenarioId.toUpperCase()}
-          </Typography>
+            {titleStartAdornment ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  height: `${compactTitleLineHeight}em`,
+                }}
+              >
+                {titleStartAdornment}
+              </Box>
+            ) : null}
+            <Box
+              component="span"
+              sx={{
+                minWidth: 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {displayLabel}
+            </Box>
+          </Box>
           {showAllThemeBadges && themeLabel && themeColors ? (
             <Box
               component={onThemeBadgeClick ? "button" : "span"}
@@ -258,9 +284,9 @@ export function StrategyHeader({
               onClick={
                 onThemeBadgeClick && strategy.theme
                   ? (e: React.MouseEvent) => {
-                      e.stopPropagation()
-                      onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                    }
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
                   : undefined
               }
               sx={themeBadgeButtonSx}
@@ -289,38 +315,7 @@ export function StrategyHeader({
             </Box>
           ) : null}
         </Box>
-        <Box
-          component="span"
-          onClick={onTitleClick}
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: titleStartAdornment ? "6px" : 0,
-            color: theme.palette.text.primary,
-            cursor: onTitleClick ? "pointer" : "default",
-            fontSize: "0.8125rem",
-            fontWeight: 500,
-            lineHeight: compactTitleLineHeight,
-            m: 0,
-            p: 0,
-          }}
-        >
-          {titleStartAdornment ? (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                flexShrink: 0,
-                height: `${compactTitleLineHeight}em`,
-              }}
-            >
-              {titleStartAdornment}
-            </Box>
-          ) : null}
-          <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
-            {displayLabel}
-          </Box>
-        </Box>
+
         {showDescription && (
           <CompactDescription
             description={strategy.description}
@@ -344,20 +339,6 @@ export function StrategyHeader({
           minWidth: 0,
         }}
       >
-        <Typography
-          component="span"
-          variant="overline"
-          sx={{
-            color: theme.palette.grey[600],
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            fontSize: "0.6875rem",
-            lineHeight: 1,
-            flexShrink: 0,
-          }}
-        >
-          {strategy.scenarioId.toUpperCase()}
-        </Typography>
 
         {showAllThemeBadges && themeLabel && themeColors ? (
           <Box
@@ -366,42 +347,42 @@ export function StrategyHeader({
             onClick={
               onThemeBadgeClick && strategy.theme
                 ? (e: React.MouseEvent) => {
-                    e.stopPropagation()
-                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                  }
+                  e.stopPropagation()
+                  onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                }
                 : undefined
             }
             sx={
               onThemeBadgeClick
                 ? {
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                    "&:hover > span": { opacity: 0.8 },
-                    "&:focus-visible": {
-                      outline: `2px solid ${theme.palette.blue.bright}`,
-                      outlineOffset: "2px",
-                      borderRadius: "2px",
-                    },
-                  }
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                  "&:hover > span": { opacity: 0.8 },
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.blue.bright}`,
+                    outlineOffset: "2px",
+                    borderRadius: "2px",
+                  },
+                }
                 : {
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                  }
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                }
             }
           >
             <ScenarioBadge
@@ -412,12 +393,12 @@ export function StrategyHeader({
                 themeBadgeMultiline
                   ? { minWidth: 0, maxWidth: "100%" }
                   : {
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      minWidth: 0,
-                      flexShrink: 0,
-                    }
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    minWidth: 0,
+                    flexShrink: 0,
+                  }
               }
             />
           </Box>
