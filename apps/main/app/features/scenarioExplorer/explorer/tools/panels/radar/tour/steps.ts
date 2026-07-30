@@ -84,6 +84,14 @@ export const RADAR_TOUR: TourStep[] = [
     placement: "bottom-start",
   },
   {
+    id: "radar.step1.dotsOnly",
+    anchorId: "radar.dotsOnly",
+    eyebrow: "arrange the radar chart",
+    title: "Dots only",
+    body: "Turn this on to collapse each polygon down to its vertex points, useful once the chart gets crowded and the filled shapes start to overlap.",
+    placement: "bottom-start",
+  },
+  {
     id: "radar.step1.highlightBaseline",
     anchorId: "radar.highlightBaseline",
     eyebrow: "arrange the radar chart",

@@ -44,11 +44,13 @@ export default function RadarChartControls({ share }: RadarChartControlsProps) {
           onClick={() => setRadarShowAll(!radarShowAll)}
         />
       </RadarTourAnchor>
-      <InlineToggleChip
-        label="dots only"
-        active={showDotsOnly}
-        onClick={() => setShowDotsOnly(!showDotsOnly)}
-      />
+      <RadarTourAnchor anchorId="radar.dotsOnly">
+        <InlineToggleChip
+          label="dots only"
+          active={showDotsOnly}
+          onClick={() => setShowDotsOnly(!showDotsOnly)}
+        />
+      </RadarTourAnchor>
       <RadarTourAnchor anchorId="radar.highlightBaseline">
         <InlineToggleChip
           label="highlight current operations"

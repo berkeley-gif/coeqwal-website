@@ -18,6 +18,8 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import { useOutcomeMapAction } from "../../../../../map/hooks"
+import { InlineTourAnchor } from "../../tour/anchors/InlineTourAnchor"
+import { useTourAnchor } from "../../tour/anchors/TourAnchorContext"
 import {
   StrategyHeader,
   OutcomeGlyphItem,
@@ -75,6 +77,7 @@ interface BarOutcomeHeaderCellProps {
   activeTooltip: string | null
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   onSortChange: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  isFirstColumn: boolean
 }
 
 function BarOutcomeHeaderCell({
@@ -85,18 +88,12 @@ function BarOutcomeHeaderCell({
   activeTooltip,
   onTooltipToggle,
   onSortChange,
+  isFirstColumn
 }: BarOutcomeHeaderCellProps) {
   const theme = useTheme()
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "6px",
-      }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
       <Typography
         component="div"
         sx={{
@@ -111,29 +108,41 @@ function BarOutcomeHeaderCell({
       >
         {formatOutcomeLabel(displayName)}
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 0.5,
-        }}
-      >
-        <InfoIconButton
-          isActive={activeTooltip === shortCode}
-          onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
-          title="Click for outcome details"
-        />
-        <ToggleSortButton
-          sortState={isSorted ? sortDirection : null}
-          onToggle={(newState) =>
-            onSortChange(
-              newState === null ? null : shortCode,
-              newState ?? "asc",
-            )
-          }
-          title="Sort by this outcome"
-        />
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+        {isFirstColumn ? (
+          <InlineTourAnchor anchorId="bar.outcome.infoButton">
+            <InfoIconButton
+              isActive={activeTooltip === shortCode}
+              onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
+              title="Click for outcome details"
+            />
+          </InlineTourAnchor>
+        ) : (
+          <InfoIconButton
+            isActive={activeTooltip === shortCode}
+            onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
+            title="Click for outcome details"
+          />
+        )}
+        {isFirstColumn ? (
+          <InlineTourAnchor anchorId="bar.outcome.sortButton">
+            <ToggleSortButton
+              sortState={isSorted ? sortDirection : null}
+              onToggle={(newState) =>
+                onSortChange(newState === null ? null : shortCode, newState ?? "asc")
+              }
+              title="Sort by this outcome"
+            />
+          </InlineTourAnchor>
+        ) : (
+          <ToggleSortButton
+            sortState={isSorted ? sortDirection : null}
+            onToggle={(newState) =>
+              onSortChange(newState === null ? null : shortCode, newState ?? "asc")
+            }
+            title="Sort by this outcome"
+          />
+        )}
       </Box>
     </Box>
   )
@@ -159,6 +168,8 @@ export default function BarPanel() {
   const { allChartData, outcomeNames, allScoreData, isLoading, error } =
     useResolvedScenarioTiers()
   const { orderedScenarios } = useOrderedScenarios(allScoreData)
+
+  const barGlyphTourRef = useTourAnchor("bar.outcome.glyph")
 
   const {
     openTooltip: activeTooltip,
@@ -317,7 +328,7 @@ export default function BarPanel() {
             pb: theme.space.gap.sm,
           }}
         >
-          {outcomeNames.map(({ shortCode, displayName }) => (
+          {outcomeNames.map(({ shortCode, displayName }, index) => (
             <Box
               key={shortCode}
               sx={{ width: OUTCOME_COLUMN_WIDTH, flexShrink: 0 }}
@@ -330,6 +341,7 @@ export default function BarPanel() {
                 activeTooltip={activeTooltip}
                 onTooltipToggle={handleToggleWithAnchor}
                 onSortChange={handleSortChange}
+                isFirstColumn={index === 0}
               />
             </Box>
           ))}
@@ -379,9 +391,14 @@ export default function BarPanel() {
                     gap: theme.space.gap.sm,
                   }}
                 >
-                  {outcomeNames.map(({ shortCode, displayName }) => (
+                  {outcomeNames.map(({ shortCode, displayName }, outcomeIndex) => (
                     <Box
                       key={shortCode}
+                      ref={
+                        index === 0 && outcomeIndex === 0
+                          ? barGlyphTourRef
+                          : undefined
+                      }
                       sx={{
                         width: OUTCOME_COLUMN_WIDTH,
                         flexShrink: 0,
@@ -400,7 +417,7 @@ export default function BarPanel() {
                         onGlyphClick={
                           isMapVisible
                             ? () =>
-                                showOutcomeOnMap(shortCode, scenario.scenarioId)
+                              showOutcomeOnMap(shortCode, scenario.scenarioId)
                             : undefined
                         }
                       />

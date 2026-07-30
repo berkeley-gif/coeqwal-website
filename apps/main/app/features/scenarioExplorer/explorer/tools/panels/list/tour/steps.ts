@@ -45,6 +45,12 @@ export const LIST_TOUR: TourStep[] = [
     placement: "bottom-start",
   },
   {
+    id: "list.step1.themeFilterChip",
+    eyebrow: "arrange the list",
+    title: "Filtering shows a removable chip",
+    body: "Click a scenario's theme badge to filter the list to that theme, or select any scenarios to reveal a Clear all chip. Both appear next to the chips above and let you back out of a filter in one click.",
+  },
+  {
     id: "list.step3.showOnlyChosen",
     anchorId: "list.select.showOnlyChosen",
     eyebrow: "arrange the list",
@@ -59,6 +65,14 @@ export const LIST_TOUR: TourStep[] = [
     title: "Key operations",
     body: "Toggle key operations to add a column of icons that summarize the key operations of each scenario.",
     placement: "bottom-start",
+  },
+  {
+    id: "list.step1.operationsIcons",
+    anchorId: "list.row.operations",
+    eyebrow: "arrange the list",
+    title: "Click an icon to filter by that operation",
+    body: "Selecting an operation icon selects every scenario in the library that shares it, so you can quickly build a shortlist around one water-management choice.",
+    placement: "left-start",
   },
   {
     id: "list.step1.pin",
