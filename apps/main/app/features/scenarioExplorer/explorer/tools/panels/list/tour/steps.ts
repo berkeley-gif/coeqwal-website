@@ -15,7 +15,8 @@ export const LIST_TOUR: TourStep[] = [
   {
     id: "list.hero",
     eyebrow: "start here",
-    title: "The List view lets you select the scenarios that you want to compare",
+    title:
+      "The List view lets you select the scenarios that you want to compare",
     body: "Select your scenarios and use the top bar to move between tools",
   },
 

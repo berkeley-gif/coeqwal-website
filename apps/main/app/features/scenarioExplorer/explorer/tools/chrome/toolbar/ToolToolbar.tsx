@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from "react"
-import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Switch } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
 import { HydroclimateChooser } from "../../../../../scenarios/components"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"

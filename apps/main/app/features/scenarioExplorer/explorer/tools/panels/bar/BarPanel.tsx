@@ -88,12 +88,19 @@ function BarOutcomeHeaderCell({
   activeTooltip,
   onTooltipToggle,
   onSortChange,
-  isFirstColumn
+  isFirstColumn,
 }: BarOutcomeHeaderCellProps) {
   const theme = useTheme()
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "6px",
+      }}
+    >
       <Typography
         component="div"
         sx={{
@@ -108,7 +115,14 @@ function BarOutcomeHeaderCell({
       >
         {formatOutcomeLabel(displayName)}
       </Typography>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.5,
+        }}
+      >
         {isFirstColumn ? (
           <InlineTourAnchor anchorId="bar.outcome.infoButton">
             <InfoIconButton
@@ -129,7 +143,10 @@ function BarOutcomeHeaderCell({
             <ToggleSortButton
               sortState={isSorted ? sortDirection : null}
               onToggle={(newState) =>
-                onSortChange(newState === null ? null : shortCode, newState ?? "asc")
+                onSortChange(
+                  newState === null ? null : shortCode,
+                  newState ?? "asc",
+                )
               }
               title="Sort by this outcome"
             />
@@ -138,7 +155,10 @@ function BarOutcomeHeaderCell({
           <ToggleSortButton
             sortState={isSorted ? sortDirection : null}
             onToggle={(newState) =>
-              onSortChange(newState === null ? null : shortCode, newState ?? "asc")
+              onSortChange(
+                newState === null ? null : shortCode,
+                newState ?? "asc",
+              )
             }
             title="Sort by this outcome"
           />
@@ -184,7 +204,6 @@ export default function BarPanel() {
     window.addEventListener("resize", compute)
     return () => window.removeEventListener("resize", compute)
   }, [setMaxPinnedScenarios])
-
 
   const outcomeDisplayMode = useWorkspaceSlice((s) => s.outcomeDisplayMode)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
@@ -347,11 +366,19 @@ export default function BarPanel() {
             />
           }
         />
-        <Box sx={{ mt: theme.space.gap.md, display: "flex", gap: theme.space.gap.sm }}>
+        <Box
+          sx={{
+            mt: theme.space.gap.md,
+            display: "flex",
+            gap: theme.space.gap.sm,
+          }}
+        >
           {outcomeNames.map(({ shortCode, displayName }, outcomeIndex) => (
             <Box
               key={shortCode}
-              ref={isFirstCard && outcomeIndex === 0 ? barGlyphTourRef : undefined}
+              ref={
+                isFirstCard && outcomeIndex === 0 ? barGlyphTourRef : undefined
+              }
               sx={{
                 flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`,
                 width: OUTCOME_COLUMN_WIDTH,
@@ -379,7 +406,6 @@ export default function BarPanel() {
       </Box>
     )
   }
-
 
   return (
     <Box
@@ -428,7 +454,13 @@ export default function BarPanel() {
             }}
           >
             {outcomeNames.map(({ shortCode, displayName }, index) => (
-              <Box key={shortCode} sx={{ flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`, minWidth: OUTCOME_COLUMN_WIDTH }}>
+              <Box
+                key={shortCode}
+                sx={{
+                  flex: `1 1 ${OUTCOME_COLUMN_WIDTH}px`,
+                  minWidth: OUTCOME_COLUMN_WIDTH,
+                }}
+              >
                 <BarOutcomeHeaderCell
                   shortCode={shortCode}
                   displayName={displayName}
@@ -491,7 +523,6 @@ export default function BarPanel() {
           },
         }}
       />
-
     </Box>
   )
 }

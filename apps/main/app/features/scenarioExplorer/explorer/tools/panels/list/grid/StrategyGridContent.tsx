@@ -340,7 +340,6 @@ export function StrategyGridContent({
       })}
     </>
   )
-
 }
 
 export default StrategyGridContent

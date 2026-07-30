@@ -62,10 +62,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onThemeBadgeClick,
   onIconClick,
   scenarioColors,
-  pinnedScenarioIds,
   activeScenarioIds,
   onRowHover,
-  onLayoutModeChange,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -103,7 +101,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     openTooltip: activeTooltip,
     anchor: tooltipAnchor,
     scenarioContext,
-    handleToggleWithAnchor,
     handleClose: closeTooltip,
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
@@ -222,7 +219,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
             scenarioColors={scenarioColors}
-            pinnedScenarioIds={pinnedScenarioIds}
             activeScenarioIds={activeScenarioIds}
             onRowHover={onRowHover}
           />

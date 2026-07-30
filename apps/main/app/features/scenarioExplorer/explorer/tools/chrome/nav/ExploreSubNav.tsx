@@ -118,8 +118,6 @@ export default function ExploreSubNav() {
 
   const navHeight = theme.layout.collapsedTabHeight
 
-
-
   return (
     <Box
       ref={subNavRef}
@@ -171,9 +169,9 @@ export default function ExploreSubNav() {
                   border: step.showTrailingArrow
                     ? "none"
                     : `1px solid ${alpha(
-                      theme.palette.common.white,
-                      active ? 0.7 : 0.3,
-                    )}`,
+                        theme.palette.common.white,
+                        active ? 0.7 : 0.3,
+                      )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -243,12 +241,16 @@ export default function ExploreSubNav() {
                 >
                   <motion.div
                     animate={
-                      selectedScenarios.length > 0 && exploreMode === 'list' && !prefersReducedMotion
+                      selectedScenarios.length > 0 &&
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
                         ? { x: [0, 4, 0] }
                         : { x: 0 }
                     }
                     transition={
-                      selectedScenarios.length > 0 && exploreMode === 'list' && !prefersReducedMotion
+                      selectedScenarios.length > 0 &&
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
                         ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
                         : { duration: 0.2, ease: "easeOut" }
                     }

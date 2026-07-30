@@ -35,7 +35,6 @@ export default function VisualizeRail({ active, onClick }: VisualizeRailProps) {
     }
   }, [active, prefersReducedMotion, controls])
 
-
   return (
     <Box
       component="button"

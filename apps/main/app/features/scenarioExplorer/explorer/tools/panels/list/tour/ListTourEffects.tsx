@@ -14,7 +14,10 @@ import { useEffect, useRef } from "react"
 import { useExplorerStore, useWorkspaceSlice } from "../../../../store"
 import type { TourEffectsProps } from "../../../tour/types"
 
-const KEY_OPERATIONS_STEP_IDS = ["list.step1.operations", "list.step1.operationsIcons"]
+const KEY_OPERATIONS_STEP_IDS = [
+  "list.step1.operations",
+  "list.step1.operationsIcons",
+]
 
 export default function ListTourEffects({ step }: TourEffectsProps) {
   const setShowKeyOperations = useWorkspaceSlice((s) => s.setShowKeyOperations)
