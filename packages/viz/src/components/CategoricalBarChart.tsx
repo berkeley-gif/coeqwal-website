@@ -189,6 +189,11 @@ const CategoricalBarChart: React.FC<CategoricalBarChartProps> = React.memo(
               .append("div")
               .attr("id", tooltipId)
               .style("position", "absolute")
+              // Pinned to the page origin while hidden: with no initial
+              // position the absolutely-placed box lands after the page
+              // content and its padding extends the document height.
+              .style("left", "0px")
+              .style("top", "0px")
               .style("visibility", "hidden")
               .style("background", "#fff")
               .style("border-radius", "6px")

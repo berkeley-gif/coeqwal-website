@@ -109,8 +109,11 @@ export default function DataExplorerView({
         }}
       >
         {mode === "explorer" ? (
+          // Left padding only: the explorer's chart column carries its own
+          // right padding INSIDE its scroll container, so the column's
+          // scrollbar sits flush at the tool's right edge (List view parity).
           <Box
-            sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}
+            sx={{ height: "100%", py: { xs: 1, md: 2 }, pl: { xs: 2, md: 4 } }}
           >
             <ToolErrorBoundary tool="data">
               <ExplorerView />
