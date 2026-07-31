@@ -51,9 +51,20 @@ test("wyt chips filter the sample data and persist across reload", async ({
     page.getByRole("button", { name: "All years", pressed: true }),
   ).toBeVisible()
 
-  // Select two dry classes for the filter-effect and persistence checks.
+  // Single-select: picking a second class replaces the first instead of
+  // adding to it. Leave Critical active for the filter-effect and
+  // persistence checks.
   await page.getByRole("button", { name: "Dry", exact: true }).click()
+  await expect(
+    page.getByRole("button", { name: "Dry", exact: true, pressed: true }),
+  ).toBeVisible()
   await critical.click()
+  await expect(
+    page.getByRole("button", { name: "Dry", exact: true, pressed: false }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Critical", exact: true, pressed: true }),
+  ).toBeVisible()
 
   // The selection survives a reload (explorer session storage).
   await page.reload()

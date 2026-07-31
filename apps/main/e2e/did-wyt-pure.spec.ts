@@ -44,8 +44,13 @@ test("filterSeriesByWyt keeps selected classes, passes through when empty", () =
   expect(filterSeriesByWyt(series, [2, 5], cls)).toEqual([20, 50])
 })
 
-test("toggleWytClass adds, removes, and keeps the selection sorted", () => {
+test("toggleWytClass is single-select: pick replaces, re-pick clears", () => {
   expect(toggleWytClass([], 4)).toEqual([4])
-  expect(toggleWytClass([4], 1)).toEqual([1, 4])
-  expect(toggleWytClass([1, 4], 4)).toEqual([1])
+  // Choosing another class replaces the selection (one type at a time).
+  expect(toggleWytClass([4], 1)).toEqual([1])
+  // Choosing the active class returns to all years.
+  expect(toggleWytClass([4], 4)).toEqual([])
+  // Legacy multi-class selections still resolve to the clicked class.
+  expect(toggleWytClass([1, 4], 3)).toEqual([3])
+  expect(toggleWytClass([1, 4], 4)).toEqual([])
 })

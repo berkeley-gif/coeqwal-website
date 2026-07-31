@@ -80,3 +80,12 @@ test("mergeDataInitialState heals retired variable ids and views", () => {
   expect(kept.selectedVariableId).toBe("res_apr")
   expect(kept.view).toBe("pct")
 })
+
+test("mergeDataInitialState heals legacy multi-class WYT selections", () => {
+  // The filter is single-select; a persisted multi-class selection from an
+  // older session resets to all years rather than silently picking one.
+  const healed = mergeDataInitialState({ selectedWaterYearTypes: [1, 4] })
+  expect(healed.selectedWaterYearTypes).toEqual([])
+  const single = mergeDataInitialState({ selectedWaterYearTypes: [5] })
+  expect(single.selectedWaterYearTypes).toEqual([5])
+})
