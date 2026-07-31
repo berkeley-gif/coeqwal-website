@@ -3,9 +3,11 @@
 /**
  * WytFilterChips - the water-year-type filter row for the explorer. An
  * "All years" chip (the default, selected whenever no class filter is
- * active) followed by five toggleable chips (Sacramento index classes,
- * wettest to driest); an empty selection means all years. Hidden for
- * single-value views, which have no annual series to filter.
+ * active) followed by five class chips (Sacramento index classes, wettest
+ * to driest). The filter is single-select: picking a class replaces the
+ * selection, picking it again (or picking "All years") returns to all
+ * years. Hidden for single-value views, which have no annual series to
+ * filter.
  */
 
 import React from "react"

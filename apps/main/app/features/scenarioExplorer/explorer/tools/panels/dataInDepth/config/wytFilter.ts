@@ -27,10 +27,13 @@ export function filterSeriesByWyt(
   return series.filter((_, i) => allow.has(classForIndex(i)))
 }
 
-/** Toggle one class in a selection, returning a new sorted array. */
+/**
+ * Single-select toggle: choosing a class replaces the selection (one water
+ * year type shown at a time, per the team ruling), and choosing the active
+ * class clears it back to all years. The selection stays an array so the
+ * session shape, the live `wyt=` request serialization, and the series
+ * filter are unchanged.
+ */
 export function toggleWytClass(selected: number[], wyt: number): number[] {
-  const next = selected.includes(wyt)
-    ? selected.filter((v) => v !== wyt)
-    : [...selected, wyt]
-  return next.sort((a, b) => a - b)
+  return selected.includes(wyt) ? [] : [wyt]
 }

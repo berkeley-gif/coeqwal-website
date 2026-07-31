@@ -447,6 +447,12 @@ export function mergeDataInitialState(
   hydration: Partial<DataState>,
 ): DataState {
   const merged = { ...dataInitialState, ...hydration }
+  // The water-year-type filter is single-select; a multi-class selection
+  // persisted by an older session resets to all years rather than silently
+  // keeping one of the classes.
+  if (merged.selectedWaterYearTypes.length > 1) {
+    merged.selectedWaterYearTypes = []
+  }
   // Heal ids and views the variable registry no longer offers, so a stale
   // persisted session cannot select a retired variable or render a view
   // that has no button.
