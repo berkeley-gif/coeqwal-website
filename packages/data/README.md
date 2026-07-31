@@ -702,9 +702,9 @@ Single-value outcomes carry the same pair, derived from the tier level directly.
 
 ### Which visualization uses which, and why
 
-| Score              | Used by                                                        | Why                                                                                                                                                                                                                                                   |
-| ------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `average_score`   | Scenario **sort / comparison**, and the **resilience heatmap** | The heatmap paints each cell one of four tier colors, so it rounds the value into a tier band and looks up the tier palette. It needs the value on the native 1-4 tier scale.                                                                         |
+| Score              | Used by                                                        | Why                                                                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `average_score`    | Scenario **sort / comparison**, and the **resilience heatmap** | The heatmap paints each cell one of four tier colors, so it rounds the value into a tier band and looks up the tier palette. It needs the value on the native 1-4 tier scale.                                                                        |
 | `normalized_score` | The **radar plot** axes                                        | The radar plots every outcome on one shared axis where outward = better. It maps the score to `[-1, 1]` via `normalized_score * 2 - 1`, so it needs the 0-1, higher-is-better orientation. `average_score` would render inverted and need rescaling. |
 
 The bar chart glyph on the List tab and the per-location map coloring use neither aggregate score. They read the raw tier proportions (`data[].normalized`) and the per-location `tier_level` respectively.
@@ -759,11 +759,11 @@ This means your component code doesn't change when the user switches hydroclimat
 
 **Pre-cached (available instantly, loaded on Explore tab activation):**
 
-| Data                                                | How to access                                    | What it contains                                               |
-| --------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
-| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                          |
+| Data                                                | How to access                                    | What it contains                                              |
+| --------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                         |
 | Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | average_score, normalized_score, and tier distribution counts |
-| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                     |
+| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                    |
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
 
