@@ -48,6 +48,7 @@ import {
 } from "../../../../../../../content/scenarios"
 import {
   getLocation,
+  getLocationTitle,
   getVariable,
   LOCATION_GROUPS,
   type VariableDef,
@@ -113,6 +114,8 @@ export interface VariableData {
   source: "live" | "mock"
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string
+  /** Held location as a figure-title name ("Shasta Reservoir"; "" if none) */
+  locationTitleName: string
   /** Held-constant climate label (scenarios / locations axes) */
   climateName: string
   /** Held-constant scenario label (climates / locations axes) */
@@ -283,6 +286,7 @@ export function useVariableData(): VariableData {
     const emptyContext = {
       locationName:
         getLocation(groupId ?? "reservoirs", heldLocation)?.name ?? "",
+      locationTitleName: groupId ? getLocationTitle(groupId, heldLocation) : "",
       climateName: climateLabel(heldClimate),
       scenarioName: scenarioLabel(heldScenario),
     }

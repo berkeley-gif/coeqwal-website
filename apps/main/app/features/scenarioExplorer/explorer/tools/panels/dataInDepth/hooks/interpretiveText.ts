@@ -8,6 +8,7 @@
  */
 
 import type { VariableView } from "../config/variableRegistry"
+import { buildFigureTitle } from "../../../../share/figureTitle"
 import {
   seriesStats,
   MOCK_YEARS,
@@ -161,6 +162,57 @@ export function summarySentence(
   const mx = meds.reduce((p, c) => (c.med > p.med ? c : p))
   const mn = meds.reduce((p, c) => (c.med < p.med ? c : p))
   return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}.`
+}
+
+/** Inputs for the card's standardized figure title. */
+export interface DataFigureTitleInput {
+  variableName: string
+  compareBy: "scenarios" | "climates" | "locations"
+  memberCount: number
+  /** Label of the single compared member, when there is exactly one */
+  firstMemberLabel?: string
+  /** Held location as a title ("Shasta Reservoir"); "" when none */
+  locationTitleName: string
+  /** Held climate label */
+  climateName: string
+  /** Held scenario label */
+  scenarioName: string
+  /** Active water-year-type class labels; empty = all years */
+  waterYearTypeLabels: readonly string[]
+}
+
+/**
+ * Compose the standardized figure title for the data-in-depth card: the
+ * compared axis is summarized (single member label, or "<n> scenarios" /
+ * "<n> climate futures" / "<n> locations") and the held axes fill the
+ * scenario, hydroclimate, and location slots.
+ */
+export function dataFigureTitle(input: DataFigureTitleInput): string {
+  const single = input.memberCount === 1 ? input.firstMemberLabel : undefined
+  const scenarioContext =
+    input.compareBy === "scenarios"
+      ? (single ?? `${input.memberCount} scenarios`)
+      : input.scenarioName
+  // Held-climate labels are short ("Historical"); spell out "hydroclimate"
+  // in the title unless the label already mentions climate.
+  const heldClimateTitle = /climate/i.test(input.climateName)
+    ? input.climateName
+    : `${input.climateName} hydroclimate`
+  const hydroclimateName =
+    input.compareBy === "climates"
+      ? (single ?? `${input.memberCount} climate futures`)
+      : heldClimateTitle
+  const locationName =
+    input.compareBy === "locations"
+      ? (single ?? `${input.memberCount} locations`)
+      : input.locationTitleName
+  return buildFigureTitle({
+    variableName: input.variableName,
+    locationName: locationName || undefined,
+    memberSummary: scenarioContext,
+    hydroclimateName: hydroclimateName || undefined,
+    waterYearTypeLabels: input.waterYearTypeLabels,
+  })
 }
 
 /** Explainer body for "How do I read this chart?", per view. */

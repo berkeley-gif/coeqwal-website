@@ -49,6 +49,10 @@ export interface LocationDef {
 export interface LocationGroup {
   /** Control label, e.g. "Reservoir" */
   label: string
+  /** Suffix appended to a location name in figure titles (e.g. "Reservoir"
+   *  --> "Shasta Reservoir"); omitted for groups whose names already read
+   *  as full titles (rivers, regions). */
+  titleSuffix?: string
   items: LocationDef[]
 }
 
@@ -111,6 +115,7 @@ export interface VariableDef {
 export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   reservoirs: {
     label: "Reservoir",
+    titleSuffix: "Reservoir",
     items: [
       { id: "SHSTA", name: "Shasta", region: "NOD", capacityTaf: 4552 },
       { id: "OROVL", name: "Oroville", region: "NOD", capacityTaf: 3425 },
@@ -138,6 +143,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   },
   basins: {
     label: "Groundwater basin (WBA)",
+    titleSuffix: "Basin",
     items: [
       { id: "COL", name: "Colusa", region: "NOD", mockBase: 21000 },
       { id: "SUT", name: "Sutter", region: "NOD", mockBase: 9500 },
@@ -666,6 +672,18 @@ export function getLocation(
   locationId: string,
 ): LocationDef | undefined {
   return LOCATION_GROUPS[groupId].items.find((l) => l.id === locationId)
+}
+
+/** Location display name for figure titles, with the group's title suffix
+ *  applied (e.g. "Shasta Reservoir", "Colusa Basin", "Yuba River"). */
+export function getLocationTitle(
+  groupId: LocationGroupId,
+  locationId: string,
+): string {
+  const group = LOCATION_GROUPS[groupId]
+  const name = group.items.find((l) => l.id === locationId)?.name ?? ""
+  if (!name) return ""
+  return group.titleSuffix ? `${name} ${group.titleSuffix}` : name
 }
 
 /** Default (first) location id per group, used to seed pinned locations. */

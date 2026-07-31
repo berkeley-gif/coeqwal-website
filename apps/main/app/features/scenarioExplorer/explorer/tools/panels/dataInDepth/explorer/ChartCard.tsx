@@ -21,11 +21,13 @@ import { useVariableData } from "../hooks/useVariableData"
 import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import {
+  dataFigureTitle,
   formatValue,
   summarySentence,
   type SummaryContext,
   type SummaryMember,
 } from "../hooks/interpretiveText"
+import { WYT_LABELS } from "../config/wytFilter"
 import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
 import { toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
@@ -35,8 +37,22 @@ const CHART_HEIGHT = 340
 
 export default function ChartCard() {
   const theme = useTheme()
-  const { compareBy, distKind } = useDataSlice()
+  const { compareBy, distKind, selectedWaterYearTypes } = useDataSlice()
   const data = useVariableData()
+
+  // Standardized figure title, shared verbatim with the snapshot export.
+  const figureTitle = dataFigureTitle({
+    variableName: data.variable?.name ?? "",
+    compareBy,
+    memberCount: data.members.length,
+    firstMemberLabel: data.members[0]?.label,
+    locationTitleName: data.locationTitleName,
+    climateName: data.climateName,
+    scenarioName: data.scenarioName,
+    waterYearTypeLabels: selectedWaterYearTypes.map(
+      (c) => WYT_LABELS[c] ?? String(c),
+    ),
+  })
 
   // One sticky color per member id, shared with the CompareControls chips
   // (same scope key + same ordered member ids on both surfaces).
@@ -247,6 +263,21 @@ export default function ChartCard() {
           sx={{ mb: 1.5, color: theme.palette.text.primary, lineHeight: 1.5 }}
         >
           {summarySentence(summaryMembers, ctx)}
+        </Typography>
+      )}
+
+      {/* Standardized figure title (mirrored on snapshot exports) */}
+      {hasMembers && (
+        <Typography
+          variant="subtitle2"
+          component="h3"
+          sx={{
+            mb: 1,
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+          }}
+        >
+          {figureTitle}
         </Typography>
       )}
 

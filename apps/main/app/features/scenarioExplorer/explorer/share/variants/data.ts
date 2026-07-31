@@ -49,10 +49,17 @@ const dataHandler: VariantHandler<DataItem> = {
 
   renderCard(item, ctx) {
     const variableName = getVariable(item.variableId)?.name ?? item.variableId
+    // The standardized figure title captured with the chart leads the card
+    // (and therefore the exported PNG/SVG, which raster the card chrome);
+    // URL-restored items without cached chart data fall back to the
+    // variable name.
+    const figureTitle = (
+      item.cachedChartData as { figureTitle?: string } | undefined
+    )?.figureTitle
     return React.createElement(ShareSnapshotCard, {
       id: item.id,
       toolLabel: "Data in depth",
-      title: variableName,
+      title: figureTitle ?? variableName,
       subtitle: viewLabelFor(item),
       chips: [
         item.source === "live" ? "Live data" : "Sample data",

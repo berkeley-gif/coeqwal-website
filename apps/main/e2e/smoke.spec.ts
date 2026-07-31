@@ -38,5 +38,11 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByText(/^(Sample|Live) data$/)).toBeVisible()
   await expect(page.getByRole("group", { name: "Compare by" })).toBeVisible()
+  // Every chart carries the standardized figure title.
+  await expect(
+    page.getByText(
+      /^April Reservoir Storage \(Shasta Reservoir\), Current Ops, Historical Hydroclimate, All Water Years$/,
+    ),
+  ).toBeVisible()
   expect(errors).toEqual([])
 })
