@@ -15,6 +15,7 @@ import { stageShareItem } from "../../../../share/stage"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import { VIEW_LABELS, type VariableView } from "../config/variableRegistry"
 import { WYT_LABELS } from "../config/wytFilter"
+import { dataFigureTitle } from "./interpretiveText"
 import { captureDataInDepthOffscreen } from "../OffscreenDataCapture"
 import type { VariableData } from "./useVariableData"
 
@@ -43,12 +44,35 @@ export function useDataShareCapture(
     selectedWaterYearTypes,
   } = useDataSlice()
 
-  const canSnapshot = data.members.length > 0 && !data.isLoading
+  // The Stats style renders a composite of bar plots the offscreen capture
+  // pipeline cannot draw yet (it captures a single chart SVG), so the save
+  // button disables instead of exporting a chart that does not match the
+  // screen. Stats snapshot support needs a composed multi-chart capture.
+  const statsStyle =
+    distKind === "stats" &&
+    (data.view === "dist" || data.view === "pct" || data.view === "level")
+  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
     const variableName = data.variable?.name ?? selectedVariableId
-    const viewLabel = VIEW_LABELS[data.view as VariableView] ?? data.view
+    // Same standardized title the on-screen card shows above the chart.
+    const figureTitle = dataFigureTitle({
+      variableName,
+      compareBy,
+      memberCount: data.members.length,
+      firstMemberLabel: data.members[0]?.label,
+      locationTitleName: data.locationTitleName,
+      climateName: data.climateName,
+      scenarioName: data.scenarioName,
+      waterYearTypeLabels: selectedWaterYearTypes.map(
+        (c) => WYT_LABELS[c] ?? String(c),
+      ),
+    })
+    const viewLabel =
+      data.variable?.viewLabels?.[data.view as VariableView] ??
+      VIEW_LABELS[data.view as VariableView] ??
+      data.view
     // Record the climate the chart was actually generated under: the pinned
     // (held) climate when one is set, except on the climates axis where the
     // members themselves are climates and the workspace value stands.
@@ -73,6 +97,7 @@ export function useDataShareCapture(
           unitLabel: data.unitLabel,
           source: data.source,
           waterYearTypesLabel,
+          figureTitle,
         }),
       buildItem: (captured) => ({
         id: `data-${selectedVariableId}-${crypto.randomUUID()}`,

@@ -47,6 +47,10 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   for await (const chunk of stream) chunks.push(chunk as Buffer)
   const csv = Buffer.concat(chunks).toString("utf8")
   expect(csv).toContain("Coeqwal export,Data in depth")
+  // The standardized figure title travels with the export (quoted: it
+  // contains commas).
+  expect(csv).toContain("Figure title,")
+  expect(csv).toContain("April Reservoir Storage (Shasta Reservoir)")
   expect(csv).toContain("Data source,Sample data")
   expect(csv).toContain("Member,Mean,CV,Min,P10,P25,Median,P75,P90,Max,Source")
   expect(csv).toContain("Year index")

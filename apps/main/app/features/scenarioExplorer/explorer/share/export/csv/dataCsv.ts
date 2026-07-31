@@ -25,6 +25,8 @@ export type DataChartDataShape = {
   source: string
   /** Active water-year-type filter at capture, e.g. "Dry; Critical" (absent = all years) */
   waterYearTypesLabel?: string
+  /** Standardized figure title as drawn on the exported image */
+  figureTitle?: string
   members: Array<{
     label: string
     series: number[]
@@ -70,6 +72,9 @@ export function dataInDepthToCSV(
     ...buildCsvHeaderBlock({
       ...header,
       extra: [
+        ...(data.figureTitle
+          ? ([["Figure title", data.figureTitle]] as Array<[string, string]>)
+          : []),
         ["Variable", data.variableName],
         ["View", data.viewLabel],
         ["Compare by", data.compareByLabel],

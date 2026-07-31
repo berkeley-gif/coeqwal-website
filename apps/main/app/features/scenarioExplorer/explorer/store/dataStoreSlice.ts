@@ -29,7 +29,7 @@ import {
 import { toggleWytClass } from "../tools/panels/dataInDepth/config/wytFilter"
 
 /** How the annual-distribution view is drawn. */
-export type DataDistKind = "exceedance" | "box"
+export type DataDistKind = "exceedance" | "box" | "stats"
 
 /** The single axis the explorer compares members along. */
 export type DataCompareBy = "scenarios" | "climates" | "locations"

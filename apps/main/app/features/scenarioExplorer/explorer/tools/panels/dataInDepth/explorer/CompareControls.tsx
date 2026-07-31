@@ -28,7 +28,6 @@ import {
   Box,
   Chip,
   FormControl,
-  InputLabel,
   MenuItem,
   Select,
   ToggleButton,
@@ -143,58 +142,82 @@ export default function CompareControls() {
 
   const controlSx = { minWidth: 190 } as const
 
+  // Pinned selectors label with the same small caption used across this
+  // control row instead of a floating MUI InputLabel: the floating label
+  // sat half-behind the white input fill (clipped against the border) and
+  // rendered a size too large. The caption id keeps the select's
+  // accessible name via labelId.
+  const pinCaptionSx = {
+    display: "block",
+    mb: 0.5,
+    color: theme.palette.grey[600],
+  } as const
+  const pinSelectSx = { typography: "body2" } as const
+
   const scenarioPin = (
-    <FormControl size="small" sx={controlSx}>
-      <InputLabel id="scenario-pin-label">Scenario</InputLabel>
-      <Select
-        labelId="scenario-pin-label"
-        label="Scenario"
-        value={heldScenario}
-        onChange={(e) => setPinnedScenario(e.target.value)}
-      >
-        {compareScenarios.map((id) => (
-          <MenuItem key={id} value={id}>
-            {scenarioLabel(id)}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Box>
+      <Typography id="scenario-pin-label" variant="caption" sx={pinCaptionSx}>
+        Scenario
+      </Typography>
+      <FormControl size="small" sx={controlSx}>
+        <Select
+          labelId="scenario-pin-label"
+          value={heldScenario}
+          onChange={(e) => setPinnedScenario(e.target.value)}
+          sx={pinSelectSx}
+        >
+          {compareScenarios.map((id) => (
+            <MenuItem key={id} value={id}>
+              {scenarioLabel(id)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   )
 
   const climatePin = (
-    <FormControl size="small" sx={controlSx}>
-      <InputLabel id="climate-pin-label">Hydroclimate</InputLabel>
-      <Select
-        labelId="climate-pin-label"
-        label="Hydroclimate"
-        value={heldClimate}
-        onChange={(e) => setPinnedClimate(e.target.value)}
-      >
-        {HYDROCLIMATES.map((c) => (
-          <MenuItem key={c} value={c}>
-            {climateLabel(c)}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Box>
+      <Typography id="climate-pin-label" variant="caption" sx={pinCaptionSx}>
+        Hydroclimate
+      </Typography>
+      <FormControl size="small" sx={controlSx}>
+        <Select
+          labelId="climate-pin-label"
+          value={heldClimate}
+          onChange={(e) => setPinnedClimate(e.target.value)}
+          sx={pinSelectSx}
+        >
+          {HYDROCLIMATES.map((c) => (
+            <MenuItem key={c} value={c}>
+              {climateLabel(c)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   )
 
   const locationPin = multiLoc ? (
-    <FormControl size="small" sx={controlSx}>
-      <InputLabel id="location-pin-label">{group.label}</InputLabel>
-      <Select
-        labelId="location-pin-label"
-        label={group.label}
-        value={heldLocation}
-        onChange={(e) => setPinnedLocation(groupId, e.target.value)}
-      >
-        {group.items.map((l) => (
-          <MenuItem key={l.id} value={l.id}>
-            {l.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Box>
+      <Typography id="location-pin-label" variant="caption" sx={pinCaptionSx}>
+        {group.label}
+      </Typography>
+      <FormControl size="small" sx={controlSx}>
+        <Select
+          labelId="location-pin-label"
+          value={heldLocation}
+          onChange={(e) => setPinnedLocation(groupId, e.target.value)}
+          sx={pinSelectSx}
+        >
+          {group.items.map((l) => (
+            <MenuItem key={l.id} value={l.id}>
+              {l.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   ) : null
 
   return (
