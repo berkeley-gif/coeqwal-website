@@ -166,7 +166,7 @@ export function summarySentence(
 /** Explainer body for "How do I read this chart?", per view. */
 export function howToReadText(
   view: VariableView,
-  distKind: "exceedance" | "box",
+  distKind: "exceedance" | "box" | "stats",
 ): string {
   if (view === "monthly") {
     return `Each line is the median value for that month across all ${MOCK_YEARS} simulated years; the shaded band spans the 10th-90th percentile (8 of 10 years fall inside it). Months follow the water year (October-September).`
@@ -176,6 +176,9 @@ export function howToReadText(
   }
   if (view === "value") {
     return "A single summary number per comparison member. Hover a bar for the exact value."
+  }
+  if (distKind === "stats") {
+    return `Each panel is one summary statistic across all ${MOCK_YEARS} simulated years, with one bar per comparison member. Mean is the long-run average. CV (coefficient of variation) is the year-to-year standard deviation divided by the mean: a CV of 0.10 means typical years vary about plus or minus 10% around the average. On the level view, Trend is the least-squares slope of the annual levels in feet per year; negative bars mean declining groundwater levels.`
   }
   if (distKind === "box") {
     return `Each box summarizes all ${MOCK_YEARS} simulated years: the heavy line is the median, the box spans the 25th-75th percentile (half of all years), and the whiskers reach the 10th and 90th percentiles. Wider boxes = more year-to-year variability.`

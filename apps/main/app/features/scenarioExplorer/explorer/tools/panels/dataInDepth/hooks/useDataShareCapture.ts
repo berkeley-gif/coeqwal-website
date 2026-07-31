@@ -43,7 +43,14 @@ export function useDataShareCapture(
     selectedWaterYearTypes,
   } = useDataSlice()
 
-  const canSnapshot = data.members.length > 0 && !data.isLoading
+  // The Stats style renders a composite of bar plots the offscreen capture
+  // pipeline cannot draw yet, so the save button disables instead of
+  // exporting a chart that does not match the screen. (Snapshot support
+  // arrives with the standardized figure-title work.)
+  const statsStyle =
+    distKind === "stats" &&
+    (data.view === "dist" || data.view === "pct" || data.view === "level")
+  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return

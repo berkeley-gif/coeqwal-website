@@ -26,7 +26,7 @@ import {
   type SummaryContext,
   type SummaryMember,
 } from "../hooks/interpretiveText"
-import { MOCK_YEARS } from "../config/mockDataEngine"
+import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
 import { toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
@@ -106,6 +106,73 @@ export default function ChartCard() {
         yAxisLabel={yLabel}
         formatValue={fmt}
       />
+    )
+  } else if (distKind === "stats") {
+    // Side-by-side summary statistics of the selected quantity view: mean
+    // and CV everywhere, plus the linear level trend (ft/yr) on the
+    // groundwater level view.
+    const statPanels = [
+      {
+        key: "mean",
+        title: `Mean (${data.unit})`,
+        yLabel: data.unit,
+        format: fmt,
+        valueOf: (m: (typeof data.members)[number]) => m.stats.mean,
+      },
+      {
+        key: "cv",
+        title: "CV",
+        yLabel: "CV",
+        format: (v: number) => v.toFixed(2),
+        valueOf: (m: (typeof data.members)[number]) => m.stats.cv,
+      },
+      ...(data.view === "level"
+        ? [
+            {
+              key: "trend",
+              title: "Trend (ft/yr)",
+              yLabel: "ft/yr",
+              format: (v: number) => formatValue(v, "ft/yr"),
+              valueOf: (m: (typeof data.members)[number]) =>
+                linearTrendPerYear(m.series),
+            },
+          ]
+        : []),
+    ]
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: { xs: "wrap", md: "nowrap" },
+        }}
+      >
+        {statPanels.map((panel) => (
+          <Box key={panel.key} sx={{ flex: 1, minWidth: 220 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                textAlign: "center",
+                color: theme.palette.grey[600],
+                mb: 0.5,
+              }}
+            >
+              {panel.title}
+            </Typography>
+            <CategoricalBarChart
+              bars={data.members.map((m, i) => ({
+                id: m.id,
+                label: m.label,
+                value: panel.valueOf(m),
+                color: memberColors[i],
+              }))}
+              yAxisLabel={panel.yLabel}
+              formatValue={panel.format}
+            />
+          </Box>
+        ))}
+      </Box>
     )
   } else if (distKind === "box") {
     chart = (

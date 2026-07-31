@@ -22,6 +22,7 @@ import {
 const DIST_OPTIONS: { value: DataDistKind; label: string }[] = [
   { value: "exceedance", label: "Exceedance" },
   { value: "box", label: "Box plot" },
+  { value: "stats", label: "Stats" },
 ]
 
 export default function ViewBar() {

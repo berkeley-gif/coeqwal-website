@@ -533,6 +533,28 @@ export function gwLevelFromStorage(
   )
 }
 
+/**
+ * Least-squares linear trend of an annual series, in value units per year.
+ * Pure and source-agnostic (works for live and sample series alike); returns
+ * 0 for series too short to carry a slope.
+ */
+export function linearTrendPerYear(series: readonly number[]): number {
+  const n = series.length
+  if (n < 2) return 0
+  const meanX = (n - 1) / 2
+  let meanY = 0
+  for (const v of series) meanY += v
+  meanY /= n
+  let num = 0
+  let den = 0
+  for (let i = 0; i < n; i++) {
+    const dx = i - meanX
+    num += dx * ((series[i] as number) - meanY)
+    den += dx * dx
+  }
+  return den === 0 ? 0 : num / den
+}
+
 /** Single summary value per member (the "value" view). */
 export function mockSummaryValue(
   variableId: string,
