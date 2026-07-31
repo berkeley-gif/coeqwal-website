@@ -45,9 +45,9 @@ export function useDataShareCapture(
   } = useDataSlice()
 
   // The Stats style renders a composite of bar plots the offscreen capture
-  // pipeline cannot draw yet, so the save button disables instead of
-  // exporting a chart that does not match the screen. (Snapshot support
-  // arrives with the standardized figure-title work.)
+  // pipeline cannot draw yet (it captures a single chart SVG), so the save
+  // button disables instead of exporting a chart that does not match the
+  // screen. Stats snapshot support needs a composed multi-chart capture.
   const statsStyle =
     distKind === "stats" &&
     (data.view === "dist" || data.view === "pct" || data.view === "level")
