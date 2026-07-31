@@ -7,11 +7,13 @@
  * and overlay siblings (keyboard shortcuts, share drawer, tool tour).
  */
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { ErrorBoundary } from "@repo/utils"
-import { useWorkspaceSlice, useDataSlice } from "./store"
+import { useWorkspaceSlice } from "./store"
 import UnifiedToolView from "./tools/chrome/layout/UnifiedToolView"
+import { hasTourFor } from "./tools/tour/registry"
+import { hasSeenTour, markTourSeen } from "./tools/tour/hasSeenTour"
 import CollapsedRailStrip, {
   COLLAPSED_RAIL_WIDTH,
 } from "./tools/chrome/layout/CollapsedRailStrip"
@@ -26,16 +28,18 @@ import { useExploreShareCapture } from "./useExploreShareCapture"
 
 export default function ExplorerToolView() {
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
+  const startToolTour = useWorkspaceSlice((s) => s.startToolTour)
   const isListMode = exploreMode === "list"
 
-  // Data in depth collapses its scenario sidebar to a slim strip; other
-  // modes keep the fixed sidebar (collapse state is data-tool session state).
-  const scenarioRailCollapsed = useDataSlice((s) => s.scenarioRailCollapsed)
-  const setScenarioRailCollapsed = useDataSlice(
+  // Every sidebar-layout tool (bar, equity, radar, resilience, data) can
+  // collapse the scenario sidebar to a slim strip; list mode has no sidebar.
+  const scenarioRailCollapsed = useWorkspaceSlice(
+    (s) => s.scenarioRailCollapsed,
+  )
+  const setScenarioRailCollapsed = useWorkspaceSlice(
     (s) => s.setScenarioRailCollapsed,
   )
-  const isDataMode = exploreMode === "data"
-  const sidebarCollapsed = isDataMode && scenarioRailCollapsed
+  const sidebarCollapsed = !isListMode && scenarioRailCollapsed
 
   const hover = useExploreHoverCoordination()
   const share = useExploreShareCapture()
@@ -43,6 +47,18 @@ export default function ExplorerToolView() {
   const [radarScenarioColors, setRadarScenarioColors] = useState<
     Record<string, string>
   >({})
+
+  useEffect(() => {
+    if (!hasTourFor(exploreMode)) return
+    if (hasSeenTour(exploreMode)) return
+
+    const timeout = setTimeout(() => {
+      markTourSeen(exploreMode)
+      startToolTour(exploreMode)
+    }, 0)
+
+    return () => clearTimeout(timeout)
+  }, [exploreMode, startToolTour])
 
   return (
     <TourAnchorProvider>
@@ -63,9 +79,7 @@ export default function ExplorerToolView() {
                 hover={hover}
                 share={share}
                 radarScenarioColors={radarScenarioColors}
-                onCollapse={
-                  isDataMode ? () => setScenarioRailCollapsed(true) : undefined
-                }
+                onCollapse={() => setScenarioRailCollapsed(true)}
               />
             )
           }

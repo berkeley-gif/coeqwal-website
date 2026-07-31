@@ -125,9 +125,9 @@ export type ShareItem =
       type: "data"
       /** Registry id of the captured variable, e.g. "res_apr" */
       variableId: string
-      /** VariableView at capture time: "dist" | "pct" | "cv" | "value" */
+      /** VariableView at capture time, e.g. "dist" | "pct" | "level" | "value" */
       view: string
-      /** Distribution style at capture: "exceedance" | "box" (dist/pct views) */
+      /** Distribution style at capture: "exceedance" | "box" (dist-like views) */
       distKind: string
       /** Compare axis at capture: "scenarios" | "climates" | "locations" */
       compareBy: string

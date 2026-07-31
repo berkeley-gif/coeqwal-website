@@ -22,6 +22,7 @@ import {
 const DIST_OPTIONS: { value: DataDistKind; label: string }[] = [
   { value: "exceedance", label: "Exceedance" },
   { value: "box", label: "Box plot" },
+  { value: "stats", label: "Stats" },
 ]
 
 export default function ViewBar() {
@@ -33,7 +34,7 @@ export default function ViewBar() {
   if (!variable) return null
 
   const views = variable.views.filter((v) => v !== "monthly")
-  const showDistToggle = view === "dist" || view === "pct"
+  const showDistToggle = view === "dist" || view === "pct" || view === "level"
 
   return (
     <Box
@@ -61,7 +62,7 @@ export default function ViewBar() {
             value={v}
             sx={{ textTransform: "none", px: 1.5 }}
           >
-            {VIEW_LABELS[v]}
+            {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>

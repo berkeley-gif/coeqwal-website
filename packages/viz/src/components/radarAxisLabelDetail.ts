@@ -315,23 +315,8 @@ function measureSvgTextWidth(
   return w
 }
 
-/** Matches compact StrategyHeader short-code typography (0.6875rem, weight 400). */
-function estimateAxisDetailChromeRowWidthPx(
-  svg: SVGSVGElement | null,
-  scenarioId: string,
-  fontFamily: string,
-): number {
-  const shortCodeSpec = {
-    fontSize: "11px",
-    fontFamily,
-    fontWeight: 400,
-  }
-  const codeW = measureSvgTextWidth(
-    svg,
-    scenarioId.toUpperCase(),
-    shortCodeSpec,
-  )
-  return AXIS_DETAIL_CHROME_ROW_FIXED_PX + codeW
+function estimateAxisDetailChromeRowWidthPx(): number {
+  return AXIS_DETAIL_CHROME_ROW_FIXED_PX
 }
 
 function estimateLineHeightPx(fontSize: string): number {
@@ -532,13 +517,7 @@ export function renderRadarAxisLabelDetailInto(
     AXIS_DETAIL_CHIP_TEXT_GAP +
     measureSvgTextWidth(svgRoot, tierDisplay, tierSpec)
 
-  const chromeRowW = showChrome
-    ? estimateAxisDetailChromeRowWidthPx(
-        svgRoot,
-        payload.scenarioId,
-        s.fontFamily,
-      )
-    : 0
+  const chromeRowW = showChrome ? estimateAxisDetailChromeRowWidthPx() : 0
 
   const innerContentW = Math.max(scenarioBlockW, tierRowW, chromeRowW)
   const foW = Math.min(

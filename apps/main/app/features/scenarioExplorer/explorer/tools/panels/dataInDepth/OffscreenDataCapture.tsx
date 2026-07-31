@@ -32,9 +32,9 @@ import {
 
 export interface CaptureDataInDepthInput {
   theme: Theme
-  /** View at capture time: "dist" | "pct" | "cv" | "value" */
+  /** View at capture time, e.g. "dist" | "pct" | "level" | "value" */
   view: string
-  /** "exceedance" | "box"; only read for the dist/pct views */
+  /** "exceedance" | "box"; only read for the dist-like views */
   distKind: string
   /** Members exactly as the live card rendered them */
   members: MarkMember[]
@@ -50,6 +50,9 @@ export interface CaptureDataInDepthInput {
   source: "live" | "mock"
   /** Active water-year-type filter, e.g. "Dry; Critical" (absent = all years) */
   waterYearTypesLabel?: string
+  /** Standardized figure title; persisted with the chart data so the share
+   *  card heading and the CSV provenance block carry it */
+  figureTitle: string
 }
 
 export interface CaptureDataInDepthResult {
@@ -117,6 +120,7 @@ export async function captureDataInDepthOffscreen(
     unitLabel: input.unitLabel,
     source: input.source,
     waterYearTypesLabel: input.waterYearTypesLabel,
+    figureTitle: input.figureTitle,
     members: input.members.map((m) => ({
       label: m.label,
       series: m.series,

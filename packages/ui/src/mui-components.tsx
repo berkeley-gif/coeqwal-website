@@ -121,6 +121,7 @@ import ReplayIcon from "@mui/icons-material/Replay"
 import InfoIcon from "@mui/icons-material/Info"
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import MenuIcon from "@mui/icons-material/Menu"
 import EditNoteIcon from "@mui/icons-material/EditNote"
@@ -194,6 +195,7 @@ export {
   ReplayIcon,
   InfoIcon,
   InfoOutlinedIcon,
+  DragIndicatorIcon,
   UnfoldMoreIcon,
   MyLocationIcon,
   MenuIcon,

@@ -55,6 +55,9 @@ export interface WorkspaceState {
   outcomeDisplayMode: OutcomeDisplayMode
   showMap: boolean
 
+  // --- Scenario sidebar (ScenarioSelectioSidebar, all sidebar-layout tools) ---
+  scenarioRailCollapsed: boolean
+
   // --- Share drawer (ShareDrawer, URL rehydration, useExploreShareCapture) ---
   shareItems: ShareItem[]
   storyItemIds: string[]
@@ -86,6 +89,7 @@ export interface WorkspaceActions {
   setShowKeyOperations: (show: boolean) => void
   setOutcomeDisplayMode: (mode: OutcomeDisplayMode) => void
   setShowMap: (show: boolean) => void
+  setScenarioRailCollapsed: (collapsed: boolean) => void
 
   addShareItem: (item: ShareItem) => void
   removeShareItem: (id: string) => void
@@ -125,6 +129,7 @@ export const workspaceInitialState: WorkspaceState = {
   showKeyOperations: false,
   outcomeDisplayMode: "bar",
   showMap: false,
+  scenarioRailCollapsed: false,
   shareItems: persisted.shareItems,
   storyItemIds: persisted.storyItemIds,
   showShareDrawer: false,
@@ -210,6 +215,11 @@ export function createWorkspaceSlice(
     setShowMap: (show) =>
       set((state) => {
         state.showMap = show
+      }),
+
+    setScenarioRailCollapsed: (collapsed) =>
+      set((state) => {
+        state.scenarioRailCollapsed = collapsed
       }),
 
     addShareItem: (item) =>

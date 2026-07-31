@@ -4,7 +4,6 @@ import React from "react"
 import {
   Box,
   Checkbox,
-  Typography,
   useTheme,
   type Theme,
   ThemeProvider,
@@ -97,24 +96,6 @@ function RadarAxisDetailScenarioControlsInner({
           minHeight: "16px",
         }}
       >
-        <Typography
-          component="span"
-          sx={{
-            flex: "0 1 auto",
-            minWidth: 0,
-            maxWidth: "100%",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            color: theme.palette.grey[600],
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            fontSize: "0.6875rem",
-            lineHeight: 1,
-          }}
-        >
-          {scenarioId.toUpperCase()}
-        </Typography>
         <InlineRowActions
           scenarioId={scenarioId}
           scenarioLabel={scenarioLabel}

@@ -1,9 +1,10 @@
 "use client"
 
 /**
- * WytFilterChips - the water-year-type filter row for the explorer. Five
- * toggleable chips (Sacramento index classes, wettest to driest) plus an
- * "All years" clear chip; an empty selection means all years. Hidden for
+ * WytFilterChips - the water-year-type filter row for the explorer. An
+ * "All years" chip (the default, selected whenever no class filter is
+ * active) followed by five toggleable chips (Sacramento index classes,
+ * wettest to driest); an empty selection means all years. Hidden for
  * single-value views, which have no annual series to filter.
  */
 
@@ -42,6 +43,15 @@ export default function WytFilterChips() {
       >
         Water year types
       </Typography>
+      <Chip
+        size="small"
+        clickable
+        label="All years"
+        color={anySelected ? "default" : "primary"}
+        variant={anySelected ? "outlined" : "filled"}
+        aria-pressed={!anySelected}
+        onClick={clearWaterYearTypes}
+      />
       {WYT_CLASSES.map((wyt) => {
         const selected = selectedWaterYearTypes.includes(wyt)
         return (
@@ -57,15 +67,6 @@ export default function WytFilterChips() {
           />
         )
       })}
-      {anySelected && (
-        <Chip
-          size="small"
-          clickable
-          variant="outlined"
-          label="All years"
-          onClick={clearWaterYearTypes}
-        />
-      )}
     </Box>
   )
 }

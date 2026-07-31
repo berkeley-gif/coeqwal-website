@@ -4,8 +4,10 @@ import { setupNetwork } from "./support/network"
 // The Data in Depth tool's two option columns (scenario library sidebar and
 // the variables rail) collapse to slim labeled strips so the chart gets the
 // width (per the layout decision that followed the 2026-07-10 real-estate
-// feedback). Collapsed state lives in the tool-session store slice, so it
-// survives tool switches and a same-tab reload.
+// feedback). Collapsed state persists across tool switches and a same-tab
+// reload, but the two rails are scoped differently: the scenario rail is
+// workspace state shared by every sidebar-layout tool (since the cross-tool
+// rails port), while the variables rail is data-tool session state.
 
 async function openDataTool(page: Page) {
   await setupNetwork(page)
@@ -56,9 +58,18 @@ test("collapsed rails survive tool switch and reload", async ({ page }) => {
   await page.getByRole("button", { name: "Collapse variables" }).click()
   await page.getByRole("button", { name: "Collapse scenarios" }).click()
 
-  // Other tools keep their full sidebar: Radar shows the scenario library.
+  // The scenario rail is workspace-scoped, so Radar shows the same collapsed
+  // strip; the variables rail is data-tool-only, so Radar renders no
+  // variables strip. Radar auto-opens its tour on first visit; close it so
+  // the modal cannot swallow the tab click back to Data in depth.
   await page.getByRole("tab", { name: /Radar/ }).click()
-  await expect(page.getByText("Scenario library")).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Expand scenarios" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Expand variables" }),
+  ).toHaveCount(0)
+  await page.getByRole("button", { name: "Close tour" }).click()
 
   // Back to Data in depth: both rails are still collapsed.
   await page

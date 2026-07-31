@@ -21,12 +21,14 @@ import { useVariableData } from "../hooks/useVariableData"
 import { usePerfPaintMark } from "../hooks/usePerfPaintMark"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import {
+  dataFigureTitle,
   formatValue,
   summarySentence,
   type SummaryContext,
   type SummaryMember,
 } from "../hooks/interpretiveText"
-import { MOCK_YEARS } from "../config/mockDataEngine"
+import { WYT_LABELS } from "../config/wytFilter"
+import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
 import { toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
@@ -35,8 +37,22 @@ const CHART_HEIGHT = 340
 
 export default function ChartCard() {
   const theme = useTheme()
-  const { compareBy, distKind } = useDataSlice()
+  const { compareBy, distKind, selectedWaterYearTypes } = useDataSlice()
   const data = useVariableData()
+
+  // Standardized figure title, shared verbatim with the snapshot export.
+  const figureTitle = dataFigureTitle({
+    variableName: data.variable?.name ?? "",
+    compareBy,
+    memberCount: data.members.length,
+    firstMemberLabel: data.members[0]?.label,
+    locationTitleName: data.locationTitleName,
+    climateName: data.climateName,
+    scenarioName: data.scenarioName,
+    waterYearTypeLabels: selectedWaterYearTypes.map(
+      (c) => WYT_LABELS[c] ?? String(c),
+    ),
+  })
 
   // One sticky color per member id, shared with the CompareControls chips
   // (same scope key + same ordered member ids on both surfaces).
@@ -106,6 +122,73 @@ export default function ChartCard() {
         yAxisLabel={yLabel}
         formatValue={fmt}
       />
+    )
+  } else if (distKind === "stats") {
+    // Side-by-side summary statistics of the selected quantity view: mean
+    // and CV everywhere, plus the linear level trend (ft/yr) on the
+    // groundwater level view.
+    const statPanels = [
+      {
+        key: "mean",
+        title: `Mean (${data.unit})`,
+        yLabel: data.unit,
+        format: fmt,
+        valueOf: (m: (typeof data.members)[number]) => m.stats.mean,
+      },
+      {
+        key: "cv",
+        title: "CV",
+        yLabel: "CV",
+        format: (v: number) => v.toFixed(2),
+        valueOf: (m: (typeof data.members)[number]) => m.stats.cv,
+      },
+      ...(data.view === "level"
+        ? [
+            {
+              key: "trend",
+              title: "Trend (ft/yr)",
+              yLabel: "ft/yr",
+              format: (v: number) => formatValue(v, "ft/yr"),
+              valueOf: (m: (typeof data.members)[number]) =>
+                linearTrendPerYear(m.series),
+            },
+          ]
+        : []),
+    ]
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: { xs: "wrap", md: "nowrap" },
+        }}
+      >
+        {statPanels.map((panel) => (
+          <Box key={panel.key} sx={{ flex: 1, minWidth: 220 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                textAlign: "center",
+                color: theme.palette.grey[600],
+                mb: 0.5,
+              }}
+            >
+              {panel.title}
+            </Typography>
+            <CategoricalBarChart
+              bars={data.members.map((m, i) => ({
+                id: m.id,
+                label: m.label,
+                value: panel.valueOf(m),
+                color: memberColors[i],
+              }))}
+              yAxisLabel={panel.yLabel}
+              formatValue={panel.format}
+            />
+          </Box>
+        ))}
+      </Box>
     )
   } else if (distKind === "box") {
     chart = (
@@ -180,6 +263,21 @@ export default function ChartCard() {
           sx={{ mb: 1.5, color: theme.palette.text.primary, lineHeight: 1.5 }}
         >
           {summarySentence(summaryMembers, ctx)}
+        </Typography>
+      )}
+
+      {/* Standardized figure title (mirrored on snapshot exports) */}
+      {hasMembers && (
+        <Typography
+          variant="subtitle2"
+          component="h3"
+          sx={{
+            mb: 1,
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+          }}
+        >
+          {figureTitle}
         </Typography>
       )}
 

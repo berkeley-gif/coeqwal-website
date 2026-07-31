@@ -515,6 +515,46 @@ export function seriesStats(values: number[]): SeriesStats {
   }
 }
 
+/**
+ * Sample-only groundwater level series (feet) for the "level" view, derived
+ * from the storage series: a nominal per-basin level scaled by relative
+ * storage, minus a slow constant drawdown so long-run level trends read like
+ * real declining aquifers (and a trend statistic has signal in sample data).
+ */
+export function gwLevelFromStorage(
+  storage: readonly number[],
+  location: LocationDef,
+): number[] {
+  const base = location.mockBase ?? 1
+  const nominalFt = base / 100
+  const declineFtPerYear = nominalFt * 0.001
+  return storage.map((v, i) =>
+    Math.max(0, nominalFt * (v / base) - declineFtPerYear * i),
+  )
+}
+
+/**
+ * Least-squares linear trend of an annual series, in value units per year.
+ * Pure and source-agnostic (works for live and sample series alike); returns
+ * 0 for series too short to carry a slope.
+ */
+export function linearTrendPerYear(series: readonly number[]): number {
+  const n = series.length
+  if (n < 2) return 0
+  const meanX = (n - 1) / 2
+  let meanY = 0
+  for (const v of series) meanY += v
+  meanY /= n
+  let num = 0
+  let den = 0
+  for (let i = 0; i < n; i++) {
+    const dx = i - meanX
+    num += dx * ((series[i] as number) - meanY)
+    den += dx * dx
+  }
+  return den === 0 ? 0 : num / den
+}
+
 /** Single summary value per member (the "value" view). */
 export function mockSummaryValue(
   variableId: string,
@@ -524,19 +564,6 @@ export function mockSummaryValue(
 ): number {
   const variable = VARIABLES[variableId]
   if (!variable) return 0
-  if (variableId === "gw_trend") {
-    const location = getLocation(variable.locationGroup, locationId)
-    const base = location?.region === "SOD" ? -1.6 : -0.45
-    const effect = scenarioEffect(scenarioId)
-    const e =
-      (effect.eff.gwTrend ?? 0) *
-      (location ? regionWeight(effect, location) : 1)
-    const stress = MOCK_CLIMATE_STRESS[climateKey] ?? 0
-    const r = rng(
-      hash(`tr|${[variableId, scenarioId, climateKey, locationId].join("|")}`),
-    )
-    return base * (1 - e) - 0.55 * stress + 0.08 * gauss(r)
-  }
   const stats = seriesStats(
     mockAnnualSeries(variableId, scenarioId, climateKey, locationId),
   )

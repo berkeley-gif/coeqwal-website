@@ -31,9 +31,12 @@ const DIST_LABELS: Record<string, string> = {
 }
 
 function viewLabelFor(item: DataItem): string {
-  const view = VIEW_LABELS[item.view as VariableView] ?? item.view
+  const view =
+    getVariable(item.variableId)?.viewLabels?.[item.view as VariableView] ??
+    VIEW_LABELS[item.view as VariableView] ??
+    item.view
   const dist =
-    item.view === "dist" || item.view === "pct"
+    item.view === "dist" || item.view === "pct" || item.view === "level"
       ? DIST_LABELS[item.distKind]
       : undefined
   return dist ? `${view} (${dist})` : view
@@ -46,10 +49,17 @@ const dataHandler: VariantHandler<DataItem> = {
 
   renderCard(item, ctx) {
     const variableName = getVariable(item.variableId)?.name ?? item.variableId
+    // The standardized figure title captured with the chart leads the card
+    // (and therefore the exported PNG/SVG, which raster the card chrome);
+    // URL-restored items without cached chart data fall back to the
+    // variable name.
+    const figureTitle = (
+      item.cachedChartData as { figureTitle?: string } | undefined
+    )?.figureTitle
     return React.createElement(ShareSnapshotCard, {
       id: item.id,
       toolLabel: "Data in depth",
-      title: variableName,
+      title: figureTitle ?? variableName,
       subtitle: viewLabelFor(item),
       chips: [
         item.source === "live" ? "Live data" : "Sample data",

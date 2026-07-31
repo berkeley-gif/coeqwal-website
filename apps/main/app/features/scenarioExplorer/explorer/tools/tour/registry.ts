@@ -20,7 +20,7 @@
  * See `README.md` for the full how-to.
  */
 
-export const TOUR_TOOLS = ["list", "radar"] as const
+export const TOUR_TOOLS = ["list", "radar", "bar"] as const
 
 export type TourTool = (typeof TOUR_TOOLS)[number]
 

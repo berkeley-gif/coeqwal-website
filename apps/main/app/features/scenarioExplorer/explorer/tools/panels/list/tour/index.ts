@@ -20,4 +20,3 @@ const listTourModule: TourModule = {
 export default listTourModule
 
 export { LIST_TOUR } from "./steps"
-export { useListInfoTooltipSync } from "./useListInfoTooltipSync"
