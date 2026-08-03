@@ -98,8 +98,8 @@ export function computeOrderedScenarios({
     baseScenarios.sort((a, b) => {
       const aScores = allScoreData[a.scenarioId]
       const bScores = allScoreData[b.scenarioId]
-      const aScore = aScores?.[sortBy]?.weighted_score ?? null
-      const bScore = bScores?.[sortBy]?.weighted_score ?? null
+      const aScore = aScores?.[sortBy]?.average_score ?? null
+      const bScore = bScores?.[sortBy]?.average_score ?? null
       // Push scenarios with a null weighted score (no tier row for this
       // outcome, or a degenerate distribution) to the bottom of either
       // sort direction so they don't slot above real winners or losers.

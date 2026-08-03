@@ -268,7 +268,7 @@ import { useResolvedScenarioTiers } from "../tools/hooks/useResolvedScenarioTier
 const {
   allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
-  allScoreData, // Scores per outcome: weighted_score and normalized_score
+  allScoreData, // Scores per outcome: average_score and normalized_score
   outcomeNames, // Display-ordered list of { shortCode, displayName }
   siblingGroups, // Scenario group metadata
   getDisplayName, // maps a scenario id to a human-readable name
@@ -297,10 +297,10 @@ const { idMapping, resolvedIds, missingScenarioIds, reverseMap } =
 
 The resilience heatmap and the radar read the API's aggregate tier scores differently, because each chart encodes them differently:
 
-- The **resilience heatmap** uses `weighted_score` (the 1-4 mean tier level). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
+- The **resilience heatmap** uses `average_score` (the 1.0-5.0 mean continuous tier value). It rounds each cell into a tier band and paints it with the tier palette, so it needs the value on the native 1-4 scale.
 - The **radar** uses `normalized_score` (0-1, higher = better). It plots every outcome on one shared axis where outward = better, mapping the score via `normalized_score * 2 - 1`.
 
-They are the same quantity rescaled, each matched to its chart. See "Tier scores: `weighted_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
+They are the same quantity rescaled, each matched to its chart. See "Tier scores: `average_score` vs `normalized_score`" in `packages/data/README.md` for the full breakdown.
 
 ### Hydroclimate resolution
 
