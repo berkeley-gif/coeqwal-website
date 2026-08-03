@@ -168,11 +168,13 @@ export function Footer() {
                     ))}
                 </Box>
                 <Box
-                    sx={{ pt: 2 }}>
+                    sx={{ pt: 1 }}>
                     <Typography variant="compactSubtitle">
                         We thank our partners at DWR and Kike Arnal for the imagery used in this site
                     </Typography>
-
+                    <Typography variant="compactSubtitle" sx={{ display: "block" }}>
+                        © COEQWAL 2026
+                    </Typography>
                 </Box>
             </Box>
 
@@ -269,7 +271,8 @@ export function Footer() {
                                         disabled={issue.disabled}
                                         variant="dashboard"
                                         sx={{
-                                            color: "inherit"
+                                            color: "inherit",
+                                            textDecoration: "underline"
                                         }}
                                     >
                                         {issue.label}
