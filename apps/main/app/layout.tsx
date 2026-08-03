@@ -26,6 +26,7 @@ import { FontLoader } from "./components/FontLoader"
 import { ActiveThemePanel } from "./components/ActiveThemePanel"
 import { Header } from "./components/Header"
 import { TabsProvider } from "./context/Tabs"
+import { Footer } from "./components/Footer"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -67,10 +68,18 @@ export default function RootLayout({
                   <ErrorBoundary fallback={null}>
                     <Suspense fallback={null}>
                       <Header />
+
                     </Suspense>
                   </ErrorBoundary>
 
                   {children}
+                  {/* Suspense required: Footer's Water Issues accordion
+                      uses usePanelRoute, which reads useSearchParams(). */}
+                  <ErrorBoundary fallback={null}>
+                    <Suspense fallback={null}>
+                      <Footer />
+                    </Suspense>
+                  </ErrorBoundary>
                 </TabsProvider>
               </ThemeRegistry>
             </DataProvider>
