@@ -99,7 +99,7 @@ export function AboutCoeqwalPanel() {
                 COEQWAL – the Collaboratory for Equity in Water Allocation – is a
                 publicly-funded project that works with communities to better
                 understand how water decisions affect us now and for generations
-                to come
+                to come.
                 <br />
                 <br />
                 Using a water planning model for California’s Central Valley,

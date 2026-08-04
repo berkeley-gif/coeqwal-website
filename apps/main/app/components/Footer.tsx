@@ -138,7 +138,7 @@ export function Footer() {
             {/* Left: credit text + partner logos */}
             <Box
                 sx={{
-                    flexBasis: { lg: "50%" },
+                    flexBasis: { lg: "65%" },
                     borderRight: { lg: `1px solid ${theme.palette.common.white}` },
                     pr: { lg: 12 },
                 }}
@@ -168,9 +168,13 @@ export function Footer() {
                     ))}
                 </Box>
                 <Box
-                    sx={{ pt: 1 }}>
-                    <Typography variant="compactSubtitle">
-                        We thank our partners at DWR and Kike Arnal for the imagery used in this site
+                    sx={{ 
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                        pt: 1 }}>
+                    <Typography variant="compactSubtitle" sx={{ display: "block", lineHeight: 1.5 }}>
+                        We thank our partners at DWR, Freshwaters Illustrated and Kike Arnal for the imagery used in this site
                     </Typography>
                     <Typography variant="compactSubtitle" sx={{ display: "block" }}>
                         © COEQWAL 2026
@@ -181,7 +185,7 @@ export function Footer() {
             {/* Right: nav links mirroring BaseHeader */}
             <Box
                 sx={{
-                    flexBasis: { lg: "50%" },
+                    flexBasis: { lg: "35%" },
                     pl: { lg: 12 },
                     display: "flex",
                     flexDirection: "column",
