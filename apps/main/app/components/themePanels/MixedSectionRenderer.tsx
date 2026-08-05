@@ -68,7 +68,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             return (
               <LinedList
                 key={i}
-                items={block.items.map((text) => ({ label: text }))}
+                items={block.items.map((text) => ({ label: parseBoldText(text) }))}
                 icon={
                   <OpacityIcon
                     sx={{

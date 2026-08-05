@@ -23,11 +23,17 @@ export default function WelcomePanel() {
           }}
         >
           {/* Column 1 - The model */}
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: sp.md
+            }}
+          >
             <Typography
               variant="overline"
               color="text.secondary"
-              sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
+              sx={{ opacity: 0.5, display: "block" }}
             >
               COEQWAL Scenarios
             </Typography>
@@ -45,7 +51,6 @@ export default function WelcomePanel() {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: sp.md }}
             >
               Each scenario pairs a{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
@@ -62,7 +67,6 @@ export default function WelcomePanel() {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: sp.md }}
             >
               The management strategy represents what we can control and the
               hydroclimate represents what we can&rsquo;t control and must

@@ -13,7 +13,7 @@ import {
 } from "@repo/ui/mui"
 
 export interface LinedListItem {
-  label: string
+  label: React.ReactNode
   description?: string
   /** Dim the row (0-1). Defaults to 1. */
   opacity?: number
