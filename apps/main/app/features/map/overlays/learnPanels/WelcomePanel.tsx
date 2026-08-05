@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Link } from "@repo/ui/mui"
 import { LinedList, WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
@@ -13,7 +13,7 @@ export default function WelcomePanel() {
   return (
     <Box>
       <PanelShell background={theme.palette.tabPanels.exploreDeep}>
-        <PanelHeading title="What is the COEQWAL scenario library and how should I use it?" />
+        <PanelHeading title="What is COEQWAL?" />
         <Box
           sx={{
             display: "grid",
@@ -29,7 +29,7 @@ export default function WelcomePanel() {
               color="text.secondary"
               sx={{ opacity: 0.5, mb: sp.sm, display: "block" }}
             >
-              The model
+              COEQWAL Scenarios
             </Typography>
             <Typography variant="body2" color="text.secondary">
               COEQWAL uses the{" "}
@@ -80,7 +80,7 @@ export default function WelcomePanel() {
               The library
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              COEQWAL has compiled a library of over 100 scenarios.
+              COEQWAL has created a library of over 100 scenarios.
             </Typography>
             <Typography
               variant="body2"
@@ -104,26 +104,17 @@ export default function WelcomePanel() {
               sx={{ mt: sp.md }}
             >
               A summary of all scenarios can be accessed{" "}
-              <Typography
-                component="button"
-                variant="body2"
+              <Link
+                href="/"
+                color="inherit"
+                underline="always"
                 sx={{
-                  background: "none",
-                  border: "none",
-                  p: 0,
-                  color: "text.secondary",
-                  textDecoration: "underline",
-                  textDecorationColor: alpha(theme.palette.common.white, 0.4),
-                  textUnderlineOffset: "3px",
-                  cursor: "pointer",
-                  font: "inherit",
-                  "&:hover": {
-                    textDecorationColor: alpha(theme.palette.common.white, 0.8),
-                  },
+                  font: 'inherit',
+                  lineHeight: 'inherit',
                 }}
               >
                 here
-              </Typography>
+              </Link>
               .
             </Typography>
           </Box>
@@ -157,7 +148,6 @@ export default function WelcomePanel() {
                 },
               ]}
               color={theme.palette.common.white}
-              arrows={false}
               icon={dropletIcon}
               labelVariant="body2"
               sx={{ mt: sp.sm }}

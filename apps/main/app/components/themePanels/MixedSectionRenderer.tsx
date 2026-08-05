@@ -15,6 +15,7 @@ import { motion } from "@repo/motion"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
 import type { MixedSection } from "../../content/themes"
 import { themeValues } from "@repo/ui/themes/theme"
+import { LinedList } from "@repo/ui"
 
 function parseBoldText(text: string): React.ReactNode {
   const parts = text.split(/\*\*(.*?)\*\*/g)
@@ -65,55 +66,22 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             )
           case "list":
             return (
-              <List
+              <LinedList
                 key={i}
-                sx={{
-                  // Remove default list padding.the Panel component
-                  // already owns horizontal spacing
-                  px: 0,
-                  // Tighter vertical padding on mobile
-                  py: isMobile ? 0 : 1,
-                }}
-              >
-                {block.items.map((item, j) => (
-                  <ListItem
+                items={block.items.map((text) => ({ label: text }))}
+                icon={
+                  <OpacityIcon
                     sx={{
-                      // Reduce horizontal padding on mobile
-                      px: isMobile ? 0 : 1,
-                      alignItems: "flex-start",
+                      color: muiTheme.palette.blue.darkest,
+                      fontSize: isMobile ? "1rem" : "1.25rem",
                     }}
-                    key={j}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        color: muiTheme.palette.blue.darkest,
-                        // Align icon with first line of text, not center of item
-                        mt: "4px",
-                        minWidth: isMobile ? "32px" : "40px",
-                      }}
-                    >
-                      <OpacityIcon
-                        sx={{ fontSize: isMobile ? "1rem" : "1.25rem" }}
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      sx={{
-                        maxWidth: themeValues.spacing.paragraphMaxWidth.default,
-                      }}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            maxWidth:
-                              themeValues.spacing.paragraphMaxWidth.default,
-                          },
-                        },
-                      }}
-                      primary={parseBoldText(item)}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+                  />
+                }
+                labelVariant="body1"
+                textMaxWidth={themeValues.spacing.paragraphMaxWidth.default}
+              />
             )
+
           case "image":
             return (
               <Box

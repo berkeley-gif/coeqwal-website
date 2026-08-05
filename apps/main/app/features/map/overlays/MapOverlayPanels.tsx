@@ -94,6 +94,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
               variant="call"
               isVisible
             >
+              <PanelEyebrow>Get Started</PanelEyebrow>
               <Typography variant="body1">
                 Review this section to learn how you can explore the COEQWAL
                 scenario library, evaluate the effects of different water
@@ -142,7 +143,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                   gap: theme.space.component.lg,
                 }}
               >
-                <PanelEyebrow>Central Valley Water</PanelEyebrow>
+                <PanelEyebrow>California's Central Valley Water System</PanelEyebrow>
                 <Typography variant="body1">
                   The{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
@@ -234,7 +235,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
             >
               <Typography variant="body1">
                 Water is stored, diverted and distributed to multiple points
-                throughout the Valley and to cities along the coast. All of it
+                throughout the Valley and to cities along the coast, including Los Angeles. All of it
                 must be carefully accounted for.
               </Typography>
             </CallResponsePanel>
@@ -283,17 +284,26 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                   </Box>{" "}
                   use a computer model called{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
-                    CalSim
+                    CalSim3
                   </Box>{" "}
                   to do this accounting.
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     CalSim
                   </Box>{" "}
-                  represents the water management system as a network and
-                  simulates how much water flows into reservoirs, how much is
-                  stored or released, and where it gets delivered.
+                  represents the Central Valley water management system as a network of interconnected nodes.
+                  The model simulates how much water flows through rivers and into reservoirs,
+                  how much is stored or released, and where it gets delivered -
+                  both within and outside of the Central Valley.
+
+                </Typography>
+                <Typography variant="body1">{" "}
+                  CalSim also predicts how water flowing into the Delta affects salinity, 
+                  how much water is pumped out of the Delta, 
+                  and how much water flows into the San Francisco Bay. 
+                  In addition, CalSim estimates how groundwater aquifers below 
+                  the Central Valley are affected by pumping.
                 </Typography>
               </Box>
             </CallResponsePanel>

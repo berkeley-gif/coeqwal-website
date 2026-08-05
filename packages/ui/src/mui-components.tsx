@@ -26,6 +26,7 @@ export {
   AccordionDetails,
   Tabs,
   Tab,
+  Link,
 
   // Typography and content
   Typography,
