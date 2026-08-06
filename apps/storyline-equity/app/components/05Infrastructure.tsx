@@ -1,146 +1,108 @@
 "use client"
 
-import { motion } from "@repo/motion"
-import type { ReactNode } from "react"
-import {
-  ScrollElement,
-  ScrollSection,
-  StickyElement,
-  useScrollProgress,
-  useScrollValue,
-} from "@repo/scrollytelling"
+import { ScrollElement, StickyScrollSection } from "@repo/scrollytelling"
 import { Paragraph, SectionTitle } from "@repo/ui"
 import { Box, Stack } from "@repo/ui/mui"
 
+const infrastructureText = {
+  en: {
+    title: { text: "How infrastructure shaped inequity" },
+    sections: [
+      [
+        [
+          {
+            text: "In the 20th century, California's massive investments in water infrastructure reinforced inequities.",
+          },
+          {
+            text: "Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems designed to store and deliver water.",
+          },
+        ],
+        [
+          {
+            text: "These dams, reservoirs, and canals expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
+          },
+          {
+            text: "Over time, these systems reshaped how water flows through the landscape, redirecting rivers, interrupting natural pathways, and prioritizing some uses over others.",
+          },
+        ],
+      ],
+      [
+        [
+          {
+            text: "But these systems further preserved and intensified inequities in water access.",
+          },
+          {
+            text: "Senior water-rights holders, largely large farms and landowners, were guaranteed supplies.",
+          },
+          {
+            text: "Meanwhile, many Tribes, small rural communities, and disadvantaged areas were left behind.",
+          },
+        ],
+      ],
+      [
+        [
+          { text: "The environmental costs were also largely overlooked." },
+          {
+            text: "Dams blocked more than 95% of the historical habitat used by salmon.",
+          },
+          { text: "Rivers were dewatered and fragmented." },
+          {
+            text: "California's freshwater ecosystems have suffered from degradation of water quality, loss of wetlands, fish population declines, and the extinction of species.",
+          },
+        ],
+      ],
+    ],
+  },
+} as const
+
 export default function Infrastructure() {
   return (
-    <Box
-      component="section"
+    <StickyScrollSection
       id="frame-4"
-      aria-label="Institutions and infrastructure shaped inequity"
+      ariaLabel="Institutions and infrastructure shaped inequity"
+      height="510vh"
+      stickyTop="15vh"
+      stickyHeight="70vh"
+      offset={["start start", "end center"]}
     >
-      <ScrollSection height="250vh" offset={["start start", "end center"]}>
-        <StickyElement top="15vh" style={{ height: "35vh" }}>
-          <InfrastructureOriginsPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="150vh">
-        <StickyElement top="15vh">
-          <InfrastructureAccessPanel />
-        </StickyElement>
-      </ScrollSection>
-
-      <ScrollSection height="190vh">
-        <StickyElement top="15vh">
-          <InfrastructureEcologyPanel />
-        </StickyElement>
-      </ScrollSection>
-    </Box>
-  )
-}
-
-function PanelContainer({ children }: { children: ReactNode }) {
-  return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-        minHeight: "70vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-function InfrastructureOriginsPanel() {
-  const progress = useScrollProgress()
-  const titleOpacity = useScrollValue(progress, [0.04, 0.12], [0, 1])
-  const firstParagraphOpacity = useScrollValue(progress, [0.08, 0.18], [0, 1])
-  const secondParagraphOpacity = useScrollValue(progress, [0.42, 0.5], [0, 1])
-
-  return (
-    <PanelContainer>
-      <motion.div style={{ opacity: titleOpacity }}>
-        <Box className="paragraph" component="header" role="banner">
-          <SectionTitle text={"How infrastructure shaped inequity"} />
-        </Box>
-      </motion.div>
-
-      <Stack spacing={2} direction="column">
-        <motion.div style={{ opacity: firstParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "In the 20th century, California's massive investments in water infrastructure reinforced inequities.",
-                "Large-scale projects such as the Central Valley Project and the State Water Project transformed rivers into highly engineered systems designed to store and deliver water.",
-              ]}
-            />
-          </Box>
-        </motion.div>
-
-        <motion.div style={{ opacity: secondParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Paragraph
-              blocks={[
-                "These dams, reservoirs, and canals expanded water supplies for agricultural water districts and growing cities, fueling economic growth and population expansion.",
-                "Over time, these systems reshaped how water flows through the landscape, redirecting rivers, interrupting natural pathways, and prioritizing some uses over others.",
-              ]}
-            />
-          </Box>
-        </motion.div>
-      </Stack>
-    </PanelContainer>
-  )
-}
-
-function InfrastructureAccessPanel() {
-  return (
-    <PanelContainer>
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.78]}
-        exit={[0.78, 0.92]}
-        animation="slideUp"
+      <Box
+        className="container text-section"
+        sx={{
+          width: "min(75ch, calc(100vw - 6rem))",
+          maxWidth: "75ch",
+          minHeight: "70vh",
+          display: "grid",
+          alignItems: "center",
+        }}
       >
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "But these systems further preserved and intensified inequities in water access.",
-              "Senior water-rights holders, largely large farms and landowners, were guaranteed supplies.",
-              "Meanwhile, many Tribes, small rural communities, and disadvantaged areas were left behind.",
-            ]}
-          />
-        </Box>
-      </ScrollElement>
-    </PanelContainer>
-  )
-}
-
-function InfrastructureEcologyPanel() {
-  return (
-    <PanelContainer>
-      <ScrollElement
-        enter={[0.12, 0.28]}
-        hold={[0.28, 0.88]}
-        exit={[0.88, 0.98]}
-        animation="slideUp"
-      >
-        <Box className="paragraph" component="article">
-          <Paragraph
-            blocks={[
-              "The environmental costs were also largely overlooked.",
-              "Dams blocked more than 95% of the historical habitat used by salmon.",
-              "Rivers were dewatered and fragmented.",
-              "California's freshwater ecosystems have suffered from degradation of water quality, loss of wetlands, fish population declines, and the extinction of species.",
-            ]}
-          />
-        </Box>
-      </ScrollElement>
-    </PanelContainer>
+        {infrastructureText.en.sections.map((groups, index) => {
+          const start = index / infrastructureText.en.sections.length
+          const end = (index + 1) / infrastructureText.en.sections.length
+          return (
+            <ScrollElement
+              key={index}
+              enter={[start, start + 0.04]}
+              hold={[start + 0.04, end - 0.04]}
+              exit={[end - 0.04, end]}
+              animation="slideUp"
+              style={{ gridArea: "1 / 1" }}
+            >
+              {index === 0 ? (
+                <Box component="header">
+                  <SectionTitle text={infrastructureText.en.title} />
+                </Box>
+              ) : null}
+              <Stack component="section" spacing={2}>
+                {groups.map((sentences, paragraphIndex) => (
+                  <Box key={paragraphIndex} component="article">
+                    <Paragraph blocks={sentences} />
+                  </Box>
+                ))}
+              </Stack>
+            </ScrollElement>
+          )
+        })}
+      </Box>
+    </StickyScrollSection>
   )
 }

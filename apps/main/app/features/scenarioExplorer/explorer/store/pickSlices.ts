@@ -151,6 +151,7 @@ export const DATA_PERSIST_KEYS = [
   "selectedClimates",
   "selectedLocationsByGroup",
   "variableRailCollapsed",
+  "selectedWaterYearTypes",
 ] as const satisfies readonly (keyof DataState)[]
 
 /** List fields kept in memory only (not written to sessionStorage) */
@@ -278,6 +279,8 @@ const DATA_ACTION_KEYS = [
   "setSelectedClimates",
   "setSelectedLocations",
   "setVariableRailCollapsed",
+  "toggleWaterYearType",
+  "clearWaterYearTypes",
 ] as const satisfies readonly (keyof DataSlice)[]
 
 function pickKeys<T extends object, K extends keyof T>(

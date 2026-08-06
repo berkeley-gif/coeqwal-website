@@ -11,11 +11,31 @@ import type {
 import {
   CALIFORNIA_VIEW,
   DELTA_INFRASTRUCTURE_VIEW,
+  SHASTA_MCCLOUD_VIEW,
 } from "./components/map/config/cameraPresets"
 
 export type { SectionId } from "./components/map/config/sectionConfig"
 
 export type MetroRiverPlaygroundMode = "off" | "metro-map"
+export type CentralValleyIcon =
+  | "/map-icons/ag/water-user-ag-01.svg"
+  | "/map-icons/ag/water-user-ag-02.svg"
+  | "/map-icons/ag/water-user-ag-03.svg"
+  | "/map-icons/ag/water-user-ag-06.svg"
+  | "/map-icons/ag/water-user-ag-08.svg"
+export type UrbanIcon =
+  | "/map-icons/urban/water_user_urban-01.svg"
+  | "/map-icons/urban/water_user_urban-02.svg"
+  | "/map-icons/urban/water_user_urban-03.svg"
+export type WetlandIcon =
+  | "/map-icons/wetland/water_user_wetland-01.svg"
+  | "/map-icons/wetland/water_user_wetland-02.svg"
+  | "/map-icons/wetland/water_user_wetland-03.svg"
+export type SalmonIcon =
+  | "/map-icons/salmon/salmon_adult.svg"
+  | "/map-icons/salmon/salmon_jump.svg"
+  | "/map-icons/salmon/salmon_juvenile.svg"
+  | "/map-icons/salmon/salmon_simple.svg"
 
 interface AppState {
   activeSection: SectionId
@@ -27,6 +47,11 @@ interface AppState {
   backgroundProgress: number
   infrastructureProgress: number
   metroRiverPlaygroundMode: MetroRiverPlaygroundMode
+  centralValleyIcon: CentralValleyIcon
+  urbanIcon: UrbanIcon
+  wetlandIcon: WetlandIcon
+  salmonIcon: SalmonIcon
+  showMapIconStrokes: boolean
 }
 
 const initialState: AppState = {
@@ -39,11 +64,15 @@ const initialState: AppState = {
   backgroundProgress: 0,
   infrastructureProgress: 0,
   metroRiverPlaygroundMode: "metro-map",
+  centralValleyIcon: "/map-icons/ag/water-user-ag-06.svg",
+  urbanIcon: "/map-icons/urban/water_user_urban-01.svg",
+  wetlandIcon: "/map-icons/wetland/water_user_wetland-01.svg",
+  salmonIcon: "/map-icons/salmon/salmon_adult.svg",
+  showMapIconStrokes: false,
 }
 
 const EMPTY_LOCATION_LABELS: LocationLabel[] = []
 const EMPTY_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = []
-const HISTORICAL_CONTEXT_CAMERA_PROGRESS = 0.38
 const GOLD_RUSH_CAMERA_PROGRESS = 0.12
 export const INFRASTRUCTURE_DELTA_PROGRESS = 0.66
 export const INFRASTRUCTURE_DELTA_PIPES_PROGRESS = 0.78
@@ -103,6 +132,21 @@ export const appActions = {
 
   setMetroRiverPlaygroundMode: (mode: MetroRiverPlaygroundMode) =>
     useStoryStore.setState({ metroRiverPlaygroundMode: mode }),
+
+  setCentralValleyIcon: (icon: CentralValleyIcon) =>
+    useStoryStore.setState({ centralValleyIcon: icon }),
+
+  setUrbanIcon: (icon: UrbanIcon) =>
+    useStoryStore.setState({ urbanIcon: icon }),
+
+  setWetlandIcon: (icon: WetlandIcon) =>
+    useStoryStore.setState({ wetlandIcon: icon }),
+
+  setSalmonIcon: (icon: SalmonIcon) =>
+    useStoryStore.setState({ salmonIcon: icon }),
+
+  setShowMapIconStrokes: (show: boolean) =>
+    useStoryStore.setState({ showMapIconStrokes: show }),
 }
 
 // ============================================================================
@@ -129,6 +173,13 @@ export const useInfrastructureProgress = () =>
   useStoryStore((state) => state.infrastructureProgress)
 export const useMetroRiverPlaygroundMode = () =>
   useStoryStore((state) => state.metroRiverPlaygroundMode)
+export const useCentralValleyIcon = () =>
+  useStoryStore((state) => state.centralValleyIcon)
+export const useUrbanIcon = () => useStoryStore((state) => state.urbanIcon)
+export const useWetlandIcon = () => useStoryStore((state) => state.wetlandIcon)
+export const useSalmonIcon = () => useStoryStore((state) => state.salmonIcon)
+export const useShowMapIconStrokes = () =>
+  useStoryStore((state) => state.showMapIconStrokes)
 export const useShowMetroRiverPlayground = () =>
   useStoryStore(
     (state) =>
@@ -164,10 +215,10 @@ export const useCircleAnnotations = () =>
 export const useCameraView = () =>
   useStoryStore((state) => {
     if (
-      state.activeSection === "HistoricalContext" &&
-      state.historicalContextProgress < HISTORICAL_CONTEXT_CAMERA_PROGRESS
+      state.activeSection === "Background" &&
+      state.backgroundProgress >= 0.84
     ) {
-      return CALIFORNIA_VIEW
+      return SHASTA_MCCLOUD_VIEW
     }
 
     if (

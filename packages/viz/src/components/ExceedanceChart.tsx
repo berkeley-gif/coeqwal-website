@@ -50,6 +50,10 @@ export interface ExceedanceChartProps {
   height?: number
   /** Chart margins */
   margin?: { top: number; right: number; bottom: number; left: number }
+  /** When false, skips hover listeners and the tooltip (capture mode) */
+  interactive?: boolean
+  /** Fires once after the first committed draw (off-screen capture waits on it) */
+  onReady?: () => void
 }
 
 const DEFAULT_MARGIN = { top: 16, right: 20, bottom: 48, left: 64 }
@@ -94,6 +98,8 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
     width = 600,
     height = 320,
     margin = DEFAULT_MARGIN,
+    interactive = true,
+    onReady,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -102,6 +108,11 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
+    const onReadyRef = useRef(onReady)
+    useEffect(() => {
+      onReadyRef.current = onReady
+    }, [onReady])
+    const hasFiredOnReadyRef = useRef(false)
 
     useEffect(() => {
       if (responsive && dimensions && dimensions.width > 0) {
@@ -242,11 +253,17 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
         })
 
         // Hover probe: vertical line + per-series readout tooltip
+        if (!interactive) return null
         const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 11)}`
         const tooltip = select("body")
           .append("div")
           .attr("id", tooltipId)
           .style("position", "absolute")
+          // Pinned to the page origin while hidden: with no initial position
+          // the absolutely-placed box lands after the page content and its
+          // padding extends the document height.
+          .style("left", "0px")
+          .style("top", "0px")
           .style("visibility", "hidden")
           .style("background", "#fff")
           .style("border-radius", "6px")
@@ -307,13 +324,25 @@ const ExceedanceChart: React.FC<ExceedanceChartProps> = React.memo(
 
         return tooltipId
       },
-      [series, yAxisLabel, formatValue, margin],
+      [series, yAxisLabel, formatValue, margin, interactive],
     )
 
     useEffect(() => {
       if (currentWidth > 0 && currentHeight > 0) {
         const tooltipId = updateChart(currentWidth, currentHeight)
+        // TierGrid's ordering: the fired flag is set inside the frame, so a
+        // frame cancelled by a re-render re-schedules on the next effect run
+        // instead of losing the only onReady the capture host waits for.
+        let readyFrame: number | undefined
+        if (!hasFiredOnReadyRef.current) {
+          readyFrame = requestAnimationFrame(() => {
+            if (hasFiredOnReadyRef.current) return
+            hasFiredOnReadyRef.current = true
+            onReadyRef.current?.()
+          })
+        }
         return () => {
+          if (readyFrame != null) cancelAnimationFrame(readyFrame)
           if (tooltipId) select(`#${tooltipId}`).remove()
         }
       }

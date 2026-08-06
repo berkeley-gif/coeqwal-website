@@ -63,7 +63,7 @@ export const JOURNEY: Record<ExploreMode, JourneyStageConfig> = {
   },
   data: {
     mode: "data",
-    purpose: "Dig into the underlying data for the selected scenarios.",
+    purpose: "Explore additional outcome variables.",
     nextMode: null,
     nextLabel: "",
     nextRationale: "",
@@ -84,7 +84,7 @@ export const EXPLORE_MODE_VIEW_NAME: Record<ExploreMode, string> = {
   radar: "Radar chart",
   equity: "Distribution",
   resilience: "Resilience heatmap",
-  data: "Data explorer",
+  data: "Data in Depth",
 }
 
 export function getExploreModeViewName(mode: ExploreMode): string {

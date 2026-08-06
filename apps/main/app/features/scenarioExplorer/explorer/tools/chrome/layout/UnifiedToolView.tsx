@@ -172,11 +172,9 @@ export default function UnifiedToolView({
           pointerEvents: "auto",
         }}
       >
-        {exploreMode !== "data" && (
-          <Box sx={{ flexShrink: 0 }}>
-            <ToolJourneyStrip mode={exploreMode} />
-          </Box>
-        )}
+        <Box sx={{ flexShrink: 0 }}>
+          <ToolJourneyStrip mode={exploreMode} />
+        </Box>
 
         <Box
           sx={{

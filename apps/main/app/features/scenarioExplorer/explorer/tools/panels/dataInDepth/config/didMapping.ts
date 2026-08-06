@@ -152,6 +152,36 @@ export function seriesFromValues(
   return out
 }
 
+/** One extracted live point list: values plus their water years, index-aligned. */
+export interface SeriesPoints {
+  series: number[]
+  waterYears: number[]
+}
+
+/**
+ * Extract values AND water years from a `values` facet, dropping null-value
+ * years. `waterYears` is empty when any surviving point lacks a water_year,
+ * so consumers can trust index alignment or fall back to index labels.
+ */
+export function pointsFromValues(
+  values:
+    | ReadonlyArray<{ water_year?: number; value: number | null }>
+    | undefined,
+): SeriesPoints {
+  const series: number[] = []
+  const waterYears: number[] = []
+  let allYears = true
+  if (values) {
+    for (const point of values) {
+      if (point.value == null) continue
+      series.push(point.value)
+      if (point.water_year == null) allYears = false
+      else waterYears.push(point.water_year)
+    }
+  }
+  return { series, waterYears: allYears ? waterYears : [] }
+}
+
 /** Per-scenario response array key for each domain. */
 const RESPONSE_ARRAY_BY_DOMAIN: Record<
   DidDomain,
@@ -170,7 +200,9 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
 }
 
 /** Minimal structural shape of one scenario block in a data-in-depth response. */
-type LiveFacet = { values?: ReadonlyArray<{ value: number | null }> }
+type LiveFacet = {
+  values?: ReadonlyArray<{ water_year?: number; value: number | null }>
+}
 type LiveSubject = {
   subject: string
   periods?: Record<string, Record<string, LiveFacet>>
@@ -198,4 +230,23 @@ export function pickLiveSeries(
   const match = subjects?.find((s) => s.subject === subject)
   const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
   return seriesFromValues(facet?.values)
+}
+
+/**
+ * Like `pickLiveSeries` but returns water years alongside the values so
+ * exports can label rows with real years. Same fallback contract: an empty
+ * `series` means the caller uses the mock engine.
+ */
+export function pickLiveSeriesPoints(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+  period: DidPeriodToken,
+  unitToken: DidUnitToken,
+): SeriesPoints {
+  if (!block) return { series: [], waterYears: [] }
+  const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  const match = subjects?.find((s) => s.subject === subject)
+  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  return pointsFromValues(facet?.values)
 }

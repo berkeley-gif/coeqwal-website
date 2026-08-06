@@ -1,62 +1,68 @@
 "use client"
 
-import { Box, Typography, Stack } from "@repo/ui/mui"
+import { Paragraph, StorylineOpener, Text } from "@repo/ui"
+import { Box, Stack } from "@repo/ui/mui"
 import ScrollIndicator from "./helpers/ScrollIndicator"
 
+const openerText = {
+  en: {
+    title: {
+      text: "How to Reach a More Equitable Water Future for California?",
+    },
+    subtitle: {
+      text: "Exploring Equitable and Resilient Water Futures with COEQWAL",
+    },
+    paragraphs: [
+      [
+        {
+          text: "Understanding equity in California water begins with a few fundamental questions:",
+        },
+      ],
+      [
+        { text: "Whose needs are being met... and who is left behind?" },
+        {
+          text: "Who bears the cost when water is scarce... and who benefits?",
+        },
+        {
+          text: "How does our history, infrastructure, and decision-making influence who has access to water, and when?",
+        },
+      ],
+      [
+        {
+          text: "By exploring water equity across future what-if scenarios, COEQWAL begins to answer a bigger question:",
+        },
+        {
+          text: "How can all Californians get the water they need to survive and thrive for generations to come?",
+        },
+      ],
+    ],
+  },
+} as const
+
 export default function Opener() {
+  const copy = openerText.en
+
   return (
-    <Box
-      className="container"
-      sx={{
-        maxWidth: "60%",
-      }}
+    <StorylineOpener
+      title={<Text value={copy.title} />}
+      subtitle={<Text value={copy.subtitle} />}
+      alignment="left"
+      sx={{ maxWidth: "75ch", px: "0 !important" }}
+      scrollIndicator={<ScrollIndicator animationComplete />}
     >
-      {/* Title */}
-      <Box className="paragraph" component="header" role="banner">
-        <Typography id="opener-heading" variant="h1">
-          {"How is Equity Considered in California Water?"}
-        </Typography>
-        <Typography variant="h3" gutterBottom>
-          {"Exploring Equitable and Resilient Water Futures with COEQWAL"}
-        </Typography>
+      <Box className="text-section">
+        <Stack component="section" direction="column" spacing={2}>
+          {copy.paragraphs.map((sentences, index) => (
+            <Box
+              key={index}
+              component="article"
+              sx={index === 1 ? { paddingLeft: "2rem" } : undefined}
+            >
+              <Paragraph blocks={sentences} />
+            </Box>
+          ))}
+        </Stack>
       </Box>
-
-      {/* Content */}
-      <Stack spacing={2} direction="column" component="section" role="region">
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" gutterBottom>
-            {
-              "Understanding equity in California water begins with a few fundamental questions:"
-            }
-          </Typography>
-        </Box>
-        <Box
-          className="paragraph"
-          component="article"
-          sx={{
-            paddingLeft: "2rem",
-          }}
-        >
-          <Typography variant="body1">
-            {"Whose needs are being met?"}
-          </Typography>
-          <Typography variant="body1">{"Who is left behind?"}</Typography>
-          <Typography variant="body1">
-            {
-              "Who benefits from water allocations, and who bears the costs when water is scarce?"
-            }
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" gutterBottom>
-            {
-              "These questions sit at the heart of today’s water debates, and at the core of COEQWAL."
-            }
-          </Typography>
-        </Box>
-      </Stack>
-
-      <ScrollIndicator animationComplete={true} />
-    </Box>
+    </StorylineOpener>
   )
 }

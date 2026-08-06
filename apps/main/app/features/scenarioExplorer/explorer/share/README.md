@@ -1,6 +1,6 @@
 # Share system
 
-This folder lets a user save a chart as a card, collect cards into a story, and share or download them. Each kind of chart is a "variant" (barChart, radar, equity, resilience).
+This folder lets a user save a chart as a card, collect cards into a story, and share or download them. Each kind of chart is a "variant" (barChart, radar, equity, resilience, data).
 
 The key idea: every variant is described by one `VariantHandler` row in `variants.ts`. The dispatchers (card render, URL encode and decode, filename, raster size, CSV) read from that registry.
 
@@ -213,6 +213,7 @@ The off-screen capture (the next two steps) has three layers. You write only the
 | **Radar**      | `useRadarShareCapture.ts`, `RadarPanel.tsx` (staging), `OffscreenRadarCapture.tsx`, `variants/radar.ts`                                                                      | Full pattern: panel ref registration, multi-scenario sidebar capture    |
 | **Resilience** | `hooks/useResilienceShareCapture.ts`, `OffscreenResilienceCapture.tsx`, `OffscreenResiliencePanelCapture.tsx`, `variants/resilience.ts`, `live/ShareResilienceLiveChart.tsx` | Matrix or heatmap tool: panel and tile capture, two off-screen adapters |
 | **barChart**   | `StrategyGridRow.tsx`, `variants/barChart.ts`                                                                                                                                | Row-level share from List view only, not a tool-panel template          |
+| **Data**       | `useDataShareCapture.ts`, `OffscreenDataCapture.tsx`, `variants/data.ts`, `explorer/chartMarks.ts`                                                                           | In-tool card button; declarative capture from the card's own props      |
 
 ## A note on the React rules of hooks
 

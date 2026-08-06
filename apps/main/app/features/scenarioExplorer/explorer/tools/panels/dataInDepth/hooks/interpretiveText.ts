@@ -8,6 +8,7 @@
  */
 
 import type { VariableView } from "../config/variableRegistry"
+import { buildFigureTitle } from "../../../../share/figureTitle"
 import {
   seriesStats,
   MOCK_YEARS,
@@ -163,10 +164,61 @@ export function summarySentence(
   return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}.`
 }
 
+/** Inputs for the card's standardized figure title. */
+export interface DataFigureTitleInput {
+  variableName: string
+  compareBy: "scenarios" | "climates" | "locations"
+  memberCount: number
+  /** Label of the single compared member, when there is exactly one */
+  firstMemberLabel?: string
+  /** Held location as a title ("Shasta Reservoir"); "" when none */
+  locationTitleName: string
+  /** Held climate label */
+  climateName: string
+  /** Held scenario label */
+  scenarioName: string
+  /** Active water-year-type class labels; empty = all years */
+  waterYearTypeLabels: readonly string[]
+}
+
+/**
+ * Compose the standardized figure title for the data-in-depth card: the
+ * compared axis is summarized (single member label, or "<n> scenarios" /
+ * "<n> climate futures" / "<n> locations") and the held axes fill the
+ * scenario, hydroclimate, and location slots.
+ */
+export function dataFigureTitle(input: DataFigureTitleInput): string {
+  const single = input.memberCount === 1 ? input.firstMemberLabel : undefined
+  const scenarioContext =
+    input.compareBy === "scenarios"
+      ? (single ?? `${input.memberCount} scenarios`)
+      : input.scenarioName
+  // Held-climate labels are short ("Historical"); spell out "hydroclimate"
+  // in the title unless the label already mentions climate.
+  const heldClimateTitle = /climate/i.test(input.climateName)
+    ? input.climateName
+    : `${input.climateName} hydroclimate`
+  const hydroclimateName =
+    input.compareBy === "climates"
+      ? (single ?? `${input.memberCount} climate futures`)
+      : heldClimateTitle
+  const locationName =
+    input.compareBy === "locations"
+      ? (single ?? `${input.memberCount} locations`)
+      : input.locationTitleName
+  return buildFigureTitle({
+    variableName: input.variableName,
+    locationName: locationName || undefined,
+    memberSummary: scenarioContext,
+    hydroclimateName: hydroclimateName || undefined,
+    waterYearTypeLabels: input.waterYearTypeLabels,
+  })
+}
+
 /** Explainer body for "How do I read this chart?", per view. */
 export function howToReadText(
   view: VariableView,
-  distKind: "exceedance" | "box",
+  distKind: "exceedance" | "box" | "stats",
 ): string {
   if (view === "monthly") {
     return `Each line is the median value for that month across all ${MOCK_YEARS} simulated years; the shaded band spans the 10th-90th percentile (8 of 10 years fall inside it). Months follow the water year (October-September).`
@@ -176,6 +228,9 @@ export function howToReadText(
   }
   if (view === "value") {
     return "A single summary number per comparison member. Hover a bar for the exact value."
+  }
+  if (distKind === "stats") {
+    return `Each panel is one summary statistic across all ${MOCK_YEARS} simulated years, with one bar per comparison member. Mean is the long-run average. CV (coefficient of variation) is the year-to-year standard deviation divided by the mean: a CV of 0.10 means typical years vary about plus or minus 10% around the average. On the level view, Trend is the least-squares slope of the annual levels in feet per year; negative bars mean declining groundwater levels.`
   }
   if (distKind === "box") {
     return `Each box summarizes all ${MOCK_YEARS} simulated years: the heavy line is the median, the box spans the 25th-75th percentile (half of all years), and the whiskers reach the 10th and 90th percentiles. Wider boxes = more year-to-year variability.`
