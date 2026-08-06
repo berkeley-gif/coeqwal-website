@@ -25,7 +25,7 @@ export function AboutCoeqwalPanel() {
   }
 
   return (
-    <div style={{ backgroundColor: theme.palette.brand.water }}>
+    <div style={{ backgroundColor: theme.palette.blue.pale }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -47,7 +47,7 @@ export function AboutCoeqwalPanel() {
         >
           <Box
             sx={{
-              color: theme.palette.common.white,
+              color: theme.palette.text.primary,
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
               rowGap: { xs: 3, md: 4 },
@@ -114,7 +114,7 @@ export function AboutCoeqwalPanel() {
 
           <Box sx={{ alignSelf: "center" }}>
             <ScrollToButton
-              color={`${theme.palette.common.white}`}
+              color={`${theme.palette.text.primary}`}
               size={52}
               scrollToId="water-themes"
               // Same offset math as VideoHero's scroll button: land
