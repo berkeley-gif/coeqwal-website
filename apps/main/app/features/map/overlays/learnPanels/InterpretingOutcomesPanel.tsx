@@ -38,7 +38,6 @@ export default function InterpretingOutcomesPanel() {
               description,
             }))}
             color={theme.palette.common.white}
-            arrows={false}
             labelVariant="body2"
             descriptionVariant="body2"
           />
@@ -56,7 +55,6 @@ export default function InterpretingOutcomesPanel() {
               opacity: dimmed ? 0.45 : 1,
             }))}
             color={theme.palette.common.white}
-            arrows={false}
             labelVariant="body2"
             descriptionVariant="body2"
           />

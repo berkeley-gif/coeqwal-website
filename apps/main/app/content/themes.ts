@@ -824,14 +824,4 @@ export const WATER_THEMES: Theme[] = [
       },
     ],
   },
-  {
-    id: "governance",
-    label: "Water operations\nand impacts",
-    shortLabel: "Operations and impacts",
-    description:
-      "How water management decisions affect trade-offs, equity and resilience.",
-    heroImage: "",
-    inquiry: "",
-    sections: [],
-  },
 ]

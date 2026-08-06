@@ -13,32 +13,48 @@
 
 import Link from "next/link"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import {
-  CoeqwalPanel,
-  NavArrow,
-  ScrollToButton,
-  resolveCssLengthPx,
-} from "@repo/ui"
+import { NavArrow, ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
 
 export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
+  const calSimMapImg = {
+    src: "/images/calsim-map-yellow.png",
+    alt: "A map demonstrating the service area of Calsim",
+  }
+
   return (
-    <div style={{ backgroundColor: theme.palette.blue.pale }}>
+    <div style={{ backgroundColor: theme.palette.brand.water }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
         stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
       >
-        <CoeqwalPanel
+        <Box
+          component="section"
           id="about-coeqwal"
-          background="inherit"
-          textColor={theme.palette.blue.darkest}
-          minHeight="100%"
-          borderRadius={0}
-          responsiveHeadline={
-            <>
+          sx={{
+            background: "inherit",
+            overflow: "hidden",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+            minHeight: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box
+            sx={{
+              color: theme.palette.common.white,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              rowGap: { xs: 3, md: 4 },
+              columnGap: { md: 6 },
+            }}
+          >
+            <Box>
               <Typography
                 variant="h2Main"
                 component="span"
@@ -49,34 +65,56 @@ export function AboutCoeqwalPanel() {
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: "inherit" }}
+                sx={{
+                  display: "block",
+                  color: "inherit",
+                  mb: { xs: 2, md: 3 },
+                }}
               >
                 COEQWAL?
               </Typography>
-            </>
-          }
-          description={
-            <>
-              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
-              publicly-funded project that works with communities to better
-              understand how water decisions affect us now and for generations
-              to come
-              <br />
-              <br />
-              Using a water planning model for California’s Central Valley,
-              COEQWAL helps you learn how water is currently managed, explore
-              alternative pathways, and share your vision for California’s water
-              future.
-            </>
-          }
-          cta={
-            <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
-          }
-          layout="split"
-          descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
-          scrollIndicator={
+              <Box
+                component="img"
+                src={calSimMapImg.src}
+                alt={calSimMapImg.alt}
+                sx={{
+                  display: "block",
+                  mx: 7,
+                  width: "auto",
+                  maxWidth: "100%",
+                  height: "auto",
+                  maxHeight: { xs: "160px", md: "clamp(320px, 30vh, 540px)" },
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+
+            <Box sx={{ maxWidth: "calc(100% - 40px)" }}>
+              <Typography
+                variant="displayBody"
+                component="div"
+                sx={{ color: "inherit", mb: 4 }}
+              >
+                COEQWAL – the Collaboratory for Equity in Water Allocation – is
+                a publicly-funded project that works with communities to better
+                understand how water decisions affect us now and for generations
+                to come.
+                <br />
+                <br />
+                Using a water planning model for California’s Central Valley,
+                COEQWAL helps you learn how water is currently managed, explore
+                alternative pathways, and share your vision for California’s
+                water future.
+              </Typography>
+              <AboutCtaLink href="/about">
+                Learn more about COEQWAL
+              </AboutCtaLink>
+            </Box>
+          </Box>
+
+          <Box sx={{ alignSelf: "center" }}>
             <ScrollToButton
-              color={`${theme.palette.blue.darkest}`}
+              color={`${theme.palette.common.white}`}
               size={52}
               scrollToId="water-themes"
               // Same offset math as VideoHero's scroll button: land
@@ -91,8 +129,8 @@ export function AboutCoeqwalPanel() {
               }
               ariaLabel="Scroll down to the know more section"
             />
-          }
-        />
+          </Box>
+        </Box>
       </StickyScrollSection>
     </div>
   )

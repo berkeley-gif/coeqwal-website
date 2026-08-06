@@ -52,8 +52,10 @@ export interface CoeqwalPanelProps {
   id?: string
   /** Overline label rendered above the headline */
   eyebrow?: string
-  /** Primary heading.accepts JSX so callers can embed <br /> etc. Optional
-   *  when the headline is supplied via `responsiveHeadline` instead. */
+  /** Primary heading. Accepts JSX so callers can embed <br /> etc.
+   *  In "split" layout, renders raw (unwrapped) in the left column so
+   *  callers can mix Typography variants; in "single" layout it's
+   *  wrapped in a Typography h5, full width. */
   headline?: React.ReactNode
   /** Body description rendered below the headline */
   description?: React.ReactNode

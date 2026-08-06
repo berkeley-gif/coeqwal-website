@@ -26,6 +26,7 @@ export {
   AccordionDetails,
   Tabs,
   Tab,
+  Link,
 
   // Typography and content
   Typography,
@@ -157,9 +158,11 @@ import TrackChangesIcon from "@mui/icons-material/TrackChanges"
 import AdjustIcon from "@mui/icons-material/Adjust"
 import BuildIcon from "@mui/icons-material/Build"
 import ExploreIcon from "@mui/icons-material/Explore"
+import MailOutlineIcon from "@mui/icons-material/MailOutline"
 
 // Export individually imported icons
 export {
+  MailOutlineIcon,
   WaterIcon,
   KeyboardArrowDownIcon,
   HomeIcon,

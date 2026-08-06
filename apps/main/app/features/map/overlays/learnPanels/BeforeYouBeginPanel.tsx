@@ -28,7 +28,6 @@ export default function BeforeYouBeginPanel() {
         <LinedList
           items={CAVEATS.slice(0, 3).map((c) => ({ label: c }))}
           color={theme.palette.common.white}
-          arrows={false}
           icon={dropletIcon}
           labelVariant="body2"
           labelWeight={400}
@@ -36,7 +35,6 @@ export default function BeforeYouBeginPanel() {
         <LinedList
           items={CAVEATS.slice(3).map((c) => ({ label: c }))}
           color={theme.palette.common.white}
-          arrows={false}
           icon={dropletIcon}
           labelVariant="body2"
           labelWeight={400}
