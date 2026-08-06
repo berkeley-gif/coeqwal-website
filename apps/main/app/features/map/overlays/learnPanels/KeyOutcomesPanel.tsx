@@ -38,7 +38,6 @@ export default function KeyOutcomesPanel() {
               />
             )
           })}
-
         </InfoCardGrid>
       </PanelShell>
 

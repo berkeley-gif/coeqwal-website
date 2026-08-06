@@ -16,15 +16,12 @@ export default function WaterIssuesPanel() {
 
   return (
     <PanelShell background={theme.palette.blue.dark}>
-      <PanelHeading
-        title="What water issues interest you?"
-      />
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ my: sp.sm }}
-      >
-        Water is important to all of us – from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. COEQWAL considers how decisions affect the water issues that people care about.
+      <PanelHeading title="What water issues interest you?" />
+      <Typography variant="body2" color="text.secondary" sx={{ my: sp.sm }}>
+        Water is important to all of us – from farmers in the Central Valley to
+        communities in the Delta, from salmon in the Sacramento River to urban
+        water users in Los Angeles. COEQWAL considers how decisions affect the
+        water issues that people care about.
       </Typography>
 
       <LinedList
@@ -72,8 +69,6 @@ export default function WaterIssuesPanel() {
           />
         ))}
       </InfoCardGrid>
-
-
     </PanelShell>
   )
 }

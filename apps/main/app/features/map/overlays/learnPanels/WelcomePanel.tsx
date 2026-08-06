@@ -27,7 +27,7 @@ export default function WelcomePanel() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: sp.md
+              gap: sp.md,
             }}
           >
             <Typography
@@ -48,10 +48,7 @@ export default function WelcomePanel() {
               </Typography>{" "}
               affect outcomes for communities, farms, and the environment.
             </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-            >
+            <Typography variant="body2" color="text.secondary">
               Each scenario pairs a{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
                 water management strategy
@@ -64,10 +61,7 @@ export default function WelcomePanel() {
               (the temperature and precipitation patterns that determine how
               much water is available).
             </Typography>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-            >
+            <Typography variant="body2" color="text.secondary">
               The management strategy represents what we can control and the
               hydroclimate represents what we can&rsquo;t control and must
               prepare for.
@@ -113,8 +107,8 @@ export default function WelcomePanel() {
                 color="inherit"
                 underline="always"
                 sx={{
-                  font: 'inherit',
-                  lineHeight: 'inherit',
+                  font: "inherit",
+                  lineHeight: "inherit",
                 }}
               >
                 here

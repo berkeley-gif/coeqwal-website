@@ -53,9 +53,9 @@ export interface CoeqwalPanelProps {
   /** Overline label rendered above the headline */
   eyebrow?: string
   /** Primary heading. Accepts JSX so callers can embed <br /> etc.
-    *  In "split" layout, renders raw (unwrapped) in the left column so
-    *  callers can mix Typography variants; in "single" layout it's
-    *  wrapped in a Typography h5, full width. */
+   *  In "split" layout, renders raw (unwrapped) in the left column so
+   *  callers can mix Typography variants; in "single" layout it's
+   *  wrapped in a Typography h5, full width. */
   headline?: React.ReactNode
   /** Body description rendered below the headline */
   description?: React.ReactNode
@@ -147,11 +147,11 @@ export function CoeqwalPanel({
   const motionProps = contentMotionStyle
     ? { style: contentMotionStyle }
     : {
-      initial: { opacity: 0, y: 20 },
-      whileInView: { opacity: 1, y: 0 },
-      viewport: { once: true, amount: 0.3 },
-      transition: { duration: 0.5, ease: "easeOut" },
-    }
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.3 },
+        transition: { duration: 0.5, ease: "easeOut" },
+      }
 
   const contentInner = (
     <>
@@ -160,11 +160,11 @@ export function CoeqwalPanel({
         sx={
           layout === "split"
             ? {
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              rowGap: { xs: 3, md: 4 },
-              columnGap: { md: 6 },
-            }
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                rowGap: { xs: 3, md: 4 },
+                columnGap: { md: 6 },
+              }
             : { maxWidth: "680px" }
         }
       >
@@ -241,14 +241,14 @@ export function CoeqwalPanel({
   const minHeightSx =
     minHeight !== undefined
       ? {
-        minHeight,
-        display: "flex",
-        flexDirection: "column" as const,
-        justifyContent:
-          contentAlign === "top"
-            ? ("flex-start" as const)
-            : ("center" as const),
-      }
+          minHeight,
+          display: "flex",
+          flexDirection: "column" as const,
+          justifyContent:
+            contentAlign === "top"
+              ? ("flex-start" as const)
+              : ("center" as const),
+        }
       : {}
 
   const scrollIndicatorSlot = scrollIndicator ? (

@@ -68,7 +68,6 @@ export default function RootLayout({
                   <ErrorBoundary fallback={null}>
                     <Suspense fallback={null}>
                       <Header />
-
                     </Suspense>
                   </ErrorBoundary>
 

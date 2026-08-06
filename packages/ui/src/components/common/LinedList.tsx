@@ -51,15 +51,26 @@ export function LinedList({
   const color = colorProp ?? theme.palette.text.primary
 
   return (
-    <List sx={{ color, px: 0, py: isMobile ? 0 : 1, ...((sx as object) ?? {}) }}>
+    <List
+      sx={{ color, px: 0, py: isMobile ? 0 : 1, ...((sx as object) ?? {}) }}
+    >
       {items.map((item, i) => (
         <ListItem
           key={i}
-          sx={{ px: isMobile ? 0 : 1, alignItems: "flex-start", opacity: item.opacity ?? 1 }}
+          sx={{
+            px: isMobile ? 0 : 1,
+            alignItems: "flex-start",
+            opacity: item.opacity ?? 1,
+          }}
         >
           {icon && (
             <ListItemIcon
-              sx={{ color: "inherit", minWidth: isMobile ? "32px" : "40px", mr: 1.5, mt: "4px" }}
+              sx={{
+                color: "inherit",
+                minWidth: isMobile ? "32px" : "40px",
+                mr: 1.5,
+                mt: "4px",
+              }}
             >
               {icon}
             </ListItemIcon>
@@ -69,7 +80,11 @@ export function LinedList({
             primary={
               <Typography
                 variant={labelVariant}
-                sx={{ fontWeight: labelWeight, color: "inherit", ...(textMaxWidth ? { maxWidth: textMaxWidth } : {}), }}
+                sx={{
+                  fontWeight: labelWeight,
+                  color: "inherit",
+                  ...(textMaxWidth ? { maxWidth: textMaxWidth } : {}),
+                }}
               >
                 {item.label}
               </Typography>

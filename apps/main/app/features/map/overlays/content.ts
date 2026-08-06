@@ -119,7 +119,8 @@ export const KEY_OUTCOMES: ReadonlyArray<KeyOutcome> = [
   },
   {
     outcomeCode: "FW_EXP",
-    description: "Volume of availability of freshwater for export to other regions",
+    description:
+      "Volume of availability of freshwater for export to other regions",
   },
   {
     outcomeCode: "RES_STOR",

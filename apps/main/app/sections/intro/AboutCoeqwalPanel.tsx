@@ -13,18 +13,13 @@
 
 import Link from "next/link"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import {
-  NavArrow,
-  ScrollToButton,
-  resolveCssLengthPx,
-} from "@repo/ui"
+import { NavArrow, ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 import { StickyScrollSection } from "@repo/scrollytelling"
 
 export function AboutCoeqwalPanel() {
   const theme = useTheme()
 
-  const calSimMapImg =
-  {
+  const calSimMapImg = {
     src: "/images/calsim-map-yellow.png",
     alt: "A map demonstrating the service area of Calsim",
   }
@@ -70,7 +65,11 @@ export function AboutCoeqwalPanel() {
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: "inherit", mb: { xs: 2, md: 3 } }}
+                sx={{
+                  display: "block",
+                  color: "inherit",
+                  mb: { xs: 2, md: 3 },
+                }}
               >
                 COEQWAL?
               </Typography>
@@ -96,18 +95,20 @@ export function AboutCoeqwalPanel() {
                 component="div"
                 sx={{ color: "inherit", mb: 4 }}
               >
-                COEQWAL – the Collaboratory for Equity in Water Allocation – is a
-                publicly-funded project that works with communities to better
+                COEQWAL – the Collaboratory for Equity in Water Allocation – is
+                a publicly-funded project that works with communities to better
                 understand how water decisions affect us now and for generations
                 to come.
                 <br />
                 <br />
                 Using a water planning model for California’s Central Valley,
                 COEQWAL helps you learn how water is currently managed, explore
-                alternative pathways, and share your vision for California’s water
-                future.
+                alternative pathways, and share your vision for California’s
+                water future.
               </Typography>
-              <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
+              <AboutCtaLink href="/about">
+                Learn more about COEQWAL
+              </AboutCtaLink>
             </Box>
           </Box>
 

@@ -2,10 +2,6 @@
 
 import {
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Box,
   OpacityIcon,
   useMediaQuery,
@@ -68,7 +64,9 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             return (
               <LinedList
                 key={i}
-                items={block.items.map((text) => ({ label: parseBoldText(text) }))}
+                items={block.items.map((text) => ({
+                  label: parseBoldText(text),
+                }))}
                 icon={
                   <OpacityIcon
                     sx={{
