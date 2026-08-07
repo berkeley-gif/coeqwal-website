@@ -132,7 +132,7 @@ function buildAggregateCell(
       outcomeCode,
       hydroclimate,
       available: true,
-      continuousValue: tierInfo.level,
+      continuousValue: tierInfo.average_score,
       tierLevel: tierInfo.level,
       type: "single_value",
     }
