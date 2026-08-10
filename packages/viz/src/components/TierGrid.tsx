@@ -81,7 +81,7 @@ export interface TierGridProps {
 // Constants
 // ============================================================================
 
-const MARGIN = { top: 50, right: 50, bottom: 100, left: 60 }
+const MARGIN = { top: 50, right: 50, bottom: 100, left: 100 }
 const MAX_DOT_SIZE = 24
 const MIN_DOT_SIZE = 6
 const CELL_PADDING = 0
@@ -93,6 +93,18 @@ const DEFAULT_TIER_COLORS = {
   "Tier 3": "#f2944f",
   "Tier 4": "#ee5d32",
 }
+
+// Display labels for the y-axis. Internal tier strings ("Tier 1", etc.) are
+// left untouched everywhere else (color maps, comparisons, tooltips).
+const TIER_AXIS_LABELS: Record<string, string> = {
+  "Tier 1": "Optimal",
+  "Tier 2": "Acceptable",
+  "Tier 3": "At-Risk",
+  "Tier 4": "Critical",
+}
+
+const getTierAxisLabel = (tier: string): string =>
+  TIER_AXIS_LABELS[tier] ?? tier
 
 const CATEGORY_COLORS = [
   "#4e79a7", // Blue
@@ -571,7 +583,7 @@ const drawTierGrid = (
         .style("font-size", "11px")
         .style("fill", "#666")
         .style("pointer-events", "none")
-        .text(tickValue.toFixed(1))
+        .text(tickValue === 5.0 ? "4.99" : tickValue.toFixed(1))
     })
   } else {
     // Discrete mode: show tier labels
@@ -585,7 +597,7 @@ const drawTierGrid = (
         .style("font-size", "11px")
         .style("fill", "#666")
         .style("pointer-events", "none")
-        .text(tier)
+        .text(getTierAxisLabel(tier))
     })
   }
 }
@@ -717,19 +729,36 @@ const drawCategoryLabels = (
     const x = MARGIN.left + layout.startX + layout.width / 2
     const y = MARGIN.top + gridHeight + 15
 
-    // Split long category names into multiple lines
-    const maxCharsPerLine = 8 // Approximate chars that fit
+    // Split long category names into multiple lines. Only break mid-word
+    // when the column has been squeezed down to the minimum width — wider
+    // columns just let an unbroken long word sit on its own line.
+    const maxCharsPerLine = 10 // Approximate chars that fit
+    const isNarrowColumn = layout.width <= MIN_CATEGORY_WIDTH
     const words = layout.category.split(" ")
     const lines: string[] = []
     let currentLine = ""
 
     words.forEach((word) => {
-      const testLine = currentLine ? `${currentLine} ${word}` : word
-      if (testLine.length <= maxCharsPerLine) {
-        currentLine = testLine
-      } else {
-        if (currentLine) lines.push(currentLine)
-        currentLine = word
+      let remainingWord = word
+      while (remainingWord.length > 0) {
+        if (currentLine.length === 0) {
+          if (remainingWord.length <= maxCharsPerLine || !isNarrowColumn) {
+            currentLine = remainingWord
+            remainingWord = ""
+          } else {
+            lines.push(remainingWord.slice(0, maxCharsPerLine))
+            remainingWord = remainingWord.slice(maxCharsPerLine)
+          }
+        } else {
+          const testLine = `${currentLine} ${remainingWord}`
+          if (testLine.length <= maxCharsPerLine) {
+            currentLine = testLine
+            remainingWord = ""
+          } else {
+            lines.push(currentLine)
+            currentLine = ""
+          }
+        }
       }
     })
     if (currentLine) lines.push(currentLine)
@@ -1123,12 +1152,12 @@ export default function TierGrid({
                 obj.baselineTierContinuous !== undefined
                   ? (() => {
                       const delta =
-                        Number(obj.tierContinuous) -
-                        Number(obj.baselineTierContinuous)
+                        Number(obj.baselineTierContinuous) -
+                        Number(obj.tierContinuous)
                       const deltaColor =
-                        delta < 0
+                        delta > 0
                           ? "#1ca367"
-                          : delta > 0
+                          : delta < 0
                             ? "#ee5d32"
                             : "#718096"
                       const deltaSign = delta > 0 ? "+" : ""
@@ -1299,7 +1328,7 @@ export default function TierGrid({
                 opacity="0.7"
               />
             </svg>
-            <span style={{ color: "#4a5568" }}>Mean Cont. Tier</span>
+            <span style={{ color: "#4a5568" }}>Mean Value</span>
           </div>
         </div>
       )}
@@ -1361,43 +1390,6 @@ export default function TierGrid({
           </div>
         </div>
       )}
-
-      {/* Color legend for comparison mode */}
-
-      {/* Legend for mean line in continuous mode */}
-      {/* {yAxisMode === "continuous" && (
-        <div
-          style={{
-            position: "absolute",
-            top: showComparison && colorMode === "tier" ? 50 : 0,
-            right: 10,
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            border: "1px solid #e2e8f0",
-            borderRadius: "6px",
-            padding: "8px 12px",
-            fontSize: "12px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            zIndex: 100,
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <svg width="24" height="16" viewBox="0 0 24 16">
-            <line
-              x1="2"
-              y1="8"
-              x2="22"
-              y2="8"
-              stroke="#1976d2"
-              strokeWidth="2"
-              strokeDasharray="4,2"
-              opacity="0.7"
-            />
-          </svg>
-          <span style={{ color: "#4a5568" }}>Mean continuous tier</span>
-        </div>
-      )} */}
 
       <div
         ref={tooltipRef}
