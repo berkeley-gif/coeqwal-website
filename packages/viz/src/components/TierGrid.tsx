@@ -1125,15 +1125,15 @@ export default function TierGrid({
 
               const baselineTierRow = showComparison
                 ? `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
-                  <span style="color: #718096;">Baseline Tier:</span>
-                  <span style="font-weight: 600; color: #2d3748;">${obj.baselineTier}</span>
+                  <span style="color: #718096;">Baseline level:</span>
+                  <span style="font-weight: 600; color: #2d3748;">${getTierAxisLabel(obj.baselineTier)}</span>
                 </div>`
                 : ""
 
               const continuousTierRow =
                 obj.tierContinuous !== undefined
                   ? `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
-                  <span style="color: #718096;">Continuous Tier:</span>
+                  <span style="color: #718096;">Continuous level:</span>
                   <span style="font-weight: 600; color: #2d3748;">${Number(obj.tierContinuous).toFixed(2)}</span>
                 </div>`
                   : ""
@@ -1141,7 +1141,7 @@ export default function TierGrid({
               const baselineContinuousTierRow =
                 showComparison && obj.baselineTierContinuous !== undefined
                   ? `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
-                  <span style="color: #718096;">Baseline Continuous:</span>
+                  <span style="color: #718096;">Baseline continuous:</span>
                   <span style="font-weight: 600; color: #2d3748;">${Number(obj.baselineTierContinuous).toFixed(2)}</span>
                 </div>`
                   : ""
@@ -1162,7 +1162,7 @@ export default function TierGrid({
                             : "#718096"
                       const deltaSign = delta > 0 ? "+" : ""
                       return `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 12px;">
-                        <span style="color: #718096;">Delta (Cont. Tier):</span>
+                        <span style="color: #718096;">Delta continuous:</span>
                         <span style="font-weight: 600; color: ${deltaColor};">${deltaSign}${delta.toFixed(2)}</span>
                       </div>`
                     })()
@@ -1173,8 +1173,8 @@ export default function TierGrid({
               <div style="color: #718096; font-size: 12px; margin-bottom: 6px;">${obj.category}</div>
               <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 6px;">
                 <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px;">
-                  <span style="color: #718096;">Tier:</span>
-                  <span style="font-weight: 600; color: #2d3748;">${obj.tier}</span>
+                  <span style="color: #718096;">Outcome level:</span>
+                  <span style="font-weight: 600; color: #2d3748;">${getTierAxisLabel(obj.tier)}</span>
                 </div>
                 ${continuousTierRow}
                 ${baselineTierRow}
