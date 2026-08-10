@@ -60,10 +60,11 @@ Suites:
   (single `types=` value) requests, at n = 1 / 3 / 6.
 - `driver/app-flow.spec.ts`: full app flow per run: fresh browser context,
   open Data in Depth, one-commit scenario selection via the dev-only
-  `actions.selectScenarios` escape hatch, wait for the paint mark (cold),
-  expand the Community water section (captures `transform:cws` and the
-  fan-out endpoints), then clear and re-select inside the SWR window (warm).
-  Plus a compute-bench harvest.
+  `actions.selectScenarios` escape hatch, wait for the explorer-chart paint
+  mark (cold), then clear and re-select inside the SWR window (warm). Plus a
+  compute-bench harvest. The old category-section expand cell left with the
+  category view (July 30 content round); the analyzer still reads
+  pre-August-2026 JSONL via the old `paint:category-batch` mark name.
 
 Remove the flag from `.env.local` after measuring so local builds go back
 to the default (instrumentation-free) configuration.
