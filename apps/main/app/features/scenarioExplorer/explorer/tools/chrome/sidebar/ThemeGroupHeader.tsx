@@ -139,6 +139,9 @@ export default function ThemeGroupHeader({
             checked={allChecked}
             indeterminate={someChecked}
             onChange={handleToggle}
+            inputProps={{
+              "aria-label": `Select all ${themeConfig.label} scenarios`,
+            }}
             sx={{
               ...theme.scenarios.checkbox.md,
               mt: 0,
@@ -193,14 +196,18 @@ export default function ThemeGroupHeader({
                 : `Share all ${themeConfig.label} scenarios`
           }
           density="compact"
+          describeChild
         >
           {/* span wrapper preserves tooltip hover when the button is
               disabled - MUI suppresses pointer events on disabled
-              buttons. */}
+              buttons. describeChild keeps the tooltip's aria-label off
+              this span (prohibited on unroled elements); the button
+              carries its own. */}
           <span style={{ display: "inline-flex" }}>
             <IconButton
               className="theme-action-icon"
               size="small"
+              aria-label={`Share all ${themeConfig.label} scenarios`}
               disabled={shareDisabled}
               onClick={() => {
                 void onShareScenarios(scenarioIds)

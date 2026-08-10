@@ -128,6 +128,7 @@ export function InlineRowActions({
           >
             <IconButton
               size="small"
+              aria-label={`${isPinned ? "Unpin" : "Pin"} ${scenarioLabel} scenario`}
               onClick={(e) => {
                 e.stopPropagation()
                 togglePinnedScenario(scenarioId)
@@ -171,6 +172,7 @@ export function InlineRowActions({
           <span style={{ display: "inline-flex" }}>
             <IconButton
               size="small"
+              aria-label={`Share ${scenarioLabel} scenario`}
               disabled={shareDisabled}
               onClick={(e) => {
                 e.stopPropagation()

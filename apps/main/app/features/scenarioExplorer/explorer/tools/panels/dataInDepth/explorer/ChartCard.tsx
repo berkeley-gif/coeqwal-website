@@ -281,8 +281,15 @@ export default function ChartCard() {
         </Typography>
       )}
 
-      {/* Chart */}
-      <Box sx={{ width: "100%", height: CHART_HEIGHT }}>{chart}</Box>
+      {/* Chart. With members, the region reads as one labeled figure:
+          the D3 internals carry no accessible semantics of their own,
+          and the per-chart data alternative is the CSV export. */}
+      <Box
+        {...(hasMembers ? { role: "img", "aria-label": figureTitle } : {})}
+        sx={{ width: "100%", height: CHART_HEIGHT }}
+      >
+        {chart}
+      </Box>
 
       {/* Legend */}
       {hasMembers && (
