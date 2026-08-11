@@ -113,6 +113,7 @@ export const EQUITY_PERSIST_KEYS = [
   "showEquityComparison",
   "equityVisibleOutcomes",
   "yAxisMode",
+  "equityHiddenCategories",
 ] as const satisfies readonly (keyof EquityState)[]
 
 /**
@@ -244,6 +245,7 @@ const EQUITY_ACTION_KEYS = [
   "setShowEquityComparison",
   "setEquityVisibleOutcomes",
   "setYAxisMode",
+  "toggleEquityCategory",
 ] as const satisfies readonly (keyof EquitySlice)[]
 
 const RESILIENCE_ACTION_KEYS = [

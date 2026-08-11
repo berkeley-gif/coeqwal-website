@@ -14,7 +14,11 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Box, useTheme, DragIndicatorIcon } from "@repo/ui/mui"
 import { HydroclimateBadge } from "@repo/ui"
-import { useWorkspaceSlice, isMapPairedMode } from "../../../store"
+import {
+  useWorkspaceSlice,
+  useEquitySlice,
+  isMapPairedMode,
+} from "../../../store"
 import { mapActions } from "../../../../../map/store"
 import { getHydroclimateBadgeDisplay } from "../utils/hydroclimateBadgeDisplay"
 import ToolJourneyStrip from "./ToolJourneyStrip"
@@ -47,12 +51,18 @@ export default function UnifiedToolView({
   const exploreMode = useWorkspaceSlice((s) => s.exploreMode)
   const showKeyOperations = useWorkspaceSlice((s) => s.showKeyOperations)
   const hydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
+  const showEquityComparison = useEquitySlice((s) => s.showEquityComparison)
 
   const mapHydroBadge = getHydroclimateBadgeDisplay(hydroclimate)
 
   // The map panel opens only for tools that pair with the map: Data in
   // depth ignores the shared showMap flag entirely (no map, full width).
   const mapActive = showMap && isMapPairedMode(exploreMode)
+
+  // Distribution's comparison-mode pins use triangle-up/circle/triangle-down
+  // to encode improved/no-change/worsened (see EquityPanel's handleShowOnMap).
+  const showComparisonLegend =
+    mapActive && exploreMode === "equity" && showEquityComparison
 
   const sidebarWidth =
     sidebarWidthOverride ??
@@ -260,6 +270,96 @@ export default function UnifiedToolView({
               accentColor={mapHydroBadge.accentColor}
               surface="solid"
             />
+          </Box>
+        )}
+        {showComparisonLegend && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: theme.spacing(1),
+              left: theme.spacing(1),
+              zIndex: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.5,
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "6px",
+              px: 1.5,
+              py: 1,
+              boxShadow: theme.shadows[2],
+              pointerEvents: "none",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                style={{ flexShrink: 0 }}
+              >
+                <polygon
+                  points="7,2 2,12 12,12"
+                  fill="#999"
+                  stroke="#fff"
+                  strokeWidth="1"
+                />
+              </svg>
+              <Box
+                component="span"
+                sx={{
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                Improved from baseline
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  backgroundColor: "#999",
+                  border: "1px solid #fff",
+                }}
+              />
+              <Box
+                component="span"
+                sx={{
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                No change
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                style={{ flexShrink: 0 }}
+              >
+                <polygon
+                  points="7,12 2,2 12,2"
+                  fill="#999"
+                  stroke="#fff"
+                  strokeWidth="1"
+                />
+              </svg>
+              <Box
+                component="span"
+                sx={{
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                Worsened from baseline
+              </Box>
+            </Box>
           </Box>
         )}
       </Box>
