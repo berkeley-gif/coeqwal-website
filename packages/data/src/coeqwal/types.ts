@@ -1496,6 +1496,49 @@ export interface DeltaMonthlyResponse {
 // endpoints. Only the per-endpoint response wrapper (e.g. reservoir storage)
 // changes; values/exceedance/box/statistics are common.
 
+/** Annual-only period for the CWS and AG data-in-depth endpoints. */
+export type DidAnnualPeriod = "annual"
+
+/**
+ * Measure keys for the CWS data-in-depth endpoint.
+ *
+ * `delivery` (TAF) and `pct_demand_met` (PCT_DEMAND_MET) come from the
+ * original demand_met_by_year source. `welfare_loss` (USD), `shortage_total`
+ * (TAF), and `shortage_pct` (PCT_SHORTAGE) come from the newer
+ * welfare-outcomes source. As of 2026-08-06 all five measures are available
+ * at every subject, including the NOD_CWS/SOD_CWS aggregates:
+ * `welfare_loss`/`shortage_total` are summed across members (extensive), and
+ * `shortage_pct` is demand-weighted
+ * (`sum(shortage_total)/sum(supply_total+shortage_total)*100`, never exceeds
+ * 100 since both terms are non-negative — no capping needed, unlike
+ * `pct_demand_met`).
+ *
+ * `welfare_loss`'s `exceedance` facet is unconditionally suppressed (extreme
+ * skew makes a wyt-filtered exceedance curve misleading) — silently absent
+ * from `DidFacets` for that measure regardless of the `include` param, not
+ * an error. `values`/`box`/`statistics` are unaffected.
+ */
+export type DidCwsMeasure =
+  | "delivery"
+  | "pct_demand_met"
+  | "welfare_loss"
+  | "shortage_total"
+  | "shortage_pct"
+
+/**
+ * Measure keys for the AG data-in-depth endpoint.
+ *
+ * `net_diversion`, `gw_pumping`, and `shortage` are volumes (TAF). `revenue`
+ * is annual revenue in USD, not a volume, but rides the same generic
+ * value/exceedance/box/statistics shape since the backend's value table
+ * doesn't require a unit to be a volume.
+ */
+export type DidAgMeasure =
+  | "net_diversion"
+  | "gw_pumping"
+  | "shortage"
+  | "revenue"
+
 /** `annual` is intentionally excluded — only april/sept are exposed. */
 export type DidPeriod = "april" | "sept"
 /** Response unit keys. (Request tokens are `volume` / `pct_capacity`.) */
@@ -1533,12 +1576,22 @@ export interface DidExceedancePoint extends DidValuePoint {
   percentile: number | null
 }
 
-/** Facets are all optional; presence depends on the `include` request param. */
+/**
+ * Facets are all optional; presence depends on the `include` request param.
+ *
+ * `unit` is only present for endpoints grouped by measure rather than unit
+ * (CWS, AG) — there, the object key is the measure name (e.g. "revenue"),
+ * not the unit, so the backend echoes the unit onto each facet block. For
+ * unit-grouped endpoints (reservoir storage, river flows, delta salinity)
+ * the unit is already the `DidUnit`/`DidDeltaUnit` key one level up and
+ * `unit` is absent here.
+ */
 export interface DidFacets {
   values?: DidValuePoint[]
   exceedance?: DidExceedancePoint[]
   box?: DidBox | null
   statistics?: DidStatistics
+  unit?: string
 }
 
 /** Request options for the data-in-depth reservoir-storage endpoint. */
@@ -1656,4 +1709,131 @@ export interface DeltaSalinityDidOptions {
 export interface DeltaSalinityDidResponse {
   wyt_filter: number[] | null
   scenarios: DidDeltaScenario[]
+}
+
+// ---- Data in Depth: CWS (annual, grouped by measure) ----
+
+/** One CWS subject within a scenario: period → measure → facets. */
+export interface DidCwsSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<
+    Record<DidAnnualPeriod, Partial<Record<DidCwsMeasure, DidFacets>>>
+  >
+}
+
+export interface DidCwsScenario {
+  scenario: string
+  n_years: number
+  subjects: DidCwsSubject[]
+}
+
+/** Request options for the data-in-depth CWS endpoint. */
+export interface CwsDataInDepthOptions {
+  /** Subject short_codes (e.g. "02_PU", "MWD", "NOD_CWS"). */
+  subjects?: string[]
+  /** Annual only. */
+  periods?: DidAnnualPeriod[]
+  /** Measures to include; default all five (delivery, pct_demand_met, welfare_loss, shortage_total, shortage_pct). */
+  measures?: DidCwsMeasure[]
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/cws */
+export interface CwsDataInDepthResponse {
+  wyt_filter: number[] | null
+  scenarios: DidCwsScenario[]
+}
+
+// ---- Data in Depth: Groundwater storage (annual, grouped by measure) ----
+
+/**
+ * Measure keys for the groundwater-storage data-in-depth endpoint.
+ *
+ * `volume` (TAF, source `GW_STOR`) is extensive and available at every
+ * subject, including the NOD_GroundwaterStorage/SOD_GroundwaterStorage
+ * aggregates (summed across member WBAs). `level` (ft, source `GW_LEVEL`) is
+ * an intensive water-table elevation — summing it across WBAs is physically
+ * meaningless, so it is NEVER aggregated (permanent, not pending): requesting
+ * `measures=level` for the two aggregate subjects returns an empty series
+ * for that subject.
+ */
+export type DidGwMeasure = "volume" | "level"
+
+/** One groundwater subject (WBA or NOD/SOD aggregate) within a scenario: period → measure → facets. */
+export interface DidGroundwaterSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<
+    Record<DidAnnualPeriod, Partial<Record<DidGwMeasure, DidFacets>>>
+  >
+}
+
+export interface DidGroundwaterScenario {
+  scenario: string
+  n_years: number
+  subjects: DidGroundwaterSubject[]
+}
+
+/** Request options for the data-in-depth groundwater-storage endpoint. */
+export interface GroundwaterStorageDidOptions {
+  /** Subject short_codes (e.g. "WBA2", "NOD_GroundwaterStorage"). */
+  subjects?: string[]
+  /** Annual only. */
+  periods?: DidAnnualPeriod[]
+  /** Measures to include; default both (volume, level). `level` is empty for the NOD/SOD aggregates. */
+  measures?: DidGwMeasure[]
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/groundwater-storage */
+export interface GroundwaterStorageDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidGroundwaterScenario[]
+}
+
+// ---- Data in Depth: AG (annual, grouped by measure) ----
+
+/** One AG subject within a scenario: period → measure → facets. */
+export interface DidAgSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<
+    Record<DidAnnualPeriod, Partial<Record<DidAgMeasure, DidFacets>>>
+  >
+}
+
+export interface DidAgScenario {
+  scenario: string
+  n_years: number
+  subjects: DidAgSubject[]
+}
+
+/** Request options for the data-in-depth AG endpoint. */
+export interface AgDataInDepthOptions {
+  /** Subject short_codes (e.g. "02_NA", "NOD_Agriculture"). */
+  subjects?: string[]
+  /** Annual only. */
+  periods?: DidAnnualPeriod[]
+  /** Measures to include; default all net_diversion + gw_pumping + shortage + revenue. */
+  measures?: DidAgMeasure[]
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/ag */
+export interface AgDataInDepthResponse {
+  wyt_filter: number[] | null
+  scenarios: DidAgScenario[]
 }

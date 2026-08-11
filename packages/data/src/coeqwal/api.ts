@@ -8,6 +8,9 @@ import type {
   ReservoirStorageDidOptions,
   RiverFlowsDidOptions,
   DeltaSalinityDidOptions,
+  CwsDataInDepthOptions,
+  AgDataInDepthOptions,
+  GroundwaterStorageDidOptions,
 } from "./types"
 
 /**
@@ -27,6 +30,7 @@ interface DataInDepthParams {
   subjects?: string[]
   periods?: string[]
   units?: string[]
+  measures?: string[]
   include?: string[]
   wyt?: number[]
 }
@@ -42,6 +46,7 @@ function dataInDepthPath(
   if (opts.subjects?.length) q.set("subjects", uniqSort(opts.subjects))
   if (opts.periods?.length) q.set("periods", uniqSort(opts.periods))
   if (opts.units?.length) q.set("units", uniqSort(opts.units))
+  if (opts.measures?.length) q.set("measures", uniqSort(opts.measures))
   if (opts.include?.length) q.set("include", uniqSort(opts.include))
   if (opts.wyt?.length)
     q.set(
@@ -382,4 +387,18 @@ export const ENDPOINTS = {
     scenarios: string[],
     opts: DeltaSalinityDidOptions = {},
   ) => dataInDepthPath("/data-in-depth/delta-salinity", scenarios, opts),
+
+  /** Annual CWS delivery + percent-demand-met + welfare-outcome measures with live-computed stats. */
+  cwsDataInDepth: (scenarios: string[], opts: CwsDataInDepthOptions = {}) =>
+    dataInDepthPath("/data-in-depth/cws", scenarios, opts),
+
+  /** Annual AG net diversion + GW pumping + shortage + revenue with live-computed stats. */
+  agDataInDepth: (scenarios: string[], opts: AgDataInDepthOptions = {}) =>
+    dataInDepthPath("/data-in-depth/ag", scenarios, opts),
+
+  /** Annual groundwater storage volume + water-table level with live-computed stats. */
+  groundwaterStorageDataInDepth: (
+    scenarios: string[],
+    opts: GroundwaterStorageDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/groundwater-storage", scenarios, opts),
 } as const
