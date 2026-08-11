@@ -150,7 +150,7 @@ export type RadarAxisLabelDetailPayload = {
   scenarioId: string
   scenarioName: string
   tierIndex: number
-  weighted_score: string
+  average_score: string
 }
 
 /** Payload passed to `onScenarioControlsMount`, includes layout for anchor-aware chrome. */
@@ -315,23 +315,8 @@ function measureSvgTextWidth(
   return w
 }
 
-/** Matches compact StrategyHeader short-code typography (0.6875rem, weight 400). */
-function estimateAxisDetailChromeRowWidthPx(
-  svg: SVGSVGElement | null,
-  scenarioId: string,
-  fontFamily: string,
-): number {
-  const shortCodeSpec = {
-    fontSize: "11px",
-    fontFamily,
-    fontWeight: 400,
-  }
-  const codeW = measureSvgTextWidth(
-    svg,
-    scenarioId.toUpperCase(),
-    shortCodeSpec,
-  )
-  return AXIS_DETAIL_CHROME_ROW_FIXED_PX + codeW
+function estimateAxisDetailChromeRowWidthPx(): number {
+  return AXIS_DETAIL_CHROME_ROW_FIXED_PX
 }
 
 function estimateLineHeightPx(fontSize: string): number {
@@ -490,7 +475,7 @@ export function renderRadarAxisLabelDetailInto(
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
   const tierLevel = RADAR_TIER_LABELS[tierIdx - 1] ?? `Tier ${tierIdx}`
-  const tierScore = "(" + payload.weighted_score + ")"
+  const tierScore = "(" + payload.average_score + ")"
   const tierText = [tierLevel, tierScore].join(" ")
 
   const inner = detailG.append("g").attr("class", "axis-label-detail-inner")
@@ -532,13 +517,7 @@ export function renderRadarAxisLabelDetailInto(
     AXIS_DETAIL_CHIP_TEXT_GAP +
     measureSvgTextWidth(svgRoot, tierDisplay, tierSpec)
 
-  const chromeRowW = showChrome
-    ? estimateAxisDetailChromeRowWidthPx(
-        svgRoot,
-        payload.scenarioId,
-        s.fontFamily,
-      )
-    : 0
+  const chromeRowW = showChrome ? estimateAxisDetailChromeRowWidthPx() : 0
 
   const innerContentW = Math.max(scenarioBlockW, tierRowW, chromeRowW)
   const foW = Math.min(

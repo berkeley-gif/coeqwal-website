@@ -48,26 +48,30 @@ import {
 } from "../../../../../../../content/scenarios"
 import {
   getLocation,
+  getLocationTitle,
   getVariable,
   LOCATION_GROUPS,
   type VariableDef,
   type VariableView,
 } from "../config/variableRegistry"
 import {
+  gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
   mockSummaryValue,
+  mockWaterYearType,
   seriesStats,
   type MonthlyBand,
   type SeriesStats,
 } from "../config/mockDataEngine"
+import { filterSeriesByWyt } from "../config/wytFilter"
 import {
   didDomainForVariable,
   didPeriodForVariable,
   toDidSubject,
   unitTokenForView,
   includeForView,
-  pickLiveSeries,
+  pickLiveSeriesPoints,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
@@ -85,6 +89,10 @@ export interface VariableMember {
   isReference: boolean
   /** Annual series in display units (percent-of-capacity applied for "pct") */
   series: number[]
+  /** Water years aligned with `series` (live members only; absent for mock) */
+  waterYears?: number[]
+  /** True when this member's series came from the live API (mock fallback = false) */
+  isLive?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -106,6 +114,8 @@ export interface VariableData {
   source: "live" | "mock"
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string
+  /** Held location as a figure-title name ("Shasta Reservoir"; "" if none) */
+  locationTitleName: string
   /** Held-constant climate label (scenarios / locations axes) */
   climateName: string
   /** Held-constant scenario label (climates / locations axes) */
@@ -149,6 +159,7 @@ export function useVariableData(): VariableData {
     pinnedLocationByGroup,
     selectedClimates,
     selectedLocationsByGroup,
+    selectedWaterYearTypes,
   } = useDataSlice()
   const selectedScenarios = useWorkspaceSlice((s) => s.selectedScenarios)
   const workspaceHydroclimate = useWorkspaceSlice((s) => s.hydroclimate)
@@ -178,6 +189,7 @@ export function useVariableData(): VariableData {
     (groupId ? selectedLocationsByGroup[groupId] : undefined) ?? []
   ).join(",")
   const scenarioIdsJoined = selectedScenarios.join(",")
+  const wytJoined = selectedWaterYearTypes.join(",")
 
   // Scenario comparison set (reference first), shared by the fan-out and specs.
   const compareScenarioIds = useMemo(
@@ -213,6 +225,9 @@ export function useVariableData(): VariableData {
     ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
     : []
 
+  const wyt =
+    selectedWaterYearTypes.length > 0 ? selectedWaterYearTypes : undefined
+
   // Fan out each domain's endpoint across the comparison scenarios. Only the
   // active domain passes real ids; the others pass [] so every slot defers.
   // The hook count stays constant across renders (Rules of Hooks).
@@ -226,6 +241,7 @@ export function useVariableData(): VariableData {
           period === "annual" ? undefined : period ? [period] : undefined,
         units: view === "pct" ? ["pct_capacity"] : ["volume"],
         include,
+        wyt,
       }),
   )
   const riverSlots = useMultiScenarioSlots(
@@ -236,6 +252,7 @@ export function useVariableData(): VariableData {
         subjects: subject ? [subject] : undefined,
         units: ["volume"],
         include,
+        wyt,
       }),
   )
   const deltaSlots = useMultiScenarioSlots(
@@ -248,6 +265,7 @@ export function useVariableData(): VariableData {
           period === "annual" ? undefined : period ? [period] : undefined,
         units: ["km"],
         include,
+        wyt,
       }),
   )
 
@@ -268,6 +286,7 @@ export function useVariableData(): VariableData {
     const emptyContext = {
       locationName:
         getLocation(groupId ?? "reservoirs", heldLocation)?.name ?? "",
+      locationTitleName: groupId ? getLocationTitle(groupId, heldLocation) : "",
       climateName: climateLabel(heldClimate),
       scenarioName: scenarioLabel(heldScenario),
     }
@@ -337,6 +356,7 @@ export function useVariableData(): VariableData {
     }
 
     const isPct = view === "pct"
+    const isLevel = view === "level"
 
     let anyLive = false
     const members: VariableMember[] = specs.map((spec) => {
@@ -347,14 +367,18 @@ export function useVariableData(): VariableData {
         spec.climateKey,
         spec.locationId,
       )
-      const capacity = getLocation(groupId, spec.locationId)?.capacityTaf
+      const location = getLocation(groupId, spec.locationId)
       let series: number[]
-      if (isPct && capacity) {
-        const cap = capacity
+      if (isPct && location?.capacityTaf) {
+        const cap = location.capacityTaf
         series = raw.map((v) => (v / cap) * 100)
+      } else if (isLevel && location) {
+        series = gwLevelFromStorage(raw, location)
       } else {
         series = raw
       }
+      let waterYears: number[] | undefined
+      let adoptedLive = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
@@ -366,17 +390,35 @@ export function useVariableData(): VariableData {
         spec.slotIndex != null
       ) {
         const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
-        const liveSeries = pickLiveSeries(
+        const points = pickLiveSeriesPoints(
           block,
           domain,
           subject,
           period,
           unitToken,
         )
-        if (liveSeries.length > 0) {
-          series = liveSeries
+        if (points.series.length > 0) {
+          series = points.series
+          waterYears =
+            points.waterYears.length > 0 ? points.waterYears : undefined
           anyLive = true
+          adoptedLive = true
         }
+      }
+
+      // Mock members: apply the water-year-type filter client-side with the
+      // deterministic sample classification. Live members arrive already
+      // filtered by the wyt request parameter, in EVERY view (the hooks pass
+      // wyt unconditionally), so the mock path filters in every view too:
+      // the displayed summary value never derives from the series, but the
+      // exported series and stats must match what the capture's provenance
+      // header claims.
+      if (!adoptedLive && selectedWaterYearTypes.length > 0) {
+        series = filterSeriesByWyt(
+          series,
+          selectedWaterYearTypes,
+          mockWaterYearType,
+        )
       }
 
       const stats = seriesStats(series)
@@ -405,18 +447,25 @@ export function useVariableData(): VariableData {
         label: spec.label,
         isReference: spec.isReference,
         series,
+        waterYears,
+        isLive: adoptedLive,
         stats,
         bands,
         value,
       }
     })
 
-    const unit = isPct ? "%" : view === "cv" ? "" : variable.unit
+    const viewUnit = variable.viewUnits?.[view]
+    const unit = isPct
+      ? "%"
+      : view === "cv"
+        ? ""
+        : (viewUnit?.unit ?? variable.unit)
     const unitLabel = isPct
       ? "percent of capacity"
       : view === "cv"
         ? "coefficient of variation"
-        : variable.unitLabel
+        : (viewUnit?.unitLabel ?? variable.unitLabel)
 
     return {
       variable,
@@ -450,5 +499,6 @@ export function useVariableData(): VariableData {
     unitToken,
     liveSignature,
     liveLoading,
+    wytJoined,
   ])
 }

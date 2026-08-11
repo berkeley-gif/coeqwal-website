@@ -18,6 +18,7 @@ import { getSector, getVariable } from "../config/variableRegistry"
 import SectorRail from "./SectorRail"
 import CompareControls from "./CompareControls"
 import ViewBar from "./ViewBar"
+import WytFilterChips from "./WytFilterChips"
 import ChartCard from "./ChartCard"
 import MetricExplainers from "./MetricExplainers"
 
@@ -39,7 +40,17 @@ export default function ExplorerView() {
     >
       <SectorRail />
 
-      <Box sx={{ flex: 1, minWidth: 0, overflowY: "auto", pb: 3 }}>
+      {/* Right padding lives inside the scroller so the scrollbar hugs the
+          tool's right edge instead of floating at the padding boundary. */}
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          overflowY: "auto",
+          pb: 3,
+          pr: { xs: 2, md: 4 },
+        }}
+      >
         {variable && (
           <Box
             sx={{
@@ -73,6 +84,7 @@ export default function ExplorerView() {
 
         <CompareControls />
         <ViewBar />
+        <WytFilterChips />
         <Box sx={{ mt: 2 }}>
           <ChartCard />
         </Box>

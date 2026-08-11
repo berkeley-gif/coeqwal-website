@@ -68,7 +68,4 @@ export interface StrategyGridProps {
   activeScenarioIds?: Set<string>
   /** Called on mouse enter/leave for hover sync with other panels */
   onRowHover?: (scenarioIds: string[] | null) => void
-
-  /** Called when the internal layout mode changes (derived from container width) */
-  onLayoutModeChange?: (mode: "full" | "wrapped" | "compact") => void
 }

@@ -12,7 +12,7 @@ import type { ScenarioTiersResponse } from "../types"
 /**
  * Fetch and cache tier values for a specific scenario
  *
- * Returns the full tier data including weighted_score, normalized_score,
+ * Returns the full tier data including average_score, normalized_score,
  * and distribution data for multi-value tiers.
  *
  * @param scenarioId - Scenario ID (e.g., "s0020"), or null to skip fetching
@@ -29,7 +29,7 @@ import type { ScenarioTiersResponse } from "../types"
  *   return (
  *     <ul>
  *       {Object.entries(data?.tiers ?? {}).map(([code, tier]) => (
- *         <li key={code}>{code}: {tier.weighted_score}</li>
+ *         <li key={code}>{code}: {tier.average_score}</li>
  *       ))}
  *     </ul>
  *   )

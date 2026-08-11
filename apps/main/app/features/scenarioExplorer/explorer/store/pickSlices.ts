@@ -58,6 +58,7 @@ export const WORKSPACE_TOOLBAR_PERSIST_KEYS = [
   "showKeyOperations",
   "showAlternativeBaselines",
   "outcomeDisplayMode",
+  "scenarioRailCollapsed",
 ] as const satisfies readonly (keyof WorkspaceState)[]
 
 /** Shared chart overlay toggles */
@@ -112,6 +113,7 @@ export const EQUITY_PERSIST_KEYS = [
   "showEquityComparison",
   "equityVisibleOutcomes",
   "yAxisMode",
+  "equityHiddenCategories",
 ] as const satisfies readonly (keyof EquityState)[]
 
 /**
@@ -149,8 +151,8 @@ export const DATA_PERSIST_KEYS = [
   "pinnedLocationByGroup",
   "selectedClimates",
   "selectedLocationsByGroup",
-  "scenarioRailCollapsed",
   "variableRailCollapsed",
+  "selectedWaterYearTypes",
 ] as const satisfies readonly (keyof DataState)[]
 
 /** List fields kept in memory only (not written to sessionStorage) */
@@ -189,6 +191,7 @@ const WORKSPACE_ACTION_KEYS = [
   "setShowKeyOperations",
   "setOutcomeDisplayMode",
   "setShowMap",
+  "setScenarioRailCollapsed",
   "addShareItem",
   "removeShareItem",
   "clearShareItems",
@@ -242,6 +245,7 @@ const EQUITY_ACTION_KEYS = [
   "setShowEquityComparison",
   "setEquityVisibleOutcomes",
   "setYAxisMode",
+  "toggleEquityCategory",
 ] as const satisfies readonly (keyof EquitySlice)[]
 
 const RESILIENCE_ACTION_KEYS = [
@@ -276,8 +280,9 @@ const DATA_ACTION_KEYS = [
   "setPinnedLocation",
   "setSelectedClimates",
   "setSelectedLocations",
-  "setScenarioRailCollapsed",
   "setVariableRailCollapsed",
+  "toggleWaterYearType",
+  "clearWaterYearTypes",
 ] as const satisfies readonly (keyof DataSlice)[]
 
 function pickKeys<T extends object, K extends keyof T>(

@@ -25,16 +25,19 @@ export default function KeyOutcomesPanel() {
         />
 
         <InfoCardGrid columns={3} rowGap={theme.space.section.sm}>
-          {KEY_OUTCOMES.map(({ outcomeCode, title, description }) => (
-            <InfoCard
-              key={outcomeCode}
-              title={title}
-              description={description}
-              variant="onDark"
-              onClick={() => setOutcomeDefinitionModal(outcomeCode)}
-              ariaLabel={`${title}: open full definition and outcome levels`}
-            />
-          ))}
+          {KEY_OUTCOMES.map(({ outcomeCode, description }) => {
+            const title = getOutcomeName(outcomeCode)
+            return (
+              <InfoCard
+                key={outcomeCode}
+                title={title}
+                description={description}
+                variant="onDark"
+                onClick={() => setOutcomeDefinitionModal(outcomeCode)}
+                ariaLabel={`${title}: open full definition and outcome levels`}
+              />
+            )
+          })}
         </InfoCardGrid>
       </PanelShell>
 

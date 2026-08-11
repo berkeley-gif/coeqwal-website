@@ -12,8 +12,8 @@
  * Tier chart data from `useResolvedScenarioTiers` (API batch via SWR, warmed by `usePrefetchTiers`).
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Box, Typography, Snackbar, useTheme, alpha } from "@repo/ui/mui"
+import React, { useMemo, useRef } from "react"
+import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
 import { useWorkspaceSlice, useListSlice } from "../../../store"
 import StrategyGrid from "./grid"
 import type { ScenarioTheme } from "../../../../../../content/scenarios"
@@ -21,6 +21,7 @@ import type { ChartDataPoint } from "../../../../../scenarios/components/shared"
 import { getScenariosWithIcon } from "../../../../../scenarios/components/shared/iconRegistry"
 import { useResolvedScenarioTiers } from "../../hooks/useResolvedScenarioTiers"
 import { useOrderedScenarios } from "../../hooks/useOrderedScenarios"
+import VisualizeRail from "./VisualizeRail"
 
 interface ListViewProps {
   highlightedIds?: Set<string> | null
@@ -62,14 +63,6 @@ export default function ListView({ highlightedIds }: ListViewProps) {
 
   const listScrollRef = useRef<HTMLDivElement>(null)
 
-  const [gridLayoutMode, setGridLayoutMode] = useState<
-    "full" | "wrapped" | "compact"
-  >("full")
-  const handleLayoutModeChange = useCallback(
-    (mode: "full" | "wrapped" | "compact") => setGridLayoutMode(mode),
-    [],
-  )
-
   const {
     selectedScenarios,
     toggleScenario,
@@ -77,6 +70,7 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     showAlternativeBaselines,
     showKeyOperations,
     setShowAlternativeBaselines,
+    setExploreMode,
   } = useWorkspaceSlice()
   const {
     showOnlyChosen,
@@ -87,52 +81,7 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     setSelectedTheme,
     setSelectedIconId,
     groupByTheme,
-    pinnedScenarioIds,
-    pinCapReached,
-    setMaxPinnedScenarios,
-    dismissPinCapReached,
-    stashedPinnedScenarioIds,
-    stashAndTrimPins,
-    restoreStashedPins,
-    pinsTrimmedForMap,
-    dismissPinsTrimmedForMap,
   } = useListSlice()
-
-  const ROW_HEIGHT_ESTIMATE = 80
-  const MAX_STICKY_RATIO = 0.35
-  const WRAPPED_PIN_CAP = 1
-
-  const isWrappedLayout = gridLayoutMode !== "full"
-
-  useEffect(() => {
-    if (isWrappedLayout) {
-      setMaxPinnedScenarios(WRAPPED_PIN_CAP)
-      return
-    }
-    const compute = () => {
-      const max = Math.max(
-        2,
-        Math.ceil(
-          (window.innerHeight * MAX_STICKY_RATIO) / ROW_HEIGHT_ESTIMATE,
-        ),
-      )
-      setMaxPinnedScenarios(max)
-    }
-    compute()
-    window.addEventListener("resize", compute)
-    return () => window.removeEventListener("resize", compute)
-  }, [setMaxPinnedScenarios, isWrappedLayout])
-
-  // Stash pins when layout wraps (if more than cap), restore when it goes back to full
-  useEffect(() => {
-    if (isWrappedLayout && pinnedScenarioIds.length > WRAPPED_PIN_CAP) {
-      stashAndTrimPins(WRAPPED_PIN_CAP)
-    } else if (!isWrappedLayout && stashedPinnedScenarioIds !== null) {
-      restoreStashedPins()
-    }
-    // Only react to layout mode changes - not to pin array changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isWrappedLayout])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
@@ -240,103 +189,79 @@ export default function ListView({ highlightedIds }: ListViewProps) {
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
-    pinnedScenarioIds,
-    onLayoutModeChange: handleLayoutModeChange,
   }
 
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         height: "100%",
         overflow: "hidden",
-        backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Fixed header: stays above the scroll region. Soft bottom
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          flex: 1,
+          overflow: "hidden",
+          backgroundColor: theme.palette.grey[100],
+        }}
+      >
+        {/* Fixed header: stays above the scroll region. Soft bottom
           shadow (wider blur than sm) so content reads as scrolling
           underneath with a more diffuse edge. */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          position: "relative",
-          zIndex: 1,
-          px: theme.space.tool.px,
-          py: 1.25,
-          backgroundColor: theme.palette.grey[100],
-          boxShadow: [
-            `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}`,
-            `0 5px 18px -2px ${alpha(theme.palette.common.black, 0.1)}`,
-          ].join(", "),
-        }}
-      >
-        <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+        <Box
+          sx={{
+            flexShrink: 0,
+            position: "relative",
+            zIndex: 1,
+            px: theme.space.tool.px,
+            py: 1.25,
+            backgroundColor: theme.palette.grey[100],
+            boxShadow: [
+              `0 1px 2px ${alpha(theme.palette.common.black, 0.06)}`,
+              `0 5px 18px -2px ${alpha(theme.palette.common.black, 0.1)}`,
+            ].join(", "),
+          }}
+        >
+          <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+        </Box>
+
+        {/* Scrollable content */}
+        <Box
+          ref={listScrollRef}
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            px: theme.space.tool.px,
+            pt: "10px",
+            pb: theme.space.section.xl,
+          }}
+        >
+          {showNoResultsMessage && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: theme.palette.grey[600],
+                fontStyle: "italic",
+                mb: 2,
+                mt: 1,
+              }}
+            >
+              No scenarios match &ldquo;{searchQuery}&rdquo;
+            </Typography>
+          )}
+          <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+        </Box>
       </Box>
-
-      {/* Scrollable content */}
-      <Box
-        ref={listScrollRef}
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          overscrollBehavior: "contain",
-          px: theme.space.tool.px,
-          pt: "10px",
-          pb: theme.space.section.xl,
-        }}
-      >
-        {showNoResultsMessage && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: theme.palette.grey[600],
-              fontStyle: "italic",
-              mb: 2,
-              mt: 1,
-            }}
-          >
-            No scenarios match &ldquo;{searchQuery}&rdquo;
-          </Typography>
-        )}
-        <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
-      </Box>
-
-      <Snackbar
-        open={pinCapReached}
-        autoHideDuration={3000}
-        onClose={dismissPinCapReached}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="Pin limit reached - unpin a scenario to pin another"
-        ContentProps={{
-          sx: {
-            backgroundColor: theme.palette.grey[800],
-            color: theme.palette.common.white,
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            borderRadius: theme.borderRadius.sm,
-            justifyContent: "center",
-          },
-        }}
-      />
-
-      <Snackbar
-        open={pinsTrimmedForMap}
-        autoHideDuration={4000}
-        onClose={dismissPinsTrimmedForMap}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message="Pins reduced to 1 for this view - will restore at full width"
-        ContentProps={{
-          sx: {
-            backgroundColor: theme.palette.grey[800],
-            color: theme.palette.common.white,
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            borderRadius: theme.borderRadius.sm,
-            justifyContent: "center",
-          },
-        }}
+      <VisualizeRail
+        active={selectedScenarios.length > 0}
+        onClick={() => setExploreMode("bar")}
       />
     </Box>
   )

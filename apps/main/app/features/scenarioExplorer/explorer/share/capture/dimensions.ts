@@ -27,6 +27,7 @@ export const CAPTURE_DIMENSIONS = {
   resilienceTile: { width: 800, height: 520 },
   resiliencePanel: { width: 1200, height: 800 },
   barChartRow: { width: 720, height: 80 },
+  data: { width: 900, height: 520 },
 } as const satisfies Record<string, CaptureSize>
 
 export type CaptureDimensionKey = keyof typeof CAPTURE_DIMENSIONS

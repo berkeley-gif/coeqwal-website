@@ -192,12 +192,26 @@ export default function EquityPanel({
   // than the shared multi-select, so entering/leaving Distribution
   // does not disturb List/Radar/Resilience/Comparison selections.
   const { equityFocusScenario, showMap, setShowMap } = useWorkspaceSlice()
-  const { showEquityComparison, yAxisMode } = useEquitySlice()
+  const { showEquityComparison, yAxisMode, equityHiddenCategories } =
+    useEquitySlice()
 
-  const { objectives, categories } = useEquityObjectives({
-    scenarioId: equityFocusScenario,
-    compareToBaseline: showEquityComparison,
-  })
+  const { objectives: allObjectives, categories: allCategories } =
+    useEquityObjectives({
+      scenarioId: equityFocusScenario,
+      compareToBaseline: showEquityComparison,
+    })
+
+  // Categories toggled off in EquityChartControls are excluded from the
+  // grid entirely, so the remaining ones get more room.
+  const categories = useMemo(
+    () => allCategories.filter((c) => !equityHiddenCategories.includes(c)),
+    [allCategories, equityHiddenCategories],
+  )
+  const objectives = useMemo(
+    () =>
+      allObjectives.filter((o) => !equityHiddenCategories.includes(o.category)),
+    [allObjectives, equityHiddenCategories],
+  )
 
   const [selectedObjectives, setSelectedObjectives] = useState<
     TierGridProps["objectives"]

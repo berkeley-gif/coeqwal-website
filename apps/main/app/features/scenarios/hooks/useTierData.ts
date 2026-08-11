@@ -109,7 +109,7 @@ const extractScoreData = (
     scores[shortCode] = {
       shortCode,
       type: tierInfo.type,
-      weighted_score: tierInfo.weighted_score,
+      average_score: tierInfo.average_score,
       normalized_score: tierInfo.normalized_score,
     }
   })
@@ -176,7 +176,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 
   return {
     chartData, // Keyed by short code (e.g., chartData["CWS_DEL"])
-    scoreData, // Keyed by short code, contains weighted_score and normalized_score
+    scoreData, // Keyed by short code, contains average_score and normalized_score
     rawData: scenarioData,
     outcomeNames,
     isLoading: scenarioLoading || tiersLoading,

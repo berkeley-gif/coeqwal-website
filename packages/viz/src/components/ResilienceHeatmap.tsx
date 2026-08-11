@@ -625,10 +625,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const continuousLabel =
           cell.continuousValue == null
             ? String(cell.tierLevel)
-            : cell.type === "single_value" ||
-                cell.tierLevel === cell.continuousValue
-              ? String(cell.tierLevel)
-              : cell.continuousValue.toFixed(1)
+            : cell.continuousValue.toFixed(2)
         return { fill, text: continuousLabel, textColor }
       },
       [
@@ -704,9 +701,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           valueText = parts.length > 0 ? parts.join(" · ") : "No data"
         } else if (cell.tierLevel != null) {
           valueText = `Tier ${cell.tierLevel}${
-            cell.continuousValue != null &&
-            cell.type !== "single_value" &&
-            cell.tierLevel !== cell.continuousValue
+            cell.continuousValue != null
               ? ` (${cell.continuousValue.toFixed(2)})`
               : ""
           }`

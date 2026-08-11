@@ -7,6 +7,8 @@ import {
   includeForView,
   seriesFromValues,
   pickLiveSeries,
+  pointsFromValues,
+  pickLiveSeriesPoints,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -22,7 +24,7 @@ test("didDomainForVariable maps live variables and returns null for mock ones", 
   expect(didDomainForVariable("x2_sep")).toBe("delta")
   // Not served live -> mock:
   expect(didDomainForVariable("riv_uif")).toBeNull() // % of unimpaired not served
-  expect(didDomainForVariable("gw_vol")).toBeNull()
+  expect(didDomainForVariable("gw_stor")).toBeNull()
   expect(didDomainForVariable("station_ec")).toBeNull()
   expect(didDomainForVariable("nonsense")).toBeNull()
 })
@@ -33,7 +35,7 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("riv_flow")).toBe("annual")
   expect(didPeriodForVariable("x2_apr")).toBe("april")
   expect(didPeriodForVariable("x2_sep")).toBe("sept")
-  expect(didPeriodForVariable("gw_vol")).toBeNull()
+  expect(didPeriodForVariable("gw_stor")).toBeNull()
 })
 
 test("toDidSubject maps reservoir location ids to API subject codes", () => {
@@ -161,4 +163,62 @@ test("pickLiveSeries reads the values facet by domain, subject, period, unit", (
   expect(
     pickLiveSeries(undefined, "reservoir", "SHSTA", "april", "volume"),
   ).toEqual([])
+})
+
+test("pointsFromValues keeps years aligned with values and drops null years", () => {
+  const { series, waterYears } = pointsFromValues([
+    { water_year: 1921, value: 4200 },
+    { water_year: 1922, value: null },
+    { water_year: 1923, value: 3100 },
+  ])
+  expect(series).toEqual([4200, 3100])
+  expect(waterYears).toEqual([1921, 1923])
+})
+
+test("pointsFromValues tolerates missing water_year fields", () => {
+  const { series, waterYears } = pointsFromValues([{ value: 5 }, { value: 7 }])
+  expect(series).toEqual([5, 7])
+  expect(waterYears).toEqual([])
+})
+
+test("pickLiveSeriesPoints mirrors pickLiveSeries and adds years", () => {
+  const block = {
+    reservoirs: [
+      {
+        subject: "SHSTA",
+        periods: {
+          april: { TAF: { values: [{ water_year: 1921, value: 4200 }] } },
+        },
+      },
+    ],
+  }
+  const points = pickLiveSeriesPoints(
+    block,
+    "reservoir",
+    "SHSTA",
+    "april",
+    "volume",
+  )
+  expect(points.series).toEqual([4200])
+  expect(points.waterYears).toEqual([1921])
+  expect(
+    pickLiveSeriesPoints(block, "reservoir", "OROVL", "april", "volume").series,
+  ).toEqual([])
+})
+
+test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted", async () => {
+  // The wyt= query parameter IS the server-side water-year-type filter and
+  // doubles as part of the SWR cache key, so its serialization must be
+  // order-independent. Imported from @repo/data source directly (types-only
+  // imports, safe in this node-side spec).
+  const { ENDPOINTS } = await import("../../../packages/data/src/coeqwal/api")
+  const path = ENDPOINTS.reservoirStorageDataInDepth(["s0020"], {
+    subjects: ["SHSTA"],
+    wyt: [5, 1, 5],
+  })
+  expect(path).toContain("wyt=1%2C5")
+  const unfiltered = ENDPOINTS.reservoirStorageDataInDepth(["s0020"], {
+    subjects: ["SHSTA"],
+  })
+  expect(unfiltered).not.toContain("wyt=")
 })

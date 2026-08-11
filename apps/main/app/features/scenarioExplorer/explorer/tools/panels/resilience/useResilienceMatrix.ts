@@ -10,7 +10,7 @@
  * usePrefetchTiers(), so no extra network traffic.
  *
  * Produces a flat matrix of per-(scenario, outcome, hydroclimate) cells:
- *   - Aggregate outcomes use the API's weighted_score (multi-value) or
+ *   - Aggregate outcomes use the API's average_score (multi-value) or
  *     level (single-value).
  *   - NOD/SOD rows read the WAM team dashboard-derived regional tier means.
  *
@@ -132,16 +132,16 @@ function buildAggregateCell(
       outcomeCode,
       hydroclimate,
       available: true,
-      continuousValue: tierInfo.level,
+      continuousValue: tierInfo.average_score,
       tierLevel: tierInfo.level,
       type: "single_value",
     }
   }
 
-  // `weighted_score` is nullable (no tier row or degenerate distribution).
+  // `average_score` is nullable (no tier row or degenerate distribution).
   // Treat that as unavailable so the heatmap cell renders the empty state
   // instead of color-filling at tier 1.
-  if (score.weighted_score == null) {
+  if (score.average_score == null) {
     return {
       scenarioId,
       outcomeCode,
@@ -159,8 +159,8 @@ function buildAggregateCell(
     outcomeCode,
     hydroclimate,
     available: true,
-    continuousValue: score.weighted_score,
-    tierLevel: clampTier(score.weighted_score),
+    continuousValue: score.average_score,
+    tierLevel: clampTier(score.average_score),
     type: "multi_value",
   }
 }

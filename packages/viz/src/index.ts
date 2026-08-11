@@ -88,6 +88,13 @@ export type {
 } from "./components/CategoricalBarChart"
 export { SERIES_PALETTE, getSeriesColor } from "./seriesPalette"
 
+export { default as ExceedanceChartSnapshot } from "./components/ExceedanceChartSnapshot"
+export type { ExceedanceChartSnapshotProps } from "./components/ExceedanceChartSnapshot"
+export { default as BoxPlotSnapshot } from "./components/BoxPlotSnapshot"
+export type { BoxPlotSnapshotProps } from "./components/BoxPlotSnapshot"
+export { default as CategoricalBarChartSnapshot } from "./components/CategoricalBarChartSnapshot"
+export type { CategoricalBarChartSnapshotProps } from "./components/CategoricalBarChartSnapshot"
+
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps, RadarPlotPalette } from "./components/RadarPlot"
 export { default as RadarPlotSnapshot } from "./components/RadarPlotSnapshot"

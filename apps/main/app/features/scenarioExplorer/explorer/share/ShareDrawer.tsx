@@ -37,7 +37,7 @@ function ShareTab({
       sx={{
         position: "fixed",
         right: isOpen ? DRAWER_WIDTH : 0,
-        top: "50%",
+        top: "40%",
         transform: "translateY(-50%)",
         zIndex: (theme.zIndex?.drawer ?? 1200) + 1,
         transition: "right 225ms cubic-bezier(0, 0, 0.2, 1)",
@@ -53,11 +53,11 @@ function ShareTab({
         borderRadius: `${theme.borderRadius.md} 0 0 ${theme.borderRadius.md}`,
         cursor: "pointer",
         pointerEvents: "auto",
-        backgroundColor: theme.palette.blue.bright,
+        backgroundColor: theme.palette.tabPanels.share,
         color: theme.palette.common.white,
         boxShadow: theme.shadow.md,
         "&:hover": {
-          backgroundColor: theme.palette.blue.darkest,
+          filter: "brightness(1.15)",
         },
       }}
     >

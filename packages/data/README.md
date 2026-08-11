@@ -429,13 +429,13 @@ const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
 // scoreData: Record<outcomeCode, OutcomeScoreData>
 // scoreData["CWS_DEL"] -> {
 //   shortCode: "CWS_DEL", type: "multi_value",
-//   weighted_score: 1.8, normalized_score: 0.73
+//   average_score: 1.8, normalized_score: 0.73
 // }
 
 // rawData: ScenarioTiersResponse
 // rawData.tiers["CWS_DEL"] -> {
 //   name: "Community Water Systems Delivery", type: "multi_value",
-//   weighted_score: 1.8, normalized_score: 0.73,
+//   average_score: 1.8, normalized_score: 0.73,
 //   data: [
 //     { value: 70, normalized: 0.7 },   // index 0 = tier1 (best)
 //     { value: 20, normalized: 0.2 },   // index 1 = tier2
@@ -614,7 +614,7 @@ CACHE_KEYS.tierLocations("s0020", "CWS_DEL")  // ["tier-locations", "s0020", "CW
 import type {
   TierListItem, // Tier metadata from /api/tiers/list
   TierInfo, // Full tier data including scores
-  TierScores, // weighted_score and normalized_score
+  TierScores, // average_score and normalized_score
   ScenarioTiersResponse, // Response from scenario tiers endpoint
   ScenarioListItem, // Scenario metadata
   TierMapping, // Record<string, string> for lookups
@@ -691,24 +691,21 @@ Do not use it for:
 
 The browser's HTTP cache already handles caching for static files. The value `useLocalData` adds is the React-level `{ data, isLoading, error }` shape and the in-process dedup. If you do not need those, a plain `fetch` is fine.
 
-## Tier scores: `weighted_score` vs `normalized_score`
+## Tier scores: `average_score` vs `normalized_score`
 
 Every multi-value tier row carries two scores. They hold the same information in two presentations, not two different measurements. The choice between them comes down to what encoding each chart needs.
 
-Both are derived from the four normalized tier proportions (`n1..n4`, the share of a scenario's locations in each tier) by `calculate_tier_scores` in the API (`api/coeqwal-api/routes/tier_endpoints.py`):
-
-- **`weighted_score`** - the count-weighted mean tier level, `1.0` (best) to `4.0` (worst):
-  `(1·n1 + 2·n2 + 3·n3 + 4·n4) / Σn`. It stays on the native 1-4 tier scale, so **lower is better**.
-- **`normalized_score`** - `weighted_score` rescaled to `0.0` (worst) to `1.0` (best) via `(4 - weighted_score) / 3`. The direction is flipped so **higher is better**. No new information, just a uniform axis for visualizations like the radar chart.
+- **`average_score`** - the mean continuous tier score, `1.0` (best) to `5.0` (worst).
+- **`normalized_score`** - `average_score` rescaled to `0.0` (worst) to `1.0` (best) via `(5 - average_score) / 4`. The direction is flipped so **higher is better**. No new information, just a uniform axis for visualizations like the radar chart.
 
 Single-value outcomes carry the same pair, derived from the tier level directly.
 
 ### Which visualization uses which, and why
 
-| Score              | Used by                                                        | Why                                                                                                                                                                                                                                                   |
-| ------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `weighted_score`   | Scenario **sort / comparison**, and the **resilience heatmap** | The heatmap paints each cell one of four tier colors, so it rounds the value into a tier band and looks up the tier palette. It needs the value on the native 1-4 tier scale.                                                                         |
-| `normalized_score` | The **radar plot** axes                                        | The radar plots every outcome on one shared axis where outward = better. It maps the score to `[-1, 1]` via `normalized_score * 2 - 1`, so it needs the 0-1, higher-is-better orientation. `weighted_score` would render inverted and need rescaling. |
+| Score              | Used by                                                        | Why                                                                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `average_score`    | Scenario **sort / comparison**, and the **resilience heatmap** | The heatmap paints each cell one of four tier colors, so it rounds the value into a tier band and looks up the tier palette. It needs the value on the native 1-4 tier scale.                                                                        |
+| `normalized_score` | The **radar plot** axes                                        | The radar plots every outcome on one shared axis where outward = better. It maps the score to `[-1, 1]` via `normalized_score * 2 - 1`, so it needs the 0-1, higher-is-better orientation. `average_score` would render inverted and need rescaling. |
 
 The bar chart glyph on the List tab and the per-location map coloring use neither aggregate score. They read the raw tier proportions (`data[].normalized`) and the per-location `tier_level` respectively.
 
@@ -729,7 +726,7 @@ import { useScenarioExplorerStore } from "../store"
 const {
   allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - every scenario
   allChartData, // Pre-processed chart data, keyed by scenario then outcome code
-  allScoreData, // Scores per outcome: weighted_score and normalized_score
+  allScoreData, // Scores per outcome: average_score and normalized_score
   outcomeNames, // Display-ordered list of { shortCode, displayName }
   siblingGroups, // Scenario group metadata
   getDisplayName, // (id) => human-readable scenario name
@@ -762,11 +759,11 @@ This means your component code doesn't change when the user switches hydroclimat
 
 **Pre-cached (available instantly, loaded on Explore tab activation):**
 
-| Data                                                | How to access                                    | What it contains                                               |
-| --------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
-| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                          |
-| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | weighted_score, normalized_score, and tier distribution counts |
-| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                     |
+| Data                                                | How to access                                    | What it contains                                              |
+| --------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                         |
+| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | average_score, normalized_score, and tier distribution counts |
+| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                    |
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
 
@@ -792,7 +789,7 @@ const tiersA = allScenariosData?.["s0020"]
 const tiersB = allScenariosData?.["s0021"]
 
 const cwsA = tiersA?.tiers["CWS_DEL"]
-// cwsA.weighted_score: 2.5      - average tier level (used for sorting scenarios)
+// cwsA.average_score: 2.5      - average tier level (used for sorting scenarios)
 // cwsA.normalized_score: 0.5    - 0-1 normalized (radar plot Y-axis)
 // cwsA.total: 76                - total locations
 // cwsA.data: [                  - tier distribution counts (used in bar chart glyphs)

@@ -17,7 +17,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useEffect, useRef } from "react"
+import React, { useRef } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { useTierTooltipState } from "../../../../../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../../../../../tooltips/TierTooltipPortal"
@@ -25,7 +25,6 @@ import { type StrategyGridProps } from "./types"
 import { StrategyGridHeader } from "./StrategyGridHeader"
 import { StrategyGridContent } from "./StrategyGridContent"
 import { useContainerWidth } from "./useContainerWidth"
-import { useListInfoTooltipSync } from "../tour"
 
 /**
  * StrategyGrid component - main grid orchestrator
@@ -63,10 +62,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onThemeBadgeClick,
   onIconClick,
   scenarioColors,
-  pinnedScenarioIds,
   activeScenarioIds,
   onRowHover,
-  onLayoutModeChange,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -96,10 +93,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         ? "wrapped"
         : "compact"
 
-  useEffect(() => {
-    onLayoutModeChange?.(layoutMode)
-  }, [layoutMode, onLayoutModeChange])
-
   // =========================================================================
   // Tooltip State Management
   // =========================================================================
@@ -108,17 +101,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     openTooltip: activeTooltip,
     anchor: tooltipAnchor,
     scenarioContext,
-    handleToggleWithAnchor,
     handleClose: closeTooltip,
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
-
-  useListInfoTooltipSync(
-    activeTooltip,
-    outcomeNames,
-    handleToggleWithAnchor,
-    forceCloseTooltip,
-  )
 
   // =========================================================================
   // Derived Values
@@ -234,7 +219,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
             scenarioColors={scenarioColors}
-            pinnedScenarioIds={pinnedScenarioIds}
             activeScenarioIds={activeScenarioIds}
             onRowHover={onRowHover}
           />

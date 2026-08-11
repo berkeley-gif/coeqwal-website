@@ -1,54 +1,72 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoCard, InfoCardGrid } from "@repo/ui"
+import { WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
-import { HYDROCLIMATES } from "../content"
+import { LinedList } from "@repo/ui"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
   const sp = theme.space.component
+  const dropletIcon = <WaterDroplet />
 
   return (
     <PanelShell background={theme.palette.nature.forest}>
-      <PanelHeading
-        title="Hydroclimate futures"
-        kicker="How are climate change impacts evaluated?"
-      />
+      <PanelHeading title="How are climate change impacts evaluated?" />
 
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          columnGap: theme.space.section.lg,
-          rowGap: sp.lg,
-          mb: theme.space.section.lg,
+          display: "flex",
+          flexDirection: "column",
+          gap: sp.md,
+          mb: sp.xl,
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          COEQWAL evaluates how the outcomes of different water management
-          strategies are affected by alternative hydroclimate futures. We
-          specifically evaluate how the outcomes of water management strategies
-          change with climate-driven shifts in water supplies and temperature.
+          COEQWAL specifically evaluates how the outcomes of water management
+          strategies change with climate-driven shifts in temperature,
+          precipitation, and river flows.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          The COEQWAL scenario library evaluates various hydroclimates that
-          represent different levels of risk to the water supply system:
+          Hydroclimates are represented by historical conditions and four
+          possible futures, representing different levels of stress to our water
+          supply system that we should plan for.
         </Typography>
       </Box>
 
-      <InfoCardGrid columns={5}>
-        {HYDROCLIMATES.map(({ title, description, dimmed }) => (
-          <InfoCard
-            key={title}
-            title={title}
-            description={description}
-            dimmed={dimmed}
-            variant="onDark"
-          />
-        ))}
-      </InfoCardGrid>
+      <LinedList
+        color={theme.palette.text.secondary}
+        icon={dropletIcon}
+        labelVariant="body2"
+        sx={{ mt: sp.sm }}
+        items={[
+          {
+            label:
+              "Historical hydroclimate: Temperature, precipitation, and streamflow patterns reflect historical conditions",
+          },
+          {
+            label:
+              "Moderate climate stress: Slightly warmer and wetter conditions (+7% runoff change)",
+          },
+          {
+            label:
+              "Moderate-high climate stress: Warmer and slightly drier conditions (-1% runoff change)",
+          },
+          {
+            label:
+              "High climate stress: Much warmer and much drier conditions (-7% runoff change)",
+          },
+          {
+            label:
+              "Extreme climate stress: Warmer and substantially drier conditions (-19% runoff change)",
+          },
+        ]}
+      />
+
+      <Typography variant="body2" color="text.secondary" sx={{ my: sp.lg }}>
+        Click here to learn more.
+      </Typography>
     </PanelShell>
   )
 }

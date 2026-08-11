@@ -15,7 +15,8 @@ import {
   Box,
   useTheme,
   alpha,
-  ViewListIcon,
+  HomeIcon,
+  ArrowForwardIcon,
   BarChartIcon,
   AdjustIcon,
   AppsIcon,
@@ -25,6 +26,7 @@ import {
 import { useWorkspaceSlice, type ExploreMode } from "../../../store"
 import { useTabs } from "../../../../../../context/Tabs"
 import { useTabNavigation } from "../../../../../../hooks/useTabNavigation"
+import { motion, useReducedMotion } from "@repo/motion"
 
 /**
  * Flow map steps for the curation loop (List -> Radar -> Distribution ->
@@ -39,14 +41,16 @@ type FlowStep = {
   label: string
   purpose: string
   research?: boolean
+  showTrailingArrow?: boolean
 }
 
 const FLOW: FlowStep[] = [
   {
     mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
-    label: "List",
-    purpose: "Shortlist scenarios",
+    icon: <HomeIcon sx={{ fontSize: "1.1rem" }} />,
+    label: "Home",
+    purpose: "Select your scenarios",
+    showTrailingArrow: true,
   },
   {
     mode: "bar",
@@ -86,7 +90,8 @@ export default function ExploreSubNav() {
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
 
-  const { exploreMode, setExploreMode } = useWorkspaceSlice()
+  const { exploreMode, setExploreMode, selectedScenarios } = useWorkspaceSlice()
+  const prefersReducedMotion = useReducedMotion()
 
   // Research-only tools hidden by default, toggled with "A" key
   const [showResearchTools, setShowResearchTools] = useState(false)
@@ -130,6 +135,7 @@ export default function ExploreSubNav() {
         color: theme.palette.common.white,
         justifyContent: "center",
         gap: 1,
+        py: 4,
       }}
     >
       {/* Buttons to the different tools */}
@@ -160,10 +166,12 @@ export default function ExploreSubNav() {
                   gap: 0.6,
                   px: 0.9,
                   py: 0.4,
-                  border: `1px solid ${alpha(
-                    theme.palette.common.white,
-                    active ? 0.7 : 0.3,
-                  )}`,
+                  border: step.showTrailingArrow
+                    ? "none"
+                    : `1px solid ${alpha(
+                        theme.palette.common.white,
+                        active ? 0.7 : 0.3,
+                      )}`,
                   borderRadius: "12px",
                   cursor: "pointer",
                   background: active
@@ -221,6 +229,37 @@ export default function ExploreSubNav() {
                   </Box>
                 </Box>
               </Box>
+              {step.showTrailingArrow && (
+                <Box
+                  component="span"
+                  aria-hidden="true"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    color: alpha(theme.palette.common.white, 0.6),
+                  }}
+                >
+                  <motion.div
+                    animate={
+                      selectedScenarios.length > 0 &&
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
+                        ? { x: [0, 4, 0] }
+                        : { x: 0 }
+                    }
+                    transition={
+                      selectedScenarios.length > 0 &&
+                      exploreMode === "list" &&
+                      !prefersReducedMotion
+                        ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" }
+                        : { duration: 0.2, ease: "easeOut" }
+                    }
+                    style={{ display: "flex" }}
+                  >
+                    <ArrowForwardIcon sx={{ fontSize: "1.1rem" }} />
+                  </motion.div>
+                </Box>
+              )}
             </React.Fragment>
           )
         },

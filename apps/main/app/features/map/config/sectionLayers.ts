@@ -135,7 +135,7 @@ export const SECTION_LAYERS: Record<SubSectionId, SubSectionLayerConfig> = {
 
   // === Rivers onwards - basins + rivers stay visible ===
   rivers: { ...BASINS_AND_RIVERS, camera: DELTA_VIEW },
-  distribution: { ...BASINS_AND_RIVERS, arrows: true },
+  distribution: { ...BASINS_AND_RIVERS },
   calsim: {
     ...BASINS_AND_RIVERS,
     camera: CENTRAL_VALLEY_VIEW,

@@ -26,9 +26,10 @@ import {
   DEFAULT_VARIABLE_ID,
   defaultLocationSelection,
 } from "../tools/panels/dataInDepth/config/variableRegistry"
+import { toggleWytClass } from "../tools/panels/dataInDepth/config/wytFilter"
 
 /** How the annual-distribution view is drawn. */
-export type DataDistKind = "exceedance" | "box"
+export type DataDistKind = "exceedance" | "box" | "stats"
 
 /** The single axis the explorer compares members along. */
 export type DataCompareBy = "scenarios" | "climates" | "locations"
@@ -42,6 +43,8 @@ export interface DataState {
   distKind: DataDistKind
   /** Which axis holds multiple members; the other two are held constant */
   compareBy: DataCompareBy
+  /** Water-year-type filter (Sacramento index classes 1-5); empty = all years */
+  selectedWaterYearTypes: number[]
   /** Held-constant scenario for climate/location compare (null -> reference) */
   pinnedScenario: string | null
   /** Held-constant hydroclimate for scenario/location compare (null -> default) */
@@ -52,8 +55,6 @@ export interface DataState {
   selectedClimates: string[]
   /** Multi-member set per group for "compare by locations" (empty -> seed) */
   selectedLocationsByGroup: Record<string, string[]>
-  /** Scenario library sidebar collapsed to a slim strip (data tool only) */
-  scenarioRailCollapsed: boolean
   /** Variables rail collapsed to a slim strip */
   variableRailCollapsed: boolean
 }
@@ -68,8 +69,9 @@ export interface DataActions {
   setPinnedLocation: (groupId: string, locationId: string) => void
   setSelectedClimates: (climates: string[]) => void
   setSelectedLocations: (groupId: string, locationIds: string[]) => void
-  setScenarioRailCollapsed: (collapsed: boolean) => void
   setVariableRailCollapsed: (collapsed: boolean) => void
+  toggleWaterYearType: (wyt: number) => void
+  clearWaterYearTypes: () => void
 }
 
 export type DataSlice = DataState & DataActions
@@ -79,12 +81,12 @@ export const dataInitialState: DataState = {
   view: "dist",
   distKind: "exceedance",
   compareBy: "scenarios",
+  selectedWaterYearTypes: [],
   pinnedScenario: null,
   pinnedClimate: null,
   pinnedLocationByGroup: defaultLocationSelection(),
   selectedClimates: [],
   selectedLocationsByGroup: {},
-  scenarioRailCollapsed: false,
   variableRailCollapsed: false,
 }
 
@@ -142,14 +144,20 @@ export function createDataSlice(
         state.selectedLocationsByGroup[groupId] = locationIds
       }),
 
-    setScenarioRailCollapsed: (collapsed) =>
-      set((state) => {
-        state.scenarioRailCollapsed = collapsed
-      }),
-
     setVariableRailCollapsed: (collapsed) =>
       set((state) => {
         state.variableRailCollapsed = collapsed
+      }),
+    toggleWaterYearType: (wyt) =>
+      set((state) => {
+        state.selectedWaterYearTypes = toggleWytClass(
+          state.selectedWaterYearTypes,
+          wyt,
+        )
+      }),
+    clearWaterYearTypes: () =>
+      set((state) => {
+        state.selectedWaterYearTypes = []
       }),
   }
 }
