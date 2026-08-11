@@ -102,7 +102,7 @@ importers:
         version: 3.10.1
       next:
         specifier: ^15.5.9
-        version: 15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+        version: 15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react-scrollama:
         specifier: ^2.4.2
         version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -151,7 +151,7 @@ importers:
         version: 4.17.21
       next:
         specifier: ^15.2.1
-        version: 15.4.6(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+        version: 15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react-scrollama:
         specifier: ^2.4.2
         version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -201,9 +201,12 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      d3:
+        specifier: ^7.8.5
+        version: 7.9.0
       next:
         specifier: ^15.2.1
-        version: 15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+        version: 15.5.9(@babel/core@7.29.7)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -229,6 +232,9 @@ importers:
       '@svgr/webpack':
         specifier: ^8.1.0
         version: 8.1.0(typescript@5.8.2)
+      '@types/d3':
+        specifier: ^7.4.3
+        version: 7.4.3
 
   apps/storyline-flow:
     dependencies:
@@ -264,7 +270,7 @@ importers:
         version: 4.17.21
       next:
         specifier: ^15.5.9
-        version: 15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+        version: 15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react-scrollama:
         specifier: ^2.4.2
         version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -295,7 +301,7 @@ importers:
         version: link:../../packages/ui
       next:
         specifier: ^15.2.1
-        version: 15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+        version: 15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -558,7 +564,7 @@ importers:
         version: 7.0.1(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@mui/material-nextjs':
         specifier: ^7.3.7
-        version: 7.3.7(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(next@15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1))(react@19.1.0)
+        version: 7.3.7(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(next@15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1))(react@19.1.0)
       '@mui/system':
         specifier: ^7.3.2
         version: 7.3.2(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0)
@@ -3505,11 +3511,6 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
-
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
@@ -6453,11 +6454,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.0.10
 
-  '@mui/material-nextjs@7.3.7(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(next@15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1))(react@19.1.0)':
+  '@mui/material-nextjs@7.3.7(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(next@15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1))(react@19.1.0)':
     dependencies:
       '@babel/runtime': 7.28.6
       '@emotion/react': 11.14.0(@types/react@19.0.10)(react@19.1.0)
-      next: 15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+      next: 15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react: 19.1.0
     optionalDependencies:
       '@emotion/cache': 11.14.0
@@ -8495,9 +8496,6 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
-  fsevents@2.3.2:
-    optional: true
-
   function-bind@1.1.2: {}
 
   function.prototype.name@1.1.8:
@@ -9194,7 +9192,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next@15.4.6(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1):
+  next@15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1):
     dependencies:
       '@next/env': 15.4.6
       '@swc/helpers': 0.5.15
@@ -9212,14 +9210,37 @@ snapshots:
       '@next/swc-linux-x64-musl': 15.4.6
       '@next/swc-win32-arm64-msvc': 15.4.6
       '@next/swc-win32-x64-msvc': 15.4.6
-      '@playwright/test': 1.61.1
       sass: 1.86.1
       sharp: 0.34.3
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@15.5.9(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1):
+  next@15.5.9(@babel/core@7.29.7)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1):
+    dependencies:
+      '@next/env': 15.5.9
+      '@swc/helpers': 0.5.15
+      caniuse-lite: 1.0.30001707
+      postcss: 8.4.31
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.1.0)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 15.5.7
+      '@next/swc-darwin-x64': 15.5.7
+      '@next/swc-linux-arm64-gnu': 15.5.7
+      '@next/swc-linux-arm64-musl': 15.5.7
+      '@next/swc-linux-x64-gnu': 15.5.7
+      '@next/swc-linux-x64-musl': 15.5.7
+      '@next/swc-win32-arm64-msvc': 15.5.7
+      '@next/swc-win32-x64-msvc': 15.5.7
+      sass: 1.86.1
+      sharp: 0.34.3
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+
+  next@15.5.9(@playwright/test@1.61.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1):
     dependencies:
       '@next/env': 15.5.9
       '@swc/helpers': 0.5.15
@@ -9503,8 +9524,6 @@ snapshots:
   playwright@1.61.1:
     dependencies:
       playwright-core: 1.61.1
-    optionalDependencies:
-      fsevents: 2.3.2
 
   point-in-polygon-hao@1.2.4:
     dependencies:

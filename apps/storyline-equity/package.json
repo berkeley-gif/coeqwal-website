@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "data:cws": "node ./data-scripts/transform-cws-data.mjs",
     "dev": "node ./scripts/clean-next-dev-cache.cjs && next dev --turbo",
     "dev:webpack": "node ./scripts/clean-next-dev-cache.cjs && next dev",
     "build": "next build",
@@ -20,6 +21,7 @@
     "@repo/state": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
+    "d3": "^7.8.5",
     "next": "^15.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/d3": "^7.4.3",
     "@svgr/webpack": "^8.1.0"
   }
 }

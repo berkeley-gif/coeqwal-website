@@ -28,6 +28,15 @@ export const BACKGROUND_RIVER_LABELS: LocationLabel[] = [
   },
 ]
 
+export const SHASTA_MCCLOUD_RIVER_LABELS: LocationLabel[] = [
+  {
+    id: "mccloud-river",
+    name: "McCloud River",
+    latitude: 40.92,
+    longitude: -122.22,
+  },
+]
+
 export const BACKGROUND_CIRCLE_ANNOTATIONS: MapCircleAnnotation[] = [
   {
     id: "central-valley-agriculture",

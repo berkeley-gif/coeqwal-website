@@ -16,7 +16,6 @@ import {
 
 export type { SectionId } from "./components/map/config/sectionConfig"
 
-export type MetroRiverPlaygroundMode = "off" | "metro-map"
 export type CentralValleyIcon =
   | "/map-icons/ag/water-user-ag-01.svg"
   | "/map-icons/ag/water-user-ag-02.svg"
@@ -46,7 +45,7 @@ interface AppState {
   yubaRiverProgress: number
   backgroundProgress: number
   infrastructureProgress: number
-  metroRiverPlaygroundMode: MetroRiverPlaygroundMode
+  transparencyProgress: number
   centralValleyIcon: CentralValleyIcon
   urbanIcon: UrbanIcon
   wetlandIcon: WetlandIcon
@@ -63,7 +62,7 @@ const initialState: AppState = {
   yubaRiverProgress: 0,
   backgroundProgress: 0,
   infrastructureProgress: 0,
-  metroRiverPlaygroundMode: "metro-map",
+  transparencyProgress: 0,
   centralValleyIcon: "/map-icons/ag/water-user-ag-06.svg",
   urbanIcon: "/map-icons/urban/water_user_urban-01.svg",
   wetlandIcon: "/map-icons/wetland/water_user_wetland-01.svg",
@@ -130,8 +129,8 @@ export const appActions = {
   setInfrastructureProgress: (progress: number) =>
     useStoryStore.setState({ infrastructureProgress: progress }),
 
-  setMetroRiverPlaygroundMode: (mode: MetroRiverPlaygroundMode) =>
-    useStoryStore.setState({ metroRiverPlaygroundMode: mode }),
+  setTransparencyProgress: (progress: number) =>
+    useStoryStore.setState({ transparencyProgress: progress }),
 
   setCentralValleyIcon: (icon: CentralValleyIcon) =>
     useStoryStore.setState({ centralValleyIcon: icon }),
@@ -171,8 +170,8 @@ export const useBackgroundProgress = () =>
   useStoryStore((state) => state.backgroundProgress)
 export const useInfrastructureProgress = () =>
   useStoryStore((state) => state.infrastructureProgress)
-export const useMetroRiverPlaygroundMode = () =>
-  useStoryStore((state) => state.metroRiverPlaygroundMode)
+export const useTransparencyProgress = () =>
+  useStoryStore((state) => state.transparencyProgress)
 export const useCentralValleyIcon = () =>
   useStoryStore((state) => state.centralValleyIcon)
 export const useUrbanIcon = () => useStoryStore((state) => state.urbanIcon)
@@ -180,13 +179,6 @@ export const useWetlandIcon = () => useStoryStore((state) => state.wetlandIcon)
 export const useSalmonIcon = () => useStoryStore((state) => state.salmonIcon)
 export const useShowMapIconStrokes = () =>
   useStoryStore((state) => state.showMapIconStrokes)
-export const useShowMetroRiverPlayground = () =>
-  useStoryStore(
-    (state) =>
-      state.activeSection === "Transparency" &&
-      state.metroRiverPlaygroundMode !== "off",
-  )
-
 const createLayerSelector = (key: keyof SectionLayerConfig) => () =>
   useStoryStore((state) => !!getSectionLayerConfig(state.activeSection)[key])
 

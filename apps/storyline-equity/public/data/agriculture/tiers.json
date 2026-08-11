@@ -1,0 +1,1080 @@
+{
+  "scenario": "s0020",
+  "results": {
+    "AG_REV": {
+      "scenario": "s0020",
+      "tier_code": "AG_REV",
+      "tier_name": "Agricultural revenue",
+      "tier_type": "multi_value",
+      "locations": [
+        {
+          "location_id": "02_NA",
+          "location_name": "02_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "02_PA",
+          "location_name": "02_PA",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.740"
+        },
+        {
+          "location_id": "02_SA",
+          "location_name": "02_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "03_NA",
+          "location_name": "03_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "03_PA",
+          "location_name": "03_PA",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.040"
+        },
+        {
+          "location_id": "03_SA",
+          "location_name": "03_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.800"
+        },
+        {
+          "location_id": "04_NA",
+          "location_name": "04_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "04_PA1",
+          "location_name": "04_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.260"
+        },
+        {
+          "location_id": "04_PA2",
+          "location_name": "04_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.350"
+        },
+        {
+          "location_id": "05_NA",
+          "location_name": "05_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.060"
+        },
+        {
+          "location_id": "06_NA",
+          "location_name": "06_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.850"
+        },
+        {
+          "location_id": "06_PA",
+          "location_name": "06_PA",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.330"
+        },
+        {
+          "location_id": "07N_NA",
+          "location_name": "07N_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "07N_PA",
+          "location_name": "07N_PA",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.370"
+        },
+        {
+          "location_id": "07S_NA",
+          "location_name": "07S_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "07S_PA",
+          "location_name": "07S_PA",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.470"
+        },
+        {
+          "location_id": "08N_NA",
+          "location_name": "08N_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "08N_PA",
+          "location_name": "08N_PA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.340"
+        },
+        {
+          "location_id": "08N_SA1",
+          "location_name": "08N_SA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "08N_SA2",
+          "location_name": "08N_SA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.060"
+        },
+        {
+          "location_id": "08S_NA1",
+          "location_name": "08S_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "08S_NA2",
+          "location_name": "08S_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "08S_PA",
+          "location_name": "08S_PA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.360"
+        },
+        {
+          "location_id": "08S_SA1",
+          "location_name": "08S_SA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "08S_SA2",
+          "location_name": "08S_SA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.080"
+        },
+        {
+          "location_id": "08S_SA3",
+          "location_name": "08S_SA3",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "09_NA",
+          "location_name": "09_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "09_SA1",
+          "location_name": "09_SA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.120"
+        },
+        {
+          "location_id": "09_SA2",
+          "location_name": "09_SA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "10_NA",
+          "location_name": "10_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "11_NA",
+          "location_name": "11_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "11_SA1",
+          "location_name": "11_SA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.120"
+        },
+        {
+          "location_id": "11_SA2",
+          "location_name": "11_SA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.260"
+        },
+        {
+          "location_id": "11_SA3",
+          "location_name": "11_SA3",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.260"
+        },
+        {
+          "location_id": "11_SA4",
+          "location_name": "11_SA4",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.320"
+        },
+        {
+          "location_id": "12_NA",
+          "location_name": "12_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "12_SA",
+          "location_name": "12_SA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "13_NA",
+          "location_name": "13_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "14_NA",
+          "location_name": "14_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "15N_NA1",
+          "location_name": "15N_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "15N_NA2",
+          "location_name": "15N_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.070"
+        },
+        {
+          "location_id": "15N_SA",
+          "location_name": "15N_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "15S_NA1",
+          "location_name": "15S_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "15S_NA2",
+          "location_name": "15S_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.900"
+        },
+        {
+          "location_id": "15S_SA",
+          "location_name": "15S_SA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.060"
+        },
+        {
+          "location_id": "16_NA1",
+          "location_name": "16_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "16_NA2",
+          "location_name": "16_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "16_PA",
+          "location_name": "16_PA",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.170"
+        },
+        {
+          "location_id": "16_SA",
+          "location_name": "16_SA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.140"
+        },
+        {
+          "location_id": "17N_NA",
+          "location_name": "17N_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "17S_NA",
+          "location_name": "17S_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "17S_SA",
+          "location_name": "17S_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "18_NA",
+          "location_name": "18_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "18_SA",
+          "location_name": "18_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "19_SA",
+          "location_name": "19_SA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.060"
+        },
+        {
+          "location_id": "20_NA1",
+          "location_name": "20_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.760"
+        },
+        {
+          "location_id": "20_NA2",
+          "location_name": "20_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "20_PA",
+          "location_name": "20_PA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "21_NA",
+          "location_name": "21_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.850"
+        },
+        {
+          "location_id": "21_PA",
+          "location_name": "21_PA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.240"
+        },
+        {
+          "location_id": "21_SA",
+          "location_name": "21_SA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "22_NA",
+          "location_name": "22_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "22_SA1",
+          "location_name": "22_SA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "22_SA2",
+          "location_name": "22_SA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "23_NA",
+          "location_name": "23_NA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "24_NA1",
+          "location_name": "24_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.120"
+        },
+        {
+          "location_id": "24_NA2",
+          "location_name": "24_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "24_NA3",
+          "location_name": "24_NA3",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.900"
+        },
+        {
+          "location_id": "25_NA",
+          "location_name": "25_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "25_PA1",
+          "location_name": "25_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.020"
+        },
+        {
+          "location_id": "25_PA2",
+          "location_name": "25_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "26N_NA",
+          "location_name": "26N_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.800"
+        },
+        {
+          "location_id": "26S_NA",
+          "location_name": "26S_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "50_PA1",
+          "location_name": "50_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.800"
+        },
+        {
+          "location_id": "50_PA2",
+          "location_name": "50_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.800"
+        },
+        {
+          "location_id": "60N_NA1",
+          "location_name": "60N_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "60N_NA2",
+          "location_name": "60N_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "60N_NA3",
+          "location_name": "60N_NA3",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.060"
+        },
+        {
+          "location_id": "60N_NA4",
+          "location_name": "60N_NA4",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.600"
+        },
+        {
+          "location_id": "60N_NA5",
+          "location_name": "60N_NA5",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "60S_NA1",
+          "location_name": "60S_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.750"
+        },
+        {
+          "location_id": "60S_NA2",
+          "location_name": "60S_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.800"
+        },
+        {
+          "location_id": "60S_PA1",
+          "location_name": "60S_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.020"
+        },
+        {
+          "location_id": "60S_PA2",
+          "location_name": "60S_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.000"
+        },
+        {
+          "location_id": "61_NA1",
+          "location_name": "61_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.850"
+        },
+        {
+          "location_id": "61_NA2",
+          "location_name": "61_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.260"
+        },
+        {
+          "location_id": "61_NA3",
+          "location_name": "61_NA3",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.600"
+        },
+        {
+          "location_id": "61_NA4",
+          "location_name": "61_NA4",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "61_NA5",
+          "location_name": "61_NA5",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.700"
+        },
+        {
+          "location_id": "61_NA6",
+          "location_name": "61_NA6",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.700"
+        },
+        {
+          "location_id": "61_PA1",
+          "location_name": "61_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "61_PA2",
+          "location_name": "61_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "61_PA3",
+          "location_name": "61_PA3",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.200"
+        },
+        {
+          "location_id": "62_NA1",
+          "location_name": "62_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "62_NA2",
+          "location_name": "62_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "62_NA3",
+          "location_name": "62_NA3",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.260"
+        },
+        {
+          "location_id": "62_NA4",
+          "location_name": "62_NA4",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.450"
+        },
+        {
+          "location_id": "62_NA5",
+          "location_name": "62_NA5",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.100"
+        },
+        {
+          "location_id": "62_NA6",
+          "location_name": "62_NA6",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.080"
+        },
+        {
+          "location_id": "63_NA1",
+          "location_name": "63_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "63_NA2",
+          "location_name": "63_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.160"
+        },
+        {
+          "location_id": "63_NA3",
+          "location_name": "63_NA3",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.250"
+        },
+        {
+          "location_id": "63_NA4",
+          "location_name": "63_NA4",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.040"
+        },
+        {
+          "location_id": "64_NA1",
+          "location_name": "64_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "64_NA2",
+          "location_name": "64_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "64_PA1",
+          "location_name": "64_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.100"
+        },
+        {
+          "location_id": "64_PA2",
+          "location_name": "64_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.920"
+        },
+        {
+          "location_id": "64_PA3",
+          "location_name": "64_PA3",
+          "location_type": "demand_unit",
+          "tier_level": 3,
+          "tier_value": 1,
+          "tier_continuous": "3.150"
+        },
+        {
+          "location_id": "64_XA",
+          "location_name": "64_XA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.160"
+        },
+        {
+          "location_id": "71_NA1",
+          "location_name": "71_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.700"
+        },
+        {
+          "location_id": "71_NA2",
+          "location_name": "71_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.000"
+        },
+        {
+          "location_id": "71_PA1",
+          "location_name": "71_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.730"
+        },
+        {
+          "location_id": "71_PA2",
+          "location_name": "71_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.550"
+        },
+        {
+          "location_id": "71_PA3",
+          "location_name": "71_PA3",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.250"
+        },
+        {
+          "location_id": "71_PA4",
+          "location_name": "71_PA4",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.500"
+        },
+        {
+          "location_id": "71_PA5",
+          "location_name": "71_PA5",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.420"
+        },
+        {
+          "location_id": "71_PA6",
+          "location_name": "71_PA6",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.610"
+        },
+        {
+          "location_id": "71_PA7",
+          "location_name": "71_PA7",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.600"
+        },
+        {
+          "location_id": "71_PA8",
+          "location_name": "71_PA8",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.990"
+        },
+        {
+          "location_id": "72_NA1",
+          "location_name": "72_NA1",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.000"
+        },
+        {
+          "location_id": "72_NA2",
+          "location_name": "72_NA2",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.950"
+        },
+        {
+          "location_id": "72_PA",
+          "location_name": "72_PA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.340"
+        },
+        {
+          "location_id": "72_XA1",
+          "location_name": "72_XA1",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.160"
+        },
+        {
+          "location_id": "72_XA2",
+          "location_name": "72_XA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.020"
+        },
+        {
+          "location_id": "72_XA3",
+          "location_name": "72_XA3",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.080"
+        },
+        {
+          "location_id": "73_NA",
+          "location_name": "73_NA",
+          "location_type": "demand_unit",
+          "tier_level": 1,
+          "tier_value": 1,
+          "tier_continuous": "1.800"
+        },
+        {
+          "location_id": "73_PA1",
+          "location_name": "73_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.390"
+        },
+        {
+          "location_id": "73_PA2",
+          "location_name": "73_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.020"
+        },
+        {
+          "location_id": "73_PA3",
+          "location_name": "73_PA3",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.020"
+        },
+        {
+          "location_id": "73_XA",
+          "location_name": "73_XA",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.080"
+        },
+        {
+          "location_id": "90_PA1",
+          "location_name": "90_PA1",
+          "location_type": "demand_unit",
+          "tier_level": 4,
+          "tier_value": 1,
+          "tier_continuous": "4.050"
+        },
+        {
+          "location_id": "90_PA2",
+          "location_name": "90_PA2",
+          "location_type": "demand_unit",
+          "tier_level": 2,
+          "tier_value": 1,
+          "tier_continuous": "2.940"
+        }
+      ],
+      "metadata": {
+        "total_locations": 132,
+        "location_types": ["demand_unit"],
+        "tier_counts": {
+          "1": 58,
+          "2": 52,
+          "3": 8,
+          "4": 14
+        }
+      }
+    }
+  },
+  "missing": []
+}
