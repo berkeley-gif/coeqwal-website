@@ -35,11 +35,13 @@ export default function MapCircleAnnotationLayer({
   annotations,
   progress,
   iconOverrides = {},
+  scaleOverrides = {},
   showStrokes = true,
 }: {
   annotations: MapCircleAnnotation[]
   progress: number
   iconOverrides?: Partial<Record<string, string>>
+  scaleOverrides?: Partial<Record<string, number>>
   showStrokes?: boolean
 }) {
   return (
@@ -51,6 +53,7 @@ export default function MapCircleAnnotationLayer({
             longitude={annotation.longitude}
             latitude={annotation.latitude}
             offset={annotation.offset}
+            style={{ zIndex: 20 }}
           >
             <Box
               sx={{
@@ -70,7 +73,11 @@ export default function MapCircleAnnotationLayer({
                 aria-hidden="true"
                 focusable="false"
                 initial={{ opacity: 0, scale: 0.55, y: 18 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
+                animate={{
+                  opacity: 1,
+                  scale: scaleOverrides[annotation.id] ?? 1,
+                  y: 0,
+                }}
                 exit={{ opacity: 0, scale: 0.82, y: 12 }}
                 transition={{
                   duration: 0.65,

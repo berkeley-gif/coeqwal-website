@@ -13,7 +13,6 @@ import Infrastructure from "./components/05Infrastructure"
 import ClimateResilience from "./components/06ClimateResilience"
 import Transparency from "./components/07Transparency"
 import Resolution from "./components/08Resolution"
-import Tiers from "./components/09Tiers"
 import Conclusion from "./components/10Conclusion"
 import {
   BaseHeader,
@@ -123,12 +122,6 @@ function ContentContainer() {
         <Step data={"Resolution" as SectionId} progress>
           <Box width="100%" className="story-step-container">
             <Resolution />
-          </Box>
-        </Step>
-
-        <Step data={"Tiers" as SectionId} progress>
-          <Box width="100%" className="story-step-container">
-            <Tiers />
           </Box>
         </Step>
 

@@ -7,7 +7,7 @@ import { mcCloudRiver, salmonMigrationPath } from "@repo/data"
 import { Box, Typography } from "@repo/ui/mui"
 import {
   InfrastructureColor,
-  RiverWaterColor,
+  FreshWaterColor,
 } from "../../helpers/colorPalette"
 import TreeIcon from "../markers/TreeIcon"
 
@@ -262,7 +262,7 @@ export default function ShastaMcCloudLayer({
             id="mccloud-river-body"
             type="line"
             paint={{
-              "line-color": RiverWaterColor,
+              "line-color": FreshWaterColor,
               "line-width": 5,
               "line-opacity": 1,
               "line-trim-offset": trimOffset,
@@ -278,25 +278,6 @@ export default function ShastaMcCloudLayer({
 
       {visible ? (
         <>
-          {showRiver && clampedProgress > 0 ? (
-            <Marker longitude={-122.22} latitude={40.92}>
-              <Typography
-                component="span"
-                sx={{
-                  position: "absolute",
-                  left: 10,
-                  top: -6,
-                  whiteSpace: "nowrap",
-                  color: "#fcfbfa",
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  textShadow: "0 1px 6px rgba(0, 0, 0, 0.75)",
-                }}
-              >
-                McCloud River
-              </Typography>
-            </Marker>
-          ) : null}
           {showMovingPoint && movingPointCoordinate ? (
             <Marker
               longitude={movingPointCoordinate[0]}

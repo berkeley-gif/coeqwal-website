@@ -49,6 +49,7 @@ export function useScrollamaSection() {
 
     appActions.setMcCloudRiverProgress(0)
     appActions.setHistoricalContextProgress(0)
+    appActions.setTransparencyProgress(0)
     appActions.setActiveSection(data)
   }, [])
 
@@ -72,6 +73,11 @@ export function useScrollamaSection() {
 
       if (data === "Infrastructure") {
         appActions.setInfrastructureProgress(progress)
+        return
+      }
+
+      if (data === "Transparency") {
+        appActions.setTransparencyProgress(progress)
         return
       }
 

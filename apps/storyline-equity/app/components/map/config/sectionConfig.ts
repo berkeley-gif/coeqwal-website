@@ -9,6 +9,7 @@ import {
   BACKGROUND_RIVER_LABELS,
   LocationLabel,
   MapCircleAnnotation,
+  SHASTA_MCCLOUD_RIVER_LABELS,
 } from "./locationPresets"
 
 export type SectionId =
@@ -48,6 +49,7 @@ export const getSectionLayerConfig = (
       break
     case "HistoricalContext":
       config.majorRivers = true
+      config.locationLabels = SHASTA_MCCLOUD_RIVER_LABELS
       break
     case "GoldRush":
       config.majorRivers = true

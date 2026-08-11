@@ -29,7 +29,6 @@ type ProjectedMorphPath = {
   compiled: ReturnType<typeof compile>
 }
 
-const MORPH_DURATION_MS = 900
 const MORPH_ENDPOINT_EPSILON = 0.001
 const DEFAULT_METRO_COLOR = FreshWaterColor
 const DEFAULT_STROKE_WIDTH = 7
@@ -169,15 +168,15 @@ function getProjectedPath(
 
 export default function MetroRiverMorphOverlay({
   visible,
-  morphToMetro,
+  progress,
 }: {
   visible: boolean
-  morphToMetro: boolean
+  progress: number
 }) {
   const { mapRef } = useMap()
   const riverLines = useMemo(() => getEditedMetroLines(), [])
   const [mapVersion, setMapVersion] = useState(0)
-  const [morphProgress, setMorphProgress] = useState(morphToMetro ? 1 : 0)
+  const morphProgress = Math.max(0, Math.min(1, progress))
 
   useEffect(() => {
     const map = mapRef?.current?.getMap()
@@ -195,26 +194,6 @@ export default function MetroRiverMorphOverlay({
       map.off("resize", update)
     }
   }, [mapRef])
-
-  useEffect(() => {
-    let frame = 0
-    const start = performance.now()
-    const from = morphProgress
-    const to = morphToMetro ? 1 : 0
-
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / MORPH_DURATION_MS)
-      const eased = t * (2 - t)
-      setMorphProgress(from + (to - from) * eased)
-
-      if (t < 1) frame = window.requestAnimationFrame(tick)
-    }
-
-    frame = window.requestAnimationFrame(tick)
-    return () => window.cancelAnimationFrame(frame)
-    // Intentionally start from the current progress when visibility flips.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [morphToMetro])
 
   const projectedPaths = useMemo<ProjectedMorphPath[]>(() => {
     void mapVersion
@@ -286,24 +265,6 @@ export default function MetroRiverMorphOverlay({
       <svg width="100%" height="100%">
         {paths.map((path) => (
           <g key={path.key}>
-            <path
-              d={path.originalD}
-              fill="none"
-              stroke="#0a1020"
-              strokeWidth={Math.max(2, DEFAULT_STROKE_WIDTH - 2)}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity={morphProgress <= MORPH_ENDPOINT_EPSILON ? 0 : 0.32}
-            />
-            <path
-              d={path.d}
-              fill="none"
-              stroke="#07142c"
-              strokeWidth={DEFAULT_STROKE_WIDTH + 4}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity={0.68}
-            />
             <path
               d={path.d}
               fill="none"
