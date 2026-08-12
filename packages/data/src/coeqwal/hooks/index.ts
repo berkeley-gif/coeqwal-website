@@ -63,6 +63,9 @@ export {
   useReservoirStorageDataInDepth,
   useRiverFlowsDataInDepth,
   useDeltaSalinityDataInDepth,
+  useCwsDataInDepth,
+  useAgDataInDepth,
+  useGroundwaterStorageDataInDepth,
 } from "./useDataInDepth"
 export { useTierLocationAssignments } from "./useTierLocationAssignments"
 export { useTierLocationAssignmentsBatch } from "./useTierLocationAssignmentsBatch"

@@ -17,6 +17,9 @@ import {
   fetchReservoirStorageDataInDepth,
   fetchRiverFlowsDataInDepth,
   fetchDeltaSalinityDataInDepth,
+  fetchCwsDataInDepth,
+  fetchAgDataInDepth,
+  fetchGroundwaterStorageDataInDepth,
 } from "../fetchers"
 import type {
   ReservoirStorageDidResponse,
@@ -25,6 +28,12 @@ import type {
   RiverFlowsDidOptions,
   DeltaSalinityDidResponse,
   DeltaSalinityDidOptions,
+  CwsDataInDepthResponse,
+  CwsDataInDepthOptions,
+  AgDataInDepthResponse,
+  AgDataInDepthOptions,
+  GroundwaterStorageDidResponse,
+  GroundwaterStorageDidOptions,
 } from "../types"
 
 /**
@@ -161,6 +170,121 @@ export function useDeltaSalinityDataInDepth(
   } = useSWR<DeltaSalinityDidResponse>(
     key,
     () => fetchDeltaSalinityDataInDepth(scenarios, options),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarios: data?.scenarios ?? [],
+    wytFilter: data?.wyt_filter ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
+  }
+}
+
+/**
+ * Annual CWS delivery + percent-demand-met + welfare-outcome series with
+ * live-computed stats. All five measures — including
+ * `welfare_loss`/`shortage_total`/`shortage_pct` — are available at every
+ * subject, including the NOD_CWS/SOD_CWS aggregates (summed/demand-weighted
+ * as appropriate; see `DidCwsMeasure`). `welfare_loss`'s `exceedance` facet
+ * is unconditionally suppressed regardless of `include`.
+ */
+export function useCwsDataInDepth(
+  scenarios: string[],
+  options: CwsDataInDepthOptions = {},
+) {
+  const enabled = scenarios.length > 0
+  const key = enabled ? ENDPOINTS.cwsDataInDepth(scenarios, options) : null
+
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<CwsDataInDepthResponse>(
+    key,
+    () => fetchCwsDataInDepth(scenarios, options),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarios: data?.scenarios ?? [],
+    wytFilter: data?.wyt_filter ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
+  }
+}
+
+/**
+ * Annual groundwater storage volume + water-table level series with
+ * live-computed stats. `level` is never aggregated — it returns an empty
+ * series for the NOD_GroundwaterStorage/SOD_GroundwaterStorage subjects.
+ */
+export function useGroundwaterStorageDataInDepth(
+  scenarios: string[],
+  options: GroundwaterStorageDidOptions = {},
+) {
+  const enabled = scenarios.length > 0
+  const key = enabled
+    ? ENDPOINTS.groundwaterStorageDataInDepth(scenarios, options)
+    : null
+
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<GroundwaterStorageDidResponse>(
+    key,
+    () => fetchGroundwaterStorageDataInDepth(scenarios, options),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarios: data?.scenarios ?? [],
+    wytFilter: data?.wyt_filter ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
+  }
+}
+
+/** Annual AG net diversion + GW pumping + shortage + revenue series with live-computed stats. */
+export function useAgDataInDepth(
+  scenarios: string[],
+  options: AgDataInDepthOptions = {},
+) {
+  const enabled = scenarios.length > 0
+  const key = enabled ? ENDPOINTS.agDataInDepth(scenarios, options) : null
+
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<AgDataInDepthResponse>(
+    key,
+    () => fetchAgDataInDepth(scenarios, options),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

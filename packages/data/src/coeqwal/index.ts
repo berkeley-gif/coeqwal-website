@@ -114,6 +114,29 @@ export type {
   // Delta statistics types
   DeltaMonthlyStats,
   DeltaMonthlyResponse,
+  // Data in depth types
+  DidPeriod,
+  DidUnit,
+  DidUnitToken,
+  DidInclude,
+  DidStatistics,
+  DidBox,
+  DidValuePoint,
+  DidExceedancePoint,
+  DidFacets,
+  ReservoirStorageDidOptions,
+  ReservoirStorageDidResponse,
+  RiverFlowsDidOptions,
+  RiverFlowsDidResponse,
+  DeltaSalinityDidOptions,
+  DeltaSalinityDidResponse,
+  CwsDataInDepthOptions,
+  CwsDataInDepthResponse,
+  AgDataInDepthOptions,
+  AgDataInDepthResponse,
+  DidGwMeasure,
+  GroundwaterStorageDidOptions,
+  GroundwaterStorageDidResponse,
 } from "./types"
 
 // API constants
@@ -152,6 +175,13 @@ export {
   fetchChannelsList,
   // Delta fetchers
   fetchDeltaMonthly,
+  // Data in depth fetchers
+  fetchReservoirStorageDataInDepth,
+  fetchRiverFlowsDataInDepth,
+  fetchDeltaSalinityDataInDepth,
+  fetchCwsDataInDepth,
+  fetchAgDataInDepth,
+  fetchGroundwaterStorageDataInDepth,
 } from "./fetchers"
 
 // Re-export hooks for convenience

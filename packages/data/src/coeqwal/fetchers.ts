@@ -45,6 +45,12 @@ import type {
   RiverFlowsDidOptions,
   DeltaSalinityDidResponse,
   DeltaSalinityDidOptions,
+  CwsDataInDepthResponse,
+  CwsDataInDepthOptions,
+  AgDataInDepthResponse,
+  AgDataInDepthOptions,
+  GroundwaterStorageDidResponse,
+  GroundwaterStorageDidOptions,
 } from "./types"
 
 /**
@@ -947,6 +953,52 @@ export async function fetchDeltaSalinityDataInDepth(
   }
   return apiFetcher<DeltaSalinityDidResponse>(
     ENDPOINTS.deltaSalinityDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/** Fetch annual CWS delivery + percent-demand-met + welfare-outcome stats for one or more scenarios. */
+export async function fetchCwsDataInDepth(
+  scenarios: string[],
+  options: CwsDataInDepthOptions = {},
+): Promise<CwsDataInDepthResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<CwsDataInDepthResponse>(
+    ENDPOINTS.cwsDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/** Fetch annual AG net diversion + GW pumping + shortage + revenue stats for one or more scenarios. */
+export async function fetchAgDataInDepth(
+  scenarios: string[],
+  options: AgDataInDepthOptions = {},
+): Promise<AgDataInDepthResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<AgDataInDepthResponse>(
+    ENDPOINTS.agDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/**
+ * Fetch annual groundwater storage volume + water-table level (raw +
+ * live-computed stats) for one or more scenarios. `level` is empty for the
+ * NOD_GroundwaterStorage/SOD_GroundwaterStorage aggregates (never aggregated).
+ */
+export async function fetchGroundwaterStorageDataInDepth(
+  scenarios: string[],
+  options: GroundwaterStorageDidOptions = {},
+): Promise<GroundwaterStorageDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<GroundwaterStorageDidResponse>(
+    ENDPOINTS.groundwaterStorageDataInDepth(scenarios, options),
     { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
   )
 }
