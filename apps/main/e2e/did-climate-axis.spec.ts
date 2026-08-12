@@ -88,7 +88,10 @@ test("climate futures axis fetches each hydroclimate variant and goes live", asy
   )
   await page.route("**/api/tiers/scenarios/*/locations*", (route) => {
     const id =
-      route.request().url().match(/tiers\/scenarios\/([^/]+)\//)?.[1] ?? ""
+      route
+        .request()
+        .url()
+        .match(/tiers\/scenarios\/([^/]+)\//)?.[1] ?? ""
     return route.fulfill({ json: { scenario: id, results: {}, missing: [] } })
   })
 
