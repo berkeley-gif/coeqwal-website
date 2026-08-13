@@ -13,22 +13,26 @@
  * Data source
  * -----------
  * Reservoir, river-flow, and X2 variables (mapped in `didMapping`) use LIVE data
- * on the compare-by-scenarios axis: each scenario's raw annual series is fetched
- * from the matching /api/data-in-depth/* endpoint (per-scenario parallel
- * fan-out), and every derived value the chart needs (exceedance curve, box,
- * mean, CV) is computed on the frontend from that series via `seriesStats` and
- * `toExceedancePoints` - the same path the mock engine feeds. So the live and
- * mock members are shaped identically; only the origin of `series` differs.
+ * on the compare-by-scenarios and compare-by-climates axes: each member's raw
+ * annual series is fetched from the matching /api/data-in-depth/* endpoint
+ * (per-scenario parallel fan-out), and every derived value the chart needs
+ * (exceedance curve, box, mean, CV) is computed on the frontend from that
+ * series via `seriesStats` and `toExceedancePoints` - the same path the mock
+ * engine feeds. So the live and mock members are shaped identically; only the
+ * origin of `series` differs.
  *
- * Everything else - the climate and location compare axes, and any variable not
- * served by a data-in-depth endpoint - uses the deterministic sample-data
- * engine. Each member falls back to mock individually if its live series is
- * absent, and the card is labeled per the resolved `source`.
+ * Everything else - the locations compare axis, and any variable not served by
+ * a data-in-depth endpoint - uses the deterministic sample-data engine. Each
+ * member falls back to mock individually if its live series is absent, and the
+ * card is labeled per the resolved `source`.
  *
- * Scenario ids are resolved through the active hydroclimate
- * (`useResolvedIdMapping`) before fetching, so switching hydroclimate fetches
- * the correct variant. A pinned climate that differs from the workspace
- * hydroclimate falls back to mock (live is resolved for the workspace climate).
+ * Member ids resolve to concrete scenario short_codes before fetching:
+ * - scenarios axis: each compared scenario through the active workspace
+ *   hydroclimate (`useResolvedIdMapping`). A pinned climate that differs from
+ *   the workspace hydroclimate falls back to mock.
+ * - climates axis: the held scenario through EVERY compared climate
+ *   (`useResolvedIdMappings` + `climateFanoutIds`), one variant id per member,
+ *   since a climate future is baked into the scenario id.
  */
 
 import { useMemo } from "react"
@@ -38,11 +42,13 @@ import {
   useDeltaSalinityDataInDepth,
 } from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
-import { useResolvedIdMapping } from "../../../../../../scenarios/hooks"
+import {
+  useResolvedIdMapping,
+  useResolvedIdMappings,
+} from "../../../../../../scenarios/hooks"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
 import {
   getScenarioShortLabel,
-  HYDROCLIMATES,
   HYDROCLIMATE_ID_MAP,
   HYDROCLIMATE_SHORT_LABELS,
 } from "../../../../../../../content/scenarios"
@@ -65,6 +71,11 @@ import {
   type SeriesStats,
 } from "../config/mockDataEngine"
 import { filterSeriesByWyt } from "../config/wytFilter"
+import {
+  comparedClimateKeys,
+  climateFanoutIds,
+  liveAxisEligible,
+} from "../config/climateAxis"
 import {
   didDomainForVariable,
   didPeriodForVariable,
@@ -131,7 +142,7 @@ interface MemberSpec {
   scenarioId: string
   climateKey: string
   locationId: string
-  /** Index into the per-scenario live fan-out slots (scenarios axis only) */
+  /** Index into the per-scenario live fan-out slots (scenarios and climates axes) */
   slotIndex?: number
 }
 
@@ -209,21 +220,35 @@ export function useVariableData(): VariableData {
   const unitToken = domain ? unitTokenForView(domain, view) : "volume"
   const include = includeForView(view)
 
-  // Resolve the comparison scenarios through the active hydroclimate. Live is
-  // only correct when the held climate is the workspace hydroclimate the
-  // resolver used; otherwise fall back to mock.
+  // Resolve member ids to concrete scenario short_codes for the live fetch.
+  // Scenarios axis: each compared scenario through the active workspace
+  // hydroclimate (live is only correct when the held climate matches the
+  // climate the resolver ran for). Climates axis: the held scenario through
+  // every compared climate, one variant id per member.
   const resolved = useResolvedIdMapping()
+  const resolvedAll = useResolvedIdMappings()
   const liveEligible =
     domain != null &&
     subject != null &&
     period != null &&
-    compareBy === "scenarios" &&
-    heldClimate === resolved.hydroclimate
+    liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
 
-  // Resolved short_code (or null) per comparison scenario, in member order.
-  const fanoutIds = liveEligible
-    ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
-    : []
+  // Compared climate keys, shared by the fan-out and the member specs below
+  // so slot indexes and ids stay aligned.
+  const comparedClimates = comparedClimateKeys(selectedClimates)
+
+  // Resolved short_code (or null) per member, in member order.
+  const fanoutIds = !liveEligible
+    ? []
+    : compareBy === "scenarios"
+      ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
+      : climateFanoutIds(
+          Object.fromEntries(
+            Object.entries(resolvedAll).map(([k, m]) => [k, m.idMapping]),
+          ),
+          comparedClimates,
+          heldScenario,
+        )
 
   const wyt =
     selectedWaterYearTypes.length > 0 ? selectedWaterYearTypes : undefined
@@ -321,11 +346,9 @@ export function useVariableData(): VariableData {
         })
       })
     } else if (compareBy === "climates") {
-      const keys =
-        selectedClimates.length > 0
-          ? selectedClimates.filter((k) => k in HYDROCLIMATE_ID_MAP)
-          : [...HYDROCLIMATES]
-      for (const key of keys) {
+      // Same helper as the fan-out above, so member order and slot order
+      // always agree.
+      comparedClimateKeys(selectedClimates).forEach((key, i) => {
         specs.push({
           id: key,
           label: climateLabel(key),
@@ -333,8 +356,9 @@ export function useVariableData(): VariableData {
           scenarioId: heldScenario,
           climateKey: key,
           locationId: heldLocation,
+          slotIndex: i,
         })
-      }
+      })
     } else {
       const chosen = (selectedLocationsByGroup[groupId] ?? []).filter((id) =>
         group.items.some((l) => l.id === id),
