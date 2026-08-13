@@ -202,6 +202,7 @@ function ShareDrawerContent() {
           </Typography>
           <IconButton
             size="small"
+            aria-label="Close share drawer"
             onClick={() => setShowShareDrawer(false)}
             sx={{ p: 0.5 }}
           >

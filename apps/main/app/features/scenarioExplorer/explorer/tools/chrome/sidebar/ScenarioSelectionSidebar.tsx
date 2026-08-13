@@ -424,6 +424,9 @@ export default function ScenarioSelectionSidebar({
                   checked={isChosen}
                   onChange={() => toggleScenario(scenario.scenarioId)}
                   onClick={(e) => e.stopPropagation()}
+                  inputProps={{
+                    "aria-label": `Select ${scenario.label} scenario`,
+                  }}
                   sx={{
                     ...theme.scenarios.checkbox.sm,
                     flexShrink: 0,
