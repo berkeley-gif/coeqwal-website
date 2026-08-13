@@ -1718,7 +1718,9 @@ export interface DidSalmonSubject {
   subject: string
   kind: string
   label: string
-  periods: Partial<Record<DidAnnualPeriod, Partial<Record<"NOF_3YR_AVG", DidFacets>>>>
+  periods: Partial<
+    Record<DidAnnualPeriod, Partial<Record<"NOF_3YR_AVG", DidFacets>>>
+  >
 }
 
 export interface DidSalmonScenario {

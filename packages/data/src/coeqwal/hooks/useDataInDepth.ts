@@ -284,7 +284,11 @@ export function useSalmonDataInDepth(
   const enabled = scenarios.length > 0
   const key = enabled ? ENDPOINTS.salmonDataInDepth(scenarios, options) : null
 
-  const { data, error: swrError, isLoading } = useSWR<SalmonDidResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<SalmonDidResponse>(
     key,
     () => fetchSalmonDataInDepth(scenarios, options),
     {

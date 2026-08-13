@@ -19,8 +19,8 @@ import type {
  * Default COEQWAL API base URL
  * Can be overridden via DataProvider's apiBaseUrl prop
  */
-export const DEFAULT_API_BASE = "https://api.coeqwal.org/api"
-
+//export const DEFAULT_API_BASE = "https://api.coeqwal.org/api"
+export const DEFAULT_API_BASE = "http://localhost:8000/api"
 /**
  * Shared builder for the /data-in-depth/* endpoints. Every list param is
  * deduped + sorted (numeric sort for wyt) and serialized in a fixed order, so
