@@ -49,9 +49,9 @@ export default function ChartCard() {
     locationTitleName: data.locationTitleName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
-    waterYearTypeLabels: selectedWaterYearTypes.map(
-      (c) => WYT_LABELS[c] ?? String(c),
-    ),
+    waterYearTypeLabels: data.wytApplicable
+      ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
+      : null,
   })
 
   // One sticky color per member id, shared with the CompareControls chips

@@ -65,9 +65,9 @@ export function useDataShareCapture(
       locationTitleName: data.locationTitleName,
       climateName: data.climateName,
       scenarioName: data.scenarioName,
-      waterYearTypeLabels: selectedWaterYearTypes.map(
-        (c) => WYT_LABELS[c] ?? String(c),
-      ),
+      waterYearTypeLabels: data.wytApplicable
+        ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
+        : null,
     })
     const viewLabel =
       data.variable?.viewLabels?.[data.view as VariableView] ??
@@ -78,8 +78,9 @@ export function useDataShareCapture(
     // members themselves are climates and the workspace value stands.
     const capturedHydroclimate =
       compareBy === "climates" ? hydroclimate : (pinnedClimate ?? hydroclimate)
-    const waterYearTypesLabel =
-      selectedWaterYearTypes.length > 0
+    const waterYearTypesLabel = !data.wytApplicable
+      ? "Not applicable"
+      : selectedWaterYearTypes.length > 0
         ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? c).join("; ")
         : undefined
     await stageShareItem({

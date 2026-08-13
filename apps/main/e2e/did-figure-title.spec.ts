@@ -52,3 +52,14 @@ test("getLocationTitle appends the group's title suffix", () => {
   // Groups whose names already read as full titles get no suffix.
   expect(getLocationTitle("rivers", "YRS")).toBe("Yuba River")
 })
+
+test("null water-year labels omit the clause entirely (WYT-excluded variables)", () => {
+  expect(
+    buildFigureTitle({
+      variableName: "winter-run abundance",
+      memberSummary: "3 scenarios",
+      hydroclimateName: "Historical hydroclimate",
+      waterYearTypeLabels: null,
+    }),
+  ).toBe("Winter-run Abundance, 3 Scenarios, Historical Hydroclimate")
+})

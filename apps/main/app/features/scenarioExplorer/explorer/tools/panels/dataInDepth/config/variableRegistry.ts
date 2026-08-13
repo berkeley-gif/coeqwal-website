@@ -102,6 +102,13 @@ export interface VariableDef {
   data: "live" | "mock"
   /** Scope still under discussion (deck vs outcomes sheet); shows a chip */
   provisional?: boolean
+  /** False when the metric does not decompose by water-year type (salmon
+   *  population metrics, welfare loss): the WYT chips render disabled with a
+   *  not-applicable note, live requests omit `wyt=`, mock series skip
+   *  filtering, and figure titles and export provenance drop the
+   *  water-years clause. The stored selection stays inert, not cleared.
+   *  Absent means WYT applies. */
+  wytApplicable?: boolean
   /** Sample-data engine kind (shape/variability family) */
   mockKind: string
   /** Sample-data engine effect key (scenario response family) */

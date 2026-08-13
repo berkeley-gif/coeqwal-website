@@ -178,7 +178,7 @@ export interface DataFigureTitleInput {
   /** Held scenario label */
   scenarioName: string
   /** Active water-year-type class labels; empty = all years */
-  waterYearTypeLabels: readonly string[]
+  waterYearTypeLabels: readonly string[] | null
 }
 
 /**
