@@ -18,6 +18,8 @@ import {
   fetchRiverFlowsDataInDepth,
   fetchDeltaSalinityDataInDepth,
   fetchCwsDataInDepth,
+  fetchSalmonDataInDepth,
+  fetchSystemDeliveriesDataInDepth,
   fetchAgDataInDepth,
   fetchGroundwaterStorageDataInDepth,
 } from "../fetchers"
@@ -30,6 +32,10 @@ import type {
   DeltaSalinityDidOptions,
   CwsDataInDepthResponse,
   CwsDataInDepthOptions,
+  SalmonDidResponse,
+  SalmonDidOptions,
+  SystemDeliveriesDidResponse,
+  SystemDeliveriesDidOptions,
   AgDataInDepthResponse,
   AgDataInDepthOptions,
   GroundwaterStorageDidResponse,
@@ -251,6 +257,72 @@ export function useGroundwaterStorageDataInDepth(
   } = useSWR<GroundwaterStorageDidResponse>(
     key,
     () => fetchGroundwaterStorageDataInDepth(scenarios, options),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarios: data?.scenarios ?? [],
+    wytFilter: data?.wyt_filter ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
+  }
+}
+
+/** Annual salmon abundance (calendar-year) with live-computed stats. WYT filtering is not exposed in the client contract because the source uses calendar year, not water year. */
+export function useSalmonDataInDepth(
+  scenarios: string[],
+  options: SalmonDidOptions = {},
+) {
+  const enabled = scenarios.length > 0
+  const key = enabled ? ENDPOINTS.salmonDataInDepth(scenarios, options) : null
+
+  const { data, error: swrError, isLoading } = useSWR<SalmonDidResponse>(
+    key,
+    () => fetchSalmonDataInDepth(scenarios, options),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarios: data?.scenarios ?? [],
+    wytFilter: data?.wyt_filter ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
+  }
+}
+
+/** Annual system-delivery totals with live-computed stats. */
+export function useSystemDeliveriesDataInDepth(
+  scenarios: string[],
+  options: SystemDeliveriesDidOptions = {},
+) {
+  const enabled = scenarios.length > 0
+  const key = enabled
+    ? ENDPOINTS.systemDeliveriesDataInDepth(scenarios, options)
+    : null
+
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<SystemDeliveriesDidResponse>(
+    key,
+    () => fetchSystemDeliveriesDataInDepth(scenarios, options),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

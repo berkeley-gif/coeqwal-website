@@ -1711,6 +1711,76 @@ export interface DeltaSalinityDidResponse {
   scenarios: DidDeltaScenario[]
 }
 
+// ---- Data in Depth: Salmon (annual, calendar-year, single subject + unit) ----
+
+/** Salmon is annual and reported in calendar-year terms, not water-year terms. */
+export interface DidSalmonSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<Record<DidAnnualPeriod, Partial<Record<"NOF_3YR_AVG", DidFacets>>>>
+}
+
+export interface DidSalmonScenario {
+  scenario: string
+  n_years: number
+  subjects: DidSalmonSubject[]
+}
+
+/** Request options for the data-in-depth salmon endpoint. WYT filtering is intentionally unavailable because salmon uses calendar year, not water-year type. */
+export interface SalmonDidOptions {
+  /** Subject short_codes (default WRLCM_ADULT_FEMALES). */
+  subjects?: string[]
+  /** Annual only. */
+  periods?: DidAnnualPeriod[]
+  /** `nof_3yr_avg` only. */
+  units?: Array<"nof_3yr_avg">
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+}
+
+/** Response from GET /api/data-in-depth/salmon */
+export interface SalmonDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidSalmonScenario[]
+}
+
+// ---- Data in Depth: System Deliveries (annual, unit-grouped) ----
+
+/** One system-deliveries subject within a scenario: period → unit → facets. */
+export interface DidSystemDeliveriesSubject {
+  subject: string
+  kind: string
+  label: string
+  periods: Partial<Record<DidAnnualPeriod, Partial<Record<DidUnit, DidFacets>>>>
+}
+
+export interface DidSystemDeliveriesScenario {
+  scenario: string
+  n_years: number
+  subjects: DidSystemDeliveriesSubject[]
+}
+
+/** Request options for the data-in-depth system-deliveries endpoint. */
+export interface SystemDeliveriesDidOptions {
+  /** Subject short_codes; default all system-delivery subjects. */
+  subjects?: string[]
+  /** Annual only. */
+  periods?: DidAnnualPeriod[]
+  /** Volume in TAF only (`volume` token). */
+  units?: Array<"volume">
+  /** Which facets to return; default all. */
+  include?: DidInclude[]
+  /** Water-year-types 1-5; default all. */
+  wyt?: number[]
+}
+
+/** Response from GET /api/data-in-depth/system-deliveries */
+export interface SystemDeliveriesDidResponse {
+  wyt_filter: number[] | null
+  scenarios: DidSystemDeliveriesScenario[]
+}
+
 // ---- Data in Depth: CWS (annual, grouped by measure) ----
 
 /** One CWS subject within a scenario: period → measure → facets. */

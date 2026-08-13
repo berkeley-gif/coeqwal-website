@@ -64,6 +64,8 @@ export {
   useRiverFlowsDataInDepth,
   useDeltaSalinityDataInDepth,
   useCwsDataInDepth,
+  useSalmonDataInDepth,
+  useSystemDeliveriesDataInDepth,
   useAgDataInDepth,
   useGroundwaterStorageDataInDepth,
 } from "./useDataInDepth"
