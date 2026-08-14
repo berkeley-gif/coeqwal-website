@@ -352,7 +352,7 @@ export default function BarPanel() {
           strategy={scenario}
           titleVariant="body2"
           showThemeBadge={false}
-          descriptionMaxWidth="100%"
+          descriptionMaxWidth="65ch"
           disableTruncation
           inlineActions={
             <InlineRowActions
@@ -433,6 +433,8 @@ export default function BarPanel() {
           display: "flex",
           flexDirection: "column",
           gap: theme.space.gap.md,
+          minWidth: "100%",
+          width: "max-content",
         }}
       >
         {/* One shared sticky region: header + pinned cards move together as a unit */}

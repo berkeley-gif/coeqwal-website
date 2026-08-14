@@ -80,7 +80,7 @@ export function NonCompactRowContent({
       compact={isListMode}
       showDescription={showDescription}
       disableTruncation={disableTrunc}
-      descriptionMaxWidth="none"
+      descriptionMaxWidth="65ch"
       showThemeBadge={showThemeBadge}
       onThemeBadgeClick={onThemeBadgeClick}
       inlineActions={inlineActionsNode}

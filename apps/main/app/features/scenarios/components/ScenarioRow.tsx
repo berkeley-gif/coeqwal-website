@@ -316,7 +316,7 @@ export function ScenarioRow({
                 strategy={scenario}
                 showDescription={showDefinitions}
                 titleVariant="body2"
-                descriptionMaxWidth="none"
+                descriptionMaxWidth="65ch"
               />
             </Box>
 
