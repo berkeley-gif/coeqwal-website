@@ -73,6 +73,7 @@ export function NonCompactRowContent({
       </Box>
     ) : undefined
 
+  /** List mode strategy header */
   const strategyHeaderBlock = (disableTrunc: boolean) => (
     <StrategyHeader
       strategy={scenario}
@@ -80,7 +81,7 @@ export function NonCompactRowContent({
       compact={isListMode}
       showDescription={showDescription}
       disableTruncation={disableTrunc}
-      descriptionMaxWidth="65ch"
+      descriptionMaxWidth="80%"
       showThemeBadge={showThemeBadge}
       onThemeBadgeClick={onThemeBadgeClick}
       inlineActions={inlineActionsNode}
@@ -140,18 +141,18 @@ export function NonCompactRowContent({
           sx={{
             gridColumn: "2 / -1",
             display: "flex",
-            alignItems: "stretch",
+            alignItems: "flex-start",
             gap: theme.space.gap.xl,
             pt: theme.scenarios.grid.row.padding,
             minWidth: 0,
           }}
         >
-          <Box sx={{ flex: "none", width: "50%", minWidth: 0 }}>
+          <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
             {strategyHeaderBlock(true)}
           </Box>
           <Box
             sx={{
-              flex: 1,
+              flex: "0 0 auto",
               minWidth: 0,
               display: "flex",
               alignItems: "center",

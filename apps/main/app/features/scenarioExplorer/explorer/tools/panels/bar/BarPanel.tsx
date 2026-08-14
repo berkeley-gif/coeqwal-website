@@ -334,6 +334,7 @@ export default function BarPanel() {
     )
   }
 
+  // Bar chart scenario card
   const renderCard = (scenario: (typeof cardScenarios)[number]) => {
     const chartData = allChartData[scenario.scenarioId] ?? {}
     const isFirstCard = scenario.scenarioId === cardScenarios[0]?.scenarioId
@@ -353,7 +354,6 @@ export default function BarPanel() {
           titleVariant="body2"
           showThemeBadge={false}
           descriptionMaxWidth="65ch"
-          disableTruncation
           inlineActions={
             <InlineRowActions
               scenarioId={scenario.scenarioId}

@@ -12,6 +12,21 @@ import React, { useCallback, useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
+import { useIsCoarsePointer } from "@repo/ui/hooks"
+
+/**
+ * Truncates to a character budget, cutting at the last whole word.
+ * Used for the collapsed preview instead of a CSS height clamp, so the
+ * amount of *text* shown stays roughly constant across screen widths —
+ * a line-count clamp shows less and less text as the container narrows,
+ * since fewer characters fit per line at the same fixed height.
+ */
+export function truncateDescriptionText(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text
+  const cut = text.slice(0, maxChars)
+  const lastSpace = cut.lastIndexOf(" ")
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()
+}
 
 export interface GlossaryTerm {
   /** Regex matching the term as it appears in description text */
@@ -151,7 +166,15 @@ export function DescriptionWithGlossaryLinks({
 }) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
+  const isCoarsePointer = useIsCoarsePointer()
+  const charLimit = isCoarsePointer ? 280 : 200
+  const truncatedDescription = useMemo(
+    () => truncateDescriptionText(description, charLimit),
+    [description, charLimit],
+  )
+  const isTruncated = truncatedDescription.length < description.length
   const renderTextWithGlossaryLinks = useGlossaryRenderer(description)
+  const renderTruncatedText = useGlossaryRenderer(truncatedDescription)
 
   const toggleButtonStyles = {
     color: theme.palette.blue.medium,
@@ -246,43 +269,40 @@ export function DescriptionWithGlossaryLinks({
         style={{ top: 0, left: 0, right: 0 }}
       >
         <Box sx={{ position: "relative" }}>
-          <Box
-            sx={{
-              maxHeight: "3em",
-              overflow: "hidden",
-              lineHeight: 1.5,
-            }}
-          >
-            {renderTextWithGlossaryLinks()}
+          <Box sx={{ lineHeight: 1.5 }}>
+            {renderTruncatedText()}
+            {isTruncated && "…"}
           </Box>
-          <Box
-            component="button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(true)
-            }}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault()
+          {isTruncated && (
+            <Box
+              component="button"
+              type="button"
+              onClick={(e) => {
                 e.stopPropagation()
                 setIsExpanded(true)
-              }
-            }}
-            aria-expanded={false}
-            aria-label="Show more description text"
-            sx={{
-              ...toggleButtonStyles,
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              pl: 3,
-              background:
-                "linear-gradient(to right, transparent, var(--row-bg) 40%)",
-            }}
-          >
-            … more
-          </Box>
+              }}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsExpanded(true)
+                }
+              }}
+              aria-expanded={false}
+              aria-label="Show more description text"
+              sx={{
+                ...toggleButtonStyles,
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                pl: 3,
+                background:
+                  "linear-gradient(to right, transparent, var(--row-bg) 40%)",
+              }}
+            >
+              … more
+            </Box>
+          )}
         </Box>
       </motion.div>
     </Typography>

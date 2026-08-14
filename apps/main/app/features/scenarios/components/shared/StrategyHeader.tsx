@@ -13,18 +13,19 @@
  * cross-fade animation for smooth expand/collapse transitions.
  */
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import type { ScenarioForDisplay } from "./types"
 import {
   DescriptionWithGlossaryLinks,
   useGlossaryRenderer,
+  truncateDescriptionText,
 } from "./strategyGlossary"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import type { ScenarioTheme } from "../../../../content/scenarios"
 import { shouldWrapThemeBadgeLabel } from "../../utils/themeLabelWrap"
-
+import { useIsCoarsePointer } from "@repo/ui/hooks"
 export interface StrategyHeaderProps {
   /** Scenario data */
   strategy: ScenarioForDisplay
@@ -56,14 +57,24 @@ function CompactDescription({
   description,
   forceExpanded = false,
   disableTruncation = false,
+  maxWidth,
 }: {
   description: string
   forceExpanded?: boolean
   disableTruncation?: boolean
+  maxWidth?: string | number
 }) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
+  const isCoarsePointer = useIsCoarsePointer()
+  const charLimit = isCoarsePointer ? 220 : 150
+  const truncatedDescription = useMemo(
+    () => truncateDescriptionText(description, charLimit),
+    [description, charLimit],
+  )
+  const isTruncated = truncatedDescription.length < description.length
   const renderGlossaryText = useGlossaryRenderer(description)
+  const renderTruncatedText = useGlossaryRenderer(truncatedDescription)
 
   if (disableTruncation) {
     return (
@@ -74,6 +85,7 @@ function CompactDescription({
           lineHeight: 1.35,
           mt: "1px",
           pb: 0.5,
+          ...(maxWidth && { maxWidth }),
         }}
       >
         {renderGlossaryText()}
@@ -102,6 +114,7 @@ function CompactDescription({
         mt: "1px",
         pb: 0.5,
         position: "relative",
+        ...(maxWidth && { maxWidth }),
       }}
     >
       {expanded || forceExpanded ? (
@@ -123,27 +136,23 @@ function CompactDescription({
         </>
       ) : (
         <Box sx={{ position: "relative" }}>
-          <Box sx={{ maxHeight: "2.7em", overflow: "hidden" }}>
-            {renderGlossaryText()}
+          <Box component="span">
+            {renderTruncatedText()}
+            {isTruncated && "… "}
           </Box>
-          <Box
-            component="button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded(true)
-            }}
-            sx={{
-              ...toggleStyles,
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              pl: 3,
-              background: `linear-gradient(to right, transparent, var(--row-bg, ${theme.palette.common.white}) 40%)`,
-            }}
-          >
-            … more
-          </Box>
+          {isTruncated && (
+            <Box
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded(true)
+              }}
+              sx={{ ...toggleStyles, pl: 1 }}
+            >
+              more
+            </Box>
+          )}
         </Box>
       )}
     </Box>
@@ -188,41 +197,41 @@ export function StrategyHeader({
     const compactTitleLineHeight = 1.3
     const themeBadgeButtonSx = onThemeBadgeClick
       ? {
-          background: "none" as const,
-          border: "none",
-          padding: 0,
-          cursor: "pointer" as const,
-          textAlign: "left" as const,
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          flex: 1,
-          flexBasis: 0,
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-          "&:hover > span": { opacity: 0.8 },
-          "&:focus-visible": {
-            outline: `2px solid ${theme.palette.blue.bright}`,
-            outlineOffset: "2px",
-            borderRadius: "2px",
-          },
-        }
+        background: "none" as const,
+        border: "none",
+        padding: 0,
+        cursor: "pointer" as const,
+        textAlign: "left" as const,
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        flex: 1,
+        flexBasis: 0,
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+        "&:hover > span": { opacity: 0.8 },
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.blue.bright}`,
+          outlineOffset: "2px",
+          borderRadius: "2px",
+        },
+      }
       : {
-          minWidth: 0,
-          display: "inline-flex" as const,
-          alignItems: themeBadgeMultiline ? "flex-start" : "center",
-          overflow: themeBadgeMultiline ? "visible" : "hidden",
-          flexShrink: 1,
-        }
+        minWidth: 0,
+        display: "inline-flex" as const,
+        alignItems: themeBadgeMultiline ? "flex-start" : "center",
+        overflow: themeBadgeMultiline ? "visible" : "hidden",
+        flexShrink: 1,
+      }
     const themeBadgeTextSx = themeBadgeMultiline
       ? { minWidth: 0, maxWidth: "100%" }
       : {
-          whiteSpace: "nowrap" as const,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          minWidth: 0,
-          flexShrink: 0,
-        }
+        whiteSpace: "nowrap" as const,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: 0,
+        flexShrink: 0,
+      }
 
     return (
       <Box sx={{ m: 0, p: 0 }}>
@@ -284,9 +293,9 @@ export function StrategyHeader({
               onClick={
                 onThemeBadgeClick && strategy.theme
                   ? (e: React.MouseEvent) => {
-                      e.stopPropagation()
-                      onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                    }
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
                   : undefined
               }
               sx={themeBadgeButtonSx}
@@ -321,6 +330,7 @@ export function StrategyHeader({
             description={strategy.description}
             forceExpanded={expandDescription}
             disableTruncation={disableTruncation}
+            maxWidth={descriptionMaxWidth}
           />
         )}
       </Box>
@@ -346,42 +356,42 @@ export function StrategyHeader({
             onClick={
               onThemeBadgeClick && strategy.theme
                 ? (e: React.MouseEvent) => {
-                    e.stopPropagation()
-                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
-                  }
+                  e.stopPropagation()
+                  onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                }
                 : undefined
             }
             sx={
               onThemeBadgeClick
                 ? {
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                    "&:hover > span": { opacity: 0.8 },
-                    "&:focus-visible": {
-                      outline: `2px solid ${theme.palette.blue.bright}`,
-                      outlineOffset: "2px",
-                      borderRadius: "2px",
-                    },
-                  }
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                  "&:hover > span": { opacity: 0.8 },
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.blue.bright}`,
+                    outlineOffset: "2px",
+                    borderRadius: "2px",
+                  },
+                }
                 : {
-                    minWidth: 0,
-                    display: "inline-flex",
-                    alignItems: themeBadgeMultiline ? "flex-start" : "center",
-                    flex: 1,
-                    flexBasis: 0,
-                    overflow: themeBadgeMultiline ? "visible" : "hidden",
-                    flexShrink: 1,
-                  }
+                  minWidth: 0,
+                  display: "inline-flex",
+                  alignItems: themeBadgeMultiline ? "flex-start" : "center",
+                  flex: 1,
+                  flexBasis: 0,
+                  overflow: themeBadgeMultiline ? "visible" : "hidden",
+                  flexShrink: 1,
+                }
             }
           >
             <ScenarioBadge
@@ -392,12 +402,12 @@ export function StrategyHeader({
                 themeBadgeMultiline
                   ? { minWidth: 0, maxWidth: "100%" }
                   : {
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      minWidth: 0,
-                      flexShrink: 0,
-                    }
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    minWidth: 0,
+                    flexShrink: 0,
+                  }
               }
             />
           </Box>
