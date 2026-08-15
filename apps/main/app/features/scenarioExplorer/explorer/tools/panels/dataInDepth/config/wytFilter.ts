@@ -28,6 +28,22 @@ export function filterSeriesByWyt(
 }
 
 /**
+ * The wyt selection a variable's data path should actually use: the stored
+ * selection when the variable supports water-year-type filtering and a class
+ * is selected, otherwise undefined (no `wyt=` request param, no mock-side
+ * filtering). Variables that opt out (`wytApplicable: false` in the registry:
+ * metrics that do not decompose by water-year type, e.g. salmon population
+ * metrics, welfare loss) keep the stored selection INERT rather than cleared,
+ * so it revives when the user switches back to a variable it applies to.
+ */
+export function effectiveWytSelection(
+  wytApplicable: boolean,
+  selected: number[],
+): number[] | undefined {
+  return wytApplicable && selected.length > 0 ? selected : undefined
+}
+
+/**
  * Single-select toggle: choosing a class replaces the selection (one water
  * year type shown at a time, per the team ruling), and choosing the active
  * class clears it back to all years. The selection stays an array so the

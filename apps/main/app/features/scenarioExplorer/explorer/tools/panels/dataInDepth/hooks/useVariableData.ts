@@ -70,7 +70,7 @@ import {
   type MonthlyBand,
   type SeriesStats,
 } from "../config/mockDataEngine"
-import { filterSeriesByWyt } from "../config/wytFilter"
+import { effectiveWytSelection, filterSeriesByWyt } from "../config/wytFilter"
 import {
   comparedClimateKeys,
   climateFanoutIds,
@@ -131,6 +131,9 @@ export interface VariableData {
   climateName: string
   /** Held-constant scenario label (climates / locations axes) */
   scenarioName: string
+  /** Whether water-year typing applies to the selected variable (false =
+   *  registry opt-out: chips disabled, no wyt filtering, no title clause) */
+  wytApplicable: boolean
   isLoading: boolean
   error: unknown
 }
@@ -250,8 +253,10 @@ export function useVariableData(): VariableData {
           heldScenario,
         )
 
-  const wyt =
-    selectedWaterYearTypes.length > 0 ? selectedWaterYearTypes : undefined
+  // Whether water-year typing applies to this variable at all (salmon
+  // population metrics and welfare loss opt out via the registry flag).
+  const wytApplicable = variable?.wytApplicable !== false
+  const wyt = effectiveWytSelection(wytApplicable, selectedWaterYearTypes)
 
   // Fan out each domain's endpoint across the comparison scenarios. Only the
   // active domain passes real ids; the others pass [] so every slot defers.
@@ -326,6 +331,7 @@ export function useVariableData(): VariableData {
         provisional: false,
         source: "mock",
         ...emptyContext,
+        wytApplicable,
         isLoading: false,
         error: null,
       }
@@ -437,12 +443,8 @@ export function useVariableData(): VariableData {
       // the displayed summary value never derives from the series, but the
       // exported series and stats must match what the capture's provenance
       // header claims.
-      if (!adoptedLive && selectedWaterYearTypes.length > 0) {
-        series = filterSeriesByWyt(
-          series,
-          selectedWaterYearTypes,
-          mockWaterYearType,
-        )
+      if (!adoptedLive && wyt) {
+        series = filterSeriesByWyt(series, wyt, mockWaterYearType)
       }
 
       const stats = seriesStats(series)
@@ -500,6 +502,7 @@ export function useVariableData(): VariableData {
       provisional: variable.provisional ?? false,
       source: anyLive ? "live" : "mock",
       ...emptyContext,
+      wytApplicable,
       isLoading: liveEligible ? liveLoading : false,
       error: null,
     }
