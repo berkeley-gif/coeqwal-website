@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   didDomainForVariable,
+  viewHasLiveSource,
   didPeriodForVariable,
   toDidSubject,
   unitTokenForView,
@@ -24,7 +25,6 @@ test("didDomainForVariable maps live variables and returns null for mock ones", 
   expect(didDomainForVariable("x2_sep")).toBe("delta")
   // Not served live -> mock:
   expect(didDomainForVariable("riv_uif")).toBeNull() // % of unimpaired not served
-  expect(didDomainForVariable("gw_stor")).toBeNull()
   expect(didDomainForVariable("station_ec")).toBeNull()
   expect(didDomainForVariable("nonsense")).toBeNull()
 })
@@ -35,7 +35,7 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("riv_flow")).toBe("annual")
   expect(didPeriodForVariable("x2_apr")).toBe("april")
   expect(didPeriodForVariable("x2_sep")).toBe("sept")
-  expect(didPeriodForVariable("gw_stor")).toBeNull()
+  expect(didPeriodForVariable("riv_uif")).toBeNull()
 })
 
 test("toDidSubject maps reservoir location ids to API subject codes", () => {
@@ -221,4 +221,122 @@ test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted",
     subjects: ["SHSTA"],
   })
   expect(unfiltered).not.toContain("wyt=")
+})
+
+test("system-delivery variables map to the sysdel domain with annual periods", () => {
+  expect(didDomainForVariable("cvp_del")).toBe("sysdel")
+  expect(didDomainForVariable("swp_del")).toBe("sysdel")
+  expect(didDomainForVariable("tot_exp")).toBe("sysdel")
+  expect(didPeriodForVariable("cvp_del")).toBe("annual")
+  expect(didPeriodForVariable("swp_del")).toBe("annual")
+  expect(didPeriodForVariable("tot_exp")).toBe("annual")
+})
+
+test("sysdel subjects depend on the variable as well as the location", () => {
+  // CVP and SWP deliveries: system total plus north/south of Delta splits.
+  expect(toDidSubject("sysdel", "SYS", "cvp_del")).toBe("DEL_CVP_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "cvp_del")).toBe("DEL_CVP_TOT_N_WAMER")
+  expect(toDidSubject("sysdel", "SOD", "cvp_del")).toBe("DEL_CVP_TOT_S_WLOSS")
+  expect(toDidSubject("sysdel", "SYS", "swp_del")).toBe("DEL_SWP_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "swp_del")).toBe("DEL_SWP_TOT_N")
+  expect(toDidSubject("sysdel", "SOD", "swp_del")).toBe("DEL_SWP_TOT_S")
+  // Delta exports have no regional split in CalSim; single Delta location.
+  expect(toDidSubject("sysdel", "DELTA", "tot_exp")).toBe(
+    "C_CVPSWP_TOTAL_EXPORTS",
+  )
+  // Unknown location or missing variable id -> null (mock fallback).
+  expect(toDidSubject("sysdel", "NOD", "tot_exp")).toBeNull()
+  expect(toDidSubject("sysdel", "SYS", "nonsense")).toBeNull()
+  expect(toDidSubject("sysdel", "SYS")).toBeNull()
+})
+
+test("viewHasLiveSource: only mock-surfaced views opt out of live adoption", () => {
+  expect(viewHasLiveSource("dist")).toBe(true)
+  expect(viewHasLiveSource("pct")).toBe(true)
+  expect(viewHasLiveSource("level")).toBe(true)
+  expect(viewHasLiveSource("cv")).toBe(true)
+  // Monthly bands and summary values come from the sample engine even when a
+  // live series exists, so these views must not claim live data.
+  expect(viewHasLiveSource("monthly")).toBe(false)
+  expect(viewHasLiveSource("value")).toBe(false)
+  // Allowlist semantics: an unknown future view defaults to sample-labeled.
+  expect(viewHasLiveSource("someFutureView")).toBe(false)
+})
+
+test("pickLiveSeries reads sysdel blocks from the subjects array under TAF", () => {
+  const block = {
+    subjects: [
+      {
+        subject: "DEL_CVP_TOTAL",
+        periods: {
+          annual: { TAF: { values: [{ water_year: 1922, value: 5432.1 }] } },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(block, "sysdel", "DEL_CVP_TOTAL", "annual", "volume"),
+  ).toEqual([5432.1])
+  expect(
+    pickLiveSeries(block, "sysdel", "DEL_SWP_TOTAL", "annual", "volume"),
+  ).toEqual([])
+})
+
+test("groundwater aggregates and salmon map to their own domains with annual periods", () => {
+  expect(didDomainForVariable("gw_stor")).toBe("gw")
+  expect(didDomainForVariable("salmon_abund")).toBe("salmon")
+  expect(didPeriodForVariable("gw_stor")).toBe("annual")
+  expect(didPeriodForVariable("salmon_abund")).toBe("annual")
+})
+
+test("gw serves only the NOD/SOD aggregates live; named basins stay mock pending the basin-to-WBA lookup", () => {
+  expect(toDidSubject("gw", "AGG_GW_NOD")).toBe("NOD_GroundwaterStorage")
+  expect(toDidSubject("gw", "AGG_GW_SOD")).toBe("SOD_GroundwaterStorage")
+  expect(toDidSubject("gw", "COL")).toBeNull()
+  expect(toDidSubject("gw", "MER")).toBeNull()
+  expect(toDidSubject("salmon", "WRLCM")).toBe("WRLCM_ADULT_FEMALES")
+})
+
+test("measure-keyed domains resolve their own request tokens and response keys", () => {
+  expect(unitTokenForView("gw", "dist")).toBe("volume")
+  expect(unitTokenForView("gw", "level")).toBe("level")
+  expect(unitTokenForView("salmon", "dist")).toBe("nof_3yr_avg")
+  const gwBlock = {
+    subjects: [
+      {
+        subject: "NOD_GroundwaterStorage",
+        periods: {
+          annual: { volume: { values: [{ water_year: 1922, value: 42 }] } },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(gwBlock, "gw", "NOD_GroundwaterStorage", "annual", "volume"),
+  ).toEqual([42])
+  // Aggregates never serve level; an absent key falls back to mock.
+  expect(
+    pickLiveSeries(gwBlock, "gw", "NOD_GroundwaterStorage", "annual", "level"),
+  ).toEqual([])
+  const salmonBlock = {
+    subjects: [
+      {
+        subject: "WRLCM_ADULT_FEMALES",
+        periods: {
+          annual: {
+            NOF_3YR_AVG: { values: [{ water_year: 1934, value: 0.23 }] },
+          },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(
+      salmonBlock,
+      "salmon",
+      "WRLCM_ADULT_FEMALES",
+      "annual",
+      "nof_3yr_avg",
+    ),
+  ).toEqual([0.23])
 })
