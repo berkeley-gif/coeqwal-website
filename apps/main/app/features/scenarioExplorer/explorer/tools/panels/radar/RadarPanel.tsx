@@ -52,6 +52,10 @@ import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioCo
 import { useTourAnchor } from "../../tour"
 import { useRadarInfoIconSync } from "./tour"
 
+import { OUTCOME_LABEL_BREAKS } from "../../../../../../content/outcomes"
+
+
+
 type AxisPosition = {
   axis: string
   x: number
@@ -863,6 +867,7 @@ export default function RadarPanel({
                 baselineData={baselineScenario ?? undefined}
                 highlightBaseline={highlightBaseline}
                 chosenIds={chosenIds}
+                labelBreaks={OUTCOME_LABEL_BREAKS}
                 highlightedIds={highlightedIds}
                 morphGeneration={morphGeneration}
                 onDotClick={(scenarioId, axis) =>

@@ -58,6 +58,8 @@ export interface RadarPlotProps {
     string,
     Record<string, { tier: number; count: number; normalized: number }[]>
   >
+  /** Outcome labels broken by lines */
+  labelBreaks?: Record<string, [string, string]>
   /** When set, the dot matching this axis + scenario gets a highlight ring on the map. */
   activeMapDot?: { axis: string; scenarioId: string } | null
   /** When true, hide connecting lines and show only dots */
@@ -502,6 +504,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     showAllPaths: _showAllPaths = false,
     showTierZones = true,
     morphGeneration,
+    labelBreaks = {},
     pinnedScenarioIds: pinnedScenarioIdsProp,
     onPinnedToggle,
     onDotClick,
@@ -795,7 +798,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const labelFont = `${axisLabelDetailStyle.scenarioFontWeight} ${remToPx(axisLabelDetailStyle.scenarioFontSize)} ${axisLabelDetailStyle.fontFamily}`
 
           const maxLabelWidth = axes.reduce((max, axis) => {
-            const curated = LABEL_BREAK_POINTS[axis]
+            const curated = labelBreaks[axis]
             const lines = curated ?? [axis]
             const widest = Math.max(
               ...lines.map((line) => measureTextWidth(line, labelFont)),
@@ -803,7 +806,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return Math.max(max, widest)
           }, 0)
 
-          const size = Math.min(w, h) 
+          const size = Math.min(w, h)
 
           const idealMargin = Number.isFinite(maxLabelWidth) && maxLabelWidth > 0
             ? 24 + maxLabelWidth + 12
@@ -811,7 +814,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           const MARGIN_FRACTION_CAP = 0.22 // margin never eats more than ~22% of size per side
           const MARGIN = Math.min(idealMargin, size * MARGIN_FRACTION_CAP)
-
 
           const radius = (size - MARGIN * 2) / 2
           if (radius <= 0) {
@@ -1765,7 +1767,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const anchor =
               Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
 
-            const curated = LABEL_BREAK_POINTS[axis]
+            const curated = labelBreaks[axis]
             const detailY = curated
               ? ly + axisLabelDetailStyle.detailAnchorOffsetTwoLinePx
               : ly + axisLabelDetailStyle.detailAnchorOffsetOneLinePx

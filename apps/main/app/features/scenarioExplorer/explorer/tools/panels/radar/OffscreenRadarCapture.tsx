@@ -27,6 +27,7 @@ import {
 import { type Theme } from "@repo/ui/mui"
 import { offscreenCapture } from "../../../share/capture/OffscreenCaptureHost"
 import { CAPTURE_DIMENSIONS } from "../../../share/capture/dimensions"
+import { OUTCOME_LABEL_BREAKS } from "../../../../../../content/outcomes"
 
 export interface CaptureRadarOffscreenInput {
   data: VerticalParallelLineData[]
@@ -97,6 +98,7 @@ export async function captureRadarOffscreen(
         showTierZones={input.showTierZones}
         highlightBaseline={input.highlightBaseline}
         showDotsOnly={input.showDotsOnly}
+        labelBreaks={OUTCOME_LABEL_BREAKS}
         axisLabelDetailStyle={input.axisLabelDetailStyle}
         palette={input.palette}
         width={width}

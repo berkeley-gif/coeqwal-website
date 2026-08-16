@@ -29,7 +29,7 @@ import {
 import { themeValues } from "@repo/ui/themes/theme"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 import { NoDataAtThisTime } from "./NoDataAtThisTime"
-import { getSingleValueLocationCount } from "../../../../content/outcomes"
+import { getSingleValueLocationCount, OUTCOME_LABEL_BREAKS, } from "../../../../content/outcomes"
 
 /**
  * Generate accessible description of chart data for screen readers
@@ -63,19 +63,7 @@ function generateChartAriaLabel(
  * Each outcome breaks at a specific point for visual consistency
  */
 export function formatOutcomeLabel(displayName: string): React.ReactNode {
-  const breakPoints: Record<string, [string, string]> = {
-    "Community deliveries": ["Community", "deliveries"],
-    "Agricultural revenue": ["Agricultural", "revenue"],
-    "Environmental flows": ["Environmental", "flows"],
-    "Reservoir storage": ["Reservoir", "storage"],
-    "Groundwater storage": ["Groundwater", "storage"],
-    "Delta estuary ecology": ["Delta estuary", "ecology"],
-    "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
-    "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
-    "Winter-run salmon": ["Winter-run", "salmon"],
-  }
-
-  const parts = breakPoints[displayName]
+  const parts = OUTCOME_LABEL_BREAKS[displayName]
   if (parts) {
     return (
       <>
@@ -383,11 +371,11 @@ export function OutcomeGlyphItem({
       onKeyDown={
         isClickable
           ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault()
-                onGlyphClick?.()
-              }
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              onGlyphClick?.()
             }
+          }
           : undefined
       }
     >
