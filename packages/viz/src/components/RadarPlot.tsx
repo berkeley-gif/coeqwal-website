@@ -190,6 +190,7 @@ const FONT_FAMILY =
 
 const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "Community deliveries": ["Community", "deliveries"],
+  "Community surface water": ["Community surface", "water"],
   "Agricultural revenue": ["Agricultural", "revenue"],
   "Environmental flows": ["Environmental", "flows"],
   "Reservoir storage": ["Reservoir", "storage"],
@@ -458,6 +459,30 @@ function axisPositionsEqual(
   }
   return true
 }
+
+let measureCanvas: HTMLCanvasElement | null = null
+
+function measureTextWidth(text: string, font: string): number {
+  if (typeof document === "undefined") return 0
+  if (!measureCanvas) measureCanvas = document.createElement("canvas")
+  const ctx = measureCanvas.getContext("2d")
+  if (!ctx) return 0
+  ctx.font = font
+  return ctx.measureText(text).width
+}
+
+function remToPx(value: string): string {
+  if (!value.trim().endsWith("rem")) return value
+  const rem = parseFloat(value)
+  if (Number.isNaN(rem)) return value
+  const rootFontSize =
+    typeof document !== "undefined"
+      ? parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+      : 16
+  return `${rem * rootFontSize}px`
+}
+
+/** MAIN COMPONENT */
 
 const RadarPlot: React.FC<RadarPlotProps> = React.memo(
   ({
@@ -767,8 +792,27 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("flood-opacity", sh.panelShadowOpacity)
           }
 
-          const MARGIN = 80
-          const size = Math.min(w, h)
+          const labelFont = `${axisLabelDetailStyle.scenarioFontWeight} ${remToPx(axisLabelDetailStyle.scenarioFontSize)} ${axisLabelDetailStyle.fontFamily}`
+
+          const maxLabelWidth = axes.reduce((max, axis) => {
+            const curated = LABEL_BREAK_POINTS[axis]
+            const lines = curated ?? [axis]
+            const widest = Math.max(
+              ...lines.map((line) => measureTextWidth(line, labelFont)),
+            )
+            return Math.max(max, widest)
+          }, 0)
+
+          const size = Math.min(w, h) 
+
+          const idealMargin = Number.isFinite(maxLabelWidth) && maxLabelWidth > 0
+            ? 24 + maxLabelWidth + 12
+            : 140
+
+          const MARGIN_FRACTION_CAP = 0.22 // margin never eats more than ~22% of size per side
+          const MARGIN = Math.min(idealMargin, size * MARGIN_FRACTION_CAP)
+
+
           const radius = (size - MARGIN * 2) / 2
           if (radius <= 0) {
             // Fire onReady on this bail too so off-screen capture is
@@ -1319,7 +1363,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .filter(function () {
                   return (
                     this.getAttribute("data-scenario-id") ===
-                      active.scenarioId &&
+                    active.scenarioId &&
                     this.getAttribute("data-axis") === active.axis
                   )
                 })
@@ -1658,9 +1702,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   pinCount === 1
                     ? axisAngle
                     : axisAngle -
-                      maxArcSpan / 2 +
-                      arcSlice * pinIdx +
-                      arcSlice / 2
+                    maxArcSpan / 2 +
+                    arcSlice * pinIdx +
+                    arcSlice / 2
 
                 buckets.forEach(({ tier, count }) => {
                   if (count <= 0) return
@@ -1917,6 +1961,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       const el = containerRef.current
       if (!el || !responsive) return
 
+
+      const syncSvgAttrs = (w: number, h: number) => {
+        const svg = svgRef.current
+        if (!svg) return
+        svg.setAttribute("width", String(w))
+        svg.setAttribute("height", String(h))
+      }
+
+
       const ro = new ResizeObserver((entries) => {
         const entry = entries[0]
         if (!entry) return
@@ -1927,6 +1980,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         if (prev.width === rw && prev.height === rh) return
         lastDimsRef.current = { width: rw, height: rh }
         if (rw > 0 && rh > 0) {
+          syncSvgAttrs(rw, rh)
           updateChartRef.current(rw, rh)
         }
       })
@@ -1938,6 +1992,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       const ih = Math.round(rect.height)
       if (iw > 0 && ih > 0) {
         lastDimsRef.current = { width: iw, height: ih }
+        syncSvgAttrs(iw, ih)
         updateChartRef.current(iw, ih)
       }
 
@@ -2103,12 +2158,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       >
         <svg
           ref={(el) => {
-            ;(svgRef as React.MutableRefObject<SVGSVGElement | null>).current =
+            ; (svgRef as React.MutableRefObject<SVGSVGElement | null>).current =
               el
             svgRefCallback?.(el)
           }}
-          width={width}
-          height={height}
+          {...(!responsive && { width, height })}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
       </div>

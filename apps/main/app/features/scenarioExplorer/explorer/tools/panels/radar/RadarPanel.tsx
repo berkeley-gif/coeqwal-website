@@ -821,7 +821,7 @@ export default function RadarPanel({
       }}
     >
       <Box sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
-        <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
+        <Box sx={{ position: "relative", minWidth: 520, height: "100%"}}>
 
           {showAxisSelector && (
             <OutcomeChooserPanel
