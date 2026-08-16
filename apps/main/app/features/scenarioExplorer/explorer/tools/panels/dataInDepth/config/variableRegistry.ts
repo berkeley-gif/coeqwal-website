@@ -424,7 +424,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much water the federal Central Valley Project delivers to its contractors each year.",
-    tech: "Annual CVP deliveries, AG + M&I (DEL_CVP_TOTAL; DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS for the regional splits).",
+    tech: "Annual CVP deliveries, AG + M&I + wildlife refuges per the API subject labels (DEL_CVP_TOTAL; DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS regional splits sum exactly to the total).",
     tierOutcome: "FW_EXP",
     tierOutcomeName: "Delta freshwater exports",
     data: "live",
@@ -441,7 +441,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much water the State Water Project delivers to its contractors each year.",
-    tech: "Annual SWP deliveries, AG + M&I (DEL_SWP_TOTAL; DEL_SWP_TOT_N / DEL_SWP_TOT_S for the regional splits).",
+    tech: "Annual SWP deliveries, AG + M&I per the API subject labels (DEL_SWP_TOTAL; DEL_SWP_TOT_N / DEL_SWP_TOT_S regional splits sum exactly to the total).",
     tierOutcome: "FW_EXP",
     tierOutcomeName: "Delta freshwater exports",
     data: "live",

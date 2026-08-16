@@ -49,6 +49,11 @@ export default function ChartCard() {
     locationTitleName: data.locationTitleName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
+    // The WYT clause stays in value-view titles on purpose: the capture
+    // exports the FILTERED series (mock filters in every view), so title,
+    // provenance, and exported data agree even though the on-screen summary
+    // value does not derive from the filtered series (see the did-wyt spec
+    // "value-view capture" case).
     waterYearTypeLabels: data.wytApplicable
       ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
       : null,

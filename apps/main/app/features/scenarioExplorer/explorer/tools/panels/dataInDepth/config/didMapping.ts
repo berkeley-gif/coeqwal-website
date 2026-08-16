@@ -9,8 +9,9 @@
  * variableRegistry; this module only owns the registry-id -> API-code bridge,
  * which is an API-side fact (verified against the live DB, 2026-07-20).
  *
- * Only the scenarios compare axis and these variables are live; everything else
- * falls back to the deterministic mock engine (a null return here = mock).
+ * The scenarios and climates compare axes serve these variables live;
+ * everything else falls back to the deterministic mock engine (a null
+ * return here = mock).
  */
 
 /** A live data-in-depth domain (one endpoint each). */
@@ -50,9 +51,11 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
  * System deliveries: the subject depends on the VARIABLE as well as the
  * location, because each registry variable is its own family of API metrics
  * (verified against /api/data-in-depth/system-deliveries, 25 subjects).
- * CVP/SWP deliveries are AG + M&I totals with north/south-of-Delta splits;
- * Delta exports have NO regional split in CalSim (pumping happens in the
- * Delta), so tot_exp maps only its single Delta location.
+ * CVP/SWP deliveries are project totals (AG + M&I, plus wildlife refuges
+ * for CVP, per the API subject labels) with north/south-of-Delta splits;
+ * tot_exp exposes only the combined Banks + Jones
+ * total (C_CVPSWP_TOTAL_EXPORTS); the endpoint also serves per-project and
+ * Southern San Joaquin export subjects that are intentionally unmapped.
  */
 const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
   cvp_del: {
@@ -159,13 +162,15 @@ export function toDidSubject(
 }
 
 /**
- * Whether a view draws surfaces a live series can actually feed. Monthly
- * bands and summary values come from the sample engine even when a live
- * annual series exists, so those views must render (and label) as sample
- * data rather than adopting live points behind a mock surface.
+ * Whether a view draws surfaces a live series can actually feed. Only the
+ * annual-distribution family (dist / pct / level) and the cv view derive
+ * everything they show from the raw series; monthly bands and summary
+ * values come from the sample engine even when a live annual series
+ * exists. Allowlist on purpose: a future view defaults to sample-labeled
+ * until someone proves its surfaces are live-backed and adds it here.
  */
 export function viewHasLiveSource(view: string): boolean {
-  return view !== "monthly" && view !== "value"
+  return view === "dist" || view === "pct" || view === "level" || view === "cv"
 }
 
 /** Request unit token for a domain and view (delta is always km). */

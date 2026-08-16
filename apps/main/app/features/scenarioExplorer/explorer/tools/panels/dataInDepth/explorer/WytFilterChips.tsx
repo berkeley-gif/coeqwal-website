@@ -57,9 +57,9 @@ export default function WytFilterChips() {
         clickable={wytApplicable}
         disabled={!wytApplicable}
         label="All years"
-        color={anySelected ? "default" : "primary"}
-        variant={anySelected ? "outlined" : "filled"}
-        aria-pressed={!anySelected}
+        color={!wytApplicable || anySelected ? "default" : "primary"}
+        variant={!wytApplicable || anySelected ? "outlined" : "filled"}
+        aria-pressed={wytApplicable ? !anySelected : undefined}
         onClick={wytApplicable ? clearWaterYearTypes : undefined}
       />
       {WYT_CLASSES.map((wyt) => {

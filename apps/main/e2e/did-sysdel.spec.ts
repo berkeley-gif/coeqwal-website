@@ -22,7 +22,8 @@ const SCENARIOS_FIXTURE = [
 // wrong (detectable) series.
 const VALUE_BY_SUBJECT: Record<string, number> = {
   DEL_CVP_TOTAL: 5000,
-  DEL_SWP_TOTAL: 2500,
+  DEL_CVP_TOT_N_WAMER: 1500,
+  DEL_SWP_TOT_N: 900,
   C_CVPSWP_TOTAL_EXPORTS: 4800,
 }
 
@@ -122,13 +123,23 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
     .poll(() => requestedSubjects.includes("DEL_CVP_TOTAL"))
     .toBe(true)
 
-  // SWP deliveries map to their own subject family.
+  // Regional pin: North of Delta maps to the NOD subject of the SAME
+  // variable's family.
+  await page.getByRole("combobox").filter({ hasText: "System-wide" }).click()
+  await page.getByRole("option", { name: "North of Delta" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("DEL_CVP_TOT_N_WAMER"))
+    .toBe(true)
+
+  // SWP deliveries map to their own subject family, and the region pin
+  // persists per location group: still North of Delta -> the SWP NOD subject.
   await page
     .getByRole("button", { name: "State Water Project deliveries" })
     .click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
-    .poll(() => requestedSubjects.includes("DEL_SWP_TOTAL"))
+    .poll(() => requestedSubjects.includes("DEL_SWP_TOT_N"))
     .toBe(true)
 
   // Delta exports: single Delta location -> the combined exports metric.

@@ -260,6 +260,8 @@ test("viewHasLiveSource: only mock-surfaced views opt out of live adoption", () 
   // live series exists, so these views must not claim live data.
   expect(viewHasLiveSource("monthly")).toBe(false)
   expect(viewHasLiveSource("value")).toBe(false)
+  // Allowlist semantics: an unknown future view defaults to sample-labeled.
+  expect(viewHasLiveSource("someFutureView")).toBe(false)
 })
 
 test("pickLiveSeries reads sysdel blocks from the subjects array under TAF", () => {
