@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   didDomainForVariable,
+  viewHasLiveSource,
   didPeriodForVariable,
   toDidSubject,
   unitTokenForView,
@@ -221,4 +222,61 @@ test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted",
     subjects: ["SHSTA"],
   })
   expect(unfiltered).not.toContain("wyt=")
+})
+
+test("system-delivery variables map to the sysdel domain with annual periods", () => {
+  expect(didDomainForVariable("cvp_del")).toBe("sysdel")
+  expect(didDomainForVariable("swp_del")).toBe("sysdel")
+  expect(didDomainForVariable("tot_exp")).toBe("sysdel")
+  expect(didPeriodForVariable("cvp_del")).toBe("annual")
+  expect(didPeriodForVariable("swp_del")).toBe("annual")
+  expect(didPeriodForVariable("tot_exp")).toBe("annual")
+})
+
+test("sysdel subjects depend on the variable as well as the location", () => {
+  // CVP and SWP deliveries: system total plus north/south of Delta splits.
+  expect(toDidSubject("sysdel", "SYS", "cvp_del")).toBe("DEL_CVP_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "cvp_del")).toBe("DEL_CVP_TOT_N_WAMER")
+  expect(toDidSubject("sysdel", "SOD", "cvp_del")).toBe("DEL_CVP_TOT_S_WLOSS")
+  expect(toDidSubject("sysdel", "SYS", "swp_del")).toBe("DEL_SWP_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "swp_del")).toBe("DEL_SWP_TOT_N")
+  expect(toDidSubject("sysdel", "SOD", "swp_del")).toBe("DEL_SWP_TOT_S")
+  // Delta exports have no regional split in CalSim; single Delta location.
+  expect(toDidSubject("sysdel", "DELTA", "tot_exp")).toBe(
+    "C_CVPSWP_TOTAL_EXPORTS",
+  )
+  // Unknown location or missing variable id -> null (mock fallback).
+  expect(toDidSubject("sysdel", "NOD", "tot_exp")).toBeNull()
+  expect(toDidSubject("sysdel", "SYS", "nonsense")).toBeNull()
+  expect(toDidSubject("sysdel", "SYS")).toBeNull()
+})
+
+test("viewHasLiveSource: only mock-surfaced views opt out of live adoption", () => {
+  expect(viewHasLiveSource("dist")).toBe(true)
+  expect(viewHasLiveSource("pct")).toBe(true)
+  expect(viewHasLiveSource("level")).toBe(true)
+  expect(viewHasLiveSource("cv")).toBe(true)
+  // Monthly bands and summary values come from the sample engine even when a
+  // live series exists, so these views must not claim live data.
+  expect(viewHasLiveSource("monthly")).toBe(false)
+  expect(viewHasLiveSource("value")).toBe(false)
+})
+
+test("pickLiveSeries reads sysdel blocks from the subjects array under TAF", () => {
+  const block = {
+    subjects: [
+      {
+        subject: "DEL_CVP_TOTAL",
+        periods: {
+          annual: { TAF: { values: [{ water_year: 1922, value: 5432.1 }] } },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(block, "sysdel", "DEL_CVP_TOTAL", "annual", "volume"),
+  ).toEqual([5432.1])
+  expect(
+    pickLiveSeries(block, "sysdel", "DEL_SWP_TOTAL", "annual", "volume"),
+  ).toEqual([])
 })

@@ -14,7 +14,7 @@
  */
 
 /** A live data-in-depth domain (one endpoint each). */
-export type DidDomain = "reservoir" | "river" | "delta"
+export type DidDomain = "reservoir" | "river" | "delta" | "sysdel"
 /** Request unit token (not the response unit key). */
 export type DidUnitToken = "volume" | "pct_capacity" | "km"
 /** Which computed facets to request. */
@@ -29,6 +29,9 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   riv_flow: "river",
   x2_apr: "delta",
   x2_sep: "delta",
+  cvp_del: "sysdel",
+  swp_del: "sysdel",
+  tot_exp: "sysdel",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -38,6 +41,33 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   riv_flow: "annual",
   x2_apr: "april",
   x2_sep: "sept",
+  cvp_del: "annual",
+  swp_del: "annual",
+  tot_exp: "annual",
+}
+
+/**
+ * System deliveries: the subject depends on the VARIABLE as well as the
+ * location, because each registry variable is its own family of API metrics
+ * (verified against /api/data-in-depth/system-deliveries, 25 subjects).
+ * CVP/SWP deliveries are AG + M&I totals with north/south-of-Delta splits;
+ * Delta exports have NO regional split in CalSim (pumping happens in the
+ * Delta), so tot_exp maps only its single Delta location.
+ */
+const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
+  cvp_del: {
+    SYS: "DEL_CVP_TOTAL",
+    NOD: "DEL_CVP_TOT_N_WAMER",
+    SOD: "DEL_CVP_TOT_S_WLOSS",
+  },
+  swp_del: {
+    SYS: "DEL_SWP_TOTAL",
+    NOD: "DEL_SWP_TOT_N",
+    SOD: "DEL_SWP_TOT_S",
+  },
+  tot_exp: {
+    DELTA: "C_CVPSWP_TOTAL_EXPORTS",
+  },
 }
 
 /** Registry reservoir-location id -> API subject short_code (only the differences). */
@@ -106,19 +136,36 @@ export function didPeriodForVariable(
 /**
  * Registry location id -> API subject short_code for a domain, or null when the
  * API does not serve that subject (caller falls back to mock; never fetch a
- * subject the API lacks). Delta serves only X2.
+ * subject the API lacks). Delta serves only X2. The sysdel domain also needs
+ * `variableId`, because its subject families are per-variable; omitting it
+ * yields null (mock).
  */
 export function toDidSubject(
   domain: DidDomain,
   locationId: string,
+  variableId?: string,
 ): string | null {
   if (domain === "delta") return "X2"
+  if (domain === "sysdel") {
+    if (!variableId) return null
+    return SYSDEL_SUBJECT_BY_VARIABLE[variableId]?.[locationId] ?? null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
   }
   const code = RIVER_SUBJECT_REMAP[locationId] ?? locationId
   return RIVER_SUBJECTS.has(code) ? code : null
+}
+
+/**
+ * Whether a view draws surfaces a live series can actually feed. Monthly
+ * bands and summary values come from the sample engine even when a live
+ * annual series exists, so those views must render (and label) as sample
+ * data rather than adopting live points behind a mock surface.
+ */
+export function viewHasLiveSource(view: string): boolean {
+  return view !== "monthly" && view !== "value"
 }
 
 /** Request unit token for a domain and view (delta is always km). */
@@ -190,6 +237,7 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   reservoir: "reservoirs",
   river: "rivers",
   delta: "subjects",
+  sysdel: "subjects",
 }
 
 /** Request unit token -> response unit key. */

@@ -40,6 +40,7 @@ import {
   useReservoirStorageDataInDepth,
   useRiverFlowsDataInDepth,
   useDeltaSalinityDataInDepth,
+  useSystemDeliveriesDataInDepth,
 } from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
@@ -83,6 +84,7 @@ import {
   unitTokenForView,
   includeForView,
   pickLiveSeriesPoints,
+  viewHasLiveSource,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
@@ -219,7 +221,9 @@ export function useVariableData(): VariableData {
   // Live request mapping for the current variable (null domain -> mock only).
   const domain = variable ? didDomainForVariable(variable.id) : null
   const period = variable ? didPeriodForVariable(variable.id) : null
-  const subject = domain ? toDidSubject(domain, heldLocation) : null
+  const subject = domain
+    ? toDidSubject(domain, heldLocation, variable?.id)
+    : null
   const unitToken = domain ? unitTokenForView(domain, view) : "volume"
   const include = includeForView(view)
 
@@ -234,6 +238,7 @@ export function useVariableData(): VariableData {
     domain != null &&
     subject != null &&
     period != null &&
+    viewHasLiveSource(view) &&
     liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
 
   // Compared climate keys, shared by the fan-out and the member specs below
@@ -298,6 +303,17 @@ export function useVariableData(): VariableData {
         wyt,
       }),
   )
+  const sysdelSlots = useMultiScenarioSlots(
+    domain === "sysdel" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useSystemDeliveriesDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        units: ["volume"],
+        include,
+        wyt,
+      }),
+  )
 
   const activeSlots =
     domain === "reservoir"
@@ -306,7 +322,9 @@ export function useVariableData(): VariableData {
         ? riverSlots
         : domain === "delta"
           ? deltaSlots
-          : []
+          : domain === "sysdel"
+            ? sysdelSlots
+            : []
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")
