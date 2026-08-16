@@ -64,6 +64,7 @@ export type LocationGroupId =
   | "sysregions"
   | "agregions"
   | "cws"
+  | "salmon"
 
 export interface SectorDef {
   id: string
@@ -165,6 +166,20 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
       { id: "MOD", name: "Modesto", region: "SOD", mockBase: 6800 },
       { id: "TUR", name: "Turlock", region: "SOD", mockBase: 7900 },
       { id: "MER", name: "Merced", region: "SOD", mockBase: 9800 },
+      {
+        id: "AGG_GW_NOD",
+        name: "All North of Delta",
+        region: "NOD",
+        aggregate: true,
+        mockBase: 46000,
+      },
+      {
+        id: "AGG_GW_SOD",
+        name: "All South of Delta",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 51000,
+      },
     ],
   },
   rivers: {
@@ -274,6 +289,17 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
       },
     ],
   },
+  salmon: {
+    label: "Population",
+    items: [
+      {
+        id: "WRLCM",
+        name: "Sacramento winter-run Chinook",
+        region: "NOD",
+        mockBase: 1,
+      },
+    ],
+  },
 }
 
 /* ------------------------------------------------------------------ */
@@ -312,9 +338,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "salmonS",
     name: "Winter-run salmon",
-    variables: [],
-    locked: true,
-    note: "Population metrics in development",
+    variables: ["salmon_abund"],
   },
 ]
 
@@ -373,10 +397,10 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { level: { unit: "ft", unitLabel: "feet" } },
     plain:
       "How much water is stored underground in each groundwater basin, as a total volume or as the groundwater level in feet.",
-    tech: "Annual groundwater storage percentiles per water budget area (WBA), from CalSim3 groundwater module output. The level view shows the corresponding groundwater levels in feet.",
+    tech: "North/South-of-Delta aggregate storage is live (NOD_GroundwaterStorage / SOD_GroundwaterStorage); the named basins render sample data until the basin-to-WBA subject lookup is confirmed (INFERRED scope, see the guesses register). Level view is basin-only in the source data and stays sample for aggregates.",
     tierOutcome: "GW_STOR",
     tierOutcomeName: "Groundwater storage",
-    data: "mock",
+    data: "live",
     mockKind: "gwstor",
     mockEffect: "gwStor",
   },
@@ -464,6 +488,24 @@ export const VARIABLES: Record<string, VariableDef> = {
     data: "live",
     mockKind: "exports",
     mockEffect: "exports",
+  },
+  salmon_abund: {
+    id: "salmon_abund",
+    name: "Winter-run abundance",
+    sectorId: "salmonS",
+    locationGroup: "salmon",
+    unit: "ratio",
+    unitLabel: "proportion of spawning capacity (3-year average)",
+    views: ["dist"],
+    viewLabels: { dist: "Abundance (3-yr avg)" },
+    plain:
+      "How the Sacramento winter-run Chinook salmon population is doing relative to what the habitat can support, averaged over three years.",
+    tech: "WRLCM 3-year-average winter-run abundance (WRLCM_ADULT_FEMALES, NOF_3YR_AVG), interpreted as a proportion of spawning capacity per the review-round wording; values above 1 exceed capacity. INFERRED labeling and units, pending confirmation (see the guesses register); water-year-type filtering does not apply to a 3-year population average.",
+    data: "live",
+    provisional: true,
+    wytApplicable: false,
+    mockKind: "flow",
+    mockEffect: "eco",
   },
   ndo: {
     id: "ndo",

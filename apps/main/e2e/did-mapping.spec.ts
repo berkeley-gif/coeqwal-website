@@ -25,7 +25,6 @@ test("didDomainForVariable maps live variables and returns null for mock ones", 
   expect(didDomainForVariable("x2_sep")).toBe("delta")
   // Not served live -> mock:
   expect(didDomainForVariable("riv_uif")).toBeNull() // % of unimpaired not served
-  expect(didDomainForVariable("gw_stor")).toBeNull()
   expect(didDomainForVariable("station_ec")).toBeNull()
   expect(didDomainForVariable("nonsense")).toBeNull()
 })
@@ -36,7 +35,7 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("riv_flow")).toBe("annual")
   expect(didPeriodForVariable("x2_apr")).toBe("april")
   expect(didPeriodForVariable("x2_sep")).toBe("sept")
-  expect(didPeriodForVariable("gw_stor")).toBeNull()
+  expect(didPeriodForVariable("riv_uif")).toBeNull()
 })
 
 test("toDidSubject maps reservoir location ids to API subject codes", () => {
@@ -281,4 +280,63 @@ test("pickLiveSeries reads sysdel blocks from the subjects array under TAF", () 
   expect(
     pickLiveSeries(block, "sysdel", "DEL_SWP_TOTAL", "annual", "volume"),
   ).toEqual([])
+})
+
+test("groundwater aggregates and salmon map to their own domains with annual periods", () => {
+  expect(didDomainForVariable("gw_stor")).toBe("gw")
+  expect(didDomainForVariable("salmon_abund")).toBe("salmon")
+  expect(didPeriodForVariable("gw_stor")).toBe("annual")
+  expect(didPeriodForVariable("salmon_abund")).toBe("annual")
+})
+
+test("gw serves only the NOD/SOD aggregates live; named basins stay mock pending the basin-to-WBA lookup", () => {
+  expect(toDidSubject("gw", "AGG_GW_NOD")).toBe("NOD_GroundwaterStorage")
+  expect(toDidSubject("gw", "AGG_GW_SOD")).toBe("SOD_GroundwaterStorage")
+  expect(toDidSubject("gw", "COL")).toBeNull()
+  expect(toDidSubject("gw", "MER")).toBeNull()
+  expect(toDidSubject("salmon", "WRLCM")).toBe("WRLCM_ADULT_FEMALES")
+})
+
+test("measure-keyed domains resolve their own request tokens and response keys", () => {
+  expect(unitTokenForView("gw", "dist")).toBe("volume")
+  expect(unitTokenForView("gw", "level")).toBe("level")
+  expect(unitTokenForView("salmon", "dist")).toBe("nof_3yr_avg")
+  const gwBlock = {
+    subjects: [
+      {
+        subject: "NOD_GroundwaterStorage",
+        periods: {
+          annual: { volume: { values: [{ water_year: 1922, value: 42 }] } },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(gwBlock, "gw", "NOD_GroundwaterStorage", "annual", "volume"),
+  ).toEqual([42])
+  // Aggregates never serve level; an absent key falls back to mock.
+  expect(
+    pickLiveSeries(gwBlock, "gw", "NOD_GroundwaterStorage", "annual", "level"),
+  ).toEqual([])
+  const salmonBlock = {
+    subjects: [
+      {
+        subject: "WRLCM_ADULT_FEMALES",
+        periods: {
+          annual: {
+            NOF_3YR_AVG: { values: [{ water_year: 1934, value: 0.23 }] },
+          },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(
+      salmonBlock,
+      "salmon",
+      "WRLCM_ADULT_FEMALES",
+      "annual",
+      "nof_3yr_avg",
+    ),
+  ).toEqual([0.23])
 })

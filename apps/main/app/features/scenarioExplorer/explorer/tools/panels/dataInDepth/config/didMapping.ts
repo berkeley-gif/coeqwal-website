@@ -15,9 +15,20 @@
  */
 
 /** A live data-in-depth domain (one endpoint each). */
-export type DidDomain = "reservoir" | "river" | "delta" | "sysdel"
+export type DidDomain =
+  | "reservoir"
+  | "river"
+  | "delta"
+  | "sysdel"
+  | "gw"
+  | "salmon"
 /** Request unit token (not the response unit key). */
-export type DidUnitToken = "volume" | "pct_capacity" | "km"
+export type DidUnitToken =
+  | "volume"
+  | "pct_capacity"
+  | "km"
+  | "level"
+  | "nof_3yr_avg"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -33,6 +44,8 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   cvp_del: "sysdel",
   swp_del: "sysdel",
   tot_exp: "sysdel",
+  gw_stor: "gw",
+  salmon_abund: "salmon",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -45,6 +58,8 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   cvp_del: "annual",
   swp_del: "annual",
   tot_exp: "annual",
+  gw_stor: "annual",
+  salmon_abund: "annual",
 }
 
 /**
@@ -71,6 +86,24 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
   tot_exp: {
     DELTA: "C_CVPSWP_TOTAL_EXPORTS",
   },
+}
+
+/**
+ * Groundwater: only the NOD/SOD storage aggregates are wired live. The named
+ * basin locations (COL, SUT, ...) need a confirmed basin-to-WBA lookup before
+ * they can map to the endpoint's WBA subjects; until then they stay mock
+ * (INFERRED scope, flagged for confirmation in the guesses register).
+ * The aggregates serve volume only; level is never aggregated, so the level
+ * view on an aggregate falls back to mock per member.
+ */
+const GW_SUBJECT_BY_LOCATION: Record<string, string> = {
+  AGG_GW_NOD: "NOD_GroundwaterStorage",
+  AGG_GW_SOD: "SOD_GroundwaterStorage",
+}
+
+/** Winter-run salmon: a single population metric subject. */
+const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
+  WRLCM: "WRLCM_ADULT_FEMALES",
 }
 
 /** Registry reservoir-location id -> API subject short_code (only the differences). */
@@ -153,6 +186,12 @@ export function toDidSubject(
     if (!variableId) return null
     return SYSDEL_SUBJECT_BY_VARIABLE[variableId]?.[locationId] ?? null
   }
+  if (domain === "gw") {
+    return GW_SUBJECT_BY_LOCATION[locationId] ?? null
+  }
+  if (domain === "salmon") {
+    return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
@@ -179,6 +218,8 @@ export function unitTokenForView(
   view: string,
 ): DidUnitToken {
   if (domain === "delta") return "km"
+  if (domain === "gw") return view === "level" ? "level" : "volume"
+  if (domain === "salmon") return "nof_3yr_avg"
   if (view === "pct") return "pct_capacity"
   return "volume"
 }
@@ -243,13 +284,27 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   river: "rivers",
   delta: "subjects",
   sysdel: "subjects",
+  gw: "subjects",
+  salmon: "subjects",
 }
 
-/** Request unit token -> response unit key. */
+/**
+ * Request unit token -> response series key. Unit-keyed domains use unit
+ * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
+ * itself (gw: volume/level) or the metric code (salmon: NOF_3YR_AVG).
+ */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   volume: "TAF",
   pct_capacity: "PCT_CAP",
   km: "km",
+  level: "level",
+  nof_3yr_avg: "NOF_3YR_AVG",
+}
+
+/** The series key for a domain + request token (gw is keyed by measure name). */
+function responseSeriesKey(domain: DidDomain, unitToken: DidUnitToken): string {
+  if (domain === "gw") return unitToken === "level" ? "level" : "volume"
+  return RESPONSE_UNIT_KEY[unitToken]
 }
 
 /** Minimal structural shape of one scenario block in a data-in-depth response. */
@@ -281,7 +336,7 @@ export function pickLiveSeries(
   if (!block) return []
   const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
   const match = subjects?.find((s) => s.subject === subject)
-  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return seriesFromValues(facet?.values)
 }
 
@@ -300,6 +355,6 @@ export function pickLiveSeriesPoints(
   if (!block) return { series: [], waterYears: [] }
   const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
   const match = subjects?.find((s) => s.subject === subject)
-  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return pointsFromValues(facet?.values)
 }

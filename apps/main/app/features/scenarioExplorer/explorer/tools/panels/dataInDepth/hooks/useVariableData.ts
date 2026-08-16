@@ -41,6 +41,8 @@ import {
   useRiverFlowsDataInDepth,
   useDeltaSalinityDataInDepth,
   useSystemDeliveriesDataInDepth,
+  useGroundwaterStorageDataInDepth,
+  useSalmonDataInDepth,
 } from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
@@ -315,6 +317,28 @@ export function useVariableData(): VariableData {
       }),
   )
 
+  const gwSlots = useMultiScenarioSlots(
+    domain === "gw" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useGroundwaterStorageDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        measures: [unitToken === "level" ? "level" : "volume"],
+        include,
+        wyt,
+      }),
+  )
+  const salmonSlots = useMultiScenarioSlots(
+    domain === "salmon" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useSalmonDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        units: ["nof_3yr_avg"],
+        include,
+      }),
+  )
+
   const activeSlots =
     domain === "reservoir"
       ? reservoirSlots
@@ -324,7 +348,11 @@ export function useVariableData(): VariableData {
           ? deltaSlots
           : domain === "sysdel"
             ? sysdelSlots
-            : []
+            : domain === "gw"
+              ? gwSlots
+              : domain === "salmon"
+                ? salmonSlots
+                : []
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")
