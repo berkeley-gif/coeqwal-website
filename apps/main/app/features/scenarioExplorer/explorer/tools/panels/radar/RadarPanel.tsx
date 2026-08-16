@@ -228,10 +228,10 @@ export default function RadarPanel({
     () =>
       activeOutcome
         ? {
-            axis: getOutcomeName(activeOutcome.outcomeCode),
-            scenarioId:
-              activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
-          }
+          axis: getOutcomeName(activeOutcome.outcomeCode),
+          scenarioId:
+            activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
+        }
         : null,
     [activeOutcome],
   )
@@ -246,10 +246,10 @@ export default function RadarPanel({
       onChartHover?.(
         info
           ? {
-              scenarioId: info.scenarioId,
-              outcome: info.axis,
-              tierValue: info.tierValue,
-            }
+            scenarioId: info.scenarioId,
+            outcome: info.axis,
+            tierValue: info.tierValue,
+          }
           : null,
       )
     },
@@ -805,6 +805,8 @@ export default function RadarPanel({
       </Box>
     )
   }
+  // After
+
 
   return (
     <Box
@@ -818,217 +820,220 @@ export default function RadarPanel({
         position: "relative",
       }}
     >
-      <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
-        {showAxisSelector && (
-          <OutcomeChooserPanel
-            ref={axisChooserPanelAnchorRef}
-            title="Choose outcome axes"
-            closeAriaLabel="Close choose outcome axes panel"
-            selectedCodes={radarVisibleAxes}
-            onToggle={toggleRadarAxis}
-            onSetSelected={setRadarVisibleAxes}
-            onClose={() => setShowAxisSelector(false)}
-          />
-        )}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 0,
-            // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
-            transform: "translateY(-10px)",
-          }}
-        >
-          {showUnavailableBlock ? (
-            <HydroclimateUnavailablePlaceholder
-              hydroclimate={hydroclimate}
-              variant="block"
-            />
-          ) : (
-            <RadarPlot
-              data={filteredData}
-              axes={visibleAxisNames}
-              responsive
-              lineColors={filteredLineColors}
-              baselineData={baselineScenario ?? undefined}
-              highlightBaseline={highlightBaseline}
-              chosenIds={chosenIds}
-              highlightedIds={highlightedIds}
-              morphGeneration={morphGeneration}
-              onDotClick={(scenarioId, axis) =>
-                showOutcomeOnMap(axis, scenarioId)
-              }
-              activeMapDot={activeMapDot}
-              axisRange={showRadarRange ? axisRange : undefined}
-              showTierZones={showTierZones}
-              showAllPaths
-              showDotsOnly={showDotsOnly}
-              dimUnselected={radarShowAll && selectedScenarios.length > 0}
-              svgRefCallback={handleSvgRef}
-              onDotHover={handleDotHover}
-              onAxisPositions={handleAxisPositions}
-              axisLabelDetailStyle={radarAxisLabelDetailStyle}
-              axisLabelDetailChrome={axisLabelDetailChrome}
-              palette={radarPalette}
+      <Box sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
+        <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
+
+          {showAxisSelector && (
+            <OutcomeChooserPanel
+              ref={axisChooserPanelAnchorRef}
+              title="Choose outcome axes"
+              closeAriaLabel="Close choose outcome axes panel"
+              selectedCodes={radarVisibleAxes}
+              onToggle={toggleRadarAxis}
+              onSetSelected={setRadarVisibleAxes}
+              onClose={() => setShowAxisSelector(false)}
             />
           )}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 0,
+              // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
+              transform: "translateY(-10px)",
+            }}
+          >
+            {showUnavailableBlock ? (
+              <HydroclimateUnavailablePlaceholder
+                hydroclimate={hydroclimate}
+                variant="block"
+              />
+            ) : (
+              <RadarPlot
+                data={filteredData}
+                axes={visibleAxisNames}
+                responsive
+                lineColors={filteredLineColors}
+                baselineData={baselineScenario ?? undefined}
+                highlightBaseline={highlightBaseline}
+                chosenIds={chosenIds}
+                highlightedIds={highlightedIds}
+                morphGeneration={morphGeneration}
+                onDotClick={(scenarioId, axis) =>
+                  showOutcomeOnMap(axis, scenarioId)
+                }
+                activeMapDot={activeMapDot}
+                axisRange={showRadarRange ? axisRange : undefined}
+                showTierZones={showTierZones}
+                showAllPaths
+                showDotsOnly={showDotsOnly}
+                dimUnselected={radarShowAll && selectedScenarios.length > 0}
+                svgRefCallback={handleSvgRef}
+                onDotHover={handleDotHover}
+                onAxisPositions={handleAxisPositions}
+                axisLabelDetailStyle={radarAxisLabelDetailStyle}
+                axisLabelDetailChrome={axisLabelDetailChrome}
+                palette={radarPalette}
+              />
+            )}
 
-          {/* Per-axis info icons with click-to-open definition popover.
+            {/* Per-axis info icons with click-to-open definition popover.
               Positioned using the same pixel coordinates the RadarPlot
               reports via onAxisPositions (SVG width/height are set to the
               container's pixel size, so SVG user units == DOM pixels here,
               and this overlay shares the same bounds and transform as the
               chart wrapper). */}
-          {axisPositions.length > 0 && (
-            <Box
-              sx={{
-                position: "absolute",
-                inset: 0,
-                pointerEvents: "none",
-                zIndex: 1,
-              }}
-            >
-              {axisPositions.map(({ axis, x, y }, idx) => {
-                const definition = resolveAxisDefinition(axis)
-                if (!definition) return null
+            {axisPositions.length > 0 && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  zIndex: 1,
+                }}
+              >
+                {axisPositions.map(({ axis, x, y }, idx) => {
+                  const definition = resolveAxisDefinition(axis)
+                  if (!definition) return null
 
-                // Always place the icon inline after the last word of the
-                // label (i.e. flush against the right edge of the rendered
-                // text), vertically centered. When we haven't measured the
-                // label's bbox yet, fall back to a rough offset from the
-                // anchor point so the icon still appears on first paint.
-                const rect = axisLabelRects[axis]
-                const GAP = 3
-                const iconLeft = rect ? rect.x + rect.width + GAP : x + GAP
-                const iconTop = rect ? rect.y + rect.height / 2 : y
+                  // Always place the icon inline after the last word of the
+                  // label (i.e. flush against the right edge of the rendered
+                  // text), vertically centered. When we haven't measured the
+                  // label's bbox yet, fall back to a rough offset from the
+                  // anchor point so the icon still appears on first paint.
+                  const rect = axisLabelRects[axis]
+                  const GAP = 3
+                  const iconLeft = rect ? rect.x + rect.width + GAP : x + GAP
+                  const iconTop = rect ? rect.y + rect.height / 2 : y
 
-                const isOpen = openInfoAxis === axis
-                // Register the first axis info icon as both the
-                // axis-label and info-icon tour anchors so the radar
-                // tour can speak about either without changing target.
-                const isFirst = idx === 0
-                const setRefs = (el: HTMLElement | null) => {
-                  if (!isFirst) return
-                  axisLabelAnchorRef(el)
-                  infoIconAnchorRef(el)
-                }
+                  const isOpen = openInfoAxis === axis
+                  // Register the first axis info icon as both the
+                  // axis-label and info-icon tour anchors so the radar
+                  // tour can speak about either without changing target.
+                  const isFirst = idx === 0
+                  const setRefs = (el: HTMLElement | null) => {
+                    if (!isFirst) return
+                    axisLabelAnchorRef(el)
+                    infoIconAnchorRef(el)
+                  }
 
-                return (
-                  <Box
-                    key={axis}
-                    ref={setRefs}
-                    sx={{
-                      position: "absolute",
-                      left: iconLeft,
-                      top: iconTop,
-                      transform: "translate(0, -50%)",
-                      pointerEvents: "auto",
-                      lineHeight: 0,
-                    }}
-                  >
-                    <InfoPopover
-                      open={isOpen}
-                      onClose={closeInfoTooltip}
-                      placement="top"
-                      maxWidth="320px"
-                      content={
-                        <Box sx={{ pr: theme.space.component.md }}>
-                          <Typography
-                            variant="compactSubtitle"
+                  return (
+                    <Box
+                      key={axis}
+                      ref={setRefs}
+                      sx={{
+                        position: "absolute",
+                        left: iconLeft,
+                        top: iconTop,
+                        transform: "translate(0, -50%)",
+                        pointerEvents: "auto",
+                        lineHeight: 0,
+                      }}
+                    >
+                      <InfoPopover
+                        open={isOpen}
+                        onClose={closeInfoTooltip}
+                        placement="top"
+                        maxWidth="320px"
+                        content={
+                          <Box sx={{ pr: theme.space.component.md }}>
+                            <Typography
+                              variant="compactSubtitle"
+                              sx={{
+                                fontWeight: 700,
+                                display: "block",
+                                mb: theme.space.component.sm,
+                              }}
+                            >
+                              {axis}
+                            </Typography>
+                            <Typography
+                              variant="compactCaption"
+                              sx={{ display: "block" }}
+                            >
+                              {definition}
+                            </Typography>
+                          </Box>
+                        }
+                      >
+                        {/* span wrapper: gives MUI Tooltip a native element it
+                          can attach its ref and extra ARIA props to. */}
+                        <span style={{ display: "inline-flex" }}>
+                          <Box
+                            component="button"
+                            type="button"
+                            aria-label={`About ${axis}`}
+                            aria-expanded={isOpen}
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation()
+                              setOpenInfoAxis(isOpen ? null : axis)
+                            }}
                             sx={{
-                              fontWeight: 700,
-                              display: "block",
-                              mb: theme.space.component.sm,
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "2px",
+                              borderRadius: "50%",
+                              color: isOpen
+                                ? theme.palette.primary.main
+                                : theme.palette.text.primary,
+                              transition:
+                                "color 120ms ease, background-color 120ms ease",
+                              "&:hover": {
+                                color: theme.palette.primary.main,
+                              },
+                              "&:focus-visible": {
+                                outline: `2px solid ${theme.palette.primary.main}`,
+                                outlineOffset: "1px",
+                              },
                             }}
                           >
-                            {axis}
-                          </Typography>
-                          <Typography
-                            variant="compactCaption"
-                            sx={{ display: "block" }}
-                          >
-                            {definition}
-                          </Typography>
-                        </Box>
-                      }
-                    >
-                      {/* span wrapper: gives MUI Tooltip a native element it
-                          can attach its ref and extra ARIA props to. */}
-                      <span style={{ display: "inline-flex" }}>
-                        <Box
-                          component="button"
-                          type="button"
-                          aria-label={`About ${axis}`}
-                          aria-expanded={isOpen}
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation()
-                            setOpenInfoAxis(isOpen ? null : axis)
-                          }}
-                          sx={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "2px",
-                            borderRadius: "50%",
-                            color: isOpen
-                              ? theme.palette.primary.main
-                              : theme.palette.text.primary,
-                            transition:
-                              "color 120ms ease, background-color 120ms ease",
-                            "&:hover": {
-                              color: theme.palette.primary.main,
-                            },
-                            "&:focus-visible": {
-                              outline: `2px solid ${theme.palette.primary.main}`,
-                              outlineOffset: "1px",
-                            },
-                          }}
-                        >
-                          <InfoOutlinedIcon
-                            sx={{ fontSize: 14, display: "block" }}
-                          />
-                        </Box>
-                      </span>
-                    </InfoPopover>
-                  </Box>
-                )
-              })}
-            </Box>
+                            <InfoOutlinedIcon
+                              sx={{ fontSize: 14, display: "block" }}
+                            />
+                          </Box>
+                        </span>
+                      </InfoPopover>
+                    </Box>
+                  )
+                })}
+              </Box>
+            )}
+          </Box>
+
+          {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
+            <ChartToast maxWidth={440}>
+              <Box
+                sx={{
+                  pointerEvents: "auto",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                }}
+              >
+                <Box component="span">To show data, use</Box>
+                <InlineToggleChip
+                  label="choose outcome axes"
+                  active={showAxisSelector}
+                  onClick={() => setShowAxisSelector(!showAxisSelector)}
+                  onDarkBackground
+                />
+                <Box component="span">in the chart controls above.</Box>
+              </Box>
+            </ChartToast>
           )}
         </Box>
-
-        {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
-          <ChartToast maxWidth={440}>
-            <Box
-              sx={{
-                pointerEvents: "auto",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-              }}
-            >
-              <Box component="span">To show data, use</Box>
-              <InlineToggleChip
-                label="choose outcome axes"
-                active={showAxisSelector}
-                onClick={() => setShowAxisSelector(!showAxisSelector)}
-                onDarkBackground
-              />
-              <Box component="span">in the chart controls above.</Box>
-            </Box>
-          </ChartToast>
-        )}
       </Box>
 
       {isLoading && hasData && (
