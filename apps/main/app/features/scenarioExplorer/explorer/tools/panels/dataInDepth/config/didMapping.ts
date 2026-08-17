@@ -172,8 +172,10 @@ const GW_AGGREGATE_SUBJECTS: Record<string, string> = {
  * issuing a dead request. Every basin entity serves level and volume
  * (verified per subject); the aggregates serve volume only, so an
  * aggregate's level view falls back to sample per member.
+ * Exported so the registry parity spec can assert exact set equality with
+ * the basins location list (either list drifting fails the test).
  */
-const GW_BASIN_SUBJECTS = new Set([
+export const GW_BASIN_SUBJECTS: ReadonlySet<string> = new Set([
   "DETAW",
   "WBA2",
   "WBA3",

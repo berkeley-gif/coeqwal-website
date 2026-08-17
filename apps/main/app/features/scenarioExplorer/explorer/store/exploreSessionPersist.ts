@@ -54,7 +54,11 @@ import type { ResilienceSlice } from "./resilienceStoreSlice"
 import type { DataSlice } from "./dataStoreSlice"
 import type { ExploreMode, OutcomeDisplayMode } from "./types"
 import { hasTourFor, type TourTool } from "../tools/tour/registry"
-import { getVariable } from "../tools/panels/dataInDepth/config/variableRegistry"
+import {
+  getVariable,
+  LOCATION_GROUPS,
+  type LocationGroupId,
+} from "../tools/panels/dataInDepth/config/variableRegistry"
 import {
   RESILIENCE_HYDROCLIMATES,
   type ResilienceHydroclimate,
@@ -453,6 +457,42 @@ export function mergeDataInitialState(
   if (merged.selectedWaterYearTypes.length > 1) {
     merged.selectedWaterYearTypes = []
   }
+  // Heal persisted location state against the current registry. Location
+  // lists change between deploys (the groundwater basins moved from sample
+  // placeholders to served codes), and a stale pinned id would otherwise
+  // stick: the held-location path reads the pin without validating it, so a
+  // returning session would render sample data under a blank location name
+  // until the user re-picks. Stale pins reset to the group's first location,
+  // stale multi-select ids are pruned, unknown groups are dropped.
+  // The envelope validates the data SECTION as a record, not its fields, so
+  // both location records are re-checked here before iterating: a corrupted
+  // shape falls back to defaults instead of throwing during hydration.
+  const rawPins = isRecord(merged.pinnedLocationByGroup)
+    ? merged.pinnedLocationByGroup
+    : dataInitialState.pinnedLocationByGroup
+  const healedPins: Record<string, string> = {}
+  for (const [groupId, id] of Object.entries(rawPins)) {
+    const group = LOCATION_GROUPS[groupId as LocationGroupId]
+    if (!group) continue
+    healedPins[groupId] =
+      typeof id === "string" && group.items.some((l) => l.id === id)
+        ? id
+        : (group.items[0]?.id ?? "")
+  }
+  merged.pinnedLocationByGroup = healedPins
+  const rawSelections = isRecord(merged.selectedLocationsByGroup)
+    ? merged.selectedLocationsByGroup
+    : {}
+  const healedSelections: Record<string, string[]> = {}
+  for (const [groupId, ids] of Object.entries(rawSelections)) {
+    const group = LOCATION_GROUPS[groupId as LocationGroupId]
+    if (!group) continue
+    healedSelections[groupId] = (Array.isArray(ids) ? ids : []).filter(
+      (id): id is string =>
+        typeof id === "string" && group.items.some((l) => l.id === id),
+    )
+  }
+  merged.selectedLocationsByGroup = healedSelections
   // Heal ids and views the variable registry no longer offers, so a stale
   // persisted session cannot select a retired variable or render a view
   // that has no button.

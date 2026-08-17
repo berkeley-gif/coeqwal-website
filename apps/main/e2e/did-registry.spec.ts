@@ -13,6 +13,7 @@ import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/to
 import {
   didDomainForVariable,
   toDidSubject,
+  GW_BASIN_SUBJECTS,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
@@ -85,6 +86,52 @@ test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
   }
 })
 
+test("mergeDataInitialState heals location pins the registry no longer offers", () => {
+  // Location lists can change between deploys (the groundwater basins moved
+  // from sample placeholders to served codes), and both location fields are
+  // persisted, so stale ids must heal at hydration: a returning session must
+  // not keep a pin that now renders sample data under a blank location.
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { basins: "COL", reservoirs: "SHSTA" },
+    selectedLocationsByGroup: { basins: ["COL", "WBA10"], rivers: ["SAC049"] },
+  })
+  // A stale pin resets to the group's first location; valid pins survive.
+  expect(healed.pinnedLocationByGroup.basins).toBe("AGG_GW_NOD")
+  expect(healed.pinnedLocationByGroup.reservoirs).toBe("SHSTA")
+  // Stale multi-select ids are pruned; valid ones survive.
+  expect(healed.selectedLocationsByGroup.basins).toEqual(["WBA10"])
+  expect(healed.selectedLocationsByGroup.rivers).toEqual(["SAC049"])
+  // Groups the registry no longer offers are dropped entirely.
+  const unknownGroup = mergeDataInitialState({
+    pinnedLocationByGroup: { stations: "S1" },
+  })
+  expect("stations" in unknownGroup.pinnedLocationByGroup).toBe(false)
+  // Location healing applies even when the variable id also needs healing.
+  const both = mergeDataInitialState({
+    selectedVariableId: "riv_uif",
+    pinnedLocationByGroup: { basins: "COL" },
+  })
+  expect(both.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+  expect(both.pinnedLocationByGroup.basins).toBe("AGG_GW_NOD")
+})
+
+test("mergeDataInitialState survives malformed persisted location shapes", () => {
+  // The persisted envelope validates the data SECTION as a record but not
+  // its fields, so corrupted sessionStorage can deliver anything here;
+  // hydration must fall back to defaults instead of throwing at startup.
+  const nulled = mergeDataInitialState({
+    pinnedLocationByGroup: null as never,
+    selectedLocationsByGroup: "corrupt" as never,
+  })
+  expect(nulled.pinnedLocationByGroup.reservoirs).toBe("SHSTA")
+  expect(nulled.selectedLocationsByGroup).toEqual({})
+  // A non-array selection value for one group is dropped, not iterated.
+  const scalar = mergeDataInitialState({
+    selectedLocationsByGroup: { basins: "WBA10" as never },
+  })
+  expect(scalar.selectedLocationsByGroup.basins).toEqual([])
+})
+
 test("every basins location resolves through the gw mapping exactly once", () => {
   // The registry list and the mapping's served-subject allowlist are written
   // separately; this parity guard fails if either drifts (a basin added to
@@ -102,6 +149,10 @@ test("every basins location resolves through the gw mapping exactly once", () =>
       expect.soft(subject, `basin ${item.id} passes through`).toBe(item.id)
     }
   }
+  // Bidirectional: the mapping's served set and the registry's non-aggregate
+  // basins are the same SET, so an extra entry on either side fails too.
+  const basinIds = items.filter((l) => !l.aggregate).map((l) => l.id)
+  expect([...GW_BASIN_SUBJECTS].sort()).toEqual([...basinIds].sort())
 })
 
 test("gwLevelFromStorage derives a declining feet-scale sample series", () => {
