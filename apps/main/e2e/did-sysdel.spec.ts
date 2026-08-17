@@ -154,5 +154,62 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   // viewHasLiveSource guard that keeps a mock-surfaced view from claiming
   // live data is covered node-side in did-mapping.spec.ts.
 
+  // Sector-specific variables follow the same per-variable subject-family
+  // pattern. The regional pin (still North of Delta from above) carries into
+  // the CVP agricultural family.
+  await page
+    .getByRole("button", { name: "CVP agricultural deliveries" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("DEL_CVP_PAG_NOD"))
+    .toBe(true)
+
+  // Refuges are served as a system total only: dedicated single location.
+  await page
+    .getByRole("button", { name: "CVP wildlife refuge deliveries" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("DEL_CVP_PRF_TOTAL"))
+    .toBe(true)
+
+  // Southern SJV exports: the three served routes are the locations; the
+  // presentation is provisional pending confirmation, and switching routes
+  // fetches each route's own subject.
+  await page
+    .getByRole("button", { name: "Southern San Joaquin Valley exports" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.getByText(/^Provisional$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("D_CAA238_CVPCV"))
+    .toBe(true)
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Cross Valley Canal" })
+    .click()
+  await page.getByRole("option", { name: "Friant Division" }).click()
+  await expect
+    .poll(() => requestedSubjects.includes("D_MLRTN_FRK000"))
+    .toBe(true)
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Friant Division" })
+    .click()
+  await page.getByRole("option", { name: "Kern County Water Agency" }).click()
+  await expect
+    .poll(() => requestedSubjects.includes("SWP_TA_KERNAG"))
+    .toBe(true)
+
+  // Returning to a sysregions variable after the syswide and ssjv groups:
+  // the North-of-Delta pin set earlier is still intact and resolves to the
+  // M&I family's own NOD subject.
+  await page.getByRole("button", { name: "CVP M&I deliveries" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("DEL_CVP_PMI_N_WAMER"))
+    .toBe(true)
+
   expect(errors).toEqual([])
 })

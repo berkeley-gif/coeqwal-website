@@ -44,6 +44,14 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   cvp_del: "sysdel",
   swp_del: "sysdel",
   tot_exp: "sysdel",
+  cvp_ag: "sysdel",
+  cvp_mi: "sysdel",
+  cvp_refuges: "sysdel",
+  swp_ag: "sysdel",
+  swp_mi: "sysdel",
+  cvp_exp: "sysdel",
+  swp_exp: "sysdel",
+  ssjv_exp: "sysdel",
   gw_stor: "gw",
   salmon_abund: "salmon",
 }
@@ -58,6 +66,14 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   cvp_del: "annual",
   swp_del: "annual",
   tot_exp: "annual",
+  cvp_ag: "annual",
+  cvp_mi: "annual",
+  cvp_refuges: "annual",
+  swp_ag: "annual",
+  swp_mi: "annual",
+  cvp_exp: "annual",
+  swp_exp: "annual",
+  ssjv_exp: "annual",
   gw_stor: "annual",
   salmon_abund: "annual",
 }
@@ -93,6 +109,46 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
   },
   tot_exp: {
     DELTA: "C_CVPSWP_TOTAL_EXPORTS",
+  },
+  // Sector breakdowns (split code patterns quote the API, asymmetries and
+  // all: PAG splits are _NOD/_SOD for CVP but _NOD/_S for SWP; the CVP M&I
+  // north split carries the _WAMER qualifier like the CVP totals).
+  cvp_ag: {
+    SYS: "DEL_CVP_PAG_TOTAL",
+    NOD: "DEL_CVP_PAG_NOD",
+    SOD: "DEL_CVP_PAG_SOD",
+  },
+  cvp_mi: {
+    SYS: "DEL_CVP_PMI_TOTAL",
+    NOD: "DEL_CVP_PMI_N_WAMER",
+    SOD: "DEL_CVP_PMI_S",
+  },
+  // Refuges are served as a system total only; no regional subjects exist.
+  cvp_refuges: {
+    SYS: "DEL_CVP_PRF_TOTAL",
+  },
+  swp_ag: {
+    SYS: "DEL_SWP_PAG_TOTAL",
+    NOD: "DEL_SWP_PAG_NOD",
+    SOD: "DEL_SWP_PAG_S",
+  },
+  swp_mi: {
+    SYS: "DEL_SWP_PMI",
+    NOD: "DEL_SWP_PMI_N",
+    SOD: "DEL_SWP_PMI_S",
+  },
+  cvp_exp: {
+    DELTA: "C_CVP_TOTAL_EXPORTS",
+  },
+  swp_exp: {
+    DELTA: "C_CAA003_SWP",
+  },
+  // Southern San Joaquin Valley exports: the three served routes are the
+  // locations; no combined total is served and none is computed client-side.
+  ssjv_exp: {
+    CVC: "D_CAA238_CVPCV",
+    FRIANT: "D_MLRTN_FRK000",
+    KERN: "SWP_TA_KERNAG",
   },
 }
 

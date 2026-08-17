@@ -259,6 +259,56 @@ test("sysdel subjects depend on the variable as well as the location", () => {
   expect(toDidSubject("sysdel", "SYS")).toBeNull()
 })
 
+test("sector-specific delivery variables map their verified subject codes", () => {
+  // Subject codes pinned to the live endpoint (25 subjects). The split code
+  // patterns are asymmetric on purpose; they quote the API, not a naming
+  // convention.
+  expect(toDidSubject("sysdel", "SYS", "cvp_ag")).toBe("DEL_CVP_PAG_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "cvp_ag")).toBe("DEL_CVP_PAG_NOD")
+  expect(toDidSubject("sysdel", "SOD", "cvp_ag")).toBe("DEL_CVP_PAG_SOD")
+  expect(toDidSubject("sysdel", "SYS", "cvp_mi")).toBe("DEL_CVP_PMI_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "cvp_mi")).toBe("DEL_CVP_PMI_N_WAMER")
+  expect(toDidSubject("sysdel", "SOD", "cvp_mi")).toBe("DEL_CVP_PMI_S")
+  expect(toDidSubject("sysdel", "SYS", "swp_ag")).toBe("DEL_SWP_PAG_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "swp_ag")).toBe("DEL_SWP_PAG_NOD")
+  expect(toDidSubject("sysdel", "SOD", "swp_ag")).toBe("DEL_SWP_PAG_S")
+  expect(toDidSubject("sysdel", "SYS", "swp_mi")).toBe("DEL_SWP_PMI")
+  expect(toDidSubject("sysdel", "NOD", "swp_mi")).toBe("DEL_SWP_PMI_N")
+  expect(toDidSubject("sysdel", "SOD", "swp_mi")).toBe("DEL_SWP_PMI_S")
+  // Refuges are served as a system total only: no regional splits exist.
+  expect(toDidSubject("sysdel", "SYS", "cvp_refuges")).toBe("DEL_CVP_PRF_TOTAL")
+  expect(toDidSubject("sysdel", "NOD", "cvp_refuges")).toBeNull()
+  expect(toDidSubject("sysdel", "SOD", "cvp_refuges")).toBeNull()
+  // Per-project Delta exports at the single Delta location; regional and
+  // system ids stay unmapped.
+  expect(toDidSubject("sysdel", "DELTA", "cvp_exp")).toBe("C_CVP_TOTAL_EXPORTS")
+  expect(toDidSubject("sysdel", "DELTA", "swp_exp")).toBe("C_CAA003_SWP")
+  expect(toDidSubject("sysdel", "SYS", "cvp_exp")).toBeNull()
+  expect(toDidSubject("sysdel", "NOD", "swp_exp")).toBeNull()
+  // Southern SJV exports: three served component routes as locations under
+  // one variable; no served total exists and none is computed client-side.
+  expect(toDidSubject("sysdel", "CVC", "ssjv_exp")).toBe("D_CAA238_CVPCV")
+  expect(toDidSubject("sysdel", "FRIANT", "ssjv_exp")).toBe("D_MLRTN_FRK000")
+  expect(toDidSubject("sysdel", "KERN", "ssjv_exp")).toBe("SWP_TA_KERNAG")
+  expect(toDidSubject("sysdel", "SYS", "ssjv_exp")).toBeNull()
+})
+
+test("sector-specific delivery variables map to sysdel with annual periods", () => {
+  for (const id of [
+    "cvp_ag",
+    "cvp_mi",
+    "cvp_refuges",
+    "swp_ag",
+    "swp_mi",
+    "cvp_exp",
+    "swp_exp",
+    "ssjv_exp",
+  ]) {
+    expect(didDomainForVariable(id)).toBe("sysdel")
+    expect(didPeriodForVariable(id)).toBe("annual")
+  }
+})
+
 test("viewHasLiveSource: only mock-surfaced views opt out of live adoption", () => {
   expect(viewHasLiveSource("dist")).toBe(true)
   expect(viewHasLiveSource("pct")).toBe(true)
