@@ -66,6 +66,8 @@ export type LocationGroupId =
   | "rivers"
   | "delta"
   | "sysregions"
+  | "syswide"
+  | "ssjv"
   | "agregions"
   | "cws"
   | "salmon"
@@ -246,6 +248,26 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
       { id: "SOD", name: "South of Delta", region: "SOD", mockBase: 0.62 },
     ],
   },
+  syswide: {
+    // Single-location group for metrics served as a system total only
+    // (e.g. CVP wildlife-refuge deliveries): honest scope instead of a
+    // regional picker whose splits would render sample data.
+    label: "Region",
+    items: [{ id: "SYS", name: "System-wide", region: "ALL", mockBase: 1 }],
+  },
+  ssjv: {
+    label: "Export route",
+    items: [
+      { id: "CVC", name: "Cross Valley Canal", region: "SOD", mockBase: 130 },
+      { id: "FRIANT", name: "Friant Division", region: "SOD", mockBase: 1100 },
+      {
+        id: "KERN",
+        name: "Kern County Water Agency",
+        region: "SOD",
+        mockBase: 700,
+      },
+    ],
+  },
   agregions: {
     label: "Region (demand-unit group)",
     items: [
@@ -328,7 +350,19 @@ export const SECTORS: SectorDef[] = [
   {
     id: "sysdel",
     name: "System deliveries",
-    variables: ["cvp_del", "swp_del", "tot_exp"],
+    variables: [
+      "cvp_del",
+      "cvp_ag",
+      "cvp_mi",
+      "cvp_refuges",
+      "swp_del",
+      "swp_ag",
+      "swp_mi",
+      "tot_exp",
+      "cvp_exp",
+      "swp_exp",
+      "ssjv_exp",
+    ],
   },
   { id: "outflow", name: "Delta outflows", variables: ["ndo", "ndo_uif"] },
   {
@@ -497,6 +531,127 @@ export const VARIABLES: Record<string, VariableDef> = {
     tierOutcome: "FW_EXP",
     tierOutcomeName: "Delta freshwater exports",
     data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  cvp_ag: {
+    id: "cvp_ag",
+    name: "CVP agricultural deliveries",
+    sectorId: "sysdel",
+    locationGroup: "sysregions",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "How much Central Valley Project water is delivered to farms each year.",
+    tech: "Annual CVP agricultural deliveries per the API subject labels (DEL_CVP_PAG_TOTAL; regional splits DEL_CVP_PAG_NOD / DEL_CVP_PAG_SOD). Sector breakdown of the CVP deliveries total.",
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  cvp_mi: {
+    id: "cvp_mi",
+    name: "CVP M&I deliveries",
+    sectorId: "sysdel",
+    locationGroup: "sysregions",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "How much Central Valley Project water is delivered to cities and industry (municipal and industrial use) each year.",
+    tech: "Annual CVP municipal and industrial deliveries per the API subject labels (DEL_CVP_PMI_TOTAL; regional splits DEL_CVP_PMI_N_WAMER / DEL_CVP_PMI_S; the north split carries the _WAMER qualifier, paralleling the CVP totals; see cvp_del for what that qualifier denotes there).",
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  cvp_refuges: {
+    id: "cvp_refuges",
+    name: "CVP wildlife refuge deliveries",
+    sectorId: "sysdel",
+    locationGroup: "syswide",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "How much Central Valley Project water is delivered to wildlife refuges each year.",
+    tech: "Annual CVP wildlife-refuge deliveries (DEL_CVP_PRF_TOTAL). Served as a system total only; the endpoint has no regional refuge subjects, so this variable uses the single system-wide location.",
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  swp_ag: {
+    id: "swp_ag",
+    name: "SWP agricultural deliveries",
+    sectorId: "sysdel",
+    locationGroup: "sysregions",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "How much State Water Project water is delivered to farms each year.",
+    tech: "Annual SWP agricultural deliveries per the API subject labels (DEL_SWP_PAG_TOTAL; regional splits DEL_SWP_PAG_NOD / DEL_SWP_PAG_S).",
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  swp_mi: {
+    id: "swp_mi",
+    name: "SWP M&I deliveries",
+    sectorId: "sysdel",
+    locationGroup: "sysregions",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "How much State Water Project water is delivered to cities and industry (municipal and industrial use) each year.",
+    tech: "Annual SWP municipal and industrial deliveries per the API subject labels (DEL_SWP_PMI; regional splits DEL_SWP_PMI_N / DEL_SWP_PMI_S).",
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  cvp_exp: {
+    id: "cvp_exp",
+    name: "CVP Delta exports",
+    sectorId: "sysdel",
+    locationGroup: "delta",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "The Central Valley Project's share of the water pumped out of the Delta for use elsewhere.",
+    tech: 'Annual CVP Delta exports per the API subject label (C_CVP_TOTAL_EXPORTS, "Central Valley Project Delta Exports"). Component of the combined Total Delta exports.',
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  swp_exp: {
+    id: "swp_exp",
+    name: "SWP Delta exports",
+    sectorId: "sysdel",
+    locationGroup: "delta",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "The State Water Project's share of the water pumped out of the Delta for use elsewhere.",
+    tech: 'Annual SWP Delta exports per the API subject label (C_CAA003_SWP, "State Water Project Delta Exports"). Component of the combined Total Delta exports.',
+    data: "live",
+    mockKind: "exports",
+    mockEffect: "exports",
+  },
+  ssjv_exp: {
+    id: "ssjv_exp",
+    name: "Southern San Joaquin Valley exports",
+    sectorId: "sysdel",
+    locationGroup: "ssjv",
+    unit: "TAF",
+    unitLabel: TAF,
+    views: ["dist"],
+    plain:
+      "Water exported to the Southern San Joaquin Valley, shown by delivery route.",
+    tech: "Three served route subjects, no combined total on the endpoint: D_CAA238_CVPCV (Cross Valley Canal), D_MLRTN_FRK000 (Friant Division), SWP_TA_KERNAG (Kern County Water Agency). Shown per route; no client-side summing of served data. The three-route presentation is pending confirmation (Provisional).",
+    data: "live",
+    provisional: true,
     mockKind: "exports",
     mockEffect: "exports",
   },
