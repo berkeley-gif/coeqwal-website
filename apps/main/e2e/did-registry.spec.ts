@@ -122,6 +122,47 @@ test("salmon abundance displays as percent of spawning habitat occupied", () => 
   expect(v?.wytApplicable).toBe(false)
 })
 
+// Sector-specific system-delivery variables (2026-08 confirmation that they
+// belong in the tool): CVP and SWP by use sector, per-project Delta exports,
+// and the Southern San Joaquin routes.
+
+test("system deliveries lists the sector-specific variables in display order", () => {
+  const sysdel = SECTORS.find((s) => s.id === "sysdel")
+  expect(sysdel?.variables).toEqual([
+    "cvp_del",
+    "cvp_ag",
+    "cvp_mi",
+    "cvp_refuges",
+    "swp_del",
+    "swp_ag",
+    "swp_mi",
+    "tot_exp",
+    "cvp_exp",
+    "swp_exp",
+    "ssjv_exp",
+  ])
+})
+
+test("single-total and multi-route variables use honest location groups", () => {
+  // Refuges are served as a system total only: a dedicated single-location
+  // group, not the regional group with sample-data fallbacks.
+  expect(getVariable("cvp_refuges")?.locationGroup).toBe("syswide")
+  expect(LOCATION_GROUPS.syswide.items.map((l) => l.id)).toEqual(["SYS"])
+  // Per-project exports live at the single Delta location like tot_exp.
+  expect(getVariable("cvp_exp")?.locationGroup).toBe("delta")
+  expect(getVariable("swp_exp")?.locationGroup).toBe("delta")
+  // Southern SJV exports: the three served routes are the locations; the
+  // three-route presentation is pending confirmation, so the variable
+  // carries the Provisional chip.
+  expect(getVariable("ssjv_exp")?.locationGroup).toBe("ssjv")
+  expect(LOCATION_GROUPS.ssjv.items.map((l) => l.id)).toEqual([
+    "CVC",
+    "FRIANT",
+    "KERN",
+  ])
+  expect(getVariable("ssjv_exp")?.provisional).toBe(true)
+})
+
 test("registry data flags agree with the live request mapping", () => {
   // One source of truth for what is live: a variable has a data: "live" flag
   // exactly when the mapping can build requests for it. Catches flags left
