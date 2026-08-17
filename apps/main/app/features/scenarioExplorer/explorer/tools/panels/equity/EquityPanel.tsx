@@ -782,6 +782,7 @@ export default function EquityPanel({
           width: "100%",
           height: "100%",
           minHeight: 0,
+          overflowX: "auto",
           boxShadow: chartEmphasized
             ? `inset 0 0 0 2px ${theme.palette.primary.main}`
             : undefined,
@@ -789,24 +790,26 @@ export default function EquityPanel({
           transition: "box-shadow 0.12s ease-out",
         }}
       >
-        <HydroclimateGate scenarioId={focusScenarioId} variant="block">
-          <TierGrid
-            objectives={objectives}
-            categories={categories}
-            tiers={TIERS}
-            colorMode="tier"
-            showComparison={showEquityComparison}
-            yAxisMode={yAxisMode}
-            selectedObjectives={selectedObjectives}
-            onObjectiveClick={handleObjectiveClick}
-            onCategoryClick={handleCategoryClick}
-            onTierCategoryClick={handleTierCategoryClick}
-            onShowOnMap={handleShowOnMap}
-            showMapView
-            focusScenarioId={focusScenarioId}
-            onChartHover={onChartHover}
-          />
-        </HydroclimateGate>
+        <Box sx={{ minWidth: 1120, height: "100%" }}>
+          <HydroclimateGate scenarioId={focusScenarioId} variant="block">
+            <TierGrid
+              objectives={objectives}
+              categories={categories}
+              tiers={TIERS}
+              colorMode="tier"
+              showComparison={showEquityComparison}
+              yAxisMode={yAxisMode}
+              selectedObjectives={selectedObjectives}
+              onObjectiveClick={handleObjectiveClick}
+              onCategoryClick={handleCategoryClick}
+              onTierCategoryClick={handleTierCategoryClick}
+              onShowOnMap={handleShowOnMap}
+              showMapView
+              focusScenarioId={focusScenarioId}
+              onChartHover={onChartHover}
+            />
+          </HydroclimateGate>
+        </Box>
       </Box>
 
       {/* Context menu for filtering tier-category cells */}
