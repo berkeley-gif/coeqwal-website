@@ -193,6 +193,23 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await expect
     .poll(() => requestedSubjects.includes("D_MLRTN_FRK000"))
     .toBe(true)
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "Friant Division" })
+    .click()
+  await page.getByRole("option", { name: "Kern County Water Agency" }).click()
+  await expect
+    .poll(() => requestedSubjects.includes("SWP_TA_KERNAG"))
+    .toBe(true)
+
+  // Returning to a sysregions variable after the syswide and ssjv groups:
+  // the North-of-Delta pin set earlier is still intact and resolves to the
+  // M&I family's own NOD subject.
+  await page.getByRole("button", { name: "CVP M&I deliveries" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requestedSubjects.includes("DEL_CVP_PMI_N_WAMER"))
+    .toBe(true)
 
   expect(errors).toEqual([])
 })
