@@ -25,6 +25,7 @@ const VALUE_BY_SUBJECT: Record<string, number> = {
   DEL_CVP_TOT_N_WAMER: 1500,
   DEL_SWP_TOT_N: 900,
   C_CVPSWP_TOTAL_EXPORTS: 4800,
+  DEL_CVP_PAG_NOD: 2900,
 }
 
 function sysdelPayload(subjectsCsv: string) {
@@ -164,6 +165,9 @@ test("system-delivery variables fetch their per-variable subjects and go live", 
   await expect
     .poll(() => requestedSubjects.includes("DEL_CVP_PAG_NOD"))
     .toBe(true)
+  // The adopted live value renders in TAF (guards the shared response-unit
+  // path for the whole new variable family).
+  await expect(page.getByText(/2,900 TAF/).first()).toBeVisible()
 
   // Refuges are served as a system total only: dedicated single location.
   await page

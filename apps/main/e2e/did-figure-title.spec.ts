@@ -51,6 +51,11 @@ test("getLocationTitle appends the group's title suffix", () => {
   expect(getLocationTitle("basins", "WBA10")).toBe("WBA10 Basin")
   // Groups whose names already read as full titles get no suffix.
   expect(getLocationTitle("rivers", "YRS")).toBe("Yuba River")
+  // Aggregate rollups already read as full titles too: "All North of Delta
+  // Basin" would be wrong, and the NOD total is now the default groundwater
+  // location, so this is the default figure title.
+  expect(getLocationTitle("basins", "AGG_GW_NOD")).toBe("All North of Delta")
+  expect(getLocationTitle("reservoirs", "AGG_NOD")).toBe("All North-of-Delta")
 })
 
 test("null water-year labels omit the clause entirely (WYT-excluded variables)", () => {

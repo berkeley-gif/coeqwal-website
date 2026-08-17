@@ -487,7 +487,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { level: { unit: "ft", unitLabel: "feet" } },
     plain:
       "How much water is stored underground in each groundwater basin, as a total volume or as the groundwater level in feet.",
-    tech: "North/South-of-Delta aggregate storage (NOD_GroundwaterStorage / SOD_GroundwaterStorage) and all 42 served basins (41 WBA technical-area codes plus DETAW) are live, basins labeled by code until richer names are confirmed. Basin entities serve level and volume, so the Level view is live per basin; the aggregates serve volume only and their level view stays sample.",
+    tech: "North/South-of-Delta aggregate storage (NOD_GroundwaterStorage / SOD_GroundwaterStorage) and all 42 served basins are live: the 41 WBA basins labeled by technical-area code until richer names are confirmed, DETAW by its served name (Delta-Eastside Water). Basin entities serve level and volume, so the Level view is live per basin; the aggregates serve volume only and their level view stays sample.",
     tierOutcome: "GW_STOR",
     tierOutcomeName: "Groundwater storage",
     data: "live",
@@ -920,15 +920,20 @@ export function getLocation(
 }
 
 /** Location display name for figure titles, with the group's title suffix
- *  applied (e.g. "Shasta Reservoir", "Colusa Basin", "Yuba River"). */
+ *  applied (e.g. "Shasta Reservoir", "WBA10 Basin", "Yuba River"). Aggregate
+ *  rollups already read as full titles ("All North of Delta"), so they never
+ *  take the suffix. */
 export function getLocationTitle(
   groupId: LocationGroupId,
   locationId: string,
 ): string {
   const group = LOCATION_GROUPS[groupId]
-  const name = group.items.find((l) => l.id === locationId)?.name ?? ""
+  const location = group.items.find((l) => l.id === locationId)
+  const name = location?.name ?? ""
   if (!name) return ""
-  return group.titleSuffix ? `${name} ${group.titleSuffix}` : name
+  return group.titleSuffix && !location?.aggregate
+    ? `${name} ${group.titleSuffix}`
+    : name
 }
 
 /** Default (first) location id per group, used to seed pinned locations. */

@@ -1,5 +1,14 @@
 import { test, expect } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
+import { LOCATION_GROUPS } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
+
+// Exact served groundwater subjects, derived from the registry (the parity
+// spec keeps registry and mapping in agreement, so this mirrors production).
+const GW_SERVED_SUBJECTS = new Set(
+  LOCATION_GROUPS.basins.items.map((l) =>
+    l.aggregate ? `${l.region}_GroundwaterStorage` : l.id,
+  ),
+)
 
 // Salmon and groundwater live paths, end to end and offline, over inline
 // route fixtures (same technique as did-sysdel.spec.ts). Salmon is also the
@@ -66,8 +75,9 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
     gwRequests.push(subject)
     // Mirrors the live endpoint: basin entities serve level and volume,
     // the NOD/SOD aggregates serve volume only. Fail closed on any subject
-    // outside the served shape, so a mistyped code cannot render as live.
-    if (!/^(WBA\d+[NS]?|DETAW|(NOD|SOD)_GroundwaterStorage)$/.test(subject)) {
+    // outside the exact served set, so a mistyped or unserved code (WBA99,
+    // WBA1) cannot render as live in this spec.
+    if (!GW_SERVED_SUBJECTS.has(subject)) {
       return route.fulfill({ status: 422, json: { detail: "unknown subject" } })
     }
     const isAggregate = subject.endsWith("_GroundwaterStorage")
