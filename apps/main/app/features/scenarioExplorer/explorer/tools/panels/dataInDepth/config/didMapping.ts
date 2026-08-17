@@ -166,11 +166,12 @@ const GW_AGGREGATE_SUBJECTS: Record<string, string> = {
 /**
  * The 42 served basin subjects (verified against
  * /api/data-in-depth/groundwater-storage, 44 subjects including the two
- * aggregates). Basin location ids ARE these codes, so resolution is a
- * validated pass-through: an id outside the served set falls back to mock
- * instead of issuing a dead request. Basin entities serve level and volume;
- * the aggregates serve volume only, so an aggregate's level view falls back
- * to sample per member.
+ * aggregates). Basin location ids ARE these codes, so resolution is an
+ * allowlisted pass-through (codes verified against the endpoint at
+ * implementation time): an id outside the set falls back to mock instead of
+ * issuing a dead request. Every basin entity serves level and volume
+ * (verified per subject); the aggregates serve volume only, so an
+ * aggregate's level view falls back to sample per member.
  */
 const GW_BASIN_SUBJECTS = new Set([
   "DETAW",

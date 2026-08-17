@@ -65,7 +65,11 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
     const subject = url.searchParams.get("subjects") ?? ""
     gwRequests.push(subject)
     // Mirrors the live endpoint: basin entities serve level and volume,
-    // the NOD/SOD aggregates serve volume only.
+    // the NOD/SOD aggregates serve volume only. Fail closed on any subject
+    // outside the served shape, so a mistyped code cannot render as live.
+    if (!/^(WBA\d+[NS]?|DETAW|(NOD|SOD)_GroundwaterStorage)$/.test(subject)) {
+      return route.fulfill({ status: 422, json: { detail: "unknown subject" } })
+    }
     const isAggregate = subject.endsWith("_GroundwaterStorage")
     const units: Record<string, { values: ReturnType<typeof seriesValues> }> = {
       volume: { values: seriesValues(46000, 20, 1922) },
@@ -183,10 +187,23 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   await page.getByRole("option", { name: "WBA10", exact: true }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect.poll(() => gwRequests.includes("WBA10")).toBe(true)
+  // The volume series feeds the summary sentence (fixture serves 46,000).
+  await expect(page.getByText(/46,000 TAF/).first()).toBeVisible()
 
-  // The level view is served per basin, so it stays live on a basin...
+  // The level view is served per basin, so it stays live on a basin, and
+  // the LEVEL series (180 ft), not the volume series, feeds the display.
   await page.getByRole("button", { name: "Level (ft)" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect(page.getByText(/180 ft/).first()).toBeVisible()
+  await expect(page.getByText(/46,000 ft/)).toHaveCount(0)
+
+  // The one basin with a served display name resolves and stays live too.
+  await page.getByRole("combobox").filter({ hasText: "WBA10" }).click()
+  await page.getByRole("option", { name: "Delta-Eastside Water" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect.poll(() => gwRequests.includes("DETAW")).toBe(true)
+  await page.getByRole("combobox").filter({ hasText: "Delta-Eastside" }).click()
+  await page.getByRole("option", { name: "WBA10", exact: true }).click()
 
   // ...but the aggregates serve volume only, so their level view falls back
   // to clearly labeled sample data.

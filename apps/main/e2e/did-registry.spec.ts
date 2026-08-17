@@ -10,7 +10,10 @@ import {
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
 import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
-import { didDomainForVariable } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
+import {
+  didDomainForVariable,
+  toDidSubject,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -67,9 +70,38 @@ test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
   // label the endpoint serves.
   expect(getLocation("basins", "WBA8S")?.name).toBe("WBA8S")
   expect(getLocation("basins", "DETAW")?.name).toBe("Delta-Eastside Water")
-  // Retired sample placeholders are gone.
-  expect(getLocation("basins", "COL")).toBeUndefined()
-  expect(getLocation("basins", "MER")).toBeUndefined()
+  // Every retired sample placeholder is gone.
+  for (const retired of [
+    "COL",
+    "SUT",
+    "YOL",
+    "AMR",
+    "ESJ",
+    "MOD",
+    "TUR",
+    "MER",
+  ]) {
+    expect(getLocation("basins", retired)).toBeUndefined()
+  }
+})
+
+test("every basins location resolves through the gw mapping exactly once", () => {
+  // The registry list and the mapping's served-subject allowlist are written
+  // separately; this parity guard fails if either drifts (a basin added to
+  // one list but not the other, a typo'd code, or a duplicate id).
+  const items = LOCATION_GROUPS.basins.items
+  const ids = items.map((l) => l.id)
+  expect(new Set(ids).size).toBe(ids.length)
+  for (const item of items) {
+    const subject = toDidSubject("gw", item.id)
+    expect
+      .soft(subject, `basins location ${item.id} must resolve to a subject`)
+      .not.toBeNull()
+    if (!item.aggregate) {
+      // Non-aggregate basins pass through by their own code.
+      expect.soft(subject, `basin ${item.id} passes through`).toBe(item.id)
+    }
+  }
 })
 
 test("gwLevelFromStorage derives a declining feet-scale sample series", () => {

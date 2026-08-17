@@ -163,7 +163,11 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
     ],
   },
   basins: {
-    label: "Groundwater basin (WBA)",
+    // The list mixes the two NOD/SOD summary locations with the 42 basins,
+    // so the control label says "location", not "basin". The title suffix
+    // stays "Basin": right for 42 of 44 entries; the aggregates' "...Basin"
+    // titles predate this list and read acceptably.
+    label: "Groundwater location",
     titleSuffix: "Basin",
     // The 42 served basins (41 WBA technical-area codes plus the
     // Delta-Eastside Water entity) after the NOD/SOD totals, in natural
