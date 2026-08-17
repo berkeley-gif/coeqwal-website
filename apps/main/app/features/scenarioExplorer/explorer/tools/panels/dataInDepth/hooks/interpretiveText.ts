@@ -178,10 +178,12 @@ export function summarySentence(
 /**
  * The confirmed winter-run salmon sentence: "Winter-run Chinook salmon for
  * <scenario> under the <hydroclimate> occupy <XX%> of suitable spawning
- * habitat, on average." Scenario comparisons lead with the reference member
- * and append mean-based deltas; climate comparisons range first to last.
- * Returns "" when no member carries a series (caller falls through to the
- * generic sentences).
+ * habitat, on average." Every value the sentence reports is an occupancy
+ * percent (never a relative-change percent, which would read ambiguous next
+ * to a percent-unit lead value): scenario comparisons list the other
+ * members' own occupancy, climate comparisons enumerate every compared
+ * member. Returns "" when no member carries a series (the caller then falls
+ * through to the generic sentences, which render "" for an empty dist view).
  */
 function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   const withSeries = members.filter((m) => m.series && m.series.length > 0)
@@ -193,13 +195,15 @@ function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
     : `${ctx.climateName} hydroclimate`
 
   if (ctx.compareBy === "climates") {
-    const first = withSeries[0] as SummaryMember
-    const last = withSeries[withSeries.length - 1] as SummaryMember
-    const range =
-      withSeries.length > 1
-        ? `${meanPct(first)} of suitable spawning habitat under ${first.label} and ${meanPct(last)} under ${last.label}`
-        : `${meanPct(first)} of suitable spawning habitat under ${first.label}`
-    return `Winter-run Chinook salmon for ${ctx.scenarioName} occupy ${range}, on average.`
+    const parts = withSeries.map(
+      (m, i) =>
+        `${meanPct(m)}${i === 0 ? " of suitable spawning habitat" : ""} under ${m.label}`,
+    )
+    const list =
+      parts.length <= 2
+        ? parts.join(" and ")
+        : `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`
+    return `Winter-run Chinook salmon for ${ctx.scenarioName} occupy ${list}, on average.`
   }
 
   const ref =
@@ -210,14 +214,8 @@ function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   if (ctx.compareBy === "scenarios") {
     const others = withSeries.filter((m) => m !== ref)
     if (others.length > 0) {
-      const rest = others.map(
-        (m) =>
-          `${m.label} ${percentDelta(
-            seriesStats(ref.series as number[]).mean,
-            seriesStats(m.series as number[]).mean,
-          )}`,
-      )
-      s += `; relative to it: ${rest.join(", ")}`
+      const rest = others.map((m) => `${m.label} ${meanPct(m)}`)
+      s += `; for comparison: ${rest.join(", ")}`
     }
   }
   return `${s}.`

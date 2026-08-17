@@ -9,7 +9,11 @@
  * component changes.
  *
  * Data status per variable:
- *  - "live": served by the production API today; wired through real hooks.
+ *  - "live": the request mapping (didMapping) serves this VARIABLE from the
+ *    production API; per-view or per-location exceptions (a monthly view or
+ *    named basins still on sample data) are noted in `tech`. The fetch path
+ *    derives liveness from the mapping and actual adoption, not this flag;
+ *    a registry test keeps flag and mapping in agreement.
  *  - "mock": rendered from the deterministic sample-data engine and labeled
  *    "sample data" in the UI until the backend lands.
  * Variables whose scope is still under discussion (deck vs. outcomes sheet)
@@ -505,7 +509,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: "percent of spawning habitat occupied",
     axisLabel: "Percent of spawning habitat occupied",
     footnote:
-      "Percent of suitable spawning habitat occupied by returning winter-run Chinook spawners, averaged over three years. Values above 100% mean returning spawners exceed the habitat's capacity.",
+      "Percent of suitable spawning habitat occupied by returning winter-run Chinook spawners, averaged over three years. Values above 100% would suggest returning spawners exceed the capacity of available habitat.",
     views: ["dist"],
     viewLabels: { dist: "Abundance (3-yr avg)" },
     plain:

@@ -153,10 +153,12 @@ test("salmon goes live with the WYT row disabled; groundwater aggregates go live
     page.getByText(/occupy 80% of suitable spawning habitat, on average/),
   ).toBeVisible()
   await expect(
-    page.getByText("Percent of spawning habitat occupied").first(),
+    page
+      .locator('[role="img"]')
+      .getByText("Percent of spawning habitat occupied"),
   ).toBeVisible()
   await expect(
-    page.getByText(/Values above 100% mean returning spawners exceed/),
+    page.getByText(/would suggest returning spawners exceed/),
   ).toBeVisible()
 
   // Groundwater: the default first basin (Colusa) has no live subject and

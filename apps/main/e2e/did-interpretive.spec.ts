@@ -39,7 +39,9 @@ test("salmon sentence follows the confirmed habitat-occupancy template", () => {
   )
 })
 
-test("salmon sentence appends mean-based deltas for compared scenarios", () => {
+test("salmon sentence lists compared scenarios by their own occupancy", () => {
+  // Compared members report occupancy percents, never relative-change
+  // percents: mixing the two on a percent-unit variable reads ambiguous.
   const s = summarySentence(
     [
       member("Current Operations", [40, 50], true),
@@ -48,7 +50,7 @@ test("salmon sentence appends mean-based deltas for compared scenarios", () => {
     salmonCtx,
   )
   expect(s).toBe(
-    "Winter-run Chinook salmon for Current Operations under the Historical hydroclimate occupy 45% of suitable spawning habitat, on average; relative to it: Salmon flows +33%.",
+    "Winter-run Chinook salmon for Current Operations under the Historical hydroclimate occupy 45% of suitable spawning habitat, on average; for comparison: Salmon flows 60%.",
   )
 })
 
@@ -59,6 +61,20 @@ test("salmon sentence ranges across compared climate futures", () => {
   )
   expect(s).toBe(
     "Winter-run Chinook salmon for Current Operations occupy 45% of suitable spawning habitat under Historical and 35% under 2070 hotter-drier, on average.",
+  )
+})
+
+test("salmon sentence enumerates every compared climate member", () => {
+  const s = summarySentence(
+    [
+      member("Historical", [40, 50]),
+      member("2070 mid-century", [36, 44]),
+      member("2070 hotter-drier", [30, 40]),
+    ],
+    { ...salmonCtx, compareBy: "climates" },
+  )
+  expect(s).toBe(
+    "Winter-run Chinook salmon for Current Operations occupy 45% of suitable spawning habitat under Historical, 40% under 2070 mid-century, and 35% under 2070 hotter-drier, on average.",
   )
 })
 
