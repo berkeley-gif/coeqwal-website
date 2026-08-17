@@ -38,7 +38,12 @@
 
 import raw from "./regionalTierMeans.json"
 
-export type RegionalHydroclimate = "historical" | "ecv" | "cc50" | "cc95" | "tai"
+export type RegionalHydroclimate =
+  | "historical"
+  | "ecv"
+  | "cc50"
+  | "cc95"
+  | "tai"
 
 export type RegionalOutcomeCode =
   | "NOD_GW"
