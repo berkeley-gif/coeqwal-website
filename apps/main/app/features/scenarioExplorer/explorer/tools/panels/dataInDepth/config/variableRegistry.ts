@@ -9,7 +9,11 @@
  * component changes.
  *
  * Data status per variable:
- *  - "live": served by the production API today; wired through real hooks.
+ *  - "live": the request mapping (didMapping) serves this VARIABLE from the
+ *    production API; per-view or per-location exceptions (a monthly view or
+ *    named basins still on sample data) are noted in `tech`. The fetch path
+ *    derives liveness from the mapping and actual adoption, not this flag;
+ *    a registry test keeps flag and mapping in agreement.
  *  - "mock": rendered from the deterministic sample-data engine and labeled
  *    "sample data" in the UI until the backend lands.
  * Variables whose scope is still under discussion (deck vs. outcomes sheet)
@@ -85,6 +89,13 @@ export interface VariableDef {
   /** Long unit label for axis titles, e.g. "thousand acre-feet" */
   unitLabel: string
   views: VariableView[]
+  /** Y-axis label override for the chart; defaults to the short unit. Use
+   *  when the unit alone underspecifies the quantity (e.g. the salmon
+   *  percent axis reads "Percent of spawning habitat occupied", not "%"). */
+  axisLabel?: string
+  /** Detailed reading of the metric, rendered as the chart-card footer
+   *  (the axis and title stay short; the precise definition lives here). */
+  footnote?: string
   /** Per-variable overrides of the default VIEW_LABELS button text, so a
    *  view can be labeled by the quantity it shows (e.g. "Volume (TAF)"). */
   viewLabels?: Partial<Record<VariableView, string>>
@@ -323,7 +334,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "eflows",
     name: "Environmental flows",
-    variables: ["riv_flow", "riv_uif"],
+    variables: ["riv_flow"],
   },
   {
     id: "ag",
@@ -417,7 +428,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     tech: "Annual April X2 percentiles. X2 responds to Delta outflow; spring position matters for estuarine habitat.",
     tierOutcome: "FW_DELTA_USES",
     tierOutcomeName: "Freshwater for in-Delta uses",
-    data: "mock",
+    data: "live",
     mockKind: "x2",
     mockEffect: "sal",
   },
@@ -434,7 +445,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     tech: "Annual September X2 percentiles. The fall X2 standard is the subject of the salinity-standards scenario.",
     tierOutcome: "FW_DELTA_USES",
     tierOutcomeName: "Freshwater for in-Delta uses",
-    data: "mock",
+    data: "live",
     mockKind: "x2",
     mockEffect: "sal",
   },
@@ -448,7 +459,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much water the federal Central Valley Project delivers to its contractors each year.",
-    tech: "Annual CVP deliveries, AG + M&I + wildlife refuges per the API subject labels (DEL_CVP_TOTAL; DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS regional splits sum exactly to the total).",
+    tech: "Annual CVP deliveries, AG + M&I + wildlife refuges per the API subject labels (DEL_CVP_TOTAL; DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS regional splits sum exactly to the total). The _WAMER/_WLOSS variants are the complete regional totals per the data team: the plain CalSim north total omits the American River and the plain south total omits losses.",
     tierOutcome: "FW_EXP",
     tierOutcomeName: "Delta freshwater exports",
     data: "live",
@@ -494,13 +505,16 @@ export const VARIABLES: Record<string, VariableDef> = {
     name: "Winter-run abundance",
     sectorId: "salmonS",
     locationGroup: "salmon",
-    unit: "ratio",
-    unitLabel: "proportion of spawning capacity (3-year average)",
+    unit: "%",
+    unitLabel: "percent of spawning habitat occupied",
+    axisLabel: "Percent of spawning habitat occupied",
+    footnote:
+      "Percent of suitable spawning habitat occupied by returning winter-run Chinook spawners, averaged over three years. Values above 100% would suggest returning spawners exceed the capacity of available habitat.",
     views: ["dist"],
     viewLabels: { dist: "Abundance (3-yr avg)" },
     plain:
       "How the Sacramento winter-run Chinook salmon population is doing relative to what the habitat can support, averaged over three years.",
-    tech: "WRLCM 3-year-average winter-run abundance (WRLCM_ADULT_FEMALES, NOF_3YR_AVG), interpreted as a proportion of spawning capacity per the review-round wording; values above 1 exceed capacity. INFERRED labeling and units, pending confirmation (see the guesses register); water-year-type filtering does not apply to a 3-year population average.",
+    tech: "WRLCM 3-year-average winter-run abundance (WRLCM_ADULT_FEMALES, NOF_3YR_AVG), served as a habitat-occupancy ratio and displayed as percent (adopted live series scale by 100, see didLiveScaleForVariable). Interpretation and percent labeling confirmed by the project team; the data pointing is still under science review, so the Provisional chip stays. Water-year-type filtering does not apply to a 3-year population average.",
     data: "live",
     provisional: true,
     wytApplicable: false,
@@ -552,30 +566,12 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist", "monthly"],
     plain:
       "How much water flows down each major river over the year, and in which months - the basis for healthy river ecosystems.",
-    tech: "Annual and monthly flow percentiles at river locations (CalSim3 C_* channel variables).",
+    tech: "Annual and monthly flow percentiles at river locations (CalSim3 C_* channel variables). The annual distribution is live; the monthly view renders sample data.",
     tierOutcome: "ENV_FLOWS",
     tierOutcomeName: "Environmental flows",
-    data: "mock",
+    data: "live",
     mockKind: "flow",
     mockEffect: "flows",
-  },
-  riv_uif: {
-    id: "riv_uif",
-    name: "Flow as % of unimpaired",
-    sectorId: "eflows",
-    locationGroup: "rivers",
-    unit: "%",
-    unitLabel: "percent of unimpaired flow",
-    views: ["dist"],
-    plain:
-      "What share of the river's natural flow remains in the channel after dams and diversions.",
-    tech: "Annual percent-of-unimpaired-flow percentiles per river location (flagged as provisional in the outcomes spec).",
-    tierOutcome: "ENV_FLOWS",
-    tierOutcomeName: "Environmental flows",
-    data: "mock",
-    provisional: true,
-    mockKind: "pctuif",
-    mockEffect: "pctUIF",
   },
   ag_del: {
     id: "ag_del",

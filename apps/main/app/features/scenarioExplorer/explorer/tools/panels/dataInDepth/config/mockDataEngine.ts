@@ -316,8 +316,10 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
       return 4800
     case "ndo_uif":
       return 42
-    case "riv_uif":
-      return 38
+    case "salmon_abund":
+      // Percent of spawning habitat occupied; most sample years sit well
+      // below capacity.
+      return 55
     case "ag_del":
       return AG_BASE[location.id]?.del ?? 4000
     case "ag_pump":

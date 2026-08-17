@@ -82,6 +82,7 @@ import {
 import {
   didDomainForVariable,
   didPeriodForVariable,
+  didLiveScaleForVariable,
   toDidSubject,
   unitTokenForView,
   includeForView,
@@ -474,7 +475,13 @@ export function useVariableData(): VariableData {
           unitToken,
         )
         if (points.series.length > 0) {
-          series = points.series
+          // Served units -> display units (e.g. the salmon habitat-occupancy
+          // ratio displays as percent); 1 for every other variable.
+          const liveScale = didLiveScaleForVariable(variable.id)
+          series =
+            liveScale === 1
+              ? points.series
+              : points.series.map((v) => v * liveScale)
           waterYears =
             points.waterYears.length > 0 ? points.waterYears : undefined
           anyLive = true
