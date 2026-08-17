@@ -153,17 +153,69 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
 }
 
 /**
- * Groundwater: only the NOD/SOD storage aggregates are wired live. The named
- * basin locations (COL, SUT, ...) need a confirmed basin-to-WBA lookup before
- * they can map to the endpoint's WBA subjects; until then they stay mock
- * (INFERRED scope, flagged for confirmation in the guesses register).
- * The aggregates serve volume only; level is never aggregated, so the level
- * view on an aggregate falls back to mock per member.
+ * Groundwater: the NOD/SOD aggregates use dedicated aggregate subjects; every
+ * served basin passes through by its technical code. No friendlier lookup
+ * exists on the data side (the other explore tools show the same codes), so
+ * codes are the ids AND the labels until richer names are confirmed.
  */
-const GW_SUBJECT_BY_LOCATION: Record<string, string> = {
+const GW_AGGREGATE_SUBJECTS: Record<string, string> = {
   AGG_GW_NOD: "NOD_GroundwaterStorage",
   AGG_GW_SOD: "SOD_GroundwaterStorage",
 }
+
+/**
+ * The 42 served basin subjects (verified against
+ * /api/data-in-depth/groundwater-storage, 44 subjects including the two
+ * aggregates). Basin location ids ARE these codes, so resolution is a
+ * validated pass-through: an id outside the served set falls back to mock
+ * instead of issuing a dead request. Basin entities serve level and volume;
+ * the aggregates serve volume only, so an aggregate's level view falls back
+ * to sample per member.
+ */
+const GW_BASIN_SUBJECTS = new Set([
+  "DETAW",
+  "WBA2",
+  "WBA3",
+  "WBA4",
+  "WBA5",
+  "WBA6",
+  "WBA7N",
+  "WBA7S",
+  "WBA8N",
+  "WBA8S",
+  "WBA9",
+  "WBA10",
+  "WBA11",
+  "WBA12",
+  "WBA13",
+  "WBA14",
+  "WBA15N",
+  "WBA15S",
+  "WBA16",
+  "WBA17N",
+  "WBA17S",
+  "WBA18",
+  "WBA19",
+  "WBA20",
+  "WBA21",
+  "WBA22",
+  "WBA23",
+  "WBA24",
+  "WBA25",
+  "WBA26N",
+  "WBA26S",
+  "WBA50",
+  "WBA60N",
+  "WBA60S",
+  "WBA61",
+  "WBA62",
+  "WBA63",
+  "WBA64",
+  "WBA71",
+  "WBA72",
+  "WBA73",
+  "WBA90",
+])
 
 /** Winter-run salmon: a single population metric subject. */
 const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
@@ -267,7 +319,9 @@ export function toDidSubject(
     return SYSDEL_SUBJECT_BY_VARIABLE[variableId]?.[locationId] ?? null
   }
   if (domain === "gw") {
-    return GW_SUBJECT_BY_LOCATION[locationId] ?? null
+    const aggregate = GW_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    return GW_BASIN_SUBJECTS.has(locationId) ? locationId : null
   }
   if (domain === "salmon") {
     return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null

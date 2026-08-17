@@ -25,7 +25,7 @@ function seriesValues(value: number, years = 20, startYear = 1934) {
   }))
 }
 
-test("salmon goes live with the WYT row disabled; groundwater aggregates go live while basins stay sample", async ({
+test("salmon goes live with the WYT row disabled; groundwater totals and basins go live with level per basin", async ({
   page,
 }) => {
   const errors = collectConsoleErrors(page)
@@ -64,6 +64,15 @@ test("salmon goes live with the WYT row disabled; groundwater aggregates go live
     const url = new URL(route.request().url())
     const subject = url.searchParams.get("subjects") ?? ""
     gwRequests.push(subject)
+    // Mirrors the live endpoint: basin entities serve level and volume,
+    // the NOD/SOD aggregates serve volume only.
+    const isAggregate = subject.endsWith("_GroundwaterStorage")
+    const units: Record<string, { values: ReturnType<typeof seriesValues> }> = {
+      volume: { values: seriesValues(46000, 20, 1922) },
+    }
+    if (!isAggregate) {
+      units.level = { values: seriesValues(180, 20, 1922) }
+    }
     return route.fulfill({
       json: {
         wyt_filter: null,
@@ -74,11 +83,9 @@ test("salmon goes live with the WYT row disabled; groundwater aggregates go live
             subjects: [
               {
                 subject,
-                kind: "aggregate",
+                kind: isAggregate ? "aggregate" : "entity",
                 label: subject,
-                periods: {
-                  annual: { volume: { values: seriesValues(46000, 20, 1922) } },
-                },
+                periods: { annual: units },
               },
             ],
           },
@@ -161,16 +168,31 @@ test("salmon goes live with the WYT row disabled; groundwater aggregates go live
     page.getByText(/would suggest returning spawners exceed/),
   ).toBeVisible()
 
-  // Groundwater: the default first basin (Colusa) has no live subject and
-  // stays sample; the North-of-Delta aggregate goes live.
+  // Groundwater: the NOD/SOD totals lead the location list, so the default
+  // selection is live immediately, and every served basin resolves by its
+  // technical code.
   await page.getByRole("button", { name: "Groundwater storage" }).click()
-  await expect(page.getByText(/^Sample data$/)).toBeVisible()
-  await page.getByRole("combobox").filter({ hasText: "Colusa" }).click()
-  await page.getByRole("option", { name: "All North of Delta" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect
     .poll(() => gwRequests.includes("NOD_GroundwaterStorage"))
     .toBe(true)
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page.getByRole("option", { name: "WBA10", exact: true }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect.poll(() => gwRequests.includes("WBA10")).toBe(true)
+
+  // The level view is served per basin, so it stays live on a basin...
+  await page.getByRole("button", { name: "Level (ft)" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+
+  // ...but the aggregates serve volume only, so their level view falls back
+  // to clearly labeled sample data.
+  await page.getByRole("combobox").filter({ hasText: "WBA10" }).click()
+  await page.getByRole("option", { name: "All North of Delta" }).click()
+  await expect(page.getByText(/^Sample data$/)).toBeVisible()
 
   expect(errors).toEqual([])
 })
