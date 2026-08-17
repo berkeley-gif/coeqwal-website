@@ -10,7 +10,10 @@ import {
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
 import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
-import { didDomainForVariable } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
+import {
+  didDomainForVariable,
+  toDidSubject,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -49,8 +52,60 @@ test("groundwater storage is a single variable with volume and level views", () 
   expect(v?.viewUnits?.level).toEqual({ unit: "ft", unitLabel: "feet" })
 })
 
+// Groundwater location list (2026-08 confirmation): the two NOD/SOD summary
+// totals lead, then all 42 served basins (41 WBA technical codes plus the
+// Delta-Eastside Water entity), labeled by code until richer names are
+// confirmed. The old eight regional-looking sample placeholders are retired.
+
+test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
+  const items = LOCATION_GROUPS.basins.items
+  expect(items[0]?.id).toBe("AGG_GW_NOD")
+  expect(items[1]?.id).toBe("AGG_GW_SOD")
+  expect(items[2]?.id).toBe("DETAW")
+  expect(items).toHaveLength(44)
+  // Codes sort naturally (WBA2 before WBA10), N before S within a number.
+  expect(items[3]?.id).toBe("WBA2")
+  expect(items[items.length - 1]?.id).toBe("WBA90")
+  // Technical codes are the labels; the Delta-Eastside entity keeps the
+  // label the endpoint serves.
+  expect(getLocation("basins", "WBA8S")?.name).toBe("WBA8S")
+  expect(getLocation("basins", "DETAW")?.name).toBe("Delta-Eastside Water")
+  // Every retired sample placeholder is gone.
+  for (const retired of [
+    "COL",
+    "SUT",
+    "YOL",
+    "AMR",
+    "ESJ",
+    "MOD",
+    "TUR",
+    "MER",
+  ]) {
+    expect(getLocation("basins", retired)).toBeUndefined()
+  }
+})
+
+test("every basins location resolves through the gw mapping exactly once", () => {
+  // The registry list and the mapping's served-subject allowlist are written
+  // separately; this parity guard fails if either drifts (a basin added to
+  // one list but not the other, a typo'd code, or a duplicate id).
+  const items = LOCATION_GROUPS.basins.items
+  const ids = items.map((l) => l.id)
+  expect(new Set(ids).size).toBe(ids.length)
+  for (const item of items) {
+    const subject = toDidSubject("gw", item.id)
+    expect
+      .soft(subject, `basins location ${item.id} must resolve to a subject`)
+      .not.toBeNull()
+    if (!item.aggregate) {
+      // Non-aggregate basins pass through by their own code.
+      expect.soft(subject, `basin ${item.id} passes through`).toBe(item.id)
+    }
+  }
+})
+
 test("gwLevelFromStorage derives a declining feet-scale sample series", () => {
-  const location = getLocation("basins", "COL")
+  const location = getLocation("basins", "WBA10")
   expect(location?.mockBase).toBeTruthy()
   const storage = Array.from({ length: 100 }, () => location!.mockBase!)
   const level = gwLevelFromStorage(storage, location!)

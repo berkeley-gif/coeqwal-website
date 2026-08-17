@@ -348,11 +348,20 @@ test("groundwater aggregates and salmon map to their own domains with annual per
   expect(didPeriodForVariable("salmon_abund")).toBe("annual")
 })
 
-test("gw serves only the NOD/SOD aggregates live; named basins stay mock pending the basin-to-WBA lookup", () => {
+test("gw subjects: aggregates remap, served basins pass through by code", () => {
   expect(toDidSubject("gw", "AGG_GW_NOD")).toBe("NOD_GroundwaterStorage")
   expect(toDidSubject("gw", "AGG_GW_SOD")).toBe("SOD_GroundwaterStorage")
+  // Basin location ids ARE the endpoint's subject codes (42 served basins:
+  // 41 WBA* codes plus DETAW), validated against the served set so a typo'd
+  // or retired id falls back to mock instead of a dead request.
+  expect(toDidSubject("gw", "WBA10")).toBe("WBA10")
+  expect(toDidSubject("gw", "WBA8S")).toBe("WBA8S")
+  expect(toDidSubject("gw", "WBA90")).toBe("WBA90")
+  expect(toDidSubject("gw", "DETAW")).toBe("DETAW")
+  // Unknown ids stay unmapped, including the retired sample placeholders.
   expect(toDidSubject("gw", "COL")).toBeNull()
   expect(toDidSubject("gw", "MER")).toBeNull()
+  expect(toDidSubject("gw", "WBA99")).toBeNull()
   expect(toDidSubject("salmon", "WRLCM")).toBe("WRLCM_ADULT_FEMALES")
 })
 
