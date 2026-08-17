@@ -47,6 +47,8 @@ export interface SummaryContext {
   view: VariableView
   compareBy: "scenarios" | "climates" | "locations"
   variableName: string
+  /** Registry id, for variable-specific sentence templates */
+  variableId?: string
   unit: string
   locationName: string
   climateName: string
@@ -87,6 +89,15 @@ export function summarySentence(
   ctx: SummaryContext,
 ): string {
   if (members.length === 0) return ""
+
+  // Winter-run salmon reads by its confirmed template: the mean of the
+  // percent-of-habitat series (a 3-year population average reads as an
+  // average, not a median), phrased as habitat occupancy.
+  if (ctx.variableId === "salmon_abund") {
+    const salmon = salmonSentence(members, ctx)
+    if (salmon) return salmon
+  }
+
   const vn = ctx.variableName.toLowerCase()
   const first = members[0] as SummaryMember
 
@@ -162,6 +173,54 @@ export function summarySentence(
   const mx = meds.reduce((p, c) => (c.med > p.med ? c : p))
   const mn = meds.reduce((p, c) => (c.med < p.med ? c : p))
   return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}.`
+}
+
+/**
+ * The confirmed winter-run salmon sentence: "Winter-run Chinook salmon for
+ * <scenario> under the <hydroclimate> occupy <XX%> of suitable spawning
+ * habitat, on average." Scenario comparisons lead with the reference member
+ * and append mean-based deltas; climate comparisons range first to last.
+ * Returns "" when no member carries a series (caller falls through to the
+ * generic sentences).
+ */
+function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
+  const withSeries = members.filter((m) => m.series && m.series.length > 0)
+  if (withSeries.length === 0) return ""
+  const meanPct = (m: SummaryMember) =>
+    `${formatValue(seriesStats(m.series as number[]).mean, "%")}%`
+  const heldClimate = /climate/i.test(ctx.climateName)
+    ? ctx.climateName
+    : `${ctx.climateName} hydroclimate`
+
+  if (ctx.compareBy === "climates") {
+    const first = withSeries[0] as SummaryMember
+    const last = withSeries[withSeries.length - 1] as SummaryMember
+    const range =
+      withSeries.length > 1
+        ? `${meanPct(first)} of suitable spawning habitat under ${first.label} and ${meanPct(last)} under ${last.label}`
+        : `${meanPct(first)} of suitable spawning habitat under ${first.label}`
+    return `Winter-run Chinook salmon for ${ctx.scenarioName} occupy ${range}, on average.`
+  }
+
+  const ref =
+    withSeries.find((m) => m.isReference) ?? (withSeries[0] as SummaryMember)
+  const scenarioLabel =
+    ctx.compareBy === "scenarios" ? ref.label : ctx.scenarioName
+  let s = `Winter-run Chinook salmon for ${scenarioLabel} under the ${heldClimate} occupy ${meanPct(ref)} of suitable spawning habitat, on average`
+  if (ctx.compareBy === "scenarios") {
+    const others = withSeries.filter((m) => m !== ref)
+    if (others.length > 0) {
+      const rest = others.map(
+        (m) =>
+          `${m.label} ${percentDelta(
+            seriesStats(ref.series as number[]).mean,
+            seriesStats(m.series as number[]).mean,
+          )}`,
+      )
+      s += `; relative to it: ${rest.join(", ")}`
+    }
+  }
+  return `${s}.`
 }
 
 /** Inputs for the card's standardized figure title. */

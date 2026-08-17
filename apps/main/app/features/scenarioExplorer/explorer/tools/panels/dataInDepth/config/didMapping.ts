@@ -71,6 +71,14 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
  * tot_exp exposes only the combined Banks + Jones
  * total (C_CVPSWP_TOTAL_EXPORTS); the endpoint also serves per-project and
  * Southern San Joaquin export subjects that are intentionally unmapped.
+ *
+ * The CVP splits use DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS on purpose:
+ * per the data team, the plain del_cvp_tot_n and del_cvp_tot_s CalSim
+ * variables are incomplete (the north total omits the American River, the
+ * south total omits losses); the _WAMER/_WLOSS variants are the complete
+ * regional totals, and they sum exactly to DEL_CVP_TOTAL across all
+ * simulated years. See the project's delivery-formulas spreadsheet for the
+ * full formula definitions.
  */
 const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
   cvp_del: {
@@ -104,6 +112,22 @@ const GW_SUBJECT_BY_LOCATION: Record<string, string> = {
 /** Winter-run salmon: a single population metric subject. */
 const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
   WRLCM: "WRLCM_ADULT_FEMALES",
+}
+
+/**
+ * Display-unit scale applied to adopted live series, per variable. The
+ * salmon endpoint serves NOF_3YR_AVG as a habitat-occupancy ratio (1.0 = at
+ * capacity); the tool displays percent per the confirmed labeling, so the
+ * adopted live series scales by 100. Mock series are generated in display
+ * units already and never scale.
+ */
+const LIVE_SERIES_SCALE: Record<string, number> = {
+  salmon_abund: 100,
+}
+
+/** Scale from a live series' served units to display units (1 = as served). */
+export function didLiveScaleForVariable(variableId: string): number {
+  return LIVE_SERIES_SCALE[variableId] ?? 1
 }
 
 /** Registry reservoir-location id -> API subject short_code (only the differences). */

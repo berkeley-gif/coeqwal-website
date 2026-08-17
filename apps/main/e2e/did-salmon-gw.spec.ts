@@ -146,6 +146,18 @@ test("salmon goes live with the WYT row disabled; groundwater aggregates go live
   await expect(page.getByRole("heading", { name: /Water Years/ })).toHaveCount(
     0,
   )
+  // Percent display: the fixture serves a 0.8 habitat-occupancy ratio, so the
+  // interpretive sentence reads 80% and the y-axis carries the confirmed
+  // percent label; the detailed reading renders in the card footer.
+  await expect(
+    page.getByText(/occupy 80% of suitable spawning habitat, on average/),
+  ).toBeVisible()
+  await expect(
+    page.getByText("Percent of spawning habitat occupied").first(),
+  ).toBeVisible()
+  await expect(
+    page.getByText(/Values above 100% mean returning spawners exceed/),
+  ).toBeVisible()
 
   // Groundwater: the default first basin (Colusa) has no live subject and
   // stays sample; the North-of-Delta aggregate goes live.

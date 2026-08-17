@@ -10,6 +10,7 @@ import {
   pickLiveSeries,
   pointsFromValues,
   pickLiveSeriesPoints,
+  didLiveScaleForVariable,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -24,7 +25,7 @@ test("didDomainForVariable maps live variables and returns null for mock ones", 
   expect(didDomainForVariable("x2_apr")).toBe("delta")
   expect(didDomainForVariable("x2_sep")).toBe("delta")
   // Not served live -> mock:
-  expect(didDomainForVariable("riv_uif")).toBeNull() // % of unimpaired not served
+  expect(didDomainForVariable("ndo_uif")).toBeNull() // % of unimpaired not served
   expect(didDomainForVariable("station_ec")).toBeNull()
   expect(didDomainForVariable("nonsense")).toBeNull()
 })
@@ -35,7 +36,15 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("riv_flow")).toBe("annual")
   expect(didPeriodForVariable("x2_apr")).toBe("april")
   expect(didPeriodForVariable("x2_sep")).toBe("sept")
-  expect(didPeriodForVariable("riv_uif")).toBeNull()
+  expect(didPeriodForVariable("ndo_uif")).toBeNull()
+})
+
+test("didLiveScaleForVariable scales salmon ratios to percent, others pass through", () => {
+  // The salmon endpoint serves a habitat-occupancy ratio; the tool displays
+  // percent (confirmed labeling), so the adopted live series scales by 100.
+  expect(didLiveScaleForVariable("salmon_abund")).toBe(100)
+  expect(didLiveScaleForVariable("res_apr")).toBe(1)
+  expect(didLiveScaleForVariable("nonsense")).toBe(1)
 })
 
 test("toDidSubject maps reservoir location ids to API subject codes", () => {

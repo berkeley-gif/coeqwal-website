@@ -86,13 +86,15 @@ export default function ChartCard() {
     view: data.view,
     compareBy,
     variableName: data.variable?.name ?? "",
+    variableId: data.variable?.id,
     unit: data.unit,
     locationName: data.locationName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
   }
 
-  const yLabel = data.view === "cv" ? "CV" : data.unit
+  const yLabel =
+    data.view === "cv" ? "CV" : (data.variable?.axisLabel ?? data.unit)
   const hasMembers = data.members.length > 0
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
@@ -344,6 +346,20 @@ export default function ChartCard() {
             </Box>
           ))}
         </Box>
+      )}
+
+      {/* Variable footnote: the detailed reading of the metric */}
+      {data.variable?.footnote && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            mt: 1.5,
+            color: theme.palette.grey[600],
+          }}
+        >
+          {data.variable.footnote}
+        </Typography>
       )}
 
       {/* Provenance note */}

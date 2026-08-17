@@ -10,6 +10,7 @@ import {
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
 import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
+import { didDomainForVariable } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -88,4 +89,46 @@ test("mergeDataInitialState heals legacy multi-class WYT selections", () => {
   expect(healed.selectedWaterYearTypes).toEqual([])
   const single = mergeDataInitialState({ selectedWaterYearTypes: [5] })
   expect(single.selectedWaterYearTypes).toEqual([5])
+})
+
+// Content decisions from the 2026-08 review round: Environmental Flows keeps
+// a single variable, and winter-run abundance displays as the percent of
+// suitable spawning habitat occupied rather than a raw model ratio.
+
+test("flows as % of unimpaired is retired from the registry", () => {
+  expect(VARIABLES.riv_uif).toBeUndefined()
+  const eflows = SECTORS.find((s) => s.id === "eflows")
+  expect(eflows?.variables).toEqual(["riv_flow"])
+})
+
+test("mergeDataInitialState heals a persisted riv_uif selection", () => {
+  const healed = mergeDataInitialState({ selectedVariableId: "riv_uif" })
+  expect(healed.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+  expect(healed.view).toBe("dist")
+})
+
+test("salmon abundance displays as percent of spawning habitat occupied", () => {
+  const v = getVariable("salmon_abund")
+  expect(v?.name).toBe("Winter-run abundance")
+  expect(v?.unit).toBe("%")
+  expect(v?.unitLabel).toBe("percent of spawning habitat occupied")
+  expect(v?.axisLabel).toBe("Percent of spawning habitat occupied")
+  // The detailed reading of the metric lives in the card footer.
+  expect(v?.footnote).toContain("averaged over three years")
+  expect(v?.footnote).toContain("above 100%")
+  // The data pointing is still under review by the science team, and a
+  // population average does not decompose by water-year type.
+  expect(v?.provisional).toBe(true)
+  expect(v?.wytApplicable).toBe(false)
+})
+
+test("registry data flags agree with the live request mapping", () => {
+  // One source of truth for what is live: a variable has a data: "live" flag
+  // exactly when the mapping can build requests for it. Catches flags left
+  // stale in either direction when a variable is wired or retired.
+  for (const v of Object.values(VARIABLES)) {
+    expect
+      .soft(v.data === "live", `${v.id}: data flag vs live mapping`)
+      .toBe(didDomainForVariable(v.id) != null)
+  }
 })
