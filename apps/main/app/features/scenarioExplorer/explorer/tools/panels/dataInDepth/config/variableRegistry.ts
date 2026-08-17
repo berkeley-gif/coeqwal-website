@@ -559,7 +559,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much Central Valley Project water is delivered to cities and industry (municipal and industrial use) each year.",
-    tech: "Annual CVP municipal and industrial deliveries per the API subject labels (DEL_CVP_PMI_TOTAL; regional splits DEL_CVP_PMI_N_WAMER / DEL_CVP_PMI_S; the north split carries the _WAMER qualifier like the CVP totals, including the American River per the data team).",
+    tech: "Annual CVP municipal and industrial deliveries per the API subject labels (DEL_CVP_PMI_TOTAL; regional splits DEL_CVP_PMI_N_WAMER / DEL_CVP_PMI_S; the north split carries the _WAMER qualifier, paralleling the CVP totals; see cvp_del for what that qualifier denotes there).",
     data: "live",
     mockKind: "exports",
     mockEffect: "exports",

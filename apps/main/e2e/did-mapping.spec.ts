@@ -278,14 +278,19 @@ test("sector-specific delivery variables map their verified subject codes", () =
   // Refuges are served as a system total only: no regional splits exist.
   expect(toDidSubject("sysdel", "SYS", "cvp_refuges")).toBe("DEL_CVP_PRF_TOTAL")
   expect(toDidSubject("sysdel", "NOD", "cvp_refuges")).toBeNull()
-  // Per-project Delta exports at the single Delta location.
+  expect(toDidSubject("sysdel", "SOD", "cvp_refuges")).toBeNull()
+  // Per-project Delta exports at the single Delta location; regional and
+  // system ids stay unmapped.
   expect(toDidSubject("sysdel", "DELTA", "cvp_exp")).toBe("C_CVP_TOTAL_EXPORTS")
   expect(toDidSubject("sysdel", "DELTA", "swp_exp")).toBe("C_CAA003_SWP")
+  expect(toDidSubject("sysdel", "SYS", "cvp_exp")).toBeNull()
+  expect(toDidSubject("sysdel", "NOD", "swp_exp")).toBeNull()
   // Southern SJV exports: three served component routes as locations under
   // one variable; no served total exists and none is computed client-side.
   expect(toDidSubject("sysdel", "CVC", "ssjv_exp")).toBe("D_CAA238_CVPCV")
   expect(toDidSubject("sysdel", "FRIANT", "ssjv_exp")).toBe("D_MLRTN_FRK000")
   expect(toDidSubject("sysdel", "KERN", "ssjv_exp")).toBe("SWP_TA_KERNAG")
+  expect(toDidSubject("sysdel", "SYS", "ssjv_exp")).toBeNull()
 })
 
 test("sector-specific delivery variables map to sysdel with annual periods", () => {
