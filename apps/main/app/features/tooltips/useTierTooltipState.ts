@@ -172,7 +172,17 @@ export function useTierTooltipState(options: UseTierTooltipStateOptions = {}) {
   useEffect(() => {
     if (!openTooltip || !closeOnScroll) return
 
-    const handleScroll = () => {
+    const handleScroll = (e: Event) => {
+      // Scrolling inside the popup's own content (e.g. a long tier list)
+      // isn't the page moving out from under it - ignore those.
+      const target = e.target
+      if (
+        target instanceof Element &&
+        target.closest("[data-anchored-portal-surface]")
+      ) {
+        return
+      }
+
       setOpenTooltip(null)
       setAnchor(null)
       setScenarioContext(null)

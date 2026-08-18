@@ -177,11 +177,14 @@ function DesktopPortal({
           touchEvent="onTouchEnd"
         >
           <Box
+            data-anchored-portal-surface=""
             sx={{
               position: "relative",
               ...tooltipSurface(theme, { density }),
               ...(width !== undefined && { width }),
               ...(maxWidth !== undefined && { maxWidth }),
+              maxHeight: "calc(100vh - 32px)",
+              overflowY: "auto",
             }}
           >
             {showArrow && (

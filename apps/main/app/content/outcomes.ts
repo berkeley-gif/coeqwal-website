@@ -148,7 +148,7 @@ export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
  * water" did.
  */
 export const OUTCOME_LABEL_BREAKS: Record<string, [string, string]> = {
-  [OUTCOME_NAMES.CWS_DEL]: ["Community surface", "water"],
+  [OUTCOME_NAMES.CWS_DEL]: ["Community", "surface water"],
   [OUTCOME_NAMES.AG_REV]: ["Agricultural", "revenue"],
   [OUTCOME_NAMES.ENV_FLOWS]: ["Environmental", "flows"],
   [OUTCOME_NAMES.RES_STOR]: ["Reservoir", "storage"],
