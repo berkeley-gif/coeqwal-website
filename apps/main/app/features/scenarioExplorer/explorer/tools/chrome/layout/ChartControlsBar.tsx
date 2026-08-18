@@ -78,7 +78,7 @@ const ChartControlsBar = React.forwardRef<
             overflowX: "auto",
             overflowY: "hidden",
             WebkitOverflowScrolling: "touch",
-            py: 2,
+            py: 0.5,
             "& > *": { flexShrink: 0 },
           }}
         >

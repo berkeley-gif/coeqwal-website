@@ -343,8 +343,8 @@ export default function ResiliencePanel({
   const scenarioColumnItems = useMemo<ResilienceAxisItem[]>(() => {
     const ids =
       effectiveView === "aggregate" &&
-      aggregateScope === "selected" &&
-      selectedScenarios.length > 0
+        aggregateScope === "selected" &&
+        selectedScenarios.length > 0
         ? selectedScenarios
         : scenarioIds
     return ids.map((sid) => resolveScenarioAxisItem(sid))
@@ -2243,10 +2243,10 @@ export default function ResiliencePanel({
       const dynamicHeight =
         captureState.kind === "smallMultiples"
           ? computeResiliencePanelSmallMultiplesCaptureHeight({
-              tilesCount: captureState.tiles.length,
-              tileAspect: captureState.tileAspect,
-              rowsCount: captureState.rows.length,
-            })
+            tilesCount: captureState.tiles.length,
+            tileAspect: captureState.tileAspect,
+            rowsCount: captureState.rows.length,
+          })
           : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
         state: captureState,
@@ -2460,8 +2460,8 @@ export default function ResiliencePanel({
   const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
     const labelRotation =
       !transposed &&
-      (effectiveView === "hydroclimate" ||
-        (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
+        (effectiveView === "hydroclimate" ||
+          (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
         ? -90
         : 0
     if (columns.length === 0) return { kind: "noColumns" }
@@ -2670,120 +2670,140 @@ export default function ResiliencePanel({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Panel-level title. Names the pivot (what the chart is) and
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
+          ...(effectiveView === "aggregate" && { overflowX: "auto" }),
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            minHeight: 0,
+            minWidth: effectiveView === "aggregate" ? 720 : 0,
+          }}
+        >
+          {/* Panel-level title. Names the pivot (what the chart is) and
           spells out the specific subject it exhibits (which scenarios /
           outcomes / climates, or the aggregate framing). Kept
           intentionally different in shape from the one-line sentence
           header so the two don't read as duplicates: the sentence
           describes how the user is currently configuring the chart;
           the title describes what the chart IS. */}
-      <ResiliencePanelTitle
-        view={view}
-        aggregateOver={aggregateOver}
-        scenarioCount={selectedScenarios.length}
-        outcomeCount={resilienceVisibleOutcomes.length}
-        climateCount={selectedHydroclimates.size}
-      />
-
-      {isMapVisible && effectiveView === "aggregate" && (
-        <Typography
-          variant="caption"
-          sx={{
-            px: theme.space.component.lg,
-            pb: theme.space.component.xs,
-            color: theme.palette.grey[700],
-            lineHeight: 1.3,
-          }}
-        >
-          Overview cells aggregate across scenarios. Switch to Scenarios,
-          Outcomes, or Hydroclimates to link cells to the map.
-        </Typography>
-      )}
-
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          px: theme.space.component.lg,
-          pb: theme.space.component.md,
-          position: "relative",
-        }}
-      >
-        {showResilienceOutcomeSelector && (
-          <OutcomeChooserPanel
-            title="Choose outcome rows"
-            closeAriaLabel="Close choose outcome rows panel"
-            selectedCodes={resilienceVisibleOutcomes}
-            onToggle={toggleResilienceOutcome}
-            onSetSelected={setResilienceVisibleOutcomes}
-            onClose={() => setShowResilienceOutcomeSelector(false)}
-            sx={{
-              left: theme.space.component.lg,
-              bottom: theme.space.component.md,
-            }}
+          <ResiliencePanelTitle
+            view={view}
+            aggregateOver={aggregateOver}
+            scenarioCount={selectedScenarios.length}
+            outcomeCount={resilienceVisibleOutcomes.length}
+            climateCount={selectedHydroclimates.size}
           />
-        )}
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={view}
-            initial={motionInitial}
-            animate={{ opacity: 1, y: 0 }}
-            exit={motionExit}
-            transition={motionTransition}
-            style={{
-              height: "100%",
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
+          {isMapVisible && effectiveView === "aggregate" && (
+            <Typography
+              variant="caption"
+              sx={{
+                px: theme.space.component.lg,
+                pb: theme.space.component.xs,
+                color: theme.palette.grey[700],
+                lineHeight: 1.3,
+              }}
+            >
+              Overview cells aggregate across scenarios. Switch to Scenarios,
+              Outcomes, or Hydroclimates to link cells to the map.
+            </Typography>
+          )}
+
+          <Box
+            sx={{
+              flex: 1,
               minHeight: 0,
+              px: theme.space.component.lg,
+              pb: theme.space.component.md,
+              position: "relative",
             }}
           >
-            <ResiliencePanelChartView
-              state={chartViewState}
-              {...chartViewVisuals}
-              handlers={liveHandlers}
+            {showResilienceOutcomeSelector && (
+              <OutcomeChooserPanel
+                title="Choose outcome rows"
+                closeAriaLabel="Close choose outcome rows panel"
+                selectedCodes={resilienceVisibleOutcomes}
+                onToggle={toggleResilienceOutcome}
+                onSetSelected={setResilienceVisibleOutcomes}
+                onClose={() => setShowResilienceOutcomeSelector(false)}
+                sx={{
+                  left: theme.space.component.lg,
+                  bottom: theme.space.component.md,
+                }}
+              />
+            )}
+
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={view}
+                initial={motionInitial}
+                animate={{ opacity: 1, y: 0 }}
+                exit={motionExit}
+                transition={motionTransition}
+                style={{
+                  height: "100%",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 0,
+                }}
+              >
+                <ResiliencePanelChartView
+                  state={chartViewState}
+                  {...chartViewVisuals}
+                  handlers={liveHandlers}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </Box>
+
+          {isLoading && hasData && (
+            <CircularProgress
+              size={18}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                zIndex: 10,
+                opacity: 0.5,
+              }}
             />
-          </motion.div>
-        </AnimatePresence>
+          )}
+
+          <Snackbar
+            open={mapBlockedMessage !== null}
+            autoHideDuration={4500}
+            onClose={closeMapBlockedMessage}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            message={mapBlockedMessage ?? undefined}
+            ContentProps={{
+              sx: {
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                borderRadius: theme.borderRadius.sm,
+                justifyContent: "center",
+                maxWidth: 320,
+                px: 2,
+                py: 1.5,
+                "& .MuiSnackbarContent-message": {
+                  textAlign: "center",
+                  whiteSpace: "normal",
+                  lineHeight: 1.4,
+                },
+              },
+            }}
+          />
+        </Box>
       </Box>
-
-      {isLoading && hasData && (
-        <CircularProgress
-          size={18}
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            zIndex: 10,
-            opacity: 0.5,
-          }}
-        />
-      )}
-
-      <Snackbar
-        open={mapBlockedMessage !== null}
-        autoHideDuration={4500}
-        onClose={closeMapBlockedMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        message={mapBlockedMessage ?? undefined}
-        ContentProps={{
-          sx: {
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            borderRadius: theme.borderRadius.sm,
-            justifyContent: "center",
-            maxWidth: 320,
-            px: 2,
-            py: 1.5,
-            "& .MuiSnackbarContent-message": {
-              textAlign: "center",
-              whiteSpace: "normal",
-              lineHeight: 1.4,
-            },
-          },
-        }}
-      />
     </Box>
   )
 }

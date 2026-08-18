@@ -34,37 +34,37 @@ export type ResiliencePanelChartViewState =
   | { kind: "noColumns" }
   | { kind: "noOutcomesSelected" }
   | {
-      kind: "outcomeEmpty"
-      eyebrow: string
-      title: string
-      body: string
-    }
+    kind: "outcomeEmpty"
+    eyebrow: string
+    title: string
+    body: string
+  }
   | {
-      kind: "smallMultiples"
-      view: "scenario" | "outcome" | "hydroclimate"
-      rows: ResilienceAxisItem[]
-      columns: ResilienceAxisItem[]
-      tiles: ResilienceSmallMultiplesTile[]
-      tileAspect: ResilienceSmallMultiplesTileAspect
-      columnLabelRotation?: number
-      highlightedRowKeys?: Set<string> | null | undefined
-      highlightedColKeys?: Set<string> | null | undefined
-      highlightedTileIds?: Set<string> | null | undefined
-    }
+    kind: "smallMultiples"
+    view: "scenario" | "outcome" | "hydroclimate"
+    rows: ResilienceAxisItem[]
+    columns: ResilienceAxisItem[]
+    tiles: ResilienceSmallMultiplesTile[]
+    tileAspect: ResilienceSmallMultiplesTileAspect
+    columnLabelRotation?: number
+    highlightedRowKeys?: Set<string> | null | undefined
+    highlightedColKeys?: Set<string> | null | undefined
+    highlightedTileIds?: Set<string> | null | undefined
+  }
   | {
-      kind: "aggregate"
-      rows: ResilienceAxisItem[]
-      columns: ResilienceAxisItem[]
-      cells: ResilienceHeatmapCell[]
-      marginals?: ResilienceHeatmapMarginals | undefined
-      showMarginals?: boolean
-      highlightedRowKeys?: Set<string> | null | undefined
-      highlightedColKeys?: Set<string> | null | undefined
-      highlightedTileIds?: Set<string> | null | undefined
-      scenarioRowAxisHover?: boolean
-      scenarioColAxisHover?: boolean
-      columnLabelRotation?: number
-    }
+    kind: "aggregate"
+    rows: ResilienceAxisItem[]
+    columns: ResilienceAxisItem[]
+    cells: ResilienceHeatmapCell[]
+    marginals?: ResilienceHeatmapMarginals | undefined
+    showMarginals?: boolean
+    highlightedRowKeys?: Set<string> | null | undefined
+    highlightedColKeys?: Set<string> | null | undefined
+    highlightedTileIds?: Set<string> | null | undefined
+    scenarioRowAxisHover?: boolean
+    scenarioColAxisHover?: boolean
+    columnLabelRotation?: number
+  }
 
 export interface ResiliencePanelChartViewHandlers {
   onCellHover?: (cell: ResilienceHeatmapCell | null) => void
@@ -268,9 +268,9 @@ export default function ResiliencePanelChartView({
         onSquareHover={
           onSquareHover
             ? (info) =>
-                onSquareHover(
-                  info ? { cell: info.cell, entry: info.entry } : null,
-                )
+              onSquareHover(
+                info ? { cell: info.cell, entry: info.entry } : null,
+              )
             : undefined
         }
         onSquareClick={

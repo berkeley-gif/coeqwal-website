@@ -316,7 +316,7 @@ function truncateResilienceYAxisTick(
   const m = /^( +)/.exec(full)
   const prefix = m?.[1] ?? ""
   let rest = full.slice(prefix.length)
-  for (;;) {
+  for (; ;) {
     textEl.textContent = prefix + rest + "…"
     if (textEl.getComputedTextLength() <= maxWidth) {
       return true
@@ -700,11 +700,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .filter((s): s is string => s != null)
           valueText = parts.length > 0 ? parts.join(" · ") : "No data"
         } else if (cell.tierLevel != null) {
-          valueText = `Tier ${cell.tierLevel}${
-            cell.continuousValue != null
-              ? ` (${cell.continuousValue.toFixed(2)})`
-              : ""
-          }`
+          valueText = `Tier ${cell.tierLevel}${cell.continuousValue != null
+            ? ` (${cell.continuousValue.toFixed(2)})`
+            : ""
+            }`
         } else {
           valueText = cell.unavailableReason ?? "No data"
         }
@@ -740,11 +739,10 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const tierLevel = entry.tierLevel
         const tierText =
           tierLevel != null
-            ? `Tier ${tierLevel}${
-                entry.tierValue != null && entry.tierValue !== tierLevel
-                  ? ` (${entry.tierValue.toFixed(2)})`
-                  : ""
-              }`
+            ? `Tier ${tierLevel}${entry.tierValue != null && entry.tierValue !== tierLevel
+              ? ` (${entry.tierValue.toFixed(2)})`
+              : ""
+            }`
             : "No data"
 
         let subjectLine = ""
@@ -1867,9 +1865,17 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
     // When `responsive` is false, fall back to the prop-driven dims and
     // call updateChart once at mount / when dims change.
     useEffect(() => {
+      const syncSvgAttrs = (w: number, h: number) => {
+        const svg = svgRef.current
+        if (!svg) return
+        svg.setAttribute("width", String(w))
+        svg.setAttribute("height", String(h))
+      }
+
       if (!responsive) {
         if (width > 0 && height > 0) {
           lastDimsRef.current = { width, height }
+          syncSvgAttrs(width, height)
           updateChartRef.current(width, height)
         }
         return
@@ -1888,6 +1894,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         if (prev.width === rw && prev.height === rh) return
         lastDimsRef.current = { width: rw, height: rh }
         if (rw > 0 && rh > 0) {
+          syncSvgAttrs(rw, rh)
           updateChartRef.current(rw, rh)
         }
       })
@@ -1900,6 +1907,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       const ih = Math.round(rect.height)
       if (iw > 0 && ih > 0) {
         lastDimsRef.current = { width: iw, height: ih }
+        syncSvgAttrs(iw, ih)
         updateChartRef.current(iw, ih)
       }
 
@@ -1953,6 +1961,7 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
           ref={svgRef}
           width={width}
           height={height}
+          {...(!responsive && { width, height })}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
         {/* Tooltips are portaled to document.body and positioned with
