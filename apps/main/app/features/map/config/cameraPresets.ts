@@ -80,8 +80,8 @@ export const RESERVOIR_VIEW: CameraView = {
 /** Bounding box enclosing California's Urban (Community Water Systems).
  *  Taken as the Max, Min of coordinates of 74 LOI points. */
 export const CWS_DEL_BOUNDS: [[number, number], [number, number]] = [
-  [-122.423, 34.025], // SW corner [lng, lat]
-  [-117.035, 40.623], // NE corner [lng, lat]
+  [-122.5, 33.5], // SW corner [lng, lat]
+  [-117.0, 41.0], // NE corner [lng, lat]
 ]
 
 /** Bounding box enclosing the Legal Delta (DETAW polygon).
