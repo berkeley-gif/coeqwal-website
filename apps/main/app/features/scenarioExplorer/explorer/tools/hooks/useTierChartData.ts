@@ -43,7 +43,7 @@ const HC_HISTORICAL = "historical"
 /** Convert a regional tier mean (1-4 scale) to the radar's [-1, 1] axis,
  *  matching the API path: normalized_score = (4 - mean) / 3, then to the axis */
 function tierMeanToRadarValue(tierMean: number): number {
-  return normalizedToRadar((4 - tierMean) / 3)
+  return normalizedToRadar((5 - tierMean) / 4)
 }
 
 /**
