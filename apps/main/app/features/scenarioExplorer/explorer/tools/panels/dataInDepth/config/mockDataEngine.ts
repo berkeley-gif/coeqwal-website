@@ -312,12 +312,30 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
       return 5000 * (location.mockBase ?? 1)
     case "swp_del":
       return 2600 * (location.mockBase ?? 1)
+    case "cvp_ag":
+      return 3000 * (location.mockBase ?? 1)
+    case "cvp_mi":
+      return 500 * (location.mockBase ?? 1)
+    case "cvp_refuges":
+      return 300
+    case "swp_ag":
+      return 700 * (location.mockBase ?? 1)
+    case "swp_mi":
+      return 1900 * (location.mockBase ?? 1)
+    case "cvp_exp":
+      return 2400
+    case "swp_exp":
+      return 2400
+    case "ssjv_exp":
+      return location.mockBase ?? 400
     case "tot_exp":
       return 4800
     case "ndo_uif":
       return 42
-    case "riv_uif":
-      return 38
+    case "salmon_abund":
+      // Percent of spawning habitat occupied; most sample years sit well
+      // below capacity.
+      return 55
     case "ag_del":
       return AG_BASE[location.id]?.del ?? 4000
     case "ag_pump":

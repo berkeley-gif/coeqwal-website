@@ -47,6 +47,10 @@ import type {
   DeltaSalinityDidOptions,
   CwsDataInDepthResponse,
   CwsDataInDepthOptions,
+  SalmonDidResponse,
+  SalmonDidOptions,
+  SystemDeliveriesDidResponse,
+  SystemDeliveriesDidOptions,
   AgDataInDepthResponse,
   AgDataInDepthOptions,
   GroundwaterStorageDidResponse,
@@ -967,6 +971,34 @@ export async function fetchCwsDataInDepth(
   }
   return apiFetcher<CwsDataInDepthResponse>(
     ENDPOINTS.cwsDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/** Fetch annual salmon abundance (calendar-year) stats for one or more scenarios. */
+export async function fetchSalmonDataInDepth(
+  scenarios: string[],
+  options: SalmonDidOptions = {},
+): Promise<SalmonDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<SalmonDidResponse>(
+    ENDPOINTS.salmonDataInDepth(scenarios, options),
+    { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+  )
+}
+
+/** Fetch annual system-delivery totals stats for one or more scenarios. */
+export async function fetchSystemDeliveriesDataInDepth(
+  scenarios: string[],
+  options: SystemDeliveriesDidOptions = {},
+): Promise<SystemDeliveriesDidResponse> {
+  if (!scenarios?.length) {
+    throw new Error("At least one scenario is required")
+  }
+  return apiFetcher<SystemDeliveriesDidResponse>(
+    ENDPOINTS.systemDeliveriesDataInDepth(scenarios, options),
     { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
   )
 }

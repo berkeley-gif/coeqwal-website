@@ -38,7 +38,11 @@ import {
   HEAT_SIDE_PAD,
   HEAT_BLOCK_SHIFT_X,
 } from "./storyboardGeometry"
-import { ENV_FLOWS_NAMES, STATION_NAMES } from "../config/outcomeLocations"
+import {
+  ENV_FLOWS_NAMES,
+  CWS_DEL_NAMES,
+  STATION_NAMES,
+} from "../config/outcomeLocations"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../config/outcomeLayerRegistry"
 import {
   isSingleValueTier,
@@ -128,6 +132,7 @@ interface OutcomeMorphOverlayProps {
 
 function getLocationName(code: string, sourceId: string): string {
   if (code === "ENV_FLOWS") return ENV_FLOWS_NAMES[sourceId] ?? sourceId
+  if (code === "CWS_DEL") return CWS_DEL_NAMES[sourceId] ?? sourceId
   if (code === "FW_EXP" || code === "FW_DELTA_USES")
     return STATION_NAMES[sourceId] ?? sourceId
   if (code === "RES_STOR")

@@ -50,10 +50,13 @@ test.describe("app flow latency", () => {
       const page = await context.newPage()
       await openDataInDepth(page)
 
-      // Cold: fresh context, single-commit selection, wait for paint
+      // Cold: fresh context, single-commit selection, wait for paint.
+      // The explorer chart is the tool's only surface since the category
+      // view left the default flow (July 30 content round), so the
+      // explorer-chart mark is the "charts on screen" signal.
       await clearPerf(page)
       await selectScenarios(page, SCENARIO_IDS)
-      await waitForMark(page, "paint:category-batch")
+      await waitForMark(page, "paint:explorer-chart")
       appendResult("app-flow.jsonl", {
         suite: "app-flow",
         cell: `cold n=${n}`,
@@ -62,32 +65,12 @@ test.describe("app flow latency", () => {
         records: await harvestPerf(page),
       })
 
-      // Expand one batch-backed section so its transform measure fires
-      // (sections mount on accordion expand). Soft step: copy changes must
-      // not fail the timing run.
-      try {
-        await page
-          .getByRole("button", { name: /Community water/i })
-          .first()
-          .click({ timeout: 5_000 })
-        await page.waitForTimeout(1_500)
-        appendResult("app-flow.jsonl", {
-          suite: "app-flow",
-          cell: `expand-cws n=${n}`,
-          run,
-          startedAt,
-          records: await harvestPerf(page),
-        })
-      } catch {
-        // Section header not found: skip the expand cell for this run
-      }
-
       // Warm: clear selection, re-select the same ids inside the SWR
       // dedupe window, wait for the re-armed paint mark
       await selectScenarios(page, [])
       await clearPerf(page)
       await selectScenarios(page, SCENARIO_IDS)
-      await waitForMark(page, "paint:category-batch")
+      await waitForMark(page, "paint:explorer-chart")
       appendResult("app-flow.jsonl", {
         suite: "app-flow",
         cell: `warm n=${n}`,

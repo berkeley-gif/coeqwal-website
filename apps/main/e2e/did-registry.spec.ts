@@ -10,6 +10,11 @@ import {
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
 import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
+import {
+  didDomainForVariable,
+  toDidSubject,
+  GW_BASIN_SUBJECTS,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -48,8 +53,110 @@ test("groundwater storage is a single variable with volume and level views", () 
   expect(v?.viewUnits?.level).toEqual({ unit: "ft", unitLabel: "feet" })
 })
 
+// Groundwater location list (2026-08 confirmation): the two NOD/SOD summary
+// totals lead, then all 42 served basins (41 WBA technical codes plus the
+// Delta-Eastside Water entity), labeled by code until richer names are
+// confirmed. The old eight regional-looking sample placeholders are retired.
+
+test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
+  const items = LOCATION_GROUPS.basins.items
+  expect(items[0]?.id).toBe("AGG_GW_NOD")
+  expect(items[1]?.id).toBe("AGG_GW_SOD")
+  expect(items[2]?.id).toBe("DETAW")
+  expect(items).toHaveLength(44)
+  // Codes sort naturally (WBA2 before WBA10), N before S within a number.
+  expect(items[3]?.id).toBe("WBA2")
+  expect(items[items.length - 1]?.id).toBe("WBA90")
+  // Technical codes are the labels; the Delta-Eastside entity keeps the
+  // label the endpoint serves.
+  expect(getLocation("basins", "WBA8S")?.name).toBe("WBA8S")
+  expect(getLocation("basins", "DETAW")?.name).toBe("Delta-Eastside Water")
+  // Every retired sample placeholder is gone.
+  for (const retired of [
+    "COL",
+    "SUT",
+    "YOL",
+    "AMR",
+    "ESJ",
+    "MOD",
+    "TUR",
+    "MER",
+  ]) {
+    expect(getLocation("basins", retired)).toBeUndefined()
+  }
+})
+
+test("mergeDataInitialState heals location pins the registry no longer offers", () => {
+  // Location lists can change between deploys (the groundwater basins moved
+  // from sample placeholders to served codes), and both location fields are
+  // persisted, so stale ids must heal at hydration: a returning session must
+  // not keep a pin that now renders sample data under a blank location.
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { basins: "COL", reservoirs: "SHSTA" },
+    selectedLocationsByGroup: { basins: ["COL", "WBA10"], rivers: ["SAC049"] },
+  })
+  // A stale pin resets to the group's first location; valid pins survive.
+  expect(healed.pinnedLocationByGroup.basins).toBe("AGG_GW_NOD")
+  expect(healed.pinnedLocationByGroup.reservoirs).toBe("SHSTA")
+  // Stale multi-select ids are pruned; valid ones survive.
+  expect(healed.selectedLocationsByGroup.basins).toEqual(["WBA10"])
+  expect(healed.selectedLocationsByGroup.rivers).toEqual(["SAC049"])
+  // Groups the registry no longer offers are dropped entirely.
+  const unknownGroup = mergeDataInitialState({
+    pinnedLocationByGroup: { stations: "S1" },
+  })
+  expect("stations" in unknownGroup.pinnedLocationByGroup).toBe(false)
+  // Location healing applies even when the variable id also needs healing.
+  const both = mergeDataInitialState({
+    selectedVariableId: "riv_uif",
+    pinnedLocationByGroup: { basins: "COL" },
+  })
+  expect(both.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+  expect(both.pinnedLocationByGroup.basins).toBe("AGG_GW_NOD")
+})
+
+test("mergeDataInitialState survives malformed persisted location shapes", () => {
+  // The persisted envelope validates the data SECTION as a record but not
+  // its fields, so corrupted sessionStorage can deliver anything here;
+  // hydration must fall back to defaults instead of throwing at startup.
+  const nulled = mergeDataInitialState({
+    pinnedLocationByGroup: null as never,
+    selectedLocationsByGroup: "corrupt" as never,
+  })
+  expect(nulled.pinnedLocationByGroup.reservoirs).toBe("SHSTA")
+  expect(nulled.selectedLocationsByGroup).toEqual({})
+  // A non-array selection value for one group is dropped, not iterated.
+  const scalar = mergeDataInitialState({
+    selectedLocationsByGroup: { basins: "WBA10" as never },
+  })
+  expect(scalar.selectedLocationsByGroup.basins).toEqual([])
+})
+
+test("every basins location resolves through the gw mapping exactly once", () => {
+  // The registry list and the mapping's served-subject allowlist are written
+  // separately; this parity guard fails if either drifts (a basin added to
+  // one list but not the other, a typo'd code, or a duplicate id).
+  const items = LOCATION_GROUPS.basins.items
+  const ids = items.map((l) => l.id)
+  expect(new Set(ids).size).toBe(ids.length)
+  for (const item of items) {
+    const subject = toDidSubject("gw", item.id)
+    expect
+      .soft(subject, `basins location ${item.id} must resolve to a subject`)
+      .not.toBeNull()
+    if (!item.aggregate) {
+      // Non-aggregate basins pass through by their own code.
+      expect.soft(subject, `basin ${item.id} passes through`).toBe(item.id)
+    }
+  }
+  // Bidirectional: the mapping's served set and the registry's non-aggregate
+  // basins are the same SET, so an extra entry on either side fails too.
+  const basinIds = items.filter((l) => !l.aggregate).map((l) => l.id)
+  expect([...GW_BASIN_SUBJECTS].sort()).toEqual([...basinIds].sort())
+})
+
 test("gwLevelFromStorage derives a declining feet-scale sample series", () => {
-  const location = getLocation("basins", "COL")
+  const location = getLocation("basins", "WBA10")
   expect(location?.mockBase).toBeTruthy()
   const storage = Array.from({ length: 100 }, () => location!.mockBase!)
   const level = gwLevelFromStorage(storage, location!)
@@ -88,4 +195,87 @@ test("mergeDataInitialState heals legacy multi-class WYT selections", () => {
   expect(healed.selectedWaterYearTypes).toEqual([])
   const single = mergeDataInitialState({ selectedWaterYearTypes: [5] })
   expect(single.selectedWaterYearTypes).toEqual([5])
+})
+
+// Content decisions from the 2026-08 review round: Environmental Flows keeps
+// a single variable, and winter-run abundance displays as the percent of
+// suitable spawning habitat occupied rather than a raw model ratio.
+
+test("flows as % of unimpaired is retired from the registry", () => {
+  expect(VARIABLES.riv_uif).toBeUndefined()
+  const eflows = SECTORS.find((s) => s.id === "eflows")
+  expect(eflows?.variables).toEqual(["riv_flow"])
+})
+
+test("mergeDataInitialState heals a persisted riv_uif selection", () => {
+  const healed = mergeDataInitialState({ selectedVariableId: "riv_uif" })
+  expect(healed.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+  expect(healed.view).toBe("dist")
+})
+
+test("salmon abundance displays as percent of spawning habitat occupied", () => {
+  const v = getVariable("salmon_abund")
+  expect(v?.name).toBe("Winter-run abundance")
+  expect(v?.unit).toBe("%")
+  expect(v?.unitLabel).toBe("percent of spawning habitat occupied")
+  expect(v?.axisLabel).toBe("Percent of spawning habitat occupied")
+  // The detailed reading of the metric lives in the card footer.
+  expect(v?.footnote).toContain("averaged over three years")
+  expect(v?.footnote).toContain("above 100%")
+  // The data pointing is still under review by the science team, and a
+  // population average does not decompose by water-year type.
+  expect(v?.provisional).toBe(true)
+  expect(v?.wytApplicable).toBe(false)
+})
+
+// Sector-specific system-delivery variables (2026-08 confirmation that they
+// belong in the tool): CVP and SWP by use sector, per-project Delta exports,
+// and the Southern San Joaquin routes.
+
+test("system deliveries lists the sector-specific variables in display order", () => {
+  const sysdel = SECTORS.find((s) => s.id === "sysdel")
+  expect(sysdel?.variables).toEqual([
+    "cvp_del",
+    "cvp_ag",
+    "cvp_mi",
+    "cvp_refuges",
+    "swp_del",
+    "swp_ag",
+    "swp_mi",
+    "tot_exp",
+    "cvp_exp",
+    "swp_exp",
+    "ssjv_exp",
+  ])
+})
+
+test("single-total and multi-route variables use honest location groups", () => {
+  // Refuges are served as a system total only: a dedicated single-location
+  // group, not the regional group with sample-data fallbacks.
+  expect(getVariable("cvp_refuges")?.locationGroup).toBe("syswide")
+  expect(LOCATION_GROUPS.syswide.items.map((l) => l.id)).toEqual(["SYS"])
+  // Per-project exports live at the single Delta location like tot_exp.
+  expect(getVariable("cvp_exp")?.locationGroup).toBe("delta")
+  expect(getVariable("swp_exp")?.locationGroup).toBe("delta")
+  // Southern SJV exports: the three served routes are the locations; the
+  // three-route presentation is pending confirmation, so the variable
+  // carries the Provisional chip.
+  expect(getVariable("ssjv_exp")?.locationGroup).toBe("ssjv")
+  expect(LOCATION_GROUPS.ssjv.items.map((l) => l.id)).toEqual([
+    "CVC",
+    "FRIANT",
+    "KERN",
+  ])
+  expect(getVariable("ssjv_exp")?.provisional).toBe(true)
+})
+
+test("registry data flags agree with the live request mapping", () => {
+  // One source of truth for what is live: a variable has a data: "live" flag
+  // exactly when the mapping can build requests for it. Catches flags left
+  // stale in either direction when a variable is wired or retired.
+  for (const v of Object.values(VARIABLES)) {
+    expect
+      .soft(v.data === "live", `${v.id}: data flag vs live mapping`)
+      .toBe(didDomainForVariable(v.id) != null)
+  }
 })

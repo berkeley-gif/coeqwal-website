@@ -4,6 +4,7 @@ import {
   WYT_LABELS,
   filterSeriesByWyt,
   toggleWytClass,
+  effectiveWytSelection,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/wytFilter"
 import {
   mockWaterYearType,
@@ -53,4 +54,13 @@ test("toggleWytClass is single-select: pick replaces, re-pick clears", () => {
   // Legacy multi-class selections still resolve to the clicked class.
   expect(toggleWytClass([1, 4], 3)).toEqual([3])
   expect(toggleWytClass([1, 4], 4)).toEqual([])
+})
+
+test("effectiveWytSelection passes the selection through only when WYT applies to the variable", () => {
+  expect(effectiveWytSelection(true, [4])).toEqual([4])
+  expect(effectiveWytSelection(true, [])).toBeUndefined()
+  // WYT-excluded variables (salmon population metrics, welfare loss) never
+  // filter, regardless of the stored selection (which stays inert, not cleared).
+  expect(effectiveWytSelection(false, [4])).toBeUndefined()
+  expect(effectiveWytSelection(false, [])).toBeUndefined()
 })

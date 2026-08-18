@@ -49,9 +49,14 @@ export default function ChartCard() {
     locationTitleName: data.locationTitleName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
-    waterYearTypeLabels: selectedWaterYearTypes.map(
-      (c) => WYT_LABELS[c] ?? String(c),
-    ),
+    // The WYT clause stays in value-view titles on purpose: the capture
+    // exports the FILTERED series (mock filters in every view), so title,
+    // provenance, and exported data agree even though the on-screen summary
+    // value does not derive from the filtered series (see the did-wyt spec
+    // "value-view capture" case).
+    waterYearTypeLabels: data.wytApplicable
+      ? selectedWaterYearTypes.map((c) => WYT_LABELS[c] ?? String(c))
+      : null,
   })
 
   // One sticky color per member id, shared with the CompareControls chips
@@ -81,13 +86,15 @@ export default function ChartCard() {
     view: data.view,
     compareBy,
     variableName: data.variable?.name ?? "",
+    variableId: data.variable?.id,
     unit: data.unit,
     locationName: data.locationName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
   }
 
-  const yLabel = data.view === "cv" ? "CV" : data.unit
+  const yLabel =
+    data.view === "cv" ? "CV" : (data.variable?.axisLabel ?? data.unit)
   const hasMembers = data.members.length > 0
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
@@ -281,8 +288,15 @@ export default function ChartCard() {
         </Typography>
       )}
 
-      {/* Chart */}
-      <Box sx={{ width: "100%", height: CHART_HEIGHT }}>{chart}</Box>
+      {/* Chart. With members, the region reads as one labeled figure:
+          the D3 internals carry no accessible semantics of their own,
+          and the per-chart data alternative is the CSV export. */}
+      <Box
+        {...(hasMembers ? { role: "img", "aria-label": figureTitle } : {})}
+        sx={{ width: "100%", height: CHART_HEIGHT }}
+      >
+        {chart}
+      </Box>
 
       {/* Legend */}
       {hasMembers && (
@@ -332,6 +346,20 @@ export default function ChartCard() {
             </Box>
           ))}
         </Box>
+      )}
+
+      {/* Variable footnote: the detailed reading of the metric */}
+      {data.variable?.footnote && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            mt: 1.5,
+            color: theme.palette.grey[600],
+          }}
+        >
+          {data.variable.footnote}
+        </Typography>
       )}
 
       {/* Provenance note */}

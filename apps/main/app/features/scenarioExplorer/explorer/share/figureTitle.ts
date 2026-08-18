@@ -66,8 +66,10 @@ export interface FigureTitleParts {
   /** Held hydroclimate label (omit on the climates axis, where the
    *  compared members are the climates) */
   hydroclimateName?: string
-  /** Active water-year-type class labels; empty means all years */
-  waterYearTypeLabels: readonly string[]
+  /** Active water-year-type class labels; empty means all years. `null`
+   *  means water-year typing does not apply to this variable (e.g. salmon
+   *  population metrics, welfare loss) and the clause is omitted. */
+  waterYearTypeLabels: readonly string[] | null
 }
 
 /** Build the standardized figure title from its parts. */
@@ -76,9 +78,11 @@ export function buildFigureTitle(parts: FigureTitleParts): string {
     ? `${titleCaseLabel(parts.variableName)} (${titleCaseLabel(parts.locationName)})`
     : titleCaseLabel(parts.variableName)
   const waterYears =
-    parts.waterYearTypeLabels.length === 0
-      ? "All Water Years"
-      : `${joinAsProse(parts.waterYearTypeLabels.map(titleCaseLabel))} Water Years`
+    parts.waterYearTypeLabels === null
+      ? undefined
+      : parts.waterYearTypeLabels.length === 0
+        ? "All Water Years"
+        : `${joinAsProse(parts.waterYearTypeLabels.map(titleCaseLabel))} Water Years`
   const segments = [
     head,
     titleCaseLabel(parts.memberSummary),

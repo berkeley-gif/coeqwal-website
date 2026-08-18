@@ -76,7 +76,13 @@ for (const row of rows) {
   }
   if (String(row.cell).startsWith("expand-")) continue
   const select = row.records.find((r) => r.name === "select:scenarios")
-  const paint = row.records.find((r) => r.name === "paint:category-batch")
+  // Current runs paint the explorer chart; the category-batch name keeps
+  // pre-August-2026 JSONL analyzable (the category view left the default
+  // flow in the July 30 content round).
+  const paint = row.records.find(
+    (r) =>
+      r.name === "paint:explorer-chart" || r.name === "paint:category-batch",
+  )
   if (!select || !paint) continue
   if (!flowCells.has(row.cell)) flowCells.set(row.cell, { e2e: [], api: [] })
   flowCells.get(row.cell).e2e.push(paint.t - select.t)

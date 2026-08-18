@@ -38,6 +38,13 @@ export interface HoverTipProps {
   enterDelay?: number
   /** Delay before hiding, in ms (default: 100) */
   leaveDelay?: number
+  /**
+   * Forwarded to MUI Tooltip. Set when the child is a plain wrapper (span)
+   * that must not receive the tooltip's aria-label injection: aria-label is
+   * prohibited on unroled elements, and the labeled control inside should
+   * carry its own aria-label instead.
+   */
+  describeChild?: boolean
 }
 
 export function HoverTip({
@@ -49,6 +56,7 @@ export function HoverTip({
   maxWidth,
   enterDelay = 200,
   leaveDelay = 100,
+  describeChild,
 }: HoverTipProps) {
   const theme = useTheme()
   const isCompact = density === "compact"
@@ -63,6 +71,7 @@ export function HoverTip({
       arrow
       enterDelay={enterDelay}
       leaveDelay={leaveDelay}
+      describeChild={describeChild}
       slotProps={{
         popper: {
           // tooltipAboveModal so hints inside modals still layer above them.

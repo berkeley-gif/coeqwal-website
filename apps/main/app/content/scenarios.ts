@@ -204,6 +204,11 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     iconPath: "/images/icons/current_ops.svg",
     shortLabel: "Current ops",
   },
+  "s0020-R": {
+    theme: "baseline",
+    iconPath: "/images/icons/current_ops.svg",
+    shortLabel: "Current ops with reintroduction",
+  },
   s0021: {
     theme: "baseline",
     iconPath: "/images/icons/current_ops.svg",
@@ -262,20 +267,40 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     iconPath: "/images/icons/environmental.svg",
     shortLabel: "Salmon flows",
   },
+  "s0031-R": {
+    theme: "eco",
+    iconPath: "/images/icons/environmental.svg",
+    shortLabel: "Winter-run flows with reintroduction",
+  },
   s0032: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     shortLabel: "Func. flows + reduced ag",
+  },
+  "s0032-R": {
+    theme: "eco",
+    iconPath: "/images/icons/environmental.svg",
+    shortLabel: "Func. flows + reduced ag with reintroduction",
   },
   s0033: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     shortLabel: "Salmon flows + reduced ag",
   },
+  "s0033-R": {
+    theme: "eco",
+    iconPath: "/images/icons/environmental.svg",
+    shortLabel: "Winter-run flows + reduced ag with reintroduction",
+  },
   s0046: {
     theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     shortLabel: "Func. flows (v2)",
+  },
+  "s0046-R": {
+    theme: "eco",
+    iconPath: "/images/icons/environmental.svg",
+    shortLabel: "Func. flows (v2) with reintroduction",
   },
 
   // ---------------------------------------------------------------------------

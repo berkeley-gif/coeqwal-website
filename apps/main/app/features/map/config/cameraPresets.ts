@@ -77,12 +77,11 @@ export const RESERVOIR_VIEW: CameraView = {
   pitch: 0,
 }
 
-/** Bounding box enclosing California's Urban demand-unit polygons
- *  (Community Water Systems). Measured from the demand_units tileset
- *  filtered to Class === "Urban" (167 features). */
+/** Bounding box enclosing California's Urban (Community Water Systems).
+ *  Taken as the Max, Min of coordinates of 74 LOI points. */
 export const CWS_DEL_BOUNDS: [[number, number], [number, number]] = [
-  [-123.525, 34.995], // SW corner [lng, lat]
-  [-118.803, 41.745], // NE corner [lng, lat]
+  [-122.5, 33.5], // SW corner [lng, lat]
+  [-117.0, 41.0], // NE corner [lng, lat]
 ]
 
 /** Bounding box enclosing the Legal Delta (DETAW polygon).

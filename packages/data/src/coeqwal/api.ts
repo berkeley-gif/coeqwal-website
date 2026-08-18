@@ -11,6 +11,8 @@ import type {
   CwsDataInDepthOptions,
   AgDataInDepthOptions,
   GroundwaterStorageDidOptions,
+  SalmonDidOptions,
+  SystemDeliveriesDidOptions,
 } from "./types"
 
 /**
@@ -391,6 +393,18 @@ export const ENDPOINTS = {
   /** Annual CWS delivery + percent-demand-met + welfare-outcome measures with live-computed stats. */
   cwsDataInDepth: (scenarios: string[], opts: CwsDataInDepthOptions = {}) =>
     dataInDepthPath("/data-in-depth/cws", scenarios, opts),
+
+  /** Annual salmon abundance (calendar-year) with live-computed stats. WYT filtering is intentionally not exposed here. */
+  salmonDataInDepth: (scenarios: string[], opts: SalmonDidOptions = {}) => {
+    const { wyt: _wyt, ...rest } = opts as SalmonDidOptions & { wyt?: number[] }
+    return dataInDepthPath("/data-in-depth/salmon", scenarios, rest)
+  },
+
+  /** Annual system-delivery totals with live-computed stats. */
+  systemDeliveriesDataInDepth: (
+    scenarios: string[],
+    opts: SystemDeliveriesDidOptions = {},
+  ) => dataInDepthPath("/data-in-depth/system-deliveries", scenarios, opts),
 
   /** Annual AG net diversion + GW pumping + shortage + revenue with live-computed stats. */
   agDataInDepth: (scenarios: string[], opts: AgDataInDepthOptions = {}) =>

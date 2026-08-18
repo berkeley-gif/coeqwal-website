@@ -113,6 +113,7 @@ export default function SearchAndChips({
         {searchQuery && (
           <IconButton
             size="small"
+            aria-label="Clear scenario search"
             onClick={() => setSearchQuery("")}
             sx={{ p: 0.25 }}
           >

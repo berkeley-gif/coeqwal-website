@@ -9,14 +9,26 @@
  * variableRegistry; this module only owns the registry-id -> API-code bridge,
  * which is an API-side fact (verified against the live DB, 2026-07-20).
  *
- * Only the scenarios compare axis and these variables are live; everything else
- * falls back to the deterministic mock engine (a null return here = mock).
+ * The scenarios and climates compare axes serve these variables live;
+ * everything else falls back to the deterministic mock engine (a null
+ * return here = mock).
  */
 
 /** A live data-in-depth domain (one endpoint each). */
-export type DidDomain = "reservoir" | "river" | "delta"
+export type DidDomain =
+  | "reservoir"
+  | "river"
+  | "delta"
+  | "sysdel"
+  | "gw"
+  | "salmon"
 /** Request unit token (not the response unit key). */
-export type DidUnitToken = "volume" | "pct_capacity" | "km"
+export type DidUnitToken =
+  | "volume"
+  | "pct_capacity"
+  | "km"
+  | "level"
+  | "nof_3yr_avg"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -29,6 +41,19 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   riv_flow: "river",
   x2_apr: "delta",
   x2_sep: "delta",
+  cvp_del: "sysdel",
+  swp_del: "sysdel",
+  tot_exp: "sysdel",
+  cvp_ag: "sysdel",
+  cvp_mi: "sysdel",
+  cvp_refuges: "sysdel",
+  swp_ag: "sysdel",
+  swp_mi: "sysdel",
+  cvp_exp: "sysdel",
+  swp_exp: "sysdel",
+  ssjv_exp: "sysdel",
+  gw_stor: "gw",
+  salmon_abund: "salmon",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -38,6 +63,182 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   riv_flow: "annual",
   x2_apr: "april",
   x2_sep: "sept",
+  cvp_del: "annual",
+  swp_del: "annual",
+  tot_exp: "annual",
+  cvp_ag: "annual",
+  cvp_mi: "annual",
+  cvp_refuges: "annual",
+  swp_ag: "annual",
+  swp_mi: "annual",
+  cvp_exp: "annual",
+  swp_exp: "annual",
+  ssjv_exp: "annual",
+  gw_stor: "annual",
+  salmon_abund: "annual",
+}
+
+/**
+ * System deliveries: the subject depends on the VARIABLE as well as the
+ * location, because each registry variable is its own family of API metrics
+ * (verified against /api/data-in-depth/system-deliveries, 25 subjects).
+ * CVP/SWP deliveries are project totals (AG + M&I, plus wildlife refuges
+ * for CVP, per the API subject labels) with north/south-of-Delta splits;
+ * tot_exp exposes only the combined Banks + Jones
+ * total (C_CVPSWP_TOTAL_EXPORTS); the endpoint also serves per-project and
+ * Southern San Joaquin export subjects that are intentionally unmapped.
+ *
+ * The CVP splits use DEL_CVP_TOT_N_WAMER / DEL_CVP_TOT_S_WLOSS on purpose:
+ * per the data team, the plain del_cvp_tot_n and del_cvp_tot_s CalSim
+ * variables are incomplete (the north total omits the American River, the
+ * south total omits losses); the _WAMER/_WLOSS variants are the complete
+ * regional totals, and they sum exactly to DEL_CVP_TOTAL across all
+ * simulated years. See the project's delivery-formulas spreadsheet for the
+ * full formula definitions.
+ */
+const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
+  cvp_del: {
+    SYS: "DEL_CVP_TOTAL",
+    NOD: "DEL_CVP_TOT_N_WAMER",
+    SOD: "DEL_CVP_TOT_S_WLOSS",
+  },
+  swp_del: {
+    SYS: "DEL_SWP_TOTAL",
+    NOD: "DEL_SWP_TOT_N",
+    SOD: "DEL_SWP_TOT_S",
+  },
+  tot_exp: {
+    DELTA: "C_CVPSWP_TOTAL_EXPORTS",
+  },
+  // Sector breakdowns (split code patterns quote the API, asymmetries and
+  // all: PAG splits are _NOD/_SOD for CVP but _NOD/_S for SWP; the CVP M&I
+  // north split carries the _WAMER qualifier like the CVP totals).
+  cvp_ag: {
+    SYS: "DEL_CVP_PAG_TOTAL",
+    NOD: "DEL_CVP_PAG_NOD",
+    SOD: "DEL_CVP_PAG_SOD",
+  },
+  cvp_mi: {
+    SYS: "DEL_CVP_PMI_TOTAL",
+    NOD: "DEL_CVP_PMI_N_WAMER",
+    SOD: "DEL_CVP_PMI_S",
+  },
+  // Refuges are served as a system total only; no regional subjects exist.
+  cvp_refuges: {
+    SYS: "DEL_CVP_PRF_TOTAL",
+  },
+  swp_ag: {
+    SYS: "DEL_SWP_PAG_TOTAL",
+    NOD: "DEL_SWP_PAG_NOD",
+    SOD: "DEL_SWP_PAG_S",
+  },
+  swp_mi: {
+    SYS: "DEL_SWP_PMI",
+    NOD: "DEL_SWP_PMI_N",
+    SOD: "DEL_SWP_PMI_S",
+  },
+  cvp_exp: {
+    DELTA: "C_CVP_TOTAL_EXPORTS",
+  },
+  swp_exp: {
+    DELTA: "C_CAA003_SWP",
+  },
+  // Southern San Joaquin Valley exports: the three served routes are the
+  // locations; no combined total is served and none is computed client-side.
+  ssjv_exp: {
+    CVC: "D_CAA238_CVPCV",
+    FRIANT: "D_MLRTN_FRK000",
+    KERN: "SWP_TA_KERNAG",
+  },
+}
+
+/**
+ * Groundwater: the NOD/SOD aggregates use dedicated aggregate subjects; every
+ * served basin passes through by its technical code. No friendlier lookup
+ * exists on the data side (the other explore tools show the same codes), so
+ * codes are the ids AND the labels until richer names are confirmed.
+ */
+const GW_AGGREGATE_SUBJECTS: Record<string, string> = {
+  AGG_GW_NOD: "NOD_GroundwaterStorage",
+  AGG_GW_SOD: "SOD_GroundwaterStorage",
+}
+
+/**
+ * The 42 served basin subjects (verified against
+ * /api/data-in-depth/groundwater-storage, 44 subjects including the two
+ * aggregates). Basin location ids ARE these codes, so resolution is an
+ * allowlisted pass-through (codes verified against the endpoint at
+ * implementation time): an id outside the set falls back to mock instead of
+ * issuing a dead request. Every basin entity serves level and volume
+ * (verified per subject); the aggregates serve volume only, so an
+ * aggregate's level view falls back to sample per member.
+ * Exported so the registry parity spec can assert exact set equality with
+ * the basins location list (either list drifting fails the test).
+ */
+export const GW_BASIN_SUBJECTS: ReadonlySet<string> = new Set([
+  "DETAW",
+  "WBA2",
+  "WBA3",
+  "WBA4",
+  "WBA5",
+  "WBA6",
+  "WBA7N",
+  "WBA7S",
+  "WBA8N",
+  "WBA8S",
+  "WBA9",
+  "WBA10",
+  "WBA11",
+  "WBA12",
+  "WBA13",
+  "WBA14",
+  "WBA15N",
+  "WBA15S",
+  "WBA16",
+  "WBA17N",
+  "WBA17S",
+  "WBA18",
+  "WBA19",
+  "WBA20",
+  "WBA21",
+  "WBA22",
+  "WBA23",
+  "WBA24",
+  "WBA25",
+  "WBA26N",
+  "WBA26S",
+  "WBA50",
+  "WBA60N",
+  "WBA60S",
+  "WBA61",
+  "WBA62",
+  "WBA63",
+  "WBA64",
+  "WBA71",
+  "WBA72",
+  "WBA73",
+  "WBA90",
+])
+
+/** Winter-run salmon: a single population metric subject. */
+const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
+  WRLCM: "WRLCM_ADULT_FEMALES",
+}
+
+/**
+ * Display-unit scale applied to adopted live series, per variable. The
+ * salmon endpoint serves NOF_3YR_AVG as a habitat-occupancy ratio (1.0 = at
+ * capacity); the tool displays percent per the confirmed labeling, so the
+ * adopted live series scales by 100. Mock series are generated in display
+ * units already and never scale.
+ */
+const LIVE_SERIES_SCALE: Record<string, number> = {
+  salmon_abund: 100,
+}
+
+/** Scale from a live series' served units to display units (1 = as served). */
+export function didLiveScaleForVariable(variableId: string): number {
+  return LIVE_SERIES_SCALE[variableId] ?? 1
 }
 
 /** Registry reservoir-location id -> API subject short_code (only the differences). */
@@ -106,13 +307,28 @@ export function didPeriodForVariable(
 /**
  * Registry location id -> API subject short_code for a domain, or null when the
  * API does not serve that subject (caller falls back to mock; never fetch a
- * subject the API lacks). Delta serves only X2.
+ * subject the API lacks). Delta serves only X2. The sysdel domain also needs
+ * `variableId`, because its subject families are per-variable; omitting it
+ * yields null (mock).
  */
 export function toDidSubject(
   domain: DidDomain,
   locationId: string,
+  variableId?: string,
 ): string | null {
   if (domain === "delta") return "X2"
+  if (domain === "sysdel") {
+    if (!variableId) return null
+    return SYSDEL_SUBJECT_BY_VARIABLE[variableId]?.[locationId] ?? null
+  }
+  if (domain === "gw") {
+    const aggregate = GW_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    return GW_BASIN_SUBJECTS.has(locationId) ? locationId : null
+  }
+  if (domain === "salmon") {
+    return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
@@ -121,12 +337,26 @@ export function toDidSubject(
   return RIVER_SUBJECTS.has(code) ? code : null
 }
 
+/**
+ * Whether a view draws surfaces a live series can actually feed. Only the
+ * annual-distribution family (dist / pct / level) and the cv view derive
+ * everything they show from the raw series; monthly bands and summary
+ * values come from the sample engine even when a live annual series
+ * exists. Allowlist on purpose: a future view defaults to sample-labeled
+ * until someone proves its surfaces are live-backed and adds it here.
+ */
+export function viewHasLiveSource(view: string): boolean {
+  return view === "dist" || view === "pct" || view === "level" || view === "cv"
+}
+
 /** Request unit token for a domain and view (delta is always km). */
 export function unitTokenForView(
   domain: DidDomain,
   view: string,
 ): DidUnitToken {
   if (domain === "delta") return "km"
+  if (domain === "gw") return view === "level" ? "level" : "volume"
+  if (domain === "salmon") return "nof_3yr_avg"
   if (view === "pct") return "pct_capacity"
   return "volume"
 }
@@ -190,13 +420,28 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   reservoir: "reservoirs",
   river: "rivers",
   delta: "subjects",
+  sysdel: "subjects",
+  gw: "subjects",
+  salmon: "subjects",
 }
 
-/** Request unit token -> response unit key. */
+/**
+ * Request unit token -> response series key. Unit-keyed domains use unit
+ * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
+ * itself (gw: volume/level) or the metric code (salmon: NOF_3YR_AVG).
+ */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   volume: "TAF",
   pct_capacity: "PCT_CAP",
   km: "km",
+  level: "level",
+  nof_3yr_avg: "NOF_3YR_AVG",
+}
+
+/** The series key for a domain + request token (gw is keyed by measure name). */
+function responseSeriesKey(domain: DidDomain, unitToken: DidUnitToken): string {
+  if (domain === "gw") return unitToken === "level" ? "level" : "volume"
+  return RESPONSE_UNIT_KEY[unitToken]
 }
 
 /** Minimal structural shape of one scenario block in a data-in-depth response. */
@@ -228,7 +473,7 @@ export function pickLiveSeries(
   if (!block) return []
   const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
   const match = subjects?.find((s) => s.subject === subject)
-  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return seriesFromValues(facet?.values)
 }
 
@@ -247,6 +492,6 @@ export function pickLiveSeriesPoints(
   if (!block) return { series: [], waterYears: [] }
   const subjects = block[RESPONSE_ARRAY_BY_DOMAIN[domain]]
   const match = subjects?.find((s) => s.subject === subject)
-  const facet = match?.periods?.[period]?.[RESPONSE_UNIT_KEY[unitToken]]
+  const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return pointsFromValues(facet?.values)
 }

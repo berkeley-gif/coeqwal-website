@@ -7,18 +7,24 @@
  * to driest). The filter is single-select: picking a class replaces the
  * selection, picking it again (or picking "All years") returns to all
  * years. Hidden for single-value views, which have no annual series to
- * filter.
+ * filter. For variables whose metric does not decompose by water-year type
+ * (registry `wytApplicable: false`: salmon population metrics, welfare
+ * loss) the row renders disabled with a not-applicable note; the stored
+ * selection stays inert rather than cleared, so it revives on variables
+ * the filter applies to.
  */
 
 import React from "react"
 import { Box, Chip, Typography, useTheme } from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
 import { WYT_CLASSES, WYT_LABELS } from "../config/wytFilter"
+import { getVariable } from "../config/variableRegistry"
 
 export default function WytFilterChips() {
   const theme = useTheme()
   const {
     view,
+    selectedVariableId,
     selectedWaterYearTypes,
     toggleWaterYearType,
     clearWaterYearTypes,
@@ -26,7 +32,8 @@ export default function WytFilterChips() {
 
   if (view === "value") return null
 
-  const anySelected = selectedWaterYearTypes.length > 0
+  const wytApplicable = getVariable(selectedVariableId)?.wytApplicable !== false
+  const anySelected = wytApplicable && selectedWaterYearTypes.length > 0
 
   return (
     <Box
@@ -47,28 +54,38 @@ export default function WytFilterChips() {
       </Typography>
       <Chip
         size="small"
-        clickable
+        clickable={wytApplicable}
+        disabled={!wytApplicable}
         label="All years"
-        color={anySelected ? "default" : "primary"}
-        variant={anySelected ? "outlined" : "filled"}
-        aria-pressed={!anySelected}
-        onClick={clearWaterYearTypes}
+        color={!wytApplicable || anySelected ? "default" : "primary"}
+        variant={!wytApplicable || anySelected ? "outlined" : "filled"}
+        aria-pressed={wytApplicable ? !anySelected : undefined}
+        onClick={wytApplicable ? clearWaterYearTypes : undefined}
       />
       {WYT_CLASSES.map((wyt) => {
-        const selected = selectedWaterYearTypes.includes(wyt)
+        const selected = wytApplicable && selectedWaterYearTypes.includes(wyt)
         return (
           <Chip
             key={wyt}
             size="small"
-            clickable
+            clickable={wytApplicable}
+            disabled={!wytApplicable}
             label={WYT_LABELS[wyt]}
             color={selected ? "primary" : "default"}
             variant={selected ? "filled" : "outlined"}
             aria-pressed={selected}
-            onClick={() => toggleWaterYearType(wyt)}
+            onClick={wytApplicable ? () => toggleWaterYearType(wyt) : undefined}
           />
         )
       })}
+      {!wytApplicable && (
+        <Typography
+          variant="caption"
+          sx={{ color: theme.palette.grey[600], fontStyle: "italic" }}
+        >
+          Not applicable to this variable
+        </Typography>
+      )}
     </Box>
   )
 }
