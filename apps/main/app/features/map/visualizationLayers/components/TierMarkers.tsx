@@ -15,6 +15,8 @@ import type { TierLocation } from "../types"
 import type { HoveredFeatureInfo } from "../types"
 import { getTierLabel } from "../../../../content/tiers"
 import {
+  CWS_DEL_COORDINATES,
+  CWS_DEL_NAMES,
   ENV_FLOWS_COORDINATES,
   ENV_FLOWS_NAMES,
 } from "../../config/outcomeLocations"
@@ -55,7 +57,7 @@ export default function TierMarkers({
     }
   }
 
-  const isDiamond = tierCode === "ENV_FLOWS"
+  const isDiamond = tierCode === "ENV_FLOWS" || tierCode === "CWS_DEL"
 
   const buildFeatureInfo = (
     loc: TierLocation,
@@ -71,7 +73,7 @@ export default function TierMarkers({
     tierLabel: getTierLabel(loc.tier_level),
     tierValue: loc.tier_value ?? 0,
     locationName: loc.location_name,
-    locationType: "Environmental Flow",
+    locationType: null,
     properties: { ...loc },
     urbName: null,
     modName: null,
@@ -86,13 +88,30 @@ export default function TierMarkers({
   return (
     <>
       {locations.map((loc) => {
-        const coords = ENV_FLOWS_COORDINATES[loc.location_id]
+        // 1. Decide which data maps to use based on the tierCode
+        const isEnvFlow = tierCode === "ENV_FLOWS"
+        const coordinateMap = isEnvFlow
+          ? ENV_FLOWS_COORDINATES
+          : CWS_DEL_COORDINATES
+        const locationType = isEnvFlow
+          ? "Environmental Flow"
+          : "Community Surface Water"
+
+        // 2. Look up the coordinates using the selected map
+        const coords = coordinateMap[loc.location_id]
         if (!coords) return null
 
+        // 3. Extract data and build the feature info
         const [lng, lat] = coords
-        const name = ENV_FLOWS_NAMES[loc.location_id] || loc.location_name
+        let name = ""
+        if (isEnvFlow) {
+          name = ENV_FLOWS_NAMES[loc.location_id] || loc.location_name
+        } else {
+          name = CWS_DEL_NAMES[loc.location_id] || loc.location_name
+        }
+
         const featureInfo = buildFeatureInfo(
-          { ...loc, location_name: name },
+          { ...loc, location_name: name, location_type: locationType },
           lng,
           lat,
         )
