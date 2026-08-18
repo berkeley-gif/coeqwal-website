@@ -245,8 +245,11 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
+  const [hoveredDetailAxis, setHoveredDetailAxis] = useState<string | null>(null)
+
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
+      setHoveredDetailAxis(info ? info.axis : null)
       onChartHover?.(
         info
           ? {
@@ -825,7 +828,7 @@ export default function RadarPanel({
       }}
     >
       <Box sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
-        <Box sx={{ position: "relative", minWidth: 520, height: "100%"}}>
+        <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
 
           {showAxisSelector && (
             <OutcomeChooserPanel
@@ -918,6 +921,10 @@ export default function RadarPanel({
                   const iconTop = rect ? rect.y + rect.height / 2 : y
 
                   const isOpen = openInfoAxis === axis
+
+                  const isObscuredByDetailPanel =
+                    hoveredDetailAxis != null && hoveredDetailAxis !== axis
+
                   // Register the first axis info icon as both the
                   // axis-label and info-icon tour anchors so the radar
                   // tour can speak about either without changing target.
@@ -939,6 +946,10 @@ export default function RadarPanel({
                         transform: "translate(0, -50%)",
                         pointerEvents: "auto",
                         lineHeight: 0,
+                        ...(isObscuredByDetailPanel && {
+                          visibility: "hidden",
+                          pointerEvents: "none",
+                        }),
                       }}
                     >
                       <InfoPopover
