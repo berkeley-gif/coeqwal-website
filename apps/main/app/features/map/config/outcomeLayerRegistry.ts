@@ -168,56 +168,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // POLYGON LAYERS (Mapbox vector tiles with ID matching)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  CWS_DEL: {
-    geometryType: "polygon",
-    layerType: "demand-units",
-    mapboxLayerId: "demand-units",
-    sourceLayer: "demand-units",
-    idProperty: "DU_ID",
-    classFilter: "Urban",
-    tierCode: "CWS_DEL",
-    requiresIdMatching: true,
-    cameraBounds: CWS_DEL_BOUNDS,
-    tooltipFields: [
-      {
-        key: "urbName",
-        label: null,
-        source: "mapbox",
-        mapboxKey: "Urb_Name",
-        isPrimary: true,
-      },
-      {
-        key: "modName",
-        label: null,
-        source: "mapbox",
-        mapboxKey: "Mod_Name",
-        isSecondary: true,
-      },
-      {
-        key: "subName",
-        label: null,
-        source: "mapbox",
-        mapboxKey: "Sub_Name",
-        variant: "body2",
-      },
-      {
-        key: "comments",
-        label: null,
-        source: "mapbox",
-        mapboxKey: "Comments",
-        variant: "caption",
-      },
-      {
-        key: "type",
-        label: null,
-        source: "mapbox",
-        mapboxKey: "Type",
-        variant: "caption",
-      },
-    ],
-    idLabel: "CalSim ID",
-  },
-
   AG_REV: {
     geometryType: "polygon",
     layerType: "demand-units",
@@ -370,6 +320,25 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // REACT MARKER LAYERS (API-fetched points rendered as React components)
   // ═══════════════════════════════════════════════════════════════════════════
+
+  CWS_DEL: {
+    geometryType: "react-marker",
+    layerType: "marker",
+    mapboxLayerId: "", // No Mapbox layer - React rendered
+    tierCode: "CWS_DEL",
+    requiresIdMatching: true, // 74 per-station tier levels.must use multi-value /locations path
+    cameraBounds: CWS_DEL_BOUNDS,
+    tooltipFields: [
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
+    ],
+    idLabel: "Station ID",
+  },
 
   ENV_FLOWS: {
     geometryType: "react-marker",
