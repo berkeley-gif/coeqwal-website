@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
+  formatValue,
   summarySentence,
   type SummaryContext,
   type SummaryMember,
@@ -8,7 +9,8 @@ import {
 // Interpretive-sentence contract for the winter-run salmon variable: the
 // confirmed wording is "Winter-run Chinook salmon for <scenario> under the
 // <hydroclimate> occupy <XX%> of suitable spawning habitat, on average",
-// built from the MEAN of the displayed percent series (a 3-year population
+// built from the MEAN of the displayed proportion series converted to
+// percent for prose (a 3-year population
 // average reads as an average, not a median). Other variables keep the
 // generic median-based sentences. Node-side spec, runs in e2e-core.
 
@@ -17,7 +19,7 @@ const salmonCtx: SummaryContext = {
   compareBy: "scenarios",
   variableName: "Winter-run abundance",
   variableId: "salmon_abund",
-  unit: "%",
+  unit: "proportion",
   locationName: "Sacramento winter-run Chinook",
   climateName: "Historical",
   scenarioName: "Current Operations",
@@ -31,7 +33,7 @@ const member = (
 
 test("salmon sentence follows the confirmed habitat-occupancy template", () => {
   const s = summarySentence(
-    [member("Current Operations", [40, 50], true)],
+    [member("Current Operations", [0.4, 0.5], true)],
     salmonCtx,
   )
   expect(s).toBe(
@@ -44,8 +46,8 @@ test("salmon sentence lists compared scenarios by their own occupancy", () => {
   // percents: mixing the two on a percent-unit variable reads ambiguous.
   const s = summarySentence(
     [
-      member("Current Operations", [40, 50], true),
-      member("Salmon flows", [54, 66]),
+      member("Current Operations", [0.4, 0.5], true),
+      member("Salmon flows", [0.54, 0.66]),
     ],
     salmonCtx,
   )
@@ -56,7 +58,7 @@ test("salmon sentence lists compared scenarios by their own occupancy", () => {
 
 test("salmon sentence ranges across compared climate futures", () => {
   const s = summarySentence(
-    [member("Historical", [40, 50]), member("2070 hotter-drier", [30, 40])],
+    [member("Historical", [0.4, 0.5]), member("2070 hotter-drier", [0.3, 0.4])],
     { ...salmonCtx, compareBy: "climates" },
   )
   expect(s).toBe(
@@ -67,9 +69,9 @@ test("salmon sentence ranges across compared climate futures", () => {
 test("salmon sentence enumerates every compared climate member", () => {
   const s = summarySentence(
     [
-      member("Historical", [40, 50]),
-      member("2070 mid-century", [36, 44]),
-      member("2070 hotter-drier", [30, 40]),
+      member("Historical", [0.4, 0.5]),
+      member("2070 mid-century", [0.36, 0.44]),
+      member("2070 hotter-drier", [0.3, 0.4]),
     ],
     { ...salmonCtx, compareBy: "climates" },
   )
@@ -79,7 +81,7 @@ test("salmon sentence enumerates every compared climate member", () => {
 })
 
 test("salmon sentence does not double the word climate for climate-named holds", () => {
-  const s = summarySentence([member("Current Operations", [40, 50], true)], {
+  const s = summarySentence([member("Current Operations", [0.4, 0.5], true)], {
     ...salmonCtx,
     climateName: "Moderate-wet climate",
   })
@@ -101,4 +103,15 @@ test("non-salmon variables keep the generic median-based sentence", () => {
   )
   expect(s).toContain("median")
   expect(s).not.toContain("spawning")
+})
+
+test("formatValue renders proportion values with enough precision", () => {
+  // The generic 2-decimal rule below 10 would render small proportions as
+  // 0.00 in tooltips and axis ticks; the proportion unit gets 3 decimals
+  // below 0.1 so live salmon medians stay legible.
+  expect(formatValue(0.045, "proportion")).toBe("0.045")
+  expect(formatValue(0.0049, "proportion")).toBe("0.005")
+  expect(formatValue(0.091, "proportion")).toBe("0.091")
+  expect(formatValue(0.129, "proportion")).toBe("0.13")
+  expect(formatValue(1.29, "proportion")).toBe("1.29")
 })

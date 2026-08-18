@@ -66,6 +66,7 @@ export function formatValue(
   else if (unit === "ft/yr") d = 2
   else if (unit === "km") d = 1
   else if (unit === "%") d = a < 10 ? 1 : 0
+  else if (unit === "proportion") d = a < 0.1 ? 3 : 2
   else if (a >= 10) d = a >= 100 ? 0 : 1
   else d = 2
   return v.toLocaleString("en-US", {
@@ -188,8 +189,10 @@ export function summarySentence(
 function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   const withSeries = members.filter((m) => m.series && m.series.length > 0)
   if (withSeries.length === 0) return ""
+  // The displayed series is a proportion of 1.0; prose keeps the confirmed
+  // percent phrasing, so the mean converts back (x100) for the sentence.
   const meanPct = (m: SummaryMember) =>
-    `${formatValue(seriesStats(m.series as number[]).mean, "%")}%`
+    `${formatValue(seriesStats(m.series as number[]).mean * 100, "%")}%`
   const heldClimate = /climate/i.test(ctx.climateName)
     ? ctx.climateName
     : `${ctx.climateName} hydroclimate`

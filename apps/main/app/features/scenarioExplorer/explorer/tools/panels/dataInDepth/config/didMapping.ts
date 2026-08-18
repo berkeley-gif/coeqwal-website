@@ -227,13 +227,15 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
 
 /**
  * Display-unit scale applied to adopted live series, per variable. The
- * salmon endpoint serves NOF_3YR_AVG as a habitat-occupancy ratio (1.0 = at
- * capacity); the tool displays percent per the confirmed labeling, so the
- * adopted live series scales by 100. Mock series are generated in display
- * units already and never scale.
+ * salmon endpoint serves NOF_3YR_AVG in percent (0-100, the same units as
+ * the Salmon Data Drop csv metric_avg_roll column, verified against the
+ * live endpoint); the tool displays a proportion (0-1.0, 1.0 = at habitat
+ * capacity) per the 2026-08-18 science-team confirmation, so the adopted
+ * live series scales by 0.01. Mock series are generated in display units
+ * already and never scale.
  */
 const LIVE_SERIES_SCALE: Record<string, number> = {
-  salmon_abund: 100,
+  salmon_abund: 0.01,
 }
 
 /** Scale from a live series' served units to display units (1 = as served). */
