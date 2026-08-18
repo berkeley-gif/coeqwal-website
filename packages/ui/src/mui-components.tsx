@@ -143,6 +143,7 @@ import TimelineIcon from "@mui/icons-material/Timeline"
 import ViewListIcon from "@mui/icons-material/ViewList"
 import MapIcon from "@mui/icons-material/Map"
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows"
+import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled"
 import HistoryIcon from "@mui/icons-material/History"
 import WbSunnyIcon from "@mui/icons-material/WbSunny"
 import ThunderstormIcon from "@mui/icons-material/Thunderstorm"
@@ -221,6 +222,7 @@ export {
   MapIcon,
   CompareArrowsIcon,
   HistoryIcon,
+  AccessTimeFilledIcon,
   WbSunnyIcon,
   ThunderstormIcon,
   LocalFireDepartmentIcon,
