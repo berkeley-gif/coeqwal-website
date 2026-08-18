@@ -316,7 +316,7 @@ function truncateResilienceYAxisTick(
   const m = /^( +)/.exec(full)
   const prefix = m?.[1] ?? ""
   let rest = full.slice(prefix.length)
-  for (; ;) {
+  for (;;) {
     textEl.textContent = prefix + rest + "…"
     if (textEl.getComputedTextLength() <= maxWidth) {
       return true
@@ -700,10 +700,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
             .filter((s): s is string => s != null)
           valueText = parts.length > 0 ? parts.join(" · ") : "No data"
         } else if (cell.tierLevel != null) {
-          valueText = `Tier ${cell.tierLevel}${cell.continuousValue != null
-            ? ` (${cell.continuousValue.toFixed(2)})`
-            : ""
-            }`
+          valueText = `Tier ${cell.tierLevel}${
+            cell.continuousValue != null
+              ? ` (${cell.continuousValue.toFixed(2)})`
+              : ""
+          }`
         } else {
           valueText = cell.unavailableReason ?? "No data"
         }
@@ -739,10 +740,11 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
         const tierLevel = entry.tierLevel
         const tierText =
           tierLevel != null
-            ? `Tier ${tierLevel}${entry.tierValue != null && entry.tierValue !== tierLevel
-              ? ` (${entry.tierValue.toFixed(2)})`
-              : ""
-            }`
+            ? `Tier ${tierLevel}${
+                entry.tierValue != null && entry.tierValue !== tierLevel
+                  ? ` (${entry.tierValue.toFixed(2)})`
+                  : ""
+              }`
             : "No data"
 
         let subjectLine = ""

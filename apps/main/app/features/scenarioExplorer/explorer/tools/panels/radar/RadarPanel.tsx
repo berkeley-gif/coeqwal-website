@@ -54,8 +54,6 @@ import { useRadarInfoIconSync } from "./tour"
 
 import { OUTCOME_LABEL_BREAKS } from "../../../../../../content/outcomes"
 
-
-
 type AxisPosition = {
   axis: string
   x: number
@@ -232,10 +230,10 @@ export default function RadarPanel({
     () =>
       activeOutcome
         ? {
-          axis: getOutcomeName(activeOutcome.outcomeCode),
-          scenarioId:
-            activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
-        }
+            axis: getOutcomeName(activeOutcome.outcomeCode),
+            scenarioId:
+              activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
+          }
         : null,
     [activeOutcome],
   )
@@ -245,7 +243,9 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
-  const [hoveredDetailAxis, setHoveredDetailAxis] = useState<string | null>(null)
+  const [hoveredDetailAxis, setHoveredDetailAxis] = useState<string | null>(
+    null,
+  )
 
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
@@ -253,10 +253,10 @@ export default function RadarPanel({
       onChartHover?.(
         info
           ? {
-            scenarioId: info.scenarioId,
-            outcome: info.axis,
-            tierValue: info.tierValue,
-          }
+              scenarioId: info.scenarioId,
+              outcome: info.axis,
+              tierValue: info.tierValue,
+            }
           : null,
       )
     },
@@ -814,7 +814,6 @@ export default function RadarPanel({
   }
   // After
 
-
   return (
     <Box
       ref={chartWrapperRef}
@@ -829,7 +828,6 @@ export default function RadarPanel({
     >
       <Box sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
         <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
-
           {showAxisSelector && (
             <OutcomeChooserPanel
               ref={axisChooserPanelAnchorRef}

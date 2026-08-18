@@ -21,7 +21,10 @@ import { useIsCoarsePointer } from "@repo/ui/hooks"
  * a line-count clamp shows less and less text as the container narrows,
  * since fewer characters fit per line at the same fixed height.
  */
-export function truncateDescriptionText(text: string, maxChars: number): string {
+export function truncateDescriptionText(
+  text: string,
+  maxChars: number,
+): string {
   if (text.length <= maxChars) return text
   const cut = text.slice(0, maxChars)
   const lastSpace = cut.lastIndexOf(" ")

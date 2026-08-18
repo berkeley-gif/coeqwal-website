@@ -29,7 +29,10 @@ import {
 import { themeValues } from "@repo/ui/themes/theme"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 import { NoDataAtThisTime } from "./NoDataAtThisTime"
-import { getSingleValueLocationCount, OUTCOME_LABEL_BREAKS, } from "../../../../content/outcomes"
+import {
+  getSingleValueLocationCount,
+  OUTCOME_LABEL_BREAKS,
+} from "../../../../content/outcomes"
 
 /**
  * Generate accessible description of chart data for screen readers
@@ -371,11 +374,11 @@ export function OutcomeGlyphItem({
       onKeyDown={
         isClickable
           ? (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              onGlyphClick?.()
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onGlyphClick?.()
+              }
             }
-          }
           : undefined
       }
     >

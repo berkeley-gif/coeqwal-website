@@ -343,8 +343,8 @@ export default function ResiliencePanel({
   const scenarioColumnItems = useMemo<ResilienceAxisItem[]>(() => {
     const ids =
       effectiveView === "aggregate" &&
-        aggregateScope === "selected" &&
-        selectedScenarios.length > 0
+      aggregateScope === "selected" &&
+      selectedScenarios.length > 0
         ? selectedScenarios
         : scenarioIds
     return ids.map((sid) => resolveScenarioAxisItem(sid))
@@ -2243,10 +2243,10 @@ export default function ResiliencePanel({
       const dynamicHeight =
         captureState.kind === "smallMultiples"
           ? computeResiliencePanelSmallMultiplesCaptureHeight({
-            tilesCount: captureState.tiles.length,
-            tileAspect: captureState.tileAspect,
-            rowsCount: captureState.rows.length,
-          })
+              tilesCount: captureState.tiles.length,
+              tileAspect: captureState.tileAspect,
+              rowsCount: captureState.rows.length,
+            })
           : undefined
       const { svg, dataUrl } = await captureResiliencePanelOffscreen({
         state: captureState,
@@ -2460,8 +2460,8 @@ export default function ResiliencePanel({
   const chartViewState = useMemo<ResiliencePanelChartViewState>(() => {
     const labelRotation =
       !transposed &&
-        (effectiveView === "hydroclimate" ||
-          (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
+      (effectiveView === "hydroclimate" ||
+        (effectiveView === "aggregate" && aggregateOver === "hydroclimates"))
         ? -90
         : 0
     if (columns.length === 0) return { kind: "noColumns" }

@@ -808,9 +808,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           const size = Math.min(w, h)
 
-          const idealMargin = Number.isFinite(maxLabelWidth) && maxLabelWidth > 0
-            ? 24 + maxLabelWidth + 12
-            : 140
+          const idealMargin =
+            Number.isFinite(maxLabelWidth) && maxLabelWidth > 0
+              ? 24 + maxLabelWidth + 12
+              : 140
 
           const MARGIN_FRACTION_CAP = 0.22 // margin never eats more than ~22% of size per side
           const MARGIN = Math.min(idealMargin, size * MARGIN_FRACTION_CAP)
@@ -1365,7 +1366,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .filter(function () {
                   return (
                     this.getAttribute("data-scenario-id") ===
-                    active.scenarioId &&
+                      active.scenarioId &&
                     this.getAttribute("data-axis") === active.axis
                   )
                 })
@@ -1704,9 +1705,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   pinCount === 1
                     ? axisAngle
                     : axisAngle -
-                    maxArcSpan / 2 +
-                    arcSlice * pinIdx +
-                    arcSlice / 2
+                      maxArcSpan / 2 +
+                      arcSlice * pinIdx +
+                      arcSlice / 2
 
                 buckets.forEach(({ tier, count }) => {
                   if (count <= 0) return
@@ -1963,14 +1964,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       const el = containerRef.current
       if (!el || !responsive) return
 
-
       const syncSvgAttrs = (w: number, h: number) => {
         const svg = svgRef.current
         if (!svg) return
         svg.setAttribute("width", String(w))
         svg.setAttribute("height", String(h))
       }
-
 
       const ro = new ResizeObserver((entries) => {
         const entry = entries[0]
@@ -2160,7 +2159,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       >
         <svg
           ref={(el) => {
-            ; (svgRef as React.MutableRefObject<SVGSVGElement | null>).current =
+            ;(svgRef as React.MutableRefObject<SVGSVGElement | null>).current =
               el
             svgRefCallback?.(el)
           }}

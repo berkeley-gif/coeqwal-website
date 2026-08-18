@@ -355,7 +355,7 @@ export default function ResilienceControls({
         display: "flex",
         flexDirection: "column",
         gap: 0.75,
-        
+
         flex: 1,
         minWidth: "max-content",
         alignSelf: "stretch",
