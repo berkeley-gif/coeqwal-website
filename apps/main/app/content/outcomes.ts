@@ -292,6 +292,19 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
     "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
 }
 
+/**
+ * Outcome-specific caveat shown before the shared "see technical
+ * documentation" footer (that sentence is rendered once, in
+ * TierTooltipContent). Only outcomes with extra context to add need an
+ * entry here.
+ */
+export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
+  CWS_DEL:
+    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery.",
+  WRC_SALMON_AB:
+    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population.",
+}
+
 export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
     "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery. For more information, see technical documentation on **Data** page.",
