@@ -58,8 +58,11 @@ test("groundwater storage is a single variable with volume and level views", () 
 
 // Groundwater location list (2026-08 confirmation): the two NOD/SOD summary
 // totals lead, then all 42 served basins (41 WBA technical codes plus the
-// Delta-Eastside Water entity), labeled by code until richer names are
-// confirmed. The old eight regional-looking sample placeholders are retired.
+// Delta-Eastside Water entity). Each WBA labels as "CODE - description"
+// using the CalSim3 hydrology-report descriptions the endpoint serves; the
+// Delta-Eastside entity keeps its more specific local name (the endpoint
+// labels it just "Delta"). The old eight regional-looking sample
+// placeholders are retired.
 
 test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
   const items = LOCATION_GROUPS.basins.items
@@ -70,10 +73,25 @@ test("groundwater basins list the served 42 after the NOD/SOD totals", () => {
   // Codes sort naturally (WBA2 before WBA10), N before S within a number.
   expect(items[3]?.id).toBe("WBA2")
   expect(items[items.length - 1]?.id).toBe("WBA90")
-  // Technical codes are the labels; the Delta-Eastside entity keeps the
-  // label the endpoint serves.
-  expect(getLocation("basins", "WBA8S")?.name).toBe("WBA8S")
+  // Every WBA label leads with its technical code (keeps the dropdown in
+  // code order and the code findable across the other explore tools) and
+  // carries a served description after it.
+  for (const item of items) {
+    if (item.id.startsWith("WBA")) {
+      expect(item.name.startsWith(`${item.id} - `)).toBe(true)
+      expect(item.name.length).toBeGreaterThan(item.id.length + 3)
+    }
+  }
+  expect(getLocation("basins", "WBA8S")?.name).toBe(
+    "WBA8S - Williams; South Glenn-Colusa",
+  )
+  expect(getLocation("basins", "WBA73")?.name).toBe(
+    "WBA73 - Lower Delta-Mendota Canal; Joint Reach of the California Aqueduct",
+  )
   expect(getLocation("basins", "DETAW")?.name).toBe("Delta-Eastside Water")
+  // With descriptive names the "Basin" title suffix is redundant (chart
+  // titles read "... (WBA10 - Chico; Durham)"), so the group sets none.
+  expect(LOCATION_GROUPS.basins.titleSuffix).toBeUndefined()
   // Every retired sample placeholder is gone.
   for (const retired of [
     "COL",
