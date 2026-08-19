@@ -553,6 +553,29 @@ export function gwLevelFromStorage(
 }
 
 /**
+ * Sample-only CWS shortage-percent series for the "pct_demand" view, derived
+ * per year as shortage / (shortage + delivery) x 100 (the demand proxy is
+ * delivery plus shortage), clamped to [0, 100]. A no-demand year (both
+ * series 0) renders 0, never NaN. Mismatched lengths trim to the shorter
+ * series so years stay aligned. Live members never pass through here: they
+ * adopt the endpoint's served shortage_pct measure directly.
+ */
+export function cwsShortagePctFromSeries(
+  shortage: readonly number[],
+  delivery: readonly number[],
+): number[] {
+  const n = Math.min(shortage.length, delivery.length)
+  const out: number[] = []
+  for (let i = 0; i < n; i++) {
+    const short = shortage[i] as number
+    const demand = short + (delivery[i] as number)
+    const pct = demand > 0 ? (short / demand) * 100 : 0
+    out.push(Math.min(100, Math.max(0, pct)))
+  }
+  return out
+}
+
+/**
  * Least-squares linear trend of an annual series, in value units per year.
  * Pure and source-agnostic (works for live and sample series alike); returns
  * 0 for series too short to carry a slope.

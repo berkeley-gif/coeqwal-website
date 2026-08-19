@@ -50,7 +50,10 @@ export function useDataShareCapture(
   // screen. Stats snapshot support needs a composed multi-chart capture.
   const statsStyle =
     distKind === "stats" &&
-    (data.view === "dist" || data.view === "pct" || data.view === "level")
+    (data.view === "dist" ||
+      data.view === "pct" ||
+      data.view === "pct_demand" ||
+      data.view === "level")
   const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
 
   const saveSnapshot = useCallback(async () => {
