@@ -12,7 +12,7 @@ import React, { useEffect } from "react"
 import { motion, useReducedMotion, useAnimationControls } from "@repo/motion"
 import { Box, Typography, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 
-const RAIL_WIDTH = 76
+const RAIL_WIDTH = 90
 
 interface VisualizeRailProps {
   active: boolean

@@ -38,11 +38,9 @@ import {
   icons,
   useTheme,
 } from "@repo/ui/mui"
-import { HoverTip } from "@repo/ui"
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { PhraseButton, PopoverShell, RadioRow } from "./ResilienceControlsParts"
-import { RESILIENCE_SALIENT_PRESETS } from "./resiliencePresetDefs"
 import { useWorkspaceSlice, useResilienceSlice } from "../../../store"
 import { useResilienceControlsWriter } from "./useResilienceControlsWriter"
 import {
@@ -352,13 +350,14 @@ export default function ResilienceControls({
 
   return (
     <Box
+      id="resilience-controls"
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 0.75,
-        py: 0.5,
+
         flex: 1,
-        minWidth: 0,
+        minWidth: "max-content",
         alignSelf: "stretch",
       }}
     >
@@ -384,6 +383,7 @@ export default function ResilienceControls({
             gap: 0.25,
             minWidth: 0,
             flex: 1,
+            overflowX: "auto",
           }}
         >
           <PhraseButton
@@ -460,70 +460,10 @@ export default function ResilienceControls({
         sx={{
           display: "flex",
           alignItems: "center",
-          flexWrap: "wrap",
+          flexWrap: "nowrap",
           gap: 0.75,
-          rowGap: 0.5,
-          pl: 0,
-        }}
-      >
-        <Typography
-          variant="compactCaption"
-          sx={{
-            fontSize: "0.6875rem",
-            fontWeight: 600,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: theme.palette.grey[600],
-            flexShrink: 0,
-            mr: 0.25,
-          }}
-        >
-          Presets
-        </Typography>
-        {RESILIENCE_SALIENT_PRESETS.map((preset) => (
-          <HoverTip
-            key={preset.id}
-            content={preset.description}
-            density="compact"
-            placement="top"
-          >
-            <Button
-              type="button"
-              size="small"
-              variant="outlined"
-              onClick={() => writeChange(preset.getPatch(controlsSnapshot))}
-              aria-label={`${preset.label}. ${preset.description}`}
-              sx={{
-                borderRadius: "10px",
-                textTransform: "none",
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                lineHeight: 1.2,
-                py: 0.35,
-                px: 1,
-                minHeight: 30,
-                borderColor: theme.palette.grey[300],
-                color: theme.palette.grey[800],
-                backgroundColor: theme.palette.common.white,
-                boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
-                "&:hover": {
-                  borderColor: theme.palette.grey[400],
-                  backgroundColor: theme.palette.grey[50],
-                },
-              }}
-            >
-              {preset.label}
-            </Button>
-          </HoverTip>
-        ))}
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 0.75,
+          overflowX: "auto",
+          minWidth: 0,
         }}
       >
         <Typography

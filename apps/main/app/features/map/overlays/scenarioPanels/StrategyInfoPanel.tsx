@@ -16,6 +16,8 @@ interface StrategyInfoPanelProps {
   onTitleClick?: () => void
 }
 
+// Learn panel strategy info
+
 export function StrategyInfoPanel({
   scenarioId = "s0020",
   onTitleClick,

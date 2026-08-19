@@ -141,6 +141,34 @@ export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
   "SOD_GW",
 ]
 
+/**
+ * Two-line breaks for chart axis labels. Keyed off OUTCOME_NAMES/NOD_SOD_NAMES
+ * values (not typed-out strings) so a rename in either map can't silently
+ * orphan an entry here the way "Community deliveries" → "Community surface
+ * water" did.
+ */
+export const OUTCOME_LABEL_BREAKS: Record<string, [string, string]> = {
+  [OUTCOME_NAMES.CWS_DEL]: ["Community", "surface water"],
+  [OUTCOME_NAMES.AG_REV]: ["Agricultural", "revenue"],
+  [OUTCOME_NAMES.ENV_FLOWS]: ["Environmental", "flows"],
+  [OUTCOME_NAMES.RES_STOR]: ["Reservoir", "storage"],
+  [OUTCOME_NAMES.GW_STOR]: ["Groundwater", "storage"],
+  [OUTCOME_NAMES.DELTA_ECO]: ["Delta estuary", "ecology"],
+  [OUTCOME_NAMES.FW_EXP]: ["Freshwater for", "Delta exports"],
+  [OUTCOME_NAMES.FW_DELTA_USES]: ["Freshwater for", "in-Delta uses"],
+  [OUTCOME_NAMES.WRC_SALMON_AB]: ["Winter-run", "salmon"],
+  [NOD_SOD_NAMES.NOD_DW]: ["NOD:", "Community deliveries"],
+  [NOD_SOD_NAMES.SOD_DW]: ["SOD:", "Community deliveries"],
+  [NOD_SOD_NAMES.NOD_AG]: ["NOD:", "Agricultural revenue"],
+  [NOD_SOD_NAMES.SOD_AG]: ["SOD:", "Agricultural revenue"],
+  [NOD_SOD_NAMES.NOD_EFLOWS]: ["NOD:", "Environmental flows"],
+  [NOD_SOD_NAMES.SOD_EFLOWS]: ["SOD:", "Environmental flows"],
+  [NOD_SOD_NAMES.NOD_RES]: ["NOD:", "Reservoir storage"],
+  [NOD_SOD_NAMES.SOD_RES]: ["SOD:", "Reservoir storage"],
+  [NOD_SOD_NAMES.NOD_GW]: ["NOD:", "Groundwater storage"],
+  [NOD_SOD_NAMES.SOD_GW]: ["SOD:", "Groundwater storage"],
+}
+
 /** NOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
 export const NOD_CODES: NodSodCode[] = [
   "NOD_DW",
@@ -262,6 +290,19 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
     "Tiers reflect how often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
   WRC_SALMON_AB:
     "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
+}
+
+/**
+ * Outcome-specific caveat shown before the shared "see technical
+ * documentation" footer (that sentence is rendered once, in
+ * TierTooltipContent). Only outcomes with extra context to add need an
+ * entry here.
+ */
+export const OUTCOME_FOOTER_PREFIXES: Partial<Record<OutcomeCode, string>> = {
+  CWS_DEL:
+    "Only surface water deliveries from the State Water Project and Central Valley Project are evaluated. Other water sources, including groundwater and other surface water supplies, are not considered. Thus the outcome metric does not indicate the ability of a community water system or wholesale distributor to provide reliable water supplies to its customers. Deliveries are estimated relative to potable drinking water demands only and do not include other municipal and industrial uses, such as aquifer storage and recovery.",
+  WRC_SALMON_AB:
+    "The lowest outcome level corresponds to approximately 3,000 total returning female spawners. Below this level, changes in commercial harvest practices are required to mitigate impacts to the population.",
 }
 
 export const OUTCOME_FOOTER_DEFINITIONS: Record<OutcomeCode, string> = {

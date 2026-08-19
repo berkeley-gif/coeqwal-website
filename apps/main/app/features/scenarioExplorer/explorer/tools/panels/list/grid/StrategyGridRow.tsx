@@ -164,7 +164,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         backgroundColor: "var(--row-bg)",
         borderRadius: theme.borderRadius.sm,
         rowGap: theme.scenarios.grid.row.internalGap,
-        alignItems: "stretch",
+        alignItems: "flex-start",
         transition:
           "background-color 0.2s ease, border-color 0.2s ease, border-left-color 0.2s ease",
         outline: isHighlighted

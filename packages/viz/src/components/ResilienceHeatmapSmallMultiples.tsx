@@ -220,7 +220,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
       cellRender = "tier",
       showCellNumbers = false,
       tileAspect = "wide",
-      minTileWidth = 360,
+      minTileWidth = 520,
       maxColumns = 4,
       captureMode = false,
       onCellHover,
@@ -296,7 +296,7 @@ const ResilienceHeatmapSmallMultiples: React.FC<ResilienceHeatmapSmallMultiplesP
               flex: 1,
               minHeight: 0,
               overflowY: captureMode ? "visible" : "auto",
-              overflowX: "hidden",
+              overflowX: "auto",
               // Live mode caps via max-width to avoid stretching the
               // tiles too wide on huge screens. Capture mode leaves the
               // grid free to fill the off-screen host width that the

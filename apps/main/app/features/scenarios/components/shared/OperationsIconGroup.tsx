@@ -6,7 +6,7 @@
  * Data-driven component that reads from the icon registry in iconRegistry.tsx.
  * Each scenario maps to an ordered list of icons (theme icon first, then operations).
  *
- * Used by StrategyGrid, ScenarioRow, and KeyOperationsPanel.
+ * Used by StrategyGrid, StrategyGridRowLayouts and KeyOperationsPanel.
  */
 
 import React from "react"

@@ -40,6 +40,7 @@ export type {
   UseDisclosureResult,
 } from "./common/tooltips/useDisclosure"
 export { AnchoredPortal } from "./common/tooltips/AnchoredPortal"
+export { MobileNotSupported } from "./common/MobileNotSupported"
 export type { AnchoredPortalProps } from "./common/tooltips/AnchoredPortal"
 // Standard tooltip surfaces (hover hint + click/anchored popover)
 export { HoverTip } from "./common/tooltips/HoverTip"
