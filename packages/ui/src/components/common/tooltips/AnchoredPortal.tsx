@@ -14,12 +14,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react"
-import {
-  Box,
-  Popper,
-  ClickAwayListener,
-  useTheme,
-} from "../../.."
+import { Box, Popper, ClickAwayListener, useTheme } from "../../.."
 import type { PopperProps } from "../../.."
 import { tooltipSurface, type TooltipDensity } from "./tooltipSurface"
 
