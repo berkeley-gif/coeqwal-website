@@ -783,7 +783,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const cx = w / 2
           const cy = h / 2
 
-          const rScale = scaleLinear().domain([4.5, 0.5]).range([0, radius])
+          const rScale = scaleLinear().domain([5.0, 0.0]).range([0, radius])
           scalesRef.current = {
             rScale: (n: number) => rScale(n),
             cx,
