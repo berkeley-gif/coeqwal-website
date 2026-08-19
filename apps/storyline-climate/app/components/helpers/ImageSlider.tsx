@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Box, UnfoldMoreIcon, useTheme } from "@repo/ui/mui"
+import { Box, UnfoldMoreIcon } from "@repo/ui/mui"
 
 type HorizontalCompareProps = {
   leftSrc: string
@@ -49,7 +49,6 @@ export function HorizontalImageSlider({
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
-  const theme = useTheme()
 
   const updateFromPointer = useCallback((clientX: number) => {
     const el = wrapRef.current
@@ -160,6 +159,7 @@ export function HorizontalImageSlider({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(pos)}
+        aria-valuetext={`${Math.round(pos)}% from the left`}
         tabIndex={0}
         onKeyDown={(e) => {
           const step = e.shiftKey ? 10 : 2
@@ -182,8 +182,12 @@ export function HorizontalImageSlider({
           display: "grid",
           placeItems: "center",
           cursor: "ew-resize",
-          outline: "none",
           pointerEvents: "auto",
+          "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "primary.light",
+            outlineOffset: 3,
+          },
         }}
         onPointerDown={(e) => {
           dragging.current = true
@@ -213,16 +217,15 @@ export function HorizontalImageSlider({
           {leftKnobLabel && (
             <Box
               sx={{
-                mr: 4.5,
-                px: 1.25,
+                mr: { xs: 3.5, lg: 4.5 },
+                px: { xs: 0.75, lg: 1.25 },
                 py: 0.5,
                 borderRadius: "10px",
                 backgroundColor: "common.white",
                 backdropFilter: "blur(2px)",
                 color: "blue.darkest",
-                fontSize: theme.typography.caption.fontSize,
-                fontWeight: "bold",
-                lineHeight: 1.2,
+                typography: "compactMicro",
+                fontWeight: "fontWeightBold",
                 whiteSpace: "nowrap",
               }}
             >
@@ -233,16 +236,15 @@ export function HorizontalImageSlider({
           {rightKnobLabel && (
             <Box
               sx={{
-                ml: 4.5,
-                px: 1.25,
+                ml: { xs: 3.5, lg: 4.5 },
+                px: { xs: 0.75, lg: 1.25 },
                 py: 0.5,
                 borderRadius: "10px",
                 backgroundColor: "common.white",
                 backdropFilter: "blur(2px)",
                 color: "blue.darkest",
-                fontSize: theme.typography.caption.fontSize,
-                fontWeight: "bold",
-                lineHeight: 1.2,
+                typography: "compactMicro",
+                fontWeight: "fontWeightBold",
                 whiteSpace: "nowrap",
               }}
             >
@@ -479,7 +481,15 @@ export function VerticalImageSlider({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(pos)}
+          aria-valuetext={`${Math.round(pos)}% from the top`}
           tabIndex={0}
+          onKeyDown={(e) => {
+            const step = e.shiftKey ? 10 : 2
+            if (e.key === "ArrowUp") setPos((p) => Math.max(0, p - step))
+            if (e.key === "ArrowDown") setPos((p) => Math.min(100, p + step))
+            if (e.key === "Home") setPos(0)
+            if (e.key === "End") setPos(100)
+          }}
           sx={{
             position: "absolute",
             left: "50%",
@@ -492,8 +502,12 @@ export function VerticalImageSlider({
             display: "grid",
             placeItems: "center",
             cursor: "pointer",
-            outline: "none",
             pointerEvents: "auto",
+            "&:focus-visible": {
+              outline: "3px solid",
+              outlineColor: "primary.light",
+              outlineOffset: 3,
+            },
           }}
           onPointerDown={(e) => {
             ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)

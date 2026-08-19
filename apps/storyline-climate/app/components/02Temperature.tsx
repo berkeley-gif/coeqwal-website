@@ -235,6 +235,12 @@ function TemperatureContent() {
         justifyContent: "center",
         gap: { xs: "1rem", md: "1.25rem", lg: "1.5rem", xl: "1.75rem" },
         py: { xs: "3rem", md: "3.5rem", lg: "4rem" },
+        "@media (min-width: 750px) and (max-width: 1199.95px) and (max-height: 800px)":
+          {
+            pt: "3.5rem",
+            pb: "1rem",
+            gap: "0.75rem",
+          },
         "@media (min-width: 900px) and (max-width: 1199.95px) and (orientation: portrait)":
           {
             justifyContent: "flex-start",

@@ -2,6 +2,7 @@
 import React from "react"
 import { motion, type MotionValue } from "@repo/motion"
 import { OffWhiteColor } from "../helpers/colorPalette"
+import { useTheme } from "@repo/ui/mui"
 
 const goldenColor = "#F1B143"
 
@@ -18,20 +19,27 @@ export default function ResolutionScenario({
   secondScenario,
   restScenario,
 }: Props) {
+  const theme = useTheme()
+
   return (
     <>
       <motion.text
         x={37}
         y={50}
         fill={OffWhiteColor}
-        fontSize={22}
-        fontWeight={500}
+        fontSize={theme.typography.h6.fontSize}
+        fontWeight={theme.typography.fontWeightMedium}
         style={{ opacity: secondScenario }}
       >
         <tspan x={37} dy="0em">
           COEQWAL also explores
         </tspan>
-        <tspan x={37} dy="1.4em" fontWeight={700} textDecoration="underline">
+        <tspan
+          x={37}
+          dy="1.4em"
+          fontWeight={theme.typography.fontWeightBold}
+          textDecoration="underline"
+        >
           different strategies for managing water
         </tspan>
         <tspan x={37} dy="1.4em">
@@ -46,7 +54,7 @@ export default function ResolutionScenario({
         x={947}
         y={63}
         fill={goldenColor}
-        fontSize={26}
+        fontSize={theme.typography.h5.fontSize}
         style={{ opacity: secondScenario }}
       >
         Managing Groundwater in a Changing Agricultural Landscape
@@ -56,7 +64,7 @@ export default function ResolutionScenario({
         x={947}
         y={128}
         fill={OffWhiteColor}
-        fontSize={22}
+        fontSize={theme.typography.h6.fontSize}
         style={{ opacity: secondScenario }}
       >
         <tspan x={947} dy="0em">
@@ -74,7 +82,7 @@ export default function ResolutionScenario({
         x={947}
         y={265}
         fill={goldenColor}
-        fontSize={26}
+        fontSize={theme.typography.h5.fontSize}
         style={{ opacity: secondScenario }}
       >
         Improving Reliability of Delta Exports for Farms and Cities
@@ -84,7 +92,7 @@ export default function ResolutionScenario({
         x={947}
         y={295}
         fill={OffWhiteColor}
-        fontSize={22}
+        fontSize={theme.typography.h6.fontSize}
         style={{ opacity: secondScenario }}
       >
         <tspan x={947} dy="0em">
@@ -102,7 +110,7 @@ export default function ResolutionScenario({
         x={947}
         y={485}
         fill={goldenColor}
-        fontSize={26}
+        fontSize={theme.typography.h5.fontSize}
         style={{ opacity: secondScenario }}
       >
         Other scenario themes
@@ -112,7 +120,7 @@ export default function ResolutionScenario({
         x={810}
         y={60}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         style={{ opacity: secondScenario }}
       >
         SGMA
@@ -122,7 +130,7 @@ export default function ResolutionScenario({
         x={850}
         y={310}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
@@ -141,7 +149,7 @@ export default function ResolutionScenario({
         x={660}
         y={280}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
@@ -157,7 +165,7 @@ export default function ResolutionScenario({
         x={615}
         y={470}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
@@ -173,7 +181,7 @@ export default function ResolutionScenario({
         x={1005}
         y={570}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
@@ -189,7 +197,7 @@ export default function ResolutionScenario({
         x={840}
         y={670}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
@@ -205,7 +213,7 @@ export default function ResolutionScenario({
         x={1045}
         y={790}
         fill={OffWhiteColor}
-        fontSize={18}
+        fontSize={theme.typography.subtitle1.fontSize}
         textAnchor="middle"
         style={{ opacity: secondScenario }}
       >
