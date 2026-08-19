@@ -167,16 +167,17 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   await expect(page.getByRole("heading", { name: /Water Years/ })).toHaveCount(
     0,
   )
-  // Percent display: the fixture serves a 0.8 habitat-occupancy ratio, so the
-  // interpretive sentence reads 80% and the y-axis carries the confirmed
-  // percent label; the detailed reading renders in the card footer.
+  // Proportion display: the endpoint serves percent (fixture 0.8 = 0.8% of
+  // habitat), the tool divides by 100 for the proportion chart scale, and
+  // the interpretive sentence converts back to percent for prose; the
+  // detailed reading renders in the card footer.
   await expect(
-    page.getByText(/occupy 80% of suitable spawning habitat, on average/),
+    page.getByText(/occupy 0.8% of suitable spawning habitat, on average/),
   ).toBeVisible()
   await expect(
     page
       .locator('[role="img"]')
-      .getByText("Percent of spawning habitat occupied"),
+      .getByText("Proportion of spawning habitat occupied"),
   ).toBeVisible()
   await expect(
     page.getByText(/would suggest returning spawners exceed/),

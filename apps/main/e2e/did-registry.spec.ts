@@ -9,7 +9,10 @@ import {
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
-import { gwLevelFromStorage } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
+import {
+  gwLevelFromStorage,
+  mockAnnualSeries,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
 import {
   didDomainForVariable,
   toDidSubject,
@@ -213,19 +216,29 @@ test("mergeDataInitialState heals a persisted riv_uif selection", () => {
   expect(healed.view).toBe("dist")
 })
 
-test("salmon abundance displays as percent of spawning habitat occupied", () => {
+test("salmon abundance displays as proportion of spawning habitat occupied", () => {
   const v = getVariable("salmon_abund")
   expect(v?.name).toBe("Winter-run abundance")
-  expect(v?.unit).toBe("%")
-  expect(v?.unitLabel).toBe("percent of spawning habitat occupied")
-  expect(v?.axisLabel).toBe("Percent of spawning habitat occupied")
+  expect(v?.unit).toBe("proportion")
+  expect(v?.unitLabel).toBe("proportion of spawning habitat occupied")
+  expect(v?.axisLabel).toBe("Proportion of spawning habitat occupied")
   // The detailed reading of the metric lives in the card footer.
   expect(v?.footnote).toContain("averaged over three years")
-  expect(v?.footnote).toContain("above 100%")
-  // The data pointing is still under review by the science team, and a
-  // population average does not decompose by water-year type.
+  expect(v?.footnote).toContain("above 1.0")
+  expect(v?.footnote).toContain("lower 20th percentile")
+  // The reintroduction (-R) scenarios are not served yet, so the chip
+  // stays; a population average does not decompose by water-year type.
   expect(v?.provisional).toBe(true)
   expect(v?.wytApplicable).toBe(false)
+})
+
+test("salmon sample series generate in proportion display units", () => {
+  // Sample series never scale, so a base left in percent units would plot
+  // sample curves 100x above adopted live curves on the same axis.
+  const s = mockAnnualSeries("salmon_abund", "s9999", "historical", "WRLCM")
+  expect(s.length).toBeGreaterThan(0)
+  expect(Math.max(...s)).toBeLessThan(3)
+  expect(Math.max(...s)).toBeGreaterThan(0.05)
 })
 
 // Sector-specific system-delivery variables (2026-08 confirmation that they

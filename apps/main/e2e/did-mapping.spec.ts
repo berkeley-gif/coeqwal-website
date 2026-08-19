@@ -39,10 +39,11 @@ test("didPeriodForVariable pins one period per live variable", () => {
   expect(didPeriodForVariable("ndo_uif")).toBeNull()
 })
 
-test("didLiveScaleForVariable scales salmon ratios to percent, others pass through", () => {
-  // The salmon endpoint serves a habitat-occupancy ratio; the tool displays
-  // percent (confirmed labeling), so the adopted live series scales by 100.
-  expect(didLiveScaleForVariable("salmon_abund")).toBe(100)
+test("didLiveScaleForVariable scales served salmon percent to proportion, others pass through", () => {
+  // The salmon endpoint serves percent (0-100, the same units as the Salmon
+  // Data Drop csv); the tool displays proportion (0-1.0, confirmed at the
+  // 2026-08-18 review), so the adopted live series scales by 0.01.
+  expect(didLiveScaleForVariable("salmon_abund")).toBe(0.01)
   expect(didLiveScaleForVariable("res_apr")).toBe(1)
   expect(didLiveScaleForVariable("nonsense")).toBe(1)
 })
