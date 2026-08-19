@@ -1961,8 +1961,6 @@ const ResilienceHeatmap: React.FC<ResilienceHeatmapProps> = React.memo(
       >
         <svg
           ref={svgRef}
-          width={width}
-          height={height}
           {...(!responsive && { width, height })}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
