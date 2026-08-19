@@ -1,0 +1,2061 @@
+{
+  "scenarios": [
+    {
+      "scenario_id": "s0011",
+      "files": {
+        "zip": {
+          "key": "scenario/s0011/run/s0011_adjBL_wTUCP_v1_20250710.zip",
+          "filename": "s0011_adjBL_wTUCP_v1_20250710.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0011/csv/s0011_coeqwal_calsim_output.csv",
+          "filename": "s0011_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0011/csv/s0011_coeqwal_sv_input.csv",
+          "filename": "s0011_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0020",
+      "files": {
+        "zip": {
+          "key": "scenario/s0020/run/s0020_DCRadjBL_2020LU_wTUCP.zip",
+          "filename": "s0020_DCRadjBL_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0020/csv/s0020_coeqwal_calsim_output.csv",
+          "filename": "s0020_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0020/csv/s0020_coeqwal_sv_input.csv",
+          "filename": "s0020_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0021",
+      "files": {
+        "zip": {
+          "key": "scenario/s0021/run/s0021_DCRadjBL_2020LU_woTUCP.zip",
+          "filename": "s0021_DCRadjBL_2020LU_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0021/csv/s0021_coeqwal_calsim_output.csv",
+          "filename": "s0021_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0021/csv/s0021_coeqwal_sv_input.csv",
+          "filename": "s0021_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0022",
+      "files": {
+        "zip": {
+          "key": "scenario/s0022/run/s0022_USBR24Alt2V1_adjHist_0413LU_woTUCP.zip",
+          "filename": "s0022_USBR24Alt2V1_adjHist_0413LU_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0022/csv/s0022_coeqwal_calsim_output.csv",
+          "filename": "s0022_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0022/csv/s0022_coeqwal_sv_input.csv",
+          "filename": "s0022_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0023",
+      "files": {
+        "zip": {
+          "key": "scenario/s0023/run/s0023_USBR24Alt2V1_adjBL_2020LU_woTUCP_v2_20260217.zip",
+          "filename": "s0023_USBR24Alt2V1_adjBL_2020LU_woTUCP_v2_20260217.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0023/csv/s0023_coeqwal_calsim_output.csv",
+          "filename": "s0023_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0023/csv/s0023_coeqwal_sv_input.csv",
+          "filename": "s0023_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0024",
+      "files": {
+        "zip": {
+          "key": "scenario/s0024/run/s0024_USBR24Alt2V1_adjHist_2020LU_wTUCP_v2_20260217.zip",
+          "filename": "s0024_USBR24Alt2V1_adjHist_2020LU_wTUCP_v2_20260217.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0024/csv/s0024_coeqwal_calsim_output.csv",
+          "filename": "s0024_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0024/csv/s0024_coeqwal_sv_input.csv",
+          "filename": "s0024_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0025",
+      "files": {
+        "zip": {
+          "key": "scenario/s0025/run/s0025_SJVgwLimit_2020LU_wTUCP_v0.2_20251102.zip",
+          "filename": "s0025_SJVgwLimit_2020LU_wTUCP_v0.2_20251102.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0025/csv/s0025_coeqwal_calsim_output.csv",
+          "filename": "s0025_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0025/csv/s0025_coeqwal_sv_input.csv",
+          "filename": "s0025_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0026",
+      "files": {
+        "zip": {
+          "key": "scenario/s0026/run/s0026_SJVgwLimit_SGMALU_wTUCP.zip",
+          "filename": "s0026_SJVgwLimit_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0026/csv/s0026_coeqwal_calsim_output.csv",
+          "filename": "s0026_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0026/csv/s0026_coeqwal_sv_input.csv",
+          "filename": "s0026_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0027",
+      "files": {
+        "zip": {
+          "key": "scenario/s0027/run/s0027_CVgwLimit_2020LU_wTUCP_v0.2_20251102.zip",
+          "filename": "s0027_CVgwLimit_2020LU_wTUCP_v0.2_20251102.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0027/csv/s0027_coeqwal_calsim_output.csv",
+          "filename": "s0027_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0027/csv/s0027_coeqwal_sv_input.csv",
+          "filename": "s0027_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0028",
+      "files": {
+        "zip": {
+          "key": "scenario/s0028/run/s0028_CVgwLimit_SGMALU_wTUCP.zip",
+          "filename": "s0028_CVgwLimit_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0028/csv/s0028_coeqwal_calsim_output.csv",
+          "filename": "s0028_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0028/csv/s0028_coeqwal_sv_input.csv",
+          "filename": "s0028_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0029",
+      "files": {
+        "zip": {
+          "key": "scenario/s0029/run/s0029_DCRadjHist_2020LU_eflowsV1_v0.2_20251014.zip",
+          "filename": "s0029_DCRadjHist_2020LU_eflowsV1_v0.2_20251014.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0029/csv/s0029_coeqwal_calsim_output.csv",
+          "filename": "s0029_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0029/csv/s0029_coeqwal_sv_input.csv",
+          "filename": "s0029_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0030",
+      "files": {
+        "zip": {
+          "key": "scenario/s0030/run/s0030_DCRadjHist_2020LU_NoFlowReqt.zip",
+          "filename": "s0030_DCRadjHist_2020LU_NoFlowReqt.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0030/csv/s0030_coeqwal_calsim_output.csv",
+          "filename": "s0030_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0030/csv/s0030_coeqwal_sv_input.csv",
+          "filename": "s0030_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0031",
+      "files": {
+        "zip": {
+          "key": "scenario/s0031/run/s0031_DCRadjHist_2020LU_salmonflows_20260126v03.zip",
+          "filename": "s0031_DCRadjHist_2020LU_salmonflows_20260126v03.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0031/csv/s0031_coeqwal_calsim_output.csv",
+          "filename": "s0031_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0031/csv/s0031_coeqwal_sv_input.csv",
+          "filename": "s0031_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0032",
+      "files": {
+        "zip": {
+          "key": "scenario/s0032/run/s0032_DCRadjHist_CVgwLU_eflows.zip",
+          "filename": "s0032_DCRadjHist_CVgwLU_eflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0032/csv/s0032_coeqwal_calsim_output.csv",
+          "filename": "s0032_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0032/csv/s0032_coeqwal_sv_input.csv",
+          "filename": "s0032_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0033",
+      "files": {
+        "zip": {
+          "key": "scenario/s0033/run/s0033_DCRadjHist_CVgwLU_salmonflows_20260126v03.zip",
+          "filename": "s0033_DCRadjHist_CVgwLU_salmonflows_20260126v03.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0033/csv/s0033_coeqwal_calsim_output.csv",
+          "filename": "s0033_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0033/csv/s0033_coeqwal_sv_input.csv",
+          "filename": "s0033_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0035",
+      "files": {
+        "zip": {
+          "key": "scenario/s0035/run/s0035_DCRadjBL_2020LU_PriorityHHS.zip",
+          "filename": "s0035_DCRadjBL_2020LU_PriorityHHS.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0035/csv/s0035_coeqwal_calsim_output.csv",
+          "filename": "s0035_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0035/csv/s0035_coeqwal_sv_input.csv",
+          "filename": "s0035_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0036",
+      "files": {
+        "zip": {
+          "key": "scenario/s0036/run/s0036_DCRadjBL_2020LU_PriorityFuncCWN.zip",
+          "filename": "s0036_DCRadjBL_2020LU_PriorityFuncCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0036/csv/s0036_coeqwal_calsim_output.csv",
+          "filename": "s0036_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0036/csv/s0036_coeqwal_sv_input.csv",
+          "filename": "s0036_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0037",
+      "files": {
+        "zip": {
+          "key": "scenario/s0037/run/s0037_DCRadjBL_2020LU_PriorityFullCWN.zip",
+          "filename": "s0037_DCRadjBL_2020LU_PriorityFullCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0037/csv/s0037_coeqwal_calsim_output.csv",
+          "filename": "s0037_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0037/csv/s0037_coeqwal_sv_input.csv",
+          "filename": "s0037_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0039",
+      "files": {
+        "zip": {
+          "key": "scenario/s0039/run/s0039_USBRAlt3_2020LU_DeltaOut65.zip",
+          "filename": "s0039_USBRAlt3_2020LU_DeltaOut65.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0039/csv/s0039_coeqwal_calsim_output.csv",
+          "filename": "s0039_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0039/csv/s0039_coeqwal_sv_input.csv",
+          "filename": "s0039_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0040",
+      "files": {
+        "zip": {
+          "key": "scenario/s0040/run/s0040_USBRAlt3_2020LU_DeltaOut35.zip",
+          "filename": "s0040_USBRAlt3_2020LU_DeltaOut35.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0040/csv/s0040_coeqwal_calsim_output.csv",
+          "filename": "s0040_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0040/csv/s0040_coeqwal_sv_input.csv",
+          "filename": "s0040_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0041",
+      "files": {
+        "zip": {
+          "key": "scenario/s0041/run/s0041_USBRAlt3_2020LU_DeltaOut45.zip",
+          "filename": "s0041_USBRAlt3_2020LU_DeltaOut45.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0041/csv/s0041_coeqwal_calsim_output.csv",
+          "filename": "s0041_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0041/csv/s0041_coeqwal_sv_input.csv",
+          "filename": "s0041_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0042",
+      "files": {
+        "zip": {
+          "key": "scenario/s0042/run/s0042_USBRAlt3_2020LU_DeltaOut55.zip",
+          "filename": "s0042_USBRAlt3_2020LU_DeltaOut55.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0042/csv/s0042_coeqwal_calsim_output.csv",
+          "filename": "s0042_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0042/csv/s0042_coeqwal_sv_input.csv",
+          "filename": "s0042_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0044",
+      "files": {
+        "zip": {
+          "key": "scenario/s0044/run/s0044_DCRadjHist_2020LU_ShastaCarryover20.zip",
+          "filename": "s0044_DCRadjHist_2020LU_ShastaCarryover20.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0044/csv/s0044_coeqwal_calsim_output.csv",
+          "filename": "s0044_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0044/csv/s0044_coeqwal_sv_input.csv",
+          "filename": "s0044_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0045",
+      "files": {
+        "zip": {
+          "key": "scenario/s0045/run/s0045_DCRadjBL_2020LU_RelaxFallX2.zip",
+          "filename": "s0045_DCRadjBL_2020LU_RelaxFallX2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0045/csv/s0045_coeqwal_calsim_output.csv",
+          "filename": "s0045_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0045/csv/s0045_coeqwal_sv_input.csv",
+          "filename": "s0045_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0046",
+      "files": {
+        "zip": {
+          "key": "scenario/s0046/run/s0046_DCRadjHist_2020LU_EflowsV2.zip",
+          "filename": "s0046_DCRadjHist_2020LU_EflowsV2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0046/csv/s0046_coeqwal_calsim_output.csv",
+          "filename": "s0046_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0046/csv/s0046_coeqwal_sv_input.csv",
+          "filename": "s0046_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0047",
+      "files": {
+        "zip": {
+          "key": "scenario/s0047/run/s0047_DCRcc50_2020LU_wTUCP.zip",
+          "filename": "s0047_DCRcc50_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0047/csv/s0047_coeqwal_calsim_output.csv",
+          "filename": "s0047_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0047/csv/s0047_coeqwal_sv_input.csv",
+          "filename": "s0047_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0048",
+      "files": {
+        "zip": {
+          "key": "scenario/s0048/run/s0048_adjBL_cc50_wTUCP_20250213.zip",
+          "filename": "s0048_adjBL_cc50_wTUCP_20250213.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0048/csv/s0048_coeqwal_calsim_output.csv",
+          "filename": "s0048_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0048/csv/s0048_coeqwal_sv_input.csv",
+          "filename": "s0048_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0049",
+      "files": {
+        "zip": {
+          "key": "scenario/s0049/run/s0049_DCRadjBL_cc50_2020LU_woTUCP_20250213.zip",
+          "filename": "s0049_DCRadjBL_cc50_2020LU_woTUCP_20250213.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0049/csv/s0049_coeqwal_calsim_output.csv",
+          "filename": "s0049_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0049/csv/s0049_coeqwal_sv_input.csv",
+          "filename": "s0049_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0050",
+      "files": {
+        "zip": {
+          "key": "scenario/s0050/run/s0050_USBR24Alt2V1_cc50_adjHist_2020LU_wTUCP_20250217.zip",
+          "filename": "s0050_USBR24Alt2V1_cc50_adjHist_2020LU_wTUCP_20250217.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0050/csv/s0050_coeqwal_calsim_output.csv",
+          "filename": "s0050_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0050/csv/s0050_coeqwal_sv_input.csv",
+          "filename": "s0050_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0051",
+      "files": {
+        "zip": {
+          "key": "scenario/s0051/run/s0051_USBR24Alt2V1_cc50_adjBL_2020LU_woTUCP.zip",
+          "filename": "s0051_USBR24Alt2V1_cc50_adjBL_2020LU_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0051/csv/s0051_coeqwal_calsim_output.csv",
+          "filename": "s0051_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0051/csv/s0051_coeqwal_sv_input.csv",
+          "filename": "s0051_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0056",
+      "files": {
+        "zip": {
+          "key": "scenario/s0056/run/s0056_DCRcc95_2020LU_wTUCP.zip",
+          "filename": "s0056_DCRcc95_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0056/csv/s0056_coeqwal_calsim_output.csv",
+          "filename": "s0056_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0056/csv/s0056_coeqwal_sv_input.csv",
+          "filename": "s0056_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0057",
+      "files": {
+        "zip": {
+          "key": "scenario/s0057/run/s0057_adjBL_cc95_wTUCP_20260214.zip",
+          "filename": "s0057_adjBL_cc95_wTUCP_20260214.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0057/csv/s0057_coeqwal_calsim_output.csv",
+          "filename": "s0057_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0057/csv/s0057_coeqwal_sv_input.csv",
+          "filename": "s0057_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0058",
+      "files": {
+        "zip": {
+          "key": "scenario/s0058/run/s0058_DCRadjBL_2020LU_cc95_woTUCP.zip",
+          "filename": "s0058_DCRadjBL_2020LU_cc95_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0058/csv/s0058_coeqwal_calsim_output.csv",
+          "filename": "s0058_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0058/csv/s0058_coeqwal_sv_input.csv",
+          "filename": "s0058_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0059",
+      "files": {
+        "zip": {
+          "key": "scenario/s0059/run/s0059_USBR24Alt2V1_adjHist_cc95_2020LU_wTUCP_20260309.zip",
+          "filename": "s0059_USBR24Alt2V1_adjHist_cc95_2020LU_wTUCP_20260309.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0059/csv/s0059_coeqwal_calsim_output.csv",
+          "filename": "s0059_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0059/csv/s0059_coeqwal_sv_input.csv",
+          "filename": "s0059_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0060",
+      "files": {
+        "zip": {
+          "key": "scenario/s0060/run/s0060_USBR24Alt2V1_adjBL_cc95_2020LU_woTUCP_20260309.zip",
+          "filename": "s0060_USBR24Alt2V1_adjBL_cc95_2020LU_woTUCP_20260309.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0060/csv/s0060_coeqwal_calsim_output.csv",
+          "filename": "s0060_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0060/csv/s0060_coeqwal_sv_input.csv",
+          "filename": "s0060_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0062",
+      "files": {
+        "zip": {
+          "key": "scenario/s0062/run/s0062_CVgwLimit_cc50_2020LU_wTUCP.zip",
+          "filename": "s0062_CVgwLimit_cc50_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0062/csv/s0062_coeqwal_calsim_output.csv",
+          "filename": "s0062_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0062/csv/s0062_coeqwal_sv_input.csv",
+          "filename": "s0062_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0063",
+      "files": {
+        "zip": {
+          "key": "scenario/s0063/run/s0063_CVgwLimit_cc95_2020LU_wTUCP.zip",
+          "filename": "s0063_CVgwLimit_cc95_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0063/csv/s0063_coeqwal_calsim_output.csv",
+          "filename": "s0063_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0063/csv/s0063_coeqwal_sv_input.csv",
+          "filename": "s0063_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0065",
+      "files": {
+        "zip": {
+          "key": "scenario/s0065/run/s0065_DWRadapt25_2020LU_DCP.zip",
+          "filename": "s0065_DWRadapt25_2020LU_DCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0065/csv/s0065_coeqwal_calsim_output.csv",
+          "filename": "s0065_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0065/csv/s0065_coeqwal_sv_input.csv",
+          "filename": "s0065_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0067",
+      "files": {
+        "zip": {
+          "key": "scenario/s0067/run/s0067_SJVgwLimit_2020LU_cc50_wTUCP.zip",
+          "filename": "s0067_SJVgwLimit_2020LU_cc50_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0067/csv/s0067_coeqwal_calsim_output.csv",
+          "filename": "s0067_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0067/csv/s0067_coeqwal_sv_input.csv",
+          "filename": "s0067_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0068",
+      "files": {
+        "zip": {
+          "key": "scenario/s0068/run/s0068_SJVgwLimit_cc50_SGMALU_wTUCP_20250213.zip",
+          "filename": "s0068_SJVgwLimit_cc50_SGMALU_wTUCP_20250213.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0068/csv/s0068_coeqwal_calsim_output.csv",
+          "filename": "s0068_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0068/csv/s0068_coeqwal_sv_input.csv",
+          "filename": "s0068_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0069",
+      "files": {
+        "zip": {
+          "key": "scenario/s0069/run/s0069_CVgwLimit_cc50_SGMALU_wTUCP.zip",
+          "filename": "s0069_CVgwLimit_cc50_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0069/csv/s0069_coeqwal_calsim_output.csv",
+          "filename": "s0069_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0069/csv/s0069_coeqwal_sv_input.csv",
+          "filename": "s0069_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0070",
+      "files": {
+        "zip": {
+          "key": "scenario/s0070/run/s0070_DCRadjHist_cc50_2020LU_eflowsV1_20260211.zip",
+          "filename": "s0070_DCRadjHist_cc50_2020LU_eflowsV1_20260211.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0070/csv/s0070_coeqwal_calsim_output.csv",
+          "filename": "s0070_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0070/csv/s0070_coeqwal_sv_input.csv",
+          "filename": "s0070_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0071",
+      "files": {
+        "zip": {
+          "key": "scenario/s0071/run/s0071_DCRadjHist_cc50_2020LU_NoFlowReqt_20260211.zip",
+          "filename": "s0071_DCRadjHist_cc50_2020LU_NoFlowReqt_20260211.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0071/csv/s0071_coeqwal_calsim_output.csv",
+          "filename": "s0071_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0071/csv/s0071_coeqwal_sv_input.csv",
+          "filename": "s0071_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0072",
+      "files": {
+        "zip": {
+          "key": "scenario/s0072/run/s0072_DCRadjHist_cc50_2020LU_salmonflows.zip",
+          "filename": "s0072_DCRadjHist_cc50_2020LU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0072/csv/s0072_coeqwal_calsim_output.csv",
+          "filename": "s0072_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0072/csv/s0072_coeqwal_sv_input.csv",
+          "filename": "s0072_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0073",
+      "files": {
+        "zip": {
+          "key": "scenario/s0073/run/s0073_DCRadjHist_cc50_CVgwLU_eflows.zip",
+          "filename": "s0073_DCRadjHist_cc50_CVgwLU_eflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0073/csv/s0073_coeqwal_calsim_output.csv",
+          "filename": "s0073_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0073/csv/s0073_coeqwal_sv_input.csv",
+          "filename": "s0073_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0074",
+      "files": {
+        "zip": {
+          "key": "scenario/s0074/run/s0074_DCRadjHist_cc50_CVgwLU_salmonflows.zip",
+          "filename": "s0074_DCRadjHist_cc50_CVgwLU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0074/csv/s0074_coeqwal_calsim_output.csv",
+          "filename": "s0074_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0074/csv/s0074_coeqwal_sv_input.csv",
+          "filename": "s0074_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0075",
+      "files": {
+        "zip": {
+          "key": "scenario/s0075/run/s0075_DCRadjBL_cc50_2020LU_PriorityHHS.zip",
+          "filename": "s0075_DCRadjBL_cc50_2020LU_PriorityHHS.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0075/csv/s0075_coeqwal_calsim_output.csv",
+          "filename": "s0075_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0075/csv/s0075_coeqwal_sv_input.csv",
+          "filename": "s0075_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0076",
+      "files": {
+        "zip": {
+          "key": "scenario/s0076/run/s0076_DCRadjBL_cc50_2020LU_PriorityFuncCWN.zip",
+          "filename": "s0076_DCRadjBL_cc50_2020LU_PriorityFuncCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0076/csv/s0076_coeqwal_calsim_output.csv",
+          "filename": "s0076_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0076/csv/s0076_coeqwal_sv_input.csv",
+          "filename": "s0076_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0077",
+      "files": {
+        "zip": {
+          "key": "scenario/s0077/run/s0077_DCRadjBL_cc50_2020LU_PriorityFullCWN.zip",
+          "filename": "s0077_DCRadjBL_cc50_2020LU_PriorityFullCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0077/csv/s0077_coeqwal_calsim_output.csv",
+          "filename": "s0077_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0077/csv/s0077_coeqwal_sv_input.csv",
+          "filename": "s0077_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0078",
+      "files": {
+        "zip": {
+          "key": "scenario/s0078/run/s0078_USBRAlt3_cc50_2020LU_DeltaOut65.zip",
+          "filename": "s0078_USBRAlt3_cc50_2020LU_DeltaOut65.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0078/csv/s0078_coeqwal_calsim_output.csv",
+          "filename": "s0078_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0078/csv/s0078_coeqwal_sv_input.csv",
+          "filename": "s0078_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0079",
+      "files": {
+        "zip": {
+          "key": "scenario/s0079/run/s0079_USBRAlt3_cc50_2020LU_DeltaOut35.zip",
+          "filename": "s0079_USBRAlt3_cc50_2020LU_DeltaOut35.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0079/csv/s0079_coeqwal_calsim_output.csv",
+          "filename": "s0079_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0079/csv/s0079_coeqwal_sv_input.csv",
+          "filename": "s0079_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0080",
+      "files": {
+        "zip": {
+          "key": "scenario/s0080/run/s0080_USBRAlt3_cc50_2020LU_DeltaOut45.zip",
+          "filename": "s0080_USBRAlt3_cc50_2020LU_DeltaOut45.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0080/csv/s0080_coeqwal_calsim_output.csv",
+          "filename": "s0080_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0080/csv/s0080_coeqwal_sv_input.csv",
+          "filename": "s0080_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0081",
+      "files": {
+        "zip": {
+          "key": "scenario/s0081/run/s0081_USBRAlt3_cc50_2020LU_DeltaOut55.zip",
+          "filename": "s0081_USBRAlt3_cc50_2020LU_DeltaOut55.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0081/csv/s0081_coeqwal_calsim_output.csv",
+          "filename": "s0081_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0081/csv/s0081_coeqwal_sv_input.csv",
+          "filename": "s0081_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0082",
+      "files": {
+        "zip": {
+          "key": "scenario/s0082/run/s0082_DCRadjHist_cc50_2020LU_ShastaCarryover20_20260212.zip",
+          "filename": "s0082_DCRadjHist_cc50_2020LU_ShastaCarryover20_20260212.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0082/csv/s0082_coeqwal_calsim_output.csv",
+          "filename": "s0082_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0082/csv/s0082_coeqwal_sv_input.csv",
+          "filename": "s0082_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0083",
+      "files": {
+        "zip": {
+          "key": "scenario/s0083/run/s0083_DCRadjBL_cc50_2020LU_RelaxFallX2_20260212.zip",
+          "filename": "s0083_DCRadjBL_cc50_2020LU_RelaxFallX2_20260212.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0083/csv/s0083_coeqwal_calsim_output.csv",
+          "filename": "s0083_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0083/csv/s0083_coeqwal_sv_input.csv",
+          "filename": "s0083_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0084",
+      "files": {
+        "zip": {
+          "key": "scenario/s0084/run/s0084_DCRadjHist_2020LU_EflowsV2_20260212.zip",
+          "filename": "s0084_DCRadjHist_2020LU_EflowsV2_20260212.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0084/csv/s0084_coeqwal_calsim_output.csv",
+          "filename": "s0084_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0084/csv/s0084_coeqwal_sv_input.csv",
+          "filename": "s0084_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0085",
+      "files": {
+        "zip": {
+          "key": "scenario/s0085/run/s0085_DWRadapt25_cc50_2020LU_DCP.zip",
+          "filename": "s0085_DWRadapt25_cc50_2020LU_DCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0085/csv/s0085_coeqwal_calsim_output.csv",
+          "filename": "s0085_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0085/csv/s0085_coeqwal_sv_input.csv",
+          "filename": "s0085_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0087",
+      "files": {
+        "zip": {
+          "key": "scenario/s0087/run/s0087_SJVgwLimit_cc95_2020LU_wTUCP.zip",
+          "filename": "s0087_SJVgwLimit_cc95_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0087/csv/s0087_coeqwal_calsim_output.csv",
+          "filename": "s0087_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0087/csv/s0087_coeqwal_sv_input.csv",
+          "filename": "s0087_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0088",
+      "files": {
+        "zip": {
+          "key": "scenario/s0088/run/s0088_SJVgwLimit_cc95_SGMALU_wTUCP.zip",
+          "filename": "s0088_SJVgwLimit_cc95_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0088/csv/s0088_coeqwal_calsim_output.csv",
+          "filename": "s0088_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0088/csv/s0088_coeqwal_sv_input.csv",
+          "filename": "s0088_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0089",
+      "files": {
+        "zip": {
+          "key": "scenario/s0089/run/s0089_CVgwLimit_cc95_SGMALU_wTUCP_20250216.zip",
+          "filename": "s0089_CVgwLimit_cc95_SGMALU_wTUCP_20250216.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0089/csv/s0089_coeqwal_calsim_output.csv",
+          "filename": "s0089_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0089/csv/s0089_coeqwal_sv_input.csv",
+          "filename": "s0089_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0090",
+      "files": {
+        "zip": {
+          "key": "scenario/s0090/run/s0090_DCRadjHist_cc95_2020LU_eflowsV1_v0.2_20260215.zip",
+          "filename": "s0090_DCRadjHist_cc95_2020LU_eflowsV1_v0.2_20260215.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0090/csv/s0090_coeqwal_calsim_output.csv",
+          "filename": "s0090_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0090/csv/s0090_coeqwal_sv_input.csv",
+          "filename": "s0090_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0091",
+      "files": {
+        "zip": {
+          "key": "scenario/s0091/run/s0091_DCRadjHist_cc95_2020LU_NoFlowReqt_20260215.zip",
+          "filename": "s0091_DCRadjHist_cc95_2020LU_NoFlowReqt_20260215.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0091/csv/s0091_coeqwal_calsim_output.csv",
+          "filename": "s0091_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0091/csv/s0091_coeqwal_sv_input.csv",
+          "filename": "s0091_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0092",
+      "files": {
+        "zip": {
+          "key": "scenario/s0092/run/s0092_DCRadjHist_cc95_2020LU_salmonflows.zip",
+          "filename": "s0092_DCRadjHist_cc95_2020LU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0092/csv/s0092_coeqwal_calsim_output.csv",
+          "filename": "s0092_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0092/csv/s0092_coeqwal_sv_input.csv",
+          "filename": "s0092_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0093",
+      "files": {
+        "zip": {
+          "key": "scenario/s0093/run/s0093_DCRadjHist_cc95_CVgwLU_eflows_20250216.zip",
+          "filename": "s0093_DCRadjHist_cc95_CVgwLU_eflows_20250216.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0093/csv/s0093_coeqwal_calsim_output.csv",
+          "filename": "s0093_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0093/csv/s0093_coeqwal_sv_input.csv",
+          "filename": "s0093_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0094",
+      "files": {
+        "zip": {
+          "key": "scenario/s0094/run/s0094_DCRadjHist_cc95_CVgwLU_salmonflows_20260320jg.zip",
+          "filename": "s0094_DCRadjHist_cc95_CVgwLU_salmonflows_20260320jg.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0094/csv/s0094_coeqwal_calsim_output.csv",
+          "filename": "s0094_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0094/csv/s0094_coeqwal_sv_input.csv",
+          "filename": "s0094_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0095",
+      "files": {
+        "zip": {
+          "key": "scenario/s0095/run/s0095_DCRadjBL_cc95_2020LU_PriorityHHS.zip",
+          "filename": "s0095_DCRadjBL_cc95_2020LU_PriorityHHS.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0095/csv/s0095_coeqwal_calsim_output.csv",
+          "filename": "s0095_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0095/csv/s0095_coeqwal_sv_input.csv",
+          "filename": "s0095_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0096",
+      "files": {
+        "zip": {
+          "key": "scenario/s0096/run/s0096_DCRadjBL_cc95_2020LU_PriorityFuncCWN.zip",
+          "filename": "s0096_DCRadjBL_cc95_2020LU_PriorityFuncCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0096/csv/s0096_coeqwal_calsim_output.csv",
+          "filename": "s0096_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0096/csv/s0096_coeqwal_sv_input.csv",
+          "filename": "s0096_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0097",
+      "files": {
+        "zip": {
+          "key": "scenario/s0097/run/s0097_DCRadjBL_cc95_2020LU_PriorityFullCWN.zip",
+          "filename": "s0097_DCRadjBL_cc95_2020LU_PriorityFullCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0097/csv/s0097_coeqwal_calsim_output.csv",
+          "filename": "s0097_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0097/csv/s0097_coeqwal_sv_input.csv",
+          "filename": "s0097_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0098",
+      "files": {
+        "zip": {
+          "key": "scenario/s0098/run/s0098_USBRAlt3_cc95_2020LU_DeltaOut65.zip",
+          "filename": "s0098_USBRAlt3_cc95_2020LU_DeltaOut65.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0098/csv/s0098_coeqwal_calsim_output.csv",
+          "filename": "s0098_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0098/csv/s0098_coeqwal_sv_input.csv",
+          "filename": "s0098_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0099",
+      "files": {
+        "zip": {
+          "key": "scenario/s0099/run/s0099_USBRAlt3_cc95_2020LU_DeltaOut35.zip",
+          "filename": "s0099_USBRAlt3_cc95_2020LU_DeltaOut35.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0099/csv/s0099_coeqwal_calsim_output.csv",
+          "filename": "s0099_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0099/csv/s0099_coeqwal_sv_input.csv",
+          "filename": "s0099_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0100",
+      "files": {
+        "zip": {
+          "key": "scenario/s0100/run/s0100_USBRAlt3_cc95_2020LU_DeltaOut45.zip",
+          "filename": "s0100_USBRAlt3_cc95_2020LU_DeltaOut45.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0100/csv/s0100_coeqwal_calsim_output.csv",
+          "filename": "s0100_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0100/csv/s0100_coeqwal_sv_input.csv",
+          "filename": "s0100_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0101",
+      "files": {
+        "zip": {
+          "key": "scenario/s0101/run/s0101_USBRAlt3_cc95_2020LU_DeltaOut55.zip",
+          "filename": "s0101_USBRAlt3_cc95_2020LU_DeltaOut55.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0101/csv/s0101_coeqwal_calsim_output.csv",
+          "filename": "s0101_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0101/csv/s0101_coeqwal_sv_input.csv",
+          "filename": "s0101_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0102",
+      "files": {
+        "zip": {
+          "key": "scenario/s0102/run/s0102_DCRadjHist_cc95_2020LU_ShastaCarryover20_20250217.zip",
+          "filename": "s0102_DCRadjHist_cc95_2020LU_ShastaCarryover20_20250217.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0102/csv/s0102_coeqwal_calsim_output.csv",
+          "filename": "s0102_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0102/csv/s0102_coeqwal_sv_input.csv",
+          "filename": "s0102_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0103",
+      "files": {
+        "zip": {
+          "key": "scenario/s0103/run/s0103_DCRadjBL_cc95_2020LU_RelaxFallX2_20250217.zip",
+          "filename": "s0103_DCRadjBL_cc95_2020LU_RelaxFallX2_20250217.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0103/csv/s0103_coeqwal_calsim_output.csv",
+          "filename": "s0103_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0103/csv/s0103_coeqwal_sv_input.csv",
+          "filename": "s0103_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0104",
+      "files": {
+        "zip": {
+          "key": "scenario/s0104/run/s0104_DCRadjHist_cc95_2020LU_EflowsV2_20250216.zip",
+          "filename": "s0104_DCRadjHist_cc95_2020LU_EflowsV2_20250216.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0104/csv/s0104_coeqwal_calsim_output.csv",
+          "filename": "s0104_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0104/csv/s0104_coeqwal_sv_input.csv",
+          "filename": "s0104_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0105",
+      "files": {
+        "zip": {
+          "key": "scenario/s0105/run/s0105_DWRadapt25_cc95_2020LU_DCP.zip",
+          "filename": "s0105_DWRadapt25_cc95_2020LU_DCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0105/csv/s0105_coeqwal_calsim_output.csv",
+          "filename": "s0105_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0105/csv/s0105_coeqwal_sv_input.csv",
+          "filename": "s0105_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0107",
+      "files": {
+        "zip": {
+          "key": "scenario/s0107/run/s0107_adjBL_cqlTAI_wTUCP.zip",
+          "filename": "s0107_adjBL_cqlTAI_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0107/csv/s0107_coeqwal_calsim_output.csv",
+          "filename": "s0107_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0107/csv/s0107_coeqwal_sv_input.csv",
+          "filename": "s0107_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0108",
+      "files": {
+        "zip": {
+          "key": "scenario/s0108/run/s0108_DCRbl_cqlTAI_2020LU_wTUCP_20260413.zip",
+          "filename": "s0108_DCRbl_cqlTAI_2020LU_wTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0108/csv/s0108_coeqwal_calsim_output.csv",
+          "filename": "s0108_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0108/csv/s0108_coeqwal_sv_input.csv",
+          "filename": "s0108_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0109",
+      "files": {
+        "zip": {
+          "key": "scenario/s0109/run/s0109_DCRbl_cqlTAI_2020LU_woTUCP_20260413.zip",
+          "filename": "s0109_DCRbl_cqlTAI_2020LU_woTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0109/csv/s0109_coeqwal_calsim_output.csv",
+          "filename": "s0109_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0109/csv/s0109_coeqwal_sv_input.csv",
+          "filename": "s0109_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0110",
+      "files": {
+        "zip": {
+          "key": "scenario/s0110/run/s0110_USBR24Alt2V1_cqlTAI_2020LU_woTUCP_20260413.zip",
+          "filename": "s0110_USBR24Alt2V1_cqlTAI_2020LU_woTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0110/csv/s0110_coeqwal_calsim_output.csv",
+          "filename": "s0110_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0110/csv/s0110_coeqwal_sv_input.csv",
+          "filename": "s0110_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0111",
+      "files": {
+        "zip": {
+          "key": "scenario/s0111/run/s0111_USBR24Alt2V1_cqlTAI_2020LU_wTUCP_20260413.zip",
+          "filename": "s0111_USBR24Alt2V1_cqlTAI_2020LU_wTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0111/csv/s0111_coeqwal_calsim_output.csv",
+          "filename": "s0111_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0111/csv/s0111_coeqwal_sv_input.csv",
+          "filename": "s0111_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0112",
+      "files": {
+        "zip": {
+          "key": "scenario/s0112/run/s0112_SJVgwLimit_cqlTAI_2020LU_wTUCP_20260413.zip",
+          "filename": "s0112_SJVgwLimit_cqlTAI_2020LU_wTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0112/csv/s0112_coeqwal_calsim_output.csv",
+          "filename": "s0112_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0112/csv/s0112_coeqwal_sv_input.csv",
+          "filename": "s0112_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0113",
+      "files": {
+        "zip": {
+          "key": "scenario/s0113/run/s0113_SJVgwLimit_cqlTAI_SGMALU_wTUCP.zip",
+          "filename": "s0113_SJVgwLimit_cqlTAI_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0113/csv/s0113_coeqwal_calsim_output.csv",
+          "filename": "s0113_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0113/csv/s0113_coeqwal_sv_input.csv",
+          "filename": "s0113_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0114",
+      "files": {
+        "zip": {
+          "key": "scenario/s0114/run/s0114_CVgwLimit_cqlTAI_2020LU_wTUCP_20260413.zip",
+          "filename": "s0114_CVgwLimit_cqlTAI_2020LU_wTUCP_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0114/csv/s0114_coeqwal_calsim_output.csv",
+          "filename": "s0114_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0114/csv/s0114_coeqwal_sv_input.csv",
+          "filename": "s0114_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0115",
+      "files": {
+        "zip": {
+          "key": "scenario/s0115/run/s0115_CVgwLimit_cqlTAI_SGMALU_wTUCP.zip",
+          "filename": "s0115_CVgwLimit_cqlTAI_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0115/csv/s0115_coeqwal_calsim_output.csv",
+          "filename": "s0115_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0115/csv/s0115_coeqwal_sv_input.csv",
+          "filename": "s0115_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0117",
+      "files": {
+        "zip": {
+          "key": "scenario/s0117/run/s0117_DCRadjHist_TAIESM1_2020LU_NoFlowReqt_20260417.zip",
+          "filename": "s0117_DCRadjHist_TAIESM1_2020LU_NoFlowReqt_20260417.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0117/csv/s0117_coeqwal_calsim_output.csv",
+          "filename": "s0117_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0117/csv/s0117_coeqwal_sv_input.csv",
+          "filename": "s0117_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0118",
+      "files": {
+        "zip": {
+          "key": "scenario/s0118/run/s0118_DCRadjHist_cqlTAI_2020LU_salmonflows.zip",
+          "filename": "s0118_DCRadjHist_cqlTAI_2020LU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0118/csv/s0118_coeqwal_calsim_output.csv",
+          "filename": "s0118_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0118/csv/s0118_coeqwal_sv_input.csv",
+          "filename": "s0118_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0119",
+      "files": {
+        "zip": {
+          "key": "scenario/s0119/run/s0119_DCRadjHist_cqlTAI_CVgwLU_eflows.zip",
+          "filename": "s0119_DCRadjHist_cqlTAI_CVgwLU_eflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0119/csv/s0119_coeqwal_calsim_output.csv",
+          "filename": "s0119_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0119/csv/s0119_coeqwal_sv_input.csv",
+          "filename": "s0119_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0120",
+      "files": {
+        "zip": {
+          "key": "scenario/s0120/run/s0120_DCRadjHist_cqlTAI_CVgwLU_salmonflows.zip",
+          "filename": "s0120_DCRadjHist_cqlTAI_CVgwLU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0120/csv/s0120_coeqwal_calsim_output.csv",
+          "filename": "s0120_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0120/csv/s0120_coeqwal_sv_input.csv",
+          "filename": "s0120_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0121",
+      "files": {
+        "zip": {
+          "key": "scenario/s0121/run/s0121_DCRadjBL_cqlTAI_2020LU_PriorityHHS_20260520.zip",
+          "filename": "s0121_DCRadjBL_cqlTAI_2020LU_PriorityHHS_20260520.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0121/csv/s0121_coeqwal_calsim_output.csv",
+          "filename": "s0121_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0121/csv/s0121_coeqwal_sv_input.csv",
+          "filename": "s0121_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0123",
+      "files": {
+        "zip": {
+          "key": "scenario/s0123/run/s0123_DCRadjBL_cqlTAI_2020LU_PriorityFullCWN_20260413.zip",
+          "filename": "s0123_DCRadjBL_cqlTAI_2020LU_PriorityFullCWN_20260413.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0123/csv/s0123_coeqwal_calsim_output.csv",
+          "filename": "s0123_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0123/csv/s0123_coeqwal_sv_input.csv",
+          "filename": "s0123_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0124",
+      "files": {
+        "zip": {
+          "key": "scenario/s0124/run/s0124_USBRAlt3_cqlTAI_2020LU_DeltaOut65_20260414.zip",
+          "filename": "s0124_USBRAlt3_cqlTAI_2020LU_DeltaOut65_20260414.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0124/csv/s0124_coeqwal_calsim_output.csv",
+          "filename": "s0124_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0124/csv/s0124_coeqwal_sv_input.csv",
+          "filename": "s0124_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0125",
+      "files": {
+        "zip": {
+          "key": "scenario/s0125/run/s0125_USBRAlt3_cqlTAI_2020LU_DeltaOut35_20260414.zip",
+          "filename": "s0125_USBRAlt3_cqlTAI_2020LU_DeltaOut35_20260414.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0125/csv/s0125_coeqwal_calsim_output.csv",
+          "filename": "s0125_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0125/csv/s0125_coeqwal_sv_input.csv",
+          "filename": "s0125_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0126",
+      "files": {
+        "zip": {
+          "key": "scenario/s0126/run/s0126_USBRAlt3_cqlTAI_2020LU_DeltaOut45_20260414.zip",
+          "filename": "s0126_USBRAlt3_cqlTAI_2020LU_DeltaOut45_20260414.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0126/csv/s0126_coeqwal_calsim_output.csv",
+          "filename": "s0126_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0126/csv/s0126_coeqwal_sv_input.csv",
+          "filename": "s0126_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0127",
+      "files": {
+        "zip": {
+          "key": "scenario/s0127/run/s0127_USBRAlt3_cqlTAI_2020LU_DeltaOut55_20260414.zip",
+          "filename": "s0127_USBRAlt3_cqlTAI_2020LU_DeltaOut55_20260414.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0127/csv/s0127_coeqwal_calsim_output.csv",
+          "filename": "s0127_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0127/csv/s0127_coeqwal_sv_input.csv",
+          "filename": "s0127_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0128",
+      "files": {
+        "zip": {
+          "key": "scenario/s0128/run/s0128_DCRadjHist_TAIESM1_2020LU_ShastaCarryover20.zip",
+          "filename": "s0128_DCRadjHist_TAIESM1_2020LU_ShastaCarryover20.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0128/csv/s0128_coeqwal_calsim_output.csv",
+          "filename": "s0128_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0128/csv/s0128_coeqwal_sv_input.csv",
+          "filename": "s0128_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0129",
+      "files": {
+        "zip": {
+          "key": "scenario/s0129/run/s0129_DCRadjBL_cqITAI_2020LU_RelaxFallX2_20260415.zip",
+          "filename": "s0129_DCRadjBL_cqITAI_2020LU_RelaxFallX2_20260415.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0129/csv/s0129_coeqwal_calsim_output.csv",
+          "filename": "s0129_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0129/csv/s0129_coeqwal_sv_input.csv",
+          "filename": "s0129_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0130",
+      "files": {
+        "zip": {
+          "key": "scenario/s0130/run/s0130_DCRadjHist_cqlTAI_2020LU_EflowsV2_v0.2_20260417.zip",
+          "filename": "s0130_DCRadjHist_cqlTAI_2020LU_EflowsV2_v0.2_20260417.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0130/csv/s0130_coeqwal_calsim_output.csv",
+          "filename": "s0130_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0130/csv/s0130_coeqwal_sv_input.csv",
+          "filename": "s0130_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0133",
+      "files": {
+        "zip": {
+          "key": "scenario/s0133/run/s0133_adjBL_cqlECV_wTUCP_20260518v2.zip",
+          "filename": "s0133_adjBL_cqlECV_wTUCP_20260518v2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0133/csv/s0133_coeqwal_calsim_output.csv",
+          "filename": "s0133_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0133/csv/s0133_coeqwal_sv_input.csv",
+          "filename": "s0133_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0134",
+      "files": {
+        "zip": {
+          "key": "scenario/s0134/run/s0134_DCRbl_cqlECV_2020LU_wTUCP_20260508v2.zip",
+          "filename": "s0134_DCRbl_cqlECV_2020LU_wTUCP_20260508v2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0134/csv/s0134_coeqwal_calsim_output.csv",
+          "filename": "s0134_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0134/csv/s0134_coeqwal_sv_input.csv",
+          "filename": "s0134_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0135",
+      "files": {
+        "zip": {
+          "key": "scenario/s0135/run/s0135_DCRbl_cqlECV_2020LU_woTUCP.zip",
+          "filename": "s0135_DCRbl_cqlECV_2020LU_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0135/csv/s0135_coeqwal_calsim_output.csv",
+          "filename": "s0135_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0135/csv/s0135_coeqwal_sv_input.csv",
+          "filename": "s0135_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0136",
+      "files": {
+        "zip": {
+          "key": "scenario/s0136/run/s0136_USBR24Alt2V1_cqlECV_2020LU_woTUCP.zip",
+          "filename": "s0136_USBR24Alt2V1_cqlECV_2020LU_woTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0136/csv/s0136_coeqwal_calsim_output.csv",
+          "filename": "s0136_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0136/csv/s0136_coeqwal_sv_input.csv",
+          "filename": "s0136_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0137",
+      "files": {
+        "zip": {
+          "key": "scenario/s0137/run/s0137_USBR24Alt2V1_cqlECV_2020LU_wTUCP.zip",
+          "filename": "s0137_USBR24Alt2V1_cqlECV_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0137/csv/s0137_coeqwal_calsim_output.csv",
+          "filename": "s0137_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0137/csv/s0137_coeqwal_sv_input.csv",
+          "filename": "s0137_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0138",
+      "files": {
+        "zip": {
+          "key": "scenario/s0138/run/s0138_SJVgwLimit_cqlECV_2020LU_wTUCP.zip",
+          "filename": "s0138_SJVgwLimit_cqlECV_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0138/csv/s0138_coeqwal_calsim_output.csv",
+          "filename": "s0138_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0138/csv/s0138_coeqwal_sv_input.csv",
+          "filename": "s0138_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0139",
+      "files": {
+        "zip": {
+          "key": "scenario/s0139/run/s0139_SJVgwLimit_cqlECV_SGMALU_wTUCP.zip",
+          "filename": "s0139_SJVgwLimit_cqlECV_SGMALU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0139/csv/s0139_coeqwal_calsim_output.csv",
+          "filename": "s0139_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0139/csv/s0139_coeqwal_sv_input.csv",
+          "filename": "s0139_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0140",
+      "files": {
+        "zip": {
+          "key": "scenario/s0140/run/s0140_CVgwLimit_cqlECV_2020LU_wTUCP.zip",
+          "filename": "s0140_CVgwLimit_cqlECV_2020LU_wTUCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0140/csv/s0140_coeqwal_calsim_output.csv",
+          "filename": "s0140_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0140/csv/s0140_coeqwal_sv_input.csv",
+          "filename": "s0140_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0141",
+      "files": {
+        "zip": {
+          "key": "scenario/s0141/run/s0141_CVgwLimit_cqlECV_SGMALU_wTUCP_20260509v2.zip",
+          "filename": "s0141_CVgwLimit_cqlECV_SGMALU_wTUCP_20260509v2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0141/csv/s0141_coeqwal_calsim_output.csv",
+          "filename": "s0141_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0141/csv/s0141_coeqwal_sv_input.csv",
+          "filename": "s0141_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0143",
+      "files": {
+        "zip": {
+          "key": "scenario/s0143/run/s0143_DCRadjHist_cqlECV_2020LU_NoFlowReqt.zip",
+          "filename": "s0143_DCRadjHist_cqlECV_2020LU_NoFlowReqt.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0143/csv/s0143_coeqwal_calsim_output.csv",
+          "filename": "s0143_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0143/csv/s0143_coeqwal_sv_input.csv",
+          "filename": "s0143_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0144",
+      "files": {
+        "zip": {
+          "key": "scenario/s0144/run/s0144_DCRadjHist_cqlECV_2020LU_salmonflows.zip",
+          "filename": "s0144_DCRadjHist_cqlECV_2020LU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0144/csv/s0144_coeqwal_calsim_output.csv",
+          "filename": "s0144_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0144/csv/s0144_coeqwal_sv_input.csv",
+          "filename": "s0144_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0145",
+      "files": {
+        "zip": {
+          "key": "scenario/s0145/run/s0145_DCRadjHist_cqlECV_CVgwLU_eflows.zip",
+          "filename": "s0145_DCRadjHist_cqlECV_CVgwLU_eflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0145/csv/s0145_coeqwal_calsim_output.csv",
+          "filename": "s0145_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0145/csv/s0145_coeqwal_sv_input.csv",
+          "filename": "s0145_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0146",
+      "files": {
+        "zip": {
+          "key": "scenario/s0146/run/s0146_DCRadjHist_cqlECV_CVgwLU_salmonflows.zip",
+          "filename": "s0146_DCRadjHist_cqlECV_CVgwLU_salmonflows.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0146/csv/s0146_coeqwal_calsim_output.csv",
+          "filename": "s0146_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0146/csv/s0146_coeqwal_sv_input.csv",
+          "filename": "s0146_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0147",
+      "files": {
+        "zip": {
+          "key": "scenario/s0147/run/s0147_DCRadjBL_cqlECV_2020LU_PriorityHHS.zip",
+          "filename": "s0147_DCRadjBL_cqlECV_2020LU_PriorityHHS.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0147/csv/s0147_coeqwal_calsim_output.csv",
+          "filename": "s0147_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0147/csv/s0147_coeqwal_sv_input.csv",
+          "filename": "s0147_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0149",
+      "files": {
+        "zip": {
+          "key": "scenario/s0149/run/s0149_DCRadjBL_cqlECV_2020LU_PriorityFullCWN.zip",
+          "filename": "s0149_DCRadjBL_cqlECV_2020LU_PriorityFullCWN.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0149/csv/s0149_coeqwal_calsim_output.csv",
+          "filename": "s0149_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0149/csv/s0149_coeqwal_sv_input.csv",
+          "filename": "s0149_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0150",
+      "files": {
+        "zip": {
+          "key": "scenario/s0150/run/s0150_USBRAlt3_cqlECV_2020LU_DeltaOut65_20260509v2.zip",
+          "filename": "s0150_USBRAlt3_cqlECV_2020LU_DeltaOut65_20260509v2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0150/csv/s0150_coeqwal_calsim_output.csv",
+          "filename": "s0150_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0150/csv/s0150_coeqwal_sv_input.csv",
+          "filename": "s0150_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0151",
+      "files": {
+        "zip": {
+          "key": "scenario/s0151/run/s0151_USBRAlt3_cqlECV_2020LU_DeltaOut35.zip",
+          "filename": "s0151_USBRAlt3_cqlECV_2020LU_DeltaOut35.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0151/csv/s0151_coeqwal_calsim_output.csv",
+          "filename": "s0151_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0151/csv/s0151_coeqwal_sv_input.csv",
+          "filename": "s0151_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0152",
+      "files": {
+        "zip": {
+          "key": "scenario/s0152/run/s0152_USBRAlt3_cqlECV_2020LU_DeltaOut45.zip",
+          "filename": "s0152_USBRAlt3_cqlECV_2020LU_DeltaOut45.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0152/csv/s0152_coeqwal_calsim_output.csv",
+          "filename": "s0152_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0152/csv/s0152_coeqwal_sv_input.csv",
+          "filename": "s0152_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0153",
+      "files": {
+        "zip": {
+          "key": "scenario/s0153/run/s0153_USBRAlt3_cqlECV_2020LU_DeltaOut55.zip",
+          "filename": "s0153_USBRAlt3_cqlECV_2020LU_DeltaOut55.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0153/csv/s0153_coeqwal_calsim_output.csv",
+          "filename": "s0153_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0153/csv/s0153_coeqwal_sv_input.csv",
+          "filename": "s0153_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0154",
+      "files": {
+        "zip": {
+          "key": "scenario/s0154/run/s0154_DCRadjHist_cqlECV_2020LU_ShastaCarryover20.zip",
+          "filename": "s0154_DCRadjHist_cqlECV_2020LU_ShastaCarryover20.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0154/csv/s0154_coeqwal_calsim_output.csv",
+          "filename": "s0154_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0154/csv/s0154_coeqwal_sv_input.csv",
+          "filename": "s0154_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0155",
+      "files": {
+        "zip": {
+          "key": "scenario/s0155/run/s0155_DCRadjBL_cqlECV_2020LU_RelaxFallX2.zip",
+          "filename": "s0155_DCRadjBL_cqlECV_2020LU_RelaxFallX2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0155/csv/s0155_coeqwal_calsim_output.csv",
+          "filename": "s0155_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0155/csv/s0155_coeqwal_sv_input.csv",
+          "filename": "s0155_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0156",
+      "files": {
+        "zip": {
+          "key": "scenario/s0156/run/s0156_DCRadjHist_cqlECV_2020LU_EflowsV2_20260509v2.zip",
+          "filename": "s0156_DCRadjHist_cqlECV_2020LU_EflowsV2_20260509v2.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0156/csv/s0156_coeqwal_calsim_output.csv",
+          "filename": "s0156_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0156/csv/s0156_coeqwal_sv_input.csv",
+          "filename": "s0156_coeqwal_sv_input.csv"
+        }
+      }
+    },
+    {
+      "scenario_id": "s0157",
+      "files": {
+        "zip": {
+          "key": "scenario/s0157/run/s0157_DWRadapt25_cqlECV_2020LU_DCP.zip",
+          "filename": "s0157_DWRadapt25_cqlECV_2020LU_DCP.zip"
+        },
+        "output_csv": {
+          "key": "scenario/s0157/csv/s0157_coeqwal_calsim_output.csv",
+          "filename": "s0157_coeqwal_calsim_output.csv"
+        },
+        "sv_csv": {
+          "key": "scenario/s0157/csv/s0157_coeqwal_sv_input.csv",
+          "filename": "s0157_coeqwal_sv_input.csv"
+        }
+      }
+    }
+  ]
+}
