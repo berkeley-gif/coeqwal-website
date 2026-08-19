@@ -11,6 +11,9 @@ import {
   pointsFromValues,
   pickLiveSeriesPoints,
   didLiveScaleForVariable,
+  SSJV_ALL_ROUTES_LOCATION,
+  SSJV_ROUTE_SUBJECTS,
+  sumAlignedSeriesPoints,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -481,4 +484,63 @@ test("cws request tokens are measures, split per variable and view", () => {
   expect(
     pickLiveSeries(cwsBlock, "cws", "NOD_CWS", "annual", "shortage_total"),
   ).toEqual([])
+})
+
+// SSJV all-routes total (2026-08-19 team decision): no combined subject is
+// served, so the explorer sums the three served route series client-side,
+// FAIL-CLOSED: the sum exists only when every route series is present with
+// identical, verifiable water years; anything less falls back to sample
+// labeling, never a partial sum.
+
+test("ssjv all-routes location expands to the three served route subjects", () => {
+  expect(SSJV_ALL_ROUTES_LOCATION).toBe("ALL_ROUTES")
+  expect([...SSJV_ROUTE_SUBJECTS]).toEqual([
+    "D_CAA238_CVPCV",
+    "D_MLRTN_FRK000",
+    "SWP_TA_KERNAG",
+  ])
+  // The synthetic total is not a served subject: the single-subject mapping
+  // stays null for it, so nothing ever requests a subject the API lacks.
+  expect(toDidSubject("sysdel", "ALL_ROUTES", "ssjv_exp")).toBeNull()
+})
+
+test("sumAlignedSeriesPoints sums only complete, year-aligned series", () => {
+  const cvc = { series: [63, 60], waterYears: [1922, 1923] }
+  const friant = { series: [877, 880], waterYears: [1922, 1923] }
+  const kern = { series: [415, 410], waterYears: [1922, 1923] }
+  // Expected-total fixture: per-year sums, shared years.
+  expect(sumAlignedSeriesPoints([cvc, friant, kern])).toEqual({
+    series: [1355, 1350],
+    waterYears: [1922, 1923],
+  })
+  // A missing route series (empty) kills the sum.
+  expect(
+    sumAlignedSeriesPoints([cvc, friant, { series: [], waterYears: [] }]),
+  ).toBeNull()
+  // A length mismatch kills the sum.
+  expect(
+    sumAlignedSeriesPoints([
+      cvc,
+      friant,
+      { series: [415], waterYears: [1922] },
+    ]),
+  ).toBeNull()
+  // Misaligned years kill the sum even at equal lengths.
+  expect(
+    sumAlignedSeriesPoints([
+      cvc,
+      friant,
+      { series: [415, 410], waterYears: [1922, 1924] },
+    ]),
+  ).toBeNull()
+  // Unverifiable years (pointsFromValues returns empty waterYears when any
+  // point lacked a water_year) kill the sum: alignment cannot be proven.
+  expect(
+    sumAlignedSeriesPoints([
+      cvc,
+      friant,
+      { series: [415, 410], waterYears: [] },
+    ]),
+  ).toBeNull()
+  expect(sumAlignedSeriesPoints([])).toBeNull()
 })

@@ -289,16 +289,16 @@ test("single-total and multi-route variables use honest location groups", () => 
   // Per-project exports live at the single Delta location like tot_exp.
   expect(getVariable("cvp_exp")?.locationGroup).toBe("delta")
   expect(getVariable("swp_exp")?.locationGroup).toBe("delta")
-  // Southern SJV exports: the three served routes are the locations; the
-  // three-route presentation is pending confirmation, so the variable
-  // carries the Provisional chip.
+  // Southern SJV exports: the client-side total leads, then the three
+  // served routes (presentation confirmed; the chip retirement and the
+  // total's fail-closed sum are covered in their own test below).
   expect(getVariable("ssjv_exp")?.locationGroup).toBe("ssjv")
   expect(LOCATION_GROUPS.ssjv.items.map((l) => l.id)).toEqual([
+    "ALL_ROUTES",
     "CVC",
     "FRIANT",
     "KERN",
   ])
-  expect(getVariable("ssjv_exp")?.provisional).toBe(true)
 })
 
 test("registry data flags agree with the live request mapping", () => {
@@ -365,4 +365,29 @@ test("cws shortage percent sample series derive from shortage over demand", () =
   expect(cwsShortagePctFromSeries([0], [0])).toEqual([0])
   // Mismatched lengths trim to the shorter series so years stay aligned.
   expect(cwsShortagePctFromSeries([10, 10], [90])).toEqual([10])
+})
+
+// SSJV all-routes total (2026-08-19 team decision): the presentation is
+// confirmed (chip retired) and a client-side total location leads the route
+// list, summed fail-closed from the three served route series.
+
+test("ssjv gains a leading all-routes total and sheds the provisional chip", () => {
+  const items = LOCATION_GROUPS.ssjv.items
+  expect(items.map((l) => l.id)).toEqual([
+    "ALL_ROUTES",
+    "CVC",
+    "FRIANT",
+    "KERN",
+  ])
+  const total = getLocation("ssjv", "ALL_ROUTES")
+  expect(total?.name).toBe("All routes (total)")
+  expect(total?.aggregate).toBe(true)
+  // Sample magnitude matches the sum of the route sample magnitudes so
+  // sample members stay internally consistent.
+  expect(total?.mockBase).toBe(
+    (getLocation("ssjv", "CVC")?.mockBase ?? 0) +
+      (getLocation("ssjv", "FRIANT")?.mockBase ?? 0) +
+      (getLocation("ssjv", "KERN")?.mockBase ?? 0),
+  )
+  expect(getVariable("ssjv_exp")?.provisional).toBeUndefined()
 })

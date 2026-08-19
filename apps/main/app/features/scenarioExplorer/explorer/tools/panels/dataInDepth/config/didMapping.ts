@@ -152,13 +152,30 @@ const SYSDEL_SUBJECT_BY_VARIABLE: Record<string, Record<string, string>> = {
     DELTA: "C_CAA003_SWP",
   },
   // Southern San Joaquin Valley exports: the three served routes are the
-  // locations; no combined total is served and none is computed client-side.
+  // locations. No combined total is served; the "All routes (total)"
+  // location is synthetic, summed client-side from the three route series
+  // (fail-closed via sumAlignedSeriesPoints), so it stays out of this
+  // single-subject map on purpose.
   ssjv_exp: {
     CVC: "D_CAA238_CVPCV",
     FRIANT: "D_MLRTN_FRK000",
     KERN: "SWP_TA_KERNAG",
   },
 }
+
+/**
+ * The synthetic SSJV total location and the three served route subjects it
+ * sums (2026-08-19 team decision: client-side computation of served data is
+ * allowed, and the total presentation is confirmed). The caller fetches all
+ * three subjects in one request and adopts the sum only when
+ * `sumAlignedSeriesPoints` accepts them.
+ */
+export const SSJV_ALL_ROUTES_LOCATION = "ALL_ROUTES"
+export const SSJV_ROUTE_SUBJECTS: readonly string[] = [
+  "D_CAA238_CVPCV",
+  "D_MLRTN_FRK000",
+  "SWP_TA_KERNAG",
+]
 
 /**
  * Groundwater: the NOD/SOD aggregates use dedicated aggregate subjects; every
@@ -542,4 +559,33 @@ export function pickLiveSeriesPoints(
   const match = subjects?.find((s) => s.subject === subject)
   const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return pointsFromValues(facet?.values)
+}
+
+/**
+ * Sum several extracted live series into one, FAIL-CLOSED: the sum exists
+ * only when every input has a non-empty series with verifiable, identical
+ * water years (equal length, same year at every index). Anything less -
+ * a missing route, a length mismatch, misaligned or unverifiable years -
+ * returns null so the caller falls back to sample labeling instead of ever
+ * drawing a partial total. Used by the synthetic SSJV all-routes location.
+ */
+export function sumAlignedSeriesPoints(
+  pointsList: readonly SeriesPoints[],
+): SeriesPoints | null {
+  const first = pointsList[0]
+  if (!first) return null
+  const n = first.series.length
+  if (n === 0 || first.waterYears.length !== n) return null
+  for (const points of pointsList.slice(1)) {
+    if (points.series.length !== n || points.waterYears.length !== n) {
+      return null
+    }
+    for (let i = 0; i < n; i++) {
+      if (points.waterYears[i] !== first.waterYears[i]) return null
+    }
+  }
+  const series = first.series.map((_, i) =>
+    pointsList.reduce((acc, points) => acc + (points.series[i] as number), 0),
+  )
+  return { series, waterYears: [...first.waterYears] }
 }
