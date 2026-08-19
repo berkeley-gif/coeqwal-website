@@ -186,20 +186,21 @@ function DesktopPortal({
               ...surface,
               ...(width !== undefined && { width }),
               ...(maxWidth !== undefined && { maxWidth }),
-
             }}
           >
             {showArrow && (
               <PortalArrow placement={resolvedPlacement} setRef={setArrowEl} />
             )}
             {closeButton}
-            <Box sx={{
-              maxHeight: `calc(100vh - 32px - ${surface.padding})`,
-              overflowY: "auto",
-              overscrollBehavior: "contain",
-              marginTop: surface.padding,
-              paddingBottom: surface.padding,
-            }}>
+            <Box
+              sx={{
+                maxHeight: `calc(100vh - 32px - ${surface.padding})`,
+                overflowY: "auto",
+                overscrollBehavior: "contain",
+                marginTop: surface.padding,
+                paddingBottom: surface.padding,
+              }}
+            >
               {children}
             </Box>
           </Box>

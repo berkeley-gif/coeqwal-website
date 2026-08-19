@@ -1,10 +1,10 @@
 /**
  * Single source of truth for resilience heatmap preset buttons in
  * `ResilienceControls` (single Presets row. `salient` filters that row).
- * 
- * UPDATE: AUG 2026. This feature has been removed pre-launch as it's 
+ *
+ * UPDATE: AUG 2026. This feature has been removed pre-launch as it's
  * not working as intended. Will be revisiting this functionality in the future
- * Keeping the code for now. 
+ * Keeping the code for now.
  */
 
 import type { ResilienceControlsState } from "../../../store"
