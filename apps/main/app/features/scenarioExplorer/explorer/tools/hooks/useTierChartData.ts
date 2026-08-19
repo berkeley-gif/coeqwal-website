@@ -189,7 +189,11 @@ export function useTierChartData(
         // is opened up.
         NOD_SOD_OUTCOME_CODES.forEach((code) => {
           const displayName = getOutcomeName(code)
-          const raw = getRegionalTierMean(scenarioId, code as RegionalOutcomeCode, hydroclimate as RegionalHydroclimate)
+          const raw = getRegionalTierMean(
+            scenarioId,
+            code as RegionalOutcomeCode,
+            hydroclimate as RegionalHydroclimate,
+          )
           values[displayName] = raw != null ? tierMeanToRadarValue(raw) : null
         })
 
