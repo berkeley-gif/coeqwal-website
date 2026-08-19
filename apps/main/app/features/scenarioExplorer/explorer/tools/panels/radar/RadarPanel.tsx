@@ -232,10 +232,10 @@ export default function RadarPanel({
     () =>
       activeOutcome
         ? {
-          axis: getOutcomeName(activeOutcome.outcomeCode),
-          scenarioId:
-            activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
-        }
+            axis: getOutcomeName(activeOutcome.outcomeCode),
+            scenarioId:
+              activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
+          }
         : null,
     [activeOutcome],
   )
@@ -255,10 +255,10 @@ export default function RadarPanel({
       onChartHover?.(
         info
           ? {
-            scenarioId: info.scenarioId,
-            outcome: info.axis,
-            tierValue: info.tierValue,
-          }
+              scenarioId: info.scenarioId,
+              outcome: info.axis,
+              tierValue: info.tierValue,
+            }
           : null,
       )
     },
@@ -795,8 +795,9 @@ export default function RadarPanel({
     }
   }, [hydroclimate, hasRegionalAxis])
 
-  const { scrollRef, canScrollRight, checkOverflow } =
-    useScrollRightIndicator([visibleAxisNames])
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    visibleAxisNames,
+  ])
 
   if (isLoading && !hasData) {
     return (
@@ -818,7 +819,6 @@ export default function RadarPanel({
     )
   }
 
-
   return (
     <Box
       ref={chartWrapperRef}
@@ -834,7 +834,8 @@ export default function RadarPanel({
       <Box
         ref={scrollRef}
         onScroll={checkOverflow}
-        sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
+        sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}
+      >
         <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
           {showAxisSelector && (
             <OutcomeChooserPanel

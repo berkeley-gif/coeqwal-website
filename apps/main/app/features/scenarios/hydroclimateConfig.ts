@@ -10,7 +10,6 @@
 import type { ElementType } from "react"
 import {
   AccessTimeFilledIcon,
-  HistoryIcon,
   WaterDropIcon,
   WbSunnyIcon,
   LocalFireDepartmentIcon,

@@ -163,7 +163,7 @@ export default function TierTooltipContent({
       <Typography variant="dashboard" sx={{ mb: theme.space.component.md }}>
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcomeCode] ||
-          "Definition not available",
+            "Definition not available",
           emphasisWeight,
         )}
       </Typography>
@@ -202,7 +202,7 @@ export default function TierTooltipContent({
                 borderRadius: theme.borderRadius.xs,
                 backgroundColor:
                   theme.palette.tiers[
-                  `tier${currentTier}` as keyof typeof theme.palette.tiers
+                    `tier${currentTier}` as keyof typeof theme.palette.tiers
                   ],
                 flexShrink: 0,
               }}
@@ -320,7 +320,7 @@ export default function TierTooltipContent({
                   borderRadius: theme.borderRadius.xs,
                   backgroundColor:
                     theme.palette.tiers[
-                    `tier${tierNum}` as keyof typeof theme.palette.tiers
+                      `tier${tierNum}` as keyof typeof theme.palette.tiers
                     ],
                   flexShrink: 0,
                   mt: "5px", // Align with first line of text
@@ -334,10 +334,10 @@ export default function TierTooltipContent({
               <Typography variant="dashboard" component="span">
                 {formatTierText(
                   OUTCOME_TIER_VALUES[outcomeCode as OutcomeCode]?.[
-                  `tier${tierNum}` as "tier1" | "tier2" | "tier3" | "tier4"
+                    `tier${tierNum}` as "tier1" | "tier2" | "tier3" | "tier4"
                   ] ||
-                  ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
-                  "",
+                    ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
+                    "",
                   emphasisWeight,
                 )}
               </Typography>
@@ -346,7 +346,6 @@ export default function TierTooltipContent({
         })}
         <Typography variant="dashboard" component="span">
           {footerPrefix && <>{formatTierText(footerPrefix, emphasisWeight)} </>}
-
           For more information, see technical documentation on{" "}
           <Box
             component="button"

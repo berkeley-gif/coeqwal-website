@@ -13,8 +13,9 @@ const ChartControlsBar = React.forwardRef<
   ChartControlsBarProps
 >(function ChartControlsBar({ children }, ref) {
   const theme = useTheme()
-  const { scrollRef, canScrollRight, checkOverflow } =
-    useScrollRightIndicator([children])
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    children,
+  ])
 
   return (
     <Box

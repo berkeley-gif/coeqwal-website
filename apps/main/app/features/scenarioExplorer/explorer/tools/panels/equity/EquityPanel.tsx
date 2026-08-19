@@ -764,8 +764,10 @@ export default function EquityPanel({
     return highlightedIds.has(focusScenarioId)
   }, [highlightedIds, focusScenarioId])
 
-  const { scrollRef, canScrollRight, checkOverflow } =
-    useScrollRightIndicator([objectives, categories])
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    objectives,
+    categories,
+  ])
 
   return (
     <Box
@@ -780,7 +782,9 @@ export default function EquityPanel({
         p: theme.space.component.lg,
         position: "relative",
       }}
-    > <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
+    >
+      {" "}
+      <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         <Box
           ref={scrollRef}
           onScroll={checkOverflow}
@@ -818,7 +822,6 @@ export default function EquityPanel({
             </HydroclimateGate>
           </Box>
         </Box>
-
 
         <ScrollRightIndicator
           visible={canScrollRight}
@@ -862,7 +865,6 @@ export default function EquityPanel({
           Worsened only
         </MenuItem>
       </Menu>
-
       <Snackbar
         open={showMapHintSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}

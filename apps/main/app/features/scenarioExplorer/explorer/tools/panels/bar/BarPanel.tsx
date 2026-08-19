@@ -293,6 +293,11 @@ export default function BarPanel() {
     [cardScenarios, pinnedSet],
   )
 
+  const { scrollRef, canScrollRight, checkOverflow } = useScrollRightIndicator([
+    outcomeNames.length,
+  ])
+
+
   if (isLoading) {
     return (
       <Box
@@ -410,8 +415,6 @@ export default function BarPanel() {
     )
   }
 
-  const { scrollRef, canScrollRight, checkOverflow } =
-    useScrollRightIndicator([outcomeNames.length])
 
   return (
     <Box sx={{ position: "relative", height: "100%" }}>
@@ -504,7 +507,9 @@ export default function BarPanel() {
 
           {unpinnedCardScenarios.map((scenario, index) => {
             const previousTheme =
-              index > 0 ? (unpinnedCardScenarios[index - 1]?.theme ?? null) : null
+              index > 0
+                ? (unpinnedCardScenarios[index - 1]?.theme ?? null)
+                : null
             const showGroupLabel = scenario.theme !== previousTheme
 
             return (
