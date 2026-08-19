@@ -297,7 +297,6 @@ export default function BarPanel() {
     outcomeNames.length,
   ])
 
-
   if (isLoading) {
     return (
       <Box
@@ -414,7 +413,6 @@ export default function BarPanel() {
       </Box>
     )
   }
-
 
   return (
     <Box sx={{ position: "relative", height: "100%" }}>
