@@ -3,10 +3,14 @@
 /**
  * AnchoredPortal - Shows content next to an element, positioned for the device.
  *
- * On desktop it uses an MUI Popper with a dynamic arrow that flips to stay in
- * the viewport. Below the sm breakpoint it falls back to a centered MobileModal.
+ * Uses an MUI Popper with a dynamic arrow that flips to stay in the viewport.
  * Styling comes from tooltipSurface, and callers pass their own content (and
  * close button) as children.
+ *
+ * Mobile is not currently supported here - apps/main gates anything below the
+ * `sm` breakpoint before this ever mounts (see app/learn/page.tsx). A
+ * MobileModal-based fallback previously lived in this file; see git history
+ * if/when mobile support gets scoped.
  */
 
 import React, { useEffect, useMemo, useState } from "react"
@@ -18,7 +22,6 @@ import {
   useMediaQuery,
 } from "../../.."
 import type { PopperProps } from "../../.."
-import { MobileModal } from "../MobileModal"
 import { tooltipSurface, type TooltipDensity } from "./tooltipSurface"
 
 const ARROW_SIZE = 12
@@ -35,6 +38,8 @@ export interface AnchoredPortalProps {
   onClose: () => void
   /** Surface content, including any close button */
   children: React.ReactNode
+  /** Close button, rendered outside the scrollable content area */
+  closeButton?: React.ReactNode
   /** Preferred desktop placement (default: "top") */
   placement?: PopperProps["placement"]
   /** Placements to try when the preferred one overflows */
@@ -51,10 +56,6 @@ export interface AnchoredPortalProps {
   showArrow?: boolean
   /** Padding/text density; anchored popovers default to "spacious" rich content */
   density?: TooltipDensity
-  /** Mobile modal max width (default: 450) */
-  mobileMaxWidth?: number | string
-  /** Mobile modal max height */
-  mobileMaxHeight?: string
 }
 
 /**
@@ -118,6 +119,7 @@ function DesktopPortal({
   anchorEl,
   onClose,
   children,
+  closeButton,
   placement = "top",
   fallbackPlacements = ["top", "bottom", "left", "right"],
   offset = 12,
@@ -128,6 +130,7 @@ function DesktopPortal({
   density = "spacious",
 }: AnchoredPortalProps) {
   const theme = useTheme()
+  const surface = tooltipSurface(theme, { density })
   // Callback ref via state so modifiers recompute once the arrow mounts.
   const [arrowEl, setArrowEl] = useState<HTMLDivElement | null>(null)
   const resolvedZIndex = zIndex ?? theme.zIndex.tooltip
@@ -180,17 +183,25 @@ function DesktopPortal({
             data-anchored-portal-surface=""
             sx={{
               position: "relative",
-              ...tooltipSurface(theme, { density }),
+              ...surface,
               ...(width !== undefined && { width }),
               ...(maxWidth !== undefined && { maxWidth }),
-              maxHeight: "calc(100vh - 32px)",
-              overflowY: "auto",
+
             }}
           >
             {showArrow && (
               <PortalArrow placement={resolvedPlacement} setRef={setArrowEl} />
             )}
-            {children}
+            {closeButton}
+            <Box sx={{
+              maxHeight: `calc(100vh - 32px - ${surface.padding})`,
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              marginTop: surface.padding,
+              paddingBottom: surface.padding,
+            }}>
+              {children}
+            </Box>
           </Box>
         </ClickAwayListener>
       )}
@@ -198,36 +209,9 @@ function DesktopPortal({
   )
 }
 
-function MobilePortal({
-  open,
-  onClose,
-  children,
-  mobileMaxWidth = DEFAULT_MOBILE_MAX_WIDTH,
-  mobileMaxHeight = "calc(100vh - 64px)",
-}: AnchoredPortalProps) {
-  const theme = useTheme()
-
-  return (
-    <MobileModal
-      open={open}
-      onClose={onClose}
-      maxWidth={mobileMaxWidth}
-      maxHeight={mobileMaxHeight}
-      showCloseButton={false}
-    >
-      <Box sx={{ position: "relative", ...theme.typography.compactSubtitle }}>
-        {children}
-      </Box>
-    </MobileModal>
-  )
-}
-
 export function AnchoredPortal(props: AnchoredPortalProps) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-
   if (!props.open) return null
-  return isMobile ? <MobilePortal {...props} /> : <DesktopPortal {...props} />
+  return <DesktopPortal {...props} />
 }
 
 export default AnchoredPortal
