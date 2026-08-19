@@ -19,15 +19,11 @@ import {
   Popper,
   ClickAwayListener,
   useTheme,
-  useMediaQuery,
 } from "../../.."
 import type { PopperProps } from "../../.."
 import { tooltipSurface, type TooltipDensity } from "./tooltipSurface"
 
 const ARROW_SIZE = 12
-// Caps the mobile modal width. Sits between the theme's md (400) and lg (600)
-// maxWidth tokens, wide enough for tier-style content without spanning phones.
-const DEFAULT_MOBILE_MAX_WIDTH = 450
 
 export interface AnchoredPortalProps {
   /** Whether the surface is open */
