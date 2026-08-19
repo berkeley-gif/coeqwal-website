@@ -39,6 +39,8 @@ export interface StrategyHeaderProps {
   titleVariant?: "subtitle1" | "subtitle2" | "body1" | "body2"
   /** Max width for the description */
   descriptionMaxWidth?: string | number | object
+  /** Overrides the default ~3-line char budget for the collapsed description preview */
+  descriptionCharLimit?: number
   /** Called when title is clicked */
   onTitleClick?: () => void
   /** Whether to show the theme badge (defaults to true) */
@@ -166,6 +168,7 @@ export function StrategyHeader({
   compact = false,
   titleVariant = "body2",
   descriptionMaxWidth,
+  descriptionCharLimit,
   showThemeBadge = true,
   onTitleClick,
   onThemeBadgeClick,
@@ -445,6 +448,7 @@ export function StrategyHeader({
           description={strategy.description}
           maxWidth={descriptionMaxWidth}
           disableTruncation={disableTruncation}
+          charLimit={descriptionCharLimit}
         />
       )}
     </Box>

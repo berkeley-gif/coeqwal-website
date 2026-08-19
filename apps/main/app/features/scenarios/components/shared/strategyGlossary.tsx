@@ -162,15 +162,17 @@ export function DescriptionWithGlossaryLinks({
   description,
   maxWidth,
   disableTruncation = false,
+  charLimit: charLimitOverride,
 }: {
   description: string
   maxWidth?: string | number | object
   disableTruncation?: boolean
+  charLimit?: number
 }) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const isCoarsePointer = useIsCoarsePointer()
-  const charLimit = isCoarsePointer ? 280 : 200
+  const charLimit = charLimitOverride ?? (isCoarsePointer ? 280 : 200)
   const truncatedDescription = useMemo(
     () => truncateDescriptionText(description, charLimit),
     [description, charLimit],
@@ -183,6 +185,7 @@ export function DescriptionWithGlossaryLinks({
     color: theme.palette.blue.medium,
     fontStyle: "italic",
     cursor: "pointer",
+    float: "right",
     userSelect: "none" as const,
     background: "none",
     border: "none",
@@ -260,7 +263,7 @@ export function DescriptionWithGlossaryLinks({
         </Box>
       </motion.div>
 
-      {/* Truncated view - height-clipped with "… more" overlay at bottom-right */}
+      {/* Truncated view - "… more" flows inline right after the cut text */}
       <motion.div
         initial={false}
         animate={{
@@ -271,40 +274,34 @@ export function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        <Box sx={{ position: "relative" }}>
-          <Box sx={{ lineHeight: 1.5 }}>
-            {renderTruncatedText()}
-            {isTruncated && "…"}
-          </Box>
+        <Box sx={{ lineHeight: 1.5 }}>
+          {renderTruncatedText()}
           {isTruncated && (
-            <Box
-              component="button"
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsExpanded(true)
-              }}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
+            <>
+              {"… "}
+              <Box
+                component="button"
+                type="button"
+                onClick={(e) => {
                   e.stopPropagation()
                   setIsExpanded(true)
-                }
-              }}
-              aria-expanded={false}
-              aria-label="Show more description text"
-              sx={{
-                ...toggleButtonStyles,
-                position: "absolute",
-                bottom: 0,
-                right: 0,
-                pl: 3,
-                background:
-                  "linear-gradient(to right, transparent, var(--row-bg) 40%)",
-              }}
-            >
-              … more
-            </Box>
+                }}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setIsExpanded(true)
+                  }
+                }}
+                aria-expanded={false}
+                aria-label="Show more description text"
+                sx={{
+                  ...toggleButtonStyles,
+                }}
+              >
+                Show more
+              </Box>
+            </>
           )}
         </Box>
       </motion.div>
