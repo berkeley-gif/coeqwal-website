@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Box, Typography, useTheme, ChevronRightIcon } from "@repo/ui/mui"
-
+import React from "react"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
+import ScrollRightIndicator from "./ScrollRightIndicator"
 interface ChartControlsBarProps {
   children: React.ReactNode
 }
@@ -12,23 +13,8 @@ const ChartControlsBar = React.forwardRef<
   ChartControlsBarProps
 >(function ChartControlsBar({ children }, ref) {
   const theme = useTheme()
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [canScrollRight, setCanScrollRight] = useState(false)
-
-  const checkOverflow = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    setCanScrollRight(el.scrollWidth - el.clientWidth - el.scrollLeft > 1)
-  }, [])
-
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    checkOverflow()
-    const observer = new ResizeObserver(checkOverflow)
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [checkOverflow, children])
+  const { scrollRef, canScrollRight, checkOverflow } =
+    useScrollRightIndicator([children])
 
   return (
     <Box
@@ -85,26 +71,7 @@ const ChartControlsBar = React.forwardRef<
           {children}
         </Box>
 
-        {canScrollRight && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: 32,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              pointerEvents: "none",
-              background: `linear-gradient(to right, transparent, ${theme.palette.common.white} 70%)`,
-            }}
-          >
-            <ChevronRightIcon
-              sx={{ fontSize: 18, color: theme.palette.grey[500] }}
-            />
-          </Box>
-        )}
+        <ScrollRightIndicator visible={canScrollRight} />
       </Box>
     </Box>
   )

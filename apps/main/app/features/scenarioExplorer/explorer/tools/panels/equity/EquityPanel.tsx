@@ -25,6 +25,8 @@ import { mapActions, useMapStore } from "../../../../../map/store"
 import { getTierColorsFromTheme } from "../../../../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcomeLocations"
 import { useEquityObjectives } from "./useEquityObjectives"
+import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
+import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { HydroclimateGate } from "../../../../../scenarios/components/HydroclimateGate"
 import {
   OUTCOME_NAMES,
@@ -762,6 +764,9 @@ export default function EquityPanel({
     return highlightedIds.has(focusScenarioId)
   }, [highlightedIds, focusScenarioId])
 
+  const { scrollRef, canScrollRight, checkOverflow } =
+    useScrollRightIndicator([objectives, categories])
+
   return (
     <Box
       sx={{
@@ -775,43 +780,51 @@ export default function EquityPanel({
         p: theme.space.component.lg,
         position: "relative",
       }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          width: "100%",
-          height: "100%",
-          minHeight: 0,
-          overflowX: "auto",
-          boxShadow: chartEmphasized
-            ? `inset 0 0 0 2px ${theme.palette.primary.main}`
-            : undefined,
-          borderRadius: 1,
-          transition: "box-shadow 0.12s ease-out",
-        }}
-      >
-        <Box sx={{ minWidth: 1120, height: "100%" }}>
-          <HydroclimateGate scenarioId={focusScenarioId} variant="block">
-            <TierGrid
-              objectives={objectives}
-              categories={categories}
-              tiers={TIERS}
-              colorMode="tier"
-              showComparison={showEquityComparison}
-              yAxisMode={yAxisMode}
-              selectedObjectives={selectedObjectives}
-              onObjectiveClick={handleObjectiveClick}
-              onCategoryClick={handleCategoryClick}
-              onTierCategoryClick={handleTierCategoryClick}
-              onShowOnMap={handleShowOnMap}
-              showMapView
-              focusScenarioId={focusScenarioId}
-              onChartHover={onChartHover}
-            />
-          </HydroclimateGate>
+    > <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
+        <Box
+          ref={scrollRef}
+          onScroll={checkOverflow}
+          sx={{
+            flex: 1,
+            width: "100%",
+            height: "100%",
+            minHeight: 0,
+            overflowX: "auto",
+            boxShadow: chartEmphasized
+              ? `inset 0 0 0 2px ${theme.palette.primary.main}`
+              : undefined,
+            borderRadius: 1,
+            transition: "box-shadow 0.12s ease-out",
+          }}
+        >
+          <Box sx={{ minWidth: 1120, height: "100%" }}>
+            <HydroclimateGate scenarioId={focusScenarioId} variant="block">
+              <TierGrid
+                objectives={objectives}
+                categories={categories}
+                tiers={TIERS}
+                colorMode="tier"
+                showComparison={showEquityComparison}
+                yAxisMode={yAxisMode}
+                selectedObjectives={selectedObjectives}
+                onObjectiveClick={handleObjectiveClick}
+                onCategoryClick={handleCategoryClick}
+                onTierCategoryClick={handleTierCategoryClick}
+                onShowOnMap={handleShowOnMap}
+                showMapView
+                focusScenarioId={focusScenarioId}
+                onChartHover={onChartHover}
+              />
+            </HydroclimateGate>
+          </Box>
         </Box>
-      </Box>
 
+
+        <ScrollRightIndicator
+          visible={canScrollRight}
+          fadeColor={theme.palette.grey[100]}
+        />
+      </Box>
       {/* Context menu for filtering tier-category cells */}
       <Menu
         open={contextMenu !== null}

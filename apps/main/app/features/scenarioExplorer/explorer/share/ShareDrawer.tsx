@@ -37,7 +37,7 @@ function ShareTab({
       sx={{
         position: "fixed",
         right: isOpen ? DRAWER_WIDTH : 0,
-        top: "40%",
+        top: "25%",
         transform: "translateY(-50%)",
         zIndex: (theme.zIndex?.drawer ?? 1200) + 1,
         transition: "right 225ms cubic-bezier(0, 0, 0.2, 1)",

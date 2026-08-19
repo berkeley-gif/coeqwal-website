@@ -28,6 +28,8 @@ import {
 import { ChartToast, InfoPopover } from "@repo/ui"
 import OutcomeChooserPanel from "../../components/OutcomeChooserPanel"
 import { useTierChartData } from "../../hooks/useTierChartData"
+import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
+import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
 import { useRadarPlotTheme } from "./useRadarPlotTheme"
 import { useWorkspaceSlice, useRadarSlice } from "../../../store"
 import { useScenarioList } from "../../../../../scenarios/hooks"
@@ -230,10 +232,10 @@ export default function RadarPanel({
     () =>
       activeOutcome
         ? {
-            axis: getOutcomeName(activeOutcome.outcomeCode),
-            scenarioId:
-              activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
-          }
+          axis: getOutcomeName(activeOutcome.outcomeCode),
+          scenarioId:
+            activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
+        }
         : null,
     [activeOutcome],
   )
@@ -253,10 +255,10 @@ export default function RadarPanel({
       onChartHover?.(
         info
           ? {
-              scenarioId: info.scenarioId,
-              outcome: info.axis,
-              tierValue: info.tierValue,
-            }
+            scenarioId: info.scenarioId,
+            outcome: info.axis,
+            tierValue: info.tierValue,
+          }
           : null,
       )
     },
@@ -793,6 +795,9 @@ export default function RadarPanel({
     }
   }, [hydroclimate, hasRegionalAxis])
 
+  const { scrollRef, canScrollRight, checkOverflow } =
+    useScrollRightIndicator([visibleAxisNames])
+
   if (isLoading && !hasData) {
     return (
       <Box
@@ -812,7 +817,7 @@ export default function RadarPanel({
       </Box>
     )
   }
-  // After
+
 
   return (
     <Box
@@ -826,7 +831,10 @@ export default function RadarPanel({
         position: "relative",
       }}
     >
-      <Box sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
+      <Box
+        ref={scrollRef}
+        onScroll={checkOverflow}
+        sx={{ overflowX: "auto", flex: 1, minHeight: 0 }}>
         <Box sx={{ position: "relative", minWidth: 520, height: "100%" }}>
           {showAxisSelector && (
             <OutcomeChooserPanel
@@ -1049,6 +1057,11 @@ export default function RadarPanel({
           )}
         </Box>
       </Box>
+
+      <ScrollRightIndicator
+        visible={canScrollRight}
+        fadeColor={theme.palette.grey[100]}
+      />
 
       {isLoading && hasData && (
         <CircularProgress
