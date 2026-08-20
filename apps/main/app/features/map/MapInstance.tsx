@@ -14,6 +14,7 @@ import {
   useActiveSubSection,
   useCameraView,
   useExplorePanelWidth,
+  useIsVertNavExpanded,
   mapActions,
   type MapMode,
 } from "./store"
@@ -21,6 +22,10 @@ import { CALIFORNIA_VIEW } from "./config/cameraPresets"
 import { ensureCustomLayers } from "./config/tilesetSources"
 import type { SubSectionId } from "./config/sectionLayers"
 import { BasemapPicker } from "./controls/BasemapPicker"
+import {
+  NAV_WIDTH_COLLAPSED,
+  NAV_WIDTH_EXPANDED,
+} from "../../components/verticalNav/VerticalNav"
 import "./styles/mapboxControlStyles.css"
 
 // ============================================================================
@@ -119,6 +124,8 @@ export default function MapInstance({
   const activeSubSection = useActiveSubSection()
   const cameraView = useCameraView()
   const explorePanelWidth = useExplorePanelWidth()
+  const isVertNavExpanded = useIsVertNavExpanded()
+  const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
 
   const isLearnMode = mapMode === "learn"
   const isExploreMode = mapMode === "explore"
@@ -146,7 +153,7 @@ export default function MapInstance({
     mapActions.setMapReady(true)
 
     if (process.env.NODE_ENV === "development") {
-      ;(window as unknown as Record<string, unknown>).__mapInstance =
+      ; (window as unknown as Record<string, unknown>).__mapInstance =
         mapboxInstance
     }
   }, [map.mapRef])
@@ -250,7 +257,8 @@ export default function MapInstance({
       return
     }
     if (!map.mapRef?.current || !cameraView) return
-    if (prevSectionRef.current === activeSubSection) return
+
+    const sectionChanged = prevSectionRef.current !== activeSubSection
 
     prevSectionRef.current = activeSubSection
 
@@ -259,11 +267,11 @@ export default function MapInstance({
       zoom: cameraView.zoom,
       bearing: cameraView.bearing ?? 0,
       pitch: cameraView.pitch ?? 0,
-      padding: { left: 0, top: 0, right: 0, bottom: 0 },
-      duration: 2000,
+      padding: { left: navWidth, top: 0, right: 0, bottom: 0 },
+      duration: sectionChanged ? 2000 : 250,
       easing: (t: number) => t * (2 - t),
     })
-  }, [activeSubSection, cameraView, map, mapMode])
+  }, [activeSubSection, cameraView, map, mapMode, navWidth])
 
   // ============================================================================
   // Render

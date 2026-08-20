@@ -66,6 +66,7 @@ interface MapState {
   geocoderMarker: [number, number] | null
   geocodingResetCounter: number
   learnMapScrollOffset: number
+  isVertNavExpanded: boolean
 
   // Explore mode layout
   /** Percentage of viewport width occupied by the left panel (0-100). Default: 50 */
@@ -104,6 +105,7 @@ const initialState: MapState = {
   geocoderMarker: null,
   geocodingResetCounter: 0,
   learnMapScrollOffset: 0,
+  isVertNavExpanded: false,
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
@@ -187,6 +189,11 @@ export const mapActions = {
   setLearnMapScrollOffset: (offset: number) =>
     useMapStore.setState({ learnMapScrollOffset: offset }),
 
+  toggleVertNavExpanded: () =>
+    useMapStore.setState((state) => ({
+      isVertNavExpanded: !state.isVertNavExpanded,
+    })),
+
   // Explore mode layout
   setExplorePanelWidth: (width: number) =>
     useMapStore.setState({ explorePanelWidth: width }),
@@ -198,6 +205,7 @@ export const mapActions = {
       riversProgress: 0,
       geocoderMarker: null,
       learnMapScrollOffset: 0,
+      isVertNavExpanded: false,
       activeOutcomeVisualization: null,
     }),
 
@@ -264,8 +272,8 @@ export const mapActions = {
   setOnLocationHover: (
     fn:
       | ((
-          info: { code: string; sourceId: string; tier: number } | null,
-        ) => void)
+        info: { code: string; sourceId: string; tier: number } | null,
+      ) => void)
       | null,
   ) => {
     _onLocationHover = fn
@@ -298,6 +306,9 @@ export const useGeocodingResetCounter = () =>
 
 export const useLearnMapScrollOffset = () =>
   useMapStore((s) => s.learnMapScrollOffset)
+
+export const useIsVertNavExpanded = () =>
+  useMapStore((s) => s.isVertNavExpanded)
 
 // Explore mode layout
 export const useExplorePanelWidth = () =>

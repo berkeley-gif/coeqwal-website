@@ -17,7 +17,7 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import {
@@ -26,6 +26,7 @@ import {
   mapActions,
   useActiveSubSection,
   useLearnNavSection,
+  useIsVertNavExpanded,
 } from "../../features/map/store"
 import { InfoCard, InfoCardGrid } from "@repo/ui"
 import { usePanelRoute } from "../../hooks/usePanelRoute"
@@ -46,8 +47,9 @@ export default function LearnPanel() {
   const activeSubSection = useActiveSubSection()
   const activeSection = useLearnNavSection()
   const { openThemePanel } = usePanelRoute()
-  const [isVertNavExpanded, setIsVertNavExpanded] = useState(false)
+  const isVertNavExpanded = useIsVertNavExpanded()
   const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
+
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -108,7 +110,7 @@ export default function LearnPanel() {
         activeSectionId={activeSection}
         activeSubSectionId={activeSubSection}
         isExpanded={isVertNavExpanded}
-        onToggleExpanded={() => setIsVertNavExpanded((prev) => !prev)}
+        onToggleExpanded={mapActions.toggleVertNavExpanded}
         onNavigate={handleNavigate}
       />
 
