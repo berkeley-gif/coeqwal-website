@@ -459,7 +459,6 @@ export default function RadarPanel({
     () => new Set(selectedScenarios),
     [selectedScenarios],
   )
-  console.log(selectedSet.has("s0065"))
   /** Stable palette index */
   const scenarioColorById = useMemo(() => {
     const m = new Map<string, string>()
@@ -1119,7 +1118,7 @@ export default function RadarPanel({
           }}
         >
           Delta Conveyence Project scenario is selected. Winter-run salmon data
-          is not yet supported for this scenario.
+          are not yet supported for this scenario.
         </Box>
       )}
     </Box>
