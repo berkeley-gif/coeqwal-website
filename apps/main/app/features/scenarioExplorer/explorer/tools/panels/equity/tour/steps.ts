@@ -1,0 +1,65 @@
+import type { TourStep } from "../../../tour/types"
+
+export const EQUITY_TOUR: TourStep[] = [
+  {
+    id: "equity.hero",
+    eyebrow: "start here",
+    title: "The Distribution view lays every location out as a tier grid",
+    body: "Each column is an outcome category and each row is a tier level. Every square is one location of interest's outcome for the focused scenario, so a column packed toward the top means most locations there sit in an optimal tier.",
+  },
+  {
+    id: "equity.step0.grid",
+    anchorId: "equity.grid",
+    eyebrow: "read the grid",
+    title: "Click a square to find it on the map",
+    body: "Selecting a square (or several) highlights those locations on the map. Click an empty part of a cell to select every location in it at once, or click a category label to select the whole column.",
+    placement: "right",
+  },
+  {
+    id: "equity.step1.toggleOutcomes",
+    anchorId: "equity.controls.toggleOutcomes",
+    eyebrow: "arrange the grid",
+    title: "Show or hide outcome categories",
+    body: "Uncheck a category to drop its column from the grid and give the remaining ones more room.",
+    placement: "bottom-start",
+  },
+  {
+    id: "equity.step1.compare",
+    anchorId: "equity.controls.compareToBaseline",
+    eyebrow: "arrange the grid",
+    title: "Compare to baseline",
+    body: "Turn this on to reshape each square into a triangle: pointing up means the location improved on the current-operations baseline, pointing down means it worsened. With this on, clicking an empty part of a cell opens a menu to filter by improved, unchanged, or worsened instead of selecting everyone.",
+    placement: "bottom-start",
+  },
+  {
+    id: "equity.step1.continuous",
+    anchorId: "equity.controls.continuousLevels",
+    eyebrow: "arrange the grid",
+    title: "Continuous levels",
+    body: "Switch from four broad tiers to a continuous scale (1.0-4.99), with a dashed mean line per category, when the tier bands aren't precise enough.",
+    placement: "bottom-start",
+  },
+  {
+    id: "equity.step1.clearSelection",
+    anchorId: "equity.controls.clearMapSelection",
+    eyebrow: "arrange the grid",
+    title: "Clear map selection",
+    body: "Clears the highlighted locations on the map without losing your place in the grid.",
+    placement: "bottom-start",
+  },
+  {
+    id: "equity.step1.snapshot",
+    anchorId: "equity.controls.saveSnapshot",
+    eyebrow: "arrange the grid",
+    titleIcon: "share",
+    title: "Save snapshot",
+    body: "Use save snapshot to stage the chart you see in the Share drawer, then find it in the Share tab when you are ready to save the chart and its data.",
+    placement: "bottom-end",
+  },
+  {
+    id: "equity.journey",
+    eyebrow: "take your shortlist forward",
+    title: "What to do after this chart",
+    body: "Your shortlist stays with you in the other views",
+  },
+]
