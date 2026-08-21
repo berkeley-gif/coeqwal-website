@@ -233,6 +233,24 @@ test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted",
   expect(unfiltered).not.toContain("wyt=")
 })
 
+test("the CWS request contract omits wyt and fails loud on a smuggled one", async () => {
+  // The CWS series aggregate by calendar year upstream, so a water-year-type
+  // filter cannot apply to them. The registry flag stops the UI from sending
+  // one; this is the contract-level backstop. `wyt` is not a field on
+  // CwsDataInDepthOptions (a caller that adds one fails check-types), and the
+  // builder throws rather than silently dropping it, so a coordination
+  // failure is visible to the caller instead of buried.
+  const { ENDPOINTS } = await import("../../../packages/data/src/coeqwal/api")
+  const path = ENDPOINTS.cwsDataInDepth(["s0020"], { subjects: ["NOD_CWS"] })
+  expect(path).not.toContain("wyt=")
+  expect(() =>
+    ENDPOINTS.cwsDataInDepth(["s0020"], {
+      subjects: ["NOD_CWS"],
+      wyt: [1, 2],
+    } as Parameters<typeof ENDPOINTS.cwsDataInDepth>[1] & { wyt: number[] }),
+  ).toThrow(/wyt/)
+})
+
 test("system-delivery variables map to the sysdel domain with annual periods", () => {
   expect(didDomainForVariable("cvp_del")).toBe("sysdel")
   expect(didDomainForVariable("swp_del")).toBe("sysdel")

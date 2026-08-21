@@ -358,8 +358,10 @@ export function useVariableData(): VariableData {
               ? "shortage_total"
               : "delivery",
         ],
+        // No wyt: the CWS series aggregate by calendar year, so the filter
+        // does not apply. It is not a field on CwsDataInDepthOptions, and the
+        // endpoint builder throws if one is smuggled past that.
         include,
-        wyt,
       }),
   )
 
