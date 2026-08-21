@@ -41,6 +41,12 @@ export interface SummaryMember {
   value?: number
   /** True when this member is the comparison reference */
   isReference?: boolean
+  /** True when this member's series came from the live API */
+  isLive?: boolean
+  /** True when the scenario is not modeled for this variable at all, so its
+   *  series is sample data standing in for something that does not exist.
+   *  Such a member must never contribute a number to the summary sentence. */
+  liveDataMissing?: boolean
 }
 
 export interface SummaryContext {

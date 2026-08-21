@@ -63,7 +63,11 @@ const dataHandler: VariantHandler<DataItem> = {
       title: figureTitle ?? variableName,
       subtitle: viewLabelFor(item),
       chips: [
-        item.source === "live" ? "Live data" : "Sample data",
+        item.source === "mixed"
+          ? "Mixed data"
+          : item.source === "live"
+            ? "Live data"
+            : "Sample data",
         ...item.memberLabels,
       ],
       hydroclimate: item.hydroclimate,
@@ -105,7 +109,8 @@ const dataHandler: VariantHandler<DataItem> = {
       compareBy: parts[3] || "scenarios",
       memberIds,
       memberLabels: memberIds,
-      source: parts[5] === "live" ? "live" : "mock",
+      source:
+        parts[5] === "live" ? "live" : parts[5] === "mixed" ? "mixed" : "mock",
       hydroclimate: parts[6] || "historical",
     }
   },

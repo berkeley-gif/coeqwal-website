@@ -47,7 +47,7 @@ export interface CaptureDataInDepthInput {
   viewLabel: string
   compareByLabel: string
   unitLabel: string
-  source: "live" | "mock"
+  source: "live" | "mock" | "mixed"
   /** Active water-year-type filter, e.g. "Dry; Critical" (absent = all years) */
   waterYearTypesLabel?: string
   /** Standardized figure title; persisted with the chart data so the share
@@ -68,6 +68,15 @@ export async function captureDataInDepthOffscreen(
   const fmt = (v: number) => formatValue(v, input.unit)
   const yLabel = input.view === "cv" ? "CV" : input.unit
 
+  // Same rule the live card applies: a member whose scenario is not modeled
+  // for this variable is recorded but never drawn, so the exported image can
+  // never carry a fabricated curve the on-screen chart refused to draw.
+  const plotted = input.members
+    .map((m, i) => ({ member: m, color: input.memberColors[i] ?? "" }))
+    .filter((p) => !p.member.liveDataMissing)
+  const drawnMembers = plotted.map((p) => p.member)
+  const drawnColors = plotted.map((p) => p.color)
+
   const { svg, dataUrl } = await offscreenCapture({
     theme: input.theme,
     width,
@@ -77,7 +86,7 @@ export async function captureDataInDepthOffscreen(
       if (input.view === "cv" || input.view === "value") {
         return (
           <CategoricalBarChartSnapshot
-            bars={toBars(input.members, input.memberColors)}
+            bars={toBars(drawnMembers, drawnColors)}
             yAxisLabel={yLabel}
             formatValue={fmt}
             width={width}
@@ -89,7 +98,7 @@ export async function captureDataInDepthOffscreen(
       if (input.distKind === "box") {
         return (
           <BoxPlotSnapshot
-            boxes={toBoxes(input.members, input.memberColors)}
+            boxes={toBoxes(drawnMembers, drawnColors)}
             whiskers="p10p90"
             yAxisLabel={yLabel}
             formatValue={fmt}
@@ -101,7 +110,7 @@ export async function captureDataInDepthOffscreen(
       }
       return (
         <ExceedanceChartSnapshot
-          series={toSeries(input.members, input.memberColors)}
+          series={toSeries(drawnMembers, drawnColors)}
           yAxisLabel={yLabel}
           formatValue={fmt}
           width={width}
@@ -121,11 +130,16 @@ export async function captureDataInDepthOffscreen(
     source: input.source,
     waterYearTypesLabel: input.waterYearTypesLabel,
     figureTitle: input.figureTitle,
+    // A member with no served data exports as a LABELED, EMPTY column, never
+    // as the sample series the engine produced to fill the gap. Its water
+    // years stay an empty array (not undefined) so the other members keep
+    // their year-labeled rows instead of falling back to an index axis.
     members: input.members.map((m) => ({
       label: m.label,
-      series: m.series,
-      waterYears: m.waterYears,
+      series: m.liveDataMissing ? [] : m.series,
+      waterYears: m.liveDataMissing ? [] : m.waterYears,
       isLive: m.isLive,
+      liveDataMissing: m.liveDataMissing,
       stats: m.stats,
       value: m.value,
     })),

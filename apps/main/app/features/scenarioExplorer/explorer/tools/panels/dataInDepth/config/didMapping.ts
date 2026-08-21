@@ -484,6 +484,30 @@ export function companionUnitTokensForView(
 }
 
 /**
+ * True when a live request RESOLVED but the endpoint served no block for that
+ * scenario, i.e. the scenario is not modeled for this variable at all.
+ *
+ * Detection is response-driven on purpose, never an id list. Salmon results do
+ * not exist for the Delta Conveyance Project scenarios, and that family spans
+ * one short_code per hydroclimate (s0065, s0085, s0105, s0131, s0157), of
+ * which only one appears in site content today. A hardcoded list would
+ * silently miss the variants and quietly draw a sample curve for them.
+ *
+ * The endpoint answers 200 with `{ scenarios: [] }` in that case, so `hasData`
+ * (which is just `!!data`) is TRUE and cannot distinguish it. The distinction
+ * is the empty array, checked only once loading has settled.
+ */
+export function hasEmptyScenariosResponse(
+  slot:
+    | { hasData: boolean; isLoading: boolean; scenarios: unknown[] }
+    | undefined,
+): boolean {
+  return (
+    !!slot && slot.hasData && !slot.isLoading && slot.scenarios.length === 0
+  )
+}
+
+/**
  * Facets to request. The frontend derives exceedance, box, and cv from the raw
  * 100-year series (latency-validated: FE compute is effectively free), so
  * `values` is the only facet the explorer needs.

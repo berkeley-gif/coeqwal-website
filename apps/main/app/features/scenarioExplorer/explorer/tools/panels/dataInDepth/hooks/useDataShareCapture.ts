@@ -99,7 +99,9 @@ export function useDataShareCapture(
           viewLabel,
           compareByLabel: COMPARE_LABELS[compareBy] ?? compareBy,
           unitLabel: data.unitLabel,
-          source: data.source,
+          // A figure whose series do not share one provenance must not claim
+          // one; the per-member Source column carries the detail.
+          source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
         }),
@@ -112,7 +114,7 @@ export function useDataShareCapture(
         compareBy,
         memberIds: data.members.map((m) => m.id),
         memberLabels: data.members.map((m) => m.label),
-        source: data.source,
+        source: data.mixedSource ? "mixed" : data.source,
         hydroclimate: capturedHydroclimate,
         cachedSvg: captured?.svg,
         cachedImageDataUrl: captured?.dataUrl,

@@ -127,6 +127,12 @@ export interface VariableDef {
    *  provenance drop the water-years clause. The stored selection stays
    *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
+  /** Shown when a scenario the user selected is not modeled for this
+   *  variable, so the endpoint serves no data for it. Explains WHY rather
+   *  than leaving a blank series: an absence with a reason reads as a fact
+   *  about the model, an absence without one reads as a broken chart.
+   *  Falls back to a generic sentence when unset. */
+  noLiveDataExplanation?: string
   /** Sample-data engine kind (shape/variability family) */
   mockKind: string
   /** Sample-data engine effect key (scenario response family) */
@@ -906,6 +912,8 @@ export const VARIABLES: Record<string, VariableDef> = {
     data: "live",
     provisional: true,
     wytApplicable: false,
+    noLiveDataExplanation:
+      "Salmon spawning results are not modeled for Delta Conveyance Project scenarios.",
     mockKind: "flow",
     mockEffect: "eco",
   },

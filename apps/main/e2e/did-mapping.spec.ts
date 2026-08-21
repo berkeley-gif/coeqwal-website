@@ -15,6 +15,7 @@ import {
   SSJV_ROUTE_SUBJECTS,
   sumAlignedSeriesPoints,
   companionUnitTokensForView,
+  hasEmptyScenariosResponse,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -614,4 +615,42 @@ test("only the ag percent-of-demand view needs a companion measure", () => {
     [],
   )
   expect(companionUnitTokensForView("reservoir", "dist", "res_apr")).toEqual([])
+})
+
+test("hasEmptyScenariosResponse separates 'not modeled' from 'still loading'", () => {
+  // The endpoint answers 200 with an empty scenarios array when a scenario is
+  // not modeled for the variable (salmon under the Delta Conveyance Project),
+  // so hasData alone cannot tell that apart from a pending request. Only a
+  // RESOLVED, non-loading, empty response counts.
+  expect(
+    hasEmptyScenariosResponse({
+      hasData: true,
+      isLoading: false,
+      scenarios: [],
+    }),
+  ).toBe(true)
+  expect(
+    hasEmptyScenariosResponse({
+      hasData: true,
+      isLoading: false,
+      scenarios: [{ scenario: "s0020" }],
+    }),
+  ).toBe(false)
+  // Mid-flight: not yet an answer, so not yet a "no data" verdict.
+  expect(
+    hasEmptyScenariosResponse({
+      hasData: true,
+      isLoading: true,
+      scenarios: [],
+    }),
+  ).toBe(false)
+  // Never fetched, and a slot that does not exist at all.
+  expect(
+    hasEmptyScenariosResponse({
+      hasData: false,
+      isLoading: false,
+      scenarios: [],
+    }),
+  ).toBe(false)
+  expect(hasEmptyScenariosResponse(undefined)).toBe(false)
 })

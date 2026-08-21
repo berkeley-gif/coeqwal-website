@@ -242,3 +242,47 @@ test("dataInDepthToCSV returns null with no members", () => {
     }),
   ).toBeNull()
 })
+
+test("a mixed-provenance export labels the figure Mixed and blanks the no-data row", () => {
+  // A figure whose series do not share one provenance must not claim one, and
+  // the member the model has no results for must export as a labeled, EMPTY
+  // row. The sample engine always produces a series, so writing its numbers
+  // here would hand the reader fabricated values under a live-looking export.
+  const csv = dataInDepthToCSV(
+    csvData({
+      source: "mixed",
+      members: [
+        ...csvData().members,
+        {
+          label: "DWR 2025 DCP",
+          series: [],
+          waterYears: [],
+          isLive: false,
+          liveDataMissing: true,
+          stats: {
+            min: 0,
+            p10: 0,
+            p25: 0,
+            p50: 0.55,
+            p75: 0,
+            p90: 0,
+            max: 0,
+            mean: 0.55,
+            cv: 0,
+          },
+          value: 0.55,
+        },
+      ],
+    }),
+    { variantTitle: "Data in depth" },
+  )
+  expect(csv).toContain("Data source,Mixed (see the Source column)")
+  expect(csv).toContain("DWR 2025 DCP,,,,,,,,,,No data")
+  // The sample engine's stand-in values appear nowhere in the export.
+  expect(csv).not.toContain("0.55")
+  // The served member keeps its year-labeled rows: the empty member carries
+  // an empty year array rather than an absent one, so the export does not
+  // fall back to an index axis for everyone.
+  expect(csv).toContain("Water year,Current Operations,DWR 2025 DCP")
+  expect(csv).toContain("1921,4200,")
+})

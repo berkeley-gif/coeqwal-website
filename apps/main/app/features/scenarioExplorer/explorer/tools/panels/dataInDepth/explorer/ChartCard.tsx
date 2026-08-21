@@ -74,12 +74,28 @@ export default function ChartCard() {
 
   const fmt = (v: number) => formatValue(v, data.unit)
 
+  // Small outlined chip shared by the per-curve provenance labels; matches
+  // the existing "reference" chip so the legend reads as one vocabulary.
+  const memberChipSx = {
+    fontSize: "0.62rem",
+    fontWeight: 600,
+    color: theme.palette.grey[600],
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: "4px",
+    px: 0.5,
+    cursor: "help",
+  } as const
+
+  const liveMemberCount = data.members.filter((m) => m.isLive).length
+
   const summaryMembers: SummaryMember[] = data.members.map((m) => ({
     id: m.id,
     label: m.label,
     series: m.series,
     value: m.value,
     isReference: m.isReference,
+    isLive: m.isLive,
+    liveDataMissing: m.liveDataMissing,
   }))
 
   const ctx: SummaryContext = {
@@ -97,6 +113,18 @@ export default function ChartCard() {
     data.view === "cv" ? "CV" : (data.variable?.axisLabel ?? data.unit)
   const hasMembers = data.members.length > 0
 
+  // Members whose scenario is not modeled for this variable keep their legend
+  // entry (with a "no data" chip and an explanation) but are NOT drawn. Their
+  // series exists only because the sample engine always produces one, and
+  // drawing it would put a fabricated curve on a chart labeled "Live data".
+  // Colors are positional, so the subset carries its own aligned colors.
+  const plotted = data.members
+    .map((m, i) => ({ member: m, color: memberColors[i] ?? "" }))
+    .filter((p) => !p.member.liveDataMissing)
+  const plottedMembers = plotted.map((p) => p.member)
+  const plottedColors = plotted.map((p) => p.color)
+  const hasPlotted = plottedMembers.length > 0
+
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
   // hits the screen for the current members/variable/view combination.
   usePerfPaintMark(
@@ -106,7 +134,7 @@ export default function ChartCard() {
   )
 
   let chart: React.ReactNode = null
-  if (!hasMembers) {
+  if (!hasMembers || !hasPlotted) {
     chart = (
       <Box
         sx={{
@@ -115,17 +143,22 @@ export default function ChartCard() {
           justifyContent: "center",
           height: CHART_HEIGHT,
           color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
         }}
       >
         <Typography variant="body2">
-          Nothing to compare yet. Pick members in the controls above.
+          {hasMembers
+            ? (data.variable?.noLiveDataExplanation ??
+              "Live data is not available for the selected scenarios.")
+            : "Nothing to compare yet. Pick members in the controls above."}
         </Typography>
       </Box>
     )
   } else if (data.view === "cv" || data.view === "value") {
     chart = (
       <CategoricalBarChart
-        bars={toBars(data.members, memberColors)}
+        bars={toBars(plottedMembers, plottedColors)}
         yAxisLabel={yLabel}
         formatValue={fmt}
       />
@@ -184,11 +217,11 @@ export default function ChartCard() {
               {panel.title}
             </Typography>
             <CategoricalBarChart
-              bars={data.members.map((m, i) => ({
+              bars={plottedMembers.map((m, i) => ({
                 id: m.id,
                 label: m.label,
                 value: panel.valueOf(m),
-                color: memberColors[i],
+                color: plottedColors[i],
               }))}
               yAxisLabel={panel.yLabel}
               formatValue={panel.format}
@@ -200,7 +233,7 @@ export default function ChartCard() {
   } else if (distKind === "box") {
     chart = (
       <BoxPlot
-        boxes={toBoxes(data.members, memberColors)}
+        boxes={toBoxes(plottedMembers, plottedColors)}
         whiskers="p10p90"
         yAxisLabel={yLabel}
         formatValue={fmt}
@@ -209,7 +242,7 @@ export default function ChartCard() {
   } else {
     chart = (
       <ExceedanceChart
-        series={toSeries(data.members, memberColors)}
+        series={toSeries(plottedMembers, plottedColors)}
         yAxisLabel={yLabel}
         formatValue={fmt}
       />
@@ -343,6 +376,33 @@ export default function ChartCard() {
                   reference
                 </Box>
               )}
+              {/* Per-curve provenance. The chart-level badge above describes
+                  the figure as a whole; once one series is live and another
+                  is not, only a per-curve label is honest. "No data" and
+                  "sample" are deliberately different words: the first means
+                  the scenario is not modeled for this variable at all, the
+                  second means it is not wired to live data yet. */}
+              {m.liveDataMissing ? (
+                <Tooltip
+                  title={
+                    data.variable?.noLiveDataExplanation ??
+                    "Live data is not available for this scenario."
+                  }
+                >
+                  <Box component="span" sx={memberChipSx}>
+                    no data
+                  </Box>
+                </Tooltip>
+              ) : (
+                data.mixedSource &&
+                !m.isLive && (
+                  <Tooltip title="This series is sample data, not model results.">
+                    <Box component="span" sx={memberChipSx}>
+                      sample
+                    </Box>
+                  </Tooltip>
+                )
+              )}
             </Box>
           ))}
         </Box>
@@ -373,7 +433,9 @@ export default function ChartCard() {
         }}
       >
         {data.source === "live"
-          ? "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
+          ? data.mixedSource
+            ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
+            : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
           : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
       </Typography>
     </Box>
