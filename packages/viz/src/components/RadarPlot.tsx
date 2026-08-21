@@ -902,7 +902,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           //    covers the inner portion of the previous one)
           if (showTierZones) {
             ;[...TIER_POSITIONS].forEach((t, i) => {
-              const r = rScale(t - 0.5)
+              const r = rScale(t)
               g.append("circle")
                 .attr("cx", cx)
                 .attr("cy", cy)
@@ -927,7 +927,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           axes.forEach((_, i) => {
             const angle = getAngle(i)
-            const outerR = rScale(0.5)
+            const outerR = rScale(1)
             g.append("line")
               .attr("x1", cx)
               .attr("y1", cy)
