@@ -7,11 +7,12 @@
  * to driest). The filter is single-select: picking a class replaces the
  * selection, picking it again (or picking "All years") returns to all
  * years. Hidden for single-value views, which have no annual series to
- * filter. For variables whose metric does not decompose by water-year type
- * (registry `wytApplicable: false`: salmon population metrics, welfare
- * loss) the row renders disabled with a not-applicable note; the stored
- * selection stays inert rather than cleared, so it revives on variables
- * the filter applies to.
+ * filter. For variables the filter cannot apply to (registry
+ * `wytApplicable: false`: salmon population metrics and welfare loss, which
+ * do not decompose by water-year type, plus the CWS series, which are
+ * aggregated by calendar year upstream) the row renders disabled with a
+ * not-applicable note; the stored selection stays inert rather than
+ * cleared, so it revives on variables the filter applies to.
  */
 
 import React from "react"

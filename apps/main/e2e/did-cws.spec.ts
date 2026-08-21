@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test"
+import { test, expect, type Page } from "@playwright/test"
 import { collectConsoleErrors, setupNetwork } from "./support/network"
 
 // Community-water-systems live path, end to end and offline. Same technique
@@ -53,20 +53,27 @@ function cwsPayload(subjectsCsv: string, measuresCsv: string) {
   }
 }
 
-test("cws variables fetch their per-variable measures and go live", async ({
-  page,
-}) => {
-  const errors = collectConsoleErrors(page)
-  await setupNetwork(page)
+/** One observed cws data-in-depth request: parsed params plus the raw URL. */
+type CwsRequest = { subjects: string; measures: string; url: string }
+
+/**
+ * Installs every offline route fixture this spec needs and returns the live
+ * log of cws data-in-depth requests observed so far. Side effects: registers
+ * page routes for the scenario list, the cws endpoint, the reservoir-storage
+ * endpoint the default variable hits on tab open, and the two tiers calls the
+ * explorer fires when it opens.
+ */
+async function setupCwsRoutes(page: Page): Promise<CwsRequest[]> {
+  const requested: CwsRequest[] = []
   await page.route("**/api/scenarios", (route) =>
     route.fulfill({ json: SCENARIOS_FIXTURE }),
   )
-  const requested: Array<{ subjects: string; measures: string }> = []
   await page.route("**/api/data-in-depth/cws*", (route) => {
-    const url = new URL(route.request().url())
-    const subjects = url.searchParams.get("subjects") ?? ""
-    const measures = url.searchParams.get("measures") ?? ""
-    requested.push({ subjects, measures })
+    const raw = route.request().url()
+    const params = new URL(raw).searchParams
+    const subjects = params.get("subjects") ?? ""
+    const measures = params.get("measures") ?? ""
+    requested.push({ subjects, measures, url: raw })
     return route.fulfill({ json: cwsPayload(subjects, measures) })
   })
   // The default variable (April reservoir storage) fetches live on tab open
@@ -113,6 +120,15 @@ test("cws variables fetch their per-variable measures and go live", async ({
         .match(/tiers\/scenarios\/([^/]+)\//)?.[1] ?? ""
     return route.fulfill({ json: { scenario: id, results: {}, missing: [] } })
   })
+  return requested
+}
+
+test("cws variables fetch their per-variable measures and go live", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupCwsRoutes(page)
 
   await page.goto("/explore")
   await page
@@ -184,6 +200,89 @@ test("cws variables fetch their per-variable measures and go live", async ({
     )
     .toBe(true)
   await expect(page.getByText(/12(\.0+)? %/).first()).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
+// Water-year-type opt-out (2026-08-20 team ruling): the CWS series are
+// aggregated by calendar year upstream, so the filter cannot apply to them.
+// The registry flag is asserted in did-registry.spec.ts; this is the browser
+// half - the chip row goes not-applicable, and, the substance, no cws request
+// carries `wyt=` even when a class is selected on the way in from a variable
+// the filter DOES apply to.
+test("cws variables disable the water-year-type row and never send wyt", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupCwsRoutes(page)
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+
+  // Select a class on the default variable (April reservoir storage), which
+  // the filter applies to. The stored selection stays inert, not cleared,
+  // when we switch to CWS - which is exactly what could leak into a request.
+  await page.getByRole("button", { name: "Critical", exact: true }).click()
+  await expect(
+    page.getByRole("button", { name: "Critical", exact: true, pressed: true }),
+  ).toBeVisible()
+
+  // "Surface water deliveries" also exists in the Agricultural water sector,
+  // so scope to the list that carries the unique "Delivery shortages".
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+
+  const expectChipsNotApplicable = async () => {
+    await expect(
+      page.getByText("Not applicable to this variable"),
+    ).toBeVisible()
+    // Disabled chips drop out of the button role entirely.
+    for (const label of [
+      "All years",
+      "Wet",
+      "Above normal",
+      "Below normal",
+      "Dry",
+      "Critical",
+    ]) {
+      await expect(
+        page.getByRole("button", { name: label, exact: true }),
+      ).toHaveCount(0)
+    }
+  }
+
+  await cwsList
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requested.some((r) => r.measures === "delivery"))
+    .toBe(true)
+  await expectChipsNotApplicable()
+
+  // Shortages, volume view.
+  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requested.some((r) => r.measures === "shortage_total"))
+    .toBe(true)
+  await expectChipsNotApplicable()
+
+  // Shortages, percent-of-demand view.
+  await page.getByRole("button", { name: "% of demand", exact: true }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() => requested.some((r) => r.measures === "shortage_pct"))
+    .toBe(true)
+  await expectChipsNotApplicable()
+
+  // No CWS request carried the filter, in any variable or view.
+  expect(requested.length).toBeGreaterThan(0)
+  expect(requested.filter((r) => r.url.includes("wyt="))).toEqual([])
 
   expect(errors).toEqual([])
 })

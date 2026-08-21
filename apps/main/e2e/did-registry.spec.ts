@@ -323,6 +323,11 @@ test("community water systems wire live on the NOD/SOD aggregates", () => {
   expect(short?.provisional).toBeUndefined()
 })
 
+test("CWS variables opt out of water-year-type filtering (calendar-year aggregation)", () => {
+  expect(getVariable("cws_del")?.wytApplicable).toBe(false)
+  expect(getVariable("cws_short")?.wytApplicable).toBe(false)
+})
+
 test("mergeDataInitialState heals retired CWS sample-group pins", () => {
   const healed = mergeDataInitialState({
     pinnedLocationByGroup: { cws: "CWS_SACU" },

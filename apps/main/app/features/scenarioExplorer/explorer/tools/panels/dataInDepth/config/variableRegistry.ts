@@ -118,12 +118,14 @@ export interface VariableDef {
   data: "live" | "mock"
   /** Scope still under discussion (deck vs outcomes sheet); shows a chip */
   provisional?: boolean
-  /** False when the metric does not decompose by water-year type (salmon
-   *  population metrics, welfare loss): the WYT chips render disabled with a
-   *  not-applicable note, live requests omit `wyt=`, mock series skip
-   *  filtering, and figure titles and export provenance drop the
-   *  water-years clause. The stored selection stays inert, not cleared.
-   *  Absent means WYT applies. */
+  /** False when the water-year-type filter cannot apply to the metric,
+   *  either because it does not decompose by water year (salmon population
+   *  metrics, welfare loss) or because it is aggregated on a different
+   *  calendar upstream (the CWS series aggregate by calendar year). The WYT
+   *  chips render disabled with a not-applicable note, live requests omit
+   *  `wyt=`, mock series skip filtering, and figure titles and export
+   *  provenance drop the water-years clause. The stored selection stays
+   *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
   /** Sample-data engine kind (shape/variability family) */
   mockKind: string
@@ -868,10 +870,11 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
-    tech: "Served live from the cws data-in-depth endpoint's delivery measure on the NOD_CWS/SOD_CWS aggregates (annual TAF by water year; entity-level locations follow once the location list is finalized with the data team).",
+    tech: "Served live from the cws data-in-depth endpoint's delivery measure on the NOD_CWS/SOD_CWS aggregates (annual TAF; entity-level locations follow once the location list is finalized with the data team). Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
     data: "live",
+    wytApplicable: false,
     mockKind: "cwsdel",
     mockEffect: "cws",
   },
@@ -887,10 +890,11 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water community systems were short of their needs - the gap the tiers pathway scores against human-health thresholds.",
-    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so shortage_pct is not simply 100 minus pct_demand_met.",
+    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so shortage_pct is not simply 100 minus pct_demand_met. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
     data: "live",
+    wytApplicable: false,
     mockKind: "short",
     mockEffect: "cwsShort",
   },
