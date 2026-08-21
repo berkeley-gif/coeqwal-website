@@ -89,6 +89,9 @@ import {
   unitTokenForView,
   includeForView,
   pickLiveSeriesPoints,
+  sumAlignedSeriesPoints,
+  SSJV_ALL_ROUTES_LOCATION,
+  SSJV_ROUTE_SUBJECTS,
   viewHasLiveSource,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
@@ -229,6 +232,10 @@ export function useVariableData(): VariableData {
   const subject = domain
     ? toDidSubject(domain, heldLocation, variable?.id)
     : null
+  // The synthetic SSJV total has no served subject of its own: it fetches
+  // all three route subjects and sums them fail-closed at adoption time.
+  const isSsjvTotal =
+    variable?.id === "ssjv_exp" && heldLocation === SSJV_ALL_ROUTES_LOCATION
   const unitToken = domain
     ? unitTokenForView(domain, view, variable?.id)
     : "volume"
@@ -243,7 +250,7 @@ export function useVariableData(): VariableData {
   const resolvedAll = useResolvedIdMappings()
   const liveEligible =
     domain != null &&
-    subject != null &&
+    (subject != null || isSsjvTotal) &&
     period != null &&
     viewHasLiveSource(view) &&
     liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
@@ -315,7 +322,11 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useSystemDeliveriesDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: isSsjvTotal
+          ? [...SSJV_ROUTE_SUBJECTS]
+          : subject
+            ? [subject]
+            : undefined,
         units: ["volume"],
         include,
         wyt,
@@ -500,22 +511,21 @@ export function useVariableData(): VariableData {
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
-      if (
-        liveEligible &&
-        subject &&
-        period &&
-        domain &&
-        spec.slotIndex != null
-      ) {
+      if (liveEligible && period && domain && spec.slotIndex != null) {
         const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
-        const points = pickLiveSeriesPoints(
-          block,
-          domain,
-          subject,
-          period,
-          unitToken,
-        )
-        if (points.series.length > 0) {
+        // The synthetic SSJV total sums the three served route series,
+        // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
+        // back to sample labeling, never a partial total.
+        const points = isSsjvTotal
+          ? sumAlignedSeriesPoints(
+              SSJV_ROUTE_SUBJECTS.map((code) =>
+                pickLiveSeriesPoints(block, domain, code, period, unitToken),
+              ),
+            )
+          : subject
+            ? pickLiveSeriesPoints(block, domain, subject, period, unitToken)
+            : null
+        if (points && points.series.length > 0) {
           // Served units -> display units (e.g. the salmon habitat-occupancy
           // ratio displays as percent); 1 for every other variable.
           const liveScale = didLiveScaleForVariable(variable.id)

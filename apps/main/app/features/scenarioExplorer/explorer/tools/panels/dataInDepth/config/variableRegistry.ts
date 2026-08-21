@@ -485,6 +485,16 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   ssjv: {
     label: "Export route",
     items: [
+      // Synthetic total, summed client-side from the three served route
+      // series (fail-closed; see didMapping.sumAlignedSeriesPoints). Sample
+      // magnitude = the sum of the route sample magnitudes.
+      {
+        id: "ALL_ROUTES",
+        name: "All routes (total)",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 1930,
+      },
       { id: "CVC", name: "Cross Valley Canal", region: "SOD", mockBase: 130 },
       { id: "FRIANT", name: "Friant Division", region: "SOD", mockBase: 1100 },
       {
@@ -872,10 +882,9 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain:
-      "Water exported to the Southern San Joaquin Valley, shown by delivery route.",
-    tech: "Three served route subjects, no combined total on the endpoint: D_CAA238_CVPCV (Cross Valley Canal), D_MLRTN_FRK000 (Friant Division), SWP_TA_KERNAG (Kern County Water Agency). Shown per route; no client-side summing of served data. The three-route presentation is pending confirmation (Provisional).",
+      "Water exported to the Southern San Joaquin Valley, shown as a total or by delivery route.",
+    tech: "Three served route subjects: D_CAA238_CVPCV (Cross Valley Canal), D_MLRTN_FRK000 (Friant Division), SWP_TA_KERNAG (Kern County Water Agency); the three-route presentation is confirmed. The endpoint serves no combined total, so the All routes (total) location sums the three served series client-side, and only when all three are present and year-aligned (verified: identical years 1922-2021, no nulls); otherwise the total falls back to sample labeling, never a partial sum.",
     data: "live",
-    provisional: true,
     mockKind: "exports",
     mockEffect: "exports",
   },
