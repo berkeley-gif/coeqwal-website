@@ -113,7 +113,7 @@ export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
       "Baselines represent current operations of the State Water Project and Central Valley Project. They serve as the reference point for comparing all other scenarios.",
   },
   ag_gw: { label: "Farms and groundwater" },
-  eco: { label: "Rivers, salmon and the Delta ecosystem" },
+  eco: { label: "Rivers and salmon" },
   delta: { label: "The Delta as a living place" },
   cws: { label: "Community water systems" },
   unthemed: { label: "Other scenarios" },
