@@ -174,7 +174,7 @@ const DEFAULT_RADAR_PALETTE: RadarPlotPalette = {
   gridStroke: "#dce3ea",
   tierLabelText: "#718096",
   dotStroke: "#ffffff",
-  tierZoneFills: ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const,
+  tierZoneFills: ["#1ca367", "#31b2c5", "#f2944f", "#ee5d32"] as const,
   rangeBandFill: "#cbd5e0",
   rangeBandStroke: "#a0aec0",
   baselineColor: "#cc9a06",
@@ -908,6 +908,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("cy", cy)
                 .attr("r", r)
                 .attr("fill", palette.tierZoneFills[i] ?? palette.dotStroke)
+                .attr("fill-opacity", "0.05")
                 .attr("stroke", "none")
             })
           }
