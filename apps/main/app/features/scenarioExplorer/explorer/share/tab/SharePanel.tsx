@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useCallback } from "react"
-import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Button, icons, useTheme } from "@repo/ui/mui"
 import { useWorkspaceSlice } from "../../store"
 import type { ShareItem } from "../types"
 import type { ShareRadarLiveDataFields } from "../utils/shareRadarLiveData"
@@ -56,6 +56,7 @@ function SharePanelContent() {
     removeFromStory,
     reorderStory,
     updateShareItem,
+    clearShareItems,
   } = useWorkspaceSlice()
 
   const handleNoteChange = useCallback(
@@ -195,9 +196,34 @@ function SharePanelContent() {
           pb: theme.space.section.md,
         }}
       >
-        <Typography variant="h3" component="h2" color="text.secondary">
-          Tell your water story
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography variant="h3" component="h2" color="text.secondary">
+            Tell your water story
+          </Typography>
+          {/* Clears the tray AND the story, and the store persists the empty
+              state immediately. No confirm step, matching the drawer's
+              existing "Clear all" chip: two different confirmation habits for
+              the same action would be worse than none. Whether this more
+              deliberate workspace warrants one is an open product question. */}
+          {shareItems.length > 0 && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<icons.Close sx={{ fontSize: "0.875rem" }} />}
+              onClick={clearShareItems}
+            >
+              Clear share tray
+            </Button>
+          )}
+        </Box>
         <ShareUrlVersionNotice />
       </Box>
 

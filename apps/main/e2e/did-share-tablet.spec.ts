@@ -141,3 +141,37 @@ test("the share tab fits tablet widths without horizontal overflow", async ({
 
   expect(errors).toEqual([])
 })
+
+// GitHub issue #250: the Share tab had no way to empty the tray. The store
+// action already existed and the Explore drawer already used it; this was UI
+// wiring only. The reload half is the part worth pinning: the store persists
+// the tray, so a clear that does not flush would come back on refresh.
+test("the share tab can clear the tray, and the empty state survives reload", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  await stageTwoCards(page)
+
+  const clear = page.getByRole("button", { name: "Clear share tray" })
+  await expect(clear).toBeVisible()
+  await clear.click()
+
+  await expect(
+    page.getByText(/No scenarios staged for sharing yet/),
+  ).toBeVisible()
+  // The action clears the STORY too, not just the tray, so no orphaned story
+  // card can outlive the items it was built from.
+  await expect(page.getByRole("button", { name: "Add to story" })).toHaveCount(
+    0,
+  )
+  // The button itself goes away with the last item.
+  await expect(clear).toHaveCount(0)
+
+  await page.reload()
+  await expect(
+    page.getByText(/No scenarios staged for sharing yet/),
+  ).toBeVisible()
+
+  expect(errors).toEqual([])
+})
