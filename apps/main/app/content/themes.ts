@@ -114,7 +114,7 @@ export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   },
   ag_gw: { label: "Farms and groundwater" },
   eco: { label: "Rivers and salmon" },
-  delta: { label: "The Delta as a living place" },
+  delta: { label: "The Delta" },
   cws: { label: "Community water systems" },
   unthemed: { label: "Other scenarios" },
 }
