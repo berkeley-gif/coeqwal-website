@@ -43,6 +43,7 @@ import {
   useSystemDeliveriesDataInDepth,
   useGroundwaterStorageDataInDepth,
   useSalmonDataInDepth,
+  useCwsDataInDepth,
 } from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
@@ -64,6 +65,7 @@ import {
   type VariableView,
 } from "../config/variableRegistry"
 import {
+  cwsShortagePctFromSeries,
   gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
@@ -227,7 +229,9 @@ export function useVariableData(): VariableData {
   const subject = domain
     ? toDidSubject(domain, heldLocation, variable?.id)
     : null
-  const unitToken = domain ? unitTokenForView(domain, view) : "volume"
+  const unitToken = domain
+    ? unitTokenForView(domain, view, variable?.id)
+    : "volume"
   const include = includeForView(view)
 
   // Resolve member ids to concrete scenario short_codes for the live fetch.
@@ -339,6 +343,27 @@ export function useVariableData(): VariableData {
         include,
       }),
   )
+  const cwsSlots = useMultiScenarioSlots(
+    domain === "cws" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useCwsDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        // The cws request token IS the measure name (delivery /
+        // shortage_total / shortage_pct); anything else defers to delivery.
+        measures: [
+          unitToken === "shortage_pct"
+            ? "shortage_pct"
+            : unitToken === "shortage_total"
+              ? "shortage_total"
+              : "delivery",
+        ],
+        // No wyt: the CWS series aggregate by calendar year, so the filter
+        // does not apply. It is not a field on CwsDataInDepthOptions, and the
+        // endpoint builder throws if one is smuggled past that.
+        include,
+      }),
+  )
 
   const activeSlots =
     domain === "reservoir"
@@ -353,7 +378,9 @@ export function useVariableData(): VariableData {
               ? gwSlots
               : domain === "salmon"
                 ? salmonSlots
-                : []
+                : domain === "cws"
+                  ? cwsSlots
+                  : []
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")
@@ -434,6 +461,7 @@ export function useVariableData(): VariableData {
 
     const isPct = view === "pct"
     const isLevel = view === "level"
+    const isPctDemand = view === "pct_demand"
 
     let anyLive = false
     const members: VariableMember[] = specs.map((spec) => {
@@ -451,6 +479,19 @@ export function useVariableData(): VariableData {
         series = raw.map((v) => (v / cap) * 100)
       } else if (isLevel && location) {
         series = gwLevelFromStorage(raw, location)
+      } else if (isPctDemand) {
+        // Sample percent-of-demand: shortage over shortage-plus-delivery,
+        // both from the sample engine. Live members overwrite this with the
+        // endpoint's served shortage_pct measure below.
+        series = cwsShortagePctFromSeries(
+          raw,
+          mockAnnualSeries(
+            "cws_del",
+            spec.scenarioId,
+            spec.climateKey,
+            spec.locationId,
+          ),
+        )
       } else {
         series = raw
       }

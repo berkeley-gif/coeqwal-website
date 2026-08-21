@@ -34,7 +34,11 @@ export default function ViewBar() {
   if (!variable) return null
 
   const views = variable.views.filter((v) => v !== "monthly")
-  const showDistToggle = view === "dist" || view === "pct" || view === "level"
+  const showDistToggle =
+    view === "dist" ||
+    view === "pct" ||
+    view === "pct_demand" ||
+    view === "level"
 
   return (
     <Box

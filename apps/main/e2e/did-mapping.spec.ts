@@ -233,6 +233,24 @@ test("data-in-depth endpoint paths serialize the wyt filter deduped and sorted",
   expect(unfiltered).not.toContain("wyt=")
 })
 
+test("the CWS request contract omits wyt and fails loud on a smuggled one", async () => {
+  // The CWS series aggregate by calendar year upstream, so a water-year-type
+  // filter cannot apply to them. The registry flag stops the UI from sending
+  // one; this is the contract-level backstop. `wyt` is not a field on
+  // CwsDataInDepthOptions (a caller that adds one fails check-types), and the
+  // builder throws rather than silently dropping it, so a coordination
+  // failure is visible to the caller instead of buried.
+  const { ENDPOINTS } = await import("../../../packages/data/src/coeqwal/api")
+  const path = ENDPOINTS.cwsDataInDepth(["s0020"], { subjects: ["NOD_CWS"] })
+  expect(path).not.toContain("wyt=")
+  expect(() =>
+    ENDPOINTS.cwsDataInDepth(["s0020"], {
+      subjects: ["NOD_CWS"],
+      wyt: [1, 2],
+    } as Parameters<typeof ENDPOINTS.cwsDataInDepth>[1] & { wyt: number[] }),
+  ).toThrow(/wyt/)
+})
+
 test("system-delivery variables map to the sysdel domain with annual periods", () => {
   expect(didDomainForVariable("cvp_del")).toBe("sysdel")
   expect(didDomainForVariable("swp_del")).toBe("sysdel")
@@ -408,4 +426,59 @@ test("measure-keyed domains resolve their own request tokens and response keys",
       "nof_3yr_avg",
     ),
   ).toEqual([0.23])
+})
+
+// CWS wiring (2026-08-19): the cws endpoint serves delivery, shortage_total,
+// and shortage_pct (plus pct_demand_met and welfare_loss) with NOD_CWS and
+// SOD_CWS aggregate subjects. The explorer wires both CWS variables on the
+// aggregates; entity-level locations follow once the location list is
+// finalized with the data team, so unknown ids stay unmapped (mock).
+
+test("cws variables map to the cws domain with annual periods", () => {
+  expect(didDomainForVariable("cws_del")).toBe("cws")
+  expect(didDomainForVariable("cws_short")).toBe("cws")
+  expect(didPeriodForVariable("cws_del")).toBe("annual")
+  expect(didPeriodForVariable("cws_short")).toBe("annual")
+})
+
+test("cws subjects: only the served NOD/SOD aggregates resolve", () => {
+  expect(toDidSubject("cws", "AGG_CWS_NOD", "cws_del")).toBe("NOD_CWS")
+  expect(toDidSubject("cws", "AGG_CWS_SOD", "cws_short")).toBe("SOD_CWS")
+  // Retired illustrative groups and entity codes stay unmapped until the
+  // entity-level location list is finalized.
+  expect(toDidSubject("cws", "CWS_SACU")).toBeNull()
+  expect(toDidSubject("cws", "02_NU")).toBeNull()
+})
+
+test("cws request tokens are measures, split per variable and view", () => {
+  expect(unitTokenForView("cws", "dist", "cws_del")).toBe("delivery")
+  expect(unitTokenForView("cws", "dist", "cws_short")).toBe("shortage_total")
+  expect(unitTokenForView("cws", "pct_demand", "cws_short")).toBe(
+    "shortage_pct",
+  )
+  // The percent-of-demand view draws only live-backed distribution surfaces.
+  expect(viewHasLiveSource("pct_demand")).toBe(true)
+  const cwsBlock = {
+    subjects: [
+      {
+        subject: "NOD_CWS",
+        periods: {
+          annual: {
+            delivery: { values: [{ water_year: 1922, value: 380.5 }] },
+            shortage_pct: { values: [{ water_year: 1922, value: 6.2 }] },
+          },
+        },
+      },
+    ],
+  }
+  expect(
+    pickLiveSeries(cwsBlock, "cws", "NOD_CWS", "annual", "delivery"),
+  ).toEqual([380.5])
+  expect(
+    pickLiveSeries(cwsBlock, "cws", "NOD_CWS", "annual", "shortage_pct"),
+  ).toEqual([6.2])
+  // A measure the block does not carry falls back to mock.
+  expect(
+    pickLiveSeries(cwsBlock, "cws", "NOD_CWS", "annual", "shortage_total"),
+  ).toEqual([])
 })

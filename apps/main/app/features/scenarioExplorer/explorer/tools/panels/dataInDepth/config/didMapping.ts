@@ -22,6 +22,7 @@ export type DidDomain =
   | "sysdel"
   | "gw"
   | "salmon"
+  | "cws"
 /** Request unit token (not the response unit key). */
 export type DidUnitToken =
   | "volume"
@@ -29,6 +30,9 @@ export type DidUnitToken =
   | "km"
   | "level"
   | "nof_3yr_avg"
+  | "delivery"
+  | "shortage_total"
+  | "shortage_pct"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -54,6 +58,8 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   ssjv_exp: "sysdel",
   gw_stor: "gw",
   salmon_abund: "salmon",
+  cws_del: "cws",
+  cws_short: "cws",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -76,6 +82,8 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   ssjv_exp: "annual",
   gw_stor: "annual",
   salmon_abund: "annual",
+  cws_del: "annual",
+  cws_short: "annual",
 }
 
 /**
@@ -226,6 +234,18 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
 }
 
 /**
+ * Community water systems: the endpoint serves 107 subjects, but the
+ * explorer wires only the two served aggregates for now (verified against
+ * /api/data-in-depth/cws, 2026-08-19: NOD_CWS/SOD_CWS carry all five
+ * measures). Entity-level locations follow once the location list is
+ * finalized with the data team, so any other id stays unmapped (mock).
+ */
+const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
+  AGG_CWS_NOD: "NOD_CWS",
+  AGG_CWS_SOD: "SOD_CWS",
+}
+
+/**
  * Display-unit scale applied to adopted live series, per variable. The
  * salmon endpoint serves NOF_3YR_AVG in percent (0-100, the same units as
  * the Salmon Data Drop csv metric_avg_roll column, verified against the
@@ -331,6 +351,9 @@ export function toDidSubject(
   if (domain === "salmon") {
     return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
   }
+  if (domain === "cws") {
+    return CWS_AGGREGATE_SUBJECTS[locationId] ?? null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
@@ -348,17 +371,35 @@ export function toDidSubject(
  * until someone proves its surfaces are live-backed and adds it here.
  */
 export function viewHasLiveSource(view: string): boolean {
-  return view === "dist" || view === "pct" || view === "level" || view === "cv"
+  return (
+    view === "dist" ||
+    view === "pct" ||
+    view === "level" ||
+    view === "cv" ||
+    view === "pct_demand"
+  )
 }
 
-/** Request unit token for a domain and view (delta is always km). */
+/**
+ * Request unit token for a domain and view (delta is always km). The cws
+ * domain is measure-keyed PER VARIABLE (its two variables read different
+ * measures from the same endpoint), so callers pass `variableId` for it;
+ * without one, cws falls back to the delivery measure.
+ */
 export function unitTokenForView(
   domain: DidDomain,
   view: string,
+  variableId?: string,
 ): DidUnitToken {
   if (domain === "delta") return "km"
   if (domain === "gw") return view === "level" ? "level" : "volume"
   if (domain === "salmon") return "nof_3yr_avg"
+  if (domain === "cws") {
+    if (variableId === "cws_short") {
+      return view === "pct_demand" ? "shortage_pct" : "shortage_total"
+    }
+    return "delivery"
+  }
   if (view === "pct") return "pct_capacity"
   return "volume"
 }
@@ -425,12 +466,14 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   sysdel: "subjects",
   gw: "subjects",
   salmon: "subjects",
+  cws: "subjects",
 }
 
 /**
  * Request unit token -> response series key. Unit-keyed domains use unit
  * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
- * itself (gw: volume/level) or the metric code (salmon: NOF_3YR_AVG).
+ * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct) or
+ * the metric code (salmon: NOF_3YR_AVG).
  */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   volume: "TAF",
@@ -438,6 +481,9 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   km: "km",
   level: "level",
   nof_3yr_avg: "NOF_3YR_AVG",
+  delivery: "delivery",
+  shortage_total: "shortage_total",
+  shortage_pct: "shortage_pct",
 }
 
 /** The series key for a domain + request token (gw is keyed by measure name). */

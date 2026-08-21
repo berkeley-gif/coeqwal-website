@@ -12,6 +12,7 @@ import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer
 import {
   gwLevelFromStorage,
   mockAnnualSeries,
+  cwsShortagePctFromSeries,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
 import {
   didDomainForVariable,
@@ -309,4 +310,59 @@ test("registry data flags agree with the live request mapping", () => {
       .soft(v.data === "live", `${v.id}: data flag vs live mapping`)
       .toBe(didDomainForVariable(v.id) != null)
   }
+})
+
+// Community water systems (2026-08-19): both CWS variables wire live on the
+// served NOD_CWS/SOD_CWS aggregate subjects; the four illustrative sample
+// groups are retired (their persisted ids heal), and Delivery shortages
+// gains a served percent-of-demand view alongside the TAF volume view.
+
+test("community water systems wire live on the NOD/SOD aggregates", () => {
+  const items = LOCATION_GROUPS.cws.items
+  expect(items.map((l) => l.id)).toEqual(["AGG_CWS_NOD", "AGG_CWS_SOD"])
+  expect(items.every((l) => l.aggregate)).toBe(true)
+  expect(getLocation("cws", "AGG_CWS_NOD")?.name).toBe("All North of Delta")
+  expect(getLocation("cws", "AGG_CWS_SOD")?.name).toBe("All South of Delta")
+  for (const retired of ["CWS_SACU", "CWS_BAY", "CWS_CVS", "CWS_SOC"]) {
+    expect(getLocation("cws", retired)).toBeUndefined()
+  }
+  const del = getVariable("cws_del")
+  expect(del?.data).toBe("live")
+  expect(del?.views).toEqual(["dist"])
+  const short = getVariable("cws_short")
+  expect(short?.data).toBe("live")
+  expect(short?.views).toEqual(["dist", "pct_demand"])
+  expect(short?.viewLabels?.dist).toBe("Shortage (TAF)")
+  expect(short?.viewLabels?.pct_demand).toBe("% of demand")
+  expect(short?.viewUnits?.pct_demand).toEqual({
+    unit: "%",
+    unitLabel: "percent of demand",
+  })
+  expect(short?.provisional).toBeUndefined()
+})
+
+test("CWS variables opt out of water-year-type filtering (calendar-year aggregation)", () => {
+  expect(getVariable("cws_del")?.wytApplicable).toBe(false)
+  expect(getVariable("cws_short")?.wytApplicable).toBe(false)
+})
+
+test("mergeDataInitialState heals retired CWS sample-group pins", () => {
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { cws: "CWS_SACU" },
+    selectedLocationsByGroup: { cws: ["CWS_BAY", "AGG_CWS_SOD"] },
+  })
+  expect(healed.pinnedLocationByGroup.cws).toBe("AGG_CWS_NOD")
+  expect(healed.selectedLocationsByGroup.cws).toEqual(["AGG_CWS_SOD"])
+})
+
+test("cws shortage percent sample series derive from shortage over demand", () => {
+  // pct = short / (short + delivery) x 100 per year, clamped to [0, 100];
+  // a no-demand year (both series 0) renders 0, never NaN. Sample-only
+  // transform: live members adopt the served shortage_pct measure directly.
+  expect(cwsShortagePctFromSeries([10, 0, 5], [90, 100, 0])).toEqual([
+    10, 0, 100,
+  ])
+  expect(cwsShortagePctFromSeries([0], [0])).toEqual([0])
+  // Mismatched lengths trim to the shorter series so years stay aligned.
+  expect(cwsShortagePctFromSeries([10, 10], [90])).toEqual([10])
 })
