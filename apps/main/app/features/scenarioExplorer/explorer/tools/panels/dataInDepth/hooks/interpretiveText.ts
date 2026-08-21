@@ -41,6 +41,12 @@ export interface SummaryMember {
   value?: number
   /** True when this member is the comparison reference */
   isReference?: boolean
+  /** True when this member's series came from the live API */
+  isLive?: boolean
+  /** True when the scenario is not modeled for this variable at all, so its
+   *  series is sample data standing in for something that does not exist.
+   *  Such a member must never contribute a number to the summary sentence. */
+  liveDataMissing?: boolean
 }
 
 export interface SummaryContext {
@@ -91,9 +97,11 @@ export function summarySentence(
 ): string {
   if (members.length === 0) return ""
 
-  // Winter-run salmon reads by its confirmed template: the mean of the
-  // percent-of-habitat series (a 3-year population average reads as an
-  // average, not a median), phrased as habitat occupancy.
+  // Winter-run salmon reads by its own template, phrased as habitat
+  // occupancy. The statistic is the MEDIAN of the percent-of-habitat series,
+  // matching what the chart plots (2026-08-20 science-team correction; the
+  // sentence previously reported the arithmetic mean, which did not match the
+  // plotted data).
   if (ctx.variableId === "salmon_abund") {
     const salmon = salmonSentence(members, ctx)
     if (salmon) return salmon
@@ -177,22 +185,43 @@ export function summarySentence(
 }
 
 /**
- * The confirmed winter-run salmon sentence: "Winter-run Chinook salmon for
- * <scenario> under the <hydroclimate> occupy <XX%> of suitable spawning
- * habitat, on average." Every value the sentence reports is an occupancy
- * percent (never a relative-change percent, which would read ambiguous next
- * to a percent-unit lead value): scenario comparisons list the other
- * members' own occupancy, climate comparisons enumerate every compared
- * member. Returns "" when no member carries a series (the caller then falls
- * through to the generic sentences, which render "" for an empty dist view).
+ * The winter-run salmon sentence: "Winter-run Chinook salmon for <scenario>
+ * under the <hydroclimate> occupy <XX%> of suitable spawning habitat, at the
+ * median."
+ *
+ * Two rules the science team set on 2026-08-20:
+ *
+ *  1. The statistic is the MEDIAN, matching the plotted distribution. The
+ *     sentence previously reported the arithmetic mean, so the number in the
+ *     header did not match the chart under it.
+ *  2. No member without model results may contribute a NUMBER. Scenarios the
+ *     model does not cover still carry a sample series (the engine always
+ *     produces one), and quoting it read as a real result. Those members are
+ *     named as having no data instead. A member that is merely sample-backed
+ *     keeps its value but is marked "(sample)".
+ *
+ * Every value the sentence reports is an occupancy percent (never a
+ * relative-change percent, which would read ambiguous next to a percent-unit
+ * lead value): scenario comparisons list the other members' own occupancy,
+ * climate comparisons enumerate every compared member. Returns "" when no
+ * member carries a usable series (the caller then falls through to the
+ * generic sentences, which render "" for an empty dist view).
  */
 function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
-  const withSeries = members.filter((m) => m.series && m.series.length > 0)
+  // Members the model has no results for are excluded from every statistic.
+  const noData = members.filter((m) => m.liveDataMissing)
+  const withSeries = members.filter(
+    (m) => !m.liveDataMissing && m.series && m.series.length > 0,
+  )
   if (withSeries.length === 0) return ""
-  // The displayed series is a proportion of 1.0; prose keeps the confirmed
-  // percent phrasing, so the mean converts back (x100) for the sentence.
-  const meanPct = (m: SummaryMember) =>
-    `${formatValue(seriesStats(m.series as number[]).mean * 100, "%")}%`
+  // The displayed series is a proportion of 1.0; prose keeps the percent
+  // phrasing, so the median converts back (x100) for the sentence.
+  const medianPct = (m: SummaryMember) =>
+    `${formatValue(seriesStats(m.series as number[]).p50 * 100, "%")}%`
+  const noDataClause =
+    noData.length > 0
+      ? `; no data available for ${noData.map((m) => m.label).join(", ")}`
+      : ""
   const heldClimate = /climate/i.test(ctx.climateName)
     ? ctx.climateName
     : `${ctx.climateName} hydroclimate`
@@ -200,28 +229,33 @@ function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   if (ctx.compareBy === "climates") {
     const parts = withSeries.map(
       (m, i) =>
-        `${meanPct(m)}${i === 0 ? " of suitable spawning habitat" : ""} under ${m.label}`,
+        `${medianPct(m)}${i === 0 ? " of suitable spawning habitat" : ""} under ${m.label}`,
     )
     const list =
       parts.length <= 2
         ? parts.join(" and ")
         : `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`
-    return `Winter-run Chinook salmon for ${ctx.scenarioName} occupy ${list}, on average.`
+    return `Winter-run Chinook salmon for ${ctx.scenarioName} occupy ${list}, at the median${noDataClause}.`
   }
 
   const ref =
     withSeries.find((m) => m.isReference) ?? (withSeries[0] as SummaryMember)
   const scenarioLabel =
     ctx.compareBy === "scenarios" ? ref.label : ctx.scenarioName
-  let s = `Winter-run Chinook salmon for ${scenarioLabel} under the ${heldClimate} occupy ${meanPct(ref)} of suitable spawning habitat, on average`
+  let s = `Winter-run Chinook salmon for ${scenarioLabel} under the ${heldClimate} occupy ${medianPct(ref)} of suitable spawning habitat, at the median`
   if (ctx.compareBy === "scenarios") {
     const others = withSeries.filter((m) => m !== ref)
     if (others.length > 0) {
-      const rest = others.map((m) => `${m.label} ${meanPct(m)}`)
+      // A sample-backed member keeps its number but says so, so the reader
+      // can tell which comparisons rest on model results.
+      const rest = others.map(
+        (m) =>
+          `${m.label} ${medianPct(m)}${m.isLive === false ? " (sample)" : ""}`,
+      )
       s += `; for comparison: ${rest.join(", ")}`
     }
   }
-  return `${s}.`
+  return `${s}${noDataClause}.`
 }
 
 /** Inputs for the card's standardized figure title. */

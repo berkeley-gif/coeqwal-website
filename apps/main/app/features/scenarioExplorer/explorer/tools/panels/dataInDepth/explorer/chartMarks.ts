@@ -22,6 +22,11 @@ export interface MarkMember {
   waterYears?: number[]
   /** Per-member provenance, carried through to the CSV payload (not drawn) */
   isLive?: boolean
+  /** True when the scenario is not modeled for this variable at all. Such a
+   *  member is recorded in exports (labeled, with empty values) but is never
+   *  DRAWN: its series exists only because the sample engine always produces
+   *  one, and drawing it would put a fabricated curve on the figure. */
+  liveDataMissing?: boolean
 }
 
 /** One bar per member (the "cv" and "value" views). */

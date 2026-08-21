@@ -96,6 +96,7 @@ import {
   SSJV_ALL_ROUTES_LOCATION,
   SSJV_ROUTE_SUBJECTS,
   viewHasLiveSource,
+  hasEmptyScenariosResponse,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
@@ -117,6 +118,12 @@ export interface VariableMember {
   waterYears?: number[]
   /** True when this member's series came from the live API (mock fallback = false) */
   isLive?: boolean
+  /** True when the variable IS live-eligible and this member's request
+   *  resolved, but the endpoint served no block for the scenario: the
+   *  scenario is not modeled for this variable (salmon under the Delta
+   *  Conveyance Project). Distinct from a plain mock fallback, which means
+   *  "not wired yet" rather than "does not exist". `isLive` stays false. */
+  liveDataMissing?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -136,6 +143,9 @@ export interface VariableData {
   provisional: boolean
   /** Data provenance for the card label */
   source: "live" | "mock"
+  /** True when some members are live and others are not, so a single
+   *  chart-level provenance badge would misdescribe part of the figure */
+  mixedSource: boolean
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string
   /** Held location as a figure-title name ("Shasta Reservoir"; "" if none) */
@@ -429,6 +439,15 @@ export function useVariableData(): VariableData {
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")
+  // Per-slot "resolved but served nothing for this scenario". Kept as its own
+  // signal because hasData cannot express it: the endpoint answers 200 with an
+  // empty scenarios array, so hasData is true either way.
+  const emptyResponseBySlot = activeSlots.map((r) =>
+    hasEmptyScenariosResponse(r),
+  )
+  const emptyResponseSignature = emptyResponseBySlot
+    .map((v) => (v ? "1" : "0"))
+    .join("")
   const liveLoading = activeSlots.some((r) => r?.isLoading)
 
   return useMemo<VariableData>(() => {
@@ -449,6 +468,7 @@ export function useVariableData(): VariableData {
         unitLabel: "",
         provisional: false,
         source: "mock",
+        mixedSource: false,
         ...emptyContext,
         wytApplicable,
         isLoading: false,
@@ -632,6 +652,15 @@ export function useVariableData(): VariableData {
         )
       else value = stats.p50
 
+      // "Not modeled for this scenario", as distinct from "not wired yet".
+      // Only meaningful when the variable IS live-eligible and this member's
+      // own request resolved; adoptedLive / anyLive / source semantics are
+      // deliberately unchanged.
+      const liveDataMissing =
+        liveEligible &&
+        spec.slotIndex != null &&
+        emptyResponseBySlot[spec.slotIndex] === true
+
       return {
         id: spec.id,
         label: spec.label,
@@ -639,6 +668,7 @@ export function useVariableData(): VariableData {
         series,
         waterYears,
         isLive: adoptedLive,
+        ...(liveDataMissing ? { liveDataMissing: true } : {}),
         stats,
         bands,
         value,
@@ -665,6 +695,9 @@ export function useVariableData(): VariableData {
       unitLabel,
       provisional: variable.provisional ?? false,
       source: anyLive ? "live" : "mock",
+      // A single chart-level badge misdescribes the figure the moment one
+      // series is live and another is not.
+      mixedSource: anyLive && members.some((m) => !m.isLive),
       ...emptyContext,
       wytApplicable,
       isLoading: liveEligible ? liveLoading : false,
@@ -690,6 +723,7 @@ export function useVariableData(): VariableData {
     unitToken,
     companionSignature,
     liveSignature,
+    emptyResponseSignature,
     liveLoading,
     wytJoined,
   ])
