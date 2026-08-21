@@ -709,7 +709,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: "proportion of spawning habitat occupied",
     axisLabel: "Proportion of spawning habitat occupied",
     footnote:
-      "Proportion of total spawning habitat occupied by returning natural-origin female winter-run Chinook spawners, averaged over three years. Values above 1.0 would suggest returning spawners exceed the capacity of available habitat. The data shown represent the lower 20th percentile of model simulations.",
+      "Proportion of total spawning habitat occupied by returning natural-origin female winter-run Chinook spawners, averaged over three years. The data shown represent the lower 20th percentile of model simulations.",
     views: ["dist"],
     viewLabels: { dist: "Abundance (3-yr avg)" },
     plain:

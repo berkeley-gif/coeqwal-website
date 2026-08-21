@@ -180,8 +180,14 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
       .getByText("Proportion of spawning habitat occupied"),
   ).toBeVisible()
   await expect(
-    page.getByText(/would suggest returning spawners exceed/),
+    page.getByText(/lower 20th percentile of model simulations/),
   ).toBeVisible()
+  // The above-1.0 sentence was removed from the caption at the science
+  // team's request; assert it stays gone so a future caption edit cannot
+  // restore it silently.
+  await expect(
+    page.getByText(/would suggest returning spawners exceed/),
+  ).toHaveCount(0)
 
   // Groundwater: the NOD/SOD totals lead the location list, so the default
   // selection is live immediately, and every served basin resolves by its
