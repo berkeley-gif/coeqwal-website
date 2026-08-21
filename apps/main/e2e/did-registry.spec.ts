@@ -243,8 +243,10 @@ test("salmon abundance displays as proportion of spawning habitat occupied", () 
   expect(v?.axisLabel).toBe("Proportion of spawning habitat occupied")
   // The detailed reading of the metric lives in the card footer.
   expect(v?.footnote).toContain("averaged over three years")
-  expect(v?.footnote).toContain("above 1.0")
   expect(v?.footnote).toContain("lower 20th percentile")
+  // The above-1.0 sentence was removed at the science team's request; assert
+  // it stays gone so a future caption edit cannot restore it silently.
+  expect(v?.footnote).not.toContain("above 1.0")
   // The reintroduction (-R) scenarios are not served yet, so the chip
   // stays; a population average does not decompose by water-year type.
   expect(v?.provisional).toBe(true)
