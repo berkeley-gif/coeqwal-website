@@ -164,18 +164,21 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   },
   basins: {
     // The list mixes the two NOD/SOD summary locations with the 42 basins,
-    // so the control label says "location", not "basin". The title suffix
-    // stays "Basin": right for 42 of 44 entries; the aggregates' "...Basin"
-    // titles predate this list and read acceptably.
+    // so the control label says "location", not "basin". No title suffix:
+    // with descriptive names, titles read "... (WBA10 - Chico; Durham)"
+    // and appending "Basin" would dangle after the place names.
     label: "Groundwater location",
-    titleSuffix: "Basin",
     // The 42 served basins (41 WBA technical-area codes plus the
     // Delta-Eastside Water entity) after the NOD/SOD totals, in natural
-    // code order. Codes are the labels until richer basin names are
-    // confirmed; DETAW keeps the label the endpoint serves. Regions are
-    // INFERRED from the WBA numbering (Sacramento Valley codes 2-26
-    // north of the Delta, 50-90 south) and only flavor the sample-data
-    // engine. mockBase values are synthetic sample magnitudes.
+    // code order. Each WBA labels as "CODE - description" with the CalSim3
+    // hydrology-report description the endpoint serves (verified against
+    // /api/data-in-depth/groundwater-storage subject labels): the code
+    // leads so the dropdown keeps code order and stays cross-referenceable
+    // with the other explore tools, which show bare codes. DETAW keeps its
+    // more specific local name (the endpoint labels it just "Delta").
+    // Regions are INFERRED from the WBA numbering (Sacramento Valley codes
+    // 2-26 north of the Delta, 50-90 south) and only flavor the
+    // sample-data engine. mockBase values are synthetic sample magnitudes.
     items: [
       {
         id: "AGG_GW_NOD",
@@ -197,47 +200,222 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         region: "Delta",
         mockBase: 6400,
       },
-      { id: "WBA2", name: "WBA2", region: "NOD", mockBase: 4000 },
-      { id: "WBA3", name: "WBA3", region: "NOD", mockBase: 4300 },
-      { id: "WBA4", name: "WBA4", region: "NOD", mockBase: 4600 },
-      { id: "WBA5", name: "WBA5", region: "NOD", mockBase: 4900 },
-      { id: "WBA6", name: "WBA6", region: "NOD", mockBase: 5200 },
-      { id: "WBA7N", name: "WBA7N", region: "NOD", mockBase: 5500 },
-      { id: "WBA7S", name: "WBA7S", region: "NOD", mockBase: 5800 },
-      { id: "WBA8N", name: "WBA8N", region: "NOD", mockBase: 6100 },
-      { id: "WBA8S", name: "WBA8S", region: "NOD", mockBase: 6400 },
-      { id: "WBA9", name: "WBA9", region: "NOD", mockBase: 6700 },
-      { id: "WBA10", name: "WBA10", region: "NOD", mockBase: 7000 },
-      { id: "WBA11", name: "WBA11", region: "NOD", mockBase: 7300 },
-      { id: "WBA12", name: "WBA12", region: "NOD", mockBase: 7600 },
-      { id: "WBA13", name: "WBA13", region: "NOD", mockBase: 7900 },
-      { id: "WBA14", name: "WBA14", region: "NOD", mockBase: 8200 },
-      { id: "WBA15N", name: "WBA15N", region: "NOD", mockBase: 8500 },
-      { id: "WBA15S", name: "WBA15S", region: "NOD", mockBase: 8800 },
-      { id: "WBA16", name: "WBA16", region: "NOD", mockBase: 9100 },
-      { id: "WBA17N", name: "WBA17N", region: "NOD", mockBase: 9400 },
-      { id: "WBA17S", name: "WBA17S", region: "NOD", mockBase: 9700 },
-      { id: "WBA18", name: "WBA18", region: "NOD", mockBase: 10000 },
-      { id: "WBA19", name: "WBA19", region: "NOD", mockBase: 10300 },
-      { id: "WBA20", name: "WBA20", region: "NOD", mockBase: 10600 },
-      { id: "WBA21", name: "WBA21", region: "NOD", mockBase: 10900 },
-      { id: "WBA22", name: "WBA22", region: "NOD", mockBase: 11200 },
-      { id: "WBA23", name: "WBA23", region: "NOD", mockBase: 11500 },
-      { id: "WBA24", name: "WBA24", region: "NOD", mockBase: 11800 },
-      { id: "WBA25", name: "WBA25", region: "NOD", mockBase: 12100 },
-      { id: "WBA26N", name: "WBA26N", region: "NOD", mockBase: 12400 },
-      { id: "WBA26S", name: "WBA26S", region: "NOD", mockBase: 12700 },
-      { id: "WBA50", name: "WBA50", region: "SOD", mockBase: 13000 },
-      { id: "WBA60N", name: "WBA60N", region: "SOD", mockBase: 13300 },
-      { id: "WBA60S", name: "WBA60S", region: "SOD", mockBase: 13600 },
-      { id: "WBA61", name: "WBA61", region: "SOD", mockBase: 13900 },
-      { id: "WBA62", name: "WBA62", region: "SOD", mockBase: 14200 },
-      { id: "WBA63", name: "WBA63", region: "SOD", mockBase: 14500 },
-      { id: "WBA64", name: "WBA64", region: "SOD", mockBase: 14800 },
-      { id: "WBA71", name: "WBA71", region: "SOD", mockBase: 15100 },
-      { id: "WBA72", name: "WBA72", region: "SOD", mockBase: 15400 },
-      { id: "WBA73", name: "WBA73", region: "SOD", mockBase: 15700 },
-      { id: "WBA90", name: "WBA90", region: "SOD", mockBase: 16000 },
+      {
+        id: "WBA2",
+        name: "WBA2 - West Redding",
+        region: "NOD",
+        mockBase: 4000,
+      },
+      {
+        id: "WBA3",
+        name: "WBA3 - East Redding",
+        region: "NOD",
+        mockBase: 4300,
+      },
+      {
+        id: "WBA4",
+        name: "WBA4 - West Red Bluff",
+        region: "NOD",
+        mockBase: 4600,
+      },
+      {
+        id: "WBA5",
+        name: "WBA5 - East Red Bluff; Los Molinos",
+        region: "NOD",
+        mockBase: 4900,
+      },
+      { id: "WBA6", name: "WBA6 - Orland", region: "NOD", mockBase: 5200 },
+      {
+        id: "WBA7N",
+        name: "WBA7N - Willows; North Tehama-Colusa",
+        region: "NOD",
+        mockBase: 5500,
+      },
+      {
+        id: "WBA7S",
+        name: "WBA7S - Arbuckle; South Tehama-Colusa",
+        region: "NOD",
+        mockBase: 5800,
+      },
+      {
+        id: "WBA8N",
+        name: "WBA8N - Hamilton City; North Glenn-Colusa",
+        region: "NOD",
+        mockBase: 6100,
+      },
+      {
+        id: "WBA8S",
+        name: "WBA8S - Williams; South Glenn-Colusa",
+        region: "NOD",
+        mockBase: 6400,
+      },
+      { id: "WBA9", name: "WBA9 - Butte City", region: "NOD", mockBase: 6700 },
+      {
+        id: "WBA10",
+        name: "WBA10 - Chico; Durham",
+        region: "NOD",
+        mockBase: 7000,
+      },
+      {
+        id: "WBA11",
+        name: "WBA11 - Gridley; Live Oaks",
+        region: "NOD",
+        mockBase: 7300,
+      },
+      {
+        id: "WBA12",
+        name: "WBA12 - South Oroville; Honcut Valley",
+        region: "NOD",
+        mockBase: 7600,
+      },
+      {
+        id: "WBA13",
+        name: "WBA13 - Palermo; Honcut Foothills",
+        region: "NOD",
+        mockBase: 7900,
+      },
+      {
+        id: "WBA14",
+        name: "WBA14 - Browns Valley; Yuba Foothills",
+        region: "NOD",
+        mockBase: 8200,
+      },
+      {
+        id: "WBA15N",
+        name: "WBA15N - Marysville; North Yuba",
+        region: "NOD",
+        mockBase: 8500,
+      },
+      {
+        id: "WBA15S",
+        name: "WBA15S - Wheatland; South Yuba",
+        region: "NOD",
+        mockBase: 8800,
+      },
+      { id: "WBA16", name: "WBA16 - Yuba City", region: "NOD", mockBase: 9100 },
+      {
+        id: "WBA17N",
+        name: "WBA17N - North Sutter Buttes; Butte Sink",
+        region: "NOD",
+        mockBase: 9400,
+      },
+      {
+        id: "WBA17S",
+        name: "WBA17S - South Sutter Buttes; Sutter Bypass",
+        region: "NOD",
+        mockBase: 9700,
+      },
+      { id: "WBA18", name: "WBA18 - Meridian", region: "NOD", mockBase: 10000 },
+      { id: "WBA19", name: "WBA19 - Robbins", region: "NOD", mockBase: 10300 },
+      {
+        id: "WBA20",
+        name: "WBA20 - Davis; Woodland",
+        region: "NOD",
+        mockBase: 10600,
+      },
+      {
+        id: "WBA21",
+        name: "WBA21 - Fremont Landing; Yolo Bypass",
+        region: "NOD",
+        mockBase: 10900,
+      },
+      {
+        id: "WBA22",
+        name: "WBA22 - Natomas; Pleasant Grove",
+        region: "NOD",
+        mockBase: 11200,
+      },
+      {
+        id: "WBA23",
+        name: "WBA23 - Camp Far West; Sutter",
+        region: "NOD",
+        mockBase: 11500,
+      },
+      {
+        id: "WBA24",
+        name: "WBA24 - Lincoln; West Placer",
+        region: "NOD",
+        mockBase: 11800,
+      },
+      {
+        id: "WBA25",
+        name: "WBA25 - Dixon; Vacaville",
+        region: "NOD",
+        mockBase: 12100,
+      },
+      {
+        id: "WBA26N",
+        name: "WBA26N - North Sacramento",
+        region: "NOD",
+        mockBase: 12400,
+      },
+      {
+        id: "WBA26S",
+        name: "WBA26S - South Sacramento",
+        region: "NOD",
+        mockBase: 12700,
+      },
+      {
+        id: "WBA50",
+        name: "WBA50 - Byron-Bethany; Banta-Carbona; Tracy",
+        region: "SOD",
+        mockBase: 13000,
+      },
+      {
+        id: "WBA60N",
+        name: "WBA60N - Elk Grove; Lodi",
+        region: "SOD",
+        mockBase: 13300,
+      },
+      {
+        id: "WBA60S",
+        name: "WBA60S - Stockton; Jenny Lind; Bachelor Valley",
+        region: "SOD",
+        mockBase: 13600,
+      },
+      {
+        id: "WBA61",
+        name: "WBA61 - Modesto; Oakdale; South San Joaquin",
+        region: "SOD",
+        mockBase: 13900,
+      },
+      { id: "WBA62", name: "WBA62 - Turlock", region: "SOD", mockBase: 14200 },
+      {
+        id: "WBA63",
+        name: "WBA63 - Merced; El Nido; Stevenson",
+        region: "SOD",
+        mockBase: 14500,
+      },
+      {
+        id: "WBA64",
+        name: "WBA64 - Madera; Chowchilla; Gravelly Ford; Adobe",
+        region: "SOD",
+        mockBase: 14800,
+      },
+      {
+        id: "WBA71",
+        name: "WBA71 - Upper Delta-Mendota Canal",
+        region: "SOD",
+        mockBase: 15100,
+      },
+      {
+        id: "WBA72",
+        name: "WBA72 - Grasslands Ecological Area; Westside Exchange Contractors",
+        region: "SOD",
+        mockBase: 15400,
+      },
+      {
+        id: "WBA73",
+        name: "WBA73 - Lower Delta-Mendota Canal; Joint Reach of the California Aqueduct",
+        region: "SOD",
+        mockBase: 15700,
+      },
+      {
+        id: "WBA90",
+        name: "WBA90 - Westlands Water District",
+        region: "SOD",
+        mockBase: 16000,
+      },
     ],
   },
   rivers: {

@@ -48,7 +48,9 @@ test("buildFigureTitle omits absent parts without dangling separators", () => {
 
 test("getLocationTitle appends the group's title suffix", () => {
   expect(getLocationTitle("reservoirs", "SHSTA")).toBe("Shasta Reservoir")
-  expect(getLocationTitle("basins", "WBA10")).toBe("WBA10 Basin")
+  // Basins set no suffix: the descriptive "CODE - description" names read
+  // as full titles, and "Basin" would dangle after the place names.
+  expect(getLocationTitle("basins", "WBA10")).toBe("WBA10 - Chico; Durham")
   // Groups whose names already read as full titles get no suffix.
   expect(getLocationTitle("rivers", "YRS")).toBe("Yuba River")
   // Aggregate rollups already read as full titles too: "All North of Delta
