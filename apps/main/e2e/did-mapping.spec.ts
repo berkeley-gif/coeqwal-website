@@ -14,6 +14,7 @@ import {
   SSJV_ALL_ROUTES_LOCATION,
   SSJV_ROUTE_SUBJECTS,
   sumAlignedSeriesPoints,
+  companionUnitTokensForView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -567,8 +568,10 @@ test("sumAlignedSeriesPoints sums only complete, year-aligned series", () => {
 test("ag variables resolve the ag domain on the NOD/SOD aggregates", () => {
   expect(didDomainForVariable("ag_del")).toBe("ag")
   expect(didDomainForVariable("ag_pump")).toBe("ag")
+  expect(didDomainForVariable("ag_short")).toBe("ag")
   expect(didPeriodForVariable("ag_del")).toBe("annual")
   expect(didPeriodForVariable("ag_pump")).toBe("annual")
+  expect(didPeriodForVariable("ag_short")).toBe("annual")
   expect(toDidSubject("ag", "AGG_AG_NOD", "ag_del")).toBe("NOD_Agriculture")
   expect(toDidSubject("ag", "AGG_AG_SOD", "ag_pump")).toBe("SOD_Agriculture")
   // The retired illustrative groups stay unmapped, so a stale persisted pin
@@ -583,10 +586,32 @@ test("ag variables resolve the ag domain on the NOD/SOD aggregates", () => {
 test("ag measure tokens are keyed per variable and never scaled", () => {
   expect(unitTokenForView("ag", "dist", "ag_del")).toBe("net_diversion")
   expect(unitTokenForView("ag", "dist", "ag_pump")).toBe("gw_pumping")
+  // Shortage is the primary series in BOTH of ag_short's views: the percent
+  // view derives rather than switching to a served percent measure.
+  expect(unitTokenForView("ag", "dist", "ag_short")).toBe("shortage")
+  expect(unitTokenForView("ag", "pct_demand", "ag_short")).toBe("shortage")
   // The upstream extraction bug that made ag volumes read 1000x low was fixed
   // in the databases, so the served values are already TAF. Pinning the scale
   // at 1 makes a future client-side "correction" fail loudly instead of
   // silently double-counting the upstream fix.
   expect(didLiveScaleForVariable("ag_del")).toBe(1)
   expect(didLiveScaleForVariable("ag_pump")).toBe(1)
+  expect(didLiveScaleForVariable("ag_short")).toBe(1)
+})
+
+test("only the ag percent-of-demand view needs a companion measure", () => {
+  // The ag endpoint serves no percent measure, so that view fetches shortage
+  // AND net_diversion and derives the percent on the site. Every other view
+  // and domain fetches exactly one measure; community water systems in
+  // particular adopt a SERVED shortage_pct and need no companion, so a
+  // regression that gave them one would fetch a measure nothing reads.
+  expect(companionUnitTokensForView("ag", "pct_demand", "ag_short")).toEqual([
+    "net_diversion",
+  ])
+  expect(companionUnitTokensForView("ag", "dist", "ag_short")).toEqual([])
+  expect(companionUnitTokensForView("ag", "dist", "ag_del")).toEqual([])
+  expect(companionUnitTokensForView("cws", "pct_demand", "cws_short")).toEqual(
+    [],
+  )
+  expect(companionUnitTokensForView("reservoir", "dist", "res_apr")).toEqual([])
 })

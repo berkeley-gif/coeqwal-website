@@ -67,6 +67,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   cws_short: "cws",
   ag_del: "ag",
   ag_pump: "ag",
+  ag_short: "ag",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -94,6 +95,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   cws_short: "annual",
   ag_del: "annual",
   ag_pump: "annual",
+  ag_short: "annual",
 }
 
 /**
@@ -450,11 +452,35 @@ export function unitTokenForView(
   }
   if (domain === "ag") {
     if (variableId === "ag_pump") return "gw_pumping"
+    // Shortage is the primary series in BOTH of ag_short's views. The percent
+    // view derives from it plus the companion net_diversion series rather
+    // than switching to a served percent measure the way cws does.
     if (variableId === "ag_short") return "shortage"
     return "net_diversion"
   }
   if (view === "pct") return "pct_capacity"
   return "volume"
+}
+
+/**
+ * Extra measures a request needs beyond the view's primary unit token.
+ *
+ * Only the agriculture percent-of-demand view needs one. The ag endpoint
+ * serves no percent measure, so that view is DERIVED on the site from the
+ * shortage and net_diversion series together and both must be fetched in the
+ * same request. (Community water systems differ: their endpoint serves
+ * shortage_pct directly, so their percent view adopts it and needs no
+ * companion.)
+ */
+export function companionUnitTokensForView(
+  domain: DidDomain,
+  view: string,
+  variableId?: string,
+): DidUnitToken[] {
+  if (domain === "ag" && variableId === "ag_short" && view === "pct_demand") {
+    return ["net_diversion"]
+  }
+  return []
 }
 
 /**

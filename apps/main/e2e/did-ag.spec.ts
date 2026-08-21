@@ -19,9 +19,12 @@ const SCENARIOS_FIXTURE = [
   },
 ]
 
+// Every value is distinct, and the shortage/net_diversion pairs are chosen so
+// the DERIVED percent-of-demand lands on a round number that cannot be
+// mistaken for either input: NOD 400 / (3,600 + 400) = 10 percent.
 const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
-  NOD_Agriculture: { net_diversion: 3100, gw_pumping: 2200, shortage: 41 },
-  SOD_Agriculture: { net_diversion: 4700, gw_pumping: 2600, shortage: 88 },
+  NOD_Agriculture: { net_diversion: 3600, gw_pumping: 2200, shortage: 400 },
+  SOD_Agriculture: { net_diversion: 4700, gw_pumping: 2600, shortage: 300 },
 }
 
 function agPayload(subjectsCsv: string, measuresCsv: string) {
@@ -151,9 +154,9 @@ test("ag variables fetch their per-variable measures and go live", async ({
     .toBe(true)
   // The adopted live value renders in TAF at the served magnitude. The
   // upstream extraction bug made these read 1000x low; the fix is in the
-  // databases and the site applies NO client-side scale, so 3,100 in must be
-  // 3,100 out.
-  await expect(page.getByText(/3,100 TAF/).first()).toBeVisible()
+  // databases and the site applies NO client-side scale, so 3,600 in must be
+  // 3,600 out.
+  await expect(page.getByText(/3,600 TAF/).first()).toBeVisible()
 
   // Location switch: the SOD aggregate resolves to its own subject.
   await page
@@ -193,6 +196,62 @@ test("ag variables fetch their per-variable measures and go live", async ({
   await expect
     .poll(() => requested.some((r) => r.url.includes("wyt=5")))
     .toBe(true)
+
+  expect(errors).toEqual([])
+})
+
+// The ag percent-of-demand view is DERIVED on the site: the endpoint serves
+// no percent measure, so the request carries shortage AND net_diversion and
+// the view computes shortage / (net_diversion + shortage) x 100. The fixture
+// picks 25 and 75 so the expected percent (25) is unmistakable and cannot be
+// confused with either input.
+test("ag shortage derives its percent-of-demand view from two served measures", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupAgRoutes(page)
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+
+  const agList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
+
+  // Volume view first: one measure, the served shortage series in TAF.
+  await agList.getByRole("button", { name: "Water shortage" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "NOD_Agriculture" && r.measures === "shortage",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/400 TAF/).first()).toBeVisible()
+  // Scope is settled now that the series is served.
+  await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
+
+  // Percent view: BOTH measures in one request, and the rendered value is the
+  // derived percent, not either input.
+  await page.getByRole("button", { name: "% of demand", exact: true }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) =>
+          r.subjects === "NOD_Agriculture" &&
+          r.measures.includes("shortage") &&
+          r.measures.includes("net_diversion"),
+      ),
+    )
+    .toBe(true)
+  // 400 / (3,600 + 400) x 100 = 10 percent, a value that appears nowhere in
+  // the fixture's inputs.
+  await expect(page.getByText(/10(\.0+)? %/).first()).toBeVisible()
 
   expect(errors).toEqual([])
 })

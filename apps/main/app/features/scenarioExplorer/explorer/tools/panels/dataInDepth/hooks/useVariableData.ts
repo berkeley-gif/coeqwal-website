@@ -46,6 +46,7 @@ import {
   useCwsDataInDepth,
   useAgDataInDepth,
 } from "@repo/data/coeqwal/hooks"
+import type { DidAgMeasure } from "@repo/data/coeqwal"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
   useResolvedIdMapping,
@@ -66,7 +67,7 @@ import {
   type VariableView,
 } from "../config/variableRegistry"
 import {
-  cwsShortagePctFromSeries,
+  shortagePctOfDemand,
   gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
@@ -88,6 +89,7 @@ import {
   didLiveScaleForVariable,
   toDidSubject,
   unitTokenForView,
+  companionUnitTokensForView,
   includeForView,
   pickLiveSeriesPoints,
   sumAlignedSeriesPoints,
@@ -240,6 +242,12 @@ export function useVariableData(): VariableData {
   const unitToken = domain
     ? unitTokenForView(domain, view, variable?.id)
     : "volume"
+  // Extra measures the request needs beyond the primary one. Only the ag
+  // percent-of-demand view has any: it is derived from two served series.
+  const companionTokens = domain
+    ? companionUnitTokensForView(domain, view, variable?.id)
+    : []
+  const companionSignature = companionTokens.join(",")
   const include = includeForView(view)
 
   // Resolve member ids to concrete scenario short_codes for the live fetch.
@@ -391,6 +399,9 @@ export function useVariableData(): VariableData {
             : unitToken === "shortage"
               ? "shortage"
               : "net_diversion",
+          // The percent-of-demand view needs net_diversion alongside
+          // shortage, because the endpoint serves no percent measure.
+          ...(companionSignature ? (companionTokens as DidAgMeasure[]) : []),
         ],
         include,
         wyt,
@@ -514,13 +525,15 @@ export function useVariableData(): VariableData {
       } else if (isLevel && location) {
         series = gwLevelFromStorage(raw, location)
       } else if (isPctDemand) {
-        // Sample percent-of-demand: shortage over shortage-plus-delivery,
-        // both from the sample engine. Live members overwrite this with the
-        // endpoint's served shortage_pct measure below.
-        series = cwsShortagePctFromSeries(
+        // Sample percent-of-demand: shortage over shortage-plus-delivered,
+        // both from the sample engine. The delivered term is the sector's own
+        // delivery variable. For CWS a live member overwrites this with the
+        // endpoint's served shortage_pct measure below; for ag there is no
+        // served percent measure, so the live path derives it the same way.
+        series = shortagePctOfDemand(
           raw,
           mockAnnualSeries(
-            "cws_del",
+            variable.id === "ag_short" ? "ag_del" : "cws_del",
             spec.scenarioId,
             spec.climateKey,
             spec.locationId,
@@ -548,7 +561,31 @@ export function useVariableData(): VariableData {
           : subject
             ? pickLiveSeriesPoints(block, domain, subject, period, unitToken)
             : null
-        if (points && points.series.length > 0) {
+        // The ag percent-of-demand view has no served percent measure, so it
+        // is derived from the primary shortage series and the companion
+        // net_diversion series in the SAME response block. If either is
+        // missing the member falls back to sample data rather than showing a
+        // half-derived number.
+        if (isPctDemand && companionTokens.length > 0 && subject) {
+          const companion = pickLiveSeriesPoints(
+            block,
+            domain,
+            subject,
+            period,
+            companionTokens[0] as typeof unitToken,
+          )
+          if (
+            points &&
+            points.series.length > 0 &&
+            companion.series.length > 0
+          ) {
+            series = shortagePctOfDemand(points.series, companion.series)
+            waterYears =
+              points.waterYears.length > 0 ? points.waterYears : undefined
+            anyLive = true
+            adoptedLive = true
+          }
+        } else if (points && points.series.length > 0) {
           // Served units -> display units (e.g. the salmon habitat-occupancy
           // ratio displays as percent); 1 for every other variable.
           const liveScale = didLiveScaleForVariable(variable.id)
@@ -651,6 +688,7 @@ export function useVariableData(): VariableData {
     period,
     domain,
     unitToken,
+    companionSignature,
     liveSignature,
     liveLoading,
     wytJoined,

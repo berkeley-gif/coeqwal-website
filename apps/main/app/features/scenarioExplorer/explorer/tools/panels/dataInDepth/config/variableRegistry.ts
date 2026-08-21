@@ -607,7 +607,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "ag",
     name: "Agricultural water",
-    variables: ["ag_del", "ag_pump", "ag_short", "ag_shortpct", "ag_rev"],
+    variables: ["ag_del", "ag_pump", "ag_short", "ag_rev"],
   },
   {
     id: "cwsS",
@@ -996,38 +996,21 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_short: {
     id: "ag_short",
-    name: "Total water shortage",
+    name: "Water shortage",
     sectorId: "ag",
     locationGroup: "agregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist"],
+    views: ["dist", "pct_demand"],
+    viewLabels: { dist: "Shortage (TAF)", pct_demand: "% of demand" },
+    viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
-      "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts.",
-    tech: "Annual shortage volume percentiles (demand minus deliveries minus pumping), post-processed from CalSim3. Deck-only metric pending scope confirmation.",
+      "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts. The percent view expresses the same gap as a share of what farms needed, which compares across regions of different size.",
+    tech: "Served live from the ag data-in-depth endpoint's shortage measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
+    data: "live",
     mockKind: "short",
-    mockEffect: "short",
-  },
-  ag_shortpct: {
-    id: "ag_shortpct",
-    name: "Shortage as % of demand",
-    sectorId: "ag",
-    locationGroup: "agregions",
-    unit: "%",
-    unitLabel: "percent of demand",
-    views: ["dist"],
-    plain:
-      "Shortage expressed as a share of what farms needed - easier to compare across regions of different size.",
-    tech: "Annual shortage-percent percentiles per demand-unit group. Deck-only metric pending scope confirmation.",
-    tierOutcome: "AG_REV",
-    tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
-    mockKind: "shortpct",
     mockEffect: "short",
   },
   ag_rev: {
@@ -1090,6 +1073,37 @@ export const VARIABLES: Record<string, VariableDef> = {
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Variable ids retired by being FOLDED INTO a view of another variable, with
+ * the view that now shows the same quantity.
+ *
+ * Share URLs carry a variable id and a view, so a link minted before a fold
+ * must land on the same chart rather than on a stranger. Generic healing
+ * (fall back to the default variable) is the right answer for a variable
+ * whose content is simply gone; this map is for the ones whose content still
+ * exists, just under a different address.
+ */
+const FOLDED_VARIABLE_IDS: Record<string, { id: string; view: VariableView }> =
+  {
+    // "Shortage as % of demand" became ag_short's percent-of-demand view.
+    ag_shortpct: { id: "ag_short", view: "pct_demand" },
+  }
+
+/**
+ * Resolves a persisted (variableId, view) pair through the fold map. Returns
+ * the pair unchanged when the id was never folded, so callers can apply it
+ * unconditionally. Pure.
+ */
+export function resolveFoldedVariable(
+  variableId: string,
+  view: string,
+): { id: string; view: string } {
+  const folded = FOLDED_VARIABLE_IDS[variableId]
+  return folded
+    ? { id: folded.id, view: folded.view }
+    : { id: variableId, view }
+}
 
 export function getVariable(id: string): VariableDef | undefined {
   return VARIABLES[id]

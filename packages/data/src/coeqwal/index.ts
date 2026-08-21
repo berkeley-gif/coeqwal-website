@@ -138,6 +138,8 @@ export type {
   SystemDeliveriesDidResponse,
   AgDataInDepthOptions,
   AgDataInDepthResponse,
+  DidAgMeasure,
+  DidCwsMeasure,
   DidGwMeasure,
   GroundwaterStorageDidOptions,
   GroundwaterStorageDidResponse,
