@@ -23,6 +23,7 @@ export type DidDomain =
   | "gw"
   | "salmon"
   | "cws"
+  | "ag"
 /** Request unit token (not the response unit key). */
 export type DidUnitToken =
   | "volume"
@@ -33,6 +34,9 @@ export type DidUnitToken =
   | "delivery"
   | "shortage_total"
   | "shortage_pct"
+  | "net_diversion"
+  | "gw_pumping"
+  | "shortage"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -61,6 +65,9 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   salmon_abund: "salmon",
   cws_del: "cws",
   cws_short: "cws",
+  ag_del: "ag",
+  ag_pump: "ag",
+  ag_short: "ag",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -86,6 +93,9 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   salmon_abund: "annual",
   cws_del: "annual",
   cws_short: "annual",
+  ag_del: "annual",
+  ag_pump: "annual",
+  ag_short: "annual",
 }
 
 /**
@@ -265,6 +275,17 @@ const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
 }
 
 /**
+ * Agriculture: the two served aggregate subjects (verified against
+ * /api/data-in-depth/ag 2026-08-21, 100 annual years each in TAF). Same
+ * scoping decision as CWS: entity-level demand units are NOT guessed at, so
+ * any other id stays unmapped and renders sample data.
+ */
+const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
+  AGG_AG_NOD: "NOD_Agriculture",
+  AGG_AG_SOD: "SOD_Agriculture",
+}
+
+/**
  * Display-unit scale applied to adopted live series, per variable. The
  * salmon endpoint serves NOF_3YR_AVG in percent (0-100, the same units as
  * the Salmon Data Drop csv metric_avg_roll column, verified against the
@@ -380,6 +401,9 @@ export function toDidSubject(
   if (domain === "cws") {
     return CWS_AGGREGATE_SUBJECTS[locationId] ?? null
   }
+  if (domain === "ag") {
+    return AG_AGGREGATE_SUBJECTS[locationId] ?? null
+  }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
     return RESERVOIR_SUBJECTS.has(code) ? code : null
@@ -426,8 +450,37 @@ export function unitTokenForView(
     }
     return "delivery"
   }
+  if (domain === "ag") {
+    if (variableId === "ag_pump") return "gw_pumping"
+    // Shortage is the primary series in BOTH of ag_short's views. The percent
+    // view derives from it plus the companion net_diversion series rather
+    // than switching to a served percent measure the way cws does.
+    if (variableId === "ag_short") return "shortage"
+    return "net_diversion"
+  }
   if (view === "pct") return "pct_capacity"
   return "volume"
+}
+
+/**
+ * Extra measures a request needs beyond the view's primary unit token.
+ *
+ * Only the agriculture percent-of-demand view needs one. The ag endpoint
+ * serves no percent measure, so that view is DERIVED on the site from the
+ * shortage and net_diversion series together and both must be fetched in the
+ * same request. (Community water systems differ: their endpoint serves
+ * shortage_pct directly, so their percent view adopts it and needs no
+ * companion.)
+ */
+export function companionUnitTokensForView(
+  domain: DidDomain,
+  view: string,
+  variableId?: string,
+): DidUnitToken[] {
+  if (domain === "ag" && variableId === "ag_short" && view === "pct_demand") {
+    return ["net_diversion"]
+  }
+  return []
 }
 
 /**
@@ -493,6 +546,7 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
   gw: "subjects",
   salmon: "subjects",
   cws: "subjects",
+  ag: "subjects",
 }
 
 /**
@@ -510,6 +564,9 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   delivery: "delivery",
   shortage_total: "shortage_total",
   shortage_pct: "shortage_pct",
+  net_diversion: "net_diversion",
+  gw_pumping: "gw_pumping",
+  shortage: "shortage",
 }
 
 /** The series key for a domain + request token (gw is keyed by measure name). */

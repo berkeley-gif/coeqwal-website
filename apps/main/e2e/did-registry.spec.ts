@@ -6,13 +6,14 @@ import {
   getVariable,
   getLocation,
   DEFAULT_VARIABLE_ID,
+  resolveFoldedVariable,
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
 import {
   gwLevelFromStorage,
   mockAnnualSeries,
-  cwsShortagePctFromSeries,
+  shortagePctOfDemand,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/mockDataEngine"
 import {
   didDomainForVariable,
@@ -357,16 +358,18 @@ test("mergeDataInitialState heals retired CWS sample-group pins", () => {
   expect(healed.selectedLocationsByGroup.cws).toEqual(["AGG_CWS_SOD"])
 })
 
-test("cws shortage percent sample series derive from shortage over demand", () => {
-  // pct = short / (short + delivery) x 100 per year, clamped to [0, 100];
-  // a no-demand year (both series 0) renders 0, never NaN. Sample-only
-  // transform: live members adopt the served shortage_pct measure directly.
-  expect(cwsShortagePctFromSeries([10, 0, 5], [90, 100, 0])).toEqual([
-    10, 0, 100,
-  ])
-  expect(cwsShortagePctFromSeries([0], [0])).toEqual([0])
+test("shortage percent series derive from shortage over demand", () => {
+  // pct = short / (short + delivered) x 100 per year, clamped to [0, 100];
+  // a no-demand year (both series 0) renders 0, never NaN.
+  expect(shortagePctOfDemand([10, 0, 5], [90, 100, 0])).toEqual([10, 0, 100])
+  expect(shortagePctOfDemand([0], [0])).toEqual([0])
   // Mismatched lengths trim to the shorter series so years stay aligned.
-  expect(cwsShortagePctFromSeries([10, 10], [90])).toEqual([10])
+  expect(shortagePctOfDemand([10, 10], [90])).toEqual([10])
+  // The ag percent-of-demand view uses the same transform with net diversion
+  // as the delivered term, for LIVE members as well as sample ones: the ag
+  // endpoint serves no percent measure, so there is nothing to adopt.
+  expect(shortagePctOfDemand([5], [0])).toEqual([100])
+  expect(shortagePctOfDemand([25], [75])).toEqual([25])
 })
 
 // SSJV all-routes total (2026-08-19 team decision): the presentation is
@@ -392,4 +395,89 @@ test("ssjv gains a leading all-routes total and sheds the provisional chip", () 
       (getLocation("ssjv", "KERN")?.mockBase ?? 0),
   )
   expect(getVariable("ssjv_exp")?.provisional).toBeUndefined()
+})
+
+// Agriculture (2026-08-21): ag surface deliveries and groundwater pumping
+// wire live on the served NOD_Agriculture/SOD_Agriculture aggregate subjects;
+// the four illustrative demand-unit groups are retired and their persisted
+// ids heal. Revenue stays sample: it is an external-model output, not a
+// CalSim3 result, and is out of scope for this pass.
+
+test("agriculture wires live on the NOD/SOD aggregates", () => {
+  const items = LOCATION_GROUPS.agregions.items
+  expect(items.map((l) => l.id)).toEqual(["AGG_AG_NOD", "AGG_AG_SOD"])
+  expect(items.every((l) => l.aggregate)).toBe(true)
+  expect(getLocation("agregions", "AGG_AG_NOD")?.name).toBe(
+    "All North of Delta",
+  )
+  expect(getLocation("agregions", "AGG_AG_SOD")?.name).toBe(
+    "All South of Delta",
+  )
+  for (const retired of ["AG_SAC", "AG_SJV", "AG_TUL", "AG_ALL"]) {
+    expect(getLocation("agregions", retired)).toBeUndefined()
+  }
+  expect(getVariable("ag_del")?.data).toBe("live")
+  expect(getVariable("ag_pump")?.data).toBe("live")
+  // Revenue is an external-model output; it stays sample and provisional.
+  expect(getVariable("ag_rev")?.data).toBe("mock")
+})
+
+test("ag shortage is one variable with a volume view and a percent view", () => {
+  // The separate "Shortage as % of demand" variable is folded into a view of
+  // the shortage variable, matching how community water systems present the
+  // same pair. Two entries in one sector for one quantity read as two
+  // metrics; they are one metric in two units.
+  expect(getVariable("ag_shortpct")).toBeUndefined()
+  const sector = SECTORS.find((s) => s.id === "ag")
+  expect(sector?.variables).toEqual(["ag_del", "ag_pump", "ag_short", "ag_rev"])
+  const short = getVariable("ag_short")
+  expect(short?.data).toBe("live")
+  expect(short?.views).toEqual(["dist", "pct_demand"])
+  expect(short?.viewLabels?.dist).toBe("Shortage (TAF)")
+  expect(short?.viewLabels?.pct_demand).toBe("% of demand")
+  expect(short?.viewUnits?.pct_demand).toEqual({
+    unit: "%",
+    unitLabel: "percent of demand",
+  })
+  // Scope is settled now that the series is served, so the chip drops.
+  expect(short?.provisional).toBeUndefined()
+})
+
+test("a share link for a folded variable id resolves to its replacement view", () => {
+  // Share URLs carry a variable id AND a view, so folding one variable into a
+  // view of another would strand every link minted before the fold. Generic
+  // healing (fall back to the default variable) is right when content is
+  // gone; a fold means the content still exists at a different address, and
+  // the link should follow it. The share decode path applies this
+  // unconditionally, so ids that were never folded must pass through.
+  expect(resolveFoldedVariable("ag_shortpct", "dist")).toEqual({
+    id: "ag_short",
+    view: "pct_demand",
+  })
+  expect(resolveFoldedVariable("ag_short", "dist")).toEqual({
+    id: "ag_short",
+    view: "dist",
+  })
+  expect(resolveFoldedVariable("res_apr", "pct")).toEqual({
+    id: "res_apr",
+    view: "pct",
+  })
+})
+
+test("mergeDataInitialState heals a persisted ag_shortpct selection", () => {
+  // The retired variable id is generic-healed (no migration table), so a
+  // session persisted before this change lands on the default variable
+  // rather than a blank panel.
+  const healed = mergeDataInitialState({ selectedVariableId: "ag_shortpct" })
+  expect(healed.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+  expect(healed.view).toBe("dist")
+})
+
+test("mergeDataInitialState heals retired ag demand-unit-group pins", () => {
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { agregions: "AG_SAC" },
+    selectedLocationsByGroup: { agregions: ["AG_TUL", "AGG_AG_SOD"] },
+  })
+  expect(healed.pinnedLocationByGroup.agregions).toBe("AGG_AG_NOD")
+  expect(healed.selectedLocationsByGroup.agregions).toEqual(["AGG_AG_SOD"])
 })
