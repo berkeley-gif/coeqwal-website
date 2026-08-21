@@ -919,10 +919,10 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist", "monthly"],
     plain:
       "How much fresh water flows out of the Delta toward San Francisco Bay. Outflow keeps the estuary fresh and supports fish and wildlife.",
-    tech: "Net Delta Outflow (NDO), monthly and annual percentiles.",
+    tech: "Net Delta Outflow at the CalSim3 C_SAC000 channel (the Sacramento/San Joaquin confluence node), served by the river-flows endpoint as subject SAC000. The annual distribution is live; the monthly view renders sample data.",
     tierOutcome: "DELTA_ECO",
     tierOutcomeName: "Delta estuary ecology",
-    data: "mock",
+    data: "live",
     mockKind: "outflow",
     mockEffect: "outflow",
   },

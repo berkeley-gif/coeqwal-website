@@ -43,6 +43,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   res_apr: "reservoir",
   res_sep: "reservoir",
   riv_flow: "river",
+  ndo: "river",
   x2_apr: "delta",
   x2_sep: "delta",
   cvp_del: "sysdel",
@@ -67,6 +68,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   res_apr: "april",
   res_sep: "sept",
   riv_flow: "annual",
+  ndo: "annual",
   x2_apr: "april",
   x2_sep: "sept",
   cvp_del: "annual",
@@ -308,6 +310,13 @@ const RIVER_SUBJECT_REMAP: Record<string, string> = {
   TLG: "TUO003",
   MRC: "MCD005",
   MKM: "MOK028",
+  // Delta outflow (ndo) rides the river domain: the modeling team confirmed
+  // C_SAC000 as the outflow series, and the endpoint serves it as the bare
+  // subject code SAC000. DELTA is ndo's own location id (riv_flow uses the
+  // rivers group), so this entry cannot affect any other variable, and ndo
+  // keeps its "Delta (NDO node)" display name instead of inheriting
+  // riv_flow's confluence label for the same subject.
+  DELTA: "SAC000",
 }
 
 /** The river subjects the API actually serves. */
