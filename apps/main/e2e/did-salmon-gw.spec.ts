@@ -172,7 +172,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   // the interpretive sentence converts back to percent for prose; the
   // detailed reading renders in the card footer.
   await expect(
-    page.getByText(/occupy 0.8% of suitable spawning habitat, on average/),
+    page.getByText(/occupy 0.8% of suitable spawning habitat, at the median/),
   ).toBeVisible()
   await expect(
     page

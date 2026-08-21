@@ -191,5 +191,12 @@ test("a scenario with no served block is detected from its response, not its id"
   const curves = page.locator('svg path[stroke-width="2"][fill="none"][stroke]')
   await expect.poll(() => curves.count()).toBe(1)
 
+  // The header sentence names the unmodeled scenario as having no data rather
+  // than quoting the sample engine's stand-in value for it as a real result,
+  // and reports the plotted median rather than the arithmetic mean.
+  await expect(
+    page.getByText(/at the median.*no data available for DWR 2025 DCP/),
+  ).toBeVisible()
+
   expect(errors).toEqual([])
 })
