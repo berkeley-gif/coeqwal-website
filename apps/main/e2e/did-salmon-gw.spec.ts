@@ -195,7 +195,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
     .getByRole("combobox")
     .filter({ hasText: "All North of Delta" })
     .click()
-  await page.getByRole("option", { name: "WBA10", exact: true }).click()
+  await page.getByRole("option", { name: "WBA10" }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect.poll(() => gwRequests.includes("WBA10")).toBe(true)
   // The volume series feeds the summary sentence (fixture serves 46,000).
@@ -214,7 +214,7 @@ test("salmon goes live with the WYT row disabled; groundwater totals and basins 
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await expect.poll(() => gwRequests.includes("DETAW")).toBe(true)
   await page.getByRole("combobox").filter({ hasText: "Delta-Eastside" }).click()
-  await page.getByRole("option", { name: "WBA10", exact: true }).click()
+  await page.getByRole("option", { name: "WBA10" }).click()
 
   // ...but the aggregates serve volume only, so their level view falls back
   // to clearly labeled sample data.
