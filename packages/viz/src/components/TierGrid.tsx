@@ -20,6 +20,7 @@ export interface Objective {
   category: string
   locationId: string
   locationName: string
+  displayName?: string
   tierLevel: number
   tierContinuous?: number
   baselineTierContinuous?: number
@@ -677,6 +678,8 @@ const drawMeanLines = (
     .selectAll<SVGGElement, (typeof meanLineData)[0]>(".mean-line-group")
     .data(meanLineData, (d) => d.category)
 
+  lineGroups.interrupt().style("opacity", null)
+
   // Remove old lines
   lineGroups.exit().transition().duration(300).style("opacity", 0).remove()
 
@@ -1169,7 +1172,7 @@ export default function TierGrid({
                   : ""
 
               const tooltipHTML = `
-              <div style="font-weight: 600; margin-bottom: 4px; color: #1a202c; font-size: 15.5px;">${obj.locationName}</div>
+              <div style="font-weight: 600; margin-bottom: 4px; color: #1a202c; font-size: 15.5px;">${obj.displayName || obj.locationName}</div>
               <div style="color: #718096; font-size: 12px; margin-bottom: 6px;">${obj.category}</div>
               <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 6px;">
                 <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px;">

@@ -27,6 +27,7 @@ import { getOutcomeLocationCoordinates } from "../../../../../map/config/outcome
 import { useEquityObjectives } from "./useEquityObjectives"
 import { useScrollRightIndicator } from "../../hooks/useScrollRightIndicator"
 import ScrollRightIndicator from "../../chrome/layout/ScrollRightIndicator"
+import { useTourAnchor } from "../../tour"
 import { HydroclimateGate } from "../../../../../scenarios/components/HydroclimateGate"
 import {
   OUTCOME_NAMES,
@@ -36,6 +37,7 @@ import {
   OUTCOME_LAYER_REGISTRY,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../../../../map/config/outcomeLayerRegistry"
+import { resolveSourceForQuery } from "../../../../../map/config/tilesetSources"
 import { useMap, Marker } from "@repo/map"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
@@ -98,12 +100,19 @@ function calculateMultiPolygonCentroid(
   return calculatePolygonCentroid(largestPolygon)
 }
 
-function getPolygonCentroidNameFromMapbox(
+/**
+ * Resolves the {sourceId, sourceLayer, idProperty} to query for an
+ * outcome's polygon tileset. Reads the source off the live layer instance
+ * instead of hardcoding "composite" - non-satellite basemaps (Light,
+ * Streets) inject these tilesets as standalone sources at runtime, so
+ * "composite" doesn't exist there and a hardcoded query would silently
+ * return zero features.
+ */
+function getPolygonQueryTarget(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   map: any,
   outcomeCode: string,
-  locationId: string,
-): { coords: [number, number]; name: string } | null {
+): { sourceId: string; sourceLayer: string; idProperty: string } | null {
   const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
 
   // Only works for polygon layers
@@ -112,38 +121,91 @@ function getPolygonCentroidNameFromMapbox(
   }
 
   let sourceLayer = config.sourceLayer
-  const idProperty = outcomeCode != "DELTA_ECO" ? config.idProperty : "WBA_ID"
+  const idProperty = config.idProperty
 
   if (!sourceLayer || !idProperty) {
     return null
   }
-  const sourceId = "composite"
 
-  if (outcomeCode == "AG_REV" || outcomeCode == "CWS_DEL")
-    sourceLayer = "demand_units"
-  if (outcomeCode == "RES_STOR")
-    locationId = RESERVOIR_CALSIM_TO_GNISIDLABEL[locationId] || locationId
-  if (outcomeCode == "DELTA_ECO") sourceLayer = "delta_water"
+  // The registry's AG_REV sourceLayer is stale (hyphenated); the real
+  // tileset source-layer uses an underscore.
+  if (outcomeCode == "AG_REV") sourceLayer = "demand_units"
+
+  return {
+    sourceId: resolveSourceForQuery(map, config.mapboxLayerId),
+    sourceLayer,
+    idProperty,
+  }
+}
+
+/**
+ * Maps an objective's API locationId to the id value the Mapbox tileset
+ * feature actually carries. RES_STOR uses CalSim short codes (API) vs.
+ * full reservoir names (tileset); single-feature layers like DELTA_ECO
+ * carry one fixed feature id regardless of locationId.
+ */
+function resolveMapboxFeatureId(
+  outcomeCode: string,
+  locationId: string,
+): string {
+  if (outcomeCode === "RES_STOR") {
+    return RESERVOIR_CALSIM_TO_GNISIDLABEL[locationId] || locationId
+  }
+  return (
+    OUTCOME_LAYER_REGISTRY[outcomeCode]?.featureIdMap?.[outcomeCode] ??
+    locationId
+  )
+}
+
+function getPolygonCentroidNameFromMapbox(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any,
+  outcomeCode: string,
+  locationId: string,
+): { coords: [number, number]; name: string } | null {
+  const target = getPolygonQueryTarget(map, outcomeCode)
+  if (!target) {
+    return null
+  }
+  const { sourceId, sourceLayer, idProperty } = target
+  const featureId = resolveMapboxFeatureId(outcomeCode, locationId)
 
   try {
-    // Query the source for the specific feature
-    const filter =
-      outcomeCode === "DELTA_ECO"
-        ? undefined
-        : ["==", ["get", idProperty], locationId]
+    const features: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      properties?: Record<string, any>
+      geometry: { type: string; coordinates: unknown }
+    }[] = map.querySourceFeatures(sourceId, { sourceLayer })
+    const matches = features.filter(
+      (f) => String(f.properties?.[idProperty]) === featureId,
+    )
 
-    const features = map.querySourceFeatures(sourceId, {
-      sourceLayer: sourceLayer,
-      ...(filter && { filter }),
-    })
-
-    if (features.length === 0) {
+    const feature = matches[0]
+    if (!feature) {
       return null
     }
 
-    const feature = features[0]
-    const geometry = feature.geometry
+    // Some ids are generic/placeholder codes (e.g. a region's "not
+    // assigned" demand-unit id) reused across several genuinely different
+    // real-world locations. Tile-boundary fragments of the *same* feature
+    // always agree on name, so if the matched features disagree, this id
+    // is ambiguous and there is no way to know which location the API
+    // actually meant - bail rather than guess one.
+    const distinctNames = new Set(
+      matches
+        .map(
+          (f) =>
+            f.properties?.Mod_Name ||
+            f.properties?.Urb_Name ||
+            f.properties?.Sub_Name,
+        )
+        .filter(Boolean),
+    )
+    if (distinctNames.size > 1) {
+      return null
+    }
 
+    const geometry = feature.geometry
     const resolvedName =
       feature.properties?.Mod_Name ||
       feature.properties?.Urb_Name ||
@@ -164,13 +226,63 @@ function getPolygonCentroidNameFromMapbox(
     }
 
     return null
-  } catch (error) {
-    console.warn(
-      `Failed to get centroid for ${locationId} in ${outcomeCode}:`,
-      error,
-    )
+  } catch (_error) {
     return null
   }
+}
+
+/**
+ * Batches a single querySourceFeatures call per outcome (rather than one
+ * per objective) to build a feature-id -> descriptive Mapbox name lookup.
+ * Same field priority (Mod_Name / Urb_Name / Sub_Name) as the map's own
+ * marker tooltips, so the grid and the map agree on what a location is
+ * called instead of the grid falling back to the API's more generic
+ * `location_name`.
+ */
+function collectMapboxNames(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any,
+  outcomeCode: string,
+): Map<string, string> {
+  const names = new Map<string, string>()
+  // Some ids are generic/placeholder codes (e.g. a region's "not assigned"
+  // demand-unit id) reused across several genuinely different real-world
+  // locations. Track which ids see more than one distinct name and drop
+  // them below rather than keep whichever happened to be seen last -
+  // matches the ambiguity check in getPolygonCentroidNameFromMapbox so the
+  // grid and the map agree on when a location can't be resolved at all.
+  const ambiguousIds = new Set<string>()
+  const target = getPolygonQueryTarget(map, outcomeCode)
+  if (!target) {
+    return names
+  }
+
+  try {
+    const features = map.querySourceFeatures(target.sourceId, {
+      sourceLayer: target.sourceLayer,
+    })
+    for (const feature of features) {
+      const featureId = feature.properties?.[target.idProperty]
+      const resolvedName =
+        feature.properties?.Mod_Name ||
+        feature.properties?.Urb_Name ||
+        feature.properties?.Sub_Name
+      if (featureId == null || !resolvedName) continue
+
+      const key = String(featureId)
+      const existing = names.get(key)
+      if (existing !== undefined && existing !== resolvedName) {
+        ambiguousIds.add(key)
+        continue
+      }
+      names.set(key, resolvedName)
+    }
+  } catch {
+    /* tiles for this layer may not be loaded yet; caller retries */
+  }
+
+  ambiguousIds.forEach((key) => names.delete(key))
+  return names
 }
 
 export default function EquityPanel({
@@ -209,10 +321,71 @@ export default function EquityPanel({
     () => allCategories.filter((c) => !equityHiddenCategories.includes(c)),
     [allCategories, equityHiddenCategories],
   )
-  const objectives = useMemo(
+  const baseObjectives = useMemo(
     () =>
       allObjectives.filter((o) => !equityHiddenCategories.includes(o.category)),
     [allObjectives, equityHiddenCategories],
+  )
+
+  // Descriptive names resolved from the same Mapbox tilesets the map
+  // markers use, keyed by "<tierCode>:<mapbox feature id>". Without this,
+  // the grid tooltip falls back to the API's `location_name`, which reads
+  // more generic than what the map shows for the same location. Populated
+  // per-outcome (one querySourceFeatures call per outcome, not per
+  // objective) once the map instance exists.
+  const [mapboxNames, setMapboxNames] = useState<Map<string, string>>(new Map())
+
+  useEffect(() => {
+    const map = mapRef?.current?.getMap()
+    if (!map) return
+
+    const outcomeCodes = Array.from(
+      new Set(baseObjectives.map((o) => o.tierCode)),
+    )
+    if (outcomeCodes.length === 0) return
+
+    let cancelled = false
+
+    const collect = () => {
+      const next = new Map<string, string>()
+      outcomeCodes.forEach((outcomeCode) => {
+        collectMapboxNames(map, outcomeCode).forEach((name, featureId) => {
+          next.set(`${outcomeCode}:${featureId}`, name)
+        })
+      })
+      return next
+    }
+
+    const apply = () => {
+      if (cancelled) return
+      const next = collect()
+      if (next.size > 0) {
+        setMapboxNames(next)
+      }
+    }
+
+    apply()
+
+    // querySourceFeatures only sees currently loaded tiles. Small polygons
+    // can still be loading on first query, so retry once after they've had
+    // a moment (same tradeoff SummaryPanel makes rather than polling
+    // indefinitely).
+    const retryId = setTimeout(apply, 1000)
+
+    return () => {
+      cancelled = true
+      clearTimeout(retryId)
+    }
+  }, [mapRef, baseObjectives])
+
+  const objectives = useMemo(
+    () =>
+      baseObjectives.map((obj) => {
+        const featureId = resolveMapboxFeatureId(obj.tierCode, obj.locationId)
+        const displayName = mapboxNames.get(`${obj.tierCode}:${featureId}`)
+        return displayName ? { ...obj, displayName } : obj
+      }),
+    [baseObjectives, mapboxNames],
   )
 
   const [selectedObjectives, setSelectedObjectives] = useState<
@@ -425,9 +598,14 @@ export default function EquityPanel({
 
         // Get coordinates - try polygon centroid first, fallback to hardcoded
         let coords: [number, number] | null = null
-        let name: string | null = null
         if (obj.tierCode && map) {
-          // Try to get centroid from polygon layer
+          // Try to get centroid from polygon layer. Name is intentionally
+          // not read from this result - it's a fresh, separately-timed
+          // query that can see a different set of loaded tiles than the
+          // batched lookup below did, which is exactly what was causing
+          // the map and the grid to disagree on a location's name. Using
+          // obj.displayName here instead means both always read the same
+          // resolved value.
           const result = getPolygonCentroidNameFromMapbox(
             map,
             obj.tierCode,
@@ -435,9 +613,9 @@ export default function EquityPanel({
           )
           if (result) {
             coords = result.coords
-            name = result.name
           }
         }
+        const name = obj.displayName ?? null
 
         // Fallback to hardcoded coordinates if polygon centroid not available
         if (!coords && obj.tierCode) {
@@ -446,6 +624,9 @@ export default function EquityPanel({
 
         // Skip marker if no coordinates available
         if (!coords) {
+          console.warn(
+            `No coordinates found for ${obj.locationId} in ${obj.tierCode}`,
+          )
           return null
         }
 
@@ -768,6 +949,14 @@ export default function EquityPanel({
     objectives,
     categories,
   ])
+  const gridTourRef = useTourAnchor("equity.grid")
+  const setGridRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollRef.current = node
+      gridTourRef(node)
+    },
+    [scrollRef, gridTourRef],
+  )
 
   return (
     <Box
@@ -786,7 +975,7 @@ export default function EquityPanel({
       {" "}
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         <Box
-          ref={scrollRef}
+          ref={setGridRef}
           onScroll={checkOverflow}
           sx={{
             flex: 1,
