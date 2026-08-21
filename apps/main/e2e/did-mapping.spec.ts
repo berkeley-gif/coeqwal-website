@@ -78,6 +78,19 @@ test("toDidSubject returns X2 for delta regardless of location", () => {
   expect(toDidSubject("delta", "DELTA")).toBe("X2")
 })
 
+test("ndo resolves to the river domain's SAC000 series", () => {
+  // Delta outflow is served by the river-flows endpoint as the CalSim
+  // C_SAC000 channel (confirmed by the modeling team, 2026-08-20), so ndo
+  // borrows the river domain rather than the delta one (which serves X2
+  // only). The DELTA location id is unique to ndo, so remapping it to the
+  // SAC000 subject cannot collide with riv_flow's own SAC000 location.
+  expect(didDomainForVariable("ndo")).toBe("river")
+  expect(didPeriodForVariable("ndo")).toBe("annual")
+  expect(toDidSubject("river", "DELTA", "ndo")).toBe("SAC000")
+  // riv_flow keeps its own location group, so the remap changes nothing there.
+  expect(toDidSubject("river", "SAC000")).toBe("SAC000")
+})
+
 test("unitTokenForView picks the request unit per domain and view", () => {
   expect(unitTokenForView("reservoir", "dist")).toBe("volume")
   expect(unitTokenForView("reservoir", "pct")).toBe("pct_capacity")
