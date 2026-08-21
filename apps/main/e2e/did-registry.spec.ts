@@ -393,3 +393,37 @@ test("ssjv gains a leading all-routes total and sheds the provisional chip", () 
   )
   expect(getVariable("ssjv_exp")?.provisional).toBeUndefined()
 })
+
+// Agriculture (2026-08-21): ag surface deliveries and groundwater pumping
+// wire live on the served NOD_Agriculture/SOD_Agriculture aggregate subjects;
+// the four illustrative demand-unit groups are retired and their persisted
+// ids heal. Revenue stays sample: it is an external-model output, not a
+// CalSim3 result, and is out of scope for this pass.
+
+test("agriculture wires live on the NOD/SOD aggregates", () => {
+  const items = LOCATION_GROUPS.agregions.items
+  expect(items.map((l) => l.id)).toEqual(["AGG_AG_NOD", "AGG_AG_SOD"])
+  expect(items.every((l) => l.aggregate)).toBe(true)
+  expect(getLocation("agregions", "AGG_AG_NOD")?.name).toBe(
+    "All North of Delta",
+  )
+  expect(getLocation("agregions", "AGG_AG_SOD")?.name).toBe(
+    "All South of Delta",
+  )
+  for (const retired of ["AG_SAC", "AG_SJV", "AG_TUL", "AG_ALL"]) {
+    expect(getLocation("agregions", retired)).toBeUndefined()
+  }
+  expect(getVariable("ag_del")?.data).toBe("live")
+  expect(getVariable("ag_pump")?.data).toBe("live")
+  // Revenue is an external-model output; it stays sample and provisional.
+  expect(getVariable("ag_rev")?.data).toBe("mock")
+})
+
+test("mergeDataInitialState heals retired ag demand-unit-group pins", () => {
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { agregions: "AG_SAC" },
+    selectedLocationsByGroup: { agregions: ["AG_TUL", "AGG_AG_SOD"] },
+  })
+  expect(healed.pinnedLocationByGroup.agregions).toBe("AGG_AG_NOD")
+  expect(healed.selectedLocationsByGroup.agregions).toEqual(["AGG_AG_SOD"])
+})

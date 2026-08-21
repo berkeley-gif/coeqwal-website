@@ -44,6 +44,7 @@ import {
   useGroundwaterStorageDataInDepth,
   useSalmonDataInDepth,
   useCwsDataInDepth,
+  useAgDataInDepth,
 } from "@repo/data/coeqwal/hooks"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
@@ -375,6 +376,26 @@ export function useVariableData(): VariableData {
         include,
       }),
   )
+  const agSlots = useMultiScenarioSlots(
+    domain === "ag" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useAgDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        // Like cws, the ag request token IS the measure name; anything else
+        // defers to the delivery measure. Unlike cws, ag IS water-year data,
+        // so the water-year-type filter applies and rides along.
+        measures: [
+          unitToken === "gw_pumping"
+            ? "gw_pumping"
+            : unitToken === "shortage"
+              ? "shortage"
+              : "net_diversion",
+        ],
+        include,
+        wyt,
+      }),
+  )
 
   const activeSlots =
     domain === "reservoir"
@@ -391,7 +412,9 @@ export function useVariableData(): VariableData {
                 ? salmonSlots
                 : domain === "cws"
                   ? cwsSlots
-                  : []
+                  : domain === "ag"
+                    ? agSlots
+                    : []
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
     .join("")

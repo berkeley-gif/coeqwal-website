@@ -557,3 +557,36 @@ test("sumAlignedSeriesPoints sums only complete, year-aligned series", () => {
   ).toBeNull()
   expect(sumAlignedSeriesPoints([])).toBeNull()
 })
+
+// Agriculture wiring (2026-08-21): the ag endpoint serves net_diversion,
+// gw_pumping, shortage, and revenue on the NOD_Agriculture / SOD_Agriculture
+// aggregate subjects. Aggregates only in this pass, mirroring the CWS
+// precedent: there is no upstream-confirmed entity-level demand-unit list, so
+// the four illustrative sample groups retire rather than being guessed at.
+
+test("ag variables resolve the ag domain on the NOD/SOD aggregates", () => {
+  expect(didDomainForVariable("ag_del")).toBe("ag")
+  expect(didDomainForVariable("ag_pump")).toBe("ag")
+  expect(didPeriodForVariable("ag_del")).toBe("annual")
+  expect(didPeriodForVariable("ag_pump")).toBe("annual")
+  expect(toDidSubject("ag", "AGG_AG_NOD", "ag_del")).toBe("NOD_Agriculture")
+  expect(toDidSubject("ag", "AGG_AG_SOD", "ag_pump")).toBe("SOD_Agriculture")
+  // The retired illustrative groups stay unmapped, so a stale persisted pin
+  // falls back to sample data rather than fetching a subject that does not
+  // exist.
+  expect(toDidSubject("ag", "AG_SAC", "ag_del")).toBeNull()
+  expect(toDidSubject("ag", "AG_ALL", "ag_del")).toBeNull()
+  // Revenue is an external-model output and stays out of scope.
+  expect(didDomainForVariable("ag_rev")).toBeNull()
+})
+
+test("ag measure tokens are keyed per variable and never scaled", () => {
+  expect(unitTokenForView("ag", "dist", "ag_del")).toBe("net_diversion")
+  expect(unitTokenForView("ag", "dist", "ag_pump")).toBe("gw_pumping")
+  // The upstream extraction bug that made ag volumes read 1000x low was fixed
+  // in the databases, so the served values are already TAF. Pinning the scale
+  // at 1 makes a future client-side "correction" fail loudly instead of
+  // silently double-counting the upstream fix.
+  expect(didLiveScaleForVariable("ag_del")).toBe(1)
+  expect(didLiveScaleForVariable("ag_pump")).toBe(1)
+})

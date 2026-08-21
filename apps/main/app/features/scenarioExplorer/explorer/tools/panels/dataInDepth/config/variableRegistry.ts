@@ -506,27 +506,27 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
     ],
   },
   agregions: {
-    label: "Region (demand-unit group)",
+    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture,
+    // verified against /api/data-in-depth/ag 2026-08-21). The four
+    // illustrative demand-unit groups are retired for the same reason the
+    // CWS sample groups were: real aggregates on a public tool beat invented
+    // groupings, and stale persisted ids heal at hydration. Entity-level
+    // demand units follow only when the data team confirms a subject list.
+    label: "Region",
     items: [
       {
-        id: "AG_SAC",
-        name: "Sacramento Valley DUs",
+        id: "AGG_AG_NOD",
+        name: "All North of Delta",
         region: "NOD",
-        mockBase: 1,
-      },
-      {
-        id: "AG_SJV",
-        name: "San Joaquin Valley DUs",
-        region: "SOD",
-        mockBase: 1,
-      },
-      { id: "AG_TUL", name: "Tulare Basin DUs", region: "SOD", mockBase: 1 },
-      {
-        id: "AG_ALL",
-        name: "All Central Valley DUs",
-        region: "ALL",
-        mockBase: 1,
         aggregate: true,
+        mockBase: 1,
+      },
+      {
+        id: "AGG_AG_SOD",
+        name: "All South of Delta",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 1,
       },
     ],
   },
@@ -970,10 +970,10 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist", "monthly"],
     plain: "How much river and project water is delivered to farms each year.",
-    tech: "Annual agricultural surface delivery percentiles per demand-unit group.",
+    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Entity-level demand units follow once the data team confirms a subject list.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
+    data: "live",
     mockKind: "agdel",
     mockEffect: "agDel",
   },
@@ -987,10 +987,10 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much groundwater farms pump to make up for surface water they don't receive. Pumping rises in dry years.",
-    tech: "Annual agricultural groundwater pumping percentiles. Pumping-limit scenarios constrain this directly.",
+    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Pumping-limit scenarios constrain this directly.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
+    data: "live",
     mockKind: "pump",
     mockEffect: "pump",
   },
