@@ -184,6 +184,7 @@ export function useStoryboardLayout({
   }, [activeOutcomeGroups, outcomeLocations, hideScheduleRef])
 
   const lockedHeightsRef = useRef<Map<string, number>>(new Map())
+  const lockedHeightsWidthRef = useRef<number | null>(null)
 
   const describeLocations = useCallback(
     (code: string, count: number): string => {
@@ -209,10 +210,21 @@ export function useStoryboardLayout({
 
   const outcomeLayout = useMemo<Beat2Layout | null>(() => {
     if (!panelSize) return null
+
+    // Locked heights are only valid for the width they were measured at.
+    // Without this, a height inflated by a narrow measurement (sidebar
+    // open, tablet width) never shrinks back down even after the panel
+    // widens again - it only ever grows via Math.max below.
+    if (lockedHeightsWidthRef.current !== panelSize.width) {
+      lockedHeightsRef.current.clear()
+      lockedHeightsWidthRef.current = panelSize.width
+    }
+
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
+
     // Estimated per-column inner width, used only to decide row count. The
     // precise width is measured from the DOM later.
-    const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
+    const approxColWidth = Math.max(80, (panelSize.width * (1 / 2)) / 2 - 36)
 
     // Left column order (AG_REV before CWS_DEL). Don't reorder
     // OUTCOME_CODE_ORDER globally (radar axes and NOD/SOD helpers depend on

@@ -415,7 +415,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
               sx={{
                 position: "sticky",
                 top: 0,
-                height: "120vh",
+                height: "100vh",
                 // Re-enable pointer events for Play/Next/Back controls
                 // and interactive squares.
                 pointerEvents: "auto",

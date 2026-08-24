@@ -456,7 +456,7 @@ export default function OutcomeMorphOverlay({
   const heatmapExtraColumnRefs = useRef<Array<SVGGElement | null>>([])
 
   const outcomeShapes = useMemo(() => {
-    const panelLeft = panelWidth * (2 / 3)
+    const panelLeft = panelWidth * (1 / 2)
     const activeCodes = outcomes.map((o) => o.code)
 
     return outcomes.map((outcome) => {
@@ -495,7 +495,7 @@ export default function OutcomeMorphOverlay({
       const pos = distributionPositionMap[outcome.code]
       const gridTargetX = panelLeft + (pos?.x ?? 24)
       const gridTargetY = pos?.y ?? 0
-      const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
+      const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 2) - 48
       const outcomeSlotHeight = pos?.slotHeight ?? 0
 
       const chartPoints = tierChartData?.[outcome.code]

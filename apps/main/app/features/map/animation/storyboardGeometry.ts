@@ -21,7 +21,7 @@ export interface RadarFrame {
 
 /** Radar center and outer radius for a panel of the given size. */
 export function computeRadarFrame(panelW: number, panelH: number): RadarFrame {
-  const panelLeft = panelW * (2 / 3)
+  const panelLeft = panelW * (1 / 2)
   const rightW = panelW - panelLeft
   const cx = panelLeft + rightW / 2
   const cy = panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX
@@ -71,7 +71,7 @@ export function computeHeatmapColumnFrame(
   panelH: number,
   rowCount: number,
 ): HeatmapColumnFrame {
-  const panelLeft = panelW * (2 / 3)
+  const panelLeft = panelW * (1 / 2)
   const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
   const heatmapLeft = rightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
   const availableH = panelH * 0.8
