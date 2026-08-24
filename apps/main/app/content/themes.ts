@@ -126,8 +126,8 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
   "baseline",
   "ag_gw",
   "eco",
-  "delta",
   "cws",
+  "delta",
   "unthemed",
 ]
 
