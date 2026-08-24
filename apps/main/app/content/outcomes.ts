@@ -273,23 +273,23 @@ export function describeOutcomeLocations(
  */
 export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
-    "Tiers reflect the extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to estimated recent potable water demands for these deliveries at 74 locations of interest.",
+    "The extent to which surface water deliveries to cities and towns satisfy associated drinking water demands. Water deliveries are evaluated relative to independent estimates of recent potable water demands at each of 74 locations of interest.",
   AG_REV:
-    "Tiers reflect how average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
+    "How average agricultural revenue changes in response to water delivery and groundwater shortages. Revenues are estimated at 134 agricultural water districts and evaluated relative to revenues if no supply shortages occur.",
   ENV_FLOWS:
-    "Tiers reflect the extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "The extent to which river flows are of sufficient magnitude across seasons and years to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
   RES_STOR:
-    "Tier reflects how full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
+    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in seven large reservoirs in the Central Valley.",
   GW_STOR:
-    "Tier reflects trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
+    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in 42 groundwater basins in the Central Valley.",
   DELTA_ECO:
-    "Tiers reflect the extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation, salinity, turbidity, and microhabitat availability.",
+    "The extent to which winter and spring outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses, assessed by growth of submerged aquatic vegetation (SAV), salinity, turbidity, and microhabitat availability.",
   FW_EXP:
-    "Tier reflects the amount of freshwater exported from the Delta (Banks and Jones pumping plants), with volumes reduced if salinity exceeds water quality requirements for drinking water or irrigation needs.",
+    "The amount of freshwater exported from the Delta (Banks and Jones pumping plants), with volumes reduced if salinity exceeds water quality requirements for drinking water or irrigation needs.",
   FW_DELTA_USES:
-    "Tiers reflect how often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
+    "How often water in the Delta is fresh enough for in-Delta community and agricultural uses, assessed at two compliance locations (Jersey Point and Emmaton) in the western Delta.",
   WRC_SALMON_AB:
-    "Tiers reflect condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
+    "The condition of the endangered Sacramento River winter-run Chinook salmon population, assessed by a life cycle model. Population condition is assessed by the proportion of spawning habitat potentially utilized by natural-origin adult females over a 3-year rolling average.",
 }
 
 /**
