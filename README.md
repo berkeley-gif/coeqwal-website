@@ -6,6 +6,7 @@ This repository uses Turborepo to streamline development workflows, allowing sha
 
 Dependencies and configurations set at the root level are overriden by local dependencies and configurations. For example, if you'd like to set a different linting configuration or a different dependency version for a specific app, you can configure these using that app's `package.json` and configuration files.
 
+
 ## Table of contents
 
 - [Overview](#overview)
