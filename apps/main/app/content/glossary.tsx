@@ -202,3 +202,15 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "Groups of related water management strategies",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
+
+/**
+ * Resolves a possibly-mistyped-case string to its canonical glossary term
+ * name (e.g. "calsim" -> "CalSim"). Falls back to the original input if
+ * nothing matches, so an unknown term fails the same way it always did.
+ */
+export function resolveGlossaryTerm(input: string): string {
+  const match = glossaryTerms.find(
+    (entry) => entry.term.toLowerCase() === input.toLowerCase(),
+  )
+  return match ? match.term : input
+}

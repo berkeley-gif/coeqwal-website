@@ -97,6 +97,7 @@ export function useGlossaryRenderer(
       border: "none",
       padding: 0,
       font: "inherit",
+      ...theme.typography.glossaryTerm,
       textDecoration: "underline",
       "&:focus-visible": {
         outline: `2px solid ${theme.palette.blue.bright}`,

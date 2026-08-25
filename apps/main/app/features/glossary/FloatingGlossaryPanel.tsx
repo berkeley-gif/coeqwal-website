@@ -143,6 +143,7 @@ export function FloatingGlossaryPanel({
     border: "none",
     padding: 0,
     font: "inherit",
+    ...theme.typography.glossaryTerm,
     "&:hover": {
       color: theme.palette.blue.darkest,
     },
@@ -216,16 +217,16 @@ export function FloatingGlossaryPanel({
             sx={
               internalSelectedTerm === term.term
                 ? {
-                    scrollMarginTop: "20px",
-                    backgroundColor: alpha(theme.palette.blue.bright, 0.08),
-                    padding: theme.space.component.lg,
-                    borderRadius: theme.borderRadius.md,
-                    border: theme.border.active,
-                    transition: theme.transition.default,
-                  }
+                  scrollMarginTop: "20px",
+                  backgroundColor: alpha(theme.palette.blue.bright, 0.08),
+                  padding: theme.space.component.lg,
+                  borderRadius: theme.borderRadius.md,
+                  border: theme.border.active,
+                  transition: theme.transition.default,
+                }
                 : {
-                    padding: theme.space.component.lg,
-                  }
+                  padding: theme.space.component.lg,
+                }
             }
           >
             {/* Term header with icon */}
@@ -368,14 +369,14 @@ export function FloatingGlossaryPanel({
         // Position based on which half of screen the button is on
         ...(isOnLeftHalf
           ? {
-              left:
-                typeof window !== "undefined"
-                  ? window.innerWidth - position.right
-                  : position.right,
-            }
+            left:
+              typeof window !== "undefined"
+                ? window.innerWidth - position.right
+                : position.right,
+          }
           : {
-              right: position.right,
-            }),
+            right: position.right,
+          }),
         width: "33.333vw",
         minWidth: "400px",
         maxWidth: theme.layout.maxWidth.lg,
