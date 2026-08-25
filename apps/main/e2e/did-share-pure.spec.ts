@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test"
 import {
+  shareFigureFooter,
+  shareFigureFooterText,
+} from "../app/features/scenarioExplorer/explorer/share/figureFooter"
+import {
   toBars,
   toBoxes,
   toSeries,
@@ -285,4 +289,76 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
   // fall back to an index axis for everyone.
   expect(csv).toContain("Water year,Current Operations,DWR 2025 DCP")
   expect(csv).toContain("1921,4200,")
+})
+
+// Every exported figure carries the same footer: who produced the data, what
+// kind of data the figure shows, and when it was captured. Built by a pure
+// helper from the share item so all five card types read one way.
+test("shareFigureFooter names the source, the provenance and the capture date", () => {
+  const live = shareFigureFooter({
+    id: "x",
+    type: "data",
+    variableId: "res_apr",
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    memberIds: ["s0020"],
+    memberLabels: ["Current ops"],
+    source: "live",
+    hydroclimate: "historical",
+    capturedAt: "2026-08-24T19:00:00.000Z",
+  })
+  expect(live.source).toBe("COEQWAL, coeqwal.org. CalSim3 model results.")
+  expect(live.provenance).toBe("Live data from api.coeqwal.org.")
+  expect(live.capturedAt).toBe("Captured Aug 24, 2026.")
+  expect(shareFigureFooterText(live)).toBe(
+    "COEQWAL, coeqwal.org. CalSim3 model results. Live data from api.coeqwal.org. Captured Aug 24, 2026.",
+  )
+  const sample = shareFigureFooter({
+    id: "y",
+    type: "data",
+    variableId: "ag_rev",
+    view: "dist",
+    distKind: "box",
+    compareBy: "scenarios",
+    memberIds: ["s0020"],
+    memberLabels: ["Current ops"],
+    source: "mock",
+    hydroclimate: "historical",
+  })
+  expect(sample.provenance).toBe("Sample data, not model results.")
+  expect(sample.capturedAt).toBeUndefined()
+  const mixed = shareFigureFooter({
+    id: "z",
+    type: "data",
+    variableId: "res_apr",
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    memberIds: ["s0020", "s0065"],
+    memberLabels: ["Current ops", "DCP"],
+    source: "mixed",
+    hydroclimate: "historical",
+  })
+  expect(mixed.provenance).toBe(
+    "Live data from api.coeqwal.org for some series; see the legend.",
+  )
+})
+
+test("shareFigureFooter covers the other tools with the tiers wording", () => {
+  const radar = shareFigureFooter({
+    id: "r",
+    type: "radar",
+    scenarioIds: ["s0020"],
+    hydroclimate: "historical",
+    showRange: false,
+    highlightBaseline: false,
+    showDotsOnly: false,
+    capturedAt: "2026-08-24T19:00:00.000Z",
+  } as never)
+  expect(radar.source).toBe(
+    "COEQWAL, coeqwal.org. CalSim3 model results and key-outcome tiers.",
+  )
+  expect(radar.provenance).toBeUndefined()
+  expect(radar.capturedAt).toBe("Captured Aug 24, 2026.")
 })

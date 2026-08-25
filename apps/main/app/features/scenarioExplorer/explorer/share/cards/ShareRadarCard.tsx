@@ -3,6 +3,7 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import ShareCardShell from "../ShareCardShell"
+import type { ShareFigureFooter } from "../figureFooter"
 import HydroclimateBadge from "./HydroclimateBadge"
 import ChartThumbnail from "./ChartThumbnail"
 
@@ -33,6 +34,8 @@ interface ShareRadarCardProps {
   onRemove?: () => void
   note?: string
   onNoteChange?: (note: string) => void
+  /** Provenance footer rendered by the shell inside the exported area. */
+  figureFooter?: ShareFigureFooter
 }
 
 export default function ShareRadarCard({
@@ -50,6 +53,7 @@ export default function ShareRadarCard({
   onRemove,
   note,
   onNoteChange,
+  figureFooter,
 }: ShareRadarCardProps) {
   const theme = useTheme()
 
@@ -66,6 +70,7 @@ export default function ShareRadarCard({
 
   return (
     <ShareCardShell
+      figureFooter={figureFooter}
       onRemove={onRemove}
       note={note}
       onNoteChange={onNoteChange}

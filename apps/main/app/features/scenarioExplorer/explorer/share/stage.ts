@@ -43,5 +43,6 @@ export async function stageShareItem<T extends ShareItem, R = CapturedVisual>(
   } catch (err) {
     console.error(`[${args.errorLabel}] capture failed:`, err)
   }
-  args.addItem(args.buildItem(captured))
+  const item = args.buildItem(captured)
+  args.addItem({ ...item, capturedAt: new Date().toISOString() })
 }

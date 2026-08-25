@@ -21,6 +21,7 @@ import {
   type VariableView,
 } from "../../tools/panels/dataInDepth/config/variableRegistry"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
+import { shareFigureFooter } from "../figureFooter"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -61,7 +62,13 @@ const dataHandler: VariantHandler<DataItem> = {
       id: item.id,
       toolLabel: "Data in depth",
       title: figureTitle ?? variableName,
-      subtitle: viewLabelFor(item),
+      // A title that counts its members ("3 scenarios") names them here so
+      // the figure reads on its own.
+      subtitle:
+        item.memberLabels.length > 1
+          ? `${viewLabelFor(item)}. Compared: ${item.memberLabels.join(", ")}.`
+          : viewLabelFor(item),
+      figureFooter: shareFigureFooter(item),
       chips: [
         item.source === "mixed"
           ? "Mixed data"

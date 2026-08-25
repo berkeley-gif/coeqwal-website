@@ -33,6 +33,9 @@ export interface ShareItemPatch {
 
 interface ShareItemBaseFields {
   id: string
+  /** ISO time the item was staged; shown in the figure footer. Absent on
+   *  items restored from a URL, whose token does not carry it. */
+  capturedAt?: string
   /**
    * Free-form annotation set by the user on the share card.
    * Editable inline via `updateShareItem`.

@@ -9,6 +9,7 @@
  * Side effects: appends one item to the workspace share store per call.
  */
 
+import { axisLabelFor } from "../explorer/chartMarks"
 import { useCallback, useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { stageShareItem } from "../../../../share/stage"
@@ -109,6 +110,7 @@ export function useDataShareCapture(
           source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
+          axisLabel: axisLabelFor(data.variable, data.view, data.unit),
           yearBasis: data.variable?.yearBasis,
         }),
       buildItem: (captured) => ({

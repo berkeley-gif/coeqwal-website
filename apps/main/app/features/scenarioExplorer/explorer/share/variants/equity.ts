@@ -4,6 +4,7 @@
  * tool's hydroclimate badge.
  */
 
+import { shareFigureFooter } from "../figureFooter"
 import React, { useEffect } from "react"
 import {
   OUTCOME_NAMES,
@@ -97,6 +98,7 @@ const equityHandler: VariantHandler<EquityItem> = {
           compareToBaseline: item.compareToBaseline,
         })
     return React.createElement(ShareSnapshotCard, {
+      figureFooter: shareFigureFooter(item),
       id: item.id,
       toolLabel: "Distribution",
       title: info?.description ?? info?.name ?? item.scenarioId,
