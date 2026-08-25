@@ -1,10 +1,15 @@
 import { test, expect } from "@playwright/test"
 import {
   CHIP_CLOUD_MAX,
+  levelUnavailableIds,
+  levelViewBlockedReason,
   locationOptionGroups,
   usesLocationPicker,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/explorer/locationOptions"
-import { LOCATION_GROUPS } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
+import {
+  LOCATION_GROUPS,
+  LEVEL_VIEW_UNAVAILABLE_REASON,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 
 // Location groups with many members (the 132 ag demand units, the 74 and 63
 // community water systems, the 44 groundwater basins) render as a grouped
@@ -64,4 +69,53 @@ test("locationOptionGroups keeps a group with no regional split as one list", ()
   // reservoirs have regions, so they split; the salmon group has one item.
   const salmon = locationOptionGroups(LOCATION_GROUPS.salmon)
   expect(salmon.map((g) => g.label)).toEqual(["North of Delta"])
+})
+
+// The Level view rule, as pure functions the pickers and the view bar share:
+// which members of a group cannot show the Level view, and why the Level
+// toggle is blocked for the current selection (or null when it is not).
+test("levelUnavailableIds names the groundwater totals and nothing else", () => {
+  expect(levelUnavailableIds(LOCATION_GROUPS.basins)).toEqual([
+    "AGG_GW_NOD",
+    "AGG_GW_SOD",
+  ])
+  expect(levelUnavailableIds(LOCATION_GROUPS.reservoirs)).toEqual([])
+  const groups = locationOptionGroups(LOCATION_GROUPS.basins, {
+    disabled: levelUnavailableIds(LOCATION_GROUPS.basins),
+  })
+  expect(groups[0]?.options.every((o) => o.disabled)).toBe(true)
+  expect(groups[1]?.options.some((o) => o.disabled)).toBe(false)
+})
+
+test("levelViewBlockedReason blocks Level for a pinned or selected total, never for a basin", () => {
+  const basins = LOCATION_GROUPS.basins
+  expect(levelViewBlockedReason(basins, "scenarios", "AGG_GW_NOD", [])).toBe(
+    LEVEL_VIEW_UNAVAILABLE_REASON,
+  )
+  expect(levelViewBlockedReason(basins, "climates", "AGG_GW_SOD", [])).toBe(
+    LEVEL_VIEW_UNAVAILABLE_REASON,
+  )
+  expect(levelViewBlockedReason(basins, "scenarios", "WBA10", [])).toBeNull()
+  // On the Locations axis the compared members decide, not the pin.
+  expect(
+    levelViewBlockedReason(basins, "locations", "AGG_GW_NOD", [
+      "WBA10",
+      "WBA20",
+    ]),
+  ).toBeNull()
+  expect(
+    levelViewBlockedReason(basins, "locations", "WBA10", [
+      "WBA10",
+      "AGG_GW_SOD",
+    ]),
+  ).toBe(LEVEL_VIEW_UNAVAILABLE_REASON)
+  // Groups without the capability flag are never blocked.
+  expect(
+    levelViewBlockedReason(
+      LOCATION_GROUPS.reservoirs,
+      "scenarios",
+      "AGG_NOD",
+      [],
+    ),
+  ).toBeNull()
 })

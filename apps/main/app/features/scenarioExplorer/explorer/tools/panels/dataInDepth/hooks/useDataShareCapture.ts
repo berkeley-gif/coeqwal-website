@@ -54,7 +54,11 @@ export function useDataShareCapture(
       data.view === "pct" ||
       data.view === "pct_demand" ||
       data.view === "level")
-  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
+  const canSnapshot =
+    data.members.length > 0 &&
+    !data.isLoading &&
+    !statsStyle &&
+    !data.unavailableReason
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return

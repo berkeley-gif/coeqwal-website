@@ -54,6 +54,15 @@ test("Stats style adds the trend plot on the groundwater level view", async ({
     .getByRole("navigation", { name: "Variables by sector" })
     .getByRole("button", { name: "Groundwater storage" })
     .click()
+  // The default pin is the North of Delta total, which has no level series
+  // (levels are per basin), so the Level view is blocked until a basin is
+  // picked; nothing is reselected for the user.
+  await expect(page.getByRole("button", { name: "Level (ft)" })).toBeDisabled()
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page.getByRole("option", { name: "WBA10" }).click()
   await page.getByRole("button", { name: "Level (ft)" }).click()
   await page.getByRole("button", { name: "Stats", exact: true }).click()
 

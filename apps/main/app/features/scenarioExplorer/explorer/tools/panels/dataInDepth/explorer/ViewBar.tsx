@@ -10,14 +10,22 @@
  */
 
 import React from "react"
-import { Box, ToggleButton, ToggleButtonGroup, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  useTheme,
+} from "@repo/ui/mui"
 import { useDataSlice } from "../../../../store"
 import type { DataDistKind } from "../../../../store"
 import {
   getVariable,
+  LOCATION_GROUPS,
   VIEW_LABELS,
   type VariableView,
 } from "../config/variableRegistry"
+import { levelViewBlockedReason } from "./locationOptions"
 
 const DIST_OPTIONS: { value: DataDistKind; label: string }[] = [
   { value: "exceedance", label: "Exceedance" },
@@ -27,13 +35,30 @@ const DIST_OPTIONS: { value: DataDistKind; label: string }[] = [
 
 export default function ViewBar() {
   const theme = useTheme()
-  const { selectedVariableId, view, distKind, setView, setDistKind } =
-    useDataSlice()
+  const {
+    selectedVariableId,
+    view,
+    distKind,
+    compareBy,
+    pinnedLocationByGroup,
+    selectedLocationsByGroup,
+    setView,
+    setDistKind,
+  } = useDataSlice()
 
   const variable = getVariable(selectedVariableId)
   if (!variable) return null
 
   const views = variable.views.filter((v) => v !== "monthly")
+  // The Level view is blocked while a groundwater total is the pinned (or a
+  // compared) location; the user picks a basin, nothing is reselected.
+  const group = LOCATION_GROUPS[variable.locationGroup]
+  const levelBlocked = levelViewBlockedReason(
+    group,
+    compareBy,
+    pinnedLocationByGroup[variable.locationGroup] ?? group.items[0]?.id ?? "",
+    selectedLocationsByGroup[variable.locationGroup] ?? [],
+  )
   const showDistToggle =
     view === "dist" ||
     view === "pct" ||
@@ -64,12 +89,27 @@ export default function ViewBar() {
           <ToggleButton
             key={v}
             value={v}
+            disabled={v === "level" && levelBlocked != null}
+            aria-describedby={
+              v === "level" && levelBlocked != null
+                ? "level-view-blocked-reason"
+                : undefined
+            }
             sx={{ textTransform: "none", px: 1.5 }}
           >
             {variable.viewLabels?.[v] ?? VIEW_LABELS[v]}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      {levelBlocked && view !== "level" && (
+        <Typography
+          id="level-view-blocked-reason"
+          variant="caption"
+          sx={{ color: theme.palette.grey[600] }}
+        >
+          {levelBlocked}
+        </Typography>
+      )}
 
       {showDistToggle && (
         <ToggleButtonGroup
