@@ -49,15 +49,16 @@ export function comparedClimateKeys(
  * Inputs: the active compare axis, the held climate key, and the climate the
  * workspace resolver ran for. Output: scenarios axis is live only when the
  * held climate matches the workspace resolver's climate (the pre-existing
- * rule); the climates axis is always eligible because each member resolves
- * its own climate; the locations axis is not wired for live data.
+ * rule); the locations axis fetches one block for the held scenario, so it
+ * follows the same rule; the climates axis is always eligible because each
+ * member resolves its own climate.
  */
 export function liveAxisEligible(
   compareBy: string,
   heldClimate: string,
   resolvedWorkspaceClimate: string,
 ): boolean {
-  if (compareBy === "scenarios") {
+  if (compareBy === "scenarios" || compareBy === "locations") {
     return heldClimate === resolvedWorkspaceClimate
   }
   return compareBy === "climates"
