@@ -1014,7 +1014,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     provisional: true,
     wytApplicable: false,
     noLiveDataExplanation:
-      "Salmon spawning results are not modeled for Delta Conveyance Project scenarios.",
+      "Winter-run salmon data are not available for the Delta Conveyance Project scenario.",
     mockKind: "flow",
     mockEffect: "eco",
   },
