@@ -767,3 +767,23 @@ test("every variable carries a prose name that starts as the sentence needs it",
   expect(getVariable("tot_exp")?.proseName).toBe("Delta exports")
   expect(getVariable("riv_flow")?.proseName).toBe("river flows")
 })
+
+// Welfare loss (the third community water systems variable, requested by the
+// project lead on Aug 16): the served welfare_loss measure in USD, displayed
+// in millions of dollars per year on the shortage-modeled system list.
+test("welfare loss is a live community water systems variable in millions of dollars", () => {
+  const sector = SECTORS.find((s) => s.id === "cwsS")
+  expect(sector?.variables).toEqual(["cws_del", "cws_short", "cws_welfare"])
+  const v = getVariable("cws_welfare")
+  expect(v?.name).toBe("Welfare loss")
+  expect(v?.proseName).toBe("welfare loss")
+  expect(v?.locationGroup).toBe("cwsShortage")
+  expect(v?.unit).toBe("$M")
+  expect(v?.unitLabel).toBe("million dollars per year")
+  expect(v?.views).toEqual(["dist"])
+  expect(v?.data).toBe("live")
+  expect(v?.wytApplicable).toBe(false)
+  expect(v?.provisional).toBeUndefined()
+  expect(v?.tierOutcomeName).toBeUndefined()
+  expect(keyOutcomeChipText(v!)).toBeNull()
+})

@@ -688,7 +688,7 @@ export const SECTORS: SectorDef[] = [
   {
     id: "cwsS",
     name: "Community water systems",
-    variables: ["cws_del", "cws_short"],
+    variables: ["cws_del", "cws_short", "cws_welfare"],
   },
   {
     id: "salmonS",
@@ -1157,6 +1157,23 @@ export const VARIABLES: Record<string, VariableDef> = {
     tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). The shortage set overlaps but differs from the 74-system delivery set, so shortage_pct is not simply 100 minus pct_demand_met and the location list here is its own. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
+    data: "live",
+    wytApplicable: false,
+    mockKind: "short",
+    mockEffect: "cwsShort",
+  },
+  cws_welfare: {
+    id: "cws_welfare",
+    proseName: "welfare loss",
+    name: "Welfare loss",
+    sectorId: "cwsS",
+    locationGroup: "cwsShortage",
+    unit: "$M",
+    unitLabel: "million dollars per year",
+    views: ["dist"],
+    plain:
+      "The economic cost to a community water system of the water it did not get, in dollars per year. Zero in most years; it rises steeply in the droughts when shortages bite.",
+    tech: "Served live from the cws data-in-depth endpoint's welfare_loss measure (USD per year, the capped welfare-loss series from the CWS economics analysis) on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series; the site displays millions of dollars. Water-year-type filtering does not apply: the loss is an economic outcome that does not decompose by water year. The distribution is heavily zero-inflated, so the sentence reports the share of years with no loss and the mean rather than a median.",
     data: "live",
     wytApplicable: false,
     mockKind: "short",

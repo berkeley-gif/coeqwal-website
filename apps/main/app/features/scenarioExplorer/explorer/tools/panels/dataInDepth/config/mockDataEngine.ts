@@ -337,6 +337,10 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
     case "cws_short":
       // The shortage group's mockBase is already a shortage median (TAF).
       return location.mockBase ?? 30
+    case "cws_welfare":
+      // Sample only on API failure: the shortage magnitude in TAF is the
+      // same order as the welfare loss in $M at the aggregates.
+      return location.mockBase ?? 3
     default:
       return location.mockBase ?? 1000
   }

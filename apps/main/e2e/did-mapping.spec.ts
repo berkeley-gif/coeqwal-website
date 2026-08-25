@@ -726,3 +726,42 @@ test("blockHasSubject reports whether a served block carries the subject", () =>
     ),
   ).toBe(true)
 })
+
+// Welfare loss reads the cws endpoint's welfare_loss measure (USD) and is the
+// second variable of the shortage/welfare family, so it resolves the same
+// 63-system list as delivery shortages. The served dollars scale to millions
+// on adoption; the scale table is pinned exactly so an accidental scale on
+// any other variable regresses loudly.
+test("welfare loss maps to the welfare_loss measure on the shortage family and scales USD to $M", () => {
+  expect(didDomainForVariable("cws_welfare")).toBe("cws")
+  expect(didPeriodForVariable("cws_welfare")).toBe("annual")
+  expect(unitTokenForView("cws", "dist", "cws_welfare")).toBe("welfare_loss")
+  expect(toDidSubject("cws", "02_NU", "cws_welfare")).toBe("02_NU")
+  expect(toDidSubject("cws", "MWD", "cws_welfare")).toBeNull()
+  expect(toDidSubject("cws", "AGG_CWS_NOD", "cws_welfare")).toBe("NOD_CWS")
+  expect(didLiveScaleForVariable("cws_welfare")).toBe(1e-6)
+  expect(didLiveScaleForVariable("cws_short")).toBe(1)
+  expect(didLiveScaleForVariable("ag_del")).toBe(1)
+  expect(
+    pickLiveSeriesPoints(
+      {
+        subjects: [
+          {
+            subject: "NOD_CWS",
+            periods: {
+              annual: {
+                welfare_loss: {
+                  values: [{ water_year: 1922, value: 2551000 }],
+                },
+              },
+            },
+          },
+        ],
+      },
+      "cws",
+      "NOD_CWS",
+      "annual",
+      "welfare_loss",
+    ).series,
+  ).toEqual([2551000])
+})

@@ -44,6 +44,7 @@ export type DidUnitToken =
   | "net_diversion"
   | "gw_pumping"
   | "shortage"
+  | "welfare_loss"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -72,6 +73,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   salmon_abund: "salmon",
   cws_del: "cws",
   cws_short: "cws",
+  cws_welfare: "cws",
   ag_del: "ag",
   ag_pump: "ag",
   ag_short: "ag",
@@ -100,6 +102,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   salmon_abund: "annual",
   cws_del: "annual",
   cws_short: "annual",
+  cws_welfare: "annual",
   ag_del: "annual",
   ag_pump: "annual",
   ag_short: "annual",
@@ -284,6 +287,7 @@ const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
 /** Variables that read the shortage/welfare measure family. */
 const CWS_SHORTAGE_FAMILY_VARIABLES: ReadonlySet<string> = new Set([
   "cws_short",
+  "cws_welfare",
 ])
 
 /**
@@ -307,6 +311,9 @@ const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
  */
 const LIVE_SERIES_SCALE: Record<string, number> = {
   salmon_abund: 0.01,
+  // The cws welfare_loss measure is served in USD; the tool displays
+  // millions of dollars per year.
+  cws_welfare: 1e-6,
 }
 
 /** Scale from a live series' served units to display units (1 = as served). */
@@ -469,6 +476,7 @@ export function unitTokenForView(
     if (variableId === "cws_short") {
       return view === "pct_demand" ? "shortage_pct" : "shortage_total"
     }
+    if (variableId === "cws_welfare") return "welfare_loss"
     return "delivery"
   }
   if (domain === "ag") {
@@ -597,7 +605,7 @@ const RESPONSE_ARRAY_BY_DOMAIN: Record<
 /**
  * Request unit token -> response series key. Unit-keyed domains use unit
  * codes (TAF, PCT_CAP, km); measure-keyed domains use the measure name
- * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct) or
+ * itself (gw: volume/level; cws: delivery/shortage_total/shortage_pct/welfare_loss) or
  * the metric code (salmon: NOF_3YR_AVG).
  */
 const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
@@ -609,6 +617,7 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   delivery: "delivery",
   shortage_total: "shortage_total",
   shortage_pct: "shortage_pct",
+  welfare_loss: "welfare_loss",
   net_diversion: "net_diversion",
   gw_pumping: "gw_pumping",
   shortage: "shortage",
