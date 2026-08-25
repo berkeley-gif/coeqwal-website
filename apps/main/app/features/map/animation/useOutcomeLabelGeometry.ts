@@ -98,6 +98,8 @@ export interface OutcomeLabelRefs {
   captionRefsMap: RefObject<Map<string, HTMLDivElement | null>>
   /** Column eyebrows, indexed by column (0 / 1). */
   eyebrowRefs: RefObject<(HTMLDivElement | null)[]>
+  /** Outer two-column grid wrapper, clipped during radar/heatmap. */
+  gridWrapperRef: RefObject<HTMLDivElement | null>
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -140,7 +142,7 @@ export function useOutcomeLabelGeometry({
   // Precomputed geometry, filled by the measure pass and read each frame.
   /** Wrapped (radar-layout) center of each title block, panel-relative. */
   const wrappedTitleGeomRef = useRef<
-    Map<string, { textCenterX: number; textCenterY: number }>
+    Map<string, { textCenterX: number; textCenterY: number; textHeight: number }>
   >(new Map())
   /** Per-outcome translate to slide a title onto its radar axis. */
   const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
@@ -165,6 +167,29 @@ export function useOutcomeLabelGeometry({
   const heatmapTextActiveRef = useRef(false)
   const radarWrapActiveRef = useRef<boolean>(false)
   const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
+  /** Outer two-column grid wrapper. Clipped to the visible height during
+   *  radar/heatmap so its placeholder rows (locked tall, see
+   *  useStoryboardLayout.ts) stop inflating `root`'s scrollHeight once
+   *  they're just invisible dead space underneath the compact chart. */
+  const gridWrapperRef = useRef<HTMLDivElement>(null)
+  /** Distribution grid's measured bottom edge, cached from `measure()`'s
+   *  caption scan so the tick handler below can reuse it without
+   *  re-scanning the DOM every frame. */
+  const tallContentHeightRef = useRef(0)
+  /** Which content-height regime is currently applied, so the tick
+   *  handler only recomputes on an actual crossing, not every frame.
+   *  Three states, not just tall/compact, because radar and heatmap need
+   *  their own heights tracked separately below - blending them with a
+   *  single `Math.max` made radar inherit heatmap's (larger) requirement
+   *  for the whole compact span, reintroducing empty space under radar. */
+  const contentHeightPhaseRef = useRef<"tall" | "radar" | "heatmap">("tall")
+
+  /** Radar's and heatmap's own real bottom edges (from their geometry,
+   *  not just assumed to always fit in one viewport) - see the comment at
+   *  the end of `measure()`. Reused by the tick handler for a
+   *  scroll-driven crossing, same as `tallContentHeightRef`. */
+  const radarContentHeightRef = useRef(0)
+  const heatmapContentHeightRef = useRef(0)
 
   // Mirror props into refs so the per-frame closure reads the latest values
   // without re-subscribing the engine.
@@ -340,6 +365,41 @@ export function useOutcomeLabelGeometry({
         }
       })
     }
+    // Radar/heatmap are sized to fit one viewport, but the distribution
+    // grid's placeholder rows stay mounted at their locked (tall) height
+    // underneath - they just fade out. `measure()` only recomputes content
+    // height on resize, so a plain scroll across this boundary needs its
+    // own check here, on every tick, to catch it.
+    const contentPhase: "tall" | "radar" | "heatmap" =
+      v < RADAR_SLIDE_START ? "tall" : v < HEATMAP_TAKEOVER ? "radar" : "heatmap"
+    if (contentPhase !== contentHeightPhaseRef.current) {
+      contentHeightPhaseRef.current = contentPhase
+      const rootEl = rightColumnRootRef.current
+      if (rootEl) {
+        const visibleHeight = rootEl.getBoundingClientRect().height
+        const targetHeight =
+          contentPhase === "tall"
+            ? tallContentHeightRef.current
+            : Math.max(
+              visibleHeight,
+              contentPhase === "radar"
+                ? radarContentHeightRef.current
+                : heatmapContentHeightRef.current,
+            )
+        onContentHeightChange?.(targetHeight)
+        const gridWrapperEl = gridWrapperRef.current
+        if (gridWrapperEl) {
+          if (contentPhase === "tall") {
+            gridWrapperEl.style.height = ""
+            gridWrapperEl.style.overflow = ""
+          } else {
+            gridWrapperEl.style.height = `${targetHeight}px`
+            gridWrapperEl.style.overflow = "hidden"
+          }
+        }
+      }
+    }
+
     // Slide titles to the radar [RADAR_SLIDE_START-RADAR_SLIDE_END], hold
     // while they fade out, then snap to the heatmap axis at HEATMAP_TAKEOVER+.
     // The snap is hidden because the labels are invisible there.
@@ -432,6 +492,7 @@ export function useOutcomeLabelGeometry({
     const measure = () => {
       const rootRect = root.getBoundingClientRect()
       const layout: Record<string, GlyphRect> = {}
+      let maxContentBottom = 0
       placeholderRefsMap.current.forEach((el, code) => {
         if (!el) return
         const r = el.getBoundingClientRect()
@@ -442,8 +503,18 @@ export function useOutcomeLabelGeometry({
           height: r.height,
         }
       })
+      captionRefsMap.current.forEach((el) => {
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        maxContentBottom = Math.max(
+          maxContentBottom,
+          r.bottom - rootRect.top + root.scrollTop,
+        )
+      })
       onGlyphLayoutChange(layout)
-      onContentHeightChange?.(root.scrollHeight)
+      // The actual `onContentHeightChange` call happens further down,
+      // once the heatmap/radar geometry tells us which phase we're in.
+      tallContentHeightRef.current = Math.max(maxContentBottom, rootRect.height)
 
       // Sync the white backdrop's height to the content column. They are
       // siblings (nesting would cause a z-index conflict with the SVG
@@ -528,6 +599,7 @@ export function useOutcomeLabelGeometry({
         wrapGeom.set(code, {
           textCenterX: (rText.left + rText.right) / 2 - rootRect.left,
           textCenterY: (rText.top + rText.bottom) / 2 - rootRect.top,
+          textHeight: rText.height,
         })
       })
       // Revert wrap (leave transforms cleared) to measure the at-rest
@@ -592,6 +664,11 @@ export function useOutcomeLabelGeometry({
       const Nr = radarOrderCodes.length
       const delta = radarLabelDeltaRef.current
       delta.clear()
+      // Real landed bottom edge of whichever label ends up lowest on the
+      // ring, measured from its own rect rather than guessed from a
+      // formula + padding - a label two lines tall lands lower than its
+      // own center by more than a single-line one would.
+      let radarLabelMaxBottom = 0
       if (Nr > 0) {
         for (let i = 0; i < Nr; i++) {
           const code = radarOrderCodes[i]!
@@ -604,6 +681,10 @@ export function useOutcomeLabelGeometry({
             dx: lx - wrapped.textCenterX,
             dy: ly - wrapped.textCenterY,
           })
+          radarLabelMaxBottom = Math.max(
+            radarLabelMaxBottom,
+            ly + wrapped.textHeight / 2,
+          )
         }
       }
 
@@ -620,6 +701,9 @@ export function useOutcomeLabelGeometry({
       const heatmapMaxW = heatmapLabelMaxWRef.current
       heatmap.clear()
       heatmapMaxW.clear()
+      // Real landed bottom edge of whichever heatmap label ends up
+      // lowest, measured the same way as radarLabelMaxBottom above.
+      let heatmapLabelMaxBottom = 0
       if (Nr > 0) {
         wrapStateByCode.forEach(({ boxEl }) => {
           boxEl.style.transform = ""
@@ -654,6 +738,10 @@ export function useOutcomeLabelGeometry({
             dx: targetRightX - (rH.right - rootRect.left),
             dy: targetCenterY - cye,
           })
+          heatmapLabelMaxBottom = Math.max(
+            heatmapLabelMaxBottom,
+            targetCenterY + rH.height / 2,
+          )
           boxEl.style.justifyContent = prevJ
           textEl.style.whiteSpace = prevWhite
           textEl.style.textAlign = prevAlign
@@ -665,6 +753,30 @@ export function useOutcomeLabelGeometry({
           boxEl.style.transform = prevBoxTransform
         })
       }
+
+      // A small buffer, not a load-bearing estimate: `getBoundingClientRect`
+      // is exact, this just avoids clipping right at a shared pixel edge.
+      const CONTENT_BOTTOM_BUFFER = 8
+      radarContentHeightRef.current = Math.max(
+        rootRect.height,
+        radarLabelMaxBottom + CONTENT_BOTTOM_BUFFER,
+      )
+      heatmapContentHeightRef.current = Math.max(
+        rootRect.height,
+        heatmapLabelMaxBottom + CONTENT_BOTTOM_BUFFER,
+      )
+
+      const v = progress.get()
+      const phase: "tall" | "radar" | "heatmap" =
+        v < RADAR_SLIDE_START ? "tall" : v < HEATMAP_TAKEOVER ? "radar" : "heatmap"
+      contentHeightPhaseRef.current = phase
+      onContentHeightChange?.(
+        phase === "tall"
+          ? tallContentHeightRef.current
+          : phase === "radar"
+            ? radarContentHeightRef.current
+            : heatmapContentHeightRef.current,
+      )
 
       // A resize (e.g. sidebar toggle) just recomputed radar/heatmap label
       // deltas above, but the transform that actually places labels only
@@ -699,5 +811,6 @@ export function useOutcomeLabelGeometry({
     placeholderRefsMap,
     captionRefsMap,
     eyebrowRefs,
+    gridWrapperRef,
   }
 }

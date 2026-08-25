@@ -57,7 +57,7 @@ export default function WaterIssuesPanel() {
         Click on each water issue to learn more.
       </Typography>
 
-      <InfoCardGrid columns={5}>
+      <InfoCardGrid columns={WATER_ISSUE_THEMES.length}>
         {WATER_ISSUE_THEMES.map(({ title, description, themeKey, dimmed }) => (
           <InfoCard
             key={themeKey}

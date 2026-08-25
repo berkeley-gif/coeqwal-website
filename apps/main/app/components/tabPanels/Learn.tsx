@@ -39,6 +39,8 @@ import VerticalNav, {
   NAV_WIDTH_EXPANDED,
 } from "../verticalNav/VerticalNav"
 
+const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
+
 export default function LearnPanel() {
   const mapReady = useMapReady()
   const mapError = useMapError()
@@ -198,21 +200,25 @@ export default function LearnPanel() {
         <Box
           sx={{
             p: 4,
-            color: theme.palette.common.white,
-            backgroundColor: theme.palette.blue.dark,
+            color: theme.palette.text.secondary,
+            backgroundColor: theme.palette.blue.medium,
+            backgroundImage: `url(${DELTA_AERIALS_SRC})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom -160px",
+            backgroundRepeat: "no-repeat",
             minHeight: "100vh",
-            paddingTop: (theme) => theme.space.panel.paddingXl,
+            paddingTop: (theme) => theme.space.panel.padding,
             paddingLeft: (theme) =>
               `calc(${theme.space.panel.paddingXl} + ${navWidth}px)`,
             paddingRight: (theme) => theme.space.panel.padding,
           }}
         >
-          <Typography variant="h3" sx={{ maxWidth: "66%" }}>
+          <Typography variant="h3" sx={{ maxWidth: "100%" }}>
             What water issues matter to you?
           </Typography>
           <Typography
             variant="body1"
-            sx={{ maxWidth: "66%", mt: theme.space.listGap.sm }}
+            sx={{ maxWidth: "75%", mt: theme.space.listGap.sm }}
           >
             Water is important to all of us — from farmers in the Central Valley
             to communities in the Delta, from salmon in the Sacramento River to
@@ -227,7 +233,7 @@ export default function LearnPanel() {
             >
               Click on each water issue to learn more.
             </Typography>
-            <InfoCardGrid columns={5}>
+            <InfoCardGrid columns={WATER_ISSUE_THEMES.length}>
               {WATER_ISSUE_THEMES.map(
                 ({ title, description, themeKey, dimmed }) => (
                   <InfoCard
@@ -238,7 +244,7 @@ export default function LearnPanel() {
                       dimmed ? undefined : () => openThemePanel(themeKey)
                     }
                     dimmed={dimmed}
-                    variant="onDark"
+                    variant="onLight"
                   />
                 ),
               )}

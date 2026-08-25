@@ -80,7 +80,7 @@ export interface HeatmapColumnFrame {
 /** Same fixed header-height problem as the radar (see
  *  RADAR_HEADER_CLEARANCE_PX) - the heatmap has no label ring, so its
  *  floor is just the header's own height plus a small margin. */
-const HEATMAP_HEADER_CLEARANCE_PX = 174
+const HEATMAP_HEADER_CLEARANCE_PX = 140
 
 /** Heatmap layout parts shared by the SVG cells and HTML row labels. The
  *  overlay computes its own cell widths on top of this. The labels need only

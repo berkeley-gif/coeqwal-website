@@ -139,6 +139,7 @@ export default function BeatTextOverlay({
     placeholderRefsMap,
     captionRefsMap,
     eyebrowRefs,
+    gridWrapperRef,
   } = useOutcomeLabelGeometry({
     progress,
     narrationTickRef,
@@ -273,7 +274,7 @@ export default function BeatTextOverlay({
           {/* Two-column outcome grid. Each row stacks Title, glyph
          *  placeholder, Caption, measured/animated by the geometry hook. */}
           {beat2Layout && (
-            <Box sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}>
+            <Box ref={gridWrapperRef} sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}>
               {/* View-mode header (beats 4-7), absolutely positioned over the
              *  eyebrow slot so it doesn't shift the glyph layout. */}
               <Box
