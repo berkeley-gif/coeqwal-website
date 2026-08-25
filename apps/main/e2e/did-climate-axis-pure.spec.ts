@@ -39,7 +39,7 @@ test("climateFanoutIds resolves the held scenario per climate, index-aligned wit
   ])
 })
 
-test("liveAxisEligible: scenarios axis needs the workspace climate; climates axis is always eligible; locations stays mock", () => {
+test("liveAxisEligible: scenarios and locations axes need the workspace climate; climates axis is always eligible", () => {
   // scenarios axis: live only when the held climate is the one the workspace
   // resolver used (the pre-existing rule, unchanged)
   expect(liveAxisEligible("scenarios", "historical", "historical")).toBe(true)
@@ -48,8 +48,10 @@ test("liveAxisEligible: scenarios axis needs the workspace climate; climates axi
   // not depend on the workspace climate
   expect(liveAxisEligible("climates", "historical", "historical")).toBe(true)
   expect(liveAxisEligible("climates", "cc95", "historical")).toBe(true)
-  // locations axis: not wired for live yet
-  expect(liveAxisEligible("locations", "historical", "historical")).toBe(false)
+  // locations axis: one request for the held scenario, so the same rule as
+  // the scenarios axis (the resolved id is only right for that climate)
+  expect(liveAxisEligible("locations", "historical", "historical")).toBe(true)
+  expect(liveAxisEligible("locations", "cc95", "historical")).toBe(false)
 })
 
 test("climateFanoutIds yields null for a missing variant or unknown climate, never a crash", () => {

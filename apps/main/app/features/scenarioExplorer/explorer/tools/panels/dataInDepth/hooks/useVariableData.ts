@@ -21,8 +21,10 @@
  * engine feeds. So the live and mock members are shaped identically; only the
  * origin of `series` differs.
  *
- * Everything else - the locations compare axis, and any variable not served by
- * a data-in-depth endpoint - uses the deterministic sample-data engine. Each
+ * The locations axis is live too: ONE request for the held scenario carries
+ * every selected location's subject, and each member picks its own series by
+ * subject id (`locationAxisRequest`). Any variable not served by a
+ * data-in-depth endpoint uses the deterministic sample-data engine. Each
  * member falls back to mock individually if its live series is absent, and the
  * card is labeled per the resolved `source`.
  *
@@ -96,6 +98,7 @@ import {
   sumAlignedSeriesPoints,
   blockHasSubject,
   trimPointsToYearRange,
+  locationAxisRequest,
   SSJV_ALL_ROUTES_LOCATION,
   SSJV_ROUTE_SUBJECTS,
   viewHasLiveSource,
@@ -175,8 +178,11 @@ interface MemberSpec {
   scenarioId: string
   climateKey: string
   locationId: string
-  /** Index into the per-scenario live fan-out slots (scenarios and climates axes) */
+  /** Index into the per-scenario live fan-out slots (every axis) */
   slotIndex?: number
+  /** Locations axis: this member's subject in the shared block, the SSJV
+   *  route list for the synthetic total, or null when unmapped (sample). */
+  subject?: string | readonly string[] | null
 }
 
 /** A valid hydroclimate key, falling back to historical. */
@@ -279,6 +285,19 @@ export function useVariableData(): VariableData {
   // all three route subjects and sums them fail-closed at adoption time.
   const isSsjvTotal =
     variable?.id === "ssjv_exp" && heldLocation === SSJV_ALL_ROUTES_LOCATION
+  // Locations axis: the compared location ids (chosen, or the seeded first
+  // few) and the single request they share. Hoisted so the request and the
+  // member specs below cannot disagree.
+  const isLocationsAxis = compareBy === "locations"
+  const locationMemberIds =
+    comparedLocationIds.length > 0
+      ? comparedLocationIds
+      : (group?.items.slice(0, DEFAULT_LOCATION_COUNT).map((l) => l.id) ?? [])
+  const locationRequest =
+    isLocationsAxis && domain && variable && !levelUnavailable
+      ? locationAxisRequest(domain, variable.id, locationMemberIds)
+      : null
+  const locationRequestSignature = locationRequest?.subjects.join(",") ?? ""
   const unitToken = domain
     ? unitTokenForView(domain, view, variable?.id)
     : "volume"
@@ -299,7 +318,9 @@ export function useVariableData(): VariableData {
   const resolvedAll = useResolvedIdMappings()
   const liveEligible =
     domain != null &&
-    (subject != null || isSsjvTotal) &&
+    (isLocationsAxis
+      ? locationRequest != null && locationRequest.subjects.length > 0
+      : subject != null || isSsjvTotal) &&
     period != null &&
     viewHasLiveSource(view) &&
     liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
@@ -313,18 +334,29 @@ export function useVariableData(): VariableData {
     ? []
     : compareBy === "scenarios"
       ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
-      : climateFanoutIds(
-          Object.fromEntries(
-            Object.entries(resolvedAll).map(([k, m]) => [k, m.idMapping]),
-          ),
-          comparedClimates,
-          heldScenario,
-        )
+      : isLocationsAxis
+        ? [resolved.idMapping[heldScenario] ?? null]
+        : climateFanoutIds(
+            Object.fromEntries(
+              Object.entries(resolvedAll).map(([k, m]) => [k, m.idMapping]),
+            ),
+            comparedClimates,
+            heldScenario,
+          )
 
   // Whether water-year typing applies to this variable at all (salmon
   // population metrics and welfare loss opt out via the registry flag).
   const wytApplicable = variable?.wytApplicable !== false
   const wyt = effectiveWytSelection(wytApplicable, selectedWaterYearTypes)
+  // The subject list every domain hook requests: the shared locations-axis
+  // list, or the held location's subject (the SSJV total's three routes).
+  const requestSubjects: string[] | undefined = isLocationsAxis
+    ? locationRequest?.subjects
+    : isSsjvTotal
+      ? [...SSJV_ROUTE_SUBJECTS]
+      : subject
+        ? [subject]
+        : undefined
 
   // Fan out each domain's endpoint across the comparison scenarios. Only the
   // active domain passes real ids; the others pass [] so every slot defers.
@@ -334,7 +366,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useReservoirStorageDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         periods:
           period === "annual" ? undefined : period ? [period] : undefined,
         units: view === "pct" ? ["pct_capacity"] : ["volume"],
@@ -347,7 +379,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useRiverFlowsDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         units: ["volume"],
         include,
         wyt,
@@ -358,7 +390,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useDeltaSalinityDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         periods:
           period === "annual" ? undefined : period ? [period] : undefined,
         units: ["km"],
@@ -371,11 +403,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useSystemDeliveriesDataInDepth(id ? [id] : [], {
-        subjects: isSsjvTotal
-          ? [...SSJV_ROUTE_SUBJECTS]
-          : subject
-            ? [subject]
-            : undefined,
+        subjects: requestSubjects,
         units: ["volume"],
         include,
         wyt,
@@ -387,7 +415,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useGroundwaterStorageDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         measures: [unitToken === "level" ? "level" : "volume"],
         include,
         wyt,
@@ -398,7 +426,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useSalmonDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         units: ["nof_3yr_avg"],
         include,
       }),
@@ -408,7 +436,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useCwsDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         // The cws request token IS the measure name (delivery /
         // shortage_total / shortage_pct / welfare_loss); anything else
         // defers to delivery.
@@ -432,7 +460,7 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useAgDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: requestSubjects,
         // Like cws, the ag request token IS the measure name; anything else
         // defers to the delivery measure. Unlike cws, ag IS water-year data,
         // so the water-year-type filter applies and rides along.
@@ -538,14 +566,8 @@ export function useVariableData(): VariableData {
         })
       })
     } else {
-      const chosen = (selectedLocationsByGroup[groupId] ?? []).filter((id) =>
-        group.items.some((l) => l.id === id),
-      )
-      const ids =
-        chosen.length > 0
-          ? chosen
-          : group.items.slice(0, DEFAULT_LOCATION_COUNT).map((l) => l.id)
-      for (const id of ids) {
+      // One shared slot; each member picks its own subject from it.
+      locationMemberIds.forEach((id, i) => {
         specs.push({
           id,
           label: getLocation(groupId, id)?.name ?? id,
@@ -553,8 +575,10 @@ export function useVariableData(): VariableData {
           scenarioId: heldScenario,
           climateKey: heldClimate,
           locationId: id,
+          slotIndex: 0,
+          subject: locationRequest?.memberSubjects[i] ?? null,
         })
-      }
+      })
     }
 
     const isPct = view === "pct"
@@ -606,13 +630,21 @@ export function useVariableData(): VariableData {
       if (liveEligible && period && domain && spec.slotIndex != null) {
         const slot = activeSlots[spec.slotIndex]
         const block = slot?.scenarios?.[0]
+        // What this member picks from the block: on the locations axis its
+        // own subject (or route list); elsewhere the held location's.
+        const memberSubject: string | readonly string[] | null = isLocationsAxis
+          ? (spec.subject ?? null)
+          : isSsjvTotal
+            ? SSJV_ROUTE_SUBJECTS
+            : subject
+        const memberSingle =
+          typeof memberSubject === "string" ? memberSubject : null
         subjectAbsent =
           !!block &&
           !!slot?.hasData &&
           !slot.isLoading &&
-          subject != null &&
-          !isSsjvTotal &&
-          !blockHasSubject(block, domain, subject)
+          memberSingle != null &&
+          !blockHasSubject(block, domain, memberSingle)
         // Served stub years (the CWS delivery family) are dropped before
         // anything is computed from the series.
         const range = variable.servedYearRange
@@ -623,21 +655,22 @@ export function useVariableData(): VariableData {
         // The synthetic SSJV total sums the three served route series,
         // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
         // back to sample labeling, never a partial total.
-        const points = isSsjvTotal
-          ? sumAlignedSeriesPoints(
-              SSJV_ROUTE_SUBJECTS.map((code) => pick(code, unitToken)),
-            )
-          : subject
-            ? pick(subject, unitToken)
-            : null
+        const points =
+          memberSubject == null
+            ? null
+            : typeof memberSubject === "string"
+              ? pick(memberSubject, unitToken)
+              : sumAlignedSeriesPoints(
+                  memberSubject.map((code) => pick(code, unitToken)),
+                )
         // The ag percent-of-demand view has no served percent measure, so it
         // is derived from the primary shortage series and the companion
         // net_diversion series in the SAME response block. If either is
         // missing the member falls back to sample data rather than showing a
         // half-derived number.
-        if (isPctDemand && companionTokens.length > 0 && subject) {
+        if (isPctDemand && companionTokens.length > 0 && memberSingle) {
           const companion = pick(
-            subject,
+            memberSingle,
             companionTokens[0] as typeof unitToken,
           )
           if (
@@ -782,5 +815,6 @@ export function useVariableData(): VariableData {
     liveLoading,
     wytJoined,
     unavailableReason,
+    locationRequestSignature,
   ])
 }

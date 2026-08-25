@@ -18,6 +18,7 @@ import {
   hasEmptyScenariosResponse,
   trimPointsToYearRange,
   blockHasSubject,
+  locationAxisRequest,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -764,4 +765,61 @@ test("welfare loss maps to the welfare_loss measure on the shortage family and s
       "welfare_loss",
     ).series,
   ).toEqual([2551000])
+})
+
+// Compare by Locations makes ONE request per chart (the held scenario, every
+// selected location's subject) and each member picks its own series by
+// subject id. The helper turns the selected location ids into that request:
+// deduplicated subjects in first-seen order, and per member the subject to
+// pick (or the SSJV route list for the synthetic total, or null when the
+// registry cannot map the id, which renders sample, labeled).
+test("locationAxisRequest builds one deduplicated subject list and per-member selectors", () => {
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SHSTA", "OROVL", "TRNTY"]),
+  ).toEqual({
+    subjects: ["SHSTA", "OROVL", "TRNTY"],
+    memberSubjects: ["SHSTA", "OROVL", "TRNTY"],
+  })
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SLCVP", "SLSWP", "AGG_NOD"]),
+  ).toEqual({
+    subjects: ["SLUIS_CVP", "SLUIS_SWP", "NOD_Reservoirs"],
+    memberSubjects: ["SLUIS_CVP", "SLUIS_SWP", "NOD_Reservoirs"],
+  })
+  expect(
+    locationAxisRequest("sysdel", "cvp_del", ["SYS", "NOD", "SOD"]),
+  ).toEqual({
+    subjects: ["DEL_CVP_TOTAL", "DEL_CVP_TOT_N_WAMER", "DEL_CVP_TOT_S_WLOSS"],
+    memberSubjects: [
+      "DEL_CVP_TOTAL",
+      "DEL_CVP_TOT_N_WAMER",
+      "DEL_CVP_TOT_S_WLOSS",
+    ],
+  })
+  // The SSJV total depends on its three route subjects; a route picked
+  // alongside it shares the request without duplicating the subject.
+  expect(
+    locationAxisRequest("sysdel", "ssjv_exp", [
+      SSJV_ALL_ROUTES_LOCATION,
+      "CVC",
+    ]),
+  ).toEqual({
+    subjects: ["D_CAA238_CVPCV", "D_MLRTN_FRK000", "SWP_TA_KERNAG"],
+    memberSubjects: [[...SSJV_ROUTE_SUBJECTS], "D_CAA238_CVPCV"],
+  })
+  // Unknown ids map to null and never enter the request; a duplicated id
+  // is requested once and still yields two members.
+  expect(
+    locationAxisRequest("reservoir", "res_apr", ["SHSTA", "NOPE", "SHSTA"]),
+  ).toEqual({
+    subjects: ["SHSTA"],
+    memberSubjects: ["SHSTA", null, "SHSTA"],
+  })
+  // Entities: ag demand units and CWS systems ride the same helper.
+  expect(
+    locationAxisRequest("ag", "ag_del", ["AGG_AG_NOD", "08N_SA2", "90_PA1"]),
+  ).toEqual({
+    subjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
+    memberSubjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
+  })
 })

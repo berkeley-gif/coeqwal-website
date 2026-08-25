@@ -662,6 +662,46 @@ export function pickLiveSeries(
   return seriesFromValues(facet?.values)
 }
 
+/** Request subjects and per-member selectors for the locations axis. */
+export interface LocationAxisRequest {
+  /** Deduplicated request subjects in first-seen order */
+  subjects: string[]
+  /** Per member, index-aligned with the location ids: one subject, the SSJV
+   *  route list for the synthetic total, or null when unmapped (sample). */
+  memberSubjects: (string | readonly string[] | null)[]
+}
+
+/**
+ * The locations axis fetches ONE block for the held scenario carrying every
+ * selected location's subject; each member then picks its own series by
+ * subject id. Two locations that map to the same subject collapse in the
+ * request and still get two members. Pure.
+ */
+export function locationAxisRequest(
+  domain: DidDomain,
+  variableId: string,
+  locationIds: readonly string[],
+): LocationAxisRequest {
+  const subjects: string[] = []
+  const seen = new Set<string>()
+  const push = (code: string) => {
+    if (!seen.has(code)) {
+      seen.add(code)
+      subjects.push(code)
+    }
+  }
+  const memberSubjects = locationIds.map((id) => {
+    if (variableId === "ssjv_exp" && id === SSJV_ALL_ROUTES_LOCATION) {
+      SSJV_ROUTE_SUBJECTS.forEach(push)
+      return SSJV_ROUTE_SUBJECTS
+    }
+    const code = toDidSubject(domain, id, variableId)
+    if (code) push(code)
+    return code
+  })
+  return { subjects, memberSubjects }
+}
+
 /**
  * Whether a served scenario block carries `subject` at all. A block that
  * exists but lacks the subject means the subject is not modeled for that
