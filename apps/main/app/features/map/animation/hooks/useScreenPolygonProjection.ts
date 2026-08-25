@@ -106,12 +106,16 @@ export function useScreenPolygonProjection({
   useEffect(() => {
     if (isLoading) return
     const raf = requestAnimationFrame(measurePanel)
-    window.addEventListener("resize", measurePanel)
+
+    const panel = panelRef.current
+    const observer = panel ? new ResizeObserver(measurePanel) : null
+    if (panel && observer) observer.observe(panel)
+
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener("resize", measurePanel)
+      observer?.disconnect()
     }
-  }, [isLoading, measurePanel])
+  }, [isLoading, measurePanel, panelRef])
 
   /* Collect screen shapes from Mapbox layers + coordinate lookups. */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -465,14 +469,19 @@ export function useScreenPolygonProjection({
   reprojectRef.current = reprojectShapes
 
   useEffect(() => {
-    const onResize = () => {
+    const panel = panelRef.current
+    if (!panel) return
+
+    const onPanelResize = () => {
       if (viewportDataRef.current.size > 0) {
         reprojectShapes()
       }
     }
-    window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
-  }, [reprojectShapes])
+
+    const observer = new ResizeObserver(onPanelResize)
+    observer.observe(panel)
+    return () => observer.disconnect()
+  }, [reprojectShapes, panelRef])
 
   // Re-apply offset on scroll (cheap: no Mapbox queries). Page-level scrolling,
   // so listen on window not a parent scroll container.

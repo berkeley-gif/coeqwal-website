@@ -6,7 +6,7 @@
  * in Narration.tsx (left column copy/timing), StoryboardControls.tsx, and
  * useOutcomeLabelGeometry (right-column per-frame label math). */
 
-import { useRef, type RefObject } from "react"
+import { useRef, useEffect, type RefObject } from "react"
 import {
   Box,
   Typography,
@@ -24,21 +24,19 @@ import {
 } from "./animationTiming"
 import type { Beat2Layout, GlyphRect } from "./overlayTypes"
 import { useOutcomeLabelGeometry } from "./useOutcomeLabelGeometry"
+import { useScrollDownIndicator } from "./hooks/useScrollDownIndicator"
 import Narration from "./Narration"
+import ScrollDownIndicator from "./ScrollDownIndicator"
 
 export type { GlyphRect } from "./overlayTypes"
 
 /* Right-panel view-mode header for beats 4-7. Earlier beats have none. */
 const VIEW_MODE_HEADER_BY_BEAT: Record<number, string> = {
   4: "Distribution view",
-  5: "List view",
+  5: "Bar chart",
   6: "Radar chart",
   7: "Heat map",
 }
-
-/** Pixels the right column is lifted above the panel's top padding, so it
- *  and the SVG read as one block and fit vertically. */
-const OVERLAY_TOP_LIFT_PX = 30
 
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
@@ -77,6 +75,13 @@ interface BeatTextOverlayProps {
   /** Forwarded to the geometry hook, which reports glyph landing rects
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
+  /** Fires once the right column's scrollable DOM node exists, so a
+   *  sibling component can portal content into it. Fires again with
+   *  `null` on unmount. */
+  onScrollContainerReady?: (node: HTMLDivElement | null) => void
+  /** Forwarded to the geometry hook, which reports the right column's
+   *  full scrollable content height on every relevant layout pass. */
+  onContentHeightChange?: (height: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -101,6 +106,8 @@ export default function BeatTextOverlay({
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
+  onScrollContainerReady,
+  onContentHeightChange,
   hideControls = false,
   heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
@@ -132,20 +139,39 @@ export default function BeatTextOverlay({
     placeholderRefsMap,
     captionRefsMap,
     eyebrowRefs,
+    gridWrapperRef,
   } = useOutcomeLabelGeometry({
     progress,
     narrationTickRef,
     beat2Layout,
     outcomeMorphWindows,
     onGlyphLayoutChange,
+    onContentHeightChange,
     heatmapExtraColumnCount,
   })
+
+  // Scroll position from a previous beat (e.g. having scrolled down the
+  // squares grid) must not leak into a beat that doesn't scroll at all
+  // (bars, radar, heatmap) - reset on every beat change.
+  useEffect(() => {
+    rightColumnRootRef.current?.scrollTo({ top: 0 })
+  }, [beatIndex, rightColumnRootRef])
+
+  // Reports the scrollable DOM node up so a sibling can portal the SVG
+  // overlay into it - the SVG needs to live inside this element to scroll
+  // natively with it instead of needing a JS-driven compensating transform.
+  useEffect(() => {
+    onScrollContainerReady?.(rightColumnRootRef.current)
+    return () => onScrollContainerReady?.(null)
+  }, [rightColumnRootRef, onScrollContainerReady])
+
+  const { canScrollDown } = useScrollDownIndicator(rightColumnRootRef, [
+    beat2Layout,
+  ])
 
   // Kept live: its JSX ("Add a location to track" CTA) is preserved behind
   // a `{false && ...}` guard below for future reuse.
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
-
-  const padding = theme.space.panel.padding
 
   return (
     <Box
@@ -179,7 +205,7 @@ export default function BeatTextOverlay({
         ref={beat2PanelRef}
         sx={{
           position: "absolute",
-          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
+          top: "80px",
           right: 0,
           width: "33.33%",
           height: 0,
@@ -196,253 +222,280 @@ export default function BeatTextOverlay({
       {/* Right-third content column. Left edge at `panelWidth * 2/3`,
        * matching the SVG overlay's `pos.x` origin. Auto-sizes to content. */}
       <Box
-        ref={rightColumnRootRef}
         sx={{
           position: "absolute",
-          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
+          top: "80px",
+          height: "80vh",
+          bottom: 0,
           right: 0,
           width: "33.33%",
           zIndex: 5,
-          display: "flex",
-          flexDirection: "column",
-          pt: 2.5,
-          pb: 2,
-          "& .MuiTypography-root": {
-            color: theme.palette.text.primary,
-          },
         }}
       >
-        {/* Scenario-name header. Fades in with the backdrop and holds. */}
-        <motion.div
-          style={{
-            opacity: scenarioHeaderOpacity,
-            flexShrink: 0,
-            pointerEvents: "none",
+        <Box
+          ref={rightColumnRootRef}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            pointerEvents: "auto",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            pt: 6,
+            pb: 8,
+            "& .MuiTypography-root": {
+              color: theme.palette.text.primary,
+            },
           }}
         >
-          <Box sx={{ px: 3, pb: 0.75, minHeight: 20 }}>
-            <Typography
-              variant="overline"
-              component="h3"
-              color="text.secondary"
-              sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
-            >
-              {displayScenarioLabel}
-            </Typography>
-          </Box>
-        </motion.div>
+          {/* Scenario-name header. Fades in with the backdrop and holds. */}
+          <motion.div
+            style={{
+              opacity: scenarioHeaderOpacity,
+              flexShrink: 0,
+              pointerEvents: "none",
+              position: "relative",
+              zIndex: 3,
+            }}
+          >
+            <Box sx={{ px: 3, pb: 0.75, minHeight: 20 }}>
+              <Typography
+                variant="overline"
+                component="h3"
+                color="text.secondary"
+                sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
+              >
+                Key Outcomes
+              </Typography>
+            </Box>
+          </motion.div>
 
-        {/* Two-column outcome grid. Each row stacks Title, glyph
-         *  placeholder, Caption, measured/animated by the geometry hook. */}
-        {beat2Layout && (
-          <Box sx={{ position: "relative" }}>
-            {/* View-mode header (beats 4-7), absolutely positioned over the
-             *  eyebrow slot so it doesn't shift the glyph layout. */}
+          {/* Two-column outcome grid. Each row stacks Title, glyph
+           *  placeholder, Caption, measured/animated by the geometry hook. */}
+          {beat2Layout && (
             <Box
-              aria-hidden
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                pt: 1.5,
-                px: 3,
-                pointerEvents: "none",
-                textAlign: "center",
-              }}
+              ref={gridWrapperRef}
+              sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}
             >
-              <AnimatePresence mode="wait">
-                {VIEW_MODE_HEADER_BY_BEAT[beatIndex] && (
-                  <motion.div
-                    key={beatIndex}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: PARAGRAPH_FADE_SEC }}
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 0,
-                      right: 0,
-                      paddingLeft: 24,
-                      paddingRight: 24,
-                      textAlign: "left",
+              {/* View-mode header (beats 4-7), absolutely positioned over the
+               *  eyebrow slot so it doesn't shift the glyph layout. */}
+              <Box
+                aria-hidden
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  pt: 1.5,
+                  px: 3,
+                  pointerEvents: "none",
+                  textAlign: "center",
+                }}
+              >
+                <AnimatePresence mode="wait">
+                  {VIEW_MODE_HEADER_BY_BEAT[beatIndex] && (
+                    <motion.div
+                      key={beatIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: PARAGRAPH_FADE_SEC }}
+                      style={{
+                        position: "absolute",
+                        top: 12,
+                        left: 0,
+                        right: 0,
+                        paddingLeft: 24,
+                        paddingRight: 24,
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography variant="overline" component="p">
+                        {VIEW_MODE_HEADER_BY_BEAT[beatIndex]}
+                      </Typography>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "12px",
+                  px: 3,
+                  pt: 1.5,
+                }}
+              >
+                {[0, 1].map((col) => (
+                  <Box
+                    key={col}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      rowGap: 1.5,
                     }}
                   >
-                    <Typography variant="overline" component="p">
-                      {VIEW_MODE_HEADER_BY_BEAT[beatIndex]}
-                    </Typography>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                gap: "12px",
-                px: 3,
-                pt: 1.5,
-              }}
-            >
-              {[0, 1].map((col) => (
-                <Box
-                  key={col}
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    rowGap: 1.5,
-                  }}
-                >
-                  {beat2Layout.eyebrows[col] && (
-                    <Box
-                      ref={(el: HTMLDivElement | null) => {
-                        eyebrowRefs.current[col] = el
-                      }}
-                      sx={{ opacity: 0 }}
-                    >
-                      <Typography variant="compactCaptionMedium" component="p">
-                        {beat2Layout.eyebrows[col]!.label}
-                      </Typography>
-                    </Box>
-                  )}
-                  {beat2Layout.items
-                    .filter((item) => item.column === col)
-                    .map((item) => {
-                      const isSelected = selectedOutcomeCode === item.code
-                      const hasGlyph = item.isActive && item.targetHeight > 0
-                      return (
-                        <Box
-                          key={item.code}
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                          }}
+                    {/* Reserves the same slot the view-mode header (above)
+                     *  crossfades into - without this, item titles start
+                     *  higher and collide with that header text. */}
+                    {beat2Layout.eyebrows[col] && (
+                      <Box
+                        ref={(el: HTMLDivElement | null) => {
+                          eyebrowRefs.current[col] = el
+                        }}
+                        sx={{ opacity: 0 }}
+                      >
+                        <Typography
+                          variant="compactCaptionMedium"
+                          component="p"
                         >
+                          &nbsp;
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {beat2Layout.items
+                      .filter((item) => item.column === col)
+                      .map((item) => {
+                        const isSelected = selectedOutcomeCode === item.code
+                        const hasGlyph = item.isActive && item.targetHeight > 0
+                        return (
                           <Box
-                            ref={(el: HTMLDivElement | null) => {
-                              titleRefsMap.current.set(item.code, el)
-                            }}
+                            key={item.code}
                             sx={{
-                              opacity: 0,
-                              pointerEvents: "none",
-                              borderRadius: 1,
-                              px: 0.5,
-                              mx: -0.5,
                               display: "flex",
-                              alignItems: "center",
-                              boxSizing: "border-box",
-                              overflow: "hidden",
-                              transition: "color 0.15s",
+                              flexDirection: "column",
                             }}
                           >
-                            <Typography
-                              variant="axisLabel"
-                              noWrap
+                            <Box
+                              ref={(el: HTMLDivElement | null) => {
+                                titleRefsMap.current.set(item.code, el)
+                              }}
                               sx={{
-                                fontWeight: isSelected ? 700 : 500,
+                                opacity: 0,
+                                pointerEvents: "none",
+                                borderRadius: 1,
+                                px: 0.5,
+                                mx: -0.5,
+                                display: "flex",
+                                alignItems: "center",
+                                boxSizing: "border-box",
+                                overflow: "hidden",
                                 transition: "color 0.15s",
-                                color: theme.palette.grey[900],
-                                lineHeight: 1.2,
                               }}
                             >
-                              {item.label}
-                            </Typography>
-                          </Box>
-                          {hasGlyph && (
-                            <>
-                              {/* Transparent placeholder reserving the SVG
-                               *  morph landing rect. */}
-                              <Box
-                                ref={(el: HTMLDivElement | null) => {
-                                  placeholderRefsMap.current.set(item.code, el)
-                                }}
-                                data-outcome-code={item.code}
+                              <Typography
+                                variant="axisLabel"
                                 sx={{
-                                  width: "100%",
-                                  height: `${item.targetHeight}px`,
-                                  mt: "12px",
-                                  pointerEvents: "none",
+                                  fontWeight: isSelected ? 700 : 500,
+                                  transition: "color 0.15s",
+                                  color: theme.palette.grey[900],
+                                  lineHeight: 1.2,
                                 }}
-                              />
-                              <Box
-                                ref={(el: HTMLDivElement | null) => {
-                                  captionRefsMap.current.set(item.code, el)
-                                }}
-                                sx={{ opacity: 0, mt: "4px" }}
                               >
-                                <Typography
-                                  component="span"
-                                  sx={{
-                                    fontSize: 11,
-                                    lineHeight: 1.3,
-                                    color: theme.palette.grey[700],
+                                {item.label}
+                              </Typography>
+                            </Box>
+                            {hasGlyph && (
+                              <>
+                                {/* Transparent placeholder reserving the SVG
+                                 *  morph landing rect. */}
+                                <Box
+                                  ref={(el: HTMLDivElement | null) => {
+                                    placeholderRefsMap.current.set(
+                                      item.code,
+                                      el,
+                                    )
                                   }}
+                                  data-outcome-code={item.code}
+                                  sx={{
+                                    width: "100%",
+                                    height: `${item.targetHeight}px`,
+                                    mt: "12px",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                                <Box
+                                  ref={(el: HTMLDivElement | null) => {
+                                    captionRefsMap.current.set(item.code, el)
+                                  }}
+                                  sx={{ opacity: 0, mt: "4px" }}
                                 >
-                                  {item.locationDescription}
-                                </Typography>
-                              </Box>
-                            </>
-                          )}
-                        </Box>
-                      )
-                    })}
-                  {/* eslint-disable-next-line no-constant-binary-expression */}
-                  {col === 0 && false && (
-                    /* "Add a location to track" CTA. Disabled, kept for
-                     *  future reuse. */
-                    <Box
-                      ref={addLocationCtaRef}
-                      sx={{
-                        opacity: 0,
-                        transition: "opacity 0.6s ease",
-                        pointerEvents: interactive ? "auto" : "none",
-                        mt: "auto",
-                        pt: 3,
-                      }}
-                    >
+                                  <Typography
+                                    component="span"
+                                    sx={{
+                                      fontSize: 11,
+                                      lineHeight: 1.3,
+                                      color: theme.palette.grey[700],
+                                    }}
+                                  >
+                                    {item.locationDescription}
+                                  </Typography>
+                                </Box>
+                              </>
+                            )}
+                          </Box>
+                        )
+                      })}
+                    {/* eslint-disable-next-line no-constant-binary-expression */}
+                    {col === 0 && false && (
+                      /* "Add a location to track" CTA. Disabled, kept for
+                       *  future reuse. */
                       <Box
-                        component="button"
-                        type="button"
-                        onClick={onAddLocation}
+                        ref={addLocationCtaRef}
                         sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          color: theme.palette.grey[600],
-                          border: `1px solid ${theme.palette.grey[300]}`,
-                          borderRadius: "4px",
-                          background: "transparent",
-                          textTransform: "none",
-                          fontWeight: 500,
-                          fontSize: "0.75rem",
-                          letterSpacing: "0.02em",
-                          fontFamily: "inherit",
-                          px: 1.25,
-                          py: 0.125,
-                          cursor: "pointer",
-                          transition: "background 0.15s, border-color 0.15s",
-                          "&:hover": {
-                            backgroundColor: theme.palette.grey[100],
-                            borderColor: theme.palette.grey[400],
-                          },
-                          "&:focus-visible": {
-                            outline: `2px solid ${theme.palette.blue.bright}`,
-                            outlineOffset: "2px",
-                          },
+                          opacity: 0,
+                          transition: "opacity 0.6s ease",
+                          pointerEvents: interactive ? "auto" : "none",
+                          mt: "auto",
+                          pt: 3,
                         }}
                       >
-                        Add a location to track
-                        <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={onAddLocation}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            color: theme.palette.grey[600],
+                            border: `1px solid ${theme.palette.grey[300]}`,
+                            borderRadius: "4px",
+                            background: "transparent",
+                            textTransform: "none",
+                            fontWeight: 500,
+                            fontSize: "0.75rem",
+                            letterSpacing: "0.02em",
+                            fontFamily: "inherit",
+                            px: 1.25,
+                            py: 0.125,
+                            cursor: "pointer",
+                            transition: "background 0.15s, border-color 0.15s",
+                            "&:hover": {
+                              backgroundColor: theme.palette.grey[100],
+                              borderColor: theme.palette.grey[400],
+                            },
+                            "&:focus-visible": {
+                              outline: `2px solid ${theme.palette.blue.bright}`,
+                              outlineOffset: "2px",
+                            },
+                          }}
+                        >
+                          Add a location to track
+                          <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
+                        </Box>
                       </Box>
-                    </Box>
-                  )}
-                </Box>
-              ))}
+                    )}
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          </Box>
-        )}
+          )}
+        </Box>
+        <ScrollDownIndicator visible={canScrollDown} />
       </Box>
     </Box>
   )

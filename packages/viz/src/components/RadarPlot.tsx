@@ -191,7 +191,6 @@ const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
 
 const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
-  "Community deliveries": ["Community", "deliveries"],
   "Community surface water": ["Community surface", "water"],
   "Agricultural revenue": ["Agricultural", "revenue"],
   "Environmental flows": ["Environmental", "flows"],

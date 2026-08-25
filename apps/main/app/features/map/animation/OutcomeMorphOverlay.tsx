@@ -71,6 +71,15 @@ interface OutcomeMorphOverlayProps {
   outcomes: OutcomeGroup[]
   panelWidth: number
   panelHeight: number
+  /** The right column's DOM node, once mounted - the SVG portals into
+   *  this so it scrolls natively with the column instead of needing a
+   *  JS-driven compensating transform. Null until BeatTextOverlay reports
+   *  it ready (one render cycle after mount). */
+  scrollContainerNode?: HTMLDivElement | null
+  /** The right column's full scrollable content height. Falls back to
+   *  `panelHeight` (the visible window) until the first real measurement
+   *  arrives, so the SVG isn't 0px tall on first paint. */
+  contentHeight?: number
   progress: MotionValue<number>
   /** Bridge into `OverlayMorphArbiter`. The component writes its
    *  dispatcher into `.current` on mount and clears it on unmount. The
@@ -217,6 +226,8 @@ function computeOutcomeLayout(
   maxWidth: number,
   maxCols: number,
   slotHeight: number,
+  sourceOffsetX: number,
+  sourceOffsetY: number,
   chartPoints?: ChartDataPoint[],
   tierColors?: { tier1: string; tier2: string; tier3: string; tier4: string },
 ) {
@@ -294,6 +305,9 @@ function computeOutcomeLayout(
     barTarget: [number, number][]
     dotTarget: [number, number][]
     rawD: string
+    outerResampled: [number, number][]
+    outerSquareTarget: [number, number][]
+    outerRawD: string
     color: string
     tier: number
     sourceId: string
@@ -347,13 +361,31 @@ function computeOutcomeLayout(
       const gridY = targetY + row * cell + SQUARE_SIZE / 2
 
       const shape = group[i]!
+      const shiftedSource: [number, number][] = shape.screenShape.map(
+        ([x, y]) => [x - sourceOffsetX, y],
+      )
       const resampled =
-        shape.screenShape.length === POINTS_PER_SHAPE
-          ? shape.screenShape
-          : resampleClosedPath(shape.screenShape, POINTS_PER_SHAPE)
+        shiftedSource.length === POINTS_PER_SHAPE
+          ? shiftedSource
+          : resampleClosedPath(shiftedSource, POINTS_PER_SHAPE)
       const squareTarget = rectPoints(
         gridX,
         gridY,
+        SQUARE_SIZE,
+        SQUARE_SIZE,
+        POINTS_PER_SHAPE,
+      )
+
+      // Panel-relative twins of the above, used only while the shape is
+      // still "in flight" (see the outer <svg> below). The inner (shifted)
+      // versions are for the settled, column-scrolling state.
+      const outerResampled =
+        shape.screenShape.length === POINTS_PER_SHAPE
+          ? shape.screenShape
+          : resampleClosedPath(shape.screenShape, POINTS_PER_SHAPE)
+      const outerSquareTarget = rectPoints(
+        gridX + sourceOffsetX,
+        gridY + sourceOffsetY,
         SQUARE_SIZE,
         SQUARE_SIZE,
         POINTS_PER_SHAPE,
@@ -364,7 +396,10 @@ function computeOutcomeLayout(
         squareTarget,
         barTarget: barPts,
         dotTarget: dotPts,
-        rawD: pointsToD(shape.screenShape),
+        rawD: pointsToD(shiftedSource),
+        outerResampled,
+        outerSquareTarget,
+        outerRawD: pointsToD(shape.screenShape),
         color: shape.color,
         tier: shape.tier,
         sourceId: shape.sourceId,
@@ -419,6 +454,8 @@ export default function OutcomeMorphOverlay({
   outcomes,
   panelWidth,
   panelHeight,
+  scrollContainerNode,
+  contentHeight,
   progress,
   overlayMorphTickRef,
   squaresPerRow,
@@ -448,15 +485,30 @@ export default function OutcomeMorphOverlay({
   extraHydroclimateColumns,
 }: OutcomeMorphOverlayProps) {
   const theme = useTheme()
+  const columnWidth = panelWidth / 3
+  // Radar/heatmap centering needs the scrolling column's own visible height,
+  // not the full (3-column) panel's - that's the coordinate space the
+  // portaled SVG actually renders in. Falls back to panelHeight until the
+  // column node is mounted.
+  const columnHeight =
+    scrollContainerNode?.getBoundingClientRect().height ?? panelHeight
+  // The scrolling column sits 80px below the panel's own top edge (see
+  // BeatTextOverlay's wrapper). gridY is root-relative (matches the
+  // portaled inner SVG); the outer, non-portaled SVG is panel-relative,
+  // so its flight target needs this added back to land on the same pixel.
+  const OUTER_Y_OFFSET = 80
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
+  const outerPathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(
+    new Map(),
+  )
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
   const radarChromeRef = useRef<SVGGElement | null>(null)
   const heatmapChromeRef = useRef<SVGGElement | null>(null)
   const heatmapExtraColumnRefs = useRef<Array<SVGGElement | null>>([])
 
   const outcomeShapes = useMemo(() => {
-    const panelLeft = panelWidth * (2 / 3)
+    const columnOffsetX = panelWidth - columnWidth
     const activeCodes = outcomes.map((o) => o.code)
 
     return outcomes.map((outcome) => {
@@ -493,9 +545,9 @@ export default function OutcomeMorphOverlay({
           : outcome.polygons
 
       const pos = distributionPositionMap[outcome.code]
-      const gridTargetX = panelLeft + (pos?.x ?? 24)
+      const gridTargetX = pos?.x ?? 24
       const gridTargetY = pos?.y ?? 0
-      const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
+      const maxColWidth = pos?.maxWidth ?? columnWidth - 48
       const outcomeSlotHeight = pos?.slotHeight ?? 0
 
       const chartPoints = tierChartData?.[outcome.code]
@@ -509,6 +561,8 @@ export default function OutcomeMorphOverlay({
         maxColWidth,
         squaresPerRow,
         outcomeSlotHeight,
+        columnOffsetX,
+        OUTER_Y_OFFSET,
         chartPoints,
         tierColors,
       )
@@ -561,6 +615,7 @@ export default function OutcomeMorphOverlay({
   }, [
     outcomes,
     panelWidth,
+    columnWidth,
     squaresPerRow,
     distributionPositionMap,
     tierChartData,
@@ -590,7 +645,7 @@ export default function OutcomeMorphOverlay({
   /* Radar geometry */
   const radarGeometry = useMemo(() => {
     const N = outcomeShapes.length
-    const { cx, cy, rMax } = computeRadarFrame(panelWidth, panelHeight)
+    const { cx, cy, rMax } = computeRadarFrame(columnWidth, columnHeight, 0)
     const tierR = (tier: number) => radarTierRadius(rMax, tier)
 
     const vertices: Array<{
@@ -616,7 +671,7 @@ export default function OutcomeMorphOverlay({
       })
     }
     return { cx, cy, rMax, tierR, vertices }
-  }, [outcomeShapes, panelWidth, panelHeight])
+  }, [outcomeShapes, columnWidth, columnHeight])
 
   const radarTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
@@ -638,8 +693,8 @@ export default function OutcomeMorphOverlay({
     const numExtras = extraHydroclimateColumns?.length ?? 0
     const numColumns = 1 + numExtras
     const { panelLeft, heatmapLeft, cellH, columnTop } =
-      computeHeatmapColumnFrame(panelWidth, panelHeight, N)
-    const rightWidth = panelWidth - panelLeft
+      computeHeatmapColumnFrame(columnWidth, columnHeight, N, 0)
+    const rightWidth = columnWidth - panelLeft
     const HEAT_COL_GAP_FRACTION = 0.18
     const HEAT_MAX_CELL_W = 150
 
@@ -729,7 +784,13 @@ export default function OutcomeMorphOverlay({
       columnCx,
       extraColumns,
     }
-  }, [outcomeShapes, panelWidth, panelHeight, extraHydroclimateColumns, theme])
+  }, [
+    outcomeShapes,
+    columnWidth,
+    columnHeight,
+    extraHydroclimateColumns,
+    theme,
+  ])
 
   const heatmapTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
@@ -1181,6 +1242,7 @@ export default function OutcomeMorphOverlay({
 
     for (const group of outcomeShapes) {
       const refs = pathRefsMap.current.get(group.code)
+      const outerRefs = outerPathRefsMap.current.get(group.code)
       if (!refs) continue
 
       const [morphStart, morphEnd] = group.progressRange
@@ -1200,14 +1262,38 @@ export default function OutcomeMorphOverlay({
               ? Math.min(1, (v - fadeStart) / (morphStart - fadeStart))
               : 1
 
-        if (v < morphStart) {
-          el.setAttribute("d", shape.rawD)
-          el.setAttribute("fill", shape.color)
-          el.style.opacity = String(baseOpacity)
-          el.setAttribute("stroke-opacity", "0.4")
+        // Before the shape settles into the grid, it's drawn on the outer,
+        // unclipped SVG (panel-relative) so it stays visible while crossing
+        // from the map into the (now horizontally-clipped) scrolling column.
+        // Only once settled does the inner, column-scrolling copy take over.
+        if (v < morphEnd) {
+          el.style.opacity = "0"
           if (chromeEl && !isBar) chromeEl.style.opacity = "0"
+
+          const outerEl = outerRefs?.[i]
+          if (outerEl) {
+            if (v < morphStart) {
+              outerEl.setAttribute("d", shape.outerRawD)
+            } else {
+              const outerMorphT = Math.min(
+                1,
+                (v - morphStart) / (morphEnd - morphStart),
+              )
+              const outerEasedT = easeInOut(outerMorphT)
+              const outerPts = shape.outerResampled.map((a, pi) =>
+                lerp(a, shape.outerSquareTarget[pi]!, outerEasedT),
+              )
+              outerEl.setAttribute("d", pointsToD(outerPts))
+            }
+            outerEl.setAttribute("fill", shape.color)
+            outerEl.style.opacity = String(baseOpacity)
+            outerEl.setAttribute("stroke-opacity", "0.4")
+          }
           continue
         }
+
+        const outerElSettled = outerRefs?.[i]
+        if (outerElSettled) outerElSettled.style.opacity = "0"
 
         const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
         const easedT = easeInOut(morphT)
@@ -1253,23 +1339,31 @@ export default function OutcomeMorphOverlay({
 
           // Blend the target by lerping through square, bar, dot, radar,
           // then heatmap cell in order. Each blend has its own window.
-          let pts = shape.squareTarget
+          let chainPts = shape.squareTarget
           if (barBlend > 0) {
-            pts = pts.map((a, pi) => lerp(a, shape.barTarget[pi]!, barBlend))
+            chainPts = chainPts.map((a, pi) =>
+              lerp(a, shape.barTarget[pi]!, barBlend),
+            )
           }
           if (avgBlend > 0) {
             // From the settled bar to the dot (grid center).
-            pts = pts.map((a, pi) => lerp(a, shape.dotTarget[pi]!, avgBlend))
+            chainPts = chainPts.map((a, pi) =>
+              lerp(a, shape.dotTarget[pi]!, avgBlend),
+            )
           }
           if (radarBlend > 0) {
             // From the dot to the radar vertex (per-outcome polar).
-            pts = pts.map((a, pi) => lerp(a, radarTarget[pi]!, radarBlend))
+            chainPts = chainPts.map((a, pi) =>
+              lerp(a, radarTarget[pi]!, radarBlend),
+            )
           }
           if (heatmapBlend > 0) {
             // From the radar vertex to the heatmap cell rectangle.
-            pts = pts.map((a, pi) => lerp(a, heatmapTarget[pi]!, heatmapBlend))
+            chainPts = chainPts.map((a, pi) =>
+              lerp(a, heatmapTarget[pi]!, heatmapBlend),
+            )
           }
-          el.setAttribute("d", pointsToD(pts))
+          el.setAttribute("d", pointsToD(chainPts))
 
           // Non-representative shapes fade to 0 once we leave pure-bar
           // territory.
@@ -1309,11 +1403,11 @@ export default function OutcomeMorphOverlay({
           } else if (v >= morphEnd) {
             chromeEl.style.opacity = "1"
           } else {
-            const morphT = Math.min(
+            const chromeMorphT = Math.min(
               1,
               (v - morphStart) / (morphEnd - morphStart),
             )
-            chromeEl.style.opacity = String(easeInOut(morphT))
+            chromeEl.style.opacity = String(easeInOut(chromeMorphT))
           }
         } else if (encodingMode === "distribution" && v >= morphEnd) {
           // Fade-in rides barBlend once the outcome settles. Hidden before
@@ -1362,9 +1456,10 @@ export default function OutcomeMorphOverlay({
     heatmapTargetsByCode,
   ])
 
-  return (
+  const effectiveHeight = contentHeight || panelHeight
+
+  const outerSvgElement = (
     <svg
-      ref={svgRef}
       style={{
         position: "absolute",
         inset: 0,
@@ -1374,6 +1469,49 @@ export default function OutcomeMorphOverlay({
         zIndex: 2,
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
+    >
+      {outcomeShapes.map((group) => {
+        if (!outerPathRefsMap.current.has(group.code)) {
+          outerPathRefsMap.current.set(group.code, [])
+        }
+        const outerRefs = outerPathRefsMap.current.get(group.code)!
+        return (
+          <g key={group.code}>
+            {group.shapes.map((shape, i) => (
+              <path
+                key={`${group.code}-${i}`}
+                ref={(el) => {
+                  outerRefs[i] = el
+                }}
+                d={shape.outerRawD}
+                fill={shape.color}
+                fillOpacity={0.75}
+                stroke={shape.color}
+                strokeWidth={0.5}
+                strokeOpacity={0.4}
+                style={{ opacity: 0 }}
+                pointerEvents="none"
+              />
+            ))}
+          </g>
+        )
+      })}
+    </svg>
+  )
+
+  const svgElement = (
+    <svg
+      ref={svgRef}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: columnWidth,
+        height: effectiveHeight,
+        pointerEvents: "none",
+        zIndex: 2,
+      }}
+      viewBox={`0 0 ${columnWidth} ${effectiveHeight}`}
     >
       {/* Radar chrome: tier rings, radial axes, tier labels, and a trace
           connecting the per-outcome vertices. Opacity driven by
@@ -1491,7 +1629,7 @@ export default function OutcomeMorphOverlay({
             textAnchor="middle"
             dominantBaseline="central"
           >
-            Historical hydroclimate
+            Historical
           </text>
         )}
       </g>
@@ -1527,7 +1665,13 @@ export default function OutcomeMorphOverlay({
               textAnchor="middle"
               dominantBaseline="central"
             >
-              {column.label}
+              {column.label.includes(" ")
+                ? column.label.split(" ").map((word, i) => (
+                    <tspan key={word} x={column.cx} dy={i === 0 ? -6 : 12}>
+                      {word}
+                    </tspan>
+                  ))
+                : column.label}
             </text>
           )}
         </g>
@@ -1790,9 +1934,15 @@ export default function OutcomeMorphOverlay({
             />
           )
         })}
-
       {hoverTooltip && renderHoverTooltipPortal(hoverTooltip)}
     </svg>
+  )
+
+  return (
+    <>
+      {outerSvgElement}
+      {scrollContainerNode && createPortal(svgElement, scrollContainerNode)}
+    </>
   )
 
   /* Render the square hover tooltip through a portal to the document body.
