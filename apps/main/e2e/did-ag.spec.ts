@@ -30,6 +30,10 @@ const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
   "08N_SA2": { net_diversion: 310, gw_pumping: 31, shortage: 5 },
   "90_PA1": { net_diversion: 620, gw_pumping: 90, shortage: 7 },
 }
+// Revenue is served in USD; the aggregate is billions, a demand unit
+// hundreds of millions. Both must read in $M.
+VALUE_BY_SUBJECT_MEASURE.NOD_Agriculture!.revenue = 4142000000
+VALUE_BY_SUBJECT_MEASURE["08N_SA2"]!.revenue = 178500000
 
 function agPayload(subjectsCsv: string, measuresCsv: string) {
   const measures = measuresCsv ? measuresCsv.split(",") : ["net_diversion"]
@@ -345,5 +349,52 @@ test("ag demand units are pickable and fetch their own subject", async ({
   await expect(chip).toHaveCount(0)
   await expect(page.getByRole("img", { name: /3 locations/i })).toBeVisible()
 
+  expect(errors).toEqual([])
+})
+
+// Gross crop revenues: served in USD, displayed in millions of dollars per
+// year, one distribution view, no provisional chip.
+test("gross crop revenues reads the revenue measure and displays millions of dollars", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupAgRoutes(page)
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const agList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
+  await agList.getByRole("button", { name: "Gross crop revenues" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "NOD_Agriculture" && r.measures === "revenue",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/\$4,142 M/).first()).toBeVisible()
+  await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
+  await expect(page.getByRole("button", { name: "Summary value" })).toHaveCount(
+    0,
+  )
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page
+    .getByRole("option", { name: "08N_SA2 - Glenn-Colusa ID (55% of total)" })
+    .click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "08N_SA2" && r.measures === "revenue",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/\$178 M|\$179 M/).first()).toBeVisible()
   expect(errors).toEqual([])
 })
