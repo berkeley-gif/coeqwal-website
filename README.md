@@ -33,7 +33,7 @@ Dependencies and configurations set at the root level are overriden by local dep
 - [Regular Turborepo maintenance (for lead dev)](#regular-turborepo-maintenance-for-lead-dev)
 - [Roadmap](#roadmap)
 
-## Overview
+## Overview of Repository
 
 ### Monorepo structure
 
