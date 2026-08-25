@@ -14,8 +14,9 @@
  */
 
 import React from "react"
-import { Box, IconButton, useTheme, icons } from "@repo/ui/mui"
+import { Box, IconButton, Typography, useTheme, icons } from "@repo/ui/mui"
 import ShareItemNoteBlock from "./note/ShareItemNoteBlock"
+import { shareFigureFooterText, type ShareFigureFooter } from "./figureFooter"
 
 export interface ShareCardShellProps {
   children: React.ReactNode
@@ -25,6 +26,9 @@ export interface ShareCardShellProps {
   onRemove?: () => void
   /** Accessible label for the close button. */
   removeAriaLabel?: string
+  /** Provenance footer (source, data kind, capture date), rendered inside
+   *  the exported area so every figure carries it. */
+  figureFooter?: ShareFigureFooter
 }
 
 export default function ShareCardShell({
@@ -33,6 +37,7 @@ export default function ShareCardShell({
   onNoteChange,
   onRemove,
   removeAriaLabel = "Remove from share tray",
+  figureFooter,
 }: ShareCardShellProps) {
   const theme = useTheme()
   return (
@@ -65,6 +70,20 @@ export default function ShareCardShell({
         </IconButton>
       )}
       {children}
+      {figureFooter && (
+        <Typography
+          data-share-figure-footer=""
+          sx={{
+            display: "block",
+            mt: 1,
+            fontSize: "0.625rem",
+            lineHeight: 1.35,
+            color: theme.palette.grey[600],
+          }}
+        >
+          {shareFigureFooterText(figureFooter)}
+        </Typography>
+      )}
       <ShareItemNoteBlock note={note} onNoteChange={onNoteChange} />
     </Box>
   )

@@ -49,7 +49,10 @@ interface ExportOptions {
   rasterScale?: number
 }
 
-const DEFAULT_RASTER_SCALE = 2
+// Three times the card's CSS size (times the device pixel ratio): a 360px
+// story card exports at about 1,080px wide, legible as a figure rather than
+// a thumbnail.
+const DEFAULT_RASTER_SCALE = 3
 
 /**
  * Web font embedding pipeline.

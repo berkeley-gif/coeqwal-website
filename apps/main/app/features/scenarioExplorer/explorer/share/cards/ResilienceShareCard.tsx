@@ -4,6 +4,8 @@ import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { ShareItem } from "../../store"
 import ShareSnapshotCard from "./ShareSnapshotCard"
+import { shareFigureFooter } from "../figureFooter"
+import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import ShareResilienceLiveChart from "../live/ShareResilienceLiveChart"
 import {
   getResilienceShareCardContent,
@@ -93,6 +95,8 @@ export default function ResilienceShareCard({
 
   return (
     <ShareSnapshotCard
+      figureFooter={shareFigureFooter(item)}
+      thumbnailAspectRatio={thumbnailAspectRatioFor(item)}
       id={item.id}
       toolLabel="Resilience"
       title={model.headline}
