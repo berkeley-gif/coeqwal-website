@@ -425,3 +425,128 @@ test("stats sentence prints money as dollars in prose", () => {
     "Mean welfare loss for Current Operations under the Historical hydroclimate is $4.00 M.",
   )
 })
+
+// The project lead's exact median-sentence templates for three variable
+// families on the scenarios axis (Aug 23 board, n55 reservoir storage, n65
+// X2, n150 total Delta exports). September variants use the April template
+// with the month swapped. Every other variable keeps the generic sentence.
+
+const templateCtx = (over: Partial<SummaryContext>): SummaryContext => ({
+  view: "dist",
+  distKind: "exceedance",
+  compareBy: "scenarios",
+  variableName: "",
+  unit: "TAF",
+  locationName: "Shasta",
+  locationTitleName: "Shasta Reservoir",
+  climateName: "Historical",
+  scenarioName: "Current Operations",
+  ...over,
+})
+
+test("reservoir storage sentence follows the n55 template with higher and lower", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [10, 20, 30], true),
+      member("Salmon flows", [15, 25, 35]),
+      member("More storage", [5, 10, 15]),
+    ],
+    templateCtx({
+      variableId: "res_apr",
+      variableName: "April reservoir storage",
+      proseName: "April reservoir storage",
+    }),
+  )
+  expect(s).toBe(
+    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF. The Salmon flows scenario has 25% higher median April reservoir storage. The More storage scenario has 50% lower median April reservoir storage.",
+  )
+})
+
+test("September reservoir storage swaps the month in the n55 template", () => {
+  const s = summarySentence(
+    [member("Current Operations", [10, 20, 30], true)],
+    templateCtx({
+      variableId: "res_sep",
+      variableName: "September reservoir storage",
+      proseName: "September reservoir storage",
+    }),
+  )
+  expect(s).toBe(
+    "At Shasta Reservoir, median September reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF.",
+  )
+})
+
+test("X2 sentence follows the n65 template with no location clause", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [70, 74, 78], true),
+      member("Salmon flows", [72, 76, 80]),
+    ],
+    templateCtx({
+      variableId: "x2_apr",
+      variableName: "April X2 position",
+      proseName: "April X2 position",
+      unit: "km",
+      locationName: "Delta (NDO node)",
+      locationTitleName: "Delta (NDO node)",
+    }),
+  )
+  expect(s).toBe(
+    "The median X2 location in April for Current Operations under the Historical hydroclimate is 74.0 km. The median April X2 location for the Salmon flows scenario is 76.0 km: a difference of +3%.",
+  )
+})
+
+test("total Delta exports sentence follows the n150 template", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [4000, 4800, 5600], true),
+      member("Salmon flows", [3000, 3600, 4200]),
+    ],
+    templateCtx({
+      variableId: "tot_exp",
+      variableName: "Total Delta exports",
+      proseName: "Delta exports",
+      locationName: "Delta (NDO node)",
+      locationTitleName: "Delta (NDO node)",
+    }),
+  )
+  expect(s).toBe(
+    "For Current Operations under the Historical hydroclimate, median Delta exports is 4,800 TAF. For the Salmon flows scenario, median Delta exports is 3,600 TAF, a difference of -25%.",
+  )
+})
+
+test("template sentences skip and name a member with no model results", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [10, 20, 30], true),
+      { ...member("DWR 2025 DCP", [99, 99, 99]), liveDataMissing: true },
+    ],
+    templateCtx({
+      variableId: "res_apr",
+      variableName: "April reservoir storage",
+      proseName: "April reservoir storage",
+    }),
+  )
+  expect(s).toBe(
+    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF; no data available for DWR 2025 DCP.",
+  )
+})
+
+test("other variables keep the generic sentence with the prose name", () => {
+  const s = summarySentence(
+    [
+      member("Current Operations", [10, 20, 30], true),
+      member("Other", [20, 40, 60]),
+    ],
+    templateCtx({
+      variableId: "riv_flow",
+      variableName: "River flows",
+      proseName: "river flows",
+      locationName: "Yuba River",
+      locationTitleName: "Yuba River",
+    }),
+  )
+  expect(s).toBe(
+    "At Yuba River under the Historical hydroclimate, median river flows for Current Operations (the reference) is 20.0 TAF; relative to it: Other +100%.",
+  )
+})

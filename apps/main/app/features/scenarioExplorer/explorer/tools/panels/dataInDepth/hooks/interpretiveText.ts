@@ -208,6 +208,13 @@ export function summarySentence(
   if (meds.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
 
+  // Three variable families read in the project lead's own wording on the
+  // scenarios axis; everything else keeps the generic sentence below.
+  if (ctx.compareBy === "scenarios") {
+    const templated = templateSentence(meds, ctx, noDataClause)
+    if (templated) return templated
+  }
+
   if (ctx.compareBy === "scenarios") {
     const ref =
       meds.find((x) => x.m.isReference) ?? (meds[0] as (typeof meds)[0])
@@ -274,6 +281,80 @@ function welfareSentence(
   const mx = rows.reduce((p, c) => (c.mean > p.mean ? c : p))
   const mn = rows.reduce((p, c) => (c.mean < p.mean ? c : p))
   return `Under ${ctx.scenarioName} (${ctx.climateName}), mean annual ${vn} ranges from ${money(mn.mean)} at ${mn.m.label} (${noLoss(mn)}) to ${money(mx.mean)} at ${mx.m.label} (${noLoss(mx)})${noDataClause}.`
+}
+
+/**
+ * The lead's median-sentence templates (scenarios axis only):
+ *  - reservoir storage (April, September): "At <Location> Reservoir, median
+ *    <month> reservoir storage for <reference> under the <hydroclimate>
+ *    hydroclimate is <median>. The <scenario> scenario has <N>% higher/lower
+ *    median <month> reservoir storage." per compared scenario;
+ *  - X2 position (April, September): "The median X2 location in <month> for
+ *    <reference> under the <hydroclimate> hydroclimate is <median>. The
+ *    median <month> X2 location for the <scenario> scenario is <median>: a
+ *    difference of <N>%." with no location clause;
+ *  - total Delta exports: "For <reference> under the <hydroclimate>
+ *    hydroclimate, median Delta exports is <median>. For the <scenario>
+ *    scenario, median Delta exports is <median>, a difference of <N>%."
+ * Returns null for every other variable, and for a zero reference median
+ * (a percent of zero is not a number), so the generic sentence applies.
+ */
+function templateSentence(
+  meds: Array<{ m: SummaryMember; med: number }>,
+  ctx: SummaryContext,
+  noDataClause: string,
+): string | null {
+  const family =
+    ctx.variableId === "res_apr" || ctx.variableId === "res_sep"
+      ? "reservoir"
+      : ctx.variableId === "x2_apr" || ctx.variableId === "x2_sep"
+        ? "x2"
+        : ctx.variableId === "tot_exp"
+          ? "exports"
+          : null
+  if (!family) return null
+  const month = /sep/.test(ctx.variableId ?? "") ? "September" : "April"
+  const ref = meds.find((x) => x.m.isReference) ?? (meds[0] as (typeof meds)[0])
+  if (!ref.med) return null
+  const others = meds.filter((x) => x !== ref)
+  const held = heldClimateOf(ctx)
+  const val = (v: number) => formatWithUnit(v, ctx.unit)
+  const sentences: string[] = []
+  if (family === "reservoir") {
+    const where = ctx.locationTitleName || ctx.locationName
+    sentences.push(
+      `At ${where}, median ${month} reservoir storage for ${ref.m.label} under the ${held} is ${val(ref.med)}.`,
+    )
+    for (const x of others) {
+      const d = ((x.med - ref.med) / Math.abs(ref.med)) * 100
+      sentences.push(
+        `The ${x.m.label} scenario has ${Math.abs(d).toFixed(0)}% ${d >= 0 ? "higher" : "lower"} median ${month} reservoir storage.`,
+      )
+    }
+  } else if (family === "x2") {
+    sentences.push(
+      `The median X2 location in ${month} for ${ref.m.label} under the ${held} is ${val(ref.med)}.`,
+    )
+    for (const x of others) {
+      sentences.push(
+        `The median ${month} X2 location for the ${x.m.label} scenario is ${val(x.med)}: a difference of ${percentDelta(ref.med, x.med)}.`,
+      )
+    }
+  } else {
+    sentences.push(
+      `For ${ref.m.label} under the ${held}, median Delta exports is ${val(ref.med)}.`,
+    )
+    for (const x of others) {
+      sentences.push(
+        `For the ${x.m.label} scenario, median Delta exports is ${val(x.med)}, a difference of ${percentDelta(ref.med, x.med)}.`,
+      )
+    }
+  }
+  if (noDataClause) {
+    const last = sentences.pop() as string
+    sentences.push(`${last.replace(/\.$/, "")}${noDataClause}.`)
+  }
+  return sentences.join(" ")
 }
 
 /** "; no data available for A, B" for members the model has no results for. */
