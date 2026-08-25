@@ -25,6 +25,8 @@ import type { VariableView } from "../tools/panels/dataInDepth/config/variableRe
 import {
   DEFAULT_VARIABLE_ID,
   defaultLocationSelection,
+  getVariable,
+  carryLocationSelection,
 } from "../tools/panels/dataInDepth/config/variableRegistry"
 import { toggleWytClass } from "../tools/panels/dataInDepth/config/wytFilter"
 
@@ -101,7 +103,22 @@ export function createDataSlice(
 
     setSelectedVariableId: (id) =>
       set((state) => {
+        // A variable in another location group takes the user's latest
+        // location with it when that group has it (CWS deliveries vs
+        // shortages share most systems but not all).
+        const prevGroup = getVariable(state.selectedVariableId)?.locationGroup
+        const nextGroup = getVariable(id)?.locationGroup
         state.selectedVariableId = id
+        if (prevGroup && nextGroup && prevGroup !== nextGroup) {
+          const carried = carryLocationSelection(
+            prevGroup,
+            nextGroup,
+            state.pinnedLocationByGroup,
+            state.selectedLocationsByGroup,
+          )
+          state.pinnedLocationByGroup = carried.pinnedLocationByGroup
+          state.selectedLocationsByGroup = carried.selectedLocationsByGroup
+        }
       }),
 
     setView: (view) =>

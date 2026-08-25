@@ -322,16 +322,21 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
       // the 0.01-scaled live series); most sample years sit well below
       // capacity (1.0).
       return 0.55
+    // Ag aggregates keep their hand-set bases; demand units carry a served
+    // net-diversion median as mockBase, and the other measures scale from it
+    // at roughly the aggregate ratios (pumping ~0.9x, shortage ~0.03x,
+    // revenue ~1.08x in $M).
     case "ag_del":
-      return AG_BASE[location.id]?.del ?? 4000
+      return AG_BASE[location.id]?.del ?? location.mockBase ?? 4000
     case "ag_pump":
-      return AG_BASE[location.id]?.pump ?? 3000
+      return AG_BASE[location.id]?.pump ?? (location.mockBase ?? 3300) * 0.9
     case "ag_short":
-      return AG_BASE[location.id]?.short ?? 800
+      return AG_BASE[location.id]?.short ?? (location.mockBase ?? 26000) * 0.03
     case "ag_rev":
-      return AG_BASE[location.id]?.rev ?? 15
+      return AG_BASE[location.id]?.rev ?? (location.mockBase ?? 14) * 1.08
     case "cws_short":
-      return (location.mockBase ?? 500) * 0.06
+      // The shortage group's mockBase is already a shortage median (TAF).
+      return location.mockBase ?? 30
     default:
       return location.mockBase ?? 1000
   }

@@ -654,3 +654,25 @@ test("hasEmptyScenariosResponse separates 'not modeled' from 'still loading'", (
   ).toBe(false)
   expect(hasEmptyScenariosResponse(undefined)).toBe(false)
 })
+
+// Entity-level subjects for the ag and CWS domains: the served code IS the
+// registry id, and each CWS variable resolves only within its own measure
+// family (delivery vs shortage/welfare), so the site never requests a subject
+// the endpoint does not serve for that measure.
+test("toDidSubject resolves ag demand units and CWS systems per measure family", () => {
+  expect(toDidSubject("ag", "08N_SA2", "ag_del")).toBe("08N_SA2")
+  expect(toDidSubject("ag", "90_PA1", "ag_pump")).toBe("90_PA1")
+  expect(toDidSubject("ag", "AGG_AG_NOD", "ag_short")).toBe("NOD_Agriculture")
+  expect(toDidSubject("ag", "NOD_Agriculture", "ag_del")).toBeNull()
+  expect(toDidSubject("cws", "MWD", "cws_del")).toBe("MWD")
+  expect(toDidSubject("cws", "MWD", "cws_short")).toBeNull()
+  expect(toDidSubject("cws", "02_NU", "cws_short")).toBe("02_NU")
+  expect(toDidSubject("cws", "02_NU", "cws_del")).toBeNull()
+  expect(toDidSubject("cws", "26N_NU1", "cws_del")).toBe("26N_NU1")
+  expect(toDidSubject("cws", "26N_NU1", "cws_short")).toBe("26N_NU1")
+  expect(toDidSubject("cws", "AGG_CWS_SOD", "cws_short")).toBe("SOD_CWS")
+  expect(toDidSubject("cws", "NO_SUCH", "cws_del")).toBeNull()
+  // Without a variable the cws domain cannot pick a family: aggregates only.
+  expect(toDidSubject("cws", "MWD")).toBeNull()
+  expect(toDidSubject("cws", "AGG_CWS_NOD")).toBe("NOD_CWS")
+})

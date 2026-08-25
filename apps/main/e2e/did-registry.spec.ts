@@ -8,6 +8,7 @@ import {
   DEFAULT_VARIABLE_ID,
   resolveFoldedVariable,
   keyOutcomeChipText,
+  carryLocationSelection,
   RETIRED_VARIABLE_IDS,
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
@@ -22,6 +23,11 @@ import {
   toDidSubject,
   GW_BASIN_SUBJECTS,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
+import {
+  AG_ENTITY_LOCATIONS,
+  CWS_DELIVERY_ENTITY_LOCATIONS,
+  CWS_SHORTAGE_ENTITY_LOCATIONS,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/entityLocations.generated"
 
 // Registry contract for the Data in Depth content edits (2026-07-30 review):
 // station salinity retired, the year-to-year variability view withdrawn in
@@ -322,19 +328,68 @@ test("registry data flags agree with the live request mapping", () => {
 // groups are retired (their persisted ids heal), and Delivery shortages
 // gains a served percent-of-demand view alongside the TAF volume view.
 
-test("community water systems wire live on the NOD/SOD aggregates", () => {
-  const items = LOCATION_GROUPS.cws.items
-  expect(items.map((l) => l.id)).toEqual(["AGG_CWS_NOD", "AGG_CWS_SOD"])
-  expect(items.every((l) => l.aggregate)).toBe(true)
+/** Shape every entity-bearing group must have: the two aggregates first,
+ *  then entities that are regioned, uniquely identified, and named with
+ *  their served code as the prefix. */
+function expectEntityGroupShape(
+  groupId: "agregions" | "cws" | "cwsShortage",
+  aggregateIds: string[],
+  entityCount: number,
+) {
+  const items = LOCATION_GROUPS[groupId].items
+  expect(items.slice(0, aggregateIds.length).map((l) => l.id)).toEqual(
+    aggregateIds,
+  )
+  expect(items.slice(0, aggregateIds.length).every((l) => l.aggregate)).toBe(
+    true,
+  )
+  const entities = items.slice(aggregateIds.length)
+  expect(entities).toHaveLength(entityCount)
+  expect(new Set(items.map((l) => l.id)).size).toBe(items.length)
+  for (const l of entities) {
+    expect(l.aggregate, l.id).toBeFalsy()
+    expect(["NOD", "SOD"], l.id).toContain(l.region)
+    expect(l.name.startsWith(l.id), `${l.id} name ${l.name}`).toBe(true)
+    expect(typeof l.apiLabel, l.id).toBe("string")
+    expect(l.mockBase, l.id).toBeGreaterThan(0)
+  }
+  // North of Delta block precedes the South of Delta block.
+  const regions = entities.map((l) => l.region)
+  expect(regions.lastIndexOf("NOD")).toBeLessThan(regions.indexOf("SOD"))
+}
+
+test("community water systems list every served delivery system after the aggregates", () => {
+  expectEntityGroupShape("cws", ["AGG_CWS_NOD", "AGG_CWS_SOD"], 74)
   expect(getLocation("cws", "AGG_CWS_NOD")?.name).toBe("All North of Delta")
   expect(getLocation("cws", "AGG_CWS_SOD")?.name).toBe("All South of Delta")
+  expect(getLocation("cws", "MWD")?.name).toBe(
+    "MWD - Metropolitan Water District of Southern California",
+  )
+  // A shortage-only system is not offered where only deliveries are served.
+  expect(getLocation("cws", "02_NU")).toBeUndefined()
   for (const retired of ["CWS_SACU", "CWS_BAY", "CWS_CVS", "CWS_SOC"]) {
     expect(getLocation("cws", retired)).toBeUndefined()
   }
   const del = getVariable("cws_del")
   expect(del?.data).toBe("live")
+  expect(del?.locationGroup).toBe("cws")
   expect(del?.views).toEqual(["dist"])
+})
+
+test("delivery shortages use the shortage-modeled system list, a separate group", () => {
+  // Brian's ruling: the delivery set (74) and the shortage/welfare set (63)
+  // overlap but are separate, so each variable binds to its own group and
+  // the site never requests a subject the endpoint lacks for that measure.
+  expectEntityGroupShape("cwsShortage", ["AGG_CWS_NOD", "AGG_CWS_SOD"], 63)
+  expect(getLocation("cwsShortage", "02_NU")?.name).toBe(
+    "02_NU - Anderson City of Anderson",
+  )
+  expect(getLocation("cwsShortage", "MWD")).toBeUndefined()
+  // A system in both sets appears in both groups under the same id.
+  expect(getLocation("cws", "26N_NU1")).toBeDefined()
+  expect(getLocation("cwsShortage", "26N_NU1")).toBeDefined()
   const short = getVariable("cws_short")
+  expect(short?.locationGroup).toBe("cwsShortage")
   expect(short?.data).toBe("live")
   expect(short?.views).toEqual(["dist", "pct_demand"])
   expect(short?.viewLabels?.dist).toBe("Shortage (TAF)")
@@ -358,6 +413,15 @@ test("mergeDataInitialState heals retired CWS sample-group pins", () => {
   })
   expect(healed.pinnedLocationByGroup.cws).toBe("AGG_CWS_NOD")
   expect(healed.selectedLocationsByGroup.cws).toEqual(["AGG_CWS_SOD"])
+})
+
+test("mergeDataInitialState heals a delivery-only system pinned in the shortage group", () => {
+  const healed = mergeDataInitialState({
+    pinnedLocationByGroup: { cwsShortage: "MWD" },
+    selectedLocationsByGroup: { cwsShortage: ["MWD", "02_NU"] },
+  })
+  expect(healed.pinnedLocationByGroup.cwsShortage).toBe("AGG_CWS_NOD")
+  expect(healed.selectedLocationsByGroup.cwsShortage).toEqual(["02_NU"])
 })
 
 test("shortage percent series derive from shortage over demand", () => {
@@ -405,10 +469,15 @@ test("ssjv gains a leading all-routes total and sheds the provisional chip", () 
 // ids heal. Revenue stays sample: it is an external-model output, not a
 // CalSim3 result, and is out of scope for this pass.
 
-test("agriculture wires live on the NOD/SOD aggregates", () => {
-  const items = LOCATION_GROUPS.agregions.items
-  expect(items.map((l) => l.id)).toEqual(["AGG_AG_NOD", "AGG_AG_SOD"])
-  expect(items.every((l) => l.aggregate)).toBe(true)
+test("agriculture lists every served demand unit after the aggregates", () => {
+  expectEntityGroupShape("agregions", ["AGG_AG_NOD", "AGG_AG_SOD"], 132)
+  expect(getLocation("agregions", "08N_SA2")?.name).toBe(
+    "08N_SA2 - Glenn-Colusa ID (55% of total)",
+  )
+  // Duplicate served labels ("Non-district" x22) stay distinguishable
+  // because the code leads the name.
+  expect(getLocation("agregions", "02_NA")?.name).toBe("02_NA - Non-district")
+  expect(getLocation("agregions", "03_NA")?.name).toBe("03_NA - Non-district")
   expect(getLocation("agregions", "AGG_AG_NOD")?.name).toBe(
     "All North of Delta",
   )
@@ -571,4 +640,101 @@ test("X2 carries the axis label and figure-title head Ted asked for", () => {
   // location parenthetical until Ted says otherwise.
   expect(getVariable("ndo")?.figureTitleHead).toBeUndefined()
   expect(getVariable("tot_exp")?.figureTitleHead).toBeUndefined()
+})
+
+// The entity lists are generated from the live API (scripts/did-entity-
+// locations); the registry composes them after the hand-authored aggregates.
+// These pins catch a regeneration that silently changed shape.
+test("the generated entity lists carry the served counts and never collide with an aggregate id", () => {
+  expect(AG_ENTITY_LOCATIONS).toHaveLength(132)
+  expect(CWS_DELIVERY_ENTITY_LOCATIONS).toHaveLength(74)
+  expect(CWS_SHORTAGE_ENTITY_LOCATIONS).toHaveLength(63)
+  const aggregateIds = new Set(
+    Object.values(LOCATION_GROUPS)
+      .flatMap((g) => g.items)
+      .filter((l) => l.aggregate)
+      .map((l) => l.id),
+  )
+  for (const l of [
+    ...AG_ENTITY_LOCATIONS,
+    ...CWS_DELIVERY_ENTITY_LOCATIONS,
+    ...CWS_SHORTAGE_ENTITY_LOCATIONS,
+  ]) {
+    expect(aggregateIds.has(l.id), l.id).toBe(false)
+  }
+})
+
+test("sample fallbacks for an entity sit at the generated magnitude", () => {
+  // Only reached when the API fails; the magnitude must still be plausible
+  // (and labeled as sample), not a hard-coded aggregate-scale number.
+  for (const [variableId, locationId, groupId] of [
+    ["ag_del", "08N_SA2", "agregions"],
+    ["ag_pump", "90_PA1", "agregions"],
+    ["cws_del", "MWD", "cws"],
+    ["cws_short", "26N_NU1", "cwsShortage"],
+  ] as const) {
+    const base = getLocation(groupId, locationId)?.mockBase ?? 0
+    const series = mockAnnualSeries(
+      variableId,
+      "s0020",
+      "historical",
+      locationId,
+    )
+    expect(series).toHaveLength(100)
+    const sorted = [...series].sort((a, b) => a - b)
+    const median = sorted[50] ?? 0
+    expect(median, `${variableId} ${locationId}`).toBeGreaterThan(base * 0.3)
+    expect(median, `${variableId} ${locationId}`).toBeLessThan(base * 3)
+  }
+})
+
+// Switching between variables that bind different location groups (the CWS
+// delivery set vs the shortage set) must not lose a pin the user just chose
+// when the same system exists in both, and must never carry one that does
+// not exist there. Pure helper, wired into the variable-select action.
+test("carryLocationSelection carries a pin across groups only when the next group has it", () => {
+  const carried = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "26N_NU1" },
+    { cws: ["26N_NU1", "MWD"] },
+  )
+  expect(carried.pinnedLocationByGroup).toEqual({
+    cws: "26N_NU1",
+    cwsShortage: "26N_NU1",
+  })
+  expect(carried.selectedLocationsByGroup).toEqual({
+    cws: ["26N_NU1", "MWD"],
+    cwsShortage: ["26N_NU1"],
+  })
+  // A delivery-only system does not exist in the shortage group: nothing is
+  // written for the next group, so its own default applies.
+  const notCarried = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "MWD" },
+    { cws: ["MWD"] },
+  )
+  expect(notCarried.pinnedLocationByGroup).toEqual({ cws: "MWD" })
+  expect(notCarried.selectedLocationsByGroup).toEqual({ cws: ["MWD"] })
+  // The location picked last follows the user: an older pin in the next
+  // group gives way (the store seeds every group with a default pin, so
+  // "no pin yet" cannot be told apart from "the default").
+  const latest = carryLocationSelection(
+    "cws",
+    "cwsShortage",
+    { cws: "26N_NU1", cwsShortage: "02_NU" },
+    {},
+  )
+  expect(latest.pinnedLocationByGroup.cwsShortage).toBe("26N_NU1")
+  // Same group, or groups with nothing in common, pass through untouched.
+  const same = carryLocationSelection("cws", "cws", { cws: "MWD" }, {})
+  expect(same.pinnedLocationByGroup).toEqual({ cws: "MWD" })
+  const unrelated = carryLocationSelection(
+    "reservoirs",
+    "cwsShortage",
+    { reservoirs: "SHSTA" },
+    {},
+  )
+  expect(unrelated.pinnedLocationByGroup).toEqual({ reservoirs: "SHSTA" })
 })

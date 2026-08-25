@@ -24,6 +24,11 @@ const SCENARIOS_FIXTURE = [
 const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
   NOD_CWS: { delivery: 350, shortage_total: 42, shortage_pct: 6.5 },
   SOD_CWS: { delivery: 2000, shortage_total: 77, shortage_pct: 12 },
+  // One delivery-only system, one shortage-only system, and one in both
+  // families, so a subject requested outside its family is detectable.
+  MWD: { delivery: 1134 },
+  "02_NU": { shortage_total: 9, shortage_pct: 4 },
+  "26N_NU1": { delivery: 20, shortage_total: 3, shortage_pct: 2.5 },
 }
 
 function cwsPayload(subjectsCsv: string, measuresCsv: string) {
@@ -283,6 +288,111 @@ test("cws variables disable the water-year-type row and never send wyt", async (
   // No CWS request carried the filter, in any variable or view.
   expect(requested.length).toBeGreaterThan(0)
   expect(requested.filter((r) => r.url.includes("wyt="))).toEqual([])
+
+  expect(errors).toEqual([])
+})
+
+// Entity-level systems: deliveries and shortages read different, overlapping
+// system sets, so each variable offers its own list. A pinned system carries
+// over to the other variable only when it exists there; otherwise the pin
+// heals to the aggregate rather than requesting a subject the endpoint does
+// not serve for that measure.
+test("cws systems are pickable per measure family and pins carry over only when shared", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupCwsRoutes(page)
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+  await cwsList
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+
+  // A delivery-only system.
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page
+    .getByRole("option", {
+      name: "MWD - Metropolitan Water District of Southern California",
+    })
+    .click()
+  await expect
+    .poll(() =>
+      requested.some((r) => r.subjects === "MWD" && r.measures === "delivery"),
+    )
+    .toBe(true)
+  await expect(page.getByText(/1,134 TAF/).first()).toBeVisible()
+
+  // Shortages do not serve MWD: the pin heals to the aggregate and the
+  // request never names MWD.
+  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "NOD_CWS" && r.measures === "shortage_total",
+      ),
+    )
+    .toBe(true)
+  expect(
+    requested.some((r) => r.subjects === "MWD" && r.measures !== "delivery"),
+  ).toBe(false)
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  // A shortage-only system is offered here and not on deliveries.
+  await page
+    .getByRole("option", { name: "02_NU - Anderson City of Anderson" })
+    .click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "02_NU" && r.measures === "shortage_total",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/9(\.00)? TAF/).first()).toBeVisible()
+
+  // Back on deliveries the group's own pin (MWD) still stands: the shortage
+  // pick does not exist there, so nothing carried over.
+  await cwsList
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "MWD - Metropolitan Water District" })
+    .click()
+  await expect(
+    page.getByRole("option", { name: "02_NU - Anderson City of Anderson" }),
+  ).toHaveCount(0)
+  await page.getByRole("option", { name: /^26N_NU1 - / }).click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "26N_NU1" && r.measures === "delivery",
+      ),
+    )
+    .toBe(true)
+  await cwsList.getByRole("button", { name: "Delivery shortages" }).click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "26N_NU1" && r.measures === "shortage_total",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/3(\.00)? TAF/).first()).toBeVisible()
 
   expect(errors).toEqual([])
 })
