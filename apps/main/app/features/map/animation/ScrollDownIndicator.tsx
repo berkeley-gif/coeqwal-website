@@ -31,6 +31,7 @@ export default function ScrollDownIndicator({
                 right: 0,
                 bottom: 0,
                 height: 42,
+                borderRadius: 2,
                 display: "flex",
                 alignItems: "flex-end",
                 justifyContent: "center",

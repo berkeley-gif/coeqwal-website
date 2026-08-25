@@ -38,10 +38,6 @@ const VIEW_MODE_HEADER_BY_BEAT: Record<number, string> = {
   7: "Heat map",
 }
 
-/** Pixels the right column is lifted above the panel's top padding, so it
- *  and the SVG read as one block and fit vertically. */
-const OVERLAY_TOP_LIFT_PX = 30
-
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
   /** Bridge into `NarrationArbiter`, handed to the geometry hook, which
@@ -79,9 +75,6 @@ interface BeatTextOverlayProps {
   /** Forwarded to the geometry hook, which reports glyph landing rects
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
-  /** Forwarded to the geometry hook, which fires it on every scroll of the
- *  right column so the sibling SVG overlay can stay in sync. */
-  onScrollOffsetChange?: (offsetY: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -106,7 +99,6 @@ export default function BeatTextOverlay({
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
-  onScrollOffsetChange,
   hideControls = false,
   heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
@@ -144,7 +136,6 @@ export default function BeatTextOverlay({
     beat2Layout,
     outcomeMorphWindows,
     onGlyphLayoutChange,
-    onScrollOffsetChange,
     heatmapExtraColumnCount,
   })
 
@@ -163,8 +154,6 @@ export default function BeatTextOverlay({
   // Kept live: its JSX ("Add a location to track" CTA) is preserved behind
   // a `{false && ...}` guard below for future reuse.
   const addLocationCtaRef = useRef<HTMLDivElement>(null)
-
-  const padding = theme.space.panel.padding
 
   return (
     <Box
@@ -198,7 +187,7 @@ export default function BeatTextOverlay({
         ref={beat2PanelRef}
         sx={{
           position: "absolute",
-          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
+          top: "80px",
           right: 0,
           width: "33.33%",
           height: 0,
@@ -217,7 +206,8 @@ export default function BeatTextOverlay({
       <Box
         sx={{
           position: "absolute",
-          top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
+          top: "80px",
+          height: "80vh",
           bottom: 0,
           right: 0,
           width: "33.33%",

@@ -130,13 +130,6 @@ export function useOutcomeLabelGeometry({
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const panelRootRef = useRef<HTMLDivElement>(null)
   const rightColumnRootRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = rightColumnRootRef.current
-    if (!el || !onScrollOffsetChange) return
-    const handleScroll = () => onScrollOffsetChange(el.scrollTop)
-    el.addEventListener("scroll", handleScroll, { passive: true })
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [onScrollOffsetChange])
 
   const titleRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const placeholderRefsMap = useRef<Map<string, HTMLDivElement | null>>(
