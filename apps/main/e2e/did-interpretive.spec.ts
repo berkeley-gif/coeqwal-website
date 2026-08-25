@@ -342,3 +342,86 @@ test("generic median sentences also skip and name a member with no model results
   expect(s).not.toContain("99")
   expect(s).toContain("no data available for DWR 2025 DCP")
 })
+
+// Money: the $M unit prints with decimals that follow the magnitude, because
+// every community water system's median welfare loss is under 50,000 USD
+// (0.05 $M) while the North of Delta total is millions. In prose, money
+// reads "$2.55 M", never "2.55 $M".
+test("formatValue prints millions of dollars with magnitude-adaptive decimals", () => {
+  expect(formatValue(4142, "$M")).toBe("4,142")
+  expect(formatValue(2.551, "$M")).toBe("2.55")
+  expect(formatValue(0.9, "$M")).toBe("0.90")
+  expect(formatValue(0.028, "$M")).toBe("0.028")
+  expect(formatValue(0, "$M")).toBe("0.000")
+})
+
+// Welfare loss is zero in most years, so a median says nothing; its
+// distribution sentence names the share of years with no loss and the mean.
+test("welfare loss sentence reports the no-loss year count and the mean, per scenario", () => {
+  const ref = member("Current Operations", [0, 0, 0, 4], true) // mean 1
+  const other = member("Salmon flows", [0, 0, 8, 8]) // mean 4
+  const s = summarySentence([ref, other], {
+    view: "dist",
+    distKind: "exceedance",
+    compareBy: "scenarios",
+    variableName: "Welfare loss",
+    variableId: "cws_welfare",
+    proseName: "welfare loss",
+    unit: "$M",
+    locationName: "All North of Delta",
+    climateName: "Historical",
+    scenarioName: "Current Operations",
+  })
+  expect(s).toBe(
+    "At All North of Delta under the Historical hydroclimate, Current Operations has no welfare loss in 3 of 4 years and a mean annual loss of $1.00 M; Salmon flows has no loss in 2 of 4 years and a mean annual loss of $4.00 M (+300%).",
+  )
+})
+
+test("welfare loss sentence ranges across climates and locations", () => {
+  const base = {
+    view: "dist" as const,
+    distKind: "exceedance" as const,
+    variableName: "Welfare loss",
+    variableId: "cws_welfare",
+    proseName: "welfare loss",
+    unit: "$M",
+    locationName: "All North of Delta",
+    climateName: "Historical",
+    scenarioName: "Current Operations",
+  }
+  expect(
+    summarySentence(
+      [
+        member("Historical", [0, 0, 0, 4]),
+        member("Extreme stress", [0, 0, 8, 8]),
+      ],
+      { ...base, compareBy: "climates" },
+    ),
+  ).toBe(
+    "Under Current Operations at All North of Delta, mean annual welfare loss goes from $1.00 M (Historical, no loss in 3 of 4 years) to $4.00 M (Extreme stress, no loss in 2 of 4 years): a change of +300%.",
+  )
+  expect(
+    summarySentence(
+      [
+        member("02_NU - Anderson", [0, 0, 0, 4]),
+        member("15N_NU - Marysville", [0, 0, 8, 8]),
+      ],
+      { ...base, compareBy: "locations" },
+    ),
+  ).toBe(
+    "Under Current Operations (Historical), mean annual welfare loss ranges from $1.00 M at 02_NU - Anderson (no loss in 3 of 4 years) to $4.00 M at 15N_NU - Marysville (no loss in 2 of 4 years).",
+  )
+})
+
+test("stats sentence prints money as dollars in prose", () => {
+  const s = summarySentence([member("Current Operations", [1, 1, 10], true)], {
+    ...statsCtx,
+    variableId: "cws_welfare",
+    variableName: "Welfare loss",
+    proseName: "welfare loss",
+    unit: "$M",
+  })
+  expect(s).toContain(
+    "Mean welfare loss for Current Operations under the Historical hydroclimate is $4.00 M.",
+  )
+})

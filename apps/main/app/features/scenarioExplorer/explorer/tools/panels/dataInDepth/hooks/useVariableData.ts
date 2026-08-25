@@ -382,13 +382,16 @@ export function useVariableData(): VariableData {
       useCwsDataInDepth(id ? [id] : [], {
         subjects: subject ? [subject] : undefined,
         // The cws request token IS the measure name (delivery /
-        // shortage_total / shortage_pct); anything else defers to delivery.
+        // shortage_total / shortage_pct / welfare_loss); anything else
+        // defers to delivery.
         measures: [
           unitToken === "shortage_pct"
             ? "shortage_pct"
             : unitToken === "shortage_total"
               ? "shortage_total"
-              : "delivery",
+              : unitToken === "welfare_loss"
+                ? "welfare_loss"
+                : "delivery",
         ],
         // No wyt: the CWS series aggregate by calendar year, so the filter
         // does not apply. It is not a field on CwsDataInDepthOptions, and the

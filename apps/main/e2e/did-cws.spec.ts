@@ -27,9 +27,13 @@ const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
   // One delivery-only system, one shortage-only system, and one in both
   // families, so a subject requested outside its family is detectable.
   MWD: { delivery: 1134 },
-  "02_NU": { shortage_total: 9, shortage_pct: 4 },
+  "02_NU": { shortage_total: 9, shortage_pct: 4, welfare_loss: 28000 },
   "26N_NU1": { delivery: 20, shortage_total: 3, shortage_pct: 2.5 },
 }
+// Welfare loss is served in USD; the aggregates are millions, an entity
+// tens of thousands. Both must read correctly in $M.
+VALUE_BY_SUBJECT_MEASURE.NOD_CWS!.welfare_loss = 2551000
+VALUE_BY_SUBJECT_MEASURE.SOD_CWS!.welfare_loss = 3280000
 
 // A subject the endpoint serves in most scenarios but not this one (KCWA is
 // absent from the Delta Conveyance Project family): the block exists and
@@ -69,7 +73,12 @@ function cwsPayload(subjectsCsv: string, measuresCsv: string) {
             return [
               measure,
               {
-                unit: measure === "shortage_pct" ? "PCT_SHORTAGE" : "TAF",
+                unit:
+                  measure === "shortage_pct"
+                    ? "PCT_SHORTAGE"
+                    : measure === "welfare_loss"
+                      ? "USD"
+                      : "TAF",
                 values,
               },
             ]
@@ -499,5 +508,62 @@ test("a subject absent from a served block is reported as no data, not sample", 
   await page.getByRole("option", { name: /^ACFC/ }).click()
   await expect(page.getByText("no data", { exact: true }).first()).toBeVisible()
   await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
+  expect(errors).toEqual([])
+})
+
+// Welfare loss: served in USD on the shortage-modeled systems, displayed in
+// millions of dollars per year, no water-year-type filter, and a sentence
+// that reports the no-loss year count and the mean rather than a median.
+test("welfare loss reads the welfare_loss measure and displays millions of dollars", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupCwsRoutes(page)
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+  await cwsList.getByRole("button", { name: "Welfare loss" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "NOD_CWS" && r.measures === "welfare_loss",
+      ),
+    )
+    .toBe(true)
+  expect(requested.some((r) => r.url.includes("wyt="))).toBe(false)
+  await expect(page.getByText("Not applicable to this variable")).toHaveCount(1)
+  // 2,551,000 USD reads as $2.55 M in the sentence.
+  await expect(page.getByText(/mean annual loss of \$2\.55 M/)).toBeVisible()
+  await expect(page.getByText(/^Provisional$/)).toHaveCount(0)
+
+  // An entity at tens of thousands of dollars keeps its digits.
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page
+    .getByRole("option", { name: "02_NU - Anderson City of Anderson" })
+    .click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "02_NU" && r.measures === "welfare_loss",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/mean annual loss of \$0\.028 M/)).toBeVisible()
+
+  // Stats: mean and CV from the same scaled series.
+  await page.getByRole("button", { name: "Stats", exact: true }).click()
+  await expect(page.getByText("Mean ($M)")).toBeVisible()
+  await expect(
+    page.getByText(/^Mean welfare loss for .+ is \$0\.028 M\./),
+  ).toBeVisible()
   expect(errors).toEqual([])
 })

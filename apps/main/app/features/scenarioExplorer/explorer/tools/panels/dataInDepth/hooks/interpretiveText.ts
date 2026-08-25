@@ -78,7 +78,11 @@ export function formatValue(
   if (v == null || Number.isNaN(v)) return "-"
   const a = Math.abs(v)
   let d: number
-  if (unit === "$B") d = 1
+  // Money in millions spans four orders of magnitude on one tool (a system's
+  // median welfare loss is thousands of dollars; a regional total is
+  // millions), so the decimals follow the magnitude.
+  if (unit === "$M") d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 0.1 ? 2 : 3
+  else if (unit === "$B") d = 1
   else if (unit === "ft/yr") d = 2
   else if (unit === "km") d = 1
   else if (unit === "%") d = a < 10 ? 1 : 0
@@ -89,6 +93,16 @@ export function formatValue(
     minimumFractionDigits: d,
     maximumFractionDigits: d,
   })
+}
+
+/**
+ * A value with its unit as prose: "1,234 TAF", "74.2 km", "$2.55 M". Money
+ * units put the dollar sign first and the scale after the number.
+ */
+export function formatWithUnit(v: number, unit: string): string {
+  if (unit === "$M") return `$${formatValue(v, unit)} M`
+  if (unit === "$B") return `$${formatValue(v, unit)} B`
+  return `${formatValue(v, unit)} ${unit}`
 }
 
 export function percentDelta(reference: number, other: number): string {
@@ -119,6 +133,17 @@ export function summarySentence(
 
   const vn = ctx.proseName ?? ctx.variableName.toLowerCase()
   const first = members[0] as SummaryMember
+
+  // Welfare loss is zero in most years, so its distribution sentence names
+  // the share of years with no loss and the mean; a median would read 0.
+  if (
+    ctx.variableId === "cws_welfare" &&
+    ctx.distKind !== "stats" &&
+    (ctx.view === "dist" || ctx.view === "pct")
+  ) {
+    const welfare = welfareSentence(members, ctx, vn)
+    if (welfare) return welfare
+  }
 
   // The Stats style draws mean and CV bars; its sentence reports the same
   // two statistics, from the same series, so the text under the bars can
@@ -187,7 +212,7 @@ export function summarySentence(
     const ref =
       meds.find((x) => x.m.isReference) ?? (meds[0] as (typeof meds)[0])
     const others = meds.filter((x) => x !== ref)
-    let s = `At ${ctx.locationName} under the ${ctx.climateName} hydroclimate, median ${vn} for ${ref.m.label} (the reference) is ${formatValue(ref.med, ctx.unit)} ${ctx.unit}`
+    let s = `At ${ctx.locationName} under the ${ctx.climateName} hydroclimate, median ${vn} for ${ref.m.label} (the reference) is ${formatWithUnit(ref.med, ctx.unit)}`
     if (others.length > 0) {
       const rest = others.map(
         (x) => `${x.m.label} ${percentDelta(ref.med, x.med)}`,
@@ -200,12 +225,55 @@ export function summarySentence(
   if (ctx.compareBy === "climates") {
     const a = meds[0] as (typeof meds)[0]
     const b = meds[meds.length - 1] as (typeof meds)[0]
-    return `Under ${ctx.scenarioName} at ${ctx.locationName}, median ${vn} goes from ${formatValue(a.med, ctx.unit)} ${ctx.unit} (${a.m.label}) to ${formatValue(b.med, ctx.unit)} ${ctx.unit} (${b.m.label}): a change of ${percentDelta(a.med, b.med)}${noDataClause}.`
+    return `Under ${ctx.scenarioName} at ${ctx.locationName}, median ${vn} goes from ${formatWithUnit(a.med, ctx.unit)} (${a.m.label}) to ${formatWithUnit(b.med, ctx.unit)} (${b.m.label}): a change of ${percentDelta(a.med, b.med)}${noDataClause}.`
   }
 
   const mx = meds.reduce((p, c) => (c.med > p.med ? c : p))
   const mn = meds.reduce((p, c) => (c.med < p.med ? c : p))
-  return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}${noDataClause}.`
+  return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatWithUnit(mn.med, ctx.unit)} at ${mn.m.label} to ${formatWithUnit(mx.med, ctx.unit)} at ${mx.m.label}${noDataClause}.`
+}
+
+/**
+ * The welfare-loss distribution sentence: per member, the count of years
+ * with no loss and the mean annual loss in dollars. Scenarios compare to the
+ * reference by percent; climates and locations range from first to last, or
+ * lowest to highest. Members without model results are named, not quoted.
+ */
+function welfareSentence(
+  members: SummaryMember[],
+  ctx: SummaryContext,
+  vn: string,
+): string {
+  const rows = members
+    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
+    .map((m) => {
+      const series = m.series as number[]
+      const zero = series.filter((v) => v <= 0).length
+      return { m, mean: seriesStats(series).mean, zero, n: series.length }
+    })
+  if (rows.length === 0) return ""
+  const noDataClause = noDataClauseFor(members)
+  const money = (v: number) => formatWithUnit(v, ctx.unit)
+  const noLoss = (r: (typeof rows)[0]) => `no loss in ${r.zero} of ${r.n} years`
+
+  if (ctx.compareBy === "scenarios") {
+    const ref =
+      rows.find((r) => r.m.isReference) ?? (rows[0] as (typeof rows)[0])
+    const others = rows.filter((r) => r !== ref)
+    let s = `At ${ctx.locationName} under the ${heldClimateOf(ctx)}, ${ref.m.label} has no ${vn} in ${ref.zero} of ${ref.n} years and a mean annual loss of ${money(ref.mean)}`
+    for (const r of others) {
+      s += `; ${r.m.label} has ${noLoss(r)} and a mean annual loss of ${money(r.mean)} (${percentDelta(ref.mean, r.mean)})`
+    }
+    return `${s}${noDataClause}.`
+  }
+  if (ctx.compareBy === "climates") {
+    const a = rows[0] as (typeof rows)[0]
+    const b = rows[rows.length - 1] as (typeof rows)[0]
+    return `Under ${ctx.scenarioName} at ${ctx.locationName}, mean annual ${vn} goes from ${money(a.mean)} (${a.m.label}, ${noLoss(a)}) to ${money(b.mean)} (${b.m.label}, ${noLoss(b)}): a change of ${percentDelta(a.mean, b.mean)}${noDataClause}.`
+  }
+  const mx = rows.reduce((p, c) => (c.mean > p.mean ? c : p))
+  const mn = rows.reduce((p, c) => (c.mean < p.mean ? c : p))
+  return `Under ${ctx.scenarioName} (${ctx.climateName}), mean annual ${vn} ranges from ${money(mn.mean)} at ${mn.m.label} (${noLoss(mn)}) to ${money(mx.mean)} at ${mx.m.label} (${noLoss(mx)})${noDataClause}.`
 }
 
 /** "; no data available for A, B" for members the model has no results for. */
@@ -260,7 +328,7 @@ function statsSentence(
   if (rows.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
   const unit = ctx.unit
-  const fmt = (v: number) => `${formatValue(v, unit)} ${unit}`
+  const fmt = (v: number) => formatWithUnit(v, unit)
   const x2Month =
     ctx.variableId === "x2_apr"
       ? "April"
