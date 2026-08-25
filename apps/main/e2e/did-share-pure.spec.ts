@@ -3,6 +3,7 @@ import {
   shareFigureFooter,
   shareFigureFooterText,
 } from "../app/features/scenarioExplorer/explorer/share/figureFooter"
+import { thumbnailAspectRatioFor } from "../app/features/scenarioExplorer/explorer/share/thumbnailAspect"
 import {
   toBars,
   toBoxes,
@@ -361,4 +362,28 @@ test("shareFigureFooter covers the other tools with the tiers wording", () => {
   )
   expect(radar.provenance).toBeUndefined()
   expect(radar.capturedAt).toBe("Captured Aug 24, 2026.")
+})
+
+// The snapshot thumbnail box takes the captured chart's own aspect ratio, so
+// a 900 x 520 chart is not letterboxed inside a square (the blank bands the
+// reviewer saw on the resilience heatmap cards).
+test("thumbnailAspectRatioFor follows each variant's capture size", () => {
+  expect(thumbnailAspectRatioFor({ type: "data" } as never)).toBeCloseTo(
+    900 / 520,
+    6,
+  )
+  expect(thumbnailAspectRatioFor({ type: "equity" } as never)).toBeCloseTo(
+    900 / 600,
+    6,
+  )
+  expect(
+    thumbnailAspectRatioFor({
+      type: "resilience",
+      tileScope: "panel",
+    } as never),
+  ).toBeCloseTo(1200 / 800, 6)
+  expect(
+    thumbnailAspectRatioFor({ type: "resilience", tileScope: "tile" } as never),
+  ).toBeCloseTo(800 / 520, 6)
+  expect(thumbnailAspectRatioFor({ type: "radar" } as never)).toBe(1)
 })

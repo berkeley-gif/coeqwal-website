@@ -61,6 +61,9 @@ interface ShareSnapshotCardProps {
   onRemove?: (id: string) => void
   /** Provenance footer rendered by the shell inside the exported area. */
   figureFooter?: ShareFigureFooter
+  /** Width over height of the captured chart; the thumbnail box takes it so
+   *  the chart is not letterboxed. Default 1. */
+  thumbnailAspectRatio?: number
 }
 
 export default function ShareSnapshotCard({
@@ -79,6 +82,7 @@ export default function ShareSnapshotCard({
   onNoteChange,
   onRemove,
   figureFooter,
+  thumbnailAspectRatio = 1,
 }: ShareSnapshotCardProps) {
   const theme = useTheme()
 
@@ -154,6 +158,7 @@ export default function ShareSnapshotCard({
         liveChart={liveChart}
         ariaLabel={title}
         variant="bordered"
+        aspectRatio={thumbnailAspectRatio}
       />
 
       {showTierLegend && <ShareCardTierLegend />}

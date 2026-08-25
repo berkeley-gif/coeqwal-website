@@ -5,6 +5,7 @@
  */
 
 import { shareFigureFooter } from "../figureFooter"
+import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import React, { useEffect } from "react"
 import {
   OUTCOME_NAMES,
@@ -99,6 +100,7 @@ const equityHandler: VariantHandler<EquityItem> = {
         })
     return React.createElement(ShareSnapshotCard, {
       figureFooter: shareFigureFooter(item),
+      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
       id: item.id,
       toolLabel: "Distribution",
       title: info?.description ?? info?.name ?? item.scenarioId,

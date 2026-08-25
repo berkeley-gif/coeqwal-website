@@ -22,6 +22,7 @@ import {
 } from "../../tools/panels/dataInDepth/config/variableRegistry"
 import { hydroclimateSlug, slugifyForFilename } from "../utils/filename"
 import { shareFigureFooter } from "../figureFooter"
+import { thumbnailAspectRatioFor } from "../thumbnailAspect"
 import type { ShareItemOfType } from "../types"
 import type { VariantHandler } from "../variants"
 
@@ -69,6 +70,7 @@ const dataHandler: VariantHandler<DataItem> = {
           ? `${viewLabelFor(item)}. Compared: ${item.memberLabels.join(", ")}.`
           : viewLabelFor(item),
       figureFooter: shareFigureFooter(item),
+      thumbnailAspectRatio: thumbnailAspectRatioFor(item),
       chips: [
         item.source === "mixed"
           ? "Mixed data"

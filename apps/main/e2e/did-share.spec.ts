@@ -78,7 +78,11 @@ test("data-in-depth chart can be saved, shared, and exported", async ({
   const pngBytes = Buffer.concat(pngChunks)
   // PNG IHDR: width at bytes 16..19, height at 20..23 (big-endian).
   const pngWidth = pngBytes.readUInt32BE(16)
+  const pngHeight = pngBytes.readUInt32BE(20)
   expect(pngWidth).toBeGreaterThanOrEqual(1000)
+  // The chart box follows the chart's 900 x 520 shape, so the card is not
+  // taller than it is wide by much: no blank bands around the chart.
+  expect(pngHeight / pngWidth).toBeLessThan(1.15)
 
   // The SVG export carries the long axis label and the footer as text.
   const svgPromise = page.waitForEvent("download")
