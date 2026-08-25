@@ -251,9 +251,12 @@ export function useStoryboardNavigation({
   const handleNext = useCallback(() => {
     if (beatIndexRef.current >= FINAL_TIMING_BEAT_INDEX) return
     clearInteractiveState()
+    const fromBeat = beatIndexRef.current
     // `viaCamera` eases back to home first (no-op when already home) so a
-    // square-click zoom doesn't persist into the next beat.
-    goTo(beatIndexRef.current + 1, { viaCamera: true })
+    // square-click zoom doesn't persist into the next beat. Skipped leaving
+    // beat 0 - nothing interactive exists yet to have moved the camera, so
+    // there's nothing to reset, and flying home anyway is a needless move.
+    goTo(fromBeat + 1, { viaCamera: fromBeat > 0 })
   }, [goTo, clearInteractiveState, beatIndexRef])
 
   /* Intro tween (Play). Tweens the first beat's window (0 to

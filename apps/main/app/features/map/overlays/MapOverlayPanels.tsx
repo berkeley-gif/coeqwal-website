@@ -35,6 +35,7 @@ import {
   BeforeYouBeginPanel,
 } from "./learnPanels"
 import TierAnimationSection from "../animation/TierAnimationSection"
+import { StickyScrollSection } from "@repo/scrollytelling"
 interface MapOverlayPanelsProps {
   navWidth: number
 }
@@ -395,36 +396,35 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
         </Step>
 
         {/* ==================== Storyboard ====================
-        300vh runway gives the click-driven storyboard room to sit.
-        sticky + 100vh pins it in view while the user is in this section.
-        progress={true} is prep for scroll-driven migration — onStepProgress
-        will eventually write the storyboard's MotionValue instead of Next/Back.
+        StickyScrollSection gives the click-driven storyboard a real 300vh
+        runway to sit in — same pinning primitive the homepage panels use
+        (AboutCoeqwalPanel, WaterThemesPanel). The hand-rolled sticky+minHeight
+        version this replaced never actually held the panel in place: minHeight
+        just floors the runway, so it silently grew to match the sticky child's
+        own height instead of exceeding it, collapsing the dwell window to zero.
+        progress={true} on the Step is prep for scroll-driven migration —
+        onStepProgress will eventually write the storyboard's MotionValue
+        instead of Next/Back.
         */}
         <Step data={"outcomes-viz" as SubSectionId} progress>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              position: "relative",
+          <StickyScrollSection
+            height="200vh"
+            stickyTop={theme.layout.headerHeight}
+            stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
+            style={{
               pointerEvents: "none",
               paddingLeft: defaultLeftPadding,
               transition: defPaddingTransition,
-              paddingRight: (theme) => theme.space.panel.padding,
+              paddingRight: theme.space.panel.padding,
             }}
+            // Re-enable pointer events for Play/Next/Back controls and
+            // interactive squares.
+            stickyStyle={{ pointerEvents: "auto" }}
           >
-            <Box
-              sx={{
-                position: "sticky",
-                top: 0,
-                height: "100vh",
-                // Re-enable pointer events for Play/Next/Back controls
-                // and interactive squares.
-                pointerEvents: "auto",
-              }}
-            >
-              <TierAnimationSection />
-            </Box>
-          </Box>
+            <TierAnimationSection />
+          </StickyScrollSection>
         </Step>
+
 
         <Step data={"data-in-depth-intro" as SubSectionId}>
           <Box

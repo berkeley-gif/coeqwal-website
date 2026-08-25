@@ -19,13 +19,23 @@ export interface RadarFrame {
   rMax: number
 }
 
+/** Fixed header content (scenario name + view-mode label) is ~154px tall
+ *  regardless of panel height, plus label-ring padding - so a proportional
+ *  lift alone can clear it on tall viewports but overlaps it on shorter
+ *  ones. This floors cy so the ring never crowds the header either way. */
+const RADAR_HEADER_CLEARANCE_PX = 196
+
 /** Radar center and outer radius for a panel of the given size. */
 export function computeRadarFrame(panelW: number, panelH: number): RadarFrame {
-  const panelLeft = panelW * (1 / 2)
+  const panelLeft = panelW * (2 / 3)
   const rightW = panelW - panelLeft
   const cx = panelLeft + rightW / 2
-  const cy = panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX
   const rMax = Math.min(rightW / 2, panelH / 2) * 0.6
+  const cy = Math.max(
+    panelH * 0.42 - STORYBOARD_VISUAL_LIFT_PX,
+    RADAR_HEADER_CLEARANCE_PX + rMax,
+  )
+
   return { cx, cy, rMax }
 }
 
@@ -63,6 +73,11 @@ export interface HeatmapColumnFrame {
   labelRightX: number
 }
 
+/** Same fixed header-height problem as the radar (see
+ *  RADAR_HEADER_CLEARANCE_PX) - the heatmap has no label ring, so its
+ *  floor is just the header's own height plus a small margin. */
+const HEATMAP_HEADER_CLEARANCE_PX = 174
+
 /** Heatmap layout parts shared by the SVG cells and HTML row labels. The
  *  overlay computes its own cell widths on top of this. The labels need only
  *  the left edge, row height, and top. */
@@ -71,13 +86,16 @@ export function computeHeatmapColumnFrame(
   panelH: number,
   rowCount: number,
 ): HeatmapColumnFrame {
-  const panelLeft = panelW * (1 / 2)
+  const panelLeft = panelW * (2 / 3)
   const rightColLeft = panelLeft + HEAT_SIDE_PAD + HEAT_BLOCK_SHIFT_X
   const heatmapLeft = rightColLeft + HEAT_LABEL_COL_W + HEAT_LABEL_GAP
   const availableH = panelH * 0.8
   const cellH = Math.min(44, availableH / Math.max(rowCount, 1))
   const totalH = rowCount * cellH
-  const columnTop = panelH / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX
+  const columnTop = Math.max(
+    panelH / 2 - totalH / 2 - STORYBOARD_VISUAL_LIFT_PX,
+    HEATMAP_HEADER_CLEARANCE_PX,
+  )
   const labelRightX = heatmapLeft - HEAT_LABEL_GAP
   return { panelLeft, heatmapLeft, cellH, columnTop, labelRightX }
 }

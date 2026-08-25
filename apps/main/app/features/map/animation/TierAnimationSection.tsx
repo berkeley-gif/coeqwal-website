@@ -565,6 +565,15 @@ export default function TierAnimationSection() {
     )
   }, [centroids])
 
+  const svgScrollWrapperRef = useRef<HTMLDivElement>(null)
+
+  const handleScrollOffsetChange = useCallback((offsetY: number) => {
+    if (svgScrollWrapperRef.current) {
+      svgScrollWrapperRef.current.style.transform =
+        offsetY > 0 ? `translateY(-${offsetY}px)` : ""
+    }
+  }, [])
+
   // Tracks whether the interactive hover wrote the current map popups. On the
   // loi-highlight beat the engine places the scripted Glenn Colusa popup on
   // arrival, so we only clear popups we placed and leave the scripted one
@@ -1165,70 +1174,72 @@ export default function TierAnimationSection() {
                 pointerEvents: "none",
               }}
             >
-              <OutcomeMorphOverlay
-                outcomes={activeOutcomeGroups}
-                panelWidth={panelSize.width}
-                panelHeight={panelSize.height}
-                progress={progress}
-                overlayMorphTickRef={overlayMorphTickRef}
-                squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
-                distributionPositionMap={distributionPositionMap}
-                // On the bar and radar beats, clicking a glyph or vertex dot
-                // paints its layer (see `handleOutcomeGlyphClick`). On grid
-                // and final beats the layer is driven by clicking a square
-                // (see `locHandlers.onClick`), so chart selection stays off.
-                onOutcomeClick={
-                  outcomeGlyphClickEnabled || radarDotClickEnabled
-                    ? handleOutcomeGlyphClick
-                    : undefined
-                }
-                outcomeGlyphClickEnabled={outcomeGlyphClickEnabled}
-                radarDotClickEnabled={radarDotClickEnabled}
-                heatmapCellClickEnabled={heatmapCellClickEnabled}
-                heatmapPrimaryScenarioId={resolvedScenarioId}
-                selectedScenarioId={selectedScenarioId}
-                onHeatmapCellClick={
-                  heatmapCellClickEnabled ? handleHeatmapCellClick : undefined
-                }
-                selectedOutcomeCode={
-                  isInteractive || outcomeSelectEnabled
-                    ? selectedOutcomeCode
-                    : null
-                }
-                interactive={isInteractive}
-                squareHoverEnabled={squareHoverEnabled}
-                activeLocationSet={
-                  isInteractive ? activeLocationSet : undefined
-                }
-                hoveredLocation={
-                  isInteractive ? hoveredLocation : demoHoveredLocation
-                }
-                demoHighlightedLocationKey={demoLocationKey}
-                mustIncludeSourceIds={overlayMustIncludeSourceIds}
-                onLocationEnter={
-                  isInteractive ? locHandlers.onMouseEnter : undefined
-                }
-                onLocationLeave={
-                  isInteractive ? locHandlers.onMouseLeave : undefined
-                }
-                onLocationClick={
-                  isInteractive ? locHandlers.onClick : undefined
-                }
-                locationNameMap={locationNameMap}
-                encodingMode={isInteractive ? encodingMode : "distribution"}
-                tierChartData={tierChartData}
-                extraHydroclimateColumns={heatmapExtraColumns}
-                spotlightedTier={spotlightedTier}
-                onBarClick={
-                  isInteractive
-                    ? (code: string, tier: number) => {
+              <div ref={svgScrollWrapperRef} style={{ position: "absolute", inset: 0 }}>
+                <OutcomeMorphOverlay
+                  outcomes={activeOutcomeGroups}
+                  panelWidth={panelSize.width}
+                  panelHeight={panelSize.height}
+                  progress={progress}
+                  overlayMorphTickRef={overlayMorphTickRef}
+                  squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
+                  distributionPositionMap={distributionPositionMap}
+                  // On the bar and radar beats, clicking a glyph or vertex dot
+                  // paints its layer (see `handleOutcomeGlyphClick`). On grid
+                  // and final beats the layer is driven by clicking a square
+                  // (see `locHandlers.onClick`), so chart selection stays off.
+                  onOutcomeClick={
+                    outcomeGlyphClickEnabled || radarDotClickEnabled
+                      ? handleOutcomeGlyphClick
+                      : undefined
+                  }
+                  outcomeGlyphClickEnabled={outcomeGlyphClickEnabled}
+                  radarDotClickEnabled={radarDotClickEnabled}
+                  heatmapCellClickEnabled={heatmapCellClickEnabled}
+                  heatmapPrimaryScenarioId={resolvedScenarioId}
+                  selectedScenarioId={selectedScenarioId}
+                  onHeatmapCellClick={
+                    heatmapCellClickEnabled ? handleHeatmapCellClick : undefined
+                  }
+                  selectedOutcomeCode={
+                    isInteractive || outcomeSelectEnabled
+                      ? selectedOutcomeCode
+                      : null
+                  }
+                  interactive={isInteractive}
+                  squareHoverEnabled={squareHoverEnabled}
+                  activeLocationSet={
+                    isInteractive ? activeLocationSet : undefined
+                  }
+                  hoveredLocation={
+                    isInteractive ? hoveredLocation : demoHoveredLocation
+                  }
+                  demoHighlightedLocationKey={demoLocationKey}
+                  mustIncludeSourceIds={overlayMustIncludeSourceIds}
+                  onLocationEnter={
+                    isInteractive ? locHandlers.onMouseEnter : undefined
+                  }
+                  onLocationLeave={
+                    isInteractive ? locHandlers.onMouseLeave : undefined
+                  }
+                  onLocationClick={
+                    isInteractive ? locHandlers.onClick : undefined
+                  }
+                  locationNameMap={locationNameMap}
+                  encodingMode={isInteractive ? encodingMode : "distribution"}
+                  tierChartData={tierChartData}
+                  extraHydroclimateColumns={heatmapExtraColumns}
+                  spotlightedTier={spotlightedTier}
+                  onBarClick={
+                    isInteractive
+                      ? (code: string, tier: number) => {
                         setSpotlightedTier((prev) =>
                           prev === tier ? null : tier,
                         )
                       }
-                    : undefined
-                }
-              />
+                      : undefined
+                  }
+                />
+              </div>
             </motion.div>
           )}
 
@@ -1255,11 +1266,13 @@ export default function TierAnimationSection() {
             onEncodingChange={setEncodingMode}
             outcomeMorphWindows={outcomeMorphWindows}
             onGlyphLayoutChange={handleGlyphLayoutChange}
+            onScrollOffsetChange={handleScrollOffsetChange}
             hideControls={prefersReducedMotion}
             heatmapExtraColumnCount={heatmapExtraColumns.length}
           />
         </>
-      )}
-    </Box>
+      )
+      }
+    </Box >
   )
 }

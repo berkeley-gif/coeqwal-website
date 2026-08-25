@@ -120,7 +120,7 @@ export default function Narration({
         top: 0,
         left: 0,
         bottom: 0,
-        right: "50%",
+        right: "33.33%",
         zIndex: 5,
         display: "flex",
         flexDirection: "column",

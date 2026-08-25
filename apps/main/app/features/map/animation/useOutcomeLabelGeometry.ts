@@ -73,6 +73,10 @@ interface UseOutcomeLabelGeometryParams {
   outcomeMorphWindows?: Record<string, { start: number; end: number }>
   /** Reports panel-relative glyph landing rects to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
+  /** Fires on every scroll of the right column, so the SVG overlay (a
+ *  sibling, not a DOM descendant) can compensate with a matching
+ *  transform - otherwise the squares stay put while the labels scroll. */
+  onScrollOffsetChange?: (offsetY: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -82,7 +86,7 @@ interface UseOutcomeLabelGeometryParams {
 export interface OutcomeLabelRefs {
   /** Outer panel box (`inset: 0`). The `y` reference frame. */
   panelRootRef: RefObject<HTMLDivElement | null>
-  /** Right-column root (left edge at `panelWidth * 2/3`). The `x` frame. */
+    /** Right-column root (left edge at `panelWidth * 2/3`). The `x` frame. */
   rightColumnRootRef: RefObject<HTMLDivElement | null>
   /** White backdrop behind the right-column content. */
   beat2PanelRef: RefObject<HTMLDivElement | null>
@@ -108,8 +112,7 @@ export interface OutcomeLabelRefs {
  *
  * Two facts used throughout:
  *   - Positions are panel-relative. `x` from `rightColumnRootRef` (left edge
- *     at `panelWidth * 2/3`), `y` from `panelRootRef` (the `inset: 0` box),
- *     matching the SVG overlay's origin.
+ *     at `panelWidth * 2/3`), `y` from `panelRootRef` (the `inset: 0` box,
  *   - Radar and heatmap geometry comes from `storyboardGeometry.ts` (shared
  *     with `OutcomeMorphOverlay`) so labels land on the SVG vertices.
  * ────────────────────────────────────────────────────────────── */
@@ -119,6 +122,7 @@ export function useOutcomeLabelGeometry({
   beat2Layout,
   outcomeMorphWindows,
   onGlyphLayoutChange,
+  onScrollOffsetChange,
   heatmapExtraColumnCount = 0,
 }: UseOutcomeLabelGeometryParams): OutcomeLabelRefs {
   const theme = useTheme()
@@ -126,6 +130,14 @@ export function useOutcomeLabelGeometry({
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const panelRootRef = useRef<HTMLDivElement>(null)
   const rightColumnRootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = rightColumnRootRef.current
+    if (!el || !onScrollOffsetChange) return
+    const handleScroll = () => onScrollOffsetChange(el.scrollTop)
+    el.addEventListener("scroll", handleScroll, { passive: true })
+    return () => el.removeEventListener("scroll", handleScroll)
+  }, [onScrollOffsetChange])
+
   const titleRefsMap = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const placeholderRefsMap = useRef<Map<string, HTMLDivElement | null>>(
     new Map(),
@@ -177,7 +189,7 @@ export function useOutcomeLabelGeometry({
    * translates. Rebuilt every render and invoked via `narrationTickRef` (set
    * in the bridge effect below). Fades are `clamp01((v - START) / WIDTH)`,
    * combined as `fadeIn * (1 - fadeOut)`. */
-  const latestNarrationFrameRef = useRef<(v: number) => void>(() => {})
+  const latestNarrationFrameRef = useRef<(v: number) => void>(() => { })
   latestNarrationFrameRef.current = (v: number) => {
     if (beat2PanelRef.current) {
       // White backdrop fades in with AG_REV's morph (the first graphic).
@@ -202,8 +214,8 @@ export function useOutcomeLabelGeometry({
       wrapDip =
         v < HEATMAP_WRAP_DIP_CENTER
           ? 1 -
-            (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
-              HEATMAP_WRAP_DIP_HALF
+          (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
+          HEATMAP_WRAP_DIP_HALF
           : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
     // Hold radar labels opaque through RADAR_SETTLE, fade out, hold invisible
@@ -363,11 +375,11 @@ export function useOutcomeLabelGeometry({
         const shift = radarActive ? reflowShift.get(code) : undefined
         const radarDx = rd
           ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) +
-            rd.dx * radarPosBlend
+          rd.dx * radarPosBlend
           : 0
         const radarDy = rd
           ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) +
-            rd.dy * radarPosBlend
+          rd.dy * radarPosBlend
           : 0
         const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
         const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)

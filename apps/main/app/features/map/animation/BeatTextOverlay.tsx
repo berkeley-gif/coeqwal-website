@@ -6,7 +6,7 @@
  * in Narration.tsx (left column copy/timing), StoryboardControls.tsx, and
  * useOutcomeLabelGeometry (right-column per-frame label math). */
 
-import { useRef, type RefObject } from "react"
+import { useRef, useEffect, type RefObject } from "react"
 import {
   Box,
   Typography,
@@ -77,6 +77,9 @@ interface BeatTextOverlayProps {
   /** Forwarded to the geometry hook, which reports glyph landing rects
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
+  /** Forwarded to the geometry hook, which fires it on every scroll of the
+ *  right column so the sibling SVG overlay can stay in sync. */
+  onScrollOffsetChange?: (offsetY: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -101,6 +104,7 @@ export default function BeatTextOverlay({
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
+  onScrollOffsetChange,
   hideControls = false,
   heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
@@ -138,8 +142,17 @@ export default function BeatTextOverlay({
     beat2Layout,
     outcomeMorphWindows,
     onGlyphLayoutChange,
+    onScrollOffsetChange,
     heatmapExtraColumnCount,
   })
+
+  // Scroll position from a previous beat (e.g. having scrolled down the
+  // squares grid) must not leak into a beat that doesn't scroll at all
+  // (bars, radar, heatmap) - reset on every beat change.
+  useEffect(() => {
+    rightColumnRootRef.current?.scrollTo({ top: 0 })
+  }, [beatIndex, rightColumnRootRef])
+
 
   // Kept live: its JSX ("Add a location to track" CTA) is preserved behind
   // a `{false && ...}` guard below for future reuse.
@@ -181,7 +194,7 @@ export default function BeatTextOverlay({
           position: "absolute",
           top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
           right: 0,
-          width: "50%",
+          width: "33.33%",
           height: 0,
           zIndex: 3,
           backgroundColor: alpha(theme.palette.common.white, 0.75),
@@ -202,15 +215,15 @@ export default function BeatTextOverlay({
           top: `calc(${padding} - ${OVERLAY_TOP_LIFT_PX}px)`,
           bottom: 0,
           right: 0,
-          width: "50%",
+          width: "33.33%",
           zIndex: 5,
           display: "flex",
           flexDirection: "column",
+          pointerEvents: "auto",
           overflowY: "auto",
           overscrollBehavior: "contain",
-          pointerEvents: "auto",
-          pt: 2.5,
-          pb: 2,
+          pt: 6,
+          pb: 8,
           "& .MuiTypography-root": {
             color: theme.palette.text.primary,
           },
@@ -239,7 +252,7 @@ export default function BeatTextOverlay({
         {/* Two-column outcome grid. Each row stacks Title, glyph
          *  placeholder, Caption, measured/animated by the geometry hook. */}
         {beat2Layout && (
-          <Box sx={{ position: "relative" }}>
+          <Box sx={{ position: "relative", pointerEvents: "none" }}>
             {/* View-mode header (beats 4-7), absolutely positioned over the
              *  eyebrow slot so it doesn't shift the glyph layout. */}
             <Box
