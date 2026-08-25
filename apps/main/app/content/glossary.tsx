@@ -9,17 +9,13 @@ import {
   SettingsIcon,
   EngineeringIcon,
   LocationOnIcon,
-  AgricultureIcon,
   AccountBalanceIcon,
   Diversity3Icon,
   LocalShippingIcon,
   CloudIcon,
-  GroupsIcon,
-  AssessmentIcon,
-  CategoryIcon,
+  GrassIcon,
   WavesIcon,
   TimelineIcon,
-  Box,
 } from "@repo/ui/mui"
 
 // Glossary term type definitions
@@ -40,28 +36,16 @@ export interface GlossaryTerm {
 // Complete array of glossary terms with Material Icons
 export const glossaryTerms: GlossaryTerm[] = [
   {
-    icon: <AgricultureIcon />,
-    term: "Agricultural deliveries",
-    definition:
-      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agriculture uses the largest share of California's developed water supply.",
-  },
-  {
-    icon: <AgricultureIcon />,
-    term: "Agricultural revenues",
-    definition:
-      "How average agricultural revenue changes in response to water deliveries.",
-  },
-  {
     icon: <SettingsIcon />,
     term: "Allocation",
     definition:
-      "The amount of water allocated to a particular water users, based on available water supplies, regulations, and priorities established by law and policy. In the CalSim model, available water is distributed across the Central Valley and inter-connected regions to satisfy agricultural, community, and environmental water demands. CalSim estimates the amount of water delivered to every water use specified in the model for each month in a 100-year period, which may represent historical conditions or future hydroclimates.",
+      "The amount of water distributed to a particular water user, based on available water supplies, regulations, and priorities established by law and policy.",
   },
   {
     icon: <AccountBalanceIcon />,
     term: "California Department of Water Resources (DWR)",
     definition:
-      "A state agency that manages California's water resources. DWR operates the State Water Project and plays a central role in planning, modeling, and allocating water in California.",
+      "The state agency that operates the State Water Project (SWP) and plays a central role in planning, modeling, and allocating water in California.",
   },
   {
     icon: <EngineeringIcon />,
@@ -71,32 +55,27 @@ export const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <EngineeringIcon />,
-    term: "CalSim",
+    term: "CalSim3",
     definition:
-      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim3 is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
+      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim3 is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management strategies and hydroclimates could affect water allocations and outcomes for people and the environment.",
+  },
+  {
+    icon: <WaterIcon />,
+    term: "Central Valley Project",
+    definition:
+      "Federally operated water distribution system serving farms, homes, and industry in California's Central Valley and some urban Bay Area centers. A multi-purpose network of dams, reservoirs, canals, hydroelectric power plants, and other facilities run by the U.S. Bureau of Reclamation.",
   },
   {
     icon: <LocationOnIcon />,
     term: "Central Valley",
     definition:
-      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California.  It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water to farms through the Central Valley, but also to cities within the Valley and along the coast, including in the San Francisco Bay Area and Southern California.",
+      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California. It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water to farms through the Central Valley, but also to cities within the Valley and along the coast, including in the San Francisco Bay Area and Southern California.",
   },
   {
     icon: <Diversity3Icon />,
     term: "COEQWAL",
-    definition: `A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California\u2019s water under a changing climate. See "About COEQWAL" for more information.`,
-  },
-  {
-    icon: <LocalShippingIcon />,
-    term: "Conveyance",
     definition:
-      "The movement of water through managed infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
-  },
-  {
-    icon: <SettingsIcon />,
-    term: "Current operations",
-    definition:
-      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated. This water management strategy uses a current operations scenario developed by the Department of Water Resources in 2020, with a representation of current agricultural land use (2020) and Temporary Use Change Petitions (TUCPs). Current operations serve as a baseline to help us understand how and why water is allocated to different users and how water allocations shift with changes in water management strategies.",
+      "The Collaboratory for Equity in Water Allocation – is a publicly-funded project that works with communities to better understand how water decisions affect us now and for generations to come. Visit ABOUT US to learn more about the project.",
   },
   {
     icon: <LocalShippingIcon />,
@@ -105,33 +84,22 @@ export const glossaryTerms: GlossaryTerm[] = [
       "The distribution of water from storage and conveyance systems to end users, including farms, communities, and environmental uses. Water deliveries are managed according to water rights, contracts, and regulatory requirements. See also allocation.",
   },
   {
-    icon: <WaterIcon />,
-    term: "Demands",
-    definition: "TODO",
+    icon: <LocationOnIcon />,
+    term: "Delta",
+    definition:
+      "The Sacramento–San Joaquin Delta is a river delta and estuary at the confluence of the Sacramento and San Joaquin rivers. Many of California’s water challenges intersect here because of the presence of large pumps that export water from the Delta, a long history of habitat modification that have transformed the Delta ecosystem, and competing demands on the Delta to serve the needs of communities, agriculture, recreational uses, and the environment.",
   },
   {
     icon: <EngineeringIcon />,
     term: "Delta Conveyance Project",
     definition:
-      "A proposed water infrastructure project by the state Department of Water Resources designed to improve the reliability of water deliveries from the Sacramento-San Joaquin Delta. The project includes tunnel alternatives that would convey water from the Sacramento River, under the Delta, to pumping plants in the southern Delta. The Bethany Alternative refers to a specific tunnel route ending at Bethany Reservoir instead of Clifton Court Forebay.",
+      "A proposed water infrastructure project by the Department of Water Resources designed to improve the reliability of water deliveries from the Sacramento-San Joaquin Delta. The project includes tunnel alternatives that would convey water from the Sacramento River, through a tunnel, to pumping plants in the southern Delta. The Bethany Alternative refers to a specific tunnel route ending at Bethany Reservoir instead of Clifton Court Forebay.",
   },
   {
-    icon: <GroupsIcon />,
-    term: "Distributional equity",
+    icon: <LocationOnIcon />,
+    term: "Fall X2 Salinity Standard",
     definition:
-      "How fairly the benefits and burdens of water allocations are shared.",
-  },
-  {
-    icon: <WaterIcon />,
-    term: "Environmental river flows",
-    definition:
-      "Water maintained in rivers to sustain fish populations and other benefits and services that healthy river ecosystems support",
-  },
-  {
-    icon: <WaterIcon />,
-    term: "Environmental water",
-    definition:
-      "Water allocated to benefit the environment, including river flows, Delta outflows for estuary health, and deliveries to wetland refuges.",
+      "The X2 refers to the geographic distance, measured in kilometers from the Golden Gate Bridge, to the point in the Delta where daily average salinity is 2 parts per thousand (ppt). Current regulations require that the location of the X2 in the fall be maintained below a maximum distance, primarily for ecological purposes.",
   },
   {
     icon: <WaterIcon />,
@@ -140,37 +108,75 @@ export const glossaryTerms: GlossaryTerm[] = [
       "Water that is stored underground in aquifers-layers of rock, sand, and soil that hold water. Groundwater is pumped from wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
   },
   {
+    icon: <WaterIcon />,
+    term: "Groundwater basin",
+    definition:
+      "Layers of rock, sand, and soil that hold water underground over a defined geographic area. Groundwater basins are important because they provide a significant portion of California's water supply, especially during droughts.",
+  },
+  {
     icon: <CloudIcon />,
     term: "Hydroclimate",
     definition:
-      "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with water management strategies to see how water allocation outcomes change under different conditions.",
+      "Temperature, precipitation, and streamflow patterns that affect water supplies. In the context of COEQWAL, hydroclimate refers to one potential version of current or future hydroclimates, informed by historical conditions, climate model projections or statistical models.",
   },
   {
-    icon: <WavesIcon />,
-    term: "Reservoir storage",
-    definition: "The volume of water held behind large dams in California.",
+    icon: <CloudIcon />,
+    term: "Key outcomes",
+    definition:
+      "COEQWAL scenario results summarized by nine variables relating to different aspects of the water system: community surface water, agricultural revenue, environmental flows, groundwater storage, reservoir storage, Delta estuary ecology, freshwater for in-Delta uses, freshwater for Delta exports, and winter-run salmon.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Location of interest",
+    definition: "Locations at which key outcomes are evaluated.",
+  },
+  {
+    icon: <CloudIcon />,
+    term: "Management strategies",
+    definition:
+      "Decisions made by water system operators about how to manage water infrastructure and allocate water. These include decisions about when to release water from reservoirs, how much water to pump through canals, how to satisfy regulatory and legal requirements, and how to balance competing demands for water across the system. Management strategies are combined with hydroclimates to create different CalSim3 scenarios.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Microhabitat",
+    definition:
+      "Small patches of wetland or floodplain in the Delta that, when wetted, are highly productive and can serve as nursery or feeding grounds for a variety of species. Microhabitats are typically only inundated during high flows.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Sacramento River",
+    definition:
+      "The Sacramento River is the largest river in California by volume of water carried. It flows about 400 miles South from Northern California before reaching the Sacramento-San Joaquin Delta.",
+  },
+  {
+    icon: <SettingsIcon />,
+    term: "Salinity",
+    definition:
+      "A measure of salt concentration in water. Salinity levels are important in the Delta estuary because they affect habitats, the quality of water exported south for farms and communities, and the quality of water used within the Delta for human purposes.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "San Joaquin River",
+    definition:
+      "The San Joaquin River flows approximately 366 miles from the high Sierra Nevadas down to, and then through, California’s Central Valley before reaching the Sacramento-San Joaquin Delta. It is the longest river in California’s Central Valley.",
   },
   {
     icon: <TimelineIcon />,
-    term: "Scenarios",
+    term: "Scenario",
     definition:
-      "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California's water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
-  },
-  {
-    icon: (
-      <Box sx={{ transform: "rotate(90deg)", display: "inline-flex" }}>
-        <AssessmentIcon />
-      </Box>
-    ),
-    term: "Scenario outcomes",
-    definition:
-      'The detailed outputs produced by modeling unique combinations of hydroclimate futures and operational scenarios in CalSim3. The CalSim3 model outputs include things like river flows, reservoir levels, and water deliveries. Additional "sub-models" are used to estimate how changes in water allocations affect agricultural revenues, Delta salinity, and salmon populations. These data help us understand and respond to the anticipated effects of specific water management decisions under current or future hydroclimates.',
+      "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California's water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized deliveries for drinking water? How will allocations change if the state gets warmer and drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
   },
   {
     icon: <WaterIcon />,
-    term: "Surface water",
+    term: "State Water Project",
     definition:
-      "Surface water is water that flows over, or is stored on, the Earth's surface. It includes water flowing in rivers and artificial channels and water stored in lakes and reservoirs. Surface water plays a key role in supporting ecosystems, agriculture, and communities.",
+      "A state-operated, multi-purpose water storage and delivery system — canals, pipelines, reservoirs, and hydroelectric facilities delivering water to homes, agriculture, and businesses — managed by the California Department of Water Resources.",
+  },
+  {
+    icon: <GrassIcon />,
+    term: "Submerged Aquatic Vegetation (SAV)",
+    definition:
+      "SAV refers to the invasive vegetation that grows in many Delta waterways. When SAV, particularly the Brazilian waterweed (Egeria densa), grows in high densities, it reduces turbidity, clogs boating paths, and provides habitat for non-native fishes. Very high flows reduce the density and extent of SAV for a period of time.",
   },
   {
     icon: <WaterIcon />,
@@ -185,20 +191,27 @@ export const glossaryTerms: GlossaryTerm[] = [
       "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
   },
   {
+    icon: <WaterIcon />,
+    term: "Tributary",
+    definition:
+      "A stream or other body of water that flows into a larger stream or river.",
+  },
+  {
+    icon: <SettingsIcon />,
+    term: "Turbidity",
+    definition:
+      "A measure of water clarity. In the historic Delta, water was more turbid (less clear), and many native species endemic to the Delta are adapted to turbid conditions. Higher delta outflows typically coincide with higher turbidity because as more water flows through the system, more sediment is disturbed.",
+  },
+  {
     icon: <AccountBalanceIcon />,
     term: "U.S. Bureau of Reclamation",
     definition:
-      "A federal agency that manages water in the western U.S., including operation of the Central Valley Project in California. It works alongside state agencies and plays a key role in delivering water to farms, communities, and wildlife refuges throughout the Central Valley.",
+      'Federal agency that operates the Central Valley Project (CVP). Also referred to as "Reclamation."',
   },
   {
-    icon: <EngineeringIcon />,
-    term: "Water management strategies",
+    icon: <WavesIcon />,
+    term: "Winter-run Chinook salmon",
     definition:
-      "Decisions made by water system operators about how to manage water infrastructure and allocate water. These include decisions about when to release water from reservoirs, how much water to pump through canals, how to satisfy regulatory and legal requirements, and how to balance competing demands for water across the system.",
-  },
-  {
-    icon: <CategoryIcon />,
-    term: "Water management themes",
-    definition: "Groups of related water management strategies",
+      "Sacramento River winter-run Chinook salmon (Oncorhynchus tshawytscha) are a critically endangered salmon population unique to California that enter fresh water in winter and historically spawned in cold, spring-fed headwaters and tributaries of the Sacramento River. Today, Shasta Dam blocks access to most of those habitats, and winter-run primarily spawn downstream of Shasta Dam during the warmest part of the year. Their egg survival now depends heavily on cold water stored in Shasta Reservoir and released downstream during summer.",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
