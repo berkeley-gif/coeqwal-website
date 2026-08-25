@@ -274,15 +274,15 @@ function scenarioEffect(scenarioId: string): ScenarioEffect {
 /* ------------------------------------------------------------------ */
 
 // Sample magnitudes per served aggregate, in the same units the endpoint
-// serves (TAF; revenue in billions of USD). Only reached when a live series
+// serves (TAF; revenue in millions of USD). Only reached when a live series
 // is absent. There is no shortpct row: the percent-of-demand view is DERIVED
 // from the shortage and delivery series, never seeded from a base.
 const AG_BASE: Record<
   string,
   { del: number; pump: number; short: number; rev: number }
 > = {
-  AGG_AG_NOD: { del: 3800, pump: 3500, short: 85, rev: 4.1 },
-  AGG_AG_SOD: { del: 3400, pump: 3800, short: 113, rev: 9.3 },
+  AGG_AG_NOD: { del: 3800, pump: 3500, short: 85, rev: 4142 },
+  AGG_AG_SOD: { del: 3400, pump: 3800, short: 113, rev: 9309 },
 }
 
 function baseFor(variable: VariableDef, location: LocationDef): number {
@@ -610,7 +610,7 @@ export function mockSummaryValue(
   const stats = seriesStats(
     mockAnnualSeries(variableId, scenarioId, climateKey, locationId),
   )
-  return variableId === "ag_rev" ? stats.mean : stats.p50
+  return stats.p50
 }
 
 /**

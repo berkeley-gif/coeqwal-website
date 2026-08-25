@@ -48,7 +48,7 @@ test("non-TAF axes keep their unit and the CV view reads CV", () => {
   expect(axisLabelFor(getVariable("res_apr"), "pct", "%")).toBe("%")
   expect(axisLabelFor(getVariable("gw_stor"), "level", "ft")).toBe("ft")
   expect(axisLabelFor(getVariable("ag_short"), "pct_demand", "%")).toBe("%")
-  expect(axisLabelFor(getVariable("ag_rev"), "dist", "$B")).toBe("$B")
+  expect(axisLabelFor(getVariable("ag_rev"), "dist", "$M")).toBe("$M")
   expect(axisLabelFor(getVariable("res_apr"), "cv", "")).toBe("CV")
   // A registry axisLabel (salmon) still wins over the unit rule.
   expect(axisLabelFor(getVariable("salmon_abund"), "dist", "proportion")).toBe(

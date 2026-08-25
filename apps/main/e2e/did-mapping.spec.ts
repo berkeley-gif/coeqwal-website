@@ -584,7 +584,8 @@ test("ag variables resolve the ag domain on the NOD/SOD aggregates", () => {
   expect(toDidSubject("ag", "AG_SAC", "ag_del")).toBeNull()
   expect(toDidSubject("ag", "AG_ALL", "ag_del")).toBeNull()
   // Revenue is an external-model output and stays out of scope.
-  expect(didDomainForVariable("ag_rev")).toBeNull()
+  // Revenue is served too (see the dedicated case below).
+  expect(didDomainForVariable("ag_rev")).toBe("ag")
 })
 
 test("ag measure tokens are keyed per variable and never scaled", () => {
@@ -822,4 +823,33 @@ test("locationAxisRequest builds one deduplicated subject list and per-member se
     subjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
     memberSubjects: ["NOD_Agriculture", "08N_SA2", "90_PA1"],
   })
+})
+
+// Revenue reads the ag endpoint's revenue measure (USD) and scales to $M on
+// adoption, the third and last entry in the scale table.
+test("gross crop revenues maps to the revenue measure and scales USD to $M", () => {
+  expect(didDomainForVariable("ag_rev")).toBe("ag")
+  expect(unitTokenForView("ag", "dist", "ag_rev")).toBe("revenue")
+  expect(didLiveScaleForVariable("ag_rev")).toBe(1e-6)
+  expect(didLiveScaleForVariable("ag_short")).toBe(1)
+  expect(
+    pickLiveSeriesPoints(
+      {
+        subjects: [
+          {
+            subject: "08N_SA2",
+            periods: {
+              annual: {
+                revenue: { values: [{ water_year: 1922, value: 178500000 }] },
+              },
+            },
+          },
+        ],
+      },
+      "ag",
+      "08N_SA2",
+      "annual",
+      "revenue",
+    ).series,
+  ).toEqual([178500000])
 })

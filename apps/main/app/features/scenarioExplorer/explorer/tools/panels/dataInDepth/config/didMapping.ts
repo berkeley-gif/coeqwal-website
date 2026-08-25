@@ -45,6 +45,7 @@ export type DidUnitToken =
   | "gw_pumping"
   | "shortage"
   | "welfare_loss"
+  | "revenue"
 /** Which computed facets to request. */
 export type DidIncludeToken = "values" | "exceedance" | "box" | "statistics"
 /** Request period token (river is annual; reservoir/delta are april/sept). */
@@ -77,6 +78,7 @@ const DOMAIN_BY_VARIABLE: Record<string, DidDomain> = {
   ag_del: "ag",
   ag_pump: "ag",
   ag_short: "ag",
+  ag_rev: "ag",
 }
 
 /** One pinned period per live variable, so `values` is a clean annual series. */
@@ -106,6 +108,7 @@ const PERIOD_BY_VARIABLE: Record<string, DidPeriodToken> = {
   ag_del: "annual",
   ag_pump: "annual",
   ag_short: "annual",
+  ag_rev: "annual",
 }
 
 /**
@@ -311,9 +314,10 @@ const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
  */
 const LIVE_SERIES_SCALE: Record<string, number> = {
   salmon_abund: 0.01,
-  // The cws welfare_loss measure is served in USD; the tool displays
-  // millions of dollars per year.
+  // The cws welfare_loss and ag revenue measures are served in USD; the
+  // tool displays millions of dollars per year.
   cws_welfare: 1e-6,
+  ag_rev: 1e-6,
 }
 
 /** Scale from a live series' served units to display units (1 = as served). */
@@ -485,6 +489,7 @@ export function unitTokenForView(
     // view derives from it plus the companion net_diversion series rather
     // than switching to a served percent measure the way cws does.
     if (variableId === "ag_short") return "shortage"
+    if (variableId === "ag_rev") return "revenue"
     return "net_diversion"
   }
   if (view === "pct") return "pct_capacity"
@@ -621,6 +626,7 @@ const RESPONSE_UNIT_KEY: Record<DidUnitToken, string> = {
   net_diversion: "net_diversion",
   gw_pumping: "gw_pumping",
   shortage: "shortage",
+  revenue: "revenue",
 }
 
 /** The series key for a domain + request token (gw is keyed by measure name). */

@@ -48,6 +48,14 @@ export interface SummaryMember {
    *  series is sample data standing in for something that does not exist.
    *  Such a member must never contribute a number to the summary sentence. */
   liveDataMissing?: boolean
+  /** True while the member's live request is still in flight; its series is
+   *  a stand-in and must not be quoted either. */
+  pending?: boolean
+}
+
+/** A member whose series is real enough to put a number in a sentence. */
+function hasUsableSeries(m: SummaryMember): boolean {
+  return !m.liveDataMissing && !m.pending && !!m.series && m.series.length > 0
 }
 
 export interface SummaryContext {
@@ -81,8 +89,8 @@ export function formatValue(
   // Money in millions spans four orders of magnitude on one tool (a system's
   // median welfare loss is thousands of dollars; a regional total is
   // millions), so the decimals follow the magnitude.
-  if (unit === "$M") d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 0.1 ? 2 : 3
-  else if (unit === "$B") d = 1
+  if (unit === "$M" || unit === "$B")
+    d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 0.1 ? 2 : 3
   else if (unit === "ft/yr") d = 2
   else if (unit === "km") d = 1
   else if (unit === "%") d = a < 10 ? 1 : 0
@@ -203,7 +211,7 @@ export function summarySentence(
   // Distribution views (dist / pct): compare medians. A member the model
   // has no results for never contributes a number; it is named instead.
   const meds = members
-    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
+    .filter(hasUsableSeries)
     .map((m) => ({ m, med: seriesStats(m.series as number[]).p50 }))
   if (meds.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
@@ -251,13 +259,11 @@ function welfareSentence(
   ctx: SummaryContext,
   vn: string,
 ): string {
-  const rows = members
-    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
-    .map((m) => {
-      const series = m.series as number[]
-      const zero = series.filter((v) => v <= 0).length
-      return { m, mean: seriesStats(series).mean, zero, n: series.length }
-    })
+  const rows = members.filter(hasUsableSeries).map((m) => {
+    const series = m.series as number[]
+    const zero = series.filter((v) => v <= 0).length
+    return { m, mean: seriesStats(series).mean, zero, n: series.length }
+  })
   if (rows.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
   const money = (v: number) => formatWithUnit(v, ctx.unit)
@@ -400,12 +406,10 @@ function statsSentence(
   ctx: SummaryContext,
   vn: string,
 ): string {
-  const rows = members
-    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
-    .map((m) => {
-      const stats = seriesStats(m.series as number[])
-      return { m, mean: stats.mean, cv: stats.cv }
-    })
+  const rows = members.filter(hasUsableSeries).map((m) => {
+    const stats = seriesStats(m.series as number[])
+    return { m, mean: stats.mean, cv: stats.cv }
+  })
   if (rows.length === 0) return ""
   const noDataClause = noDataClauseFor(members)
   const unit = ctx.unit
@@ -523,9 +527,7 @@ function statsSentence(
 function salmonSentence(members: SummaryMember[], ctx: SummaryContext): string {
   // Members the model has no results for are excluded from every statistic.
   const noData = members.filter((m) => m.liveDataMissing)
-  const withSeries = members.filter(
-    (m) => !m.liveDataMissing && m.series && m.series.length > 0,
-  )
+  const withSeries = members.filter(hasUsableSeries)
   if (withSeries.length === 0) return ""
   // The displayed series is a proportion of 1.0; prose keeps the percent
   // phrasing, so the median converts back (x100) for the sentence.

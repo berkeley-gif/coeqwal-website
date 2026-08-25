@@ -1014,7 +1014,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     provisional: true,
     wytApplicable: false,
     noLiveDataExplanation:
-      "Salmon spawning results are not modeled for Delta Conveyance Project scenarios.",
+      "Winter-run salmon data are not available for the Delta Conveyance Project scenario.",
     mockKind: "flow",
     mockEffect: "eco",
   },
@@ -1115,16 +1115,15 @@ export const VARIABLES: Record<string, VariableDef> = {
     name: "Gross crop revenues",
     sectorId: "ag",
     locationGroup: "agregions",
-    unit: "$B",
-    unitLabel: "billion dollars per year",
-    views: ["dist", "value"],
+    unit: "$M",
+    unitLabel: "million dollars per year",
+    views: ["dist"],
     plain:
       "The total value of crops produced, given the water available. Water shortages translate into fallowed land and lost revenue.",
-    tech: "Annual gross revenue percentiles from the external agricultural economics model, driven by CalSim3 deliveries and pumping. External-source metric pending scope confirmation.",
+    tech: "Served live from the ag data-in-depth endpoint's revenue measure (USD per year, displayed in millions) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). The series comes from the agricultural economics model driven by CalSim3 deliveries and pumping, not from CalSim3 itself.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
+    data: "live",
     mockKind: "rev",
     mockEffect: "rev",
   },
@@ -1233,6 +1232,12 @@ export function resolveFoldedVariable(
   if (folded) return { id: folded.id, view: folded.view }
   if (RETIRED_VARIABLE_IDS.has(variableId)) {
     return { id: DEFAULT_VARIABLE_ID, view: "dist" }
+  }
+  // A view the variable no longer offers (a retired summary view) heals to
+  // its first view, so a stale link never renders a chart with no button.
+  const def = VARIABLES[variableId]
+  if (def && !def.views.includes(view as VariableView)) {
+    return { id: variableId, view: def.views[0] ?? "dist" }
   }
   return { id: variableId, view }
 }

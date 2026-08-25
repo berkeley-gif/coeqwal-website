@@ -46,22 +46,23 @@ export function comparedClimateKeys(
 /**
  * Whether the given compare axis can adopt live series.
  *
- * Inputs: the active compare axis, the held climate key, and the climate the
- * workspace resolver ran for. Output: scenarios axis is live only when the
- * held climate matches the workspace resolver's climate (the pre-existing
- * rule); the locations axis fetches one block for the held scenario, so it
- * follows the same rule; the climates axis is always eligible because each
- * member resolves its own climate.
+ * Input: the active compare axis. Output: true for the three axes the tool
+ * offers. Every axis resolves its scenario ids through the PINNED
+ * hydroclimate (the scenarios and locations axes take each scenario's
+ * variant under the held climate; the climates axis takes the held
+ * scenario's variant under every compared climate), so no axis depends on
+ * the climate the workspace resolver ran for. The earlier rule, which made
+ * the scenarios and locations axes live only when the pin matched the
+ * workspace climate, dropped the whole chart to sample data whenever a user
+ * pinned a different climate, and drew a fabricated series for a scenario
+ * the model does not cover. An unknown axis is never live.
  */
-export function liveAxisEligible(
-  compareBy: string,
-  heldClimate: string,
-  resolvedWorkspaceClimate: string,
-): boolean {
-  if (compareBy === "scenarios" || compareBy === "locations") {
-    return heldClimate === resolvedWorkspaceClimate
-  }
-  return compareBy === "climates"
+export function liveAxisEligible(compareBy: string): boolean {
+  return (
+    compareBy === "scenarios" ||
+    compareBy === "climates" ||
+    compareBy === "locations"
+  )
 }
 
 /**

@@ -97,6 +97,7 @@ export default function ChartCard() {
     isReference: m.isReference,
     isLive: m.isLive,
     liveDataMissing: m.liveDataMissing,
+    pending: m.pending,
   }))
 
   const ctx: SummaryContext = {
@@ -120,13 +121,26 @@ export default function ChartCard() {
   // entry (with a "no data" chip and an explanation) but are NOT drawn. Their
   // series exists only because the sample engine always produces one, and
   // drawing it would put a fabricated curve on a chart labeled "Live data".
+  // A member whose live request is still in flight is held back the same
+  // way (legend chip "loading") so the stand-in never shows, even briefly.
   // Colors are positional, so the subset carries its own aligned colors.
   const plotted = data.members
     .map((m, i) => ({ member: m, color: memberColors[i] ?? "" }))
-    .filter((p) => !p.member.liveDataMissing)
+    .filter((p) => !p.member.liveDataMissing && !p.member.pending)
   const plottedMembers = plotted.map((p) => p.member)
   const plottedColors = plotted.map((p) => p.color)
   const hasPlotted = plottedMembers.length > 0
+  const anyPending = data.members.some((m) => m.pending)
+  const missingMembers = data.members.filter((m) => m.liveDataMissing)
+  // One visible line, in addition to the per-curve chip, whenever a compared
+  // member is not modeled for this variable and the chart still draws others.
+  const noDataNotice =
+    hasPlotted && missingMembers.length > 0
+      ? (data.variable?.noLiveDataExplanation ??
+        `Live data is not available for ${missingMembers
+          .map((m) => m.label)
+          .join(", ")}.`)
+      : null
 
   // Dev-only (NEXT_PUBLIC_PERF_LOG=1): approximate when the explorer chart
   // hits the screen for the current members/variable/view combination.
@@ -151,6 +165,24 @@ export default function ChartCard() {
         }}
       >
         <Typography variant="body2">{data.unavailableReason}</Typography>
+      </Box>
+    )
+  } else if (!hasPlotted && anyPending) {
+    // Nothing has answered yet: say so, rather than showing the sample
+    // engine's stand-in or the no-data explanation for a result still coming.
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">Loading model results.</Typography>
       </Box>
     )
   } else if (!hasMembers || !hasPlotted) {
@@ -279,8 +311,8 @@ export default function ChartCard() {
     >
       {/* Data-source labels */}
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        {/* Nothing is claimed when nothing is shown */}
-        {!data.unavailableReason && (
+        {/* Nothing is claimed when nothing is shown, or not yet known */}
+        {!data.unavailableReason && !(anyPending && !hasPlotted) && (
           <Chip
             size="small"
             label={data.source === "live" ? "Live data" : "Sample data"}
@@ -325,6 +357,23 @@ export default function ChartCard() {
           sx={{ mb: 1.5, color: theme.palette.text.primary, lineHeight: 1.5 }}
         >
           {summarySentence(summaryMembers, ctx)}
+        </Typography>
+      )}
+
+      {/* Visible no-data notice for a compared member the model does not
+          cover (the per-curve chip alone is easy to miss) */}
+      {noDataNotice && !data.unavailableReason && (
+        <Typography
+          role="status"
+          variant="body2"
+          sx={{
+            mb: 1.5,
+            color: theme.palette.grey[700],
+            fontStyle: "italic",
+            lineHeight: 1.5,
+          }}
+        >
+          {noDataNotice}
         </Typography>
       )}
 
@@ -404,7 +453,13 @@ export default function ChartCard() {
                   "sample" are deliberately different words: the first means
                   the scenario is not modeled for this variable at all, the
                   second means it is not wired to live data yet. */}
-              {m.liveDataMissing ? (
+              {m.pending ? (
+                <Tooltip title="Waiting for model results for this series.">
+                  <Box component="span" sx={memberChipSx}>
+                    loading
+                  </Box>
+                </Tooltip>
+              ) : m.liveDataMissing ? (
                 <Tooltip
                   title={
                     data.variable?.noLiveDataExplanation ??

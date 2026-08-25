@@ -490,8 +490,32 @@ test("agriculture lists every served demand unit after the aggregates", () => {
   }
   expect(getVariable("ag_del")?.data).toBe("live")
   expect(getVariable("ag_pump")?.data).toBe("live")
-  // Revenue is an external-model output; it stays sample and provisional.
-  expect(getVariable("ag_rev")?.data).toBe("mock")
+})
+
+// Gross crop revenues: the ag endpoint serves the agricultural economics
+// model's revenue series (USD per year) on every subject, so the variable
+// goes live in millions of dollars per year with one distribution view; the
+// summary-value view had no live source and is retired.
+test("gross crop revenues is live in millions of dollars with a single distribution view", () => {
+  const rev = getVariable("ag_rev")
+  expect(rev?.data).toBe("live")
+  expect(rev?.provisional).toBeUndefined()
+  expect(rev?.unit).toBe("$M")
+  expect(rev?.unitLabel).toBe("million dollars per year")
+  expect(rev?.views).toEqual(["dist"])
+  for (const v of Object.values(VARIABLES)) {
+    expect(v.views, v.id).not.toContain("value")
+  }
+  // A persisted or shared (variable, view) pair whose view the variable no
+  // longer offers heals to the variable's first view, generically.
+  expect(resolveFoldedVariable("ag_rev", "value")).toEqual({
+    id: "ag_rev",
+    view: "dist",
+  })
+  expect(resolveFoldedVariable("res_apr", "pct")).toEqual({
+    id: "res_apr",
+    view: "pct",
+  })
 })
 
 test("ag shortage is one variable with a volume view and a percent view", () => {
