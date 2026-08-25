@@ -233,7 +233,7 @@ export default function LearnPanel() {
             >
               Click on each water issue to learn more.
             </Typography>
-            <InfoCardGrid columns={WATER_ISSUE_THEMES.length}>
+            <InfoCardGrid columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}>
               {WATER_ISSUE_THEMES.map(
                 ({ title, description, themeKey, dimmed }) => (
                   <InfoCard

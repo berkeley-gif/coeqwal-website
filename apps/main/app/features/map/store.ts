@@ -92,6 +92,14 @@ interface MapState {
   // The storyboard turns this on only for the settled-grid beats. Off
   // elsewhere keeps the storyboard a solid card with a scripted camera.
   storyboardMapInteractive: boolean
+
+  // The storyboard panel's own live-measured rect (viewport-relative left,
+  // and its full width), written by TierAnimationSection via a
+  // ResizeObserver. MapInstance (a sibling, not a parent/child - see
+  // MapOverlayPanels.tsx) reads this to pad the fly-home camera so it
+  // centers on the storyboard's middle column instead of the whole map
+  // canvas, without duplicating the panel's own CSS layout math.
+  storyboardColumnRect: { left: number; width: number } | null
 }
 
 const initialState: MapState = {
@@ -112,6 +120,7 @@ const initialState: MapState = {
   locationHighlights: [],
   showHoverHighlightsOnMap: false,
   storyboardMapInteractive: false,
+  storyboardColumnRect: null,
 }
 
 // ============================================================================
@@ -197,6 +206,9 @@ export const mapActions = {
   // Explore mode layout
   setExplorePanelWidth: (width: number) =>
     useMapStore.setState({ explorePanelWidth: width }),
+
+  setStoryboardColumnRect: (rect: { left: number; width: number } | null) =>
+    useMapStore.setState({ storyboardColumnRect: rect }),
 
   resetLearnState: () =>
     useMapStore.setState({
@@ -313,6 +325,9 @@ export const useIsVertNavExpanded = () =>
 // Explore mode layout
 export const useExplorePanelWidth = () =>
   useMapStore((s) => s.explorePanelWidth)
+
+export const useStoryboardColumnRect = () =>
+  useMapStore((s) => s.storyboardColumnRect)
 
 // Derived layer visibility selectors
 const createLayerSelector = (key: keyof SubSectionLayerConfig) => () =>

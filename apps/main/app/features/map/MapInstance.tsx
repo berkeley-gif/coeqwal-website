@@ -15,6 +15,7 @@ import {
   useCameraView,
   useExplorePanelWidth,
   useIsVertNavExpanded,
+  useStoryboardColumnRect,
   mapActions,
   type MapMode,
 } from "./store"
@@ -126,6 +127,7 @@ export default function MapInstance({
   const explorePanelWidth = useExplorePanelWidth()
   const isVertNavExpanded = useIsVertNavExpanded()
   const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
+  const storyboardColumnRect = useStoryboardColumnRect()
 
   const isLearnMode = mapMode === "learn"
   const isExploreMode = mapMode === "explore"
@@ -250,6 +252,33 @@ export default function MapInstance({
     return () => window.removeEventListener("resize", handleResize)
   }, [mapMode, map, explorePanelWidth])
 
+  /** The storyboard ("outcomes-viz") overlays a 3-column layout on top of
+   *  the map: narration text (left), map (middle - where the squares
+   *  should land), white panel (right). The map canvas itself is always
+   *  full-viewport, so without padding a camera fly centers on the whole
+   *  canvas and visibly lands under the narration column instead of the
+   *  middle one. `storyboardColumnRect` is the storyboard panel's own
+   *  live-measured rect (TierAnimationSection.tsx, via ResizeObserver),
+   *  read through the shared store since this component and the
+   *  storyboard panel are siblings, not parent/child (see
+   *  MapOverlayPanels.tsx) - so the padding always matches the real DOM,
+   *  not a hand-reimplemented copy of the panel's CSS. */
+  const getStoryboardCameraPadding = useCallback(() => {
+    if (!storyboardColumnRect) {
+      return { left: navWidth, top: 0, right: 0, bottom: 0 }
+    }
+    const columnWidth = storyboardColumnRect.width / 3
+    return {
+      top: 0,
+      bottom: 0,
+      left: storyboardColumnRect.left + columnWidth,
+      right:
+        window.innerWidth -
+        (storyboardColumnRect.left + storyboardColumnRect.width) +
+        columnWidth,
+    }
+  }, [storyboardColumnRect, navWidth])
+
   /** Learn mode: camera transitions when section changes */
   useEffect(() => {
     if (mapMode !== "learn") {
@@ -262,16 +291,49 @@ export default function MapInstance({
 
     prevSectionRef.current = activeSubSection
 
+    // Only "outcomes-viz" has a right-hand panel to clear - other Learn
+    // subsections keep their original sidebar-only padding.
+    const padding: { top: number; bottom: number; left: number; right: number } =
+      activeSubSection === "outcomes-viz"
+        ? getStoryboardCameraPadding()
+        : { left: navWidth, top: 0, right: 0, bottom: 0 }
+
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
       zoom: cameraView.zoom,
       bearing: cameraView.bearing ?? 0,
       pitch: cameraView.pitch ?? 0,
-      padding: { left: navWidth, top: 0, right: 0, bottom: 0 },
+      padding,
       duration: sectionChanged ? 2000 : 250,
       easing: (t: number) => t * (2 - t),
     })
-  }, [activeSubSection, cameraView, map, mapMode, navWidth])
+  }, [activeSubSection, cameraView, map, mapMode, navWidth, getStoryboardCameraPadding])
+
+  /** Storyboard ("outcomes-viz"): re-center whenever the panel's measured
+   *  rect changes. `storyboardColumnRect` updates on both window resize
+   *  and sidebar toggle (both resize the panel via ResizeObserver in
+   *  TierAnimationSection.tsx), so one effect covers what used to need a
+   *  separate manual `resize` listener. */
+  useEffect(() => {
+    if (mapMode !== "learn" || activeSubSection !== "outcomes-viz") return
+    if (!map.mapRef?.current || !cameraView || !storyboardColumnRect) return
+
+    map.mapRef.current.easeTo({
+      center: [cameraView.longitude, cameraView.latitude],
+      zoom: cameraView.zoom,
+      bearing: cameraView.bearing ?? 0,
+      pitch: cameraView.pitch ?? 0,
+      padding: getStoryboardCameraPadding(),
+      duration: 300,
+    })
+  }, [
+    mapMode,
+    activeSubSection,
+    cameraView,
+    map,
+    storyboardColumnRect,
+    getStoryboardCameraPadding,
+  ])
 
   // ============================================================================
   // Render

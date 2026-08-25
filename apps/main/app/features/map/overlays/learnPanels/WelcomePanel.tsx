@@ -103,7 +103,7 @@ export default function WelcomePanel() {
             >
               A summary of all scenarios can be accessed{" "}
               <Link
-                href="/"
+                href="/data"
                 color="inherit"
                 underline="always"
                 sx={{

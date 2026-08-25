@@ -33,7 +33,7 @@ export type { GlyphRect } from "./overlayTypes"
 /* Right-panel view-mode header for beats 4-7. Earlier beats have none. */
 const VIEW_MODE_HEADER_BY_BEAT: Record<number, string> = {
   4: "Distribution view",
-  5: "List view",
+  5: "Bar chart",
   6: "Radar chart",
   7: "Heat map",
 }
@@ -266,7 +266,7 @@ export default function BeatTextOverlay({
                 color="text.secondary"
                 sx={{ letterSpacing: "0.08em", lineHeight: 1.3 }}
               >
-                {displayScenarioLabel}
+                Key Outcomes
               </Typography>
             </Box>
           </motion.div>
@@ -334,6 +334,9 @@ export default function BeatTextOverlay({
                       rowGap: 1.5,
                     }}
                   >
+                    {/* Reserves the same slot the view-mode header (above)
+                     *  crossfades into - without this, item titles start
+                     *  higher and collide with that header text. */}
                     {beat2Layout.eyebrows[col] && (
                       <Box
                         ref={(el: HTMLDivElement | null) => {
@@ -342,10 +345,11 @@ export default function BeatTextOverlay({
                         sx={{ opacity: 0 }}
                       >
                         <Typography variant="compactCaptionMedium" component="p">
-                          {beat2Layout.eyebrows[col]!.label}
+                          &nbsp;
                         </Typography>
                       </Box>
                     )}
+
                     {beat2Layout.items
                       .filter((item) => item.column === col)
                       .map((item) => {

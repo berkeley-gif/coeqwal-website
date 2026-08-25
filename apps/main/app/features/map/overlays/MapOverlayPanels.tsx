@@ -191,7 +191,13 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
                 side="left"
                 variant="call"
                 isVisible
-                sx={{ minHeight: "auto", mb: 0 }}
+                sx={{
+                  minHeight: "auto",
+                  mb: 0,
+                  backgroundColor: (theme) => theme.background.paragraph,
+                  padding: (theme) => theme.space.card.xs,
+                  borderRadius: (theme) => theme.borderRadius.md,
+                }}
               >
                 <Typography variant="body1">
                   The{" "}
@@ -408,7 +414,7 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
         */}
         <Step data={"outcomes-viz" as SubSectionId} progress>
           <StickyScrollSection
-            height="200vh"
+            height="300vh"
             stickyTop={theme.layout.headerHeight}
             stickyHeight={`calc(100vh - ${theme.layout.headerHeight}px)`}
             style={{

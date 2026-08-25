@@ -37,6 +37,11 @@ interface StoryboardNavigationParams {
   mapAPI: ReturnType<typeof useMap>
   /** Camera helper that eases the map back to the home view. */
   cameraArbiter: CameraArbiter
+  /** Live padding reserving the storyboard's left/right columns, computed
+  *  from the panel's current DOM rect at call time (not baked into
+  *  `cameraArbiter`, which is a module-level singleton with no access to
+  *  it) - see `TierAnimationSection.tsx`. */
+  getCameraPadding: () => { top: number; bottom: number; left: number; right: number }
   /** Map layers reset on settle and Restart. */
   animPolygonLayers: readonly { fill: string; outline: string }[]
   controlsRef: React.RefObject<ReturnType<typeof animate> | null>
@@ -72,6 +77,7 @@ export function useStoryboardNavigation({
   panelInView,
   mapAPI,
   cameraArbiter,
+  getCameraPadding,
   animPolygonLayers,
   controlsRef,
   setBeatIndex,
@@ -193,6 +199,7 @@ export function useStoryboardNavigation({
       if (opts?.viaCamera) {
         cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
           duration: 800,
+          padding: getCameraPadding(),
           onStart: () => setPlayState("playing"),
           onArrive: () => {
             computePolygonDataRef.current()
@@ -334,6 +341,7 @@ export function useStoryboardNavigation({
       // `moveend`, then `applyBeat` snaps the beat.
       cameraArbiter.flyHome(mapAPI.mapRef?.current?.getMap?.(), {
         duration: 800,
+        padding: getCameraPadding(),
         onStart: () => setPlayState("playing"),
         onArrive: applyBeat,
       })
@@ -373,6 +381,7 @@ export function useStoryboardNavigation({
     mapAPI.mapRef,
     beatIndexRef,
     cameraArbiter,
+    getCameraPadding,
     controlsRef,
     engineApiRef,
     hasPlayedRef,
@@ -448,6 +457,7 @@ export function useStoryboardNavigation({
       cameraArbiter.flyHome(map, {
         duration: 800,
         resetOrientation: true,
+        padding: getCameraPadding(),
       })
     }
 
@@ -469,6 +479,7 @@ export function useStoryboardNavigation({
     animPolygonLayers,
     beatIndexRef,
     cameraArbiter,
+    getCameraPadding,
     computePolygonDataRef,
     controlsRef,
     engineApiRef,

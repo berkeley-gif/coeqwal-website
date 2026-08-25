@@ -141,6 +141,59 @@ export default function TierAnimationSection() {
 
   const activeSubSection = useActiveSubSection()
   const isActive = activeSubSection === "outcomes-viz"
+
+  // Report `panelRef`'s live rect to the shared store so MapInstance (a
+  // sibling, not a parent/child of this component - see
+  // MapOverlayPanels.tsx) can pad the fly-home camera to center on this
+  // panel's middle column, using the real measured DOM rect instead of a
+  // hand-reimplemented copy of the panel's own CSS clamp() math.
+  useEffect(() => {
+    if (!isActive) {
+      mapActions.setStoryboardColumnRect(null)
+      return
+    }
+    const el = panelRef.current
+    if (!el) return
+
+    const measure = () => {
+      const rect = el.getBoundingClientRect()
+      mapActions.setStoryboardColumnRect({ left: rect.left, width: rect.width })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      mapActions.setStoryboardColumnRect(null)
+    }
+  }, [isActive])
+
+  // Same padding math as the effect above, but computed synchronously
+  // from `panelRef` at call time - used by every camera fly this
+  // component triggers directly (beat nav's `flyHome`, glyph/bar click
+  // flies below), so none of them wait on the store round-trip.
+  const getCameraPadding = useCallback(() => {
+    const rect = panelRef.current?.getBoundingClientRect()
+    if (!rect) return { top: 0, bottom: 0, left: 0, right: 0 }
+    const columnWidth = rect.width / 3
+    // `right` reserves the actual white panel plus its own trailing CSS
+    // margin - a real, fixed obstruction, unchanged from before.
+    const rightMargin = window.innerWidth - (rect.left + rect.width)
+    const right = rightMargin + columnWidth
+    // Centering dead-center in the middle column (the original target)
+    // measured ~150px too far left in testing. Target just inside the
+    // white panel's left edge instead, with a small buffer so content
+    // doesn't touch the card - `left` is derived from that target and
+    // the (unchanged) right padding, since only their difference
+    // affects where the camera's center actually renders.
+    const whitePanelStart = rect.left + rect.width - columnWidth
+    const target = whitePanelStart - columnWidth * 0.125
+    const left = 2 * target - window.innerWidth + right
+    return { top: 0, bottom: 0, left, right }
+  }, [])
+
+
+
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref copy of `beatIndex` so navigation callbacks read the latest cursor
@@ -318,14 +371,14 @@ export default function TierAnimationSection() {
     }> = []
     if (cc50VariantId) {
       cols.push({
-        label: "Moderate risk",
+        label: "Moderate stress",
         scenarioId: cc50VariantId,
         tierChartData: cc50ChartData,
       })
     }
     if (cc95VariantId) {
       cols.push({
-        label: "High risk",
+        label: "High stress",
         scenarioId: cc95VariantId,
         tierChartData: cc95ChartData,
       })
@@ -435,7 +488,7 @@ export default function TierAnimationSection() {
         }
 
         if (isNewOutcomeSelection) {
-          const action = resolveOutcomeCamera(info.code, "learn")
+          const action = resolveOutcomeCamera(info.code, "learn", getCameraPadding(),)
           mapAPI.withMap((mapRef) => {
             if (action.type === "fitBounds") {
               mapRef.fitBounds(action.bounds, {
@@ -462,7 +515,7 @@ export default function TierAnimationSection() {
   // Shared by the bar-glyph click below.
   const flyToOutcome = useCallback(
     (code: string) => {
-      const action = resolveOutcomeCamera(code, "learn")
+      const action = resolveOutcomeCamera(code, "learn", getCameraPadding())
       mapAPI.withMap((mapRef) => {
         if (action.type === "fitBounds") {
           mapRef.fitBounds(action.bounds, {
@@ -480,7 +533,7 @@ export default function TierAnimationSection() {
         }
       })
     },
-    [mapAPI],
+    [mapAPI, getCameraPadding],
   )
 
   // Clicking a bar glyph paints that outcome's layer and flies to its
@@ -1088,6 +1141,7 @@ export default function TierAnimationSection() {
       panelInView: isActive,
       mapAPI,
       cameraArbiter: CAMERA_ARBITER,
+      getCameraPadding,
       animPolygonLayers: ANIM_POLYGON_LAYERS,
       controlsRef,
       setBeatIndex,
