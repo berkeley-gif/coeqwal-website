@@ -81,8 +81,8 @@ export function formatValue(
   // Money in millions spans four orders of magnitude on one tool (a system's
   // median welfare loss is thousands of dollars; a regional total is
   // millions), so the decimals follow the magnitude.
-  if (unit === "$M") d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 0.1 ? 2 : 3
-  else if (unit === "$B") d = 1
+  if (unit === "$M" || unit === "$B")
+    d = a >= 100 ? 0 : a >= 10 ? 1 : a >= 0.1 ? 2 : 3
   else if (unit === "ft/yr") d = 2
   else if (unit === "km") d = 1
   else if (unit === "%") d = a < 10 ? 1 : 0

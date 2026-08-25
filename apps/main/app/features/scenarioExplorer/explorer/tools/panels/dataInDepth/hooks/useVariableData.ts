@@ -469,7 +469,9 @@ export function useVariableData(): VariableData {
             ? "gw_pumping"
             : unitToken === "shortage"
               ? "shortage"
-              : "net_diversion",
+              : unitToken === "revenue"
+                ? "revenue"
+                : "net_diversion",
           // The percent-of-demand view needs net_diversion alongside
           // shortage, because the endpoint serves no percent measure.
           ...(companionSignature ? (companionTokens as DidAgMeasure[]) : []),
