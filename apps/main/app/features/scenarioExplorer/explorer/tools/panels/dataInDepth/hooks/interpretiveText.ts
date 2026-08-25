@@ -13,6 +13,7 @@ import {
   seriesStats,
   MOCK_YEARS,
   type MonthlyBand,
+  linearTrendPerYear,
 } from "../config/mockDataEngine"
 
 export const WATER_MONTHS = [
@@ -51,12 +52,21 @@ export interface SummaryMember {
 
 export interface SummaryContext {
   view: VariableView
+  /** Chart style of the distribution family. The Stats style draws mean and
+   *  CV bars, and its sentence reports those; the other two report medians. */
+  distKind: "exceedance" | "box" | "stats"
   compareBy: "scenarios" | "climates" | "locations"
   variableName: string
   /** Registry id, for variable-specific sentence templates */
   variableId?: string
+  /** Registry prose name ("April X2 position"); falls back to the lowercased
+   *  display name when absent. */
+  proseName?: string
   unit: string
   locationName: string
+  /** Held location as a figure title ("Shasta Reservoir"), for the
+   *  climates-axis Stats sentence. */
+  locationTitleName?: string
   climateName: string
   scenarioName: string
 }
@@ -107,8 +117,20 @@ export function summarySentence(
     if (salmon) return salmon
   }
 
-  const vn = ctx.variableName.toLowerCase()
+  const vn = ctx.proseName ?? ctx.variableName.toLowerCase()
   const first = members[0] as SummaryMember
+
+  // The Stats style draws mean and CV bars; its sentence reports the same
+  // two statistics, from the same series, so the text under the bars can
+  // never disagree with them.
+  if (
+    ctx.distKind === "stats" &&
+    ctx.view !== "monthly" &&
+    ctx.view !== "cv" &&
+    ctx.view !== "value"
+  ) {
+    return statsSentence(members, ctx, vn)
+  }
 
   if (ctx.view === "monthly" && first.bands && first.bands.length === 12) {
     const bands = first.bands
@@ -153,11 +175,13 @@ export function summarySentence(
     return `${mx.label} has the highest value (${formatValue(mx.value, ctx.unit)} ${ctx.unit}); ${mn.label} the lowest (${formatValue(mn.value, ctx.unit)} ${ctx.unit}).`
   }
 
-  // Distribution views (dist / pct): compare medians.
+  // Distribution views (dist / pct): compare medians. A member the model
+  // has no results for never contributes a number; it is named instead.
   const meds = members
-    .filter((m) => m.series && m.series.length > 0)
+    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
     .map((m) => ({ m, med: seriesStats(m.series as number[]).p50 }))
   if (meds.length === 0) return ""
+  const noDataClause = noDataClauseFor(members)
 
   if (ctx.compareBy === "scenarios") {
     const ref =
@@ -170,18 +194,158 @@ export function summarySentence(
       )
       s += `; relative to it: ${rest.join(", ")}`
     }
-    return `${s}.`
+    return `${s}${noDataClause}.`
   }
 
   if (ctx.compareBy === "climates") {
     const a = meds[0] as (typeof meds)[0]
     const b = meds[meds.length - 1] as (typeof meds)[0]
-    return `Under ${ctx.scenarioName} at ${ctx.locationName}, median ${vn} goes from ${formatValue(a.med, ctx.unit)} ${ctx.unit} (${a.m.label}) to ${formatValue(b.med, ctx.unit)} ${ctx.unit} (${b.m.label}): a change of ${percentDelta(a.med, b.med)}.`
+    return `Under ${ctx.scenarioName} at ${ctx.locationName}, median ${vn} goes from ${formatValue(a.med, ctx.unit)} ${ctx.unit} (${a.m.label}) to ${formatValue(b.med, ctx.unit)} ${ctx.unit} (${b.m.label}): a change of ${percentDelta(a.med, b.med)}${noDataClause}.`
   }
 
   const mx = meds.reduce((p, c) => (c.med > p.med ? c : p))
   const mn = meds.reduce((p, c) => (c.med < p.med ? c : p))
-  return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}.`
+  return `Under ${ctx.scenarioName} (${ctx.climateName}), median ${vn} ranges from ${formatValue(mn.med, ctx.unit)} ${ctx.unit} at ${mn.m.label} to ${formatValue(mx.med, ctx.unit)} ${ctx.unit} at ${mx.m.label}${noDataClause}.`
+}
+
+/** "; no data available for A, B" for members the model has no results for. */
+function noDataClauseFor(members: SummaryMember[]): string {
+  const noData = members.filter((m) => m.liveDataMissing)
+  return noData.length > 0
+    ? `; no data available for ${noData.map((m) => m.label).join(", ")}`
+    : ""
+}
+
+/** "Historical hydroclimate", unless the label already says climate. */
+function heldClimateOf(ctx: SummaryContext): string {
+  return /climate/i.test(ctx.climateName)
+    ? ctx.climateName
+    : `${ctx.climateName} hydroclimate`
+}
+
+/** CV as the bars print it: a ratio to two decimals, no unit. */
+function formatCv(cv: number): string {
+  return cv.toFixed(2)
+}
+
+/** Prose list: "a", "a and b", "a, b, and c". */
+function proseList(items: string[]): string {
+  if (items.length <= 2) return items.join(" and ")
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`
+}
+
+/**
+ * The Stats-style sentences: a mean sentence and a CV sentence built from
+ * the same `seriesStats` the bars read, in the wording the project lead
+ * specified per axis (scenarios: "Mean <variable> for <reference> under the
+ * <hydroclimate> hydroclimate is <mean> <unit>. Mean <variable> for the
+ * <scenario> scenario is <mean> <unit>: a difference of <%>." and the CV
+ * twin; climates: "At <location> under <scenario>, mean <variable> ranges
+ * from ... (<first>) to ... (<last>): a change of <%>." and the CV twin).
+ * The X2 variables use the lead's X2 phrasing. On the level view a third
+ * sentence reports the linear trend the third panel draws. Members without
+ * model results contribute no number and are named.
+ */
+function statsSentence(
+  members: SummaryMember[],
+  ctx: SummaryContext,
+  vn: string,
+): string {
+  const rows = members
+    .filter((m) => !m.liveDataMissing && m.series && m.series.length > 0)
+    .map((m) => {
+      const stats = seriesStats(m.series as number[])
+      return { m, mean: stats.mean, cv: stats.cv }
+    })
+  if (rows.length === 0) return ""
+  const noDataClause = noDataClauseFor(members)
+  const unit = ctx.unit
+  const fmt = (v: number) => `${formatValue(v, unit)} ${unit}`
+  const x2Month =
+    ctx.variableId === "x2_apr"
+      ? "April"
+      : ctx.variableId === "x2_sep"
+        ? "September"
+        : null
+  const sentences: string[] = []
+
+  if (ctx.compareBy === "scenarios") {
+    const ref =
+      rows.find((r) => r.m.isReference) ?? (rows[0] as (typeof rows)[0])
+    const others = rows.filter((r) => r !== ref)
+    const held = heldClimateOf(ctx)
+    if (x2Month) {
+      sentences.push(
+        `The mean X2 location in ${x2Month} for ${ref.m.label} under the ${held} is ${fmt(ref.mean)}.`,
+      )
+      for (const r of others) {
+        sentences.push(
+          `The mean ${x2Month} X2 location for the ${r.m.label} scenario is ${fmt(r.mean)}: a difference of ${percentDelta(ref.mean, r.mean)}.`,
+        )
+      }
+      sentences.push(
+        `The annual variation in X2 location in ${x2Month} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv)} (CV).`,
+      )
+      for (const r of others) {
+        sentences.push(
+          `The annual variation in ${x2Month} X2 location for the ${r.m.label} scenario is ${formatCv(r.cv)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+        )
+      }
+    } else {
+      sentences.push(
+        `Mean ${vn} for ${ref.m.label} under the ${held} is ${fmt(ref.mean)}.`,
+      )
+      for (const r of others) {
+        sentences.push(
+          `Mean ${vn} for the ${r.m.label} scenario is ${fmt(r.mean)}: a difference of ${percentDelta(ref.mean, r.mean)}.`,
+        )
+      }
+      sentences.push(
+        `The annual variation in ${vn} for ${ref.m.label} under the ${held} is ${formatCv(ref.cv)} (CV).`,
+      )
+      for (const r of others) {
+        sentences.push(
+          `The annual variation in ${vn} for the ${r.m.label} scenario is ${formatCv(r.cv)} (CV): a difference of ${percentDelta(ref.cv, r.cv)}.`,
+        )
+      }
+    }
+  } else if (ctx.compareBy === "climates") {
+    const a = rows[0] as (typeof rows)[0]
+    const b = rows[rows.length - 1] as (typeof rows)[0]
+    const where = ctx.locationTitleName || ctx.locationName
+    sentences.push(
+      `At ${where} under ${ctx.scenarioName}, mean ${vn} ranges from ${fmt(a.mean)} (${a.m.label}) to ${fmt(b.mean)} (${b.m.label}): a change of ${percentDelta(a.mean, b.mean)}.`,
+    )
+    sentences.push(
+      `At ${where} under ${ctx.scenarioName}, the coefficient of variation (CV) of annual ${vn} is ${formatCv(a.cv)} (${a.m.label}) to ${formatCv(b.cv)} (${b.m.label}): a change of ${percentDelta(a.cv, b.cv)}.`,
+    )
+  } else {
+    const mx = rows.reduce((p, c) => (c.mean > p.mean ? c : p))
+    const mn = rows.reduce((p, c) => (c.mean < p.mean ? c : p))
+    sentences.push(
+      `Under ${ctx.scenarioName} (${ctx.climateName}), mean ${vn} ranges from ${fmt(mn.mean)} at ${mn.m.label} to ${fmt(mx.mean)} at ${mx.m.label}.`,
+    )
+    sentences.push(
+      `The coefficient of variation (CV) of annual ${vn} is ${proseList(rows.map((r) => `${formatCv(r.cv)} at ${r.m.label}`))}.`,
+    )
+  }
+
+  if (ctx.view === "level") {
+    sentences.push(
+      `The linear trend in groundwater level is ${proseList(
+        rows.map(
+          (r) =>
+            `${formatValue(linearTrendPerYear(r.m.series as number[]), "ft/yr")} ft/yr for ${r.m.label}`,
+        ),
+      )}.`,
+    )
+  }
+
+  if (noDataClause) {
+    const last = sentences.pop() as string
+    sentences.push(`${last.replace(/\.$/, "")}${noDataClause}.`)
+  }
+  return sentences.join(" ")
 }
 
 /**

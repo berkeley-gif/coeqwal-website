@@ -751,3 +751,19 @@ test("CWS deliveries declare a calendar-year basis and a served year range", () 
   expect(getVariable("cws_short")?.yearBasis).toBeUndefined()
   expect(getVariable("res_apr")?.yearBasis).toBeUndefined()
 })
+
+// Prose names feed the interpretive sentences ("Mean <prose name> for ...")
+// so the text never lowercases a proper noun ("april x2 position") the way
+// the old toLowerCase() did.
+test("every variable carries a prose name that starts as the sentence needs it", () => {
+  for (const v of Object.values(VARIABLES)) {
+    expect(typeof v.proseName, v.id).toBe("string")
+    expect(v.proseName.length, v.id).toBeGreaterThan(0)
+  }
+  expect(getVariable("x2_apr")?.proseName).toBe("April X2 position")
+  expect(getVariable("swp_mi")?.proseName).toBe(
+    "M&I deliveries of the State Water Project",
+  )
+  expect(getVariable("tot_exp")?.proseName).toBe("Delta exports")
+  expect(getVariable("riv_flow")?.proseName).toBe("river flows")
+})
