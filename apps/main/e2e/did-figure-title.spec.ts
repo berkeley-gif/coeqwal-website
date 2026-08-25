@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test"
 import { buildFigureTitle } from "../app/features/scenarioExplorer/explorer/share/figureTitle"
-import { getLocationTitle } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
+import {
+  getLocationTitle,
+  getVariable,
+} from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
+import { dataFigureTitle } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/hooks/interpretiveText"
 
 // Standardized figure titles: every generated figure carries a descriptive
 // title of the form "<Variable> (<Location>), <Scenario context>,
@@ -69,4 +73,60 @@ test("null water-year labels omit the clause entirely (WYT-excluded variables)",
       waterYearTypeLabels: null,
     }),
   ).toBe("Winter-run Abundance, 3 Scenarios, Historical Hydroclimate")
+})
+
+// Ted's n71: the X2 figure title drops the "(Delta (NDO Node))" parenthetical
+// and reads "April X2 position (in km), <#> Scenarios, <Hydroclimate>, <Water
+// Year selection>". The registry carries the head verbatim; every other
+// variable keeps the standard "<Variable> (<Location>)" head.
+
+test("dataFigureTitle uses the registry head for X2 and omits the location", () => {
+  expect(
+    dataFigureTitle({
+      variableName: "April X2 position",
+      figureTitleHead: getVariable("x2_apr")?.figureTitleHead,
+      compareBy: "scenarios",
+      memberCount: 2,
+      firstMemberLabel: "Current ops",
+      locationTitleName: getLocationTitle("delta", "DELTA"),
+      climateName: "Historical",
+      scenarioName: "Current ops",
+      waterYearTypeLabels: [],
+    }),
+  ).toBe(
+    "April X2 Position (in km), 2 Scenarios, Historical Hydroclimate, All Water Years",
+  )
+})
+
+test("dataFigureTitle keeps the standard head for other variables", () => {
+  expect(
+    dataFigureTitle({
+      variableName: "April reservoir storage",
+      figureTitleHead: getVariable("res_apr")?.figureTitleHead,
+      compareBy: "scenarios",
+      memberCount: 1,
+      firstMemberLabel: "Current ops",
+      locationTitleName: getLocationTitle("reservoirs", "SHSTA"),
+      climateName: "Historical",
+      scenarioName: "Current ops",
+      waterYearTypeLabels: [],
+    }),
+  ).toBe(
+    "April Reservoir Storage (Shasta Reservoir), Current Ops, Historical Hydroclimate, All Water Years",
+  )
+  expect(
+    dataFigureTitle({
+      variableName: "Total Delta exports",
+      figureTitleHead: getVariable("tot_exp")?.figureTitleHead,
+      compareBy: "scenarios",
+      memberCount: 2,
+      firstMemberLabel: "Current ops",
+      locationTitleName: getLocationTitle("delta", "DELTA"),
+      climateName: "Historical",
+      scenarioName: "Current ops",
+      waterYearTypeLabels: [],
+    }),
+  ).toBe(
+    "Total Delta Exports (Delta (NDO Node)), 2 Scenarios, Historical Hydroclimate, All Water Years",
+  )
 })
