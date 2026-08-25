@@ -492,8 +492,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     axes,
     baselineData,
     responsive = true,
-    width = 600,
-    height = 600,
+    width = 800,
+    height = 800,
     lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
@@ -939,7 +939,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           // Tier labels along the first spoke (top)
           TIER_POSITIONS.forEach((t, i) => {
-            const r = rScale(t)
+            const r = rScale(t + 1)
             g.append("text")
               .attr("x", cx + 6)
               .attr("y", cy - r - 3)
@@ -1760,7 +1760,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }[] = []
           axes.forEach((axis, i) => {
             const angle = getAngle(i)
-            const labelR = radius + 24
+            const labelR = radius
             const lx = cx + labelR * Math.cos(angle)
             const ly = cy + labelR * Math.sin(angle)
 
