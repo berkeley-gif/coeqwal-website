@@ -114,6 +114,16 @@ export interface VariableDef {
   tierOutcome?: string
   /** Human name of that key outcome, for copy */
   tierOutcomeName?: string
+  /** Key-outcome chip override. "not-used" renders "not used in calculation
+   *  of key outcome" whatever `tierOutcome` says (the tier metadata is kept
+   *  for the pathway; the chip is copy). Absent: the chip reads "used in
+   *  calculation of key outcome: <tierOutcomeName>" when a name exists, and
+   *  nothing renders otherwise. */
+  keyOutcomeChip?: "not-used"
+  /** Verbatim head for the standardized figure title, replacing the default
+   *  "<Variable> (<Location>)" head, e.g. "April X2 Position (in km)". Set
+   *  only where the location parenthetical adds nothing (the X2 titles). */
+  figureTitleHead?: string
   /** Data source status: live API today, or deterministic sample data */
   data: "live" | "mock"
   /** Scope still under discussion (deck vs outcomes sheet); shows a chip */
@@ -604,7 +614,7 @@ export const SECTORS: SectorDef[] = [
       "ssjv_exp",
     ],
   },
-  { id: "outflow", name: "Delta outflows", variables: ["ndo", "ndo_uif"] },
+  { id: "outflow", name: "Delta outflows", variables: ["ndo"] },
   {
     id: "eflows",
     name: "Environmental flows",
@@ -697,6 +707,9 @@ export const VARIABLES: Record<string, VariableDef> = {
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "April X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches into the Delta in April. X2 is the distance (km from the Golden Gate) where salinity hits 2 ppt - smaller is fresher.",
     tech: "Annual April X2 percentiles. X2 responds to Delta outflow; spring position matters for estuarine habitat.",
@@ -714,6 +727,9 @@ export const VARIABLES: Record<string, VariableDef> = {
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "September X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches in September, at the end of the dry season, when the Delta is at its saltiest.",
     tech: "Annual September X2 percentiles. The fall X2 standard is the subject of the salinity-standards scenario.",
@@ -842,6 +858,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unit: "TAF",
     unitLabel: TAF,
     views: ["dist"],
+    keyOutcomeChip: "not-used",
     plain:
       "How much State Water Project water is delivered to cities and industry (municipal and industrial use) each year.",
     tech: "Annual SWP municipal and industrial deliveries per the API subject labels (DEL_SWP_PMI; regional splits DEL_SWP_PMI_N / DEL_SWP_PMI_S).",
@@ -933,24 +950,6 @@ export const VARIABLES: Record<string, VariableDef> = {
     data: "live",
     mockKind: "outflow",
     mockEffect: "outflow",
-  },
-  ndo_uif: {
-    id: "ndo_uif",
-    name: "Outflow as % of unimpaired flow",
-    sectorId: "outflow",
-    locationGroup: "delta",
-    unit: "%",
-    unitLabel: "percent of unimpaired flow",
-    views: ["dist"],
-    plain:
-      "What share of the river water that would naturally reach the Delta actually flows out of it, after storage and diversions.",
-    tech: "Annual Delta outflow divided by unimpaired outflow estimate; flagged as provisional in the outcomes spec.",
-    tierOutcome: "DELTA_ECO",
-    tierOutcomeName: "Delta estuary ecology",
-    data: "mock",
-    provisional: true,
-    mockKind: "pctuif",
-    mockEffect: "pctUIF",
   },
   riv_flow: {
     id: "riv_flow",
@@ -1099,18 +1098,48 @@ const FOLDED_VARIABLE_IDS: Record<string, { id: string; view: VariableView }> =
   }
 
 /**
- * Resolves a persisted (variableId, view) pair through the fold map. Returns
- * the pair unchanged when the id was never folded, so callers can apply it
- * unconditionally. Pure.
+ * Variable ids retired OUTRIGHT: their content is gone, not moved. A share
+ * URL or persisted session carrying one lands on the default variable, on
+ * purpose and deterministically, rather than on whatever the caller's own
+ * fallback happens to be.
+ *
+ * - ndo_uif, "Outflow as % of unimpaired flow": provisional sample data only;
+ *   the unimpaired series exists as a spreadsheet, not in the API. Dropped
+ *   from the Delta outflows sector at the project lead's request (Aug 2026).
+ */
+export const RETIRED_VARIABLE_IDS: ReadonlySet<string> = new Set(["ndo_uif"])
+
+/**
+ * Resolves a persisted (variableId, view) pair through the fold map and the
+ * retired set. Returns the pair unchanged when the id was never folded or
+ * retired, so callers can apply it unconditionally. Pure.
  */
 export function resolveFoldedVariable(
   variableId: string,
   view: string,
 ): { id: string; view: string } {
   const folded = FOLDED_VARIABLE_IDS[variableId]
-  return folded
-    ? { id: folded.id, view: folded.view }
-    : { id: variableId, view }
+  if (folded) return { id: folded.id, view: folded.view }
+  if (RETIRED_VARIABLE_IDS.has(variableId)) {
+    return { id: DEFAULT_VARIABLE_ID, view: "dist" }
+  }
+  return { id: variableId, view }
+}
+
+/**
+ * Text of the key-outcome chip under the variable breadcrumb, or null when
+ * the variable shows no chip. "not-used" wins over the tier metadata; a
+ * tier outcome name reads as "used in calculation of key outcome: <name>".
+ * Pure.
+ */
+export function keyOutcomeChipText(variable: VariableDef): string | null {
+  if (variable.keyOutcomeChip === "not-used") {
+    return "not used in calculation of key outcome"
+  }
+  if (variable.tierOutcomeName) {
+    return `used in calculation of key outcome: ${variable.tierOutcomeName}`
+  }
+  return null
 }
 
 export function getVariable(id: string): VariableDef | undefined {

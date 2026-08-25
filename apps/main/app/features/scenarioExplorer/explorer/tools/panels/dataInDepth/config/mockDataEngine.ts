@@ -97,7 +97,6 @@ const KINDS: Record<string, Kind> = {
   short: { clim: 0.55, sens: -2.0, cv0: 0.55, cvS: 0.4 },
   rev: { clim: -0.1, sens: 0.22, cv0: 0.08, cvS: 0.45 },
   cwsdel: { clim: -0.08, sens: 0.22, cv0: 0.06, cvS: 0.45 },
-  pctuif: { clim: -0.08, sens: 0.12, cv0: 0.1, cvS: 0.4, clamp: [2, 98] },
 }
 
 /** Seasonal shapes by water month (Oct..Sep). */
@@ -179,7 +178,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       storage: 0.08,
       outflow: -0.15,
       sal: 0.1,
-      pctUIF: -0.2,
     },
   },
   s0046: {
@@ -190,7 +188,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       storage: -0.05,
       outflow: 0.12,
       sal: -0.06,
-      pctUIF: 0.25,
     },
   },
   s0032: {
@@ -202,7 +199,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       rev: -0.1,
       gwStor: 0.2,
       gwTrend: 0.7,
-      pctUIF: 0.27,
       short: 0.3,
     },
   },
@@ -213,7 +209,6 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       sepBonus: 0.1,
       exports: -0.1,
       agDel: -0.08,
-      pctUIF: 0.15,
     },
   },
   s0033: {
@@ -226,19 +221,17 @@ const SCENARIO_EFFECTS: Record<string, ScenarioEffect> = {
       rev: -0.09,
       gwStor: 0.2,
       gwTrend: 0.7,
-      pctUIF: 0.17,
       short: 0.3,
     },
   },
-  s0040: { eff: { outflow: -0.15, exports: 0.12, sal: 0.12, pctUIF: -0.18 } },
-  s0041: { eff: { outflow: 0.02, exports: 0.02, pctUIF: 0.02 } },
-  s0042: { eff: { outflow: 0.15, exports: -0.13, sal: -0.08, pctUIF: 0.2 } },
+  s0040: { eff: { outflow: -0.15, exports: 0.12, sal: 0.12 } },
+  s0041: { eff: { outflow: 0.02, exports: 0.02 } },
+  s0042: { eff: { outflow: 0.15, exports: -0.13, sal: -0.08 } },
   s0039: {
     eff: {
       outflow: 0.3,
       exports: -0.27,
       sal: -0.15,
-      pctUIF: 0.42,
       storage: -0.07,
       agDel: -0.1,
     },
@@ -271,7 +264,6 @@ function scenarioEffect(scenarioId: string): ScenarioEffect {
       gwStor: shift(),
       gwTrend: shift(),
       sal: shift(),
-      pctUIF: shift(),
       cwsShort: shift(),
     },
   }
@@ -325,8 +317,6 @@ function baseFor(variable: VariableDef, location: LocationDef): number {
       return location.mockBase ?? 400
     case "tot_exp":
       return 4800
-    case "ndo_uif":
-      return 42
     case "salmon_abund":
       // Proportion of spawning habitat occupied (display units, matching
       // the 0.01-scaled live series); most sample years sit well below

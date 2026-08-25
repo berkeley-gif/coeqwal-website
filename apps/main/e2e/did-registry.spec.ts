@@ -7,6 +7,8 @@ import {
   getLocation,
   DEFAULT_VARIABLE_ID,
   resolveFoldedVariable,
+  keyOutcomeChipText,
+  RETIRED_VARIABLE_IDS,
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
 import { mergeDataInitialState } from "../app/features/scenarioExplorer/explorer/store/exploreSessionPersist"
@@ -480,4 +482,93 @@ test("mergeDataInitialState heals retired ag demand-unit-group pins", () => {
   })
   expect(healed.pinnedLocationByGroup.agregions).toBe("AGG_AG_NOD")
   expect(healed.selectedLocationsByGroup.agregions).toEqual(["AGG_AG_SOD"])
+})
+
+// Ted's Aug 23 board review (Data in Depth column), confirmed on the Aug 24
+// call: the provisional "Outflow as % of unimpaired flow" variable is dropped
+// outright (its unimpaired series exists only as a spreadsheet, never in the
+// API), and the key-outcome chips are reworded. A retired id must heal
+// deterministically wherever it can still arrive: a persisted session and a
+// share-URL token both go through resolveFoldedVariable.
+
+test("outflow as percent of unimpaired flow is retired from the registry", () => {
+  expect(VARIABLES.ndo_uif).toBeUndefined()
+  const outflow = SECTORS.find((s) => s.id === "outflow")
+  expect(outflow?.variables).toEqual(["ndo"])
+  expect(RETIRED_VARIABLE_IDS.has("ndo_uif")).toBe(true)
+  for (const sector of SECTORS) {
+    for (const id of sector.variables) {
+      expect(getVariable(id), `sector ${sector.id} lists ${id}`).toBeDefined()
+    }
+  }
+})
+
+test("a retired variable id resolves to the default variable", () => {
+  expect(resolveFoldedVariable("ndo_uif", "dist")).toEqual({
+    id: DEFAULT_VARIABLE_ID,
+    view: "dist",
+  })
+  // Unknown ids keep the existing behaviour: passed through unchanged, so
+  // the caller's own fallback applies.
+  expect(resolveFoldedVariable("no_such_variable", "dist")).toEqual({
+    id: "no_such_variable",
+    view: "dist",
+  })
+  const healed = mergeDataInitialState({
+    selectedVariableId: "ndo_uif",
+    view: "dist",
+  })
+  expect(healed.selectedVariableId).toBe(DEFAULT_VARIABLE_ID)
+})
+
+test("key-outcome chips read used or not used per Ted's board", () => {
+  // April X2 keeps its tier metadata but reads "not used" (n64); September
+  // X2 gets the same treatment; SWP M&I had no chip and gains a "not used"
+  // one (n84).
+  expect(getVariable("x2_apr")?.tierOutcome).toBe("FW_DELTA_USES")
+  expect(getVariable("x2_apr")?.keyOutcomeChip).toBe("not-used")
+  expect(getVariable("x2_sep")?.keyOutcomeChip).toBe("not-used")
+  expect(getVariable("swp_mi")?.keyOutcomeChip).toBe("not-used")
+  expect(keyOutcomeChipText(getVariable("x2_apr")!)).toBe(
+    "not used in calculation of key outcome",
+  )
+  expect(keyOutcomeChipText(getVariable("swp_mi")!)).toBe(
+    "not used in calculation of key outcome",
+  )
+  // Every other chip carries the same prefix (n54, n56, n58, n63 and the
+  // consistency extension to the remaining chipped variables).
+  expect(keyOutcomeChipText(getVariable("res_apr")!)).toBe(
+    "used in calculation of key outcome: Reservoir storage",
+  )
+  expect(keyOutcomeChipText(getVariable("gw_stor")!)).toBe(
+    "used in calculation of key outcome: Groundwater storage",
+  )
+  expect(keyOutcomeChipText(getVariable("ndo")!)).toBe(
+    "used in calculation of key outcome: Delta estuary ecology",
+  )
+  expect(keyOutcomeChipText(getVariable("riv_flow")!)).toBe(
+    "used in calculation of key outcome: Environmental flows",
+  )
+  // Variables with neither a tier outcome nor an explicit chip stay bare.
+  expect(keyOutcomeChipText(getVariable("cvp_ag")!)).toBeNull()
+  expect(keyOutcomeChipText(getVariable("salmon_abund")!)).toBeNull()
+})
+
+test("X2 carries the axis label and figure-title head Ted asked for", () => {
+  expect(getVariable("x2_apr")?.axisLabel).toBe(
+    "distance of X2 from Golden Gate (km)",
+  )
+  expect(getVariable("x2_sep")?.axisLabel).toBe(
+    "distance of X2 from Golden Gate (km)",
+  )
+  expect(getVariable("x2_apr")?.figureTitleHead).toBe(
+    "April X2 Position (in km)",
+  )
+  expect(getVariable("x2_sep")?.figureTitleHead).toBe(
+    "September X2 Position (in km)",
+  )
+  // Only the X2 titles change; the outflow and export titles keep their
+  // location parenthetical until Ted says otherwise.
+  expect(getVariable("ndo")?.figureTitleHead).toBeUndefined()
+  expect(getVariable("tot_exp")?.figureTitleHead).toBeUndefined()
 })

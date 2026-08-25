@@ -29,7 +29,7 @@ import {
 } from "../hooks/interpretiveText"
 import { WYT_LABELS } from "../config/wytFilter"
 import { linearTrendPerYear, MOCK_YEARS } from "../config/mockDataEngine"
-import { toBars, toBoxes, toSeries } from "./chartMarks"
+import { axisLabelFor, toBars, toBoxes, toSeries } from "./chartMarks"
 import { SaveSnapshotButton } from "../../../chrome/actions/SaveSnapshotButton"
 import { useDataShareCapture } from "../hooks/useDataShareCapture"
 
@@ -43,6 +43,7 @@ export default function ChartCard() {
   // Standardized figure title, shared verbatim with the snapshot export.
   const figureTitle = dataFigureTitle({
     variableName: data.variable?.name ?? "",
+    figureTitleHead: data.variable?.figureTitleHead,
     compareBy,
     memberCount: data.members.length,
     firstMemberLabel: data.members[0]?.label,
@@ -109,8 +110,7 @@ export default function ChartCard() {
     scenarioName: data.scenarioName,
   }
 
-  const yLabel =
-    data.view === "cv" ? "CV" : (data.variable?.axisLabel ?? data.unit)
+  const yLabel = axisLabelFor(data.variable, data.view, data.unit)
   const hasMembers = data.members.length > 0
 
   // Members whose scenario is not modeled for this variable keep their legend
@@ -171,7 +171,7 @@ export default function ChartCard() {
       {
         key: "mean",
         title: `Mean (${data.unit})`,
-        yLabel: data.unit,
+        yLabel: axisLabelFor(data.variable, data.view, data.unit),
         format: fmt,
         valueOf: (m: (typeof data.members)[number]) => m.stats.mean,
       },

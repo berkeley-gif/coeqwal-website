@@ -62,6 +62,7 @@ export function useDataShareCapture(
     // Same standardized title the on-screen card shows above the chart.
     const figureTitle = dataFigureTitle({
       variableName,
+      figureTitleHead: data.variable?.figureTitleHead,
       compareBy,
       memberCount: data.members.length,
       firstMemberLabel: data.members[0]?.label,

@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   formatValue,
+  howToReadText,
   summarySentence,
   type SummaryContext,
   type SummaryMember,
@@ -167,4 +168,13 @@ test("salmon sentence marks a sample-backed comparison member as sample", () => 
     salmonCtx,
   )
   expect(s).toContain("Salmon flows 60% (sample)")
+})
+
+// Ted's n128: the box plot draws a dashed tick at the mean inside each box
+// and the "How do I read this chart?" text did not say so.
+test("the box-plot explainer names the dashed mean marker", () => {
+  const sentence = "The short dashed line inside each box marks the mean."
+  expect(howToReadText("dist", "box")).toContain(sentence)
+  expect(howToReadText("dist", "exceedance")).not.toContain(sentence)
+  expect(howToReadText("dist", "stats")).not.toContain(sentence)
 })
