@@ -431,7 +431,6 @@ export default function MapOverlayPanels({ navWidth }: MapOverlayPanelsProps) {
           </StickyScrollSection>
         </Step>
 
-
         <Step data={"data-in-depth-intro" as SubSectionId}>
           <Box
             id="data-in-depth-intro"

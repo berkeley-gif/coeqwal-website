@@ -192,8 +192,6 @@ export default function TierAnimationSection() {
     return { top: 0, bottom: 0, left, right }
   }, [])
 
-
-
   /** Storyboard cursor: driven by Next / Back. */
   const [beatIndex, setBeatIndex] = useState(0)
   /** Ref copy of `beatIndex` so navigation callbacks read the latest cursor
@@ -488,7 +486,11 @@ export default function TierAnimationSection() {
         }
 
         if (isNewOutcomeSelection) {
-          const action = resolveOutcomeCamera(info.code, "learn", getCameraPadding(),)
+          const action = resolveOutcomeCamera(
+            info.code,
+            "learn",
+            getCameraPadding(),
+          )
           mapAPI.withMap((mapRef) => {
             if (action.type === "fitBounds") {
               mapRef.fitBounds(action.bounds, {
@@ -508,7 +510,7 @@ export default function TierAnimationSection() {
         }
       },
     }),
-    [locKey, resolvedScenarioId, mapAPI],
+    [locKey, resolvedScenarioId, mapAPI, getCameraPadding],
   )
 
   // Fly the camera to an outcome's region, matching the square-click camera.
@@ -1175,7 +1177,6 @@ export default function TierAnimationSection() {
     [],
   )
 
-
   useStoryboardDebugLog({ progress, beatIndex, playState })
 
   /* Error state */
@@ -1292,10 +1293,10 @@ export default function TierAnimationSection() {
                 onBarClick={
                   isInteractive
                     ? (code: string, tier: number) => {
-                      setSpotlightedTier((prev) =>
-                        prev === tier ? null : tier,
-                      )
-                    }
+                        setSpotlightedTier((prev) =>
+                          prev === tier ? null : tier,
+                        )
+                      }
                     : undefined
                 }
               />
@@ -1331,8 +1332,7 @@ export default function TierAnimationSection() {
             heatmapExtraColumnCount={heatmapExtraColumns.length}
           />
         </>
-      )
-      }
-    </Box >
+      )}
+    </Box>
   )
 }

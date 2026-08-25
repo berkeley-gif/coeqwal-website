@@ -32,11 +32,11 @@ export function InfoCardGrid({
     typeof columns === "number"
       ? `repeat(${columns}, 1fr)`
       : Object.fromEntries(
-        Object.entries(columns).map(([breakpoint, count]) => [
-          breakpoint,
-          `repeat(${count}, 1fr)`,
-        ]),
-      )
+          Object.entries(columns).map(([breakpoint, count]) => [
+            breakpoint,
+            `repeat(${count}, 1fr)`,
+          ]),
+        )
   return (
     <Box
       sx={{

@@ -76,8 +76,8 @@ interface BeatTextOverlayProps {
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
   /** Fires once the right column's scrollable DOM node exists, so a
- *  sibling component can portal content into it. Fires again with
- *  `null` on unmount. */
+   *  sibling component can portal content into it. Fires again with
+   *  `null` on unmount. */
   onScrollContainerReady?: (node: HTMLDivElement | null) => void
   /** Forwarded to the geometry hook, which reports the right column's
    *  full scrollable content height on every relevant layout pass. */
@@ -272,11 +272,14 @@ export default function BeatTextOverlay({
           </motion.div>
 
           {/* Two-column outcome grid. Each row stacks Title, glyph
-         *  placeholder, Caption, measured/animated by the geometry hook. */}
+           *  placeholder, Caption, measured/animated by the geometry hook. */}
           {beat2Layout && (
-            <Box ref={gridWrapperRef} sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}>
+            <Box
+              ref={gridWrapperRef}
+              sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}
+            >
               {/* View-mode header (beats 4-7), absolutely positioned over the
-             *  eyebrow slot so it doesn't shift the glyph layout. */}
+               *  eyebrow slot so it doesn't shift the glyph layout. */}
               <Box
                 aria-hidden
                 sx={{
@@ -344,7 +347,10 @@ export default function BeatTextOverlay({
                         }}
                         sx={{ opacity: 0 }}
                       >
-                        <Typography variant="compactCaptionMedium" component="p">
+                        <Typography
+                          variant="compactCaptionMedium"
+                          component="p"
+                        >
                           &nbsp;
                         </Typography>
                       </Box>
@@ -395,10 +401,13 @@ export default function BeatTextOverlay({
                             {hasGlyph && (
                               <>
                                 {/* Transparent placeholder reserving the SVG
-                               *  morph landing rect. */}
+                                 *  morph landing rect. */}
                                 <Box
                                   ref={(el: HTMLDivElement | null) => {
-                                    placeholderRefsMap.current.set(item.code, el)
+                                    placeholderRefsMap.current.set(
+                                      item.code,
+                                      el,
+                                    )
                                   }}
                                   data-outcome-code={item.code}
                                   sx={{
@@ -488,6 +497,6 @@ export default function BeatTextOverlay({
         </Box>
         <ScrollDownIndicator visible={canScrollDown} />
       </Box>
-    </Box >
+    </Box>
   )
 }

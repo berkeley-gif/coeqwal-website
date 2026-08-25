@@ -34,12 +34,12 @@ export interface FlyHomeOpts {
    *  only. If already home, no flight runs and bearing/pitch are kept. */
   resetOrientation?: boolean
   /** Reserves space for the storyboard's own left (narration) and right
- *  (white panel) columns, so the camera settles on the middle column
- *  instead of the full map canvas. Passed explicitly on every flight
- *  rather than relying on Mapbox to carry over a prior `easeTo`'s
- *  padding - `isHome()` below only compares center/zoom, so a stale
- *  padding from before a resize or sidebar toggle could otherwise go
- *  unnoticed. */
+   *  (white panel) columns, so the camera settles on the middle column
+   *  instead of the full map canvas. Passed explicitly on every flight
+   *  rather than relying on Mapbox to carry over a prior `easeTo`'s
+   *  padding - `isHome()` below only compares center/zoom, so a stale
+   *  padding from before a resize or sidebar toggle could otherwise go
+   *  unnoticed. */
   padding?: CameraPadding
   /** Fires when a flight actually starts (not when already home or `map`
    *  is null). Use to flip play-state to "playing" for the flight. */
@@ -50,7 +50,7 @@ export interface FlyHomeOpts {
 }
 
 export class CameraArbiter {
-  constructor(private readonly home: CameraHome) { }
+  constructor(private readonly home: CameraHome) {}
 
   /** True when the map is at the home center and zoom (within 0.01
    *  degrees and 0.05 zoom). Ignores bearing and pitch. */
@@ -68,7 +68,13 @@ export class CameraArbiter {
    *  `onStart` fires, an easeTo is dispatched, and `onArrive` is wired
    *  to the next `moveend`. */
   flyHome(map: MapboxGLMap | null | undefined, opts: FlyHomeOpts = {}): void {
-    const { duration = 800, resetOrientation = false, padding, onStart, onArrive } = opts
+    const {
+      duration = 800,
+      resetOrientation = false,
+      padding,
+      onStart,
+      onArrive,
+    } = opts
 
     if (!map || this.isHome(map)) {
       // Position isn't moving, but padding still might be stale (e.g. a

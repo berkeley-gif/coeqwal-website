@@ -72,9 +72,9 @@ interface OutcomeMorphOverlayProps {
   panelWidth: number
   panelHeight: number
   /** The right column's DOM node, once mounted - the SVG portals into
- *  this so it scrolls natively with the column instead of needing a
- *  JS-driven compensating transform. Null until BeatTextOverlay reports
- *  it ready (one render cycle after mount). */
+   *  this so it scrolls natively with the column instead of needing a
+   *  JS-driven compensating transform. Null until BeatTextOverlay reports
+   *  it ready (one render cycle after mount). */
   scrollContainerNode?: HTMLDivElement | null
   /** The right column's full scrollable content height. Falls back to
    *  `panelHeight` (the visible window) until the first real measurement
@@ -263,10 +263,10 @@ function computeOutcomeLayout(
   const countWeightedScore =
     totalPolygons > 0
       ? tierKeys.reduce(
-        (sum, tier) =>
-          sum + tier * (byTier.get(tier)!.length / totalPolygons),
-        0,
-      )
+          (sum, tier) =>
+            sum + tier * (byTier.get(tier)!.length / totalPolygons),
+          0,
+        )
       : null
   const weightedScore = apiWeightedScore ?? countWeightedScore
   const avgTierLevel =
@@ -406,7 +406,6 @@ function computeOutcomeLayout(
         averageColor: avgColor,
         isRepresentative: i === 0,
       })
-
     }
     currentRow += Math.ceil(group.length / cols)
   }
@@ -500,7 +499,9 @@ export default function OutcomeMorphOverlay({
   const OUTER_Y_OFFSET = 80
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
-  const outerPathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
+  const outerPathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(
+    new Map(),
+  )
   const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
   const radarChromeRef = useRef<SVGGElement | null>(null)
   const heatmapChromeRef = useRef<SVGGElement | null>(null)
@@ -514,33 +515,33 @@ export default function OutcomeMorphOverlay({
       const sampled =
         outcome.polygons.length > MAX_POLYGONS_PER_OUTCOME
           ? (() => {
-            const keptIndices = new Set<number>()
-            const pinned: ShapeMorphData[] = []
-            if (mustIncludeSourceIds && mustIncludeSourceIds.size > 0) {
-              for (let i = 0; i < outcome.polygons.length; i++) {
-                const p = outcome.polygons[i]!
-                if (mustIncludeSourceIds.has(p.sourceId)) {
-                  keptIndices.add(i)
-                  pinned.push(p)
-                  if (pinned.length >= MAX_POLYGONS_PER_OUTCOME) break
+              const keptIndices = new Set<number>()
+              const pinned: ShapeMorphData[] = []
+              if (mustIncludeSourceIds && mustIncludeSourceIds.size > 0) {
+                for (let i = 0; i < outcome.polygons.length; i++) {
+                  const p = outcome.polygons[i]!
+                  if (mustIncludeSourceIds.has(p.sourceId)) {
+                    keptIndices.add(i)
+                    pinned.push(p)
+                    if (pinned.length >= MAX_POLYGONS_PER_OUTCOME) break
+                  }
                 }
               }
-            }
-            const remaining = MAX_POLYGONS_PER_OUTCOME - pinned.length
-            if (remaining <= 0) return pinned
-            // Build the pool of candidates (indices not already pinned) and
-            // stride across it so gaps between kept squares stay even.
-            const pool: number[] = []
-            for (let i = 0; i < outcome.polygons.length; i++) {
-              if (!keptIndices.has(i)) pool.push(i)
-            }
-            const step = pool.length / remaining
-            const strided: ShapeMorphData[] = Array.from(
-              { length: remaining },
-              (_, i) => outcome.polygons[pool[Math.floor(i * step)]!]!,
-            )
-            return [...pinned, ...strided]
-          })()
+              const remaining = MAX_POLYGONS_PER_OUTCOME - pinned.length
+              if (remaining <= 0) return pinned
+              // Build the pool of candidates (indices not already pinned) and
+              // stride across it so gaps between kept squares stay even.
+              const pool: number[] = []
+              for (let i = 0; i < outcome.polygons.length; i++) {
+                if (!keptIndices.has(i)) pool.push(i)
+              }
+              const step = pool.length / remaining
+              const strided: ShapeMorphData[] = Array.from(
+                { length: remaining },
+                (_, i) => outcome.polygons[pool[Math.floor(i * step)]!]!,
+              )
+              return [...pinned, ...strided]
+            })()
           : outcome.polygons
 
       const pos = distributionPositionMap[outcome.code]
@@ -614,6 +615,7 @@ export default function OutcomeMorphOverlay({
   }, [
     outcomes,
     panelWidth,
+    columnWidth,
     squaresPerRow,
     distributionPositionMap,
     tierChartData,
@@ -782,7 +784,13 @@ export default function OutcomeMorphOverlay({
       columnCx,
       extraColumns,
     }
-  }, [outcomeShapes, columnWidth, columnHeight, extraHydroclimateColumns, theme])
+  }, [
+    outcomeShapes,
+    columnWidth,
+    columnHeight,
+    extraHydroclimateColumns,
+    theme,
+  ])
 
   const heatmapTargetsByCode = useMemo(() => {
     const map = new Map<string, [number, number][]>()
@@ -1147,7 +1155,7 @@ export default function OutcomeMorphOverlay({
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
   /* Overlay-morph frame applier */
-  const latestMorphFrameRef = useRef<(v: number) => void>(() => { })
+  const latestMorphFrameRef = useRef<(v: number) => void>(() => {})
   latestMorphFrameRef.current = (v: number) => {
     const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
@@ -1491,7 +1499,6 @@ export default function OutcomeMorphOverlay({
     </svg>
   )
 
-
   const svgElement = (
     <svg
       ref={svgRef}
@@ -1506,7 +1513,6 @@ export default function OutcomeMorphOverlay({
       }}
       viewBox={`0 0 ${columnWidth} ${effectiveHeight}`}
     >
-
       {/* Radar chrome: tier rings, radial axes, tier labels, and a trace
           connecting the per-outcome vertices. Opacity driven by
           `radarChromeBlend` in the main progress handler. */}
@@ -1659,15 +1665,13 @@ export default function OutcomeMorphOverlay({
               textAnchor="middle"
               dominantBaseline="central"
             >
-              {column.label.includes(" ") ? (
-                column.label.split(" ").map((word, i) => (
-                  <tspan key={word} x={column.cx} dy={i === 0 ? -6 : 12}>
-                    {word}
-                  </tspan>
-                ))
-              ) : (
-                column.label
-              )}
+              {column.label.includes(" ")
+                ? column.label.split(" ").map((word, i) => (
+                    <tspan key={word} x={column.cx} dy={i === 0 ? -6 : 12}>
+                      {word}
+                    </tspan>
+                  ))
+                : column.label}
             </text>
           )}
         </g>
@@ -1724,7 +1728,7 @@ export default function OutcomeMorphOverlay({
                       group.glyphMeta.barGlyphTop +
                       group.glyphMeta.barSpacing +
                       ti *
-                      (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
+                        (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
                     return (
                       <rect
                         key={`track-${ti}`}
@@ -1835,11 +1839,11 @@ export default function OutcomeMorphOverlay({
                   onMouseEnter={
                     squareHoverEnabled && !isBarOrAvg
                       ? () =>
-                        onLocationEnter?.({
-                          code: group.code,
-                          sourceId: shape.sourceId,
-                          tier: shape.tier,
-                        })
+                          onLocationEnter?.({
+                            code: group.code,
+                            sourceId: shape.sourceId,
+                            tier: shape.tier,
+                          })
                       : undefined
                   }
                   onMouseLeave={
@@ -1850,17 +1854,17 @@ export default function OutcomeMorphOverlay({
                   onClick={
                     squareHoverEnabled
                       ? (e) => {
-                        e.stopPropagation()
-                        if (isBarMode && onBarClick) {
-                          onBarClick(group.code, shape.tier)
-                        } else if (!isBarOrAvg) {
-                          onLocationClick?.({
-                            code: group.code,
-                            sourceId: shape.sourceId,
-                            tier: shape.tier,
-                          })
+                          e.stopPropagation()
+                          if (isBarMode && onBarClick) {
+                            onBarClick(group.code, shape.tier)
+                          } else if (!isBarOrAvg) {
+                            onLocationClick?.({
+                              code: group.code,
+                              sourceId: shape.sourceId,
+                              tier: shape.tier,
+                            })
+                          }
                         }
-                      }
                       : undefined
                   }
                 />

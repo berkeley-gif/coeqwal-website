@@ -33,7 +33,7 @@ export default function ChooseScenariosPanel() {
         These will be saved in the{" "}
         <Typography component="span" variant="body2" fontWeight={600}>
           SHARE
-          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600}/>
+          <icons.IosShare sx={{ fontSize: "1rem", ml: 0.5 }} fontWeight={600} />
         </Typography>{" "}
         section of the site.
       </Typography>

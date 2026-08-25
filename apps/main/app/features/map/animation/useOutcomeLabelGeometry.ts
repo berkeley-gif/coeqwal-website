@@ -142,7 +142,10 @@ export function useOutcomeLabelGeometry({
   // Precomputed geometry, filled by the measure pass and read each frame.
   /** Wrapped (radar-layout) center of each title block, panel-relative. */
   const wrappedTitleGeomRef = useRef<
-    Map<string, { textCenterX: number; textCenterY: number; textHeight: number }>
+    Map<
+      string,
+      { textCenterX: number; textCenterY: number; textHeight: number }
+    >
   >(new Map())
   /** Per-outcome translate to slide a title onto its radar axis. */
   const radarLabelDeltaRef = useRef<Map<string, { dx: number; dy: number }>>(
@@ -207,7 +210,7 @@ export function useOutcomeLabelGeometry({
    * translates. Rebuilt every render and invoked via `narrationTickRef` (set
    * in the bridge effect below). Fades are `clamp01((v - START) / WIDTH)`,
    * combined as `fadeIn * (1 - fadeOut)`. */
-  const latestNarrationFrameRef = useRef<(v: number) => void>(() => { })
+  const latestNarrationFrameRef = useRef<(v: number) => void>(() => {})
   latestNarrationFrameRef.current = (v: number) => {
     if (beat2PanelRef.current) {
       // White backdrop fades in with AG_REV's morph (the first graphic).
@@ -232,8 +235,8 @@ export function useOutcomeLabelGeometry({
       wrapDip =
         v < HEATMAP_WRAP_DIP_CENTER
           ? 1 -
-          (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
-          HEATMAP_WRAP_DIP_HALF
+            (v - (HEATMAP_WRAP_DIP_CENTER - HEATMAP_WRAP_DIP_HALF)) /
+              HEATMAP_WRAP_DIP_HALF
           : (v - HEATMAP_WRAP_DIP_CENTER) / HEATMAP_WRAP_DIP_HALF
     }
     // Hold radar labels opaque through RADAR_SETTLE, fade out, hold invisible
@@ -371,7 +374,11 @@ export function useOutcomeLabelGeometry({
     // height on resize, so a plain scroll across this boundary needs its
     // own check here, on every tick, to catch it.
     const contentPhase: "tall" | "radar" | "heatmap" =
-      v < RADAR_SLIDE_START ? "tall" : v < HEATMAP_TAKEOVER ? "radar" : "heatmap"
+      v < RADAR_SLIDE_START
+        ? "tall"
+        : v < HEATMAP_TAKEOVER
+          ? "radar"
+          : "heatmap"
     if (contentPhase !== contentHeightPhaseRef.current) {
       contentHeightPhaseRef.current = contentPhase
       const rootEl = rightColumnRootRef.current
@@ -381,11 +388,11 @@ export function useOutcomeLabelGeometry({
           contentPhase === "tall"
             ? tallContentHeightRef.current
             : Math.max(
-              visibleHeight,
-              contentPhase === "radar"
-                ? radarContentHeightRef.current
-                : heatmapContentHeightRef.current,
-            )
+                visibleHeight,
+                contentPhase === "radar"
+                  ? radarContentHeightRef.current
+                  : heatmapContentHeightRef.current,
+              )
         onContentHeightChange?.(targetHeight)
         const gridWrapperEl = gridWrapperRef.current
         if (gridWrapperEl) {
@@ -428,11 +435,11 @@ export function useOutcomeLabelGeometry({
         const shift = radarActive ? reflowShift.get(code) : undefined
         const radarDx = rd
           ? (shift ? -shift.dx * (1 - radarPosBlend) : 0) +
-          rd.dx * radarPosBlend
+            rd.dx * radarPosBlend
           : 0
         const radarDy = rd
           ? (shift ? -shift.dy * (1 - radarPosBlend) : 0) +
-          rd.dy * radarPosBlend
+            rd.dy * radarPosBlend
           : 0
         const dx = radarDx + (hd ? hd.dx * heatmapPosBlend : 0)
         const dy = radarDy + (hd ? hd.dy * heatmapPosBlend : 0)
@@ -768,7 +775,11 @@ export function useOutcomeLabelGeometry({
 
       const v = progress.get()
       const phase: "tall" | "radar" | "heatmap" =
-        v < RADAR_SLIDE_START ? "tall" : v < HEATMAP_TAKEOVER ? "radar" : "heatmap"
+        v < RADAR_SLIDE_START
+          ? "tall"
+          : v < HEATMAP_TAKEOVER
+            ? "radar"
+            : "heatmap"
       contentHeightPhaseRef.current = phase
       onContentHeightChange?.(
         phase === "tall"
@@ -801,7 +812,14 @@ export function useOutcomeLabelGeometry({
     measure()
 
     return () => ro.disconnect()
-  }, [onGlyphLayoutChange, beat2Layout, heatmapExtraColumnCount, theme])
+  }, [
+    onGlyphLayoutChange,
+    beat2Layout,
+    heatmapExtraColumnCount,
+    theme,
+    onContentHeightChange,
+    progress,
+  ])
 
   return {
     panelRootRef,

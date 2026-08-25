@@ -119,9 +119,9 @@ export function useScreenPolygonProjection({
 
   /* Collect screen shapes from Mapbox layers + coordinate lookups. */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const computePolygonDataRef = useRef<() => void>(() => { })
-  const reprojectRef = useRef<() => void>(() => { })
-  const applyPanelOffsetRef = useRef<() => void>(() => { })
+  const computePolygonDataRef = useRef<() => void>(() => {})
+  const reprojectRef = useRef<() => void>(() => {})
+  const applyPanelOffsetRef = useRef<() => void>(() => {})
   const cachedGeoRingsRef = useRef<
     Map<
       string,

@@ -38,10 +38,15 @@ interface StoryboardNavigationParams {
   /** Camera helper that eases the map back to the home view. */
   cameraArbiter: CameraArbiter
   /** Live padding reserving the storyboard's left/right columns, computed
-  *  from the panel's current DOM rect at call time (not baked into
-  *  `cameraArbiter`, which is a module-level singleton with no access to
-  *  it) - see `TierAnimationSection.tsx`. */
-  getCameraPadding: () => { top: number; bottom: number; left: number; right: number }
+   *  from the panel's current DOM rect at call time (not baked into
+   *  `cameraArbiter`, which is a module-level singleton with no access to
+   *  it) - see `TierAnimationSection.tsx`. */
+  getCameraPadding: () => {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
   /** Map layers reset on settle and Restart. */
   animPolygonLayers: readonly { fill: string; outline: string }[]
   controlsRef: React.RefObject<ReturnType<typeof animate> | null>
@@ -223,6 +228,7 @@ export function useStoryboardNavigation({
       engineApiRef,
       setBeatIndex,
       setPlayState,
+      getCameraPadding,
     ],
   )
 

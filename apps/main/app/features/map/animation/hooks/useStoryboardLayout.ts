@@ -213,7 +213,7 @@ export function useStoryboardLayout({
 
     // Estimated per-column inner width, used only to decide row count. The
     // precise width is measured from the DOM later.
-    const approxColWidth = Math.max(80, (panelSize.width * (1 /3)) / 2 - 36)
+    const approxColWidth = Math.max(80, (panelSize.width * (1 / 3)) / 2 - 36)
 
     // Left column order (AG_REV before CWS_DEL). Don't reorder
     // OUTCOME_CODE_ORDER globally (radar axes and NOD/SOD helpers depend on

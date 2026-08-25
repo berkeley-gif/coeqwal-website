@@ -52,7 +52,6 @@ export default function LearnPanel() {
   const isVertNavExpanded = useIsVertNavExpanded()
   const navWidth = isVertNavExpanded ? NAV_WIDTH_EXPANDED : NAV_WIDTH_COLLAPSED
 
-
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
     // Reset Learn-specific state and activate Learn mode
@@ -233,7 +232,9 @@ export default function LearnPanel() {
             >
               Click on each water issue to learn more.
             </Typography>
-            <InfoCardGrid columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}>
+            <InfoCardGrid
+              columns={{ xs: 2, sm: 3, md: WATER_ISSUE_THEMES.length }}
+            >
               {WATER_ISSUE_THEMES.map(
                 ({ title, description, themeKey, dimmed }) => (
                   <InfoCard

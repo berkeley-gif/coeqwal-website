@@ -11,9 +11,9 @@ export function useBreakpoint(): Breakpoint {
   const isLg = useMediaQuery(theme.breakpoints.only("lg"))
   const isXl = useMediaQuery(theme.breakpoints.up("xl"))
 
-  if (isXs) return "xs" 
-  if (isSm) return "sm" 
-  if (isMd) return "md" 
+  if (isXs) return "xs"
+  if (isSm) return "sm"
+  if (isMd) return "md"
   if (isLg) return "lg"
   if (isXl) return "xl"
 

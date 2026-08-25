@@ -1140,16 +1140,11 @@ export const VARIABLES: Record<string, VariableDef> = {
     plain: "How much water community drinking-water systems receive each year.",
     tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. The served series is aggregated by calendar year over a model run from October 1921 to September 2021, so its first and last years are three-month and nine-month stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
-<<<<<<< HEAD
     tierOutcomeName: "Community surface water",
-    data: "mock",
-=======
-    tierOutcomeName: "Community deliveries",
     data: "live",
     wytApplicable: false,
     yearBasis: "calendar",
     servedYearRange: { min: 1922, max: 2020 },
->>>>>>> dev
     mockKind: "cwsdel",
     mockEffect: "cws",
   },

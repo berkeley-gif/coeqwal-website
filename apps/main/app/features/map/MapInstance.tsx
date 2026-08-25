@@ -155,7 +155,7 @@ export default function MapInstance({
     mapActions.setMapReady(true)
 
     if (process.env.NODE_ENV === "development") {
-      ; (window as unknown as Record<string, unknown>).__mapInstance =
+      ;(window as unknown as Record<string, unknown>).__mapInstance =
         mapboxInstance
     }
   }, [map.mapRef])
@@ -293,7 +293,12 @@ export default function MapInstance({
 
     // Only "outcomes-viz" has a right-hand panel to clear - other Learn
     // subsections keep their original sidebar-only padding.
-    const padding: { top: number; bottom: number; left: number; right: number } =
+    const padding: {
+      top: number
+      bottom: number
+      left: number
+      right: number
+    } =
       activeSubSection === "outcomes-viz"
         ? getStoryboardCameraPadding()
         : { left: navWidth, top: 0, right: 0, bottom: 0 }
@@ -307,7 +312,14 @@ export default function MapInstance({
       duration: sectionChanged ? 2000 : 250,
       easing: (t: number) => t * (2 - t),
     })
-  }, [activeSubSection, cameraView, map, mapMode, navWidth, getStoryboardCameraPadding])
+  }, [
+    activeSubSection,
+    cameraView,
+    map,
+    mapMode,
+    navWidth,
+    getStoryboardCameraPadding,
+  ])
 
   /** Storyboard ("outcomes-viz"): re-center whenever the panel's measured
    *  rect changes. `storyboardColumnRect` updates on both window resize
