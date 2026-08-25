@@ -36,11 +36,11 @@ export default function ScrollDownIndicator({
                 alignItems: "flex-end",
                 justifyContent: "center",
                 pointerEvents: "none",
-                background: `linear-gradient(to bottom, transparent, ${fadeColor ?? theme.palette.brand.sky
+                background: `linear-gradient(to bottom, transparent, ${fadeColor ?? theme.palette.common.white
                     } 70%)`,
             }}
         >
-            <KeyboardArrowDownIcon sx={{ fontSize: 22, color: theme.palette.common.white }} />
+            <KeyboardArrowDownIcon sx={{ fontSize: 22, color: theme.palette.common.black }} />
         </Box>
     )
 }

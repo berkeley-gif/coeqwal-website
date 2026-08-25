@@ -1108,6 +1108,20 @@ export default function TierAnimationSection() {
     handleRestart()
   }, [isActive, handleRestart])
 
+  const [scrollContainerNode, setScrollContainerNode] =
+    useState<HTMLDivElement | null>(null)
+  const [contentHeight, setContentHeight] = useState(0)
+
+  const handleScrollContainerReady = useCallback(
+    (node: HTMLDivElement | null) => setScrollContainerNode(node),
+    [],
+  )
+  const handleContentHeightChange = useCallback(
+    (height: number) => setContentHeight(height),
+    [],
+  )
+
+
   useStoryboardDebugLog({ progress, beatIndex, playState })
 
   /* Error state */
@@ -1169,6 +1183,8 @@ export default function TierAnimationSection() {
                 outcomes={activeOutcomeGroups}
                 panelWidth={panelSize.width}
                 panelHeight={panelSize.height}
+                scrollContainerNode={scrollContainerNode}
+                contentHeight={contentHeight}
                 progress={progress}
                 overlayMorphTickRef={overlayMorphTickRef}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
@@ -1255,6 +1271,8 @@ export default function TierAnimationSection() {
             onEncodingChange={setEncodingMode}
             outcomeMorphWindows={outcomeMorphWindows}
             onGlyphLayoutChange={handleGlyphLayoutChange}
+            onScrollContainerReady={handleScrollContainerReady}
+            onContentHeightChange={handleContentHeightChange}
             hideControls={prefersReducedMotion}
             heatmapExtraColumnCount={heatmapExtraColumns.length}
           />

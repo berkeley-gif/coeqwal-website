@@ -73,10 +73,10 @@ interface UseOutcomeLabelGeometryParams {
   outcomeMorphWindows?: Record<string, { start: number; end: number }>
   /** Reports panel-relative glyph landing rects to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
-  /** Fires on every scroll of the right column, so the SVG overlay (a
- *  sibling, not a DOM descendant) can compensate with a matching
- *  transform - otherwise the squares stay put while the labels scroll. */
-  onScrollOffsetChange?: (offsetY: number) => void
+  /** Reports the right column's full scrollable content height (not just
+   *  what's currently visible), so the SVG overlay can size itself to
+   *  cover the whole scroll range instead of just the visible window. */
+  onContentHeightChange?: (height: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -86,7 +86,7 @@ interface UseOutcomeLabelGeometryParams {
 export interface OutcomeLabelRefs {
   /** Outer panel box (`inset: 0`). The `y` reference frame. */
   panelRootRef: RefObject<HTMLDivElement | null>
-    /** Right-column root (left edge at `panelWidth * 2/3`). The `x` frame. */
+  /** Right-column root (left edge at `panelWidth * 2/3`). The `x` frame. */
   rightColumnRootRef: RefObject<HTMLDivElement | null>
   /** White backdrop behind the right-column content. */
   beat2PanelRef: RefObject<HTMLDivElement | null>
@@ -122,7 +122,7 @@ export function useOutcomeLabelGeometry({
   beat2Layout,
   outcomeMorphWindows,
   onGlyphLayoutChange,
-  onScrollOffsetChange,
+  onContentHeightChange,
   heatmapExtraColumnCount = 0,
 }: UseOutcomeLabelGeometryParams): OutcomeLabelRefs {
   const theme = useTheme()
@@ -431,19 +431,19 @@ export function useOutcomeLabelGeometry({
 
     const measure = () => {
       const rootRect = root.getBoundingClientRect()
-      const panelRect = panel.getBoundingClientRect()
       const layout: Record<string, GlyphRect> = {}
       placeholderRefsMap.current.forEach((el, code) => {
         if (!el) return
         const r = el.getBoundingClientRect()
         layout[code] = {
           x: r.left - rootRect.left,
-          y: r.top - panelRect.top,
+          y: r.top - rootRect.top + root.scrollTop,
           width: r.width,
           height: r.height,
         }
       })
       onGlyphLayoutChange(layout)
+      onContentHeightChange?.(root.scrollHeight)
 
       // Sync the white backdrop's height to the content column. They are
       // siblings (nesting would cause a z-index conflict with the SVG
@@ -455,9 +455,11 @@ export function useOutcomeLabelGeometry({
 
       // Radar center / radius (shared with `OutcomeMorphOverlay`). Labels
       // ring `labelR` (just past the axis tips) so they clear the outer ring.
-      const panelW = panelRect.width
-      const panelH = panelRect.height
-      const { cx, cy, rMax } = computeRadarFrame(panelW, panelH)
+      // Sized off the scrolling column's own box, not the full panel's -
+      // that's the coordinate space the portaled SVG actually renders in.
+      const panelW = rootRect.width
+      const panelH = rootRect.height
+      const { cx, cy, rMax } = computeRadarFrame(panelW, panelH, 0)
       const LABEL_PAD = 22
       const labelR = rMax + LABEL_PAD
       const activeItems =
@@ -524,8 +526,8 @@ export function useOutcomeLabelGeometry({
       wrapStateByCode.forEach(({ textEl }, code) => {
         const rText = textEl.getBoundingClientRect()
         wrapGeom.set(code, {
-          textCenterX: (rText.left + rText.right) / 2 - panelRect.left,
-          textCenterY: (rText.top + rText.bottom) / 2 - panelRect.top,
+          textCenterX: (rText.left + rText.right) / 2 - rootRect.left,
+          textCenterY: (rText.top + rText.bottom) / 2 - rootRect.top,
         })
       })
       // Revert wrap (leave transforms cleared) to measure the at-rest
@@ -556,9 +558,9 @@ export function useOutcomeLabelGeometry({
       wrapStateByCode.forEach(({ textEl }, code) => {
         const r = textEl.getBoundingClientRect()
         atRestGeom.set(code, {
-          textCenterX: (r.left + r.right) / 2 - panelRect.left,
-          textCenterY: (r.top + r.bottom) / 2 - panelRect.top,
-          textRightX: r.right - panelRect.left,
+          textCenterX: (r.left + r.right) / 2 - rootRect.left,
+          textCenterY: (r.top + r.bottom) / 2 - rootRect.top,
+          textRightX: r.right - rootRect.left,
         })
       })
       // Restore transforms so the next frame resumes from its position.
@@ -613,7 +615,7 @@ export function useOutcomeLabelGeometry({
         cellH: heatCellH,
         columnTop: heatColumnTop,
         labelRightX: targetRightX,
-      } = computeHeatmapColumnFrame(panelW, panelH, Nr)
+      } = computeHeatmapColumnFrame(panelW, panelH, Nr, 0)
       const heatmap = heatmapLabelDeltaRef.current
       const heatmapMaxW = heatmapLabelMaxWRef.current
       heatmap.clear()
@@ -647,9 +649,9 @@ export function useOutcomeLabelGeometry({
           textEl.style.overflowWrap = "break-word"
           textEl.style.color = theme.palette.text.primary
           const rH = textEl.getBoundingClientRect()
-          const cye = (rH.top + rH.bottom) / 2 - panelRect.top
+          const cye = (rH.top + rH.bottom) / 2 - rootRect.top
           heatmap.set(code, {
-            dx: targetRightX - (rH.right - panelRect.left),
+            dx: targetRightX - (rH.right - rootRect.left),
             dy: targetCenterY - cye,
           })
           boxEl.style.justifyContent = prevJ

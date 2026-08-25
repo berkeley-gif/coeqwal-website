@@ -75,6 +75,13 @@ interface BeatTextOverlayProps {
   /** Forwarded to the geometry hook, which reports glyph landing rects
    *  to the SVG morph overlay. */
   onGlyphLayoutChange?: (layout: Record<string, GlyphRect>) => void
+  /** Fires once the right column's scrollable DOM node exists, so a
+ *  sibling component can portal content into it. Fires again with
+ *  `null` on unmount. */
+  onScrollContainerReady?: (node: HTMLDivElement | null) => void
+  /** Forwarded to the geometry hook, which reports the right column's
+   *  full scrollable content height on every relevant layout pass. */
+  onContentHeightChange?: (height: number) => void
   /** Extra heatmap columns beyond the primary one. Defaults to 0. */
   heatmapExtraColumnCount?: number
 }
@@ -99,6 +106,8 @@ export default function BeatTextOverlay({
   onAddLocation,
   outcomeMorphWindows,
   onGlyphLayoutChange,
+  onScrollContainerReady,
+  onContentHeightChange,
   hideControls = false,
   heatmapExtraColumnCount = 0,
 }: BeatTextOverlayProps) {
@@ -136,6 +145,7 @@ export default function BeatTextOverlay({
     beat2Layout,
     outcomeMorphWindows,
     onGlyphLayoutChange,
+    onContentHeightChange,
     heatmapExtraColumnCount,
   })
 
@@ -146,6 +156,13 @@ export default function BeatTextOverlay({
     rightColumnRootRef.current?.scrollTo({ top: 0 })
   }, [beatIndex, rightColumnRootRef])
 
+  // Reports the scrollable DOM node up so a sibling can portal the SVG
+  // overlay into it - the SVG needs to live inside this element to scroll
+  // natively with it instead of needing a JS-driven compensating transform.
+  useEffect(() => {
+    onScrollContainerReady?.(rightColumnRootRef.current)
+    return () => onScrollContainerReady?.(null)
+  }, [rightColumnRootRef, onScrollContainerReady])
 
   const { canScrollDown } = useScrollDownIndicator(rightColumnRootRef, [
     beat2Layout,
@@ -237,6 +254,8 @@ export default function BeatTextOverlay({
               opacity: scenarioHeaderOpacity,
               flexShrink: 0,
               pointerEvents: "none",
+              position: "relative",
+              zIndex: 3,
             }}
           >
             <Box sx={{ px: 3, pb: 0.75, minHeight: 20 }}>
@@ -254,7 +273,7 @@ export default function BeatTextOverlay({
           {/* Two-column outcome grid. Each row stacks Title, glyph
          *  placeholder, Caption, measured/animated by the geometry hook. */}
           {beat2Layout && (
-            <Box sx={{ position: "relative", pointerEvents: "none" }}>
+            <Box sx={{ position: "relative", pointerEvents: "none", zIndex: 3 }}>
               {/* View-mode header (beats 4-7), absolutely positioned over the
              *  eyebrow slot so it doesn't shift the glyph layout. */}
               <Box
