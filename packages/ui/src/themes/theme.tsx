@@ -1189,16 +1189,16 @@ const theme = createTheme({
       fontWeight: 700,
       textDecoration: "underline",
     },
-},
+  },
   shape: {
-  borderRadius: parseInt(themeValues.borderRadius.md, 10),
-},
+    borderRadius: parseInt(themeValues.borderRadius.md, 10),
+  },
   // Z-index
   zIndex: themeValues.zIndex,
   // Components customizations
   components: {
-  MuiCssBaseline: {
-    styleOverrides: `
+    MuiCssBaseline: {
+      styleOverrides: `
         *, *::before, *::after {
           box-sizing: border-box;
         }
@@ -1234,600 +1234,600 @@ const theme = createTheme({
           outline: none;
         }
       `,
-  },
-  MuiAppBar: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        backgroundColor: "transparent",
-        borderBottom: "none",
-        color: theme.palette.text.secondary,
-        borderRadius: theme.borderRadius.none,
-        boxShadow: "none",
-      }),
     },
-    defaultProps: {
-      elevation: 0,
-    },
-  },
-  MuiCard: {
-    styleOverrides: {
-      root: {
-        borderRadius: themeValues.borderRadius.sm,
-        textDecoration: "none",
-        boxShadow: themeValues.shadow.md,
-      },
-    },
-  },
-
-  MuiCardActionArea: {
-    styleOverrides: {
-      root: {
-        // keep MUI's focus ring behavior sane
-        borderRadius: themeValues.borderRadius.sm,
-      },
-    },
-  },
-
-  MuiCardContent: {
-    styleOverrides: {
-      root: {
-        // optional: to inherit link styling cleanly
-        textDecoration: "inherit",
-      },
-    },
-  },
-  MuiButton: {
-    variants: [
-      {
-        props: { variant: "contained" },
-        style: ({ theme }) => ({
-          textTransform: "none",
-          borderRadius: theme.borderRadius.pill,
+    MuiAppBar: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: "transparent",
+          borderBottom: "none",
+          color: theme.palette.text.secondary,
+          borderRadius: theme.borderRadius.none,
           boxShadow: "none",
         }),
       },
-      {
-        props: { variant: "outlined" },
-        style: ({ theme }) => ({
-          border: theme.border.medium,
-          textTransform: "none",
-          borderRadius: theme.borderRadius.pill,
-          boxShadow: "none",
-        }),
+      defaultProps: {
+        elevation: 0,
       },
-      {
-        props: { variant: "pill" },
-        style: ({ theme }) => ({
-          border: theme.border.medium,
-          textTransform: "none",
-          borderRadius: theme.borderRadius.pill,
-          boxShadow: "none",
-        }),
-      },
-      {
-        props: { variant: "standard" },
-        style: ({ theme }) => ({
-          textTransform: "none",
-          borderRadius: theme.borderRadius.pill,
-          boxShadow: "none",
-          border: "none",
-          padding: "6px 16px",
-          minWidth: 64,
-          lineHeight: 1.75,
-          fontSize: "1rem",
-          fontWeight: 400,
-          color: theme.palette.common.white,
-          backgroundColor: theme.palette.overlay.water,
-          "&:hover": {
-            backgroundColor: theme.palette.common.white,
-            color: theme.palette.blue.darkest,
-            opacity: 1,
-          },
-        }),
-      },
-      {
-        props: { variant: "text" },
-        style: {
-          textTransform: "none",
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: themeValues.borderRadius.sm,
+          textDecoration: "none",
+          boxShadow: themeValues.shadow.md,
         },
       },
-      {
-        props: { variant: "actionCard" },
-        style: ({ theme }) => ({
-          textTransform: "none",
-          borderRadius: theme.borderRadius.md,
-          boxShadow: "none",
-          border: "none",
-          padding: "16px",
-          fontSize: typeScale.uiControl,
-          fontWeight: 400,
-          textAlign: "center",
-          transition: themeValues.transition.default,
-          // Default active state - using grey colors
-          backgroundColor: theme.palette.grey[200],
-          color: theme.palette.text.disabled,
-          "&:hover": {
-            backgroundColor: theme.palette.blue.bright,
+    },
+
+    MuiCardActionArea: {
+      styleOverrides: {
+        root: {
+          // keep MUI's focus ring behavior sane
+          borderRadius: themeValues.borderRadius.sm,
+        },
+      },
+    },
+
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          // optional: to inherit link styling cleanly
+          textDecoration: "inherit",
+        },
+      },
+    },
+    MuiButton: {
+      variants: [
+        {
+          props: { variant: "contained" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
+        },
+        {
+          props: { variant: "outlined" },
+          style: ({ theme }) => ({
+            border: theme.border.medium,
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
+        },
+        {
+          props: { variant: "pill" },
+          style: ({ theme }) => ({
+            border: theme.border.medium,
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
+        },
+        {
+          props: { variant: "standard" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+            border: "none",
+            padding: "6px 16px",
+            minWidth: 64,
+            lineHeight: 1.75,
+            fontSize: "1rem",
+            fontWeight: 400,
             color: theme.palette.common.white,
+            backgroundColor: theme.palette.overlay.water,
+            "&:hover": {
+              backgroundColor: theme.palette.common.white,
+              color: theme.palette.blue.darkest,
+              opacity: 1,
+            },
+          }),
+        },
+        {
+          props: { variant: "text" },
+          style: {
+            textTransform: "none",
           },
-          // Disabled state - same as active but with not-allowed cursor
-          "&:disabled": {
+        },
+        {
+          props: { variant: "actionCard" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.md,
+            boxShadow: "none",
+            border: "none",
+            padding: "16px",
+            fontSize: typeScale.uiControl,
+            fontWeight: 400,
+            textAlign: "center",
+            transition: themeValues.transition.default,
+            // Default active state - using grey colors
             backgroundColor: theme.palette.grey[200],
             color: theme.palette.text.disabled,
-            cursor: "not-allowed",
             "&:hover": {
-              backgroundColor: theme.palette.grey[200],
+              backgroundColor: theme.palette.blue.bright,
+              color: theme.palette.common.white,
             },
+            // Disabled state - same as active but with not-allowed cursor
+            "&:disabled": {
+              backgroundColor: theme.palette.grey[200],
+              color: theme.palette.text.disabled,
+              cursor: "not-allowed",
+              "&:hover": {
+                backgroundColor: theme.palette.grey[200],
+              },
+            },
+          }),
+        },
+      ],
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.pill,
+          boxShadow: "none",
+        }),
+      },
+      defaultProps: {
+        variant: "standard",
+      },
+    },
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          "&:focus:not(:focus-visible)": {
+            outline: "none",
+          },
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderColor: theme.palette.divider,
+        }),
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.common.white,
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: theme.border.medium,
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            border: theme.border.medium,
+          },
+          "&.Mui-focused": {
+            backgroundColor: theme.palette.common.white, // Maintain white background when focused
           },
         }),
       },
-    ],
-    styleOverrides: {
-      root: ({ theme }) => ({
-        borderRadius: theme.borderRadius.pill,
-        boxShadow: "none",
-      }),
     },
-    defaultProps: {
-      variant: "standard",
-    },
-  },
-  MuiButtonBase: {
-    styleOverrides: {
-      root: {
-        "&:focus:not(:focus-visible)": {
-          outline: "none",
-        },
-      },
-    },
-  },
-  MuiDivider: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        borderColor: theme.palette.divider,
-      }),
-    },
-  },
-  MuiOutlinedInput: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        backgroundColor: theme.palette.common.white,
-        "& .MuiOutlinedInput-notchedOutline": {
-          border: theme.border.medium,
-        },
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          border: theme.border.medium,
-        },
-        "&.Mui-focused": {
-          backgroundColor: theme.palette.common.white, // Maintain white background when focused
-        },
-      }),
-    },
-  },
-  MuiSelect: {
-    styleOverrides: {
-      outlined: ({ theme }) => ({
-        backgroundColor: theme.palette.common.white,
-        "&.Mui-focused": {
-          backgroundColor: theme.palette.common.white,
-        },
-      }),
-    },
-  },
-  MuiMenu: {
-    styleOverrides: {
-      paper: ({ theme }) => ({
-        backgroundColor: theme.palette.common.white,
-      }),
-    },
-  },
-  MuiTextField: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        "& .MuiOutlinedInput-root": {
+    MuiSelect: {
+      styleOverrides: {
+        outlined: ({ theme }) => ({
           backgroundColor: theme.palette.common.white,
           "&.Mui-focused": {
             backgroundColor: theme.palette.common.white,
           },
-        },
-      }),
-    },
-  },
-  MuiSvgIcon: {
-    styleOverrides: {
-      root: () => ({
-        color: "inherit",
-        fontSize: "inherit",
-        transition: "none",
-        pointerEvents: "auto",
-        "&:hover, &:focus": {
-          color: "inherit",
-        },
-      }),
-    },
-  },
-  MuiDrawer: {
-    styleOverrides: {
-      paper: ({ theme }) => ({
-        color: theme.palette.text.secondary,
-        top: theme.layout.headerHeight,
-        height: `calc(100% - ${theme.layout.headerHeight}px)`,
-        borderRadius: 0,
-      }),
-      root: ({ theme, ownerState }) => {
-        const drawerMixins = createDrawerMixins(
-          theme,
-          theme.layout.drawer.width,
-          theme.layout.drawer.closedWidth,
-        )
-
-        return {
-          width: theme.layout.drawer.width,
-
-          "&.MiniDrawer-docked": {
-            zIndex: theme.zIndex.floating,
-
-            "& .MuiDrawer-paper.MiniDrawer-paper": {
-              backgroundColor: theme.palette.common.white,
-              top: 0,
-              height: "100vh",
-              borderRadius: 0,
-              paddingTop: theme.layout.headerHeight,
-              border: "none",
-
-              ...(ownerState.open
-                ? drawerMixins.opened
-                : drawerMixins.closed),
-            },
-
-            "& .MuiListItemButton-root": {
-              display: "block",
-              padding: theme.spacing(2),
-              borderRadius: theme.borderRadius.md,
-              mx: 1,
-              my: 0.5,
-              transition: theme.transitions.create(
-                ["background-color", "transform", "box-shadow"],
-                {
-                  duration: theme.transitions.duration.shortest,
-                },
-              ),
-              "&:hover": {
-                backgroundColor: `${theme.palette.action.hover}cc`,
-                transform: "translateY(-2px)",
-                boxShadow: themeValues.shadow.sm,
-              },
-              "&:active": {
-                transform: "translateY(0px)",
-                boxShadow: themeValues.shadow.subtle,
-              },
-            },
-
-            "& .MuiListItem-root": {
-              transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
-              transformOrigin: "center center",
-              transition: theme.transitions.create("transform", {
-                duration: theme.transitions.duration.shortest,
-              }),
-            },
-
-            "& .MuiListItemText-root": {
-              textAlign: ownerState.open ? "left" : "center",
-              "& .MuiListItemText-primary": {
-                color: "inherit",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                fontSize: "0.875rem",
-                lineHeight: 1.1,
-              },
-            },
-          },
-        }
-      },
-    },
-  },
-  MuiToggleButton: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        borderRadius: theme.borderRadius.pill,
-        padding: "1px 15px", // to account for border width
-        fontSize: typeScale.uiControl,
-        fontWeight: 500,
-        backgroundColor: "transparent",
-        color: theme.palette.text.primary,
-        boxShadow: "none",
-        "&:hover": {
-          backgroundColor: "transparent",
-        },
-        "&.Mui-selected": {
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.common.white,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.common.white,
-          },
-        },
-      }),
-    },
-  },
-  MuiToggleButtonGroup: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
-          borderLeft: `1px solid ${theme.palette.divider}`,
-        },
-      }),
-    },
-  },
-  MuiPaper: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        borderRadius: theme.borderRadius.md,
-        // Ensure dropdown panels and menus have white backgrounds
-        "&.MuiMenu-paper, &.MuiSelect-paper": {
-          backgroundColor: theme.palette.common.white,
-        },
-      }),
-    },
-  },
-  MuiToolbar: {
-    styleOverrides: {
-      root: {
-        // Reset MUI defaults (56px / 64px at sm breakpoint) so that
-        // BaseHeader controls height via CSS custom property --header-h
-        minHeight: "unset",
-      },
-    },
-  },
-  MuiTypography: {
-    defaultProps: {
-      variantMapping: {
-        // Map custom variants to semantic HTML elements
-        // Block variants (render as <p> or <div>)
-        dashboard: "p",
-        compactCaptionMedium: "p",
-        outcomeLabel: "div",
-        outcomeHeader: "p",
-        scenarioTitle: "h3",
-        // Inline variants (render as <span>)
-        // These are inline by default for use within flex containers, chips, etc.
-        // Use sx={{ display: "block" }} when standalone block display is needed.
-        nav: "span",
-        compactTitle: "span",
-        compactSubtitle: "span",
-        axisLabel: "span",
-        compactCaption: "span",
-        compactMicro: "span",
-        dashboardBold: "span",
-        glossaryTerm: "span",
-      },
-    },
-    variants: [
-      {
-        props: { variant: "h2" },
-        style: ({ theme }) => ({
-          marginBottom: theme.spacing(2.5),
         }),
       },
-    ],
-  },
-  MuiCheckbox: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        // Custom square checkbox
-        width: `${themeValues.layout.controls.standard}px !important`,
-        height: `${themeValues.layout.controls.standard}px !important`,
-        minWidth: `${themeValues.layout.controls.standard}px !important`,
-        maxWidth: `${themeValues.layout.controls.standard}px !important`,
-        flexShrink: 0,
-        backgroundColor: "transparent",
-        padding: "0",
-        alignSelf: "flex-start",
-        transform: "translateY(-3px)",
-        transition: themeValues.transition.default,
-        position: "relative",
-        display: "inline-block",
-        borderRadius: theme.borderRadius.xs,
-        border: `2px solid ${theme.palette.text.primary}`,
-        margin: theme.spacing(0.5),
-        cursor: "pointer",
-        "&:hover": {
-          backgroundColor: `${theme.palette.action.hover}30`,
-        },
-        "&.Mui-checked": {
-          backgroundColor: theme.palette.blue.darkest,
-          borderColor: theme.palette.blue.darkest,
-        },
-        // Remove ripple animation
-        "& .MuiTouchRipple-root": {
-          display: "none",
-        },
-        // Hide the default MUI SVG and replace with custom checkmark
-        "& .MuiSvgIcon-root": {
-          display: "none !important", // Force hide default checkbox SVG
-          width: "0 !important",
-          height: "0 !important",
-        },
-        // WCAG 2.5.5: Extend touch target to 44px on mobile while keeping visual size small
-        // The input extends beyond visual bounds to create larger touch area
-        "& input[type='checkbox']": {
-          position: "absolute",
-          // Center the 44px touch target around the 20px visual checkbox
-          width: "44px",
-          height: "44px",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          opacity: 0,
-          margin: 0,
-          padding: 0,
-          cursor: "pointer",
-        },
-        // WCAG 2.4.7: Ring only when the input shows keyboard focus-visible (not mouse click)
-        "&:has(input:focus-visible)": {
-          outline: `2px solid ${themeValues.palette.blue.bright}`,
-          outlineOffset: "2px",
-        },
-        // Custom checkmark using CSS - centered in inline-block
-        "&.Mui-checked::after": {
-          content: '"✓"',
-          position: "absolute",
-          color: theme.palette.common.white,
-          fontSize: "12px",
-          fontWeight: "bold",
-          lineHeight: "18px", // height minus border
-          textAlign: "center",
-          top: "0",
-          left: "0",
-          width: "100%",
-          height: "100%",
-        },
-      }),
     },
-  },
-  MuiRadio: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        // Custom circular radio button
-        width: `${themeValues.layout.controls.standard}px !important`,
-        height: `${themeValues.layout.controls.standard}px !important`,
-        minWidth: `${themeValues.layout.controls.standard}px !important`,
-        maxWidth: `${themeValues.layout.controls.standard}px !important`,
-        flexShrink: 0,
-        backgroundColor: "transparent",
-        padding: "0",
-        alignSelf: "flex-start",
-        transform: "translateY(-3px)",
-        transition: themeValues.transition.default,
-        position: "relative",
-        display: "inline-block",
-        borderRadius: theme.borderRadius.circle,
-        border: `1px solid ${theme.palette.text.primary}`,
-        margin: theme.spacing(0.5),
-        cursor: "pointer",
-        "&:hover": {
-          backgroundColor: `${theme.palette.action.hover}30`,
-        },
-        "&.Mui-checked": {
-          backgroundColor: theme.palette.blue.darkest,
-          borderColor: theme.palette.blue.darkest,
-        },
-        // Remove ripple animation
-        "& .MuiTouchRipple-root": {
-          display: "none",
-        },
-        // Hide the default MUI SVG and replace with custom dot
-        "& .MuiSvgIcon-root": {
-          display: "none", // Hide default radio SVG
-        },
-        // Custom dot using CSS - centered in inline-block
-        "&.Mui-checked::after": {
-          content: '""',
-          position: "absolute",
-          width: "6px",
-          height: "6px",
-          borderRadius: theme.borderRadius.circle,
+    MuiMenu: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
           backgroundColor: theme.palette.common.white,
-          top: "7px", // (20px - 6px) / 2 = 7px
-          left: "7px", // (20px - 6px) / 2 = 7px
-        },
-      }),
+        }),
+      },
     },
-  },
-  MuiFormControlLabel: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        margin: 0, // Remove default margins for condensed spacing
-        alignItems: "flex-start", // Align checkbox with first line of text
-        "& .MuiFormControlLabel-label": {
+    MuiTextField: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: theme.palette.common.white,
+            "&.Mui-focused": {
+              backgroundColor: theme.palette.common.white,
+            },
+          },
+        }),
+      },
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: () => ({
+          color: "inherit",
+          fontSize: "inherit",
+          transition: "none",
+          pointerEvents: "auto",
+          "&:hover, &:focus": {
+            color: "inherit",
+          },
+        }),
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          color: theme.palette.text.secondary,
+          top: theme.layout.headerHeight,
+          height: `calc(100% - ${theme.layout.headerHeight}px)`,
+          borderRadius: 0,
+        }),
+        root: ({ theme, ownerState }) => {
+          const drawerMixins = createDrawerMixins(
+            theme,
+            theme.layout.drawer.width,
+            theme.layout.drawer.closedWidth,
+          )
+
+          return {
+            width: theme.layout.drawer.width,
+
+            "&.MiniDrawer-docked": {
+              zIndex: theme.zIndex.floating,
+
+              "& .MuiDrawer-paper.MiniDrawer-paper": {
+                backgroundColor: theme.palette.common.white,
+                top: 0,
+                height: "100vh",
+                borderRadius: 0,
+                paddingTop: theme.layout.headerHeight,
+                border: "none",
+
+                ...(ownerState.open
+                  ? drawerMixins.opened
+                  : drawerMixins.closed),
+              },
+
+              "& .MuiListItemButton-root": {
+                display: "block",
+                padding: theme.spacing(2),
+                borderRadius: theme.borderRadius.md,
+                mx: 1,
+                my: 0.5,
+                transition: theme.transitions.create(
+                  ["background-color", "transform", "box-shadow"],
+                  {
+                    duration: theme.transitions.duration.shortest,
+                  },
+                ),
+                "&:hover": {
+                  backgroundColor: `${theme.palette.action.hover}cc`,
+                  transform: "translateY(-2px)",
+                  boxShadow: themeValues.shadow.sm,
+                },
+                "&:active": {
+                  transform: "translateY(0px)",
+                  boxShadow: themeValues.shadow.subtle,
+                },
+              },
+
+              "& .MuiListItem-root": {
+                transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
+                transformOrigin: "center center",
+                transition: theme.transitions.create("transform", {
+                  duration: theme.transitions.duration.shortest,
+                }),
+              },
+
+              "& .MuiListItemText-root": {
+                textAlign: ownerState.open ? "left" : "center",
+                "& .MuiListItemText-primary": {
+                  color: "inherit",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: 1.1,
+                },
+              },
+            },
+          }
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.pill,
+          padding: "1px 15px", // to account for border width
           fontSize: typeScale.uiControl,
-          lineHeight: 1.3, // Tighter line height
-          color: theme.palette.text.primary,
-          paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
-        },
-      }),
-    },
-  },
-  MuiTabs: {
-    styleOverrides: {
-      root: {
-        minHeight: "auto", // Reduce default height
-      },
-      indicator: ({ theme }) => ({
-        backgroundColor: theme.palette.action.hover,
-      }),
-    },
-  },
-  MuiTab: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        color: theme.palette.text.primary,
-        fontSize: typeScale.uiControl,
-        fontWeight: 400,
-        textTransform: "none",
-        minWidth: "auto",
-        minHeight: "auto",
-        padding: theme.spacing(1, 2),
-        "&.Mui-selected": {
-          color: theme.palette.action.hover,
           fontWeight: 500,
-        },
-        "&:hover": {
-          color: theme.palette.action.hover,
-        },
-        // Remove click ripple animation
-        "& .MuiTouchRipple-root": {
-          display: "none",
-        },
-      }),
+          backgroundColor: "transparent",
+          color: theme.palette.text.primary,
+          boxShadow: "none",
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.common.white,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.common.white,
+            },
+          },
+        }),
+      },
     },
-  },
-  MuiTooltip: {
-    defaultProps: {
-      enterDelay: 300, // Slight delay before showing (prevents accidental triggers)
-      leaveDelay: 200, // Delay before hiding (gives time to move cursor)
-      enterNextDelay: 100, // Faster subsequent tooltips
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
+            borderLeft: `1px solid ${theme.palette.divider}`,
+          },
+        }),
+      },
     },
-    styleOverrides: {
-      // Single source of truth for the tooltip look: see tooltipSurface
-      tooltip: ({ theme }) => ({
-        ...tooltipSurface(theme),
-        maxWidth: themeValues.layout.maxWidth.sm,
-        // Add pointer events so tooltip can be hovered
-        pointerEvents: "auto",
-      }),
-      arrow: ({ theme }) => ({
-        color: theme.palette.background.paper,
-        "&::before": {
-          border: theme.border.light,
-        },
-      }),
-      // Create a safe area between trigger and tooltip
-      popper: {
-        '&[data-popper-placement*="top"]': {
-          "& .MuiTooltip-tooltip": {
-            marginBottom: "6px",
+    MuiPaper: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.md,
+          // Ensure dropdown panels and menus have white backgrounds
+          "&.MuiMenu-paper, &.MuiSelect-paper": {
+            backgroundColor: theme.palette.common.white,
           },
+        }),
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          // Reset MUI defaults (56px / 64px at sm breakpoint) so that
+          // BaseHeader controls height via CSS custom property --header-h
+          minHeight: "unset",
         },
-        '&[data-popper-placement*="bottom"]': {
-          "& .MuiTooltip-tooltip": {
-            marginTop: "6px",
+      },
+    },
+    MuiTypography: {
+      defaultProps: {
+        variantMapping: {
+          // Map custom variants to semantic HTML elements
+          // Block variants (render as <p> or <div>)
+          dashboard: "p",
+          compactCaptionMedium: "p",
+          outcomeLabel: "div",
+          outcomeHeader: "p",
+          scenarioTitle: "h3",
+          // Inline variants (render as <span>)
+          // These are inline by default for use within flex containers, chips, etc.
+          // Use sx={{ display: "block" }} when standalone block display is needed.
+          nav: "span",
+          compactTitle: "span",
+          compactSubtitle: "span",
+          axisLabel: "span",
+          compactCaption: "span",
+          compactMicro: "span",
+          dashboardBold: "span",
+          glossaryTerm: "span",
+        },
+      },
+      variants: [
+        {
+          props: { variant: "h2" },
+          style: ({ theme }) => ({
+            marginBottom: theme.spacing(2.5),
+          }),
+        },
+      ],
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // Custom square checkbox
+          width: `${themeValues.layout.controls.standard}px !important`,
+          height: `${themeValues.layout.controls.standard}px !important`,
+          minWidth: `${themeValues.layout.controls.standard}px !important`,
+          maxWidth: `${themeValues.layout.controls.standard}px !important`,
+          flexShrink: 0,
+          backgroundColor: "transparent",
+          padding: "0",
+          alignSelf: "flex-start",
+          transform: "translateY(-3px)",
+          transition: themeValues.transition.default,
+          position: "relative",
+          display: "inline-block",
+          borderRadius: theme.borderRadius.xs,
+          border: `2px solid ${theme.palette.text.primary}`,
+          margin: theme.spacing(0.5),
+          cursor: "pointer",
+          "&:hover": {
+            backgroundColor: `${theme.palette.action.hover}30`,
           },
-        },
-        '&[data-popper-placement*="left"]': {
-          "& .MuiTooltip-tooltip": {
-            marginRight: "6px",
+          "&.Mui-checked": {
+            backgroundColor: theme.palette.blue.darkest,
+            borderColor: theme.palette.blue.darkest,
           },
+          // Remove ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
+          },
+          // Hide the default MUI SVG and replace with custom checkmark
+          "& .MuiSvgIcon-root": {
+            display: "none !important", // Force hide default checkbox SVG
+            width: "0 !important",
+            height: "0 !important",
+          },
+          // WCAG 2.5.5: Extend touch target to 44px on mobile while keeping visual size small
+          // The input extends beyond visual bounds to create larger touch area
+          "& input[type='checkbox']": {
+            position: "absolute",
+            // Center the 44px touch target around the 20px visual checkbox
+            width: "44px",
+            height: "44px",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            opacity: 0,
+            margin: 0,
+            padding: 0,
+            cursor: "pointer",
+          },
+          // WCAG 2.4.7: Ring only when the input shows keyboard focus-visible (not mouse click)
+          "&:has(input:focus-visible)": {
+            outline: `2px solid ${themeValues.palette.blue.bright}`,
+            outlineOffset: "2px",
+          },
+          // Custom checkmark using CSS - centered in inline-block
+          "&.Mui-checked::after": {
+            content: '"✓"',
+            position: "absolute",
+            color: theme.palette.common.white,
+            fontSize: "12px",
+            fontWeight: "bold",
+            lineHeight: "18px", // height minus border
+            textAlign: "center",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
+          },
+        }),
+      },
+    },
+    MuiRadio: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // Custom circular radio button
+          width: `${themeValues.layout.controls.standard}px !important`,
+          height: `${themeValues.layout.controls.standard}px !important`,
+          minWidth: `${themeValues.layout.controls.standard}px !important`,
+          maxWidth: `${themeValues.layout.controls.standard}px !important`,
+          flexShrink: 0,
+          backgroundColor: "transparent",
+          padding: "0",
+          alignSelf: "flex-start",
+          transform: "translateY(-3px)",
+          transition: themeValues.transition.default,
+          position: "relative",
+          display: "inline-block",
+          borderRadius: theme.borderRadius.circle,
+          border: `1px solid ${theme.palette.text.primary}`,
+          margin: theme.spacing(0.5),
+          cursor: "pointer",
+          "&:hover": {
+            backgroundColor: `${theme.palette.action.hover}30`,
+          },
+          "&.Mui-checked": {
+            backgroundColor: theme.palette.blue.darkest,
+            borderColor: theme.palette.blue.darkest,
+          },
+          // Remove ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
+          },
+          // Hide the default MUI SVG and replace with custom dot
+          "& .MuiSvgIcon-root": {
+            display: "none", // Hide default radio SVG
+          },
+          // Custom dot using CSS - centered in inline-block
+          "&.Mui-checked::after": {
+            content: '""',
+            position: "absolute",
+            width: "6px",
+            height: "6px",
+            borderRadius: theme.borderRadius.circle,
+            backgroundColor: theme.palette.common.white,
+            top: "7px", // (20px - 6px) / 2 = 7px
+            left: "7px", // (20px - 6px) / 2 = 7px
+          },
+        }),
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          margin: 0, // Remove default margins for condensed spacing
+          alignItems: "flex-start", // Align checkbox with first line of text
+          "& .MuiFormControlLabel-label": {
+            fontSize: typeScale.uiControl,
+            lineHeight: 1.3, // Tighter line height
+            color: theme.palette.text.primary,
+            paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
+          },
+        }),
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          minHeight: "auto", // Reduce default height
         },
-        '&[data-popper-placement*="right"]': {
-          "& .MuiTooltip-tooltip": {
-            marginLeft: "6px",
+        indicator: ({ theme }) => ({
+          backgroundColor: theme.palette.action.hover,
+        }),
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          fontSize: typeScale.uiControl,
+          fontWeight: 400,
+          textTransform: "none",
+          minWidth: "auto",
+          minHeight: "auto",
+          padding: theme.spacing(1, 2),
+          "&.Mui-selected": {
+            color: theme.palette.action.hover,
+            fontWeight: 500,
+          },
+          "&:hover": {
+            color: theme.palette.action.hover,
+          },
+          // Remove click ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
+          },
+        }),
+      },
+    },
+    MuiTooltip: {
+      defaultProps: {
+        enterDelay: 300, // Slight delay before showing (prevents accidental triggers)
+        leaveDelay: 200, // Delay before hiding (gives time to move cursor)
+        enterNextDelay: 100, // Faster subsequent tooltips
+      },
+      styleOverrides: {
+        // Single source of truth for the tooltip look: see tooltipSurface
+        tooltip: ({ theme }) => ({
+          ...tooltipSurface(theme),
+          maxWidth: themeValues.layout.maxWidth.sm,
+          // Add pointer events so tooltip can be hovered
+          pointerEvents: "auto",
+        }),
+        arrow: ({ theme }) => ({
+          color: theme.palette.background.paper,
+          "&::before": {
+            border: theme.border.light,
+          },
+        }),
+        // Create a safe area between trigger and tooltip
+        popper: {
+          '&[data-popper-placement*="top"]': {
+            "& .MuiTooltip-tooltip": {
+              marginBottom: "6px",
+            },
+          },
+          '&[data-popper-placement*="bottom"]': {
+            "& .MuiTooltip-tooltip": {
+              marginTop: "6px",
+            },
+          },
+          '&[data-popper-placement*="left"]': {
+            "& .MuiTooltip-tooltip": {
+              marginRight: "6px",
+            },
+          },
+          '&[data-popper-placement*="right"]': {
+            "& .MuiTooltip-tooltip": {
+              marginLeft: "6px",
+            },
           },
         },
       },
     },
   },
-},
 })
 
 /* ========================================================

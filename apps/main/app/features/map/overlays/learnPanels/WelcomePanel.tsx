@@ -40,8 +40,8 @@ export default function WelcomePanel() {
             </Typography>
             <Typography variant="body2" color="text.secondary">
               COEQWAL uses the{" "}
-              <GlossaryTermLink term="CalSim">CalSim3</GlossaryTermLink>{" "}
-              water planning model to evaluate how different{" "}
+              <GlossaryTermLink term="CalSim">CalSim3</GlossaryTermLink> water
+              planning model to evaluate how different{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
                 scenarios
               </Typography>{" "}
@@ -54,11 +54,9 @@ export default function WelcomePanel() {
               </GlossaryTermLink>{" "}
               (the operating rules, policies, and infrastructure decisions that
               determine how water is allocated) with a{" "}
-              <GlossaryTermLink>
-                hydroclimate
-              </GlossaryTermLink>{" "}
-              (the temperature and precipitation patterns that determine how
-              much water is available).
+              <GlossaryTermLink>hydroclimate</GlossaryTermLink> (the temperature
+              and precipitation patterns that determine how much water is
+              available).
             </Typography>
             <Typography variant="body2" color="text.secondary">
               The management strategy represents what we can control and the

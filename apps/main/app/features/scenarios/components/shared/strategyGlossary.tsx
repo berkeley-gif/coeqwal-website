@@ -105,7 +105,7 @@ export function useGlossaryRenderer(
         borderRadius: "2px",
       },
     }),
-    [theme.palette.blue.bright],
+    [theme.palette.blue.bright, theme.typography.glossaryTerm],
   )
 
   return useCallback(() => {
