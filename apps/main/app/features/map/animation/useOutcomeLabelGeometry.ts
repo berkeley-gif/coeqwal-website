@@ -665,11 +665,19 @@ export function useOutcomeLabelGeometry({
           boxEl.style.transform = prevBoxTransform
         })
       }
+
+      // A resize (e.g. sidebar toggle) just recomputed radar/heatmap label
+      // deltas above, but the transform that actually places labels only
+      // runs on scroll ticks. Re-invoke it now with the current progress so
+      // labels snap to their new position immediately instead of sitting
+      // stale until the next scroll.
+      latestNarrationFrameRef.current(progress.get())
     }
 
     const ro = new ResizeObserver(() => {
       measure()
     })
+
     ro.observe(root)
     ro.observe(panel)
     placeholderRefsMap.current.forEach((el) => {
