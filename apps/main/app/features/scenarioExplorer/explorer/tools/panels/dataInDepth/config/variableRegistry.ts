@@ -21,6 +21,12 @@
  */
 
 /** One selectable view of a variable's data. */
+import {
+  AG_ENTITY_LOCATIONS,
+  CWS_DELIVERY_ENTITY_LOCATIONS,
+  CWS_SHORTAGE_ENTITY_LOCATIONS,
+} from "./entityLocations.generated"
+
 export type VariableView =
   | "dist" // annual distribution (exceedance curve or box plot)
   | "pct" // annual distribution as percent of capacity (reservoirs)
@@ -50,6 +56,14 @@ export interface LocationDef {
   aggregate?: boolean
   /** Synthetic median magnitude for the sample-data engine */
   mockBase?: number
+  /** Uncut display label, present only when `name` was cut at a word
+   *  boundary to stay legible in chips, legends and titles (generated
+   *  entity locations). Shown in tooltips. */
+  longName?: string
+  /** The label the API serves for this subject, verbatim, when the display
+   *  name was derived from it (generated entity locations). Kept so a
+   *  display-name review can see what the data team called the entity. */
+  apiLabel?: string
 }
 
 export interface LocationGroup {
@@ -72,6 +86,7 @@ export type LocationGroupId =
   | "ssjv"
   | "agregions"
   | "cws"
+  | "cwsShortage"
   | "salmon"
 
 export interface SectorDef {
@@ -137,6 +152,17 @@ export interface VariableDef {
    *  provenance drop the water-years clause. The stored selection stays
    *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
+  /** Year basis of the served series. Absent means water years (October to
+   *  September), the CalSim3 convention. "calendar" marks series aggregated
+   *  upstream by calendar year (the CWS delivery family), which changes the
+   *  year-axis label in exports and provenance. */
+  yearBasis?: "water" | "calendar"
+  /** Inclusive range of served years the site adopts. Points outside it are
+   *  dropped before any statistic is computed. Set where the endpoint serves
+   *  partial stub years at the ends of the model run (the CWS delivery
+   *  family: a three-month 1921 and a nine-month 2021), so a stub never
+   *  becomes the minimum, the exceedance tail or a term of the mean and CV. */
+  servedYearRange?: { min: number; max: number }
   /** Shown when a scenario the user selected is not modeled for this
    *  variable, so the endpoint serves no data for it. Explains WHY rather
    *  than leaving a blank series: an absence with a reason reads as a fact
@@ -522,13 +548,14 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
     ],
   },
   agregions: {
-    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture,
-    // verified against /api/data-in-depth/ag 2026-08-21). The four
-    // illustrative demand-unit groups are retired for the same reason the
-    // CWS sample groups were: real aggregates on a public tool beat invented
-    // groupings, and stale persisted ids heal at hydration. Entity-level
-    // demand units follow only when the data team confirms a subject list.
-    label: "Region",
+    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture)
+    // followed by every demand unit the ag endpoint serves (132 as of
+    // 2026-08-24), generated from the live API by
+    // scripts/did-entity-locations. Names lead with the served code because
+    // the served labels repeat ("Non-district" appears 22 times). The
+    // aggregate mockBase values are scale factors read by AG_BASE in the
+    // sample engine; entity mockBase values are served medians.
+    label: "Demand unit",
     items: [
       {
         id: "AGG_AG_NOD",
@@ -544,32 +571,60 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         aggregate: true,
         mockBase: 1,
       },
+      ...AG_ENTITY_LOCATIONS,
     ],
   },
   cws: {
-    // The two served aggregates (subjects NOD_CWS/SOD_CWS, verified against
-    // /api/data-in-depth/cws 2026-08-19). The four illustrative sample
-    // groups are retired: real aggregates on a public tool beat invented
-    // groupings, and stale persisted ids heal at hydration. Entity-level
-    // locations (74 systems with served delivery) follow once the location
-    // list is finalized with the data team. mockBase values approximate the
-    // served median deliveries so sample fallbacks share the live scale.
-    label: "Community water systems",
+    // Community water systems with served DELIVERIES: the two aggregates
+    // (subjects NOD_CWS/SOD_CWS) followed by the 74 systems the cws endpoint
+    // serves the delivery measure for, generated from the live API. The
+    // shortage and welfare measures cover a different, overlapping set of
+    // systems, which is the separate `cwsShortage` group below. Aggregate
+    // mockBase values approximate the served median deliveries.
+    label: "Community water system",
     items: [
       {
         id: "AGG_CWS_NOD",
         name: "All North of Delta",
         region: "NOD",
         aggregate: true,
-        mockBase: 350,
+        mockBase: 597,
       },
       {
         id: "AGG_CWS_SOD",
         name: "All South of Delta",
         region: "SOD",
         aggregate: true,
-        mockBase: 2000,
+        mockBase: 2220,
       },
+      ...CWS_DELIVERY_ENTITY_LOCATIONS,
+    ],
+  },
+  cwsShortage: {
+    // Community water systems with served SHORTAGE and WELFARE outcomes: the
+    // same two aggregates (the endpoint serves all five measures on them)
+    // followed by the 63 systems modeled in the welfare-outcomes source. The
+    // data team treats this set as separate from the delivery set (34
+    // systems are in both); binding each variable to its own group means the
+    // site never requests a subject the endpoint lacks for that measure.
+    // mockBase here is the median shortage in TAF.
+    label: "Community water system",
+    items: [
+      {
+        id: "AGG_CWS_NOD",
+        name: "All North of Delta",
+        region: "NOD",
+        aggregate: true,
+        mockBase: 2.6,
+      },
+      {
+        id: "AGG_CWS_SOD",
+        name: "All South of Delta",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 3.5,
+      },
+      ...CWS_SHORTAGE_ENTITY_LOCATIONS,
     ],
   },
   salmon: {
@@ -977,7 +1032,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist", "monthly"],
     plain: "How much river and project water is delivered to farms each year.",
-    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Entity-level demand units follow once the data team confirms a subject list.",
+    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132).",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -994,7 +1049,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much groundwater farms pump to make up for surface water they don't receive. Pumping rises in dry years.",
-    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). Pumping-limit scenarios constrain this directly.",
+    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). Pumping-limit scenarios constrain this directly.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -1013,7 +1068,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts. The percent view expresses the same gap as a share of what farms needed, which compares across regions of different size.",
-    tech: "Served live from the ag data-in-depth endpoint's shortage measure on the NOD_Agriculture/SOD_Agriculture aggregates (annual TAF). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
+    tech: "Served live from the ag data-in-depth endpoint's shortage measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
     data: "live",
@@ -1047,11 +1102,13 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
-    tech: "Served live from the cws data-in-depth endpoint's delivery measure on the NOD_CWS/SOD_CWS aggregates (annual TAF; entity-level locations follow once the location list is finalized with the data team). Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. The served series is aggregated by calendar year over a model run from October 1921 to September 2021, so its first and last years are three-month and nine-month stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
     data: "live",
     wytApplicable: false,
+    yearBasis: "calendar",
+    servedYearRange: { min: 1922, max: 2020 },
     mockKind: "cwsdel",
     mockEffect: "cws",
   },
@@ -1059,7 +1116,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     id: "cws_short",
     name: "Delivery shortages",
     sectorId: "cwsS",
-    locationGroup: "cws",
+    locationGroup: "cwsShortage",
     unit: "TAF",
     unitLabel: TAF,
     views: ["dist", "pct_demand"],
@@ -1067,7 +1124,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water community systems were short of their needs - the gap the tiers pathway scores against human-health thresholds.",
-    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). Note the shortage measures aggregate over the systems with modeled shortage series, a narrower set than the delivery measure covers, so shortage_pct is not simply 100 minus pct_demand_met. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). The shortage set overlaps but differs from the 74-system delivery set, so shortage_pct is not simply 100 minus pct_demand_met and the location list here is its own. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
     data: "live",
@@ -1176,6 +1233,40 @@ export function getLocationTitle(
   return group.titleSuffix && !location?.aggregate
     ? `${name} ${group.titleSuffix}`
     : name
+}
+
+/**
+ * Carry the location selection from one group to another when a variable
+ * switch changes groups (community water systems deliveries vs shortages
+ * bind different, overlapping system lists). The location picked last
+ * follows the user into the next group when that group has it; a location
+ * the next group lacks is left behind, and the next group's own pin (its
+ * default at worst) stands. The store seeds every group with a default pin,
+ * so "no pin yet" cannot be told apart from "the default", which is why the
+ * latest pick wins rather than only filling a gap. Pure: returns new
+ * records, never mutates the inputs.
+ */
+export function carryLocationSelection(
+  prevGroupId: string,
+  nextGroupId: string,
+  pinnedLocationByGroup: Record<string, string>,
+  selectedLocationsByGroup: Record<string, string[]>,
+): {
+  pinnedLocationByGroup: Record<string, string>
+  selectedLocationsByGroup: Record<string, string[]>
+} {
+  const next = LOCATION_GROUPS[nextGroupId as LocationGroupId]
+  if (prevGroupId === nextGroupId || !next) {
+    return { pinnedLocationByGroup, selectedLocationsByGroup }
+  }
+  const has = (id: string) => next.items.some((l) => l.id === id)
+  const pins = { ...pinnedLocationByGroup }
+  const prevPin = pinnedLocationByGroup[prevGroupId]
+  if (prevPin && has(prevPin)) pins[nextGroupId] = prevPin
+  const selections = { ...selectedLocationsByGroup }
+  const carried = (selectedLocationsByGroup[prevGroupId] ?? []).filter(has)
+  if (carried.length > 0) selections[nextGroupId] = carried
+  return { pinnedLocationByGroup: pins, selectedLocationsByGroup: selections }
 }
 
 /** Default (first) location id per group, used to seed pinned locations. */

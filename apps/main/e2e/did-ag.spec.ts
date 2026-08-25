@@ -25,6 +25,10 @@ const SCENARIOS_FIXTURE = [
 const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
   NOD_Agriculture: { net_diversion: 3600, gw_pumping: 2200, shortage: 400 },
   SOD_Agriculture: { net_diversion: 4700, gw_pumping: 2600, shortage: 300 },
+  // Two demand units, one per region, so a wrong subject cannot render a
+  // number that also appears on an aggregate.
+  "08N_SA2": { net_diversion: 310, gw_pumping: 31, shortage: 5 },
+  "90_PA1": { net_diversion: 620, gw_pumping: 90, shortage: 7 },
 }
 
 function agPayload(subjectsCsv: string, measuresCsv: string) {
@@ -252,6 +256,94 @@ test("ag shortage derives its percent-of-demand view from two served measures", 
   // 400 / (3,600 + 400) x 100 = 10 percent, a value that appears nowhere in
   // the fixture's inputs.
   await expect(page.getByText(/10(\.0+)? %/).first()).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
+// Entity-level demand units: the picker lists every served demand unit after
+// the two aggregates, grouped by region, and a picked unit fetches its own
+// subject code. On the Locations axis the same units are added through an
+// add-location control instead of a chip cloud (134 chips is not a control).
+test("ag demand units are pickable and fetch their own subject", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  const requested = await setupAgRoutes(page)
+
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const agList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Groundwater pumping" }) })
+  await agList.getByRole("button", { name: "Surface water deliveries" }).click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+
+  // The pin is a grouped select: aggregates, then North of Delta, then
+  // South of Delta. Pick a North of Delta demand unit.
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  const listbox = page.getByRole("listbox")
+  await expect(
+    listbox.getByText("North of Delta", { exact: true }),
+  ).toBeVisible()
+  await expect(
+    listbox.getByText("South of Delta", { exact: true }),
+  ).toBeVisible()
+  await listbox
+    .getByRole("option", { name: "08N_SA2 - Glenn-Colusa ID (55% of total)" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "08N_SA2" && r.measures === "net_diversion",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/310 TAF/).first()).toBeVisible()
+  // The figure title names the unit with its code.
+  await expect(
+    page.getByRole("img", { name: /08N_SA2 - Glenn-Colusa ID/ }),
+  ).toBeVisible()
+
+  // The pin persists across the sector's variables (same location group).
+  await agList.getByRole("button", { name: "Groundwater pumping" }).click()
+  await expect
+    .poll(() =>
+      requested.some(
+        (r) => r.subjects === "08N_SA2" && r.measures === "gw_pumping",
+      ),
+    )
+    .toBe(true)
+  await expect(page.getByText(/31(\.0)? TAF/).first()).toBeVisible()
+
+  // Locations axis: the default three members are the two aggregates and the
+  // first demand unit; a further unit is added through the add control and
+  // removed from its chip.
+  await page.getByRole("button", { name: "Locations", exact: true }).click()
+  const addSelect = page.getByRole("combobox", { name: "Add location" })
+  await addSelect.click()
+  await page
+    .getByRole("option", {
+      name: "90_PA1 - Westlands WD Priority Area I, DD No. 2",
+    })
+    .click()
+  await page.getByRole("button", { name: "Add", exact: true }).click()
+  const chip = page.getByRole("button", {
+    name: /90_PA1 - Westlands WD Priority Area I, DD No. 2/,
+  })
+  await expect(chip).toBeVisible()
+  await expect(page.getByRole("img", { name: /4 locations/i })).toBeVisible()
+  // Removable by keyboard: a focused chip drops on Backspace.
+  await chip.focus()
+  await page.keyboard.press("Backspace")
+  await expect(chip).toHaveCount(0)
+  await expect(page.getByRole("img", { name: /3 locations/i })).toBeVisible()
 
   expect(errors).toEqual([])
 })

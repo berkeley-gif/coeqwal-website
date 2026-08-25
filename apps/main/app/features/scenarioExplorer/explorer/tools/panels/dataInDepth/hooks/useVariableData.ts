@@ -93,6 +93,8 @@ import {
   includeForView,
   pickLiveSeriesPoints,
   sumAlignedSeriesPoints,
+  blockHasSubject,
+  trimPointsToYearRange,
   SSJV_ALL_ROUTES_LOCATION,
   SSJV_ROUTE_SUBJECTS,
   viewHasLiveSource,
@@ -564,22 +566,38 @@ export function useVariableData(): VariableData {
       }
       let waterYears: number[] | undefined
       let adoptedLive = false
+      // The served block exists but lacks this member's subject: not
+      // modeled for this scenario, reported like an empty response.
+      let subjectAbsent = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
       if (liveEligible && period && domain && spec.slotIndex != null) {
-        const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
+        const slot = activeSlots[spec.slotIndex]
+        const block = slot?.scenarios?.[0]
+        subjectAbsent =
+          !!block &&
+          !!slot?.hasData &&
+          !slot.isLoading &&
+          subject != null &&
+          !isSsjvTotal &&
+          !blockHasSubject(block, domain, subject)
+        // Served stub years (the CWS delivery family) are dropped before
+        // anything is computed from the series.
+        const range = variable.servedYearRange
+        const pick = (code: string, token: typeof unitToken) => {
+          const p = pickLiveSeriesPoints(block, domain, code, period, token)
+          return range ? trimPointsToYearRange(p, range) : p
+        }
         // The synthetic SSJV total sums the three served route series,
         // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
         // back to sample labeling, never a partial total.
         const points = isSsjvTotal
           ? sumAlignedSeriesPoints(
-              SSJV_ROUTE_SUBJECTS.map((code) =>
-                pickLiveSeriesPoints(block, domain, code, period, unitToken),
-              ),
+              SSJV_ROUTE_SUBJECTS.map((code) => pick(code, unitToken)),
             )
           : subject
-            ? pickLiveSeriesPoints(block, domain, subject, period, unitToken)
+            ? pick(subject, unitToken)
             : null
         // The ag percent-of-demand view has no served percent measure, so it
         // is derived from the primary shortage series and the companion
@@ -587,11 +605,8 @@ export function useVariableData(): VariableData {
         // missing the member falls back to sample data rather than showing a
         // half-derived number.
         if (isPctDemand && companionTokens.length > 0 && subject) {
-          const companion = pickLiveSeriesPoints(
-            block,
-            domain,
+          const companion = pick(
             subject,
-            period,
             companionTokens[0] as typeof unitToken,
           )
           if (
@@ -659,7 +674,7 @@ export function useVariableData(): VariableData {
       const liveDataMissing =
         liveEligible &&
         spec.slotIndex != null &&
-        emptyResponseBySlot[spec.slotIndex] === true
+        (emptyResponseBySlot[spec.slotIndex] === true || subjectAbsent)
 
       return {
         id: spec.id,
@@ -694,7 +709,15 @@ export function useVariableData(): VariableData {
       unit,
       unitLabel,
       provisional: variable.provisional ?? false,
-      source: anyLive ? "live" : "mock",
+      // A live request that served nothing for every member (the scenario, or
+      // the subject, is not modeled) is still a live answer: the card shows
+      // the no-data notice under a "Live data" badge rather than a "Sample
+      // data" badge over an empty chart.
+      source:
+        anyLive ||
+        (members.length > 0 && members.every((m) => m.liveDataMissing))
+          ? "live"
+          : "mock",
       // A single chart-level badge misdescribes the figure the moment one
       // series is live and another is not.
       mixedSource: anyLive && members.some((m) => !m.isLive),

@@ -4,8 +4,9 @@
  * Bridges the explorer's registry ids (variable ids, location ids) to the
  * /api/data-in-depth/* request vocabulary (domain, subject short_code, period,
  * unit token, include facets). Self-contained on purpose: no React, no store,
- * no registry import, so it is trivially unit-testable and safe to import from
- * a Node-side spec. The variable-to-tier and location metadata stay in
+ * no registry import (only the generated entity id sets, which carry no
+ * runtime dependency), so it is trivially unit-testable and safe to import
+ * from a Node-side spec. The variable-to-tier and location metadata stay in
  * variableRegistry; this module only owns the registry-id -> API-code bridge,
  * which is an API-side fact (verified against the live DB, 2026-07-20).
  *
@@ -13,6 +14,12 @@
  * everything else falls back to the deterministic mock engine (a null
  * return here = mock).
  */
+
+import {
+  AG_ENTITY_IDS,
+  CWS_DELIVERY_ENTITY_IDS,
+  CWS_SHORTAGE_ENTITY_IDS,
+} from "./entityLocations.generated"
 
 /** A live data-in-depth domain (one endpoint each). */
 export type DidDomain =
@@ -263,22 +270,26 @@ const SALMON_SUBJECT_BY_LOCATION: Record<string, string> = {
 }
 
 /**
- * Community water systems: the endpoint serves 107 subjects, but the
- * explorer wires only the two served aggregates for now (verified against
- * /api/data-in-depth/cws, 2026-08-19: NOD_CWS/SOD_CWS carry all five
- * measures). Entity-level locations follow once the location list is
- * finalized with the data team, so any other id stays unmapped (mock).
+ * Community water systems: the two aggregates remap to their served subject
+ * codes; every entity's registry id IS its served code, checked against the
+ * generated id set of the measure family the variable reads (deliveries:
+ * 74 systems; shortage and welfare: 63 systems, overlapping but separate per
+ * the data team). A code outside the variable's family stays unmapped.
  */
 const CWS_AGGREGATE_SUBJECTS: Record<string, string> = {
   AGG_CWS_NOD: "NOD_CWS",
   AGG_CWS_SOD: "SOD_CWS",
 }
 
+/** Variables that read the shortage/welfare measure family. */
+const CWS_SHORTAGE_FAMILY_VARIABLES: ReadonlySet<string> = new Set([
+  "cws_short",
+])
+
 /**
- * Agriculture: the two served aggregate subjects (verified against
- * /api/data-in-depth/ag 2026-08-21, 100 annual years each in TAF). Same
- * scoping decision as CWS: entity-level demand units are NOT guessed at, so
- * any other id stays unmapped and renders sample data.
+ * Agriculture: the two aggregates remap to their served subject codes; every
+ * demand unit's registry id IS its served code (132, generated from the
+ * live API), and all four measures are served on every subject.
  */
 const AG_AGGREGATE_SUBJECTS: Record<string, string> = {
   AGG_AG_NOD: "NOD_Agriculture",
@@ -399,10 +410,20 @@ export function toDidSubject(
     return SALMON_SUBJECT_BY_LOCATION[locationId] ?? null
   }
   if (domain === "cws") {
-    return CWS_AGGREGATE_SUBJECTS[locationId] ?? null
+    const aggregate = CWS_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    // Entities resolve only within the family the variable reads; with no
+    // variable there is no family, so only the aggregates resolve.
+    if (!variableId) return null
+    const family = CWS_SHORTAGE_FAMILY_VARIABLES.has(variableId)
+      ? CWS_SHORTAGE_ENTITY_IDS
+      : CWS_DELIVERY_ENTITY_IDS
+    return family.has(locationId) ? locationId : null
   }
   if (domain === "ag") {
-    return AG_AGGREGATE_SUBJECTS[locationId] ?? null
+    const aggregate = AG_AGGREGATE_SUBJECTS[locationId]
+    if (aggregate) return aggregate
+    return AG_ENTITY_IDS.has(locationId) ? locationId : null
   }
   if (domain === "reservoir") {
     const code = RESERVOIR_SUBJECT_REMAP[locationId] ?? locationId
@@ -630,6 +651,40 @@ export function pickLiveSeries(
   const match = subjects?.find((s) => s.subject === subject)
   const facet = match?.periods?.[period]?.[responseSeriesKey(domain, unitToken)]
   return seriesFromValues(facet?.values)
+}
+
+/**
+ * Whether a served scenario block carries `subject` at all. A block that
+ * exists but lacks the subject means the subject is not modeled for that
+ * scenario (KCWA is absent from the Delta Conveyance Project family on the
+ * cws endpoint), which is a fact to show, not a reason to draw sample data.
+ */
+export function blockHasSubject(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+): boolean {
+  const subjects = block?.[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  return !!subjects?.some((s) => s.subject === subject)
+}
+
+/**
+ * Keep only the points whose year lies in `range` (inclusive), index-aligned
+ * across `series` and `waterYears`. Fails closed: with no years to judge by,
+ * the points are returned untouched rather than partially trimmed. Pure.
+ */
+export function trimPointsToYearRange(
+  points: SeriesPoints,
+  range: { min: number; max: number },
+): SeriesPoints {
+  if (points.waterYears.length !== points.series.length) return points
+  if (points.waterYears.length === 0) return points
+  const keep = points.waterYears.map((y) => y >= range.min && y <= range.max)
+  if (keep.every(Boolean)) return points
+  return {
+    series: points.series.filter((_, i) => keep[i]),
+    waterYears: points.waterYears.filter((_, i) => keep[i]),
+  }
 }
 
 /**
