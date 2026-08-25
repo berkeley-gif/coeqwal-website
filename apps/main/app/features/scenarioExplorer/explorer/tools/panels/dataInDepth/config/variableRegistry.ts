@@ -102,6 +102,11 @@ export interface SectorDef {
 export interface VariableDef {
   id: string
   name: string
+  /** How the variable reads inside a sentence after "mean", "median" or
+   *  "the annual variation in": keeps proper nouns and acronyms cased
+   *  ("April X2 position", "CVP M&I deliveries") where the display name
+   *  cannot simply be lowercased. */
+  proseName: string
   sectorId: string
   locationGroup: LocationGroupId
   unit: string
@@ -701,6 +706,7 @@ const TAF = "thousand acre-feet"
 export const VARIABLES: Record<string, VariableDef> = {
   res_apr: {
     id: "res_apr",
+    proseName: "April reservoir storage",
     name: "April reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -719,6 +725,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   res_sep: {
     id: "res_sep",
+    proseName: "September reservoir storage",
     name: "September reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -737,6 +744,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   gw_stor: {
     id: "gw_stor",
+    proseName: "groundwater storage",
     name: "Groundwater storage",
     sectorId: "gw",
     locationGroup: "basins",
@@ -756,6 +764,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_apr: {
     id: "x2_apr",
+    proseName: "April X2 position",
     name: "April X2 position",
     sectorId: "salin",
     locationGroup: "delta",
@@ -776,6 +785,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_sep: {
     id: "x2_sep",
+    proseName: "September X2 position",
     name: "September X2 position",
     sectorId: "salin",
     locationGroup: "delta",
@@ -796,6 +806,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_del: {
     id: "cvp_del",
+    proseName: "Central Valley Project deliveries",
     name: "Central Valley Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -813,6 +824,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_del: {
     id: "swp_del",
+    proseName: "State Water Project deliveries",
     name: "State Water Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -830,6 +842,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   tot_exp: {
     id: "tot_exp",
+    proseName: "Delta exports",
     name: "Total Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -847,6 +860,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_ag: {
     id: "cvp_ag",
+    proseName: "CVP agricultural deliveries",
     name: "CVP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -862,6 +876,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_mi: {
     id: "cvp_mi",
+    proseName: "CVP M&I deliveries",
     name: "CVP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -877,6 +892,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_refuges: {
     id: "cvp_refuges",
+    proseName: "CVP wildlife refuge deliveries",
     name: "CVP wildlife refuge deliveries",
     sectorId: "sysdel",
     locationGroup: "syswide",
@@ -892,6 +908,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_ag: {
     id: "swp_ag",
+    proseName: "SWP agricultural deliveries",
     name: "SWP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -907,6 +924,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_mi: {
     id: "swp_mi",
+    proseName: "M&I deliveries of the State Water Project",
     name: "SWP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -923,6 +941,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_exp: {
     id: "cvp_exp",
+    proseName: "CVP Delta exports",
     name: "CVP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -938,6 +957,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_exp: {
     id: "swp_exp",
+    proseName: "SWP Delta exports",
     name: "SWP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -953,6 +973,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ssjv_exp: {
     id: "ssjv_exp",
+    proseName: "southern San Joaquin Valley exports",
     name: "Southern San Joaquin Valley exports",
     sectorId: "sysdel",
     locationGroup: "ssjv",
@@ -968,6 +989,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   salmon_abund: {
     id: "salmon_abund",
+    proseName: "winter-run abundance",
     name: "Winter-run abundance",
     sectorId: "salmonS",
     locationGroup: "salmon",
@@ -991,6 +1013,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ndo: {
     id: "ndo",
+    proseName: "Delta outflow volume",
     name: "Delta outflow volume",
     sectorId: "outflow",
     locationGroup: "delta",
@@ -1008,6 +1031,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   riv_flow: {
     id: "riv_flow",
+    proseName: "river flows",
     name: "River flows",
     sectorId: "eflows",
     locationGroup: "rivers",
@@ -1025,6 +1049,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_del: {
     id: "ag_del",
+    proseName: "agricultural surface water deliveries",
     name: "Surface water deliveries",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -1041,6 +1066,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_pump: {
     id: "ag_pump",
+    proseName: "agricultural groundwater pumping",
     name: "Groundwater pumping",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -1058,6 +1084,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_short: {
     id: "ag_short",
+    proseName: "agricultural water shortage",
     name: "Water shortage",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -1077,6 +1104,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_rev: {
     id: "ag_rev",
+    proseName: "gross crop revenues",
     name: "Gross crop revenues",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -1095,6 +1123,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cws_del: {
     id: "cws_del",
+    proseName: "community water system deliveries",
     name: "Surface water deliveries",
     sectorId: "cwsS",
     locationGroup: "cws",
@@ -1114,6 +1143,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cws_short: {
     id: "cws_short",
+    proseName: "community water system delivery shortages",
     name: "Delivery shortages",
     sectorId: "cwsS",
     locationGroup: "cwsShortage",

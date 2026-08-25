@@ -101,11 +101,14 @@ export default function ChartCard() {
 
   const ctx: SummaryContext = {
     view: data.view,
+    distKind,
     compareBy,
     variableName: data.variable?.name ?? "",
     variableId: data.variable?.id,
+    proseName: data.variable?.proseName,
     unit: data.unit,
     locationName: data.locationName,
+    locationTitleName: data.locationTitleName,
     climateName: data.climateName,
     scenarioName: data.scenarioName,
   }
