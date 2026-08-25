@@ -135,8 +135,9 @@ export type ShareItem =
       memberIds: string[]
       /** Ordered display labels, aligned with memberIds */
       memberLabels: string[]
-      /** Data provenance at capture time */
-      source: "live" | "mock"
+      /** Data provenance at capture time. "mixed" when the figure's series
+       *  did not share one provenance, so no single label describes it. */
+      source: "live" | "mock" | "mixed"
       hydroclimate: string
     })
 

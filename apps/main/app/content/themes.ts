@@ -113,8 +113,8 @@ export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
       "Baselines represent current operations of the State Water Project and Central Valley Project. They serve as the reference point for comparing all other scenarios.",
   },
   ag_gw: { label: "Farms and groundwater" },
-  eco: { label: "Rivers, salmon and the Delta ecosystem" },
-  delta: { label: "The Delta as a living place" },
+  eco: { label: "Rivers and salmon" },
+  delta: { label: "The Delta" },
   cws: { label: "Community water systems" },
   unthemed: { label: "Other scenarios" },
 }
@@ -126,8 +126,8 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
   "baseline",
   "ag_gw",
   "eco",
-  "delta",
   "cws",
+  "delta",
   "unthemed",
 ]
 

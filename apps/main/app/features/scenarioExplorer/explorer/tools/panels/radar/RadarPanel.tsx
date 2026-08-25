@@ -459,7 +459,6 @@ export default function RadarPanel({
     () => new Set(selectedScenarios),
     [selectedScenarios],
   )
-
   /** Stable palette index */
   const scenarioColorById = useMemo(() => {
     const m = new Map<string, string>()
@@ -1097,6 +1096,29 @@ export default function RadarPanel({
           }}
         >
           NOD/SOD alternative hydroclimates not loaded yet
+        </Box>
+      )}
+      {selectedSet.has("s0065") && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+            bgcolor: theme.palette.grey[800],
+            color: theme.palette.common.white,
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            borderRadius: theme.borderRadius.sm,
+            px: 2,
+            py: 1,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          Delta Conveyence Project scenario is selected. Winter-run salmon data
+          are not yet supported for this scenario.
         </Box>
       )}
     </Box>

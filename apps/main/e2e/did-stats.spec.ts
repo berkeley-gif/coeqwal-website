@@ -54,10 +54,44 @@ test("Stats style adds the trend plot on the groundwater level view", async ({
     .getByRole("navigation", { name: "Variables by sector" })
     .getByRole("button", { name: "Groundwater storage" })
     .click()
+  // The default pin is the North of Delta total, which has no level series
+  // (levels are per basin), so the Level view is blocked until a basin is
+  // picked; nothing is reselected for the user.
+  await expect(page.getByRole("button", { name: "Level (ft)" })).toBeDisabled()
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page.getByRole("option", { name: "WBA10" }).click()
   await page.getByRole("button", { name: "Level (ft)" }).click()
   await page.getByRole("button", { name: "Stats", exact: true }).click()
 
   await expect(page.getByText("Mean (ft)")).toBeVisible()
   await expect(page.getByText("CV", { exact: true }).first()).toBeVisible()
   await expect(page.getByText("Trend (ft/yr)")).toBeVisible()
+})
+
+// The sentence under the Stats bars reports the mean and the CV those bars
+// draw, on both axes; the word "median" never appears there.
+test("Stats view sentence reports the mean and CV, not the median", async ({
+  page,
+}) => {
+  await openDataTool(page)
+  await page.getByRole("button", { name: "Stats", exact: true }).click()
+  await expect(page.getByText("Mean (TAF)")).toBeVisible()
+  const sentence = page.getByText(
+    /^Mean April reservoir storage for .+ under the Historical hydroclimate is [\d,.]+ TAF\./,
+  )
+  await expect(sentence).toBeVisible()
+  await expect(sentence).toContainText("(CV)")
+  await expect(sentence).not.toContainText(/median/i)
+
+  await page
+    .getByRole("button", { name: "Climate futures", exact: true })
+    .click()
+  await expect(
+    page.getByText(
+      /^At Shasta Reservoir under .+, mean April reservoir storage ranges from [\d,.]+ TAF \(/,
+    ),
+  ).toBeVisible()
 })

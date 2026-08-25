@@ -14,6 +14,7 @@ import ChartControlsBar from "../../chrome/layout/ChartControlsBar"
 import { InlineToggleChip } from "../../chrome/chips/InlineToggleChip"
 import { SaveSnapshotButton } from "../../chrome/actions/SaveSnapshotButton"
 import { SimpleButton } from "../../chrome/actions/SimpleButton"
+import { InlineTourAnchor, useTourAnchor } from "../../tour"
 import { mapActions } from "../../../../../map/store"
 import { useMap } from "@repo/map"
 import { useWorkspaceSlice, useEquitySlice } from "../../../store"
@@ -45,6 +46,7 @@ export default function EquityChartControls({
   const [categoriesAnchor, setCategoriesAnchor] = useState<HTMLElement | null>(
     null,
   )
+  const toggleOutcomesTourRef = useTourAnchor("equity.controls.toggleOutcomes")
 
   const canSnapshot = equityFocusScenario !== null
   const { onSaveSnapshot } = share.chartControlsProps
@@ -66,6 +68,7 @@ export default function EquityChartControls({
       <Box
         component="button"
         type="button"
+        ref={toggleOutcomesTourRef}
         onClick={(e) => setCategoriesAnchor(e.currentTarget)}
         aria-pressed={categoriesChipActive}
         aria-label={`Toggle Outcomes (${visibleCount}/${OUTCOME_CODE_ORDER.length} shown)`}
@@ -139,23 +142,31 @@ export default function EquityChartControls({
           )
         })}
       </Menu>
-      <InlineToggleChip
-        label="Compare to Baseline"
-        active={showEquityComparison}
-        onClick={() => setShowEquityComparison(!showEquityComparison)}
-      />
-      <InlineToggleChip
-        label="Continuous Levels"
-        active={yAxisMode === "continuous"}
-        onClick={() =>
-          setYAxisMode(yAxisMode === "continuous" ? "discrete" : "continuous")
-        }
-      />
-      <SimpleButton
-        label="Clear Map Selection"
-        onClick={handleClearSelection}
-      />
-      <SaveSnapshotButton disabled={!canSnapshot} onClick={onSaveSnapshot} />
+      <InlineTourAnchor anchorId="equity.controls.compareToBaseline">
+        <InlineToggleChip
+          label="Compare to Baseline"
+          active={showEquityComparison}
+          onClick={() => setShowEquityComparison(!showEquityComparison)}
+        />
+      </InlineTourAnchor>
+      <InlineTourAnchor anchorId="equity.controls.continuousLevels">
+        <InlineToggleChip
+          label="Continuous Levels"
+          active={yAxisMode === "continuous"}
+          onClick={() =>
+            setYAxisMode(yAxisMode === "continuous" ? "discrete" : "continuous")
+          }
+        />
+      </InlineTourAnchor>
+      <InlineTourAnchor anchorId="equity.controls.clearMapSelection">
+        <SimpleButton
+          label="Clear Map Selection"
+          onClick={handleClearSelection}
+        />
+      </InlineTourAnchor>
+      <InlineTourAnchor anchorId="equity.controls.saveSnapshot">
+        <SaveSnapshotButton disabled={!canSnapshot} onClick={onSaveSnapshot} />
+      </InlineTourAnchor>
     </ChartControlsBar>
   )
 }

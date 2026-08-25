@@ -27,12 +27,18 @@ export type DataChartDataShape = {
   waterYearTypesLabel?: string
   /** Standardized figure title as drawn on the exported image */
   figureTitle?: string
+  /** Year basis of the series rows: water years unless the variable is
+   *  aggregated by calendar year upstream (the CWS delivery family). */
+  yearBasis?: "water" | "calendar"
   members: Array<{
     label: string
     series: number[]
     waterYears?: number[]
     /** Per-member provenance: true when the series came from the live API */
     isLive?: boolean
+    /** True when the scenario is not modeled for this variable at all: the
+     *  row is present and labeled, but every value cell is empty. */
+    liveDataMissing?: boolean
     stats: {
       min: number
       p10: number
@@ -79,7 +85,14 @@ export function dataInDepthToCSV(
         ["View", data.viewLabel],
         ["Compare by", data.compareByLabel],
         ["Unit", data.unitLabel],
-        ["Data source", data.source === "live" ? "Live data" : "Sample data"],
+        [
+          "Data source",
+          data.source === "mixed"
+            ? "Mixed (see the Source column)"
+            : data.source === "live"
+              ? "Live data"
+              : "Sample data",
+        ],
         ...(data.waterYearTypesLabel
           ? ([["Water year types", data.waterYearTypesLabel]] as Array<
               [string, string]
@@ -93,6 +106,29 @@ export function dataInDepthToCSV(
   lines.push("")
   lines.push(STATS_HEADER)
   for (const m of data.members) {
+    // A scenario that is not modeled for this variable keeps its labeled row
+    // so the reader can see it WAS compared, but every statistic is blank:
+    // the member's series is sample data standing in for something that does
+    // not exist, and exporting those numbers under a "Live" export would
+    // hand the reader fabricated values.
+    if (m.liveDataMissing) {
+      lines.push(
+        [
+          csvEscape(m.label),
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "No data",
+        ].join(","),
+      )
+      continue
+    }
     lines.push(
       [
         csvEscape(m.label),
@@ -129,7 +165,7 @@ export function dataInDepthToCSV(
     )
     lines.push("")
     lines.push(
-      ["Water year"]
+      [data.yearBasis === "calendar" ? "Calendar year" : "Water year"]
         .concat(data.members.map((m) => csvEscape(m.label)))
         .join(","),
     )

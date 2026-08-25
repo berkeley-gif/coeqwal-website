@@ -21,9 +21,16 @@
  */
 
 /** One selectable view of a variable's data. */
+import {
+  AG_ENTITY_LOCATIONS,
+  CWS_DELIVERY_ENTITY_LOCATIONS,
+  CWS_SHORTAGE_ENTITY_LOCATIONS,
+} from "./entityLocations.generated"
+
 export type VariableView =
   | "dist" // annual distribution (exceedance curve or box plot)
   | "pct" // annual distribution as percent of capacity (reservoirs)
+  | "pct_demand" // annual distribution of shortage as percent of demand
   | "level" // annual distribution of groundwater levels in feet
   | "monthly" // monthly pattern (median + band per water month)
   | "cv" // year-to-year variability (coefficient of variation)
@@ -32,6 +39,7 @@ export type VariableView =
 export const VIEW_LABELS: Record<VariableView, string> = {
   dist: "Annual distribution",
   pct: "% of capacity",
+  pct_demand: "% of demand",
   level: "Level (ft)",
   monthly: "Monthly pattern",
   cv: "Year-to-year variability",
@@ -46,8 +54,21 @@ export interface LocationDef {
   capacityTaf?: number
   /** True for aggregate rollups (e.g. all North-of-Delta reservoirs) */
   aggregate?: boolean
+  /** False when the location cannot show the groundwater Level view: a
+   *  water-table elevation is reported per basin and cannot be summed, so
+   *  the North and South of Delta totals carry volume only. Pickers disable
+   *  the location on that view and the view bar disables the view for it. */
+  levelView?: false
   /** Synthetic median magnitude for the sample-data engine */
   mockBase?: number
+  /** Uncut display label, present only when `name` was cut at a word
+   *  boundary to stay legible in chips, legends and titles (generated
+   *  entity locations). Shown in tooltips. */
+  longName?: string
+  /** The label the API serves for this subject, verbatim, when the display
+   *  name was derived from it (generated entity locations). Kept so a
+   *  display-name review can see what the data team called the entity. */
+  apiLabel?: string
 }
 
 export interface LocationGroup {
@@ -70,6 +91,7 @@ export type LocationGroupId =
   | "ssjv"
   | "agregions"
   | "cws"
+  | "cwsShortage"
   | "salmon"
 
 export interface SectorDef {
@@ -85,6 +107,11 @@ export interface SectorDef {
 export interface VariableDef {
   id: string
   name: string
+  /** How the variable reads inside a sentence after "mean", "median" or
+   *  "the annual variation in": keeps proper nouns and acronyms cased
+   *  ("April X2 position", "CVP M&I deliveries") where the display name
+   *  cannot simply be lowercased. */
+  proseName: string
   sectorId: string
   locationGroup: LocationGroupId
   unit: string
@@ -112,17 +139,46 @@ export interface VariableDef {
   tierOutcome?: string
   /** Human name of that key outcome, for copy */
   tierOutcomeName?: string
+  /** Key-outcome chip override. "not-used" renders "not used in calculation
+   *  of key outcome" whatever `tierOutcome` says (the tier metadata is kept
+   *  for the pathway; the chip is copy). Absent: the chip reads "used in
+   *  calculation of key outcome: <tierOutcomeName>" when a name exists, and
+   *  nothing renders otherwise. */
+  keyOutcomeChip?: "not-used"
+  /** Verbatim head for the standardized figure title, replacing the default
+   *  "<Variable> (<Location>)" head, e.g. "April X2 Position (in km)". Set
+   *  only where the location parenthetical adds nothing (the X2 titles). */
+  figureTitleHead?: string
   /** Data source status: live API today, or deterministic sample data */
   data: "live" | "mock"
   /** Scope still under discussion (deck vs outcomes sheet); shows a chip */
   provisional?: boolean
-  /** False when the metric does not decompose by water-year type (salmon
-   *  population metrics, welfare loss): the WYT chips render disabled with a
-   *  not-applicable note, live requests omit `wyt=`, mock series skip
-   *  filtering, and figure titles and export provenance drop the
-   *  water-years clause. The stored selection stays inert, not cleared.
-   *  Absent means WYT applies. */
+  /** False when the water-year-type filter cannot apply to the metric,
+   *  either because it does not decompose by water year (salmon population
+   *  metrics, welfare loss) or because it is aggregated on a different
+   *  calendar upstream (the CWS series aggregate by calendar year). The WYT
+   *  chips render disabled with a not-applicable note, live requests omit
+   *  `wyt=`, mock series skip filtering, and figure titles and export
+   *  provenance drop the water-years clause. The stored selection stays
+   *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
+  /** Year basis of the served series. Absent means water years (October to
+   *  September), the CalSim3 convention. "calendar" marks series aggregated
+   *  upstream by calendar year (the CWS delivery family), which changes the
+   *  year-axis label in exports and provenance. */
+  yearBasis?: "water" | "calendar"
+  /** Inclusive range of served years the site adopts. Points outside it are
+   *  dropped before any statistic is computed. Set where the endpoint serves
+   *  partial stub years at the ends of the model run (the CWS delivery
+   *  family: a three-month 1921 and a nine-month 2021), so a stub never
+   *  becomes the minimum, the exceedance tail or a term of the mean and CV. */
+  servedYearRange?: { min: number; max: number }
+  /** Shown when a scenario the user selected is not modeled for this
+   *  variable, so the endpoint serves no data for it. Explains WHY rather
+   *  than leaving a blank series: an absence with a reason reads as a fact
+   *  about the model, an absence without one reads as a broken chart.
+   *  Falls back to a generic sentence when unset. */
+  noLiveDataExplanation?: string
   /** Sample-data engine kind (shape/variability family) */
   mockKind: string
   /** Sample-data engine effect key (scenario response family) */
@@ -164,24 +220,28 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   },
   basins: {
     // The list mixes the two NOD/SOD summary locations with the 42 basins,
-    // so the control label says "location", not "basin". The title suffix
-    // stays "Basin": right for 42 of 44 entries; the aggregates' "...Basin"
-    // titles predate this list and read acceptably.
+    // so the control label says "location", not "basin". No title suffix:
+    // with descriptive names, titles read "... (WBA10 - Chico; Durham)"
+    // and appending "Basin" would dangle after the place names.
     label: "Groundwater location",
-    titleSuffix: "Basin",
     // The 42 served basins (41 WBA technical-area codes plus the
     // Delta-Eastside Water entity) after the NOD/SOD totals, in natural
-    // code order. Codes are the labels until richer basin names are
-    // confirmed; DETAW keeps the label the endpoint serves. Regions are
-    // INFERRED from the WBA numbering (Sacramento Valley codes 2-26
-    // north of the Delta, 50-90 south) and only flavor the sample-data
-    // engine. mockBase values are synthetic sample magnitudes.
+    // code order. Each WBA labels as "CODE - description" with the CalSim3
+    // hydrology-report description the endpoint serves (verified against
+    // /api/data-in-depth/groundwater-storage subject labels): the code
+    // leads so the dropdown keeps code order and stays cross-referenceable
+    // with the other explore tools, which show bare codes. DETAW keeps its
+    // more specific local name (the endpoint labels it just "Delta").
+    // Regions are INFERRED from the WBA numbering (Sacramento Valley codes
+    // 2-26 north of the Delta, 50-90 south) and only flavor the
+    // sample-data engine. mockBase values are synthetic sample magnitudes.
     items: [
       {
         id: "AGG_GW_NOD",
         name: "All North of Delta",
         region: "NOD",
         aggregate: true,
+        levelView: false,
         mockBase: 46000,
       },
       {
@@ -189,6 +249,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         name: "All South of Delta",
         region: "SOD",
         aggregate: true,
+        levelView: false,
         mockBase: 51000,
       },
       {
@@ -197,47 +258,222 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         region: "Delta",
         mockBase: 6400,
       },
-      { id: "WBA2", name: "WBA2", region: "NOD", mockBase: 4000 },
-      { id: "WBA3", name: "WBA3", region: "NOD", mockBase: 4300 },
-      { id: "WBA4", name: "WBA4", region: "NOD", mockBase: 4600 },
-      { id: "WBA5", name: "WBA5", region: "NOD", mockBase: 4900 },
-      { id: "WBA6", name: "WBA6", region: "NOD", mockBase: 5200 },
-      { id: "WBA7N", name: "WBA7N", region: "NOD", mockBase: 5500 },
-      { id: "WBA7S", name: "WBA7S", region: "NOD", mockBase: 5800 },
-      { id: "WBA8N", name: "WBA8N", region: "NOD", mockBase: 6100 },
-      { id: "WBA8S", name: "WBA8S", region: "NOD", mockBase: 6400 },
-      { id: "WBA9", name: "WBA9", region: "NOD", mockBase: 6700 },
-      { id: "WBA10", name: "WBA10", region: "NOD", mockBase: 7000 },
-      { id: "WBA11", name: "WBA11", region: "NOD", mockBase: 7300 },
-      { id: "WBA12", name: "WBA12", region: "NOD", mockBase: 7600 },
-      { id: "WBA13", name: "WBA13", region: "NOD", mockBase: 7900 },
-      { id: "WBA14", name: "WBA14", region: "NOD", mockBase: 8200 },
-      { id: "WBA15N", name: "WBA15N", region: "NOD", mockBase: 8500 },
-      { id: "WBA15S", name: "WBA15S", region: "NOD", mockBase: 8800 },
-      { id: "WBA16", name: "WBA16", region: "NOD", mockBase: 9100 },
-      { id: "WBA17N", name: "WBA17N", region: "NOD", mockBase: 9400 },
-      { id: "WBA17S", name: "WBA17S", region: "NOD", mockBase: 9700 },
-      { id: "WBA18", name: "WBA18", region: "NOD", mockBase: 10000 },
-      { id: "WBA19", name: "WBA19", region: "NOD", mockBase: 10300 },
-      { id: "WBA20", name: "WBA20", region: "NOD", mockBase: 10600 },
-      { id: "WBA21", name: "WBA21", region: "NOD", mockBase: 10900 },
-      { id: "WBA22", name: "WBA22", region: "NOD", mockBase: 11200 },
-      { id: "WBA23", name: "WBA23", region: "NOD", mockBase: 11500 },
-      { id: "WBA24", name: "WBA24", region: "NOD", mockBase: 11800 },
-      { id: "WBA25", name: "WBA25", region: "NOD", mockBase: 12100 },
-      { id: "WBA26N", name: "WBA26N", region: "NOD", mockBase: 12400 },
-      { id: "WBA26S", name: "WBA26S", region: "NOD", mockBase: 12700 },
-      { id: "WBA50", name: "WBA50", region: "SOD", mockBase: 13000 },
-      { id: "WBA60N", name: "WBA60N", region: "SOD", mockBase: 13300 },
-      { id: "WBA60S", name: "WBA60S", region: "SOD", mockBase: 13600 },
-      { id: "WBA61", name: "WBA61", region: "SOD", mockBase: 13900 },
-      { id: "WBA62", name: "WBA62", region: "SOD", mockBase: 14200 },
-      { id: "WBA63", name: "WBA63", region: "SOD", mockBase: 14500 },
-      { id: "WBA64", name: "WBA64", region: "SOD", mockBase: 14800 },
-      { id: "WBA71", name: "WBA71", region: "SOD", mockBase: 15100 },
-      { id: "WBA72", name: "WBA72", region: "SOD", mockBase: 15400 },
-      { id: "WBA73", name: "WBA73", region: "SOD", mockBase: 15700 },
-      { id: "WBA90", name: "WBA90", region: "SOD", mockBase: 16000 },
+      {
+        id: "WBA2",
+        name: "WBA2 - West Redding",
+        region: "NOD",
+        mockBase: 4000,
+      },
+      {
+        id: "WBA3",
+        name: "WBA3 - East Redding",
+        region: "NOD",
+        mockBase: 4300,
+      },
+      {
+        id: "WBA4",
+        name: "WBA4 - West Red Bluff",
+        region: "NOD",
+        mockBase: 4600,
+      },
+      {
+        id: "WBA5",
+        name: "WBA5 - East Red Bluff; Los Molinos",
+        region: "NOD",
+        mockBase: 4900,
+      },
+      { id: "WBA6", name: "WBA6 - Orland", region: "NOD", mockBase: 5200 },
+      {
+        id: "WBA7N",
+        name: "WBA7N - Willows; North Tehama-Colusa",
+        region: "NOD",
+        mockBase: 5500,
+      },
+      {
+        id: "WBA7S",
+        name: "WBA7S - Arbuckle; South Tehama-Colusa",
+        region: "NOD",
+        mockBase: 5800,
+      },
+      {
+        id: "WBA8N",
+        name: "WBA8N - Hamilton City; North Glenn-Colusa",
+        region: "NOD",
+        mockBase: 6100,
+      },
+      {
+        id: "WBA8S",
+        name: "WBA8S - Williams; South Glenn-Colusa",
+        region: "NOD",
+        mockBase: 6400,
+      },
+      { id: "WBA9", name: "WBA9 - Butte City", region: "NOD", mockBase: 6700 },
+      {
+        id: "WBA10",
+        name: "WBA10 - Chico; Durham",
+        region: "NOD",
+        mockBase: 7000,
+      },
+      {
+        id: "WBA11",
+        name: "WBA11 - Gridley; Live Oaks",
+        region: "NOD",
+        mockBase: 7300,
+      },
+      {
+        id: "WBA12",
+        name: "WBA12 - South Oroville; Honcut Valley",
+        region: "NOD",
+        mockBase: 7600,
+      },
+      {
+        id: "WBA13",
+        name: "WBA13 - Palermo; Honcut Foothills",
+        region: "NOD",
+        mockBase: 7900,
+      },
+      {
+        id: "WBA14",
+        name: "WBA14 - Browns Valley; Yuba Foothills",
+        region: "NOD",
+        mockBase: 8200,
+      },
+      {
+        id: "WBA15N",
+        name: "WBA15N - Marysville; North Yuba",
+        region: "NOD",
+        mockBase: 8500,
+      },
+      {
+        id: "WBA15S",
+        name: "WBA15S - Wheatland; South Yuba",
+        region: "NOD",
+        mockBase: 8800,
+      },
+      { id: "WBA16", name: "WBA16 - Yuba City", region: "NOD", mockBase: 9100 },
+      {
+        id: "WBA17N",
+        name: "WBA17N - North Sutter Buttes; Butte Sink",
+        region: "NOD",
+        mockBase: 9400,
+      },
+      {
+        id: "WBA17S",
+        name: "WBA17S - South Sutter Buttes; Sutter Bypass",
+        region: "NOD",
+        mockBase: 9700,
+      },
+      { id: "WBA18", name: "WBA18 - Meridian", region: "NOD", mockBase: 10000 },
+      { id: "WBA19", name: "WBA19 - Robbins", region: "NOD", mockBase: 10300 },
+      {
+        id: "WBA20",
+        name: "WBA20 - Davis; Woodland",
+        region: "NOD",
+        mockBase: 10600,
+      },
+      {
+        id: "WBA21",
+        name: "WBA21 - Fremont Landing; Yolo Bypass",
+        region: "NOD",
+        mockBase: 10900,
+      },
+      {
+        id: "WBA22",
+        name: "WBA22 - Natomas; Pleasant Grove",
+        region: "NOD",
+        mockBase: 11200,
+      },
+      {
+        id: "WBA23",
+        name: "WBA23 - Camp Far West; Sutter",
+        region: "NOD",
+        mockBase: 11500,
+      },
+      {
+        id: "WBA24",
+        name: "WBA24 - Lincoln; West Placer",
+        region: "NOD",
+        mockBase: 11800,
+      },
+      {
+        id: "WBA25",
+        name: "WBA25 - Dixon; Vacaville",
+        region: "NOD",
+        mockBase: 12100,
+      },
+      {
+        id: "WBA26N",
+        name: "WBA26N - North Sacramento",
+        region: "NOD",
+        mockBase: 12400,
+      },
+      {
+        id: "WBA26S",
+        name: "WBA26S - South Sacramento",
+        region: "NOD",
+        mockBase: 12700,
+      },
+      {
+        id: "WBA50",
+        name: "WBA50 - Byron-Bethany; Banta-Carbona; Tracy",
+        region: "SOD",
+        mockBase: 13000,
+      },
+      {
+        id: "WBA60N",
+        name: "WBA60N - Elk Grove; Lodi",
+        region: "SOD",
+        mockBase: 13300,
+      },
+      {
+        id: "WBA60S",
+        name: "WBA60S - Stockton; Jenny Lind; Bachelor Valley",
+        region: "SOD",
+        mockBase: 13600,
+      },
+      {
+        id: "WBA61",
+        name: "WBA61 - Modesto; Oakdale; South San Joaquin",
+        region: "SOD",
+        mockBase: 13900,
+      },
+      { id: "WBA62", name: "WBA62 - Turlock", region: "SOD", mockBase: 14200 },
+      {
+        id: "WBA63",
+        name: "WBA63 - Merced; El Nido; Stevenson",
+        region: "SOD",
+        mockBase: 14500,
+      },
+      {
+        id: "WBA64",
+        name: "WBA64 - Madera; Chowchilla; Gravelly Ford; Adobe",
+        region: "SOD",
+        mockBase: 14800,
+      },
+      {
+        id: "WBA71",
+        name: "WBA71 - Upper Delta-Mendota Canal",
+        region: "SOD",
+        mockBase: 15100,
+      },
+      {
+        id: "WBA72",
+        name: "WBA72 - Grasslands Ecological Area; Westside Exchange Contractors",
+        region: "SOD",
+        mockBase: 15400,
+      },
+      {
+        id: "WBA73",
+        name: "WBA73 - Lower Delta-Mendota Canal; Joint Reach of the California Aqueduct",
+        region: "SOD",
+        mockBase: 15700,
+      },
+      {
+        id: "WBA90",
+        name: "WBA90 - Westlands Water District",
+        region: "SOD",
+        mockBase: 16000,
+      },
     ],
   },
   rivers: {
@@ -303,6 +539,16 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
   ssjv: {
     label: "Export route",
     items: [
+      // Synthetic total, summed client-side from the three served route
+      // series (fail-closed; see didMapping.sumAlignedSeriesPoints). Sample
+      // magnitude = the sum of the route sample magnitudes.
+      {
+        id: "ALL_ROUTES",
+        name: "All routes (total)",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 1930,
+      },
       { id: "CVC", name: "Cross Valley Canal", region: "SOD", mockBase: 130 },
       { id: "FRIANT", name: "Friant Division", region: "SOD", mockBase: 1100 },
       {
@@ -314,57 +560,83 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
     ],
   },
   agregions: {
-    label: "Region (demand-unit group)",
+    // The two served aggregates (subjects NOD_Agriculture/SOD_Agriculture)
+    // followed by every demand unit the ag endpoint serves (132 as of
+    // 2026-08-24), generated from the live API by
+    // scripts/did-entity-locations. Names lead with the served code because
+    // the served labels repeat ("Non-district" appears 22 times). The
+    // aggregate mockBase values are scale factors read by AG_BASE in the
+    // sample engine; entity mockBase values are served medians.
+    label: "Demand unit",
     items: [
       {
-        id: "AG_SAC",
-        name: "Sacramento Valley DUs",
+        id: "AGG_AG_NOD",
+        name: "All North of Delta",
         region: "NOD",
-        mockBase: 1,
-      },
-      {
-        id: "AG_SJV",
-        name: "San Joaquin Valley DUs",
-        region: "SOD",
-        mockBase: 1,
-      },
-      { id: "AG_TUL", name: "Tulare Basin DUs", region: "SOD", mockBase: 1 },
-      {
-        id: "AG_ALL",
-        name: "All Central Valley DUs",
-        region: "ALL",
-        mockBase: 1,
         aggregate: true,
+        mockBase: 1,
       },
+      {
+        id: "AGG_AG_SOD",
+        name: "All South of Delta",
+        region: "SOD",
+        aggregate: true,
+        mockBase: 1,
+      },
+      ...AG_ENTITY_LOCATIONS,
     ],
   },
   cws: {
-    label: "Community water system group",
+    // Community water systems with served DELIVERIES: the two aggregates
+    // (subjects NOD_CWS/SOD_CWS) followed by the 74 systems the cws endpoint
+    // serves the delivery measure for, generated from the live API. The
+    // shortage and welfare measures cover a different, overlapping set of
+    // systems, which is the separate `cwsShortage` group below. Aggregate
+    // mockBase values approximate the served median deliveries.
+    label: "Community water system",
     items: [
       {
-        id: "CWS_SACU",
-        name: "Sacramento-area systems",
+        id: "AGG_CWS_NOD",
+        name: "All North of Delta",
         region: "NOD",
-        mockBase: 380,
+        aggregate: true,
+        mockBase: 597,
       },
       {
-        id: "CWS_BAY",
-        name: "Bay Area contractors",
-        region: "Delta",
-        mockBase: 520,
-      },
-      {
-        id: "CWS_CVS",
-        name: "Small Central Valley systems",
+        id: "AGG_CWS_SOD",
+        name: "All South of Delta",
         region: "SOD",
-        mockBase: 140,
+        aggregate: true,
+        mockBase: 2220,
+      },
+      ...CWS_DELIVERY_ENTITY_LOCATIONS,
+    ],
+  },
+  cwsShortage: {
+    // Community water systems with served SHORTAGE and WELFARE outcomes: the
+    // same two aggregates (the endpoint serves all five measures on them)
+    // followed by the 63 systems modeled in the welfare-outcomes source. The
+    // data team treats this set as separate from the delivery set (34
+    // systems are in both); binding each variable to its own group means the
+    // site never requests a subject the endpoint lacks for that measure.
+    // mockBase here is the median shortage in TAF.
+    label: "Community water system",
+    items: [
+      {
+        id: "AGG_CWS_NOD",
+        name: "All North of Delta",
+        region: "NOD",
+        aggregate: true,
+        mockBase: 2.6,
       },
       {
-        id: "CWS_SOC",
-        name: "Southern California contractors",
+        id: "AGG_CWS_SOD",
+        name: "All South of Delta",
         region: "SOD",
-        mockBase: 1900,
+        aggregate: true,
+        mockBase: 3.5,
       },
+      ...CWS_SHORTAGE_ENTITY_LOCATIONS,
     ],
   },
   salmon: {
@@ -409,7 +681,7 @@ export const SECTORS: SectorDef[] = [
       "ssjv_exp",
     ],
   },
-  { id: "outflow", name: "Delta outflows", variables: ["ndo", "ndo_uif"] },
+  { id: "outflow", name: "Delta outflows", variables: ["ndo"] },
   {
     id: "eflows",
     name: "Environmental flows",
@@ -418,12 +690,12 @@ export const SECTORS: SectorDef[] = [
   {
     id: "ag",
     name: "Agricultural water",
-    variables: ["ag_del", "ag_pump", "ag_short", "ag_shortpct", "ag_rev"],
+    variables: ["ag_del", "ag_pump", "ag_short", "ag_rev"],
   },
   {
     id: "cwsS",
     name: "Community water systems",
-    variables: ["cws_del", "cws_short"],
+    variables: ["cws_del", "cws_short", "cws_welfare"],
   },
   {
     id: "salmonS",
@@ -441,6 +713,7 @@ const TAF = "thousand acre-feet"
 export const VARIABLES: Record<string, VariableDef> = {
   res_apr: {
     id: "res_apr",
+    proseName: "April reservoir storage",
     name: "April reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -459,6 +732,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   res_sep: {
     id: "res_sep",
+    proseName: "September reservoir storage",
     name: "September reservoir storage",
     sectorId: "res",
     locationGroup: "reservoirs",
@@ -477,6 +751,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   gw_stor: {
     id: "gw_stor",
+    proseName: "groundwater storage",
     name: "Groundwater storage",
     sectorId: "gw",
     locationGroup: "basins",
@@ -496,12 +771,16 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_apr: {
     id: "x2_apr",
+    proseName: "April X2 position",
     name: "April X2 position",
     sectorId: "salin",
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "April X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches into the Delta in April. X2 is the distance (km from the Golden Gate) where salinity hits 2 ppt - smaller is fresher.",
     tech: "Annual April X2 percentiles. X2 responds to Delta outflow; spring position matters for estuarine habitat.",
@@ -513,12 +792,16 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   x2_sep: {
     id: "x2_sep",
+    proseName: "September X2 position",
     name: "September X2 position",
     sectorId: "salin",
     locationGroup: "delta",
     unit: "km",
     unitLabel: "km from the Golden Gate",
     views: ["dist"],
+    axisLabel: "distance of X2 from Golden Gate (km)",
+    figureTitleHead: "September X2 Position (in km)",
+    keyOutcomeChip: "not-used",
     plain:
       "How far upstream salty water reaches in September, at the end of the dry season, when the Delta is at its saltiest.",
     tech: "Annual September X2 percentiles. The fall X2 standard is the subject of the salinity-standards scenario.",
@@ -530,6 +813,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_del: {
     id: "cvp_del",
+    proseName: "Central Valley Project deliveries",
     name: "Central Valley Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -547,6 +831,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_del: {
     id: "swp_del",
+    proseName: "State Water Project deliveries",
     name: "State Water Project deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -564,6 +849,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   tot_exp: {
     id: "tot_exp",
+    proseName: "Delta exports",
     name: "Total Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -581,6 +867,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_ag: {
     id: "cvp_ag",
+    proseName: "CVP agricultural deliveries",
     name: "CVP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -596,6 +883,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_mi: {
     id: "cvp_mi",
+    proseName: "CVP M&I deliveries",
     name: "CVP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -611,6 +899,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_refuges: {
     id: "cvp_refuges",
+    proseName: "CVP wildlife refuge deliveries",
     name: "CVP wildlife refuge deliveries",
     sectorId: "sysdel",
     locationGroup: "syswide",
@@ -626,6 +915,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_ag: {
     id: "swp_ag",
+    proseName: "SWP agricultural deliveries",
     name: "SWP agricultural deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
@@ -641,12 +931,14 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_mi: {
     id: "swp_mi",
+    proseName: "M&I deliveries of the State Water Project",
     name: "SWP M&I deliveries",
     sectorId: "sysdel",
     locationGroup: "sysregions",
     unit: "TAF",
     unitLabel: TAF,
     views: ["dist"],
+    keyOutcomeChip: "not-used",
     plain:
       "How much State Water Project water is delivered to cities and industry (municipal and industrial use) each year.",
     tech: "Annual SWP municipal and industrial deliveries per the API subject labels (DEL_SWP_PMI; regional splits DEL_SWP_PMI_N / DEL_SWP_PMI_S).",
@@ -656,6 +948,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cvp_exp: {
     id: "cvp_exp",
+    proseName: "CVP Delta exports",
     name: "CVP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -671,6 +964,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   swp_exp: {
     id: "swp_exp",
+    proseName: "SWP Delta exports",
     name: "SWP Delta exports",
     sectorId: "sysdel",
     locationGroup: "delta",
@@ -686,6 +980,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ssjv_exp: {
     id: "ssjv_exp",
+    proseName: "southern San Joaquin Valley exports",
     name: "Southern San Joaquin Valley exports",
     sectorId: "sysdel",
     locationGroup: "ssjv",
@@ -693,15 +988,15 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain:
-      "Water exported to the Southern San Joaquin Valley, shown by delivery route.",
-    tech: "Three served route subjects, no combined total on the endpoint: D_CAA238_CVPCV (Cross Valley Canal), D_MLRTN_FRK000 (Friant Division), SWP_TA_KERNAG (Kern County Water Agency). Shown per route; no client-side summing of served data. The three-route presentation is pending confirmation (Provisional).",
+      "Water exported to the Southern San Joaquin Valley, shown as a total or by delivery route.",
+    tech: "Three served route subjects: D_CAA238_CVPCV (Cross Valley Canal), D_MLRTN_FRK000 (Friant Division), SWP_TA_KERNAG (Kern County Water Agency); the three-route presentation is confirmed. The endpoint serves no combined total, so the All routes (total) location sums the three served series client-side, and only when all three are present and year-aligned (verified: identical years 1922-2021, no nulls); otherwise the total falls back to sample labeling, never a partial sum.",
     data: "live",
-    provisional: true,
     mockKind: "exports",
     mockEffect: "exports",
   },
   salmon_abund: {
     id: "salmon_abund",
+    proseName: "winter-run abundance",
     name: "Winter-run abundance",
     sectorId: "salmonS",
     locationGroup: "salmon",
@@ -709,7 +1004,7 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: "proportion of spawning habitat occupied",
     axisLabel: "Proportion of spawning habitat occupied",
     footnote:
-      "Proportion of total spawning habitat occupied by returning natural-origin female winter-run Chinook spawners, averaged over three years. Values above 1.0 would suggest returning spawners exceed the capacity of available habitat. The data shown represent the lower 20th percentile of model simulations.",
+      "Proportion of total spawning habitat occupied by returning natural-origin female winter-run Chinook spawners, averaged over three years. The data shown represent the lower 20th percentile of model simulations.",
     views: ["dist"],
     viewLabels: { dist: "Abundance (3-yr avg)" },
     plain:
@@ -718,11 +1013,14 @@ export const VARIABLES: Record<string, VariableDef> = {
     data: "live",
     provisional: true,
     wytApplicable: false,
+    noLiveDataExplanation:
+      "Salmon spawning results are not modeled for Delta Conveyance Project scenarios.",
     mockKind: "flow",
     mockEffect: "eco",
   },
   ndo: {
     id: "ndo",
+    proseName: "Delta outflow volume",
     name: "Delta outflow volume",
     sectorId: "outflow",
     locationGroup: "delta",
@@ -731,33 +1029,16 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist", "monthly"],
     plain:
       "How much fresh water flows out of the Delta toward San Francisco Bay. Outflow keeps the estuary fresh and supports fish and wildlife.",
-    tech: "Net Delta Outflow (NDO), monthly and annual percentiles.",
+    tech: "Net Delta Outflow at the CalSim3 C_SAC000 channel (the Sacramento/San Joaquin confluence node), served by the river-flows endpoint as subject SAC000. The annual distribution is live; the monthly view renders sample data.",
     tierOutcome: "DELTA_ECO",
     tierOutcomeName: "Delta estuary ecology",
-    data: "mock",
+    data: "live",
     mockKind: "outflow",
     mockEffect: "outflow",
   },
-  ndo_uif: {
-    id: "ndo_uif",
-    name: "Outflow as % of unimpaired flow",
-    sectorId: "outflow",
-    locationGroup: "delta",
-    unit: "%",
-    unitLabel: "percent of unimpaired flow",
-    views: ["dist"],
-    plain:
-      "What share of the river water that would naturally reach the Delta actually flows out of it, after storage and diversions.",
-    tech: "Annual Delta outflow divided by unimpaired outflow estimate; flagged as provisional in the outcomes spec.",
-    tierOutcome: "DELTA_ECO",
-    tierOutcomeName: "Delta estuary ecology",
-    data: "mock",
-    provisional: true,
-    mockKind: "pctuif",
-    mockEffect: "pctUIF",
-  },
   riv_flow: {
     id: "riv_flow",
+    proseName: "river flows",
     name: "River flows",
     sectorId: "eflows",
     locationGroup: "rivers",
@@ -775,6 +1056,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   ag_del: {
     id: "ag_del",
+    proseName: "agricultural surface water deliveries",
     name: "Surface water deliveries",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -782,15 +1064,16 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist", "monthly"],
     plain: "How much river and project water is delivered to farms each year.",
-    tech: "Annual agricultural surface delivery percentiles per demand-unit group.",
+    tech: "Served live from the ag data-in-depth endpoint's net_diversion measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132).",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
+    data: "live",
     mockKind: "agdel",
     mockEffect: "agDel",
   },
   ag_pump: {
     id: "ag_pump",
+    proseName: "agricultural groundwater pumping",
     name: "Groundwater pumping",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -799,51 +1082,36 @@ export const VARIABLES: Record<string, VariableDef> = {
     views: ["dist"],
     plain:
       "How much groundwater farms pump to make up for surface water they don't receive. Pumping rises in dry years.",
-    tech: "Annual agricultural groundwater pumping percentiles. Pumping-limit scenarios constrain this directly.",
+    tech: "Served live from the ag data-in-depth endpoint's gw_pumping measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). Pumping-limit scenarios constrain this directly.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
+    data: "live",
     mockKind: "pump",
     mockEffect: "pump",
   },
   ag_short: {
     id: "ag_short",
-    name: "Total water shortage",
+    proseName: "agricultural water shortage",
+    name: "Water shortage",
     sectorId: "ag",
     locationGroup: "agregions",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist"],
+    views: ["dist", "pct_demand"],
+    viewLabels: { dist: "Shortage (TAF)", pct_demand: "% of demand" },
+    viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
-      "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts.",
-    tech: "Annual shortage volume percentiles (demand minus deliveries minus pumping), post-processed from CalSim3. Deck-only metric pending scope confirmation.",
+      "How much water farms wanted but did not get, from any source. Zero in wet years; can spike in droughts. The percent view expresses the same gap as a share of what farms needed, which compares across regions of different size.",
+    tech: "Served live from the ag data-in-depth endpoint's shortage measure (annual TAF) on the NOD_Agriculture/SOD_Agriculture aggregates and on every served demand unit (132). The percent-of-demand view is DERIVED on the site as shortage / (net diversion + shortage) x 100, because the endpoint serves no percent measure; demand is approximated as delivered water plus shortage.",
     tierOutcome: "AG_REV",
     tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
+    data: "live",
     mockKind: "short",
-    mockEffect: "short",
-  },
-  ag_shortpct: {
-    id: "ag_shortpct",
-    name: "Shortage as % of demand",
-    sectorId: "ag",
-    locationGroup: "agregions",
-    unit: "%",
-    unitLabel: "percent of demand",
-    views: ["dist"],
-    plain:
-      "Shortage expressed as a share of what farms needed - easier to compare across regions of different size.",
-    tech: "Annual shortage-percent percentiles per demand-unit group. Deck-only metric pending scope confirmation.",
-    tierOutcome: "AG_REV",
-    tierOutcomeName: "Agricultural revenue",
-    data: "mock",
-    provisional: true,
-    mockKind: "shortpct",
     mockEffect: "short",
   },
   ag_rev: {
     id: "ag_rev",
+    proseName: "gross crop revenues",
     name: "Gross crop revenues",
     sectorId: "ag",
     locationGroup: "agregions",
@@ -862,6 +1130,7 @@ export const VARIABLES: Record<string, VariableDef> = {
   },
   cws_del: {
     id: "cws_del",
+    proseName: "community water system deliveries",
     name: "Surface water deliveries",
     sectorId: "cwsS",
     locationGroup: "cws",
@@ -869,28 +1138,56 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
-    tech: "Annual CWS surface delivery percentiles per system group (system groups are illustrative until the location list is finalized).",
+    tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. The served series is aggregated by calendar year over a model run from October 1921 to September 2021, so its first and last years are three-month and nine-month stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
+<<<<<<< HEAD
     tierOutcomeName: "Community surface water",
     data: "mock",
+=======
+    tierOutcomeName: "Community deliveries",
+    data: "live",
+    wytApplicable: false,
+    yearBasis: "calendar",
+    servedYearRange: { min: 1922, max: 2020 },
+>>>>>>> dev
     mockKind: "cwsdel",
     mockEffect: "cws",
   },
   cws_short: {
     id: "cws_short",
+    proseName: "community water system delivery shortages",
     name: "Delivery shortages",
     sectorId: "cwsS",
-    locationGroup: "cws",
+    locationGroup: "cwsShortage",
     unit: "TAF",
     unitLabel: TAF,
-    views: ["dist"],
+    views: ["dist", "pct_demand"],
+    viewLabels: { dist: "Shortage (TAF)", pct_demand: "% of demand" },
+    viewUnits: { pct_demand: { unit: "%", unitLabel: "percent of demand" } },
     plain:
       "How much water community systems were short of their needs - the gap the tiers pathway scores against human-health thresholds.",
-    tech: "Annual CWS shortage percentiles (external post-processing). Pairs with the Community deliveries tier definition.",
+    tech: "Served live from the cws data-in-depth endpoint on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series: the volume view reads the shortage_total measure (annual TAF), the percent view reads the served shortage_pct measure directly (0-100). The shortage set overlaps but differs from the 74-system delivery set, so shortage_pct is not simply 100 minus pct_demand_met and the location list here is its own. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community surface water",
-    data: "mock",
-    provisional: true,
+    data: "live",
+    wytApplicable: false,
+    mockKind: "short",
+    mockEffect: "cwsShort",
+  },
+  cws_welfare: {
+    id: "cws_welfare",
+    proseName: "welfare loss",
+    name: "Welfare loss",
+    sectorId: "cwsS",
+    locationGroup: "cwsShortage",
+    unit: "$M",
+    unitLabel: "million dollars per year",
+    views: ["dist"],
+    plain:
+      "The economic cost to a community water system of the water it did not get, in dollars per year. Zero in most years; it rises steeply in the droughts when shortages bite.",
+    tech: "Served live from the cws data-in-depth endpoint's welfare_loss measure (USD per year, the capped welfare-loss series from the CWS economics analysis) on the NOD_CWS/SOD_CWS aggregates and on the 63 community water systems with modeled shortage series; the site displays millions of dollars. Water-year-type filtering does not apply: the loss is an economic outcome that does not decompose by water year. The distribution is heavily zero-inflated, so the sentence reports the share of years with no loss and the mean rather than a median.",
+    data: "live",
+    wytApplicable: false,
     mockKind: "short",
     mockEffect: "cwsShort",
   },
@@ -899,6 +1196,67 @@ export const VARIABLES: Record<string, VariableDef> = {
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Variable ids retired by being FOLDED INTO a view of another variable, with
+ * the view that now shows the same quantity.
+ *
+ * Share URLs carry a variable id and a view, so a link minted before a fold
+ * must land on the same chart rather than on a stranger. Generic healing
+ * (fall back to the default variable) is the right answer for a variable
+ * whose content is simply gone; this map is for the ones whose content still
+ * exists, just under a different address.
+ */
+const FOLDED_VARIABLE_IDS: Record<string, { id: string; view: VariableView }> =
+  {
+    // "Shortage as % of demand" became ag_short's percent-of-demand view.
+    ag_shortpct: { id: "ag_short", view: "pct_demand" },
+  }
+
+/**
+ * Variable ids retired OUTRIGHT: their content is gone, not moved. A share
+ * URL or persisted session carrying one lands on the default variable, on
+ * purpose and deterministically, rather than on whatever the caller's own
+ * fallback happens to be.
+ *
+ * - ndo_uif, "Outflow as % of unimpaired flow": provisional sample data only;
+ *   the unimpaired series exists as a spreadsheet, not in the API. Dropped
+ *   from the Delta outflows sector at the project lead's request (Aug 2026).
+ */
+export const RETIRED_VARIABLE_IDS: ReadonlySet<string> = new Set(["ndo_uif"])
+
+/**
+ * Resolves a persisted (variableId, view) pair through the fold map and the
+ * retired set. Returns the pair unchanged when the id was never folded or
+ * retired, so callers can apply it unconditionally. Pure.
+ */
+export function resolveFoldedVariable(
+  variableId: string,
+  view: string,
+): { id: string; view: string } {
+  const folded = FOLDED_VARIABLE_IDS[variableId]
+  if (folded) return { id: folded.id, view: folded.view }
+  if (RETIRED_VARIABLE_IDS.has(variableId)) {
+    return { id: DEFAULT_VARIABLE_ID, view: "dist" }
+  }
+  return { id: variableId, view }
+}
+
+/**
+ * Text of the key-outcome chip under the variable breadcrumb, or null when
+ * the variable shows no chip. "not-used" wins over the tier metadata; a
+ * tier outcome name reads as "used in calculation of key outcome: <name>".
+ * Pure.
+ */
+export function keyOutcomeChipText(variable: VariableDef): string | null {
+  if (variable.keyOutcomeChip === "not-used") {
+    return "not used in calculation of key outcome"
+  }
+  if (variable.tierOutcomeName) {
+    return `used in calculation of key outcome: ${variable.tierOutcomeName}`
+  }
+  return null
+}
 
 export function getVariable(id: string): VariableDef | undefined {
   return VARIABLES[id]
@@ -935,6 +1293,44 @@ export function getLocationTitle(
     ? `${name} ${group.titleSuffix}`
     : name
 }
+
+/**
+ * Carry the location selection from one group to another when a variable
+ * switch changes groups (community water systems deliveries vs shortages
+ * bind different, overlapping system lists). The location picked last
+ * follows the user into the next group when that group has it; a location
+ * the next group lacks is left behind, and the next group's own pin (its
+ * default at worst) stands. The store seeds every group with a default pin,
+ * so "no pin yet" cannot be told apart from "the default", which is why the
+ * latest pick wins rather than only filling a gap. Pure: returns new
+ * records, never mutates the inputs.
+ */
+export function carryLocationSelection(
+  prevGroupId: string,
+  nextGroupId: string,
+  pinnedLocationByGroup: Record<string, string>,
+  selectedLocationsByGroup: Record<string, string[]>,
+): {
+  pinnedLocationByGroup: Record<string, string>
+  selectedLocationsByGroup: Record<string, string[]>
+} {
+  const next = LOCATION_GROUPS[nextGroupId as LocationGroupId]
+  if (prevGroupId === nextGroupId || !next) {
+    return { pinnedLocationByGroup, selectedLocationsByGroup }
+  }
+  const has = (id: string) => next.items.some((l) => l.id === id)
+  const pins = { ...pinnedLocationByGroup }
+  const prevPin = pinnedLocationByGroup[prevGroupId]
+  if (prevPin && has(prevPin)) pins[nextGroupId] = prevPin
+  const selections = { ...selectedLocationsByGroup }
+  const carried = (selectedLocationsByGroup[prevGroupId] ?? []).filter(has)
+  if (carried.length > 0) selections[nextGroupId] = carried
+  return { pinnedLocationByGroup: pins, selectedLocationsByGroup: selections }
+}
+
+/** The reason shown wherever a groundwater total cannot take the Level view. */
+export const LEVEL_VIEW_UNAVAILABLE_REASON =
+  "Groundwater levels are reported per basin; the North and South of Delta totals are volumes."
 
 /** Default (first) location id per group, used to seed pinned locations. */
 export function defaultLocationSelection(): Record<string, string> {

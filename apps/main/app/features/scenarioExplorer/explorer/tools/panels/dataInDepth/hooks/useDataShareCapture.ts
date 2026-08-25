@@ -50,8 +50,15 @@ export function useDataShareCapture(
   // screen. Stats snapshot support needs a composed multi-chart capture.
   const statsStyle =
     distKind === "stats" &&
-    (data.view === "dist" || data.view === "pct" || data.view === "level")
-  const canSnapshot = data.members.length > 0 && !data.isLoading && !statsStyle
+    (data.view === "dist" ||
+      data.view === "pct" ||
+      data.view === "pct_demand" ||
+      data.view === "level")
+  const canSnapshot =
+    data.members.length > 0 &&
+    !data.isLoading &&
+    !statsStyle &&
+    !data.unavailableReason
 
   const saveSnapshot = useCallback(async () => {
     if (data.members.length === 0) return
@@ -59,6 +66,7 @@ export function useDataShareCapture(
     // Same standardized title the on-screen card shows above the chart.
     const figureTitle = dataFigureTitle({
       variableName,
+      figureTitleHead: data.variable?.figureTitleHead,
       compareBy,
       memberCount: data.members.length,
       firstMemberLabel: data.members[0]?.label,
@@ -96,9 +104,12 @@ export function useDataShareCapture(
           viewLabel,
           compareByLabel: COMPARE_LABELS[compareBy] ?? compareBy,
           unitLabel: data.unitLabel,
-          source: data.source,
+          // A figure whose series do not share one provenance must not claim
+          // one; the per-member Source column carries the detail.
+          source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
+          yearBasis: data.variable?.yearBasis,
         }),
       buildItem: (captured) => ({
         id: `data-${selectedVariableId}-${crypto.randomUUID()}`,
@@ -109,7 +120,7 @@ export function useDataShareCapture(
         compareBy,
         memberIds: data.members.map((m) => m.id),
         memberLabels: data.members.map((m) => m.label),
-        source: data.source,
+        source: data.mixedSource ? "mixed" : data.source,
         hydroclimate: capturedHydroclimate,
         cachedSvg: captured?.svg,
         cachedImageDataUrl: captured?.dataUrl,

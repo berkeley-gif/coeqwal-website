@@ -16,6 +16,7 @@ import {
 } from "../export/csv/dataCsv"
 import {
   getVariable,
+  resolveFoldedVariable,
   VIEW_LABELS,
   type VariableView,
 } from "../../tools/panels/dataInDepth/config/variableRegistry"
@@ -62,7 +63,11 @@ const dataHandler: VariantHandler<DataItem> = {
       title: figureTitle ?? variableName,
       subtitle: viewLabelFor(item),
       chips: [
-        item.source === "live" ? "Live data" : "Sample data",
+        item.source === "mixed"
+          ? "Mixed data"
+          : item.source === "live"
+            ? "Live data"
+            : "Sample data",
         ...item.memberLabels,
       ],
       hydroclimate: item.hydroclimate,
@@ -92,16 +97,20 @@ const dataHandler: VariantHandler<DataItem> = {
   decodeUrlToken(parts) {
     if (parts.length < 1 || !parts[0]) return null
     const memberIds = (parts[4] ?? "").split("~").filter(Boolean)
+    // A link minted before a variable was folded into a view of another one
+    // must land on the same chart, not on a stranger or a blank panel.
+    const resolved = resolveFoldedVariable(parts[0], parts[1] || "dist")
     return {
       id: crypto.randomUUID(),
       type: "data",
-      variableId: parts[0],
-      view: parts[1] || "dist",
+      variableId: resolved.id,
+      view: resolved.view,
       distKind: parts[2] || "exceedance",
       compareBy: parts[3] || "scenarios",
       memberIds,
       memberLabels: memberIds,
-      source: parts[5] === "live" ? "live" : "mock",
+      source:
+        parts[5] === "live" ? "live" : parts[5] === "mixed" ? "mixed" : "mock",
       hydroclimate: parts[6] || "historical",
     }
   },

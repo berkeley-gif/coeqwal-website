@@ -43,7 +43,10 @@ import {
   useSystemDeliveriesDataInDepth,
   useGroundwaterStorageDataInDepth,
   useSalmonDataInDepth,
+  useCwsDataInDepth,
+  useAgDataInDepth,
 } from "@repo/data/coeqwal/hooks"
+import type { DidAgMeasure } from "@repo/data/coeqwal"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
 import {
   useResolvedIdMapping,
@@ -59,11 +62,13 @@ import {
   getLocation,
   getLocationTitle,
   getVariable,
+  LEVEL_VIEW_UNAVAILABLE_REASON,
   LOCATION_GROUPS,
   type VariableDef,
   type VariableView,
 } from "../config/variableRegistry"
 import {
+  shortagePctOfDemand,
   gwLevelFromStorage,
   mockAnnualSeries,
   mockMonthlyBands,
@@ -85,9 +90,16 @@ import {
   didLiveScaleForVariable,
   toDidSubject,
   unitTokenForView,
+  companionUnitTokensForView,
   includeForView,
   pickLiveSeriesPoints,
+  sumAlignedSeriesPoints,
+  blockHasSubject,
+  trimPointsToYearRange,
+  SSJV_ALL_ROUTES_LOCATION,
+  SSJV_ROUTE_SUBJECTS,
   viewHasLiveSource,
+  hasEmptyScenariosResponse,
 } from "../config/didMapping"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { useMultiScenarioSlots } from "./useMultiScenarioSlots"
@@ -109,6 +121,12 @@ export interface VariableMember {
   waterYears?: number[]
   /** True when this member's series came from the live API (mock fallback = false) */
   isLive?: boolean
+  /** True when the variable IS live-eligible and this member's request
+   *  resolved, but the endpoint served no block for the scenario: the
+   *  scenario is not modeled for this variable (salmon under the Delta
+   *  Conveyance Project). Distinct from a plain mock fallback, which means
+   *  "not wired yet" rather than "does not exist". `isLive` stays false. */
+  liveDataMissing?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -128,6 +146,9 @@ export interface VariableData {
   provisional: boolean
   /** Data provenance for the card label */
   source: "live" | "mock"
+  /** True when some members are live and others are not, so a single
+   *  chart-level provenance badge would misdescribe part of the figure */
+  mixedSource: boolean
   /** Held-constant location name (scenarios / climates axes) */
   locationName: string
   /** Held location as a figure-title name ("Shasta Reservoir"; "" if none) */
@@ -139,6 +160,10 @@ export interface VariableData {
   /** Whether water-year typing applies to the selected variable (false =
    *  registry opt-out: chips disabled, no wyt filtering, no title clause) */
   wytApplicable: boolean
+  /** Set when the selection cannot be shown at all (a groundwater total on
+   *  the Level view): the card shows this reason instead of a chart, and
+   *  no request is made. Members are still listed so the legend reads. */
+  unavailableReason?: string
   isLoading: boolean
   error: unknown
 }
@@ -221,13 +246,48 @@ export function useVariableData(): VariableData {
     [scenarioIdsJoined],
   )
 
+  // A groundwater total on the Level view cannot be shown: no request goes
+  // out for it and the card renders the reason (the locations axis checks
+  // its compared members instead of the pin).
+  const heldLocationDef = groupId
+    ? getLocation(groupId, heldLocation)
+    : undefined
+  const comparedLocationIds = (
+    (groupId ? selectedLocationsByGroup[groupId] : undefined) ?? []
+  ).filter((id) => group?.items.some((l) => l.id === id))
+  const levelUnavailable =
+    view === "level" &&
+    (compareBy === "locations"
+      ? (comparedLocationIds.length > 0
+          ? comparedLocationIds
+          : (group?.items.slice(0, DEFAULT_LOCATION_COUNT).map((l) => l.id) ??
+            [])
+        ).some((id) => groupId && getLocation(groupId, id)?.levelView === false)
+      : heldLocationDef?.levelView === false)
+  const unavailableReason = levelUnavailable
+    ? LEVEL_VIEW_UNAVAILABLE_REASON
+    : undefined
+
   // Live request mapping for the current variable (null domain -> mock only).
   const domain = variable ? didDomainForVariable(variable.id) : null
   const period = variable ? didPeriodForVariable(variable.id) : null
-  const subject = domain
-    ? toDidSubject(domain, heldLocation, variable?.id)
-    : null
-  const unitToken = domain ? unitTokenForView(domain, view) : "volume"
+  const subject =
+    domain && !levelUnavailable
+      ? toDidSubject(domain, heldLocation, variable?.id)
+      : null
+  // The synthetic SSJV total has no served subject of its own: it fetches
+  // all three route subjects and sums them fail-closed at adoption time.
+  const isSsjvTotal =
+    variable?.id === "ssjv_exp" && heldLocation === SSJV_ALL_ROUTES_LOCATION
+  const unitToken = domain
+    ? unitTokenForView(domain, view, variable?.id)
+    : "volume"
+  // Extra measures the request needs beyond the primary one. Only the ag
+  // percent-of-demand view has any: it is derived from two served series.
+  const companionTokens = domain
+    ? companionUnitTokensForView(domain, view, variable?.id)
+    : []
+  const companionSignature = companionTokens.join(",")
   const include = includeForView(view)
 
   // Resolve member ids to concrete scenario short_codes for the live fetch.
@@ -239,7 +299,7 @@ export function useVariableData(): VariableData {
   const resolvedAll = useResolvedIdMappings()
   const liveEligible =
     domain != null &&
-    subject != null &&
+    (subject != null || isSsjvTotal) &&
     period != null &&
     viewHasLiveSource(view) &&
     liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
@@ -311,7 +371,11 @@ export function useVariableData(): VariableData {
     (id) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
       useSystemDeliveriesDataInDepth(id ? [id] : [], {
-        subjects: subject ? [subject] : undefined,
+        subjects: isSsjvTotal
+          ? [...SSJV_ROUTE_SUBJECTS]
+          : subject
+            ? [subject]
+            : undefined,
         units: ["volume"],
         include,
         wyt,
@@ -339,6 +403,53 @@ export function useVariableData(): VariableData {
         include,
       }),
   )
+  const cwsSlots = useMultiScenarioSlots(
+    domain === "cws" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useCwsDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        // The cws request token IS the measure name (delivery /
+        // shortage_total / shortage_pct / welfare_loss); anything else
+        // defers to delivery.
+        measures: [
+          unitToken === "shortage_pct"
+            ? "shortage_pct"
+            : unitToken === "shortage_total"
+              ? "shortage_total"
+              : unitToken === "welfare_loss"
+                ? "welfare_loss"
+                : "delivery",
+        ],
+        // No wyt: the CWS series aggregate by calendar year, so the filter
+        // does not apply. It is not a field on CwsDataInDepthOptions, and the
+        // endpoint builder throws if one is smuggled past that.
+        include,
+      }),
+  )
+  const agSlots = useMultiScenarioSlots(
+    domain === "ag" ? fanoutIds : [],
+    (id) =>
+      // eslint-disable-next-line react-hooks/rules-of-hooks -- useMultiScenarioSlots calls this a fixed number of times per render
+      useAgDataInDepth(id ? [id] : [], {
+        subjects: subject ? [subject] : undefined,
+        // Like cws, the ag request token IS the measure name; anything else
+        // defers to the delivery measure. Unlike cws, ag IS water-year data,
+        // so the water-year-type filter applies and rides along.
+        measures: [
+          unitToken === "gw_pumping"
+            ? "gw_pumping"
+            : unitToken === "shortage"
+              ? "shortage"
+              : "net_diversion",
+          // The percent-of-demand view needs net_diversion alongside
+          // shortage, because the endpoint serves no percent measure.
+          ...(companionSignature ? (companionTokens as DidAgMeasure[]) : []),
+        ],
+        include,
+        wyt,
+      }),
+  )
 
   const activeSlots =
     domain === "reservoir"
@@ -353,9 +464,22 @@ export function useVariableData(): VariableData {
               ? gwSlots
               : domain === "salmon"
                 ? salmonSlots
-                : []
+                : domain === "cws"
+                  ? cwsSlots
+                  : domain === "ag"
+                    ? agSlots
+                    : []
   const liveSignature = activeSlots
     .map((r) => (r?.hasData ? "1" : "0"))
+    .join("")
+  // Per-slot "resolved but served nothing for this scenario". Kept as its own
+  // signal because hasData cannot express it: the endpoint answers 200 with an
+  // empty scenarios array, so hasData is true either way.
+  const emptyResponseBySlot = activeSlots.map((r) =>
+    hasEmptyScenariosResponse(r),
+  )
+  const emptyResponseSignature = emptyResponseBySlot
+    .map((v) => (v ? "1" : "0"))
     .join("")
   const liveLoading = activeSlots.some((r) => r?.isLoading)
 
@@ -377,6 +501,7 @@ export function useVariableData(): VariableData {
         unitLabel: "",
         provisional: false,
         source: "mock",
+        mixedSource: false,
         ...emptyContext,
         wytApplicable,
         isLoading: false,
@@ -434,6 +559,7 @@ export function useVariableData(): VariableData {
 
     const isPct = view === "pct"
     const isLevel = view === "level"
+    const isPctDemand = view === "pct_demand"
 
     let anyLive = false
     const members: VariableMember[] = specs.map((spec) => {
@@ -451,30 +577,81 @@ export function useVariableData(): VariableData {
         series = raw.map((v) => (v / cap) * 100)
       } else if (isLevel && location) {
         series = gwLevelFromStorage(raw, location)
+      } else if (isPctDemand) {
+        // Sample percent-of-demand: shortage over shortage-plus-delivered,
+        // both from the sample engine. The delivered term is the sector's own
+        // delivery variable. For CWS a live member overwrites this with the
+        // endpoint's served shortage_pct measure below; for ag there is no
+        // served percent measure, so the live path derives it the same way.
+        series = shortagePctOfDemand(
+          raw,
+          mockAnnualSeries(
+            variable.id === "ag_short" ? "ag_del" : "cws_del",
+            spec.scenarioId,
+            spec.climateKey,
+            spec.locationId,
+          ),
+        )
       } else {
         series = raw
       }
       let waterYears: number[] | undefined
       let adoptedLive = false
+      // The served block exists but lacks this member's subject: not
+      // modeled for this scenario, reported like an empty response.
+      let subjectAbsent = false
 
       // Live override: the endpoint already returns the requested unit
       // (TAF / PCT_CAP / km), so no capacity math is applied to live series.
-      if (
-        liveEligible &&
-        subject &&
-        period &&
-        domain &&
-        spec.slotIndex != null
-      ) {
-        const block = activeSlots[spec.slotIndex]?.scenarios?.[0]
-        const points = pickLiveSeriesPoints(
-          block,
-          domain,
-          subject,
-          period,
-          unitToken,
-        )
-        if (points.series.length > 0) {
+      if (liveEligible && period && domain && spec.slotIndex != null) {
+        const slot = activeSlots[spec.slotIndex]
+        const block = slot?.scenarios?.[0]
+        subjectAbsent =
+          !!block &&
+          !!slot?.hasData &&
+          !slot.isLoading &&
+          subject != null &&
+          !isSsjvTotal &&
+          !blockHasSubject(block, domain, subject)
+        // Served stub years (the CWS delivery family) are dropped before
+        // anything is computed from the series.
+        const range = variable.servedYearRange
+        const pick = (code: string, token: typeof unitToken) => {
+          const p = pickLiveSeriesPoints(block, domain, code, period, token)
+          return range ? trimPointsToYearRange(p, range) : p
+        }
+        // The synthetic SSJV total sums the three served route series,
+        // FAIL-CLOSED: a null sum (missing route, misaligned years) falls
+        // back to sample labeling, never a partial total.
+        const points = isSsjvTotal
+          ? sumAlignedSeriesPoints(
+              SSJV_ROUTE_SUBJECTS.map((code) => pick(code, unitToken)),
+            )
+          : subject
+            ? pick(subject, unitToken)
+            : null
+        // The ag percent-of-demand view has no served percent measure, so it
+        // is derived from the primary shortage series and the companion
+        // net_diversion series in the SAME response block. If either is
+        // missing the member falls back to sample data rather than showing a
+        // half-derived number.
+        if (isPctDemand && companionTokens.length > 0 && subject) {
+          const companion = pick(
+            subject,
+            companionTokens[0] as typeof unitToken,
+          )
+          if (
+            points &&
+            points.series.length > 0 &&
+            companion.series.length > 0
+          ) {
+            series = shortagePctOfDemand(points.series, companion.series)
+            waterYears =
+              points.waterYears.length > 0 ? points.waterYears : undefined
+            anyLive = true
+            adoptedLive = true
+          }
+        } else if (points && points.series.length > 0) {
           // Served units -> display units (e.g. the salmon habitat-occupancy
           // ratio displays as percent); 1 for every other variable.
           const liveScale = didLiveScaleForVariable(variable.id)
@@ -521,6 +698,15 @@ export function useVariableData(): VariableData {
         )
       else value = stats.p50
 
+      // "Not modeled for this scenario", as distinct from "not wired yet".
+      // Only meaningful when the variable IS live-eligible and this member's
+      // own request resolved; adoptedLive / anyLive / source semantics are
+      // deliberately unchanged.
+      const liveDataMissing =
+        liveEligible &&
+        spec.slotIndex != null &&
+        (emptyResponseBySlot[spec.slotIndex] === true || subjectAbsent)
+
       return {
         id: spec.id,
         label: spec.label,
@@ -528,6 +714,7 @@ export function useVariableData(): VariableData {
         series,
         waterYears,
         isLive: adoptedLive,
+        ...(liveDataMissing ? { liveDataMissing: true } : {}),
         stats,
         bands,
         value,
@@ -553,9 +740,21 @@ export function useVariableData(): VariableData {
       unit,
       unitLabel,
       provisional: variable.provisional ?? false,
-      source: anyLive ? "live" : "mock",
+      // A live request that served nothing for every member (the scenario, or
+      // the subject, is not modeled) is still a live answer: the card shows
+      // the no-data notice under a "Live data" badge rather than a "Sample
+      // data" badge over an empty chart.
+      source:
+        anyLive ||
+        (members.length > 0 && members.every((m) => m.liveDataMissing))
+          ? "live"
+          : "mock",
+      // A single chart-level badge misdescribes the figure the moment one
+      // series is live and another is not.
+      mixedSource: anyLive && members.some((m) => !m.isLive),
       ...emptyContext,
       wytApplicable,
+      ...(unavailableReason ? { unavailableReason } : {}),
       isLoading: liveEligible ? liveLoading : false,
       error: null,
     }
@@ -577,8 +776,11 @@ export function useVariableData(): VariableData {
     period,
     domain,
     unitToken,
+    companionSignature,
     liveSignature,
+    emptyResponseSignature,
     liveLoading,
     wytJoined,
+    unavailableReason,
   ])
 }

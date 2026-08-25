@@ -124,10 +124,11 @@ export default function StoryCanvas({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "1fr 1fr",
-              },
+              // Columns derive from the space actually available rather than
+              // from the VIEWPORT breakpoint: the canvas sits beside a
+              // fixed-width tray on desktop, so a viewport-keyed threshold
+              // does not describe how much room these cards really have.
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
               gap: 2,
             }}
           >
