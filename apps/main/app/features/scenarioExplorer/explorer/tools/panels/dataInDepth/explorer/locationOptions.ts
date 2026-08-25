@@ -10,7 +10,35 @@
  * (members a view cannot show). No React, no store reads.
  */
 
-import type { LocationDef, LocationGroup } from "../config/variableRegistry"
+import {
+  LEVEL_VIEW_UNAVAILABLE_REASON,
+  type LocationDef,
+  type LocationGroup,
+} from "../config/variableRegistry"
+
+/** Ids in a group that cannot show the groundwater Level view. */
+export function levelUnavailableIds(group: LocationGroup): string[] {
+  return group.items.filter((l) => l.levelView === false).map((l) => l.id)
+}
+
+/**
+ * Why the Level view is blocked for the current selection, or null when it
+ * is not: on the scenarios and climates axes the pinned location decides,
+ * on the locations axis any compared member does. Pure.
+ */
+export function levelViewBlockedReason(
+  group: LocationGroup,
+  compareBy: "scenarios" | "climates" | "locations",
+  heldLocationId: string,
+  selectedLocationIds: readonly string[],
+): string | null {
+  const blocked = new Set(levelUnavailableIds(group))
+  if (blocked.size === 0) return null
+  const ids = compareBy === "locations" ? selectedLocationIds : [heldLocationId]
+  return ids.some((id) => blocked.has(id))
+    ? LEVEL_VIEW_UNAVAILABLE_REASON
+    : null
+}
 
 /** Groups with more members than this render as a picker, not chips. */
 export const CHIP_CLOUD_MAX = 12

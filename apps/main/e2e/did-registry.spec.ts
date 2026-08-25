@@ -9,6 +9,7 @@ import {
   resolveFoldedVariable,
   keyOutcomeChipText,
   carryLocationSelection,
+  LEVEL_VIEW_UNAVAILABLE_REASON,
   RETIRED_VARIABLE_IDS,
   type VariableView,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/variableRegistry"
@@ -786,4 +787,17 @@ test("welfare loss is a live community water systems variable in millions of dol
   expect(v?.provisional).toBeUndefined()
   expect(v?.tierOutcomeName).toBeUndefined()
   expect(keyOutcomeChipText(v!)).toBeNull()
+})
+
+// Groundwater levels are reported per basin (a water-table elevation cannot
+// be summed across basins), so the North and South of Delta totals cannot
+// show the Level view. The registry carries the capability on the location
+// and one reason string every control reads.
+test("groundwater totals declare that the Level view is unavailable", () => {
+  expect(getLocation("basins", "AGG_GW_NOD")?.levelView).toBe(false)
+  expect(getLocation("basins", "AGG_GW_SOD")?.levelView).toBe(false)
+  expect(getLocation("basins", "WBA10")?.levelView).toBeUndefined()
+  expect(LEVEL_VIEW_UNAVAILABLE_REASON).toBe(
+    "Groundwater levels are reported per basin; the North and South of Delta totals are volumes.",
+  )
 })

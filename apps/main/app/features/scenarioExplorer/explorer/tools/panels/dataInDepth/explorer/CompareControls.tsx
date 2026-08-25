@@ -49,7 +49,12 @@ import { getVariable, LOCATION_GROUPS } from "../config/variableRegistry"
 import { MAX_DATA_IN_DEPTH_SCENARIOS } from "../config/scenarioLimit"
 import { getStableSeriesColors } from "../config/seriesColorAssignment"
 import { AddEntityPicker } from "../components/shared/AddEntityPicker"
-import { locationOptionGroups, usesLocationPicker } from "./locationOptions"
+import {
+  levelUnavailableIds,
+  locationOptionGroups,
+  usesLocationPicker,
+} from "./locationOptions"
+import { LEVEL_VIEW_UNAVAILABLE_REASON } from "../config/variableRegistry"
 
 const MAX_COMPARE_LOCATIONS = 6
 const DEFAULT_LOCATION_COUNT = 3
@@ -67,6 +72,7 @@ export default function CompareControls() {
   const theme = useTheme()
   const {
     selectedVariableId,
+    view,
     compareBy,
     pinnedScenario,
     pinnedClimate,
@@ -94,6 +100,18 @@ export default function CompareControls() {
   // Large groups (demand units, community water systems, basins) are picked
   // from a grouped select; small groups keep the chip cloud.
   const picker = usesLocationPicker(group)
+  // On the groundwater Level view the totals cannot be chosen; they stay
+  // listed, disabled, with the reason on screen.
+  const levelBlockedIds = view === "level" ? levelUnavailableIds(group) : []
+  const levelCaption =
+    levelBlockedIds.length > 0 ? (
+      <Typography
+        variant="caption"
+        sx={{ display: "block", mt: 0.5, color: theme.palette.grey[600] }}
+      >
+        {LEVEL_VIEW_UNAVAILABLE_REASON}
+      </Typography>
+    ) : null
 
   // Comparison scenario set: reference first, then the workspace selection.
   const compareScenarios = [
@@ -213,14 +231,17 @@ export default function CompareControls() {
         {group.label}
       </Typography>
       {picker ? (
-        <CompactSelect
-          value={heldLocation}
-          onChange={(id) => setPinnedLocation(groupId, id)}
-          groups={locationOptionGroups(group)}
-          aria-label={group.label}
-          minWidth={260}
-          maxMenuHeight={420}
-        />
+        <>
+          <CompactSelect
+            value={heldLocation}
+            onChange={(id) => setPinnedLocation(groupId, id)}
+            groups={locationOptionGroups(group, { disabled: levelBlockedIds })}
+            aria-label={group.label}
+            minWidth={260}
+            maxMenuHeight={420}
+          />
+          {levelCaption}
+        </>
       ) : (
         <FormControl size="small" sx={controlSx}>
           <Select
@@ -230,13 +251,18 @@ export default function CompareControls() {
             sx={pinSelectSx}
           >
             {group.items.map((l) => (
-              <MenuItem key={l.id} value={l.id}>
+              <MenuItem
+                key={l.id}
+                value={l.id}
+                disabled={levelBlockedIds.includes(l.id)}
+              >
                 {l.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
       )}
+      {!picker && levelCaption}
     </Box>
   ) : null
 
@@ -447,6 +473,7 @@ export default function CompareControls() {
                     onChange={setPendingLocation}
                     groups={locationOptionGroups(group, {
                       exclude: effectiveLocations,
+                      disabled: levelBlockedIds,
                     })}
                     onAdd={addLocation}
                     placeholder="add a location"

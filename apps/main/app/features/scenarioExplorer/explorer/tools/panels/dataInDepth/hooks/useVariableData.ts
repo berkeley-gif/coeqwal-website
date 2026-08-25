@@ -62,6 +62,7 @@ import {
   getLocation,
   getLocationTitle,
   getVariable,
+  LEVEL_VIEW_UNAVAILABLE_REASON,
   LOCATION_GROUPS,
   type VariableDef,
   type VariableView,
@@ -159,6 +160,10 @@ export interface VariableData {
   /** Whether water-year typing applies to the selected variable (false =
    *  registry opt-out: chips disabled, no wyt filtering, no title clause) */
   wytApplicable: boolean
+  /** Set when the selection cannot be shown at all (a groundwater total on
+   *  the Level view): the card shows this reason instead of a chart, and
+   *  no request is made. Members are still listed so the legend reads. */
+  unavailableReason?: string
   isLoading: boolean
   error: unknown
 }
@@ -241,12 +246,35 @@ export function useVariableData(): VariableData {
     [scenarioIdsJoined],
   )
 
+  // A groundwater total on the Level view cannot be shown: no request goes
+  // out for it and the card renders the reason (the locations axis checks
+  // its compared members instead of the pin).
+  const heldLocationDef = groupId
+    ? getLocation(groupId, heldLocation)
+    : undefined
+  const comparedLocationIds = (
+    (groupId ? selectedLocationsByGroup[groupId] : undefined) ?? []
+  ).filter((id) => group?.items.some((l) => l.id === id))
+  const levelUnavailable =
+    view === "level" &&
+    (compareBy === "locations"
+      ? (comparedLocationIds.length > 0
+          ? comparedLocationIds
+          : (group?.items.slice(0, DEFAULT_LOCATION_COUNT).map((l) => l.id) ??
+            [])
+        ).some((id) => groupId && getLocation(groupId, id)?.levelView === false)
+      : heldLocationDef?.levelView === false)
+  const unavailableReason = levelUnavailable
+    ? LEVEL_VIEW_UNAVAILABLE_REASON
+    : undefined
+
   // Live request mapping for the current variable (null domain -> mock only).
   const domain = variable ? didDomainForVariable(variable.id) : null
   const period = variable ? didPeriodForVariable(variable.id) : null
-  const subject = domain
-    ? toDidSubject(domain, heldLocation, variable?.id)
-    : null
+  const subject =
+    domain && !levelUnavailable
+      ? toDidSubject(domain, heldLocation, variable?.id)
+      : null
   // The synthetic SSJV total has no served subject of its own: it fetches
   // all three route subjects and sums them fail-closed at adoption time.
   const isSsjvTotal =
@@ -726,6 +754,7 @@ export function useVariableData(): VariableData {
       mixedSource: anyLive && members.some((m) => !m.isLive),
       ...emptyContext,
       wytApplicable,
+      ...(unavailableReason ? { unavailableReason } : {}),
       isLoading: liveEligible ? liveLoading : false,
       error: null,
     }
@@ -752,5 +781,6 @@ export function useVariableData(): VariableData {
     emptyResponseSignature,
     liveLoading,
     wytJoined,
+    unavailableReason,
   ])
 }

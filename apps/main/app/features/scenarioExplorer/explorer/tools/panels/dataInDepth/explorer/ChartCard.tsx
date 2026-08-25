@@ -137,7 +137,23 @@ export default function ChartCard() {
   )
 
   let chart: React.ReactNode = null
-  if (!hasMembers || !hasPlotted) {
+  if (data.unavailableReason) {
+    chart = (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: CHART_HEIGHT,
+          color: theme.palette.grey[600],
+          px: 3,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body2">{data.unavailableReason}</Typography>
+      </Box>
+    )
+  } else if (!hasMembers || !hasPlotted) {
     chart = (
       <Box
         sx={{
@@ -263,21 +279,24 @@ export default function ChartCard() {
     >
       {/* Data-source labels */}
       <Box sx={{ display: "flex", gap: 1, mb: 1.5, flexWrap: "wrap" }}>
-        <Chip
-          size="small"
-          label={data.source === "live" ? "Live data" : "Sample data"}
-          sx={{
-            backgroundColor:
-              data.source === "live"
-                ? theme.palette.info.light
-                : theme.palette.grey[100],
-            color:
-              data.source === "live"
-                ? theme.palette.info.dark
-                : theme.palette.grey[600],
-            fontWeight: 600,
-          }}
-        />
+        {/* Nothing is claimed when nothing is shown */}
+        {!data.unavailableReason && (
+          <Chip
+            size="small"
+            label={data.source === "live" ? "Live data" : "Sample data"}
+            sx={{
+              backgroundColor:
+                data.source === "live"
+                  ? theme.palette.info.light
+                  : theme.palette.grey[100],
+              color:
+                data.source === "live"
+                  ? theme.palette.info.dark
+                  : theme.palette.grey[600],
+              fontWeight: 600,
+            }}
+          />
+        )}
         {data.provisional && (
           <Tooltip title="Scope still under discussion (deck vs. outcomes sheet)">
             <Chip
@@ -299,8 +318,8 @@ export default function ChartCard() {
         />
       </Box>
 
-      {/* Interpretive summary sentence */}
-      {hasMembers && (
+      {/* Interpretive summary sentence (never from series that cannot be shown) */}
+      {hasMembers && !data.unavailableReason && (
         <Typography
           variant="body2"
           sx={{ mb: 1.5, color: theme.palette.text.primary, lineHeight: 1.5 }}
@@ -426,21 +445,23 @@ export default function ChartCard() {
       )}
 
       {/* Provenance note */}
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          mt: 1.5,
-          color: theme.palette.grey[500],
-          fontStyle: "italic",
-        }}
-      >
-        {data.source === "live"
-          ? data.mixedSource
-            ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
-            : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
-          : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
-      </Typography>
+      {!data.unavailableReason && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: "block",
+            mt: 1.5,
+            color: theme.palette.grey[500],
+            fontStyle: "italic",
+          }}
+        >
+          {data.source === "live"
+            ? data.mixedSource
+              ? `Live data from api.coeqwal.org (CalSim3 post-processed annual series) for ${liveMemberCount} of ${data.members.length} series; see the legend for series shown as sample or without data.`
+              : "Live data from api.coeqwal.org (CalSim3 post-processed annual series)."
+            : `Sample data (${MOCK_YEARS} simulated years, seeded): illustrative structure that mimics CalSim3 post-processed output, not model results.`}
+        </Typography>
+      )}
     </Box>
   )
 }

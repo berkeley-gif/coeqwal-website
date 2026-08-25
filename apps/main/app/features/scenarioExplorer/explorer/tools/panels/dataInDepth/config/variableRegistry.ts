@@ -54,6 +54,11 @@ export interface LocationDef {
   capacityTaf?: number
   /** True for aggregate rollups (e.g. all North-of-Delta reservoirs) */
   aggregate?: boolean
+  /** False when the location cannot show the groundwater Level view: a
+   *  water-table elevation is reported per basin and cannot be summed, so
+   *  the North and South of Delta totals carry volume only. Pickers disable
+   *  the location on that view and the view bar disables the view for it. */
+  levelView?: false
   /** Synthetic median magnitude for the sample-data engine */
   mockBase?: number
   /** Uncut display label, present only when `name` was cut at a word
@@ -236,6 +241,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         name: "All North of Delta",
         region: "NOD",
         aggregate: true,
+        levelView: false,
         mockBase: 46000,
       },
       {
@@ -243,6 +249,7 @@ export const LOCATION_GROUPS: Record<LocationGroupId, LocationGroup> = {
         name: "All South of Delta",
         region: "SOD",
         aggregate: true,
+        levelView: false,
         mockBase: 51000,
       },
       {
@@ -1315,6 +1322,10 @@ export function carryLocationSelection(
   if (carried.length > 0) selections[nextGroupId] = carried
   return { pinnedLocationByGroup: pins, selectedLocationsByGroup: selections }
 }
+
+/** The reason shown wherever a groundwater total cannot take the Level view. */
+export const LEVEL_VIEW_UNAVAILABLE_REASON =
+  "Groundwater levels are reported per basin; the North and South of Delta totals are volumes."
 
 /** Default (first) location id per group, used to seed pinned locations. */
 export function defaultLocationSelection(): Record<string, string> {
