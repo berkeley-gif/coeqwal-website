@@ -53,6 +53,8 @@ export interface CaptureDataInDepthInput {
   /** Standardized figure title; persisted with the chart data so the share
    *  card heading and the CSV provenance block carry it */
   figureTitle: string
+  /** Year basis of the series; calendar-year series label their rows so. */
+  yearBasis?: "water" | "calendar"
 }
 
 export interface CaptureDataInDepthResult {
@@ -130,6 +132,7 @@ export async function captureDataInDepthOffscreen(
     source: input.source,
     waterYearTypesLabel: input.waterYearTypesLabel,
     figureTitle: input.figureTitle,
+    yearBasis: input.yearBasis,
     // A member with no served data exports as a LABELED, EMPTY column, never
     // as the sample series the engine produced to fill the gap. Its water
     // years stay an empty array (not undefined) so the other members keep

@@ -56,6 +56,10 @@ export interface LocationDef {
   aggregate?: boolean
   /** Synthetic median magnitude for the sample-data engine */
   mockBase?: number
+  /** Uncut display label, present only when `name` was cut at a word
+   *  boundary to stay legible in chips, legends and titles (generated
+   *  entity locations). Shown in tooltips. */
+  longName?: string
   /** The label the API serves for this subject, verbatim, when the display
    *  name was derived from it (generated entity locations). Kept so a
    *  display-name review can see what the data team called the entity. */
@@ -148,6 +152,17 @@ export interface VariableDef {
    *  provenance drop the water-years clause. The stored selection stays
    *  inert, not cleared. Absent means WYT applies. */
   wytApplicable?: boolean
+  /** Year basis of the served series. Absent means water years (October to
+   *  September), the CalSim3 convention. "calendar" marks series aggregated
+   *  upstream by calendar year (the CWS delivery family), which changes the
+   *  year-axis label in exports and provenance. */
+  yearBasis?: "water" | "calendar"
+  /** Inclusive range of served years the site adopts. Points outside it are
+   *  dropped before any statistic is computed. Set where the endpoint serves
+   *  partial stub years at the ends of the model run (the CWS delivery
+   *  family: a three-month 1921 and a nine-month 2021), so a stub never
+   *  becomes the minimum, the exceedance tail or a term of the mean and CV. */
+  servedYearRange?: { min: number; max: number }
   /** Shown when a scenario the user selected is not modeled for this
    *  variable, so the endpoint serves no data for it. Explains WHY rather
    *  than leaving a blank series: an absence with a reason reads as a fact
@@ -1087,11 +1102,13 @@ export const VARIABLES: Record<string, VariableDef> = {
     unitLabel: TAF,
     views: ["dist"],
     plain: "How much water community drinking-water systems receive each year.",
-    tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
+    tech: "Served live from the cws data-in-depth endpoint's delivery measure (annual TAF) on the NOD_CWS/SOD_CWS aggregates and on the 74 community water systems with modeled deliveries. The served series is aggregated by calendar year over a model run from October 1921 to September 2021, so its first and last years are three-month and nine-month stubs; the site keeps 1922 to 2020. Water-year-type filtering does not apply: the CWS team aggregated these series by calendar year, not water year.",
     tierOutcome: "CWS_DEL",
     tierOutcomeName: "Community deliveries",
     data: "live",
     wytApplicable: false,
+    yearBasis: "calendar",
+    servedYearRange: { min: 1922, max: 2020 },
     mockKind: "cwsdel",
     mockEffect: "cws",
   },

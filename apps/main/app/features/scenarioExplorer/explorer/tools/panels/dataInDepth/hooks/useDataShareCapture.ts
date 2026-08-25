@@ -105,6 +105,7 @@ export function useDataShareCapture(
           source: data.mixedSource ? "mixed" : data.source,
           waterYearTypesLabel,
           figureTitle,
+          yearBasis: data.variable?.yearBasis,
         }),
       buildItem: (captured) => ({
         id: `data-${selectedVariableId}-${crypto.randomUUID()}`,

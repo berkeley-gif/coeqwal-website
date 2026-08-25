@@ -654,6 +654,40 @@ export function pickLiveSeries(
 }
 
 /**
+ * Whether a served scenario block carries `subject` at all. A block that
+ * exists but lacks the subject means the subject is not modeled for that
+ * scenario (KCWA is absent from the Delta Conveyance Project family on the
+ * cws endpoint), which is a fact to show, not a reason to draw sample data.
+ */
+export function blockHasSubject(
+  block: LiveScenarioBlock | undefined,
+  domain: DidDomain,
+  subject: string,
+): boolean {
+  const subjects = block?.[RESPONSE_ARRAY_BY_DOMAIN[domain]]
+  return !!subjects?.some((s) => s.subject === subject)
+}
+
+/**
+ * Keep only the points whose year lies in `range` (inclusive), index-aligned
+ * across `series` and `waterYears`. Fails closed: with no years to judge by,
+ * the points are returned untouched rather than partially trimmed. Pure.
+ */
+export function trimPointsToYearRange(
+  points: SeriesPoints,
+  range: { min: number; max: number },
+): SeriesPoints {
+  if (points.waterYears.length !== points.series.length) return points
+  if (points.waterYears.length === 0) return points
+  const keep = points.waterYears.map((y) => y >= range.min && y <= range.max)
+  if (keep.every(Boolean)) return points
+  return {
+    series: points.series.filter((_, i) => keep[i]),
+    waterYears: points.waterYears.filter((_, i) => keep[i]),
+  }
+}
+
+/**
  * Like `pickLiveSeries` but returns water years alongside the values so
  * exports can label rows with real years. Same fallback contract: an empty
  * `series` means the caller uses the mock engine.

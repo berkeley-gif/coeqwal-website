@@ -738,3 +738,16 @@ test("carryLocationSelection carries a pin across groups only when the next grou
   )
   expect(unrelated.pinnedLocationByGroup).toEqual({ reservoirs: "SHSTA" })
 })
+
+// Calendar-year basis for the CWS delivery family: the served series runs
+// 1921 to 2021 on calendar years, with three-month and nine-month stubs at
+// the ends, so the site keeps 1922 to 2020. The shortage and welfare family
+// is 1922 to 2021 water years and needs no trim.
+test("CWS deliveries declare a calendar-year basis and a served year range", () => {
+  const del = getVariable("cws_del")
+  expect(del?.yearBasis).toBe("calendar")
+  expect(del?.servedYearRange).toEqual({ min: 1922, max: 2020 })
+  expect(getVariable("cws_short")?.servedYearRange).toBeUndefined()
+  expect(getVariable("cws_short")?.yearBasis).toBeUndefined()
+  expect(getVariable("res_apr")?.yearBasis).toBeUndefined()
+})

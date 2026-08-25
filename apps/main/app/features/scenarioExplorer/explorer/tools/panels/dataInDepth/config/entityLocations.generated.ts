@@ -6,13 +6,15 @@
  * run `did:entities:check` to compare this file against the live API.
  *
  * Source: https://api.coeqwal.org/api/data-in-depth/{ag,cws}?scenarios=s0020
- * Generated: 2026-08-25T00:18:40.060Z
+ * Generated: 2026-08-25T00:43:25.338Z
  * Counts: AG_ENTITY_LOCATIONS: 132, CWS_DELIVERY_ENTITY_LOCATIONS: 74, CWS_SHORTAGE_ENTITY_LOCATIONS: 63
  *
  * Regions (NOD/SOD) come from scripts/did-entity-locations/regions.json,
  * a copy of the data platform ETL aggregation maps; display names are
- * the served labels with extraction artifacts removed and the subject
- * code prefixed. `apiLabel` keeps the served label verbatim.
+ * the served labels with extraction artifacts removed, cut at a word
+ * boundary past 50 characters, and prefixed with the subject code.
+ * `longName` carries the uncut label when a name was cut; `apiLabel`
+ * keeps the served label verbatim.
  */
 // --- end of generated header ---
 import type { LocationDef } from "./variableRegistry"
@@ -34,7 +36,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "02_SA",
-    name: "02_SA - Anderson-Cottonwood ID, misc. settlement contractors",
+    name: "02_SA - Anderson-Cottonwood ID, misc. settlement…",
+    longName: "Anderson-Cottonwood ID, misc. settlement contractors",
     apiLabel: "Anderson-Cottonwood ID, misc. settlement contractors",
     region: "NOD",
     mockBase: 30.9,
@@ -55,14 +58,16 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "03_SA",
-    name: "03_SA - Anderson-Cottonwood ID, misc. settlement contractors",
+    name: "03_SA - Anderson-Cottonwood ID, misc. settlement…",
+    longName: "Anderson-Cottonwood ID, misc. settlement contractors",
     apiLabel: "Anderson-Cottonwood ID, misc. settlement contractors",
     region: "NOD",
     mockBase: 3.45,
   },
   {
     id: "04_NA",
-    name: "04_NA - Non-district including misc. settlement contractors",
+    name: "04_NA - Non-district including misc. settlement…",
+    longName: "Non-district including misc. settlement contractors",
     apiLabel: "Non-district including misc. settlement contractors",
     region: "NOD",
     mockBase: 15.3,
@@ -111,7 +116,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "07N_PA",
-    name: "07N_PA - Glide WD, Holthouse WD (65% of total), Kanawha WD, Orland- Artois WD",
+    name: "07N_PA - Glide WD, Holthouse WD (65% of total), Kanawha WD…",
+    longName:
+      "Glide WD, Holthouse WD (65% of total), Kanawha WD, Orland- Artois WD",
     apiLabel:
       "Glide WD, Holthouse WD (65% of total), Kanawha WD, Orland- Artois WD",
     region: "NOD",
@@ -147,7 +154,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "08N_SA1",
-    name: "08N_SA1 - Maxwell ID (5% of total), Princeton-Codora-Glenn ID, Provident ID, misc. settlement contractors",
+    name: "08N_SA1 - Maxwell ID (5% of total), Princeton-Codora-Glenn…",
+    longName:
+      "Maxwell ID (5% of total), Princeton-Codora-Glenn ID, Provident ID, misc. settlement contractors",
     apiLabel:
       "Maxwell ID (5% of total), Princeton-Codora-Glenn ID, Provident ID, misc. settlement contractors",
     region: "NOD",
@@ -183,7 +192,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "08S_SA1",
-    name: "08S_SA1 - Maxwell ID (95% of total), Sycamore Family Trust, misc. settlement contractors",
+    name: "08S_SA1 - Maxwell ID (95% of total), Sycamore Family Trust…",
+    longName:
+      "Maxwell ID (95% of total), Sycamore Family Trust, misc. settlement contractors",
     apiLabel:
       "Maxwell ID (95% of total), Sycamore Family Trust, misc. settlement contractors",
     region: "NOD",
@@ -198,14 +209,17 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "08S_SA3",
-    name: "08S_SA3 - RD 108, River Garden Farms, misc. settlement contractors",
+    name: "08S_SA3 - RD 108, River Garden Farms, misc. settlement…",
+    longName: "RD 108, River Garden Farms, misc. settlement contractors",
     apiLabel: "RD 108, River Garden Farms, misc. settlement contractors",
     region: "NOD",
     mockBase: 194,
   },
   {
     id: "09_NA",
-    name: "09_NA - Llano Seco Ranch (formerly Parrot Ranch), Dayton MWC, non- district",
+    name: "09_NA - Llano Seco Ranch (formerly Parrot Ranch), Dayton…",
+    longName:
+      "Llano Seco Ranch (formerly Parrot Ranch), Dayton MWC, non- district",
     apiLabel:
       "Llano Seco Ranch (formerly Parrot Ranch), Dayton MWC, non- district",
     region: "NOD",
@@ -213,14 +227,16 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "09_SA1",
-    name: "09_SA1 - Pacific Realty Associates (formerly M&T Chico Ranch)",
+    name: "09_SA1 - Pacific Realty Associates…",
+    longName: "Pacific Realty Associates (formerly M&T Chico Ranch)",
     apiLabel: "Pacific Realty Associates (formerly M&T Chico Ranch)",
     region: "NOD",
     mockBase: 23.7,
   },
   {
     id: "09_SA2",
-    name: "09_SA2 - RD 1004, Carter MWC, Jack Baber, misc. settlement contractors",
+    name: "09_SA2 - RD 1004, Carter MWC, Jack Baber, misc. settlement…",
+    longName: "RD 1004, Carter MWC, Jack Baber, misc. settlement contractors",
     apiLabel: "RD 1004, Carter MWC, Jack Baber, misc. settlement contractors",
     region: "NOD",
     mockBase: 94.9,
@@ -283,7 +299,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "13_NA",
-    name: "13_NA - South Feather Water and Power Agency, Yuba County WD",
+    name: "13_NA - South Feather Water and Power Agency, Yuba County…",
+    longName: "South Feather Water and Power Agency, Yuba County WD",
     apiLabel: "South Feather Water and Power Agency, Yuba County WD",
     region: "NOD",
     mockBase: 8.36,
@@ -325,7 +342,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "15S_NA2",
-    name: "15S_NA2 - Brophy WD, Dry Creek MWC, South Yuba WD, Wheatland WD",
+    name: "15S_NA2 - Brophy WD, Dry Creek MWC, South Yuba WD, Wheatland…",
+    longName: "Brophy WD, Dry Creek MWC, South Yuba WD, Wheatland WD",
     apiLabel: "Brophy WD, Dry Creek MWC, South Yuba WD, Wheatland WD",
     region: "NOD",
     mockBase: 38.9,
@@ -360,7 +378,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "16_SA",
-    name: "16_SA - Garden Highway MWC, Tudor ID, Oswald WD, misc. FRSA diverters",
+    name: "16_SA - Garden Highway MWC, Tudor ID, Oswald WD, misc.…",
+    longName: "Garden Highway MWC, Tudor ID, Oswald WD, misc. FRSA diverters",
     apiLabel: "Garden Highway MWC, Tudor ID, Oswald WD, misc. FRSA diverters",
     region: "NOD",
     mockBase: 23.1,
@@ -381,14 +400,17 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "17S_SA",
-    name: "17S_SA - Misc. FRSA diverters and minor settlement contractors",
+    name: "17S_SA - Misc. FRSA diverters and minor settlement…",
+    longName: "Misc. FRSA diverters and minor settlement contractors",
     apiLabel: "Misc. FRSA diverters and minor settlement contractors",
     region: "NOD",
     mockBase: 4.65,
   },
   {
     id: "18_NA",
-    name: "18_NA - Butte Slough Irrigation Company, Sutter Butte MWC, non- district",
+    name: "18_NA - Butte Slough Irrigation Company, Sutter Butte MWC…",
+    longName:
+      "Butte Slough Irrigation Company, Sutter Butte MWC, non- district",
     apiLabel:
       "Butte Slough Irrigation Company, Sutter Butte MWC, non- district",
     region: "NOD",
@@ -396,7 +418,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "18_SA",
-    name: "18_SA - Meridian Farms WC, Lomo Cold Storage, Sutter MWC (5%), Tisdale IDC, misc. settlement contractors",
+    name: "18_SA - Meridian Farms WC, Lomo Cold Storage, Sutter MWC…",
+    longName:
+      "Meridian Farms WC, Lomo Cold Storage, Sutter MWC (5%), Tisdale IDC, misc. settlement contractors",
     apiLabel:
       "Meridian Farms WC, Lomo Cold Storage, Sutter MWC (5%), Tisdale IDC, misc. settlement contractors",
     region: "NOD",
@@ -404,7 +428,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "19_SA",
-    name: "19_SA - Bardis et al., Pelger MWC, Sutter MWC (95% of total), misc. settlement contractors",
+    name: "19_SA - Bardis et al., Pelger MWC, Sutter MWC…",
+    longName:
+      "Bardis et al., Pelger MWC, Sutter MWC (95% of total), misc. settlement contractors",
     apiLabel:
       "Bardis et al., Pelger MWC, Sutter MWC (95% of total), misc. settlement contractors",
     region: "NOD",
@@ -447,7 +473,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "21_SA",
-    name: "21_SA - Conaway Conservancy Group, misc. settlement contractors",
+    name: "21_SA - Conaway Conservancy Group, misc. settlement…",
+    longName: "Conaway Conservancy Group, misc. settlement contractors",
     apiLabel: "Conaway Conservancy Group, misc. settlement contractors",
     region: "NOD",
     mockBase: 45.7,
@@ -461,7 +488,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "22_SA1",
-    name: "22_SA1 - Natomas Central MWC, Pleasant Grove-Verona MWC, misc. settlement contractors",
+    name: "22_SA1 - Natomas Central MWC, Pleasant Grove-Verona MWC…",
+    longName:
+      "Natomas Central MWC, Pleasant Grove-Verona MWC, misc. settlement contractors",
     apiLabel:
       "Natomas Central MWC, Pleasant Grove-Verona MWC, misc. settlement contractors",
     region: "NOD",
@@ -546,7 +575,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "50_PA2",
-    name: "50_PA2 - Byron-Bethany ID (excluding former Plainview ID service area)",
+    name: "50_PA2 - Byron-Bethany ID…",
+    longName: "Byron-Bethany ID (excluding former Plainview ID service area)",
     apiLabel: "Byron-Bethany ID (excluding former Plainview ID service area)",
     region: "SOD",
     mockBase: 9.97,
@@ -630,7 +660,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "61_NA3",
-    name: "61_NA3 - Non-district, Tuolumne River riparian right bank diverters",
+    name: "61_NA3 - Non-district, Tuolumne River riparian right bank…",
+    longName: "Non-district, Tuolumne River riparian right bank diverters",
     apiLabel: "Non-district, Tuolumne River riparian right bank diverters",
     region: "SOD",
     mockBase: 6.46,
@@ -644,7 +675,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "61_NA5",
-    name: "61_NA5 - Non-district, San Joaquin River riparian diverters between Tuolumne and Stanislaus rivers",
+    name: "61_NA5 - Non-district, San Joaquin River riparian diverters…",
+    longName:
+      "Non-district, San Joaquin River riparian diverters between Tuolumne and Stanislaus rivers",
     apiLabel:
       "Non-district, San Joaquin River riparian diverters between Tuolumne and Stanislaus rivers",
     region: "SOD",
@@ -652,7 +685,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "61_NA6",
-    name: "61_NA6 - Non-district, San Joaquin River riparian diverters downstream from Stanislaus River confluence",
+    name: "61_NA6 - Non-district, San Joaquin River riparian diverters…",
+    longName:
+      "Non-district, San Joaquin River riparian diverters downstream from Stanislaus River confluence",
     apiLabel:
       "Non-district, San Joaquin River riparian diverters downstream from Stanislaus River confluence",
     region: "SOD",
@@ -688,7 +723,8 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "62_NA2",
-    name: "62_NA2 - Non-district, Merced River riparian right bank diverters",
+    name: "62_NA2 - Non-district, Merced River riparian right bank…",
+    longName: "Non-district, Merced River riparian right bank diverters",
     apiLabel: "Non-district, Merced River riparian right bank diverters",
     region: "SOD",
     mockBase: 5.44,
@@ -702,14 +738,17 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "62_NA4",
-    name: "62_NA4 - Non-district, Tuolumne River riparian left bank diverters",
+    name: "62_NA4 - Non-district, Tuolumne River riparian left bank…",
+    longName: "Non-district, Tuolumne River riparian left bank diverters",
     apiLabel: "Non-district, Tuolumne River riparian left bank diverters",
     region: "SOD",
     mockBase: 2.78,
   },
   {
     id: "62_NA5",
-    name: "62_NA5 - Non-district, San Joaquin River riparian diverters between Merced and Tuolumne rivers",
+    name: "62_NA5 - Non-district, San Joaquin River riparian diverters…",
+    longName:
+      "Non-district, San Joaquin River riparian diverters between Merced and Tuolumne rivers",
     apiLabel:
       "Non-district, San Joaquin River riparian diverters between Merced and Tuolumne rivers",
     region: "SOD",
@@ -745,7 +784,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "63_NA4",
-    name: "63_NA4 - Non-district West, Plainsburg ID, La Grande-Athlone WD, Turner Island WD, Stevinson WD, Merced River riparian diverters",
+    name: "63_NA4 - Non-district West, Plainsburg ID, La…",
+    longName:
+      "Non-district West, Plainsburg ID, La Grande-Athlone WD, Turner Island WD, Stevinson WD, Merced River riparian diverters",
     apiLabel:
       "Non-district West, Plainsburg ID, La Grande-Athlone WD, Turner Island WD, Stevinson WD, Merced River riparian diverters",
     region: "SOD",
@@ -795,7 +836,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "71_NA1",
-    name: "71_NA1 - Non-district San Joaquin River riparian diverters (Orestimba Creek to Del Puerto Creek)",
+    name: "71_NA1 - Non-district San Joaquin River riparian diverters…",
+    longName:
+      "Non-district San Joaquin River riparian diverters (Orestimba Creek to Del Puerto Creek)",
     apiLabel:
       "Non-district San Joaquin River riparian diverters (Orestimba Creek to Del Puerto Creek)",
     region: "SOD",
@@ -803,7 +846,9 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "71_NA2",
-    name: "71_NA2 - El Solyo WD and non-district San Joaquin River riparian diverters (Del Puerto Creek to Vernalis)",
+    name: "71_NA2 - El Solyo WD and non-district San Joaquin River…",
+    longName:
+      "El Solyo WD and non-district San Joaquin River riparian diverters (Del Puerto Creek to Vernalis)",
     apiLabel:
       "El Solyo WD and non-district San Joaquin River riparian diverters (Del Puerto Creek to Vernalis)",
     region: "SOD",
@@ -839,14 +884,17 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "71_PA5",
-    name: "71_PA5 - Del Puerto WD, Salado WD, Orestimba WD, Sunflower WD",
+    name: "71_PA5 - Del Puerto WD, Salado WD, Orestimba WD, Sunflower…",
+    longName: "Del Puerto WD, Salado WD, Orestimba WD, Sunflower WD",
     apiLabel: "Del Puerto WD, Salado WD, Orestimba WD, Sunflower WD",
     region: "SOD",
     mockBase: 37,
   },
   {
     id: "71_PA6",
-    name: "71_PA6 - Davis WD, Foothill WD, Mustang WD, Quinto WD, Romero WD, Centinella WD",
+    name: "71_PA6 - Davis WD, Foothill WD, Mustang WD, Quinto WD…",
+    longName:
+      "Davis WD, Foothill WD, Mustang WD, Quinto WD, Romero WD, Centinella WD",
     apiLabel:
       "Davis WD, Foothill WD, Mustang WD, Quinto WD, Romero WD, Centinella WD",
     region: "SOD",
@@ -861,14 +909,17 @@ export const AG_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "71_PA8",
-    name: "71_PA8 - Byron-Bethany ID (area which was formerly Plainview ID)",
+    name: "71_PA8 - Byron-Bethany ID…",
+    longName: "Byron-Bethany ID (area which was formerly Plainview ID)",
     apiLabel: "Byron-Bethany ID (area which was formerly Plainview ID)",
     region: "SOD",
     mockBase: 7.69,
   },
   {
     id: "72_NA1",
-    name: "72_NA1 - Non-district San Joaquin River riparian diverters (Mud Slough to Orestimba Creek)",
+    name: "72_NA1 - Non-district San Joaquin River riparian diverters…",
+    longName:
+      "Non-district San Joaquin River riparian diverters (Mud Slough to Orestimba Creek)",
     apiLabel:
       "Non-district San Joaquin River riparian diverters (Mud Slough to Orestimba Creek)",
     region: "SOD",
@@ -974,7 +1025,8 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "02_SU",
-    name: "02_SU - Redding – Foothill, Hill 900 and Cascade City of Redding",
+    name: "02_SU - Redding, Foothill, Hill 900 and Cascade City of…",
+    longName: "Redding, Foothill, Hill 900 and Cascade City of Redding",
     apiLabel:
       "Redding – Foothill, Hill 900 and Cascade City of Redding 4510005",
     region: "NOD",
@@ -989,7 +1041,9 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "03_PU2",
-    name: "03_PU2 - Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD",
+    name: "03_PU2 - Stillwater Valley, Bella Vista, Palo Cedro…",
+    longName:
+      "Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD",
     apiLabel:
       "Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD 4510014",
     region: "NOD",
@@ -997,7 +1051,7 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "03_SU",
-    name: "03_SU - Redding – Hilltop and Enterprise",
+    name: "03_SU - Redding, Hilltop and Enterprise",
     apiLabel: "Redding – Hilltop and Enterprise",
     region: "NOD",
     mockBase: 5.2,
@@ -1046,14 +1100,16 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "24_NU1",
-    name: "24_NU1 - Auburn, Bowman Placer County WA – Upper Zone 1",
+    name: "24_NU1 - Auburn, Bowman Placer County WA, Upper Zone 1",
     apiLabel: "Auburn, Bowman Placer County WA – Upper Zone 1 3110005",
     region: "NOD",
     mockBase: 6.01,
   },
   {
     id: "24_NU2",
-    name: "24_NU2 - Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA)",
+    name: "24_NU2 - Loomis, Newcastle, Penryn, Rocklin, Granite Bay…",
+    longName:
+      "Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA)",
     apiLabel:
       "Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 3110025 •8 •7 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA) 3110004",
     region: "NOD",
@@ -1075,7 +1131,9 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26N_NU1",
-    name: "26N_NU1 - Northridge, McClellan Business Park Sacramento Suburban WD – NSA13, McClellan (Placer County WA)",
+    name: "26N_NU1 - Northridge, McClellan Business Park Sacramento…",
+    longName:
+      "Northridge, McClellan Business Park Sacramento Suburban WD, NSA13, McClellan (Placer County WA)",
     apiLabel:
       "Northridge, McClellan Business Park Sacramento Suburban WD – NSA13, McClellan (Placer County WA) 3410024",
     region: "NOD",
@@ -1139,14 +1197,16 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26S_PU4",
-    name: "26S_PU4 - Laguna Sacramento County WA – SSA",
+    name: "26S_PU4 - Laguna Sacramento County WA, SSA",
     apiLabel: "Laguna Sacramento County WA – SSA 3410029",
     region: "NOD",
     mockBase: 12,
   },
   {
     id: "26S_PU5",
-    name: "26S_PU5 - City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA)",
+    name: "26S_PU5 - City of Elk Grove Elk Grove WD, Tariff Area No.2…",
+    longName:
+      "City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA)",
     apiLabel:
       "City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA) 3410008",
     region: "NOD",
@@ -1154,7 +1214,7 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26S_PU6",
-    name: "26S_PU6 - Vineyard Sacramento County WA – CSA (Zone 40)",
+    name: "26S_PU6 - Vineyard Sacramento County WA, CSA (Zone 40)",
     apiLabel: "Vineyard Sacramento County WA – CSA (Zone 40)",
     region: "NOD",
     mockBase: 12,
@@ -1196,7 +1256,8 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "CSPSO",
-    name: "CSPSO - Solano State Prison California State Prison – Solano",
+    name: "CSPSO - Solano State Prison California State Prison…",
+    longName: "Solano State Prison California State Prison, Solano",
     apiLabel: "Solano State Prison California State Prison – Solano 4810800",
     region: "NOD",
     mockBase: 1,
@@ -1266,7 +1327,9 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "PCWA3",
-    name: "PCWA3 - Placer County WA - Alta, Dutch Flat, Colfax, Applegate, Meadow Vista",
+    name: "PCWA3 - Placer County WA - Alta, Dutch Flat, Colfax…",
+    longName:
+      "Placer County WA - Alta, Dutch Flat, Colfax, Applegate, Meadow Vista",
     apiLabel:
       "Placer County WA - Alta, Dutch Flat, Colfax, Applegate, Meadow Vista",
     region: "NOD",
@@ -1365,7 +1428,9 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "CCWD",
-    name: "CCWD - Bay Point, Clayton, Clyde, Concord, Oakley, Pittsburg, Port Costa Contra Costa Water District",
+    name: "CCWD - Bay Point, Clayton, Clyde, Concord, Oakley…",
+    longName:
+      "Bay Point, Clayton, Clyde, Concord, Oakley, Pittsburg, Port Costa Contra Costa Water District",
     apiLabel:
       "Bay Point, Clayton, Clyde, Concord, Oakley, Pittsburg, Port Costa24 Contra Costa Water District 710003",
     region: "SOD",
@@ -1373,21 +1438,25 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "CSB038",
-    name: "CSB038 - San Luis Obispo County FC&WCD - Coastal Branch delivery",
+    name: "CSB038 - San Luis Obispo County FC&WCD - Coastal Branch…",
+    longName: "San Luis Obispo County FC&WCD - Coastal Branch delivery",
     apiLabel: "San Luis Obispo County FC&WCD - Coastal Branch delivery",
     region: "SOD",
     mockBase: 2.57,
   },
   {
     id: "CSB103",
-    name: "CSB103 - Santa Barbara County FC&WCD - Coastal Branch delivery",
+    name: "CSB103 - Santa Barbara County FC&WCD - Coastal Branch…",
+    longName: "Santa Barbara County FC&WCD - Coastal Branch delivery",
     apiLabel: "Santa Barbara County FC&WCD - Coastal Branch delivery",
     region: "SOD",
     mockBase: 25.6,
   },
   {
     id: "EBMUD",
-    name: "EBMUD - Berkeley, Oakland, Richmond, Walnut Creek East Bay Municipal Utility District",
+    name: "EBMUD - Berkeley, Oakland, Richmond, Walnut Creek East Bay…",
+    longName:
+      "Berkeley, Oakland, Richmond, Walnut Creek East Bay Municipal Utility District",
     apiLabel:
       "Berkeley, Oakland, Richmond, Walnut Creek25 East Bay Municipal Utility District 11005",
     region: "SOD",
@@ -1395,7 +1464,8 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "ESB324",
-    name: "ESB324 - Antelope Valley-East Kern WA - East Branch delivery",
+    name: "ESB324 - Antelope Valley-East Kern WA - East Branch…",
+    longName: "Antelope Valley-East Kern WA - East Branch delivery",
     apiLabel: "Antelope Valley-East Kern WA - East Branch delivery",
     region: "SOD",
     mockBase: 81.6,
@@ -1458,7 +1528,8 @@ export const CWS_DELIVERY_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "SBA036",
-    name: "SBA036 - Santa Clara Valley WD - South Bay Aqueduct delivery",
+    name: "SBA036 - Santa Clara Valley WD - South Bay Aqueduct…",
+    longName: "Santa Clara Valley WD - South Bay Aqueduct delivery",
     apiLabel: "Santa Clara Valley WD - South Bay Aqueduct delivery",
     region: "SOD",
     mockBase: 55.9,
@@ -1514,7 +1585,8 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "02_SU",
-    name: "02_SU - Redding – Foothill, Hill 900 and Cascade City of Redding",
+    name: "02_SU - Redding, Foothill, Hill 900 and Cascade City of…",
+    longName: "Redding, Foothill, Hill 900 and Cascade City of Redding",
     apiLabel:
       "Redding – Foothill, Hill 900 and Cascade City of Redding 4510005",
     region: "NOD",
@@ -1529,7 +1601,9 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "03_PU2",
-    name: "03_PU2 - Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD",
+    name: "03_PU2 - Stillwater Valley, Bella Vista, Palo Cedro…",
+    longName:
+      "Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD",
     apiLabel:
       "Stillwater Valley, Bella Vista, Palo Cedro, Redding Bella Vista WD 4510014",
     region: "NOD",
@@ -1537,14 +1611,14 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "03_PU3",
-    name: "03_PU3 - Redding – Buckeye and Hilltop",
+    name: "03_PU3 - Redding, Buckeye and Hilltop",
     apiLabel: "Redding – Buckeye and Hilltop",
     region: "NOD",
     mockBase: 0.1,
   },
   {
     id: "03_SU",
-    name: "03_SU - Redding – Hilltop and Enterprise",
+    name: "03_SU - Redding, Hilltop and Enterprise",
     apiLabel: "Redding – Hilltop and Enterprise",
     region: "NOD",
     mockBase: 0.1,
@@ -1642,7 +1716,8 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "13_NU2",
-    name: "13_NU2 - Small communities South Feather Water and Power Agency",
+    name: "13_NU2 - Small communities South Feather Water and Power…",
+    longName: "Small communities South Feather Water and Power Agency",
     apiLabel: "Small communities South Feather Water and Power Agency",
     region: "NOD",
     mockBase: 0.1,
@@ -1698,14 +1773,16 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "24_NU1",
-    name: "24_NU1 - Auburn, Bowman Placer County WA – Upper Zone 1",
+    name: "24_NU1 - Auburn, Bowman Placer County WA, Upper Zone 1",
     apiLabel: "Auburn, Bowman Placer County WA – Upper Zone 1 3110005",
     region: "NOD",
     mockBase: 0.00195,
   },
   {
     id: "24_NU2",
-    name: "24_NU2 - Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA)",
+    name: "24_NU2 - Loomis, Newcastle, Penryn, Rocklin, Granite Bay…",
+    longName:
+      "Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA)",
     apiLabel:
       "Loomis, Newcastle, Penryn, Rocklin, Granite Bay (Portion), Roseville (Portion) Placer County WA - lower Zone 1 3110025 •8 •7 Bear River Canal, North Fork American River Lincoln City of Lincoln (Placer County WA) 3110004",
     region: "NOD",
@@ -1734,7 +1811,9 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26N_NU1",
-    name: "26N_NU1 - Northridge, McClellan Business Park Sacramento Suburban WD – NSA13, McClellan (Placer County WA)",
+    name: "26N_NU1 - Northridge, McClellan Business Park Sacramento…",
+    longName:
+      "Northridge, McClellan Business Park Sacramento Suburban WD, NSA13, McClellan (Placer County WA)",
     apiLabel:
       "Northridge, McClellan Business Park Sacramento Suburban WD – NSA13, McClellan (Placer County WA) 3410024",
     region: "NOD",
@@ -1756,7 +1835,8 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26N_NU4",
-    name: "26N_NU4 - Arcade Sacramento Suburban WD – SSA (City of Sacramento)",
+    name: "26N_NU4 - Arcade Sacramento Suburban WD, SSA…",
+    longName: "Arcade Sacramento Suburban WD, SSA (City of Sacramento)",
     apiLabel:
       "Arcade14 Sacramento Suburban WD – SSA (City of Sacramento) 3410001",
     region: "NOD",
@@ -1827,14 +1907,16 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26S_PU4",
-    name: "26S_PU4 - Laguna Sacramento County WA – SSA",
+    name: "26S_PU4 - Laguna Sacramento County WA, SSA",
     apiLabel: "Laguna Sacramento County WA – SSA 3410029",
     region: "NOD",
     mockBase: 0.1,
   },
   {
     id: "26S_PU5",
-    name: "26S_PU5 - City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA)",
+    name: "26S_PU5 - City of Elk Grove Elk Grove WD, Tariff Area No.2…",
+    longName:
+      "City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA)",
     apiLabel:
       "City of Elk Grove Elk Grove WD, Tariff Area No.2 (Sacramento County WA) 3410008",
     region: "NOD",
@@ -1842,7 +1924,7 @@ export const CWS_SHORTAGE_ENTITY_LOCATIONS: readonly LocationDef[] = [
   },
   {
     id: "26S_PU6",
-    name: "26S_PU6 - Vineyard Sacramento County WA – CSA (Zone 40)",
+    name: "26S_PU6 - Vineyard Sacramento County WA, CSA (Zone 40)",
     apiLabel: "Vineyard Sacramento County WA – CSA (Zone 40)",
     region: "NOD",
     mockBase: 0.1,

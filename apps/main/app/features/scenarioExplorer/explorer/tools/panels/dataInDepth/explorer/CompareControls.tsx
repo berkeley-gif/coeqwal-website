@@ -414,28 +414,30 @@ export default function CompareControls() {
                     const l = group.items.find((item) => item.id === id)
                     if (!l) return null
                     return (
-                      <Chip
-                        key={id}
-                        size="small"
-                        label={l.name}
-                        variant="filled"
-                        onDelete={
-                          effectiveLocations.length > 1
-                            ? () => toggleLocation(id)
-                            : undefined
-                        }
-                        icon={
-                          <Box
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              ml: 1,
-                              backgroundColor: locationColors[i],
-                            }}
-                          />
-                        }
-                      />
+                      <Tooltip key={id} title={l.longName ?? ""}>
+                        <Chip
+                          size="small"
+                          label={l.name}
+                          variant="filled"
+                          sx={{ maxWidth: 320 }}
+                          onDelete={
+                            effectiveLocations.length > 1
+                              ? () => toggleLocation(id)
+                              : undefined
+                          }
+                          icon={
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "50%",
+                                ml: 1,
+                                backgroundColor: locationColors[i],
+                              }}
+                            />
+                          }
+                        />
+                      </Tooltip>
                     )
                   })}
                 </Box>

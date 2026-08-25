@@ -16,6 +16,8 @@ import {
   sumAlignedSeriesPoints,
   companionUnitTokensForView,
   hasEmptyScenariosResponse,
+  trimPointsToYearRange,
+  blockHasSubject,
 } from "../app/features/scenarioExplorer/explorer/tools/panels/dataInDepth/config/didMapping"
 
 // Pure request-mapping for the data-in-depth live endpoints. Node-side spec
@@ -675,4 +677,52 @@ test("toDidSubject resolves ag demand units and CWS systems per measure family",
   // Without a variable the cws domain cannot pick a family: aggregates only.
   expect(toDidSubject("cws", "MWD")).toBeNull()
   expect(toDidSubject("cws", "AGG_CWS_NOD")).toBe("NOD_CWS")
+})
+
+// The CWS delivery family is a calendar-year series over a model run that
+// starts in October 1921 and ends in September 2021, so its first and last
+// years are three-month and nine-month stubs (about 0.2 and 0.8 of a full
+// year). The site trims a served series to the registry's servedYearRange
+// before adoption; a series without years cannot be trimmed safely and is
+// returned untouched rather than partially trimmed.
+test("trimPointsToYearRange drops points outside the range, index-aligned, and fails closed without years", () => {
+  const points = {
+    series: [10, 100, 110, 120, 80],
+    waterYears: [1921, 1922, 1923, 2020, 2021],
+  }
+  expect(trimPointsToYearRange(points, { min: 1922, max: 2020 })).toEqual({
+    series: [100, 110, 120],
+    waterYears: [1922, 1923, 2020],
+  })
+  // Nothing outside the range: unchanged.
+  expect(
+    trimPointsToYearRange(
+      { series: [1, 2], waterYears: [1950, 1951] },
+      { min: 1922, max: 2020 },
+    ),
+  ).toEqual({ series: [1, 2], waterYears: [1950, 1951] })
+  // No years: cannot tell which points are stubs, so nothing is dropped.
+  const noYears = { series: [10, 100], waterYears: [] }
+  expect(trimPointsToYearRange(noYears, { min: 1922, max: 2020 })).toBe(noYears)
+})
+
+// A served scenario block that lacks the requested subject means the subject
+// is not modeled for that scenario (KCWA is absent from the five Delta
+// Conveyance Project scenarios on /cws). That is a fact about the model,
+// distinct from an empty response (scenario not modeled at all) and from a
+// transport failure.
+test("blockHasSubject reports whether a served block carries the subject", () => {
+  const block = {
+    subjects: [{ subject: "MWD", periods: {} }, { subject: "NOD_CWS" }],
+  }
+  expect(blockHasSubject(block, "cws", "MWD")).toBe(true)
+  expect(blockHasSubject(block, "cws", "KCWA")).toBe(false)
+  expect(blockHasSubject(undefined, "cws", "MWD")).toBe(false)
+  expect(
+    blockHasSubject(
+      { reservoirs: [{ subject: "SHSTA" }] },
+      "reservoir",
+      "SHSTA",
+    ),
+  ).toBe(true)
 })

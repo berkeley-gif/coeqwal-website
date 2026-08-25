@@ -31,27 +31,52 @@ const VALUE_BY_SUBJECT_MEASURE: Record<string, Record<string, number>> = {
   "26N_NU1": { delivery: 20, shortage_total: 3, shortage_pct: 2.5 },
 }
 
+// A subject the endpoint serves in most scenarios but not this one (KCWA is
+// absent from the Delta Conveyance Project family): the block exists and
+// simply lacks the subject.
+const ABSENT_SUBJECT = "ACFC"
+
 function cwsPayload(subjectsCsv: string, measuresCsv: string) {
   const measures = measuresCsv ? measuresCsv.split(",") : ["delivery"]
-  const subjects = subjectsCsv.split(",").map((code) => ({
-    subject: code,
-    kind: "aggregate",
-    label: code,
-    periods: {
-      annual: Object.fromEntries(
-        measures.map((measure) => [
-          measure,
-          {
-            unit: measure === "shortage_pct" ? "PCT_SHORTAGE" : "TAF",
-            values: Array.from({ length: 20 }, (_, i) => ({
-              water_year: 1922 + i,
-              value: VALUE_BY_SUBJECT_MEASURE[code]?.[measure] ?? 1,
-            })),
-          },
-        ]),
-      ),
-    },
-  }))
+  const subjects = subjectsCsv
+    .split(",")
+    .filter((code) => code !== ABSENT_SUBJECT)
+    .map((code) => ({
+      subject: code,
+      kind: "aggregate",
+      label: code,
+      periods: {
+        annual: Object.fromEntries(
+          measures.map((measure) => {
+            const full = VALUE_BY_SUBJECT_MEASURE[code]?.[measure] ?? 1
+            // The delivery family is calendar-year and served with a
+            // three-month 1921 stub and a nine-month 2021 stub, at about
+            // 0.2 and 0.8 of a full year; the site must drop both.
+            const values =
+              measure === "delivery"
+                ? [
+                    { water_year: 1921, value: full * 0.2 },
+                    ...Array.from({ length: 20 }, (_, i) => ({
+                      water_year: 1922 + i,
+                      value: full,
+                    })),
+                    { water_year: 2021, value: full * 0.8 },
+                  ]
+                : Array.from({ length: 20 }, (_, i) => ({
+                    water_year: 1922 + i,
+                    value: full,
+                  }))
+            return [
+              measure,
+              {
+                unit: measure === "shortage_pct" ? "PCT_SHORTAGE" : "TAF",
+                values,
+              },
+            ]
+          }),
+        ),
+      },
+    }))
   return {
     wyt_filter: null,
     scenarios: [{ scenario: "s0020", n_years: 20, subjects }],
@@ -394,5 +419,85 @@ test("cws systems are pickable per measure family and pins carry over only when 
     .toBe(true)
   await expect(page.getByText(/3(\.00)? TAF/).first()).toBeVisible()
 
+  expect(errors).toEqual([])
+})
+
+// The delivery series is trimmed to full calendar years before anything is
+// computed from it: the exported table starts at 1922, ends at 2020, and is
+// headed "Calendar year"; a stub year never reaches the min, mean or CV.
+test("cws deliveries drop the partial calendar years and export calendar-year rows", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  await setupCwsRoutes(page)
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+  await cwsList
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await expect(page.getByText(/^Live data$/)).toBeVisible()
+  // Stats: with every full year at 350 the mean is exactly 350 only when the
+  // 70 and 280 stubs are gone.
+  await page.getByRole("button", { name: "Stats", exact: true }).click()
+  await expect(page.getByText("Mean (TAF)")).toBeVisible()
+  await expect(page.getByText(/350 TAF/).first()).toBeVisible()
+
+  await page.getByRole("button", { name: "Exceedance", exact: true }).click()
+  await page.getByRole("button", { name: "save snapshot" }).click()
+  await page.getByRole("button", { name: "Go to Share" }).dispatchEvent("click")
+  const addToStory = page.getByRole("button", { name: "Add to story" })
+  await expect(addToStory).toBeVisible()
+  await addToStory.click()
+  const downloadPromise = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Download data" }).click()
+  const download = await downloadPromise
+  const stream = await download.createReadStream()
+  const chunks: Buffer[] = []
+  for await (const chunk of stream) chunks.push(chunk as Buffer)
+  const csv = Buffer.concat(chunks).toString("utf8")
+  expect(csv).toContain("Calendar year,")
+  expect(csv).not.toContain("Water year,")
+  const years = csv
+    .split("\n")
+    .map((l) => l.split(",")[0] ?? "")
+    .filter((c) => /^\d{4}$/.test(c))
+    .map(Number)
+  expect(Math.min(...years)).toBe(1922)
+  expect(Math.max(...years)).toBe(1941)
+  expect(years).not.toContain(1921)
+  expect(errors).toEqual([])
+})
+
+// A served block without the requested subject is "not modeled for this
+// scenario", shown as the no-data member, never as a sample curve.
+test("a subject absent from a served block is reported as no data, not sample", async ({
+  page,
+}) => {
+  const errors = collectConsoleErrors(page)
+  await setupNetwork(page)
+  await setupCwsRoutes(page)
+  await page.goto("/explore")
+  await page
+    .getByRole("tab", { name: "Data in depth: Explore underlying data" })
+    .click()
+  const cwsList = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("button", { name: "Delivery shortages" }) })
+  await cwsList
+    .getByRole("button", { name: "Surface water deliveries" })
+    .click()
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: "All North of Delta" })
+    .click()
+  await page.getByRole("option", { name: /^ACFC/ }).click()
+  await expect(page.getByText("no data", { exact: true }).first()).toBeVisible()
+  await expect(page.getByText(/^Sample data$/)).toHaveCount(0)
   expect(errors).toEqual([])
 })
