@@ -29,9 +29,9 @@
  * card is labeled per the resolved `source`.
  *
  * Member ids resolve to concrete scenario short_codes before fetching:
- * - scenarios axis: each compared scenario through the active workspace
- *   hydroclimate (`useResolvedIdMapping`). A pinned climate that differs from
- *   the workspace hydroclimate falls back to mock.
+ * - scenarios axis: each compared scenario through the PINNED
+ *   hydroclimate (`useResolvedIdMappings()[heldClimate]`), so pinning a
+ *   climate other than the workspace selection keeps the chart live.
  * - climates axis: the held scenario through EVERY compared climate
  *   (`useResolvedIdMappings` + `climateFanoutIds`), one variant id per member,
  *   since a climate future is baked into the scenario id.
@@ -50,10 +50,7 @@ import {
 } from "@repo/data/coeqwal/hooks"
 import type { DidAgMeasure } from "@repo/data/coeqwal"
 import { useDataSlice, useWorkspaceSlice } from "../../../../store"
-import {
-  useResolvedIdMapping,
-  useResolvedIdMappings,
-} from "../../../../../../scenarios/hooks"
+import { useResolvedIdMappings } from "../../../../../../scenarios/hooks"
 import { BASELINE_SCENARIO_ID } from "../../../../../constants"
 import {
   getScenarioShortLabel,
@@ -130,6 +127,10 @@ export interface VariableMember {
    *  Conveyance Project). Distinct from a plain mock fallback, which means
    *  "not wired yet" rather than "does not exist". `isLive` stays false. */
   liveDataMissing?: boolean
+  /** True while this member's own live request is still in flight. Its
+   *  series is the sample engine's stand-in until the answer lands, so it
+   *  is neither drawn nor quoted; the card shows it as loading. */
+  pending?: boolean
   /** Summary stats of `series` */
   stats: SeriesStats
   /** Monthly p10/p50/p90 bands (populated only for the "monthly" view) */
@@ -309,13 +310,16 @@ export function useVariableData(): VariableData {
   const companionSignature = companionTokens.join(",")
   const include = includeForView(view)
 
-  // Resolve member ids to concrete scenario short_codes for the live fetch.
-  // Scenarios axis: each compared scenario through the active workspace
-  // hydroclimate (live is only correct when the held climate matches the
-  // climate the resolver ran for). Climates axis: the held scenario through
-  // every compared climate, one variant id per member.
-  const resolved = useResolvedIdMapping()
+  // Resolve member ids to concrete scenario short_codes for the live fetch,
+  // always through the PINNED hydroclimate. Scenarios axis: each compared
+  // scenario's variant under the held climate. Locations axis: the held
+  // scenario's variant under the held climate. Climates axis: the held
+  // scenario through every compared climate, one variant id per member. A
+  // climate whose scenario list has not loaded, or a scenario with no variant
+  // under it, yields null, which keeps that member on labeled sample data
+  // rather than borrowing another climate's series.
   const resolvedAll = useResolvedIdMappings()
+  const heldMapping = resolvedAll[heldClimate]?.idMapping
   const liveEligible =
     domain != null &&
     (isLocationsAxis
@@ -323,7 +327,7 @@ export function useVariableData(): VariableData {
       : subject != null || isSsjvTotal) &&
     period != null &&
     viewHasLiveSource(view) &&
-    liveAxisEligible(compareBy, heldClimate, resolved.hydroclimate)
+    liveAxisEligible(compareBy)
 
   // Compared climate keys, shared by the fan-out and the member specs below
   // so slot indexes and ids stay aligned.
@@ -333,9 +337,9 @@ export function useVariableData(): VariableData {
   const fanoutIds = !liveEligible
     ? []
     : compareBy === "scenarios"
-      ? compareScenarioIds.map((id) => resolved.idMapping[id] ?? null)
+      ? compareScenarioIds.map((id) => heldMapping?.[id] ?? null)
       : isLocationsAxis
-        ? [resolved.idMapping[heldScenario] ?? null]
+        ? [heldMapping?.[heldScenario] ?? null]
         : climateFanoutIds(
             Object.fromEntries(
               Object.entries(resolvedAll).map(([k, m]) => [k, m.idMapping]),
@@ -512,6 +516,10 @@ export function useVariableData(): VariableData {
     .map((v) => (v ? "1" : "0"))
     .join("")
   const liveLoading = activeSlots.some((r) => r?.isLoading)
+  // Per-slot in-flight state, so a member can be marked pending on its own.
+  const loadingSignature = activeSlots
+    .map((r) => (r?.isLoading ? "1" : "0"))
+    .join("")
 
   return useMemo<VariableData>(() => {
     const emptyContext = {
@@ -742,6 +750,15 @@ export function useVariableData(): VariableData {
         spec.slotIndex != null &&
         (emptyResponseBySlot[spec.slotIndex] === true || subjectAbsent)
 
+      // In flight: this member's own request has not answered yet, so the
+      // series it carries is the sample engine's stand-in. It is flagged so
+      // the card neither draws nor quotes it until the answer lands.
+      const pending =
+        liveEligible &&
+        !adoptedLive &&
+        spec.slotIndex != null &&
+        activeSlots[spec.slotIndex]?.isLoading === true
+
       return {
         id: spec.id,
         label: spec.label,
@@ -750,6 +767,7 @@ export function useVariableData(): VariableData {
         waterYears,
         isLive: adoptedLive,
         ...(liveDataMissing ? { liveDataMissing: true } : {}),
+        ...(pending ? { pending: true } : {}),
         stats,
         bands,
         value,
@@ -815,6 +833,7 @@ export function useVariableData(): VariableData {
     liveSignature,
     emptyResponseSignature,
     liveLoading,
+    loadingSignature,
     wytJoined,
     unavailableReason,
     locationRequestSignature,
