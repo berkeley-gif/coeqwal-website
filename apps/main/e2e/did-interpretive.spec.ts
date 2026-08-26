@@ -53,12 +53,12 @@ test("salmon sentence lists compared scenarios by their own occupancy", () => {
   const s = summarySentence(
     [
       member("Current Operations", [0.4, 0.5], true),
-      member("Salmon flows", [0.54, 0.66]),
+      member("Winter-run refuge flows", [0.54, 0.66]),
     ],
     salmonCtx,
   )
   expect(s).toBe(
-    "Winter-run Chinook salmon for Current Operations under the Historical hydroclimate occupy 45% of suitable spawning habitat, at the median; for comparison: Salmon flows 60%.",
+    "Winter-run Chinook salmon for Current Operations under the Historical hydroclimate occupy 45% of suitable spawning habitat, at the median; for comparison: Winter-run refuge flows 60%.",
   )
 })
 
@@ -145,8 +145,8 @@ test("salmon sentence never quotes a value for a scenario with no data", () => {
   // The member still carries a sample series (the engine always produces
   // one), and quoting its number was the bug: it read as a real result.
   const dcp: SummaryMember = {
-    id: "DWR 2025 DCP",
-    label: "DWR 2025 DCP",
+    id: "Delta Conveyance Project",
+    label: "Delta Conveyance Project",
     series: [0.52, 0.52],
     liveDataMissing: true,
   }
@@ -155,7 +155,7 @@ test("salmon sentence never quotes a value for a scenario with no data", () => {
     salmonCtx,
   )
   expect(s).not.toContain("52%")
-  expect(s).toContain("no data available for DWR 2025 DCP")
+  expect(s).toContain("no data available for Delta Conveyance Project")
   // The member that DOES have data still reports normally.
   expect(s).toContain("45% of suitable spawning habitat")
 })
@@ -164,11 +164,11 @@ test("salmon sentence marks a sample-backed comparison member as sample", () => 
   const s = summarySentence(
     [
       { ...member("Current Operations", [0.4, 0.5], true), isLive: true },
-      { ...member("Salmon flows", [0.54, 0.66]), isLive: false },
+      { ...member("Winter-run refuge flows", [0.54, 0.66]), isLive: false },
     ],
     salmonCtx,
   )
-  expect(s).toContain("Salmon flows 60% (sample)")
+  expect(s).toContain("Winter-run refuge flows 60% (sample)")
 })
 
 // Ted's n128: the box plot draws a dashed tick at the mean inside each box
@@ -205,12 +205,12 @@ test("stats sentence on the scenarios axis reports mean then CV per compared sce
   const s = summarySentence(
     [
       member("Current Operations", [1, 1, 10], true),
-      member("Salmon flows", [2, 2, 20]),
+      member("Winter-run refuge flows", [2, 2, 20]),
     ],
     statsCtx,
   )
   expect(s).toBe(
-    "Mean M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 4.00 TAF. Mean M&I deliveries of the State Water Project for the Salmon flows scenario is 8.00 TAF: a difference of +100%. The annual variation in M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in M&I deliveries of the State Water Project for the Salmon flows scenario is 1.06 (CV): a difference of +0%.",
+    "Mean M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 4.00 TAF. Mean M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 8.00 TAF: a difference of +100%. The annual variation in M&I deliveries of the State Water Project for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in M&I deliveries of the State Water Project for the Winter-run refuge flows scenario is 1.06 (CV): a difference of +0%.",
   )
   expect(s).not.toMatch(/median/i)
   // CV is a ratio: no unit token follows a CV value.
@@ -221,7 +221,7 @@ test("stats sentence uses the X2 wording for the Delta salinity variables", () =
   const s = summarySentence(
     [
       member("Current Operations", [1, 1, 10], true),
-      member("Salmon flows", [2, 2, 20]),
+      member("Winter-run refuge flows", [2, 2, 20]),
     ],
     {
       ...statsCtx,
@@ -234,7 +234,7 @@ test("stats sentence uses the X2 wording for the Delta salinity variables", () =
     },
   )
   expect(s).toBe(
-    "The mean X2 location in April for Current Operations under the Historical hydroclimate is 4.0 km. The mean April X2 location for the Salmon flows scenario is 8.0 km: a difference of +100%. The annual variation in X2 location in April for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in April X2 location for the Salmon flows scenario is 1.06 (CV): a difference of +0%.",
+    "The mean X2 location in April for Current Operations under the Historical hydroclimate is 4.0 km. The mean April X2 location for the Winter-run refuge flows scenario is 8.0 km: a difference of +100%. The annual variation in X2 location in April for Current Operations under the Historical hydroclimate is 1.06 (CV). The annual variation in April X2 location for the Winter-run refuge flows scenario is 1.06 (CV): a difference of +0%.",
   )
 })
 
@@ -276,12 +276,12 @@ test("stats sentence skips a member with no model results and names it", () => {
   const s = summarySentence(
     [
       member("Current Operations", [1, 1, 10], true),
-      { ...member("DWR 2025 DCP", [5, 5, 5]), liveDataMissing: true },
+      { ...member("Delta Conveyance Project", [5, 5, 5]), liveDataMissing: true },
     ],
     statsCtx,
   )
   expect(s).not.toContain("5.00")
-  expect(s).toContain("no data available for DWR 2025 DCP")
+  expect(s).toContain("no data available for Delta Conveyance Project")
 })
 
 test("stats sentence renders a dash, not a division, when the reference mean is zero", () => {
@@ -328,7 +328,7 @@ test("generic median sentences also skip and name a member with no model results
   const s = summarySentence(
     [
       member("Current Operations", [10, 20, 30], true),
-      { ...member("DWR 2025 DCP", [99, 99, 99]), liveDataMissing: true },
+      { ...member("Delta Conveyance Project", [99, 99, 99]), liveDataMissing: true },
     ],
     {
       ...salmonCtx,
@@ -340,7 +340,7 @@ test("generic median sentences also skip and name a member with no model results
     },
   )
   expect(s).not.toContain("99")
-  expect(s).toContain("no data available for DWR 2025 DCP")
+  expect(s).toContain("no data available for Delta Conveyance Project")
 })
 
 // Money: the $M unit prints with decimals that follow the magnitude, because
@@ -359,7 +359,7 @@ test("formatValue prints millions of dollars with magnitude-adaptive decimals", 
 // distribution sentence names the share of years with no loss and the mean.
 test("welfare loss sentence reports the no-loss year count and the mean, per scenario", () => {
   const ref = member("Current Operations", [0, 0, 0, 4], true) // mean 1
-  const other = member("Salmon flows", [0, 0, 8, 8]) // mean 4
+  const other = member("Winter-run refuge flows", [0, 0, 8, 8]) // mean 4
   const s = summarySentence([ref, other], {
     view: "dist",
     distKind: "exceedance",
@@ -373,7 +373,7 @@ test("welfare loss sentence reports the no-loss year count and the mean, per sce
     scenarioName: "Current Operations",
   })
   expect(s).toBe(
-    "At All North of Delta under the Historical hydroclimate, Current Operations has no welfare loss in 3 of 4 years and a mean annual loss of $1.00 M; Salmon flows has no loss in 2 of 4 years and a mean annual loss of $4.00 M (+300%).",
+    "At All North of Delta under the Historical hydroclimate, Current Operations has no welfare loss in 3 of 4 years and a mean annual loss of $1.00 M; Winter-run refuge flows has no loss in 2 of 4 years and a mean annual loss of $4.00 M (+300%).",
   )
 })
 
@@ -448,7 +448,7 @@ test("reservoir storage sentence follows the n55 template with higher and lower"
   const s = summarySentence(
     [
       member("Current Operations", [10, 20, 30], true),
-      member("Salmon flows", [15, 25, 35]),
+      member("Winter-run refuge flows", [15, 25, 35]),
       member("More storage", [5, 10, 15]),
     ],
     templateCtx({
@@ -458,7 +458,7 @@ test("reservoir storage sentence follows the n55 template with higher and lower"
     }),
   )
   expect(s).toBe(
-    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF. The Salmon flows scenario has 25% higher median April reservoir storage. The More storage scenario has 50% lower median April reservoir storage.",
+    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF. The Winter-run refuge flows scenario has 25% higher median April reservoir storage. The More storage scenario has 50% lower median April reservoir storage.",
   )
 })
 
@@ -480,7 +480,7 @@ test("X2 sentence follows the n65 template with no location clause", () => {
   const s = summarySentence(
     [
       member("Current Operations", [70, 74, 78], true),
-      member("Salmon flows", [72, 76, 80]),
+      member("Winter-run refuge flows", [72, 76, 80]),
     ],
     templateCtx({
       variableId: "x2_apr",
@@ -492,7 +492,7 @@ test("X2 sentence follows the n65 template with no location clause", () => {
     }),
   )
   expect(s).toBe(
-    "The median X2 location in April for Current Operations under the Historical hydroclimate is 74.0 km. The median April X2 location for the Salmon flows scenario is 76.0 km: a difference of +3%.",
+    "The median X2 location in April for Current Operations under the Historical hydroclimate is 74.0 km. The median April X2 location for the Winter-run refuge flows scenario is 76.0 km: a difference of +3%.",
   )
 })
 
@@ -500,7 +500,7 @@ test("total Delta exports sentence follows the n150 template", () => {
   const s = summarySentence(
     [
       member("Current Operations", [4000, 4800, 5600], true),
-      member("Salmon flows", [3000, 3600, 4200]),
+      member("Winter-run refuge flows", [3000, 3600, 4200]),
     ],
     templateCtx({
       variableId: "tot_exp",
@@ -511,7 +511,7 @@ test("total Delta exports sentence follows the n150 template", () => {
     }),
   )
   expect(s).toBe(
-    "For Current Operations under the Historical hydroclimate, median Delta exports is 4,800 TAF. For the Salmon flows scenario, median Delta exports is 3,600 TAF, a difference of -25%.",
+    "For Current Operations under the Historical hydroclimate, median Delta exports is 4,800 TAF. For the Winter-run refuge flows scenario, median Delta exports is 3,600 TAF, a difference of -25%.",
   )
 })
 
@@ -519,7 +519,7 @@ test("template sentences skip and name a member with no model results", () => {
   const s = summarySentence(
     [
       member("Current Operations", [10, 20, 30], true),
-      { ...member("DWR 2025 DCP", [99, 99, 99]), liveDataMissing: true },
+      { ...member("Delta Conveyance Project", [99, 99, 99]), liveDataMissing: true },
     ],
     templateCtx({
       variableId: "res_apr",
@@ -528,7 +528,7 @@ test("template sentences skip and name a member with no model results", () => {
     }),
   )
   expect(s).toBe(
-    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF; no data available for DWR 2025 DCP.",
+    "At Shasta Reservoir, median April reservoir storage for Current Operations under the Historical hydroclimate is 20.0 TAF; no data available for Delta Conveyance Project.",
   )
 })
 

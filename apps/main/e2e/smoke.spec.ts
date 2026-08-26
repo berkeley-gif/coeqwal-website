@@ -41,7 +41,7 @@ test("data-in-depth tool activates and renders its panel", async ({ page }) => {
   // Every chart carries the standardized figure title.
   await expect(
     page.getByText(
-      /^April Reservoir Storage \(Shasta Reservoir\), Current Ops, Historical Hydroclimate, All Water Years$/,
+      /^April Reservoir Storage \(Shasta Reservoir\), Current Operations, Historical Hydroclimate, All Water Years$/,
     ),
   ).toBeVisible()
   expect(errors).toEqual([])

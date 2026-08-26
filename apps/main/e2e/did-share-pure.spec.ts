@@ -259,7 +259,7 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
       members: [
         ...csvData().members,
         {
-          label: "DWR 2025 DCP",
+          label: "Delta Conveyance Project",
           series: [],
           waterYears: [],
           isLive: false,
@@ -282,13 +282,13 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
     { variantTitle: "Data in depth" },
   )
   expect(csv).toContain("Data source,Mixed (see the Source column)")
-  expect(csv).toContain("DWR 2025 DCP,,,,,,,,,,No data")
+  expect(csv).toContain("Delta Conveyance Project,,,,,,,,,,No data")
   // The sample engine's stand-in values appear nowhere in the export.
   expect(csv).not.toContain("0.55")
   // The served member keeps its year-labeled rows: the empty member carries
   // an empty year array rather than an absent one, so the export does not
   // fall back to an index axis for everyone.
-  expect(csv).toContain("Water year,Current Operations,DWR 2025 DCP")
+  expect(csv).toContain("Water year,Current Operations,Delta Conveyance Project")
   expect(csv).toContain("1921,4200,")
 })
 
@@ -304,7 +304,7 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     distKind: "exceedance",
     compareBy: "scenarios",
     memberIds: ["s0020"],
-    memberLabels: ["Current ops"],
+    memberLabels: ["Current operations"],
     source: "live",
     hydroclimate: "historical",
     capturedAt: "2026-08-24T19:00:00.000Z",
@@ -323,7 +323,7 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     distKind: "box",
     compareBy: "scenarios",
     memberIds: ["s0020"],
-    memberLabels: ["Current ops"],
+    memberLabels: ["Current operations"],
     source: "mock",
     hydroclimate: "historical",
   })
@@ -337,7 +337,7 @@ test("shareFigureFooter names the source, the provenance and the capture date", 
     distKind: "exceedance",
     compareBy: "scenarios",
     memberIds: ["s0020", "s0065"],
-    memberLabels: ["Current ops", "DCP"],
+    memberLabels: ["Current operations", "DCP"],
     source: "mixed",
     hydroclimate: "historical",
   })
