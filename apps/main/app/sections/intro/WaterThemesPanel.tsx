@@ -22,12 +22,14 @@ import {
 } from "@repo/scrollytelling"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { TabKey } from "../../types/tabs"
+import { ScrollToButton, resolveCssLengthPx } from "@repo/ui"
 
 /*───────────────── */
 /* IMAGE & TAB CARDS                                                       */
 /*───────────────── */
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
+
 
 interface TabCard {
   tab: TabKey
@@ -73,6 +75,9 @@ function WaterThemesPanelContent({
   const prefersReducedMotion = useReducedMotion()
   const { navigateToTab } = useTabNavigation()
 
+  const PANEL_BG = theme.palette.brand.sky
+  const TEXT_COLOR = "text.primary"
+
   // Local scroll progress (0-1) within this StickyScrollSection
   const progress = useScrollProgress()
 
@@ -96,6 +101,12 @@ function WaterThemesPanelContent({
         overflow: "hidden",
         borderBottom: insetCfg ? "none" : (borderBottom ?? "none"),
         borderRadius: radius,
+        px: theme.space.panel.padding,
+        py: theme.space.panel.padding,
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
       {/* Layer 1: Gradient background (always visible) */}
@@ -104,7 +115,7 @@ function WaterThemesPanelContent({
           position: "absolute",
           inset: 0,
           zIndex: 0,
-          background: `${theme.palette.brand.panelLight}`,
+          background: `#aacbd9`,
         }}
       />
 
@@ -130,11 +141,9 @@ function WaterThemesPanelContent({
         sx={{
           position: "relative",
           zIndex: 2,
-          px: theme.space.panel.padding,
-          pt: theme.space.panel.topOffset,
           pb: theme.space.panel.padding,
-          height: "100%",
           boxSizing: "border-box",
+          maxWidth: theme.breakpoints.values.xl
         }}
       >
         {/* Headline + intro - pinned near the top, fades in on first
@@ -152,7 +161,6 @@ function WaterThemesPanelContent({
             sx={{
               display: { xs: "block", md: "grid" },
               gridTemplateColumns: { md: "1fr 1fr" },
-              columnGap: { md: theme.space.section.lg },
               alignItems: "start",
             }}
           >
@@ -160,7 +168,7 @@ function WaterThemesPanelContent({
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: "text.primary" }}
+                sx={{ display: "block", color: TEXT_COLOR }}
               >
                 Want to know more?
               </Typography>
@@ -169,7 +177,7 @@ function WaterThemesPanelContent({
             <Typography
               variant="body1"
               sx={{
-                color: "text.primary",
+                color: TEXT_COLOR,
                 maxWidth: { xs: "66%", md: "none" },
                 mb: { xs: theme.space.section.md, md: 0 },
                 gridColumn: { md: "2" },
@@ -194,6 +202,7 @@ function WaterThemesPanelContent({
           sx={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: theme.space.section.sm,
             mt: "10vh",
           }}
@@ -210,20 +219,43 @@ function WaterThemesPanelContent({
                   variant="onDark"
                   background={panelColor}
                   hoverBackground={alpha(panelColor, 0.85)}
-                  sx={{ flex: 1, height: "200px" }}
+                  sx={{ flex: 1, height: "200px", maxWidth: "350px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
                   <CircularArrowButton
                     decorative
                     size={50}
                     rotation="-90deg"
-                    color={theme.palette.brand.panelLight}
+                    color={theme.palette.text.primary}
                   />
                 )}
               </React.Fragment>
             )
           })}
         </Box>
+      </Box>
+      <Box sx={{
+        position: "absolute",
+        bottom: 40,
+        left: "50%",
+        transform: "translate(-50%)",
+      }}>
+        <ScrollToButton
+          color={`${theme.palette.text.secondary}`}
+          size={52}
+          scrollToId="water-themes"
+          // Same offset math as VideoHero's scroll button: land
+          // the target panel's rounded card flush below the
+          // header by subtracting the header height and adding
+          // back one top frame-gap. Resolved at click time so
+          // the responsive `clamp()` value is read at the
+          // viewport's current width.
+          scrollOffset={() =>
+            theme.layout.headerHeight -
+            resolveCssLengthPx(theme.layout.panel.insetY, 24)
+          }
+          ariaLabel="Scroll down to the know more section"
+        />
       </Box>
     </Box>
   )

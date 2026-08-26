@@ -25,7 +25,7 @@ export function AboutCoeqwalPanel() {
   }
 
   return (
-    <div style={{ backgroundColor: theme.palette.blue.pale }}>
+    <div style={{ backgroundColor: theme.palette.brand.panelLight }}>
       <StickyScrollSection
         height="200vh"
         stickyTop={theme.layout.headerHeight}
@@ -35,14 +35,14 @@ export function AboutCoeqwalPanel() {
           component="section"
           id="about-coeqwal"
           sx={{
+            position: "relative",
             background: "inherit",
             overflow: "hidden",
             px: theme.space.panel.padding,
             py: theme.space.panel.padding,
             minHeight: "100%",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
+            justifyContent: "center",
           }}
         >
           <Box
@@ -50,15 +50,17 @@ export function AboutCoeqwalPanel() {
               color: theme.palette.text.primary,
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              rowGap: { xs: 3, md: 4 },
+              rowGap: { xs: 3, md: 2 },
               columnGap: { md: 6 },
+              maxWidth: theme.breakpoints.values.xl
             }}
           >
-            <Box>
+            {/** Title */}
+            <Box sx={{ gridColumn: "1 / -1", mb: { xs: 2, md: 3 }, gap: 7 }}>
               <Typography
                 variant="h2Main"
                 component="span"
-                sx={{ display: "block", color: "inherit" }}
+                sx={{ color: "inherit", mr: 1 }}
               >
                 What is
               </Typography>
@@ -66,30 +68,33 @@ export function AboutCoeqwalPanel() {
                 variant="h1"
                 component="span"
                 sx={{
-                  display: "block",
+
                   color: "inherit",
-                  mb: { xs: 2, md: 3 },
                 }}
               >
                 COEQWAL?
               </Typography>
-              <Box
-                component="img"
-                src={calSimMapImg.src}
-                alt={calSimMapImg.alt}
-                sx={{
-                  display: "block",
-                  mx: 7,
-                  width: "auto",
-                  maxWidth: "100%",
-                  height: "auto",
-                  maxHeight: { xs: "160px", md: "clamp(320px, 30vh, 540px)" },
-                  objectFit: "contain",
-                }}
-              />
             </Box>
 
-            <Box sx={{ maxWidth: "calc(100% - 40px)" }}>
+            {/** Image */}
+            <Box
+              component="img"
+              src={calSimMapImg.src}
+              alt={calSimMapImg.alt}
+              sx={{
+                display: "block",
+                mx: 18,
+                mt: 1,
+                width: "auto",
+                maxWidth: "100%",
+                height: "auto",
+                maxHeight: { xs: "220px", md: "clamp(360px, 45vh, 640px)" },
+                objectFit: "contain",
+              }}
+            />
+
+            {/** Body text */}
+            <Box sx={{ maxWidth: "70ch" }}>
               <Typography
                 variant="displayBody"
                 component="div"
@@ -110,26 +115,33 @@ export function AboutCoeqwalPanel() {
                 Learn more about COEQWAL
               </AboutCtaLink>
             </Box>
-          </Box>
 
-          <Box sx={{ alignSelf: "center" }}>
-            <ScrollToButton
-              color={`${theme.palette.text.primary}`}
-              size={52}
-              scrollToId="water-themes"
-              // Same offset math as VideoHero's scroll button: land
-              // the target panel's rounded card flush below the
-              // header by subtracting the header height and adding
-              // back one top frame-gap. Resolved at click time so
-              // the responsive `clamp()` value is read at the
-              // viewport's current width.
-              scrollOffset={() =>
-                theme.layout.headerHeight -
-                resolveCssLengthPx(theme.layout.panel.insetY, 24)
-              }
-              ariaLabel="Scroll down to the know more section"
-            />
+
           </Box>
+        </Box>
+
+        <Box sx={{
+          position: "absolute",
+          bottom: 40,
+          left: "50%",
+          transform: "translate(-50%)",
+        }}>
+          <ScrollToButton
+            color={`${theme.palette.text.primary}`}
+            size={52}
+            scrollToId="water-themes"
+            // Same offset math as VideoHero's scroll button: land
+            // the target panel's rounded card flush below the
+            // header by subtracting the header height and adding
+            // back one top frame-gap. Resolved at click time so
+            // the responsive `clamp()` value is read at the
+            // viewport's current width.
+            scrollOffset={() =>
+              theme.layout.headerHeight -
+              resolveCssLengthPx(theme.layout.panel.insetY, 24)
+            }
+            ariaLabel="Scroll down to the know more section"
+          />
         </Box>
       </StickyScrollSection>
     </div>
