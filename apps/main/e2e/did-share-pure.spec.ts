@@ -288,7 +288,9 @@ test("a mixed-provenance export labels the figure Mixed and blanks the no-data r
   // The served member keeps its year-labeled rows: the empty member carries
   // an empty year array rather than an absent one, so the export does not
   // fall back to an index axis for everyone.
-  expect(csv).toContain("Water year,Current Operations,Delta Conveyance Project")
+  expect(csv).toContain(
+    "Water year,Current Operations,Delta Conveyance Project",
+  )
   expect(csv).toContain("1921,4200,")
 })
 

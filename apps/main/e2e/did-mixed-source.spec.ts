@@ -232,7 +232,9 @@ test("a scenario with no served block is detected from its response, not its id"
   // than quoting the sample engine's stand-in value for it as a real result,
   // and reports the plotted median rather than the arithmetic mean.
   await expect(
-    page.getByText(/at the median.*no data available for Delta Conveyance Project/),
+    page.getByText(
+      /at the median.*no data available for Delta Conveyance Project/,
+    ),
   ).toBeVisible()
 
   expect(errors).toEqual([])

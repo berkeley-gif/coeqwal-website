@@ -276,7 +276,10 @@ test("stats sentence skips a member with no model results and names it", () => {
   const s = summarySentence(
     [
       member("Current Operations", [1, 1, 10], true),
-      { ...member("Delta Conveyance Project", [5, 5, 5]), liveDataMissing: true },
+      {
+        ...member("Delta Conveyance Project", [5, 5, 5]),
+        liveDataMissing: true,
+      },
     ],
     statsCtx,
   )
@@ -328,7 +331,10 @@ test("generic median sentences also skip and name a member with no model results
   const s = summarySentence(
     [
       member("Current Operations", [10, 20, 30], true),
-      { ...member("Delta Conveyance Project", [99, 99, 99]), liveDataMissing: true },
+      {
+        ...member("Delta Conveyance Project", [99, 99, 99]),
+        liveDataMissing: true,
+      },
     ],
     {
       ...salmonCtx,
@@ -519,7 +525,10 @@ test("template sentences skip and name a member with no model results", () => {
   const s = summarySentence(
     [
       member("Current Operations", [10, 20, 30], true),
-      { ...member("Delta Conveyance Project", [99, 99, 99]), liveDataMissing: true },
+      {
+        ...member("Delta Conveyance Project", [99, 99, 99]),
+        liveDataMissing: true,
+      },
     ],
     templateCtx({
       variableId: "res_apr",
