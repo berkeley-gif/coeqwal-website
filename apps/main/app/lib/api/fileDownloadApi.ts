@@ -2,50 +2,38 @@ import type { ScenariosResponse } from "../../types/scenarioDownloads"
 import { FILE_DOWNLOAD_API_BASE } from "../constants/api"
 
 /**
- * Fetch scenarios list for file downloads
- * Uses the presigned download API
+ * Fetch scenarios list for file downloads.
  *
- * Includes retry logic with exponential backoff to handle Lambda cold starts
+ * Scenarios are frozen and complete, so this list is a static manifest
+ * (`public/scenario-manifest.json`) generated once from the presign
+ * Lambda's `GET /scenario` route rather than fetched from it live on every
+ * page load - see coeqwal-data-platform's
+ * `api/lambda/coeqwalPresignDownload/open_issues.md` #1. Regenerate that
+ * file (re-run the same one-off S3 listing) only if the scenario set ever
+ * changes again. Same-origin static asset, so no CORS/cold-start handling
+ * is needed here anymore.
  */
-export async function fetchScenariosForDownload(
-  retries = 3,
-): Promise<ScenariosResponse> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const response = await fetch(`${FILE_DOWNLOAD_API_BASE}/scenario`, {
-        method: "GET",
-        mode: "cors",
-        headers: {
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(15000), // 15s timeout for cold starts
-      })
+export async function fetchScenariosForDownload(): Promise<ScenariosResponse> {
+  const response = await fetch("/scenario-manifest.json", {
+    headers: { Accept: "application/json" },
+  })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      return await response.json()
-    } catch (error) {
-      if (attempt === retries) {
-        throw new Error(
-          `Failed to fetch scenarios after ${retries} attempts: ${error instanceof Error ? error.message : "Unknown error"}`,
-        )
-      }
-      // Exponential backoff: 1s, 2s, 3s
-      await new Promise((r) => setTimeout(r, 1000 * attempt))
-    }
+  if (!response.ok) {
+    throw new Error(`Failed to load scenario manifest: HTTP ${response.status}`)
   }
 
-  throw new Error("Failed to fetch scenarios after retries")
+  return await response.json()
 }
 
 /**
- * Get presigned download URL for a specific scenario and file type
+ * Get presigned download URL for a specific scenario and file type.
+ * Unlike the scenario list, this always hits the Lambda - presigned URLs
+ * expire in 15 minutes, so they have to be minted at click time, not baked
+ * into a static asset.
  */
 export function getFileDownloadUrl(
   scenarioId: string,
   fileType: "zip" | "output" | "sv",
 ): string {
-  return `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/download?scenario=${scenarioId}&type=${fileType}`
+  return `${FILE_DOWNLOAD_API_BASE}/download?scenario=${scenarioId}&type=${fileType}`
 }

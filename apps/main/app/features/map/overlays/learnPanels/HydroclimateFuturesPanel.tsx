@@ -5,6 +5,7 @@ import { WaterDroplet } from "@repo/ui"
 import PanelShell from "./PanelShell"
 import PanelHeading from "./PanelHeading"
 import { LinedList } from "@repo/ui"
+import { GlossaryTermLink } from "../../../glossary"
 
 export default function HydroclimateFuturesPanel() {
   const theme = useTheme()
@@ -24,14 +25,20 @@ export default function HydroclimateFuturesPanel() {
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          COEQWAL specifically evaluates how the outcomes of water management
-          strategies change with climate-driven shifts in temperature,
-          precipitation, and river flows.
+          <GlossaryTermLink>COEQWAL</GlossaryTermLink> makes it possible to look
+          at how the outcomes of water{" "}
+          <GlossaryTermLink term="Management strategies">
+            management strategies
+          </GlossaryTermLink>{" "}
+          change with climate-driven shifts in temperature, precipitation, and
+          river flows.
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Hydroclimates are represented by historical conditions and four
-          possible futures, representing different levels of stress to our water
-          supply system that we should plan for.
+          <GlossaryTermLink term="Hydroclimate">Hydroclimates</GlossaryTermLink>{" "}
+          are simulations of historical and future conditions that represent
+          different levels of stress to our water supply system. COEQWAL
+          evaluates all management strategies under five hydroclimate,
+          including:
         </Typography>
       </Box>
 
@@ -43,23 +50,23 @@ export default function HydroclimateFuturesPanel() {
         items={[
           {
             label:
-              "Historical hydroclimate: Temperature, precipitation, and streamflow patterns reflect historical conditions",
+              "Historical: Temperature, precipitation, and flow patterns reflect historical conditions",
           },
           {
             label:
-              "Moderate climate stress: Slightly warmer and wetter conditions (+7% runoff change)",
+              "Moderate climate stress: Slightly warmer and moderately wetter conditions (+3.5% flow change)",
           },
           {
             label:
-              "Moderate-high climate stress: Warmer and slightly drier conditions (-1% runoff change)",
+              "Moderate-high climate stress: Moderately warmer with little change in precipitation (-1% flow change)",
           },
           {
             label:
-              "High climate stress: Much warmer and much drier conditions (-7% runoff change)",
+              "High climate stress: Much warmer and moderately drier conditions (-6.5% flow change)",
           },
           {
             label:
-              "Extreme climate stress: Warmer and substantially drier conditions (-19% runoff change)",
+              "Extreme climate stress: Much warmer and much drier conditions (-19.2% flow change)",
           },
         ]}
       />
