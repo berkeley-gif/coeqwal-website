@@ -5,10 +5,9 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme, alpha } from "@repo/ui/mui"
+import { Box, Typography, useTheme, alpha, ArrowDownwardIcon } from "@repo/ui/mui"
 import {
   InfoCard,
-  CircularArrowButton,
   resolveRadius,
   resolveInset,
   type RadiusValue,
@@ -75,7 +74,6 @@ function WaterThemesPanelContent({
   const prefersReducedMotion = useReducedMotion()
   const { navigateToTab } = useTabNavigation()
 
-  const PANEL_BG = theme.palette.brand.sky
   const TEXT_COLOR = "text.primary"
 
   // Local scroll progress (0-1) within this StickyScrollSection
@@ -222,11 +220,18 @@ function WaterThemesPanelContent({
                   sx={{ flex: 1, height: "200px", maxWidth: "350px" }}
                 />
                 {i < TAB_CARDS.length - 1 && (
-                  <CircularArrowButton
-                    decorative
-                    size={50}
-                    rotation="-90deg"
-                    color={theme.palette.text.primary}
+                  <ArrowDownwardIcon
+                    aria-hidden="true"
+                    sx={{
+                      fontSize: 54,
+                      transform: "rotate(-90deg)",
+                      color: theme.palette.brand.panelLight,
+                      "& path": {
+                        stroke: "currentColor",
+                        strokeWidth: `${theme.strokeWidth.accent}px`,
+                        paintOrder: "stroke fill",
+                      },
+                    }}
                   />
                 )}
               </React.Fragment>
@@ -241,7 +246,7 @@ function WaterThemesPanelContent({
         transform: "translate(-50%)",
       }}>
         <ScrollToButton
-          color={`${theme.palette.text.secondary}`}
+          color={`${theme.palette.brand.panelLight}`}
           size={52}
           scrollToId="water-themes"
           // Same offset math as VideoHero's scroll button: land
