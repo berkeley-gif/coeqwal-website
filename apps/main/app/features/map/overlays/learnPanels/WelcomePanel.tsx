@@ -39,29 +39,31 @@ export default function WelcomePanel() {
               COEQWAL Scenarios
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              COEQWAL uses the{" "}
-              <GlossaryTermLink term="CalSim">CalSim3</GlossaryTermLink> water
-              planning model to evaluate how different{" "}
-              <Typography component="span" variant="body2" fontWeight={600}>
-                scenarios
-              </Typography>{" "}
+              <GlossaryTermLink>COEQWAL</GlossaryTermLink> uses the{" "}
+              <GlossaryTermLink>CalSim3</GlossaryTermLink> water planning model
+              to evaluate how different{" "}
+              <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink>{" "}
               affect outcomes for communities, farms, and the environment.
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Each scenario pairs a{" "}
-              <GlossaryTermLink term="Water management strategies">
-                water management strategy
+              Each scenario pairs a water{" "}
+              <GlossaryTermLink term="Management strategies">
+                management strategy
               </GlossaryTermLink>{" "}
               (the operating rules, policies, and infrastructure decisions that
               determine how water is allocated) with a{" "}
-              <GlossaryTermLink>hydroclimate</GlossaryTermLink> (the temperature
-              and precipitation patterns that determine how much water is
-              available).
+              <GlossaryTermLink>hydroclimate</GlossaryTermLink> (the
+              temperature, precipitation, and streamflow patterns that determine
+              how much water is available).
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              The management strategy represents what we can control and the
-              hydroclimate represents what we can&rsquo;t control and must
-              prepare for.
+              The{" "}
+              <GlossaryTermLink term="Management strategies">
+                management strategy
+              </GlossaryTermLink>{" "}
+              represents what we can control and the{" "}
+              <GlossaryTermLink>hydroclimate</GlossaryTermLink> represents what
+              we can&rsquo;t control and must prepare for.
             </Typography>
           </Box>
 
@@ -75,15 +77,18 @@ export default function WelcomePanel() {
               The library
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              COEQWAL has created a library of over 100 scenarios.
+              <GlossaryTermLink>COEQWAL</GlossaryTermLink> has created a library
+              of over 100{" "}
+              <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink>.
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mt: sp.md }}
             >
-              Each scenario is associated with dozens of outcome variables that
-              describe how water is allocated to different locations and users.
+              Each <GlossaryTermLink>scenario</GlossaryTermLink> is associated
+              with dozens of outcome variables that describe how water is
+              allocated to different locations and users.
             </Typography>
             <Typography
               variant="body2"
@@ -98,7 +103,9 @@ export default function WelcomePanel() {
               color="text.secondary"
               sx={{ mt: sp.md }}
             >
-              A summary of all scenarios can be accessed{" "}
+              A summary of all{" "}
+              <GlossaryTermLink term="Scenario">scenarios</GlossaryTermLink> can
+              be accessed{" "}
               <Link
                 href="/data"
                 color="inherit"
@@ -124,14 +131,20 @@ export default function WelcomePanel() {
               What you&rsquo;ll learn
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              By exploring the scenario library, you will gain understanding of
-              how:
+              By exploring the <GlossaryTermLink>scenario</GlossaryTermLink>{" "}
+              library, you will gain an understanding of how:
             </Typography>
             <LinedList
               items={[
                 {
-                  label:
-                    "Management strategies affect trade-offs and synergies among outcomes",
+                  label: (
+                    <>
+                      <GlossaryTermLink term="Management strategy">
+                        Management strategies
+                      </GlossaryTermLink>{" "}
+                      affect trade-offs and synergies among outcomes,
+                    </>
+                  ),
                 },
                 {
                   label:
