@@ -16,12 +16,12 @@ test("buildFigureTitle matches the standardized format", () => {
     buildFigureTitle({
       variableName: "April reservoir storage",
       locationName: "Shasta Reservoir",
-      memberSummary: "Current ops",
+      memberSummary: "Current operations",
       hydroclimateName: "Historical hydroclimate",
       waterYearTypeLabels: [],
     }),
   ).toBe(
-    "April Reservoir Storage (Shasta Reservoir), Current Ops, Historical Hydroclimate, All Water Years",
+    "April Reservoir Storage (Shasta Reservoir), Current Operations, Historical Hydroclimate, All Water Years",
   )
 })
 
@@ -87,10 +87,10 @@ test("dataFigureTitle uses the registry head for X2 and omits the location", () 
       figureTitleHead: getVariable("x2_apr")?.figureTitleHead,
       compareBy: "scenarios",
       memberCount: 2,
-      firstMemberLabel: "Current ops",
+      firstMemberLabel: "Current operations",
       locationTitleName: getLocationTitle("delta", "DELTA"),
       climateName: "Historical",
-      scenarioName: "Current ops",
+      scenarioName: "Current operations",
       waterYearTypeLabels: [],
     }),
   ).toBe(
@@ -105,14 +105,14 @@ test("dataFigureTitle keeps the standard head for other variables", () => {
       figureTitleHead: getVariable("res_apr")?.figureTitleHead,
       compareBy: "scenarios",
       memberCount: 1,
-      firstMemberLabel: "Current ops",
+      firstMemberLabel: "Current operations",
       locationTitleName: getLocationTitle("reservoirs", "SHSTA"),
       climateName: "Historical",
-      scenarioName: "Current ops",
+      scenarioName: "Current operations",
       waterYearTypeLabels: [],
     }),
   ).toBe(
-    "April Reservoir Storage (Shasta Reservoir), Current Ops, Historical Hydroclimate, All Water Years",
+    "April Reservoir Storage (Shasta Reservoir), Current Operations, Historical Hydroclimate, All Water Years",
   )
   expect(
     dataFigureTitle({
@@ -120,10 +120,10 @@ test("dataFigureTitle keeps the standard head for other variables", () => {
       figureTitleHead: getVariable("tot_exp")?.figureTitleHead,
       compareBy: "scenarios",
       memberCount: 2,
-      firstMemberLabel: "Current ops",
+      firstMemberLabel: "Current operations",
       locationTitleName: getLocationTitle("delta", "DELTA"),
       climateName: "Historical",
-      scenarioName: "Current ops",
+      scenarioName: "Current operations",
       waterYearTypeLabels: [],
     }),
   ).toBe(

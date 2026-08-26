@@ -26,7 +26,7 @@ const SCENARIOS_FIXTURE = [
     sibling_group: "s0020",
   },
   {
-    name: "DWR 2025 DCP",
+    name: "Delta Conveyance Project",
     short_code: "s0065",
     short_description: "spec fixture, no salmon results",
     is_active: true,
@@ -44,7 +44,7 @@ const SCENARIOS_FIXTURE = [
     sibling_group: "s0020",
   },
   {
-    name: "DWR 2025 DCP",
+    name: "Delta Conveyance Project",
     short_code: "s0157",
     short_description: "spec fixture, Moderate risk variant, no salmon results",
     is_active: true,
@@ -179,7 +179,7 @@ test("a scenario with no served block is detected from its response, not its id"
   // Add the Delta Conveyance Project scenario to the comparison. The chart
   // now holds one scenario the endpoint serves and one it does not.
   await page
-    .getByLabel("Select DWR 2025 DCP scenario")
+    .getByLabel("Select Delta Conveyance Project scenario")
     .check({ timeout: 10_000 })
 
   // The substance: the site asks for BOTH scenarios and learns the second has
@@ -197,7 +197,7 @@ test("a scenario with no served block is detected from its response, not its id"
   // to compare reads as data loss, and this case needs an explanation rather
   // than an absence.
   await expect(page.getByText("Current operations").first()).toBeVisible()
-  await expect(page.getByText("DWR 2025 DCP").first()).toBeVisible()
+  await expect(page.getByText("Delta Conveyance Project").first()).toBeVisible()
 
   // The served-nothing member is labeled "no data", carrying the registry's
   // explanation, and the served one is NOT labeled.
@@ -232,7 +232,9 @@ test("a scenario with no served block is detected from its response, not its id"
   // than quoting the sample engine's stand-in value for it as a real result,
   // and reports the plotted median rather than the arithmetic mean.
   await expect(
-    page.getByText(/at the median.*no data available for DWR 2025 DCP/),
+    page.getByText(
+      /at the median.*no data available for Delta Conveyance Project/,
+    ),
   ).toBeVisible()
 
   expect(errors).toEqual([])
@@ -252,7 +254,7 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
   await page.getByRole("button", { name: /Winter-run abundance/ }).click()
   await expect(page.getByText(/^Live data$/)).toBeVisible()
   await page
-    .getByLabel("Select DWR 2025 DCP scenario")
+    .getByLabel("Select Delta Conveyance Project scenario")
     .check({ timeout: 10_000 })
   await expect(page.getByText("no data", { exact: true })).toHaveCount(1)
 
@@ -284,7 +286,7 @@ test("pinning a hydroclimate other than the workspace climate keeps the scenario
   // served, shown as a proportion) and still names the unmodeled scenario.
   await expect(
     page.getByText(
-      /under the Moderate risk hydroclimate occupy 40%.*no data available for DWR 2025 DCP/,
+      /under the Moderate risk hydroclimate occupy 40%.*no data available for Delta Conveyance Project/,
     ),
   ).toBeVisible()
 
@@ -321,7 +323,7 @@ test("a member whose live request is still in flight is shown as loading, not dr
   await expect(page.getByText(/^Live data$/)).toBeVisible()
 
   await page
-    .getByLabel("Select DWR 2025 DCP scenario")
+    .getByLabel("Select Delta Conveyance Project scenario")
     .check({ timeout: 10_000 })
 
   // While the DCP request is outstanding: one legend entry says "loading",
